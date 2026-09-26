@@ -85,23 +85,22 @@ def sheet(outdir: Outdir) -> pl.DataFrame:
         outdir: A checked fetchngs outdir.
 
     Returns:
-        The sheet, in ``COLUMNS`` order.
-
-    Raises:
-        ValueError: If a count does not fit Int32; it is then kept as Int64 deliberately.
+        The sheet, in ``COLUMNS`` order. ``read_count`` and ``base_count`` are Int32 where
+        every value fits, Int64 otherwise: base counts of deep runs pass 2**31.
     """
     runs = outdir.runs
     frame = runs.select([c for c in COLUMNS if c in runs.columns]).with_columns(
         [pl.lit("").alias(c) for c in CURATION]
     )
     counts = frame.select(pl.col("read_count", "base_count").cast(pl.Int64))
-    for column in counts.columns:
-        # Downcast only after checking the range (CONVENTIONS.md, Stack).
-        if int(counts.select(pl.col(column).max()).item() or 0) > INT32_MAX:
-            raise ValueError(f"{column} exceeds Int32; keep Int64 for this dataset")
-    return frame.with_columns(
-        pl.col("read_count", "base_count").cast(pl.Int64).cast(pl.Int32)
-    ).select(list(COLUMNS))
+    # Downcast only after checking the range (CONVENTIONS.md, Stack), column by column.
+    fitted = [
+        counts[c].cast(pl.Int32)
+        if int(counts.select(pl.col(c).max()).item() or 0) <= INT32_MAX
+        else counts[c]
+        for c in counts.columns
+    ]
+    return frame.with_columns(fitted).select(list(COLUMNS))
 
 
 def _facts(outdir: Outdir, frame: pl.DataFrame) -> tuple[str, ...]:

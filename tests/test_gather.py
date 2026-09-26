@@ -6,9 +6,11 @@ import shutil
 from collections import Counter
 from pathlib import Path
 
+import polars as pl
 import pytest
 
 from ctx.gather.fetchngs import FETCHNGS_VERSION, VERSIONS_FILE, FetchngsError, read
+from ctx.gather.harmonise import sheet
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures" / "fetchngs"
@@ -170,3 +172,17 @@ def test_preconditions_stop_first(tmp_path):
         read(outdir)
     assert "1.13.0" in str(raised.value)
     assert "missing" not in str(raised.value)
+
+
+def test_counts_keep_int64_when_they_do_not_fit():
+    checked = read(FIXTURES / "download")
+    deep = checked.runs.with_columns(
+        base_count=pl.when(pl.col("run_accession") == "ERR1160846")
+        .then(pl.lit("23415996610"))
+        .otherwise(pl.col("base_count"))
+    )
+    frame = sheet(type(checked)(deep, checked.unlisted_fastq, checked.provenance))
+    assert frame.schema["base_count"] == pl.Int64
+    assert frame.schema["read_count"] == pl.Int32
+    assert 23415996610 in frame["base_count"].to_list()
+    assert sheet(checked).schema["base_count"] == pl.Int32
