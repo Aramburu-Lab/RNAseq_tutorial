@@ -412,7 +412,7 @@ Decisions D14–D16 were resolved at this check-in. Engineering decisions are re
 and Phase 0 is still open (D5 and pinning). Phase 1 proceeds anyway because Rytis asked for
 it. P1.2 pins every dependency the project adds.
 
-- [ ] P1.1 Adopt `codebase_template` in place (D14). Files are moved, never deleted or overwritten
+- [x] P1.1 Adopt `codebase_template` in place (D14). Files are moved, never deleted or overwritten
   - c1: `git init`, then commit the three files unchanged.
   - c2, moves only:
     - `mkdir knowledge`
@@ -447,6 +447,18 @@ it. P1.2 pins every dependency the project adds.
     - The copier log has exit 0 and no `overwrite`.
     - The `/usr/bin/time -l` output for copier and pixi.
     - In a fresh scratchpad clone, `pixi install --locked && pixi run preflight` exits 0. At conformance 1, labdocs lint checks only LD008.
+  - Evidence, 2026-09-26, macOS 15 arm64:
+    - Commits: fdd58a8 (c1), 45632ed (c2), 9800065 (c3), 9829ac2 (c4), 3b5d329 (c5).
+    - c1 to c2 is exactly `R100 CLAUDE.md CONVENTIONS.md`, `R100 todo.md TODO.md` and `R100 lessons.md knowledge/lessons.md`. c2 to c3 is 31 `A` lines and nothing else.
+    - copier log: exit 0, zero `overwrite`, and `conflict` + `skip` only for `knowledge/lessons.md` and `TODO.md`. The three files keep their c1 SHA-256.
+    - `/usr/bin/time -l`: copier copy took 3.08 s wall at 59,047,936 bytes max RSS; pixi install took 25.41 s wall at 564,822,016 bytes max RSS.
+    - `git check-ignore --no-index`:
+      - ignored: `data/x.csv`, `resources/manifest.json`, `tests/fixtures/chr22/.DS_Store`, `tests/fixtures/x.key`;
+      - not ignored: `tests/fixtures/x.fa`, `x.fq`, `x.gz`, `src/ctx/data/x.py`.
+    - Fresh clone: `pixi install --locked` exits 0 and `pixi run preflight` exits 0. pytest collected no tests and still passed; P1.2 closes that exit-5 trap.
+    - Deviations:
+      - The source is `git@github.com:Aramburu-Lab/codebase_template.git` rather than `gh:`, because SSH is the access path that was verified. `_src_path` records it.
+      - The D-entries are appended after the template's entry skeleton instead of replacing it, which leaves Copier's lines untouched.
 
 - [ ] P1.2 `ctx` package skeleton, gates, and the full lock (after P1.1)
   - `pyproject.toml`:
