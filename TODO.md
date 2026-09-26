@@ -505,7 +505,7 @@ it. P1.2 pins every dependency the project adds.
       - `test_hooks_run_the_gates_on_src` was added, so a hook whose `files` filter matches nothing fails a test.
       - The wheel is built with `python -m hatchling build -t wheel -d <dir>`.
 
-- [ ] P1.3 Synthetic count matrix with planted truth (after P1.2)
+- [x] P1.3 Synthetic count matrix with planted truth (after P1.2)
   - `tests/synth.py::counts(seed=42)` lives in the tests, not the wheel; P1.5 loads it by path. Dimensions are fixed:
     - 2 cell types x 2 conditions;
     - 6 donors per condition, nested in condition, each donor giving both cell types: 24 samples;
@@ -520,6 +520,11 @@ it. P1.2 pins every dependency the project adds.
       - within each cell type, the sign of the normalised log2 ratio matches the truth for every gene with planted |LFC| >= 2;
       - no null gene reaches that threshold;
       - PC1 of log-CPM separates the cell types.
+  - Evidence, 2026-09-26: 3/3 pass.
+    - Mutation check: planting the condition effect in the controls instead of the cases fails `test_planted_truth` and passes the other two.
+    - Deviation: markers are 10 % of genes at |LFC| 4, and nulls 70 %. With 5 % at a smaller effect, the condition axis would carry about as much variance as cell type, and PC1 could split on condition.
+    - Added beyond the plan: a per-donor effect (log2 SD 0.25), so the nesting matters, and a `batch` column balanced against condition with no planted effect.
+    - `counts()` also takes `n_genes` and `donors_per_condition`, for the P1.5 size grid.
 
 - [ ] P1.4 `ctx.io`: naming lint and README companion (after P1.2)
   - `src/ctx/io/naming.py`:
