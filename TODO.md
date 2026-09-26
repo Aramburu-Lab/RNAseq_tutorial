@@ -705,7 +705,7 @@ it. P1.2 pins every dependency the project adds.
       - mypy ignores missing imports for seaborn, plotly and scipy only, because they ship no type information; everything else stays strict.
     - Not done: Liberation Sans is not installed, so Linux CI falls back to DejaVu Sans, which the chain allows.
 
-- [ ] P1.8 `ctx.report.builder`, the figure HTML and the round trip (after P1.6, P1.7)
+- [x] P1.8 `ctx.report.builder`, the figure HTML and the round trip (after P1.6, P1.7)
   - `src/ctx/report/templates/base.html.j2`, with autoescape on:
     - a theme script in `<head>`: the stored `ctx-theme` if present, else `prefers-color-scheme`;
     - a toggle that calls `Plotly.relayout` with the embedded light and dark templates;
@@ -735,6 +735,22 @@ it. P1.2 pins every dependency the project adds.
     - `::test_quiz_hidden`: at least one `<details>` answer exists, and every answer sits inside `<details><summary>`.
     - `test_packaging.py` is extended to render a page from the unzipped wheel.
     - Manual, once: serve the page on 127.0.0.1 in the browser pane under light and dark colour-scheme emulation. The request log must show one origin, and screenshots before and after the toggle must show the background and ink changing. The results are pasted here.
+  - Evidence, 2026-09-26: `tests/test_report.py` passes 6/6, `test_packaging.py` passes 2/2, and preflight passes with 76 tests.
+    - Each mutation fails the named test:
+      - no `<` escaping in script JSON: `test_escaping`;
+      - Jinja autoescape off: `test_escaping`;
+      - two sections swapped: `test_skeleton_order`.
+    - Browser pane check, served from 127.0.0.1:8765, demo page 4,870,602 bytes. The values below are read with JavaScript from computed styles and plotly's `_fullLayout`.
+      - Dark scheme, nothing stored: `data-theme` is black, the page background is rgb(17,17,17) and the ink rgb(242,242,242). The plotly paper is #111111 and its font #F2F2F2, which shows the relayout after drawing works.
+      - Toggle: white is stored, the page is rgb(255,255,255), and the plotly paper and font are #FFFFFF and #000000.
+      - Reload with the OS on dark and white stored: the page stays white, so the reader's choice wins.
+      - The network log shows only the page itself, 4 GETs over 4 loads, from one origin.
+    - The check found two defects, now fixed: the one-line caption inside the plot was cut off at the right edge, and is now wrapped at the double-column width; the data link kept the browser's default blue on black, and now takes the ink colour.
+    - Deviations:
+      - The plan checked the caption in the README. Instead, the CSV carries every number the figure prints (`n_group, u, p, p_adj, r`), and the round trip asserts those equal the printed ones. The README dictionary names the test and the correction in each column's meaning.
+      - The token check reads plotly's `<br>` as the space it replaces, as the PDF check already does for line breaks.
+      - `write_figure` gained a `title` argument for the page.
+    - Not done: plotly draws its box fills half-transparent by default, so the HTML boxes look lighter than the PDF ones; the colours are the same palette roles.
 
 - [ ] P1.9 `ctx setup` environment report as the end-to-end consumer (after P1.6, P1.8)
   - This is the M0 subset from `TODO.md:102`; it downloads nothing.
