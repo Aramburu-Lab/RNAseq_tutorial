@@ -19,3 +19,7 @@ and every human reading the repo cold will also see it.
   by the prek hook.
 - Record any correction you had to make twice as one line in `knowledge/lessons.md`. That
   file is yours to append to and template updates skip it.
+
+@CONVENTIONS.md
+
+Where `CONVENTIONS.md` conflicts with `AGENTS.md`, `CONVENTIONS.md` wins; each divergence is a D-entry in `knowledge/decisions.md`. `knowledge/api_index.md` does not index the `src/ctx` package; read that package directly.

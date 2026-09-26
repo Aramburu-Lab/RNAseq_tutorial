@@ -215,7 +215,7 @@ Scaffold from Aramburu-Lab `codebase_template` (Copier): pixi multi-stage contai
 ```text
 cancer-transcriptomics-teaching/
 ├── pixi.toml, pixi.lock, Dockerfile, apptainer.def
-├── README.md, todo.md, lessons.md, CITATION.cff, LICENSE (code MIT, materials CC BY 4.0)
+├── README.md, TODO.md, knowledge/lessons.md, CITATION.cff, LICENSE (code MIT, materials CC BY 4.0)
 ├── src/ctx/
 │   ├── acquire/   gdc.py ena.py geo.py
 │   ├── qc/        fastp_parse.py
@@ -263,7 +263,7 @@ cancer-transcriptomics-teaching/
 
 ### Phase 1 — Foundations
 
-- [ ] Scaffold repo from `codebase_template`; CI skeleton; `lessons.md` created
+- [ ] Scaffold repo from `codebase_template`; CI skeleton; `knowledge/lessons.md` in place
 - [ ] Feasibility spike: `pydeseq2`, `plotly`, `scipy` under Pyodide via micropip; record outcome; choose the DE strategy for JupyterLite
 - [ ] `ctx.viz` palette/static/interactive/annotate with one round-trip test (same data → PDF light/dark + HTML)
 - [ ] `ctx.report.builder` with theme toggle, parameter card, quiz and reproduction-block components
@@ -304,7 +304,7 @@ cancer-transcriptomics-teaching/
 
 - [ ] Docker + Apptainer builds; Apple-silicon and Windows/WSL2 smoke tests; HPC profile test on Kebnekaise
 - [ ] Runtime/RAM benchmarks recorded in reports
-- [ ] Pilot with 2–3 students; collect friction points into `lessons.md`; release v1.0 with Zenodo DOI
+- [ ] Pilot with 2–3 students; collect friction points into `knowledge/lessons.md`; release v1.0 with Zenodo DOI
 
 ---
 
@@ -387,7 +387,7 @@ cancer-transcriptomics-teaching/
 
 - What was built, what deviated from plan and why
 - Measured budgets per module
-- Lessons captured in `lessons.md`
+- Lessons captured in `knowledge/lessons.md`
 
 ---
 

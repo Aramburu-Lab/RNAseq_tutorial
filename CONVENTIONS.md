@@ -1,18 +1,18 @@
-# CLAUDE.md — Cancer Transcriptomics Teaching Suite
+# CONVENTIONS.md — Cancer Transcriptomics Teaching Suite
 
-Instructions for Claude Code sessions in this repository. If the repo was scaffolded from `codebase_template` and already ships a CLAUDE.md, merge this file into it; do not overwrite template conventions.
+Project rules for agents and humans in this repository, imported by `CLAUDE.md`. The repo is scaffolded from `codebase_template`, whose rules are in `AGENTS.md`. Where `CONVENTIONS.md` conflicts with `AGENTS.md`, `CONVENTIONS.md` wins; each divergence is a D-entry in `knowledge/decisions.md`.
 
 ## Read first, every session
 
-1. `lessons.md` — rules written after corrections; apply them.
-2. `todo.md` — the plan; work only on unchecked items of the current phase.
+1. `knowledge/lessons.md` — rules written after corrections; apply them.
+2. `TODO.md` — the plan; work only on unchecked items of the current phase.
 3. This file.
 
 ## Workflow
 
-- Plan mode for any task with 3+ steps or an architectural choice. Write the plan (checkable items) into `todo.md`, check in before implementing, mark items done as you go, add a short review section when a phase completes.
+- Plan mode for any task with 3+ steps or an architectural choice. Write the plan (checkable items) into `TODO.md`, check in before implementing, mark items done as you go, add a short review section when a phase completes.
 - Verify before done: run tests, execute the CLI on fixture data, open the HTML offline, measure wall time and peak RAM (`/usr/bin/time -v`). Never report a module complete without this evidence.
-- After any correction from the user, add a rule to `lessons.md` in the same session.
+- After any correction from the user, add a rule to `knowledge/lessons.md` in the same session.
 - Use subagents for research, dataset scouting, and parallel exploration; one task per subagent.
 - If something goes sideways, stop and re-plan; do not push through.
 - Doc edits: targeted string replacements with grep verification, never whole-file rewrites.
@@ -22,7 +22,7 @@ Instructions for Claude Code sessions in this repository. If the repo was scaffo
 ## Stack
 
 - Python 3.12; environment via `pixi` (channels: conda-forge, bioconda); containers via multi-stage Docker from the template, Apptainer SIF for HPC.
-- CLI package `ctx` (typer). Layout and module list: see `todo.md` → Repository. One subcommand per module: `ctx setup | gather | qc | process | quant | de | function | proteo | ncrna | report | lite-build`.
+- CLI package `ctx` (typer). Layout and module list: see `TODO.md` → Repository. One subcommand per module: `ctx setup | gather | qc | process | quant | de | function | proteo | ncrna | report | lite-build`.
 - Runtime profiles `laptop` (default) / `hpc` / `lite`; thread and memory budgets come from the profile, command syntax does not change.
 - Budgets: Track A < 15 min and < 6 GB peak RAM on 4 cores; Track B < 10 min and < 4 GB. Every report states the measured values.
 - Tables: Polars, lazy where possible, chunked concat, downcast to Int32/Float32 only after checking the value range, print `estimated_size()` for every materialised frame. Pandas only inside JupyterLite notebooks.
@@ -68,9 +68,9 @@ Instructions for Claude Code sessions in this repository. If the repo was scaffo
 ## Data and scope boundaries
 
 - TCGA raw reads are controlled-access; only processed expression from GDC is used. Do not attempt dbGaP data.
-- Tier-1 dataset: E-MTAB-11190 (pending FASTQ verification, see `todo.md` D5). Teaching subset and indices are prepared once on HPC and hosted on Zenodo; students never download full FASTQs.
+- Tier-1 dataset: E-MTAB-11190 (pending FASTQ verification, see `TODO.md` D5). Teaching subset and indices are prepared once on HPC and hosted on Zenodo; students never download full FASTQs.
 - Licences: code MIT, materials CC BY 4.0; respect KEGG, COSMIC, DisGeNET and miRTarBase terms (documented in `docs/`).
 
 ## Definition of done (per module)
 
-- `ctx <module>` runs end to end on fixtures in CI; HTML opens offline; all figure variants present with annotations; every output has `_README.md` and passes the naming lint; notebook executes headless; budgets measured and within limits; biology sanity checks from `todo.md` pass; `todo.md` updated.
+- `ctx <module>` runs end to end on fixtures in CI; HTML opens offline; all figure variants present with annotations; every output has `_README.md` and passes the naming lint; notebook executes headless; budgets measured and within limits; biology sanity checks from `TODO.md` pass; `TODO.md` updated.

@@ -48,3 +48,14 @@ logs/*
 .copier-scaffold-nfcore.sh
 
 .DS_Store
+
+# Project additions (D-002). Data and fetched resources are never committed.
+/data/
+/resources/
+# Test fixtures are committed despite the extension rules above. Secrets and
+# Finder files are re-ignored after the negation, because the last match wins.
+!tests/fixtures/**
+.DS_Store
+.env
+*.pem
+*.key
