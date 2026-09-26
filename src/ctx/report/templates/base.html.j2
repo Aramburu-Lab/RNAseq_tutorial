@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ page.title }}</title>
+<script>
+/* Resolve the theme before first paint: the reader's stored choice, else the OS preference. */
+(function () {
+  var theme = null;
+  try { theme = localStorage.getItem("ctx-theme"); } catch (e) {}
+  if (theme !== "white" && theme !== "black") {
+    theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "black" : "white";
+  }
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
+<style>
+/* Fallbacks first: with JavaScript off no data-theme is ever set, and the page must still read. */
+:root { {{ css.white }} }
+@media (prefers-color-scheme: dark) { :root:not([data-theme]) { {{ css.black }} } }
+:root[data-theme="white"] { {{ css.white }} }
+:root[data-theme="black"] { {{ css.black }} }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--background); color: var(--ink); font: var(--size-base)/1.6 var(--font); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px; }
+header { display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 2px solid var(--grid); }
+h2 { border-bottom: 1px solid var(--grid); padding-bottom: 4px; margin-top: 40px; }
+button { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--ink); border-radius: 4px; padding: 4px 12px; cursor: pointer; }
+table { border-collapse: collapse; }
+th, td { border-bottom: 1px solid var(--grid); padding: 4px 8px; text-align: left; vertical-align: top; }
+pre { background: var(--grid); padding: 8px 12px; overflow-x: auto; }
+details { margin: 4px 0 16px; }
+summary { cursor: pointer; }
+figure { margin: 16px 0; }
+a { color: inherit; }
+</style>
+<script>{{ plotly_js }}</script>
+</head>
+<body>
+<main class="wrap">
+<header><h1>{{ page.title }}</h1><button id="ctx-theme-toggle" type="button">Light / dark</button></header>
+{% block content %}{% endblock %}
+</main>
+<script type="application/json" id="ctx-templates">{{ templates }}</script>
+<script>
+/* One toggle for every page kind: swap the CSS variables and re-theme every plotly figure. */
+(function () {
+  var templates = JSON.parse(document.getElementById("ctx-templates").textContent);
+  function apply(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    document.querySelectorAll(".js-plotly-plot").forEach(function (div) {
+      Plotly.relayout(div, { template: templates[theme] });
+    });
+  }
+  document.getElementById("ctx-theme-toggle").addEventListener("click", function () {
+    var next = document.documentElement.getAttribute("data-theme") === "black" ? "white" : "black";
+    try { localStorage.setItem("ctx-theme", next); } catch (e) {}
+    apply(next);
+  });
+  /* The figures were drawn with the light template; bring them to the resolved theme. */
+  apply(document.documentElement.getAttribute("data-theme"));
+})();
+</script>
+</body>
+</html>

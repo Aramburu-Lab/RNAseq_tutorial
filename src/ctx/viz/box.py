@@ -27,6 +27,14 @@ from ctx.viz.style import (
 )
 
 REQUIRED = ("feature", "group", "sample", "value")
+# The numbers the figure prints, shipped beside the values they were computed from.
+STAT_COLUMNS = {
+    "n_group": ("samples", "Non-missing values of this feature in this row's group."),
+    "u": ("pairs", "Mann-Whitney U of the comparison group against the reference group."),
+    "p": ("dimensionless", "Two-sided Mann-Whitney U p-value, before adjustment."),
+    "p_adj": ("dimensionless", "Benjamini-Hochberg adjusted p over the plotted features."),
+    "r": ("dimensionless", "Rank-biserial correlation; > 0 when the comparison group is higher."),
+}
 
 
 @dataclass(frozen=True)
@@ -86,6 +94,27 @@ def box_data(
     caption = compare_groups(frame, feature="feature", group="group", value="value", groups=groups)
     unit = columns["value"][0]
     return BoxData(frame, columns, feature_label, value_label, unit, groups, hover, caption)
+
+
+def table(data: BoxData) -> pl.DataFrame:
+    """The values plus, on every row, the statistics the figure prints for that feature.
+
+    Args:
+        data: The contract.
+
+    Returns:
+        ``data.frame`` with the ``STAT_COLUMNS`` appended, rows in their original order.
+    """
+    stats = pl.DataFrame(
+        [
+            {"feature": t.feature, "n_ref": t.n_reference, "n_cmp": t.n_comparison,
+             "u": t.u, "p": t.p, "p_adj": t.p_adj, "r": t.r}
+            for t in data.caption.tests
+        ]
+    )  # fmt: skip
+    n_group = pl.when(pl.col("group") == data.groups[0]).then("n_ref").otherwise("n_cmp")
+    joined = data.frame.join(stats, on="feature", how="left", maintain_order="left")
+    return joined.with_columns(n_group.alias("n_group")).select(*data.frame.columns, *STAT_COLUMNS)
 
 
 def static(data: BoxData, theme: Theme) -> Any:
@@ -199,15 +228,20 @@ def interactive(data: BoxData) -> Any:
         }
         for f in stats
     ]
+    # Wrapped to the double-column width: one long line is cut off at the plot's right edge.
+    lines = data.caption.text(caption_chars(figure_inches("double", "box")[0])).split("\n")
     caption = {
-        "text": data.caption.text(),
-        "xref": "paper", "yref": "paper", "x": 0, "y": -0.25, "showarrow": False, "xanchor": "left",
+        "text": "<br>".join(lines), "xref": "paper", "yref": "paper", "x": 0, "y": 0,
+        "yshift": -3 * SIZES["caption"] * LINE_SPACING, "yanchor": "top", "xanchor": "left",
+        "showarrow": False, "align": "left",
     }  # fmt: skip
+    bottom = (len(lines) + 4) * SIZES["caption"] * LINE_SPACING
     fig.update_layout(
         template=plotly_templates()["white"],
         boxmode="group",
         xaxis_title=data.feature_label,
         yaxis_title=f"{data.value_label} ({data.unit})",
         annotations=[*labels, caption],
+        margin={"b": bottom},
     )
     return fig

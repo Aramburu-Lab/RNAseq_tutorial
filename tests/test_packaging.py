@@ -62,3 +62,22 @@ def test_wheel_runs_outside_repo(tmp_path):
     assert Path(out[0]).is_relative_to(site)
     declared = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["version"]
     assert out[1] == declared
+
+
+def test_wheel_renders_a_page(tmp_path):
+    site = build_wheel(tmp_path)
+    out = run_from_wheel(
+        site,
+        """
+        import plotly.graph_objects as go
+        import ctx
+        from ctx.report.builder import FigureBlock, FigurePage, render
+        html = render(FigurePage("t", FigureBlock(go.Figure(), "caption", [], "d.csv")))
+        print(ctx.__file__)
+        print("ctx-theme-toggle" in html, len(html))
+        """,
+        cwd=tmp_path,
+    ).split()
+    assert Path(out[0]).is_relative_to(site)
+    assert out[1] == "True"
+    assert int(out[2]) > 1_000_000

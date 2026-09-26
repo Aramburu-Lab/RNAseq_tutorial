@@ -1,0 +1,8 @@
+{% macro figure_block(f) %}
+<figure>
+{{ f.html }}
+<figcaption>{{ f.caption }}</figcaption>
+<p class="data">Data: <a href="{{ f.data_file }}">{{ f.data_file }}</a></p>
+<script type="application/json" id="ctx-data-{{ f.index }}">{{ f.rows }}</script>
+</figure>
+{% endmacro %}

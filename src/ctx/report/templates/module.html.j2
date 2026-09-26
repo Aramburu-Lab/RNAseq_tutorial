@@ -1,0 +1,55 @@
+{% extends "base.html.j2" %}
+{% from "_figure.html.j2" import figure_block %}
+{% block content %}
+{% for id, title in sections %}
+<section id="{{ id }}">
+<h2>{{ title }}</h2>
+{% if id == "question" %}
+<p class="question">{{ page.question }}</p>
+{% elif id == "concept" %}
+<p>{{ page.concept }}</p>
+{% elif id == "parameters" %}
+<table class="cards">
+<thead><tr><th>Parameter</th><th>What it means</th><th>Default</th><th>What changes if you move it</th></tr></thead>
+<tbody>
+{% for card in page.parameters %}
+<tr id="card-{{ card.name }}"><td><code>{{ card.name }}</code></td><td>{{ card.meaning }}</td><td><code class="default">{{ card.default }}</code></td><td>{{ card.effect }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% elif id == "results" %}
+{% for kind, item in results %}
+{% if kind == "figure" %}{{ figure_block(item) }}{% else %}<p>{{ item }}</p>{% endif %}
+{% endfor %}
+{% elif id == "practice" %}
+<p>{{ page.practice }}</p>
+{% elif id == "think" %}
+<ol class="think">
+{% for check in page.think %}
+<li><p>{{ check.prompt }}</p><details><summary>Answer</summary><p>{{ check.answer }}</p></details></li>
+{% endfor %}
+</ol>
+{% elif id == "mistakes" %}
+<ul class="mistakes">
+{% for mistake in page.mistakes %}<li>{{ mistake }}</li>{% endfor %}
+</ul>
+{% elif id == "reproduce" %}
+{% set r = page.reproduce %}
+<pre><code>{{ r.command }}</code></pre>
+<table class="measured">
+<tr><th>Wall time</th><td class="wall">{{ "%.3f"|format(r.wall_seconds) }} s</td></tr>
+<tr><th>Peak RSS, this process</th><td class="rss-self">{{ "%.1f"|format(r.peak_rss_self / 1048576) }} MiB ({{ r.peak_rss_self }} bytes)</td></tr>
+<tr><th>Peak RSS, largest child process</th><td class="rss-children">{{ "%.1f"|format(r.peak_rss_children / 1048576) }} MiB ({{ r.peak_rss_children }} bytes)</td></tr>
+<tr><th>Profile</th><td>{{ r.profile }}</td></tr>
+<tr><th>Budget</th><td>{{ r.budget }}</td></tr>
+</table>
+<table class="versions">
+<thead><tr><th>Package</th><th>Version</th></tr></thead>
+<tbody>
+{% for name, version in r.versions.items() %}<tr><td>{{ name }}</td><td>{{ version }}</td></tr>{% endfor %}
+</tbody>
+</table>
+{% endif %}
+</section>
+{% endfor %}
+{% endblock %}

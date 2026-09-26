@@ -285,7 +285,8 @@ def written(tmp_path_factory):
     out = tmp_path_factory.mktemp("figure")
     figure_stem = stem("de", "box_demo", 1, day=date(2026, 9, 26))
     data = demo_box(counts(), planted=3, null=5)
-    return out, figure_stem, data, write_figure(data, out, figure_stem, data_releases={})
+    files = write_figure(data, out, figure_stem, title="Demo", data_releases={})
+    return out, figure_stem, data, files
 
 
 def test_caption_wrap_keeps_words_whole():
