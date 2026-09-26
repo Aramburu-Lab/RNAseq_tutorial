@@ -157,8 +157,12 @@ the root and hand-merge `CLAUDE.md`.
 0 overwrites and `conflict`/`skip` for `TODO.md` and `knowledge/lessons.md` only; all three files
 kept their SHA-256.
 
-**Consequence.** `copier update` merges against two appended lines in `CLAUDE.md` and `AGENTS.md`
-instead of the whole rule set.
+**Consequence.** `copier update` merges against two short project additions in `CLAUDE.md` and
+`AGENTS.md` instead of the whole rule set. They sit at the top of each file, after the import and
+after the intro paragraph, not at the end: a real update to a synthetic template release that
+appended to both files left conflict markers in each while the lines were appended, and merged
+cleanly once they were moved (P1.11, 2026-09-26). A template change to those top lines would still
+conflict; that is the smallest surface available.
 
 ## D-001 — `src/ctx` is an installable package, an exception to "no shared helper module"
 

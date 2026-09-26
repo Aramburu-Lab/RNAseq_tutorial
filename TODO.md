@@ -214,8 +214,9 @@ Scaffold from Aramburu-Lab `codebase_template` (Copier): pixi multi-stage contai
 
 ```text
 cancer-transcriptomics-teaching/
-├── pixi.toml, pixi.lock, Dockerfile, apptainer.def
-├── README.md, TODO.md, knowledge/lessons.md, CITATION.cff, LICENSE (code MIT, materials CC BY 4.0)
+├── pixi.toml, pixi.lock, pyproject.toml; containers/ (template: analysis.Dockerfile, build.sh, digests.lock)
+├── README.md, TODO.md, CONVENTIONS.md (project rules), AGENTS.md + CLAUDE.md (template), LICENSE (MIT; CC BY 4.0 file with the first materials), CITATION.cff (later)
+├── knowledge/     decisions.md (D-001 on), lessons.md, generated codebase map and API index
 ├── src/ctx/
 │   ├── acquire/   gdc.py ena.py geo.py
 │   ├── qc/        fastp_parse.py
@@ -225,17 +226,18 @@ cancer-transcriptomics-teaching/
 │   ├── function/  ora.py gsea.py disease.py lite.py
 │   ├── proteo/    cptac.py pdc.py concordance.py
 │   ├── ncrna/     biotypes.py mirna.py targets.py
-│   ├── viz/       palette.py static.py interactive.py annotate.py
-│   ├── report/    builder.py templates/*.html.j2 assets/
-│   ├── io/        naming.py readme_companion.py polars_utils.py
+│   ├── viz/       style.py (the one style config) annotate.py save.py, one module per figure type: box.py
+│   ├── report/    builder.py templates/{base,figure,module,_figure}.html.j2
+│   ├── io/        naming.py readme_companion.py (polars_utils.py in Phase 2)
+│   ├── runtime.py profiles, roots, measurement, versions; setup.py (M0)
 │   └── cli.py     (typer)
 ├── notebooks/     01_gather … 08_ncrna (student + solutions; 05–08 also run in JupyterLite)
 ├── lite/          JupyterLite config + bundled data (built by `ctx lite-build`)
 ├── resources/     references, indices, GMTs (gitignored; fetched by ctx setup)
 ├── data/          raw/ interim/ processed/ (gitignored)
-├── reports/       index.html + committed example reports
-├── figures/       pdf light/dark
-├── tests/         pytest, chr22-sized fixtures
+├── scripts/python/ one-off instructor steps: make_chr22_fixture.py, spike_pyodide.py, pyodide_harness.py
+├── outputs/NN_<module>/  run outputs (gitignored); deliverables/ what leaves the project (reports, figures, the spike record)
+├── tests/         pytest; synth.py (synthetic counts); fixtures/chr22/ (committed)
 ├── docs/          glossary.md teacher_guide.md parameter_cards/
 └── .github/workflows/ci.yml
 ```
@@ -389,6 +391,7 @@ cancer-transcriptomics-teaching/
 - What was built, what deviated from plan and why
 - Measured budgets per module
 - Lessons captured in `knowledge/lessons.md`
+- Phase 1 (2026-09-26): done; review, measured budgets and lessons under P1.11 below.
 
 ---
 
@@ -884,7 +887,7 @@ it. P1.2 pins every dependency the project adds.
       - The reviewer could not reproduce the scan's candidate numbers from the implementer's report. The README's claim, that this is the narrowest window, was confirmed by an independent scan.
       - Byte-identical regeneration was checked on macOS only.
 
-- [ ] P1.11 Close Phase 1
+- [x] P1.11 Close Phase 1
   - Divergence inventory: in a scratchpad clone, run `copier recopy --trust --defaults --skip-tasks`. `git diff --name-only` must list exactly `pixi.toml`, `.pre-commit-config.yaml`, `AGENTS.md`, `CLAUDE.md` and `knowledge/decisions.md`. Any other file is an unplanned divergence.
   - Real update, in a scratchpad clone of the template:
     - Tag a synthetic release that bumps the labcore and ruff pins, edits the last lines of `CLAUDE.md.jinja` and `AGENTS.md.jinja`, and touches the pre-commit local block.
@@ -899,6 +902,55 @@ it. P1.2 pins every dependency the project adds.
     - `knowledge/lessons.md` updated;
     - the D-entries listed.
   - The CI run URL is recorded only after Rytis creates the remote and pushes.
+  - Evidence, 2026-09-26, on macOS 15 (Darwin 24.6.0), arm64, 14 cores, 24.0 GiB:
+    - Divergence inventory: `copier recopy` in a scratch clone changes exactly `.pre-commit-config.yaml`, `AGENTS.md`, `CLAUDE.md`, `knowledge/decisions.md` and `pixi.toml`, both before and after the fix below.
+    - Real update: a scratch template clone tagged a synthetic v0.9.12 with five edits: labcore pin v0.6.6, ruff 0.16.3, a line appended to `CLAUDE.md.jinja`, a sentence after the last paragraph of `AGENTS.md.jinja`, and a comment in the pre-commit local block. The update was run on a scratch project clone.
+      - First run: exit 0, but conflict markers in `AGENTS.md` and `CLAUDE.md`, where the project lines were appended at the end.
+      - The lines were moved to the top of each file (5cc4c5e, D-002).
+      - Second run: exit 0, no `*.rej`, no markers; all four project additions and all five template changes present.
+    - Fresh clone: `pixi install --locked` exits 0, and `pixi run preflight` exits 0 with 98 passed, 1 deselected (network) and 7 hooks.
+    - `/usr/bin/time -l pixi run test`: 20.40 s real at 784,384,000 bytes max RSS, well inside the 5-minute test budget.
+  - Measured, each with its command:
+
+    | Step | Wall | Peak RSS | Measured by |
+    |---|---|---|---|
+    | `copier copy` v0.9.10 | 3.08 s | 59,047,936 bytes | `/usr/bin/time -l` |
+    | `pixi install`, template only | 25.41 s | 564,822,016 bytes | `/usr/bin/time -l` |
+    | `pixi install`, with the ctx features | 34.09 s | 788,873,216 bytes | `/usr/bin/time -l` |
+    | `copier recopy`, scratch clone | 4.45 s | 58,261,504 bytes | `/usr/bin/time -l` |
+    | `copier update` to the synthetic v0.9.12 | 3.42 s | 82,100,224 bytes | `/usr/bin/time -l`, first run |
+    | `pixi run test`, 98 tests | 20.40 s | 784,384,000 bytes | `/usr/bin/time -l`, fresh clone |
+    | Pyodide spike, every arm and size | 323.37 s | 1,916,305,408 bytes | `/usr/bin/time -l`, run log |
+    | chr22 fixture build | 4.37 s | 197,853,184 bytes | `/usr/bin/time -l`, implementer's report |
+    | `ctx setup` | 0.935 s | 109.2 MiB in-process, 5.2 MiB largest child | its own reproduction block |
+    | `pixi run ctx setup` | 1.39 s | 171,999,232 bytes | `/usr/bin/time -l`, pixi wrapper included |
+
+  - Review of Phase 1:
+    - Built:
+      - the template adopted in place with nothing overwritten;
+      - the `ctx` package with strict gates that are proven able to fail;
+      - naming and README companions;
+      - laptop and hpc profiles with measured thread limits and peak RSS;
+      - one style config;
+      - a box figure as PDF and SVG from one render, each file measured;
+      - self-contained HTML pages with one theme toggle, checked in a browser;
+      - `ctx setup` as the end-to-end consumer;
+      - synthetic counts with planted truth;
+      - a GENCODE 50 chr22 fixture with simulated reads;
+      - the Pyodide spike with its rule fixed before the run.
+    - Deviations: recorded under each item. The larger ones:
+      - two pixi features instead of one;
+      - 14 pt kept, with the layout adapting (a double column above 3 features);
+      - the figure CSV carries every printed number instead of the README carrying the caption;
+      - the project lines sit at the top of `CLAUDE.md` and `AGENTS.md`.
+    - Decisions: D14 to D17 in the decisions table; D-001 to D-005 in `knowledge/decisions.md`.
+    - Lessons: five new rules in `knowledge/lessons.md`.
+    - Repository tree: updated above.
+    - Not done:
+      - No CI run exists yet; the remote and the push are Rytis's.
+      - The template's example scripts, `scripts/python/example.py` and `scripts/bash/count_records.sh`, are left in place, not deleted.
+      - Liberation Sans is not installed, so Linux CI draws with DejaVu Sans.
+      - Byte-identical fixture regeneration was checked on macOS only.
 
 ### Conflicts with codebase_template
 
