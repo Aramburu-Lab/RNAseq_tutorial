@@ -1065,21 +1065,47 @@ No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work 
   - Proven by: `pixi install --locked` exits 0; `pixi run -e fetch nextflow -version` pasted; `test_gitignore_rules` gains `results/samplesheet/samplesheet.csv` (ignored) and `tests/fixtures/fetchngs/download/fastq/x_1.fastq.gz` (not ignored); `test_fetchngs_version_single_source`: every `nf-core/fetchngs -r <v>` in TODO.md, CONVENTIONS.md, scripts/ and src/ equals `FETCHNGS_VERSION`, match count > 0.
   - Evidence, 2026-09-26: `pixi install -e fetch` 19.47 s real, 182,861,824 bytes max RSS; resolved nextflow 26.04.6 (bioconda), openjdk 25.0.2, python 3.12.14, pinned `==`; `nextflow -version` reads `version 26.04.6 build 12646`; `pixi install --locked` exits 0 for `default` and `fetch`; preflight 101 passed. Mutation: changing one pinned fetchngs command in TODO.md to release 1.13.0 fails `test_fetchngs_version_single_source`.
 
-- [ ] P1b.2 Real fixtures, on this Mac (after P1b.1)
+- [x] P1b.2 Real fixtures, on this Mac (after P1b.1)
   - `scripts/python/make_fetchngs_fixture.py` (`exempt:` block, standard library): refuses a non-empty outdir; relative `--outdir` inside a scratch working directory; `NXF_SYNTAX_PARSER=v1 NXF_ANSI_LOG=false nextflow run nf-core/fetchngs -r 1.12.0 -profile docker,arm --input ids.csv --outdir out --nf_core_pipeline rnaseq [--skip_fastq_download]` with `-work-dir` and `NXF_HOME` in the scratchpad; copies `out/` without the pipeline_info HTML pages, then deletes the scratch outdir so no written path stays reachable; writes `MANIFEST.sha256` and a README (exact command, fetchngs version string and sha7 from the versions file, Nextflow version, profile, host, date, input list with its source URL and SHA-256, omitted files with bytes and SHA-256, what it can and cannot test). `pixi run docs` afterwards.
   - `download/`: SRR13191702 (paired, FTP, ~32 KB), ERR1160846 (single, FTP, 18 KB), SRR14709033 (single, sra-tools fallback, 1 read), SRR14593545 (paired, sra-tools fallback, 1 read): covers `verified` and `no_md5` on both layouts; no GEO IDs.
   - `metadata_only/`: `--skip_fastq_download` on nf-core's pinned `sra_ids_test.csv` (test-datasets commit 2732b911; 10 IDs incl. GSE/GSM): 14 real rows, SRX9504942 with 4 runs.
   - `test_no_cohort_identifiers` skips `tests/fixtures/fetchngs/metadata_only/` only (D20); every other path is scanned as before.
   - Proven by `tests/test_fetchngs_fixture.py`: `::test_manifest` (files = manifest, count > 0, hashes, total <= 2 MB, tracked and not ignored); `::test_exempt_input_is_nf_core_list` (the committed `ids.csv` SHA-256 equals the pinned upstream list's, so the exemption cannot hide a course cohort); `::test_is_pinned_release` (versions file reads `v1.12.0-g<sha7>`); `::test_md5_consistency` (labelled consistency only); `::test_matches_ena` (marker `network`: `fastq_md5` and the recomputed MD5 of each downloaded FASTQ equal a live ENA filereport; this, the rebuild and the README are the proof the fixture is real); `::test_rebuilds` (marker `network`, Docker: a rerun reproduces `samplesheet/`, `metadata/`, `fastq/`, `fastq/md5/` byte for byte, plus the parsed version; run once, output pasted).
+  - Evidence, 2026-09-26, commits a742380 and ca27549. fetchngs 1.12.0 ran on this Mac under `-profile docker,arm` with Nextflow 26.04.6 and `NXF_SYNTAX_PARSER=v1`; its versions file reads `nf-core/fetchngs: v1.12.0-g8ec2d93`.
+    - The first download attempt failed: fasterq-dump requested 36 GB on a 24 GB Mac (248.08 s). The script now caps the run at `--max_cpus 4 --max_memory 8.GB`.
+    - Builds, measured with `/usr/bin/time -l`:
+      - `download/`: 76.96 s at 514,637,824 bytes max RSS; 23 files; 2 FTP runs with md5 files, 2 sra-tools runs without.
+      - `metadata_only/`: 19.73 s at 517,259,264 bytes max RSS; 19 files; 14 rows in 11 experiments, SRX9504942 with 4 runs.
+      - Both fixtures together: 123,092 bytes. The HTML reports are left out, with their SHA-256 in each README.
+      - The first metadata-only build came from an earlier script without the resource cap. It was moved to the scratchpad and rebuilt, so the README states the command that ran.
+    - Offline, `tests/test_fetchngs_fixture.py` passes 7 tests.
+    - Network tests, run once:
+      - `test_matches_ena` passed twice: every downloaded FASTQ's MD5 equals ENA's `fastq_md5`, and ENA lists no FASTQ for the two sra-tools runs.
+      - `test_rebuilds[metadata_only]` passed (25.61 s, with `test_matches_ena`), but only after one correction. Its first run reproduced 12 files byte for byte and differed on `metadata/GSM4907283.runinfo_ftp.tsv`: same rows, another order, because fetchngs does not fix that order (D-006). Metadata files are now compared by rows.
+      - `test_rebuilds[download]`: first attempt stalled in the sra-tools `prefetch` step inside the emulated container. The host reached the same NCBI URL in 0.4 s. The attempt was stopped after about 30 min and retried; the result is recorded under P1b.5.
 
-- [ ] P1b.3 `ctx.gather.fetchngs.read(outdir)` (after P1b.2)
+- [x] P1b.3 `ctx.gather.fetchngs.read(outdir)` (after P1b.2)
   - Order: version check (refuses anything but 1.12.0, and a missing versions file); `samplesheet.csv` as text; `strandedness` present (else "rerun with --nf_core_pipeline rnaseq"); a single `params_*.json` (else refuse: a `-resume` into the same outdir); completeness (every input ID has a `metadata/` file, every run listed there has a row); `id_mappings.csv` agrees with the sheet (same runs, equal values; a check, not a join); FASTQ resolved by file name inside `<outdir>/fastq/`; md5 per file.
   - Status per file: `verified`, `mismatch`, `no_md5`, `missing`, `not_downloaded`. Mismatch, missing and completeness gaps raise one error listing every offender; `no_md5` is reported; FASTQs in `fastq/` that no row lists are reported; runs with > 2 ENA files flagged. Per run: `run_index`, `n_runs`, `single_end`. Provenance: version string and sha7, plus name and SHA-256 of every pipeline_info file read.
   - Proven by `tests/test_gather.py`, failure injection on tmp copies of the real fixtures: reads the download fixture (2 `verified`, 2 `no_md5`); original paths unreachable (asserts first that no written path exists here); md5 mismatch fails; missing FASTQ fails; missing metadata fails; unlisted FASTQ reported; two params files refused; missing `strandedness` fails; other version refused; metadata-only gives `not_downloaded`; multi-run (SRX9504942 `n_runs` = 4, counted independently from the CSV); `id_mappings` disagreement fails.
+  - Evidence, 2026-09-26: `tests/test_gather.py` passes 16/16.
+    - Mutations, each failing exactly its target test:
+      - md5 never compared: `test_md5_mismatch_fails`;
+      - raising on the first problem: `test_every_problem_listed_together`;
+      - the version checked after the files: `test_preconditions_stop_first`.
+    - Added beyond the plan: `test_missing_input_list_fails`, because the completeness check needs the input list inside the outdir, and `test_every_problem_listed_together`.
+    - In metadata-only mode, a run with no ENA link has no file name; its status comes from `library_layout`.
 
-- [ ] P1b.4 `ctx gather` (after P1b.3)
+- [x] P1b.4 `ctx gather` (after P1b.3)
   - `ctx gather --dataset <slug> [--fetchngs-dir DIR]`; unset means `<root>/data/raw/<slug>`. Cards for both.
   - Writes `outputs/01_gather/YYYY-MM-DD_gather_<slug>_samplesheet_v1` (Parquet + CSV) + README through `write_table`: one row per run; FASTQ paths relative to the outdir; statuses; `strandedness` (`auto`); a chosen subset of ENA columns with meanings cited from ENA's field documentation, `library_selection` and `library_strategy` kept for M8; `donor, cell_type, condition, replicate, batch` empty until curation (Phase 2), stated in the README. Module page with counts, statuses and the reproduction block; M1 figures come in Phase 2.
   - Proven by: `test_parameter_cards_match_cli` parametrised over every subcommand; `::test_gather_end_to_end` (exit 0; lint clean; READMEs present; no `\r` in the CSV; Parquet equals CSV; wall and RSS within Track B); `::test_upstream_untouched` (SHA-256 and mtime of every outdir file unchanged); `::test_failure_writes_no_sheet` from the CLI; `test_packaging.py` runs `gather` from the wheel.
+  - Evidence, 2026-09-26, commit 032f81f: `tests/test_cli.py` passes 14 tests, and preflight passes with 130 tests.
+    - `ctx gather --dataset nfcore_test` on the download fixture: 0.341 s wall and 91.2 MiB peak RSS, from its reproduction block. It writes 4 files, lint-clean. The page counts 3 `verified` and 3 `no_md5` files.
+    - With a FASTQ removed, it exits 1, names the file, and writes no `outputs/`.
+    - Mutation: `run()` dropping a marker file into the fetchngs outdir fails `test_upstream_untouched`.
+    - ENA column meanings quote ENA's own descriptions from the ENA Portal API `returnFields`, `result=read_run`, retrieved 2026-09-26.
+    - Added beyond the plan: `test_every_subcommand_has_a_card_test`, which fails if a new subcommand has no card case.
+    - `--dataset` is required, so its card says `required`.
 
 - [ ] P1b.5 Close: fresh-clone preflight; `/usr/bin/time -l pixi run test` < 5 min; measured table (both fixture runs, test suite, `ctx gather`); review with deviations; lessons; D-006 evidence final.
