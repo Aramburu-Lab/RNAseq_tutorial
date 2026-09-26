@@ -526,7 +526,7 @@ it. P1.2 pins every dependency the project adds.
     - Added beyond the plan: a per-donor effect (log2 SD 0.25), so the nesting matters, and a `batch` column balanced against condition with no planted effect.
     - `counts()` also takes `n_genes` and `donors_per_condition`, for the P1.5 size grid.
 
-- [ ] P1.4 `ctx.io`: naming lint and README companion (after P1.2)
+- [x] P1.4 `ctx.io`: naming lint and README companion (after P1.2)
   - `src/ctx/io/naming.py`:
     - `MODULES`: ordered (token, NN) pairs, the single list. Hyphens become underscores, as in `lite_build`.
     - `stem(module, description, version, *, day)`: the only name builder.
@@ -552,6 +552,16 @@ it. P1.2 pins every dependency the project adds.
       - every README SHA-256 equals hashlib of the file on disk;
       - Parquet and CSV read back equal.
     - `::test_provenance_not_from_cwd`: run from inside an unrelated git repo, and with the unzipped wheel placed inside another git repo, the README carries neither repo's SHA.
+  - Evidence, 2026-09-26: `tests/test_io.py` passes 23/23, and preflight passes with 42 tests.
+    - Mutation check: running git in the working directory instead of ctx's checkout fails `test_provenance_not_from_cwd`.
+    - Added:
+      - `test_readme_written_last`, an order test: a CSV write that fails leaves only the Parquet file and no README.
+      - `test_stem_raises_on_illegal_parts`.
+    - Deviations:
+      - The dirty flag is `git status --porcelain -- src`, which counts untracked source files. The first version ignored untracked files and reported a clean SHA for modules that were not committed yet.
+      - `versions()` lists the distributions behind every imported module, not a fixed list.
+      - `report` is 09 and `lite_build` is 10 in MODULES. todo.md numbers only M0 to M8.
+      - `estimated_size()` is recorded in each README rather than printed.
 
 - [ ] P1.5 Pyodide feasibility spike and the JupyterLite DE strategy (after P1.3, P1.4)
   - `scripts/python/spike_pyodide.py` has an `exempt:` codebase-meta block. It holds `decide(record)`, which is committed before the run.
