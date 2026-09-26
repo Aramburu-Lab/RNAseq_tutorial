@@ -204,7 +204,7 @@ Each module = one CLI subcommand (`ctx <module>`), one notebook (`notebooks/0N_<
 - Parameter cards: table of parameter → plain-English meaning → default → what changes if you move it.
 - Pedagogy elements: think-about-it prompts, `<details>` self-check answers, "common mistakes" callouts, reproduction block with measured runtime/RAM.
 - Size guard: heatmaps capped at 50–100 genes; embedded tables capped to tested genes with ≤ 8 columns.
-- In-browser Python (D4, agreed): a JupyterLite site (`jupyter lite build`, static, GitHub Pages) ships notebooks 05–08 with the count tables and DE results bundled as CSV/JSON (< 50 MB total), so students re-run M5–M8 in the browser with nothing installed. Pyodide rules: `pandas`/`numpy`/`scipy`/`plotly` only (no Polars, no compiled bioinformatics tools); DE re-runs use `pydeseq2` only if the Phase 1 spike shows it installs via micropip, otherwise precomputed grids plus live nonparametric tests; enrichment uses `ctx.function.lite`. Track A (M2–M4) stays CLI-only.
+- In-browser Python (D4, agreed; DE strategy D17, settled by the P1.5 spike, D-005): a JupyterLite site (`jupyter lite build`, static, GitHub Pages) ships notebooks 05–08 with the count tables and DE results bundled as CSV/JSON (< 50 MB total), so students re-run M5–M8 in the browser with nothing installed. Pyodide rules: `pandas`/`numpy`/`scipy`/`plotly` only (no Polars, no compiled bioinformatics tools). DE in the browser is precomputed grids plus live nonparametric tests (scipy Mann–Whitney U with BH), not live `pydeseq2`. In Pyodide 314.0.6, micropip installs pydeseq2 0.5.4, but its default fit fails at every spike size because joblib's threading fallback rejects `inner_max_num_threads`. Its public backend argument makes a toy 1,000 x 24 fit pass stage A, but at 20,000 x 24 the fits disagree and at 20,000 x 200 the wheels plus data (56,385,918 bytes) exceed the cap. The scipy tests matched CPython to max |dpadj| 5.6e-16 at all three sizes, and plotly 7.1.0 installs. At 20,000 x 200 the fallback leaves 3,188,506 bytes of the 50 MB for the precomputed grids, before the runtime. Enrichment uses `ctx.function.lite`. Track A (M2–M4) stays CLI-only.
 
 ---
 
@@ -365,6 +365,7 @@ cancer-transcriptomics-teaching/
 | D14 | Placement of the plan files under the template | Resolved: `TODO.md`, `knowledge/lessons.md`, and `CONVENTIONS.md` imported by `CLAUDE.md`, overriding `AGENTS.md` where they conflict |
 | D15 | labcore at runtime | Resolved: no; ctx is self-contained, labcore stays for labdocs |
 | D16 | Files per figure | Resolved: `_white`/`_black` PDF and SVG from one render, one HTML with a theme toggle, CSV with `_README.md` |
+| D17 | JupyterLite DE strategy | Resolved 2026-09-26 by the P1.5 spike (D-005): precomputed DE grids plus live scipy tests, with plotly figures. pydeseq2 0.5.4 installs in Pyodide 314.0.6, but its default fit fails on joblib's threading fallback. With the backend argument, 1,000 x 24 passes stage A, but 20,000 x 24 disagrees and 20,000 x 200 exceeds 50 MB. The rule's reading, the default call, was kept; stage B was never run |
 
 ### Items you could search or verify for me (saves tokens)
 
@@ -563,7 +564,7 @@ it. P1.2 pins every dependency the project adds.
       - `report` is 09 and `lite_build` is 10 in MODULES. todo.md numbers only M0 to M8.
       - `estimated_size()` is recorded in each README rather than printed.
 
-- [ ] P1.5 Pyodide feasibility spike and the JupyterLite DE strategy (after P1.3, P1.4)
+- [x] P1.5 Pyodide feasibility spike and the JupyterLite DE strategy (after P1.3, P1.4)
   - `scripts/python/spike_pyodide.py` has an `exempt:` codebase-meta block. It holds `decide(record)`, which is committed before the run.
   - The rule, fixed before the run. Choose live pydeseq2 in JupyterLite only if all of these hold:
     - micropip installs it (explicit pins are allowed and recorded);
@@ -595,6 +596,37 @@ it. P1.2 pins every dependency the project adds.
       - the wheel bytes sum to the recorded total;
       - the recorded `counts()` call, with every argument explicit, regenerates the recorded input SHA-256.
       - A numpy bump that changes `counts()` fails this test by design; the spike is then rerun.
+  - Evidence, 2026-09-26: merged in b389984, fixed in 83925a7. macOS 15 arm64, Node v24.15.0.
+    - Commits:
+      - 247d3f5 holds `decide()` and `agreement()` with their boundary tests, before any run;
+      - 4a54ff0 holds the harness;
+      - f1e2f55 holds the record and D-005.
+      - `git merge-base --is-ancestor 247d3f5 f1e2f55` exits 0, and both functions at 247d3f5 are identical to the current ones.
+    - npm `pyodide@314.0.6`, integrity `sha512-BKDTJyIqFxC4BExLqeRS3f5xvXZIjOt8C3zGLN/Cc7tFxSwvKVhVkchQQ2AGLOtR4YrVOIFxbV8poyDOOmWwxQ==`. @jupyterlite/pyodide-kernel 0.8.6 pins it as a devDependency (npm registry, retrieved 2026-09-26).
+    - Recorded run: exit 0, 323.37 s real at 1,916,305,408 bytes max RSS (`/usr/bin/time -l`, run log), 378 rows.
+    - Verdict: fallback at 1,000 x 24, 20,000 x 24 and 20,000 x 200; figures stay plotly. Stage B was not run. The 1,000 x 24 reading was settled with Rytis (D17): the rule's "fit" is pydeseq2's default call.
+    - First blocking error, at every size: `AssertionError: ThreadingBackend does not accept setting the inner_max_num_threads argument.`
+    - Wheels plus data per size: 41,895,096, 43,673,655 and 56,385,918 bytes. The byte field counts unique files by name. 41,957,904 bytes of wheels were fetched and 41,800,855 recorded; the Pyodide runtime, 9,598,218 + 2,545,564 bytes, is not counted (D-005).
+    - Fallback arm: `import pydeseq2` fails as required. scipy, pandas and plotly come to 10 files, 32,226,431 bytes. Against CPython: max |dp| 2.2e-16, max |dpadj| 5.6e-16, and 0 genes crossing 0.05.
+    - Shim arm, recorded but not read by the rule:
+      - 1,000 x 24: 0 disagreements, max |dLFC| 2.2e-5;
+      - 20,000 x 24: 389 disagreements. 388 are low-count genes whose padj is NaN in Pyodide only; one is a well-expressed gene, g15471, with padj 0.0876 in CPython against 0.0318 in Pyodide;
+      - 20,000 x 200: 0 disagreements, max |dLFC| 2.8e-4.
+      - These numbers were recomputed from the raw results files.
+    - `tests/test_spike_record.py` passes 8/8. In CI's depth-1 checkout, `test_rule_predates_record` skips, so that proof is local-only.
+    - The implementer ran 18 mutations, each failing its target. The adversarial review added two:
+      - M1, `decide()` rewritten between the rule commit and the record commit with the hash rewritten to match: the old test passed 6/6, and the new test fails it;
+      - M3, `compare()` reading the reference file twice: fails `test_compare_counts_what_it_is_fed`.
+    - Deviations:
+      - A second exempt helper, `pyodide_harness.py`, because one file would pass the 600-line ratchet.
+      - The shim arm.
+      - Three commits.
+      - Rule choices: verdicts per size; the padj band exempts a gene when either fit lies in [0.04, 0.06]; 50 MB is 50,000,000 bytes; plotly pinned to 7.1.0.
+      - Added tests: `test_agreement_boundaries`, `test_rule_source_unchanged`, `test_compare_counts_what_it_is_fed` and `test_wheels_counts_unique_install_files`.
+    - Not done:
+      - Stage B.
+      - The rule's gap: two missing version rows compare equal. This is recorded in D-005 and left unedited, because the rule was fixed before the run.
+      - The pixi and npm install timings in the implementer's report were not logged, so they are not recorded here.
 
 - [x] P1.6 Runtime profiles `laptop` / `hpc` and resource measurement (after P1.4)
   - `src/ctx/runtime.py`:
@@ -798,7 +830,7 @@ it. P1.2 pins every dependency the project adds.
       - typer 0.27 bundles its own click, so `parameter_cards` takes loosely typed commands.
       - mypy also ignores missing imports for threadpoolctl.
 
-- [ ] P1.10 Chr22 slice and a simulated FASTQ pair with known truth (after P1.2; can run in parallel with P1.3–P1.9)
+- [x] P1.10 Chr22 slice and a simulated FASTQ pair with known truth (after P1.2; can run in parallel with P1.3–P1.9)
   - `scripts/python/make_chr22_fixture.py` has an `exempt:` block. It runs instructor-side and needs the network.
     - It pins a GENCODE release, looked up and cited when the script is written. Checksums are the publisher's if GENCODE provides a checksum file; otherwise they are labelled as first-download values.
     - It takes a small chr22 window holding multi-exon protein-coding genes on both strands.
@@ -825,6 +857,32 @@ it. P1.2 pins every dependency the project adds.
     - `::test_regenerate_byte_identical`: `reads()`, loaded by path and run from a tmp copy of `transcripts.fa` into an empty tmp directory, gives hashes equal to the manifest.
     - `::test_refuses_nonempty_dir`.
     - `::test_slice_rebuilds` (marker `network`): rebuilding from the pinned release reproduces the manifest. It is run once and the output pasted here.
+  - Evidence, 2026-09-26: merged in 379e47f, review fixes in ad5ac94.
+    - Release: GENCODE 50 (06.2026, GRCh38.p14), which is Ensembl 116, per gencodegenes.org/human/releases.html retrieved 2026-09-26; the GTF header reads `version 50 (Ensembl 116)`.
+      - Annotation: `gencode.v50.basic.annotation.gtf.gz`, publisher MD5 `11e77cf1d4b78b43f57d608e3f7f2202`.
+      - Sequence: Ensembl 116 `Homo_sapiens.GRCh38.dna.chromosome.22.fa.gz`, publisher BSD `sum` `31309 11123`.
+      - Both matched. The SHA-256s pinned beside them are first-download values, because neither publisher gives one.
+    - Window: `chr22:30330001-30431000` (101,000 bp, offset 30,330,000), as stated in the fixture README. It holds 10 genes and 36 transcripts: 23 multi-exon on +, 8 on −.
+    - Reads: seed 42, 2,500 pairs of 2 x 100 nt, fragments 150 to 350 nt, dUTP, no errors, quality `I`. 2 of the 36 transcripts are shorter than 350 nt and stay at 0.
+    - Fixture: 8 files, 1,683,160 bytes; `shasum -a 256 -c MANIFEST.sha256` gives 7/7 OK.
+    - `test_slice_rebuilds`, run once with `-m network` by the implementer: `1 passed, 6 deselected in 252.06s`.
+    - Offline tests: 6 passed, 1 deselected.
+    - Mutations: the implementer ran 15, plus an unmutated control; each fails its test. The review found X1, a wrong rebase `OFFSET`, which passed every offline test because all three files shared the error. The new codon anchor catches it offline: rebuilt from the cache, the start codons read CAT, GAT, TGC and TGG instead of ATG.
+    - Review fixes:
+      - start and stop codons spliced from `slice.fa` must read ATG and a stop;
+      - `transcripts.fa` gene ids and names are checked against `slice.gtf`;
+      - the default seed and the quality string are exercised;
+      - `fetch()` names the digest that failed;
+      - the build comment now says what the extraction order does.
+    - Deviations:
+      - `reads()` takes a keyword-only `out_dir`.
+      - The offline order test uses a synthetic chromosome.
+      - The fixture README has no timestamp, so a rebuild reproduces it byte for byte.
+      - The script is 518 lines: over the 200-line warning, under the 600-line limit.
+    - Not done:
+      - The fixture README lacks a typed data dictionary for `truth.tsv`. Adding one changes the manifest and needs a new network proof, so it waits for the next fixture change.
+      - The reviewer could not reproduce the scan's candidate numbers from the implementer's report. The README's claim, that this is the narrowest window, was confirmed by an independent scan.
+      - Byte-identical regeneration was checked on macOS only.
 
 - [ ] P1.11 Close Phase 1
   - Divergence inventory: in a scratchpad clone, run `copier recopy --trust --defaults --skip-tasks`. `git diff --name-only` must list exactly `pixi.toml`, `.pre-commit-config.yaml`, `AGENTS.md`, `CLAUDE.md` and `knowledge/decisions.md`. Any other file is an unplanned divergence.
