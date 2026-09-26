@@ -1152,3 +1152,6 @@ No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work 
       - fetchngs 1.13.0.
       - Byte-identical rebuilds were checked on this Mac only.
       - `knowledge/recommendation1/` was moved out of the repo on 2026-09-27, to `/Users/rytis/Scripts/Pipeline/OLD/RNAseq_tutorial_recommendation1_2026-09-26/`.
+
+- [x] Tutorial test run for M0–M1 (2026-09-27, requested by Rytis): `scripts/python/tutorial_test_run.py --study <ERP/PRJEB> --root <course folder> [--download-runs N] [--open]` walks M0 setup, M1a accession lookup (ENA run table and transfer budget), M1b fetchngs metadata-only and a download of the N smallest runs, and M1c `ctx gather` on both, printing what each step teaches. It refuses a root inside the repository and holds no cohort identifier.
+  - Evidence: on PRJEB49000 with one run downloaded, exit 0 in 346.73 s real at 577,830,912 bytes max RSS (`/usr/bin/time -l`). Steps: setup 1.0 s, accession lookup 0.4 s, metadata-only fetch 9.0 s, download of ERR7425276 (294,598,862 bytes) 333.7 s, gather 2.4 s. The downloaded run is `verified` against ENA's md5; `work/` held a 293 MB second copy. After formatting, a rerun with `--download-runs 0` exited 0.
