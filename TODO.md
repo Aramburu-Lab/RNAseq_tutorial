@@ -596,7 +596,7 @@ it. P1.2 pins every dependency the project adds.
       - the recorded `counts()` call, with every argument explicit, regenerates the recorded input SHA-256.
       - A numpy bump that changes `counts()` fails this test by design; the spike is then rerun.
 
-- [ ] P1.6 Runtime profiles `laptop` / `hpc` and resource measurement (after P1.4)
+- [x] P1.6 Runtime profiles `laptop` / `hpc` and resource measurement (after P1.4)
   - `src/ctx/runtime.py`:
     - Profile: `--profile`, then `CTX_PROFILE`, then `laptop`.
     - Root: `--root`, then `CTX_ROOT`, then the working directory, on laptop only. `hpc` raises unless a root is given, and the message names both options. The root is printed and recorded in every README.
@@ -618,6 +618,14 @@ it. P1.2 pins every dependency the project adds.
       - a child writes one byte per page of 256 MiB; the children peak is >= 256 MiB and < 1 GiB, and the self peak is < 256 MiB;
       - a control child that allocates nothing leaves the children peak < 256 MiB;
       - it runs on macOS locally and on Linux in CI, which proves the unit handling on both.
+  - Evidence, 2026-09-26: `tests/test_runtime.py` passes 13/13, and preflight passes with 55 tests.
+    - Mutation check: reading the children's peak from `RUSAGE_SELF` fails `test_child_peak_attributed`.
+    - Negative control for the thread test: the same child without the profile reports 14 polars threads and BLAS [14]; with the hpc profile at 2, it reports 2 and [2]. BLAS here is OpenBLAS 0.3.34 with OpenMP threading.
+    - Added:
+      - `start()` raises if polars, numpy or another library in `HEAVY` was imported first (`test_start_refuses_after_heavy_import`), so a misordered import fails loudly.
+      - `test_threads_applied_before_import` runs here at the runtime level; P1.9 repeats it through the CLI.
+    - hpc memory comes from `SLURM_MEM_PER_CPU` x `SLURM_CPUS_PER_TASK`, or else `SLURM_MEM_PER_NODE`. The names follow sbatch(1) OUTPUT ENVIRONMENT VARIABLES and are tested only with a patched environment; they have not run under a real Slurm job.
+    - Deviation: the command decorator itself is written in P1.9 with the first command. P1.6 provides `start()`, which that decorator calls.
 
 - [ ] P1.7 `ctx.viz` style, annotation and the box figure, static PDF and SVG (after P1.3, P1.4)
   - `src/ctx/viz/style.py` is the only style config:
