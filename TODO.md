@@ -1,6 +1,6 @@
 # Cancer Transcriptomics Teaching Suite — plan
 
-Status: **draft v3.1 (2026-09-26) — D1, D2, D4, D11–D13 resolved; remaining Phase 0 items: D5 dataset verification and version pinning.**
+Status: **draft v3.2 (2026-09-26) — Phase 1 closed; M1 restructured around nf-core/fetchngs 1.12.0 (find → fetch → make usable) with a dataset-independent Phase 1b; D1, D2, D4, D11–D20 resolved; remaining Phase 0 items: D5 dataset verification and version pinning.**
 Outputs of this plan: a Python package + CLI, one Jupyter notebook per module, and one self-contained interactive HTML report per module, linked from a hub page.
 
 ---
@@ -9,7 +9,7 @@ Outputs of this plan: a Python package + CLI, one Jupyter notebook per module, a
 
 Students analyse public human cancer RNA-seq (ENA / GEO / TCGA) end to end on a laptop, connect it to public proteomics, and leave able to:
 
-1. Choose the right data tier and repository for a question (raw reads vs processed counts; open vs controlled access).
+1. Choose the right data tier and repository for a question (raw reads vs processed counts; open vs controlled access), trace a paper's accession through GEO/SRA/ENA, and fetch reads reproducibly with nf-core/fetchngs.
 2. Judge whether reads are usable from QC metrics, and know what trimming/filtering parameters do.
 3. Explain what an aligner, a pseudo-aligner and a read counter each produce, and why counts differ between them.
 4. Set up a differential-expression (DE) design correctly (pairing, covariates, filtering, multiple testing, shrinkage) and read the diagnostics.
@@ -32,7 +32,7 @@ flowchart LR
     accDescr: Track A runs the complete read-level pipeline on subsampled FASTQ files so it fits a laptop. Track B uses count tables from immune-cell cohorts and, at tier 3, from TCGA and GTEx, for realistic cohort statistics. Both tracks feed the same differential expression and functional annotation modules; two integration modules compare RNA changes with proteomics and handle non-coding RNAs before reporting.
 
     subgraph track_a["Track A — raw reads, laptop scale"]
-        fastq["ENA FASTQ, tier-1 subset<br/>subsampled ~1M pairs/sample"] --> qc["fastp<br/>QC + trimming"]
+        fastq["nf-core/fetchngs 1.12.0<br/>ENA FASTQ + samplesheet, subsampled"] --> qc["fastp<br/>QC + trimming"]
         qc --> align["STAR on chr22 or HISAT2<br/>BAM + featureCounts"]
         qc --> salmon["Salmon<br/>full transcriptome"]
         salmon --> tximport["pytximport<br/>gene-level counts"]
@@ -87,7 +87,7 @@ Cohort ladder agreed at check-in: innate immune cells → other immune cells →
 | Proteomics, tier 1 | Rieckmann et al. 2017 Nat Immunol immune-cell proteome (PRIDE; healthy donors; protein copy numbers per cell type incl. neutrophils and monocytes) | Cross-dataset: RNA from tier 1 vs protein per cell type | Neutrophil vs monocyte RNA–protein discordance (granule proteins are transcribed early in granulopoiesis, so mature neutrophils carry high protein with low mRNA) | PRIDE accession; processed copy-number table availability; cell-type labels matching tier 1 |
 | miRNA-seq, tier 3 | TCGA-KIRC miRNA-seq (mature-miRNA and isoform quantification, open at GDC) for the same cases as mRNA-seq | Matched mRNA + miRNA per sample | miRNA–target anticorrelation and its protein footprint in CPTAC | Number of normals with miRNA-seq; GDC file types and normalisation |
 | ncRNA resources | GENCODE biotypes; TargetScan predicted targets (context++ scores); miRTarBase validated targets; LncBook / Lnc2Cancer for disease-linked lncRNAs; GENCODE Ribo-seq ORF annotation to flag "non-coding" genes with translation evidence | — | Annotation is a status, not a proof | Download terms (miRTarBase academic licence); current versions |
-| Track A subset | 3–4 donors × 2–3 cell types from tier 1, subsampled (`seqtk sample -s42`, 1M pairs/sample) on Kebnekaise, hosted on Zenodo with DOI + md5 | — | Students never download tens of GB; same biology as Track B | Zenodo quota, redistribution terms |
+| Track A subset | 3–4 donors × 2–3 cell types from tier 1, subsampled (`seqtk sample -s42`, 1M pairs/sample) on Kebnekaise, hosted on Zenodo with DOI + md5, as one nf-core/fetchngs outdir from a fetchngs run whose input is exactly the subset runs (fetchngs names and samplesheet; `fastq/md5/` rewritten for the subsampled bytes) | — | Students never download tens of GB; same biology as Track B | Zenodo quota, redistribution terms |
 | References | GENCODE primary assembly + GTF (current release), chr22 slice for STAR, transcript FASTA for Salmon, tx2gene from GTF | — | Versions pinned in every `_README.md` | Current GENCODE release; GENCODE version behind current GDC STAR-Counts |
 | Gene sets | MSigDB Hallmark, GO BP, Reactome (GMTs cached by `ctx setup`); Enrichr disease libraries (DisGeNET, Jensen DISEASES, GWAS Catalog) as GMTs; Open Targets GraphQL for per-gene disease scores; NCG cancer-gene list; immune sets (MSigDB C7 ImmuneSigDB, neutrophil/monocyte state signatures from the source paper) | — | Offline-capable, permissive; immune sets make tier-1 results interpretable | Current MSigDB version string; Enrichr library names |
 
@@ -105,12 +105,39 @@ Each module = one CLI subcommand (`ctx <module>`), one notebook (`notebooks/0N_<
 
 ### M1 — Gather public data
 
-- Tools: BioStudies/ArrayExpress API (SDRF + processed files) and ENA Portal API `filereport` for FASTQ URLs/md5 (tier 1); `pysradb` for GEO↔SRA mapping and `GEOparse` for GSE metadata (tier 2); GDC REST API (`files`, `cases`, `data`) via `requests` and UCSC Xena TOIL downloads (tier 3).
-- Teaches: repositories and their data tiers (raw vs processed; open vs controlled), how one study appears in ArrayExpress, ENA and GEO/SRA, sample-type codes (01 tumour / 11 normal), one aliquot per sample, pairing by donor or case ID, metadata hygiene, cross-study batch as a design constraint.
-- Knob: cell-type and condition filters (tier 1), cancer project and sample type (tier 3), minimum group size.
-- Figures: cohort composition bars; metadata completeness heatmap; library-size bars (from `N_*` summary rows).
+Three lessons, because finding data, fetching it and making it usable are different skills. Raw reads enter only through nf-core/fetchngs 1.12.0; the facts below were read from its 1.12.0 code (D-006).
+
+#### M1a — Find the accession
+
+- Start from a paper's data-availability statement. Teaches repositories and their data tiers (raw vs processed; open vs controlled), and the accession alphabet and hierarchy (study → sample → experiment → run): GEO GSE/GSM; SRA SRP/SRS/SRX/SRR with BioProject PRJNA and BioSample SAMN; ENA ERP/ERS/ERX/ERR with PRJEB and SAMEA; DDBJ DRP/DRX/DRR with PRJDB; ArrayExpress E-MTAB, mirrored to ENA as an ERP/PRJEB study.
+- Where reads live: GEO and ArrayExpress hold metadata and processed files; the reads sit in SRA, ENA and DDBJ, which mirror each other. ENA serves ready-made FASTQ over FTP/Aspera; SRA serves `.sra` objects that need sra-tools.
+- Three routes, all shown with the real tier-1 study: GEO page → SRA Run Selector → Accession List (`SRR_Acc_List.txt`); ENA Browser text search → read-files report (TSV); BioStudies/ArrayExpress page → linked ENA study. Scripted, in the notebook and not in ctx: `pysradb` (`gse-to-srp`, `metadata --detailed`), the ENA Portal API `filereport`, and a metadata-only fetchngs run (M1b).
+- Before downloading, read `library_layout`, `library_strategy`, `library_selection` (PolyA vs RANDOM/other — the M8 library-type lesson starts here), `instrument_model`, `read_count` and `fastq_bytes`, and budget the transfer.
+- Knob: ID level submitted (a study ID pulls every run; a run ID pulls every run of its experiment, because fetchngs resolves runs to experiments), ENA fields requested (`--ena_metadata_fields`).
+- Figures: study map (paper → GSE → SRP → SRX → SRR → FASTQ); per-run read-count and `fastq_bytes` bars; library-type composition.
+
+#### M1b — Fetch with nf-core/fetchngs 1.12.0
+
+- Input: one ID per line, no header, LF line endings, no space anywhere in the path. Accepted: SRR/SRX/SRS/SRP/SRA/PRJNA/SAMN, ERR/ERX/ERS/ERP/ERA/PRJEB/SAMEA, DRR/DRX/DRS/DRP/DRA/PRJDB/SAMD, GSM/GSE. `E-MTAB-*` is rejected: give an ArrayExpress study as its ERP/PRJEB accession. One line that fails the pattern aborts the whole run.
+- Course command, one fresh outdir per run: `nextflow run nf-core/fetchngs -r 1.12.0 -profile <docker | docker,arm | singularity> --input data/raw/<slug>/ids.csv --outdir data/raw/<slug> --nf_core_pipeline rnaseq`. `docker,arm` on Apple silicon runs the amd64-only images under emulation; on Kebnekaise use the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`). Nextflow 26 needs `NXF_SYNTAX_PARSER=v1` for this release. `--nf_core_pipeline rnaseq` adds one column, `strandedness` = `auto`, after `fastq_2`. A run with no ENA FASTQ link falls back to sra-tools on its own; `--download_method sratools` is for runs with more than two files (FTP keeps the last two); `aspera` is faster but not for runs with more than two files.
+- Two class runs, each into its own outdir (a re-run into an existing outdir rebuilds the samplesheet from the new input only): (1) `--skip_fastq_download` on the full study into `data/raw/<dataset>_meta`, metadata and samplesheet only; (2) a real download of the 2–4 smallest runs chosen from `fastq_bytes` into `data/raw/<dataset>_dl`, each file md5-checked by fetchngs as it lands (FTP and Aspera only). `ctx gather` reads one outdir per call. The rest of the Track A subset comes from Zenodo, itself one fetchngs outdir.
+- Teaches: `-resume`, `-profile`, `-work-dir` (it holds a second copy of every FASTQ); what `pipeline_info/` records (`params_<timestamp>.json`, `nf_core_fetchngs_software_mqc_versions.yml`, the execution trace) and why it goes into the README; why the samplesheet must be curated (fetchngs itself warns that public databases do not reliably hold strandedness).
+- Output layout the suite consumes: `fastq/<EXP>_<RUN>.fastq.gz` (single-end) or `fastq/<EXP>_<RUN>_1.fastq.gz` and `_2.fastq.gz`; `fastq/md5/<fastq name>.md5` (FTP and Aspera downloads only); `metadata/<INPUT_ID>.runinfo_ftp.tsv`, one per input line (no `*.runinfo.tsv` in 1.12.0); `samplesheet/samplesheet.csv` (`sample` = experiment accession, `fastq_1`, `fastq_2`, `strandedness`, then the 31 default ENA fields; one row per run; every field quoted; paths written as `<outdir as given>/fastq/<name>`); `samplesheet/id_mappings.csv`; `samplesheet/multiqc_config.yml`; `pipeline_info/` (timestamped names).
+
+#### M1c — Make it usable: `ctx gather`
+
+- Ingests one fetchngs outdir (tiers 1–2) or a GDC/Xena download (tier 3, Phase 4) and writes the harmonised sample sheet every later module reads; nothing downstream touches `samplesheet.csv` directly, and gather never writes into the fetchngs outdir.
+- Reads `samplesheet/samplesheet.csv` with Polars as text; refuses any fetchngs release but the pinned one; resolves every FASTQ by file name inside `<outdir>/fastq/`, never by the path written in the sheet; verifies each file against `fastq/md5/` and reports runs with no md5 file (the sra-tools path) instead of failing them; marks files as not downloaded in a metadata-only outdir; checks that `id_mappings.csv` agrees with the sheet; checks that every input ID has a `metadata/` file and every run listed there has a samplesheet row.
+- Curation (Phase 2): parses `sample_title` (or another named field) into `donor`, `cell_type`, `condition`, `replicate`, `batch` with a per-dataset regex, or joins the tier-1 SDRF, from `conf/datasets/<dataset>.toml`; unparsed titles go to a validation table and the command fails. Lesson: public metadata is free text and must be curated.
+- Multi-run samples (several rows sharing one `sample`) keep one row per run with `run_index` and `n_runs`. Lesson: technical vs biological replicates. Runs are combined where FASTQs are consumed (M2–M4), never by rewriting the fetchngs outdir.
+- `strandedness` stays `auto` and is filled by M4 from Salmon's `lib_format_counts.json`; `library_selection` and `library_strategy` are carried to M8.
+- Records in the `_README.md` the fetchngs version string, the Nextflow version, and the SHA-256 of every `pipeline_info/` file read.
+- Annotations beyond the reads: the tier-1 SDRF and processed files from BioStudies/ArrayExpress (Phase 2, after D5); GEO comparator metadata and counts via `GEOparse` (tier 2). Tier 3: GDC REST API (`files`, `cases`, `data`) via `requests` and UCSC Xena TOIL downloads produce the same sheet columns (sample, case, sample_type, condition, batch), so downstream code is identical.
+- Teaches (tiers 2–3): sample-type codes (01 tumour / 11 normal), one aliquot per sample, pairing by donor or case ID, metadata hygiene, cross-study batch as a design constraint.
+- Knob: curation file; metadata-only vs downloaded outdir; cell-type and condition filters (tier 1), cancer project and sample type (tier 3), minimum group size.
+- Figures: cohort composition bars; metadata completeness heatmap; unparsed-title table; library-size bars (`read_count` for fetchngs runs, `N_*` summary rows for GDC STAR-Counts).
 - Stats: none inferential; descriptive tables.
-- Output: `data/raw/<dataset>/` + harmonised sample sheet (CSV: sample, donor, cell_type, condition, batch) + `_README.md`; Polars matrix assembled lazily (`scan_csv`, comment rows dropped, count column selected, Int32 downcast, `estimated_size()` printed).
+- Output: the fetchngs outdir under `data/raw/<slug>/`, untouched; `outputs/01_gather/YYYY-MM-DD_gather_<slug>_samplesheet_v<N>` (Parquet + CSV) + `_README.md`; count matrices assembled lazily (`scan_csv`, comment rows dropped, count column selected, Int32 downcast, `estimated_size()` recorded).
 
 ### M2 — Read QC
 
@@ -218,7 +245,7 @@ cancer-transcriptomics-teaching/
 ├── README.md, TODO.md, CONVENTIONS.md (project rules), AGENTS.md + CLAUDE.md (template), LICENSE (MIT; CC BY 4.0 file with the first materials), CITATION.cff (later)
 ├── knowledge/     decisions.md (D-001 on), lessons.md, generated codebase map and API index
 ├── src/ctx/
-│   ├── acquire/   gdc.py ena.py geo.py
+│   ├── gather/    fetchngs.py (the only ctx reader of the fetchngs layout, Phase 1b); curation.py sdrf.py (Phase 2); gdc.py xena.py geo.py (Phase 4); no ENA/SRA access code
 │   ├── qc/        fastp_parse.py
 │   ├── process/   trim.py align.py count.py strandedness.py
 │   ├── quant/     salmon.py tximport.py
@@ -234,11 +261,12 @@ cancer-transcriptomics-teaching/
 ├── notebooks/     01_gather … 08_ncrna (student + solutions; 05–08 also run in JupyterLite)
 ├── lite/          JupyterLite config + bundled data (built by `ctx lite-build`)
 ├── resources/     references, indices, GMTs (gitignored; fetched by ctx setup)
-├── data/          raw/ interim/ processed/ (gitignored)
-├── scripts/python/ one-off instructor steps: make_chr22_fixture.py, spike_pyodide.py, pyodide_harness.py
+├── data/raw/      external inputs as fetched: fetchngs outdirs, GDC/Xena downloads; read-only to ctx (gitignored)
+├── scripts/python/ one-off instructor steps: make_chr22_fixture.py, spike_pyodide.py, pyodide_harness.py, make_fetchngs_fixture.py
 ├── outputs/NN_<module>/  run outputs (gitignored); deliverables/ what leaves the project (reports, figures, the spike record)
-├── tests/         pytest; synth.py (synthetic counts); fixtures/chr22/ (committed)
-├── docs/          glossary.md teacher_guide.md parameter_cards/
+├── tests/         pytest; synth.py (synthetic counts); fixtures/chr22/ and fixtures/fetchngs/ (real nf-core/fetchngs 1.12.0 output), committed
+├── docs/          glossary.md accessions.md teacher_guide.md parameter_cards/
+├── conf/          datasets/<dataset>.toml: title regex or SDRF join, groups, contrasts (project-owned)
 └── .github/workflows/ci.yml
 ```
 
@@ -265,23 +293,28 @@ cancer-transcriptomics-teaching/
 
 ### Phase 1 — Foundations
 
-- [ ] Scaffold repo from `codebase_template`; CI skeleton; `knowledge/lessons.md` in place
-- [ ] Feasibility spike: `pydeseq2`, `plotly`, `scipy` under Pyodide via micropip; record outcome; choose the DE strategy for JupyterLite
-- [ ] `ctx.viz` palette/static/interactive/annotate with one round-trip test (same data → PDF light/dark + HTML)
-- [ ] `ctx.report.builder` with theme toggle, parameter card, quiz and reproduction-block components
-- [ ] `ctx.io` naming lint + README companion; runtime profiles `laptop` / `hpc`
-- [ ] Chr22 fixture data for tests (tiny FASTQ pair, tiny count matrix)
+- [x] Scaffold repo from `codebase_template`; CI skeleton; `knowledge/lessons.md` in place (P1.1, P1.2)
+- [x] Feasibility spike: `pydeseq2`, `plotly`, `scipy` under Pyodide via micropip; record outcome; choose the DE strategy for JupyterLite (P1.5, D17)
+- [x] `ctx.viz` palette/static/interactive/annotate with one round-trip test (same data → PDF light/dark + HTML) (P1.7, P1.8)
+- [x] `ctx.report.builder` with theme toggle, parameter card, quiz and reproduction-block components (P1.8, P1.9)
+- [x] `ctx.io` naming lint + README companion; runtime profiles `laptop` / `hpc` (P1.4, P1.6)
+- [x] Chr22 fixture data for tests (tiny FASTQ pair, tiny count matrix) (P1.3, P1.10)
+
+### Phase 1b — `ctx gather` core on real fetchngs output, no dataset (D19)
+
+- [ ] Implementation order and proofs: see "Phase 1b" at the end of this file (P1b.0–P1b.5)
 
 ### Phase 2 — Tier 1 cohort (highest value first)
 
-- [ ] M1 tier-1 acquisition: SDRF metadata → harmonised sample sheet; processed counts if provided, otherwise Salmon counts produced once on Kebnekaise and released with the teaching subset
+- [ ] M1c tier 1 (after D5 and Phase 1b): metadata-only fetchngs run of the tier-1 ENA study (ERP/PRJEB); curation engine and `conf/datasets/<tier-1>.toml` (title regex or SDRF join, groups, contrasts); `ctx gather` on it; processed counts if provided, otherwise Salmon counts produced once on Kebnekaise and released with the teaching subset
 - [ ] M5 pydeseq2 on tier 1: cell-type axis, cancer-vs-healthy contrasts within cell type, all M5 figures, precomputed knob grid
 - [ ] M6 ORA/GSEA/disease association with immune gene sets; `ctx.function.lite` validated against gseapy
 - [ ] Reports M1, M5, M6 + hub; sanity checks pass (see verification)
 
 ### Phase 3 — Track A on the tier-1 subset
 
-- [ ] Instructor-side: subsample FASTQs on Kebnekaise, build chr22 STAR index, host subset + indices on Zenodo
+- [ ] Instructor-side: on Kebnekaise, through the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`, `NXF_SYNTAX_PARSER=v1`, a fresh project directory per run), fetch exactly the chosen subset runs with nf-core/fetchngs -r 1.12.0 (a full-study run, metadata-only or for Salmon counts, stays a separate outdir); subsample with `seqtk sample -s42` keeping fetchngs file names; write new `fastq/md5/*.md5` for the subsampled files and a README naming the samplesheet columns that describe the original runs (`read_count`, `base_count`, `fastq_bytes`, `fastq_md5`); build chr22 STAR index; host subset outdir + indices on Zenodo
+- [ ] M1a/M1b content: `docs/accessions.md` (three routes, ID hierarchy, budget from `fastq_bytes`), class exercises (a metadata-only run; the 2–4 smallest runs downloaded, checked by `ctx gather`)
 - [ ] M2 fastp/seqkit/MultiQC parsing and report
 - [ ] M3 STAR-chr22 / featureCounts / strandedness; HISAT2 optional path
 - [ ] M4 Salmon + pytximport; cross-method Venn; per-sample comparison against the cohort counts of the same samples
@@ -316,6 +349,7 @@ cancer-transcriptomics-teaching/
 - [ ] HTML opens with network disabled; no `<script src="http…">`; size < 15 MB
 - [ ] All figures exist in PDF light/dark + HTML; captions carry test, n, p, effect size
 - [ ] Every output has `_README.md` with data dictionary; names pass the naming lint
+- [ ] `ctx gather` reads a real fetchngs 1.12.0 fixture and the Zenodo subset through the same code path with equal columns; an md5 mismatch, a missing FASTQ or an input ID with no metadata fails loudly and writes no sample sheet; a run with no md5 file (the sra-tools path) is reported, not failed
 - [ ] Biology sanity, tier 1: PCA separates cell types before disease; cancer-vs-healthy contrasts recover the source paper's reported signatures; p-value histograms show the expected anti-conservative shape. Tier 3: KIRC shows CA9/NDUFA4L2 up and hypoxia/glycolysis enriched
 - [ ] JupyterLite notebooks reproduce the CLI results on the bundled data within tolerance (tests compare tables)
 - [ ] M7 sanity: per-gene RNA–protein ρ distribution matches the source publication; complex subunits show lower ρ than metabolic enzymes; missingness plotted before any test
@@ -344,6 +378,8 @@ cancer-transcriptomics-teaching/
 | Proteomics access changes (`cptac` package, PDC API) | Processed tables cached in `resources/` at setup; PDC GraphQL as fallback; versions recorded |
 | Proteomics pitfalls mislead students (missing values, TMT ratio compression, batch) | Explicit QC section in M7; missingness plotted; tests restricted to proteins quantified in ≥ 70 % of samples |
 | miRNA target lists are noisy | Predicted and validated targets shown separately; enrichment tests use matched backgrounds |
+| fetchngs quirks: a run with > 2 ENA files (FTP keeps the last two), a run with no ENA FASTQ link (automatic sra-tools fallback, no md5 file), an accession skipped with exit 0, one invalid ID aborting the run, a re-run into an existing outdir replacing its samplesheet | Metadata-only run first; `--download_method sratools` for runs with > 2 files; `ctx gather` checks input IDs against `metadata/`, runs against the samplesheet and md5 per file, and reports runs without md5; one fresh outdir per run |
+| fetchngs 1.12.0 is no longer the latest (1.13.0, 2026-09-15) and needs `NXF_SYNTAX_PARSER=v1` on Nextflow 26 | Pinned by D18; `ctx gather` refuses any other release, so an upgrade is one deliberate change with a new fixture |
 
 ---
 
@@ -368,10 +404,13 @@ cancer-transcriptomics-teaching/
 | D15 | labcore at runtime | Resolved: no; ctx is self-contained, labcore stays for labdocs |
 | D16 | Files per figure | Resolved: `_white`/`_black` PDF and SVG from one render, one HTML with a theme toggle, CSV with `_README.md` |
 | D17 | JupyterLite DE strategy | Resolved 2026-09-26 by the P1.5 spike (D-005): precomputed DE grids plus live scipy tests, with plotly figures. pydeseq2 0.5.4 installs in Pyodide 314.0.6, but its default fit fails on joblib's threading fallback. With the backend argument, 1,000 x 24 passes stage A, but 20,000 x 24 disagrees and 20,000 x 200 exceeds 50 MB. The rule's reading, the default call, was kept; stage B was never run |
+| D18 | nf-core/fetchngs release | Resolved: 1.12.0, Rytis's choice in knowledge/recommendation1 and what the lab runs on Kebnekaise; 1.13.0 recorded as a risk (D-006) |
+| D19 | Placement of the dataset-independent `ctx gather` core | Resolved 2026-09-26: Phase 1b now, on nf-core/fetchngs's own test IDs |
+| D20 | Proof of multi-run handling | Resolved 2026-09-26: a real metadata-only fetchngs fixture of nf-core's full test list; `test_no_cohort_identifiers` skips `tests/fixtures/fetchngs/metadata_only/` only, guarded by a test pinning its input list to nf-core's |
 
 ### Items you could search or verify for me (saves tokens)
 
-- E-MTAB-11190: ENA project accession, FASTQ availability and layout, read length, SDRF fields (cell type, condition, donor, batch), whether processed counts are provided, source publication and its positive-control genes, licence.
+- E-MTAB-11190: ENA study accession (ERP or PRJEB; fetchngs rejects `E-MTAB-*`), FASTQ availability and layout, read length, SDRF fields (cell type, condition, donor, batch), whether processed counts are provided, source publication and its positive-control genes, licence.
 - Cassetta et al. 2019 (Cancer Cell): GEO accession and whether FASTQs are on ENA.
 - Current TCGA-KIRC / BRCA / LUAD paired tumour–normal counts and TCGA-LAML / DLBC case counts in the current GDC release; GENCODE version behind current STAR-Counts; current UCSC Xena TOIL file names.
 - Current release and API of `pydeseq2` (design formula, `vst()`, `lfc_shrink`, `lfc_null`) and of `pytximport` (`counts_from_abundance` options); whether either installs under Pyodide.
@@ -383,6 +422,7 @@ cancer-transcriptomics-teaching/
 - TCGA-KIRC miRNA-seq: number of solid-tissue-normal samples at GDC; file types (miRNA and isoform quantification).
 - TargetScan and miRTarBase current versions and download terms; GENCODE Ribo-seq ORF annotation availability.
 - `inmoose` (Python ports of limma/edgeR/DESeq2): current status for moderated t-tests.
+- nf-core/fetchngs 1.12.0 on the tier-1 study: whether its ERP/PRJEB accession resolves in a metadata-only run, the total `fastq_bytes`, and whether any run has more than two ENA files or no ENA FASTQ link. Known already: minimum Nextflow `!>=23.04.0`; `-profile singularity` ran on Kebnekaise with Nextflow 26.04.4 under `NXF_SYNTAX_PARSER=v1` (D-006).
 
 ---
 
@@ -978,6 +1018,9 @@ it. P1.2 pins every dependency the project adds.
 | Licence | One answer, no LICENSE file | Code MIT, materials CC BY 4.0 | MIT and `LICENSE` now; the CC BY file with the first materials (Phase 5) |
 | Report sections | none | TODO.md:98 lists 7, CLAUDE.md:56 lists 8 | CLAUDE.md:56's eight are the contract |
 | CI comment | "while the repo is private" (ci.yml.jinja:33) | none | labcore is public; the comment is harmless and reported upstream, not edited |
+| nf-core outputs | `results/**` naming-exempt (AGENTS.md); `.gitignore` ignores `results/` only for the pipeline flavour | fetchngs outdirs | Under `/data/raw/<slug>/`, never renamed, read-only to ctx; anchored `/results/` added to `.gitignore` as a guard (D-006) |
+| `conf/` | Renders `conf/*.config` only when an HPC2N answer is set | Per-dataset curation files | Project-owned `conf/datasets/*.toml`; no template file shares the path |
+| Nextflow | `languages: nextflow` adds it to the linux-64 `tools` feature (prod only) | Needed on the Mac for fixtures and class runs | Project feature and environment `fetch`, both platforms, pinned `==`; no copier re-answer |
 
 Where the project overrides the global rules:
 - Helvetica, not Arial.
@@ -1007,3 +1050,35 @@ Not in Phase 1:
 - upstream fixes to labcore or the template, which are filed as issues;
 - raising conformance above 1;
 - the FINAL package.
+
+---
+
+## 🧱 Phase 1b — `ctx gather` core on real fetchngs output (approved 2026-09-26; D19, D20)
+
+No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work is in Phases 2–3.
+
+- [x] P1b.0 Doc merge of knowledge/recommendation1, corrected against the fetchngs 1.12.0 code (D-006). Proven by: every anchor matched once; `pixi run preflight` exits 0.
+  - Evidence, 2026-09-26: 29 targeted edits in one pass (TODO.md, CONVENTIONS.md, knowledge/lessons.md, knowledge/decisions.md), each matched exactly once; `pixi run preflight` exits 0 with 98 tests. Not carried from the recommendation, with reasons in the plan: its pre-Phase-1 status, tree and paths; `--merge-runs`; `*.runinfo.tsv`; "ENA can lag" and "minutes, no disk" (unverified). `knowledge/recommendation1/` stays untracked, as Rytis left it.
+
+- [ ] P1b.1 Nextflow and the version pin
+  - `[feature.fetch]` (nextflow from bioconda, noarch, with its openjdk) on both platforms, pinned `==` to the lock, in its own `fetch` environment outside the `main` solve-group, so `default`, `laptop`, `prod` and CI are unchanged. `FETCHNGS_VERSION = "1.12.0"` in `src/ctx/gather/fetchngs.py`, the one definition. Anchored `/results/` in `.gitignore`.
+  - Proven by: `pixi install --locked` exits 0; `pixi run -e fetch nextflow -version` pasted; `test_gitignore_rules` gains `results/samplesheet/samplesheet.csv` (ignored) and `tests/fixtures/fetchngs/download/fastq/x_1.fastq.gz` (not ignored); `test_fetchngs_version_single_source`: every `nf-core/fetchngs -r <v>` in TODO.md, CONVENTIONS.md, scripts/ and src/ equals `FETCHNGS_VERSION`, match count > 0.
+
+- [ ] P1b.2 Real fixtures, on this Mac (after P1b.1)
+  - `scripts/python/make_fetchngs_fixture.py` (`exempt:` block, standard library): refuses a non-empty outdir; relative `--outdir` inside a scratch working directory; `NXF_SYNTAX_PARSER=v1 NXF_ANSI_LOG=false nextflow run nf-core/fetchngs -r 1.12.0 -profile docker,arm --input ids.csv --outdir out --nf_core_pipeline rnaseq [--skip_fastq_download]` with `-work-dir` and `NXF_HOME` in the scratchpad; copies `out/` without the pipeline_info HTML pages, then deletes the scratch outdir so no written path stays reachable; writes `MANIFEST.sha256` and a README (exact command, fetchngs version string and sha7 from the versions file, Nextflow version, profile, host, date, input list with its source URL and SHA-256, omitted files with bytes and SHA-256, what it can and cannot test). `pixi run docs` afterwards.
+  - `download/`: SRR13191702 (paired, FTP, ~32 KB), ERR1160846 (single, FTP, 18 KB), SRR14709033 (single, sra-tools fallback, 1 read), SRR14593545 (paired, sra-tools fallback, 1 read): covers `verified` and `no_md5` on both layouts; no GEO IDs.
+  - `metadata_only/`: `--skip_fastq_download` on nf-core's pinned `sra_ids_test.csv` (test-datasets commit 2732b911; 10 IDs incl. GSE/GSM): 14 real rows, SRX9504942 with 4 runs.
+  - `test_no_cohort_identifiers` skips `tests/fixtures/fetchngs/metadata_only/` only (D20); every other path is scanned as before.
+  - Proven by `tests/test_fetchngs_fixture.py`: `::test_manifest` (files = manifest, count > 0, hashes, total <= 2 MB, tracked and not ignored); `::test_exempt_input_is_nf_core_list` (the committed `ids.csv` SHA-256 equals the pinned upstream list's, so the exemption cannot hide a course cohort); `::test_is_pinned_release` (versions file reads `v1.12.0-g<sha7>`); `::test_md5_consistency` (labelled consistency only); `::test_matches_ena` (marker `network`: `fastq_md5` and the recomputed MD5 of each downloaded FASTQ equal a live ENA filereport; this, the rebuild and the README are the proof the fixture is real); `::test_rebuilds` (marker `network`, Docker: a rerun reproduces `samplesheet/`, `metadata/`, `fastq/`, `fastq/md5/` byte for byte, plus the parsed version; run once, output pasted).
+
+- [ ] P1b.3 `ctx.gather.fetchngs.read(outdir)` (after P1b.2)
+  - Order: version check (refuses anything but 1.12.0, and a missing versions file); `samplesheet.csv` as text; `strandedness` present (else "rerun with --nf_core_pipeline rnaseq"); a single `params_*.json` (else refuse: a `-resume` into the same outdir); completeness (every input ID has a `metadata/` file, every run listed there has a row); `id_mappings.csv` agrees with the sheet (same runs, equal values; a check, not a join); FASTQ resolved by file name inside `<outdir>/fastq/`; md5 per file.
+  - Status per file: `verified`, `mismatch`, `no_md5`, `missing`, `not_downloaded`. Mismatch, missing and completeness gaps raise one error listing every offender; `no_md5` is reported; FASTQs in `fastq/` that no row lists are reported; runs with > 2 ENA files flagged. Per run: `run_index`, `n_runs`, `single_end`. Provenance: version string and sha7, plus name and SHA-256 of every pipeline_info file read.
+  - Proven by `tests/test_gather.py`, failure injection on tmp copies of the real fixtures: reads the download fixture (2 `verified`, 2 `no_md5`); original paths unreachable (asserts first that no written path exists here); md5 mismatch fails; missing FASTQ fails; missing metadata fails; unlisted FASTQ reported; two params files refused; missing `strandedness` fails; other version refused; metadata-only gives `not_downloaded`; multi-run (SRX9504942 `n_runs` = 4, counted independently from the CSV); `id_mappings` disagreement fails.
+
+- [ ] P1b.4 `ctx gather` (after P1b.3)
+  - `ctx gather --dataset <slug> [--fetchngs-dir DIR]`; unset means `<root>/data/raw/<slug>`. Cards for both.
+  - Writes `outputs/01_gather/YYYY-MM-DD_gather_<slug>_samplesheet_v1` (Parquet + CSV) + README through `write_table`: one row per run; FASTQ paths relative to the outdir; statuses; `strandedness` (`auto`); a chosen subset of ENA columns with meanings cited from ENA's field documentation, `library_selection` and `library_strategy` kept for M8; `donor, cell_type, condition, replicate, batch` empty until curation (Phase 2), stated in the README. Module page with counts, statuses and the reproduction block; M1 figures come in Phase 2.
+  - Proven by: `test_parameter_cards_match_cli` parametrised over every subcommand; `::test_gather_end_to_end` (exit 0; lint clean; READMEs present; no `\r` in the CSV; Parquet equals CSV; wall and RSS within Track B); `::test_upstream_untouched` (SHA-256 and mtime of every outdir file unchanged); `::test_failure_writes_no_sheet` from the CLI; `test_packaging.py` runs `gather` from the wheel.
+
+- [ ] P1b.5 Close: fresh-clone preflight; `/usr/bin/time -l pixi run test` < 5 min; measured table (both fixture runs, test suite, `ctx gather`); review with deviations; lessons; D-006 evidence final.

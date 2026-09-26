@@ -26,6 +26,8 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 - Runtime profiles `laptop` (default) / `hpc` / `lite`; thread and memory budgets come from the profile, command syntax does not change.
 - Budgets: Track A < 15 min and < 6 GB peak RAM on 4 cores; Track B < 10 min and < 4 GB. Every report states the measured values.
 - Tables: Polars, lazy where possible, chunked concat, downcast to Int32/Float32 only after checking the value range, print `estimated_size()` for every materialised frame. Pandas only inside JupyterLite notebooks.
+- Raw reads enter only through nf-core/fetchngs, pinned `-r 1.12.0` (TODO.md D18) and run with `--nf_core_pipeline rnaseq` into a fresh outdir. Inside a ctx root that outdir is `data/raw/<slug>/`, never `./results/`; the Kebnekaise lab script's `nfcore_fetchngs/results/` is copied there unchanged. `ctx gather` is the only ctx module that reads that layout (`samplesheet/`, `fastq/`, `fastq/md5/`, `metadata/`, `pipeline_info/`), and it never writes into it; every later module reads the harmonised sample sheet in `outputs/01_gather/`. Never write custom ENA/SRA download code (D-006).
+- Nextflow comes from the pixi `fetch` environment on a laptop (pinned `==`, both platforms; `-profile docker,arm` on Apple silicon) and from the shared HPC2N install through the lab's `SHARED_run_fetchngs.sbatch` on Kebnekaise. fetchngs 1.12.0 on Nextflow 26 needs `NXF_SYNTAX_PARSER=v1`.
 - Bioinformatics tools (bioconda): fastp, seqkit, MultiQC, STAR, HISAT2 (optional), samtools, subread/featureCounts, Salmon. Python: pydeseq2, pytximport, gseapy, decoupler (optional), pysradb, GEOparse, cptac (verify), scikit-bio, scipy, statsmodels, plotly, seaborn, matplotlib, jinja2, typer, pytest, ruff, mypy, interrogate.
 - Pin every version in `pixi.toml`; record data-release identifiers (GDC release, GENCODE, MSigDB, TargetScan, miRTarBase, PDC) in the `_README.md` of each output.
 
@@ -40,7 +42,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 
 - File naming: `YYYY-MM-DD_<module>_<description>_v<X>.<ext>`; underscores, no spaces. A lint (`ctx.io.naming`) enforces this.
 - Every data output gets a companion `_README.md`: creation timestamp, source script and commit, tool and data versions, and a data dictionary (one row per column: name, type, unit, meaning).
-- `data/` and `resources/` are never committed; `ctx setup` fetches resources with checksums.
+- `data/` and `resources/` are never committed; `ctx setup` fetches resources with checksums. External inputs (fetchngs outdirs, GDC and Xena downloads) sit under `data/raw/` as fetched; ctx writes only under `<root>/outputs/NN_<module>/`.
 
 ## Figures
 
@@ -68,7 +70,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 ## Data and scope boundaries
 
 - TCGA raw reads are controlled-access; only processed expression from GDC is used. Do not attempt dbGaP data.
-- Tier-1 dataset: E-MTAB-11190 (pending FASTQ verification, see `TODO.md` D5). Teaching subset and indices are prepared once on HPC and hosted on Zenodo; students never download full FASTQs.
+- Tier-1 dataset: E-MTAB-11190 (pending FASTQ verification, see `TODO.md` D5); fetchngs takes it as its ENA study accession (ERP or PRJEB), because it rejects `E-MTAB-*`. Cohort identifiers never go in `src/`, `tests/` (except the D20 fixture of nf-core's own test IDs), `scripts/`, `pyproject.toml` or `pixi.toml` (`tests/test_repo.py::test_no_cohort_identifiers`). Teaching subset and indices are prepared once on HPC and hosted on Zenodo; students never download full FASTQs.
 - Licences: code MIT, materials CC BY 4.0; respect KEGG, COSMIC, DisGeNET and miRTarBase terms (documented in `docs/`).
 
 ## Definition of done (per module)
