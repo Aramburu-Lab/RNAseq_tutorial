@@ -59,3 +59,5 @@ logs/*
 .env
 *.pem
 *.key
+# nf-core output dirs never land in the repo root; fetchngs outdirs go under /data/raw/ (D-006).
+/results/

@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+from ctx.gather.fetchngs import FETCHNGS_VERSION
+
 ROOT = Path(__file__).resolve().parents[1]
 PRECEDENCE = (
     "Where `CONVENTIONS.md` conflicts with `AGENTS.md`, `CONVENTIONS.md` wins; "
@@ -35,9 +37,11 @@ def test_layout():
         ("resources/manifest.json", True),
         ("tests/fixtures/chr22/.DS_Store", True),
         ("tests/fixtures/x.key", True),
+        ("results/samplesheet/samplesheet.csv", True),
         ("tests/fixtures/x.fa", False),
         ("tests/fixtures/x.fq", False),
         ("tests/fixtures/x.gz", False),
+        ("tests/fixtures/fetchngs/download/fastq/x_1.fastq.gz", False),
         # Proves /data/ is anchored: a package subdirectory called data stays tracked.
         ("src/ctx/data/x.py", False),
     ],
@@ -61,3 +65,16 @@ def test_no_cohort_identifiers():
         for m in COHORT_ID.finditer(p.read_text(errors="ignore"))
     ]
     assert not hits, "Phase 1 must not depend on a dataset"
+
+
+def test_fetchngs_version_single_source():
+    sources = [ROOT / "TODO.md", ROOT / "CONVENTIONS.md"] + [
+        p for top in ("scripts", "src") for p in (ROOT / top).rglob("*.py")
+    ]
+    pinned = [
+        (p.name, v)
+        for p in sources
+        for v in re.findall(r"nf-core/fetchngs -r (\d+\.\d+\.\d+)", p.read_text())
+    ]
+    assert pinned, "no pinned fetchngs command found"
+    assert all(v == FETCHNGS_VERSION for _, v in pinned), pinned

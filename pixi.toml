@@ -85,6 +85,9 @@ prek = "==0.4.13"
 # share, so what you test is what ships.
 default = { features = ["analysis", "dev", "ctx", "ctx-dev"], solve-group = "main" }
 laptop = { features = ["analysis", "ctx"], solve-group = "main" }
+# Nextflow for nf-core/fetchngs runs on a laptop (D-006). Its own environment, outside the
+# main solve-group, so default, laptop, prod and CI resolve exactly as before.
+fetch = { features = ["fetch"] }
 prod = { features = ["analysis", "tools"], solve-group = "main" }
 
 [tasks]
@@ -136,3 +139,10 @@ mypy = "==2.3.1"
 interrogate = "==1.7.0"
 pypdf = "==6.19.0"
 hatchling = "==1.32.4"
+
+[feature.fetch]
+platforms = ["linux-64-glibc-2-35", "osx-arm64"]
+
+[feature.fetch.dependencies]
+nextflow = "==26.04.6"
+python = "==3.12.14"
