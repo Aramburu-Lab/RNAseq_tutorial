@@ -141,6 +141,15 @@ def test_rebuilds(builder, tmp_path, mode):
         and p.parts[len((FIXTURES / mode).parts)] in {"samplesheet", "metadata", "fastq"}
     ]
     assert compared
-    assert {p: (out / p).read_bytes() for p in compared} == {
-        p: (FIXTURES / mode / p).read_bytes() for p in compared
-    }
+
+    def content(root, path):
+        data = (root / path).read_bytes()
+        if path.parts[0] != "metadata":
+            return data
+        # fetchngs writes metadata/*.runinfo_ftp.tsv rows in no fixed order (seen 2026-09-26:
+        # two runs of GSM4907283 swapped); the rows, not their order, are the contract.
+        header, *rows = data.splitlines()
+        return (header, sorted(rows))
+
+    rebuilt = {p: content(out, p) for p in compared}
+    assert rebuilt == {p: content(FIXTURES / mode, p) for p in compared}
