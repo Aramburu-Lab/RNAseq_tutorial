@@ -1,0 +1,379 @@
+stage,component,field,value
+meta,pyodide,version,314.0.6
+meta,pyodide,npm_version,314.0.6
+meta,pyodide,npm_integrity,sha512-BKDTJyIqFxC4BExLqeRS3f5xvXZIjOt8C3zGLN/Cc7tFxSwvKVhVkchQQ2AGLOtR4YrVOIFxbV8poyDOOmWwxQ==
+meta,pyodide,python_version,3.14.2
+meta,node,version,v24.15.0
+meta,host,platform,macOS-15.7.9-arm64-arm-64bit
+meta,host,cpu_count_n,14
+meta,rule,decide_source_sha256,f978c0c5d0c4c279bbfe0252031d06942acb00adc1e723256b7aded722372a16
+meta,rule,agreement_source_sha256,90725eda02e4e182db88dcf4f6ad79f0cde36b1d06037a566ac37d9821faaa63
+meta,design,formula,~ cell_type + condition
+meta,design,contrast,condition: case vs control
+meta,design,fallback_test,"Mann-Whitney U on CPM, type_a, case vs control; BH"
+meta,timeout,limit_s,600
+meta,grid,sizes,1000x24;20000x24;20000x200
+meta,input_1000x24,counts_call,"counts(seed=42, n_genes=1000, donors_per_condition=6)"
+meta,input_1000x24,counts_sha256,e96d12846a7d6b1206db1b58b1dab4d7c612ccb9f34a807dfb00b23561201168
+meta,input_1000x24,counts_bytes,93302
+meta,input_1000x24,samples_sha256,70538a5b2f55b02fb1298deaed09cb904781db28da9280b2d4a9f77e37a0b111
+meta,input_1000x24,samples_bytes,939
+meta,input_1000x24,total_bytes,94241
+meta,input_20000x24,counts_call,"counts(seed=42, n_genes=20000, donors_per_condition=6)"
+meta,input_20000x24,counts_sha256,6d98965e9cc95f9a6d4157ae2919ad3cef2cbb14b7a4d10f21fca47c84bdfb46
+meta,input_20000x24,counts_bytes,1871861
+meta,input_20000x24,samples_sha256,70538a5b2f55b02fb1298deaed09cb904781db28da9280b2d4a9f77e37a0b111
+meta,input_20000x24,samples_bytes,939
+meta,input_20000x24,total_bytes,1872800
+meta,input_20000x200,counts_call,"counts(seed=42, n_genes=20000, donors_per_condition=50)"
+meta,input_20000x200,counts_sha256,31da5688ffbe931bb80725992dde6db3afbfdc160f250cb42088390406c39661
+meta,input_20000x200,counts_bytes,14577524
+meta,input_20000x200,samples_sha256,7e9beb93005ceecb41aaeb5fd29ce47ea30eba955a71dde7ad8d1ba2f5f6de3f
+meta,input_20000x200,samples_bytes,7539
+meta,input_20000x200,total_bytes,14585063
+cpython,fit_1000x24,status,ok
+cpython,fit_1000x24,process_status,exited
+cpython,fit_1000x24,process_returncode,0
+cpython,fit_1000x24,process_wall_s,3.529925291892141
+cpython,fit_1000x24,process_peak_rss_bytes,323682304
+cpython,fit_1000x24,python_s,3.1935133750084788
+stage_a,fit_1000x24,status,error
+stage_a,fit_1000x24,error,AssertionError: ThreadingBackend does not accept setting the inner_max_num_threads argument.
+stage_a,fit_1000x24,node_load_s,0.816814375
+stage_a,fit_1000x24,node_install_s,12.603251916000001
+stage_a,fit_1000x24,node_run_s,4.874594000000001
+stage_a,fit_1000x24,node_install_plus_run_s,17.477845916000003
+stage_a,fit_1000x24,process_status,exited
+stage_a,fit_1000x24,process_returncode,0
+stage_a,fit_1000x24,process_wall_s,18.39729370898567
+stage_a,fit_1000x24,process_peak_rss_bytes,1488371712
+stage_a,fit_1000x24,wheels_downloaded_bytes,41800855
+stage_a,pydeseq2_wheels:anndata-0.13.4-py3-none-any.whl,bytes,190231
+stage_a,pydeseq2_wheels:annotated_types-0.7.0-py3-none-any.whl,bytes,11963
+stage_a,pydeseq2_wheels:array_api_compat-1.15.0-py3-none-any.whl,bytes,79113
+stage_a,pydeseq2_wheels:contourpy-1.3.3-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,118875
+stage_a,pydeseq2_wheels:cycler-0.12.1-py3-none-any.whl,bytes,8321
+stage_a,pydeseq2_wheels:deprecated-1.3.1-py2.py3-none-any.whl,bytes,11298
+stage_a,pydeseq2_wheels:donfig-0.8.1.post1-py3-none-any.whl,bytes,15360
+stage_a,pydeseq2_wheels:fonttools-4.62.1-py3-none-any.whl,bytes,1152647
+stage_a,pydeseq2_wheels:formulaic-1.2.2-py3-none-any.whl,bytes,118939
+stage_a,pydeseq2_wheels:formulaic_contrasts-1.0.0-py3-none-any.whl,bytes,10054
+stage_a,pydeseq2_wheels:google_crc32c-1.8.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,20916
+stage_a,pydeseq2_wheels:h5py-3.13.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,1583582
+stage_a,pydeseq2_wheels:interface_meta-2.0.1-py3-none-any.whl,bytes,15330
+stage_a,pydeseq2_wheels:joblib-1.5.3-py3-none-any.whl,bytes,180317
+stage_a,pydeseq2_wheels:kiwisolver-1.5.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,36616
+stage_a,pydeseq2_wheels:legacy_api_wrap-1.5-py3-none-any.whl,bytes,10182
+stage_a,pydeseq2_wheels:matplotlib-3.10.8-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,6982033
+stage_a,pydeseq2_wheels:micropip-0.11.1-py3-none-any.whl,bytes,115486
+stage_a,pydeseq2_wheels:narwhals-2.18.1-py3-none-any.whl,bytes,444952
+stage_a,pydeseq2_wheels:natsort-8.4.0-py3-none-any.whl,bytes,38268
+stage_a,pydeseq2_wheels:numcodecs-0.15.1-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,448724
+stage_a,pydeseq2_wheels:numpy-2.4.6-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,2918760
+stage_a,pydeseq2_wheels:packaging-26.1-py3-none-any.whl,bytes,95852
+stage_a,pydeseq2_wheels:pandas-3.0.2-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,4177814
+stage_a,pydeseq2_wheels:pillow-12.2.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,1037807
+stage_a,pydeseq2_wheels:pkgconfig-1.6.0-py3-none-any.whl,bytes,7083
+stage_a,pydeseq2_wheels:pydantic-2.12.5-py3-none-any.whl,bytes,463578
+stage_a,pydeseq2_wheels:pydantic_core-2.41.5-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,1310163
+stage_a,pydeseq2_wheels:pydantic_settings-2.15.0-py3-none-any.whl,bytes,69413
+stage_a,pydeseq2_wheels:pydeseq2-0.5.4-py3-none-any.whl,bytes,45617
+stage_a,pydeseq2_wheels:pyparsing-3.3.2-py3-none-any.whl,bytes,122781
+stage_a,pydeseq2_wheels:python_dateutil-2.9.0.post0-py2.py3-none-any.whl,bytes,229892
+stage_a,pydeseq2_wheels:python_dotenv-1.2.3-py3-none-any.whl,bytes,22780
+stage_a,pydeseq2_wheels:pytz-2026.1.post1-py2.py3-none-any.whl,bytes,510489
+stage_a,pydeseq2_wheels:pyyaml-6.0.3-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,111318
+stage_a,pydeseq2_wheels:scikit_learn-1.8.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,4449200
+stage_a,pydeseq2_wheels:scipy-1.18.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,14029768
+stage_a,pydeseq2_wheels:scverse_misc-0.1.6-py3-none-any.whl,bytes,28763
+stage_a,pydeseq2_wheels:session_info-1.0.1-py3-none-any.whl,bytes,9119
+stage_a,pydeseq2_wheels:session_info2-0.4.2-py3-none-any.whl,bytes,17665
+stage_a,pydeseq2_wheels:six-1.17.0-py2.py3-none-any.whl,bytes,11050
+stage_a,pydeseq2_wheels:stdlib_list-0.12.0-py3-none-any.whl,bytes,87615
+stage_a,pydeseq2_wheels:threadpoolctl-3.6.0-py3-none-any.whl,bytes,18638
+stage_a,pydeseq2_wheels:typing_extensions-4.16.0-py3-none-any.whl,bytes,45571
+stage_a,pydeseq2_wheels:typing_inspection-0.4.2-py3-none-any.whl,bytes,14610
+stage_a,pydeseq2_wheels:wrapt-2.1.2-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,52189
+stage_a,pydeseq2_wheels:zarr-3.2.1-py3-none-any.whl,bytes,320113
+stage_a,pydeseq2_wheels,total_bytes,41800855
+stage_a,pydeseq2_wheels,files_n,47
+stage_a,pydeseq2,status,installed
+stage_a,pydeseq2,version,0.5.4
+stage_a,deseq_dist:anndata,version,0.13.4 (pypi)
+stage_a,deseq_dist:annotated-types,version,0.7.0 (pyodide)
+stage_a,deseq_dist:array-api-compat,version,1.15.0 (pypi)
+stage_a,deseq_dist:contourpy,version,1.3.3 (pyodide)
+stage_a,deseq_dist:cycler,version,0.12.1 (pyodide)
+stage_a,deseq_dist:deprecated,version,1.3.1 (pyodide)
+stage_a,deseq_dist:donfig,version,0.8.1.post1 (pyodide)
+stage_a,deseq_dist:fonttools,version,4.62.1 (pyodide)
+stage_a,deseq_dist:formulaic,version,1.2.2 (pypi)
+stage_a,deseq_dist:formulaic-contrasts,version,1.0.0 (pypi)
+stage_a,deseq_dist:google-crc32c,version,1.8.0 (pyodide)
+stage_a,deseq_dist:h5py,version,3.13.0 (pyodide)
+stage_a,deseq_dist:interface-meta,version,2.0.1 (pypi)
+stage_a,deseq_dist:joblib,version,1.5.3 (pyodide)
+stage_a,deseq_dist:kiwisolver,version,1.5.0 (pyodide)
+stage_a,deseq_dist:legacy-api-wrap,version,1.5 (pypi)
+stage_a,deseq_dist:matplotlib,version,3.10.8 (pyodide)
+stage_a,deseq_dist:micropip,version,0.11.1 (pyodide)
+stage_a,deseq_dist:narwhals,version,2.18.1 (pyodide)
+stage_a,deseq_dist:natsort,version,8.4.0 (pypi)
+stage_a,deseq_dist:numcodecs,version,0.15.1 (pyodide)
+stage_a,deseq_dist:numpy,version,2.4.6 (pyodide)
+stage_a,deseq_dist:packaging,version,26.1 (pyodide)
+stage_a,deseq_dist:pandas,version,3.0.2 (pyodide)
+stage_a,deseq_dist:pillow,version,12.2.0 (pyodide)
+stage_a,deseq_dist:pkgconfig,version,1.6.0 (pyodide)
+stage_a,deseq_dist:pydantic,version,2.12.5 (pyodide)
+stage_a,deseq_dist:pydantic-core,version,2.41.5 (pyodide)
+stage_a,deseq_dist:pydantic-settings,version,2.15.0 (pypi)
+stage_a,deseq_dist:pydeseq2,version,0.5.4 (pypi)
+stage_a,deseq_dist:pyparsing,version,3.3.2 (pyodide)
+stage_a,deseq_dist:python-dateutil,version,2.9.0.post0 (pyodide)
+stage_a,deseq_dist:python-dotenv,version,1.2.3 (pypi)
+stage_a,deseq_dist:pytz,version,2026.1.post1 (pyodide)
+stage_a,deseq_dist:pyyaml,version,6.0.3 (pyodide)
+stage_a,deseq_dist:scikit-learn,version,1.8.0 (pyodide)
+stage_a,deseq_dist:scipy,version,1.18.0 (pyodide)
+stage_a,deseq_dist:scverse-misc,version,0.1.6 (pypi)
+stage_a,deseq_dist:session-info,version,1.0.1 (pypi)
+stage_a,deseq_dist:session-info2,version,0.4.2 (pypi)
+stage_a,deseq_dist:six,version,1.17.0 (pyodide)
+stage_a,deseq_dist:stdlib-list,version,0.12.0 (pypi)
+stage_a,deseq_dist:threadpoolctl,version,3.6.0 (pyodide)
+stage_a,deseq_dist:typing-extensions,version,4.16.0 (pypi)
+stage_a,deseq_dist:typing-inspection,version,0.4.2 (pyodide)
+stage_a,deseq_dist:wrapt,version,2.1.2 (pyodide)
+stage_a,deseq_dist:zarr,version,3.2.1 (pyodide)
+cpython,fit_20000x24,status,ok
+cpython,fit_20000x24,process_status,exited
+cpython,fit_20000x24,process_returncode,0
+cpython,fit_20000x24,process_wall_s,18.470093291951343
+cpython,fit_20000x24,process_peak_rss_bytes,439713792
+cpython,fit_20000x24,python_s,18.13726562517695
+stage_a,fit_20000x24,status,error
+stage_a,fit_20000x24,error,AssertionError: ThreadingBackend does not accept setting the inner_max_num_threads argument.
+stage_a,fit_20000x24,node_load_s,0.8139281249999999
+stage_a,fit_20000x24,node_install_s,12.215351916
+stage_a,fit_20000x24,node_run_s,4.900478416
+stage_a,fit_20000x24,node_install_plus_run_s,17.115830332
+stage_a,fit_20000x24,process_status,exited
+stage_a,fit_20000x24,process_returncode,0
+stage_a,fit_20000x24,process_wall_s,18.049356583040208
+stage_a,fit_20000x24,process_peak_rss_bytes,1547239424
+stage_a,fit_20000x24,wheels_downloaded_bytes,41800855
+cpython,fit_20000x200,status,ok
+cpython,fit_20000x200,process_status,exited
+cpython,fit_20000x200,process_returncode,0
+cpython,fit_20000x200,process_wall_s,22.739580624969676
+cpython,fit_20000x200,process_peak_rss_bytes,920109056
+cpython,fit_20000x200,python_s,22.362793083069846
+stage_a,fit_20000x200,status,error
+stage_a,fit_20000x200,error,AssertionError: ThreadingBackend does not accept setting the inner_max_num_threads argument.
+stage_a,fit_20000x200,node_load_s,0.825678542
+stage_a,fit_20000x200,node_install_s,11.765836333
+stage_a,fit_20000x200,node_run_s,5.327146458
+stage_a,fit_20000x200,node_install_plus_run_s,17.092982790999997
+stage_a,fit_20000x200,process_status,exited
+stage_a,fit_20000x200,process_returncode,0
+stage_a,fit_20000x200,process_wall_s,18.060122417053208
+stage_a,fit_20000x200,process_peak_rss_bytes,1795047424
+stage_a,fit_20000x200,wheels_downloaded_bytes,41800855
+cpython,fit_shim_1000x24,status,ok
+cpython,fit_shim_1000x24,process_status,exited
+cpython,fit_shim_1000x24,process_returncode,0
+cpython,fit_shim_1000x24,process_wall_s,3.013963666977361
+cpython,fit_shim_1000x24,process_peak_rss_bytes,323305472
+cpython,fit_shim_1000x24,python_s,2.6566683331038803
+stage_a,fit_shim_1000x24,status,ok
+stage_a,fit_shim_1000x24,node_load_s,0.8213428749999999
+stage_a,fit_shim_1000x24,node_install_s,12.414081957999999
+stage_a,fit_shim_1000x24,node_run_s,6.5610871669999975
+stage_a,fit_shim_1000x24,node_install_plus_run_s,18.975169124999997
+stage_a,fit_shim_1000x24,process_status,exited
+stage_a,fit_shim_1000x24,process_returncode,0
+stage_a,fit_shim_1000x24,process_wall_s,19.905022375052795
+stage_a,fit_shim_1000x24,process_peak_rss_bytes,1408090112
+stage_a,fit_shim_1000x24,wheels_downloaded_bytes,41800855
+stage_a,fit_shim_1000x24,genes_n,1000
+stage_a,fit_shim_1000x24,padj_below_alpha_cpython_n,103
+stage_a,fit_shim_1000x24,padj_below_alpha_pyodide_n,103
+stage_a,fit_shim_1000x24,pvalue_nan_mismatch_n,0
+stage_a,fit_shim_1000x24,max_abs_dpvalue,2.2066343874360683e-07
+stage_a,fit_shim_1000x24,padj_nan_mismatch_n,0
+stage_a,fit_shim_1000x24,max_abs_dpadj,5.19683250765901e-07
+stage_a,fit_shim_1000x24,padj_side_disagreements_n,0
+stage_a,fit_shim_1000x24,max_abs_dlfc_log2,2.246281166362607e-05
+cpython,fit_shim_20000x24,status,ok
+cpython,fit_shim_20000x24,process_status,exited
+cpython,fit_shim_20000x24,process_returncode,0
+cpython,fit_shim_20000x24,process_wall_s,18.851836915826425
+cpython,fit_shim_20000x24,process_peak_rss_bytes,436912128
+cpython,fit_shim_20000x24,python_s,18.480142166139558
+stage_a,fit_shim_20000x24,status,ok
+stage_a,fit_shim_20000x24,node_load_s,0.818156833
+stage_a,fit_shim_20000x24,node_install_s,12.219247667
+stage_a,fit_shim_20000x24,node_run_s,38.512278374999994
+stage_a,fit_shim_20000x24,node_install_plus_run_s,50.73152604199999
+stage_a,fit_shim_20000x24,process_status,exited
+stage_a,fit_shim_20000x24,process_returncode,0
+stage_a,fit_shim_20000x24,process_wall_s,51.64728425000794
+stage_a,fit_shim_20000x24,process_peak_rss_bytes,1544208384
+stage_a,fit_shim_20000x24,wheels_downloaded_bytes,41800855
+stage_a,fit_shim_20000x24,genes_n,20000
+stage_a,fit_shim_20000x24,padj_below_alpha_cpython_n,2124
+stage_a,fit_shim_20000x24,padj_below_alpha_pyodide_n,2128
+stage_a,fit_shim_20000x24,pvalue_nan_mismatch_n,0
+stage_a,fit_shim_20000x24,max_abs_dpvalue,0.03807248359389381
+stage_a,fit_shim_20000x24,padj_nan_mismatch_n,388
+stage_a,fit_shim_20000x24,max_abs_dpadj,0.056587959931984386
+stage_a,fit_shim_20000x24,padj_side_disagreements_n,389
+stage_a,fit_shim_20000x24,max_abs_dlfc_log2,0.000848151311310566
+cpython,fit_shim_20000x200,status,ok
+cpython,fit_shim_20000x200,process_status,exited
+cpython,fit_shim_20000x200,process_returncode,0
+cpython,fit_shim_20000x200,process_wall_s,23.123881542123854
+cpython,fit_shim_20000x200,process_peak_rss_bytes,907968512
+cpython,fit_shim_20000x200,python_s,22.704442125046626
+stage_a,fit_shim_20000x200,status,ok
+stage_a,fit_shim_20000x200,node_load_s,0.870940833
+stage_a,fit_shim_20000x200,node_install_s,12.743738167
+stage_a,fit_shim_20000x200,node_run_s,44.7936685
+stage_a,fit_shim_20000x200,node_install_plus_run_s,57.537406667
+stage_a,fit_shim_20000x200,process_status,exited
+stage_a,fit_shim_20000x200,process_returncode,0
+stage_a,fit_shim_20000x200,process_wall_s,58.54949279106222
+stage_a,fit_shim_20000x200,process_peak_rss_bytes,1916305408
+stage_a,fit_shim_20000x200,wheels_downloaded_bytes,41800855
+stage_a,fit_shim_20000x200,genes_n,20000
+stage_a,fit_shim_20000x200,padj_below_alpha_cpython_n,2218
+stage_a,fit_shim_20000x200,padj_below_alpha_pyodide_n,2218
+stage_a,fit_shim_20000x200,pvalue_nan_mismatch_n,0
+stage_a,fit_shim_20000x200,max_abs_dpvalue,0.004178109687844822
+stage_a,fit_shim_20000x200,padj_nan_mismatch_n,0
+stage_a,fit_shim_20000x200,max_abs_dpadj,0.004034891904327598
+stage_a,fit_shim_20000x200,padj_side_disagreements_n,0
+stage_a,fit_shim_20000x200,max_abs_dlfc_log2,0.000280462678695078
+cpython,scipy_tests_1000x24,status,ok
+cpython,scipy_tests_1000x24,process_status,exited
+cpython,scipy_tests_1000x24,process_returncode,0
+cpython,scipy_tests_1000x24,process_wall_s,1.4970102079678327
+cpython,scipy_tests_1000x24,process_peak_rss_bytes,209321984
+cpython,scipy_tests_1000x24,python_s,1.2051616669632494
+stage_a,scipy_tests_1000x24,status,ok
+stage_a,scipy_tests_1000x24,node_load_s,0.816951833
+stage_a,scipy_tests_1000x24,node_install_s,11.926948084
+stage_a,scipy_tests_1000x24,node_run_s,1.5071907499999997
+stage_a,scipy_tests_1000x24,node_install_plus_run_s,13.434138833999999
+stage_a,scipy_tests_1000x24,process_status,exited
+stage_a,scipy_tests_1000x24,process_returncode,0
+stage_a,scipy_tests_1000x24,process_wall_s,14.333167749922723
+stage_a,scipy_tests_1000x24,process_peak_rss_bytes,1228947456
+stage_a,scipy_tests_1000x24,wheels_downloaded_bytes,32226431
+stage_a,scipy_tests_1000x24,genes_n,1000
+stage_a,scipy_tests_1000x24,padj_below_alpha_cpython_n,104
+stage_a,scipy_tests_1000x24,padj_below_alpha_pyodide_n,104
+stage_a,scipy_tests_1000x24,pvalue_nan_mismatch_n,0
+stage_a,scipy_tests_1000x24,max_abs_dpvalue,2.220446049250313e-16
+stage_a,scipy_tests_1000x24,padj_nan_mismatch_n,0
+stage_a,scipy_tests_1000x24,max_abs_dpadj,4.440892098500626e-16
+stage_a,scipy_tests_1000x24,padj_below_alpha_mismatch_n,0
+stage_a,fallback_wheels:micropip-0.11.1-py3-none-any.whl,bytes,115486
+stage_a,fallback_wheels:narwhals-2.18.1-py3-none-any.whl,bytes,444952
+stage_a,fallback_wheels:numpy-2.4.6-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,2918760
+stage_a,fallback_wheels:packaging-26.1-py3-none-any.whl,bytes,95852
+stage_a,fallback_wheels:pandas-3.0.2-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,4177814
+stage_a,fallback_wheels:plotly-7.1.0-py3-none-any.whl,bytes,9692368
+stage_a,fallback_wheels:python_dateutil-2.9.0.post0-py2.py3-none-any.whl,bytes,229892
+stage_a,fallback_wheels:pytz-2026.1.post1-py2.py3-none-any.whl,bytes,510489
+stage_a,fallback_wheels:scipy-1.18.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl,bytes,14029768
+stage_a,fallback_wheels:six-1.17.0-py2.py3-none-any.whl,bytes,11050
+stage_a,fallback_wheels,total_bytes,32226431
+stage_a,fallback_wheels,files_n,10
+stage_a,plotly,status,installed
+stage_a,plotly,version,7.1.0
+stage_a,scipy,status,installed
+stage_a,scipy,version,1.18.0
+stage_a,pandas,status,installed
+stage_a,pandas,version,3.0.2
+stage_a,pydeseq2_absent,status,not importable
+stage_a,pydeseq2_absent,error,ModuleNotFoundError: No module named 'pydeseq2'
+stage_a,fallback_dist:micropip,version,0.11.1 (pyodide)
+stage_a,fallback_dist:narwhals,version,2.18.1 (pyodide)
+stage_a,fallback_dist:numpy,version,2.4.6 (pyodide)
+stage_a,fallback_dist:packaging,version,26.1 (pyodide)
+stage_a,fallback_dist:pandas,version,3.0.2 (pyodide)
+stage_a,fallback_dist:plotly,version,7.1.0 (pypi)
+stage_a,fallback_dist:python-dateutil,version,2.9.0.post0 (pyodide)
+stage_a,fallback_dist:pytz,version,2026.1.post1 (pyodide)
+stage_a,fallback_dist:scipy,version,1.18.0 (pyodide)
+stage_a,fallback_dist:six,version,1.17.0 (pyodide)
+cpython,scipy_tests_20000x24,status,ok
+cpython,scipy_tests_20000x24,process_status,exited
+cpython,scipy_tests_20000x24,process_returncode,0
+cpython,scipy_tests_20000x24,process_wall_s,1.1987189161591232
+cpython,scipy_tests_20000x24,process_peak_rss_bytes,251969536
+cpython,scipy_tests_20000x24,python_s,0.9354661670513451
+stage_a,scipy_tests_20000x24,status,ok
+stage_a,scipy_tests_20000x24,node_load_s,0.8106907919999999
+stage_a,scipy_tests_20000x24,node_install_s,12.743319792
+stage_a,scipy_tests_20000x24,node_run_s,1.5545919170000015
+stage_a,scipy_tests_20000x24,node_install_plus_run_s,14.297911709000001
+stage_a,scipy_tests_20000x24,process_status,exited
+stage_a,scipy_tests_20000x24,process_returncode,0
+stage_a,scipy_tests_20000x24,process_wall_s,15.18700237502344
+stage_a,scipy_tests_20000x24,process_peak_rss_bytes,1350631424
+stage_a,scipy_tests_20000x24,wheels_downloaded_bytes,32226431
+stage_a,scipy_tests_20000x24,genes_n,20000
+stage_a,scipy_tests_20000x24,padj_below_alpha_cpython_n,2069
+stage_a,scipy_tests_20000x24,padj_below_alpha_pyodide_n,2069
+stage_a,scipy_tests_20000x24,pvalue_nan_mismatch_n,0
+stage_a,scipy_tests_20000x24,max_abs_dpvalue,2.220446049250313e-16
+stage_a,scipy_tests_20000x24,padj_nan_mismatch_n,0
+stage_a,scipy_tests_20000x24,max_abs_dpadj,5.551115123125783e-16
+stage_a,scipy_tests_20000x24,padj_below_alpha_mismatch_n,0
+cpython,scipy_tests_20000x200,status,ok
+cpython,scipy_tests_20000x200,process_status,exited
+cpython,scipy_tests_20000x200,process_returncode,0
+cpython,scipy_tests_20000x200,process_wall_s,1.4184602908790112
+cpython,scipy_tests_20000x200,process_peak_rss_bytes,541818880
+cpython,scipy_tests_20000x200,python_s,1.1282885419204831
+stage_a,scipy_tests_20000x200,status,ok
+stage_a,scipy_tests_20000x200,node_load_s,0.814024709
+stage_a,scipy_tests_20000x200,node_install_s,11.621917792
+stage_a,scipy_tests_20000x200,node_run_s,1.8946995420000003
+stage_a,scipy_tests_20000x200,node_install_plus_run_s,13.516617334
+stage_a,scipy_tests_20000x200,process_status,exited
+stage_a,scipy_tests_20000x200,process_returncode,0
+stage_a,scipy_tests_20000x200,process_wall_s,14.453729667002335
+stage_a,scipy_tests_20000x200,process_peak_rss_bytes,1493106688
+stage_a,scipy_tests_20000x200,wheels_downloaded_bytes,32226431
+stage_a,scipy_tests_20000x200,genes_n,20000
+stage_a,scipy_tests_20000x200,padj_below_alpha_cpython_n,12430
+stage_a,scipy_tests_20000x200,padj_below_alpha_pyodide_n,12430
+stage_a,scipy_tests_20000x200,pvalue_nan_mismatch_n,0
+stage_a,scipy_tests_20000x200,max_abs_dpvalue,2.220446049250313e-16
+stage_a,scipy_tests_20000x200,padj_nan_mismatch_n,0
+stage_a,scipy_tests_20000x200,max_abs_dpadj,2.7755575615628914e-16
+stage_a,scipy_tests_20000x200,padj_below_alpha_mismatch_n,0
+cpython,anndata,version,0.13.4
+cpython,formulaic,version,1.2.2
+cpython,matplotlib,version,3.11.2
+cpython,numpy,version,2.5.3
+cpython,pandas,version,3.0.6
+cpython,plotly,version,7.1.0
+cpython,pydeseq2,version,0.5.4
+cpython,python,version,3.12.14
+cpython,scikit-learn,version,1.9.1
+cpython,scipy,version,1.18.1
+cpython,typing-extensions,version,4.16.0
+stage_b,run,status,not run: no size passed stage A
+decision,plotting,verdict,plotly
+decision,plotting,why,plotly installed
+decision,1000x24,verdict,fallback
+decision,1000x24,why,~ cell_type + condition fit: error; nan genes on the other side of 0.05; max |dLFC| nan > 0.001
+decision,20000x24,verdict,fallback
+decision,20000x24,why,~ cell_type + condition fit: error; nan genes on the other side of 0.05; max |dLFC| nan > 0.001
+decision,20000x200,verdict,fallback
+decision,20000x200,why,~ cell_type + condition fit: error; nan genes on the other side of 0.05; max |dLFC| nan > 0.001; wheels plus data 56385918 > 50000000 bytes

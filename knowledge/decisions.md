@@ -27,6 +27,50 @@ it were reversed.
 
 ---
 
+## D-005 — JupyterLite DE: precomputed grids plus live scipy tests, not live pydeseq2 (TODO.md D17)
+
+**Date:** 2026-09-26 · **Status:** decided
+
+**Context.** D4 left open whether the M5 notebook re-runs pydeseq2 in the browser. P1.5 fixed the
+rule as `decide()` in `scripts/python/spike_pyodide.py`, committed in 247d3f5 before anything ran.
+The record is `deliverables/2026-09-26_lite_build_pyodide_spike_v1.csv`.
+
+**Options.** Live pydeseq2 0.5.4 in JupyterLite; the D4 fallback, precomputed grids plus live
+scipy tests; live pydeseq2 under an in-process joblib backend, which the rule does not cover.
+
+**Decision.** The fallback at all three grid sizes, 1,000 x 24, 20,000 x 24 and 20,000 x 200, with
+plotly for figures. Stage B, the browser timing, did not run, because no size passed stage A.
+
+**Evidence.** Stage A ran npm `pyodide@314.0.6`, Python 3.14.2, under Node v24.15.0 on macOS
+15.7.9 arm64. npm integrity:
+`sha512-BKDTJyIqFxC4BExLqeRS3f5xvXZIjOt8C3zGLN/Cc7tFxSwvKVhVkchQQ2AGLOtR4YrVOIFxbV8poyDOOmWwxQ==`.
+- micropip installed pydeseq2 0.5.4 as 47 files of 41,800,855 bytes. anndata 0.13.4 arrived with
+  typing-extensions 4.16.0 from PyPI, because the bundled 4.15.0 was never loaded, so the known
+  risk did not fire in Node.
+- The fit failed at every size. First blocking error, verbatim:
+  `AssertionError: ThreadingBackend does not accept setting the inner_max_num_threads argument.`
+  pydeseq2 0.5.4, the newest release on PyPI, wraps every inference call in
+  `parallel_backend("loky", inner_max_num_threads=1)`. Pyodide has no loky, joblib 1.5.3 falls
+  back to threading, and threading rejects that argument. No version pin reaches it.
+- Loaded versions, Pyodide then CPython: numpy 2.4.6 and 2.5.3, scipy 1.18.0 and 1.18.1,
+  scikit-learn 1.8.0 and 1.9.1, pandas 3.0.2 and 3.0.6, pydeseq2 0.5.4 in both.
+- At 20,000 x 200, wheels plus data are 56,385,918 bytes, over the 50,000,000 limit, so that size
+  fails even with a working fit.
+- Fallback arm: in a Pyodide where `import pydeseq2` raises `ModuleNotFoundError`, scipy 1.18.0,
+  pandas 3.0.2 and plotly 7.1.0 installed as 10 files of 32,226,431 bytes. Mann-Whitney U with BH
+  matched CPython at every size: max |dp| 2.2e-16, max |dpadj| 5.6e-16, and no gene crossed 0.05.
+- Recorded beside the rule, which never reads it: with a sequential joblib backend registered as
+  `in_process`, pydeseq2 fits in Pyodide in 6.6, 38.5 and 44.8 s of Node time. It agrees at
+  1,000 x 24 (0 disagreements, max |dLFC| 2.2e-5) and at 20,000 x 200 (0, 2.8e-4) but not at
+  20,000 x 24: 389 disagreements, of which 388 are low-count genes, baseMean 0.27 to 1.34, whose
+  padj is NaN in Pyodide only. Independent filtering chose a different threshold.
+
+**Consequence.** Phase 5 bundles precomputed DE grids and runs the scipy tests live. Reversing this
+needs a new decision: the backend shim changes the notebook's code path, 20,000 x 24 still
+disagrees under it, its wheels alone take 41.8 MB of the 50 MB budget, and no browser timing
+exists. A numpy change that alters `counts()` fails `tests/test_spike_record.py`; the spike is
+then rerun.
+
 ## D-004 — Output root: the laptop profile defaults to the working directory; hpc needs an explicit root
 
 **Date:** 2026-09-26 · **Status:** decided

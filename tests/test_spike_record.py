@@ -1,7 +1,13 @@
 """The P1.5 rule, and the Pyodide spike record it was applied to. No network."""
 
+import ast
+import csv
+import hashlib
 import importlib.util
+import inspect
 import math
+import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -9,6 +15,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 SIZES = ("1000x24", "20000x24", "20000x200")
+RECORD_NAME = re.compile(r"(\d{4}-\d{2}-\d{2})_lite_build_pyodide_spike_v(\d+)\.csv")
 
 
 def load_spike():
@@ -99,3 +106,97 @@ def test_agreement_boundaries():
     assert spike.agreement([0.5], [1.0], [0.5], [nan])[1] == math.inf
     with pytest.raises(ValueError, match="same genes"):
         spike.agreement([0.5], [1.0], [0.5, 0.5], [1.0, 1.0])
+
+
+def record_path():
+    """The newest record: a rerun supersedes the old one under a new date or version."""
+    found = [(RECORD_NAME.fullmatch(p.name), p) for p in (ROOT / "deliverables").iterdir()]
+    found = [(m[1], int(m[2]), p) for m, p in found if m]
+    assert found, "no spike record in deliverables/"
+    return max(found)[2]
+
+
+@pytest.fixture(scope="module")
+def record():
+    with record_path().open(newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    assert rows and list(rows[0]) == ["stage", "component", "field", "value"]
+    keys = [(r["stage"], r["component"], r["field"]) for r in rows]
+    assert len(set(keys)) == len(keys), "a (stage, component, field) key repeats"
+    return {k: r["value"] for k, r in zip(keys, rows, strict=True)}
+
+
+def test_decision_follows_rule(record):
+    verdicts = spike.decide(record)
+    recorded = {
+        c: (record[("decision", c, "verdict")], record[("decision", c, "why")])
+        for (stage, c, field) in record
+        if stage == "decision" and field == "verdict"
+    }
+    assert verdicts == recorded
+    assert set(SIZES) < set(recorded)
+
+
+def test_rule_source_unchanged(record):
+    for name in ("decide", "agreement"):
+        source = inspect.getsource(getattr(spike, name))
+        recorded = record[("meta", "rule", f"{name}_source_sha256")]
+        assert hashlib.sha256(source.encode()).hexdigest() == recorded, name
+
+
+def git(*args):
+    return subprocess.run(
+        ["git", "-C", str(ROOT), *args], capture_output=True, text=True, check=True
+    ).stdout.strip()
+
+
+def test_rule_predates_record():
+    if git("rev-parse", "--is-shallow-repository") == "true":
+        pytest.skip("shallow clone: CI checks out depth 1, so the commit adding decide() is absent")
+    script = "scripts/python/spike_pyodide.py"
+    rule = git("log", "--reverse", "--format=%H", "-S", "def decide(", "--", script).split()
+    path = record_path().relative_to(ROOT).as_posix()
+    added = git("log", "--reverse", "--diff-filter=A", "--format=%H", "--", path).split()
+    assert rule, "no commit adds decide()"
+    assert added, f"{path} is not committed"
+    assert rule[0] != added[0], "the rule and the record arrived in one commit"
+    ancestor = subprocess.run(
+        ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", rule[0], added[0]], check=False
+    )
+    assert ancestor.returncode == 0, f"{rule[0]} (decide) is not an ancestor of {added[0]}"
+
+
+def test_record_complete(record):
+    assert spike.PYODIDE_VERSION == "314.0.6"
+    assert record[("meta", "pyodide", "version")] == spike.PYODIDE_VERSION
+    assert record[("meta", "pyodide", "npm_version")] == spike.PYODIDE_VERSION
+    assert record[("meta", "pyodide", "npm_integrity")].startswith("sha512-")
+
+    for package in ("scipy", "plotly", "pydeseq2"):
+        status = record[("stage_a", package, "status")]
+        detail = "version" if status == "installed" else "error"
+        assert record.get(("stage_a", package, detail)), (package, status)
+    for package in ("numpy", "scipy", "scikit-learn", "pydeseq2"):
+        assert record.get(("cpython", package, "version")), package
+        assert record.get(("stage_a", f"deseq_dist:{package}", "version")), package
+
+    for group in ("pydeseq2_wheels", "fallback_wheels"):
+        files = [int(v) for (s, c, f), v in record.items() if c.startswith(f"{group}:")]
+        assert files and all(b > 0 for b in files), group
+        assert sum(files) == int(record[("stage_a", group, "total_bytes")]), group
+        assert len(files) == int(record[("stage_a", group, "files_n")]), group
+
+    assert record[("meta", "grid", "sizes")].split(";") == list(SIZES)
+    synth = importlib.util.module_from_spec(
+        importlib.util.spec_from_file_location("synth_signature", ROOT / "tests" / "synth.py")
+    )
+    synth.__spec__.loader.exec_module(synth)
+    declared = set(inspect.signature(synth.counts).parameters)
+    for size in SIZES:
+        call = record[("meta", f"input_{size}", "counts_call")]
+        keywords = {k.arg for k in ast.parse(call, mode="eval").body.keywords}
+        assert keywords == declared, f"{call} leaves an argument to its default"
+        # A numpy that changes counts() fails here by design; the spike is then rerun.
+        for kind, blob in zip(("counts", "samples"), spike.input_csv(call), strict=True):
+            digest = record[("meta", f"input_{size}", f"{kind}_sha256")]
+            assert hashlib.sha256(blob).hexdigest() == digest, (size, kind)
