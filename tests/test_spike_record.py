@@ -164,6 +164,20 @@ def test_rule_predates_record():
         ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", rule[0], added[0]], check=False
     )
     assert ancestor.returncode == 0, f"{rule[0]} (decide) is not an ancestor of {added[0]}"
+    # Order alone is not enough: a rule rewritten between the two commits would pass. The rule
+    # as committed first must be the rule in force now, whose hash the record carries.
+    at_rule, now = git("show", f"{rule[0]}:{script}"), (ROOT / script).read_text()
+    for name in ("decide", "agreement"):
+        assert _function_source(at_rule, name) == _function_source(now, name), (
+            f"{name}() changed after {rule[0][:7]}, the commit that fixed the rule"
+        )
+
+
+def _function_source(text, name):
+    node = next(
+        n for n in ast.parse(text).body if isinstance(n, ast.FunctionDef) and n.name == name
+    )
+    return ast.get_source_segment(text, node)
 
 
 def test_record_complete(record):
@@ -200,3 +214,49 @@ def test_record_complete(record):
         for kind, blob in zip(("counts", "samples"), spike.input_csv(call), strict=True):
             digest = record[("meta", f"input_{size}", f"{kind}_sha256")]
             assert hashlib.sha256(blob).hexdigest() == digest, (size, kind)
+
+
+def _results_csv(path, rows):
+    header = "gene_id,baseMean,log2FoldChange,pvalue,padj\n"
+    path.write_text(header + "".join(",".join(map(str, r)) + "\n" for r in rows))
+    return path
+
+
+def test_compare_counts_what_it_is_fed(tmp_path):
+    reference = _results_csv(
+        tmp_path / "ref.csv",
+        [("g1", 100, 1.0, 0.01, 0.02), ("g2", 100, 1.0, 0.001, 0.01),
+         ("g3", 1, 0.2, 0.5, 0.9), ("g4", 100, 2.0, 0.5, 0.8)],
+    )  # fmt: skip
+    pyodide = _results_csv(
+        tmp_path / "new.csv",
+        [("g1", 100, 1.0, 0.01, 0.02), ("g2", 100, 1.0, 0.1, 0.2),
+         ("g3", 1, 0.2, 0.5, ""), ("g4", 100, 2.5, 0.5, 0.8)],
+    )  # fmt: skip
+    out = spike.compare("deseq", reference, pyodide)
+    assert out["genes_n"] == 4
+    assert out["padj_side_disagreements_n"] == 2  # g2 flips side, g3 is NaN in one fit only
+    assert out["max_abs_dlfc_log2"] == pytest.approx(0.5)
+    assert out["padj_nan_mismatch_n"] == 1
+    shuffled = _results_csv(tmp_path / "shuffled.csv", [("g2", 1, 1, 1, 1), ("g1", 1, 1, 1, 1)])
+    with pytest.raises(ValueError, match="different genes"):
+        spike.compare("deseq", reference, shuffled)
+
+
+def test_wheels_counts_unique_install_files():
+    spec = importlib.util.spec_from_file_location(
+        "pyodide_harness", ROOT / "scripts" / "python" / "pyodide_harness.py"
+    )
+    harness = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(harness)
+    base = "https://files.example/packages"
+    log = [
+        {"phase": "install", "url": f"{base}/a-1.0-py3-none-any.whl", "bytes": 100},
+        {"phase": "install", "url": f"{base}/a-1.0-py3-none-any.whl", "bytes": 100},
+        {"phase": "install", "url": "https://pypi.org/simple/a/", "bytes": 7},
+        {"phase": "install", "url": f"{base}/a-1.0-py3-none-any.whl.metadata", "bytes": 9},
+        {"phase": "install", "url": f"{base}/b%2Bc-2.0.zip", "bytes": 50},
+        {"phase": "import", "url": f"{base}/late-1.0-py3-none-any.whl", "bytes": 1},
+    ]
+    # Unique files by name: a wheel fetched twice counts once, so this is not bytes downloaded.
+    assert harness.wheels(log) == {"a-1.0-py3-none-any.whl": 100, "b+c-2.0.zip": 50}

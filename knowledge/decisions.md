@@ -41,6 +41,12 @@ scipy tests; live pydeseq2 under an in-process joblib backend, which the rule do
 **Decision.** The fallback at all three grid sizes, 1,000 x 24, 20,000 x 24 and 20,000 x 200, with
 plotly for figures. Stage B, the browser timing, did not run, because no size passed stage A.
 
+The rule's "the `~ cell_type + condition` fit" was read as pydeseq2's default call. That reading
+was fixed in the harness commit 4a54ff0, after a scratch dry run had shown the failure, not in the
+rule commit 247d3f5. Under pydeseq2's public backend argument (the shim below) the 1,000 x 24 fit
+meets every stage-A criterion, so the verdict at that size rests on the reading; how it was
+settled is TODO.md D17. (The "D-005a" in AGENTS.md is the template's numbering, not this entry.)
+
 **Evidence.** Stage A ran npm `pyodide@314.0.6`, Python 3.14.2, under Node v24.15.0 on macOS
 15.7.9 arm64. npm integrity:
 `sha512-BKDTJyIqFxC4BExLqeRS3f5xvXZIjOt8C3zGLN/Cc7tFxSwvKVhVkchQQ2AGLOtR4YrVOIFxbV8poyDOOmWwxQ==`.
@@ -49,9 +55,12 @@ plotly for figures. Stage B, the browser timing, did not run, because no size pa
   risk did not fire in Node.
 - The fit failed at every size. First blocking error, verbatim:
   `AssertionError: ThreadingBackend does not accept setting the inner_max_num_threads argument.`
-  pydeseq2 0.5.4, the newest release on PyPI, wraps every inference call in
-  `parallel_backend("loky", inner_max_num_threads=1)`. Pyodide has no loky, joblib 1.5.3 falls
-  back to threading, and threading rejects that argument. No version pin reaches it.
+  pydeseq2 0.5.4, the newest release on PyPI (https://pypi.org/pypi/pydeseq2/json, uploaded
+  2026-01-23, retrieved 2026-09-26), wraps every inference call in
+  `parallel_backend(self._backend, inner_max_num_threads=1)` (`default_inference.py:96`), where
+  `backend` is a public `DefaultInference` argument that defaults to `"loky"`. Pyodide has no
+  loky, joblib 1.5.3 falls back to threading, and threading rejects that argument. No version pin
+  reaches it; the backend argument does.
 - Loaded versions, Pyodide then CPython: numpy 2.4.6 and 2.5.3, scipy 1.18.0 and 1.18.1,
   scikit-learn 1.8.0 and 1.9.1, pandas 3.0.2 and 3.0.6, pydeseq2 0.5.4 in both.
 - At 20,000 x 200, wheels plus data are 56,385,918 bytes, over the 50,000,000 limit, so that size
@@ -62,14 +71,32 @@ plotly for figures. Stage B, the browser timing, did not run, because no size pa
 - Recorded beside the rule, which never reads it: with a sequential joblib backend registered as
   `in_process`, pydeseq2 fits in Pyodide in 6.6, 38.5 and 44.8 s of Node time. It agrees at
   1,000 x 24 (0 disagreements, max |dLFC| 2.2e-5) and at 20,000 x 200 (0, 2.8e-4) but not at
-  20,000 x 24: 389 disagreements, of which 388 are low-count genes, baseMean 0.27 to 1.34, whose
-  padj is NaN in Pyodide only. Independent filtering chose a different threshold.
+  20,000 x 24: 389 disagreements. 388 are low-count genes, baseMean 0.27 to 1.34, whose padj is
+  NaN in Pyodide only (CPython has none NaN); one of them, g05499, has CPython padj 0.0307. The
+  389th is well expressed: g15471, baseMean 947.8, p 0.01027 against 0.003241, padj 0.0876
+  against 0.0318. The largest p difference is 0.0381 (g01437, baseMean 1208.6). So the fits
+  differ beyond independent filtering. Recomputed on 2026-09-26 from the run's raw results files.
+- The record's `wheels_downloaded_bytes` holds the bytes of unique package files by name, not
+  the bytes downloaded: formulaic, interface_meta and python_dotenv were each fetched twice
+  (41,957,904 bytes of wheels fetched against 41,800,855 recorded), and 785,537 bytes of index
+  pages and `.metadata` files are excluded. The Pyodide runtime is excluded as well:
+  `pyodide.asm.wasm` 9,598,218 and `python_stdlib.zip` 2,545,564 bytes (npm package 314.0.6).
+- The fallback's own budget at 20,000 x 200: 32,226,431 bytes of wheels plus 14,585,063 bytes of
+  input leave 3,188,506 bytes of the 50,000,000 for the precomputed grids, before the runtime.
+- Known gap in the pre-registered rule, left unedited: when both pydeseq2 version rows are
+  missing, the version criterion compares None with None and passes. The record carries both
+  versions, so this verdict is unaffected; a rerun must fix the rule first, in its own commit.
+- Sources, retrieved 2026-09-26: https://registry.npmjs.org/pyodide (314.0.6 integrity; npm
+  `latest` is 314.0.7, published 2026-09-14);
+  https://registry.npmjs.org/@jupyterlite/pyodide-kernel/-/pyodide-kernel-0.8.6.tgz (devDependency
+  `pyodide` 314.0.6); https://pypi.org/pypi/anndata/0.13.4/json (`typing-extensions>=4.16`).
 
 **Consequence.** Phase 5 bundles precomputed DE grids and runs the scipy tests live. Reversing this
 needs a new decision: the backend shim changes the notebook's code path, 20,000 x 24 still
 disagrees under it, its wheels alone take 41.8 MB of the 50 MB budget, and no browser timing
 exists. A numpy change that alters `counts()` fails `tests/test_spike_record.py`; the spike is
-then rerun.
+then rerun. The proof that the rule predates the record needs full history, so it runs locally
+and skips in CI's depth-1 checkout.
 
 ## D-004 — Output root: the laptop profile defaults to the working directory; hpc needs an explicit root
 
