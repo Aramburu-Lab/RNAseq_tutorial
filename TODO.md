@@ -1058,7 +1058,7 @@ Not in Phase 1:
 No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work is in Phases 2–3.
 
 - [x] P1b.0 Doc merge of knowledge/recommendation1, corrected against the fetchngs 1.12.0 code (D-006). Proven by: every anchor matched once; `pixi run preflight` exits 0.
-  - Evidence, 2026-09-26: 29 targeted edits in one pass (TODO.md, CONVENTIONS.md, knowledge/lessons.md, knowledge/decisions.md), each matched exactly once; `pixi run preflight` exits 0 with 98 tests. Not carried from the recommendation, with reasons in the plan: its pre-Phase-1 status, tree and paths; `--merge-runs`; `*.runinfo.tsv`; "ENA can lag" and "minutes, no disk" (unverified). `knowledge/recommendation1/` stays untracked, as Rytis left it.
+  - Evidence, 2026-09-26: 29 targeted edits in one pass (TODO.md, CONVENTIONS.md, knowledge/lessons.md, knowledge/decisions.md), each matched exactly once; `pixi run preflight` exits 0 with 98 tests. Not carried from the recommendation, with reasons in the plan: its pre-Phase-1 status, tree and paths; `--merge-runs`; `*.runinfo.tsv`; "ENA can lag" and "minutes, no disk" (unverified). `knowledge/recommendation1/` was moved out of the repo on 2026-09-27 to `/Users/rytis/Scripts/Pipeline/OLD/RNAseq_tutorial_recommendation1_2026-09-26/`; its CLAUDE.md held pre-Phase-1 rules that Claude Code could load.
 
 - [x] P1b.1 Nextflow and the version pin
   - `[feature.fetch]` (nextflow from bioconda, noarch, with its openjdk) on both platforms, pinned `==` to the lock, in its own `fetch` environment outside the `main` solve-group, so `default`, `laptop`, `prod` and CI are unchanged. `FETCHNGS_VERSION = "1.12.0"` in `src/ctx/gather/fetchngs.py`, the one definition. Anchored `/results/` in `.gitignore`.
@@ -1144,4 +1144,4 @@ No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work 
       - GDC and Xena (Phase 4).
       - fetchngs 1.13.0.
       - Byte-identical rebuilds were checked on this Mac only.
-      - `knowledge/recommendation1/` stays untracked.
+      - `knowledge/recommendation1/` was moved out of the repo on 2026-09-27, to `/Users/rytis/Scripts/Pipeline/OLD/RNAseq_tutorial_recommendation1_2026-09-26/`.
