@@ -627,7 +627,7 @@ it. P1.2 pins every dependency the project adds.
     - hpc memory comes from `SLURM_MEM_PER_CPU` x `SLURM_CPUS_PER_TASK`, or else `SLURM_MEM_PER_NODE`. The names follow sbatch(1) OUTPUT ENVIRONMENT VARIABLES and are tested only with a patched environment; they have not run under a real Slurm job.
     - Deviation: the command decorator itself is written in P1.9 with the first command. P1.6 provides `start()`, which that decorator calls.
 
-- [ ] P1.7 `ctx.viz` style, annotation and the box figure, static PDF and SVG (after P1.3, P1.4)
+- [x] P1.7 `ctx.viz` style, annotation and the box figure, static PDF and SVG (after P1.3, P1.4)
   - `src/ctx/viz/style.py` is the only style config:
     - Data colours in the CLAUDE.md:48 order, first seven only. `#000000` is the light-theme ink and never a category, so the cap is 7.
     - A role map, such as condition level to colour.
@@ -675,6 +675,35 @@ it. P1.2 pins every dependency the project adds.
         - the y-axis label names its unit.
       - Both SVGs: every font-family is in the chain, and there is no `<image>`.
     - Both PDFs are opened once by eye, and that is noted here.
+  - Evidence, 2026-09-26, commit fef1d1a: `tests/test_viz.py` passes 14/14, and preflight passes with 69 tests.
+    - Each mutation below fails the named test and passes on the restored code:
+      - seaborn's default saturation of 0.75: `test_static_files_measured`, because the painted colours leave the palette;
+      - `set_context` applied after the sizes: `test_context_then_sizes` and `test_static_files_measured`;
+      - an opaque white canvas: `test_static_files_measured`;
+      - 8 features forced into one column: `test_no_text_overlap`.
+    - The measurement first found two defects, now fixed:
+      - The page was 84.84 mm, not 85, because pyplot's macOS GUI backend rounds the canvas to whole pixels. Figures are now built with `matplotlib.figure.Figure`.
+      - The box fills were not palette colours, because seaborn desaturates to 75 %. Fixed with `saturation=1`.
+    - Measured on the demo figure (8 genes, 6 vs 6):
+      - fonts: Type0 Helvetica only, no Type 3;
+      - Tf sizes: {12, 14};
+      - line widths: {0, 1, 1.5};
+      - page: 170 mm;
+      - no image XObject, and no painted fill covering the page;
+      - the SVG font-family is the chain plus sans-serif.
+      - Planted genes: BH p = 0.0058 with r = +1 or -1, against the smallest attainable p of 2/924. Nulls: BH p between 0.26 and 0.94.
+    - Eye check: every label overlapped at 85 mm with 8 genes at 14 pt. As this plan requires, the problem is raised here rather than the sizes changed. The sizes stay 14/12 pt, and the layout adapts:
+      - more than 3 features uses the 170 mm column (`SINGLE_COLUMN_MAX_FEATURES`);
+      - labels are compact (`p=0.0058`), and the caption says p is BH-adjusted;
+      - the legend sits above the axes;
+      - the caption wraps to the figure width without splitting hyphenated words.
+      - `test_no_text_overlap` measures every text box after drawing and fails on any overlap or text off the page. The black variant has a transparent canvas and is meant for dark slides.
+    - Deviations:
+      - `box_data` reads the unit from `columns["value"]` rather than taking it as a separate argument, so it is stated once, and the template's 6-argument cap holds.
+      - Added `category_colours()`, which raises above 7 categories.
+      - Added `test_projector_unsafe_is_the_lowest_contrast`.
+      - mypy ignores missing imports for seaborn, plotly and scipy only, because they ship no type information; everything else stays strict.
+    - Not done: Liberation Sans is not installed, so Linux CI falls back to DejaVu Sans, which the chain allows.
 
 - [ ] P1.8 `ctx.report.builder`, the figure HTML and the round trip (after P1.6, P1.7)
   - `src/ctx/report/templates/base.html.j2`, with autoescape on:
