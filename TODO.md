@@ -460,7 +460,7 @@ it. P1.2 pins every dependency the project adds.
       - The source is `git@github.com:Aramburu-Lab/codebase_template.git` rather than `gh:`, because SSH is the access path that was verified. `_src_path` records it.
       - The D-entries are appended after the template's entry skeleton instead of replacing it, which leaves Copier's lines untouched.
 
-- [ ] P1.2 `ctx` package skeleton, gates, and the full lock (after P1.1)
+- [x] P1.2 `ctx` package skeleton, gates, and the full lock (after P1.1)
   - `pyproject.toml`:
     - hatchling build, src layout;
     - distribution `cancer-transcriptomics-teaching`, import package and console script `ctx`;
@@ -494,6 +494,16 @@ it. P1.2 pins every dependency the project adds.
         - not ignored: `tests/fixtures/x.fa`, `x.fq`, `x.gz`, `src/ctx/data/x.py` (the last proves the anchoring).
       - `::test_no_cohort_identifiers`: working-tree files under `src/`, `tests/` and `scripts/`, plus pyproject.toml and pixi.toml, match none of `E-MTAB-\d+|GSE\d+|TCGA-[A-Z]+|PXD\d+|PDC\d+`. The file count is above 0.
     - `pixi run preflight` exits 0.
+  - Evidence, 2026-09-26, commit 782817e:
+    - The lock resolved pydeseq2 0.5.4 (bioconda), typer 0.27.2, jinja2 3.1.6, seaborn 0.13.2, mypy 2.3.1, interrogate 1.7.0, pypdf 6.19.0, hatchling 1.32.4, threadpoolctl 3.7.0 and typing_extensions 4.16.0. The typing_extensions `--locked` trap did not fire. Pinning `==` left every resolved package unchanged.
+    - `pixi install` took 34.09 s wall at 788,873,216 bytes max RSS (`/usr/bin/time -l`). A fresh clone installs `--locked -e default` with exit 0 and passes 16/16.
+    - `pixi run preflight` exits 0. Seven hooks pass, including `mypy-src` and `interrogate-src`.
+    - Guard check: the same `-k zz_no_such_zz` run exits 5 under `--noconftest` and 1 with the guard.
+    - `prod` still cannot install on osx-arm64, exactly as at c5: the template's `tools` feature is linux-64 only.
+    - Deviations:
+      - Two features instead of one: `ctx`, the runtime in `default` and `laptop`, and `ctx-dev`, the gates in `default` only, because the template defines `laptop` as analysis-only.
+      - `test_hooks_run_the_gates_on_src` was added, so a hook whose `files` filter matches nothing fails a test.
+      - The wheel is built with `python -m hatchling build -t wheel -d <dir>`.
 
 - [ ] P1.3 Synthetic count matrix with planted truth (after P1.2)
   - `tests/synth.py::counts(seed=42)` lives in the tests, not the wheel; P1.5 loads it by path. Dimensions are fixed:
