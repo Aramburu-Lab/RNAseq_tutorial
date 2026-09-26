@@ -151,6 +151,8 @@ def render(page: FigurePage | ModulePage) -> str:
         "templates": _json_for_script(plotly_templates()),
         "plotly_js": Markup(plotly.offline.get_plotlyjs()),
     }
+    if isinstance(page, ModulePage) and not any(isinstance(r, FigureBlock) for r in page.results):
+        context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing
     if isinstance(page, FigurePage):
         context["figure"] = _prepare(page.figure, 0)
         return _ENV.get_template("figure.html.j2").render(**context)

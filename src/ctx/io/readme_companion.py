@@ -119,6 +119,7 @@ def _readme(
         f"| Created (UTC) | {created} |",
         f"| Command | `{shlex.join(sys.argv)}` |",
         f"| ctx | {__version__}, {source()} |",
+        f"| Directory | {next(iter(digests)).parent.resolve()} |",
         f"| Rows | {frame.height} |",
         f"| Columns | {frame.width} |",
         f"| Estimated in-memory size (bytes) | {frame.estimated_size()} |",

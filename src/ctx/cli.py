@@ -1,16 +1,66 @@
-"""Command-line entry point: one subcommand per teaching module."""
+"""Command-line entry point: one subcommand per teaching module.
 
-from typing import Annotated
+Nothing heavy is imported here. Each command resolves its runtime profile first (``profiled``),
+and only then imports what it needs, so thread limits hold for every library.
+"""
+
+import functools
+import shlex
+import sys
+from collections.abc import Callable
+from pathlib import Path
+from typing import Annotated, Any
 
 import typer
 
-from ctx import __version__
+from ctx import __version__, runtime
+from ctx.report.builder import ParameterCard
 
 app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
     help="Cancer Transcriptomics Teaching Suite.",
 )
+
+# (meaning, what changes if you move it), per CLI option; the default is read from click.
+CARDS: dict[str, tuple[str, str]] = {
+    "--profile": (
+        "Where this runs: laptop, or hpc inside a Slurm job. Unset means CTX_PROFILE, else laptop.",
+        "hpc takes threads and memory from the Slurm allocation and needs an explicit --root; "
+        "laptop uses at most 4 threads. The results do not change, only the resources.",
+    ),
+    "--root": (
+        "The project directory outputs are written under. Unset means CTX_ROOT, else the "
+        "working directory (laptop only).",
+        "Moves every output. Nothing is ever written inside the installed package.",
+    ),
+}
+_UNCARDED = {"--help", "--version"}
+
+
+def parameter_cards(*commands: Any) -> tuple[ParameterCard, ...]:
+    """One card per CLI option of the given commands, with the default read from click.
+
+    Args:
+        commands: click commands (typer bundles its own click, so typed loosely): the group
+            and the subcommand whose options a page documents.
+
+    Returns:
+        The cards, in the order click lists the options.
+
+    Raises:
+        ValueError: If an option has no entry in ``CARDS``; a parameter without a card
+            is a teaching page that is silently incomplete.
+    """
+    options = [p for c in commands for p in c.params if p.opts and p.opts[0] not in _UNCARDED]
+    if missing := [p.opts[0] for p in options if p.opts[0] not in CARDS]:
+        raise ValueError(f"no parameter card for {missing}")
+    cards = []
+    for option in options:
+        meaning, effect = CARDS[option.opts[0]]
+        default = "unset" if option.default is None else str(option.default)
+        cards.append(ParameterCard(option.opts[0], meaning, default, effect))
+    return tuple(cards)
 
 
 def _print_version(value: bool) -> None:
@@ -29,7 +79,10 @@ def _print_version(value: bool) -> None:
 
 @app.callback()
 def main(
-    version: Annotated[
+    ctx: typer.Context,
+    profile: Annotated[str | None, typer.Option(help=CARDS["--profile"][0])] = None,
+    root: Annotated[Path | None, typer.Option(help=CARDS["--root"][0])] = None,
+    _version: Annotated[
         bool,
         typer.Option(
             "--version", callback=_print_version, is_eager=True, help="Print the version and exit."
@@ -37,3 +90,41 @@ def main(
     ] = False,
 ) -> None:
     """Cancer Transcriptomics Teaching Suite."""
+    # Only stored here: click runs this before a subcommand's --help, so resolving the
+    # profile now would make `ctx setup --help` fail on a login node.
+    ctx.obj = {"profile": profile, "root": root}
+
+
+def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
+    """Resolve the profile and root before the command body, and so before any heavy import.
+
+    Args:
+        command: A subcommand taking ``ctx: typer.Context``.
+
+    Returns:
+        The wrapped command; it finds the settings in ``ctx.obj["settings"]``.
+    """
+
+    @functools.wraps(command)
+    def wrapper(ctx: typer.Context, *args: Any, **kwargs: Any) -> Any:
+        """Store the resolved settings in the context, then run the command."""
+        options = ctx.find_root().obj or {}
+        ctx.obj = {
+            **options,
+            "settings": runtime.start(options.get("profile"), options.get("root")),
+        }
+        return command(ctx, *args, **kwargs)
+
+    return wrapper
+
+
+@app.command()
+@profiled
+def setup(ctx: typer.Context) -> None:
+    """Report this machine: versions, hardware, profile, fonts and colour contrast."""
+    from ctx import setup as module  # noqa: PLC0415 - heavy; imported after the runtime profile
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    written = module.run(ctx.obj["settings"], cards, "ctx " + shlex.join(sys.argv[1:]))
+    for path in written:
+        typer.echo(path)
