@@ -1,0 +1,16 @@
+sample_names_rename_buttons:
+  - sample
+  - experiment_accession
+  - run_accession
+  - sample_accession
+  - experiment_alias
+  - run_alias
+  - sample_alias
+  - experiment_title
+  - sample_title
+  - sample_description"
+sample_names_rename:
+  - ["ERX1234253", "ERX1234253", "ERR1160846", "SAMEA3687214", "qiita_ptid_1263:10317.BLANK.93.3E.r22", "qiita_ppdid_706:10317.BLANK.93.3E.r22", "qiita_sid_10317:10317.BLANK.93.3E.r22", "Illumina HiSeq 2500 sequencing: qiita_ptid_1263:10317.BLANK.93.3E.r22", "10317.BLANK.93.3E.r22", "American Gut control"]
+  - ["SRX10940790", "SRX10940790", "SRR14593545", "SAMN19097423", "PRNP_2765", "577-6_530058_19-037147 Goat_F.ab1", "prp_2765", "AB 3500xL Genetic Analyzer sequencing: prp_2765", "MIGS Eukaryotic sample from Capra hircus", "Keywords: GSC:MIxS MIGS:5.0"]
+  - ["SRX11047067", "SRX11047067", "SRR14709033", "SAMN19373034", "Sebastes_macdonaldi-1", "Sebastes_levis-2.fastq", "S._macdonaldi-1", "AB 5500 Genetic Analyzer sequencing: Sebastes macdonaldi", "Sebastes_macdonaldi-1", "Sebastes_macdonaldi-1"]
+  - ["SRX9626017", "SRX9626017", "SRR13191702", "SAMN16980141", "S.170804.00784", "S.170804.00784_662_L001_R1_001.fastq.gz", "S.170804.00784_662", "Illumina HiSeq 2500 sequencing: Stool Microbiome Features to Discriminate Clostridium Difficile Colonization and Infection", "Metagenome or environmental sample from human gut metagenome", "Metagenome or environmental sample from human gut metagenome"]

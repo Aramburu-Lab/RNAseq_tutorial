@@ -1,0 +1,13 @@
+CUSTOM_SRATOOLSNCBISETTINGS:
+  sratools: 3.0.8
+MULTIQC_MAPPINGS_CONFIG:
+  python: 3.9.5
+SRA_FASTQ_FTP:
+  wget: 1.20.1
+SRA_IDS_TO_RUNINFO:
+  python: 3.9.5
+SRA_RUNINFO_TO_FTP:
+  python: 3.9.5
+Workflow:
+    nf-core/fetchngs: v1.12.0-g8ec2d93
+    Nextflow: 26.04.6

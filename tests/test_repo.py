@@ -15,6 +15,9 @@ PRECEDENCE = (
 )
 RULE_FILES = ("CONVENTIONS.md", "AGENTS.md", "CLAUDE.md")
 COHORT_ID = re.compile(r"E-MTAB-\d+|GSE\d+|TCGA-[A-Z]+|PXD\d+|PDC\d+")
+# D20: nf-core/fetchngs's own test list holds GEO IDs; this one directory is exempt, and
+# tests/test_fetchngs_fixture.py pins its input list to nf-core's byte for byte.
+NF_CORE_FIXTURE = ROOT / "tests" / "fixtures" / "fetchngs" / "metadata_only"
 
 
 def test_layout():
@@ -56,7 +59,7 @@ def test_no_cohort_identifiers():
         p
         for top in ("src", "tests", "scripts")
         for p in (ROOT / top).rglob("*")
-        if p.is_file() and "__pycache__" not in p.parts
+        if p.is_file() and "__pycache__" not in p.parts and not p.is_relative_to(NF_CORE_FIXTURE)
     ] + [ROOT / "pyproject.toml", ROOT / "pixi.toml"]
     assert len(files) > 2
     hits = [
