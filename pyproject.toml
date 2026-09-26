@@ -24,6 +24,11 @@ packages = ["src/ctx"]
 strict = true
 files = ["src"]
 
+# These ship no type information; everything else stays strict.
+[[tool.mypy.overrides]]
+module = ["seaborn", "seaborn.*", "plotly", "plotly.*", "scipy", "scipy.*"]
+ignore_missing_imports = true
+
 [tool.interrogate]
 fail-under = 100
 

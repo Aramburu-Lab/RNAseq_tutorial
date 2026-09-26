@@ -44,7 +44,7 @@ def write_table(
     Returns:
         The data files, then the README.
     """
-    _validate(frame, table_stem, columns, formats)
+    validate(frame, table_stem, columns, formats)
     directory.mkdir(parents=True, exist_ok=True)
     written = []
     for fmt in formats:
@@ -60,13 +60,24 @@ def write_table(
     return [*written, readme]
 
 
-def _validate(
+def validate(
     frame: pl.DataFrame,
     table_stem: str,
     columns: Mapping[str, tuple[str, str]],
     formats: Sequence[str],
 ) -> None:
-    """Raise before anything touches the disk."""
+    """Raise before anything touches the disk.
+
+    Args:
+        frame: The table to publish.
+        table_stem: Its stem.
+        columns: (unit, meaning) per column.
+        formats: Formats to write.
+
+    Raises:
+        ValueError: On an illegal stem, an unknown format, or a column without both a unit
+            and a meaning.
+    """
     if not check(f"{table_stem}.csv"):
         raise ValueError(f"not a legal output stem: {table_stem!r}")
     if not formats or set(formats) - set(FORMATS):

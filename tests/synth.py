@@ -102,3 +102,35 @@ def counts(seed: int = 42, n_genes: int = 1000, donors_per_condition: int = 6) -
     assert draws.max() <= INT32_MAX, "counts exceed Int32; do not downcast"
     matrix = pl.DataFrame(draws.astype(np.int32), schema=sheet["sample"].to_list())
     return Synthetic(matrix.insert_column(0, truth["gene_id"]), sheet, truth)
+
+
+def demo_box(synthetic: Synthetic, planted: int = 3, null: int = 5):  # returns ctx BoxData
+    """A box-plot contract from the type_a samples: planted condition genes, then null genes."""
+    from ctx.viz.box import box_data  # noqa: PLC0415 - keeps synth importable without ctx
+
+    matrix = synthetic.counts.drop("gene_id").to_numpy().astype(float)
+    log_cpm = np.log2(matrix / matrix.sum(axis=0) * 1e6 + 1)
+    truth, sheet = synthetic.truth, synthetic.samples
+    affected = truth.filter(pl.col("lfc_condition_type_a") != 0)["gene_id"].head(planted)
+    nulls = truth.filter(pl.col("gene_class") == "null")["gene_id"].head(null)
+    row = {g: i for i, g in enumerate(truth["gene_id"])}
+    keep = [j for j in range(sheet.height) if sheet["cell_type"][j] == "type_a"]
+    frame = pl.DataFrame(
+        [
+            (g, sheet["condition"][j], sheet["sample"][j], float(log_cpm[row[g], j]))
+            for g in [*affected, *nulls]
+            for j in keep
+        ],
+        schema=["feature", "group", "sample", "value"],
+        orient="row",
+    )
+    columns = {
+        "feature": ("none", "Synthetic gene identifier."),
+        "group": ("none", "Condition of the donor."),
+        "sample": ("none", "Sample identifier: donor and cell type."),
+        "value": ("log2 CPM", "log2 of counts per million plus 1."),
+    }
+    return box_data(
+        frame, columns=columns, feature_label="Gene", value_label="Expression",
+        groups=("control", "case"),
+    )  # fmt: skip
