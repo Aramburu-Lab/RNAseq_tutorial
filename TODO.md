@@ -1082,7 +1082,7 @@ No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work 
     - Network tests, run once:
       - `test_matches_ena` passed twice: every downloaded FASTQ's MD5 equals ENA's `fastq_md5`, and ENA lists no FASTQ for the two sra-tools runs.
       - `test_rebuilds[metadata_only]` passed (25.61 s, with `test_matches_ena`), but only after one correction. Its first run reproduced 12 files byte for byte and differed on `metadata/GSM4907283.runinfo_ftp.tsv`: same rows, another order, because fetchngs does not fix that order (D-006). Metadata files are now compared by rows.
-      - `test_rebuilds[download]`: first attempt stalled in the sra-tools `prefetch` step inside the emulated container. The host reached the same NCBI URL in 0.4 s. The attempt was stopped after about 30 min and retried; the result is recorded under P1b.5.
+      - `test_rebuilds[download]`: the first attempt stalled in the sra-tools `prefetch` step inside the emulated container, while the host reached the same NCBI URL in 0.4 s. It was stopped after about 30 min. The retry passed: 95.65 s real at 526,827,520 bytes max RSS, with the samplesheet, the metadata rows, all six FASTQs (the sra-tools ones included) and the md5 files reproduced.
 
 - [x] P1b.3 `ctx.gather.fetchngs.read(outdir)` (after P1b.2)
   - Order: version check (refuses anything but 1.12.0, and a missing versions file); `samplesheet.csv` as text; `strandedness` present (else "rerun with --nf_core_pipeline rnaseq"); a single `params_*.json` (else refuse: a `-resume` into the same outdir); completeness (every input ID has a `metadata/` file, every run listed there has a row); `id_mappings.csv` agrees with the sheet (same runs, equal values; a check, not a join); FASTQ resolved by file name inside `<outdir>/fastq/`; md5 per file.
@@ -1108,4 +1108,40 @@ No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work 
     - Added beyond the plan: `test_every_subcommand_has_a_card_test`, which fails if a new subcommand has no card case.
     - `--dataset` is required, so its card says `required`.
 
-- [ ] P1b.5 Close: fresh-clone preflight; `/usr/bin/time -l pixi run test` < 5 min; measured table (both fixture runs, test suite, `ctx gather`); review with deviations; lessons; D-006 evidence final.
+- [x] P1b.5 Close: fresh-clone preflight; `/usr/bin/time -l pixi run test` < 5 min; measured table (both fixture runs, test suite, `ctx gather`); review with deviations; lessons; D-006 evidence final.
+  - Evidence, 2026-09-26, on macOS 15 (Darwin 24.6.0), arm64, 14 cores, 24.0 GiB:
+    - Fresh clone: `pixi install --locked` exits 0, and `pixi run preflight` exits 0 with 130 passed, 4 deselected (network) and 7 hooks.
+    - `/usr/bin/time -l pixi run test`: 19.33 s real at 805,191,680 bytes max RSS.
+
+    | Step | Wall | Peak RSS | Measured by |
+    |---|---|---|---|
+    | `pixi install -e fetch` | 19.47 s | 182,861,824 bytes | `/usr/bin/time -l` |
+    | fetchngs `download` fixture build | 76.96 s | 514,637,824 bytes | `/usr/bin/time -l` |
+    | fetchngs `metadata_only` fixture build | 19.73 s | 517,259,264 bytes | `/usr/bin/time -l` |
+    | `test_rebuilds[download]` | 95.65 s | 526,827,520 bytes | `/usr/bin/time -l`, retry |
+    | `test_rebuilds[metadata_only]` + `test_matches_ena` | 25.61 s | 601,964,544 bytes | `/usr/bin/time -l` |
+    | `pixi run test`, 130 tests | 19.33 s | 805,191,680 bytes | `/usr/bin/time -l`, fresh clone |
+    | `ctx gather`, download fixture | 0.341 s | 91.2 MiB in-process, 5.1 MiB largest child | its reproduction block |
+
+  - Review of Phase 1b:
+    - Built:
+      - the recommendation, merged and corrected against the fetchngs 1.12.0 code;
+      - Nextflow in its own `fetch` environment, with the fetchngs version defined once;
+      - two real fetchngs fixtures (123,092 bytes), proven real against ENA and by rebuild;
+      - `ctx.gather.fetchngs.read`, which checks release, strandedness, params, completeness, id_mappings, files by name and md5;
+      - `ctx gather`, which writes the harmonised sheet and its page.
+    - Deviations:
+      - The curation engine moved to Phase 2.
+      - `id_mappings.csv` is checked, not joined, because its columns already sit in the samplesheet.
+      - `--merge-runs` is dropped: gather never rewrites the fetchngs outdir.
+      - The input list must sit inside the outdir, for the completeness check.
+      - Metadata files are compared by rows in the rebuild test.
+      - The fixture script caps resources.
+    - Lessons: one new rule in `knowledge/lessons.md`.
+    - Not done:
+      - The tier-1 accession, its fetchngs run, curation and the Zenodo subset (Phases 2 and 3, after D5).
+      - M1 figures (Phase 2).
+      - GDC and Xena (Phase 4).
+      - fetchngs 1.13.0.
+      - Byte-identical rebuilds were checked on this Mac only.
+      - `knowledge/recommendation1/` stays untracked.
