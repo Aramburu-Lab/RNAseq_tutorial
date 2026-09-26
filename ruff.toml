@@ -1,0 +1,49 @@
+# ADR-12 as configuration rather than prose. Stated as a style guide it survives
+# about two weeks; stated here it survives every commit.
+#
+# Ruff has no file-length rule, so the ADR-12 line ceiling lives in the
+# `check-file-length` prek hook and its ratchet values in .labtemplate.yml.
+# Pinned to ruff 0.16.2 (knowledge/versions.md) — the codes below are verified
+# against that release, not assumed.
+
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "N", "D", "UP", "B", "C90", "PL", "ERA", "ARG", "SIM"]
+# E722 (bare except) is in the E set on purpose and must stay enabled: a bare
+# except in the lab's live plotting code silently replaced apply_style with a
+# no-op, so a missing PYTHONPATH produced unthemed figures and no error at all
+# (knowledge/prior_art.md §2). It catches a real defect; the line-length rule
+# does not.
+ignore = [
+  "D203", # conflicts with D211
+  "D213", # conflicts with D212
+  # ERA001 (commented-out code) is in the ADR-12 set but cannot stay on. Ruff
+  # 0.16.2 exempts a PEP 723 `# /// script` fence from ERA001 and nothing else,
+  # so it reports every line of the `# /// codebase-meta` block that §5.2
+  # requires in every script — measured: 8 findings on a 130-line example. The
+  # choice is between the metadata carrier and this rule, and the carrier is
+  # load-bearing. Commented-out code is caught in review instead; revisit if
+  # ruff gains a configurable fence list.
+  "ERA001",
+]
+
+[lint.pydocstyle]
+# Google style, because students read these. One summary line, then Args /
+# Returns / Raises. Terse — nobody reads an essay.
+convention = "google"
+
+[lint.mccabe]
+max-complexity = 10
+
+[lint.pylint]
+max-statements = 50
+max-branches = 12
+# Ruff defaults to 5. ADR-12's table says 6, so it is set explicitly here or the
+# table is quietly wrong (knowledge/versions.md).
+max-args = 6
+
+[lint.per-file-ignores]
+# Tests document themselves by name and routinely compare against literals.
+"tests/**" = ["D", "PLR2004", "ARG"]

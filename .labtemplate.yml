@@ -1,0 +1,35 @@
+# Template-management state for this project. Build plan §9.1.
+#
+# This file records HOW the project is managed, never WHAT it depends on. The
+# labcore version lives in pixi.toml and nowhere else — a pin duplicated here
+# would drift the moment one of the two is bumped alone.
+
+# Conformance level enforced by `labdocs lint` (§9.1). Raise it in a deliberate
+# commit once the work it demands is actually done; never leave it aspirational.
+#   1 adopted · 2 documented · 3 structured · 4 reproducible · 5 verified
+conformance: 1
+
+# `labdocs audit` skips frozen repos and copier update is never run on them.
+# Set true at manuscript submission, together with the digest pins (§8).
+frozen: false
+
+# Human-readable echo of the template release this project last updated from.
+# `.copier-answers.yml:_commit` remains the authority — this exists so `labdocs
+# audit` can report drift without cloning the template, and so the release
+# survives a squashed or re-inited history where _commit does not.
+template_release: v0.2.0
+
+# Globs exempt from the ADR-11 naming regime. Each entry needs a reason in the
+# commit that adds it, or the exemption list becomes the convention.
+naming_exempt: []
+
+# ADR-12 decomposition ceiling, ratcheted per D-005b. The target is 200 lines;
+# the hard failure starts at 600 because 64-83% of the lab's real files exceed
+# 200 today, and a hook that fails most of a codebase gets disabled in week one,
+# taking the metadata and naming lints down with it. Tighten `fail` toward
+# `warn` as scripts move their reusable halves into labcore — the change is one
+# reviewable line here, and the prek hook reads these values rather than
+# carrying its own copy.
+file_length:
+  warn: 200
+  fail: 600

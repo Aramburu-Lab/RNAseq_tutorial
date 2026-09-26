@@ -1,0 +1,19 @@
+# The single answer to "what format should this be?", so it is never re-decided
+# per script. `labcore.io.write_table` reads this file and refuses a write whose
+# extension contradicts it unless passed `override=True`; `labdocs lint` flags
+# any output path in a codebase-meta block that disagrees.
+
+tabular = "parquet"             # csv/tsv only at project boundaries
+tabular_interchange = "tsv"     # what leaves the project for collaborators
+matrix = "h5ad"
+figure_static = "pdf"           # vector, always
+figure_interactive = "html"
+report = "html"
+compression = "zstd"            # 1.1 GB of TSV -> 54 MB, measured in this lab
+
+# Plotly HTML must be genuinely self-contained. `include_plotlyjs="cdn"` is
+# FORBIDDEN: every "self-contained" deliverable in the lab written that way is
+# blank offline, and a figure produced on a compute node with no egress never
+# renders at all. Vendor one plotly.min.js next to the figures, or inline it —
+# do not reach for the CDN because the file is smaller.
+plotly_include_js = "vendor"

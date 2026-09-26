@@ -1,0 +1,218 @@
+name: containers
+
+# The release container path (D-004). Docker Hub dev images are built on the laptop by
+# containers/build.sh and never appear here; this workflow only produces the artefacts that may be
+# cited in a manuscript.
+#
+# build -> push OCI to GHCR -> apptainer build --reproducible -> apptainer push oras:// -> verify
+# the ORAS artefact is byte-stable -> commit containers/digests.lock.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver to publish, e.g. 0.1.0
+        required: true
+
+permissions:
+  contents: write # the digests.lock commit
+  packages: write # GHCR
+
+env:
+  IMAGE_NAME: cancer_transcriptomics_teaching-analysis
+  GHCR_REPO: ghcr.io/aramburu-lab/cancer_transcriptomics_teaching-analysis
+  SIF_REPO: ghcr.io/aramburu-lab/cancer_transcriptomics_teaching-analysis-sif
+  # knowledge/versions.md. Nothing else in this file hardcodes a version.
+  APPTAINER_VERSION: "1.5.3"
+
+jobs:
+  oci:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.meta.outputs.version }}
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: meta
+        run: |
+          v="${{ inputs.version || github.ref_name }}"
+          v="${v#v}"
+          case "$v" in
+            [0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "::error::'$v' is not semver; digests.lock entries are keyed on it"; exit 1 ;;
+          esac
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        run: echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      # The docker-container driver, not the default one: the default builder cannot --push, and
+      # discovering that after a twenty-minute build is a waste of a runner.
+      - name: Builder
+        run: docker buildx create --use --name ci --driver docker-container
+
+      # --load first so the smoke test runs before anything reaches a registry. The runner is
+      # already amd64, so unlike the laptop path there is no architecture gate to enforce here —
+      # the second build below is a cache hit.
+      - name: Build
+        run: |
+          docker buildx build --load \
+            -f containers/analysis.Dockerfile \
+            -t "$GHCR_REPO:${{ steps.meta.outputs.version }}" \
+            --build-arg "VCS_REF=$(git rev-parse --short HEAD)" \
+            --build-arg "IMAGE_VERSION=${{ steps.meta.outputs.version }}" \
+            .
+
+      # bash and ps are Nextflow's hard container requirements. Catching a missing one here beats a
+      # cryptic process-metrics error inside a pipeline run three weeks later.
+      - name: Smoke test
+        run: |
+          ref="$GHCR_REPO:${{ steps.meta.outputs.version }}"
+          docker run --rm --entrypoint /bin/bash "$ref" -lc 'bash --version | head -1'
+          docker run --rm --entrypoint /bin/bash "$ref" -lc 'ps --version'
+          size=$(docker image inspect --format '{{.Size}}' "$ref")
+          echo "size: $((size / 1048576)) MB"
+          # 1.5 GB, set 2026-08-12. The build plan's 500 MB was written for a
+          # single-tool image and no scientific stack reaches it: the reference
+          # image's floor is polars' runtime 208 MB, duckdb 59, scipy 57, plotly 42.
+          # It is a REGRESSION detector, not a target — a build near the ceiling has
+          # usually pulled in a GUI toolkit (matplotlib, not matplotlib-base) or
+          # Arrow's dataset/S3 layers (pyarrow, not pyarrow-core).
+          # This FAILS rather than warns: a warning nobody reads is not a limit.
+          MAX_BYTES=1500000000
+          [ "$size" -lt "$MAX_BYTES" ] || {
+            echo "::error::image is $(( size / 1000000 )) MB, over the $(( MAX_BYTES / 1000000 )) MB ceiling"
+            exit 1
+          }
+
+      - id: push
+        name: Push the OCI image
+        run: |
+          ref="$GHCR_REPO:${{ steps.meta.outputs.version }}"
+          docker buildx build --push \
+            -f containers/analysis.Dockerfile -t "$ref" \
+            --build-arg "VCS_REF=$(git rev-parse --short HEAD)" \
+            --build-arg "IMAGE_VERSION=${{ steps.meta.outputs.version }}" \
+            .
+          digest=$(docker buildx imagetools inspect "$ref" --format '{{.Manifest.Digest}}')
+          case "$digest" in sha256:*) ;; *) echo "::error::no manifest digest for $ref"; exit 1 ;; esac
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+  sif:
+    needs: oci
+    runs-on: ubuntu-latest
+    outputs:
+      sha256: ${{ steps.build.outputs.sha256 }}
+      apptainer: ${{ steps.install.outputs.version }}
+    steps:
+      - id: install
+        name: Install apptainer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq software-properties-common
+          sudo add-apt-repository -y ppa:apptainer/ppa
+          sudo apt-get update -qq
+          # The PPA usually carries only the current release. Pinning is attempted, and when the pin
+          # is gone the actual version is recorded in digests.lock rather than assumed — a silent
+          # substitution is what would make the lockfile lie.
+          sudo apt-get install -y -qq "apptainer=${APPTAINER_VERSION}*" || {
+            echo "::warning::apptainer ${APPTAINER_VERSION} is not in the PPA; installing the current release. Update knowledge/versions.md."
+            sudo apt-get install -y -qq apptainer
+          }
+          v=$(apptainer --version | awk '{print $NF}')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      # Converting from the DIGEST, not the tag, is what makes the .sif correspond to exactly the
+      # bytes just pushed even if the tag moves a minute later.
+      - id: build
+        name: Build and push the .sif
+        run: |
+          sif="${IMAGE_NAME}_${{ needs.oci.outputs.version }}.sif"
+          apptainer build --reproducible "$sif" "docker://${GHCR_REPO}@${{ needs.oci.outputs.digest }}"
+          apptainer push "$sif" "oras://${SIF_REPO}:${{ needs.oci.outputs.version }}"
+          echo "sha256=sha256:$(sha256sum "$sif" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
+
+  # ADR-7's central claim, and the entire reason this is a workflow rather than a local script:
+  # `apptainer pull oras://` returns the same bytes every time, so a .sif can be pinned by checksum
+  # in a methods section. It has never been verified, and it CANNOT be verified on macOS, where
+  # there is no apptainer at all (D-003). This job is where it gets proven.
+  #
+  # IF THIS JOB FAILS, ADR-7 IS WRONG. The reproducibility argument does not hold, `digests.lock`
+  # records a number that nobody can reproduce, and the whole distribution story has to be rethought
+  # — probably by shipping the OCI digest as the only citable identity. Do not "fix" this job by
+  # relaxing the comparison.
+  verify-byte-identity:
+    needs: [oci, sif]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install apptainer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq software-properties-common
+          sudo add-apt-repository -y ppa:apptainer/ppa
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq "apptainer=${APPTAINER_VERSION}*" || sudo apt-get install -y -qq apptainer
+
+      # Separate cache directories AND --disable-cache. Without both, the second pull is served from
+      # the first one's cache, the two files are the same file, and the test passes while proving
+      # nothing whatsoever.
+      - name: Pull the same artefact twice
+        run: |
+          uri="oras://${SIF_REPO}:${{ needs.oci.outputs.version }}"
+          for n in 1 2; do
+            mkdir -p "pull$n"
+            APPTAINER_CACHEDIR="$PWD/cache$n" apptainer pull --disable-cache "pull$n/img.sif" "$uri"
+          done
+          a=$(sha256sum pull1/img.sif | awk '{print $1}')
+          b=$(sha256sum pull2/img.sif | awk '{print $1}')
+          echo "pull 1: $a"
+          echo "pull 2: $b"
+          if [ "$a" != "$b" ]; then
+            echo "::error::two pulls of $uri differ. ADR-7's byte-identity claim is FALSE and the distribution story must be rethought."
+            exit 1
+          fi
+          built="${{ needs.sif.outputs.sha256 }}"
+          if [ "sha256:$a" != "$built" ]; then
+            echo "::warning::pulls agree with each other but not with the built file ($built) — the registry is re-wrapping the artefact, so cite the pulled checksum, not the build log."
+          fi
+          echo "byte-identical across pulls: sha256:$a" >> "$GITHUB_STEP_SUMMARY"
+
+  lock:
+    needs: [oci, sif, verify-byte-identity]
+    runs-on: ubuntu-latest
+    steps:
+      # The tag is a detached HEAD; a commit made there would be unreachable. The lockfile belongs
+      # on the default branch, which is where anyone reading it will look.
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Write containers/digests.lock
+        run: |
+          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          ref=$(git rev-parse --short HEAD)
+          v="${{ needs.oci.outputs.version }}"
+          {
+            printf '# Published container digests. Generated by .github/workflows/containers.yml.\n'
+            printf '# GHCR and ORAS only (D-004): a docker.io/ dev tag must never appear here.\n'
+            printf '# Pin by digest, never by tag, in anything archived with a manuscript.\n'
+            printf '# digest: for oci, the registry manifest digest; for sif, the sha256 of the .sif\n'
+            printf '#         file, verified byte-identical across two `apptainer pull oras://`.\n'
+            printf '# built with apptainer ${{ needs.sif.outputs.apptainer }}\n'
+            printf '#\n'
+            printf '# kind\tversion\treference\tdigest\tbuilt_utc\tvcs_ref\n'
+            printf 'oci\t%s\t%s\t%s\t%s\t%s\n' "$v" "$GHCR_REPO" "${{ needs.oci.outputs.digest }}" "$now" "$ref"
+            printf 'sif\t%s\t%s\t%s\t%s\t%s\n' "$v" "oras://$SIF_REPO" "${{ needs.sif.outputs.sha256 }}" "$now" "$ref"
+          } > containers/digests.lock
+
+      - name: Commit it
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add containers/digests.lock
+          git diff --cached --quiet && exit 0
+          git commit -qm "containers: record digests for ${{ needs.oci.outputs.version }}"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
+

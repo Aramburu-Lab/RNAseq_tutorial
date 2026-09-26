@@ -1,0 +1,50 @@
+# Hooks are run by prek 0.4.13, not pre-commit — nf-core/tools 4.0.0 switched and
+# the lab followed. Install with `prek install`; run everything with `prek run -a`.
+#
+# prek reads `prek.toml` as well as this file. If a hook here ever looks like it
+# is being ignored or duplicated, check for a prek.toml before debugging YAML.
+#
+# ADR-10 calls enforcement "the whole point": without these hooks
+# explain_codebase.html decays into exactly the stale wiki this system exists to
+# prevent, and nothing tells you until someone reads a report that lies.
+
+repos:
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.2
+    hooks:
+      # `ruff-check`, not the bare `ruff` id — that one is a legacy alias and
+      # prek says so on every run.
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      # Both hooks route through pixi when the project has it, so they use the SAME
+      # labcore that `pixi run docs` and CI use. A bare `labdocs` takes whatever is
+      # on PATH, and when that differs from the pinned one the two render slightly
+      # different reports — which surfaces as `render --check` calling freshly
+      # generated artifacts stale, a version mismatch wearing a staleness costume.
+      - id: labdocs-lint
+        name: labdocs lint
+        entry: sh -c 'if command -v pixi >/dev/null && [ -f pixi.toml ]; then exec pixi run labdocs lint; else exec labdocs lint; fi'
+        language: system
+        pass_filenames: false
+
+      - id: labdocs-render
+        name: labdocs render (staleness check)
+        entry: sh -c 'if command -v pixi >/dev/null && [ -f pixi.toml ]; then exec pixi run labdocs render --check; else exec labdocs render --check; fi'
+        language: system
+        pass_filenames: false
+
+      # The ADR-12 line ceiling. Ruff has no file-length rule, and the two
+      # thresholds live in .labtemplate.yml rather than here so that tightening
+      # the ratchet (D-005b) is one reviewable line in one file instead of a
+      # config edit that silently disagrees with the declared conformance state.
+      - id: check-file-length
+        name: check file length (ratchet from .labtemplate.yml)
+        language: system
+        files: '^(scripts|bin)/.*\.(py|sh|bash|R|r|nf|rs)$'
+        entry: |
+          bash -c 'w=$(sed -n "s/^[[:space:]]*warn:[[:space:]]*//p" .labtemplate.yml); f=$(sed -n "s/^[[:space:]]*fail:[[:space:]]*//p" .labtemplate.yml); rc=0; for p in "$@"; do n=$(awk "END{print NR}" "$p"); if [ "$n" -gt "$f" ]; then echo "$p:1: ERROR $n lines > $f - extract a helper (ADR-12)"; rc=1; elif [ "$n" -gt "$w" ]; then echo "$p:1: warning $n lines > $w target"; fi; done; exit $rc' --

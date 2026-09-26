@@ -1,0 +1,50 @@
+# CREDENTIALS — first, because this is the one that cannot be undone.
+# bin/submit_nextflow.sh sources bin/secrets.env, which holds TOWER_ACCESS_TOKEN.
+# A token in git history is a token to rotate, so it never goes in.
+bin/secrets.env
+.env
+*.pem
+*.key
+
+# Environments and caches
+.pixi/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.nox/
+
+# Nextflow runtime
+.nextflow/
+.nextflow.log*
+work/
+
+# Analysis outputs. Kept out of git deliberately: `outputs/` is regenerable from
+# scripts + inputs, and a repo that carries it stops being clonable. Deliverables
+# ARE tracked — they are what leaves the project.
+outputs/**
+!outputs/**/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# Data, by extension as well as by directory. A dogfooded repo had 2.4 GB of loose
+# .parquet/.tsv at its top level, which every directory-based rule missed and which
+# went straight into the first commit.
+*.parquet
+*.h5ad
+*.bam
+*.bai
+*.cram
+*.fa
+*.fasta
+*.fq
+*.fastq
+*.gz
+*.zst
+*.sif
+
+# Generation-time only; the scaffold deletes itself after it runs (D-001).
+.copier-scaffold-nfcore.sh
+
+.DS_Store

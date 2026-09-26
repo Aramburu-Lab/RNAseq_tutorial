@@ -1,0 +1,22 @@
+# Every root this project reads or writes, resolved by `labcore.paths`.
+#
+# Resolution order is: a literal `path` here -> $LABCORE_<NAME>_ROOT -> hard
+# failure. A literal always wins, so drop the `path` line for a root that should
+# be site-supplied rather than committed. There is deliberately no guessed
+# default: a fallback would resolve to a plausible-but-wrong directory on the
+# cluster and the run would write somewhere nobody looks.
+#
+# sbatch cannot source TOML, so the bash view is GENERATED from this file:
+#   python -c "from pathlib import Path; from labcore.paths import load_paths, write_site_env; \
+#              write_site_env(load_paths('.'), Path('settings/site.env'))"
+# One direction only. Never hand-edit site.env — regeneration overwrites it.
+
+[roots]
+
+# Laptop-only project: no HPC2N allocation was given at generation time. Point
+# `data` at wherever the raw data actually lives — it does not belong in the repo.
+data = "data"
+outputs = "outputs"
+scratch = "/tmp"
+
+deliverables = "deliverables"

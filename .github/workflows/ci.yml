@@ -1,0 +1,77 @@
+name: ci
+
+# Lint and test Cancer Transcriptomics Teaching Suite. The hooks in .pre-commit-config.yaml are the same checks; they
+# run here as well because a hook can be skipped with `--no-verify` and a CI job cannot.
+on:
+  push:
+    branches: [main, master, dev]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # From knowledge/versions.md. Nothing else in this file hardcodes a version.
+  PIXI_VERSION: "v0.76.2"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install pixi
+        run: |
+          curl -fsSL https://pixi.sh/install.sh | bash
+          echo "$HOME/.pixi/bin" >> "$GITHUB_PATH"
+
+      # labcore is a git dependency (ADR-4, Channel 3). While the repo is private an unauthenticated
+      # clone sits at a credential prompt, so the job hangs until the runner times out instead of
+      # failing in ten seconds with a readable error.
+      - name: Authenticate git for the labcore dependency
+        env:
+          GH_TOKEN: ${{ secrets.LABCORE_TOKEN || github.token }}
+        run: |
+          git config --global url."https://x-access-token:${GH_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+      # --locked, never --frozen: --locked aborts when pixi.lock is stale relative to pixi.toml,
+      # --frozen installs the stale lock silently. A project generated without pixi on the machine
+      # has no lock at all yet, and that is a different, non-fatal state.
+      - name: Install the environment
+        run: |
+          if [ -f pixi.lock ]; then
+            pixi install --locked -e default
+          else
+            echo "::warning::no pixi.lock committed — resolving fresh. Run 'pixi install' and commit the lock."
+            pixi install -e default
+          fi
+
+      # `!cancelled()` on every check below, so one run reports every problem instead of only the
+      # first. The job still fails; it just fails informatively.
+
+      - name: ruff
+        if: ${{ !cancelled() }}
+        run: pixi run lint
+
+      - name: prek
+        if: ${{ !cancelled() }}
+        run: pixi run prek run --all-files --show-diff-on-failure
+
+      - name: labdocs lint
+        if: ${{ !cancelled() }}
+        run: pixi run labdocs lint
+
+      # The staleness guard. Without it explain_codebase.html drifts from the scripts it claims to
+      # describe and becomes the stale wiki this whole system exists to replace (ADR-10).
+      - name: labdocs render --check
+        if: ${{ !cancelled() }}
+        run: pixi run labdocs render --check
+
+      - name: pytest
+        if: ${{ !cancelled() }}
+        run: pixi run test

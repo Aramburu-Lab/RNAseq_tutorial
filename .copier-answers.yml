@@ -1,0 +1,14 @@
+_commit: v0.9.10
+_src_path: git@github.com:Aramburu-Lab/codebase_template.git
+author_email: rytis.stakaitis@umu.se
+author_name: Rytis Stakaitis
+flavour: analysis
+github_org: aramburu-lab
+hpc2n_compute_account: ''
+hpc2n_storage_project: ''
+languages:
+- python
+- bash
+license: MIT
+project_name: Cancer Transcriptomics Teaching Suite
+project_slug: cancer_transcriptomics_teaching

@@ -1,0 +1,81 @@
+# Project-level overrides to the `labcore.viz` defaults. Every key here already
+# exists in labcore with a house default; this file is where THIS project
+# disagrees, and the diff is the documentation.
+#
+# Honest scope note: labcore.viz 0.1.0 takes its theme, scale and font as call
+# arguments and does not yet read this file. Treat it as the declared override
+# surface — set it now, keep one vocabulary, and it becomes load-bearing when
+# viz grows a config loader. Do not fork a second key naming scheme meanwhile.
+
+# Written filenames carry _white / _black (D-005a); light / dark stay the
+# internal argument spelling. Changing these orphans every figure the lab has
+# produced, so they are here to be read, not edited.
+[suffix]
+light = "_white"
+dark = "_black"
+
+[defaults]
+themes = ["light", "dark"]
+# Output intent, not a font size. `paper` is a journal multi-panel where 8 pt
+# body is normal; `deck` is a projector. One base size cannot serve both.
+scale = "paper"
+font = "sans"
+# Interactive HTML is opt-in per D-005d — pass interactive=True to save_figure
+# for the figures that genuinely benefit. Most do not: broken axes and twin y
+# axes have no Plotly equivalent.
+interactive = false
+# Non-negotiable in this lab: a figure must blend onto whatever it is dropped
+# onto. An opaque canvas renders as a grey frame on a dark slide.
+transparent = true
+# Keeps PDF text editable in Illustrator instead of collapsing it to outlines.
+# A "vector PDF always" policy that drops this is a regression.
+pdf_fonttype = 42
+
+# Colours keyed by ROLE, not by position in a flat palette. A role survives a
+# theme switch; palette[3] does not, which is how figures end up disagreeing
+# with their own legends. Ported key-for-key from the schema that has been in
+# production use (knowledge/prior_art.md §3).
+[colors.light]
+text = "#000000"
+edge = "#000000"
+bar = "#0072B2"
+reference = "#0072B2"
+target = "#D55E00"
+secondary_axis = "#C0392B"
+grid = "#F0F0F0"
+
+[colors.dark]
+text = "#F2F2F2"
+edge = "#EEEEEE"
+bar = "#56B4E9"
+reference = "#56B4E9"
+target = "#E69F00"
+secondary_axis = "#FF6B5E"
+grid = "#2A2E36"
+
+# Categorical ramp for anything with more groups than a contrast has arms.
+# Okabe-Ito, colourblind-safe, same order in both themes.
+[palette]
+categorical = "okabe-ito"
+heatmap = "viridis"
+
+# Text roles, one table driving both the figure fonts and settings/report.css.
+# Same names in both places is what makes the figures and the HTML report look
+# like one system rather than three.
+[typography.paper]
+suptitle = 11.0
+panel_title = 10.0
+axis_label = 8.0
+annot = 7.0
+caption = 7.0
+tick = 6.0
+value = 6.0
+
+[typography.deck]
+suptitle = 19.0
+panel_title = 18.0
+axis_label = 16.0
+annot = 14.0
+caption = 13.0
+tick = 14.0
+value = 13.0

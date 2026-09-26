@@ -1,0 +1,113 @@
+[workspace]
+name = "cancer_transcriptomics_teaching"
+description = "Cancer Transcriptomics Teaching Suite"
+authors = ["Rytis Stakaitis <rytis.stakaitis@umu.se>"]
+channels = ["conda-forge", "bioconda"]
+# An old pixi accepts `pixi lock` and then rejects the lock it just wrote under
+# `--locked`, which looks like a corrupt lockfile rather than a stale tool.
+# Declaring the floor turns that into one clear message. Matches
+# knowledge/versions.md.
+requires-pixi = ">=0.76.1,<1.0"
+platforms = [{ platform = "linux-64", name = "linux-64-glibc-2-35", glibc = "2.35" }, "osx-arm64"]
+
+# glibc is pinned so a `GLIBCXX_... not found` crash on a Kebnekaise compute node
+# becomes a resolver error on the laptop instead. 2.35 is VERIFIED on Kebnekaise
+# (2026-08-12): `ldd (Ubuntu GLIBC 2.35-0ubuntu3.14) 2.35` on Ubuntu 22.04.5.
+#
+# Declared as a RICH PLATFORM, not the deprecated `[system-requirements]` table. The two are the
+# same thing: `pixi info` on the old form reported `linux-64-glibc-2-35 (glibc=2.35)`, so pixi was
+# already translating the table into a named platform internally. The name here is that generated
+# name verbatim, which is why the migration was a no-op — `Target platforms` reads identically
+# before and after.
+#
+# The `name` is what makes this work alongside per-feature `platforms`. Without it, a feature
+# listing "linux-64" as a string does not match a workspace platform declared as a table, and pixi
+# fails with `feature 'analysis' references platform 'linux-64' which is not declared in the
+# workspace`. Features must reference the NAME, not the underlying platform.
+#
+# That is not obvious from the deprecation warning, whose example omits `name` entirely
+# (`help: e.g. platforms = [{ platform = "linux-64", cuda = "12" }]`). Following it literally is
+# what made this look impossible; prefix-dev/pixi#6814 has the exchange and the correction.
+
+# Platforms are split per feature rather than declared once, because bioconda's
+# osx-arm64 coverage is partial: a single global list makes the laptop
+# environment unsolvable the first time an aligner is added (build plan §5.4).
+
+[feature.analysis]
+platforms = ["linux-64-glibc-2-35", "osx-arm64"]
+
+[feature.analysis.dependencies]
+python = "3.12.*"
+# Pinned conda-side on purpose. Without it `pixi install --locked` fails with
+# "'typing_extensions' is locked as a conda package but only requested by pypi
+# dependencies": the solver takes it from conda, then the lock check sees it
+# requested only through the pypi half (labcore's transitive deps) and calls the
+# lock stale. `pixi install` succeeds and `--locked` fails, so the lock assertion
+# is lost — which is exactly the check that stops a project shipping a resolution
+# nobody tested. Naming it explicitly makes both halves agree.
+typing_extensions = "*"
+polars = ">=1.43,<2"
+# pandas and duckdb are not optional. ~70% of the lab's existing table code is
+# pandas, and every out-of-core join is DuckDB; without them labcore.write_table
+# is uncallable from most existing scripts (knowledge/prior_art.md verdict 4).
+pandas = ">=2"
+duckdb = ">=1.0"
+pyarrow = ">=16"
+matplotlib = ">=3.8"
+plotly = ">=5.20"
+scipy = ">=1.11"
+
+[feature.analysis.pypi-dependencies]
+# Channel 3 (ADR-4). Shared logic arrives as a version bump here, never as a
+# file copied into this repo. This tag is THE labcore pin for this project —
+# .labtemplate.yml must not carry a second one.
+labcore = { git = "https://github.com/aramburu-lab/labcore.git", tag = "v0.6.5", extras = ["all"] }
+
+# Anything that only ever runs on the cluster: aligners, callers, samtools.
+# Keeping it linux-64 lets the laptop environment stay solvable.
+[feature.tools]
+platforms = ["linux-64-glibc-2-35"]
+
+[feature.tools.dependencies]
+
+[feature.dev]
+platforms = ["linux-64-glibc-2-35", "osx-arm64"]
+
+[feature.dev.dependencies]
+pytest = ">=8"
+
+[feature.dev.pypi-dependencies]
+ruff = "==0.16.2"
+prek = "==0.4.13"
+
+[environments]
+# solve-group keeps laptop and prod on identical versions of everything they
+# share, so what you test is what ships.
+default = { features = ["analysis", "dev"], solve-group = "main" }
+laptop = { features = ["analysis"], solve-group = "main" }
+prod = { features = ["analysis", "tools"], solve-group = "main" }
+
+[tasks]
+# pytest exits 5 when it collects nothing, which is the state of every project
+# on day one. Treat only that code as success; every other failure still fails.
+test = "sh -c 'pytest -q; c=$?; [ $c -eq 5 ] && exit 0; exit $c'"
+lint = "ruff check scripts"
+docs = "labdocs render && labdocs api"
+check = "labdocs lint && labdocs render --check"
+
+# Everything CI runs, in one command. Run this before every push.
+#
+# CI is not a discovery mechanism: each failure arrives one push at a time, and every red run
+# emails whoever owns the repo. Migrating three sibling repos produced ~15 red pushes, all five
+# causes reproducible locally in seconds — ruff check, ruff format, the file-length ratchet, stale
+# generated artifacts, and dependencies the environment was missing.
+#
+# `hooks` is not redundant with `lint`/`check`. The file-length ratchet is a prek hook with an
+# inline `language: system` entry and no standalone command, so `prek` is the ONLY way to reach
+# it. Leaving it out is what let fragpipe-launcher push nine consecutive red runs while every
+# local gate passed — including this task, which claimed to run everything CI runs and did not.
+#
+# `prek` includes ruff-format, which REWRITES rather than reports. Preflight can therefore leave
+# the tree formatted; `git diff` after a run is the tell, and committing it is the fix.
+hooks = "prek run --all-files --show-diff-on-failure"
+preflight = { depends-on = ["lint", "check", "test", "hooks"], cmd = "ruff format --check ." }
