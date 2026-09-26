@@ -60,8 +60,8 @@ FASTA = Source(
     "974f97ac8ef7ffae971b63b47608feda327403be40c27e391ee4a1a78b800df5",
 )
 CHROM = "chr22"
-# 1-based closed. Both edges fall between genes, so no transcript is cut, and the window holds
-# SF3A1 and RNF215 (-) overlapping CCDC157 and SEC14L2 (+): strandedness decides those reads.
+# 1-based closed. Both edges fall between genes, so no transcript is cut, and genes inside share
+# exons on opposite strands (the README lists them): strandedness decides those reads.
 WINDOW_START, WINDOW_END = 30_330_001, 30_431_000
 OFFSET = WINDOW_START - 1
 CONTIG = "chr22_slice"
@@ -122,13 +122,13 @@ def fetch(source: Source, cache: Path) -> Path:
         Path of the verified file.
 
     Raises:
-        ValueError: If the file matches either the publisher's checksum or the SHA-256 not.
+        ValueError: If the file fails the publisher's checksum or the pinned SHA-256.
     """
     path = cache / source.url.rsplit("/", 1)[1]
     if not path.exists():
         cache.mkdir(parents=True, exist_ok=True)
         partial = path.with_name(path.name + ".part")
-        urllib.request.urlretrieve(source.url, partial)  # noqa: S310 - pinned https URL
+        urllib.request.urlretrieve(source.url, partial)
         partial.rename(path)
     found = digest(path, "md5") if source.algorithm == "md5" else bsd_sum(path)
     if found != source.publisher or digest(path, "sha256") != source.sha256:
