@@ -3,6 +3,8 @@
 Canonical rules for any coding agent here. `CLAUDE.md` imports this file, so there is one
 rule set and not two. Read it before touching a file.
 
+`CONVENTIONS.md` holds this project's own rules. Where `CONVENTIONS.md` conflicts with `AGENTS.md`, `CONVENTIONS.md` wins; each divergence is a D-entry in `knowledge/decisions.md`.
+
 ## Commands you cannot guess
 
 ```bash
@@ -84,7 +86,3 @@ helper. Comments say **why**, never what; no banner comments; no bare
 
 What no linter checks, and so the first review question: **is the name intuitive?**
 `unmapped_reads` not `df2`; `drop_low_quality_cells()` not `process()`.
-
-## This project
-
-`CONVENTIONS.md` holds this project's own rules. Where `CONVENTIONS.md` conflicts with `AGENTS.md`, `CONVENTIONS.md` wins; each divergence is a D-entry in `knowledge/decisions.md`.
