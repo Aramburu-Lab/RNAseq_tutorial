@@ -65,11 +65,11 @@ def gtf(path):
     return parsed(line.split("\t") for line in lines if not line.startswith("#"))
 
 
-def independent_splice(sequence, rows):
-    """Concatenate exons in genomic order, then reverse-complement the whole minus-strand join."""
+def independent_splice(sequence, rows, kind="exon"):
+    """Concatenate one feature type in genomic order, reverse-complementing minus-strand joins."""
     exons = {}
     for _, feature, low, high, strand, attrs in rows:
-        if feature == "exon":
+        if feature == kind:
             exons.setdefault(attrs["transcript_id"], []).append((low, high, strand))
     out = {}
     for transcript, parts in exons.items():
@@ -137,6 +137,23 @@ def test_gtf_fasta_consistent(script):
 
     transcripts = fasta(FIXTURE / "transcripts.fa")
     assert independent_splice(sequence, rows) == transcripts
+    # Anchor to biology, not to the builder: a wrong rebase offset keeps the three files
+    # consistent with each other but moves every codon off its ATG and stop.
+    starts = independent_splice(sequence, rows, "start_codon")
+    stops = independent_splice(sequence, rows, "stop_codon")
+    assert starts and stops
+    assert set(starts.values()) == {"ATG"}
+    assert set(stops.values()) <= {"TAA", "TAG", "TGA"}
+    exon_attrs = {r[5]["transcript_id"]: r[5] for r in rows if r[1] == "exon"}
+    for line in (FIXTURE / "transcripts.fa").read_text().splitlines():
+        if line.startswith(">"):
+            name, *fields = line[1:].split()
+            header = dict(f.split("=", 1) for f in fields)
+            source = exon_attrs[name]
+            assert (header["gene_id"], header["gene_name"]) == (
+                source["gene_id"],
+                source["gene_name"],
+            )
     exons_per = Counter((r[5]["transcript_id"], r[4]) for r in rows if r[1] == "exon")
     for strand in "+-":
         assert any(n > 1 for (_, s), n in exons_per.items() if s == strand), (
@@ -186,7 +203,8 @@ def test_reads_known_truth(script):
     for (name1, seq1, plus1, qual1), (name2, seq2, plus2, qual2) in zip(read1, read2, strict=True):
         assert name1.endswith("/1") and name2.endswith("/2") and name1[:-2] == name2[:-2]
         assert plus1 == plus2 == "+"
-        assert len(seq1) == len(qual1) == len(seq2) == len(qual2) == script.READ_LENGTH
+        assert len(seq1) == len(seq2) == script.READ_LENGTH
+        assert qual1 == qual2 == script.QUALITY * script.READ_LENGTH
         _, transcript, start, length = name1[:-2].split(":")
         start, length = int(start), int(length)
         assert script.FRAGMENT_MIN <= length <= script.FRAGMENT_MAX
@@ -217,7 +235,7 @@ def test_regenerate_byte_identical(script, tmp_path):
     shutil.copyfile(FIXTURE / "transcripts.fa", source)
     out = tmp_path / "out"
     out.mkdir()
-    script.reads(source, script.N_PAIRS, seed=script.SEED, out_dir=out)
+    script.reads(source, script.N_PAIRS, out_dir=out)  # the default seed is the committed one
     produced = {p.name: sha256(p) for p in out.iterdir()}
     assert sorted(produced) == sorted(READS)
     assert produced == {name: manifest()[name] for name in READS}

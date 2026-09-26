@@ -131,8 +131,10 @@ def fetch(source: Source, cache: Path) -> Path:
         urllib.request.urlretrieve(source.url, partial)
         partial.rename(path)
     found = digest(path, "md5") if source.algorithm == "md5" else bsd_sum(path)
-    if found != source.publisher or digest(path, "sha256") != source.sha256:
+    if found != source.publisher:
         raise ValueError(f"{path}: {source.algorithm} {found}, expected {source.publisher}")
+    if (sha := digest(path, "sha256")) != source.sha256:
+        raise ValueError(f"{path}: sha256 {sha}, expected {source.sha256}")
     return path
 
 
@@ -481,8 +483,9 @@ def main(argv: list[str] | None = None) -> int:
     contig = read_chromosome(fetch(FASTA, args.cache))[WINDOW_START - 1 : WINDOW_END]
     if set(contig) - set("ACGT"):
         raise ValueError(f"the window holds {sorted(set(contig) - set('ACGT'))}, not only ACGT")
-    # Extract from the slice at the rebased coordinates, never from chr22: a rebase error then
-    # makes transcripts.fa disagree with slice.fa + slice.gtf instead of hiding behind them.
+    # Extracted from the slice at the rebased coordinates, so all three files share any rebase
+    # error and agree with each other. Offline, the codon anchor in test_gtf_fasta_consistent
+    # catches a wrong offset; test_slice_rebuilds checks against the genome itself.
     transcripts = splice(contig, annotation)
     with tempfile.TemporaryDirectory() as staging_dir:
         staging = Path(staging_dir)
