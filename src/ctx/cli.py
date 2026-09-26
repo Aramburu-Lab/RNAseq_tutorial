@@ -34,6 +34,15 @@ CARDS: dict[str, tuple[str, str]] = {
         "working directory (laptop only).",
         "Moves every output. Nothing is ever written inside the installed package.",
     ),
+    "--dataset": (
+        "Short name for this download: lowercase words joined by underscores. It names the "
+        "outputs, and the default fetchngs outdir <root>/data/raw/<dataset>.",
+        "Changes the output names and where gather looks when --fetchngs-dir is unset.",
+    ),
+    "--fetchngs-dir": (
+        "The nf-core/fetchngs outdir to read. Unset means <root>/data/raw/<dataset>.",
+        "Points gather at another download. gather only reads it and never writes into it.",
+    ),
 }
 _UNCARDED = {"--help", "--version"}
 
@@ -58,7 +67,11 @@ def parameter_cards(*commands: Any) -> tuple[ParameterCard, ...]:
     cards = []
     for option in options:
         meaning, effect = CARDS[option.opts[0]]
-        default = "unset" if option.default is None else str(option.default)
+        default = (
+            "required"
+            if option.required
+            else ("unset" if option.default is None else str(option.default))
+        )
         cards.append(ParameterCard(option.opts[0], meaning, default, effect))
     return tuple(cards)
 
@@ -126,5 +139,27 @@ def setup(ctx: typer.Context) -> None:
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     written = module.run(ctx.obj["settings"], cards, "ctx " + shlex.join(sys.argv[1:]))
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
+def gather(
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
+    fetchngs_dir: Annotated[Path | None, typer.Option(help=CARDS["--fetchngs-dir"][0])] = None,
+) -> None:
+    """Check one nf-core/fetchngs outdir and write the harmonised sample sheet (M1c)."""
+    from ctx.gather import harmonise  # noqa: PLC0415 - heavy; imported after the runtime profile
+    from ctx.gather.fetchngs import FetchngsError  # noqa: PLC0415 - same module, same reason
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = "ctx " + shlex.join(sys.argv[1:])
+    try:
+        written = harmonise.run(ctx.obj["settings"], cards, command, dataset, fetchngs_dir)
+    except FetchngsError as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
     for path in written:
         typer.echo(path)

@@ -1,12 +1,15 @@
 """The ctx CLI end to end: `ctx setup`, parameter cards, profiles, and code kept apart from data."""
 
+import hashlib
 import os
 import re
+import shutil
 import subprocess
 import sys
 import textwrap
 from pathlib import Path
 
+import polars as pl
 import pytest
 import typer
 from test_packaging import build_wheel, run_from_wheel
@@ -42,13 +45,40 @@ def setup_run(tmp_path_factory):
     return root, _report(root)
 
 
-def test_parameter_cards_match_cli(setup_run):
-    _, html = setup_run
+FIXTURE = ROOT / "tests" / "fixtures" / "fetchngs" / "download"
+
+
+@pytest.fixture(scope="module")
+def gather_run(tmp_path_factory):
+    root = tmp_path_factory.mktemp("gather_root")
+    args = (
+        "--root",
+        str(root),
+        "gather",
+        "--dataset",
+        "nfcore_test",
+        "--fetchngs-dir",
+        str(FIXTURE),
+    )
+    done = _ctx(*args, cwd=root)
+    assert done.returncode == 0, done.stderr
+    (page,) = (root / "outputs" / "01_gather").glob("*_gather_nfcore_test_overview_v1.html")
+    return root, page.read_text()
+
+
+def test_every_subcommand_has_a_card_test():
+    # A new subcommand without a case below fails here, not silently.
+    assert set(typer.main.get_command(app).commands) == {"setup", "gather"}
+
+
+@pytest.mark.parametrize("command", ["setup", "gather"])
+def test_parameter_cards_match_cli(request, command):
+    _, html = request.getfixturevalue(f"{command}_run")
     group = typer.main.get_command(app)
     options = {
-        p.opts[0]: p.default
-        for command in (group, group.commands["setup"])
-        for p in command.params
+        p.opts[0]: p
+        for cmd in (group, group.commands[command])
+        for p in cmd.params
         if p.opts[0] not in {"--help", "--version"}
     }
     assert options
@@ -56,8 +86,15 @@ def test_parameter_cards_match_cli(setup_run):
         re.findall(r'<tr id="card-(--[\w-]+)">.*?<code class="default">(.*?)</code>', html)
     )
     assert set(shown) == set(options)
-    assert all(shown[k] == ("unset" if v is None else str(v)) for k, v in options.items())
-
+    for name, param in options.items():
+        expected = (
+            "required"
+            if param.required
+            else ("unset" if param.default is None else str(param.default))
+        )
+        assert shown[name] == expected, name
+    if command != "setup":
+        return
     extra = typer.Typer()
 
     @extra.command()
@@ -152,3 +189,73 @@ def test_setup_runs_from_wheel(tmp_path):
         cwd=tmp_path,
     )
     assert "installed wheel" in next((tmp_path / "root").rglob("*_README.md")).read_text()
+
+
+def _snapshot_hashes(directory):
+    return {
+        str(p): (hashlib.sha256(p.read_bytes()).hexdigest(), p.stat().st_mtime_ns)
+        for p in directory.rglob("*")
+        if p.is_file()
+    }
+
+
+def test_gather_end_to_end(gather_run):
+    root, html = gather_run
+    out = root / "outputs" / "01_gather"
+    scanned, violations = lint(out)
+    assert scanned == 4
+    assert violations == []
+    (csv_path,) = out.glob("*_samplesheet_v1.csv")
+    (parquet,) = out.glob("*_samplesheet_v1.parquet")
+    assert (out / f"{csv_path.stem}_README.md").is_file()
+    assert b"\r" not in csv_path.read_bytes()
+    parquet_frame = pl.read_parquet(parquet)
+    csv_frame = pl.read_csv(csv_path, schema=parquet_frame.schema)
+    assert csv_frame.equals(parquet_frame)
+    assert parquet_frame.height == 4
+    assert sorted(parquet_frame["status_1"]) == ["no_md5", "no_md5", "verified", "verified"]
+    wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', html).group(1))
+    rss = int(re.search(r'<td class="rss-self">[\d.]+ MiB \((\d+) bytes\)</td>', html).group(1))
+    assert 0 < wall < BUDGETS["B"].minutes * 60
+    assert 0 < rss < BUDGETS["B"].ram_gb * 10**9
+
+
+def test_upstream_untouched(tmp_path):
+    before = _snapshot_hashes(FIXTURE)
+    args = ("--root", str(tmp_path), "gather", "--dataset", "x", "--fetchngs-dir", str(FIXTURE))
+    assert _ctx(*args, cwd=tmp_path).returncode == 0
+    assert _snapshot_hashes(FIXTURE) == before
+
+
+def test_failure_writes_no_sheet(tmp_path):
+    broken = tmp_path / "broken"
+    shutil.copytree(FIXTURE, broken)
+    (broken / "fastq" / "ERX1234253_ERR1160846.fastq.gz").unlink()
+    root = tmp_path / "root"
+    done = _ctx(
+        "--root",
+        str(root),
+        "gather",
+        "--dataset",
+        "bad",
+        "--fetchngs-dir",
+        str(broken),
+        cwd=tmp_path,
+    )
+    assert done.returncode != 0
+    assert "ERX1234253_ERR1160846.fastq.gz is missing" in done.stderr
+    assert not (root / "outputs").exists()
+
+
+def test_gather_runs_from_wheel(tmp_path):
+    site = build_wheel(tmp_path)
+    run_from_wheel(
+        site,
+        f"""
+        from ctx.cli import app
+        app(["--root", {str(tmp_path / "root")!r}, "gather", "--dataset", "w",
+             "--fetchngs-dir", {str(FIXTURE)!r}], standalone_mode=False)
+        """,
+        cwd=tmp_path,
+    )
+    assert list((tmp_path / "root" / "outputs" / "01_gather").glob("*_samplesheet_v1.csv"))
