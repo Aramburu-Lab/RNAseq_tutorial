@@ -11,7 +11,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 ## Workflow
 
 - Plan mode for any task with 3+ steps or an architectural choice. Write the plan (checkable items) into `TODO.md`, check in before implementing, mark items done as you go, add a short review section when a phase completes.
-- Verify before done: run tests, execute the CLI on fixture data, open the HTML offline, measure wall time and peak RAM (`/usr/bin/time -v`). Never report a module complete without this evidence.
+- Verify before done: run tests, execute the CLI on fixture data, open the HTML offline, measure wall time and peak RAM (the ctx reproduction block; for other commands `/usr/bin/time -l` on macOS, `-v` on Linux). Never report a module complete without this evidence.
 - After any correction from the user, add a rule to `knowledge/lessons.md` in the same session.
 - Use subagents for research, dataset scouting, and parallel exploration; one task per subagent.
 - If something goes sideways, stop and re-plan; do not push through.

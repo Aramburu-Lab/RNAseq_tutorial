@@ -320,7 +320,7 @@ cancer-transcriptomics-teaching/
 - [ ] M8 sanity: biotype fractions match the library type; known KIRC miRNA–target pairs recovered (e.g. hypoxia-induced miR-210); mature miRNAs absent from the mRNA-seq counts, as expected
 - [ ] Paired vs unpaired designs produce the expected difference in DE counts (documented)
 - [ ] Notebook executes headless; parameter cards match the code defaults (test reads defaults from CLI)
-- [ ] Peak RAM and wall time measured (`/usr/bin/time -v`) and within budget
+- [ ] Peak RAM and wall time measured (the ctx reproduction block; for other commands `/usr/bin/time -l` on macOS, `-v` on Linux) and within budget
 
 ---
 
