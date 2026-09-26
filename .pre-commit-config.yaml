@@ -48,3 +48,22 @@ repos:
         files: '^(scripts|bin)/.*\.(py|sh|bash|R|r|nf|rs)$'
         entry: |
           bash -c 'w=$(sed -n "s/^[[:space:]]*warn:[[:space:]]*//p" .labtemplate.yml); f=$(sed -n "s/^[[:space:]]*fail:[[:space:]]*//p" .labtemplate.yml); rc=0; for p in "$@"; do n=$(awk "END{print NR}" "$p"); if [ "$n" -gt "$f" ]; then echo "$p:1: ERROR $n lines > $f - extract a helper (ADR-12)"; rc=1; elif [ "$n" -gt "$w" ]; then echo "$p:1: warning $n lines > $w target"; fi; done; exit $rc' --
+
+  # Project additions (D-001): the gates CONVENTIONS.md sets for the ctx package, mypy strict
+  # and interrogate at 100 %. A separate block, so template updates to the one above merge
+  # without touching these lines. tests/test_gates.py proves both can fail.
+  - repo: local
+    hooks:
+      - id: mypy-src
+        name: mypy strict (src/)
+        entry: pixi run mypy
+        language: system
+        files: '^src/.*\.py$'
+        pass_filenames: false
+
+      - id: interrogate-src
+        name: interrogate 100 % (src/)
+        entry: pixi run interrogate src
+        language: system
+        files: '^src/.*\.py$'
+        pass_filenames: false

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cancer-transcriptomics-teaching"
+version = "0.1.0"
+description = "Cancer Transcriptomics Teaching Suite: the ctx command-line tool."
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Rytis Stakaitis", email = "rytis.stakaitis@umu.se" }]
+# Ranges only: the pins live in pixi.toml and pixi.lock (CONVENTIONS.md, Stack).
+dependencies = ["typer"]
+
+[project.scripts]
+ctx = "ctx.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ctx"]
+
+[tool.mypy]
+strict = true
+files = ["src"]
+
+[tool.interrogate]
+fail-under = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["network: needs the network; deselected by default, run with -m network"]
+addopts = "-m 'not network'"

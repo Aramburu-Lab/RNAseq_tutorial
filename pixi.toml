@@ -83,8 +83,8 @@ prek = "==0.4.13"
 [environments]
 # solve-group keeps laptop and prod on identical versions of everything they
 # share, so what you test is what ships.
-default = { features = ["analysis", "dev"], solve-group = "main" }
-laptop = { features = ["analysis"], solve-group = "main" }
+default = { features = ["analysis", "dev", "ctx", "ctx-dev"], solve-group = "main" }
+laptop = { features = ["analysis", "ctx"], solve-group = "main" }
 prod = { features = ["analysis", "tools"], solve-group = "main" }
 
 [tasks]
@@ -111,3 +111,28 @@ check = "labdocs lint && labdocs render --check"
 # the tree formatted; `git diff` after a run is the tell, and committing it is the fix.
 hooks = "prek run --all-files --show-diff-on-failure"
 preflight = { depends-on = ["lint", "check", "test", "hooks"], cmd = "ruff format --check ." }
+
+# Project additions (D-001). `ctx` is the teaching package and what it imports; `ctx-dev`
+# holds its gates. Versions are pinned `==` here, as CONVENTIONS.md asks; the template's own
+# ranges above are pinned by pixi.lock. Neither feature is in `prod`: the container builds prod
+# from pixi.toml and pixi.lock alone, so an editable install of this repo cannot exist there.
+[feature.ctx]
+platforms = ["linux-64-glibc-2-35", "osx-arm64"]
+
+[feature.ctx.dependencies]
+typer = "==0.27.2"
+jinja2 = "==3.1.6"
+seaborn = "==0.13.2"
+pydeseq2 = "==0.5.4"
+
+[feature.ctx.pypi-dependencies]
+cancer-transcriptomics-teaching = { path = ".", editable = true }
+
+[feature.ctx-dev]
+platforms = ["linux-64-glibc-2-35", "osx-arm64"]
+
+[feature.ctx-dev.dependencies]
+mypy = "==2.3.1"
+interrogate = "==1.7.0"
+pypdf = "==6.19.0"
+hatchling = "==1.32.4"
