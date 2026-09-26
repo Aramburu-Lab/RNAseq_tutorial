@@ -752,7 +752,7 @@ it. P1.2 pins every dependency the project adds.
       - `write_figure` gained a `title` argument for the page.
     - Not done: plotly draws its box fills half-transparent by default, so the HTML boxes look lighter than the PDF ones; the colours are the same palette roles.
 
-- [ ] P1.9 `ctx setup` environment report as the end-to-end consumer (after P1.6, P1.8)
+- [x] P1.9 `ctx setup` environment report as the end-to-end consumer (after P1.6, P1.8)
   - This is the M0 subset from `TODO.md:102`; it downloads nothing.
   - Every CLI parameter gets a parameter card (meaning and effect), including the global `--profile` and `--root`, which are rendered once as a shared block.
   - Outputs under `<root>/outputs/00_setup/`:
@@ -779,6 +779,24 @@ it. P1.2 pins every dependency the project adds.
       - the P1.8 offline checks pass;
       - wall time and peak RSS are above 0 and within the laptop budget.
     - `test_packaging.py` is extended: `ctx setup` runs from the unzipped wheel.
+  - Evidence, 2026-09-26: `tests/test_cli.py` passes 8/8, and preflight passes with 84 tests.
+    - Each mutation fails the named test:
+      - resolving the profile in the group callback: `test_help_without_slurm`;
+      - a card checker that skips options without a card: `test_parameter_cards_match_cli`.
+    - One run of `ctx setup` on this Mac (macOS 15, arm64, 14 cores, 24.0 GiB):
+      - `/usr/bin/time -l pixi run ctx setup`: 1.39 s real at 171,999,232 bytes max RSS;
+      - the page's own reproduction block: 0.935 s wall, 109.2 MiB peak RSS for the process and 5.2 MiB for the largest child, which is the provenance `git` call. Both are well inside Track B, under 10 min and 4 GB;
+      - under the laptop profile, the polars thread pool and the BLAS pools both report 4;
+      - under hpc with `SLURM_CPUS_PER_TASK=2`, the page reports 2 and [2];
+      - the figure font resolves to Helvetica.
+    - Also changed:
+      - The README companion records the absolute `Directory` it was written to (D-004).
+      - A module page without a figure no longer inlines plotly.js; the setup page went from 4,839,541 to 23,684 bytes.
+    - Deviations:
+      - Parameter-card meaning and effect live in `CARDS` in `cli.py`; the default is read from click.
+      - `parameter_cards()` raises at run time as well, so a missing card fails the command and not only the test.
+      - typer 0.27 bundles its own click, so `parameter_cards` takes loosely typed commands.
+      - mypy also ignores missing imports for threadpoolctl.
 
 - [ ] P1.10 Chr22 slice and a simulated FASTQ pair with known truth (after P1.2; can run in parallel with P1.3–P1.9)
   - `scripts/python/make_chr22_fixture.py` has an `exempt:` block. It runs instructor-side and needs the network.
