@@ -13,7 +13,14 @@ import numpy as np
 import polars as pl
 from scipy.stats import false_discovery_control, mannwhitneyu
 
-from ctx.viz.style import LEGEND_MAX_COLUMNS, LINE_SPACING, SIZES, caption_chars
+from ctx.viz.style import (
+    AVERAGE_CHAR_EM,
+    AXIS_TITLE_SHARE,
+    LEGEND_MAX_COLUMNS,
+    LINE_SPACING,
+    SIZES,
+    caption_chars,
+)
 
 TEST_NAME = "Mann-Whitney U, two-sided"
 PERMANOVA_NAME = "PERMANOVA on Euclidean distances"
@@ -70,6 +77,20 @@ def wrap(text: str, width: int = 0) -> str:
     reader or a PDF text extractor.
     """
     return textwrap.fill(text, width, break_on_hyphens=False) if width else text
+
+
+def fit_title(text: str, height: float) -> str:
+    """Wrap a vertical axis title to the length its axis has: a share of the figure height.
+
+    Args:
+        text: The title, with its unit.
+        height: Figure height in inches.
+
+    Returns:
+        The title, broken into lines that fit.
+    """
+    chars = int(height * 72 * AXIS_TITLE_SHARE / (SIZES["axis_label"] * AVERAGE_CHAR_EM))
+    return wrap(text, max(chars, 8))
 
 
 def place_caption(

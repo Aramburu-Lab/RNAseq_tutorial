@@ -280,7 +280,7 @@ def demo_bars_at_scale(horizontal: bool):  # BarData
 
 
 def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted design
-    groups: tuple[tuple[str, str, int], ...] = (("control", "short", 6), ("case", "short", 6)),
+    groups: tuple[tuple, ...] = (("control", "short", 6), ("case", "short", 6)),
     *,
     seed: int = 7,
     n_genes: int = 1000,
@@ -302,10 +302,13 @@ def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted d
     """
     rng = np.random.default_rng(seed)
     rows, donor_of = [], []
-    for g, (condition, batch, n) in enumerate(groups):
+    for g, (condition, batch, n, *extra) in enumerate(groups):
+        cell = extra[0] if extra else "type_a"
+        # A fifth element names the individuals: groups sharing a prefix share donors.
+        prefix = extra[1] if len(extra) > 1 else None
         for i in range(n):
-            donor = f"d{i:03d}" if paired else f"d{g}{i:02d}"
-            rows.append((f"XRR{len(rows) + 1:06d}", f"S{len(rows) + 1:03d}", donor, "type_a",
+            donor = f"{prefix}{i:03d}" if prefix else (f"d{i:03d}" if paired else f"d{g}{i:02d}")
+            rows.append((f"XRR{len(rows) + 1:06d}", f"S{len(rows) + 1:03d}", donor, cell,
                          condition, batch, "", "M" if i % 2 else "F", "PB"))  # fmt: skip
             donor_of.append(donor)
     sheet = pl.DataFrame(
@@ -324,7 +327,15 @@ def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted d
     ]
     is_case = (sheet["condition"] == "case").to_numpy()
     is_long = (sheet["batch"] == "long").to_numpy()
-    log2_mu = lfc_condition[:, None] * is_case + lfc_batch[:, None] * is_long + effect
+    is_b = (sheet["cell_type"] == "type_b").to_numpy()
+    # Genes 20-30 % mark type_b (|LFC| 4), so cell type leads the PCA as in sorted cells.
+    lfc_cell = np.where((index >= 0.2 * n_genes) & (index < 0.3 * n_genes), 4.0 * sign, 0.0)
+    log2_mu = (
+        lfc_condition[:, None] * is_case
+        + lfc_batch[:, None] * is_long
+        + lfc_cell[:, None] * is_b
+        + effect
+    )
     mu = np.exp(rng.normal(0.0, SIZE_FACTOR_SD, sheet.height)) * base[:, None] * np.exp2(log2_mu)
     n = 1.0 / DISPERSION
     draws = rng.negative_binomial(n, n / (n + mu)).astype(np.int32)
@@ -335,3 +346,66 @@ def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted d
     })  # fmt: skip
     matrix = pl.DataFrame(draws, schema=sheet["sample"].to_list(), orient="row")
     return Synthetic(matrix.insert_column(0, truth["gene_id"]), sheet, truth)
+
+
+SEX_GENES = ("XIST", "RPS4Y1", "DDX3Y", "KDM5D", "UTY", "EIF1AY")
+
+
+def write_gather_outputs(root, dataset: str, synthetic: Synthetic, day) -> None:
+    """Sheet, counts and genes as gather writes them, from a design_counts experiment.
+
+    The last six genes become the sex genes, expressed by the sheet's sex: XIST in F, the
+    chrY genes in M.
+    """
+    from ctx.gather.harmonise import MODULE  # noqa: PLC0415 - keeps synth importable without ctx
+    from ctx.io.naming import stem  # noqa: PLC0415
+    from ctx.io.readme_companion import write_table  # noqa: PLC0415
+
+    out = root / "outputs" / "01_gather"
+    counts = synthetic.counts
+    ids = counts["gene_id"].to_list()
+    names = [g.upper() for g in ids[: -len(SEX_GENES)]] + list(SEX_GENES)
+    female = set(synthetic.samples.filter(pl.col("sex") == "F")["sample"])
+    sex_ids = ids[-len(SEX_GENES) :]
+    counts = counts.with_columns([
+        pl.when(pl.col("gene_id") == sex_ids[0]).then(3000 if c in female else 0)
+        .when(pl.col("gene_id").is_in(sex_ids[1:])).then(0 if c in female else 800)
+        .otherwise(pl.col(c)).cast(pl.Int32).alias(c)
+        for c in counts.columns[1:]
+    ])  # fmt: skip
+    genes = pl.DataFrame({"gene_id": ids, "gene_name": names})
+    sheet = synthetic.samples.with_columns(donor_sex=pl.lit(""), replicate=pl.lit(1, pl.Int32))
+    described = {c: ("none", c) for c in {*sheet.columns, *counts.columns, *genes.columns}}
+    for what, frame in (("samplesheet", sheet), ("counts", counts), ("genes", genes)):
+        table_stem = stem(MODULE, f"{dataset}_{what}", 1, day=day)
+        write_table(frame, out, table_stem, columns={c: described[c] for c in frame.columns},
+                    data_releases={})  # fmt: skip
+
+
+# The groups tests/fixtures/datasets/de_synthetic.toml declares its contrasts on.
+DE_GROUPS = (
+    ("control", "short", 6, "type_a"),
+    ("case", "short", 6, "type_a"),
+    ("control", "long", 3, "type_a"),
+    ("case", "long", 6, "type_a"),
+    ("control", "short", 6, "type_b"),
+    ("case", "short", 6, "type_b"),
+)
+
+
+def write_gene_sets(path, n_genes: int = 1000, seed: int = 5, n_random: int = 20) -> None:
+    """A GMT for design_counts genes: UP_SET and DOWN_SET hold the planted condition genes
+    (uppercase symbols, as write_gather_outputs names them); twenty random sets hold others."""
+    rng = np.random.default_rng(seed)
+    planted = [f"G{i + 1:05d}" for i in range(int(0.1 * n_genes))]
+    others = [f"G{i + 1:05d}" for i in range(int(0.3 * n_genes), n_genes - len(SEX_GENES))]
+    # At most 100 genes each, near the tier-1 IFN-alpha set's 97 and under GSEA's 500.
+    sets = {"UP_SET": planted[0::2][:100], "DOWN_SET": planted[1::2][:100]}
+    sets |= {
+        f"RANDOM_{j:02d}": list(rng.choice(others, int(rng.integers(15, 200)), replace=False))
+        for j in range(n_random)
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        "".join(f"{name}\tsynthetic\t" + "\t".join(genes) + "\n" for name, genes in sets.items())
+    )

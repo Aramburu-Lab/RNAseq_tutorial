@@ -1441,7 +1441,7 @@ Exit gate:
     - `pixi run preflight` exits 0, 219 passed, 60.91 s real at 1,318,223,872 bytes max RSS.
   - Not done: the Hallmark CC BY 4.0 licence was not re-read; it goes on the M6 page in P2B.6 as the research recorded it.
 
-- [ ] **P2B.6 `ctx de`, `ctx function`, `ctx report` and the hub, end to end on synthetic data, plus the budget at real size.**
+- [x] **P2B.6 `ctx de`, `ctx function`, `ctx report` and the hub, end to end on synthetic data, plus the budget at real size.**
   - Options are `--dataset`, `--dataset-file` and `--min-count`, each with a card. Each command reads the newest upstream output and states its SHA-256.
   - Tables:
     - one contrasts table: design, reference, n per group, pairing, dropped runs, condition × batch × isolation crosstab, tested, up, down, NA by reason;
@@ -1468,6 +1468,53 @@ Exit gate:
     - card tests extended;
     - packaging runs de from the wheel;
     - `tests/test_budget.py`, marker `budget`, deselected by default and run once: synthetic 60,000 × 171 with the tier-1 contrast sizes, each command under 10 min, RAM bound under 4 GB, page under 15 MB, and n_cpus 1 against 4 recorded.
+  - Evidence, 2026-09-27:
+    - Built:
+      - the dataset file's `[[contrasts]]`, `[de]` (featured contrast, PCAs with their PERMANOVA factors, lessons, LFC scatters, box genes), `[function]` and `[sanity]` tables, with `Contrast` and `Split` moved into `dataset.py`;
+      - `de/run.py` (`Writer`, every M5 figure, the contrasts, results, metrics and sex-check tables);
+      - `function/run.py` (GSEA and ORA per contrast, the M6 figures and metrics);
+      - `report/hub.py` with a `HubPage` kind and `hub.html.j2`;
+      - `ctx de`, `ctx function` and `ctx report`, each with its cards;
+      - `layout_problems()`, which `write_figure` runs on both themes before writing any file;
+      - `fit_title()`; `page_table()` on every figure contract;
+      - synthetic `DE_GROUPS`, `write_gather_outputs()`, `write_gene_sets()` and `tests/fixtures/datasets/de_synthetic.toml`.
+    - `tests/test_cli.py` runs `ctx de`, `ctx function` and `ctx report` on one root, entering at the gather-output boundary through gather's own writer (`write_table` and the same stems). Checked:
+      - lint, READMEs and offline pages in 05_de, 06_function and 09_report;
+      - at least 80 of the 100 planted genes called;
+      - the null split calls 0 genes;
+      - the sex check disagrees on 0 of 33 samples;
+      - UP_SET and DOWN_SET at FDR < 0.05 with the right sign;
+      - the gather outputs byte-identical afterwards;
+      - hub links resolve after the outputs are copied, with no http or absolute link;
+      - `newest()` picks by date, then version;
+      - the `--min-count` default equals `MIN_COUNT`;
+      - `ctx de` runs from the built wheel;
+      - `ctx report --dataset-file` decides S1 PASS, S2 PASS and S3 FAIL. S3 is a missing metric.
+    - The card test now covers all five commands.
+    - `tests/test_budget.py`, marker `budget`, run on 2026-09-27: 60,000 synthetic genes by 171 samples (NDN 73, monocytes 60, LDN 38, with tier-1's individuals, repeats and batches), the ten tier-1 contrasts at their real n, laptop profile, 4 threads.
+
+      | Command | Wall | Self RSS | Largest child | Bound (self + 4 x child) | Page |
+      |---|---|---|---|---|---|
+      | `ctx de` | 296.1 s | 2,274,476,032 B | 258,834,432 B | 3,309,813,760 B | 11,167,022 B |
+      | `ctx function` | 15.7 s | 1,859,993,600 B | 5,783,552 B | 1,883,127,808 B | 6,602,147 B |
+
+      ndn_pdac_naive at 60,000 genes took 70.8 s at n_cpus 1 and 23.5 s at n_cpus 4, so the profile's thread count stays. Every synthetic gene passes the filter, which makes this pessimistic next to tier 1.
+    - The first two budget runs failed, and each found a defect:
+      - the volcano page reached 19,345,923 B because every figure page embedded all table rows; `page_table()` now embeds only the drawn rows, and the CSV keeps all;
+      - a 3,000-gene featured set was tested in no contrast, which left an empty bar figure and a ZeroDivisionError; `BarData` now refuses an empty table, M6 states on the page why the figure is missing, and the synthetic sets are capped at 100 genes.
+    - Eye check in the browser pane, 2026-09-27, served on 127.0.0.1: the hub, M5 (10 figures) and M6 (5 figures) render, each page makes one request, and the slider moves 52 up and 51 down at padj < 0.05 to 54 and 52 at padj < 0.1. Found and fixed:
+      - plotly gene labels stacked on each other; the interactive plots now carry none, and hover names each point;
+      - the slider covered the caption; it now sits above the plot;
+      - lines drawn in the light theme's ink vanished in dark mode; they are now the reference grey;
+      - two y titles were clipped at real size: "Expression (log2 normalised reads)" and "Fold change, b_case (log2 fold change)". `fit_title()` now wraps vertical titles to the axis, the units are shorter, and `write_figure` refuses any clipped or overlapping text.
+    - Mutations, applied with Python, each fail their test: absolute hub links; `min` instead of `max` in `newest()`; `page_table()` returning the whole table; the layout check disabled; the empty-bar check removed; a CLI default of 11. After the stale-bytecode finding in `knowledge/lessons.md`, the two same-size mutations were rerun on a clean cache and still fail.
+    - `pixi run preflight` exits 0, 247 passed, 141.20 s real at 1,504,919,552 bytes max RSS.
+  - Deviations:
+    - No results table is embedded on the M5 page (minor 12); each contrast's results are linked as Parquet and CSV.
+    - Verdicts are decided by `ctx report --dataset-file`, which writes `<dataset>_sanity_v1` and shows them on the hub. `decide()` itself is in `ctx.de.sanity` as planned.
+    - The PERMANOVA p is recorded for the first factor only, the one strata are meant for; R² is recorded for every factor.
+    - ORA counts up and down calls separately.
+    - The interactive volcano has no text labels.
 
 ### Phase 2C — Tier 1 plugs in; close
 

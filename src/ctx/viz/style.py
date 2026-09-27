@@ -52,6 +52,8 @@ BAR_LABEL_ROTATION = 90.0
 # Horizontal bars grow the figure: this much height per category, plus room for the axis,
 # legend and caption, so 20 categories stay readable at 14 pt.
 BAR_ROW_MM = 7.0
+# The share of a figure's height a vertical axis title may use before it wraps.
+AXIS_TITLE_SHARE = 0.55
 BAR_MARGIN_MM = 45.0
 
 

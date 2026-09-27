@@ -52,6 +52,12 @@ CARDS: dict[str, tuple[str, str]] = {
         "condition, replicate and batch, and stops with a problem table if anything fails to "
         "join, map or match the declared counts.",
     ),
+    "--min-count": (
+        "Reads a gene needs at the median library size, in at least the smallest group's "
+        "number of samples, to be tested (edgeR filterByExpr's min.count).",
+        "Higher tests fewer, better-measured genes: fewer tests for BH to correct, but weakly "
+        "expressed biology drops out. The cutoff scales with depth (counts per million).",
+    ),
     "--rnaseq-dir": (
         "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset writes no counts.",
         "Set, gather checks the release, the params files and that the matrix holds exactly "
@@ -194,4 +200,70 @@ def gather(
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
+def de(
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
+    dataset_file: Annotated[Path, typer.Option(help=CARDS["--dataset-file"][0])],
+    min_count: Annotated[int, typer.Option(help=CARDS["--min-count"][0])] = 10,
+) -> None:
+    """Fit the dataset's contrasts with DESeq2 and write the M5 tables, figures and page."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.de import run as module  # noqa: PLC0415 - heavy; imported after the runtime profile
+    from ctx.de.deseq import ContrastError  # noqa: PLC0415 - same reason
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = "ctx " + shlex.join(sys.argv[1:])
+    try:
+        written = module.run(
+            ctx.obj["settings"], cards, command, dataset, dataset_file=dataset_file,
+            min_count=min_count,
+        )  # fmt: skip
+    except (DatasetError, ContrastError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
+def function(
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
+    dataset_file: Annotated[Path, typer.Option(help=CARDS["--dataset-file"][0])],
+) -> None:
+    """Enrichment of every contrast (ORA and preranked GSEA); the M6 tables, figures and page."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.function import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = "ctx " + shlex.join(sys.argv[1:])
+    try:
+        written = module.run(
+            ctx.obj["settings"], cards, command, dataset, dataset_file=dataset_file
+        )
+    except DatasetError as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
+def report(
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
+    dataset_file: Annotated[Path | None, typer.Option(help=CARDS["--dataset-file"][0])] = None,
+) -> None:
+    """Write the hub linking every module's newest page, and decide the sanity rules."""
+    from ctx.report import hub  # noqa: PLC0415 - imported after the runtime profile
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    for path in hub.run(ctx.obj["settings"], cards, dataset, dataset_file):
         typer.echo(path)

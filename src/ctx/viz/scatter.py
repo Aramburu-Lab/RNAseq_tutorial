@@ -11,7 +11,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import place_caption, plotly_caption
+from ctx.viz.annotate import fit_title, place_caption, plotly_caption
 from ctx.viz.style import (
     LINE_WIDTHS,
     MARKER_SIZE,
@@ -29,6 +29,8 @@ from ctx.viz.style import (
 # Points not in ``keep`` above this many are thinned on the HTML page; the CSV keeps all.
 THIN_MAX = 2000
 MAX_LABELS = 10
+# Room above the plot for the threshold slider, in pixels.
+SLIDER_MARGIN_PX = 130
 # Offset of a point label from its point, in points.
 LABEL_OFFSET = 3.0
 
@@ -109,6 +111,10 @@ class ScatterData:
         """(unit, meaning) for every column of ``table()``."""
         return self.columns
 
+    def page_table(self) -> pl.DataFrame:
+        """The points the page draws: thinned like the plot, so the page stays under its cap."""
+        return self.on_page()
+
     def on_page(self) -> pl.DataFrame:
         """The points the HTML page draws: every kept point, the rest thinned by a stride."""
         if self.keep is None:
@@ -174,7 +180,7 @@ class ScatterData:
         ax.set_xscale("log" if self.log_x else "linear")
         ax.set_yscale("log" if self.log_y else "linear")
         ax.set_xlabel(self._axis_title(self.x_label, self.x))
-        ax.set_ylabel(self._axis_title(self.y_label, self.y))
+        ax.set_ylabel(fit_title(self._axis_title(self.y_label, self.y), height))
         present = set(self.frame[self.colour].unique())
         handles = [
             Line2D([], [], marker="o", linestyle="", color=c, label=str(level))
@@ -272,20 +278,12 @@ class ScatterData:
                     customdata=rows.select(self.hover).rows(), hovertemplate=template,
                 )
             )  # fmt: skip
-        if self.label:
-            named = frame.filter(pl.col(self.label) != "")
-            fig.add_trace(
-                go.Scatter(
-                    x=named[self.x].to_list(), y=named[self.y].to_list(), mode="text",
-                    text=named[self.label].to_list(), textposition="top right",
-                    showlegend=False, hoverinfo="skip",
-                )
-            )  # fmt: skip
+        # No text labels here: plotly cannot keep them apart; hover names every point.
         for line in self.lines:
             fig.add_trace(
                 go.Scatter(
                     x=list(line.x), y=list(line.y), mode="lines", name=line.name,
-                    line={"color": light.ink, "width": LINE_WIDTHS["line"]}, hoverinfo="skip",
+                    line={"color": light.reference, "width": LINE_WIDTHS["line"]}, hoverinfo="skip",
                 )
             )  # fmt: skip
         caption, bottom = plotly_caption(self.caption_text(), figure_inches("double", "scatter")[0])
@@ -299,7 +297,7 @@ class ScatterData:
             margin={"b": bottom},
         )  # fmt: skip
         if self.steps:
-            fig.update_layout(sliders=[self._slider(frame)])
+            fig.update_layout(sliders=[self._slider(frame)], margin={"t": SLIDER_MARGIN_PX})
         return fig
 
     def _slider(self, frame: pl.DataFrame) -> dict[str, Any]:
@@ -315,4 +313,14 @@ class ScatterData:
             }
             steps.append({"label": label, "method": "restyle", "args": [restyle, indices]})
         active = next(i for i, (_, column) in enumerate(self.steps) if column == self.colour)
-        return {"active": active, "steps": steps, "currentvalue": {"prefix": "threshold: "}}
+        # Above the plot: below it, the slider covers the caption the figure carries.
+        return {
+            "active": active,
+            "steps": steps,
+            "currentvalue": {"prefix": "threshold: "},
+            "x": 0,
+            "y": 1.02,
+            "yanchor": "bottom",
+            "len": 0.6,
+            "pad": {"t": 0, "b": 10},
+        }

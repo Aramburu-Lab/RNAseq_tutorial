@@ -10,12 +10,13 @@ subset; check the group sizes and the design; fit; copy the raw results; shrink 
 
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 import polars as pl
 
+from ctx.dataset import Contrast, Split
 from ctx.de.filters import MIN_COUNT, expressed
 from ctx.de.stats import ALPHA, classify
 from ctx.gather.curation import REPLICATE_KEYS, rank_replicates
@@ -44,41 +45,6 @@ class ContrastError(ValueError):
 
 
 @dataclass(frozen=True)
-class Split:
-    """A seeded split of individuals into two arbitrary groups, balanced within strata."""
-
-    seed: int
-    strata: str
-
-
-@dataclass(frozen=True)
-class Contrast:
-    """One comparison: which samples, which two levels, which design, and the n it must have.
-
-    Attributes:
-        name: Identifier, used in output names.
-        variable: Column holding the compared levels; ignored for a split.
-        reference: Baseline level; the LFC is tested over reference.
-        tested: The other level.
-        expected_n: (reference, tested) samples after every step; a mismatch stops the fit.
-        design: pydeseq2 formula over ``group`` and sheet columns, e.g. ``~donor + group``.
-        filters: Column to allowed values; a sample must match every one.
-        paired: Keep only donors with a sample at both levels.
-        split: Replace the compared levels by a seeded split of individuals.
-    """
-
-    name: str
-    variable: str
-    reference: str
-    tested: str
-    expected_n: tuple[int, int]
-    design: str = "~group"
-    filters: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
-    paired: bool = False
-    split: Split | None = None
-
-
-@dataclass(frozen=True)
 class Pca:
     """Principal components of the blind VST.
 
@@ -86,11 +52,14 @@ class Pca:
         scores: ``sample``, ``pc1`` and ``pc2``.
         share: The share of the selected genes' variance each component explains.
         genes: The genes used: the ``TOP_GENES`` most variable after the VST.
+        coords: Every component's scores, samples by components; Euclidean distances here
+            equal those between the samples' centred VST values over ``genes``.
     """
 
     scores: pl.DataFrame
     share: tuple[float, float]
     genes: tuple[str, ...]
+    coords: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -102,6 +71,7 @@ class Fit:
     samples: pl.DataFrame
     dropped: tuple[str, ...]
     dispersions: pl.DataFrame
+    size_factors: pl.DataFrame
 
 
 def _split(frame: pl.DataFrame, split: Split) -> pl.DataFrame:
@@ -260,7 +230,8 @@ def fit(  # noqa: PLR0913 - every argument is a separate input of the fit
         "fitted": var["fitted_dispersions"].to_numpy(),
         "final": var["dispersions"].to_numpy(),
     })  # fmt: skip
-    return Fit(contrast, out.select(list(RESULT_COLUMNS)), used, dropped, dispersions)
+    factors = pl.DataFrame({"sample": names, "size_factor": dds.obs["size_factors"].to_numpy()})
+    return Fit(contrast, out.select(list(RESULT_COLUMNS)), used, dropped, dispersions, factors)
 
 
 def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
@@ -298,4 +269,5 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
     u, s, _ = np.linalg.svd(centred, full_matrices=False)
     share = s**2 / (s**2).sum()
     scores = pl.DataFrame({"sample": samples, "pc1": u[:, 0] * s[0], "pc2": u[:, 1] * s[1]})
-    return Pca(scores, (float(share[0]), float(share[1])), tuple(genes[i] for i in top))
+    genes_used = tuple(genes[i] for i in top)
+    return Pca(scores, (float(share[0]), float(share[1])), genes_used, u * s)

@@ -80,6 +80,28 @@ class FigurePage:
 
 
 @dataclass(frozen=True)
+class HubLink:
+    """One module's newest page, linked relative to the hub."""
+
+    module: str
+    title: str
+    href: str
+    written: str
+
+
+@dataclass(frozen=True)
+class HubPage:
+    """The course hub: one link per module page of one dataset."""
+
+    title: str
+    intro: str
+    parameters: tuple[ParameterCard, ...]
+    links: tuple[HubLink, ...]
+    missing: tuple[str, ...]
+    verdicts: tuple[tuple[str, str, str], ...] = ()
+
+
+@dataclass(frozen=True)
 class ModulePage:
     """A module report: every section of the skeleton is required and non-empty."""
 
@@ -132,7 +154,7 @@ def _prepare(block: FigureBlock, index: int) -> dict[str, Any]:
     }
 
 
-def render(page: FigurePage | ModulePage) -> str:
+def render(page: FigurePage | ModulePage | HubPage) -> str:
     """Render a page to one self-contained HTML string.
 
     Args:
@@ -151,8 +173,13 @@ def render(page: FigurePage | ModulePage) -> str:
         "templates": _json_for_script(plotly_templates()),
         "plotly_js": Markup(plotly.offline.get_plotlyjs()),
     }
-    if isinstance(page, ModulePage) and not any(isinstance(r, FigureBlock) for r in page.results):
+    draws = isinstance(page, FigurePage) or (
+        isinstance(page, ModulePage) and any(isinstance(r, FigureBlock) for r in page.results)
+    )
+    if not draws:
         context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing
+    if isinstance(page, HubPage):
+        return _ENV.get_template("hub.html.j2").render(**context)
     if isinstance(page, FigurePage):
         context["figure"] = _prepare(page.figure, 0)
         return _ENV.get_template("figure.html.j2").render(**context)
@@ -163,7 +190,7 @@ def render(page: FigurePage | ModulePage) -> str:
     return _ENV.get_template("module.html.j2").render(**context)
 
 
-def write(page: FigurePage | ModulePage, path: Path) -> Path:
+def write(page: FigurePage | ModulePage | HubPage, path: Path) -> Path:
     """Render and write a page, refusing one over 15 MB before anything is written.
 
     Args:

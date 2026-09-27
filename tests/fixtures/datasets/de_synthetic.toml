@@ -1,0 +1,114 @@
+# The M5 and M6 tables of a dataset file, on tests/synth.py's DE_GROUPS: no real identifier.
+
+[dataset]
+slug = "desynth"
+
+[[resources]]
+name = "sets"
+urls = ["http://127.0.0.1/sets.gmt"]
+bytes = 0
+sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+dest = "resources/sets/synthetic.gmt"
+
+[guard]
+ids = []
+patterns = []
+
+[[contrasts]]
+name = "a_case"
+variable = "condition"
+reference = "control"
+tested = "case"
+n = [6, 6]
+filters = { cell_type = ["type_a"], batch = ["short"] }
+
+[[contrasts]]
+name = "b_case"
+variable = "condition"
+reference = "control"
+tested = "case"
+n = [6, 6]
+filters = { cell_type = ["type_b"], batch = ["short"] }
+
+[[contrasts]]
+name = "a_naive"
+variable = "condition"
+reference = "control"
+tested = "case"
+n = [9, 12]
+filters = { cell_type = ["type_a"] }
+
+[[contrasts]]
+name = "a_adjusted"
+variable = "condition"
+reference = "control"
+tested = "case"
+n = [9, 12]
+design = "~batch + group"
+filters = { cell_type = ["type_a"] }
+
+[[contrasts]]
+name = "a_within"
+variable = "condition"
+reference = "control"
+tested = "case"
+n = [3, 6]
+filters = { cell_type = ["type_a"], batch = ["long"] }
+
+[[contrasts]]
+name = "a_null"
+variable = "condition"
+reference = "control"
+tested = "control"
+n = [3, 3]
+filters = { cell_type = ["type_a"], batch = ["short"], condition = ["control"] }
+split = { seed = 42, strata = "sex" }
+
+[de]
+featured = "a_case"
+box_contrast = "a_case"
+box_genes = ["G00001", "G00002", "G00003", "NOTAGENE"]
+scatters = [["a_naive", "a_adjusted"], ["a_case", "b_case"]]
+
+[de.lessons]
+"Batch" = ["a_naive", "a_adjusted", "a_within"]
+
+[[de.pca]]
+name = "all"
+factors = ["cell_type", "condition", "batch"]
+strata = "donor"
+
+[[de.pca]]
+name = "control_a"
+filters = { cell_type = ["type_a"], condition = ["control"] }
+factors = ["batch"]
+one_per = "donor"
+
+[function]
+gene_sets = "sets"
+licence = "Synthetic gene sets written by the test; no licence."
+featured_set = "UP_SET"
+running = ["a_case", "UP_SET"]
+
+[[sanity.rules]]
+id = "S1"
+text = "The null split calls at most 1 % of tested genes."
+source = "synthetic, the R3 shape"
+conditions = [
+    { metric = "calls.a_null.called", op = "<=", other = "calls.a_null.tested", times = 0.01 },
+]
+
+[[sanity.rules]]
+id = "S2"
+text = "UP_SET is enriched among the genes up in a_case."
+source = "synthetic, the R4 shape"
+conditions = [
+    { metric = "gsea.a_case.UP_SET.nes", op = ">", value = 0 },
+    { metric = "gsea.a_case.UP_SET.fdr", op = "<", value = 0.05 },
+]
+
+[[sanity.rules]]
+id = "S3"
+text = "A metric no module writes fails; it is never read as a pass."
+source = "synthetic, D-005"
+conditions = [{ metric = "no.such.metric", op = ">", value = 0 }]

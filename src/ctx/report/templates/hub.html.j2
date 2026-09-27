@@ -1,0 +1,37 @@
+{% extends "base.html.j2" %}
+{% block content %}
+<section id="hub">
+<p>{{ page.intro }}</p>
+<table class="hub">
+<thead><tr><th>Module</th><th>Page</th><th>Written</th></tr></thead>
+<tbody>
+{% for link in page.links %}
+<tr><td>{{ link.module }}</td><td><a href="{{ link.href }}">{{ link.title }}</a></td><td>{{ link.written }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% if page.verdicts %}
+<h2>Sanity rules</h2>
+<table class="verdicts">
+<thead><tr><th>Rule</th><th>What it checks</th><th>Verdict</th></tr></thead>
+<tbody>
+{% for rule, text, verdict in page.verdicts %}
+<tr><td>{{ rule }}</td><td>{{ text }}</td><td class="verdict">{{ verdict }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% endif %}
+<h2>Parameters</h2>
+<table class="cards">
+<thead><tr><th>Parameter</th><th>What it means</th><th>Default</th><th>What changes if you move it</th></tr></thead>
+<tbody>
+{% for card in page.parameters %}
+<tr id="card-{{ card.name }}"><td><code>{{ card.name }}</code></td><td>{{ card.meaning }}</td><td><code class="default">{{ card.default }}</code></td><td>{{ card.effect }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+{% if page.missing %}
+<p>Not run yet: {{ page.missing|join(", ") }}.</p>
+{% endif %}
+</section>
+{% endblock %}

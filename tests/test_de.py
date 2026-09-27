@@ -12,8 +12,9 @@ import polars as pl
 import pytest
 from synth import design_counts
 
+from ctx.dataset import Contrast, Split
 from ctx.de import deseq
-from ctx.de.deseq import Contrast, ContrastError, fit, pca, select_samples
+from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -191,7 +192,7 @@ def test_n_mismatch_raises():
 
 def test_split_is_seeded_and_stratified():
     synthetic = design_counts((("control", "short", 13), ("case", "short", 1)))
-    split = deseq.Split(42, "sex")
+    split = Split(42, "sex")
     contrast = Contrast("s", "condition", "control", "control", (7, 6),
                         filters={"condition": ("control",)}, split=split)  # fmt: skip
     first, _ = select_samples(synthetic.samples, contrast, {})

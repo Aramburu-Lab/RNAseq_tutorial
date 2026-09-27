@@ -1,5 +1,6 @@
 """Figure style, statistical annotation, and measurements of the written PDF and SVG files."""
 
+import dataclasses
 import math
 import re
 from datetime import date
@@ -10,9 +11,7 @@ import matplotlib as mpl
 import numpy as np
 import polars as pl
 import pytest
-from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
-from matplotlib.text import Text
 from pypdf import PdfReader
 from pypdf.generic import ContentStream
 from scipy.stats import mannwhitneyu
@@ -30,7 +29,7 @@ from ctx.de.stats import classify
 from ctx.io.naming import stem
 from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
-from ctx.viz.save import write_figure
+from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
 from ctx.viz.scatter import THIN_MAX, ScatterData
 from ctx.viz.style import (
     DATA_COLOURS,
@@ -379,27 +378,6 @@ def test_static_files_measured(written):
         assert not [e for e in svg.iter() if e.tag.endswith("image")]
 
 
-def _drawn_texts(fig) -> list[Text]:
-    """Visible, non-empty texts, without the labels of ticks outside the view limits.
-
-    matplotlib keeps a label for every tick its locator proposes but draws only those inside
-    the view interval; an undrawn label sits wherever its tick would be.
-    """
-    hidden = set()
-    for ax in fig.axes:
-        for axis in (ax.xaxis, ax.yaxis):
-            low, high = sorted(axis.get_view_interval())
-            span = high - low
-            for tick, loc in zip(axis.get_major_ticks(), axis.get_majorticklocs(), strict=False):
-                if not low - 1e-9 * span <= loc <= high + 1e-9 * span:
-                    hidden |= {id(tick.label1), id(tick.label2)}
-    return [
-        t
-        for t in fig.findobj(Text)
-        if t.get_visible() and t.get_text().strip() and id(t) not in hidden
-    ]
-
-
 OVERLAP_CASES = {
     "box_1_1": lambda s: demo_box(s, planted=1, null=1),
     "box_3_5": lambda s: demo_box(s, planted=3, null=5),
@@ -419,24 +397,17 @@ def test_no_text_overlap(case):
     data = OVERLAP_CASES[case](counts())
     for theme in THEMES.values():
         fig = data.static(theme)
-        renderer = FigureCanvasAgg(fig).get_renderer()
-        fig.draw(renderer)
-        boxes = [(t.get_text(), t.get_window_extent(renderer)) for t in _drawn_texts(fig)]
-        assert len(boxes) > 4
-        page = fig.bbox
-        outside = [
-            name
-            for name, b in boxes
-            if b.x0 < page.x0 or b.x1 > page.x1 or b.y0 < page.y0 or b.y1 > page.y1
-        ]
-        assert not outside, f"text off the page: {outside}"
-        clashes = [
-            (a, b)
-            for i, (a, box_a) in enumerate(boxes)
-            for b, box_b in boxes[i + 1 :]
-            if box_a.overlaps(box_b)
-        ]
-        assert not clashes, clashes[:5]
+        assert len(drawn_texts(fig)) > 4
+        assert layout_problems(fig) == []
+
+
+def test_write_refuses_clipped_text(tmp_path):
+    data = demo_bar(counts())
+    long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 3)
+    with pytest.raises(ValueError, match="off the page"):
+        write_figure(long, tmp_path, stem("de", "clipped", 1, day=date(2026, 9, 27)),
+                     title="t", data_releases={})  # fmt: skip
+    assert not list(tmp_path.iterdir())
 
 
 # --- scatter: drawn points, thinning, slider --------------------------------------------
@@ -462,6 +433,14 @@ def test_points_drawn_equal_csv_rows():
     called = set(data.frame.filter(pl.col("keep"))["gene_id"])
     on_page = set(data.on_page()["gene_id"])
     assert called <= on_page
+    # The page embeds the rows it draws, not the table's: the CSV beside it holds all.
+    assert len(figure_block(data, "x").rows) == data.on_page().height < data.table().height
+
+
+def test_empty_bars_refused():
+    data = demo_bar(counts())
+    with pytest.raises(ValueError, match="no bars"):
+        dataclasses.replace(data, frame=data.frame.head(0))
 
 
 def test_volcano_steps_count_from_figure():
@@ -546,3 +525,14 @@ def test_permanova_strata():
     assert permanova(coords, labels, strata=labels).p == 1.0
     paired = [f"s{i % 10}" for i in range(20)]
     assert permanova(coords, labels, strata=paired).p < 0.05
+
+
+def test_fit_title_wraps_to_axis_length():
+    from ctx.viz.annotate import fit_title  # noqa: PLC0415
+
+    title = "mono_hsct_early (log2 FC)"
+    height = WIDTHS_MM["single"] * 1.1 / 25.4
+    wrapped = fit_title(title, height)
+    assert wrapped.replace("\n", " ") == title
+    assert "\n" in wrapped
+    assert fit_title("Samples (runs)", height) == "Samples (runs)"

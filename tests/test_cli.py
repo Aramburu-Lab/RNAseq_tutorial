@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import textwrap
+from datetime import date
 from pathlib import Path
 
 import polars as pl
@@ -66,12 +67,63 @@ def gather_run(tmp_path_factory):
     return root, page.read_text()
 
 
+DE_SPEC = ROOT / "tests" / "fixtures" / "datasets" / "de_synthetic.toml"
+
+
+@pytest.fixture(scope="module")
+def pipeline(tmp_path_factory):
+    """de, function and report on one root, from gather outputs written by gather's writer."""
+    from synth import (  # noqa: PLC0415
+        DE_GROUPS,
+        design_counts,
+        write_gather_outputs,
+        write_gene_sets,
+    )
+
+    from ctx.dataset import load  # noqa: PLC0415
+
+    root = tmp_path_factory.mktemp("pipeline")
+    write_gather_outputs(root, "desynth", design_counts(DE_GROUPS, batch_lfc=2.0), date.today())
+    write_gene_sets(root / load(DE_SPEC).resource("sets").dest)
+    gathered = {p.name: p.read_bytes() for p in (root / "outputs" / "01_gather").iterdir()}
+    runs = {}
+    with_spec = ["--dataset-file", str(DE_SPEC)]
+    for command, extra in (("de", with_spec), ("function", with_spec), ("report", with_spec)):
+        done = _ctx("--root", str(root), command, "--dataset", "desynth", *extra, cwd=root)
+        assert done.returncode == 0, (command, done.stderr[-3000:])
+        runs[command] = done
+    return root, gathered, runs
+
+
+def _page(root: Path, number_module: str, what: str) -> str:
+    (page,) = (root / "outputs" / number_module).glob(f"*_{what}_v1.html")
+    return page.read_text()
+
+
+@pytest.fixture(scope="module")
+def de_run(pipeline):
+    return pipeline[0], _page(pipeline[0], "05_de", "desynth_overview")
+
+
+@pytest.fixture(scope="module")
+def function_run(pipeline):
+    return pipeline[0], _page(pipeline[0], "06_function", "desynth_overview")
+
+
+@pytest.fixture(scope="module")
+def report_run(pipeline):
+    return pipeline[0], _page(pipeline[0], "09_report", "desynth_hub")
+
+
+COMMANDS = ["setup", "gather", "de", "function", "report"]
+
+
 def test_every_subcommand_has_a_card_test():
     # A new subcommand without a case below fails here, not silently.
-    assert set(typer.main.get_command(app).commands) == {"setup", "gather"}
+    assert set(typer.main.get_command(app).commands) == set(COMMANDS)
 
 
-@pytest.mark.parametrize("command", ["setup", "gather"])
+@pytest.mark.parametrize("command", COMMANDS)
 def test_parameter_cards_match_cli(request, command):
     _, html = request.getfixturevalue(f"{command}_run")
     group = typer.main.get_command(app)
@@ -259,3 +311,128 @@ def test_gather_runs_from_wheel(tmp_path):
         cwd=tmp_path,
     )
     assert list((tmp_path / "root" / "outputs" / "01_gather").glob("*_samplesheet_v1.csv"))
+
+
+def _offline(html: str) -> None:
+    """P1.8: plotly.js inlined at most once, no external script, link or url()."""
+    import plotly.offline  # noqa: PLC0415
+
+    js = plotly.offline.get_plotlyjs()
+    assert html.count(js) <= 1
+    outside = html.replace(js, "")
+    assert not re.search(r"<script[^>]+\bsrc\s*=", outside, re.IGNORECASE)
+    assert not re.search(r"<link[^>]+\bhref\s*=", outside, re.IGNORECASE)
+    assert not re.search(r"url\(\s*['\"]?(https?:)?//", outside, re.IGNORECASE)
+    assert len(html.encode()) <= 15 * 10**6
+
+
+@pytest.mark.parametrize("folder", ["05_de", "06_function", "09_report"])
+def test_module_outputs_clean(pipeline, folder):
+    root, _, _ = pipeline
+    out = root / "outputs" / folder
+    scanned, violations = lint(out)
+    assert scanned > 0 and violations == []
+    for data in [*out.glob("*.csv"), *out.glob("*.parquet")]:
+        stem = data.name.rsplit(".", 1)[0]
+        assert (out / f"{stem}_README.md").is_file(), data.name
+    for page in out.glob("*.html"):
+        _offline(page.read_text())
+
+
+def test_de_end_to_end(de_run):
+    root, html = de_run
+    out = root / "outputs" / "05_de"
+    results = pl.read_parquet(next(out.glob("*_desynth_a_case_results_v1.parquet")))
+    planted = [f"g{i + 1:05d}" for i in range(100)]
+    called = set(results.filter(pl.col("call") != "ns")["gene_id"])
+    assert len(called & set(planted)) >= 80
+    metrics = dict(
+        pl.read_parquet(next(out.glob("*_desynth_metrics_v1.parquet")))
+        .select("metric", "value")
+        .rows()
+    )
+    assert metrics["calls.a_null.called"] == 0
+    assert metrics["sex.disagree"] == 0 and metrics["sex.compared"] == 33
+    wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', html).group(1))
+    assert 0 < wall < BUDGETS["B"].minutes * 60
+
+
+def test_function_end_to_end(function_run):
+    root, _ = function_run
+    out = root / "outputs" / "06_function"
+    gsea = dict(
+        (s, (nes, fdr))
+        for s, nes, fdr in pl.read_parquet(next(out.glob("*_desynth_a_case_gsea_v1.parquet")))
+        .select("gene_set", "nes", "fdr")
+        .rows()
+    )
+    assert gsea["UP_SET"][0] > 0 and gsea["UP_SET"][1] < 0.05
+    assert gsea["DOWN_SET"][0] < 0 and gsea["DOWN_SET"][1] < 0.05
+    ora = pl.read_parquet(next(out.glob("*_desynth_a_case_ora_v1.parquet")))
+    up = ora.filter((pl.col("direction") == "up") & (pl.col("gene_set") == "UP_SET"))
+    assert up["fdr"][0] < 0.05
+
+
+def test_inputs_untouched(pipeline):
+    root, gathered, _ = pipeline
+    now = {p.name: p.read_bytes() for p in (root / "outputs" / "01_gather").iterdir()}
+    assert now == gathered
+
+
+def test_hub_links_resolve_after_move(pipeline, tmp_path):
+    root, _, _ = pipeline
+    moved = tmp_path / "copied_outputs"
+    shutil.copytree(root / "outputs", moved)
+    (hub,) = (moved / "09_report").glob("*_desynth_hub_v1.html")
+    hrefs = re.findall(r'href="([^"]+)"', hub.read_text())
+    # Only de and function wrote pages here; setup and gather are listed as not run.
+    assert [h.split("/")[1] for h in hrefs] == ["05_de", "06_function"]
+    assert "Not run yet: M0 Setup, M1 Gather" in hub.read_text()
+    for href in hrefs:
+        assert not href.startswith(("http", "/")), href
+        assert (hub.parent / href).resolve().is_file(), href
+
+
+def test_newest_by_date_then_version(tmp_path):
+    from ctx.de.run import newest  # noqa: PLC0415
+
+    for day, dataset, version in (("01", "x", 3), ("02", "x", 1), ("02", "x", 2), ("02", "y", 9)):
+        (tmp_path / f"2026-09-{day}_gather_{dataset}_counts_v{version}.parquet").write_bytes(b"")
+    assert newest(tmp_path, "x", "counts").name == "2026-09-02_gather_x_counts_v2.parquet"
+
+
+def test_min_count_default_single_source():
+    from ctx.de.filters import MIN_COUNT  # noqa: PLC0415
+
+    command = typer.main.get_command(app).commands["de"]
+    (option,) = [p for p in command.params if p.opts[0] == "--min-count"]
+    assert option.default == MIN_COUNT
+
+
+def test_de_runs_from_wheel(pipeline, tmp_path):
+    root, _, _ = pipeline
+    fresh = tmp_path / "root"
+    shutil.copytree(root / "outputs" / "01_gather", fresh / "outputs" / "01_gather")
+    site = build_wheel(tmp_path)
+    run_from_wheel(
+        site,
+        f"""
+        import ctx
+        from ctx.cli import app
+        assert ctx.__file__.startswith({str(site)!r}), ctx.__file__
+        app(["--root", {str(fresh)!r}, "de", "--dataset", "desynth",
+             "--dataset-file", {str(DE_SPEC)!r}], standalone_mode=False)
+        """,
+        cwd=tmp_path,
+    )
+    assert list((fresh / "outputs" / "05_de").glob("*_desynth_overview_v1.html"))
+
+
+def test_report_decides_sanity(pipeline):
+    root, _, _ = pipeline
+    out = root / "outputs" / "09_report"
+    verdicts = pl.read_parquet(next(out.glob("*_desynth_sanity_v1.parquet")))
+    rules = dict(verdicts.select("rule", "rule_verdict").unique().rows())
+    assert rules == {"S1": "PASS", "S2": "PASS", "S3": "FAIL"}
+    hub = next(out.glob("*_desynth_hub_v1.html")).read_text()
+    assert hub.count('class="verdict"') == 4  # S1, both S2 conditions, S3

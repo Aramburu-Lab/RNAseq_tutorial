@@ -11,7 +11,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from ctx.viz.annotate import place_caption, plotly_caption
+from ctx.viz.annotate import fit_title, place_caption, plotly_caption
 from ctx.viz.style import (
     BAR_LABEL_ROTATION,
     BAR_MARGIN_MM,
@@ -69,6 +69,8 @@ class BarData:
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
+        if self.frame.is_empty():
+            raise ValueError("no bars to draw: the table is empty")
         named = [self.category, self.value, self.series, *self.hover]
         if missing := [c for c in named if c not in self.frame.columns]:
             raise ValueError(f"missing columns {missing}")
@@ -86,6 +88,10 @@ class BarData:
     def table_columns(self) -> Mapping[str, tuple[str, str]]:
         """(unit, meaning) for every column of ``table()``."""
         return self.columns
+
+    def page_table(self) -> pl.DataFrame:
+        """Every bar."""
+        return self.frame
 
     def caption_text(self) -> str:
         """The caption, unwrapped."""
@@ -158,7 +164,7 @@ class BarData:
         labels = [str(c) for c in categories]
         ticks[0](positions if shown else [], labels if shown else [], rotation=rotation)
         ticks[1](self.category_label)
-        ticks[2](self._value_title())
+        ticks[2](self._value_title() if self.horizontal else fit_title(self._value_title(), height))
         if self.horizontal:
             ax.invert_yaxis()
         sns.despine(fig=fig)
@@ -195,7 +201,7 @@ class BarData:
             )  # fmt: skip
         if self.hline:
             add = fig.add_vline if self.horizontal else fig.add_hline
-            add(self.hline[0], line_dash="dash", line_color=light.ink,
+            add(self.hline[0], line_dash="dash", line_color=light.reference,
                 annotation_text=self.hline[1])  # fmt: skip
         caption, bottom = plotly_caption(self.caption, figure_inches("double", "bar")[0])
         category_axis = {"title": self.category_label, "categoryorder": "array",

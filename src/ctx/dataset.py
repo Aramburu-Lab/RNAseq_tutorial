@@ -7,13 +7,16 @@ the counts the curated sheet must reproduce. Every schema error is reported at o
 
 import tomllib
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 # Curation columns every dataset with an SDRF must fill (harmonise.CURATION).
 REQUIRED_COLUMNS = ("donor", "cell_type", "condition")
-TABLES = {"dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect"}
+TABLES = {
+    "dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect",
+    "contrasts", "de", "function", "sanity",
+}  # fmt: skip
 
 
 class DatasetError(ValueError):
@@ -56,6 +59,84 @@ class Sdrf:
 
 
 @dataclass(frozen=True)
+class Split:
+    """A seeded split of individuals into two arbitrary groups, balanced within strata."""
+
+    seed: int
+    strata: str
+
+
+@dataclass(frozen=True)
+class Contrast:
+    """One comparison: which samples, which two levels, which design, and the n it must have.
+
+    Attributes:
+        name: Identifier, used in output names.
+        variable: Column holding the compared levels; ignored for a split.
+        reference: Baseline level; the LFC is tested over reference.
+        tested: The other level.
+        expected_n: (reference, tested) samples after every step; a mismatch stops the fit.
+        design: pydeseq2 formula over ``group`` and sheet columns, e.g. ``~donor + group``.
+        filters: Column to allowed values; a sample must match every one.
+        paired: Keep only donors with a sample at both levels.
+        split: Replace the compared levels by a seeded split of individuals.
+    """
+
+    name: str
+    variable: str
+    reference: str
+    tested: str
+    expected_n: tuple[int, int]
+    design: str = "~group"
+    filters: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    paired: bool = False
+    split: Split | None = None
+
+
+@dataclass(frozen=True)
+class PcaSpec:
+    """A PCA figure and its PERMANOVA metrics.
+
+    Attributes:
+        name: Identifier, used in output and metric names.
+        filters: Column to allowed values.
+        factors: Sheet columns to test; the first colours the points.
+        symbol: Column setting the point shape, or None.
+        strata: Permute labels only within this column (the individual), or None.
+        one_per: Keep one sample per value of this column (the first run), or None.
+    """
+
+    name: str
+    filters: Mapping[str, tuple[str, ...]]
+    factors: tuple[str, ...]
+    symbol: str | None = None
+    strata: str | None = None
+    one_per: str | None = None
+
+
+@dataclass(frozen=True)
+class DeSpec:
+    """What the M5 page draws beyond each contrast's tables."""
+
+    featured: str
+    pca: tuple[PcaSpec, ...] = ()
+    lessons: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
+    scatters: tuple[tuple[str, str], ...] = ()
+    box_contrast: str | None = None
+    box_genes: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True)
+class FunctionSpec:
+    """Which gene sets M6 tests, their licence line, and what the page features."""
+
+    gene_sets: str
+    licence: str
+    featured_set: str
+    running: tuple[str, str]
+
+
+@dataclass(frozen=True)
 class Dataset:
     """A parsed dataset file."""
 
@@ -69,6 +150,10 @@ class Dataset:
     order: Mapping[str, tuple[str, ...]]
     expect_runs: int | None
     expect_counts: Mapping[str, Mapping[str, int]]
+    contrasts: tuple[Contrast, ...] = ()
+    de: DeSpec | None = None
+    function: FunctionSpec | None = None
+    sanity: Mapping[str, Any] = field(default_factory=dict)
 
     def resource(self, name: str) -> Resource:
         """The resource with this name."""
@@ -132,6 +217,88 @@ def _sdrf(raw: Mapping[str, Any], resources: tuple[Resource, ...], problems: lis
     return Sdrf(resource or "", (join[0], join[-1]), tuple((a, b) for a, b in pairs))
 
 
+def _values(raw: Mapping[str, Any]) -> dict[str, tuple[str, ...]]:
+    """A filter table: column to allowed values."""
+    return {k: tuple(str(x) for x in v) for k, v in raw.items()}
+
+
+def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
+    """Parse [[contrasts]]."""
+    out = []
+    for i, entry in enumerate(raw):
+        where = f"contrasts[{i}]"
+        fields = [_need(entry, key, str, where, problems)
+                  for key in ("name", "variable", "reference", "tested")]  # fmt: skip
+        n = _need(entry, "n", list, where, problems)
+        split = entry.get("split")
+        if n is not None and (len(n) != 2 or not all(isinstance(x, int) for x in n)):  # noqa: PLR2004 - a pair
+            problems.append(f"{where}.n: expected [reference n, tested n], found {n!r}")
+        if None in fields or n is None:
+            continue
+        name, variable, reference, tested = (str(f) for f in fields)
+        out.append(Contrast(
+            name, variable, reference, tested, expected_n=(n[0], n[-1]),
+            design=entry.get("design", "~group"),
+            filters=_values(entry.get("filters", {})), paired=bool(entry.get("paired", False)),
+            split=Split(int(split["seed"]), str(split["strata"])) if split else None,
+        ))  # fmt: skip
+    names = [c.name for c in out]
+    problems += [
+        f"contrasts: {n!r} appears twice" for n in sorted(set(names)) if names.count(n) > 1
+    ]
+    return tuple(out)
+
+
+def _de(raw: Mapping[str, Any], names: set[str], problems: list[str]) -> DeSpec:
+    """Parse [de] and check it names only declared contrasts."""
+    pca = tuple(
+        PcaSpec(
+            p["name"],
+            _values(p.get("filters", {})),
+            tuple(p["factors"]),
+            p.get("symbol"),
+            p.get("strata"),
+            p.get("one_per"),
+        )  # fmt: skip
+        for p in raw.get("pca", [])
+    )
+    spec = DeSpec(
+        featured=raw.get("featured", ""),
+        pca=pca,
+        lessons={k: tuple(v) for k, v in raw.get("lessons", {}).items()},
+        scatters=tuple((a, b) for a, b in raw.get("scatters", [])),
+        box_contrast=raw.get("box_contrast"),
+        box_genes=tuple(raw.get("box_genes", [])),
+    )
+    used = [spec.featured, *(c for v in spec.lessons.values() for c in v)]
+    used += [c for pair in spec.scatters for c in pair] + (
+        [spec.box_contrast] if spec.box_contrast else []
+    )
+    problems += [
+        f"de: {c!r} is not a declared contrast" for c in dict.fromkeys(used) if c not in names
+    ]
+    return spec
+
+
+def _function(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, ...],
+              problems: list[str]) -> FunctionSpec | None:  # fmt: skip
+    """Parse [function]."""
+    fields = [_need(raw, k, str, "function", problems)
+              for k in ("gene_sets", "licence", "featured_set")]  # fmt: skip
+    running = raw.get("running", [])
+    if len(running) != 2:  # noqa: PLR2004 - a pair
+        problems.append("function.running: expected [contrast, gene set]")
+        return None
+    if fields[0] is not None and fields[0] not in {r.name for r in resources}:
+        problems.append(f"function.gene_sets: no [[resources]] entry named {fields[0]!r}")
+    if running[0] not in names:
+        problems.append(f"function.running: {running[0]!r} is not a declared contrast")
+    if None in fields:
+        return None
+    gene_sets, licence, featured = (str(f) for f in fields)
+    return FunctionSpec(gene_sets, licence, featured, running=(running[0], running[1]))
+
+
 def load(path: Path) -> Dataset:
     """Read and check a dataset file.
 
@@ -164,6 +331,10 @@ def load(path: Path) -> Dataset:
     counts = expect.get("counts", {})
     known = named | {"batch", "read_length"}
     problems += [f"expect.counts.{k}: not a curated column" for k in counts if k not in known]
+    contrasts = _contrasts(raw.get("contrasts", []), problems)
+    names = {c.name for c in contrasts}
+    de = _de(raw["de"], names, problems) if "de" in raw else None
+    function = _function(raw["function"], names, resources, problems) if "function" in raw else None
     if problems:
         raise DatasetError(f"{path}:\n  " + "\n  ".join(problems))
     return Dataset(
@@ -177,4 +348,8 @@ def load(path: Path) -> Dataset:
         order=order,
         expect_runs=expect.get("runs"),
         expect_counts={k: {str(v): int(n) for v, n in c.items()} for k, c in counts.items()},
+        contrasts=contrasts,
+        de=de,
+        function=function,
+        sanity=raw.get("sanity", {}),
     )

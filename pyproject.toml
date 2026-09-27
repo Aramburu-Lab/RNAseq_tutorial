@@ -35,5 +35,8 @@ fail-under = 100
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["network: needs the network; deselected by default, run with -m network"]
-addopts = "-m 'not network'"
+markers = [
+    "network: needs the network; deselected by default, run with -m network",
+    "budget: real-size run against the Track B budget; minutes; run with -m budget",
+]
+addopts = "-m 'not network and not budget'"

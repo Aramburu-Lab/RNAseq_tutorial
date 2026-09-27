@@ -10,7 +10,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import Caption, compare_groups, place_caption, plotly_caption
+from ctx.viz.annotate import Caption, compare_groups, fit_title, place_caption, plotly_caption
 from ctx.viz.style import (
     HEADROOM,
     LINE_WIDTHS,
@@ -66,6 +66,10 @@ class BoxData:
     def table_columns(self) -> dict[str, tuple[str, str]]:
         """(unit, meaning) for every column of ``table()``."""
         return {**self.columns, **STAT_COLUMNS}
+
+    def page_table(self) -> pl.DataFrame:
+        """Every row: a box plot draws every sample."""
+        return table(self)
 
     def static(self, theme: Theme) -> Any:
         """The matplotlib figure for one theme; see ``static()``."""
@@ -174,7 +178,7 @@ def static(data: BoxData, theme: Theme) -> Any:
     low, high = ax.get_ylim()
     ax.set_ylim(top=high + (high - low) * HEADROOM)
     ax.set_xlabel(data.feature_label)
-    ax.set_ylabel(f"{data.value_label} ({data.unit})")
+    ax.set_ylabel(fit_title(f"{data.value_label} ({data.unit})", height))
     # Above the axes: inside, it collides with the p/r labels over the boxes.
     ax.legend(title=None, loc="lower left", bbox_to_anchor=(0, 1), ncols=2, borderaxespad=0)
     sns.despine(fig=fig)
