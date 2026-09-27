@@ -8,6 +8,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
+from ctx.gather import rnaseq
 from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate
 from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
@@ -282,6 +283,36 @@ def _curation_facts(frame: pl.DataFrame, spec: Dataset) -> tuple[str, ...]:
     )
 
 
+def _counts_tables(
+    counts: rnaseq.Counts,
+) -> list[tuple[str, pl.DataFrame, dict[str, tuple[str, str]]]]:
+    """(description, frame, column dictionary) of the counts and genes tables."""
+    source = f"nf-core/rnaseq {counts.provenance['nf-core/rnaseq']} {rnaseq.MATRIX_FILE}"
+    per_sample = {
+        s: ("reads", f"Length-scaled count for sample {s}, rounded half to even ({source}).")
+        for s in counts.matrix.columns[1:]
+    }
+    gene_id = ("none", "Gene identifier from the annotation the index was built with.")
+    return [
+        ("counts", counts.matrix, {"gene_id": gene_id, **per_sample}),
+        ("genes", counts.genes, {"gene_id": gene_id,
+                                 "gene_name": ("none", "Gene symbol from the same annotation.")}),
+    ]  # fmt: skip
+
+
+def _counts_facts(counts: rnaseq.Counts) -> str:
+    """What the counts step read and did, counted."""
+    genes, samples = counts.matrix.height, counts.matrix.width - 1
+    kind = counts.matrix.dtypes[1] if samples else "none"
+    return (
+        f"Counts: {genes:,} genes by {samples} samples from nf-core/rnaseq "
+        f"{counts.provenance['nf-core/rnaseq']} (Salmon {counts.provenance['salmon']}), the "
+        f"length-scaled gene matrix; {counts.fractional:,} of {genes * samples:,} values were "
+        f"fractional and were rounded half to even; stored as {kind}, "
+        f"{counts.matrix.estimated_size():,} bytes in memory."
+    )
+
+
 def _write_problems(
     error: CurationError, out: Path, dataset: str, releases: dict[str, str]
 ) -> Path:
@@ -294,13 +325,40 @@ def _write_problems(
     return written[0]
 
 
+def _curate(
+    settings: runtime.Settings, spec: Dataset, checked: Outdir, out: Path, releases: dict[str, str]
+) -> pl.DataFrame:
+    """Curate the runs with the dataset's SDRF, adding what was read to ``releases``.
+
+    Raises:
+        DatasetError: If the SDRF has not been fetched under the root.
+        CurationError: After writing the problem table.
+    """
+    assert spec.sdrf is not None  # noqa: S101 - run() refuses a dataset file without [sdrf]
+    sdrf = settings.root / spec.resource(spec.sdrf.resource).dest
+    if not sdrf.is_file():
+        raise DatasetError(f"{sdrf} is missing; run ctx setup --dataset-file {spec.path}")
+    releases |= {
+        "dataset file": str(spec.path),
+        f"sha256:{spec.path.name}": hashlib.sha256(spec.path.read_bytes()).hexdigest(),
+        f"sha256:{sdrf.name}": hashlib.sha256(sdrf.read_bytes()).hexdigest(),
+    }
+    try:
+        return curate(checked.runs, sdrf.read_text(), spec)
+    except CurationError as error:
+        _write_problems(error, out, spec.slug, releases)
+        raise
+
+
 def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named option or context
     settings: runtime.Settings,
     cards: tuple[ParameterCard, ...],
     command: str,
     dataset: str,
-    fetchngs_dir: Path | None,
+    *,
+    fetchngs_dir: Path | None = None,
     dataset_file: Path | None = None,
+    rnaseq_dir: Path | None = None,
 ) -> list[Path]:
     """Check the outdir, curate it if a dataset file is given, and write the sheet and page.
 
@@ -311,6 +369,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         dataset: Slug naming the dataset in output names.
         fetchngs_dir: The fetchngs outdir; unset means ``<root>/data/raw/<dataset>``.
         dataset_file: The dataset file; unset writes the sheet with empty curation columns.
+        rnaseq_dir: An nf-core/rnaseq outdir whose gene counts to check and write; unset
+            writes no counts.
 
     Returns:
         The page, then the sheet files, then the figure files.
@@ -319,6 +379,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         DatasetError: If the dataset file is unusable, names another slug, or its SDRF has
             not been fetched under the root.
         CurationError: After writing the problem table, if curation found any problem.
+        rnaseq.RnaseqError: If the rnaseq outdir cannot be used; nothing is written.
     """
     day = date.today()
     sheet_stem = stem(MODULE, f"{dataset}_samplesheet", 1, day=day)  # validates the slug first
@@ -332,24 +393,19 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     checked = read(source)  # raises before anything is written
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
     releases = {"fetchngs outdir": str(source), **checked.provenance}
-    curated = None
-    if spec and spec.sdrf:
-        sdrf = settings.root / spec.resource(spec.sdrf.resource).dest
-        if not sdrf.is_file():
-            raise DatasetError(f"{sdrf} is missing; run ctx setup --dataset-file {dataset_file}")
-        releases |= {
-            "dataset file": str(spec.path),
-            f"sha256:{spec.path.name}": hashlib.sha256(spec.path.read_bytes()).hexdigest(),
-            f"sha256:{sdrf.name}": hashlib.sha256(sdrf.read_bytes()).hexdigest(),
-        }
-        try:
-            curated = curate(checked.runs, sdrf.read_text(), spec)
-        except CurationError as error:
-            _write_problems(error, out, dataset, releases)
-            raise
+    curated = _curate(settings, spec, checked, out, releases) if spec else None
     frame = sheet(checked, curated)
+    # Read before anything is written, so a bad outdir leaves no sheet behind.
+    counts = rnaseq.read(rnaseq_dir.resolve(), set(frame["sample"])) if rnaseq_dir else None
     files = write_table(frame, out, sheet_stem, columns=columns(spec), data_releases=releases)
     results: list[FigureBlock | str] = list(_facts(checked, frame))
+    if counts is not None:
+        counts_releases = {**releases, "rnaseq outdir": str(rnaseq_dir), **counts.provenance}
+        for name, table, described in _counts_tables(counts):
+            table_stem = stem(MODULE, f"{dataset}_{name}", 1, day=day)
+            files += write_table(table, out, table_stem, columns=described,
+                                 data_releases=counts_releases)  # fmt: skip
+        results.append(_counts_facts(counts))
     if spec and curated is not None:
         results += _curation_facts(frame, spec)
         for name, data in (

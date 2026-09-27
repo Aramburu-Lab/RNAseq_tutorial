@@ -57,7 +57,7 @@ CANNOT = (
 
 def definitions() -> tuple[str, tuple[str, ...]]:
     """RNASEQ_VERSION and COPIED_FILES from their one definition, without importing ctx."""
-    names = {"RNASEQ_VERSION", "VERSIONS_FILE", "READ_FILES", "COPIED_FILES"}
+    names = {"RNASEQ_VERSION", "VERSIONS_FILE", "MATRIX_FILE", "READ_FILES", "COPIED_FILES"}
     tree = ast.parse(SOURCE.read_text())
     tree.body = [
         n

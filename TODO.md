@@ -1311,7 +1311,7 @@ Exit gate:
     - Eye check at real size: the vertical composition bars lost their axes to rotated labels, so composition is now horizontal, and a horizontal bar figure grows by `BAR_ROW_MM` per category. The library-size bars showed matplotlib's "1e7" offset over the legend, so they now show million reads, and the CSV keeps `read_count`. The 210 unlabelled runs drew a comb of tick marks, which are now hidden with their labels. Overlap and measured-file cases at tier-1 scale (20 groups, 210 runs) were added to `tests/test_viz.py`.
   - Deviation: the `[[contrasts]]`, `[de]` and `[sanity]` tables are not parsed yet. The loader refuses unknown tables, so each is added with the item that reads it (P2B.4, P2B.6, P2C.1).
 
-- [ ] **P2B.3 Counts reader: `ctx gather --rnaseq-dir`.**
+- [x] **P2B.3 Counts reader: `ctx gather --rnaseq-dir`.**
   - `gather/rnaseq.py::read(dir)` runs in this order:
     1. refuse any other release;
     2. params files agree on pseudo_aligner, skip_alignment, gencode, fasta and gtf;
@@ -1327,6 +1327,9 @@ Exit gate:
     - reads only `READ_FILES`, with the full fixture made unreachable first;
     - input dir untouched;
     - a card.
+  - Evidence, 2026-09-27: `gather/rnaseq.py` gains `read(outdir, samples)`, `to_counts` and `RnaseqError`; `harmonise.run` reads the matrix before it writes anything, then writes `<dataset>_counts_v1` and `<dataset>_genes_v1` with the release, Salmon version, params and the SHA-256 of each file read in their README; `--rnaseq-dir` has a card. On the fixture: 124 genes by 5 samples; 446 of 620 values were fractional before rounding; Int32; `estimated_size()` 3,391 bytes. `tests/test_rnaseq.py`, 8 tests: rounding half to even and the Int64 switch; the fixture read against `np.rint` of its own TSV; the sample-set mismatch listed both ways; another release refused; two params files disagreeing on `gencode`; a copy holding only `READ_FILES` read identically; the CLI writing counts and leaving the outdir's SHA-256 and mtimes unchanged; a bad outdir writing nothing. `pixi run preflight` exits 0, 184 passed, 38.51 s real at 897,302,528 bytes max RSS.
+  - Mutations, applied with Python, each fail their test: truncation instead of `np.rint`; params never compared; any release accepted; extra matrix samples not listed; the matrix read after the sheet is written.
+  - `run()` now takes its options keyword-only, and curation moved to `_curate()`, to stay within ruff's complexity limits.
 
 - [ ] **P2B.4 DE engine on planted truth.**
   - `de/filters.py::expressed()` is edgeR `filterByExpr`: a CPM cutoff from min.count and the median library size, the smallest-group rule with the large-n and min-prop terms, and a min total count (minor 7).
