@@ -1,15 +1,28 @@
 """M1c: turn one checked fetchngs outdir into the harmonised sample sheet and its page."""
 
+import hashlib
 from datetime import date
 from pathlib import Path
 
 import polars as pl
 
 from ctx import runtime
+from ctx.dataset import Dataset, DatasetError, load
+from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate
 from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
-from ctx.report.builder import ModulePage, ParameterCard, Reproduction, SelfCheck, write
+from ctx.report.builder import (
+    FigureBlock,
+    ModulePage,
+    ParameterCard,
+    Reproduction,
+    SelfCheck,
+    write,
+)
+from ctx.viz.bar import BarData
+from ctx.viz.save import figure_block, write_figure
+from ctx.viz.style import category_colours
 
 MODULE = "gather"
 ENA_SOURCE = "ENA Portal API returnFields, result=read_run, retrieved 2026-09-26"
@@ -72,26 +85,51 @@ CURATION_COLUMNS = {
     c: ("none", f"{c}, from the dataset's curation file (Phase 2); empty until then.")
     for c in CURATION
 }
+DERIVED_COLUMNS = {
+    "replicate": (
+        "none",
+        "Order of this sample among the runs of one donor, cell type and condition: by the "
+        "dataset file's [order], then by run accession; from 1.",
+    ),
+    "batch": ("none", "Batch from the dataset file's read-length bins ([derived.batch])."),
+    "read_length": ("nt", "base_count / read_count / mates (2 for paired runs); never rounded."),
+}
 COLUMNS = {**OWN_COLUMNS, **ENA_COLUMNS, **CURATION_COLUMNS}
 INT32_MAX = 2**31 - 1
 # fetchngs's FTP path keeps only the last two ENA files of a run (sra_runinfo_to_ftp.py:70-71).
 FTP_KEEPS = 2
 
 
-def sheet(outdir: Outdir) -> pl.DataFrame:
-    """The harmonised sheet: one row per run, the chosen columns, curation columns empty.
+def columns(spec: Dataset | None) -> dict[str, tuple[str, str]]:
+    """(unit, meaning) of every sheet column: fixed columns, then the dataset's extras."""
+    if spec is None:
+        return COLUMNS
+    extras = {c.name: (c.unit, c.meaning) for c in spec.columns}
+    fixed = {**COLUMNS, **{k: v for k, v in extras.items() if k in CURATION}}
+    fixed |= {k: DERIVED_COLUMNS[k] for k in ("replicate", "batch")}
+    return {**fixed, **{k: v for k, v in extras.items() if k not in CURATION},
+            "read_length": DERIVED_COLUMNS["read_length"]}  # fmt: skip
+
+
+def sheet(outdir: Outdir, curated: pl.DataFrame | None = None) -> pl.DataFrame:
+    """The harmonised sheet: one row per run, the chosen columns, curation filled if given.
 
     Args:
         outdir: A checked fetchngs outdir.
+        curated: ``curation.curate()`` output, or None to leave the curation columns empty.
 
     Returns:
-        The sheet, in ``COLUMNS`` order. ``read_count`` and ``base_count`` are Int32 where
-        every value fits, Int64 otherwise: base counts of deep runs pass 2**31.
+        The sheet. ``read_count`` and ``base_count`` are Int32 where every value fits,
+        Int64 otherwise: base counts of deep runs pass 2**31.
     """
     runs = outdir.runs
     frame = runs.select([c for c in COLUMNS if c in runs.columns]).with_columns(
         [pl.lit("").alias(c) for c in CURATION]
     )
+    if curated is not None:
+        frame = frame.drop(CURATION).join(
+            curated, on="run_accession", how="left", maintain_order="left"
+        )
     counts = frame.select(pl.col("read_count", "base_count").cast(pl.Int64))
     # Downcast only after checking the range (CONVENTIONS.md, Stack), column by column.
     fitted = [
@@ -100,7 +138,8 @@ def sheet(outdir: Outdir) -> pl.DataFrame:
         else counts[c]
         for c in counts.columns
     ]
-    return frame.with_columns(fitted).select(list(COLUMNS))
+    extras = [c for c in frame.columns if c not in COLUMNS]
+    return frame.with_columns(fitted).select(*COLUMNS, *extras)
 
 
 def _facts(outdir: Outdir, frame: pl.DataFrame) -> tuple[str, ...]:
@@ -159,14 +198,111 @@ MISTAKES = (
 )
 
 
+def _composition(frame: pl.DataFrame, spec: Dataset) -> BarData:
+    """Samples per cell type and condition, stacked by batch, individuals on hover."""
+    groups = (
+        frame.with_columns(batch=pl.col("batch").replace("", "all"))
+        .group_by("cell_type", "condition", "batch")
+        .agg(n_samples=pl.len().cast(pl.Int64), n_individuals=pl.col("donor").n_unique())
+        .sort("cell_type", "condition", "batch")
+        .with_columns(group=pl.format("{} {}", "cell_type", "condition"))
+    )
+    levels = [b for b in (*spec.batch_bins, "all") if b in set(groups["batch"])]
+    columns = {
+        "cell_type": ("none", "Cell type, curated."),
+        "condition": ("none", "Condition, curated."),
+        "batch": ("none", "Batch from read length; all when the dataset declares none."),
+        "n_samples": ("runs", "Runs in this cell type, condition and batch."),
+        "n_individuals": ("individuals", "Distinct donors among those runs."),
+        "group": ("none", "Cell type and condition, the bar's label."),
+    }
+    caption = (
+        f"{frame.height} runs from {frame['donor'].n_unique()} individuals, by cell type, "
+        "condition and batch; counts, no test. An individual can give several cell types, "
+        "so individuals do not add up across bars."
+    )
+    return BarData(
+        frame=groups, columns=columns, category="group", value="n_samples",
+        category_label="Cell type and condition", value_label="Samples", series="batch",
+        colours=category_colours(levels), caption=caption, horizontal=True, stacked=True,
+        hover=("n_individuals",), width="double",
+    )  # fmt: skip
+
+
+def _library_sizes(frame: pl.DataFrame, spec: Dataset) -> BarData:
+    """Reads per run, grouped by batch, largest first."""
+    runs = frame.with_columns(batch=pl.col("batch").replace("", "all")).sort(
+        "batch", "read_count", descending=[False, True]
+    )
+    levels = [b for b in (*spec.batch_bins, "all") if b in set(runs["batch"])]
+    medians = "; ".join(
+        f"{b}: n = {n} runs, median {m:,.0f} reads"
+        for b, n, m in runs.group_by("batch", maintain_order=True)
+        .agg(pl.len(), pl.col("read_count").median())
+        .rows()
+    )
+    columns = {
+        "run_accession": COLUMNS["run_accession"],
+        "read_count": COLUMNS["read_count"],
+        "million_reads": ("million reads", "read_count / 1,000,000, the bar's length."),
+        "batch": ("none", "Batch from read length; all when the dataset declares none."),
+        "cell_type": ("none", "Cell type, curated."),
+        "condition": ("none", "Condition, curated."),
+    }
+    return BarData(
+        frame=runs.with_columns(
+            pl.col("read_count").cast(pl.Int64), million_reads=pl.col("read_count") / 1e6
+        ).select(*columns),
+        columns=columns, category="run_accession", value="million_reads",
+        category_label="Run, by batch and depth", value_label="Reads", series="batch",
+        colours=category_colours(levels),
+        caption=f"Reads per run as ENA reports them, no test. {medians}.",
+        stacked=True, hover=("cell_type", "condition"), width="double",
+    )  # fmt: skip
+
+
+def _curation_facts(frame: pl.DataFrame, spec: Dataset) -> tuple[str, ...]:
+    """What curation joined and derived, counted."""
+    assert spec.sdrf is not None  # noqa: S101 - curation ran, so the dataset has an SDRF
+    lengths = ", ".join(
+        f"{v:g} nt {n}" for v, n in frame["read_length"].value_counts().sort("read_length").rows()
+    )
+    batches = ", ".join(
+        f"{b or 'none'} {n}" for b, n in frame["batch"].value_counts().sort("batch").rows()
+    )
+    checked = ", ".join(a for a, _ in spec.sdrf.cross_check)
+    repeats = frame.filter(pl.col("replicate") > 1).height
+    return (
+        f"Curation from {spec.path.name}: each of {frame.height} runs joined to one SDRF row "
+        f"on {spec.sdrf.join[0]}, in both directions"
+        + (f"; {checked} agrees for every run" if checked else "")
+        + "; every value is in the dataset file's value maps.",
+        f"Read length by run: {lengths}. Batch: {batches}.",
+        f"Runs beyond the first of a donor, cell type and condition: {repeats}.",
+    )
+
+
+def _write_problems(
+    error: CurationError, out: Path, dataset: str, releases: dict[str, str]
+) -> Path:
+    """Write the problem table beside where the sheet would have gone; no sheet is written."""
+    problems = pl.DataFrame(error.problems, schema=list(PROBLEM_COLUMNS), orient="row")
+    problem_stem = stem(MODULE, f"{dataset}_curation_problems", 1, day=date.today())
+    written = write_table(
+        problems, out, problem_stem, columns=PROBLEM_COLUMNS, data_releases=releases
+    )
+    return written[0]
+
+
 def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named option or context
     settings: runtime.Settings,
     cards: tuple[ParameterCard, ...],
     command: str,
     dataset: str,
     fetchngs_dir: Path | None,
+    dataset_file: Path | None = None,
 ) -> list[Path]:
-    """Check the outdir, then write the sheet and its page under ``outputs/01_gather``.
+    """Check the outdir, curate it if a dataset file is given, and write the sheet and page.
 
     Args:
         settings: The resolved runtime.
@@ -174,19 +310,56 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         command: The command line, as the reader should retype it.
         dataset: Slug naming the dataset in output names.
         fetchngs_dir: The fetchngs outdir; unset means ``<root>/data/raw/<dataset>``.
+        dataset_file: The dataset file; unset writes the sheet with empty curation columns.
 
     Returns:
-        The page, then the sheet files.
+        The page, then the sheet files, then the figure files.
+
+    Raises:
+        DatasetError: If the dataset file is unusable, names another slug, or its SDRF has
+            not been fetched under the root.
+        CurationError: After writing the problem table, if curation found any problem.
     """
     day = date.today()
     sheet_stem = stem(MODULE, f"{dataset}_samplesheet", 1, day=day)  # validates the slug first
     page_stem = stem(MODULE, f"{dataset}_overview", 1, day=day)
+    spec = load(dataset_file) if dataset_file else None
+    if spec and spec.slug != dataset:
+        raise DatasetError(f"{dataset_file} is for {spec.slug!r}, not --dataset {dataset!r}")
+    if spec and spec.sdrf is None:
+        raise DatasetError(f"{dataset_file}: no [sdrf] table; nothing to curate from")
     source = (fetchngs_dir or settings.root / "data" / "raw" / dataset).resolve()
     checked = read(source)  # raises before anything is written
-    frame = sheet(checked)
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
     releases = {"fetchngs outdir": str(source), **checked.provenance}
-    files = write_table(frame, out, sheet_stem, columns=COLUMNS, data_releases=releases)
+    curated = None
+    if spec and spec.sdrf:
+        sdrf = settings.root / spec.resource(spec.sdrf.resource).dest
+        if not sdrf.is_file():
+            raise DatasetError(f"{sdrf} is missing; run ctx setup --dataset-file {dataset_file}")
+        releases |= {
+            "dataset file": str(spec.path),
+            f"sha256:{spec.path.name}": hashlib.sha256(spec.path.read_bytes()).hexdigest(),
+            f"sha256:{sdrf.name}": hashlib.sha256(sdrf.read_bytes()).hexdigest(),
+        }
+        try:
+            curated = curate(checked.runs, sdrf.read_text(), spec)
+        except CurationError as error:
+            _write_problems(error, out, dataset, releases)
+            raise
+    frame = sheet(checked, curated)
+    files = write_table(frame, out, sheet_stem, columns=columns(spec), data_releases=releases)
+    results: list[FigureBlock | str] = list(_facts(checked, frame))
+    if spec and curated is not None:
+        results += _curation_facts(frame, spec)
+        for name, data in (
+            ("composition", _composition(frame, spec)),
+            ("library_sizes", _library_sizes(frame, spec)),
+        ):
+            figure_stem = stem(MODULE, f"{dataset}_{name}", 1, day=day)
+            title = f"M1c {name.replace('_', ' ')}: {dataset}"
+            files += write_figure(data, out, figure_stem, title=title, data_releases=releases)
+            results.append(figure_block(data, figure_stem))
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
@@ -194,7 +367,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,
-        results=_facts(checked, frame),
+        results=tuple(results),
         practice=PRACTICE,
         think=THINK,
         mistakes=MISTAKES,

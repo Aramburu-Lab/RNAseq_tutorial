@@ -1264,7 +1264,7 @@ Exit gate:
     - Eye check at real size, 2026-09-27: the first renders clipped legend entries at 85 mm and squeezed the axes to fit the legend, which crushed the horizontal bars; the legend now takes the most columns that fit. Point labels near the right edge ran off the page and are now placed toward the middle of the axes; a label pushed above the legend is now kept inside the axes with a leader line or left out. At 85 mm with 10 labels requested, 4 fit.
   - Not done: the PERMANOVA mutation the plan named, permuting distances instead of labels, cannot fail a test. A joint row and column permutation of the distance matrix is a label permutation (critique minor 21), so ignoring strata was used instead.
 
-- [ ] **P2B.2 Dataset file and curation: `ctx gather --dataset-file`.**
+- [x] **P2B.2 Dataset file and curation: `ctx gather --dataset-file`.**
   - `src/ctx/dataset.py::load(path)` is the one reader of `conf/datasets/*.toml`. It uses tomllib and frozen dataclasses, and raises every schema error together. Its tables:
     - `[dataset]`, `[[resources]]`, `[guard]`;
     - `[sdrf]` (join and cross-check pairs);
@@ -1303,6 +1303,13 @@ Exit gate:
     - without the file the Phase 1b sheet is unchanged;
     - SDRF untouched;
     - a card for `--dataset-file`.
+  - Evidence, 2026-09-27:
+    - Built: `src/ctx/dataset.py`; `src/ctx/gather/curation.py`; `harmonise.sheet(outdir, curated)` and `harmonise.columns(spec)`; `harmonise.run(..., dataset_file)`; the `--dataset-file` option and card. The composition figure (horizontal, stacked by batch, individuals on hover) and library sizes (million reads per run, stacked by batch) are written with the page, and a module page takes their `figure_block`. `tests/fixtures/datasets/synthetic.toml` holds no real ID.
+    - `tests/test_curation.py`: 12 tests on the metadata-only fixture with an SDRF written at test time from its own runs. The cases: both join directions; a configured header repeated; a cross-check naming the row; two spaces collapsed before the value map; replicate order `fu2` before `fu10`, against both string and accession order; the read-length rule; `[expect]` with two counts swapped and the total unchanged; three schema errors in one exception; and through the CLI a curated run, a failure that writes the problem table and no sheet, and a slug mismatch. The SDRF is left untouched (SHA-256 and mtime). `pixi run preflight` exits 0, 176 passed, 37.26 s real at 914,358,272 bytes max RSS.
+    - Mutations, applied with Python, each fail their test: dropping the cross-check; building the SDRF table without whitespace collapse; string order for replicates; comparing totals only; raising on the first schema error; rounding a fractional read length into a bin. The rounding mutation first passed: the test's bins did not hold a fractional length's rounded value. The test now puts them there and the mutation fails.
+    - The fixture has real fractional read lengths, e.g. 431,758 bases / 2,954 reads / 2 = 73.08 nt. Read length is therefore always a float, and only binning into batch requires a whole number.
+    - Eye check at real size: the vertical composition bars lost their axes to rotated labels, so composition is now horizontal, and a horizontal bar figure grows by `BAR_ROW_MM` per category. The library-size bars showed matplotlib's "1e7" offset over the legend, so they now show million reads, and the CSV keeps `read_count`. The 210 unlabelled runs drew a comb of tick marks, which are now hidden with their labels. Overlap and measured-file cases at tier-1 scale (20 groups, 210 runs) were added to `tests/test_viz.py`.
+  - Deviation: the `[[contrasts]]`, `[de]` and `[sanity]` tables are not parsed yet. The loader refuses unknown tables, so each is added with the item that reads it (P2B.4, P2B.6, P2C.1).
 
 - [ ] **P2B.3 Counts reader: `ctx gather --rnaseq-dir`.**
   - `gather/rnaseq.py::read(dir)` runs in this order:

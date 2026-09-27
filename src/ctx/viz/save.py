@@ -31,6 +31,13 @@ class Figure(Protocol):
         """The caption the page prints under the figure."""
 
 
+def figure_block(data: Figure, figure_stem: str) -> FigureBlock:
+    """The interactive figure, caption and data rows, for a figure page or a module page."""
+    return FigureBlock(
+        data.interactive(), data.caption_text(), data.table().to_dicts(), f"{figure_stem}.csv"
+    )
+
+
 def write_figure(
     data: Figure,
     directory: Path,
@@ -70,9 +77,7 @@ def write_figure(
         for ext in ("pdf", "svg"):
             rendered[(theme.name, ext)] = directory / f"{figure_stem}_{theme.name}.{ext}"
             fig.savefig(rendered[(theme.name, ext)])
-    block = FigureBlock(
-        data.interactive(), data.caption_text(), rows.to_dicts(), f"{figure_stem}.csv"
-    )
+    block = figure_block(data, figure_stem)
     page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     table = write_table(
         rows, directory, figure_stem, columns=columns, data_releases=data_releases, formats=("csv",)

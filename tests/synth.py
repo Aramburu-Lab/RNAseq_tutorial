@@ -246,3 +246,34 @@ def demo_bar(synthetic: Synthetic, horizontal: bool = False):  # BarData
         caption=f"{synthetic.samples.height} samples; counts, no test.", horizontal=horizontal,
         stacked=True, hline=(3.0, "half a group"), hover=("batch",),
     )  # fmt: skip
+
+
+def demo_bars_at_scale(horizontal: bool):  # BarData
+    """Bars at tier-1 scale: 20 labelled groups stacked by 2 batches, or 210 unlabelled runs."""
+    from ctx.viz.bar import BarData  # noqa: PLC0415
+    from ctx.viz.style import category_colours  # noqa: PLC0415
+
+    rng = np.random.default_rng(3)
+    if horizontal:
+        groups = [f"cell type {i // 5} condition {i % 5}" for i in range(20)]
+        frame = pl.DataFrame(
+            {"group": groups * 2, "batch": ["short"] * 20 + ["long"] * 20,
+             "n": rng.integers(0, 15, 40).astype(np.int64)}
+        )  # fmt: skip
+        category, value, label = "group", "n", "Samples"
+        columns = {"group": ("none", "Group."), "batch": ("none", "Batch."),
+                   "n": ("samples", "Samples.")}  # fmt: skip
+    else:
+        frame = pl.DataFrame(
+            {"run": [f"r{i:03d}" for i in range(210)], "batch": ["short"] * 111 + ["long"] * 99,
+             "million_reads": rng.uniform(5.5, 232.0, 210)}
+        )  # fmt: skip
+        category, value, label = "run", "million_reads", "Reads"
+        columns = {"run": ("none", "Run."), "batch": ("none", "Batch."),
+                   "million_reads": ("million reads", "Reads / 1e6.")}  # fmt: skip
+    return BarData(
+        frame=frame, columns=columns, category=category, value=value, category_label="Group",
+        value_label=label, series="batch", colours=category_colours(["short", "long"]),
+        caption="Counts at the tier-1 scale; no test.", horizontal=horizontal,
+        stacked=True, width="double",
+    )  # fmt: skip

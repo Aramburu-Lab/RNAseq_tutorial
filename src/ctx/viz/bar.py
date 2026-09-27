@@ -14,8 +14,11 @@ import polars as pl
 from ctx.viz.annotate import place_caption, plotly_caption
 from ctx.viz.style import (
     BAR_LABEL_ROTATION,
+    BAR_MARGIN_MM,
+    BAR_ROW_MM,
     LINE_WIDTHS,
     MAX_CATEGORIES,
+    MM_PER_INCH,
     THEMES,
     Theme,
     apply_matplotlib,
@@ -117,10 +120,13 @@ class BarData:
         from matplotlib.patches import Patch  # noqa: PLC0415 - heavy
 
         apply_matplotlib(theme)
+        categories = self._categories()
         width, height = figure_inches(self.width, "bar")
+        if self.horizontal:
+            rows = (len(categories) * BAR_ROW_MM + BAR_MARGIN_MM) / MM_PER_INCH
+            height = max(height, rows)
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
-        categories = self._categories()
         positions = np.arange(len(categories), dtype=float)
         present = [level for level in self.colours if level in set(self.frame[self.series])]
         thickness = BAR_SPAN if self.stacked else BAR_SPAN / len(present)
@@ -149,7 +155,8 @@ class BarData:
             ax.set_xticks, ax.set_xlabel, ax.set_ylabel)  # fmt: skip
         shown = len(categories) <= MAX_TICK_LABELS
         rotation = 0.0 if self.horizontal else BAR_LABEL_ROTATION
-        ticks[0](positions, [str(c) for c in categories] if shown else [], rotation=rotation)
+        labels = [str(c) for c in categories]
+        ticks[0](positions if shown else [], labels if shown else [], rotation=rotation)
         ticks[1](self.category_label)
         ticks[2](self._value_title())
         if self.horizontal:

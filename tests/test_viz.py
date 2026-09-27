@@ -16,7 +16,15 @@ from matplotlib.text import Text
 from pypdf import PdfReader
 from pypdf.generic import ContentStream
 from scipy.stats import mannwhitneyu
-from synth import VOLCANO_STEPS, counts, demo_bar, demo_box, demo_pca, demo_volcano
+from synth import (
+    VOLCANO_STEPS,
+    counts,
+    demo_bar,
+    demo_bars_at_scale,
+    demo_box,
+    demo_pca,
+    demo_volcano,
+)
 
 from ctx.de.stats import classify
 from ctx.io.naming import stem
@@ -291,6 +299,8 @@ def _contracts():
         "pca": demo_pca(synthetic),
         "bar": demo_bar(synthetic),
         "bar_horizontal": demo_bar(synthetic, horizontal=True),
+        "composition_20_groups": demo_bars_at_scale(horizontal=True),
+        "library_sizes_210_runs": demo_bars_at_scale(horizontal=False),
     }
 
 
@@ -399,6 +409,8 @@ OVERLAP_CASES = {
     "pca": demo_pca,
     "bar": demo_bar,
     "bar_horizontal": lambda s: demo_bar(s, horizontal=True),
+    "composition_20_groups": lambda s: demo_bars_at_scale(horizontal=True),
+    "library_sizes_210_runs": lambda s: demo_bars_at_scale(horizontal=False),
 }
 
 

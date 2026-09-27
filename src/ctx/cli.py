@@ -43,6 +43,13 @@ CARDS: dict[str, tuple[str, str]] = {
         "The nf-core/fetchngs outdir to read. Unset means <root>/data/raw/<dataset>.",
         "Points gather at another download. gather only reads it and never writes into it.",
     ),
+    "--dataset-file": (
+        "The cohort's dataset file (conf/datasets/<slug>.toml): its SDRF join, value maps, "
+        "batch rule and expected counts. Unset leaves the curation columns empty.",
+        "Set, gather joins the SDRF (fetched by ctx setup) to every run, fills donor, cell "
+        "type, condition, replicate and batch, and stops with a problem table if anything "
+        "fails to join, map or match the declared counts.",
+    ),
 }
 _UNCARDED = {"--help", "--version"}
 
@@ -149,16 +156,21 @@ def gather(
     ctx: typer.Context,
     dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
     fetchngs_dir: Annotated[Path | None, typer.Option(help=CARDS["--fetchngs-dir"][0])] = None,
+    dataset_file: Annotated[Path | None, typer.Option(help=CARDS["--dataset-file"][0])] = None,
 ) -> None:
     """Check one nf-core/fetchngs outdir and write the harmonised sample sheet (M1c)."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
     from ctx.gather import harmonise  # noqa: PLC0415 - heavy; imported after the runtime profile
+    from ctx.gather.curation import CurationError  # noqa: PLC0415 - same reason
     from ctx.gather.fetchngs import FetchngsError  # noqa: PLC0415 - same module, same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = "ctx " + shlex.join(sys.argv[1:])
     try:
-        written = harmonise.run(ctx.obj["settings"], cards, command, dataset, fetchngs_dir)
-    except FetchngsError as error:
+        written = harmonise.run(
+            ctx.obj["settings"], cards, command, dataset, fetchngs_dir, dataset_file
+        )
+    except (FetchngsError, DatasetError, CurationError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

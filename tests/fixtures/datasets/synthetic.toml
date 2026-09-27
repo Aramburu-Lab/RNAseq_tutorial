@@ -1,0 +1,50 @@
+# A dataset file for tests: the same tables as a real cohort, and no real identifier.
+# tests/test_curation.py writes the SDRF at test time from the fetchngs fixture's own runs.
+
+[dataset]
+slug = "synthetic"
+
+[[resources]]
+name = "sdrf"
+urls = ["http://127.0.0.1/synthetic.sdrf.txt"]
+bytes = 0
+sha256 = "0000000000000000000000000000000000000000000000000000000000000000"
+dest = "resources/datasets/synthetic/synthetic.sdrf.txt"
+
+[guard]
+ids = []
+patterns = []
+
+[sdrf]
+resource = "sdrf"
+join = ["Comment[ENA_RUN]", "run_accession"]
+cross_check = [["Source Name", "sample_title"]]
+
+[columns.donor]
+source = "Characteristics[individual]"
+meaning = "Individual the sample came from."
+
+[columns.cell_type]
+source = "Characteristics[cell type]"
+meaning = "Cell type."
+values = { "type A" = "type_a", "type B" = "type_b" }
+
+[columns.condition]
+source = "Characteristics[condition]"
+meaning = "Condition."
+values = { "Control" = "control", "Case" = "case" }
+
+[columns.time_point]
+source = "Characteristics[time point]"
+meaning = "Follow-up time point; empty for none."
+values = { "na" = "", "2nd follow up" = "fu2", "10th follow up" = "fu10" }
+
+[order]
+time_point = ["", "fu2", "fu10"]
+
+[expect]
+runs = 14
+
+[expect.counts.condition]
+control = 7
+case = 7

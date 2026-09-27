@@ -49,6 +49,10 @@ LEGEND = {"handlelength": 1.0, "columnspacing": 1.0, "handletextpad": 0.4}
 LEGEND_MAX_COLUMNS = 4
 # Category labels under vertical bars run upward, so long names never collide.
 BAR_LABEL_ROTATION = 90.0
+# Horizontal bars grow the figure: this much height per category, plus room for the axis,
+# legend and caption, so 20 categories stay readable at 14 pt.
+BAR_ROW_MM = 7.0
+BAR_MARGIN_MM = 45.0
 
 
 @dataclass(frozen=True)
