@@ -1228,6 +1228,7 @@ Exit gate:
 - a fresh clone passes `pixi install --locked` and `preflight`;
 - `/usr/bin/time -l pixi run test` finishes in under 5 min;
 - `test_spike_record.py` passes unchanged.
+- Evidence, 2026-09-27, after P2B.6 (commit 7a74159): a fresh clone ran `pixi install --locked`, which exited 0 in 9.52 s real, and `pixi run preflight`, which exited 0 with 247 passed in 193.27 s of tests, 207.49 s real in total, under the 5-minute limit. `tests/test_spike_record.py` is unchanged since Phase 1 and passes.
 
 - [x] **P2B.1 One figure writer for every figure type; scatter and bar; PERMANOVA; one up/down rule.**
   - `viz/save.py::write_figure` takes any contract with `table()`, `static(theme)`, `interactive()` and `caption_text()`; BoxData gains thin methods.
