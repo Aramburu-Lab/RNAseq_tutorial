@@ -1,0 +1,44 @@
+# Tier-1 teaching cohort (D5). The one committed place for this cohort's identifiers:
+# tests/test_repo.py fails if any [guard] id or pattern appears in src/, tests/ or scripts/.
+
+[dataset]
+slug = "tier1"
+ena_study = "PRJEB49000"
+ena_secondary_study = "ERP133445"
+arrayexpress = "E-MTAB-11190"
+source = "Montaldo et al. 2022 Nat Immunol, doi:10.1038/s41590-022-01311-1, PMC7615267"
+
+# BioStudies publishes no checksum: size and SHA-256 are from the first download, 2026-09-27,
+# identical from both URLs.
+[[resources]]
+name = "sdrf"
+urls = [
+    "https://www.ebi.ac.uk/biostudies/files/E-MTAB-11190/E-MTAB-11190.sdrf.txt",
+    "https://ftp.ebi.ac.uk/biostudies/fire/E-MTAB-/190/E-MTAB-11190/Files/E-MTAB-11190.sdrf.txt",
+]
+bytes = 108110
+sha256 = "b34b846aafa8a111c3f23a00b1fead7d8b0d73ce2e178d4b1e4b51c455813b9e"
+dest = "resources/datasets/tier1/E-MTAB-11190.sdrf.txt"
+
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+# Patterns are checked against the ENA read_run report of the study by
+# tests/test_repo.py::test_guard_patterns_cover_study (runs ERR7425257-466, experiments
+# ERX6994339-548, samples SAMEA11307688-897, secondary samples ERS8952829-53038, 2026-09-27)
+# and against the SDRF's individual column.
+[guard]
+ids = ["PRJEB49000", "ERP133445", "E-MTAB-11190"]
+patterns = [
+    '\bERR7425\d{3}\b',
+    '\bERX699\d{4}\b',
+    '\bSAMEA11307[6-8]\d{2}\b',
+    '\bERS895\d{4}\b',
+    '\bUPN\d+\b',
+]

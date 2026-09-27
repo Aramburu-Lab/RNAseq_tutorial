@@ -1155,3 +1155,484 @@ No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work 
 
 - [x] Tutorial test run for M0–M1 (2026-09-27, requested by Rytis): `scripts/python/tutorial_test_run.py --study <ERP/PRJEB> --root <course folder> [--download-runs N] [--open]` walks M0 setup, M1a accession lookup (ENA run table and transfer budget), M1b fetchngs metadata-only and a download of the N smallest runs, and M1c `ctx gather` on both, printing what each step teaches. It refuses a root inside the repository and holds no cohort identifier.
   - Evidence: on PRJEB49000 with one run downloaded, exit 0 in 346.73 s real at 577,830,912 bytes max RSS (`/usr/bin/time -l`). Steps: setup 1.0 s, accession lookup 0.4 s, metadata-only fetch 9.0 s, download of ERR7425276 (294,598,862 bytes) 333.7 s, gather 2.4 s. The downloaded run is `verified` against ENA's md5; `work/` held a 293 MB second copy. After formatting, a rerun with `--download-runs 0` exited 0.
+
+## 🧱 Phase 2 — implementation order (approved 2026-09-27)
+
+Tier 1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session plan of 2026-09-27; the corrections made while planning are recorded in D-009 at close.
+
+| Decision | Choice |
+|---|---|
+| nf-core/rnaseq release | 3.27.0 (Salmon 2.7.0), rehearsed on this Mac first; if the rehearsal fails, 3.26.0 is rehearsed and the choice comes back to Rytis |
+| HSCT repeated samples | earliest of 1st or 2nd follow-up, one sample per individual; 3rd follow-up unused |
+| Scope | lessons-first subset; Hallmark only |
+
+### Phase 2A — Pin the counts step; start the cluster run
+
+- [x] **P2A.1 The cohort guard reads what each dataset file declares.** Add a stub of `conf/datasets/tier1.toml`.
+  - `[dataset]` holds:
+    - slug `tier1`;
+    - PRJEB49000 = ERP133445 = E-MTAB-11190;
+    - the doi.
+  - `[[resources]]`:
+    - the SDRF, 108,110 bytes, SHA-256 b34b846a…3b9e, from both the BioStudies URL and the FTP mirror, to `resources/datasets/tier1/`. The destination follows CONVENTIONS.md:45, not `data/raw/`.
+    - MSigDB h.all 2026.1.Hs, 48,686 bytes, SHA-256 eecaf6da…f596, to `resources/msigdb/`.
+  - `[guard]` holds the ids plus `\b`-anchored patterns for runs, experiments, samples, secondary samples and individual IDs.
+    - Checked against the ENA ranges: ERR7425257–466, ERX6994339–548, SAMEA11307688–897 and ERS8952829–53038.
+  - `test_no_cohort_identifiers` reads every `conf/datasets/*.toml` `[guard]`.
+    - Exemptions become (directory, token) pairs, each pinned to an upstream SHA-256.
+  - Proven by:
+    - the tree passes;
+    - `::test_guard_reads_dataset_files`, in a tmp tree: a planted id and a planted pattern hit are both reported, and a file without `[guard]` fails. Mutation: skipping dataset files.
+    - `::test_guard_patterns_cover_study`, marked `network`, run once: every ENA accession of the study matches a pattern, and nothing under `tests/fixtures/` does.
+
+  - Evidence, 2026-09-27: `conf/datasets/tier1.toml` holds `[dataset]`, two `[[resources]]` and `[guard]` (3 ids, 5 `\b`-anchored patterns). `tests/test_repo.py` gains `guard_patterns` and `cohort_hits`, `test_guard_reads_dataset_files` and the network test `test_guard_patterns_cover_study`, which passed once against ENA and the SDRF. Mutations, applied with Python, each fail their test: skipping the dataset files; dropping the individual-ID pattern; the draft sample pattern `SAMEA113078\d{2}`; a run accession planted in `src/ctx/__init__.py`. `pixi run preflight` exits 0, 132 passed.
+  - Deviation: the (directory, token) exemption pairs are not built. The D20 directory exemption is still the only one, and a pair is added in P2A.2 only if its fixture carries an nf-core test accession.
+
+- [ ] **P2A.2 Rehearse nf-core/rnaseq 3.27.0 Salmon-only on this Mac and pin the layout as a fixture.**
+  - `src/ctx/gather/rnaseq.py` holds the single definitions:
+    - `RNASEQ_VERSION`;
+    - `READ_FILES`: the length-scaled gene TSV, the versions yml and the params json;
+    - `COPIED_FILES`: `READ_FILES` plus each sample's `lib_format_counts.json` and `aux_info/meta_info.json`, and the execution trace. There are no transcript matrices, `.rds`, multiqc or HTML reports (critique M3).
+  - `scripts/python/make_rnaseq_fixture.py` is standard library only and follows `make_fetchngs_fixture.py`. The command:
+    - `NXF_SYNTAX_PARSER=v2 pixi run -e fetch nextflow run nf-core/rnaseq -r 3.27.0 -profile test,docker,arm64 -params-file params.yml -c cap.config`
+    - params.yml sets `pseudo_aligner: salmon`, `skip_alignment: true`, `save_reference: true`, `skip_bbsplit: true`, and nulls `salmon_index`, `transcript_fasta` and `additional_fasta`, so the index is built as on the cluster.
+    - cap.config limits resources to 4 CPU and 8 GB.
+    - If an arm64 image fails, it switches to `emulate_amd64` and records that.
+  - It copies `COPIED_FILES` to `tests/fixtures/rnaseq/` with a MANIFEST.sha256 and a README. The README states:
+    - the exact command, versions, host and date;
+    - omitted files with their bytes;
+    - what the fixture cannot test: GENCODE, single-end 75–101 nt reads, and Nextflow 26.04.4 with Apptainer;
+    - whether the nulls took effect.
+  - Proven by:
+    - `test_rnaseq_fixture.py`:
+      - `::test_manifest`: at most 2 MB, all files tracked.
+      - `::test_is_pinned_release`: rnaseq 3.27.0 and Salmon 2.7.0.
+      - `::test_layout`: header gene_id, gene_name, then the samplesheet's samples; values non-negative, some fractional.
+    - `test_repo.py::test_rnaseq_version_single_source`. Mutation: another release in one command.
+    - `/usr/bin/time -l` exit code, wall time and RSS, pasted here.
+
+- [ ] **P2A.3 Cluster (Rytis): full fetchngs download, GENCODE 50, then rnaseq 3.27.0 on 210 runs.**
+  - No repo code; the commands are in the cluster block below, pasted here unchanged.
+  - Timing:
+    - steps 0–3 can start now;
+    - steps 4–6 wait for P2A.2;
+    - step 7 waits for the P2C.1 rule commit.
+  - Proven by the pasted checks, each with its expected value.
+  - Any count short of 210 stops 2C until it is explained.
+
+### Phase 2B — Engines on synthetic data and real nf-core fixtures; no tier-1 byte read
+
+Exit gate:
+- a fresh clone passes `pixi install --locked` and `preflight`;
+- `/usr/bin/time -l pixi run test` finishes in under 5 min;
+- `test_spike_record.py` passes unchanged.
+
+- [ ] **P2B.1 One figure writer for every figure type; scatter and bar; PERMANOVA; one up/down rule.**
+  - `viz/save.py::write_figure` takes any contract with `table()`, `static(theme)`, `interactive()` and `caption_text()`; BoxData gains thin methods.
+  - `viz/scatter.py`, one contract, covers:
+    - PCA;
+    - volcano with a plotly padj slider done by restyle only;
+    - MA raw/shrunk;
+    - dispersion;
+    - LFC-vs-LFC;
+    - GSEA running score.
+  - `viz/bar.py` covers composition, library size, p-value histogram (20 bins), ORA/GSEA and call counts.
+  - Styling goes through the style.py ASPECT and MARKERS entries; no new colour.
+  - Volcano thinning drops only genes that are not significant at the loosest slider step (M12). The CSV keeps every tested gene.
+  - `de/stats.py`:
+    - `ALPHA = 0.05` is one constant;
+    - `classify(padj, lfc)` uses the raw LFC sign and is the rule for the volcano, the captions and the CSVs.
+  - `viz/annotate.py::permanova(coords, labels, strata=None, permutations=999, seed=42)`, numpy only:
+    - Euclidean pseudo-F and R²;
+    - labels are permuted within `strata` when given (M11);
+    - p = (1 + #F_perm >= F) / (1 + permutations).
+  - Proven by:
+    - round-trip, measured-file and no-overlap tests parametrised over box, scatter and bar, including a labelled volcano at 85 and 170 mm;
+    - `test_no_style_literals`;
+    - `::test_points_drawn_equal_csv_rows` after the stated thinning;
+    - `::test_volcano_steps_count_from_figure`: up/down counts are read from the figure's marker arrays at every step and compared with an expression written independently in the test. Mutation: `<=` for `<`.
+    - `::test_permanova_identity` against a trace-ANOVA F;
+    - `::test_permanova_null_and_planted`;
+    - `::test_permanova_strata`: a label confounded with strata gives p = 1 when stratified. Mutation: ignoring strata.
+    - an eye check at real size.
+
+- [ ] **P2B.2 Dataset file and curation: `ctx gather --dataset-file`.**
+  - `src/ctx/dataset.py::load(path)` is the one reader of `conf/datasets/*.toml`. It uses tomllib and frozen dataclasses, and raises every schema error together. Its tables:
+    - `[dataset]`, `[[resources]]`, `[guard]`;
+    - `[sdrf]` (join and cross-check pairs);
+    - `[columns.<name>]` (source header, unit, meaning, value map);
+    - `[derived]` (read-length bins into batch);
+    - `[order]` (time points);
+    - `[expect]`;
+    - `[[contrasts]]` (filters, design, reference, tested, expected n per group, pairing);
+    - `[de]` (the featured contrast);
+    - `[sanity]`.
+  - `tests/fixtures/datasets/synthetic.toml` holds no real id.
+  - `gather/curation.py` runs in this order:
+    1. SDRF as text; a configured header that repeats is refused.
+    2. Collapse whitespace, then map values.
+    3. Join `Comment[ENA_RUN]` = run_accession in both directions, then cross-check Source Name = sample_title.
+    4. read_length = base_count / read_count / mates; a non-integer is listed, never rounded.
+    5. Batch from the declared bins.
+    6. `rank_replicates(frame, keys, order)`, the one function that picks one sample per key, reused by de.
+    7. Check `[expect]`.
+  - Any problem writes `…_curation_problems_v1.csv`, writes no sheet, and exits 1.
+  - Curated columns: donor, cell_type, condition, replicate, batch, plus the declared extras tissue, read_length, time_point, isolation (M9), sex and donor_sex (M8).
+  - The M1 page gains:
+    - a composition bar: cell type by condition, coloured by batch, with n samples and n individuals;
+    - library-size bars coloured by batch (minor 2);
+    - the validation table.
+  - Proven by `test_curation.py`, on the metadata_only fixture plus a synthetic SDRF written at test time:
+    - join both ways;
+    - repeated header refused;
+    - cross-check names the row;
+    - normalise before map, an order test;
+    - read-length rule;
+    - replicate order `10th` after `2nd`;
+    - `[expect]` swap with the total unchanged;
+    - schema errors together;
+    - failure writes no sheet;
+    - without the file the Phase 1b sheet is unchanged;
+    - SDRF untouched;
+    - a card for `--dataset-file`.
+
+- [ ] **P2B.3 Counts reader: `ctx gather --rnaseq-dir`.**
+  - `gather/rnaseq.py::read(dir)` runs in this order:
+    1. refuse any other release;
+    2. params files agree on pseudo_aligner, skip_alignment, gencode, fasta and gtf;
+    3. lazy scan of the length-scaled TSV;
+    4. sample set equals the sheet, with every difference listed;
+    5. `numpy.rint`, then a range check, then Int32 or Int64.
+  - It writes `…_counts_v1` and `…_genes_v1`, each with a README carrying the release, Salmon, the GENCODE files and the SHA-256 of every file read.
+  - Proven by `test_rnaseq.py`:
+    - `[0.5, 1.5, 2.5, 2.6]` becomes `[0, 2, 2, 3]`. Mutation: `astype(int)`.
+    - sample mismatch lists all;
+    - other release refused;
+    - params disagree;
+    - reads only `READ_FILES`, with the full fixture made unreachable first;
+    - input dir untouched;
+    - a card.
+
+- [ ] **P2B.4 DE engine on planted truth.**
+  - `de/filters.py::expressed()` is edgeR `filterByExpr`: a CPM cutoff from min.count and the median library size, the smallest-group rule with the large-n and min-prop terms, and a min total count (minor 7).
+    - The defaults (10, 15, 10, 0.7) are from memory and are **re-read from the edgeR source before coding**. The test is hand-worked.
+  - `de/deseq.py::fit()` is the only pandas import. It runs in this order:
+    1. subset;
+    2. `rank_replicates`;
+    3. drop unpaired donors when paired;
+    4. recode to group with levels reference and tested;
+    5. filter on the subset;
+    6. check that the realised n per group equals the contrast's expected n, otherwise raise (minor 10);
+    7. check the design rank, otherwise raise;
+    8. `DeseqDataSet(refit_cooks=True, inference=inf)` and `deseq2()`;
+    9. `DeseqStats(..., inference=inf).summary()` and copy the raw results;
+    10. a new `DeseqStats(..., inference=inf)`, then `summary()`, then `lfc_shrink`;
+    11. one frame with raw and shrunk LFC and `na_reason`.
+  - `pca()` is a blind VST, the top 500 genes by VST variance, then a numpy SVD.
+  - The loky executor is shut down before `measure()`. joblib is pinned `==1.6.0`, its locked version.
+  - `tests/synth.py::design_counts()` is new. It has batch-only genes, a donor effect, paired donors and repeats, and it reuses `planted_truth`.
+  - Proven by `test_de.py`, with module-scoped fits at 1,000 x 24:
+    - planted genes recovered at observed FDR ≤ 0.05;
+    - the reference sign holds when `case` sorts before `control`;
+    - order tests with mutations: filter on the subset, dedupe after the subset, pair after batch;
+    - raw LFC kept after shrink, exactly;
+    - rank-deficient raises;
+    - n mismatch raises;
+    - naive vs adjusted: the naive fit calls at least 80 % of planted batch genes and the adjusted fit at most 5 % (thresholds fixed first, values recorded);
+    - paired beats unpaired, recorded;
+    - one planted gene per `na_reason`;
+    - `::test_threads_passed`: the spy sees every `DefaultInference` and every joblib `Parallel(n_jobs)` equal `settings.threads`. Mutation: None on the stats object.
+    - PCA ranks by VST variance;
+    - pandas only at the boundary;
+    - `test_runtime.py::test_loky_child_peak_attributed`, 256 MiB.
+
+- [ ] **P2B.5 Enrichment engine and checksummed resources.**
+  - `function/lite.py` uses numpy, scipy and the standard library only, so it is Pyodide-safe. It holds:
+    - a GMT reader;
+    - `ora` (hypergeometric, then BH);
+    - `prerank` (1000 permutations, seed 42, sizes 15–500 after intersecting with the ranked universe; NES by the same-sign null mean; FDR from the pooled null).
+    - Single definitions: rank by the Wald stat; a duplicate symbol goes to the highest baseMean, ties to gene_id; the background is the genes with non-NaN padj.
+  - `setup.fetch()` and `ctx setup --dataset-file`:
+    - a destination inside the root only;
+    - mirrors tried in order;
+    - download to `.part`, check bytes and SHA-256, then rename;
+    - record in `resources/manifest.json`;
+    - a file present with the right hash is skipped;
+    - without the option, setup makes no network call.
+  - gseapy ==1.3.1 goes into `[feature.ctx-dev]` only, as the test oracle.
+  - Proven by `test_enrich.py`:
+    - hand-worked ES;
+    - ORA against scipy and gseapy within 1e-12;
+    - prerank against gseapy: ES within 1e-9; nominal p within 3·√2·SE + 1/1001 (M12); the FDR side checked only outside [0.02, 0.1];
+    - intersect before the size filter;
+    - collapse is order-free;
+    - background equals the tested genes;
+    - the background trap;
+    - a planted set is recovered;
+    - seed determinism;
+    - Pyodide-safe imports.
+  - Proven by `test_fetch.py`, on a 127.0.0.1 http.server:
+    - verifies;
+    - tampered file refused, leaving no file;
+    - idempotent;
+    - outside the root refused;
+    - mirror fallback;
+    - `::test_fetch_real`, marked network.
+  - The lock diff adds only gseapy's dependencies and changes no existing `main` version. Otherwise gseapy moves to its own environment.
+
+- [ ] **P2B.6 `ctx de`, `ctx function`, `ctx report` and the hub, end to end on synthetic data, plus the budget at real size.**
+  - Options are `--dataset`, `--dataset-file` and `--min-count`, each with a card. Each command reads the newest upstream output and states its SHA-256.
+  - Tables:
+    - one contrasts table: design, reference, n per group, pairing, dropped runs, condition × batch × isolation crosstab, tested, up, down, NA by reason;
+    - one results table per contrast, Parquet and CSV;
+    - the embedded table is capped at 8 columns (minor 12).
+  - M5 figures:
+    - PB PCA by cell type, PERMANOVA stratified by individual;
+    - NDN PCA by condition with batch as symbol, p on one sample per individual;
+    - for the featured contrast: volcano, MA, p-value histogram, dispersion;
+    - the batch lesson:
+      - call counts for naive, adjusted and within;
+      - naive vs adjusted LFC scatter;
+    - the paired lesson bars;
+    - IFN-gene box plot, MWU in the caption, padj in the hover;
+    - NDN-vs-monocyte LFC scatter, whose caption says the individuals are shared.
+  - M6 figures: ORA and GSEA bars for the featured contrast, IFN-alpha NES across every contrast, one running score, the background-trap bars, and the MSigDB CC BY 4.0 attribution.
+  - The hub is `YYYY-MM-DD_report_<slug>_hub_v1.html`, which the naming lint accepts, with relative links.
+  - The RAM bound is self + threads × largest child.
+  - Proven by:
+    - end-to-end tests for de, function and report;
+    - de reads the newest gather output;
+    - inputs untouched;
+    - hub links resolve after a move, with no http;
+    - card tests extended;
+    - packaging runs de from the wheel;
+    - `tests/test_budget.py`, marker `budget`, deselected by default and run once: synthetic 60,000 × 171 with the tier-1 contrast sizes, each command under 10 min, RAM bound under 4 GB, page under 15 MB, and n_cpus 1 against 4 recorded.
+
+### Phase 2C — Tier 1 plugs in; close
+
+- [ ] **P2C.1 Tier-1 inputs and pre-registered rules.** The rule commit lands before step 7 copies any count.
+  - Metadata-only fetchngs into `~/ctx_tier1/data/raw/tier1_meta`, with the `tutorial_test_run.py:80-99` command shape.
+  - `ctx --root ~/ctx_tier1 setup --dataset-file conf/datasets/tier1.toml`.
+  - Complete `tier1.toml`:
+    - columns;
+    - batch bins (75/76 short, 101 long);
+    - `[expect]`: 210 runs; 98/99/13 by length; HSCT 59, G-CSF 44, steady state 41, PDAC 35, IPMN 31; PB 171;
+    - `[de] featured = "ndn_gcsf"`;
+    - the null-split seed;
+    - ten PB contrasts, one sample per individual per group:
+
+      | Contrast | Samples | Design | n |
+      |---|---|---|---|
+      | ndn_gcsf | NDN, G-CSF vs steady state, short batch (9 individuals on both sides; unpaired is conservative for them) | ~group | 13 vs 13 |
+      | mono_gcsf | monocytes, same; isolation differs, stated | ~group | 8 vs 8 |
+      | ndn_hsct_early | NDN, HSCT earliest of 1st/2nd follow-up vs steady state, short | ~group | 5 vs 13 |
+      | mono_hsct_early | monocytes, same | ~group | 4 vs 8 |
+      | ndn_gcsf_paired | the 9 short-batch pairs | ~donor + group | 9 pairs |
+      | ndn_gcsf_unpaired9 | the same 18 samples | ~group | 9 vs 9 |
+      | ndn_pdac_naive | NDN, PDAC vs steady state, both batches | ~group | 14 vs 17 |
+      | ndn_pdac_adjusted | the same samples | ~batch + group | 14 vs 17 |
+      | ndn_pdac_within | NDN, PDAC vs steady state, long batch | ~group | 14 vs 4 |
+      | ndn_null_split | a seeded split of the short-batch steady-state individuals, stratified by recorded sex | ~group | 6 vs 7 |
+
+  - `[sanity]` holds the thresholds. They are choices fixed before the data; **Rytis reviews and edits them before the rule commit**.
+    - R1: blind VST of the 171 PB samples, top 500 genes. PERMANOVA R² for cell type is greater than R² for condition and for batch.
+    - R2: in ndn_gcsf and ndn_hsct_early, count(p < 0.05) ≥ 2 × the mean count per 0.05 bin over [0.5, 1].
+    - R3: in ndn_null_split, ≤ 1 % of tested genes have padj < 0.05.
+    - R4: HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_hsct_early has NES > 0 and FDR < 0.05. Its NES in mono_hsct_early is lower than in NDN (M10). Source: abstract and Fig. 4d.
+    - R5: the same set in ndn_gcsf has NES < 0 and FDR < 0.05 (Fig. 4d).
+    - R6: steady-state NDN, one sample per individual, 4 long vs 13 short. PERMANOVA for batch gives p < 0.05. This shows the batch exists without the PDAC groups (M6).
+    - R7: ndn_gcsf_paired calls ≥ ndn_gcsf_unpaired9 calls at padj < 0.05.
+    - R8: expression sex, from XIST against RPS4Y1, DDX3Y, KDM5D, UTY and EIF1AY by symbol, equals the recorded sex. HSCT samples are compared with donor sex. Samples with no recorded sex are listed. A missing gene fails the rule.
+    - Recorded, not gating: IFN-alpha NES in ndn_pdac_adjusted and ndn_pdac_within.
+  - `ctx.de.sanity.decide(record, rules)` is pure. A missing metric gives FAIL.
+  - Proven by:
+    - tier-1 gather exits 0 with `[expect]` enforced;
+    - the guard passes;
+    - `test_sanity_record.py`:
+      - `::test_decide_boundaries`, including a missing metric;
+      - `::test_rule_predates_record`;
+      - `::test_rule_unchanged`: `git diff --quiet <rule> <record> -- conf/datasets/tier1.toml src/ctx/dataset.py src/ctx/gather/curation.py src/ctx/de src/ctx/function src/ctx/viz/annotate.py` (M4). Mutation: a threshold edited after the rule commit.
+
+- [ ] **P2C.2 Real counts through gather (after step 7).**
+  - Command: `ctx --root ~/ctx_tier1 gather --dataset tier1 --fetchngs-dir … --dataset-file … --rnaseq-dir ~/ctx_tier1/data/raw/tier1_rnaseq`, under `/usr/bin/time -l`.
+  - Proven by:
+    - release, 210 = 210, Int range, `[expect]`, join 210/210 and 0 unmapped values;
+    - SHA-256 lists of the rnaseq dir equal before and after;
+    - under 10 min and 4 GB.
+
+- [ ] **P2C.3 M5, M6 and hub on tier 1; the verdicts.**
+  - `ctx de`, `ctx function` and `ctx report` run on the laptop profile.
+  - The verdicts go to `deliverables/YYYY-MM-DD_de_tier1_sanity_v1.csv` with a README and its SHA-256 recorded here (minor 17). A failing rule is reported, never retuned.
+  - Eye check at real size. Offline in the browser pane, light and dark, with one origin.
+  - Proven by:
+    - `::test_decision_follows_rule`;
+    - `::test_record_complete`;
+    - the P1.8 offline checks;
+    - every page under 15 MB;
+    - budgets from the reproduction blocks.
+
+- [ ] **P2C.4 The Track B bundle, proven in an empty root.**
+  - Contents:
+    - the metadata-only outdir;
+    - `COPIED_FILES`;
+    - tier1.toml;
+    - MANIFEST.sha256;
+    - a README with sources, licences and bytes.
+  - The SDRF and Hallmark are fetched by setup, not bundled.
+  - **Cap: 100 MB compressed**, a choice fixed now. Over the cap stops here and comes back to Rytis.
+  - Proven by:
+    - wheel installed outside the repo;
+    - CTX_ROOT at a temp root;
+    - repo unreachable;
+    - setup, gather, de, function and report run;
+    - tables equal to P2C.3 by content.
+
+- [ ] **P2C.5 Close.**
+  - Fresh clone: preflight passes and the test run is under 5 min.
+  - A measured table: the rehearsal, the cluster steps from the trace, each ctx command, the tests and the budget test.
+  - Review, lessons, and the TODO.md tree updated by grep-verified edits. TODO.md:299 "Pin tool versions" is closed or deferred with its reason.
+  - D-entries:
+    - D-007: rnaseq 3.27.0 and the rounded length-scaled matrix; pandas at the boundary.
+    - D-008: `ctx.function.lite` with gseapy as the oracle; numpy PERMANOVA.
+    - D-009: the tier-1 design, with the Fig. 4d PDAC IFN finding stated correctly.
+    - D-010: deferrals, including the M5 top-50 heatmap (TODO.md:171) and notebooks.
+
+**Not in Phase 2:**
+- Track A (M2–M4), strandedness in the sheet, and the teaching subset: Phase 3.
+- Heatmaps, UpSet, Venn, paired Wilcoxon: Phase 4.
+- Knob grids: Phase 5, D-005.
+- C7, GO, Reactome, decoupler, disease association.
+- LDN, IPMN, BM, the HSCT 3rd follow-up, the monocyte within-101-nt contrast, and the nested cell-type interaction (M10's full version).
+- Batch correction; fetchngs 1.13.0; the rnaseq fixture rebuild test.
+- Notebooks: JupyterLite, Phase 5.
+- Zenodo: Rytis, with Phase 3.
+
+### Phase 2 cluster commands (P2A.3), the only copy
+
+```
+# Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
+# Steps 0-3 can start now. Steps 4-6 wait until I confirm P2A.2 passed. Step 7 waits for the
+# P2C.1 rule commit. P2A.2 may rename files in steps 6 and 7.
+
+# ---- 0. Run root, space, allocation, Nextflow ----
+export P=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
+mkdir -p "$P/refs" "$P/nfcore_fetchngs" "$P/nfcore_rnaseq"
+cd "$P"
+df -h /proj/nobackup/hpc2n2024-150                                   # PASTE
+projinfo                                                              # PASTE
+source /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/nextflow_env.sh
+nextflow -version                                                     # PASTE
+
+# ---- 1. Full download with the lab launcher, unchanged (fetchngs 1.12.0) ----
+printf 'executor {\n    queueSize = 50\n}\nparams {\n    publish_dir_mode = "link"\n}\n' > "$P/nfcore_fetchngs/nextflow.config"
+printf 'PRJEB49000\n' > "$P/ids.txt"
+# Free check first: does the launch-directory params block reach publishDir? (critique M1)
+cd "$P/nfcore_fetchngs" && nextflow pull nf-core/fetchngs -r 1.12.0 >/dev/null && NXF_SYNTAX_PARSER=v1 nextflow config nf-core/fetchngs -r 1.12.0 -profile singularity | grep -n "mode" | sort | uniq -c | head   # PASTE
+cd "$P"
+# STOP and paste if it shows 'copy', or if less than about 600 GB is free (900 GB if copy).
+# Both figures are my arithmetic from 287 GB of FASTQ, not measurements.
+DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq     # PASTE
+sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq
+
+# ---- 2. GENCODE 50; MD5 values from release_50/MD5SUMS, read 2026-09-27 ----
+cd "$P/refs"
+wget -nv https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/GRCh38.primary_assembly.genome.fa.gz
+wget -nv https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz
+printf '%s  %s\n' da1a11258be075cfa7af718162c894e7 GRCh38.primary_assembly.genome.fa.gz 289b91e5e95e8b0450d223246f10a12e gencode.v50.primary_assembly.annotation.gtf.gz | md5sum -c -     # PASTE, expect two OK
+cd "$P"
+
+# ---- 3. After the fetchngs job ends ----
+R="$P/nfcore_fetchngs/results"
+tail -n 25 "$P"/slurm-nf_fetchngs-*.out                               # PASTE
+ls "$R"/fastq/*.fastq.gz | wc -l                                      # PASTE, expect 210
+ls "$R"/fastq/md5/*.md5 | wc -l                                       # PASTE, expect 210
+awk 'END{print NR}' "$R/samplesheet/samplesheet.csv"                  # PASTE, expect 211
+find "$R/fastq" -name '*.fastq.gz' -links 1 | wc -l                   # PASTE, expect 0
+du -sh "$R/fastq" "$P/nfcore_fetchngs/work"                           # PASTE
+
+# ---- 4. rnaseq samplesheet: the fetchngs sheet cut to four columns, a new file beside it ----
+python3 -c "
+import csv, os
+p = os.environ['P']
+rows = list(csv.DictReader(open(p + '/nfcore_fetchngs/results/samplesheet/samplesheet.csv')))
+keep = ['sample', 'fastq_1', 'fastq_2', 'strandedness']
+with open(p + '/rnaseq_samplesheet.csv', 'w', newline='') as fh:
+    w = csv.DictWriter(fh, fieldnames=keep)
+    w.writeheader()
+    w.writerows({k: r[k] for k in keep} for r in rows)
+print(len(rows), 'rows;', len({r['sample'] for r in rows}), 'samples')
+"                                                                     # PASTE, expect 210 rows; 210 samples
+
+# ---- 5. nf-core/rnaseq 3.27.0, Salmon only; parameters in a params file (nf-core/rnaseq #1860) ----
+cat > "$P/rnaseq_params.yml" <<EOF
+input: $P/rnaseq_samplesheet.csv
+outdir: $P/nfcore_rnaseq/results
+fasta: $P/refs/GRCh38.primary_assembly.genome.fa.gz
+gtf: $P/refs/gencode.v50.primary_assembly.annotation.gtf.gz
+gencode: true
+pseudo_aligner: salmon
+skip_alignment: true
+save_reference: true
+EOF
+cat > "$P/rnaseq_kebnekaise.config" <<'EOF'
+executor {
+    queueSize = 50
+}
+EOF
+cat > "$P/run_rnaseq.sbatch" <<'EOF'
+#!/usr/bin/env bash
+#SBATCH -J nf_rnaseq_tier1
+#SBATCH -A hpc2n2026-161
+#SBATCH -n 1
+#SBATCH -c 1
+#SBATCH --mem=8G
+#SBATCH -t 7-00:00:00
+#SBATCH -o slurm-%x-%j.out
+set -euo pipefail
+source /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/nextflow_env.sh
+export NXF_SYNTAX_PARSER=v2 NXF_ANSI_LOG=false NXF_EXECUTOR=slurm SBATCH_ACCOUNT=hpc2n2026-161
+export NXF_SINGULARITY_CACHEDIR=/proj/nobackup/hpc2n2024-150/Rytis/Cache/Apptainer/nf-core_rnaseq_3.27.0
+export NXF_APPTAINER_CACHEDIR="$NXF_SINGULARITY_CACHEDIR"
+mkdir -p "$NXF_SINGULARITY_CACHEDIR"
+cd "$P/nfcore_rnaseq"
+nextflow -version
+nextflow run nf-core/rnaseq -r 3.27.0 -profile singularity -params-file "$P/rnaseq_params.yml" -c "$P/rnaseq_kebnekaise.config" -resume
+EOF
+cd "$P"
+sbatch --export=ALL,P="$P" "$P/run_rnaseq.sbatch"
+# About one hour after it starts: first 3.27.0 run on Nextflow 26.04.4 and Apptainer.
+tail -n 30 "$P"/slurm-nf_rnaseq_tier1-*.out                            # PASTE
+
+# ---- 6. When the rnaseq job ends ----
+S="$P/nfcore_rnaseq/results/salmon"
+tail -n 40 "$P"/slurm-nf_rnaseq_tier1-*.out                            # PASTE
+head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}'   # PASTE, expect 210
+awk 'END{print NR - 1, "genes"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"                        # PASTE
+ls "$P/nfcore_rnaseq/results" "$P/nfcore_rnaseq/results/pipeline_info"                                   # PASTE
+cat "$P"/nfcore_rnaseq/results/pipeline_info/*versions*.yml                                              # PASTE, expect rnaseq 3.27.0, salmon 2.7.0
+grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c                               # PASTE: the libType quant ran with
+du -sh "$P/nfcore_rnaseq/results" "$P/nfcore_rnaseq/work" "$P/nfcore_fetchngs/results" "$P/nfcore_fetchngs/work"   # PASTE
+sacct -X -n -S 2026-09-27 --name=nf_fetchngs,nf_rnaseq_tier1 --format=JobID,JobName,Elapsed,MaxRSS,State  # PASTE
+# Keep work/ and the FASTQs until I confirm the P2C.2 gather checks; after that it is your call.
+
+# ---- 7. On the Mac, after I confirm the rule commit: COPIED_FILES only, unchanged ----
+mkdir -p ~/ctx_tier1/data/raw/tier1_rnaseq
+rsync -avm --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1/nfcore_rnaseq/results/ ~/ctx_tier1/data/raw/tier1_rnaseq/
+du -sh ~/ctx_tier1/data/raw/tier1_rnaseq                               # PASTE
+```
+
+The cluster settings come from:
+- `SHARED_run_fetchngs.sbatch`: the account, the `nextflow_env.sh` path and the launch directory;
+- `hpc2n_verified.md`: queueSize 50 and Nextflow 26.04.4;
+- the 3.27.0 `nextflow.config` and `base.config`: the rnaseq keys, bbsplit off by default, and 36 GB × attempt, so there is no memory override.
+
+### Phase 2 dependencies
+
+| What | Where | Pin |
+|---|---|---|
+| gseapy | `[feature.ctx-dev]`, test oracle only | ==1.3.1 after the lock resolves; behaviour under pandas 3.0.6 unverified |
+| joblib | `[feature.ctx]` | ==1.6.0, already locked |
+| pytest marker `budget` | pyproject.toml | deselected by default |
+| nf-core/rnaseq | cluster and `fetch` environment | 3.27.0 as `RNASEQ_VERSION` |
+| GENCODE 50, MSigDB h.all 2026.1.Hs, SDRF | cluster and `resources/` | the hashes above |
+| Not added | | scikit-bio, upsetplot, decoupler, pytximport |
