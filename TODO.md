@@ -1,6 +1,6 @@
 # Cancer Transcriptomics Teaching Suite — plan
 
-Status: **draft v3.2 (2026-09-26) — Phase 1 closed; M1 restructured around nf-core/fetchngs 1.12.0 (find → fetch → make usable) with a dataset-independent Phase 1b; D1, D2, D4, D11–D20 resolved; remaining Phase 0 items: D5 dataset verification and version pinning.**
+Status: **draft v3.3 (2026-09-27) — Phase 1 and 1b closed; D5 resolved: tier 1 is E-MTAB-11190 (ENA PRJEB49000 / ERP133445), with its read-length batch confound taught as a lesson; D1, D2, D4, D5, D11–D20 resolved; remaining Phase 0 item: version pinning for the Phase 2+ tools.**
 Outputs of this plan: a Python package + CLI, one Jupyter notebook per module, and one self-contained interactive HTML report per module, linked from a hub page.
 
 ---
@@ -288,7 +288,7 @@ cancer-transcriptomics-teaching/
 - [x] D11 tier-1 proteomics: Rieckmann 2017 immune-cell proteome, cross-dataset
 - [x] D12 Ribo-seq: concept only inside M7
 - [x] D13 miRNA: processed TCGA miRNA-seq only, no raw small-RNA-seq in Track A
-- [ ] D5 confirm tier-1 dataset (E-MTAB-11190 recommended) after the verification items below
+- [x] D5 confirm tier-1 dataset (E-MTAB-11190 recommended) after the verification items below (confirmed by Rytis 2026-09-27: E-MTAB-11190, ENA PRJEB49000; the batch confound is taught)
   - Verified 2026-09-27 (ENA Portal API, BioStudies, PubMed; one metadata-only fetchngs run); awaiting Rytis's confirmation:
     - PRJEB49000 = ERP133445; ENA `study_alias` is E-MTAB-11190 on all 210 runs. fetchngs 1.12.0 `--skip_fastq_download` on PRJEB49000: exit 0, 210 samplesheet rows, `strandedness` auto; `ctx gather` read it (210 runs, 210 experiments, no multi-run sample, one ENA FASTQ per run, 0.859 s, 117.5 MiB).
     - Reads: single-end, RNA-Seq, Oligo-dT (poly-A), Illumina NovaSeq 6000; read length 76 nt (98 runs), 101 nt (99), 75 nt (13); 5.5M to 232M reads per run, median 26.2M; 287,051,792,224 FASTQ bytes in total, 0.29 to 11.0 GB per run; every run has one ENA FASTQ, so every file downloads over FTP with an md5.
@@ -314,7 +314,7 @@ cancer-transcriptomics-teaching/
 ### Phase 2 — Tier 1 cohort (highest value first)
 
 - [ ] M1c tier 1 (after D5 and Phase 1b): metadata-only fetchngs run of the tier-1 ENA study (ERP/PRJEB); curation engine and `conf/datasets/<tier-1>.toml` (title regex or SDRF join, groups, contrasts); `ctx gather` on it; processed counts if provided, otherwise Salmon counts produced once on Kebnekaise and released with the teaching subset
-- [ ] M5 pydeseq2 on tier 1: cell-type axis, cancer-vs-healthy contrasts within cell type, all M5 figures, precomputed knob grid
+- [ ] M5 pydeseq2 on tier 1: cell-type axis, cancer-vs-healthy contrasts within cell type, all M5 figures, precomputed knob grid. Batch lesson (D5): read length (75/76 vs 101 nt, a sequencing-batch proxy joined from ENA by run) is confounded with PDAC and IPMN; show the naive cancer-vs-healthy contrast beside the within-batch one at 101 nt (NDN 4 healthy vs 14 PDAC; monocytes 2 vs 12), with the PCA coloured by read length and the n per group stated; the G-CSF and HSC-T vs steady-state contrasts are fitted within the 76-nt batch, and the published IFN response in HSC-T neutrophils but not monocytes is the positive control
 - [ ] M6 ORA/GSEA/disease association with immune gene sets; `ctx.function.lite` validated against gseapy
 - [ ] Reports M1, M5, M6 + hub; sanity checks pass (see verification)
 
@@ -398,7 +398,7 @@ cancer-transcriptomics-teaching/
 | D2 | Student runtime | Resolved: laptops first (pixi / Docker), HPC profile kept |
 | D3 | Alignment demo | **STAR on chr22 (mirrors GDC)** + optional HISAT2 full genome / HISAT2 only |
 | D4 | Interactivity depth | Resolved: client-side sliders + JupyterLite |
-| D5 | Tier-1 dataset | **E-MTAB-11190** / Cassetta 2019 monocytes / other |
+| D5 | Tier-1 dataset | Resolved 2026-09-27: E-MTAB-11190, ENA PRJEB49000 (ERP133445), source Montaldo et al. 2022 Nat Immunol. Read length is confounded with the cancer groups (PDAC and IPMN all 101 nt, healthy mostly 76 nt): stress contrasts stay within the 76-nt batch, and cancer vs healthy is taught as a batch-confounding lesson |
 | D6 | Hosting of teaching subset and indices | **Zenodo with DOI** / GitHub release assets |
 | D7 | Orchestration | **Python CLI first**, Nextflow wrapper later / Nextflow from the start |
 | D8 | Licences | **Code MIT, materials CC BY 4.0** |
