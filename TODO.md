@@ -1386,7 +1386,7 @@ Exit gate:
     - The independent-filter case needed 600 low-count null genes and moderate effects (|LFC| 1). With strong effects alone the rejections saturate, and pydeseq2 filters nothing (`ds.py` `_independent_filtering`).
     - The null split lives on `Contrast.split` as a seeded, sex-stratified assignment; the plan named it only as a contrast.
 
-- [ ] **P2B.5 Enrichment engine and checksummed resources.**
+- [x] **P2B.5 Enrichment engine and checksummed resources.**
   - `function/lite.py` uses numpy, scipy and the standard library only, so it is Pyodide-safe. It holds:
     - a GMT reader;
     - `ora` (hypergeometric, then BH);
@@ -1419,6 +1419,27 @@ Exit gate:
     - mirror fallback;
     - `::test_fetch_real`, marked network.
   - The lock diff adds only gseapy's dependencies and changes no existing `main` version. Otherwise gseapy moves to its own environment.
+  - Evidence, 2026-09-27:
+    - Built: `function/lite.py` (`read_gmt`, `sized`, `ora`, `prerank`, `collapse`, `background`), importing only numpy, scipy and the stdlib. `setup.fetch()`, `FetchError` and `ctx setup --dataset-file`, whose card is shared with gather.
+    - The definitions follow gseapy 1.3.1 `algorithm.py`, read before coding: the extreme of larger magnitude, NES by the same-sign null mean, and the pooled-null FDR. One stated difference: the nominal p counts the observed score, so it is never 0.
+    - gseapy runs a Rust port (`gseapy.gse.prerank_rs`) by default, whose seeded null cannot be reproduced, so ES is compared exactly and p within the Monte-Carlo rule. Its Python `algorithm.enrichment_score` calls `np.in1d`, which NumPy 2.5.3 removed, so it cannot serve as an oracle here. With `background=None`, `gseapy.enrich` uses "All genes in your gene_sets" (its docstring), which is the trap the test shows.
+    - gseapy ==1.3.1 is in `[feature.ctx-dev]`. The lock diff only adds gseapy (osx-arm64 and linux-64), pyopengl and libopengl-devel; no package was removed or changed. It is not in the `laptop` environment, and `pixi install --locked` exits 0.
+    - `tests/test_enrich.py`, 11 tests:
+      - the hand-worked ES and running sum;
+      - ORA against `scipy.stats.hypergeom` and `gseapy.enrich`, |dp| <= 1e-12 on every set gseapy returns;
+      - the tested-gene background;
+      - the trap: the same hits against the 10,000-gene library union give p more than 10 times smaller than against 3,000 tested genes;
+      - cut to the universe before the size filter;
+      - collapse independent of row order, with "g1" before "g10" on a tie;
+      - planted sets recovered (FDR < 0.05, right sign; median random-set FDR >= 0.25);
+      - seed determinism;
+      - prerank against gseapy on 42 sets (ES within 1e-9, nominal p within 3 x sqrt(2) x SE + 1/1001 with SE over the ~500 same-sign nulls, FDR on the same side of 0.05 outside [0.02, 0.1]);
+      - NES against gseapy on a skewed ranking within 10 %;
+      - Pyodide-safe imports.
+    - `tests/test_fetch.py`, 7 tests: verify and record; tampered file refused with neither file nor `.part` left; mirror fallback; no server hit on a second call; destination outside the root refused; `ctx setup --dataset-file` through the CLI. The network test `test_fetch_real` fetched the tier-1 SDRF and the Hallmark GMT, and both matched the sizes and SHA-256 values in `tier1.toml`.
+    - Mutations, applied with Python, each fail their test: renaming before hashing; no skip; first mirror only; no root check; size filter before the cut; keep-first collapse; background of all genes; `import polars` in lite; an unseeded generator; NES by the mixed-sign null mean. That last one first survived. Random sets on a skewed ranking all have the majority sign, where the two means coincide. A planted 15-gene set at the bottom of the ranking catches it; its NES is about twice as large under the mutation.
+    - `pixi run preflight` exits 0, 219 passed, 60.91 s real at 1,318,223,872 bytes max RSS.
+  - Not done: the Hallmark CC BY 4.0 licence was not re-read; it goes on the M6 page in P2B.6 as the research recorded it.
 
 - [ ] **P2B.6 `ctx de`, `ctx function`, `ctx report` and the hub, end to end on synthetic data, plus the budget at real size.**
   - Options are `--dataset`, `--dataset-file` and `--min-count`, each with a card. Each command reads the newest upstream output and states its SHA-256.

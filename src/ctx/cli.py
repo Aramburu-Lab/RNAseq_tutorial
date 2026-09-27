@@ -44,11 +44,13 @@ CARDS: dict[str, tuple[str, str]] = {
         "Points gather at another download. gather only reads it and never writes into it.",
     ),
     "--dataset-file": (
-        "The cohort's dataset file (conf/datasets/<slug>.toml): its SDRF join, value maps, "
-        "batch rule and expected counts. Unset leaves the curation columns empty.",
-        "Set, gather joins the SDRF (fetched by ctx setup) to every run, fills donor, cell "
-        "type, condition, replicate and batch, and stops with a problem table if anything "
-        "fails to join, map or match the declared counts.",
+        "The cohort's dataset file (conf/datasets/<slug>.toml): its resources, SDRF join, "
+        "value maps, batch rule and expected counts. Unset: setup fetches nothing and gather "
+        "leaves the curation columns empty.",
+        "Set, setup fetches each resource (the SDRF, the gene sets) and keeps it only if its "
+        "size and SHA-256 match; gather joins the SDRF to every run, fills donor, cell type, "
+        "condition, replicate and batch, and stops with a problem table if anything fails to "
+        "join, map or match the declared counts.",
     ),
     "--rnaseq-dir": (
         "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset writes no counts.",
@@ -146,12 +148,21 @@ def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
 
 @app.command()
 @profiled
-def setup(ctx: typer.Context) -> None:
+def setup(
+    ctx: typer.Context,
+    dataset_file: Annotated[Path | None, typer.Option(help=CARDS["--dataset-file"][0])] = None,
+) -> None:
     """Report this machine: versions, hardware, profile, fonts and colour contrast."""
     from ctx import setup as module  # noqa: PLC0415 - heavy; imported after the runtime profile
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
-    written = module.run(ctx.obj["settings"], cards, "ctx " + shlex.join(sys.argv[1:]))
+    command = "ctx " + shlex.join(sys.argv[1:])
+    try:
+        written = module.run(ctx.obj["settings"], cards, command, dataset_file)
+    except (module.FetchError, DatasetError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
     for path in written:
         typer.echo(path)
 

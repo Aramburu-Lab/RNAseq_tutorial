@@ -3,10 +3,15 @@
 Downloads nothing (Phase 1). Every fact on the page is measured in this run, not assumed.
 """
 
+import hashlib
+import json
 import os
 import platform
-from datetime import date
+import urllib.request
+from collections.abc import Callable, Sequence
+from datetime import UTC, date, datetime
 from pathlib import Path
+from typing import Any
 
 import numpy
 import polars as pl
@@ -14,6 +19,7 @@ import threadpoolctl
 from matplotlib import font_manager
 
 from ctx import runtime
+from ctx.dataset import Resource, load
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
 from ctx.report.builder import ModulePage, ParameterCard, Reproduction, SelfCheck, write
@@ -100,17 +106,115 @@ def _facts(settings: runtime.Settings) -> tuple[str, ...]:
     )
 
 
-def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: str) -> list[Path]:
+MANIFEST = Path("resources") / "manifest.json"
+CHUNK = 2**20
+
+
+class FetchError(RuntimeError):
+    """A resource could not be fetched from any of its mirrors with the declared checksum."""
+
+
+def _sha256(path: Path) -> str:
+    """SHA-256 of a file, read in chunks."""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        while block := handle.read(CHUNK):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _download(url: str, part: Path, opener: Callable[..., Any]) -> None:
+    """Stream one URL to ``part``."""
+    with opener(url, timeout=120) as response, part.open("wb") as out:
+        while block := response.read(CHUNK):
+            out.write(block)
+
+
+def fetch(
+    root: Path,
+    resources: Sequence[Resource],
+    opener: Callable[..., Any] = urllib.request.urlopen,
+) -> list[dict[str, Any]]:
+    """Fetch each resource under the root, checked by size and SHA-256 before it is kept.
+
+    Each mirror is tried in order: download to ``<dest>.part``, check, then rename, so a
+    file at ``dest`` is always a checked one. A file already there with the right hash is
+    not fetched again. Every fetched or confirmed file is recorded in
+    ``resources/manifest.json``.
+
+    Args:
+        root: The project root.
+        resources: The dataset file's resources.
+        opener: How to open a URL; tests pass their own.
+
+    Returns:
+        One manifest entry per resource.
+
+    Raises:
+        FetchError: If a destination leaves the root, or no mirror gives the declared bytes.
+    """
+    manifest_path = root / MANIFEST
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
+    entries = []
+    for resource in resources:
+        dest = (root / resource.dest).resolve()
+        if not dest.is_relative_to(root.resolve()):
+            raise FetchError(f"{resource.name}: {resource.dest} is outside {root}")
+        entry = manifest.get(resource.dest)
+        if not (dest.is_file() and _sha256(dest) == resource.sha256 and entry):
+            entry = _fetch_one(resource, dest, opener)
+        manifest[resource.dest] = entry
+        entries.append(entry)
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
+    return entries
+
+
+def _fetch_one(resource: Resource, dest: Path, opener: Callable[..., Any]) -> dict[str, Any]:
+    """Try each mirror until one gives the declared size and hash; leave no partial file."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    part = dest.with_name(dest.name + ".part")
+    failures = []
+    for url in resource.urls:
+        try:
+            _download(url, part, opener)
+            size, digest = part.stat().st_size, _sha256(part)
+            if (size, digest) == (resource.bytes, resource.sha256):
+                part.replace(dest)
+                return {
+                    "name": resource.name, "url": url, "bytes": size, "sha256": digest,
+                    "retrieved": datetime.now(UTC).isoformat(timespec="seconds"),
+                }  # fmt: skip
+            failures.append(f"{url}: {size} bytes, sha256 {digest}")
+        except OSError as error:
+            failures.append(f"{url}: {error}")
+        finally:
+            part.unlink(missing_ok=True)
+    expected = f"{resource.bytes} bytes, sha256 {resource.sha256}"
+    raise FetchError(f"{resource.name}: expected {expected}; got\n  " + "\n  ".join(failures))
+
+
+def run(
+    settings: runtime.Settings,
+    cards: tuple[ParameterCard, ...],
+    command: str,
+    dataset_file: Path | None = None,
+) -> list[Path]:
     """Write the versions table and the environment report under ``outputs/00_setup``.
 
     Args:
         settings: The resolved runtime.
         cards: Parameter cards for every option of this command.
         command: The command line, as the reader should retype it.
+        dataset_file: A dataset file whose resources to fetch; unset fetches nothing.
 
     Returns:
         The written files: the report, then the versions table files.
+
+    Raises:
+        FetchError: Before any output is written, if a resource cannot be fetched.
     """
+    fetched = fetch(settings.root, load(dataset_file).resources) if dataset_file else []
     day = date.today()
     number = dict(MODULES)[MODULE]
     out = settings.root / "outputs" / f"{number:02d}_{MODULE}"
@@ -119,7 +223,11 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     files = write_table(
         table, out, stem(MODULE, "versions", 1, day=day), columns=VERSION_COLUMNS, data_releases={}
     )
-    facts = _facts(settings)
+    facts = _facts(settings) + tuple(
+        f"Resource {e['name']}: {e['bytes']:,} bytes, sha256 {e['sha256']}, from {e['url']} "
+        f"({e['retrieved']}); recorded in {MANIFEST}."
+        for e in fetched
+    )
     # Measured before the page is rendered: the page cannot contain its own rendering time.
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
