@@ -1,9 +1,13 @@
 """The sanity rules: decide() at its boundaries, the rule schema, and (with P2C) the record."""
 
+import csv
 import math
+import subprocess
+from pathlib import Path
 
 import pytest
 
+from ctx.dataset import load
 from ctx.de.sanity import RuleError, decide, parse
 
 EPS = 1e-9
@@ -75,3 +79,90 @@ def test_schema_errors_listed_together():
     message = str(raised.value)
     assert "A condition 0" in message and "B condition 0" in message
     assert "B: no source" in message and "rule id 'A' appears twice" in message
+
+
+# --- the tier-1 record (P2C.3), against the rules as committed before any count (P2C.1) ------
+
+
+ROOT = Path(__file__).resolve().parents[1]
+SPEC = ROOT / "conf" / "datasets" / "tier1.toml"
+# Everything a verdict depends on: the rules, how samples are curated and counted, the
+# models, the enrichment, the PERMANOVA, and the step that decides. None may change between
+# the rule commit and the record commit (critique M4).
+FROZEN = (
+    "conf/datasets/tier1.toml", "src/ctx/dataset.py", "src/ctx/gather/curation.py",
+    "src/ctx/gather/rnaseq.py", "src/ctx/de", "src/ctx/function", "src/ctx/viz/annotate.py",
+    "src/ctx/report/hub.py",
+)  # fmt: skip
+
+
+def git(*args: str) -> str:
+    return subprocess.run(
+        ["git", "-C", str(ROOT), *args], capture_output=True, text=True, check=True
+    ).stdout.strip()
+
+
+def records() -> tuple[Path | None, Path | None]:
+    verdicts = sorted((ROOT / "deliverables").glob("*_de_tier1_sanity_v*.csv"))
+    metrics = sorted((ROOT / "deliverables").glob("*_de_tier1_metrics_v*.csv"))
+    return (verdicts[-1] if verdicts else None), (metrics[-1] if metrics else None)
+
+
+def rows(path: Path) -> list[dict[str, str]]:
+    with path.open(newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def rule_commit() -> str:
+    found = git("log", "--reverse", "--format=%H", "-S", "[[sanity.rules]]", "--", str(SPEC))
+    assert found, "no commit adds the tier-1 [sanity] rules"
+    return found.split()[0]
+
+
+def need_record():
+    if git("rev-parse", "--is-shallow-repository") == "true":
+        pytest.skip("shallow clone: CI checks out depth 1, so the rule commit is absent")
+    verdicts, metrics = records()
+    if verdicts is None or metrics is None:
+        pytest.skip("no tier-1 record in deliverables/ yet; it is written in P2C.3")
+    return verdicts, metrics
+
+
+def test_rule_predates_record():
+    verdicts, _ = need_record()
+    added = git("log", "--reverse", "--diff-filter=A", "--format=%H", "--",
+                str(verdicts.relative_to(ROOT))).split()  # fmt: skip
+    assert added, f"{verdicts.name} is not committed"
+    assert rule_commit() != added[0], "the rules and the record arrived in one commit"
+    ancestor = subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor",
+                               rule_commit(), added[0]], check=False)  # fmt: skip
+    assert ancestor.returncode == 0
+
+
+def test_rule_unchanged():
+    verdicts, _ = need_record()
+    added = git("log", "--reverse", "--diff-filter=A", "--format=%H", "--",
+                str(verdicts.relative_to(ROOT))).split()  # fmt: skip
+    changed = git("diff", "--name-only", rule_commit(), added[0], "--", *FROZEN)
+    assert not changed, f"changed between the rule commit and the record: {changed}"
+
+
+def test_decision_follows_rule():
+    verdicts, metrics = need_record()
+    record = {r["metric"]: float(r["value"]) if r["value"] else float("nan") for r in rows(metrics)}
+    decided = decide(record, parse(load(SPEC).sanity))
+    recorded = [
+        (r["rule"], r["condition"], r["verdict"], r["rule_verdict"]) for r in rows(verdicts)
+    ]
+    assert [
+        (r["rule"], r["condition"], r["verdict"], r["rule_verdict"]) for r in decided
+    ] == recorded
+
+
+def test_record_complete():
+    verdicts, _ = need_record()
+    recorded = rows(verdicts)
+    assert {r.id for r in parse(load(SPEC).sanity)} == {r["rule"] for r in recorded}
+    for r in recorded:
+        assert r["condition"] and r["verdict"] and r["source"], r
+        assert r["left"] or r["verdict"] in {"FAIL", "RECORDED"}, r

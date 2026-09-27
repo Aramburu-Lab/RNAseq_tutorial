@@ -42,3 +42,275 @@ patterns = [
     '\bERS895\d{4}\b',
     '\bUPN\d+\b',
 ]
+
+[sdrf]
+resource = "sdrf"
+join = ["Comment[ENA_RUN]", "run_accession"]
+cross_check = [["Source Name", "sample_title"]]
+
+[columns.donor]
+source = "Characteristics[individual]"
+meaning = "Individual the sample came from (SDRF Characteristics[individual])."
+
+[columns.cell_type]
+source = "Characteristics[cell type]"
+meaning = "Sorted cell population: normal-density (NDN) or low-density (LDN) neutrophils, monocytes, or a bone-marrow stage (BM_1 to BM_4)."
+values = { NDN = "NDN", LDN = "LDN", Monocyte = "Monocyte", BM_1 = "BM_1", BM_2 = "BM_2", BM_3 = "BM_3", BM_4 = "BM_4" }
+
+[columns.condition]
+source = "Characteristics[condition]"
+meaning = "Donor state: steady state, G-CSF mobilised donor, HSCT recipient, PDAC or IPMN patient."
+values = { "Steady state" = "steady_state", "G-CSF" = "gcsf", HSCT = "hsct", PDAC = "pdac", IPMN = "ipmn" }
+
+[columns.tissue]
+source = "Characteristics[tissue]"
+meaning = "PB, peripheral blood, or BM, bone marrow."
+values = { PB = "PB", BM = "BM" }
+
+[columns.time_point]
+source = "Characteristics[hsct time point]"
+meaning = "HSCT follow-up (fu1 16-27 days, fu2 28-40 days, fu3 over 180 days after transplant, PMC7615267 Methods); empty for other conditions."
+values = { na = "", "1st follow up" = "fu1", "2nd follow up" = "fu2", "3rd follow up" = "fu3" }
+
+[columns.isolation]
+source = "Characteristics[cell isolation strategy]"
+meaning = "How the cells were isolated; differs between groups of monocytes (critique M9)."
+values = { "FACS sorting" = "facs", "Neutrophil Isolation kit" = "neutrophil_kit", "CD14 Microbeads" = "cd14_beads", "CD15 Microbeads" = "cd15_beads" }
+
+[columns.sex]
+source = "Characteristics[sex]"
+meaning = "Recorded sex of the individual; empty where the SDRF has none."
+values = { M = "M", F = "F", "" = "" }
+
+[columns.donor_sex]
+source = "Characteristics[donor sex]"
+meaning = "Sex of the stem-cell donor, for HSCT recipients; empty otherwise."
+values = { M = "M", F = "F", na = "" }
+
+[order]
+time_point = ["", "fu1", "fu2", "fu3"]
+
+[derived.batch]
+bins = { short = [75, 76], long = [101] }
+
+[expect]
+runs = 210
+
+[expect.counts.read_length]
+"75" = 13
+"76" = 98
+"101" = 99
+
+[expect.counts.condition]
+hsct = 59
+gcsf = 44
+steady_state = 41
+pdac = 35
+ipmn = 31
+
+[expect.counts.tissue]
+PB = 171
+BM = 39
+
+# Peripheral blood only; one sample per individual per group (earliest by [order], then run).
+# Group sizes measured 2026-09-27 from the SDRF joined to the ENA read_run report; ctx de
+# stops if the realised n differs.
+
+[[contrasts]]
+name = "ndn_gcsf"
+variable = "condition"
+reference = "steady_state"
+tested = "gcsf"
+n = [13, 13]
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"] }
+
+[[contrasts]]
+name = "mono_gcsf"
+variable = "condition"
+reference = "steady_state"
+tested = "gcsf"
+n = [8, 8]
+filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["short"] }
+
+[[contrasts]]
+name = "ndn_hsct_early"
+variable = "condition"
+reference = "steady_state"
+tested = "hsct"
+n = [13, 5]
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"], time_point = ["", "fu1", "fu2"] }
+
+[[contrasts]]
+name = "mono_hsct_early"
+variable = "condition"
+reference = "steady_state"
+tested = "hsct"
+n = [8, 4]
+filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["short"], time_point = ["", "fu1", "fu2"] }
+
+[[contrasts]]
+name = "ndn_gcsf_paired"
+variable = "condition"
+reference = "steady_state"
+tested = "gcsf"
+n = [9, 9]
+design = "~donor + group"
+paired = true
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"] }
+
+[[contrasts]]
+name = "ndn_gcsf_unpaired9"
+variable = "condition"
+reference = "steady_state"
+tested = "gcsf"
+n = [9, 9]
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"], donor = ["UPN1", "UPN2", "UPN3", "UPN4", "UPN5", "UPN6", "UPN7", "UPN9", "UPN11"] }
+
+[[contrasts]]
+name = "ndn_pdac_naive"
+variable = "condition"
+reference = "steady_state"
+tested = "pdac"
+n = [17, 14]
+filters = { tissue = ["PB"], cell_type = ["NDN"] }
+
+[[contrasts]]
+name = "ndn_pdac_adjusted"
+variable = "condition"
+reference = "steady_state"
+tested = "pdac"
+n = [17, 14]
+design = "~batch + group"
+filters = { tissue = ["PB"], cell_type = ["NDN"] }
+
+[[contrasts]]
+name = "ndn_pdac_within"
+variable = "condition"
+reference = "steady_state"
+tested = "pdac"
+n = [4, 14]
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["long"] }
+
+[[contrasts]]
+name = "ndn_null_split"
+variable = "condition"
+reference = "steady_state"
+tested = "steady_state"
+n = [7, 6]
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"], condition = ["steady_state"] }
+split = { seed = 42, strata = "sex" }
+
+[de]
+featured = "ndn_gcsf"
+box_contrast = "ndn_hsct_early"
+# Named by the paper (PMC7615267 Figs. 6 and 7, from its scRNA-seq): drawn, not tested as a rule.
+box_genes = ["ISG15", "IFI6", "STAT1", "OAS2", "CD274", "AIM2", "GBP5"]
+scatters = [["ndn_pdac_naive", "ndn_pdac_adjusted"], ["ndn_hsct_early", "mono_hsct_early"]]
+
+[de.lessons]
+"Batch" = ["ndn_pdac_naive", "ndn_pdac_adjusted", "ndn_pdac_within"]
+"Pairing" = ["ndn_gcsf_unpaired9", "ndn_gcsf_paired"]
+
+[[de.pca]]
+name = "pb"
+filters = { tissue = ["PB"] }
+factors = ["cell_type", "condition", "batch"]
+strata = "donor"
+
+[[de.pca]]
+name = "ndn"
+filters = { tissue = ["PB"], cell_type = ["NDN"] }
+factors = ["condition"]
+symbol = "batch"
+one_per = "donor"
+
+[[de.pca]]
+name = "ss_ndn"
+filters = { tissue = ["PB"], cell_type = ["NDN"], condition = ["steady_state"] }
+factors = ["batch"]
+one_per = "donor"
+
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+running = ["ndn_hsct_early", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
+
+# Pre-registered before any tier-1 count exists (P2C.1). Thresholds are choices fixed before
+# the data, not literature values. A failing rule is reported, never retuned. Rytis reviews
+# and edits these before the rule commit.
+
+[[sanity.rules]]
+id = "R1"
+text = "Cell type explains more of the peripheral-blood expression than condition or batch."
+source = "TODO.md:360; blind VST of the 171 PB samples, top 500 genes"
+conditions = [
+    { metric = "permanova.pb.cell_type.r2", op = ">", other = "permanova.pb.condition.r2" },
+    { metric = "permanova.pb.cell_type.r2", op = ">", other = "permanova.pb.batch.r2" },
+]
+
+[[sanity.rules]]
+id = "R2"
+text = "The p-value histograms of the two stress contrasts peak at 0 over a flat floor."
+source = "TODO.md:360"
+conditions = [
+    { metric = "phist.ndn_gcsf.low", op = ">=", other = "phist.ndn_gcsf.flat", times = 2 },
+    { metric = "phist.ndn_hsct_early.low", op = ">=", other = "phist.ndn_hsct_early.flat", times = 2 },
+]
+
+[[sanity.rules]]
+id = "R3"
+text = "A seeded split of healthy individuals calls at most 1 % of tested genes."
+source = "negative control; seed 42, split stratified by recorded sex"
+conditions = [
+    { metric = "calls.ndn_null_split.called", op = "<=", other = "calls.ndn_null_split.tested", times = 0.01 },
+]
+
+[[sanity.rules]]
+id = "R4"
+text = "Neutrophils of HSCT recipients carry an interferon-alpha signature; monocytes less so."
+source = "PMC7615267 abstract (ISGs in neutrophils, not monocytes) and Fig. 4d"
+conditions = [
+    { metric = "gsea.ndn_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
+    { metric = "gsea.ndn_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr", op = "<", value = 0.05 },
+    { metric = "gsea.mono_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = "<", other = "gsea.ndn_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes" },
+]
+
+[[sanity.rules]]
+id = "R5"
+text = "G-CSF represses the interferon-alpha response in neutrophils."
+source = "PMC7615267 Fig. 4d"
+conditions = [
+    { metric = "gsea.ndn_gcsf.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = "<", value = 0 },
+    { metric = "gsea.ndn_gcsf.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr", op = "<", value = 0.05 },
+]
+
+[[sanity.rules]]
+id = "R6"
+text = "The read-length batch is visible in healthy neutrophils alone."
+source = "D5; steady-state NDN, one sample per individual, 4 long against 13 short"
+conditions = [{ metric = "permanova.ss_ndn.batch.p", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "R7"
+text = "Pairing the G-CSF donors finds at least as many genes as ignoring the pairs."
+source = "TODO.md:364"
+conditions = [
+    { metric = "calls.ndn_gcsf_paired.called", op = ">=", other = "calls.ndn_gcsf_unpaired9.called" },
+]
+
+[[sanity.rules]]
+id = "R8"
+text = "Every sample expresses its recorded sex; HSCT samples their donor's."
+source = "critique M8; XIST against RPS4Y1, DDX3Y, KDM5D, UTY and EIF1AY"
+conditions = [{ metric = "sex.disagree", op = "<=", value = 0 }]
+
+[[sanity.rules]]
+id = "PDAC"
+text = "Recorded, not gating: interferon-alpha genes up in PDAC neutrophils."
+source = "PMC7615267 Fig. 4d; the long-batch reference is n = 4"
+gate = false
+conditions = [
+    { metric = "gsea.ndn_pdac_adjusted.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
+    { metric = "gsea.ndn_pdac_within.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
+]

@@ -1519,7 +1519,7 @@ Exit gate:
 
 ### Phase 2C — Tier 1 plugs in; close
 
-- [ ] **P2C.1 Tier-1 inputs and pre-registered rules.** The rule commit lands before step 7 copies any count.
+- [x] **P2C.1 Tier-1 inputs and pre-registered rules.** The rule commit lands before step 7 copies any count.
   - Metadata-only fetchngs into `~/ctx_tier1/data/raw/tier1_meta`, with the `tutorial_test_run.py:80-99` command shape.
   - `ctx --root ~/ctx_tier1 setup --dataset-file conf/datasets/tier1.toml`.
   - Complete `tier1.toml`:
@@ -1561,6 +1561,17 @@ Exit gate:
       - `::test_decide_boundaries`, including a missing metric;
       - `::test_rule_predates_record`;
       - `::test_rule_unchanged`: `git diff --quiet <rule> <record> -- conf/datasets/tier1.toml src/ctx/dataset.py src/ctx/gather/curation.py src/ctx/de src/ctx/function src/ctx/viz/annotate.py` (M4). Mutation: a threshold edited after the rule commit.
+
+  - Evidence, 2026-09-27 (rule commit):
+    - The metadata-only fetchngs 1.12.0 run of PRJEB49000 into `~/ctx_tier1/data/raw/tier1_meta` exited 0 in 12.14 s real (612,335,616 B max RSS); the samplesheet has 211 lines.
+    - `ctx --root ~/ctx_tier1 setup --dataset-file conf/datasets/tier1.toml` exited 0. It fetched the SDRF (108,110 B, sha256 b34b846a...) and Hallmark (48,686 B, sha256 eecaf6da...), both matching the declared values, and recorded them in `resources/manifest.json`.
+    - `ctx --root ~/ctx_tier1 gather --dataset tier1 --fetchngs-dir ... --dataset-file conf/datasets/tier1.toml` exited 0 with `[expect]` enforced, in 4.32 s real at 451,870,720 B max RSS. Curated: 210 runs; PB 171 (NDN 73, monocytes 60, LDN 38) and BM 39; batch short 111, long 99; 23 runs beyond the first of a donor, cell type and condition.
+    - Before any count exists, `select_samples` on the real sheet realises the declared n of all ten contrasts: 13/13, 8/8, 13/5, 8/4, 9/9, 9/9, 17/14, 17/14, 4/14, 7/6.
+    - The PCA subsets: pb has 171 samples from 61 individuals; ss_ndn has 17 individuals, 4 long and 13 short.
+    - The MSigDB licence was read at gsea-msigdb.org `msigdb_license_terms.jsp` on 2026-09-27: CC BY 4.0 for v2022.1 and above, with further terms only on KEGG-derived sets.
+    - Rytis approved rules R1 to R8 and the recorded PDAC rule as drafted on 2026-09-27, and they are committed here, before any tier-1 count reaches this Mac.
+    - `tests/test_sanity_record.py`: 11 `decide()` and schema tests pass. The four record tests (`test_rule_predates_record`, `test_rule_unchanged` over `FROZEN`, `test_decision_follows_rule`, `test_record_complete`) skip until P2C.3 writes the record.
+  - Not done: the `ndn` PCA keeps each individual's first run, and G-CSF runs come first for the paired donors, so it shows steady state from 6 individuals. No rule reads it; its caption states one sample per individual.
 
 - [ ] **P2C.2 Real counts through gather (after step 7).**
   - Command: `ctx --root ~/ctx_tier1 gather --dataset tier1 --fetchngs-dir … --dataset-file … --rnaseq-dir ~/ctx_tier1/data/raw/tier1_rnaseq`, under `/usr/bin/time -l`.
