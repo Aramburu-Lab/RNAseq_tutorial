@@ -26,7 +26,8 @@ files = ["src"]
 
 # These ship no type information; everything else stays strict.
 [[tool.mypy.overrides]]
-module = ["seaborn", "seaborn.*", "plotly", "plotly.*", "scipy", "scipy.*", "threadpoolctl"]
+module = ["seaborn", "seaborn.*", "plotly", "plotly.*", "scipy", "scipy.*", "threadpoolctl",
+          "pandas", "pandas.*", "pydeseq2.*", "formulaic", "joblib.*"]
 ignore_missing_imports = true
 
 [tool.interrogate]

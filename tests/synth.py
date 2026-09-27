@@ -277,3 +277,61 @@ def demo_bars_at_scale(horizontal: bool):  # BarData
         caption="Counts at the tier-1 scale; no test.", horizontal=horizontal,
         stacked=True, width="double",
     )  # fmt: skip
+
+
+def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted design
+    groups: tuple[tuple[str, str, int], ...] = (("control", "short", 6), ("case", "short", 6)),
+    *,
+    seed: int = 7,
+    n_genes: int = 1000,
+    paired: bool = False,
+    donor_sd: float = DONOR_SD_LOG2,
+    batch_lfc: float = 0.0,
+    condition_lfc: float = LFC_CONDITION,
+) -> Synthetic:
+    """Counts for DE tests: declared (condition, batch, n) groups; planted condition, batch genes.
+
+    Separate from ``counts()``, whose arguments the P1.5 spike record pins. Genes 0-9 % carry
+    a condition effect
+    (case over control, alternating sign, |LFC| ``condition_lfc``); genes 10-19 % carry
+    a batch effect (long over short, ``batch_lfc``); the rest are null. With ``paired`` the
+    i-th sample of every group comes from donor i.
+
+    Returns:
+        Counts (``gene_id`` then one column per sample), a curated-style sheet, and the truth.
+    """
+    rng = np.random.default_rng(seed)
+    rows, donor_of = [], []
+    for g, (condition, batch, n) in enumerate(groups):
+        for i in range(n):
+            donor = f"d{i:03d}" if paired else f"d{g}{i:02d}"
+            rows.append((f"XRR{len(rows) + 1:06d}", f"S{len(rows) + 1:03d}", donor, "type_a",
+                         condition, batch, "", "M" if i % 2 else "F", "PB"))  # fmt: skip
+            donor_of.append(donor)
+    sheet = pl.DataFrame(
+        rows, orient="row",
+        schema=["run_accession", "sample", "donor", "cell_type", "condition", "batch",
+                "time_point", "sex", "tissue"],
+    )  # fmt: skip
+    sign = np.where(np.arange(n_genes) % 2 == 0, 1.0, -1.0)
+    index = np.arange(n_genes)
+    lfc_condition = np.where(index < 0.1 * n_genes, condition_lfc * sign, 0.0)
+    lfc_batch = np.where((index >= 0.1 * n_genes) & (index < 0.2 * n_genes), batch_lfc * sign, 0.0)
+    base = np.exp(rng.normal(np.log(200.0), 1.0, n_genes))
+    donors = sorted(set(donor_of))
+    effect = rng.normal(0.0, donor_sd, (n_genes, len(donors)))[
+        :, [donors.index(d) for d in donor_of]
+    ]
+    is_case = (sheet["condition"] == "case").to_numpy()
+    is_long = (sheet["batch"] == "long").to_numpy()
+    log2_mu = lfc_condition[:, None] * is_case + lfc_batch[:, None] * is_long + effect
+    mu = np.exp(rng.normal(0.0, SIZE_FACTOR_SD, sheet.height)) * base[:, None] * np.exp2(log2_mu)
+    n = 1.0 / DISPERSION
+    draws = rng.negative_binomial(n, n / (n + mu)).astype(np.int32)
+    truth = pl.DataFrame({
+        "gene_id": [f"g{i + 1:05d}" for i in range(n_genes)],
+        "lfc_condition": lfc_condition,
+        "lfc_batch": lfc_batch,
+    })  # fmt: skip
+    matrix = pl.DataFrame(draws, schema=sheet["sample"].to_list(), orient="row")
+    return Synthetic(matrix.insert_column(0, truth["gene_id"]), sheet, truth)

@@ -150,3 +150,35 @@ def test_child_peak_attributed():
     assert own < 256 * MIB
     _, idle_child = json.loads(_python(PARENT.format(child="pass")))
     assert idle_child < 256 * MIB
+
+
+LOKY_CHILD = textwrap.dedent(
+    """
+    import json, sys
+    from time import perf_counter
+    import numpy as np
+    from joblib.externals.loky import get_reusable_executor
+    from ctx.de.deseq import _shutdown_workers
+    from ctx.runtime import measure
+
+    def touch(mib):
+        block = np.ones(mib * 2**20, dtype=np.uint8)
+        return int(block.sum())
+
+    started = perf_counter()
+    get_reusable_executor(max_workers=1).submit(touch, 256).result()
+    _shutdown_workers()
+    usage = measure(started)
+    print(json.dumps({"children": usage.peak_rss_children, "self": usage.peak_rss_self}))
+    """
+)
+
+
+def test_loky_child_peak_attributed():
+    # A fresh process, so no other child of the test run can set the children's peak.
+    done = subprocess.run(
+        [sys.executable, "-c", LOKY_CHILD], capture_output=True, text=True, check=True
+    )
+    usage = json.loads(done.stdout.strip().splitlines()[-1])
+    assert usage["children"] >= 256 * 2**20, usage
+    assert usage["children"] < 2**30, usage
