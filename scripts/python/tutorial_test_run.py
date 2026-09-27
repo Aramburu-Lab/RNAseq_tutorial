@@ -87,12 +87,14 @@ def fetch(root: Path, slug: str, ids: list[str], skip_download: bool) -> Path:
     outdir.mkdir(parents=True, exist_ok=True)
     (outdir / "ids.csv").write_text("".join(f"{i}\n" for i in ids))
     relative = outdir.relative_to(root)
+    # --monochrome_logs true: fetchngs 1.12.0's validation plugin reads an undefined
+    # params.monochromeLogs when colours are on, and Nextflow warns (D-006).
     command = [
         "pixi", "run", "--manifest-path", str(REPO / "pixi.toml"), "-e", "fetch",
         "nextflow", "run", "nf-core/fetchngs", "-r", fetchngs_version(), "-profile", PROFILE,
         "--input", f"{relative}/ids.csv", "--outdir", str(relative),
         "--nf_core_pipeline", "rnaseq", "--max_cpus", "4", "--max_memory", "8.GB",
-        "-work-dir", str(root / "work" / slug),
+        "--monochrome_logs", "true", "-work-dir", str(root / "work" / slug),
     ]  # fmt: skip
     if skip_download:
         command.append("--skip_fastq_download")

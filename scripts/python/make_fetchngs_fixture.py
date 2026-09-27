@@ -93,6 +93,9 @@ def run(mode: str, scratch: Path) -> list[str]:
         "-work-dir", str(work / "work"),
         # fasterq-dump asks for 36 GB by default; a laptop has less, and these runs are tiny.
         "--max_cpus", "4", "--max_memory", "8.GB",
+        # nf-validation 1.1.3 reads the undefined params.monochromeLogs when colours are on,
+        # and Nextflow warns; plain logs avoid it and read cleanly in a file (D-006).
+        "--monochrome_logs", "true",
     ]  # fmt: skip
     if MODES[mode]["skip"]:
         command.append("--skip_fastq_download")

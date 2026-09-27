@@ -157,3 +157,58 @@ def test_version_single_source(pipeline, pinned):
     ]
     assert found, f"no pinned {pipeline} command found"
     assert all(v == pinned for _, v in found), found
+
+
+def test_fetchngs_runs_monochrome():
+    """Every place that runs fetchngs, or tells a reader how to, turns colours off (D-006).
+
+    fetchngs 1.12.0's nf-validation 1.1.3 reads the undefined params.monochromeLogs when
+    colours are on, and Nextflow warns. A guard, not a proof; what escapes it is named below.
+    """
+    todo_text = (ROOT / "TODO.md").read_text()
+    todo = todo_text.splitlines()
+    conventions = (ROOT / "CONVENTIONS.md").read_text().splitlines()
+    config = "nfcore_fetchngs/nextflow.config"
+    # The M1b course command, inside its backticks: the sentence after it names the flag too.
+    (course,) = [line for line in todo if line.startswith("- Course command")]
+    (command,) = re.findall(r"`(nextflow run nf-core/fetchngs[^`]*)`", course)
+    assert "--monochrome_logs true" in command, command
+    (rule,) = [line for line in conventions if line.startswith("- Raw reads enter only through")]
+    assert "--monochrome_logs true" in rule and "monochrome_logs = true" in rule, rule
+    # Scripts: every file under scripts/ whose code (comment lines removed) names
+    # nf-core/fetchngs must carry the flag's tokens in that code. Escapes: a pipeline name
+    # built from variables, and the tokens placed in a string outside the command.
+    flag = re.compile(r'--monochrome_logs"?[\s,]+"?true')
+    code = {}
+    for path in (ROOT / "scripts").rglob("*"):
+        if not path.is_file() or "__pycache__" in path.parts:
+            continue
+        try:
+            lines = path.read_text().splitlines()
+        except UnicodeDecodeError:  # not a script: compiled or binary
+            continue
+        code[path] = "\n".join(s for s in lines if not s.lstrip().startswith("#"))
+    scripts = {p: text for p, text in code.items() if "nf-core/fetchngs" in text}
+    assert scripts, "no script names nf-core/fetchngs"
+    assert all(flag.search(text) for text in scripts.values()), list(scripts)
+    # The Kebnekaise launcher takes no extra flags and starts Nextflow in
+    # <project_dir>/nfcore_fetchngs, so its runs carry the setting in that nextflow.config.
+    # Prose routes: lines naming the launcher with -profile singularity. Escapes: a route
+    # written without that profile string.
+    launcher = ("SHARED_run_fetchngs.sbatch", "-profile singularity")
+    routes = [line for line in [*todo, *conventions] if all(k in line for k in launcher)]
+    assert routes, "no prose route through the launcher"
+    for line in routes:
+        assert "monochrome_logs = true" in line and config in line, line
+    # Code: every fenced TODO block that calls the launcher writes that config with printf,
+    # with the setting, before the first call. Escape: a later non-printf write of the config
+    # (a heredoc, say) that drops the setting.
+    call = re.compile(r"SHARED_run_fetchngs\.sbatch\s")
+    blocks = todo_text.split("```")[1::2]
+    calls = [b for b in blocks if call.search(b)]
+    assert calls, "no fenced block calls the launcher"
+    for block in calls:
+        writes = [line for line in block.splitlines() if "printf" in line and config in line]
+        assert writes and all("monochrome_logs = true" in line for line in writes), block[:200]
+        first_call = call.search(block)
+        assert first_call and block.index(writes[0]) < first_call.start(), "config after call"

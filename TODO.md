@@ -119,7 +119,7 @@ Three lessons, because finding data, fetching it and making it usable are differ
 #### M1b — Fetch with nf-core/fetchngs 1.12.0
 
 - Input: one ID per line, no header, LF line endings, no space anywhere in the path. Accepted: SRR/SRX/SRS/SRP/SRA/PRJNA/SAMN, ERR/ERX/ERS/ERP/ERA/PRJEB/SAMEA, DRR/DRX/DRS/DRP/DRA/PRJDB/SAMD, GSM/GSE. `E-MTAB-*` is rejected: give an ArrayExpress study as its ERP/PRJEB accession. One line that fails the pattern aborts the whole run.
-- Course command, one fresh outdir per run: `nextflow run nf-core/fetchngs -r 1.12.0 -profile <docker | docker,arm | singularity> --input data/raw/<slug>/ids.csv --outdir data/raw/<slug> --nf_core_pipeline rnaseq`. `docker,arm` on Apple silicon runs the amd64-only images under emulation; on Kebnekaise use the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`). Nextflow 26 needs `NXF_SYNTAX_PARSER=v1` for this release. `--nf_core_pipeline rnaseq` adds one column, `strandedness` = `auto`, after `fastq_2`. A run with no ENA FASTQ link falls back to sra-tools on its own; `--download_method sratools` is for runs with more than two files (FTP keeps the last two); `aspera` is faster but not for runs with more than two files.
+- Course command, one fresh outdir per run: `nextflow run nf-core/fetchngs -r 1.12.0 -profile <docker | docker,arm | singularity> --input data/raw/<slug>/ids.csv --outdir data/raw/<slug> --nf_core_pipeline rnaseq --monochrome_logs true`. `--monochrome_logs true` keeps colour codes out of the log and avoids a spurious warning from the validation plugin fetchngs 1.12.0 pins (D-006). `docker,arm` on Apple silicon runs the amd64-only images under emulation; on Kebnekaise use the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`, `monochrome_logs = true` in `<project_dir>/nfcore_fetchngs/nextflow.config`, the directory the launcher starts Nextflow in, since it takes no extra flags). Nextflow 26 needs `NXF_SYNTAX_PARSER=v1` for this release. `--nf_core_pipeline rnaseq` adds one column, `strandedness` = `auto`, after `fastq_2`. A run with no ENA FASTQ link falls back to sra-tools on its own; `--download_method sratools` is for runs with more than two files (FTP keeps the last two); `aspera` is faster but not for runs with more than two files.
 - Two class runs, each into its own outdir (a re-run into an existing outdir rebuilds the samplesheet from the new input only): (1) `--skip_fastq_download` on the full study into `data/raw/<dataset>_meta`, metadata and samplesheet only; (2) a real download of the 2–4 smallest runs chosen from `fastq_bytes` into `data/raw/<dataset>_dl`, each file md5-checked by fetchngs as it lands (FTP and Aspera only). `ctx gather` reads one outdir per call. The rest of the Track A subset comes from Zenodo, itself one fetchngs outdir.
 - Teaches: `-resume`, `-profile`, `-work-dir` (it holds a second copy of every FASTQ); what `pipeline_info/` records (`params_<timestamp>.json`, `nf_core_fetchngs_software_mqc_versions.yml`, the execution trace) and why it goes into the README; why the samplesheet must be curated (fetchngs itself warns that public databases do not reliably hold strandedness).
 - Output layout the suite consumes: `fastq/<EXP>_<RUN>.fastq.gz` (single-end) or `fastq/<EXP>_<RUN>_1.fastq.gz` and `_2.fastq.gz`; `fastq/md5/<fastq name>.md5` (FTP and Aspera downloads only); `metadata/<INPUT_ID>.runinfo_ftp.tsv`, one per input line (no `*.runinfo.tsv` in 1.12.0); `samplesheet/samplesheet.csv` (`sample` = experiment accession, `fastq_1`, `fastq_2`, `strandedness`, then the 31 default ENA fields; one row per run; every field quoted; paths written as `<outdir as given>/fastq/<name>`); `samplesheet/id_mappings.csv`; `samplesheet/multiqc_config.yml`; `pipeline_info/` (timestamped names).
@@ -320,7 +320,7 @@ cancer-transcriptomics-teaching/
 
 ### Phase 3 — Track A on the tier-1 subset
 
-- [ ] Instructor-side: on Kebnekaise, through the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`, `NXF_SYNTAX_PARSER=v1`, a fresh project directory per run), fetch exactly the chosen subset runs with nf-core/fetchngs -r 1.12.0 (a full-study run, metadata-only or for Salmon counts, stays a separate outdir); subsample with `seqtk sample -s42` keeping fetchngs file names; write new `fastq/md5/*.md5` for the subsampled files and a README naming the samplesheet columns that describe the original runs (`read_count`, `base_count`, `fastq_bytes`, `fastq_md5`); build chr22 STAR index; host subset outdir + indices on Zenodo
+- [ ] Instructor-side: on Kebnekaise, through the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`, `NXF_SYNTAX_PARSER=v1`, `monochrome_logs = true` in `<project_dir>/nfcore_fetchngs/nextflow.config`, a fresh project directory per run), fetch exactly the chosen subset runs with nf-core/fetchngs -r 1.12.0 (a full-study run, metadata-only or for Salmon counts, stays a separate outdir); subsample with `seqtk sample -s42` keeping fetchngs file names; write new `fastq/md5/*.md5` for the subsampled files and a README naming the samplesheet columns that describe the original runs (`read_count`, `base_count`, `fastq_bytes`, `fastq_md5`); build chr22 STAR index; host subset outdir + indices on Zenodo
 - [ ] M1a/M1b content: `docs/accessions.md` (three routes, ID hierarchy, budget from `fastq_bytes`), class exercises (a metadata-only run; the 2–4 smallest runs downloaded, checked by `ctx gather`)
 - [ ] M2 fastp/seqkit/MultiQC parsing and report
 - [ ] M3 STAR-chr22 / featureCounts / strandedness; HISAT2 optional path
@@ -1073,7 +1073,7 @@ No cohort: the only accessions are nf-core/fetchngs's own test IDs. Tier-1 work 
   - Evidence, 2026-09-26: `pixi install -e fetch` 19.47 s real, 182,861,824 bytes max RSS; resolved nextflow 26.04.6 (bioconda), openjdk 25.0.2, python 3.12.14, pinned `==`; `nextflow -version` reads `version 26.04.6 build 12646`; `pixi install --locked` exits 0 for `default` and `fetch`; preflight 101 passed. Mutation: changing one pinned fetchngs command in TODO.md to release 1.13.0 fails `test_fetchngs_version_single_source`.
 
 - [x] P1b.2 Real fixtures, on this Mac (after P1b.1)
-  - `scripts/python/make_fetchngs_fixture.py` (`exempt:` block, standard library): refuses a non-empty outdir; relative `--outdir` inside a scratch working directory; `NXF_SYNTAX_PARSER=v1 NXF_ANSI_LOG=false nextflow run nf-core/fetchngs -r 1.12.0 -profile docker,arm --input ids.csv --outdir out --nf_core_pipeline rnaseq [--skip_fastq_download]` with `-work-dir` and `NXF_HOME` in the scratchpad; copies `out/` without the pipeline_info HTML pages, then deletes the scratch outdir so no written path stays reachable; writes `MANIFEST.sha256` and a README (exact command, fetchngs version string and sha7 from the versions file, Nextflow version, profile, host, date, input list with its source URL and SHA-256, omitted files with bytes and SHA-256, what it can and cannot test). `pixi run docs` afterwards.
+  - `scripts/python/make_fetchngs_fixture.py` (`exempt:` block, standard library): refuses a non-empty outdir; relative `--outdir` inside a scratch working directory; `NXF_SYNTAX_PARSER=v1 NXF_ANSI_LOG=false nextflow run nf-core/fetchngs -r 1.12.0 -profile docker,arm --input ids.csv --outdir out --nf_core_pipeline rnaseq [--skip_fastq_download]` (from 2026-09-27 the builder also passes `--monochrome_logs true`, D-006; the committed fixtures predate it and stay as built. A metadata_only rebuild with the flag matched them in all 13 samplesheet and metadata files; two download rebuilds stalled in SRATOOLS_PREFETCH with the symptom of the stall D-006 records) with `-work-dir` and `NXF_HOME` in the scratchpad; copies `out/` without the pipeline_info HTML pages, then deletes the scratch outdir so no written path stays reachable; writes `MANIFEST.sha256` and a README (exact command, fetchngs version string and sha7 from the versions file, Nextflow version, profile, host, date, input list with its source URL and SHA-256, omitted files with bytes and SHA-256, what it can and cannot test). `pixi run docs` afterwards.
   - `download/`: SRR13191702 (paired, FTP, ~32 KB), ERR1160846 (single, FTP, 18 KB), SRR14709033 (single, sra-tools fallback, 1 read), SRR14593545 (paired, sra-tools fallback, 1 read): covers `verified` and `no_md5` on both layouts; no GEO IDs.
   - `metadata_only/`: `--skip_fastq_download` on nf-core's pinned `sra_ids_test.csv` (test-datasets commit 2732b911; 10 IDs incl. GSE/GSM): 14 real rows, SRX9504942 with 4 runs.
   - `test_no_cohort_identifiers` skips `tests/fixtures/fetchngs/metadata_only/` only (D20); every other path is scanned as before.
@@ -1520,7 +1520,7 @@ Exit gate:
 ### Phase 2C — Tier 1 plugs in; close
 
 - [x] **P2C.1 Tier-1 inputs and pre-registered rules.** The rule commit lands before step 7 copies any count.
-  - Metadata-only fetchngs into `~/ctx_tier1/data/raw/tier1_meta`, with the `tutorial_test_run.py:80-99` command shape.
+  - Metadata-only fetchngs into `~/ctx_tier1/data/raw/tier1_meta`, with the command shape of `tutorial_test_run.py` `fetch()` (this run predates its `--monochrome_logs true`, D-006).
   - `ctx --root ~/ctx_tier1 setup --dataset-file conf/datasets/tier1.toml`.
   - Complete `tier1.toml`:
     - columns;
@@ -1644,13 +1644,19 @@ source /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/nextflow_env.sh
 nextflow -version                                                     # PASTE
 
 # ---- 1. Full download with the lab launcher, unchanged (fetchngs 1.12.0) ----
-printf 'executor {\n    queueSize = 50\n}\nparams {\n    publish_dir_mode = "link"\n}\n' > "$P/nfcore_fetchngs/nextflow.config"
+# The launcher takes no extra flags, so this launch-directory config carries them; Nextflow
+# reads it. monochrome_logs reaches the run and stops nf-validation 1.1.3's monochromeLogs
+# warning (D-006). A publish_dir_mode here would NOT reach publishDir, which fetchngs resolves
+# while parsing its own config: tested on the Mac 2026-09-27, `nextflow config` still shows
+# mode:'copy' for SRA_FASTQ_FTP and every published file had one link. So the FASTQs are
+# copied: results/ and work/ each hold the 287 GB.
+printf 'executor {\n    queueSize = 50\n}\nparams {\n    monochrome_logs = true\n}\n' > "$P/nfcore_fetchngs/nextflow.config"
 printf 'PRJEB49000\n' > "$P/ids.txt"
-# Free check first: does the launch-directory params block reach publishDir? (critique M1)
-cd "$P/nfcore_fetchngs" && nextflow pull nf-core/fetchngs -r 1.12.0 >/dev/null && NXF_SYNTAX_PARSER=v1 nextflow config nf-core/fetchngs -r 1.12.0 -profile singularity | grep -n "mode" | sort | uniq -c | head   # PASTE
-cd "$P"
-# STOP and paste if it shows 'copy', or if less than about 600 GB is free (900 GB if copy).
-# Both figures are my arithmetic from 287 GB of FASTQ, not measurements.
+# STOP and paste if less than about 900 GB is free: 287 GB in fetchngs results/, 287 GB in its
+# work/, up to as much again of trimmed reads in the rnaseq work/, plus references and index.
+# My arithmetic from 287 GB of FASTQ, not a measurement. To keep one copy instead, the
+# launcher would have to pass --publish_dir_mode link on the command line, which does
+# hard-link (tested the same day); it is your script, so that is your call.
 DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq     # PASTE
 sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq
 
@@ -1667,7 +1673,7 @@ tail -n 25 "$P"/slurm-nf_fetchngs-*.out                               # PASTE
 ls "$R"/fastq/*.fastq.gz | wc -l                                      # PASTE, expect 210
 ls "$R"/fastq/md5/*.md5 | wc -l                                       # PASTE, expect 210
 awk 'END{print NR}' "$R/samplesheet/samplesheet.csv"                  # PASTE, expect 211
-find "$R/fastq" -name '*.fastq.gz' -links 1 | wc -l                   # PASTE, expect 0
+find "$R/fastq" -name '*.fastq.gz' -links 1 | wc -l                   # PASTE, expect 210: copies, not links
 du -sh "$R/fastq" "$P/nfcore_fetchngs/work"                           # PASTE
 
 # ---- 4. rnaseq samplesheet: the fetchngs sheet cut to four columns, a new file beside it ----
