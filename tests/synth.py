@@ -134,3 +134,115 @@ def demo_box(synthetic: Synthetic, planted: int = 3, null: int = 5):  # returns 
         frame, columns=columns, feature_label="Gene", value_label="Expression",
         groups=("control", "case"),
     )  # fmt: skip
+
+
+def _log_cpm(synthetic: Synthetic) -> np.ndarray:
+    """log2 CPM + 1, genes by samples."""
+    matrix = synthetic.counts.drop("gene_id").to_numpy().astype(float)
+    return np.log2(matrix / matrix.sum(axis=0) * 1e6 + 1)
+
+
+VOLCANO_STEPS = (0.01, 0.05, 0.1)
+
+
+def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6):  # ScatterData
+    """A volcano contract from the type_a samples: Welch t-test per gene, BH, three thresholds."""
+    from scipy.stats import false_discovery_control, ttest_ind  # noqa: PLC0415
+
+    from ctx.de.stats import classify  # noqa: PLC0415 - keeps synth importable without ctx
+    from ctx.viz.scatter import ScatterData  # noqa: PLC0415
+    from ctx.viz.style import ROLES  # noqa: PLC0415
+
+    sheet = synthetic.samples
+    values = _log_cpm(synthetic)
+    a = (sheet["cell_type"] == "type_a").to_numpy()
+    case, control = (
+        a & (sheet["condition"] == "case").to_numpy(),
+        a & ~(sheet["condition"] == "case").to_numpy(),
+    )
+    p = ttest_ind(values[:, case], values[:, control], axis=1).pvalue
+    lfc = values[:, case].mean(axis=1) - values[:, control].mean(axis=1)
+    frame = pl.DataFrame({"gene_id": synthetic.truth["gene_id"], "lfc": lfc, "p": p}).with_columns(
+        padj=pl.Series(false_discovery_control(np.nan_to_num(p, nan=1.0), method="bh")),
+        neg_log10_p=-pl.col("p").log10(),
+    )
+    for alpha in VOLCANO_STEPS:
+        frame = frame.with_columns(
+            classify(pl.col("padj"), pl.col("lfc"), alpha).alias(f"class_{alpha}")
+        )
+    loose = f"class_{max(VOLCANO_STEPS)}"
+    frame = frame.with_columns(keep=pl.col(loose) != "ns")
+    top = set(frame.filter(pl.col("keep")).sort("p").head(labels)["gene_id"])
+    frame = frame.with_columns(
+        label=pl.when(pl.col("gene_id").is_in(top)).then(pl.col("gene_id")).otherwise(pl.lit(""))
+    )
+    columns = {
+        "gene_id": ("none", "Synthetic gene identifier."),
+        "lfc": ("log2 fold change", "Mean log2 CPM, case minus control, type_a samples."),
+        "p": ("dimensionless", "Welch two-sample t-test p-value."),
+        "padj": ("dimensionless", "Benjamini-Hochberg adjusted p over all genes."),
+        "neg_log10_p": ("-log10 p", "Minus log10 of p."),
+        **{f"class_{a}": ("none", f"up, down or ns at padj < {a}.") for a in VOLCANO_STEPS},
+        "keep": ("none", "Called at the loosest threshold; always drawn on the page."),
+        "label": ("none", "Gene printed beside its point; empty for none."),
+    }
+    return ScatterData(
+        frame=frame, columns=columns, x="lfc", y="neg_log10_p", x_label="Fold change",
+        y_label="Significance", colour="class_0.05",
+        colours={"up": ROLES["comparison"], "down": ROLES["reference"], "ns": None},
+        caption=f"Welch t-test, BH over {frame.height} genes; n = 6 control, 6 case.",
+        label="label", hover=("gene_id", "padj"), width=width,
+        steps=tuple((f"padj < {a}", f"class_{a}") for a in VOLCANO_STEPS), keep="keep",
+    )  # fmt: skip
+
+
+def demo_pca(synthetic: Synthetic):  # ScatterData
+    """A PCA contract: all samples, coloured by cell type, shaped by condition."""
+    from ctx.viz.annotate import permanova  # noqa: PLC0415
+    from ctx.viz.scatter import ScatterData  # noqa: PLC0415
+    from ctx.viz.style import category_colours  # noqa: PLC0415
+
+    values = _log_cpm(synthetic)
+    centred = values - values.mean(axis=1, keepdims=True)
+    u, s, _ = np.linalg.svd(centred.T, full_matrices=False)
+    scores = u[:, :2] * s[:2]
+    sheet = synthetic.samples
+    test = permanova(scores, sheet["cell_type"].to_list(), strata=sheet["donor"].to_list())
+    frame = sheet.with_columns(pc1=pl.Series(scores[:, 0]), pc2=pl.Series(scores[:, 1]))
+    columns = {
+        "sample": ("none", "Sample identifier."),
+        "donor": ("none", "Donor identifier."),
+        "cell_type": ("none", "Cell type."),
+        "condition": ("none", "Condition."),
+        "batch": ("none", "Batch."),
+        "pc1": ("log2 CPM", "Score on principal component 1."),
+        "pc2": ("log2 CPM", "Score on principal component 2."),
+    }
+    return ScatterData(
+        frame=frame, columns=columns, x="pc1", y="pc2", x_label="PC1", y_label="PC2",
+        colour="cell_type", colours=category_colours(list(CELL_TYPES)),
+        caption=test.text("cell type"), symbol="condition", hover=("sample", "donor"),
+    )  # fmt: skip
+
+
+def demo_bar(synthetic: Synthetic, horizontal: bool = False):  # BarData
+    """A bar contract: samples per cell type and condition, stacked by batch."""
+    from ctx.viz.bar import BarData  # noqa: PLC0415
+    from ctx.viz.style import category_colours  # noqa: PLC0415
+
+    frame = (
+        synthetic.samples.with_columns(group=pl.format("{} {}", "cell_type", "condition"))
+        .group_by("group", "batch", maintain_order=True)
+        .agg(n=pl.len().cast(pl.Int64))
+    )
+    columns = {
+        "group": ("none", "Cell type and condition."),
+        "batch": ("none", "Batch."),
+        "n": ("samples", "Samples in this group and batch."),
+    }
+    return BarData(
+        frame=frame, columns=columns, category="group", value="n", category_label="Group",
+        value_label="Samples", series="batch", colours=category_colours(["batch1", "batch2"]),
+        caption=f"{synthetic.samples.height} samples; counts, no test.", horizontal=horizontal,
+        stacked=True, hline=(3.0, "half a group"), hover=("batch",),
+    )  # fmt: skip

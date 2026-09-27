@@ -16,12 +16,14 @@ from matplotlib.text import Text
 from pypdf import PdfReader
 from pypdf.generic import ContentStream
 from scipy.stats import mannwhitneyu
-from synth import counts, demo_box
+from synth import VOLCANO_STEPS, counts, demo_bar, demo_box, demo_pca, demo_volcano
 
+from ctx.de.stats import classify
 from ctx.io.naming import stem
 from ctx.viz import box
-from ctx.viz.annotate import compare_groups
+from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.save import write_figure
+from ctx.viz.scatter import THIN_MAX, ScatterData
 from ctx.viz.style import (
     DATA_COLOURS,
     FONT_CHAIN,
@@ -280,11 +282,49 @@ def _same(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
     return all(abs(x - y) <= 1 / 255 for x, y in zip(a, b, strict=True))
 
 
-@pytest.fixture(scope="module")
-def written(tmp_path_factory):
+def _contracts():
+    synthetic = counts()
+    return {
+        "box": demo_box(synthetic, planted=3, null=5),
+        "volcano_single": demo_volcano(synthetic),
+        "volcano_double": demo_volcano(synthetic, width="double"),
+        "pca": demo_pca(synthetic),
+        "bar": demo_bar(synthetic),
+        "bar_horizontal": demo_bar(synthetic, horizontal=True),
+    }
+
+
+KINDS = tuple(_contracts())
+
+
+def static_caption(data) -> str:
+    """The caption the static figure prints."""
+    return data.caption.text() if isinstance(data, box.BoxData) else data.caption
+
+
+def axis_titles(data) -> list[str]:
+    """Axis titles the static figure must print, each with its unit."""
+    if isinstance(data, box.BoxData):
+        return [f"{data.value_label} ({data.unit})"]
+    if isinstance(data, ScatterData):
+        return [f"{data.x_label} ({data.columns[data.x][0]})",
+                f"{data.y_label} ({data.columns[data.y][0]})"]  # fmt: skip
+    return [f"{data.value_label} ({data.columns[data.value][0]})"]
+
+
+def column_width(data) -> str:
+    """The column width the figure should take."""
+    if isinstance(data, box.BoxData):
+        many = len(data.caption.tests) > SINGLE_COLUMN_MAX_FEATURES
+        return "double" if many else "single"
+    return data.width
+
+
+@pytest.fixture(scope="module", params=KINDS)
+def written(request, tmp_path_factory):
     out = tmp_path_factory.mktemp("figure")
-    figure_stem = stem("de", "box_demo", 1, day=date(2026, 9, 26))
-    data = demo_box(counts(), planted=3, null=5)
+    figure_stem = stem("de", f"{request.param}_demo", 1, day=date(2026, 9, 26))
+    data = _contracts()[request.param]
     files = write_figure(data, out, figure_stem, title="Demo", data_releases={})
     return out, figure_stem, data, files
 
@@ -297,7 +337,7 @@ def test_caption_wrap_keeps_words_whole():
 
 def test_static_files_measured(written):
     out, figure_stem, data, _ = written
-    caption = re.sub(r"\s+", " ", data.caption.text())
+    caption = re.sub(r"\s+", " ", static_caption(data))
     for theme in THEMES.values():
         pdf = out / f"{figure_stem}_{theme.name}.pdf"
         assert _pdf_fonts(pdf) <= {f.replace(" ", "") for f in FONT_CHAIN} | {"ArialMT"}
@@ -312,12 +352,11 @@ def test_static_files_measured(written):
         assert page["/Resources"].get("/XObject") is None or all(
             x.get_object()["/Subtype"] != "/Image" for x in page["/Resources"]["/XObject"].values()
         )
-        n_features = len(data.caption.tests)
-        column = "single" if n_features <= SINGLE_COLUMN_MAX_FEATURES else "double"
-        assert float(page.mediabox.width) == pytest.approx(WIDTHS_MM[column] / 25.4 * 72, abs=0.5)
+        width = WIDTHS_MM[column_width(data)] / 25.4 * 72
+        assert float(page.mediabox.width) == pytest.approx(width, abs=0.5)
         text = re.sub(r"\s+", " ", page.extract_text())
         assert caption in text
-        assert f"{data.value_label} ({data.unit})" in text
+        assert all(title in text for title in axis_titles(data)), axis_titles(data)
 
         svg = ElementTree.parse(out / f"{figure_stem}_{theme.name}.svg")
         families = {
@@ -330,18 +369,54 @@ def test_static_files_measured(written):
         assert not [e for e in svg.iter() if e.tag.endswith("image")]
 
 
-@pytest.mark.parametrize(("planted", "null"), [(1, 1), (3, 5)])
-def test_no_text_overlap(planted, null):
-    data = demo_box(counts(), planted=planted, null=null)
+def _drawn_texts(fig) -> list[Text]:
+    """Visible, non-empty texts, without the labels of ticks outside the view limits.
+
+    matplotlib keeps a label for every tick its locator proposes but draws only those inside
+    the view interval; an undrawn label sits wherever its tick would be.
+    """
+    hidden = set()
+    for ax in fig.axes:
+        for axis in (ax.xaxis, ax.yaxis):
+            low, high = sorted(axis.get_view_interval())
+            span = high - low
+            for tick, loc in zip(axis.get_major_ticks(), axis.get_majorticklocs(), strict=False):
+                if not low - 1e-9 * span <= loc <= high + 1e-9 * span:
+                    hidden |= {id(tick.label1), id(tick.label2)}
+    return [
+        t
+        for t in fig.findobj(Text)
+        if t.get_visible() and t.get_text().strip() and id(t) not in hidden
+    ]
+
+
+OVERLAP_CASES = {
+    "box_1_1": lambda s: demo_box(s, planted=1, null=1),
+    "box_3_5": lambda s: demo_box(s, planted=3, null=5),
+    "volcano_single": demo_volcano,
+    "volcano_double": lambda s: demo_volcano(s, width="double"),
+    "volcano_crowded": lambda s: demo_volcano(s, labels=10),
+    "pca": demo_pca,
+    "bar": demo_bar,
+    "bar_horizontal": lambda s: demo_bar(s, horizontal=True),
+}
+
+
+@pytest.mark.parametrize("case", list(OVERLAP_CASES))
+def test_no_text_overlap(case):
+    data = OVERLAP_CASES[case](counts())
     for theme in THEMES.values():
-        fig = box.static(data, theme)
+        fig = data.static(theme)
         renderer = FigureCanvasAgg(fig).get_renderer()
         fig.draw(renderer)
-        texts = [t for t in fig.findobj(Text) if t.get_visible() and t.get_text().strip()]
-        boxes = [(t.get_text(), t.get_window_extent(renderer)) for t in texts]
-        assert len(boxes) > 2 * (planted + null)
+        boxes = [(t.get_text(), t.get_window_extent(renderer)) for t in _drawn_texts(fig)]
+        assert len(boxes) > 4
         page = fig.bbox
-        outside = [name for name, b in boxes if b.x0 < page.x0 or b.x1 > page.x1 or b.y0 < page.y0]
+        outside = [
+            name
+            for name, b in boxes
+            if b.x0 < page.x0 or b.x1 > page.x1 or b.y0 < page.y0 or b.y1 > page.y1
+        ]
         assert not outside, f"text off the page: {outside}"
         clashes = [
             (a, b)
@@ -350,3 +425,112 @@ def test_no_text_overlap(planted, null):
             if box_a.overlaps(box_b)
         ]
         assert not clashes, clashes[:5]
+
+
+# --- scatter: drawn points, thinning, slider --------------------------------------------
+
+
+def _points_in(fig) -> int:
+    return sum(len(c.get_offsets()) for ax in fig.axes for c in ax.collections)
+
+
+def _marker_traces(fig):
+    return [t for t in fig.data if t.mode == "markers"]
+
+
+def test_points_drawn_equal_csv_rows():
+    data = demo_volcano(counts(n_genes=6000))
+    other = data.frame.filter(~pl.col("keep")).height
+    assert other > THIN_MAX, "the case must thin"
+    assert _points_in(data.static(THEMES["white"])) == data.table().height
+    drawn = sum(len(t.x) for t in _marker_traces(data.interactive()))
+    stride = math.ceil(other / THIN_MAX)
+    assert drawn == data.table().height - other + math.ceil(other / stride)
+    assert f"every {stride}th" in data.caption_text()
+    called = set(data.frame.filter(pl.col("keep"))["gene_id"])
+    on_page = set(data.on_page()["gene_id"])
+    assert called <= on_page
+
+
+def test_volcano_steps_count_from_figure():
+    frame = pl.DataFrame(
+        {
+            "gene_id": [f"g{i}" for i in range(9)],
+            "lfc": [1.0, -1.0, 2.0, -2.0, 0.5, -0.5, 1.5, 3.0, -3.0],
+            "padj": [0.001, 0.001, 0.01, 0.05, 0.05, 0.1, 0.2, None, float("nan")],
+        }
+    ).with_columns(y=pl.col("lfc").abs())
+    for alpha in VOLCANO_STEPS:
+        frame = frame.with_columns(
+            classify(pl.col("padj"), pl.col("lfc"), alpha).alias(f"c{alpha}")
+        )
+    data = ScatterData(
+        frame=frame, columns={c: ("none", c) for c in frame.columns}, x="lfc", y="y",
+        x_label="LFC", y_label="y", colour="c0.05", colours={"up": "#D55E00", "down": "#0072B2",
+        "ns": None}, caption="c", hover=("gene_id",),
+        steps=tuple((f"{a}", f"c{a}") for a in VOLCANO_STEPS),
+    )  # fmt: skip
+    fig = data.interactive()
+    names = [t.name for t in _marker_traces(fig)]
+    (slider,) = fig.layout.sliders
+    assert slider.active == VOLCANO_STEPS.index(0.05)
+    for alpha, step in zip(VOLCANO_STEPS, slider.steps, strict=True):
+        xs = dict(zip(names, step.args[0]["x"], strict=True))
+        # Written here, independently of classify: strictly below alpha, sign of the raw LFC.
+        rows = [
+            (p, fc)
+            for p, fc in frame.select("padj", "lfc").rows()
+            if p is not None and not math.isnan(p)
+        ]
+        assert len(xs["up"]) == sum(p < alpha and fc > 0 for p, fc in rows), alpha
+        assert len(xs["down"]) == sum(p < alpha and fc < 0 for p, fc in rows), alpha
+
+
+def test_classify():
+    frame = pl.DataFrame(
+        {"padj": [0.01, 0.01, 0.05, None, float("nan"), 0.001], "lfc": [1.0, -1.0, 2, 3, 3, 0]}
+    )
+    called = frame.select(classify(pl.col("padj"), pl.col("lfc"))).to_series().to_list()
+    assert called == ["up", "down", "ns", "ns", "ns", "ns"]
+
+
+# --- PERMANOVA ------------------------------------------------------------------------------
+
+
+def _clusters(seed: int = 0):
+    rng = np.random.default_rng(seed)
+    coords = rng.normal(size=(20, 3))
+    coords[:10] += 3.0
+    return coords, ["a"] * 10 + ["b"] * 10
+
+
+def test_permanova_identity():
+    coords, labels = _clusters()
+    test = permanova(coords, labels)
+    # Anderson (2001): sums of squares from squared distances, written without group means.
+    d2 = ((coords[:, None, :] - coords[None, :, :]) ** 2).sum(axis=2)
+    n, groups = len(labels), sorted(set(labels))
+    ss_total = d2[np.triu_indices(n, 1)].sum() / n
+    ss_within = sum(
+        d2[np.ix_(idx, idx)][np.triu_indices(len(idx), 1)].sum() / len(idx)
+        for idx in ([i for i, g in enumerate(labels) if g == level] for level in groups)
+    )
+    f = ((ss_total - ss_within) / (len(groups) - 1)) / (ss_within / (n - len(groups)))
+    assert test.f == pytest.approx(f)
+    assert test.r2 == pytest.approx((ss_total - ss_within) / ss_total)
+
+
+def test_permanova_null_and_planted():
+    coords, labels = _clusters()
+    assert permanova(coords, labels).p == pytest.approx(1 / 1000)
+    shuffled = list(np.random.default_rng(42).permutation(labels))
+    null = np.random.default_rng(7).normal(size=(20, 3))
+    assert permanova(null, shuffled).p > 0.05
+
+
+def test_permanova_strata():
+    coords, labels = _clusters()
+    # Labels constant within each stratum: no permutation can move them, so p = 1.
+    assert permanova(coords, labels, strata=labels).p == 1.0
+    paired = [f"s{i % 10}" for i in range(20)]
+    assert permanova(coords, labels, strata=paired).p < 0.05

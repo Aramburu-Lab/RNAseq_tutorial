@@ -7,11 +7,16 @@ and the README cannot state different numbers.
 import math
 import textwrap
 from dataclasses import dataclass
+from typing import Any
 
+import numpy as np
 import polars as pl
 from scipy.stats import false_discovery_control, mannwhitneyu
 
+from ctx.viz.style import LEGEND_MAX_COLUMNS, LINE_SPACING, SIZES, caption_chars
+
 TEST_NAME = "Mann-Whitney U, two-sided"
+PERMANOVA_NAME = "PERMANOVA on Euclidean distances"
 
 
 @dataclass(frozen=True)
@@ -55,8 +60,77 @@ class Caption:
             f"{TEST_NAME}; p is BH-adjusted over {len(self.tests)} plotted features; "
             f"{n_text}; rank-biserial r > 0 when {comparison} is higher."
         )
-        # Never split "BH-adjusted": a reader, or a PDF text extractor, would rejoin it wrongly.
-        return textwrap.fill(body, width, break_on_hyphens=False) if width else body
+        return wrap(body, width)
+
+
+def wrap(text: str, width: int = 0) -> str:
+    """Wrap a caption to ``width`` characters; 0 leaves it on one line.
+
+    Never splits at a hyphen: "BH-adjusted" broken across lines would be rejoined wrongly by a
+    reader or a PDF text extractor.
+    """
+    return textwrap.fill(text, width, break_on_hyphens=False) if width else text
+
+
+def place_caption(
+    fig: Any,
+    text: str,
+    width: float,
+    height: float,
+    *,
+    ax: Any = None,
+    handles: list[Any] | None = None,
+) -> None:
+    """Print a wrapped caption under a figure, then lay out the axes and legend above it.
+
+    With ``handles``, the legend goes above the axes in the most columns that keep it within
+    the axes' width, measured after layout: a wider legend makes the layout squeeze the axes.
+
+    Args:
+        fig: The matplotlib Figure.
+        text: The caption, unwrapped.
+        width: Figure width in inches; sets the wrap.
+        height: Figure height in inches.
+        ax: The axes that own the legend; required with ``handles``.
+        handles: Legend handles, or None when the caller draws its own legend.
+    """
+    from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
+
+    caption = wrap(text, caption_chars(width))
+    fig.text(0.02, 0.01, caption, ha="left", va="bottom", fontsize=SIZES["caption"])
+    caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
+    rect = (0, caption_inches / height, 1, 1)
+    if not handles:
+        fig.tight_layout(rect=rect)
+        return
+    renderer = FigureCanvasAgg(fig).get_renderer()  # type: ignore[no-untyped-call]
+    for ncols in range(min(len(handles), LEGEND_MAX_COLUMNS), 0, -1):
+        legend = ax.legend(
+            handles=handles, loc="lower left", bbox_to_anchor=(0, 1), ncols=ncols,
+            borderaxespad=0,
+        )  # fmt: skip
+        fig.tight_layout(rect=rect)
+        if legend.get_window_extent(renderer).x1 <= ax.get_window_extent(renderer).x1 + 1:
+            break
+
+
+def plotly_caption(text: str, width: float) -> tuple[dict[str, Any], float]:
+    """A plotly annotation holding the wrapped caption under the plot, and the margin it needs.
+
+    Args:
+        text: The caption, unwrapped.
+        width: Width in inches to wrap to; one long line is cut off at the plot's right edge.
+
+    Returns:
+        The annotation and the bottom margin in pixels.
+    """
+    lines = wrap(text, caption_chars(width)).split("\n")
+    annotation = {
+        "text": "<br>".join(lines), "xref": "paper", "yref": "paper", "x": 0, "y": 0,
+        "yshift": -3 * SIZES["caption"] * LINE_SPACING, "yanchor": "top", "xanchor": "left",
+        "showarrow": False, "align": "left",
+    }  # fmt: skip
+    return annotation, (len(lines) + 4) * SIZES["caption"] * LINE_SPACING
 
 
 def _fmt(p: float) -> str:
@@ -104,3 +178,85 @@ def compare_groups(
     if any(math.isnan(t.p) for t in tests):
         raise ValueError("a test returned NaN; check for constant groups")
     return Caption(groups, tests)
+
+
+@dataclass(frozen=True)
+class Permanova:
+    """One PERMANOVA: pseudo-F, the share of variance the labels explain, and its p-value."""
+
+    f: float
+    r2: float
+    p: float
+    n: int
+    groups: int
+    permutations: int
+    stratified: bool
+
+    def text(self, factor: str) -> str:
+        """The test as a caption sentence for one factor."""
+        within = ", labels permuted within individuals" if self.stratified else ""
+        return (
+            f"{PERMANOVA_NAME} for {factor}: R\u00b2 = {self.r2:.2f}, pseudo-F = {self.f:.3g}, "
+            f"p = {_fmt(self.p)} ({self.permutations} permutations{within}; "
+            f"n = {self.n} samples in {self.groups} groups)."
+        )
+
+
+def _pseudo_f(coords: np.ndarray, codes: np.ndarray, n_groups: int) -> tuple[float, float]:
+    """Pseudo-F and R squared of one labelling, from within-group sums of squares."""
+    total = float(((coords - coords.mean(axis=0)) ** 2).sum())
+    counts = np.bincount(codes, minlength=n_groups)
+    sums = np.zeros((n_groups, coords.shape[1]))
+    np.add.at(sums, codes, coords)
+    # Within = sum of squares minus each group's squared sum over its size.
+    within = float((coords**2).sum() - ((sums**2).sum(axis=1) / counts).sum())
+    between = total - within
+    n = coords.shape[0]
+    return (between / (n_groups - 1)) / (within / (n - n_groups)), between / total
+
+
+def permanova(
+    coords: np.ndarray,
+    labels: list[str],
+    strata: list[str] | None = None,
+    permutations: int = 999,
+    seed: int = 42,
+) -> Permanova:
+    """PERMANOVA on Euclidean distances, labels permuted freely or within strata.
+
+    With Euclidean distances the pseudo-F is the trace ANOVA F of the coordinates. Samples
+    that share an individual are not exchangeable across individuals, so pass the individual
+    as ``strata``: labels then move only between samples of one individual.
+
+    Args:
+        coords: Samples by dimensions, e.g. principal component scores.
+        labels: One group label per sample.
+        strata: One stratum per sample, or None to permute freely.
+        permutations: Label permutations for the null distribution.
+        seed: Seed of the permutation generator.
+
+    Returns:
+        The test; p = (1 + permutations with F at least the observed) / (1 + permutations).
+
+    Raises:
+        ValueError: With fewer than two groups, or as many groups as samples.
+    """
+    levels, codes = np.unique(np.asarray(labels), return_inverse=True)
+    n = len(codes)
+    if not 1 < len(levels) < n:
+        raise ValueError(f"{len(levels)} groups in {n} samples; PERMANOVA needs 2 to n-1")
+    observed, r2 = _pseudo_f(coords, codes, len(levels))
+    rng = np.random.default_rng(seed)
+    blocks = (
+        [np.flatnonzero(np.asarray(strata) == s) for s in np.unique(np.asarray(strata))]
+        if strata is not None
+        else [np.arange(n)]
+    )
+    at_least = 0
+    for _ in range(permutations):
+        shuffled = codes.copy()
+        for block in blocks:
+            shuffled[block] = codes[rng.permutation(block)]
+        at_least += _pseudo_f(coords, shuffled, len(levels))[0] >= observed - 1e-12 * abs(observed)
+    p = (1 + at_least) / (1 + permutations)
+    return Permanova(observed, r2, p, n, len(levels), permutations, strata is not None)

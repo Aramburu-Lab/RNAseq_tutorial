@@ -24,8 +24,18 @@ FONT_CHAIN = ("Helvetica", "Arial", "Liberation Sans", "DejaVu Sans")
 SIZES = {"base": 14.0, "axis_label": 14.0, "tick": 12.0, "annotation": 12.0, "caption": 12.0}
 LINE_WIDTHS = {"axes": 1.0, "line": 1.0, "box": 1.5, "errorbar": 1.5, "marker_edge": 0.0}
 MARKER_SIZE = 4.0
+# Plotly marker diameter in pixels, the on-screen size of MARKER_SIZE.
+PLOTLY_MARKER_PX = 6.0
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
-ASPECT = {"box": 1.1}
+ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0}
+# Point shapes for a second category, in level order: (matplotlib, plotly).
+MARKERS = (
+    ("o", "circle"),
+    ("^", "triangle-up"),
+    ("s", "square"),
+    ("D", "diamond"),
+    ("v", "triangle-down"),
+)
 # Average glyph width in em, used to wrap the caption to the width a figure really has.
 AVERAGE_CHAR_EM = 0.55
 # Above this many features a box plot takes the double column: at 14 pt the labels of more
@@ -34,6 +44,11 @@ SINGLE_COLUMN_MAX_FEATURES = 3
 # Empty space above the tallest box for the p/r labels, as a fraction of the data range.
 HEADROOM = 0.35
 LINE_SPACING = 1.3
+# Legend geometry in font-size units; marker handles need less than matplotlib's line default.
+LEGEND = {"handlelength": 1.0, "columnspacing": 1.0, "handletextpad": 0.4}
+LEGEND_MAX_COLUMNS = 4
+# Category labels under vertical bars run upward, so long names never collide.
+BAR_LABEL_ROTATION = 90.0
 
 
 @dataclass(frozen=True)
@@ -142,6 +157,9 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
             "axes.facecolor": "none",
             "savefig.transparent": True,
             "legend.frameon": False,
+            "legend.handlelength": LEGEND["handlelength"],
+            "legend.columnspacing": LEGEND["columnspacing"],
+            "legend.handletextpad": LEGEND["handletextpad"],
             "pdf.fonttype": 42,
             "svg.fonttype": "none",
         }

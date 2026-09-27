@@ -1188,7 +1188,7 @@ Tier 1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session p
   - Evidence, 2026-09-27: `conf/datasets/tier1.toml` holds `[dataset]`, two `[[resources]]` and `[guard]` (3 ids, 5 `\b`-anchored patterns). `tests/test_repo.py` gains `guard_patterns` and `cohort_hits`, `test_guard_reads_dataset_files` and the network test `test_guard_patterns_cover_study`, which passed once against ENA and the SDRF. Mutations, applied with Python, each fail their test: skipping the dataset files; dropping the individual-ID pattern; the draft sample pattern `SAMEA113078\d{2}`; a run accession planted in `src/ctx/__init__.py`. `pixi run preflight` exits 0, 132 passed.
   - Deviation: the (directory, token) exemption pairs are not built. The D20 directory exemption is still the only one, and a pair is added in P2A.2 only if its fixture carries an nf-core test accession.
 
-- [ ] **P2A.2 Rehearse nf-core/rnaseq 3.27.0 Salmon-only on this Mac and pin the layout as a fixture.**
+- [x] **P2A.2 Rehearse nf-core/rnaseq 3.27.0 Salmon-only on this Mac and pin the layout as a fixture.**
   - `src/ctx/gather/rnaseq.py` holds the single definitions:
     - `RNASEQ_VERSION`;
     - `READ_FILES`: the length-scaled gene TSV, the versions yml and the params json;
@@ -1210,6 +1210,8 @@ Tier 1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session p
       - `::test_layout`: header gene_id, gene_name, then the samplesheet's samples; values non-negative, some fractional.
     - `test_repo.py::test_rnaseq_version_single_source`. Mutation: another release in one command.
     - `/usr/bin/time -l` exit code, wall time and RSS, pasted here.
+  - Evidence, 2026-09-27: `make_rnaseq_fixture.py` under `/usr/bin/time -l` exited 0 in 704.57 s real at 896,057,344 bytes max RSS (the Nextflow side; containers are not counted). The versions file reads nf-core/rnaseq v3.27.0-ga1fcddd, Nextflow 26.04.6 and Salmon 2.7.0 for SALMON_INDEX and SALMON_QUANT. The params file recorded `salmon_index`, `transcript_fasta` and `additional_fasta` as null, and the trace shows MAKE_TRANSCRIPTS_FASTA and SALMON_INDEX ran, so the index was built from FASTA and GTF as on the cluster. The fixture is 16 files, 97,733 bytes; the length-scaled matrix holds 124 genes by 5 samples. `lib_format_counts.json` reads `ISR` for 3 samples and `SR` for 2: the one `auto` sample was inferred reverse, and "undetermined" did not occur, so the rehearsal cannot show how quant treats it. No fixture file carries a GSE, E-MTAB or PRJ accession, so no exemption pair was needed. `test_rnaseq_fixture.py` (4 tests) and `test_repo.py::test_version_single_source[rnaseq]` pass; pinning the cluster command in TODO.md to 3.26.0 fails the latter. The test is the fetchngs single-source test, parametrised over both pipelines.
+  - Output file names come from the 3.27.0 salmon test snapshot (`tests/salmon.nf.test.snap`) and are confirmed by the run: `COPIED_FILES` matched every pattern.
 
 - [ ] **P2A.3 Cluster (Rytis): full fetchngs download, GENCODE 50, then rnaseq 3.27.0 on 210 runs.**
   - No repo code; the commands are in the cluster block below, pasted here unchanged.
@@ -1227,7 +1229,7 @@ Exit gate:
 - `/usr/bin/time -l pixi run test` finishes in under 5 min;
 - `test_spike_record.py` passes unchanged.
 
-- [ ] **P2B.1 One figure writer for every figure type; scatter and bar; PERMANOVA; one up/down rule.**
+- [x] **P2B.1 One figure writer for every figure type; scatter and bar; PERMANOVA; one up/down rule.**
   - `viz/save.py::write_figure` takes any contract with `table()`, `static(theme)`, `interactive()` and `caption_text()`; BoxData gains thin methods.
   - `viz/scatter.py`, one contract, covers:
     - PCA;
@@ -1255,6 +1257,12 @@ Exit gate:
     - `::test_permanova_null_and_planted`;
     - `::test_permanova_strata`: a label confounded with strata gives p = 1 when stratified. Mutation: ignoring strata.
     - an eye check at real size.
+  - Evidence, 2026-09-27:
+    - Built: `write_figure` takes a `Figure` protocol; `BoxData` gains thin methods; `viz/scatter.py` (`ScatterData`, `Line`) and `viz/bar.py` (`BarData`); `annotate.place_caption` (fits the legend in the most columns that stay within the axes width, measured after layout), `plotly_caption`, `permanova`; `de/stats.py` (`ALPHA`, `classify`). `style.py` gains the scatter and bar aspects, `MARKERS`, `PLOTLY_MARKER_PX`, `LEGEND` and `BAR_LABEL_ROTATION`.
+    - Tests: the measured-file test runs over box, volcano at 85 and 170 mm, PCA, and vertical and horizontal bars; the overlap test runs over 8 cases in both themes and now counts only drawn text, since matplotlib keeps labels for ticks outside the view limits; the report round trip runs over box, PCA, volcano and bar. New: `test_points_drawn_equal_csv_rows` (6,000 genes, thinned), `test_volcano_steps_count_from_figure`, `test_classify`, and three PERMANOVA tests. `pixi run preflight` exits 0, 160 passed, 30.48 s real at 897,662,976 bytes max RSS.
+    - Mutations, applied with Python, each fail their test: `padj <= alpha` in `classify`; PERMANOVA ignoring strata; thinning every point instead of only the uncalled ones; labels always to the right of their point.
+    - Eye check at real size, 2026-09-27: the first renders clipped legend entries at 85 mm and squeezed the axes to fit the legend, which crushed the horizontal bars; the legend now takes the most columns that fit. Point labels near the right edge ran off the page and are now placed toward the middle of the axes; a label pushed above the legend is now kept inside the axes with a leader line or left out. At 85 mm with 10 labels requested, 4 fit.
+  - Not done: the PERMANOVA mutation the plan named, permuting distances instead of labels, cannot fail a test. A joint row and column permutation of the distance matrix is a label permutation (critique minor 21), so ignoring strata was used instead.
 
 - [ ] **P2B.2 Dataset file and curation: `ctx gather --dataset-file`.**
   - `src/ctx/dataset.py::load(path)` is the one reader of `conf/datasets/*.toml`. It uses tomllib and frozen dataclasses, and raises every schema error together. Its tables:

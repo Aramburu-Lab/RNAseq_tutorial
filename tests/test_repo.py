@@ -11,6 +11,7 @@ from pathlib import Path
 import pytest
 
 from ctx.gather.fetchngs import FETCHNGS_VERSION
+from ctx.gather.rnaseq import RNASEQ_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 PRECEDENCE = (
@@ -142,14 +143,17 @@ def test_guard_patterns_cover_study():
     assert not found, found
 
 
-def test_fetchngs_version_single_source():
+@pytest.mark.parametrize(
+    ("pipeline", "pinned"), [("fetchngs", FETCHNGS_VERSION), ("rnaseq", RNASEQ_VERSION)]
+)
+def test_version_single_source(pipeline, pinned):
     sources = [ROOT / "TODO.md", ROOT / "CONVENTIONS.md"] + [
         p for top in ("scripts", "src") for p in (ROOT / top).rglob("*.py")
     ]
-    pinned = [
+    found = [
         (p.name, v)
         for p in sources
-        for v in re.findall(r"nf-core/fetchngs -r (\d+\.\d+\.\d+)", p.read_text())
+        for v in re.findall(rf"nf-core/{pipeline} -r (\d+\.\d+\.\d+)", p.read_text())
     ]
-    assert pinned, "no pinned fetchngs command found"
-    assert all(v == FETCHNGS_VERSION for _, v in pinned), pinned
+    assert found, f"no pinned {pipeline} command found"
+    assert all(v == pinned for _, v in found), found

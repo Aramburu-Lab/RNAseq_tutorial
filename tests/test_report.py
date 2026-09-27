@@ -12,7 +12,7 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 from pypdf import PdfReader
-from synth import counts, demo_box
+from synth import counts, demo_bar, demo_box, demo_pca, demo_volcano
 
 from ctx.io.naming import figure_files, lint, stem
 from ctx.report.builder import (
@@ -28,7 +28,7 @@ from ctx.report.builder import (
     write,
 )
 from ctx.viz.annotate import TEST_NAME
-from ctx.viz.box import box_data, interactive
+from ctx.viz.box import BoxData, box_data, interactive
 from ctx.viz.save import write_figure
 from ctx.viz.style import plotly_templates
 
@@ -36,16 +36,27 @@ ROOT = Path(__file__).resolve().parents[1]
 HOSTILE = "</script><b>x"
 
 
-@pytest.fixture(scope="module")
-def figure(tmp_path_factory):
+DEMOS = {
+    "box": lambda s: demo_box(s, planted=3, null=5),
+    "scatter": demo_pca,
+    "volcano": demo_volcano,
+    "bar": demo_bar,
+}
+
+
+@pytest.fixture(scope="module", params=list(DEMOS))
+def figure(request, tmp_path_factory):
     out = tmp_path_factory.mktemp("report")
-    figure_stem = stem("de", "box_demo", 1, day=date(2026, 9, 26))
-    data = demo_box(counts(), planted=3, null=5)
+    figure_stem = stem("de", f"{request.param}_demo", 1, day=date(2026, 9, 26))
+    data = DEMOS[request.param](counts())
     write_figure(data, out, figure_stem, title="Demo", data_releases={})
     return out, figure_stem, data, (out / f"{figure_stem}.html").read_text()
 
 
 def _tokens(data) -> list[str]:
+    if not isinstance(data, BoxData):
+        # Every word of the caption; the renderers wrap it at different widths.
+        return data.caption.split()
     c = data.caption
     ns = {f"n = {t.n_reference} {c.groups[0]}, {t.n_comparison} {c.groups[1]}" for t in c.tests}
     labels = [line for t in c.tests for line in c.label(t.feature).split("\n")]
@@ -57,7 +68,8 @@ def _plotly_script(html: str) -> str:
     (script,) = [
         s for s in re.findall(r"<script[^>]*>(.*?)</script>", html, re.S) if "Plotly.newPlot" in s
     ]
-    return script.replace("\\u003cbr\\u003e", " ").replace("<br>", " ")
+    decoded = re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), script)
+    return decoded.replace("<br>", " ")
 
 
 def test_round_trip(figure):
@@ -72,7 +84,8 @@ def test_round_trip(figure):
         assert not missing, (name, missing)
 
     csv = pl.read_csv(out / f"{figure_stem}.csv")
-    for t in data.caption.tests:
+    assert csv.height == data.table().height
+    for t in data.caption.tests if isinstance(data, BoxData) else ():
         rows = csv.filter(pl.col("feature") == t.feature)
         assert rows["p_adj"].unique().to_list() == pytest.approx([t.p_adj])
         assert rows["r"].unique().to_list() == pytest.approx([t.r])

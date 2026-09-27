@@ -10,10 +10,9 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import Caption, compare_groups
+from ctx.viz.annotate import Caption, compare_groups, place_caption, plotly_caption
 from ctx.viz.style import (
     HEADROOM,
-    LINE_SPACING,
     LINE_WIDTHS,
     MARKER_SIZE,
     ROLES,
@@ -21,7 +20,6 @@ from ctx.viz.style import (
     SIZES,
     Theme,
     apply_matplotlib,
-    caption_chars,
     figure_inches,
     plotly_templates,
 )
@@ -60,6 +58,26 @@ class BoxData:
     groups: tuple[str, str]
     hover: tuple[str, ...]
     caption: Caption
+
+    def table(self) -> pl.DataFrame:
+        """The values and the statistics the figure prints; see ``table()``."""
+        return table(self)
+
+    def table_columns(self) -> dict[str, tuple[str, str]]:
+        """(unit, meaning) for every column of ``table()``."""
+        return {**self.columns, **STAT_COLUMNS}
+
+    def static(self, theme: Theme) -> Any:
+        """The matplotlib figure for one theme; see ``static()``."""
+        return static(self, theme)
+
+    def interactive(self) -> Any:
+        """The plotly figure; see ``interactive()``."""
+        return interactive(self)
+
+    def caption_text(self) -> str:
+        """The caption, unwrapped."""
+        return self.caption.text()
 
 
 def box_data(
@@ -160,10 +178,7 @@ def static(data: BoxData, theme: Theme) -> Any:
     # Above the axes: inside, it collides with the p/r labels over the boxes.
     ax.legend(title=None, loc="lower left", bbox_to_anchor=(0, 1), ncols=2, borderaxespad=0)
     sns.despine(fig=fig)
-    caption = data.caption.text(caption_chars(width))
-    fig.text(0.02, 0.01, caption, ha="left", va="bottom", fontsize=SIZES["caption"])
-    caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
-    fig.tight_layout(rect=(0, caption_inches / height, 1, 1))
+    place_caption(fig, data.caption.text(), width, height)
     return fig
 
 
@@ -228,14 +243,7 @@ def interactive(data: BoxData) -> Any:
         }
         for f in stats
     ]
-    # Wrapped to the double-column width: one long line is cut off at the plot's right edge.
-    lines = data.caption.text(caption_chars(figure_inches("double", "box")[0])).split("\n")
-    caption = {
-        "text": "<br>".join(lines), "xref": "paper", "yref": "paper", "x": 0, "y": 0,
-        "yshift": -3 * SIZES["caption"] * LINE_SPACING, "yanchor": "top", "xanchor": "left",
-        "showarrow": False, "align": "left",
-    }  # fmt: skip
-    bottom = (len(lines) + 4) * SIZES["caption"] * LINE_SPACING
+    caption, bottom = plotly_caption(data.caption.text(), figure_inches("double", "box")[0])
     fig.update_layout(
         template=plotly_templates()["white"],
         boxmode="group",

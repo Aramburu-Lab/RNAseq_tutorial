@@ -1,0 +1,26 @@
+{
+  "read_files": [
+    "WT_REP1_trimmed_1_val_1.fq.gz",
+    "WT_REP1_trimmed_2_val_2.fq.gz"
+  ],
+  "expected_format": "ISR",
+  "compatible_fragment_ratio": 0.9928618189142915,
+  "num_compatible_fragments": 78865,
+  "num_incompatible_fragments": 567,
+  "num_assigned_fragments": 78865,
+  "num_frags_with_concordant_consistent_mappings": 71775,
+  "num_frags_with_inconsistent_or_orphan_mappings": 16212,
+  "strand_mapping_bias": 0.10370879120879122,
+  "IU": 0,
+  "ISF": 8305,
+  "ISR": 71775,
+  "OU": 0,
+  "OSF": 0,
+  "OSR": 0,
+  "MU": 0,
+  "MSF": 0,
+  "MSR": 0,
+  "U": 0,
+  "SF": 3966,
+  "SR": 3941
+}
