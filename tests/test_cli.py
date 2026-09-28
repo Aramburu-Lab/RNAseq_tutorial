@@ -355,14 +355,15 @@ def test_de_end_to_end(de_run):
         .select("metric", "value")
         .rows()
     )
-    assert metrics["calls.a_null.significant"] == 0
-    # R3 and R7 read significance at any fold change: recounted here from the table, and
-    # told apart from the page's calls, which also need the fold change.
+    # The registered S1 rule, not zero: a 3-vs-3 null split called 1 to 4 genes on half the
+    # seeds swept, as a Wald test on estimated dispersions does (D-017).
+    assert metrics["calls.a_null.significant"] <= 0.01 * metrics["calls.a_null.tested"]
+    # Recounted from the table. That significance counts any fold change, unlike up and down,
+    # is tested on a constructed gene in test_de.py::test_significant_counts_any_fold_change.
     significant = int((results["padj"] < 0.05).sum())
     up, down = int((results["call"] == "up").sum()), int((results["call"] == "down").sum())
     assert metrics["calls.a_case.significant"] == significant
     assert (metrics["calls.a_case.up"], metrics["calls.a_case.down"]) == (up, down)
-    assert significant != up + down
     assert metrics["calls.a_case.tested"] == results["padj"].is_not_null().sum()
     assert metrics["sex.disagree"] == 0 and metrics["sex.compared"] == 33
     wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', html).group(1))

@@ -27,6 +27,82 @@ it were reversed.
 
 ---
 
+## D-017 — Synthetic dispersion follows a trend; the planted tests rest on measured spreads
+
+**Date:** 2026-09-28 · **Status:** decided
+
+**Context.** Preflight printed four kinds of warning. Two came from pydeseq2:
+- "The dispersion trend curve fitting did not converge" on seven fits;
+- "overflow encountered in exp" on one.
+
+The first had a root cause in `tests/synth.py`: `design_counts` gave every gene the same dispersion, 0.1. With no trend to fit, pydeseq2's parametric fit fails and falls back to the mean. With zero true spread, the dispersion prior's variance also sits at its floor of 0.25. Giving the data a trend broke three tests at seed 7, and each of them had been passing by the draw.
+
+**Options.**
+- Keep the flat data and assert pydeseq2's warning where it appears. That is honest about the data, but it fixes nothing.
+- Give the data a trend and re-measure every planted assertion over many seeds.
+
+**Decision.** A trend, with each assertion set from measured spreads.
+
+- **Generator.** `design_counts` draws dispersion as (0.05 + 10 / mean) × exp(N(0, 0.3)). That is setting C7, the best of 8 settings swept.
+- **Filtered fixture.** `filtered_counts` adds 1,500 low null genes at mean 20, dispersed the same way, where it used to add 600 flat ones.
+- **Planted FDP bound.** In `test_planted_recovered`, the FDP bound on the padj < 0.05 set is 0.20; the page's call keeps 0.10.
+- **Null split.** The CLI test holds the null split to rule S1, at most 1 % of tested genes, where it used to require zero.
+- **Significant against called.** The CLI assertion that significant differs from up plus down needed a chance false positive. `test_de.py::test_significant_counts_any_fold_change` now checks the same thing on a constructed gene.
+
+**Evidence.**
+- **Why BH's 0.05 is not the bound.**
+  - Setup: all genes null, 6 vs 6, flat data at donor SD 0, seeds 0 to 24, 74,884 genes.
+  - ctx's p-values fall below 0.05, 0.01 and 0.001 at rates of 0.0595, 0.0148 and 0.0021.
+  - With the true dispersion put in place they are 0.0516, 0.0102 and 0.0012.
+  - Plain pydeseq2 gives ctx's rates to four decimals. So does R DESeq2 1.46.0 on all 9,000 genes of the same matrices, seeds 0 to 2.
+  - So the excess comes from the method, which takes an estimated dispersion as known. ctx does not cause it.
+  - Two skeptics could not refute this. One reproduced it on seeds 10 to 14, and the ctx arm and the true-dispersion arm disagree beyond chance (McNemar p = 1.2e-4 at 0.001).
+- **The planted FDP, under C7, 6 vs 6, 1,000 genes, 100 planted:**
+
+| Set | Seeds | Mean | Max | Bound |
+|---|---|---|---|---|
+| padj < 0.05, any fold change | 0 to 199 | 0.083 to 0.084 | 0.149 | 0.20 |
+| the page's call, with abs(log2 FC) ≥ 1 | 0 to 199 | not recorded | 0.084 | 0.10 |
+| raw p < 0.05, no correction | 0 to 199 | 0.353, on seeds 0 to 99 | minimum 0.273 | caught by 0.20 |
+
+- **Trend-warning fits per setting.** The eight settings, summed over the seven test designs:
+
+| Setting | a0 | a1 | scatter | Fits with the warning |
+|---|---|---|---|---|
+| C0 | 0.1 | 0 | 0 | 313 of 480 |
+| C7 | 0.05 | 10 | 0.3 | 22 of 480, all in the old 600-gene fixture; 0 with the new one |
+
+  On fresh seeds 100 to 119, C7 raised 0 such warnings in every `test_de` and `test_stats` fit. It raised 1 in 160 fits of the CLI's contrasts: b_case, seed 107.
+- **The new fixture, measured on the committed code.** Over seeds 0 to 29 and 100 to 119:
+  - the reasons hold on 50 of 50 seeds;
+  - independent filtering removes at least 141 genes;
+  - no fit warns.
+- **Seed 7, the seed the tests use.** The warning-free result is from a pytest run of the test files.
+
+| Quantity | Value |
+|---|---|
+| padj-set FDP | 0.107 |
+| called-set FDP | 0.048 |
+| raw-only genes | 13 |
+| genes removed by independent filtering | 748 |
+| paired vs unpaired, true genes significant | 80 vs 0 |
+| paired vs unpaired, true genes called | 46 vs 0 |
+| pydeseq2 warnings in these fits | none |
+
+- **Preflight and budget.**
+  - Preflight: 344 passed, 4 skipped, 0 warnings, 148 s wall, 1.63 GB peak.
+  - The 60,000-gene budget test passes: `ctx de` in 296 s with an 11.0 MB page, `ctx function` in 15.3 s.
+- **The metric test discriminates.** Counting the significant metric with the fold-change filter fails the new unit test.
+- **The overflow is upstream.** It is scverse/PyDESeq2 issue 169, open on 0.5.4, the newest release, at `utils.py:1088` inside `lfc_shrink`. On C7 it appears in 12 of 30 unpaired fits at donor SD 1.0, never at seed 7. It is not suppressed. A fix that rewrites `1 / (1 + size·exp(-η))` as `expit(η - log size)` is drafted in the session scratchpad, not posted. It leaves raw log fold changes and p-values bit-identical, and moves shrunken ones by at most 5.6e-12.
+
+**Consequence.**
+- **Synthetic numbers change.** Every synthetic count matrix from `design_counts` differs, so the example pages drawn from it change too.
+- **The FDP bound is tied to this generator.** 0.20 was measured on C7 alone. Pooled over all 8 settings, the FDP reached 0.198.
+- **Not done: the student page.** The page states that BH controls the FDR at 0.05, with no small-sample caveat. It is unchanged.
+- **Not done: the layout-check crash.** On 3 of 20 fresh seeds, `ctx de` stopped at the box figure's layout check, on overlapping p and r labels. That is a separate fault, and it is not fixed here.
+
+---
+
 ## D-016 — Registered again for the fixes an adversarial review of D-015 found
 
 **Date:** 2026-09-28 · **Status:** decided

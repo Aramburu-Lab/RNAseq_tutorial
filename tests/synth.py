@@ -23,6 +23,15 @@ CLASSES = (
 LFC_MARKER = 4.0
 LFC_CONDITION = 2.5
 DISPERSION = 0.1
+# design_counts draws each gene's dispersion around DESeq2's own trend shape, a0 + a1 / mean,
+# scattered log-normally. With one flat value there is no trend: pydeseq2's parametric fit
+# did not converge and fell back to the mean on 313 of 480 fits of the test designs, and the
+# prior's variance sat at its floor. These three, the best of 8 settings swept, gave 0 such
+# fits in test_de and test_stats over seeds 0-29 and 100-119, and 1 in 240 fits of the
+# CLI's contrasts (knowledge/decisions.md D-017).
+DISPERSION_ASYMPTOTE = 0.05
+DISPERSION_EXTRA_POISSON = 10.0
+DISPERSION_SCATTER_SD = 0.3
 DONOR_SD_LOG2 = 0.25
 SIZE_FACTOR_SD = 0.2
 INT32_MAX = 2**31 - 1
@@ -341,7 +350,10 @@ def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted d
         + effect
     )
     mu = np.exp(rng.normal(0.0, SIZE_FACTOR_SD, sheet.height)) * base[:, None] * np.exp2(log2_mu)
-    n = 1.0 / DISPERSION
+    alpha = (DISPERSION_ASYMPTOTE + DISPERSION_EXTRA_POISSON / base) * np.exp(
+        rng.normal(0.0, DISPERSION_SCATTER_SD, n_genes)
+    )
+    n = 1.0 / alpha[:, None]
     draws = rng.negative_binomial(n, n / (n + mu)).astype(np.int32)
     truth = pl.DataFrame({
         "gene_id": [f"g{i + 1:05d}" for i in range(n_genes)],
@@ -352,17 +364,30 @@ def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted d
     return Synthetic(matrix.insert_column(0, truth["gene_id"]), sheet, truth)
 
 
+# Null genes at mean 20, dispersed as design_counts disperses them. 1,500 of them make
+# independent filtering pay on every seed measured (at least 141 genes removed over seeds
+# 0-29 and 100-119); 600 left it removing nothing on 7 of 30 seeds, and a flat dispersion on
+# them brought back the trend warning.
+LOW_NULLS = 1500
+LOW_NULL_MEAN = 20.0
+
+
 def filtered_counts(synthetic: Synthetic, outlier: str = "g00500") -> pl.DataFrame:
-    """The counts plus 600 low null genes and one Cook's outlier in ``outlier``.
+    """The counts plus ``LOW_NULLS`` low null genes and one Cook's outlier in ``outlier``.
 
     Both of pydeseq2's filters then remove genes, which a test needs whenever the tested set
     must differ from every gene: the reasons, BH over the tested set, the volcano's m.
     """
     rng = np.random.default_rng(1)
     names = synthetic.samples["sample"].to_list()
+    alpha = (DISPERSION_ASYMPTOTE + DISPERSION_EXTRA_POISSON / LOW_NULL_MEAN) * np.exp(
+        rng.normal(0.0, DISPERSION_SCATTER_SD, LOW_NULLS)
+    )
+    n = 1.0 / alpha
     low = pl.DataFrame(
-        {"gene_id": [f"low{i:03d}" for i in range(600)],
-         **{c: rng.negative_binomial(10, 10 / 30, 600).astype(np.int32) for c in names}}
+        {"gene_id": [f"low{i:04d}" for i in range(LOW_NULLS)],
+         **{c: rng.negative_binomial(n, n / (n + LOW_NULL_MEAN)).astype(np.int32)
+            for c in names}}
     )  # fmt: skip
     first = names[0]
     return pl.concat([synthetic.counts, low]).with_columns(

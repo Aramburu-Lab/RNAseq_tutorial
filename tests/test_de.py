@@ -4,6 +4,7 @@ Fits share module-scoped fixtures; each takes about 3 s at 1,000 genes (P1.5 spi
 """
 
 import ast
+import dataclasses
 import math
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from ctx.dataset import Contrast, Split
 from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
+from ctx.de.run import _fit_metrics
 from ctx.de.stats import ALPHA, LFC_MIN, classify
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,18 +70,42 @@ def _significant(results: pl.DataFrame) -> pl.DataFrame:
 def test_planted_recovered(basic):
     synthetic, result = basic
     truth = planted(synthetic)
-    # BH bounds the expected FDR, not one draw's: 0.10 allows the draw's binomial spread.
     # The stored call is the one rule on the adjusted p, never on the raw one.
     recount = result.results.select(classify(pl.col("padj"), pl.col("log2FoldChange")))
     assert result.results["call"].to_list() == recount.to_series().to_list()
-    for called in (_significant(result.results), result.results.filter(pl.col("call") != "ns")):
+    # BH holds the expected FDP to 0.05 x 0.9 only if null p-values are uniform. The Wald test
+    # takes the dispersion estimated from 12 samples as known, so they are not: over seeds
+    # 0-199 the padj set's FDP averaged 0.083 and reached 0.149. On the earlier flat data at
+    # donor SD 0, putting the true dispersion in place brought the mean from 0.073 to 0.048
+    # (D-017). 0.20 is the bound one draw supports; dropping the correction gives at least
+    # 0.273. The page's call, with |LFC| >= 1, reached 0.084 against its 0.10. The called set
+    # goes last: the sign check below reads it.
+    for called, bound in ((_significant(result.results), 0.20),
+                          (result.results.filter(pl.col("call") != "ns"), 0.10)):  # fmt: skip
         false = sum(truth[g] == 0 for g in called["gene_id"])
         assert called.height > 50
-        assert false / called.height <= 0.10, (false, called.height)
+        assert false / called.height <= bound, (false, called.height)
     signs = [np.sign(truth[g]) == np.sign(lfc) for g, lfc in
              called.filter(pl.col("gene_id").is_in([g for g, v in truth.items() if v]))
              .select("gene_id", "log2FoldChange").rows()]  # fmt: skip
     assert all(signs)
+
+
+def test_significant_counts_any_fold_change(basic):
+    # R3 and R7 read significance at any fold change; up and down also need |LFC| >= 1. One
+    # gene made significant at a small fold change tells the two apart on every draw.
+    _, result = basic
+    small = pl.col("gene_id") == "g00999"
+    r = result.results.with_columns(
+        padj=pl.when(small).then(0.01).otherwise(pl.col("padj")),
+        log2FoldChange=pl.when(small).then(0.5).otherwise(pl.col("log2FoldChange")),
+    ).with_columns(call=classify(pl.col("padj"), pl.col("log2FoldChange")))
+    metrics = {m: v for m, v, _ in _fit_metrics({"c": dataclasses.replace(result, results=r)})}
+    below = r.filter((pl.col("padj") < ALPHA) & (pl.col("log2FoldChange").abs() < LFC_MIN))
+    assert below.height >= 1
+    assert metrics["calls.c.significant"] == (
+        metrics["calls.c.up"] + metrics["calls.c.down"] + below.height
+    )
 
 
 def test_call_uses_adjusted_p():
