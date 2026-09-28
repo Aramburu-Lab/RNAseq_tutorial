@@ -1705,6 +1705,13 @@ Rytis's decisions, 2026-09-28:
     - The metrics grow from 34 to 46 with `.up` and `.down`. Every old metric keeps its value, `.called` read as `.significant`, except `permanova.all.cell_type.p`. That goes from 1.0 to no p-value, because each synthetic individual gives one sample, so permuting within individuals cannot move a label. No rule reads it.
   - **Frozen paths.** Their diff from the registration commit 350341e to HEAD is empty.
   - **Before and after.** The M5, M6 and hub pages of both builds went to Rytis.
+  - **Follow-ups done the same day, at Rytis's request:**
+    - **Unit switch.** Its rule moved into `ctxCalls.applied` and `ctxCalls.switchUnit`. `tests/test_page_script.py::test_unit_switch_keeps_the_exact_threshold` runs it on a gene at log2 FC 0.4211, between the rounded 0.42 and the exact log2 1.34, and 3 mutations were each caught.
+    - **Early warning for the freeze.** `test_frozen_since_registration` fails at any change to a frozen path after the registration, until the record exists. Its two probes were an uncommitted edit and an untracked file, and each was caught.
+    - **Tier-1 M0 and M1.** Both were rebuilt in the new design from the metadata-only run: setup took 1.38 s at 146,948,096 B, gather 3.68 s at 436,518,912 B. The sample sheet and both figure tables are identical to 2026-09-27's.
+    - **Real data exposed two slips, both fixed:**
+      - the "FASTQ files" key number counted not_downloaded rows; it is now "FASTQ files on disk", pinned by a test;
+      - "1 runs" now reads "1 run".
 
 **Not in Phase 2:**
 - Track A (M2–M4), strandedness in the sheet, and the teaching subset: Phase 3.

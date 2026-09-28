@@ -59,12 +59,14 @@ def _python(rows: pl.DataFrame, basis: str, alpha: float, t: float) -> dict[str,
     }
 
 
-def _node(payload: dict) -> dict:
+def _node(payload: dict, harness: str | None = None) -> dict:
     """Run the template's rule under node on one payload; returns what the harness prints."""
     node = shutil.which("node")
     assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
     rule = SCRIPT.read_text().replace("{% raw %}", "").replace("{% endraw %}", "")
-    harness = """
+    harness = (
+        harness
+        or """
 const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
 const out = {
   grid: input.grid.map(([basis, alpha, t]) => {
@@ -76,6 +78,7 @@ const out = {
 };
 console.log(JSON.stringify(out));
 """
+    )
     done = subprocess.run(
         [node, "-e", rule + harness], input=json.dumps(payload), capture_output=True, text=True,
         check=True,
@@ -121,3 +124,49 @@ def test_threshold_and_cutoff_parsing(ran):
     # 0 and values below the minimum are raised to it, empty and junk give the default,
     # values above the maximum are lowered to it.
     assert out["cutoffs"] == [0.0001, 0.05, 0.1, 0.0001, 0.05, 0.01]
+
+
+SWITCH = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const up = (t) => ctxCalls.call(input.rows, input.cfg, t, "padj", 0.05).parts.up.map((r) => r.gene);
+const state = { exact: null, shown: null, unit: "log2" };
+const steps = [];
+let t = ctxCalls.applied(state, "1", "log2");
+steps.push({ step: "log2 1", t, up: up(t) });
+// The select moved to % without a change event, as when a browser restores the form.
+t = ctxCalls.applied(state, "34", "pct");
+steps.push({ step: "34 % typed", t, up: up(t) });
+let shown = ctxCalls.switchUnit(state, "34", "log2");
+t = ctxCalls.applied(state, shown, "log2");
+steps.push({ step: "switched to log2", shown, t, up: up(t) });
+shown = ctxCalls.switchUnit(state, shown, "pct");
+t = ctxCalls.applied(state, shown, "pct");
+steps.push({ step: "switched back to %", shown, t, up: up(t) });
+shown = ctxCalls.switchUnit(state, shown, "log2");
+t = ctxCalls.applied(state, "0.420", "log2");
+steps.push({ step: "typed 0.420", shown, t, up: up(t) });
+console.log(JSON.stringify(steps));
+"""
+
+
+def test_unit_switch_keeps_the_exact_threshold():
+    # One gene between the rounded and the exact threshold: log2 1.34 = 0.4222 shows as 0.42,
+    # and a gene at 0.4211 is called only if the rounded number were applied.
+    exact = math.log2(1.34)
+    rows = [
+        {"gene": "edge", "log2FoldChange": 0.4211, "pvalue": 1e-4, "padj": 0.001},
+        {"gene": "strong", "log2FoldChange": 2.0, "pvalue": 1e-6, "padj": 0.0001},
+    ]
+    steps = _node({"rows": rows, "cfg": CFG}, SWITCH)
+    got = {s["step"]: s for s in steps}
+    assert got["log2 1"]["up"] == ["strong"]
+    assert got["34 % typed"]["t"] == pytest.approx(exact)
+    assert got["34 % typed"]["up"] == ["strong"]
+    assert got["switched to log2"]["shown"] == "0.42"
+    assert got["switched to log2"]["t"] == pytest.approx(exact)
+    assert got["switched to log2"]["up"] == ["strong"], "the rounded 0.42 was applied"
+    assert got["switched back to %"]["shown"] == "34.0"
+    assert got["switched back to %"]["t"] == pytest.approx(exact)
+    # A number the reader types replaces the kept one.
+    assert got["typed 0.420"]["t"] == 0.42
+    assert got["typed 0.420"]["up"] == ["edge", "strong"]

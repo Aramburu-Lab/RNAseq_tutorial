@@ -32,6 +32,8 @@ from ctx.viz.save import figure_block, write_figure
 from ctx.viz.style import category_colours
 
 MODULE = "gather"
+# FASTQ statuses (ctx.gather.fetchngs.STATUSES) of a file that is in fastq/.
+ON_DISK = ("verified", "mismatch", "no_md5")
 # Below this, "0.0 million reads" would hide the depth: print the reads themselves.
 DEPTH_IN_MILLIONS = 100_000
 ENA_SOURCE = "ENA Portal API returnFields, result=read_run, retrieved 2026-09-26"
@@ -166,7 +168,8 @@ def _keys(outdir: Outdir, frame: pl.DataFrame) -> tuple[KeyNumber, ...]:
     return (
         KeyNumber("Runs", f"{frame.height:,}"),
         KeyNumber("Experiments", f"{frame['sample'].n_unique():,}"),
-        KeyNumber("FASTQ files", f"{sum(statuses.values()):,}", detail),
+        # On disk, not listed: a metadata-only download lists every file as not_downloaded.
+        KeyNumber("FASTQ files on disk", f"{sum(statuses.get(k, 0) for k in ON_DISK):,}", detail),
         KeyNumber("Unlisted FASTQs", f"{len(outdir.unlisted_fastq)}", "in fastq/, in no row"),
     )
 
@@ -245,11 +248,12 @@ def _composition_text(data: BarData) -> FigureText:
             "that sits in one batch alone cannot be told apart from that batch.",
         )
     sizes = data.frame.group_by("group").agg(pl.col("n_samples").sum())
-    smallest = sizes.sort("n_samples", "group").row(0)
+    name, runs = sizes.sort("n_samples", "group").row(0)
+    unit = "run" if runs == 1 else "runs"
     return FigureText(
         title="Samples by cell type and condition",
-        lead=f"{groups} groups; the smallest, {smallest[0]}, holds {smallest[1]} runs, "
-        "which limits what any contrast on it can find.",
+        lead=f"{groups} groups; the smallest, {name}, holds {runs} {unit}, which limits what "
+        "any contrast on it can find.",
         reading=tuple(reading),
     )  # fmt: skip
 

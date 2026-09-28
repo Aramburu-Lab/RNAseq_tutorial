@@ -132,16 +132,9 @@
     /* The cutoff lines span the whole plot, thinned points included, as drawn on load. */
     var span = div.data[cfg.cutoff_lines[0]].y, across = div.data[cfg.cutoff_lines[2]].x;
     var ytop = span[1], xmin = across[0], xmax = across[1];
-    /* A unit switch shows the threshold rounded, but keeps applying the exact value until the
-       reader types a new one. */
-    var exact = null, shown = null, unitNow = unit.value;
-    function threshold() {
-      if (exact !== null && fc.value === shown) return exact;
-      /* The unit a typed number was applied in, read now: a browser restoring the form on
-         back-navigation sets the unit without a change event. */
-      exact = null; unitNow = unit.value;
-      return ctxCalls.threshold(fc.value, unit.value);
-    }
+    /* The rounding rule of a unit switch lives in ctxCalls, where the tests run it. */
+    var state = { exact: null, shown: null, unit: unit.value };
+    function threshold() { return ctxCalls.applied(state, fc.value, unit.value); }
     function fmt(n, digits) { return n.toFixed(digits); }
     function count(n) { return n.toLocaleString("en-US"); }
     function fill(text, values) {
@@ -190,16 +183,14 @@
       if (summary) summary.textContent = fill(cfg.summary, values);
     }
     unit.addEventListener("change", function () {
-      var t = exact !== null && fc.value === shown ? exact : ctxCalls.threshold(fc.value, unitNow);
-      shown = unit.value === "pct" ? fmt(100 * (Math.pow(2, t) - 1), 1) : fmt(t, 2);
-      fc.value = shown; exact = t; unitNow = unit.value;
+      fc.value = ctxCalls.switchUnit(state, fc.value, unit.value);
       update(true);
     });
     form.addEventListener("input", function (e) { if (e.target !== unit) update(false); });
     form.addEventListener("change", function (e) { if (e.target !== unit) update(true); });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
     form.addEventListener("reset", function () {
-      setTimeout(function () { exact = null; unitNow = unit.value; update(true); }, 0);
+      setTimeout(function () { state = { exact: null, shown: null, unit: unit.value }; update(true); }, 0);
     });
     update(false);
   }

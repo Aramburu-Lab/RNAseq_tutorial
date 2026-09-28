@@ -56,7 +56,7 @@ The page redesign had to change those files: the call rule (D-012), the page tex
 **Consequence.**
 - **The freeze.** Any change to a frozen path between this commit and the record fails `test_rule_unchanged` when the record is committed.
 - **Registering once more** is allowed only while no count exists, and needs the same evidence line.
-- **An early warning** is possible: a test that fails as soon as a frozen path changes after registration, rather than at the record. It is not added, because it would block every M5 or M6 fix before P2C.3.
+- **An early warning** was first left out, because it blocks every M5 or M6 fix before P2C.3 until the rules are registered again. On Rytis's request of 2026-09-28 it was added: `tests/test_sanity_record.py::test_frozen_since_registration`. Until the record exists, it fails as soon as a frozen path differs from the registration commit, committed, uncommitted or untracked, and names the two ways out.
 
 ---
 

@@ -8,6 +8,26 @@ var ctxCalls = {
     var v = Math.max(0, Number(value) || 0);
     return unit === "pct" ? Math.log2(1 + v / 100) : v;
   },
+  /* The threshold as the box shows it in a unit: two decimals of log2, one of a percent. */
+  display: function (t, unit) {
+    return unit === "pct" ? (100 * (Math.pow(2, t) - 1)).toFixed(1) : t.toFixed(2);
+  },
+  /* The threshold in force. After a unit switch the box shows a rounded number, but the exact
+     one stays in force until the reader types something else; state.unit is the unit the box's
+     number was applied in, read on every call because a browser restoring the form on
+     back-navigation sets the unit without a change event. */
+  applied: function (state, typed, unit) {
+    if (state.exact !== null && typed === state.shown) return state.exact;
+    state.exact = null; state.unit = unit;
+    return ctxCalls.threshold(typed, unit);
+  },
+  /* A unit switch: the threshold in force, shown in the new unit; returns what the box shows. */
+  switchUnit: function (state, typed, unit) {
+    var t = state.exact !== null && typed === state.shown
+      ? state.exact : ctxCalls.threshold(typed, state.unit);
+    state.exact = t; state.unit = unit; state.shown = ctxCalls.display(t, unit);
+    return state.shown;
+  },
   /* The cutoff actually applied: the default for an empty box, else clamped to the range the
      box states, so the box and the rule never disagree. */
   cutoff: function (value, cfg) {

@@ -266,6 +266,10 @@ def test_gather_end_to_end(gather_run):
     assert csv_frame.equals(parquet_frame)
     assert parquet_frame.height == 4
     assert sorted(parquet_frame["status_1"]) == ["no_md5", "no_md5", "verified", "verified"]
+    # The key number counts files really in fastq/, not rows that list one.
+    on_disk = len(list((FIXTURE / "fastq").glob("*.fastq.gz")))
+    shown = re.search(r"<dt>FASTQ files on disk</dt><dd class=\"key-value\">([\d,]+)</dd>", html)
+    assert shown and int(shown.group(1).replace(",", "")) == on_disk == 6
     wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', html).group(1))
     rss = int(re.search(r'<td class="rss-self">[\d.]+ MiB \((\d+) bytes\)</td>', html).group(1))
     assert 0 < wall < BUDGETS["B"].minutes * 60

@@ -131,6 +131,27 @@ def test_registration_is_the_committed_date():
     assert f'registered = "{registered}"' in at_commit
 
 
+def test_frozen_since_registration():
+    """The freeze, checked on every run from the registration on, not only at the record.
+
+    ``test_rule_unchanged`` can only look back once the record exists: a frozen file changed
+    after the counts arrived would surface then, when registering again is no longer honest.
+    This test fails at the change itself, committed or not.
+    """
+    if git("rev-parse", "--is-shallow-repository") == "true":
+        pytest.skip("shallow clone: CI checks out depth 1, so the registration is absent")
+    if records()[0] is not None:
+        pytest.skip("the record exists; test_rule_unchanged holds the freeze from here")
+    # Against the working tree, so an uncommitted or untracked change counts too.
+    changed = git("diff", "--name-only", rule_commit(), "--", *FROZEN).split()
+    changed += git("ls-files", "--others", "--exclude-standard", "--", *FROZEN).split()
+    assert not changed, (
+        f"changed since the registration {rule_commit()[:7]}: {changed}. Revert the change, "
+        "or, only while no tier-1 count exists, register again: set [sanity] registered in "
+        "conf/datasets/tier1.toml and record why in knowledge/decisions.md (D-013)."
+    )
+
+
 def need_record():
     if git("rev-parse", "--is-shallow-repository") == "true":
         pytest.skip("shallow clone: CI checks out depth 1, so the rule commit is absent")
