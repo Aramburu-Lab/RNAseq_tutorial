@@ -1,6 +1,7 @@
 """Write every file of one figure (D16): PDF and SVG per theme, one HTML page, data and README."""
 
 from collections.abc import Mapping
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Protocol
 
@@ -8,8 +9,12 @@ import polars as pl
 
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
-from ctx.report.builder import FigureBlock, FigurePage, write
+from ctx.report.builder import FigureBlock, FigurePage, FigureText, write
+from ctx.viz.scatter import ScatterData
 from ctx.viz.style import THEMES, Theme
+
+# A figure with no title, lead or reading guide.
+NO_TEXT = FigureText()
 
 
 class Figure(Protocol):
@@ -79,11 +84,23 @@ def layout_problems(fig: Any) -> list[str]:
     return problems
 
 
-def figure_block(data: Figure, figure_stem: str) -> FigureBlock:
-    """The interactive figure, caption and data rows, for a figure page or a module page."""
+def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> FigureBlock:
+    """The interactive figure, caption, data rows and words, for a figure or a module page.
+
+    A scatter with live calling also carries its controls and, unless ``text`` brings its
+    own, the "How to read" lines at the default setting.
+    """
+    controls = data.controls() if isinstance(data, ScatterData) else None
+    if isinstance(data, ScatterData) and data.calls:
+        # The page script refills these lines by position from the figure's own templates;
+        # lines from elsewhere would be overwritten, or leave a template with no line.
+        if text.reading:
+            raise ValueError("a figure with live calls takes its reading from calls.reading")
+        text = replace(text, reading=data.reading())
     return FigureBlock(
-        data.interactive(), data.caption_text(), data.page_table().to_dicts(), f"{figure_stem}.csv"
-    )
+        data.interactive(), data.caption_text(), data.page_table().to_dicts(),
+        f"{figure_stem}.csv", text=text, stem=figure_stem, controls=controls,
+    )  # fmt: skip
 
 
 def write_figure(
@@ -93,6 +110,7 @@ def write_figure(
     *,
     title: str,
     data_releases: Mapping[str, str],
+    text: FigureText = NO_TEXT,
 ) -> list[Path]:
     """Validate everything, render each theme once as PDF and SVG, then the page and the data.
 
@@ -106,6 +124,7 @@ def write_figure(
         figure_stem: A stem from ``ctx.io.naming.stem()``.
         title: Title of the HTML page.
         data_releases: External releases the data derive from; empty when none.
+        text: Title, lead and reading guide; ``back`` links the page to its module page.
 
     Returns:
         The written files, in ``ctx.io.naming.figure_files()`` order.
@@ -129,7 +148,7 @@ def write_figure(
         for ext in ("pdf", "svg"):
             rendered[(name, ext)] = directory / f"{figure_stem}_{name}.{ext}"
             fig.savefig(rendered[(name, ext)])
-    block = figure_block(data, figure_stem)
+    block = figure_block(data, figure_stem, text)
     page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     table = write_table(
         rows, directory, figure_stem, columns=columns, data_releases=data_releases, formats=("csv",)

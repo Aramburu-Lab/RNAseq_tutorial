@@ -18,7 +18,7 @@ import polars as pl
 
 from ctx.dataset import Contrast, Split
 from ctx.de.filters import MIN_COUNT, expressed
-from ctx.de.stats import ALPHA, classify
+from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, classify
 from ctx.gather.curation import REPLICATE_KEYS, rank_replicates
 
 TOP_GENES = 500
@@ -33,10 +33,18 @@ RESULT_COLUMNS = {
     "stat": ("dimensionless", "Wald statistic, raw LFC over its SE; the GSEA ranking."),
     "pvalue": ("dimensionless", "Wald test p-value; missing for a Cook's outlier."),
     "padj": ("dimensionless", "Benjamini-Hochberg adjusted p; missing if not tested."),
+    **{
+        column: ("dimensionless", f"{name} adjusted p over the genes with a padj, else missing.")
+        for column, name in ADJUSTMENTS.items()
+        if column != "padj"
+    },
     "log2FoldChange_shrunk": ("log2 fold change", "LFC after apeGLM-style shrinkage."),
     "lfcSE_shrunk": ("log2 fold change", "Posterior SE of the shrunk LFC."),
     "na_reason": ("none", "tested, cooks_outlier (no p-value) or independent_filter (no padj)."),
-    "call": ("none", f"up, down or ns at padj < {ALPHA}, signed by the raw LFC."),
+    "call": (
+        "none",
+        f"padj < {ALPHA} and raw LFC >= {LFC_MIN} is up, <= -{LFC_MIN} down; else ns.",
+    ),
 }
 
 
@@ -72,6 +80,22 @@ class Fit:
     dropped: tuple[str, ...]
     dispersions: pl.DataFrame
     size_factors: pl.DataFrame
+
+
+def _adjusted(results: pl.DataFrame) -> pl.DataFrame:
+    """Add every other adjustment, over exactly the genes pydeseq2's BH adjusted.
+
+    The same hypotheses as padj, after Cook's and independent filtering, so the columns
+    differ by method alone; a gene with no padj has none in any column.
+    """
+    tested = results["padj"].is_not_null().to_numpy()
+    p = results["pvalue"].to_numpy()[tested]
+    columns = []
+    for method in (m for m in ADJUSTMENTS if m != "padj"):
+        values = np.full(results.height, np.nan)
+        values[tested] = adjust(p, method)
+        columns.append(pl.Series(method, values).fill_nan(None))
+    return results.with_columns(columns)
 
 
 def _split(frame: pl.DataFrame, split: Split) -> pl.DataFrame:
@@ -222,6 +246,7 @@ def fit(  # noqa: PLR0913 - every argument is a separate input of the fit
         .otherwise(pl.lit("tested")),
         call=classify(pl.col("padj"), pl.col("log2FoldChange")),
     )  # fmt: skip
+    out = _adjusted(out)
     var = dds.var
     dispersions = pl.DataFrame({
         "gene_id": genes,

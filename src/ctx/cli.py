@@ -5,7 +5,6 @@ and only then imports what it needs, so thread limits hold for every library.
 """
 
 import functools
-import shlex
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -22,48 +21,58 @@ app = typer.Typer(
     help="Cancer Transcriptomics Teaching Suite.",
 )
 
-# (meaning, what changes if you move it), per CLI option; the default is read from click.
+# (meaning, what changes if you move it), per CLI option; the default is read from click. The
+# meaning doubles as the --help text, so it describes the option on every command.
 CARDS: dict[str, tuple[str, str]] = {
     "--profile": (
-        "Where this runs: laptop, or hpc inside a Slurm job. Unset means CTX_PROFILE, else laptop.",
-        "hpc takes threads and memory from the Slurm allocation and needs an explicit --root; "
-        "laptop uses at most 4 threads. The results do not change, only the resources.",
+        "Where this runs: laptop (at most 4 threads) or hpc (inside a Slurm job). Unset: "
+        "CTX_PROFILE, else laptop.",
+        "Changes threads and memory, never results. hpc reads both from Slurm and needs --root.",
     ),
     "--root": (
-        "The project directory outputs are written under. Unset means CTX_ROOT, else the "
-        "working directory (laptop only).",
+        "The project directory every output is written under. Unset: CTX_ROOT, else the "
+        "working directory on a laptop.",
         "Moves every output. Nothing is ever written inside the installed package.",
     ),
     "--dataset": (
-        "Short name for this download: lowercase words joined by underscores. It names the "
-        "outputs, and the default fetchngs outdir <root>/data/raw/<dataset>.",
-        "Changes the output names and where gather looks when --fetchngs-dir is unset.",
+        "Short name of the dataset, lowercase words joined by underscores; every output name "
+        "starts with it.",
+        "Renames every output and selects which dataset's earlier outputs this command reads.",
     ),
     "--fetchngs-dir": (
-        "The nf-core/fetchngs outdir to read. Unset means <root>/data/raw/<dataset>.",
-        "Points gather at another download. gather only reads it and never writes into it.",
+        "The nf-core/fetchngs outdir to read. Unset: <root>/data/raw/<dataset>.",
+        "Points gather at another download. gather only reads it, never writes into it.",
     ),
     "--dataset-file": (
-        "The cohort's dataset file (conf/datasets/<slug>.toml): its resources, SDRF join, "
-        "value maps, batch rule and expected counts. Unset: setup fetches nothing and gather "
-        "leaves the curation columns empty.",
-        "Set, setup fetches each resource (the SDRF, the gene sets) and keeps it only if its "
-        "size and SHA-256 match; gather joins the SDRF to every run, fills donor, cell type, "
-        "condition, replicate and batch, and stops with a problem table if anything fails to "
-        "join, map or match the declared counts.",
+        "The dataset's TOML file, conf/datasets/<slug>.toml: its resources, sample curation, "
+        "contrasts, gene sets and sanity rules.",
+        "Changes what this command reads from the dataset; each page says what it uses.",
     ),
     "--min-count": (
         "Reads a gene needs at the median library size, in at least the smallest group's "
-        "number of samples, to be tested (edgeR filterByExpr's min.count).",
-        "Higher tests fewer, better-measured genes: fewer tests for BH to correct, but weakly "
-        "expressed biology drops out. The cutoff scales with depth (counts per million).",
+        "samples, to be tested (edgeR filterByExpr's min.count).",
+        "Higher tests fewer, better-measured genes, so BH corrects for fewer tests, but weakly "
+        "expressed biology drops out.",
     ),
     "--rnaseq-dir": (
-        "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset writes no counts.",
-        "Set, gather checks the release, the params files and that the matrix holds exactly "
-        "the sheet's samples, rounds the length-scaled counts to integers and writes them. "
-        "It only reads the outdir.",
+        "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset: no counts.",
+        "Set: gather checks the release and the samples, rounds the length-scaled counts to "
+        "integers and writes them. It only reads the outdir.",
     ),
+}
+# Where one option does different things on different commands, the effect is per command.
+CARD_EFFECTS: dict[tuple[str, str], str] = {
+    ("setup", "--dataset-file"): "Set: fetches each resource and keeps it only if its size "
+    "and SHA-256 match. Unset: fetches nothing.",
+    ("gather", "--dataset-file"): "Set: fills donor, cell type, condition, replicate and "
+    "batch from the SDRF, and stops on any mismatch. Unset: they stay empty.",
+    ("report", "--dataset-file"): "Set: the hub also decides and shows the file's sanity rules.",
+    ("gather", "--dataset"): "Renames every output. Unless --fetchngs-dir is set, gather "
+    "reads <root>/data/raw/<dataset>.",
+    ("de", "--dataset-file"): "Selects the contrasts, their designs and expected n, the "
+    "featured contrast, the lessons and the PCA subsets this page fits and draws.",
+    ("function", "--dataset-file"): "Selects the gene sets, the featured set and the "
+    "running score this page tests.",
 }
 _UNCARDED = {"--help", "--version"}
 
@@ -85,9 +94,11 @@ def parameter_cards(*commands: Any) -> tuple[ParameterCard, ...]:
     options = [p for c in commands for p in c.params if p.opts and p.opts[0] not in _UNCARDED]
     if missing := [p.opts[0] for p in options if p.opts[0] not in CARDS]:
         raise ValueError(f"no parameter card for {missing}")
+    command = commands[-1].name if commands else ""
     cards = []
     for option in options:
         meaning, effect = CARDS[option.opts[0]]
+        effect = CARD_EFFECTS.get((command, option.opts[0]), effect)
         default = (
             "required"
             if option.required
@@ -163,7 +174,7 @@ def setup(
     from ctx.dataset import DatasetError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
-    command = "ctx " + shlex.join(sys.argv[1:])
+    command = runtime.retypable(sys.argv[1:])
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset_file)
     except (module.FetchError, DatasetError) as error:
@@ -190,7 +201,7 @@ def gather(
     from ctx.gather.rnaseq import RnaseqError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
-    command = "ctx " + shlex.join(sys.argv[1:])
+    command = runtime.retypable(sys.argv[1:])
     try:
         written = harmonise.run(
             ctx.obj["settings"], cards, command, dataset, fetchngs_dir=fetchngs_dir,
@@ -217,7 +228,7 @@ def de(
     from ctx.de.deseq import ContrastError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
-    command = "ctx " + shlex.join(sys.argv[1:])
+    command = runtime.retypable(sys.argv[1:])
     try:
         written = module.run(
             ctx.obj["settings"], cards, command, dataset, dataset_file=dataset_file,
@@ -242,7 +253,7 @@ def function(
     from ctx.function import run as module  # noqa: PLC0415 - heavy; after the runtime profile
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
-    command = "ctx " + shlex.join(sys.argv[1:])
+    command = runtime.retypable(sys.argv[1:])
     try:
         written = module.run(
             ctx.obj["settings"], cards, command, dataset, dataset_file=dataset_file

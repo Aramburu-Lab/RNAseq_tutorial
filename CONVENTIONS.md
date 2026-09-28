@@ -48,7 +48,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 
 - Every figure exists in four variants: PDF light and PDF dark (Seaborn/Matplotlib, vector) and HTML with a light/dark toggle (Plotly). One data contract per figure type; `static()` and `interactive()` render from the same object.
 - Style: Okabe–Ito palette in this order — #E69F00, #56B4E9, #009E73, #F0E442, #0072B2, #D55E00, #CC79A7, #000000; Helvetica with a sans-serif fallback; 14 pt base; `sns.set_context("paper")`, `sns.despine()`, `plt.tight_layout()`; Nature-style bold lowercase panel letters; no chart junk.
-- Plotly: `plotly_white` base plus a custom dark template; hover shows every variable a reader would ask about; exact p-values and n in annotations.
+- Plotly: `plotly_white` base plus a custom dark template; hover shows every variable a reader would ask about; exact p-values and n in the caption printed once under each interactive figure, not inside the plot (D-011); the PDFs keep theirs in the figure.
 - Statistical annotation is mandatory: test name, n per group, adjusted p (BH) or FDR, effect size, and the caption block written by `ctx.viz.annotate`. A figure without its test is not finished.
 
 ## HTML reports

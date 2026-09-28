@@ -803,7 +803,7 @@ it. P1.2 pins every dependency the project adds.
     - `::test_round_trip`:
       - one `BoxData` gives exactly `figure_files(stem)`;
       - `lint(outdir)` gives scanned equal to the file count and no violations;
-      - the caption tokens are identical in the PDF text, the SVG text, the plotly JSON and the README;
+      - the caption tokens are identical in the PDF text, the SVG text, the plotly JSON and the README (since 2026-09-28, D-011: the test reads the PDF, the SVG and the page's caption under the plot; the plotly figure must no longer hold the caption. No test has read the README, which describes columns);
       - the embedded table rows equal the CSV rows;
       - the hover covers every hover column in the contract.
     - `::test_html_offline`:
@@ -1628,7 +1628,7 @@ Rytis's decisions, 2026-09-28:
 - R3 and R7 stay on padj alone, under the metric name `significant`;
 - captions go below the plot only.
 
-- [ ] **P2R.1 Statistics.** Changes:
+- [x] **P2R.1 Statistics.** Changes:
   - `de/stats.py` holds `ALPHA`, `LFC_MIN`, `classify(padj, lfc, alpha, lfc_min)`, `ADJUSTMENTS`, `adjust()` and `p_cutoff()`.
   - `deseq.py` adds `padj_by`, `padj_holm` and `padj_bonferroni` over the BH-tested genes.
   - The metrics are `calls.<c>.significant`, plus `.up` and `.down`.
@@ -1640,13 +1640,19 @@ Rytis's decisions, 2026-09-28:
   - `classify` at its boundaries;
   - `p_cutoff` against brute force;
   - mutation checks.
-- [ ] **P2R.2 Visual system.**
+
+  Evidence, 2026-09-28:
+  - **Adjustments.** BH equals pydeseq2 `padj` exactly (max difference 0.0) on a fit with 1,071 tested, 527 independently filtered and 1 Cook's-outlier genes. All four methods equal statsmodels to 2.2e-16. `tests/test_stats.py` has 47 tests; 4 mutations were each caught.
+  - **Stored call.** `tests/test_de.py::test_call_uses_adjusted_p` runs on a fixture with genes at raw p < 0.05 and |LFC| >= 1 that BH does not pass, and catches a call made on the raw p.
+  - **Planted truth.** The tests assert again on significance at any fold change, 7/107 false, as well as on the call.
+  - **Review.** An adversarial review found that the planted-truth tests read only the fold-change-filtered call, so a no-correction mutant passed; that is what the two points above fix.
+- [x] **P2R.2 Visual system.**
   - Tokens in `viz/style.py`.
   - `_page.css.j2`, `_page.js.j2` and `_cards.html.j2`.
   - Masthead, contents rail, key numbers at the top of Results, groups and tabs, figure cards, collapsed card effects and versions, Copy, hub pills.
   - The caption is dropped from inside the plot, and the reference-line labels are restored.
   - `viz/axes.axis_title`.
-- [ ] **P2R.3 Page content.** Changes:
+- [x] **P2R.3 Page content.** Changes:
   - `FigureText` carries a title, a lead and the "How to read" lines, all filled from data.
   - M5 copy moves to the new `de/page.py`, with dataset-neutral self-checks.
   - M6, M1, M0 and the hub are restructured.
@@ -1654,9 +1660,22 @@ Rytis's decisions, 2026-09-28:
   Proven by:
   - no tier-1 wording on the synthetic pages;
   - no em dashes in `src/`.
-- [ ] **P2R.4 Interactive volcano.** It has fold-change (log2 or %), p basis, cutoff and method controls. A live sentence, the colours and the cutoff lines update together. Only points that no setting can call are thinned.
+
+  Evidence, 2026-09-28:
+  - **Review.** 42 findings were confirmed across four lenses, many of them duplicates, and all were fixed, among them:
+    - untested genes drawn on the volcano;
+    - four meanings of "tested" on one page, now one, `de.run.n_tested`;
+    - copy the data did not support: dispersion, the background lesson, and a PCA sentence naming the wrong factor;
+    - PERMANOVA p = 1 from permutations that could not move a label, now "no p-value";
+    - home paths on pages, now `~`, with `runtime.retypable`.
+  - **Pages.** Checked in the browser at 1400 and 375 px, light and dark, with no sideways scroll.
+- [x] **P2R.4 Interactive volcano.** It has fold-change (log2 or %), p basis, cutoff and method controls. A live sentence, the colours and the cutoff lines update together. Only points that no setting can call are thinned.
 
   Proven by page counts equal to Python counts at 6 or more settings, in the browser.
+
+  Evidence, 2026-09-28:
+  - **In the browser.** At 8 settings (all four methods, raw p, log2 and %, a fold-change threshold of 10), the page's counts and line height equal a Python recount of the results parquet. The no-line branch was checked on a scratch page with every p set to 0.5. The text a no-JavaScript reader sees equals the script's, word for word.
+  - **Under node.** `tests/test_page_script.py` runs `_calls.js.j2` over 80 settings: the four adjusted columns and raw p, 4 cutoffs and 4 thresholds, including boundary rows. It compares against `classify`, and 5 mutations of the script were each caught. nodejs 26.10.0 is pinned in ctx-dev; the lock only gained packages.
 - [ ] **P2R.5 Rules and records.**
   - CONVENTIONS.md:51 and TODO.md:806 move the caption below the plot.
   - D-011 covers the caption, D-012 the call rule and adjustments, D-013 the re-registration.
@@ -1668,6 +1687,17 @@ Rytis's decisions, 2026-09-28:
   - `pytest -m budget` with every page under 15 MB;
   - tables diffed before and after;
   - before-and-after screenshots to Rytis.
+
+  Evidence so far, 2026-09-28:
+  - preflight passes: 309 passed, 4 skipped (the record tests, waiting for P2C.3).
+  - `pytest -m budget` at 60,000 genes by 171 samples:
+
+    | Command | Wall | RAM bound | Page |
+    |---|---|---|---|
+    | de | 290.3 s | 2,740,551,680 B | 11,042,066 B |
+    | function | 16.5 s | 1,630,175,232 B | 6,642,839 B |
+
+    Before the redesign the pages were 11,167,022 B and 6,602,147 B.
 
 **Not in Phase 2:**
 - Track A (M2–M4), strandedness in the sheet, and the teaching subset: Phase 3.

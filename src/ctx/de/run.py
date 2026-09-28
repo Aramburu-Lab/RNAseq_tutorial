@@ -9,6 +9,7 @@ import hashlib
 import math
 import re
 from collections.abc import Mapping
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
@@ -19,27 +20,52 @@ from scipy.stats import spearmanr
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, PcaSpec, load
 from ctx.de.deseq import RESULT_COLUMNS, TOP_GENES, Fit, fit, pca
-from ctx.de.stats import ALPHA, classify
+from ctx.de.page import (
+    BASES,
+    CONCEPT,
+    LINE_RULE,
+    MISTAKES,
+    NO_LINE_RULE,
+    PRACTICE,
+    QUESTION,
+    RAW_WORDS,
+    TERMS,
+    VOLCANO_READING,
+    VOLCANO_SUMMARY,
+    box_text,
+    calls_text,
+    dispersion_text,
+    lfc_text,
+    ma_text,
+    pca_text,
+    phist_text,
+    think,
+    volcano_text,
+)
+from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, P_FLOOR, classify, p_cutoff
 from ctx.gather.curation import rank_replicates
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
 from ctx.report.builder import (
     FigureBlock,
+    FigureText,
+    Group,
+    KeyNumber,
     ModulePage,
     ParameterCard,
     Reproduction,
-    SelfCheck,
+    Result,
+    ResultTable,
     write,
 )
-from ctx.viz.annotate import permanova
+from ctx.viz.annotate import Permanova, permanova
 from ctx.viz.bar import BarData
 from ctx.viz.box import box_data
 from ctx.viz.save import Figure, figure_block, write_figure
-from ctx.viz.scatter import Line, ScatterData
+from ctx.viz.scatter import CUTOFF_PRESETS, Calls, Line, ScatterData
 from ctx.viz.style import ROLES, category_colours
 
 MODULE = "de"
-VOLCANO_STEPS = (0.01, 0.05, 0.1)
 P_BINS = 20
 FLAT_FROM = 0.5
 MAX_VOLCANO_LABELS = 10
@@ -61,53 +87,16 @@ CONTRAST_COLUMNS = {
     "paired": ("none", "Only donors with both levels kept."),
     "dropped_runs": ("none", "Runs removed as later replicates or unpaired; ; separated."),
     "groups": ("none", "Samples by group and batch (and isolation where curated)."),
-    "genes_tested": ("genes", "Genes passing the expression filter and tested."),
-    "up": ("genes", f"padj < {ALPHA} and raw LFC > 0."),
-    "down": ("genes", f"padj < {ALPHA} and raw LFC < 0."),
+    "genes_fitted": ("genes", "Genes past the expression filter, fitted by DESeq2."),
+    "genes_tested": (
+        "genes",
+        "Genes with an adjusted p: fitted, less Cook's outliers and independent filtering.",
+    ),
+    "up": ("genes", f"padj < {ALPHA} and raw LFC >= {LFC_MIN}."),
+    "down": ("genes", f"padj < {ALPHA} and raw LFC <= -{LFC_MIN}."),
     "cooks_outlier": ("genes", "No p-value: a Cook's distance outlier."),
     "independent_filter": ("genes", "A p-value but no padj: removed by independent filtering."),
 }
-
-QUESTION = "Which genes change between two groups, and how sure can we be?"
-CONCEPT = (
-    "DESeq2 models each gene's counts as negative binomial, with a size factor per sample for "
-    "depth and a dispersion per gene for extra variability, shared across genes of similar "
-    "expression. A Wald test asks whether the fold change between the groups is zero; "
-    "Benjamini-Hochberg turns thousands of p-values into a false discovery rate. The design "
-    "says what else differs between samples: an individual, or a sequencing batch."
-)
-PRACTICE = (
-    "Read the p-value histogram before the volcano: a peak near 0 on a flat floor is signal, "
-    "anything else is a model problem. Compare contrasts at equal n, and put a known batch in "
-    "the design instead of dropping samples. Shrunk fold changes rank genes; raw ones carry "
-    "the test."
-)
-THINK = (
-    SelfCheck(
-        "The naive and the adjusted PDAC contrasts use the same samples. Why do they call "
-        "different genes?",
-        "PDAC samples are all in the long-read batch and most healthy ones in the short: the "
-        "naive design reads the batch as disease. The adjusted design estimates the batch "
-        "from the healthy samples sequenced in both, and removes it.",
-    ),
-    SelfCheck(
-        "The paired design finds more genes than the unpaired one on the same 18 samples. "
-        "Where does the power come from?",
-        "Each individual is compared with themself, so the variation between individuals "
-        "leaves the error term.",
-    ),
-    SelfCheck(
-        "Why can a gene with a large fold change have padj = NA?",
-        "Either a single sample is an outlier (Cook's distance), or the gene is so weakly "
-        "expressed that independent filtering removed it before BH.",
-    ),
-)
-MISTAKES = (
-    "Comparing a within-batch contrast of 4 samples with a pooled one of 17 and calling the "
-    "difference batch: the smaller one also has less power.",
-    "Counting one individual twice, e.g. several follow-ups, as independent samples.",
-    "Ranking genes for GSEA by padj: it has no sign and saturates.",
-)
 
 
 def newest(directory: Path, dataset: str, what: str) -> Path:
@@ -131,6 +120,21 @@ def newest(directory: Path, dataset: str, what: str) -> Path:
     return max(found, key=lambda x: (x[0], x[1]))[2]
 
 
+def n_tested(results: pl.DataFrame) -> int:
+    """Genes tested: those with an adjusted p, after Cook's and independent filtering.
+
+    The one definition every page count, metric and caption uses.
+    """
+    return int(results["padj"].is_not_null().sum())
+
+
+def _sizes(result: Fit) -> str:
+    """Group sizes as the page prints them everywhere: tested group first, each named."""
+    c = result.contrast
+    n = {g: result.samples.filter(pl.col("group") == g).height for g in ("tested", "reference")}
+    return f"{n['tested']} {c.tested} vs {n['reference']} {c.reference}"
+
+
 def _sha256(path: Path) -> str:
     """SHA-256 of a file's bytes."""
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -150,8 +154,8 @@ def _subset(
 
 def _pca_figure(
     spec: PcaSpec, sheet: pl.DataFrame, counts: pl.DataFrame, threads: int
-) -> tuple[ScatterData, list[tuple[str, float, str]]]:
-    """One PCA scatter, and a PERMANOVA per declared factor as metrics."""
+) -> tuple[ScatterData, list[tuple[str, float, str]], FigureText]:
+    """One PCA scatter, a PERMANOVA per declared factor as metrics, and its page words."""
     used = _subset(sheet, spec.filters, spec.one_per)
     result = pca(counts, used["sample"].to_list(), threads=threads)
     frame = result.scores.join(
@@ -163,7 +167,8 @@ def _pca_figure(
         on="sample",
     )
     metrics: list[tuple[str, float, str]] = []
-    first = None
+    first: str | None = None
+    shown: tuple[str, Permanova] | None = None
     for factor in spec.factors:
         labels = frame[factor].to_list()
         if not 1 < len(set(labels)) < len(labels):
@@ -179,7 +184,7 @@ def _pca_figure(
         metrics.append((f"permanova.{spec.name}.{factor}.r2", test.r2, where))
         if first is None:
             metrics.append((f"permanova.{spec.name}.{factor}.p", test.p, where))
-            first = test.text(factor.replace("_", " "))
+            first, shown = test.text(factor.replace("_", " ")), (factor, test)
     share = ", ".join(f"PC{i + 1} {s:.0%}" for i, s in enumerate(result.share))
     caption = (
         f"{first} Blind VST, the {TOP_GENES} most variable genes after the transform; "
@@ -211,72 +216,83 @@ def _pca_figure(
         hover=("sample", "donor"),
         width="double",
     )
-    return data, metrics
+    # The page describes the first factor's test, the one with a p-value.
+    text = pca_text(spec.name, spec.filters, colour, spec.symbol, result.share, shown)
+    return data, metrics, text
 
 
 def _volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
-    """Volcano of one contrast, with the padj slider."""
+    """Volcano of one contrast: the default call drawn, and every cutoff callable live.
+
+    Every gene some setting of the page could call is drawn; the rest, above the loosest
+    cutoff offered or never tested, are thinned. All four adjustments count over the same
+    tested genes, so the live view and the table agree.
+    """
+    # Only tested genes: the others have no adjusted p, so no setting of the page can call
+    # them, and a dot the rule cannot reach would contradict the reading guide.
     frame = result.results.join(genes, on="gene_id", how="left").filter(
-        pl.col("pvalue").is_not_null()
+        pl.col("padj").is_not_null()
     )
+    line = p_cutoff(frame["pvalue"].to_numpy(), frame["padj"].to_numpy(), ALPHA)
     frame = frame.with_columns(
-        neg_log10_p=-pl.col("pvalue").log10(),
-        **{
-            f"call_{a}": classify(pl.col("padj"), pl.col("log2FoldChange"), a)
-            for a in VOLCANO_STEPS
-        },
+        gene=pl.coalesce("gene_name", "gene_id"),
+        neg_log10_p=-pl.max_horizontal(pl.col("pvalue"), pl.lit(P_FLOOR)).log10(),
+        keep=pl.col("pvalue") < max(CUTOFF_PRESETS),
     )
-    frame = frame.with_columns(keep=pl.col(f"call_{max(VOLCANO_STEPS)}") != "ns")
     top = set(frame.filter(pl.col("call") != "ns").sort("padj").head(MAX_VOLCANO_LABELS)["gene_id"])
     frame = frame.with_columns(
-        label=pl.when(pl.col("gene_id").is_in(top))
-        .then(pl.coalesce("gene_name", "gene_id"))
-        .otherwise(pl.lit(""))
-    )
-    frame = frame.select(
-        "gene_id",
-        "gene_name",
-        "log2FoldChange",
-        "neg_log10_p",
-        "padj",
-        *(f"call_{a}" for a in VOLCANO_STEPS),
-        "keep",
-        "label",
-    )
+        label=pl.when(pl.col("gene_id").is_in(top)).then(pl.col("gene")).otherwise(pl.lit(""))
+    ).select(
+        "gene", "gene_id", "log2FoldChange", "pvalue", *ADJUSTMENTS, "neg_log10_p", "call",
+        "keep", "label",
+    )  # fmt: skip
     c = result.contrast
     columns = {
+        "gene": ("none", "Gene symbol, or the identifier where there is none."),
         "gene_id": RESULT_COLUMNS["gene_id"],
-        "gene_name": ("none", "Gene symbol."),
         "log2FoldChange": RESULT_COLUMNS["log2FoldChange"],
-        "padj": RESULT_COLUMNS["padj"],
-        "neg_log10_p": ("-log10 p", "Minus log10 of the Wald p-value."),
-        **{f"call_{a}": ("none", f"up, down or ns at padj < {a}.") for a in VOLCANO_STEPS},
-        "keep": ("none", "Called at the loosest threshold; always drawn on the page."),
+        "pvalue": RESULT_COLUMNS["pvalue"],
+        **{column: RESULT_COLUMNS[column] for column in ADJUSTMENTS},
+        "neg_log10_p": ("-log10 p", f"Minus log10 of the raw p-value, drawn at {P_FLOOR:g} "
+                                    "at least."),
+        "call": RESULT_COLUMNS["call"],
+        "keep": ("none", f"Raw p below {max(CUTOFF_PRESETS)}: callable at some setting, so "
+                         "always drawn."),
         "label": ("none", "Symbol printed beside the point; empty for none."),
-    }
-    dropped = result.results.filter(pl.col("pvalue").is_null()).height
+    }  # fmt: skip
+    untested = result.results.height - frame.height
+    floored = int((frame["pvalue"] < P_FLOOR).sum())
     caption = (
         f"{c.name}: DESeq2 Wald test of {c.tested} over {c.reference}, design {c.design}; "
-        f"n = {result.samples.filter(pl.col('group') == 'reference').height} {c.reference}, "
-        f"{result.samples.filter(pl.col('group') == 'tested').height} {c.tested}; BH over "
-        f"{result.results['padj'].is_not_null().sum():,} tested genes; colours at padj < {ALPHA}. "
-        f"{dropped} Cook's outliers have no p-value and are not drawn."
-    )
+        f"n = {_sizes(result)}. The four adjustments count over the same {frame.height:,} "
+        f"tested genes, all drawn. Default call: BH-adjusted p below {ALPHA} and log2 FC at "
+        f"or beyond ±{LFC_MIN:g}."
+        + (f" {untested:,} genes with no adjusted p (Cook's outliers or independent "
+           "filtering) are not drawn." if untested else "")
+        + (f" {floored} p-values below {P_FLOOR:g} are drawn at it." if floored else "")
+    )  # fmt: skip
+    calls = Calls(
+        lfc="log2FoldChange", p="pvalue", adjusted=BASES, raw_words=RAW_WORDS, tested=c.tested,
+        reference=c.reference, alpha=ALPHA, lfc_min=LFC_MIN, max_cutoff=max(CUTOFF_PRESETS),
+        n_tested=frame.height, p_floor=P_FLOOR, p_line=line, reading=VOLCANO_READING,
+        summary=VOLCANO_SUMMARY, line_rule=LINE_RULE, no_line_rule=NO_LINE_RULE,
+    )  # fmt: skip
     return ScatterData(
         frame=frame,
         columns=columns,
         x="log2FoldChange",
         y="neg_log10_p",
-        x_label=f"Fold change, {c.tested} over {c.reference}",
-        y_label="Significance",
-        colour=f"call_{ALPHA}",
+        x_label=f"log2 fold change, {c.tested} over {c.reference}",
+        y_label="-log10 raw p",
+        colour="call",
         colours=CALL_COLOURS,
         caption=caption,
         label="label",
-        hover=("gene_name", "padj"),
+        hover=("gene", "gene_id", "padj"),
         width="double",
-        steps=tuple((f"padj < {a}", f"call_{a}") for a in VOLCANO_STEPS),
         keep="keep",
+        names={"up": f"up in {c.tested}", "down": f"down in {c.tested}", "ns": "not called"},
+        calls=calls,
     )
 
 
@@ -305,7 +321,7 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
         "call": RESULT_COLUMNS["call"],
         "lfc": ("log2 fold change", "Raw or shrunk LFC."),
         "estimate": ("none", "raw or shrunk."),
-        "keep": ("none", "Called; always drawn."),
+        "keep": ("none", "Called at the default rule; always drawn."),
     }
     caption = (
         f"{result.contrast.name}: raw and shrunk LFC against mean expression for "
@@ -318,9 +334,10 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
         x="baseMean",
         y="lfc",
         x_label="Mean expression",
-        y_label="Fold change",
+        y_label="log2 fold change",
         colour="estimate",
         colours=category_colours(["raw", "shrunk"]),
+        names={"raw": "raw estimate", "shrunk": "shrunk estimate"},
         caption=caption,
         hover=("gene_name", "padj"),
         log_x=True,
@@ -348,10 +365,9 @@ def p_histogram(result: Fit) -> tuple[BarData, float, int]:
         "series": ("none", "One series."),
     }
     caption = (
-        f"{result.contrast.name}: Wald p-values of {len(p):,} tested genes. {low:,} have "
-        f"p < {ALPHA} against a flat level of {flat:,.1f} per bin, the mean over "
-        f"[{FLAT_FROM}, 1]. A peak at 0 over a flat floor is signal; a hill elsewhere "
-        "is a model problem."
+        f"{result.contrast.name}: Wald p-values of the {len(p):,} genes with one, in "
+        f"{P_BINS} bins; {low:,} have p < {ALPHA}. The flat level, {flat:,.1f}, is the mean "
+        f"count per bin over [{FLAT_FROM}, 1]."
     )
     data = BarData(
         frame=frame,
@@ -399,8 +415,8 @@ def _dispersion(result: Fit) -> ScatterData:
         "keep": ("none", "Never kept; the page thins these points."),
     }
     caption = (
-        f"{result.contrast.name}: dispersion estimates of {d.height:,} genes; the final "
-        "values are pulled toward the fitted trend, most for weakly expressed genes."
+        f"{result.contrast.name}: gene-wise and final dispersion estimates of {d.height:,} "
+        "genes, with the trend DESeq2 fitted across them."
     )
     return ScatterData(
         frame=frame,
@@ -429,26 +445,25 @@ def _calls(title: str, names: tuple[str, ...], fits: Mapping[str, Fit]) -> BarDa
         for call in ("up", "down")
     ]
     frame = pl.DataFrame(rows, schema=["contrast", "call", "genes"], orient="row")
-    sizes = "; ".join(
-        f"{n}: n = {fits[n].contrast.expected_n[0]} vs {fits[n].contrast.expected_n[1]}, "
-        f"{fits[n].contrast.design}"
-        for n in names
-    )
+    sizes = "; ".join(f"{n}: n = {_sizes(fits[n])}, {fits[n].contrast.design}" for n in names)
     columns = {
         "contrast": ("none", "Contrast."),
         "call": ("none", "up or down."),
-        "genes": ("genes", f"Genes at padj < {ALPHA}."),
+        "genes": ("genes", f"Genes called: padj < {ALPHA} and log2 FC at or beyond ±{LFC_MIN:g}."),
     }
     return BarData(
         frame=frame,
         columns=columns,
         category="contrast",
         value="genes",
-        category_label=title,
+        category_label="Contrast",
         value_label="Genes called",
         series="call",
         colours={"up": ROLES["comparison"], "down": ROLES["reference"]},
-        caption=f"{title}: genes at padj < {ALPHA}. {sizes}.",
+        caption=(
+            f"{title}: genes called per contrast (BH-adjusted p < {ALPHA}, log2 FC at or beyond ±"
+            f"{LFC_MIN:g}). {sizes}."
+        ),
         horizontal=True,
         stacked=True,
         width="double",
@@ -468,6 +483,12 @@ def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, floa
             on="gene_id",
         )
         .drop_nulls()
+        .join(
+            x.results.filter(pl.col("padj").is_not_null())
+            .select("gene_id")
+            .join(y.results.filter(pl.col("padj").is_not_null()).select("gene_id"), on="gene_id"),
+            on="gene_id",
+        )
         .join(genes, on="gene_id", how="left")
         .with_columns(
             called=pl.when((pl.col("call_x") != "ns") | (pl.col("call_y") != "ns"))
@@ -507,8 +528,8 @@ def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, floa
         columns=columns,
         x="lfc_x",
         y="lfc_y",
-        x_label=x.contrast.name,
-        y_label=y.contrast.name,
+        x_label=f"log2 FC, {x.contrast.name}",
+        y_label=f"log2 FC, {y.contrast.name}",
         colour="called",
         colours={"called in either": ROLES["comparison"], "neither": None},
         caption=caption,
@@ -632,7 +653,8 @@ def _contrast_row(result: Fit, sheet_columns: list[str]) -> dict[str, object]:
         "paired": c.paired,
         "dropped_runs": ";".join(result.dropped),
         "groups": groups,
-        "genes_tested": r.height,
+        "genes_fitted": r.height,
+        "genes_tested": n_tested(r),
         "up": int((r["call"] == "up").sum()),
         "down": int((r["call"] == "down").sum()),
         "cooks_outlier": reasons.get("cooks_outlier", 0),
@@ -658,7 +680,6 @@ class Writer:
         """Remember the output directory, naming and provenance every file shares."""
         self.out, self.dataset, self.day, self.releases = out, dataset, day, releases
         self.files: list[Path] = []
-        self.blocks: list[FigureBlock | str] = []
 
     def stem(self, what: str) -> str:
         """The stem of one output of this run."""
@@ -670,13 +691,14 @@ class Writer:
             frame, self.out, self.stem(what), columns=columns, data_releases=self.releases
         )
 
-    def figure(self, data: Figure, what: str, title: str) -> None:
-        """Write one figure and put it on the page."""
+    def figure(self, data: Figure, what: str, text: FigureText) -> FigureBlock:
+        """Write one figure, its page linked back to the module page; return its page block."""
         figure_stem = self.stem(what)
+        text = replace(text, back=f"{self.stem('overview')}.html")
         self.files += write_figure(
-            data, self.out, figure_stem, title=title, data_releases=self.releases
+            data, self.out, figure_stem, title=text.title, data_releases=self.releases, text=text
         )
-        self.blocks.append(figure_block(data, figure_stem))
+        return figure_block(data, figure_stem, text)
 
 
 def _fit_metrics(fits: Mapping[str, Fit]) -> list[tuple[str, float, str]]:
@@ -684,18 +706,48 @@ def _fit_metrics(fits: Mapping[str, Fit]) -> list[tuple[str, float, str]]:
     metrics = []
     for name, result in fits.items():
         _, flat, low = p_histogram(result)
-        tested = float(result.results["padj"].is_not_null().sum())
+        r = result.results
+        # The rules on the model's false positives and power read padj alone: a fold-change
+        # filter would flatter both, so lfc_min 0 counts every significant gene.
+        any_fold = classify(pl.col("padj"), pl.col("log2FoldChange"), lfc_min=0.0)
         metrics += [
             (f"phist.{name}.low", float(low), f"p < {ALPHA}"),
             (f"phist.{name}.flat", flat, f"mean count per bin over [{FLAT_FROM}, 1]"),
-            (
-                f"calls.{name}.called",
-                float((result.results["call"] != "ns").sum()),
-                f"padj < {ALPHA}",
-            ),
-            (f"calls.{name}.tested", tested, "padj present"),
-        ]
+            (f"calls.{name}.significant", float(r.select(any_fold != "ns").sum().item()),
+             f"padj < {ALPHA}, any fold change"),
+            (f"calls.{name}.up", float((r["call"] == "up").sum()),
+             f"padj < {ALPHA} and raw LFC >= {LFC_MIN}"),
+            (f"calls.{name}.down", float((r["call"] == "down").sum()),
+             f"padj < {ALPHA} and raw LFC <= -{LFC_MIN}"),
+            (f"calls.{name}.tested", float(n_tested(r)), "genes with an adjusted p"),
+        ]  # fmt: skip
     return metrics
+
+
+def _lessons(
+    writer: Writer, spec: Dataset, fits: Mapping[str, Fit], genes: pl.DataFrame
+) -> tuple[list[Result], list[tuple[str, float, str]]]:
+    """One group per lesson and one for the scatters no lesson holds; rho as metrics.
+
+    A lesson shows its call counts, then the fold-change scatters of its own contrasts.
+    """
+    assert spec.de is not None  # noqa: S101 - run() refuses a dataset file without [de]
+    groups: list[Result] = []
+    metrics: list[tuple[str, float, str]] = []
+    placed: dict[tuple[str, str], FigureBlock] = {}
+    for x, y in spec.de.scatters:
+        scatter, rho = _lfc_scatter(fits[x], fits[y], genes)
+        metrics.append((f"spearman.{x}.{y}", rho, "raw LFC, genes tested in both"))
+        placed[(x, y)] = writer.figure(scatter, f"lfc_{x}_vs_{y}", lfc_text(x, y, rho))
+    for title, names in spec.de.lessons.items():
+        slug = re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_")
+        items = [writer.figure(_calls(title, names, fits), f"calls_{slug}",
+                               calls_text(title, names, fits))]  # fmt: skip
+        items += [placed.pop(pair) for pair in list(placed) if set(pair) <= set(names)]
+        groups.append(Group(f"Lesson: {title}", tuple(items)))
+    if placed:
+        groups.append(Group("Across contrasts", tuple(placed.values())))
+    return groups, metrics
 
 
 def _figures(
@@ -704,35 +756,83 @@ def _figures(
     fits: Mapping[str, Fit],
     data: tuple[pl.DataFrame, pl.DataFrame, pl.DataFrame],
     threads: int,
-) -> list[tuple[str, float, str]]:
-    """Every M5 figure, in page order; returns the metrics they measured."""
+) -> tuple[list[Result], list[tuple[str, float, str]]]:
+    """Every M5 figure, grouped as the page shows them; and the metrics they measured."""
     sheet, counts, genes = data
     assert spec.de is not None  # noqa: S101 - run() refuses a dataset file without [de]
+    groups: list[Result] = []
     metrics = []
+    pcas = []
     for pca_spec in spec.de.pca:
-        scatter, found = _pca_figure(pca_spec, sheet, counts, threads)
+        scatter, found, text = _pca_figure(pca_spec, sheet, counts, threads)
         metrics += found
-        writer.figure(scatter, f"pca_{pca_spec.name}", f"M5 PCA {pca_spec.name}")
+        pcas.append(writer.figure(scatter, f"pca_{pca_spec.name}", text))
+    if pcas:
+        groups.append(Group("Samples", tuple(pcas), lead="Do samples group by biology, or by "
+                            "how they were processed?", tabs=len(pcas) > 1))  # fmt: skip
     featured = fits[spec.de.featured]
-    name = featured.contrast.name
-    writer.figure(_volcano(featured, genes), f"volcano_{name}", "M5 volcano")
-    writer.figure(_ma(featured, genes), f"ma_{name}", "M5 MA plot")
-    writer.figure(p_histogram(featured)[0], f"phist_{name}", "M5 p-value histogram")
-    writer.figure(_dispersion(featured), f"dispersion_{name}", "M5 dispersion")
-    for title, names in spec.de.lessons.items():
-        slug = re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_")
-        writer.figure(_calls(title, names, fits), f"calls_{slug}", f"M5 {title}")
-    for x, y in spec.de.scatters:
-        scatter, rho = _lfc_scatter(fits[x], fits[y], genes)
-        metrics.append((f"spearman.{x}.{y}", rho, "raw LFC, genes tested in both"))
-        writer.figure(scatter, f"lfc_{x}_vs_{y}", f"M5 {x} against {y}")
+    c, name = featured.contrast, featured.contrast.name
+    groups.append(Group(
+        f"Featured contrast: {name}",
+        (writer.figure(_volcano(featured, genes), f"volcano_{name}", volcano_text(c)),
+         writer.figure(_ma(featured, genes), f"ma_{name}", ma_text(c))),
+        lead="Which genes changed, and by how much?", tabs=True,
+    ))  # fmt: skip
+    phist, flat, low = p_histogram(featured)
+    with_p = featured.results["pvalue"].drop_nulls().len()
+    groups.append(Group(
+        "Model health",
+        (writer.figure(phist, f"phist_{name}", phist_text(
+            name, with_p, low, flat, int(phist.frame["genes"][0]), 1 / P_BINS)),
+         writer.figure(_dispersion(featured), f"dispersion_{name}", dispersion_text(name))),
+        lead="Check these before trusting any call.", tabs=True,
+    ))  # fmt: skip
+    lessons, found = _lessons(writer, spec, fits, genes)
+    groups += lessons
+    metrics += found
     if spec.de.box_contrast:
         box, missing = _box(fits[spec.de.box_contrast], counts, genes, spec.de.box_genes)
+        named: list[FigureBlock | str] = []
         if box is not None:
-            writer.figure(box, f"box_{spec.de.box_contrast}", "M5 named genes")
+            n_genes = len(spec.de.box_genes) - len(missing)
+            named.append(
+                writer.figure(
+                    box,
+                    f"box_{spec.de.box_contrast}",
+                    box_text(fits[spec.de.box_contrast].contrast, n_genes),
+                )
+            )
         if missing:
-            writer.blocks.append(f"Named genes not in the annotation: {', '.join(missing)}.")
-    return metrics + _fit_metrics(fits)
+            named.append(f"Named genes not in the annotation: {', '.join(missing)}.")
+        groups.append(Group("Named genes", tuple(named)))
+    return groups, metrics + _fit_metrics(fits)
+
+
+def _contrasts_table(fits: Mapping[str, Fit]) -> ResultTable:
+    """The contrasts, as the page shows them; the CSV beside it holds every column."""
+    rows = []
+    for name, f in fits.items():
+        c, r = f.contrast, f.results
+        rows.append((
+            name, f"{c.tested} vs {c.reference}", c.design,
+            f"{c.expected_n[1]} vs {c.expected_n[0]}", f"{n_tested(r):,}",
+            f"{(r['call'] == 'up').sum():,}", f"{(r['call'] == 'down').sum():,}",
+        ))  # fmt: skip
+    columns = ("Contrast", "Compares", "Design", "n", "Tested", "Up", "Down")
+    return ResultTable("Contrasts; tested means with an adjusted p", columns, tuple(rows),
+                       numeric=(4, 5, 6))  # fmt: skip
+
+
+def _keys(sheet: pl.DataFrame, fits: Mapping[str, Fit], featured: str) -> tuple[KeyNumber, ...]:
+    """Samples, contrasts, and the featured contrast's tested and called genes."""
+    r = fits[featured].results
+    up, down = int((r["call"] == "up").sum()), int((r["call"] == "down").sum())
+    return (
+        KeyNumber("Samples", f"{sheet['sample'].n_unique():,}", "in the sample sheet"),
+        KeyNumber("Contrasts", f"{len(fits)}"),
+        KeyNumber("Genes tested", f"{n_tested(r):,}", f"in {featured}"),
+        KeyNumber("Genes called", f"{up + down:,}", f"{up:,} up, {down:,} down in {featured}"),
+    )
 
 
 def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long sequence
@@ -779,23 +879,18 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     writer = Writer(
         settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}", dataset, day, releases
     )
-    writer.blocks.append(
-        f"Inputs: {', '.join(p.name for p in inputs.values())} (newest gather outputs). "
-        f"{len(fits)} contrasts fitted with DESeq2 (pydeseq2), BH at padj < {ALPHA}; the "
-        "contrasts table gives each design, n, dropped runs and calls."
-    )
     rows = [_contrast_row(f, sheet.columns) for f in fits.values()]
     writer.table(pl.DataFrame(rows), "contrasts", CONTRAST_COLUMNS)
     for name, result in fits.items():
         frame = result.results.join(genes, on="gene_id", how="left")
         writer.table(frame, f"{name}_results", {**RESULT_COLUMNS, "gene_name": GENE_NAME})
-    metrics = _figures(writer, spec, fits, (sheet, counts, genes), settings.threads)
+    groups, metrics = _figures(writer, spec, fits, (sheet, counts, genes), settings.threads)
     sexes, found = sex_check(sheet, counts, genes)
     if sexes is not None:
         writer.table(sexes, "sex_check", SEX_COLUMNS)
     frame = pl.DataFrame(metrics + found, schema=["metric", "value", "detail"], orient="row")
     writer.table(frame, "metrics", METRIC_COLUMNS)
-    out, files, blocks = writer.out, writer.files, writer.blocks
+    out, files = writer.out, writer.files
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     bound = usage.peak_rss_self + settings.threads * usage.peak_rss_children
@@ -804,10 +899,12 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,
-        results=tuple(blocks),
+        results=(_contrasts_table(fits), *groups),
         practice=PRACTICE,
-        think=THINK,
+        think=think(spec, fits),
         mistakes=MISTAKES,
+        key_numbers=_keys(sheet, fits, spec.de.featured),
+        terms=TERMS,
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,
@@ -819,6 +916,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
                 f"self + {settings.threads} x largest child = {bound:,} bytes"
             ),
             versions=runtime.versions(),
+            inputs=tuple(f"{p.name} (newest gather output)" for p in inputs.values()),
         ),
     )
     return [write(page, out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html"), *files]

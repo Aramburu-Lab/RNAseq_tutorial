@@ -1,0 +1,207 @@
+{% include "_calls.js.j2" %}
+{% raw %}
+/* One script for every page kind. Each block runs inside its own guard, so a failure in one
+   is logged and never stops the others; every feature degrades to a readable page without
+   JavaScript. */
+(function () {
+  "use strict";
+  function guard(name, block) {
+    try { block(); } catch (e) { if (window.console) console.error("ctx page: " + name, e); }
+  }
+  var root = document.documentElement;
+  var templates = JSON.parse(document.getElementById("ctx-templates").textContent);
+  var toggle = document.getElementById("ctx-theme-toggle");
+  function plots(scope) { return (scope || document).querySelectorAll(".js-plotly-plot"); }
+  function retheme(theme) {
+    if (!window.Plotly) return;
+    plots().forEach(function (d) { Plotly.relayout(d, { template: templates[theme] }); });
+  }
+
+  guard("theme", function () {
+    function apply(theme, redraw) {
+      root.setAttribute("data-theme", theme);
+      toggle.setAttribute("aria-pressed", theme === "black" ? "true" : "false");
+      if (redraw) retheme(theme);
+    }
+    toggle.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "black" ? "white" : "black";
+      try { localStorage.setItem("ctx-theme", next); } catch (e) {}
+      apply(next, true);
+    });
+    /* Figures are drawn with the light template baked in; only a dark start needs a relayout. */
+    var start = root.getAttribute("data-theme");
+    apply(start, start === "black");
+    /* Paper is white: print with the light figures, then restore the reader's theme. */
+    window.addEventListener("beforeprint", function () { retheme("white"); });
+    window.addEventListener("afterprint", function () { retheme(root.getAttribute("data-theme")); });
+  });
+
+  /* Tabs: every panel drew visible at full width; hide the inactive ones only now, and resize
+     a panel's plot when it is shown, so plotly never lays out a hidden div. */
+  document.querySelectorAll("[role=tablist]").forEach(function (list) {
+    guard("tabs", function () {
+      var tabs = Array.prototype.slice.call(list.querySelectorAll("[role=tab]"));
+      function show(tab) {
+        tabs.forEach(function (t) {
+          var on = t === tab, panel = document.getElementById(t.getAttribute("aria-controls"));
+          t.setAttribute("aria-selected", on ? "true" : "false");
+          t.tabIndex = on ? 0 : -1;
+          if (!panel) return;
+          panel.hidden = !on;
+          if (on && window.Plotly) plots(panel).forEach(function (d) { Plotly.Plots.resize(d); });
+        });
+      }
+      tabs.forEach(function (tab, i) {
+        tab.addEventListener("click", function () { show(tab); });
+        tab.addEventListener("keydown", function (e) {
+          var step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+          if (!step) return;
+          e.preventDefault();
+          var next = tabs[(i + step + tabs.length) % tabs.length];
+          show(next); next.focus();
+        });
+      });
+      show(tabs[0]);
+    });
+  });
+
+  /* The clipboard API is refused on some file:// pages; selecting the text lets the reader
+     copy it by hand. */
+  document.querySelectorAll("button[data-copy]").forEach(function (button) {
+    guard("copy", function () {
+      var code = document.getElementById(button.getAttribute("data-copy"));
+      function select() {
+        var range = document.createRange(); range.selectNodeContents(code);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        button.textContent = "Selected: press Ctrl+C or Cmd+C";
+      }
+      button.addEventListener("click", function () {
+        if (!navigator.clipboard || !window.isSecureContext) { select(); return; }
+        navigator.clipboard.writeText(code.textContent).then(function () {
+          button.textContent = "Copied";
+          setTimeout(function () { button.textContent = "Copy"; }, 1500);
+        }, select);
+      });
+    });
+  });
+
+  /* Mark the section being read: the last shown entry whose target is above the top third of
+     the window. Sub-entries hidden on a narrow screen are skipped, so a shown one is marked. */
+  guard("contents", function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+    if (!links.length) return;
+    var queued = false;
+    function mark() {
+      queued = false;
+      var line = window.innerHeight / 3, current = null;
+      links.forEach(function (a) {
+        var target = document.getElementById(a.hash.slice(1));
+        if (a.getClientRects().length && target && target.getBoundingClientRect().top <= line) {
+          current = a;
+        }
+      });
+      links.forEach(function (a) {
+        if (a === current) a.setAttribute("aria-current", "location");
+        else a.removeAttribute("aria-current");
+      });
+    }
+    window.addEventListener("scroll", function () {
+      if (!queued) { queued = true; window.requestAnimationFrame(mark); }
+    }, { passive: true });
+    window.addEventListener("resize", mark);
+    mark();
+  });
+
+  /* Live calling: ctxCalls holds the rule; this block reads the controls, redraws the points
+     and the cutoffs, and fills the page's own sentence templates with the same numbers the
+     Python side fills them with. */
+  document.querySelectorAll("form.calls").forEach(function (form) {
+    guard("calls", function () { liveCalls(form); });
+  });
+
+  function liveCalls(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    var div = fig.querySelector(".js-plotly-plot");
+    var reading = fig.querySelectorAll("[data-reading]");
+    var summary = fig.querySelector(".calls-summary");
+    var fc = form.elements.fc, unit = form.elements.fc_unit;
+    var basis = form.elements.basis, cutoff = form.elements.cutoff;
+    function height(p) { return -Math.log10(Math.max(p, cfg.p_floor)); }
+    /* The cutoff lines span the whole plot, thinned points included, as drawn on load. */
+    var span = div.data[cfg.cutoff_lines[0]].y, across = div.data[cfg.cutoff_lines[2]].x;
+    var ytop = span[1], xmin = across[0], xmax = across[1];
+    /* A unit switch shows the threshold rounded, but keeps applying the exact value until the
+       reader types a new one. */
+    var exact = null, shown = null, unitNow = unit.value;
+    function threshold() {
+      if (exact !== null && fc.value === shown) return exact;
+      /* The unit a typed number was applied in, read now: a browser restoring the form on
+         back-navigation sets the unit without a change event. */
+      exact = null; unitNow = unit.value;
+      return ctxCalls.threshold(fc.value, unit.value);
+    }
+    function fmt(n, digits) { return n.toFixed(digits); }
+    function count(n) { return n.toLocaleString("en-US"); }
+    function fill(text, values) {
+      return text.replace(/\{(\w+)\}/g, function (all, key) {
+        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : all;
+      });
+    }
+    /* A line the reader hid through the legend stays hidden. */
+    function shownAs(index, on) {
+      if (div.data[index].visible === "legendonly") return "legendonly";
+      return on;
+    }
+    function update(settle) {
+      var t = threshold(), alpha = ctxCalls.cutoff(cutoff.value, cfg), column = basis.value;
+      if (settle && String(alpha) !== cutoff.value) cutoff.value = String(alpha);
+      var found = ctxCalls.call(rows, cfg, t, column, alpha), parts = found.parts;
+      var restyled = { x: [], y: [], customdata: [] }, traces = [];
+      ["up", "down", "ns"].forEach(function (k) {
+        traces.push(cfg.traces[cfg.levels[k]]);
+        restyled.x.push(parts[k].map(function (r) { return r[cfg.lfc]; }));
+        restyled.y.push(parts[k].map(function (r) { return height(r[cfg.p]); }));
+        restyled.customdata.push(parts[k].map(function (r) {
+          return cfg.hover.map(function (h) { return r[h]; });
+        }));
+      });
+      var yline = found.line === null ? null : height(found.line), lines = cfg.cutoff_lines;
+      Plotly.restyle(div, restyled, traces);
+      Plotly.restyle(div, {
+        x: [[t, t], [-t, -t], [Math.min(xmin, -t), Math.max(xmax, t)]],
+        y: [[0, ytop], [0, ytop], yline === null ? [null, null] : [yline, yline]],
+        visible: [shownAs(lines[0], true), shownAs(lines[1], true),
+                  yline === null ? false : shownAs(lines[2], true)]
+      }, lines);
+      var values = {
+        n_tested: count(cfg.n_tested), tested: cfg.tested, reference: cfg.reference,
+        fc: fmt(t, 2), fold_up: fmt(Math.pow(2, t), 2), fold_down: fmt(Math.pow(2, -t), 2),
+        pct_up: fmt(100 * (Math.pow(2, t) - 1), 1), pct_down: fmt(100 * (1 - Math.pow(2, -t)), 1),
+        basis: cfg.bases[column], cutoff: String(alpha),
+        y_line: yline === null ? "" : fmt(yline, 2),
+        n_up: count(parts.up.length), n_down: count(parts.down.length)
+      };
+      values.line_rule = fill(yline === null ? cfg.no_line_rule : cfg.line_rule, values);
+      reading.forEach(function (li) {
+        li.textContent = fill(cfg.reading[Number(li.getAttribute("data-reading"))], values);
+      });
+      if (summary) summary.textContent = fill(cfg.summary, values);
+    }
+    unit.addEventListener("change", function () {
+      var t = exact !== null && fc.value === shown ? exact : ctxCalls.threshold(fc.value, unitNow);
+      shown = unit.value === "pct" ? fmt(100 * (Math.pow(2, t) - 1), 1) : fmt(t, 2);
+      fc.value = shown; exact = t; unitNow = unit.value;
+      update(true);
+    });
+    form.addEventListener("input", function (e) { if (e.target !== unit) update(false); });
+    form.addEventListener("change", function (e) { if (e.target !== unit) update(true); });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    form.addEventListener("reset", function () {
+      setTimeout(function () { exact = null; unitNow = unit.value; update(true); }, 0);
+    });
+    update(false);
+  }
+})();
+{% endraw %}

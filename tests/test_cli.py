@@ -351,7 +351,15 @@ def test_de_end_to_end(de_run):
         .select("metric", "value")
         .rows()
     )
-    assert metrics["calls.a_null.called"] == 0
+    assert metrics["calls.a_null.significant"] == 0
+    # R3 and R7 read significance at any fold change: recounted here from the table, and
+    # told apart from the page's calls, which also need the fold change.
+    significant = int((results["padj"] < 0.05).sum())
+    up, down = int((results["call"] == "up").sum()), int((results["call"] == "down").sum())
+    assert metrics["calls.a_case.significant"] == significant
+    assert (metrics["calls.a_case.up"], metrics["calls.a_case.down"]) == (up, down)
+    assert significant != up + down
+    assert metrics["calls.a_case.tested"] == results["padj"].is_not_null().sum()
     assert metrics["sex.disagree"] == 0 and metrics["sex.compared"] == 33
     wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', html).group(1))
     assert 0 < wall < BUDGETS["B"].minutes * 60

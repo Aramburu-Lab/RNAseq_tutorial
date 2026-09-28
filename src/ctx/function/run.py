@@ -8,6 +8,7 @@ down calls separately against the genes DESeq2 tested.
 import hashlib
 import re
 from collections.abc import Mapping
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
@@ -15,12 +16,38 @@ import numpy as np
 import polars as pl
 
 from ctx import runtime
-from ctx.dataset import DatasetError, load
+from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
 from ctx.de.stats import ALPHA
 from ctx.function import lite
+from ctx.function.page import (
+    CALLS,
+    CONCEPT,
+    MISTAKES,
+    PRACTICE,
+    QUESTION,
+    TERMS,
+    fdr_words,
+    gsea_text,
+    nes_text,
+    ora_text,
+    running_text,
+    think,
+    trap_text,
+)
 from ctx.io.naming import MODULES, stem
-from ctx.report.builder import ModulePage, ParameterCard, Reproduction, SelfCheck, write
+from ctx.report.builder import (
+    FigureBlock,
+    Group,
+    KeyNumber,
+    ModulePage,
+    ParameterCard,
+    Reproduction,
+    Result,
+    ResultTable,
+    SelfCheck,
+    write,
+)
 from ctx.viz.bar import BarData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import ROLES, category_colours
@@ -45,35 +72,6 @@ ORA_COLUMNS = {
     "fdr": ("dimensionless", "BH over the sets tested."),
     "genes": ("none", "The calls in the set; ; separated."),
 }
-QUESTION = "Which pathways move together, beyond single genes?"
-CONCEPT = (
-    "Over-representation asks whether a pathway holds more of the called genes than chance, "
-    "counted against the genes that could have been called. GSEA needs no cutoff: it walks "
-    "down all genes ranked by the Wald statistic and asks whether a pathway's genes gather "
-    "at one end."
-)
-PRACTICE = (
-    "Use the tested genes as the background, rank by a signed statistic, and read the NES "
-    "with its FDR. A pathway can move with no single gene significant, and one strong gene "
-    "does not make a pathway."
-)
-THINK = (
-    SelfCheck(
-        "Why does the gene-set union background make the same hits look more significant?",
-        "It adds genes that could never have been called, such as ones not expressed in the "
-        "cells, so the expected overlap shrinks and ordinary overlaps look rare.",
-    ),
-    SelfCheck(
-        "Why rank by the Wald statistic rather than by the fold change?",
-        "The statistic weighs the change by its certainty; a large fold change on few "
-        "counts would otherwise sit at the top.",
-    ),
-)
-MISTAKES = (
-    "Using the whole genome, or every gene in the gene sets, as the ORA background.",
-    "Reading a GSEA p-value of 1/1001 as exact: it is limited by the permutations.",
-    "Mixing gene IDs and symbols: duplicated symbols must be collapsed first.",
-)
 
 
 def _ranking(results: pl.DataFrame) -> tuple[list[str], np.ndarray]:
@@ -184,9 +182,8 @@ def _ora_bars(name: str, frame: pl.DataFrame, background: int) -> BarData:
         series="direction",
         colours={"up": ROLES["comparison"], "down": ROLES["reference"]},
         caption=(
-            f"{name}: hypergeometric ORA of the up and the down calls (padj < {ALPHA}), "
-            f"BH per direction, against {background:,} tested genes; the dashed line is "
-            f"FDR = {ALPHA}."
+            f"{name}: hypergeometric ORA of the up and the down calls ({CALLS}), BH per "
+            f"direction, against {background:,} tested genes; the dashed line is FDR = {ALPHA}."
         ),
         horizontal=True,
         hline=(-float(np.log10(ALPHA)), f"FDR {ALPHA}"),
@@ -243,8 +240,9 @@ def _running(name: str, result: lite.Enriched) -> ScatterData:
     }
     caption = (
         f"{result.name} in {name}: ES = {result.es:.2f}, NES = {result.nes:.2f}, nominal "
-        f"p = {result.p:.2g}, FDR = {result.fdr:.2g}; {result.size} members of "
-        f"{len(ranks):,} ranked genes."
+        f"p = {result.p:.2g}, FDR = {fdr_words(result.fdr)}; {result.size} members of "
+        f"{len(ranks):,} ranked genes; {lite.PERMUTATIONS} gene-set permutations, seed "
+        f"{lite.SEED}."
     )
     return ScatterData(
         frame=frame,
@@ -255,13 +253,16 @@ def _running(name: str, result: lite.Enriched) -> ScatterData:
         y_label="Enrichment score",
         colour="mark",
         colours={"set member": ROLES["comparison"]},
+        names={"set member": "set member"},
         caption=caption,
         lines=(Line("running score", ranks, result.running),),
         width="double",
     )
 
 
-def _trap(name: str, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]) -> BarData:
+def _trap(
+    name: str, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]
+) -> tuple[BarData, int, int]:
     """The same up calls tested against the tested genes and against the gene-set union."""
     tested = _symbols(results)
     union = sorted({g for genes in sets.values() for g in genes} | set(tested))
@@ -280,7 +281,7 @@ def _trap(name: str, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]])
         "background": ("none", "ORA background."),
         "neg_log10_p": ("-log10 p", "Hypergeometric p of the up calls."),
     }
-    return BarData(
+    data = BarData(
         frame=frame,
         columns=columns,
         category="gene_set",
@@ -290,14 +291,95 @@ def _trap(name: str, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]])
         series="background",
         colours=category_colours(["tested genes", "gene-set union"]),
         caption=(
-            f"{name}: the same {len(hits)} up calls against {len(tested):,} tested genes "
-            f"and against {len(union):,} genes, every gene in the sets plus the tested "
-            "ones (gseapy's default when no background is given). The larger background "
-            "makes every overlap look rarer."
+            f"{name}: the same {len(hits)} up calls, hypergeometric p against {len(tested):,} "
+            f"tested genes and against {len(union):,} genes, every gene in the sets plus the "
+            "tested ones (gseapy's default when no background is given)."
         ),
         horizontal=True,
         width="double",
     )
+    return data, len(tested), len(union)
+
+
+@dataclass(frozen=True)
+class _Enrichment:
+    """What one run computed, for the page: results, gene sets, GSEA tables and hits."""
+
+    results: Mapping[str, pl.DataFrame]
+    sets: Mapping[str, tuple[str, ...]]
+    gsea: Mapping[str, pl.DataFrame]
+    enriched: Mapping[str, Mapping[str, lite.Enriched]]
+    gmt: Path
+
+
+def _page(
+    writer: Writer, spec: Dataset, e: _Enrichment
+) -> tuple[list[Result], tuple[KeyNumber, ...], tuple[SelfCheck, ...]]:
+    """Every M6 figure, grouped as the page shows them, and the key numbers."""
+    assert spec.de is not None and spec.function is not None  # noqa: S101 - run() checked
+    fn = spec.function
+    featured = spec.de.featured
+    contrasts = {c.name: c for c in spec.contrasts}
+    background = _symbols(e.results[featured])
+    ora = _ora(e.results[featured], e.sets, background)
+    passing = ora.filter(pl.col("fdr") < ALPHA)["gene_set"].n_unique()
+    gsea = e.gsea[featured]
+    first = Group(
+        f"Featured contrast: {featured}",
+        (
+            writer.figure(
+                _ora_bars(featured, ora, len(background)), f"ora_{featured}",
+                ora_text(contrasts[featured], len(background), passing),
+            ),
+            writer.figure(
+                _gsea_bars(featured, gsea), f"gsea_{featured}",
+                gsea_text(contrasts[featured], int((gsea["fdr"] < ALPHA).sum()), gsea.height),
+            ),
+        ),
+        tabs=True,
+    )  # fmt: skip
+    one_set: list[FigureBlock | str] = []
+    tested = [n for n, table in e.gsea.items() if fn.featured_set in set(table["gene_set"])]
+    if tested:
+        featured_bars = _featured_bars(fn.featured_set, e.gsea)
+        one_set.append(writer.figure(featured_bars, f"nes_{_slug(fn.featured_set)}",
+                                     nes_text(fn.featured_set, len(tested))))  # fmt: skip
+    else:
+        one_set.append(
+            f"{fn.featured_set} was tested in no contrast: after the cut to the ranked genes its "
+            f"size is outside {lite.MIN_SIZE} to {lite.MAX_SIZE}, or it is not in {e.gmt.name}."
+        )
+    contrast, gene_set = fn.running
+    if gene_set in e.enriched[contrast]:
+        hit = e.enriched[contrast][gene_set]
+        one_set.append(writer.figure(
+            _running(contrast, hit), f"running_{contrast}",
+            running_text(contrasts[contrast], hit, len(hit.running)),
+        ))  # fmt: skip
+    else:
+        one_set.append(f"No running score: {gene_set} was not tested in {contrast}.")
+    trap, n_tested, n_union = _trap(featured, e.results[featured], e.sets)
+    wide = trap.frame.pivot(on="background", index="gene_set", values="neg_log10_p")
+    more = int((wide["gene-set union"] > wide["tested genes"]).sum())
+    page_results: list[Result] = [
+        ResultTable("Gene sets", ("File", "Sets", "Licence"), ((e.gmt.name, f"{len(e.sets):,}",
+                                                               fn.licence),), numeric=(1,)),
+        first,
+        Group(f"One gene set: {fn.featured_set}", tuple(one_set)),
+        Group("Method: the background", (writer.figure(
+            trap, f"background_{featured}", trap_text(n_tested, n_union, more, wide.height)),)),
+    ]  # fmt: skip
+    keys: tuple[KeyNumber, ...] = (
+        KeyNumber("Gene sets", f"{len(e.sets):,}", e.gmt.name),
+        KeyNumber("Contrasts", f"{len(e.results)}"),
+        KeyNumber(f"Sets at FDR < {ALPHA}", f"{int((gsea['fdr'] < ALPHA).sum())}",
+                  f"GSEA, {featured}"),
+    )  # fmt: skip
+    shown = e.enriched[featured].get(fn.featured_set)
+    if shown:
+        keys += (KeyNumber(f"NES, {_short(fn.featured_set)}", f"{shown.nes:.2f}",
+                           f"FDR {fdr_words(shown.fdr)}, {featured}"),)  # fmt: skip
+    return page_results, keys, think(n_tested, n_union)
 
 
 def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named option or context
@@ -345,7 +427,6 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     writer = Writer(
         settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}", dataset, day, releases
     )
-    writer.blocks.append(f"Gene sets: {gmt.name}, {len(sets)} sets. {fn.licence}")
     gsea_tables, metrics, enriched = {}, [], {}
     for name, frame in results.items():
         found = _gsea(frame, sets)
@@ -369,34 +450,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
             if hit
             else [(f"gsea.{name}.{fn.featured_set}.nes", float("nan"), f"{where}: not tested")]
         )
-    featured = spec.de.featured
-    writer.figure(
-        _ora_bars(
-            featured,
-            _ora(results[featured], sets, _symbols(results[featured])),
-            len(_symbols(results[featured])),
-        ),
-        f"ora_{featured}",
-        "M6 ORA",
-    )
-    writer.figure(_gsea_bars(featured, gsea_tables[featured]), f"gsea_{featured}", "M6 GSEA")
-    tested = [n for n, table in gsea_tables.items() if fn.featured_set in set(table["gene_set"])]
-    if tested:
-        featured_bars = _featured_bars(fn.featured_set, gsea_tables)
-        writer.figure(featured_bars, f"nes_{_slug(fn.featured_set)}", "M6 one set, every contrast")
-    else:
-        writer.blocks.append(
-            f"{fn.featured_set} was tested in no contrast: after the cut to the ranked genes its "
-            f"size is outside {lite.MIN_SIZE} to {lite.MAX_SIZE}, or it is not in {gmt.name}."
-        )
-    contrast, gene_set = fn.running
-    if gene_set in enriched[contrast]:
-        running = _running(contrast, enriched[contrast][gene_set])
-        writer.figure(running, f"running_{contrast}", "M6 running score")
-    else:
-        writer.blocks.append(f"No running score: {gene_set} was not tested in {contrast}.")
-    writer.figure(
-        _trap(featured, results[featured], sets), f"background_{featured}", "M6 background trap"
+    page_results, keys, checks = _page(
+        writer, spec, _Enrichment(results, sets, gsea_tables, enriched, gmt)
     )
     writer.table(
         pl.DataFrame(metrics, schema=["metric", "value", "detail"], orient="row"),
@@ -414,10 +469,12 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,
-        results=tuple(writer.blocks),
+        results=tuple(page_results),
         practice=PRACTICE,
-        think=THINK,
+        think=checks,
         mistakes=MISTAKES,
+        key_numbers=keys,
+        terms=TERMS,
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,
@@ -432,6 +489,11 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         write(page, writer.out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html"),
         *writer.files,
     ]
+
+
+def _short(name: str) -> str:
+    """A gene set name as a label, without the collection prefix."""
+    return re.sub(r"^HALLMARK_", "", name).replace("_", " ").lower()
 
 
 def _slug(name: str) -> str:

@@ -3,6 +3,7 @@
 import json
 import re
 from datetime import date
+from html import unescape
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -20,9 +21,13 @@ from ctx.report.builder import (
     SECTIONS,
     FigureBlock,
     FigurePage,
+    FigureText,
+    Group,
+    KeyNumber,
     ModulePage,
     ParameterCard,
     Reproduction,
+    ResultTable,
     SelfCheck,
     render,
     write,
@@ -54,13 +59,19 @@ def figure(request, tmp_path_factory):
 
 
 def _tokens(data) -> list[str]:
+    """What the caption must state; the renderers wrap it at different widths."""
     if not isinstance(data, BoxData):
-        # Every word of the caption; the renderers wrap it at different widths.
         return data.caption.split()
     c = data.caption
     ns = {f"n = {t.n_reference} {c.groups[0]}, {t.n_comparison} {c.groups[1]}" for t in c.tests}
-    labels = [line for t in c.tests for line in c.label(t.feature).split("\n")]
-    return [TEST_NAME, f"BH-adjusted over {len(c.tests)} plotted features", *ns, *labels]
+    return [TEST_NAME, f"BH-adjusted over {len(c.tests)} plotted features", *ns]
+
+
+def _labels(data) -> list[str]:
+    """The per-feature p and r a box figure prints over its boxes, in every rendering."""
+    if not isinstance(data, BoxData):
+        return []
+    return [line for t in data.caption.tests for line in data.caption.label(t.feature).split("\n")]
 
 
 def _plotly_script(html: str) -> str:
@@ -72,6 +83,11 @@ def _plotly_script(html: str) -> str:
     return decoded.replace("<br>", " ")
 
 
+def _refuse(constant: str) -> None:
+    """JSON.parse in a browser rejects NaN and Infinity; so does this test."""
+    raise ValueError(f"{constant} is not JSON")
+
+
 def test_round_trip(figure):
     out, figure_stem, data, html = figure
     assert sorted(p.name for p in out.iterdir()) == sorted(figure_files(figure_stem))
@@ -79,9 +95,20 @@ def test_round_trip(figure):
 
     pdf = " ".join(PdfReader(out / f"{figure_stem}_white.pdf").pages[0].extract_text().split())
     svg = " ".join(re.sub(r"<[^>]+>", " ", (out / f"{figure_stem}_black.svg").read_text()).split())
-    for name, text in {"pdf": pdf, "svg": svg, "plotly": _plotly_script(html)}.items():
-        missing = [t for t in _tokens(data) if t not in text]
+    # The page prints the statistics once, under the plot (D-011); the plot carries none.
+    (caption,) = re.findall(r"<figcaption>(.*?)</figcaption>", html, re.S)
+    page = " ".join(unescape(caption).split())
+    wanted = {
+        "pdf": (pdf, _tokens(data) + _labels(data)),
+        "svg": (svg, _tokens(data) + _labels(data)),
+        "page caption": (page, _tokens(data)),
+        "plot": (_plotly_script(html), _labels(data)),
+    }
+    for name, (text, tokens) in wanted.items():
+        missing = [t for t in tokens if t not in text]
         assert not missing, (name, missing)
+    shown = [a.text or "" for a in data.interactive().layout.annotations]
+    assert not [a for a in shown if data.caption_text()[:40] in a], "caption drawn in the plot"
 
     csv = pl.read_csv(out / f"{figure_stem}.csv")
     assert csv.height == data.table().height
@@ -90,7 +117,11 @@ def test_round_trip(figure):
         assert rows["p_adj"].unique().to_list() == pytest.approx([t.p_adj])
         assert rows["r"].unique().to_list() == pytest.approx([t.r])
     (embedded,) = re.findall(r'id="ctx-data-0">(.*?)</script>', html, re.S)
-    assert_frame_equal(pl.DataFrame(json.loads(embedded)), csv, check_dtypes=False)
+    rows = pl.DataFrame(json.loads(embedded, parse_constant=_refuse))  # as a browser parses it
+    # The page embeds every drawn point, with the columns it calls and names points by.
+    columns = list(data.page_table().columns)
+    assert rows.columns == columns
+    assert_frame_equal(rows, csv.select(columns).fill_nan(None), check_dtypes=False)
     for column in data.hover:
         assert f"{column}: %{{customdata" in _plotly_script(html)
 
@@ -195,3 +226,68 @@ def test_quiz_hidden():
     answers = re.findall(r"<details><summary>Answer</summary><p>(.*?)</p></details>", html)
     assert len(answers) == len(page.think) >= 1
     assert answers == [check.answer for check in page.think]
+
+
+# --- page structure: navigation, tabs, building blocks, copy ------------------------------
+
+
+def _figure_block(title: str) -> FigureBlock:
+    return FigureBlock(go.Figure(), "caption", [], "d.csv", text=FigureText(title=title))
+
+
+def test_nav_and_tabs_resolve():
+    group = Group("Views", (_figure_block("A"), _figure_block("B")), tabs=True)
+    html = render(_module(results=("A note.", group, _figure_block("C"))))
+    ids = set(re.findall(r'\bid="([^"]+)"', html))
+    anchors = re.findall(r'href="#([^"]+)"', html)
+    assert anchors and set(anchors) <= ids
+    for attribute in ("aria-controls", "aria-labelledby"):
+        values = re.findall(rf'{attribute}="([^"]+)"', html)
+        assert values and set(values) <= ids, attribute
+    # Figures are numbered across groups, in page order.
+    assert re.findall(r'<p class="fig-num">Figure (\d+)</p>', html) == ["1", "2", "3"]
+
+
+def test_building_blocks_refuse_bad_input():
+    with pytest.raises(ValueError, match="empty"):
+        Group("Nothing", ())
+    with pytest.raises(ValueError, match="tabs"):
+        Group("One view", (_figure_block("A"),), tabs=True)
+    with pytest.raises(ValueError, match="columns"):
+        ResultTable("Wide", tuple("abcdefghi"), ())
+    with pytest.raises(ValueError, match="wrong length"):
+        ResultTable("Ragged", ("a", "b"), (("1",),))
+    with pytest.raises(ValueError, match="swatch"):
+        ResultTable("Swatch", ("colour",), (("red",),), swatch=0)
+    with pytest.raises(ValueError, match="key numbers"):
+        _module(key_numbers=tuple(KeyNumber(str(i), "1") for i in range(5)))
+
+
+def test_templates_use_tokens_only():
+    # Colours and lengths come from ctx.viz.style; a literal in a template drifts from it.
+    literal = re.compile(r"#[0-9A-Fa-f]{6}\b|rgba?\(|\b\d+(?:\.\d+)?px\b")
+    for template in (ROOT / "src" / "ctx" / "report" / "templates").glob("*.j2"):
+        found = literal.findall(template.read_text())
+        assert not found, (template.name, found[:5])
+
+
+def test_copy_has_no_dashes_or_arrows():
+    # Pages are read by people: no em dash, no arrow, in any string that can reach one.
+    for path in (ROOT / "src" / "ctx").rglob("*"):
+        if path.suffix in {".py", ".j2"}:
+            text = path.read_text()
+            assert "—" not in text and "→" not in text, path
+
+
+def test_standalone_page_links_back():
+    block = FigureBlock(go.Figure(), "caption", [], "d.csv", text=FigureText(back="m.html"))
+    html = render(FigurePage("Alone", block))
+    assert 'href="m.html"' in html
+
+
+def test_hub_prints_counts_whole():
+    from ctx.report.hub import _measured  # noqa: PLC0415
+
+    assert _measured(10523.0) == "10,523"
+    assert _measured(0.0123456) == "0.01235"
+    assert _measured(float("nan")) == "not measured"

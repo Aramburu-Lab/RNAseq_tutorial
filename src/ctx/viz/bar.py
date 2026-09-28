@@ -11,7 +11,8 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption, plotly_caption
+from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.axes import axis_title
 from ctx.viz.style import (
     BAR_LABEL_ROTATION,
     BAR_MARGIN_MM,
@@ -19,7 +20,11 @@ from ctx.viz.style import (
     LINE_WIDTHS,
     MAX_CATEGORIES,
     MM_PER_INCH,
+    PLOTLY_BAR_BASE_PX,
+    PLOTLY_BAR_ROW_PX,
+    PLOTLY_HEIGHT_PX,
     THEMES,
+    THRESHOLD_DASH,
     Theme,
     apply_matplotlib,
     figure_inches,
@@ -50,6 +55,7 @@ class BarData:
         hline: (value, name) of a reference line across the value axis, or None.
         hover: Columns shown on hover, besides category, series and value.
         width: ``"single"`` or ``"double"`` column.
+        names: Legend text per series level, where the level itself is terse.
     """
 
     frame: pl.DataFrame
@@ -66,6 +72,7 @@ class BarData:
     hline: tuple[float, str] | None = None
     hover: tuple[str, ...] = ()
     width: str = "single"
+    names: Mapping[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -109,7 +116,11 @@ class BarData:
 
     def _value_title(self) -> str:
         """Value-axis title with the unit from the column dictionary."""
-        return f"{self.value_label} ({self.columns[self.value][0]})"
+        return axis_title(self.value_label, self.columns[self.value][0])
+
+    def _name(self, level: str) -> str:
+        """Legend text of a series level."""
+        return (self.names or {}).get(level, str(level))
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
@@ -150,13 +161,14 @@ class BarData:
             )  # fmt: skip
             base = base + values
         handles: list[Any] = [
-            Patch(color=self.colours[level] or theme.reference, label=str(level))
+            Patch(color=self.colours[level] or theme.reference, label=self._name(level))
             for level in present
         ]
         if self.hline:
             line = ax.axvline if self.horizontal else ax.axhline
-            line(self.hline[0], color=theme.ink, linestyle="--", linewidth=LINE_WIDTHS["line"])
-            handles.append(Line2D([], [], color=theme.ink, linestyle="--", label=self.hline[1]))
+            colour, dash = theme.reference, THRESHOLD_DASH[0]
+            line(self.hline[0], color=colour, linestyle=dash, linewidth=LINE_WIDTHS["line"])
+            handles.append(Line2D([], [], color=colour, linestyle=dash, label=self.hline[1]))
         ticks = (ax.set_yticks, ax.set_ylabel, ax.set_xlabel) if self.horizontal else (
             ax.set_xticks, ax.set_xlabel, ax.set_ylabel)  # fmt: skip
         shown = len(categories) <= MAX_TICK_LABELS
@@ -180,8 +192,11 @@ class BarData:
         import plotly.graph_objects as go  # noqa: PLC0415 - heavy; imported after the profile
 
         light = THEMES["white"]
+        # A count prints whole, a measurement to three significant digits.
+        digits = ":,d" if self.frame.schema[self.value].is_integer() else ":.3~g"
+        value = f"%{{{'x' if self.horizontal else 'y'}{digits}}}"
         hover = [f"{self.category_label}: %{{{'y' if self.horizontal else 'x'}}}"]
-        hover += [f"{self.value_label}: %{{{'x' if self.horizontal else 'y'}}}"]
+        hover += [f"{self._value_title()}: {value}"]
         hover += [f"{c}: %{{customdata[{i}]}}" for i, c in enumerate(self.hover)]
         fig = go.Figure()
         for level in self.colours:
@@ -192,30 +207,34 @@ class BarData:
             x, y = axes if self.horizontal else axes[::-1]
             fig.add_trace(
                 go.Bar(
-                    x=x, y=y, name=str(level), orientation="h" if self.horizontal else "v",
-                    marker_color=self.colours[level] or light.reference,
+                    x=x, y=y, name=self._name(level), orientation="h" if self.horizontal else "v",
+                    marker={"color": self.colours[level] or light.reference,
+                            "line": {"width": LINE_WIDTHS["marker_edge"]}},
                     customdata=rows.select(self.hover).rows(),
-                    hovertemplate="<br>".join([f"{self.series}: {level}", *hover])
+                    hovertemplate="<br>".join([f"{self.series}: {self._name(level)}", *hover])
                     + "<extra></extra>",
                 )
             )  # fmt: skip
         if self.hline:
             add = fig.add_vline if self.horizontal else fig.add_hline
-            add(self.hline[0], line_dash="dash", line_color=light.reference,
-                annotation_text=self.hline[1])  # fmt: skip
-        caption, bottom = plotly_caption(self.caption, figure_inches("double", "bar")[0])
-        category_axis = {"title": self.category_label, "categoryorder": "array",
-                         "categoryarray": [str(c) for c in self._categories()],
-                         "showticklabels": len(self._categories()) <= MAX_TICK_LABELS}  # fmt: skip
+            add(self.hline[0], line_dash=THRESHOLD_DASH[1], line_color=light.reference,
+                line_width=LINE_WIDTHS["line"], annotation_text=self.hline[1],
+                annotation_position="bottom right" if self.horizontal else "top right")  # fmt: skip
+        categories = [str(c) for c in self._categories()]
+        category_axis = {"title": {"text": self.category_label}, "categoryorder": "array",
+                         "categoryarray": categories,
+                         "showticklabels": len(categories) <= MAX_TICK_LABELS}  # fmt: skip
         if self.horizontal:
             category_axis["autorange"] = "reversed"
-        value_axis = {"title": self._value_title()}
+        value_axis = {"title": {"text": self._value_title()}}
+        rows_px = PLOTLY_BAR_BASE_PX + PLOTLY_BAR_ROW_PX * len(categories)
         fig.update_layout(
             template=plotly_templates()["white"],
+            height=max(PLOTLY_HEIGHT_PX["bar"], rows_px) if self.horizontal
+            else PLOTLY_HEIGHT_PX["bar"],
+            showlegend=len(fig.data) > 1,
             barmode="stack" if self.stacked else "group",
             xaxis=value_axis if self.horizontal else category_axis,
             yaxis=category_axis if self.horizontal else value_axis,
-            annotations=[caption],
-            margin={"b": bottom},
-        )
+        )  # fmt: skip
         return fig

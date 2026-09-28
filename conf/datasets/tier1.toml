@@ -260,10 +260,10 @@ conditions = [
 
 [[sanity.rules]]
 id = "R3"
-text = "A seeded split of healthy individuals calls at most 1 % of tested genes."
+text = "A seeded split of healthy individuals finds at most 1 % of tested genes at padj < 0.05."
 source = "negative control; seed 42, split stratified by recorded sex"
 conditions = [
-    { metric = "calls.ndn_null_split.called", op = "<=", other = "calls.ndn_null_split.tested", times = 0.01 },
+    { metric = "calls.ndn_null_split.significant", op = "<=", other = "calls.ndn_null_split.tested", times = 0.01 },
 ]
 
 [[sanity.rules]]
@@ -293,10 +293,10 @@ conditions = [{ metric = "permanova.ss_ndn.batch.p", op = "<", value = 0.05 }]
 
 [[sanity.rules]]
 id = "R7"
-text = "Pairing the G-CSF donors finds at least as many genes as ignoring the pairs."
+text = "Pairing the G-CSF donors finds at least as many genes at padj < 0.05 as ignoring the pairs."
 source = "TODO.md:364"
 conditions = [
-    { metric = "calls.ndn_gcsf_paired.called", op = ">=", other = "calls.ndn_gcsf_unpaired9.called" },
+    { metric = "calls.ndn_gcsf_paired.significant", op = ">=", other = "calls.ndn_gcsf_unpaired9.significant" },
 ]
 
 [[sanity.rules]]

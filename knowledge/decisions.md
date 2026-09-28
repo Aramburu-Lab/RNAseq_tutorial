@@ -27,6 +27,74 @@ it were reversed.
 
 ---
 
+## D-012 — A gene is called at padj < 0.05 and |log2 FC| at least 1; four adjustments on the page
+
+**Date:** 2026-09-28 · **Status:** decided
+
+**Context.** Rytis asked every figure to say in practice what it shows, with the thresholds, and the volcano to take the reader's own cutoffs. Until then a call was BH padj < 0.05 signed by the raw fold change, with no fold-change threshold, so the volcano had no x cutoff to name.
+
+**Options.**
+- Keep padj alone and say that the x cutoff is 0.
+- Filter the fold change after the Wald test.
+- Test against the threshold, as DESeq2's `lfcThreshold` does, which needs a Wald test per threshold.
+- Guide lines at plus or minus 1 without changing the call.
+
+**Decision.** These are Rytis's choices of 2026-09-28:
+- **Call rule.** Called means BH padj < 0.05 and |raw log2 FC| at least 1, the fold change filtered after the test. It is `ctx.de.stats.classify`, the one definition.
+- **Volcano controls.** The page volcano lets the reader choose:
+  - the fold-change threshold, in log2 or as a percent;
+  - the p basis: the BH, BY, Holm or Bonferroni adjusted p, or the raw p;
+  - the cutoff, from 0.0001 to 0.1.
+- **Adjustments.** They come from the same Wald p-values over the genes pydeseq2's BH kept, so no refit is needed. `deseq.py` stores `padj_by`, `padj_holm` and `padj_bonferroni`.
+- **Sanity rules.** R3 and R7 test the model's false positives and power, which a fold-change filter would flatter. They read `calls.<c>.significant`, padj < 0.05 at any fold change.
+
+**Evidence.**
+- **BH.** Our BH equals pydeseq2's `padj` exactly: the maximum difference is 0.0 on a fit with 1,071 tested genes, 527 independently filtered and 1 Cook's outlier. BH over all 1,598 p-values differs by up to 0.0933, so the tested set matters.
+- **Other methods.** All four methods equal statsmodels `multipletests` to 2.2e-16.
+- **Planted truth, old rule against new:**
+
+  | Measure | Old rule | New rule |
+  |---|---|---|
+  | planted calls / false calls | 107 / 7 | 101 / 1 |
+  | naive batch share | 0.980 | 0.890 |
+  | adjusted batch share | 0.010 | 0.000 |
+
+  All planted-truth tests pass unchanged.
+- **Mutation checks.** Four mutations of the rule and the adjustments each failed a test (`tests/test_stats.py`, 47 tests).
+- **Page.** On the synthetic M5 page, the live counts and the cutoff-line height equal a Python recount from the results parquet at 8 settings: all four methods, raw p, log2 and percent thresholds, and a fold-change threshold of 10 that no gene reaches. The branch for a cutoff no gene passes cannot be reached on this fixture, whose minimum cutoff of 0.0001 still passes genes, so it ran on a scratch copy of the page with every embedded p-value set to 0.5: the line hid, 0 up and 0 down, and the reading switched to its no-line sentence.
+
+**Consequence.**
+- **Changed counts.** Every "up" and "down" count, the ORA input and the call-count bars now need the fold change, so they differ from pages written before 2026-09-28.
+- **The height is not the call.** The volcano's height is the raw p-value. Its horizontal line sits at the largest raw p whose adjusted p passes, which is exact because each adjustment is monotone in p. The page says so.
+- **Percent thresholds.** A percent is asymmetric in log2: +20 % is log2 1.2 = 0.263, and the same threshold down is 16.7 %. The page shows both.
+- **Reversing it.** Going back would change the rule, the metrics names and the sanity rules. It would need a new registration (D-013).
+
+---
+
+## D-011 — The statistics caption sits under each interactive figure, not inside it
+
+**Date:** 2026-09-28 · **Status:** decided
+
+**Context.** Each interactive figure drew its caption as a plotly annotation and the page printed it again below. On the MA plot the annotation overlapped the x-axis title, measured in the browser on 2026-09-28, and the fixed-width annotation does not reflow on a phone.
+
+**Options.**
+- Keep the caption in the plot with its spacing fixed, so a PNG export keeps the statistics.
+- Print it once, below the plot, as page text.
+
+**Decision.** Printed once, below the plot. This is Rytis's choice of 2026-09-28.
+- The PDFs and SVGs keep their caption in the figure.
+- The plotly toolbar, and with it the PNG export, is off. That export would now carry no statistics, and over a phone-width plot the toolbar covered the legend.
+- CONVENTIONS.md:51 now says where the caption goes.
+
+**Evidence.** `test_round_trip` checks the caption tokens:
+- in the page's caption, the PDF and the SVG;
+- in none of the plot's annotations;
+- the box figure's per-gene p and r labels stay drawn in the plot.
+
+**Consequence.** Anyone who copies a plotly figure out of a page takes no statistics with it. The page's caption, the standalone figure page, the PDF and the SVG carry them; the CSV's README describes the columns, not the test.
+
+---
+
 ## D-006 — Raw reads enter only through nf-core/fetchngs 1.12.0; `ctx gather` is the only ctx reader of its layout (TODO.md D18)
 
 **Date:** 2026-09-26 · **Status:** decided

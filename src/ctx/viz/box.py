@@ -10,11 +10,13 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import Caption, compare_groups, fit_title, place_caption, plotly_caption
+from ctx.viz.annotate import Caption, compare_groups, fit_title, place_caption
+from ctx.viz.axes import axis_title
 from ctx.viz.style import (
     HEADROOM,
     LINE_WIDTHS,
     MARKER_SIZE,
+    PLOTLY_HEIGHT_PX,
     ROLES,
     SINGLE_COLUMN_MAX_FEATURES,
     SIZES,
@@ -178,7 +180,7 @@ def static(data: BoxData, theme: Theme) -> Any:
     low, high = ax.get_ylim()
     ax.set_ylim(top=high + (high - low) * HEADROOM)
     ax.set_xlabel(data.feature_label)
-    ax.set_ylabel(fit_title(f"{data.value_label} ({data.unit})", height))
+    ax.set_ylabel(fit_title(axis_title(data.value_label, data.unit), height))
     # Above the axes: inside, it collides with the p/r labels over the boxes.
     ax.legend(title=None, loc="lower left", bbox_to_anchor=(0, 1), ncols=2, borderaxespad=0)
     sns.despine(fig=fig)
@@ -227,7 +229,7 @@ def interactive(data: BoxData) -> Any:
                         f"{data.feature_label}: %{{x}}",
                         f"group: {group}",
                         *hover_lines,
-                        f"{data.value_label}: %{{y}} {data.unit}",
+                        f"{axis_title(data.value_label, data.unit)}: %{{y:.3~g}}",
                         f"n: %{{customdata[{k}]}}",
                         f"p_adj: %{{customdata[{k + 1}]:.2g}}",
                         f"r: %{{customdata[{k + 2}]:.2f}}",
@@ -247,13 +249,16 @@ def interactive(data: BoxData) -> Any:
         }
         for f in stats
     ]
-    caption, bottom = plotly_caption(data.caption.text(), figure_inches("double", "box")[0])
+    low, high = float(data.frame["value"].to_numpy().min()), top
+    span = (high - low) or 1.0
     fig.update_layout(
         template=plotly_templates()["white"],
+        height=PLOTLY_HEIGHT_PX["box"],
         boxmode="group",
         xaxis_title=data.feature_label,
-        yaxis_title=f"{data.value_label} ({data.unit})",
-        annotations=[*labels, caption],
-        margin={"b": bottom},
-    )
+        # Room above the tallest box for the p and r labels, as the static figure leaves.
+        yaxis={"title": {"text": axis_title(data.value_label, data.unit)},
+               "range": [low - 0.05 * span, high + HEADROOM * span]},
+        annotations=labels,
+    )  # fmt: skip
     return fig

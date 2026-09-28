@@ -1,0 +1,32 @@
+{% raw %}
+/* The page's call rule, apart from the page so tests/test_page_script.py runs it under node
+   against ctx.de.stats.classify. A gene is called when it was tested (it has a value in
+   cfg.gate) and the chosen p-value is below the cutoff; up at log2 FC >= t, down at <= -t. */
+var ctxCalls = {
+  /* The threshold in log2 from what the reader typed: a percent is 1 + v/100 times as high. */
+  threshold: function (value, unit) {
+    var v = Math.max(0, Number(value) || 0);
+    return unit === "pct" ? Math.log2(1 + v / 100) : v;
+  },
+  /* The cutoff actually applied: the default for an empty box, else clamped to the range the
+     box states, so the box and the rule never disagree. */
+  cutoff: function (value, cfg) {
+    var v = parseFloat(value);
+    if (!isFinite(v)) return cfg.alpha;
+    return Math.min(cfg.max_cutoff, Math.max(cfg.min_cutoff, v));
+  },
+  call: function (rows, cfg, t, column, alpha) {
+    var parts = { up: [], down: [], ns: [] }, line = null;
+    rows.forEach(function (r) {
+      var tested = r[cfg.gate] !== null && r[cfg.gate] !== undefined;
+      var q = r[column], level = "ns";
+      var called = tested && q !== null && q !== undefined && q < alpha;
+      if (called && r[cfg.lfc] >= t) level = "up";
+      else if (called && r[cfg.lfc] <= -t) level = "down";
+      if (called && (line === null || r[cfg.p] > line)) line = r[cfg.p];
+      parts[level].push(r);
+    });
+    return { parts: parts, line: line };
+  }
+};
+{% endraw %}

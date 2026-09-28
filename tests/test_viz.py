@@ -16,7 +16,6 @@ from pypdf import PdfReader
 from pypdf.generic import ContentStream
 from scipy.stats import mannwhitneyu
 from synth import (
-    VOLCANO_STEPS,
     counts,
     demo_bar,
     demo_bars_at_scale,
@@ -27,10 +26,12 @@ from synth import (
 
 from ctx.de.stats import classify
 from ctx.io.naming import stem
+from ctx.report.builder import FigureText
 from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
+from ctx.viz.axes import axis_title
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
-from ctx.viz.scatter import THIN_MAX, ScatterData
+from ctx.viz.scatter import THIN_MAX, Calls, ScatterData
 from ctx.viz.style import (
     DATA_COLOURS,
     FONT_CHAIN,
@@ -311,14 +312,28 @@ def static_caption(data) -> str:
     return data.caption.text() if isinstance(data, box.BoxData) else data.caption
 
 
-def axis_titles(data) -> list[str]:
-    """Axis titles the static figure must print, each with its unit."""
+def axis_titles(data) -> list[tuple[str, str]]:
+    """(label, unit) of every value axis the static figure must print."""
     if isinstance(data, box.BoxData):
-        return [f"{data.value_label} ({data.unit})"]
+        return [(data.value_label, data.unit)]
     if isinstance(data, ScatterData):
-        return [f"{data.x_label} ({data.columns[data.x][0]})",
-                f"{data.y_label} ({data.columns[data.y][0]})"]  # fmt: skip
-    return [f"{data.value_label} ({data.columns[data.value][0]})"]
+        return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
+    return [(data.value_label, data.columns[data.value][0])]
+
+
+def _unit_words(unit: str) -> list[str]:
+    """The words of a unit, singular, as a reader would look for them in a title."""
+    return [w.removesuffix("s") for w in re.findall(r"[a-z0-9]+", unit.lower()) if unit != "none"]
+
+
+def test_axis_title_rule():
+    # Literal cases, so the rule is pinned independently of the function under test.
+    assert axis_title("Genes called", "genes") == "Genes called"
+    assert axis_title("Samples", "samples") == "Samples"
+    assert axis_title("Reads", "million reads") == "Reads (million reads)"
+    assert axis_title("PC1", "VST units") == "PC1 (VST units)"
+    assert axis_title("Dispersion", "dimensionless") == "Dispersion (dimensionless)"
+    assert axis_title("Gene set", "none") == "Gene set"
 
 
 def column_width(data) -> str:
@@ -365,7 +380,11 @@ def test_static_files_measured(written):
         assert float(page.mediabox.width) == pytest.approx(width, abs=0.5)
         text = re.sub(r"\s+", " ", page.extract_text())
         assert caption in text
-        assert all(title in text for title in axis_titles(data)), axis_titles(data)
+        for label, unit in axis_titles(data):
+            # The printed title is the one rule's; every word of the unit must be on the page,
+            # in the title itself when the label does not already name it.
+            assert axis_title(label, unit) in text, (label, unit)
+            assert all(word in axis_title(label, unit).lower() for word in _unit_words(unit))
 
         svg = ElementTree.parse(out / f"{figure_stem}_{theme.name}.svg")
         families = {
@@ -443,38 +462,67 @@ def test_empty_bars_refused():
         dataclasses.replace(data, frame=data.frame.head(0))
 
 
-def test_volcano_steps_count_from_figure():
+def _live_volcano() -> ScatterData:
     frame = pl.DataFrame(
         {
-            "gene_id": [f"g{i}" for i in range(9)],
-            "lfc": [1.0, -1.0, 2.0, -2.0, 0.5, -0.5, 1.5, 3.0, -3.0],
-            "padj": [0.001, 0.001, 0.01, 0.05, 0.05, 0.1, 0.2, None, float("nan")],
+            "gene_id": [f"g{i}" for i in range(10)],
+            "lfc": [1.0, -1.0, 2.0, -2.0, 0.5, -0.5, 1.5, 3.0, -3.0, 0.999],
+            "p": [1e-4, 2e-4, 1e-3, 0.02, 0.01, 0.03, 0.2, 0.001, 0.5, 1e-5],
+            "padj": [0.001, 0.001, 0.01, 0.05, 0.04, 0.1, 0.2, None, float("nan"), 0.0001],
         }
-    ).with_columns(y=pl.col("lfc").abs())
-    for alpha in VOLCANO_STEPS:
-        frame = frame.with_columns(
-            classify(pl.col("padj"), pl.col("lfc"), alpha).alias(f"c{alpha}")
-        )
-    data = ScatterData(
-        frame=frame, columns={c: ("none", c) for c in frame.columns}, x="lfc", y="y",
-        x_label="LFC", y_label="y", colour="c0.05", colours={"up": "#D55E00", "down": "#0072B2",
-        "ns": None}, caption="c", hover=("gene_id",),
-        steps=tuple((f"{a}", f"c{a}") for a in VOLCANO_STEPS),
+    ).with_columns(y=-pl.col("p").log10(), call=classify(pl.col("padj"), pl.col("lfc")))
+    calls = Calls(
+        lfc="lfc", p="p", adjusted={"padj": "BH-adjusted p"}, raw_words="raw p", tested="case",
+        reference="control", alpha=0.05, lfc_min=1.0, max_cutoff=0.1, n_tested=7,
+        p_floor=1e-300, p_line=0.01, reading=("{n_up} up in {tested}; {line_rule}",),
+        summary="{n_up} up, {n_down} down", line_rule="line at {y_line}",
+        no_line_rule="no line",
     )  # fmt: skip
+    return ScatterData(
+        frame=frame, columns={c: ("none", c) for c in frame.columns}, x="lfc", y="y",
+        x_label="LFC", y_label="y", colour="call", colours={"up": "#D55E00", "down": "#0072B2",
+        "ns": None}, caption="c", hover=("gene_id",), calls=calls,
+    )  # fmt: skip
+
+
+def test_live_volcano_default_from_figure():
+    data = _live_volcano()
     fig = data.interactive()
-    names = [t.name for t in _marker_traces(fig)]
-    (slider,) = fig.layout.sliders
-    assert slider.active == VOLCANO_STEPS.index(0.05)
-    for alpha, step in zip(VOLCANO_STEPS, slider.steps, strict=True):
-        xs = dict(zip(names, step.args[0]["x"], strict=True))
-        # Written here, independently of classify: strictly below alpha, sign of the raw LFC.
-        rows = [
-            (p, fc)
-            for p, fc in frame.select("padj", "lfc").rows()
-            if p is not None and not math.isnan(p)
-        ]
-        assert len(xs["up"]) == sum(p < alpha and fc > 0 for p, fc in rows), alpha
-        assert len(xs["down"]) == sum(p < alpha and fc < 0 for p, fc in rows), alpha
+    controls = data.controls()
+    xs = {fig.data[i].name: fig.data[i].x for i in controls["traces"].values()}
+    # Written here, independently of classify: padj strictly below 0.05, |LFC| at least 1.
+    rows = [
+        (p, fc)
+        for p, fc in data.frame.select("padj", "lfc").rows()
+        if p is not None and not math.isnan(p)
+    ]
+    assert len(xs["up"]) == sum(p < 0.05 and fc >= 1 for p, fc in rows) == 2
+    assert len(xs["down"]) == sum(p < 0.05 and fc <= -1 for p, fc in rows) == 1
+    fc_up, fc_down, p_line = (fig.data[i] for i in controls["cutoff_lines"])
+    assert (fc_up.x, fc_down.x) == ((1.0, 1.0), (-1.0, -1.0))
+    assert p_line.y == pytest.approx((2.0, 2.0))  # -log10 of p_line = 0.01
+    assert data.reading() == ("2 up in case; line at 2.00",)
+    assert data.summary() == "2 up, 1 down"
+    assert list(data.page_table().columns) == ["gene_id", "lfc", "p", "padj"]
+
+
+def test_live_volcano_refuses_what_the_page_cannot_redraw():
+    data = _live_volcano()
+    frame = data.frame.with_columns(shape=pl.lit("a"))
+    with pytest.raises(ValueError, match="symbol"):
+        dataclasses.replace(data, frame=frame, symbol="shape")
+    with pytest.raises(ValueError, match="reading"):
+        figure_block(data, "x", FigureText(reading=("A line the page would overwrite.",)))
+
+
+def test_live_volcano_no_line_when_nothing_passes():
+    data = _live_volcano()
+    calls = dataclasses.replace(data.calls, p_line=None)
+    data = dataclasses.replace(data, calls=calls)
+    fig = data.interactive()
+    p_line = fig.data[data.controls()["cutoff_lines"][2]]
+    assert p_line.visible is False
+    assert data.reading() == ("2 up in case; no line",)
 
 
 def test_classify():
@@ -521,8 +569,11 @@ def test_permanova_null_and_planted():
 
 def test_permanova_strata():
     coords, labels = _clusters()
-    # Labels constant within each stratum: no permutation can move them, so p = 1.
-    assert permanova(coords, labels, strata=labels).p == 1.0
+    # Labels constant within each stratum: no permutation can move them, so there is no
+    # p-value, and the caption says so rather than printing p = 1 as if it were a result.
+    frozen = permanova(coords, labels, strata=labels)
+    assert math.isnan(frozen.p) and frozen.r2 > 0
+    assert "no p-value" in frozen.text("group") and "p = 1" not in frozen.text("group")
     paired = [f"s{i % 10}" for i in range(20)]
     assert permanova(coords, labels, strata=paired).p < 0.05
 

@@ -1,33 +1,57 @@
 """Render self-contained HTML pages: plotly.js inlined once, no external request, light/dark.
 
-Two page kinds share one base template, so there is one theme toggle: a figure page (the
-figure, its caption and its data) and a module report with the eight sections of the report
-skeleton (CONVENTIONS.md, HTML reports).
+Three page kinds share one base template, so there is one theme toggle and one look: a figure
+page (one figure with its reading guide, caption and data), a module report with the eight
+sections of the report skeleton (CONVENTIONS.md, HTML reports), and the course hub.
 """
 
 import json
-from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, fields
+import math
+import re
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 from markupsafe import Markup
 
-from ctx.viz.style import THEMES, css_variables, plotly_templates
+from ctx.io.naming import figure_files
+from ctx.viz.style import (
+    NARROW_PX,
+    RAIL_FROM_PX,
+    THEMES,
+    css_layout,
+    css_variables,
+    plotly_templates,
+)
 
 MAX_BYTES = 15 * 10**6
 # The report skeleton, in the order CONVENTIONS.md fixes; ids are the section anchors.
 SECTIONS = (
-    ("question", "The big question"),
-    ("concept", "The concept in plain English"),
+    ("question", "The question"),
+    ("concept", "The idea"),
     ("parameters", "Parameters"),
     ("results", "Results"),
-    ("practice", "What it means in practice"),
-    ("think", "Think about it"),
+    ("practice", "In practice"),
+    ("think", "Check yourself"),
     ("mistakes", "Common mistakes"),
     ("reproduce", "Reproduce this page"),
 )
+MAX_TABLE_COLUMNS = 8  # CONVENTIONS.md, HTML reports
+MAX_KEY_NUMBERS = 4
+# The packages a reader asks about first; the full list sits behind a disclosure.
+KEY_PACKAGES = ("python", "ctx", "polars", "numpy", "scipy", "pydeseq2", "plotly", "matplotlib")
+PLOTLY_CONFIG = {
+    "displaylogo": False,
+    "responsive": True,
+    # No toolbar: over a phone-width plot it covers the legend, and drag-to-zoom and
+    # double-click-to-reset work without it. A PNG export would carry no statistics anyway:
+    # the caption sits beside the plot, not in it.
+    "displayModeBar": False,
+}
+HEX = re.compile(r"#[0-9A-Fa-f]{6}")
+TITLE = re.compile(r"(?:M(?P<n>\d+)[a-z]? )?(?P<headline>[^:]+?)(?:: (?P<dataset>.+))?")
 
 
 @dataclass(frozen=True)
@@ -49,13 +73,92 @@ class SelfCheck:
 
 
 @dataclass(frozen=True)
+class FigureText:
+    """The words around a figure on a page, each filled from the run's own numbers.
+
+    Attributes:
+        title: What the figure shows, naming the contrast or subset.
+        lead: One line: the finding, or what to look for.
+        reading: "How to read this": what a mark is and the rule that colours it.
+        tab: Tab label inside a tabbed group; the title when empty.
+        back: File name of the module page, linked from the standalone figure page.
+    """
+
+    title: str = ""
+    lead: str = ""
+    reading: tuple[str, ...] = ()
+    tab: str = ""
+    back: str = ""
+
+
+@dataclass(frozen=True)
 class FigureBlock:
-    """A plotly figure with its caption, its data rows and the name of its CSV."""
+    """A plotly figure with its caption, its data rows and the name of its CSV.
+
+    Attributes:
+        figure: The plotly Figure.
+        caption: The statistics caption, printed once, under the plot.
+        rows: The rows the page draws, embedded for the reader and the page script.
+        data_file: The CSV beside the page.
+        text: Title, lead and reading guide.
+        stem: The figure's file stem, which names its PDF, SVG and README; empty for none.
+        controls: Settings for the page script's live calling, or None.
+    """
 
     figure: Any
     caption: str
     rows: Sequence[Mapping[str, Any]]
     data_file: str
+    text: FigureText = FigureText()
+    stem: str = ""
+    controls: Mapping[str, Any] | None = None
+
+
+@dataclass(frozen=True)
+class ResultTable:
+    """A small table of results; at most ``MAX_TABLE_COLUMNS`` columns, cells as text."""
+
+    title: str
+    columns: tuple[str, ...]
+    rows: tuple[tuple[str, ...], ...]
+    numeric: tuple[int, ...] = ()
+    swatch: int | None = None
+
+    def __post_init__(self) -> None:
+        """Refuse a table the page could only print wrongly."""
+        if len(self.columns) > MAX_TABLE_COLUMNS:
+            raise ValueError(f"{self.title}: {len(self.columns)} columns; at most 8")
+        if ragged := [r for r in self.rows if len(r) != len(self.columns)]:
+            raise ValueError(f"{self.title}: rows of the wrong length: {ragged[:2]}")
+        if self.swatch is not None and not all(HEX.fullmatch(r[self.swatch]) for r in self.rows):
+            raise ValueError(f"{self.title}: a swatch cell is not #RRGGBB")
+
+
+@dataclass(frozen=True)
+class Group:
+    """Results that answer one question, under one heading; tabs for alternative views."""
+
+    title: str
+    items: tuple["FigureBlock | ResultTable | str", ...]
+    lead: str = ""
+    tabs: bool = False
+
+    def __post_init__(self) -> None:
+        """Refuse an empty group, and tabs over anything but two or more figures."""
+        if not self.items:
+            raise ValueError(f"group {self.title!r} is empty")
+        figures = all(isinstance(i, FigureBlock) for i in self.items)
+        if self.tabs and not (figures and len(self.items) > 1):
+            raise ValueError(f"group {self.title!r}: tabs need two or more figures only")
+
+
+@dataclass(frozen=True)
+class KeyNumber:
+    """One number that summarises the run, computed in it."""
+
+    label: str
+    value: str
+    detail: str = ""
 
 
 @dataclass(frozen=True)
@@ -69,6 +172,7 @@ class Reproduction:
     profile: str
     budget: str
     versions: Mapping[str, str]
+    inputs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -90,6 +194,16 @@ class HubLink:
 
 
 @dataclass(frozen=True)
+class HubRule:
+    """One sanity rule: its verdict, and each condition with the value it measured."""
+
+    rule: str
+    text: str
+    verdict: str
+    conditions: tuple[tuple[str, str, str], ...]
+
+
+@dataclass(frozen=True)
 class HubPage:
     """The course hub: one link per module page of one dataset."""
 
@@ -98,7 +212,11 @@ class HubPage:
     parameters: tuple[ParameterCard, ...]
     links: tuple[HubLink, ...]
     missing: tuple[str, ...]
-    verdicts: tuple[tuple[str, str, str], ...] = ()
+    rules: tuple[HubRule, ...] = ()
+    key_numbers: tuple[KeyNumber, ...] = ()
+
+
+Result = Group | FigureBlock | ResultTable | str
 
 
 @dataclass(frozen=True)
@@ -109,16 +227,24 @@ class ModulePage:
     question: str
     concept: str
     parameters: tuple[ParameterCard, ...]
-    results: tuple[FigureBlock | str, ...]
+    results: tuple[Result, ...]
     practice: str
     think: tuple[SelfCheck, ...]
     mistakes: tuple[str, ...]
     reproduce: Reproduction
+    key_numbers: tuple[KeyNumber, ...] = ()
+    terms: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self) -> None:
-        """Refuse a page with an empty section; the skeleton is the teaching contract."""
-        if empty := [f.name for f in fields(self) if not getattr(self, f.name)]:
+        """Refuse a page with an empty section; the skeleton is the teaching contract.
+
+        Key numbers and terms are optional: a page may have nothing to summarise.
+        """
+        required = ("title", *(section for section, _ in SECTIONS))
+        if empty := [name for name in required if not getattr(self, name)]:
             raise ValueError(f"empty report sections: {empty}")
+        if len(self.key_numbers) > MAX_KEY_NUMBERS:
+            raise ValueError(f"{len(self.key_numbers)} key numbers; at most {MAX_KEY_NUMBERS}")
 
 
 _ENV = Environment(
@@ -130,35 +256,125 @@ _ENV = Environment(
 
 
 def _json_for_script(value: Any) -> Markup:
-    """JSON safe inside a ``<script>`` element: every ``<`` is escaped as a unicode escape."""
-    return Markup(json.dumps(value, default=str).replace("<", "\\u003c"))
+    """JSON safe inside a ``<script>`` element: every ``<`` is escaped as a unicode escape.
+
+    ``allow_nan=False``: a browser's JSON.parse rejects NaN and Infinity, which Python writes
+    by default; rows go through ``_finite`` first.
+    """
+    return Markup(json.dumps(value, default=str, allow_nan=False).replace("<", "\\u003c"))
+
+
+def _finite(row: Mapping[str, Any]) -> dict[str, Any]:
+    """A row with every NaN or infinite number as null, which is what they mean on a page."""
+    return {k: None if isinstance(v, float) and not math.isfinite(v) else v for k, v in row.items()}
 
 
 def _figure_html(block: FigureBlock, index: int) -> Markup:
     """The plotly div and its drawing script, without plotly.js itself."""
     html = block.figure.to_html(
-        include_plotlyjs=False, full_html=False, div_id=f"ctx-figure-{index}",
-        config={"displaylogo": False, "responsive": True},
-    )  # fmt: skip
+        include_plotlyjs=False, full_html=False, div_id=f"ctx-figure-{index}", config=PLOTLY_CONFIG
+    )
     return Markup(html)
 
 
-def _prepare(block: FigureBlock, index: int) -> dict[str, Any]:
+def _files(block: FigureBlock) -> list[tuple[str, str, str]]:
+    """(label, theme or "", file name) of every file a reader may open beside the figure."""
+    if not block.stem:
+        return [("Data (CSV)", "", block.data_file)]
+    names = figure_files(block.stem)
+    rendered = [
+        (ext.upper(), theme, name)
+        for name in names
+        for theme in THEMES
+        for ext in ("pdf", "svg")
+        if name == f"{block.stem}_{theme}.{ext}"
+    ]
+    return [
+        ("Data (CSV)", "", block.data_file),
+        ("Column meanings", "", f"{block.stem}_README.md"),
+        *rendered,
+    ]
+
+
+def _prepare(block: FigureBlock, index: int, number: int, level: int) -> dict[str, Any]:
     """Everything the figure macro prints for one figure."""
     return {
         "html": _figure_html(block, index),
         "caption": block.caption,
-        "rows": _json_for_script(list(block.rows)),
+        "rows": _json_for_script([_finite(r) for r in block.rows]),
         "data_file": block.data_file,
         "index": index,
+        "number": number,
+        "level": level,
+        "text": block.text,
+        "title": block.text.title,
+        "tab": block.text.tab or block.text.title or f"Figure {number}",
+        "page": f"{block.stem}.html" if block.stem else "",
+        "files": _files(block),
+        "controls": _json_for_script(block.controls) if block.controls else None,
+        "defaults": _defaults(block.controls) if block.controls else None,
     }
+
+
+def _defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
+    """What the controls show before the reader moves them: the page's default rule."""
+    return {
+        "fc": f"{controls['lfc_min']:g}",
+        "bases": list(controls["bases"].items()),
+        "alpha": f"{controls['alpha']:g}",
+        "max_cutoff": f"{controls['max_cutoff']:g}",
+        "min_cutoff": f"{controls['min_cutoff']:g}",
+        "presets": controls["presets"],
+        "summary": controls["default_summary"],
+    }
+
+
+def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:
+    """Results ready for the template, the contents entries of the groups, and any figure.
+
+    Figures are numbered in page order across groups; each group gets an anchor.
+    """
+    out: list[tuple[str, Any]] = []
+    outline: list[tuple[str, str]] = []
+    counter = 0
+
+    def one(item: FigureBlock | ResultTable | str, level: int) -> tuple[str, Any]:
+        """One item, prepared."""
+        nonlocal counter
+        if isinstance(item, FigureBlock):
+            counter += 1
+            return "figure", _prepare(item, counter - 1, counter, level)
+        return ("table", item) if isinstance(item, ResultTable) else ("text", item)
+
+    for item in items:
+        if isinstance(item, Group):
+            anchor = f"group-{len(outline) + 1}"
+            outline.append((anchor, item.title))
+            prepared = [one(i, 4) for i in item.items]
+            out.append(("group", {"anchor": anchor, "group": item, "items": prepared}))
+        else:
+            out.append(one(item, 3))
+    return out, outline, counter > 0
+
+
+def _heading(page: FigurePage | ModulePage | HubPage) -> dict[str, str]:
+    """Kicker, headline and dataset, parsed from the page title."""
+    if isinstance(page, FigurePage):
+        return {"kicker": "Figure", "headline": page.title, "dataset": ""}
+    match = TITLE.fullmatch(page.title)
+    assert match is not None  # noqa: S101 - the pattern accepts any title
+    if isinstance(page, HubPage):
+        kicker = "Cancer Transcriptomics Teaching Suite"
+    else:
+        kicker = f"Module {match['n']}" if match["n"] is not None else "Module"
+    return {"kicker": kicker, "headline": match["headline"], "dataset": match["dataset"] or ""}
 
 
 def render(page: FigurePage | ModulePage | HubPage) -> str:
     """Render a page to one self-contained HTML string.
 
     Args:
-        page: A figure page or a module report.
+        page: A figure page, a module report or the hub.
 
     Returns:
         The HTML.
@@ -168,25 +384,31 @@ def render(page: FigurePage | ModulePage | HubPage) -> str:
     context: dict[str, Any] = {
         "page": page,
         "sections": SECTIONS,
+        "heading": _heading(page),
         # Our own constants, and CSS inside <style> must not be HTML-escaped.
-        "css": {name: Markup(css_variables(theme)) for name, theme in THEMES.items()},
+        "css": {
+            **{name: Markup(css_variables(theme)) for name, theme in THEMES.items()},
+            "layout": Markup(css_layout()),
+        },
+        "layout": {"rail_from": RAIL_FROM_PX, "narrow": NARROW_PX},
         "templates": _json_for_script(plotly_templates()),
         "plotly_js": Markup(plotly.offline.get_plotlyjs()),
     }
-    draws = isinstance(page, FigurePage) or (
-        isinstance(page, ModulePage) and any(isinstance(r, FigureBlock) for r in page.results)
-    )
-    if not draws:
-        context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing
     if isinstance(page, HubPage):
+        context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing
         return _ENV.get_template("hub.html.j2").render(**context)
     if isinstance(page, FigurePage):
-        context["figure"] = _prepare(page.figure, 0)
+        context["figure"] = _prepare(page.figure, 0, 1, 3)
         return _ENV.get_template("figure.html.j2").render(**context)
-    context["results"] = [
-        ("figure", _prepare(item, i)) if isinstance(item, FigureBlock) else ("text", item)
-        for i, item in enumerate(page.results)
-    ]
+    results, outline, draws = _walk(page.results)
+    if not draws:
+        context["plotly_js"] = ""
+    versions = page.reproduce.versions
+    context |= {
+        "results": results,
+        "outline": outline,
+        "key_versions": [(n, versions[n]) for n in KEY_PACKAGES if n in versions],
+    }
     return _ENV.get_template("module.html.j2").render(**context)
 
 

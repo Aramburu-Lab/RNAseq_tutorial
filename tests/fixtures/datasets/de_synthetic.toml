@@ -92,10 +92,10 @@ running = ["a_case", "UP_SET"]
 
 [[sanity.rules]]
 id = "S1"
-text = "The null split calls at most 1 % of tested genes."
+text = "The null split finds at most 1 % of tested genes at padj < 0.05."
 source = "synthetic, the R3 shape"
 conditions = [
-    { metric = "calls.a_null.called", op = "<=", other = "calls.a_null.tested", times = 0.01 },
+    { metric = "calls.a_null.significant", op = "<=", other = "calls.a_null.tested", times = 0.01 },
 ]
 
 [[sanity.rules]]

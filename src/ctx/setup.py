@@ -22,20 +22,34 @@ from ctx import runtime
 from ctx.dataset import Resource, load
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
-from ctx.report.builder import ModulePage, ParameterCard, Reproduction, SelfCheck, write
+from ctx.report.builder import (
+    KeyNumber,
+    ModulePage,
+    ParameterCard,
+    Reproduction,
+    ResultTable,
+    SelfCheck,
+    write,
+)
 from ctx.viz.style import DATA_COLOURS, FONT_CHAIN, PROJECTOR_UNSAFE, THEMES, contrast
 
 MODULE = "setup"
+# WCAG 2.1 success criterion 1.4.11: non-text contrast for graphics.
+GRAPHICS_CONTRAST = 3.0
 QUESTION = "Is this computer ready for the course, and what will a run cost it?"
 CONCEPT = (
-    "An analysis is only reproducible if you can say exactly which software ran it and on what. "
-    "This page records the versions every later module relies on, how many threads and how "
-    "much memory a run may use (the profile), and how long this run took and how much memory "
-    "it peaked at. Every later report carries the same reproduction block."
+    "An analysis is reproducible only if you can say which software ran it, on what machine, "
+    "and at what cost. This page records the versions every later module relies on, the "
+    "threads and memory a run may use, and what this run took."
+)
+TERMS = (
+    ("Profile", "laptop or hpc: it sets the threads and memory a run may use, never results."),
+    ("Peak RSS", "The most memory a process held at once."),
+    ("Child process", "A tool this run started; its memory is measured on its own."),
 )
 PRACTICE = (
     "Keep this page with your results. When a number changes between two runs, compare the "
-    "versions tables first: a changed library is the commonest reason."
+    "package versions first: a changed library is the commonest reason."
 )
 THINK = (
     SelfCheck(
@@ -52,7 +66,7 @@ THINK = (
 MISTAKES = (
     "Comparing timings measured under different profiles: hpc and laptop use different "
     "thread counts.",
-    "Reading a version from memory instead of from this table.",
+    "Quoting a version from memory: read it from this page, which recorded what ran.",
 )
 VERSION_COLUMNS = {
     "package": ("none", "Python distribution imported by this run, or python/ctx."),
@@ -81,29 +95,62 @@ def _resolved_font() -> str:
     return "none of the chain; matplotlib's default"
 
 
-def _facts(settings: runtime.Settings) -> tuple[str, ...]:
-    """The measured state of this machine and run, one sentence each."""
+def _keys(settings: runtime.Settings) -> tuple[KeyNumber, ...]:
+    """The four numbers a reader checks first, measured now."""
+    memory = _memory_bytes()
+    return (
+        KeyNumber("CPU cores", f"{os.cpu_count()}", "reported by the OS"),
+        KeyNumber("Memory", f"{memory / 2**30:.1f} GiB" if memory else "not reported"),
+        KeyNumber("Threads", f"{settings.threads}", f"{settings.profile} profile"),
+        KeyNumber("Python", platform.python_version()),
+    )
+
+
+def _colour_use(colour: str, ratio: float) -> str:
+    """What a data colour's contrast on white allows, against WCAG's 3:1 for graphics."""
+    if colour in PROJECTOR_UNSAFE:
+        return "not for text, thin lines or projection"
+    if ratio >= GRAPHICS_CONTRAST:
+        return "meets 3:1 for graphics"
+    return "below 3:1: marks need size, or a second cue such as shape"
+
+
+def _facts(settings: runtime.Settings) -> tuple[ResultTable, ...]:
+    """The measured state of this machine and run, as tables."""
     numpy.zeros(1)  # loads BLAS, so its thread pool can be read
     blas = [p["num_threads"] for p in threadpoolctl.threadpool_info() if p["user_api"] == "blas"]
-    memory = _memory_bytes()
-    budget = runtime.budget(MODULE)
-    contrasts = ", ".join(
-        f"{c} {contrast(c, THEMES['white'].background):.2f}:1"
-        + (" (not for projection)" if c in PROJECTOR_UNSAFE else "")
-        for c in DATA_COLOURS
+    machine = ResultTable(
+        "This machine",
+        ("Check", "Result"),
+        (
+            ("System", f"{platform.system()} {platform.release()}, {platform.machine()}"),
+            ("Thread pools", f"polars thread pool: {pl.thread_pool_size()}; "
+                             f"BLAS thread pools: {blas}"),
+            ("Output root", runtime.shown_path(settings.root)),
+            ("Figure font", f"{_resolved_font()}, first found of {', '.join(FONT_CHAIN)}"),
+        ),
+    )  # fmt: skip
+    ratios = {c: contrast(c, THEMES["white"].background) for c in DATA_COLOURS}
+    colours = ResultTable(
+        "Data colours",
+        ("Colour", "Contrast on white", "What the ratio means"),
+        tuple((c, f"{r:.2f}:1", _colour_use(c, r)) for c, r in ratios.items()),
+        numeric=(1,),
+        swatch=0,
     )
-    return (
-        f"System: {platform.system()} {platform.release()}, {platform.machine()}; "
-        f"Python {platform.python_version()}.",
-        f"CPU cores reported: {os.cpu_count()}; physical memory: "
-        + (f"{memory / 2**30:.1f} GiB." if memory else "not reported by this OS."),
-        f"Profile: {settings.profile}; threads allowed: {settings.threads}; polars thread pool: "
-        f"{pl.thread_pool_size()}; BLAS thread pools: {blas}.",
-        f"Output root: {settings.root}.",
-        f"Budget for this module: Track B, under {budget.minutes} min and {budget.ram_gb} GB.",
-        f"Figure font in use: {_resolved_font()} (chain: {', '.join(FONT_CHAIN)}).",
-        f"Contrast of each data colour against white: {contrasts}.",
+    return machine, colours
+
+
+def _resources(fetched: list[dict[str, Any]]) -> tuple[ResultTable, ...]:
+    """What setup fetched, each file with its checksum; nothing when it fetched nothing."""
+    if not fetched:
+        return ()
+    rows = tuple(
+        (e["name"], f"{e['bytes']:,}", f"sha256 {e['sha256']}", e["url"], e["retrieved"])
+        for e in fetched
     )
+    columns = ("Resource", "Bytes", "Checksum", "Source", "Retrieved")
+    return (ResultTable(f"Resources, recorded in {MANIFEST}", columns, rows, numeric=(1,)),)
 
 
 MANIFEST = Path("resources") / "manifest.json"
@@ -223,16 +270,12 @@ def run(
     files = write_table(
         table, out, stem(MODULE, "versions", 1, day=day), columns=VERSION_COLUMNS, data_releases={}
     )
-    facts = _facts(settings) + tuple(
-        f"Resource {e['name']}: {e['bytes']:,} bytes, sha256 {e['sha256']}, from {e['url']} "
-        f"({e['retrieved']}); recorded in {MANIFEST}."
-        for e in fetched
-    )
+    facts = _facts(settings) + _resources(fetched)
     # Measured before the page is rendered: the page cannot contain its own rendering time.
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
-        title="M0 Setup: this machine and this environment",
+        title="M0 Setup",
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,
@@ -240,6 +283,8 @@ def run(
         practice=PRACTICE,
         think=THINK,
         mistakes=MISTAKES,
+        key_numbers=_keys(settings),
+        terms=TERMS,
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,

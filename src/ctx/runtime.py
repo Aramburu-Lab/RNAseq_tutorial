@@ -7,9 +7,10 @@ Slurm allocation and never guesses. The command syntax is the same under both.
 import os
 import platform
 import resource
+import shlex
 import subprocess
 import sys
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from importlib import metadata
 from pathlib import Path
@@ -171,6 +172,31 @@ def measure(started: float) -> Usage:
         peak_rss_self=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * scale,
         peak_rss_children=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * scale,
     )
+
+
+def shown_path(path: str | Path) -> str:
+    """A path as a page shows it: ``~/...`` under the home directory, else unchanged.
+
+    Pages are shared, and a home path would publish the user name.
+    """
+    try:
+        rest = Path(path).relative_to(Path.home()).as_posix()
+    except ValueError:
+        return str(path)
+    return "~" if rest == "." else f"~/{rest}"
+
+
+def retypable(argv: Sequence[str]) -> str:
+    """The command as a reader should retype it, home paths shown as ``~/``.
+
+    The part after ``~/`` is quoted on its own, so the shell still expands the tilde.
+    """
+    parts = []
+    for arg in argv:
+        shown = shown_path(arg) if os.path.isabs(arg) else arg
+        tail = shown[2:] if shown.startswith("~/") else None
+        parts.append(f"~/{shlex.quote(tail)}" if tail else shlex.quote(shown))
+    return " ".join(["ctx", *parts])
 
 
 def versions() -> dict[str, str]:

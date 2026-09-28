@@ -135,25 +135,6 @@ def place_caption(
             break
 
 
-def plotly_caption(text: str, width: float) -> tuple[dict[str, Any], float]:
-    """A plotly annotation holding the wrapped caption under the plot, and the margin it needs.
-
-    Args:
-        text: The caption, unwrapped.
-        width: Width in inches to wrap to; one long line is cut off at the plot's right edge.
-
-    Returns:
-        The annotation and the bottom margin in pixels.
-    """
-    lines = wrap(text, caption_chars(width)).split("\n")
-    annotation = {
-        "text": "<br>".join(lines), "xref": "paper", "yref": "paper", "x": 0, "y": 0,
-        "yshift": -3 * SIZES["caption"] * LINE_SPACING, "yanchor": "top", "xanchor": "left",
-        "showarrow": False, "align": "left",
-    }  # fmt: skip
-    return annotation, (len(lines) + 4) * SIZES["caption"] * LINE_SPACING
-
-
 def _fmt(p: float) -> str:
     """An exact p-value to two significant digits, never a threshold or stars."""
     return f"{p:.2g}"
@@ -216,6 +197,13 @@ class Permanova:
     def text(self, factor: str) -> str:
         """The test as a caption sentence for one factor."""
         within = ", labels permuted within individuals" if self.stratified else ""
+        if math.isnan(self.p):
+            return (
+                f"{PERMANOVA_NAME} for {factor}: R\u00b2 = {self.r2:.2f}, pseudo-F = "
+                f"{self.f:.3g}; no p-value: no individual has samples in two groups, so "
+                f"permuting within individuals cannot move a label (n = {self.n} samples in "
+                f"{self.groups} groups)."
+            )
         return (
             f"{PERMANOVA_NAME} for {factor}: R\u00b2 = {self.r2:.2f}, pseudo-F = {self.f:.3g}, "
             f"p = {_fmt(self.p)} ({self.permutations} permutations{within}; "
@@ -257,7 +245,9 @@ def permanova(
         seed: Seed of the permutation generator.
 
     Returns:
-        The test; p = (1 + permutations with F at least the observed) / (1 + permutations).
+        The test; p = (1 + permutations with F at least the observed) / (1 + permutations),
+        or NaN when strata leave no label free to move: every permutation would be the
+        observed labelling, and p = 1 would read as a result rather than as no test.
 
     Raises:
         ValueError: With fewer than two groups, or as many groups as samples.
@@ -273,6 +263,8 @@ def permanova(
         if strata is not None
         else [np.arange(n)]
     )
+    if not any(len(set(codes[block])) > 1 for block in blocks):
+        return Permanova(observed, r2, math.nan, n, len(levels), permutations, True)
     at_least = 0
     for _ in range(permutations):
         shuffled = codes.copy()

@@ -1,9 +1,11 @@
 """M1c: turn one checked fetchngs outdir into the harmonised sample sheet and its page."""
 
 import hashlib
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 import polars as pl
 
 from ctx import runtime
@@ -14,10 +16,14 @@ from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
 from ctx.report.builder import (
-    FigureBlock,
+    FigureText,
+    Group,
+    KeyNumber,
     ModulePage,
     ParameterCard,
     Reproduction,
+    Result,
+    ResultTable,
     SelfCheck,
     write,
 )
@@ -26,6 +32,8 @@ from ctx.viz.save import figure_block, write_figure
 from ctx.viz.style import category_colours
 
 MODULE = "gather"
+# Below this, "0.0 million reads" would hide the depth: print the reads themselves.
+DEPTH_IN_MILLIONS = 100_000
 ENA_SOURCE = "ENA Portal API returnFields, result=read_run, retrieved 2026-09-26"
 # (unit, meaning) per column; ENA meanings quote ENA's own field description.
 ENA_COLUMNS = {
@@ -143,26 +151,44 @@ def sheet(outdir: Outdir, curated: pl.DataFrame | None = None) -> pl.DataFrame:
     return frame.with_columns(fitted).select(*COLUMNS, *extras)
 
 
-def _facts(outdir: Outdir, frame: pl.DataFrame) -> tuple[str, ...]:
-    """What the outdir holds, counted, one sentence each."""
+def _statuses(frame: pl.DataFrame) -> dict[str, int]:
+    """FASTQ files per status, over both mates."""
     statuses = frame.select(pl.concat_list("status_1", "status_2").explode().alias("s")).filter(
         pl.col("s") != ""
     )
-    counted = ", ".join(f"{k} {v}" for k, v in sorted(statuses["s"].value_counts().iter_rows()))
+    return dict(sorted(statuses["s"].value_counts().iter_rows()))
+
+
+def _keys(outdir: Outdir, frame: pl.DataFrame) -> tuple[KeyNumber, ...]:
+    """Runs, experiments and files: the first three things to check after a download."""
+    statuses = _statuses(frame)
+    detail = ", ".join(f"{n} {k}" for k, n in statuses.items()) or "none"
+    return (
+        KeyNumber("Runs", f"{frame.height:,}"),
+        KeyNumber("Experiments", f"{frame['sample'].n_unique():,}"),
+        KeyNumber("FASTQ files", f"{sum(statuses.values()):,}", detail),
+        KeyNumber("Unlisted FASTQs", f"{len(outdir.unlisted_fastq)}", "in fastq/, in no row"),
+    )
+
+
+def _facts(outdir: Outdir, frame: pl.DataFrame, curated: bool) -> ResultTable:
+    """What the outdir holds, checked, one row per check."""
     multi = frame.filter(pl.col("n_runs") > 1)["sample"].unique().sort().to_list()
     wide = frame.filter(pl.col("ena_files") > FTP_KEEPS)["run_accession"].to_list()
-    return (
-        f"{frame.height} runs in {frame['sample'].n_unique()} experiments, from nf-core/fetchngs "
-        f"{outdir.provenance['fetchngs']} (commit {outdir.provenance['fetchngs_commit']}), "
-        "Nextflow "
-        f"{outdir.provenance['nextflow']}.",
-        f"FASTQ files by status: {counted or 'none'}.",
-        f"Experiments with more than one run: {', '.join(multi) or 'none'}.",
-        f"Runs with more than two ENA files: {', '.join(wide) or 'none'}.",
-        f"FASTQ files in fastq/ that no row names: {', '.join(outdir.unlisted_fastq) or 'none'}.",
-        "Curation columns (donor, cell_type, condition, replicate, batch) are empty: the curation "
-        "file arrives in Phase 2.",
-    )
+    counted = ", ".join(f"{k} {n}" for k, n in _statuses(frame).items())
+    rows = [
+        ("Source", f"nf-core/fetchngs {outdir.provenance['fetchngs']} (commit "
+                   f"{outdir.provenance['fetchngs_commit']}), Nextflow "
+                   f"{outdir.provenance['nextflow']}"),
+        ("FASTQ files by status", counted or "none"),
+        ("Experiments with more than one run", ", ".join(multi) or "none"),
+        ("Runs with more than two ENA files", ", ".join(wide) or "none"),
+        ("FASTQ files that no row names", ", ".join(outdir.unlisted_fastq) or "none"),
+    ]  # fmt: skip
+    if not curated:
+        rows.append(("Curation", "Not curated: without --dataset-file, donor, cell type, "
+                                 "condition, replicate and batch stay empty."))  # fmt: skip
+    return ResultTable("Download checks", ("Check", "Result"), tuple(rows))
 
 
 QUESTION = (
@@ -170,15 +196,20 @@ QUESTION = (
     "each sample?"
 )
 CONCEPT = (
-    "nf-core/fetchngs downloads reads and writes a samplesheet, but it is not the end of the "
-    "job. Files can be missing or corrupted, one experiment can hold several runs, and public "
-    "metadata is free text. gather checks the outdir against itself and against the md5 "
-    "sums, and writes one sheet every later module reads."
+    "nf-core/fetchngs downloads the reads and writes a sample sheet, but a finished download "
+    "can still be incomplete. Files go missing or arrive corrupted, one experiment can hold "
+    "several runs, and public metadata is free text. gather checks the download against its "
+    "own records and the published checksums, then writes the one sample sheet every later "
+    "module reads."
+)
+TERMS = (
+    ("Run", "One sequencing run, one accession such as SRR or ERR, with one or two FASTQ files."),
+    ("Experiment", "The library a run was sequenced from; one experiment can hold several runs."),
+    ("no_md5", "Fetched through sra-tools, which publishes no checksum to verify against."),
 )
 PRACTICE = (
-    "Run gather after every fetch. A run marked no_md5 came through sra-tools and was not "
-    "checked against ENA; several runs under one sample are technical replicates of one "
-    "library, not biological replicates."
+    "Run gather after every download and resolve what its checks report before any analysis. "
+    "From then on, treat its sample sheet as the only record of what each sample is."
 )
 THINK = (
     SelfCheck(
@@ -197,6 +228,50 @@ MISTAKES = (
     "Re-running fetchngs into an existing outdir: it rebuilds the samplesheet from the new "
     "input only.",
 )
+
+
+def _composition_text(data: BarData) -> FigureText:
+    """Title, lead and reading guide of the composition bars, from the counts drawn."""
+    groups, batches = data.frame["group"].n_unique(), data.frame["batch"].unique().sort()
+    reading = [
+        "Each bar is one cell type and condition; its length counts the runs in it.",
+        "Hover a bar for the individuals behind it; one individual can give several cell "
+        "types, so individuals do not add up across bars.",
+    ]
+    if batches.len() > 1:
+        reading.insert(
+            1,
+            f"Colours split each bar by batch ({', '.join(batches)}): a group "
+            "that sits in one batch alone cannot be told apart from that batch.",
+        )
+    sizes = data.frame.group_by("group").agg(pl.col("n_samples").sum())
+    smallest = sizes.sort("n_samples", "group").row(0)
+    return FigureText(
+        title="Samples by cell type and condition",
+        lead=f"{groups} groups; the smallest, {smallest[0]}, holds {smallest[1]} runs, "
+        "which limits what any contrast on it can find.",
+        reading=tuple(reading),
+    )  # fmt: skip
+
+
+def _library_text(data: BarData) -> FigureText:
+    """Title, lead and reading guide of the library sizes, from the depths drawn."""
+    median = float(np.median(data.frame["read_count"].to_numpy()))
+    depth = f"{median / 1e6:.1f} million" if median >= DEPTH_IN_MILLIONS else f"{median:,.0f}"
+    batched = data.frame["batch"].n_unique() > 1
+    return FigureText(
+        title="Sequencing depth per run",
+        lead=f"The median run holds {depth} reads.",
+        reading=(
+            "Each bar is one run; its height is the reads ENA reports for it, in millions.",
+            "Runs are grouped by batch and sorted by depth; colour marks the batch."
+            if batched
+            else "Runs are sorted by depth.",
+            "A run far below the others"
+            + (" in its batch" if batched else "")
+            + " may be a failed library: DESeq2's size factors correct depth, not quality.",
+        ),
+    )
 
 
 def _composition(frame: pl.DataFrame, spec: Dataset) -> BarData:
@@ -224,7 +299,7 @@ def _composition(frame: pl.DataFrame, spec: Dataset) -> BarData:
     )
     return BarData(
         frame=groups, columns=columns, category="group", value="n_samples",
-        category_label="Cell type and condition", value_label="Samples", series="batch",
+        category_label="Cell type and condition", value_label="Runs", series="batch",
         colours=category_colours(levels), caption=caption, horizontal=True, stacked=True,
         hover=("n_individuals",), width="double",
     )  # fmt: skip
@@ -262,25 +337,31 @@ def _library_sizes(frame: pl.DataFrame, spec: Dataset) -> BarData:
     )  # fmt: skip
 
 
-def _curation_facts(frame: pl.DataFrame, spec: Dataset) -> tuple[str, ...]:
+def _curation_facts(frame: pl.DataFrame, spec: Dataset) -> ResultTable:
     """What curation joined and derived, counted."""
     assert spec.sdrf is not None  # noqa: S101 - curation ran, so the dataset has an SDRF
     lengths = ", ".join(
         f"{v:g} nt {n}" for v, n in frame["read_length"].value_counts().sort("read_length").rows()
     )
     batches = ", ".join(
-        f"{b or 'none'} {n}" for b, n in frame["batch"].value_counts().sort("batch").rows()
+        f"{b or 'all'} {n}" for b, n in frame["batch"].value_counts().sort("batch").rows()
     )
     checked = ", ".join(a for a, _ in spec.sdrf.cross_check)
     repeats = frame.filter(pl.col("replicate") > 1).height
-    return (
+    joined = (
         f"Curation from {spec.path.name}: each of {frame.height} runs joined to one SDRF row "
         f"on {spec.sdrf.join[0]}, in both directions"
         + (f"; {checked} agrees for every run" if checked else "")
-        + "; every value is in the dataset file's value maps.",
-        f"Read length by run: {lengths}. Batch: {batches}.",
-        f"Runs beyond the first of a donor, cell type and condition: {repeats}.",
+        + "; every value is in the dataset file's value maps."
     )
+    rows = (
+        ("Join", joined),
+        ("Read length", lengths),
+        ("Batch", batches),
+        ("Repeated runs", f"{repeats} {'run' if repeats == 1 else 'runs'} beyond the first "
+                          "of a donor, cell type and condition"),
+    )  # fmt: skip
+    return ResultTable("Curation", ("Check", "Result"), rows)
 
 
 def _counts_tables(
@@ -300,17 +381,19 @@ def _counts_tables(
     ]  # fmt: skip
 
 
-def _counts_facts(counts: rnaseq.Counts) -> str:
+def _counts_facts(counts: rnaseq.Counts) -> ResultTable:
     """What the counts step read and did, counted."""
     genes, samples = counts.matrix.height, counts.matrix.width - 1
     kind = counts.matrix.dtypes[1] if samples else "none"
-    return (
-        f"Counts: {genes:,} genes by {samples} samples from nf-core/rnaseq "
-        f"{counts.provenance['nf-core/rnaseq']} (Salmon {counts.provenance['salmon']}), the "
-        f"length-scaled gene matrix; {counts.fractional:,} of {genes * samples:,} values were "
-        f"fractional and were rounded half to even; stored as {kind}, "
-        f"{counts.matrix.estimated_size():,} bytes in memory."
-    )
+    rows = (
+        ("Matrix", f"{genes:,} genes by {samples} samples, the length-scaled gene matrix"),
+        ("Source", f"nf-core/rnaseq {counts.provenance['nf-core/rnaseq']}, Salmon "
+                   f"{counts.provenance['salmon']}"),
+        ("Rounded", f"{counts.fractional:,} of {genes * samples:,} values were fractional and "
+                    "were rounded half to even"),
+        ("Stored as", f"{kind}, {counts.matrix.estimated_size():,} bytes in memory"),
+    )  # fmt: skip
+    return ResultTable("Counts", ("Check", "Result"), rows)
 
 
 def _write_problems(
@@ -398,7 +481,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     # Read before anything is written, so a bad outdir leaves no sheet behind.
     counts = rnaseq.read(rnaseq_dir.resolve(), set(frame["sample"])) if rnaseq_dir else None
     files = write_table(frame, out, sheet_stem, columns=columns(spec), data_releases=releases)
-    results: list[FigureBlock | str] = list(_facts(checked, frame))
+    results: list[Result] = [_facts(checked, frame, curated is not None)]
     if counts is not None:
         counts_releases = {**releases, "rnaseq outdir": str(rnaseq_dir), **counts.provenance}
         for name, table, described in _counts_tables(counts):
@@ -407,19 +490,23 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
                                  data_releases=counts_releases)  # fmt: skip
         results.append(_counts_facts(counts))
     if spec and curated is not None:
-        results += _curation_facts(frame, spec)
-        for name, data in (
-            ("composition", _composition(frame, spec)),
-            ("library_sizes", _library_sizes(frame, spec)),
+        results.append(_curation_facts(frame, spec))
+        composition, depth = _composition(frame, spec), _library_sizes(frame, spec)
+        figures = []
+        for name, data, words in (
+            ("composition", composition, _composition_text(composition)),
+            ("library_sizes", depth, _library_text(depth)),
         ):
             figure_stem = stem(MODULE, f"{dataset}_{name}", 1, day=day)
-            title = f"M1c {name.replace('_', ' ')}: {dataset}"
-            files += write_figure(data, out, figure_stem, title=title, data_releases=releases)
-            results.append(figure_block(data, figure_stem))
+            text = replace(words, back=f"{page_stem}.html")
+            files += write_figure(data, out, figure_stem, title=text.title,
+                                  data_releases=releases, text=text)  # fmt: skip
+            figures.append(figure_block(data, figure_stem, text))
+        results.append(Group("Samples", tuple(figures)))
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
-        title=f"M1c Gather: {dataset}",
+        title=f"M1 Gather: {dataset}",
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,
@@ -427,6 +514,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         practice=PRACTICE,
         think=THINK,
         mistakes=MISTAKES,
+        key_numbers=_keys(checked, frame),
+        terms=TERMS,
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,

@@ -142,15 +142,12 @@ def _log_cpm(synthetic: Synthetic) -> np.ndarray:
     return np.log2(matrix / matrix.sum(axis=0) * 1e6 + 1)
 
 
-VOLCANO_STEPS = (0.01, 0.05, 0.1)
-
-
 def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6):  # ScatterData
-    """A volcano contract from the type_a samples: Welch t-test per gene, BH, three thresholds."""
+    """A volcano contract from the type_a samples: Welch t-test per gene, BH, live calls."""
     from scipy.stats import false_discovery_control, ttest_ind  # noqa: PLC0415
 
-    from ctx.de.stats import classify  # noqa: PLC0415 - keeps synth importable without ctx
-    from ctx.viz.scatter import ScatterData  # noqa: PLC0415
+    from ctx.de.stats import ALPHA, LFC_MIN, classify  # noqa: PLC0415 - keeps synth importable
+    from ctx.viz.scatter import CUTOFF_PRESETS, Calls, ScatterData  # noqa: PLC0415
     from ctx.viz.style import ROLES  # noqa: PLC0415
 
     sheet = synthetic.samples
@@ -166,13 +163,11 @@ def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6): 
         padj=pl.Series(false_discovery_control(np.nan_to_num(p, nan=1.0), method="bh")),
         neg_log10_p=-pl.col("p").log10(),
     )
-    for alpha in VOLCANO_STEPS:
-        frame = frame.with_columns(
-            classify(pl.col("padj"), pl.col("lfc"), alpha).alias(f"class_{alpha}")
-        )
-    loose = f"class_{max(VOLCANO_STEPS)}"
-    frame = frame.with_columns(keep=pl.col(loose) != "ns")
-    top = set(frame.filter(pl.col("keep")).sort("p").head(labels)["gene_id"])
+    frame = frame.with_columns(
+        call=classify(pl.col("padj"), pl.col("lfc")),
+        keep=pl.col("p") < max(CUTOFF_PRESETS),
+    )
+    top = set(frame.filter(pl.col("call") != "ns").sort("p").head(labels)["gene_id"])
     frame = frame.with_columns(
         label=pl.when(pl.col("gene_id").is_in(top)).then(pl.col("gene_id")).otherwise(pl.lit(""))
     )
@@ -182,17 +177,26 @@ def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6): 
         "p": ("dimensionless", "Welch two-sample t-test p-value."),
         "padj": ("dimensionless", "Benjamini-Hochberg adjusted p over all genes."),
         "neg_log10_p": ("-log10 p", "Minus log10 of p."),
-        **{f"class_{a}": ("none", f"up, down or ns at padj < {a}.") for a in VOLCANO_STEPS},
-        "keep": ("none", "Called at the loosest threshold; always drawn on the page."),
+        "call": ("none", "up, down or ns at padj < 0.05 and |lfc| >= 1."),
+        "keep": ("none", "p below the loosest cutoff offered; always drawn on the page."),
         "label": ("none", "Gene printed beside its point; empty for none."),
     }
+    passing = frame.filter(pl.col("padj") < ALPHA)["p"]
+    calls = Calls(
+        lfc="lfc", p="p", adjusted={"padj": "BH-adjusted p"}, raw_words="raw p",
+        tested="case", reference="control", alpha=ALPHA, lfc_min=LFC_MIN,
+        max_cutoff=max(CUTOFF_PRESETS), n_tested=frame.height, p_floor=1e-300,
+        p_line=float(passing.max()) if passing.len() else None,
+        reading=("Each dot is one of {n_tested} genes.", "Up in {tested}: {line_rule}."),
+        summary="Up in {tested}: {n_up}. Down: {n_down}.",
+        line_rule="above -log10 p = {y_line}", no_line_rule="none passes {basis} < {cutoff}",
+    )  # fmt: skip
     return ScatterData(
         frame=frame, columns=columns, x="lfc", y="neg_log10_p", x_label="Fold change",
-        y_label="Significance", colour="class_0.05",
+        y_label="Significance", colour="call",
         colours={"up": ROLES["comparison"], "down": ROLES["reference"], "ns": None},
         caption=f"Welch t-test, BH over {frame.height} genes; n = 6 control, 6 case.",
-        label="label", hover=("gene_id", "padj"), width=width,
-        steps=tuple((f"padj < {a}", f"class_{a}") for a in VOLCANO_STEPS), keep="keep",
+        label="label", hover=("gene_id", "padj"), width=width, keep="keep", calls=calls,
     )  # fmt: skip
 
 

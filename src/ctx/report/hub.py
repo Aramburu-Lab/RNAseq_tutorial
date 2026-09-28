@@ -5,6 +5,7 @@ a zip; nothing points to the web.
 """
 
 import hashlib
+import math
 import os
 import re
 from datetime import date
@@ -18,7 +19,7 @@ from ctx.dataset import load
 from ctx.de.sanity import VERDICT_COLUMNS, decide, parse
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
-from ctx.report.builder import HubLink, HubPage, ParameterCard, write
+from ctx.report.builder import HubLink, HubPage, HubRule, KeyNumber, ParameterCard, write
 
 MODULE = "report"
 TITLES = {
@@ -31,8 +32,13 @@ TITLES = {
     "function": "M6 Function",
     "proteo": "M7 RNA versus protein",
     "ncrna": "M8 Non-coding RNA",
+    "lite_build": "JupyterLite build",
 }
-PAGE = re.compile(r"(\d{4}-\d{2}-\d{2})_(?P<module>[a-z]+)_(?P<what>.+)_v(?P<version>\d+)\.html")
+# The module is one of the MODULES tokens, longest first, so "lite_build" is not read as "lite".
+_TOKENS = "|".join(sorted((t for t, _ in MODULES), key=len, reverse=True))
+PAGE = re.compile(
+    rf"(\d{{4}}-\d{{2}}-\d{{2}})_(?P<module>{_TOKENS})_(?P<what>.+)_v(?P<version>\d+)\.html"
+)
 
 
 def _newest(directory: Path, what: str) -> Path | None:
@@ -105,6 +111,30 @@ def sanity(
     return rows, files
 
 
+def _measured(value: Any) -> str:
+    """A recorded value as the hub prints it; a missing one says so."""
+    if value is None or (isinstance(value, float) and math.isnan(value)):
+        return "not measured"
+    # A count prints whole: .4g would show 10,523 genes as 1.052e+04.
+    if float(value).is_integer():
+        return f"{int(value):,}"
+    return f"{value:.4g}"
+
+
+def _rules(rows: list[dict[str, Any]]) -> tuple[HubRule, ...]:
+    """One entry per rule, in file order, with each condition's measured value and verdict."""
+    rules: dict[str, HubRule] = {}
+    for r in rows:
+        condition = (r["condition"], _measured(r["left"]), r["verdict"])
+        if r["rule"] in rules:
+            known = rules[r["rule"]]
+            rules[r["rule"]] = HubRule(known.rule, known.text, known.verdict,
+                                       (*known.conditions, condition))  # fmt: skip
+        else:
+            rules[r["rule"]] = HubRule(r["rule"], r["text"], r["rule_verdict"], (condition,))
+    return tuple(rules.values())
+
+
 def run(
     settings: runtime.Settings,
     cards: tuple[ParameterCard, ...],
@@ -137,19 +167,23 @@ def run(
             continue
         href = Path(os.path.relpath(page, out)).as_posix()
         links.append(HubLink(TITLES.get(module, module), page.name, href, page.name[:10]))
+    rules = _rules(rows)
+    gated = [r for r in rules if r.verdict != "RECORDED"]
+    keys: tuple[KeyNumber, ...] = (
+        KeyNumber("Modules run", f"{len(links)} of {len(links) + len(missing)}"),
+    )
+    if gated:
+        passed = sum(r.verdict == "PASS" for r in gated)
+        keys += (
+            KeyNumber("Rules passed", f"{passed} of {len(gated)}", "recorded rules not counted"),
+        )
     hub = HubPage(
         title=f"Course hub: {dataset}",
-        intro=(
-            f"The newest page of every module run on {dataset}, in course order. Each page "
-            "carries its question, parameters, results, and how to reproduce it."
-        ),
+        intro=f"The newest page of every module run on {dataset}, in course order.",
         parameters=cards,
         links=tuple(links),
         missing=tuple(missing),
-        verdicts=tuple(
-            dict.fromkeys(
-                (r["rule"], f"{r['text']} ({r['condition']})", r["verdict"]) for r in rows
-            )
-        ),
+        rules=rules,
+        key_numbers=keys,
     )
     return [write(hub, out / f"{stem(MODULE, f'{dataset}_hub', 1, day=date.today())}.html"), *files]

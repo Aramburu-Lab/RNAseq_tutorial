@@ -5,7 +5,7 @@ and the seven-category cap follow the global figure rules where the project is s
 """
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 
 MM_PER_INCH = 25.4
 # sRGB transfer function breakpoint (WCAG 2 relative luminance).
@@ -68,14 +68,52 @@ class Theme:
     reference: str
 
 
+# One reference grey for both themes: a plotly trace keeps its colour when the page theme
+# flips, so it must read on both backgrounds (3.36:1 on white, 5.62:1 on #111111; the 3:1
+# graphics threshold). The earlier light grey, #999999, was 2.85:1.
 THEMES = {
     "white": Theme(
-        "white", ink=INK_COLOUR, background="#FFFFFF", grid="#E5E5E5", reference="#999999"
+        "white", ink=INK_COLOUR, background="#FFFFFF", grid="#E5E5E5", reference="#8C8C8C"
     ),
     "black": Theme(
         "black", ink="#F2F2F2", background="#111111", grid="#333333", reference="#8C8C8C"
     ),
 }
+# Page furniture per theme, never a data colour, so a link or a pill cannot read as a series.
+# Contrast on the background (surface): text 17.40 (16.07), muted 6.69 (6.18), link 8.39 (7.75)
+# light; 14.85 (13.40), 7.94 (7.17), 9.20 (8.30) dark; each pill's ink on its fill >= 6.83.
+CHROME = {
+    "white": {
+        "surface": "#F6F6F3", "text": "#1A1A1A", "muted": "#5C5C5C", "link": "#1D4E89",
+        "pass-fg": "#1B5E20", "pass-bg": "#E6F2E7", "fail-fg": "#8E1B1B", "fail-bg": "#FBE9E7",
+        "recorded-fg": "#4D4D4D", "recorded-bg": "#EDEDED",
+    },
+    "black": {
+        "surface": "#1C1C1C", "text": "#E4E4E4", "muted": "#A8A8A8", "link": "#8CB8F0",
+        "pass-fg": "#9BD3A5", "pass-bg": "#16301C", "fail-fg": "#F4ABA3", "fail-bg": "#3D1816",
+        "recorded-fg": "#C8C8C8", "recorded-bg": "#262626",
+    },
+}  # fmt: skip
+MONO_CHAIN = ("ui-monospace", "SF Mono", "Menlo", "Consolas", "Liberation Mono", "monospace")
+# Page type scale in px around SIZES["base"]; the plots keep SIZES.
+TYPE_PX = {"xs": 12, "sm": 13, "md": 16, "lg": 20, "xl": 28, "display": 44}
+SPACE_PX = (4, 8, 12, 16, 24, 32, 48, 64, 96)
+LAYOUT = {
+    "measure": "68ch", "content": "880px", "rail": "208px", "gap": "56px", "gutter": "16px",
+    "gutter-wide": "32px", "key-min": "150px", "card-min": "240px", "reading": "272px",
+    "radius": "4px",
+    "rule": "1px", "rule-mid": "2px", "rule-strong": "4px",
+}  # fmt: skip
+# Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
+RAIL_FROM_PX, NARROW_PX = 1100, 640
+PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400}
+# Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
+PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
+PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed
+PLOTLY_TICK_PX, PLOTLY_TITLE_STANDOFF_PX = 4, 8
+TRANSPARENT = "rgba(0,0,0,0)"
+# Dash of a threshold line, in both renderers.
+THRESHOLD_DASH: tuple[Literal["--"], Literal["dash"]] = ("--", "dash")
 
 
 def category_colours(levels: list[str]) -> dict[str, str]:
@@ -172,13 +210,31 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
     )
 
 
+def _plotly_axis(theme: Theme) -> dict[str, Any]:
+    """Axes as the static figures draw them: ink lines and ticks, no grid, room for titles."""
+    small = {"size": SIZES["tick"], "color": theme.ink}
+    return {
+        "showgrid": False, "showline": True, "linecolor": theme.ink,
+        "linewidth": LINE_WIDTHS["axes"], "ticks": "outside", "ticklen": PLOTLY_TICK_PX,
+        "tickcolor": theme.ink, "tickwidth": LINE_WIDTHS["axes"], "tickfont": small,
+        "zeroline": False, "automargin": True,
+        "title": {"font": {"size": SIZES["axis_label"], "color": theme.ink},
+                  "standoff": PLOTLY_TITLE_STANDOFF_PX},
+    }  # fmt: skip
+
+
 def plotly_templates() -> dict[str, Any]:
-    """Plotly layout templates for the two themes, built on ``plotly_white``."""
+    """Plotly layout templates for the two themes, built on ``plotly_white``.
+
+    Backgrounds are transparent, so a figure takes the page's colour in either theme; the
+    page's toggle swaps these templates with ``Plotly.relayout``.
+    """
     import plotly.io as pio  # noqa: PLC0415 - heavy; imported after the runtime profile
 
     templates = {}
     for name, theme in THEMES.items():
         template = pio.templates["plotly_white"].to_plotly_json()
+        small = {"size": SIZES["tick"], "color": theme.ink}
         template["layout"].update(
             {
                 "font": {
@@ -187,14 +243,23 @@ def plotly_templates() -> dict[str, Any]:
                     "color": theme.ink,
                 },
                 "colorway": list(DATA_COLOURS),
-                "paper_bgcolor": theme.background,
-                "plot_bgcolor": theme.background,
+                "paper_bgcolor": TRANSPARENT,
+                "plot_bgcolor": TRANSPARENT,
+                "margin": dict(PLOTLY_MARGIN_PX),
+                "legend": {"orientation": "h", "x": 0, "xanchor": "left", "y": 1.02,
+                           "yanchor": "bottom", "font": small, "bgcolor": TRANSPARENT,
+                           "title": {"text": ""}},
+                "hoverlabel": {"bgcolor": theme.background, "bordercolor": theme.grid,
+                               "font": {**small, "family": ", ".join(FONT_CHAIN)},
+                               "align": "left"},
+                "modebar": {"bgcolor": TRANSPARENT, "color": theme.reference,
+                            "activecolor": theme.ink},
+                "annotationdefaults": {"font": small, "arrowcolor": theme.ink},
+                "shapedefaults": {"line": {"color": theme.reference}},
+                "xaxis": _plotly_axis(theme),
+                "yaxis": _plotly_axis(theme),
             }
-        )
-        for axis in ("xaxis", "yaxis"):
-            template["layout"][axis].update(
-                {"gridcolor": theme.grid, "linecolor": theme.ink, "zerolinecolor": theme.grid}
-            )
+        )  # fmt: skip
         templates[name] = template
     return templates
 
@@ -208,7 +273,19 @@ def css_variables(theme: Theme) -> str:
         "--reference": theme.reference,
         **{f"--data-{i + 1}": colour for i, colour in enumerate(DATA_COLOURS)},
         **{f"--role-{role}": colour for role, colour in ROLES.items()},
+        **{f"--{key}": colour for key, colour in CHROME[theme.name].items()},
         "--font": ", ".join([*(f'"{f}"' for f in FONT_CHAIN), "sans-serif"]),
         "--size-base": f"{SIZES['base']}px",
+    }
+    return "; ".join(f"{k}: {v}" for k, v in pairs.items()) + ";"
+
+
+def css_layout() -> str:
+    """Type scale, spacing and layout as CSS custom properties; the same in both themes."""
+    pairs = {
+        **{f"--fs-{name}": f"{px}px" for name, px in TYPE_PX.items()},
+        **{f"--space-{i + 1}": f"{px}px" for i, px in enumerate(SPACE_PX)},
+        **{f"--{name}": value for name, value in LAYOUT.items()},
+        "--font-mono": ", ".join(f'"{f}"' if " " in f else f for f in MONO_CHAIN),
     }
     return "; ".join(f"{k}: {v}" for k, v in pairs.items()) + ";"

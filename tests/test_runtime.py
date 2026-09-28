@@ -182,3 +182,17 @@ def test_loky_child_peak_attributed():
     usage = json.loads(done.stdout.strip().splitlines()[-1])
     assert usage["children"] >= 256 * 2**20, usage
     assert usage["children"] < 2**30, usage
+
+
+def test_home_paths_shown_as_tilde():
+    from ctx.runtime import retypable, shown_path  # noqa: PLC0415
+
+    home = Path.home()
+    assert shown_path(home / "ctx_tier1") == "~/ctx_tier1"
+    assert shown_path(home) == "~"
+    # A sibling whose name starts with the home path is not under it.
+    assert shown_path(f"{home}2/x") == f"{home}2/x"
+    command = retypable(["--root", str(home / "a b"), "de", "--x", "/opt/c d"])
+    # The tilde stays outside the quotes, so a shell still expands it.
+    assert command == "ctx --root ~/'a b' de --x '/opt/c d'"
+    assert str(home) not in command

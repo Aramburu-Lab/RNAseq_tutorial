@@ -11,15 +11,18 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption, plotly_caption
+from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.axes import axis_title
 from ctx.viz.style import (
     LINE_WIDTHS,
     MARKER_SIZE,
     MARKERS,
     MAX_CATEGORIES,
+    PLOTLY_HEIGHT_PX,
     PLOTLY_MARKER_PX,
     SIZES,
     THEMES,
+    THRESHOLD_DASH,
     Theme,
     apply_matplotlib,
     figure_inches,
@@ -29,19 +32,109 @@ from ctx.viz.style import (
 # Points not in ``keep`` above this many are thinned on the HTML page; the CSV keeps all.
 THIN_MAX = 2000
 MAX_LABELS = 10
-# Room above the plot for the threshold slider, in pixels.
-SLIDER_MARGIN_PX = 130
 # Offset of a point label from its point, in points.
 LABEL_OFFSET = 3.0
+# Hover number formats: significant digits for measurements, thousands for counts.
+FLOAT_HOVER, INT_HOVER = ":.3~g", ":,d"
+# Cutoffs the page offers as presets; the loosest bounds what may be thinned.
+CUTOFF_PRESETS = (0.1, 0.05, 0.01, 0.001)
+# The strictest cutoff the page accepts; a smaller typed value is raised to it.
+MIN_CUTOFF = 0.0001
+CUTOFF_NAME = "cutoff"
 
 
 @dataclass(frozen=True)
 class Line:
-    """A line drawn over the points, e.g. a fitted trend or the identity line."""
+    """A line drawn over the points, e.g. a fitted trend, the identity line or a cutoff."""
 
     name: str
     x: tuple[float, ...]
     y: tuple[float, ...]
+    dash: bool = False
+
+
+def _line_style(line: Line, theme: Theme) -> dict[str, Any]:
+    """A cutoff is dashed in the reference grey; a fitted or identity line is ink."""
+    if line.dash:
+        return {"color": theme.reference, "linestyle": THRESHOLD_DASH[0]}
+    return {"color": theme.ink}
+
+
+@dataclass(frozen=True)
+class Calls:
+    """What the page needs to call points again, live, under the reader's own cutoffs.
+
+    A point is called when it was tested (it has a value in the first adjusted column) and
+    its chosen p-value is below the cutoff; up when its ``lfc`` is at least the fold-change
+    threshold, down when at most minus it. ``ctx.de.stats.classify`` is that rule's Python
+    definition and colours the default view; the page script repeats it on the embedded rows.
+
+    Attributes:
+        lfc: Column of raw log2 fold changes.
+        p: Column of raw p-values.
+        adjusted: Adjusted-p column to its words (e.g. "BH-adjusted p"); the first is the
+            default and marks the tested points.
+        raw_words: Words for the raw p-value, uncorrected.
+        tested: Name of the tested group, which "up" refers to.
+        reference: Name of the reference group.
+        alpha: Default cutoff.
+        lfc_min: Default fold-change threshold, in log2.
+        max_cutoff: The loosest cutoff the controls allow; points no cutoff can call may be
+            thinned.
+        n_tested: Points the adjustment counted over, drawn or thinned.
+        p_floor: p-values below this are drawn at it; -log10 of 0 has no place on an axis.
+        p_line: The largest raw p whose default adjusted p passes, or None when none passes.
+        reading: "How to read" lines with ``{placeholders}``, filled for any setting.
+        summary: The one-line result with ``{placeholders}``.
+        line_rule: How the horizontal line reads, with ``{placeholders}``.
+        no_line_rule: The same when no point passes, so no line is drawn.
+        levels: The colour column's level for up, down and not called.
+    """
+
+    lfc: str
+    p: str
+    adjusted: Mapping[str, str]
+    raw_words: str
+    tested: str
+    reference: str
+    alpha: float
+    lfc_min: float
+    max_cutoff: float
+    n_tested: int
+    p_floor: float
+    p_line: float | None
+    reading: tuple[str, ...]
+    summary: str
+    line_rule: str
+    no_line_rule: str
+    levels: tuple[str, str, str] = ("up", "down", "ns")
+
+    def page_columns(self, hover: tuple[str, ...]) -> list[str]:
+        """The columns the page embeds: what it needs to call and to name each point."""
+        return list(dict.fromkeys([*hover, self.lfc, self.p, *self.adjusted]))
+
+    def y_line(self) -> float | None:
+        """Height of the default horizontal cutoff on the -log10 p axis."""
+        return None if self.p_line is None else -math.log10(max(self.p_line, self.p_floor))
+
+    def values(self, n_up: int, n_down: int) -> dict[str, str]:
+        """The placeholders at the default setting, formatted as the page script formats them."""
+        t, line = self.lfc_min, self.y_line()
+        values = {
+            "n_tested": f"{self.n_tested:,}", "tested": self.tested, "reference": self.reference,
+            "fc": f"{t:.2f}", "fold_up": f"{2**t:.2f}", "fold_down": f"{2**-t:.2f}",
+            "pct_up": f"{100 * (2**t - 1):.1f}", "pct_down": f"{100 * (1 - 2**-t):.1f}",
+            "basis": next(iter(self.adjusted.values())), "cutoff": _js_number(self.alpha),
+            "y_line": "" if line is None else f"{line:.2f}", "n_up": f"{n_up:,}",
+            "n_down": f"{n_down:,}",
+        }  # fmt: skip
+        rule = self.no_line_rule if line is None else self.line_rule
+        return values | {"line_rule": rule.format_map(values)}
+
+
+def _js_number(value: float) -> str:
+    """A number as JavaScript's String() writes it, for the cutoffs the controls offer."""
+    return f"{value:.10g}"
 
 
 @dataclass(frozen=True)
@@ -65,9 +158,9 @@ class ScatterData:
         log_x: Log-scaled x axis.
         log_y: Log-scaled y axis.
         width: ``"single"`` or ``"double"`` column.
-        steps: (slider label, column of levels) per step of the page's slider, which recolours
-            the points; the step whose column is ``colour`` is the one drawn statically.
         keep: Boolean column of points always drawn on the page; the others are thinned.
+        names: Legend text per colour level, where the level itself is terse.
+        calls: How the page calls points again under the reader's cutoffs, or None.
     """
 
     frame: pl.DataFrame
@@ -86,20 +179,26 @@ class ScatterData:
     log_x: bool = False
     log_y: bool = False
     width: str = "single"
-    steps: tuple[tuple[str, str], ...] = ()
     keep: str | None = None
+    names: Mapping[str, str] | None = None
+    calls: Calls | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
         named = [self.x, self.y, self.colour, self.symbol, self.label, self.keep, *self.hover]
-        named += [column for _, column in self.steps]
+        if self.calls:
+            named += [self.calls.lfc, self.calls.p, *self.calls.adjusted]
         if missing := [c for c in named if c is not None and c not in self.frame.columns]:
             raise ValueError(f"missing columns {missing}")
         if len(self.colours) > MAX_CATEGORIES:
             raise ValueError(f"{len(self.colours)} colour levels; at most {MAX_CATEGORIES}")
-        for column in {self.colour, *(c for _, c in self.steps)}:
-            if stray := set(self.frame[column].unique()) - set(self.colours):
-                raise ValueError(f"{column}: levels {sorted(stray)} have no colour")
+        if stray := set(self.frame[self.colour].unique()) - set(self.colours):
+            raise ValueError(f"{self.colour}: levels {sorted(stray)} have no colour")
+        if self.calls and set(self.calls.levels) != set(self.colours):
+            raise ValueError(f"call levels {self.calls.levels} are not the colour levels")
+        if self.calls and self.symbol:
+            # The page script finds one trace per colour level; shapes would split them.
+            raise ValueError("live calls cannot be combined with a symbol column")
         if self.symbol and self.frame[self.symbol].n_unique() > len(MARKERS):
             raise ValueError(f"{self.symbol}: more levels than the {len(MARKERS)} marker shapes")
 
@@ -112,8 +211,70 @@ class ScatterData:
         return self.columns
 
     def page_table(self) -> pl.DataFrame:
-        """The points the page draws: thinned like the plot, so the page stays under its cap."""
-        return self.on_page()
+        """The points the page draws, thinned like the plot so the page stays under its cap.
+
+        With ``calls`` the page embeds only the columns it calls and names points with, so the
+        rows stay small; the CSV beside it holds every column.
+        """
+        rows = self.on_page()
+        return rows.select(self.calls.page_columns(self.hover)) if self.calls else rows
+
+    def controls(self) -> dict[str, Any] | None:
+        """The live-calling settings the page script reads, or None without ``calls``."""
+        if self.calls is None:
+            return None
+        c = self.calls
+        first_line = len(self.colours) + len(self.lines)
+        return {
+            "lfc": c.lfc, "p": c.p, "gate": next(iter(c.adjusted)),
+            "bases": {**c.adjusted, c.p: c.raw_words}, "tested": c.tested,
+            "reference": c.reference, "alpha": c.alpha, "lfc_min": c.lfc_min,
+            "max_cutoff": c.max_cutoff, "min_cutoff": MIN_CUTOFF, "n_tested": c.n_tested,
+            "p_floor": c.p_floor,
+            "reading": list(c.reading), "summary": c.summary, "line_rule": c.line_rule,
+            "no_line_rule": c.no_line_rule,
+            "levels": dict(zip(("up", "down", "ns"), c.levels, strict=True)),
+            "traces": {level: i for i, level in enumerate(self.colours)},
+            "hover": list(self.hover), "cutoff_lines": [first_line + i for i in range(3)],
+            "presets": [_js_number(c) for c in CUTOFF_PRESETS if c <= self.calls.max_cutoff],
+            "default_summary": self.summary(),
+        }  # fmt: skip
+
+    def reading(self) -> tuple[str, ...]:
+        """The "How to read" lines at the default setting; empty without ``calls``."""
+        if self.calls is None:
+            return ()
+        up, down, _ = self.calls.levels
+        counts = self.frame[self.colour].value_counts()
+        n = dict(counts.rows())
+        values = self.calls.values(n.get(up, 0), n.get(down, 0))
+        return tuple(line.format_map(values) for line in self.calls.reading)
+
+    def summary(self) -> str:
+        """The one-line result at the default setting; empty without ``calls``."""
+        if self.calls is None:
+            return ""
+        up, down, _ = self.calls.levels
+        n = dict(self.frame[self.colour].value_counts().rows())
+        return self.calls.summary.format_map(self.calls.values(n.get(up, 0), n.get(down, 0)))
+
+    def all_lines(self) -> tuple[Line, ...]:
+        """``lines``, then with ``calls`` the three default cutoffs the page script moves."""
+        if self.calls is None:
+            return self.lines
+        t, line = self.calls.lfc_min, self.calls.y_line()
+        top = float(self.frame[self.y].to_numpy().max()) * 1.05
+        x = self.frame[self.x].to_numpy()
+        low, high = min(float(x.min()), -t), max(float(x.max()), t)
+        height = (line, line) if line is not None else (math.nan, math.nan)
+        horizontal = ((low, high), height)
+        return (
+            *self.lines,
+            # One name, so one legend entry toggles all three.
+            Line(CUTOFF_NAME, (t, t), (0.0, top), dash=True),
+            Line(CUTOFF_NAME, (-t, -t), (0.0, top), dash=True),
+            Line(CUTOFF_NAME, horizontal[0], horizontal[1], dash=True),
+        )
 
     def on_page(self) -> pl.DataFrame:
         """The points the HTML page draws: every kept point, the rest thinned by a stride."""
@@ -134,7 +295,7 @@ class ScatterData:
         stride = math.ceil(other / THIN_MAX)
         return (
             f"{self.caption} This page draws {drawn - (self.frame.height - other):,} of the "
-            f"{other:,} points outside the called set, every {stride}th in order of "
+            f"{other:,} points no setting can call, every {stride}th in order of "
             f"{self.y_label}; the CSV holds all {self.frame.height:,}."
         )
 
@@ -144,7 +305,16 @@ class ScatterData:
 
     def _axis_title(self, label: str, column: str) -> str:
         """Axis title with the unit from the column dictionary."""
-        return f"{label} ({self.columns[column][0]})"
+        return axis_title(label, self.columns[column][0])
+
+    def _name(self, level: Any) -> str:
+        """Legend text of a colour level."""
+        return (self.names or {}).get(level, str(level))
+
+    def _hover_format(self, column: str) -> str:
+        """Plotly number format for a column: none for text, digits for numbers."""
+        dtype = self.frame.schema[column]
+        return FLOAT_HOVER if dtype.is_float() else INT_HOVER if dtype.is_integer() else ""
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
@@ -175,15 +345,17 @@ class ScatterData:
                     rows[self.x].to_numpy(), rows[self.y].to_numpy(), s=MARKER_SIZE**2,
                     c=colour, marker=MARKERS[j][0], linewidths=LINE_WIDTHS["marker_edge"],
                 )  # fmt: skip
-        for line in self.lines:
-            ax.plot(line.x, line.y, color=theme.ink, linewidth=LINE_WIDTHS["line"])
+        for line in self.all_lines():
+            if math.isnan(line.y[0]):
+                continue
+            ax.plot(line.x, line.y, linewidth=LINE_WIDTHS["line"], **_line_style(line, theme))
         ax.set_xscale("log" if self.log_x else "linear")
         ax.set_yscale("log" if self.log_y else "linear")
         ax.set_xlabel(self._axis_title(self.x_label, self.x))
         ax.set_ylabel(fit_title(self._axis_title(self.y_label, self.y), height))
         present = set(self.frame[self.colour].unique())
         handles = [
-            Line2D([], [], marker="o", linestyle="", color=c, label=str(level))
+            Line2D([], [], marker="o", linestyle="", color=c, label=self._name(level))
             for level, c in colours.items()
             if level in present
         ]
@@ -192,7 +364,10 @@ class ScatterData:
                 Line2D([], [], marker=MARKERS[j][0], linestyle="", color=theme.ink, label=str(s))
                 for j, s in enumerate(shapes)
             ]
-        handles += [Line2D([], [], color=theme.ink, label=line.name) for line in self.lines]
+        handles += [
+            Line2D([], [], label=line.name, **_line_style(line, theme))
+            for line in {ln.name: ln for ln in self.all_lines() if not math.isnan(ln.y[0])}.values()
+        ]
         sns.despine(fig=fig)
         place_caption(fig, self.caption, width, height, ax=ax, handles=handles)
         if self.label:
@@ -260,8 +435,18 @@ class ScatterData:
 
         light = THEMES["white"]
         frame = self.on_page()
-        hover = [f"{self.x_label}: %{{x}}", f"{self.y_label}: %{{y}}"]
-        hover += [f"{c}: %{{customdata[{i}]}}" for i, c in enumerate(self.hover)]
+        x_title, y_title = (
+            self._axis_title(self.x_label, self.x),
+            self._axis_title(self.y_label, self.y),
+        )
+        hover = [
+            f"{x_title}: %{{x{self._hover_format(self.x)}}}",
+            f"{y_title}: %{{y{self._hover_format(self.y)}}}",
+            *(
+                f"{c}: %{{customdata[{i}]{self._hover_format(c)}}}"
+                for i, c in enumerate(self.hover)
+            ),
+        ]
         template = "<br>".join(hover) + "<extra></extra>"
         fig = go.Figure()
         shapes = self._levels(self.symbol)
@@ -272,55 +457,34 @@ class ScatterData:
             fig.add_trace(
                 go.Scatter(
                     x=rows[self.x].to_list(), y=rows[self.y].to_list(), mode="markers",
-                    name=str(level) if shape is None else f"{level}, {shape}",
+                    name=self._name(level) if shape is None else f"{self._name(level)}, {shape}",
                     marker={"color": self.colours[level] or light.reference,
                             "symbol": MARKERS[j][1], "size": PLOTLY_MARKER_PX},
                     customdata=rows.select(self.hover).rows(), hovertemplate=template,
                 )
             )  # fmt: skip
         # No text labels here: plotly cannot keep them apart; hover names every point.
-        for line in self.lines:
+        named = set()
+        for line in self.all_lines():
+            # The reference grey, never ink: a trace keeps its colour when the theme flips,
+            # and light ink vanishes on the dark page. A cutoff nothing reaches stays as an
+            # empty trace, so the page script finds every cutoff at a fixed index.
+            drawn = not math.isnan(line.y[0])
             fig.add_trace(
                 go.Scatter(
-                    x=list(line.x), y=list(line.y), mode="lines", name=line.name,
-                    line={"color": light.reference, "width": LINE_WIDTHS["line"]}, hoverinfo="skip",
+                    x=list(line.x), y=list(line.y) if drawn else [None, None], mode="lines",
+                    name=line.name, visible=drawn,
+                    line={"color": light.reference, "width": LINE_WIDTHS["line"],
+                          "dash": THRESHOLD_DASH[1] if line.dash else "solid"},
+                    hoverinfo="skip", showlegend=line.name not in named, legendgroup=line.name,
                 )
             )  # fmt: skip
-        caption, bottom = plotly_caption(self.caption_text(), figure_inches("double", "scatter")[0])
+            named.add(line.name)
         fig.update_layout(
             template=plotly_templates()["white"],
-            xaxis={"title": self._axis_title(self.x_label, self.x),
-                   "type": "log" if self.log_x else "linear"},
-            yaxis={"title": self._axis_title(self.y_label, self.y),
-                   "type": "log" if self.log_y else "linear"},
-            annotations=[caption],
-            margin={"b": bottom},
+            height=PLOTLY_HEIGHT_PX["scatter"],
+            showlegend=len(fig.data) > 1,
+            xaxis={"title": {"text": x_title}, "type": "log" if self.log_x else "linear"},
+            yaxis={"title": {"text": y_title}, "type": "log" if self.log_y else "linear"},
         )  # fmt: skip
-        if self.steps:
-            fig.update_layout(sliders=[self._slider(frame)], margin={"t": SLIDER_MARGIN_PX})
         return fig
-
-    def _slider(self, frame: pl.DataFrame) -> dict[str, Any]:
-        """A slider whose steps restyle each colour trace to that step's calls; no script."""
-        indices = list(range(len(self.colours) * len(self._levels(self.symbol))))
-        steps = []
-        for label, column in self.steps:
-            rows = self._trace_rows(frame, column)
-            restyle = {
-                "x": [r[self.x].to_list() for r in rows],
-                "y": [r[self.y].to_list() for r in rows],
-                "customdata": [r.select(self.hover).rows() for r in rows],
-            }
-            steps.append({"label": label, "method": "restyle", "args": [restyle, indices]})
-        active = next(i for i, (_, column) in enumerate(self.steps) if column == self.colour)
-        # Above the plot: below it, the slider covers the caption the figure carries.
-        return {
-            "active": active,
-            "steps": steps,
-            "currentvalue": {"prefix": "threshold: "},
-            "x": 0,
-            "y": 1.02,
-            "yanchor": "bottom",
-            "len": 0.6,
-            "pad": {"t": 0, "b": 10},
-        }

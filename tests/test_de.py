@@ -16,6 +16,7 @@ from ctx.dataset import Contrast, Split
 from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
+from ctx.de.stats import ALPHA, LFC_MIN, classify
 
 ROOT = Path(__file__).resolve().parents[1]
 BASIC = Contrast("basic", "condition", "control", "case", (6, 6))
@@ -55,18 +56,46 @@ def test_min_sample_size_eases_above_large_n():
 # --- planted truth ----------------------------------------------------------------------------
 
 
+def _significant(results: pl.DataFrame) -> pl.DataFrame:
+    """Genes at padj < ALPHA at any fold change: the model's own calls, as R3 and R7 read them.
+
+    The fold-change filter in ``call`` removes most false positives by itself, so a test on
+    ``call`` alone passes even with the multiple-testing correction dropped.
+    """
+    return results.filter(classify(pl.col("padj"), pl.col("log2FoldChange"), lfc_min=0.0) != "ns")
+
+
 def test_planted_recovered(basic):
     synthetic, result = basic
     truth = planted(synthetic)
-    called = result.results.filter(pl.col("call") != "ns")
-    false = sum(truth[g] == 0 for g in called["gene_id"])
     # BH bounds the expected FDR, not one draw's: 0.10 allows the draw's binomial spread.
-    assert called.height > 50
-    assert false / called.height <= 0.10, (false, called.height)
+    # The stored call is the one rule on the adjusted p, never on the raw one.
+    recount = result.results.select(classify(pl.col("padj"), pl.col("log2FoldChange")))
+    assert result.results["call"].to_list() == recount.to_series().to_list()
+    for called in (_significant(result.results), result.results.filter(pl.col("call") != "ns")):
+        false = sum(truth[g] == 0 for g in called["gene_id"])
+        assert called.height > 50
+        assert false / called.height <= 0.10, (false, called.height)
     signs = [np.sign(truth[g]) == np.sign(lfc) for g, lfc in
              called.filter(pl.col("gene_id").is_in([g for g, v in truth.items() if v]))
              .select("gene_id", "log2FoldChange").rows()]  # fmt: skip
     assert all(signs)
+
+
+def test_call_uses_adjusted_p():
+    # Moderate effects leave genes with raw p < ALPHA and |LFC| >= LFC_MIN that BH does not
+    # pass; on them alone, a call made on the raw p differs from the rule.
+    synthetic = design_counts(condition_lfc=1.0)
+    contrast = Contrast("c", "condition", "control", "case", (6, 6))
+    r = fit(synthetic.counts, synthetic.samples, contrast, {}, threads=1).results
+    raw_only = r.filter(
+        (pl.col("pvalue") < ALPHA) & (pl.col("log2FoldChange").abs() >= LFC_MIN)
+        & ~(pl.col("padj") < ALPHA)
+    )  # fmt: skip
+    assert raw_only.height > 0, "the case must tell the raw from the adjusted p"
+    assert set(raw_only["call"]) == {"ns"}
+    recount = r.select(classify(pl.col("padj"), pl.col("log2FoldChange"))).to_series()
+    assert r["call"].to_list() == recount.to_list()
 
 
 def test_reference_sign(basic):
@@ -221,14 +250,15 @@ def test_adjusted_removes_batch_genes():
     adjust = Contrast("adj", "condition", "control", "case", (17, 14), design="~batch + group")
     adjusted = fit(synthetic.counts, synthetic.samples, adjust, {}, threads=1)
 
-    def share(result) -> float:
-        rows = result.results.filter(pl.col("gene_id").is_in(batch_genes))
-        return rows.filter(pl.col("call") != "ns").height / len(batch_genes)
+    def share(rows: pl.DataFrame) -> float:
+        return rows.filter(pl.col("gene_id").is_in(batch_genes)).height / len(batch_genes)
 
-    naive_share, adjusted_share = share(naive), share(adjusted)
-    print(f"batch genes called: naive {naive_share:.3f}, adjusted {adjusted_share:.3f}")
-    assert naive_share >= 0.80
-    assert adjusted_share <= 0.05
+    for name, pick in (("significant", _significant),
+                       ("called", lambda r: r.filter(pl.col("call") != "ns"))):  # fmt: skip
+        naive_share, adjusted_share = share(pick(naive.results)), share(pick(adjusted.results))
+        print(f"batch genes {name}: naive {naive_share:.3f}, adjusted {adjusted_share:.3f}")
+        assert naive_share >= 0.80, name
+        assert adjusted_share <= 0.05, name
 
 
 def test_paired_beats_unpaired():
@@ -246,11 +276,15 @@ def test_paired_beats_unpaired():
         threads=1,
     )
 
-    def true_calls(result) -> int:
-        return sum(truth[g] != 0 for g in result.results.filter(pl.col("call") != "ns")["gene_id"])
+    def true_calls(rows: pl.DataFrame) -> int:
+        return sum(truth[g] != 0 for g in rows["gene_id"])
 
-    print(f"true calls: paired {true_calls(paired)}, unpaired {true_calls(unpaired)}")
-    assert true_calls(paired) > true_calls(unpaired)
+    # R7 compares significance at any fold change; the page's calls add the fold-change filter.
+    for name, pick in (("significant", _significant),
+                       ("called", lambda r: r.filter(pl.col("call") != "ns"))):  # fmt: skip
+        a, b = true_calls(pick(paired.results)), true_calls(pick(unpaired.results))
+        print(f"true {name}: paired {a}, unpaired {b}")
+        assert a > b, name
 
 
 # --- missing values, threads, PCA, pandas -----------------------------------------------------
