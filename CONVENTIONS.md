@@ -70,7 +70,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 ## Data and scope boundaries
 
 - TCGA raw reads are controlled-access; only processed expression from GDC is used. Do not attempt dbGaP data.
-- Tier-1 dataset: E-MTAB-11190, ENA PRJEB49000 (confirmed 2026-09-27, `TODO.md` D5; read length is confounded with the cancer groups and is taught, never hidden); fetchngs takes it as its ENA study accession (ERP or PRJEB), because it rejects `E-MTAB-*`. Cohort identifiers never go in `src/`, `tests/` (except the D20 fixture of nf-core's own test IDs), `scripts/`, `pyproject.toml` or `pixi.toml` (`tests/test_repo.py::test_no_cohort_identifiers`). Teaching subset and indices are prepared once on HPC and hosted on Zenodo; students never download full FASTQs.
+- Step-1 dataset: E-MTAB-11190, ENA PRJEB49000 (confirmed 2026-09-27, `TODO.md` D5; read length is confounded with the cancer groups and is taught, never hidden); fetchngs takes it as its ENA study accession (ERP or PRJEB), because it rejects `E-MTAB-*`. Cohort identifiers never go in `src/`, `tests/` (except the D20 fixture of nf-core's own test IDs), `scripts/`, `pyproject.toml` or `pixi.toml` (`tests/test_repo.py::test_no_cohort_identifiers`). Teaching subset and indices are prepared once on HPC and hosted on Zenodo; students never download full FASTQs.
 - Licences: code MIT, materials CC BY 4.0; respect KEGG, COSMIC, DisGeNET and miRTarBase terms (documented in `docs/`).
 
 ## Definition of done (per module)

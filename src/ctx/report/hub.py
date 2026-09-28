@@ -168,6 +168,7 @@ def run(
         href = Path(os.path.relpath(page, out)).as_posix()
         links.append(HubLink(TITLES.get(module, module), page.name, href, page.name[:10]))
     rules = _rules(rows)
+    shown = load(dataset_file).name if dataset_file else dataset
     gated = [r for r in rules if r.verdict != "RECORDED"]
     keys: tuple[KeyNumber, ...] = (
         KeyNumber("Modules run", f"{len(links)} of {len(links) + len(missing)}"),
@@ -178,8 +179,8 @@ def run(
             KeyNumber("Rules passed", f"{passed} of {len(gated)}", "recorded rules not counted"),
         )
     hub = HubPage(
-        title=f"Course hub: {dataset}",
-        intro=f"The newest page of every module run on {dataset}, in course order.",
+        title=f"Course hub: {shown}",
+        intro=f"The newest page of every module run on {shown}, in course order.",
         parameters=cards,
         links=tuple(links),
         missing=tuple(missing),

@@ -465,7 +465,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
-        title=f"M6 Function: {dataset}",
+        title=f"M6 Function: {spec.name}",
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,

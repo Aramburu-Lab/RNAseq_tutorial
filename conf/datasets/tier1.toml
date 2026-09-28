@@ -1,8 +1,10 @@
-# Tier-1 teaching cohort (D5). The one committed place for this cohort's identifiers:
+# Step-1 teaching cohort (D5). The one committed place for this cohort's identifiers:
 # tests/test_repo.py fails if any [guard] id or pattern appears in src/, tests/ or scripts/.
 
 [dataset]
 slug = "tier1"
+# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+label = "Step-1"
 ena_study = "PRJEB49000"
 ena_secondary_study = "ERP133445"
 arrayexpress = "E-MTAB-11190"
@@ -236,16 +238,17 @@ licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents 
 featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
 running = ["ndn_hsct_early", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
 
-# Pre-registered before any tier-1 count exists (P2C.1). Thresholds are choices fixed before
+# Pre-registered before any Step-1 count exists (P2C.1). Thresholds are choices fixed before
 # the data, not literature values. A failing rule is reported, never retuned. Rytis reviews
 # and edits these before the rule commit.
 
 [sanity]
 # The commit that last changed this line is the registration: nothing a verdict depends on
 # may change between it and the record (tests/test_sanity_record.py). First registered
-# 2026-09-27 (8219d16); registered again 2026-09-28, before any tier-1 count existed, after
-# the call rule changed (D-012, D-013).
-registered = "2026-09-28"
+# 2026-09-27 (8219d16); registered again 2026-09-28, before any Step-1 count existed, after
+# the call rule changed (D-012, D-013), and once more the same day for the shown name (D-014).
+# The time makes each registration a change to this line, which is how it is found.
+registered = "2026-09-28 14:36"
 
 [[sanity.rules]]
 id = "R1"

@@ -27,7 +27,32 @@ it were reversed.
 
 ---
 
-## D-013 — The tier-1 sanity rules are registered again, before any count exists
+## D-014 — The cohort tiers are called Steps; pages show a dataset's label
+
+**Date:** 2026-09-28 · **Status:** decided
+
+**Context.** Rytis asked for "tier1" and the other tiers to read "Step-1", "Step-2" and "Step-3". A dataset's slug names every output file, and file names are lowercase with underscores, so "Step-1" cannot be a slug.
+
+**Options.**
+- Change only the shown name and the prose.
+- Rename the slug and every path to `step1`: the dataset file, output names, `~/ctx_tier1` and the cluster paths.
+- Change the prose only.
+
+**Decision.** The shown name and the prose; this is Rytis's choice of 2026-09-28.
+- `[dataset] label = "Step-1"` in `conf/datasets/tier1.toml`, read through `Dataset.name`, is what page titles and the hub show. Without a label a page shows the slug.
+- The documents, test comments and page text say Step-1, Step-2 and Step-3 wherever they meant a cohort tier: 99 replacements. "data tier", which means access level, is untouched.
+- The slug `tier1`, every file name, `conf/datasets/tier1.toml`, `~/ctx_tier1` and the cluster paths keep `tier1`, so nothing already built or running is renamed under it.
+
+**Evidence.**
+- **The freeze, handled.** The dataset file is frozen (D-013), so the rules were registered again in the same commit that adds the label. `[sanity] registered` carries a time, so each registration changes that line.
+- **No count exists.** On 2026-09-28 at the registration, `~/ctx_tier1/data/raw` held only `tier1_meta`, and a search for counts, salmon or rnaseq under `~/ctx_tier1` found nothing.
+- **The label is tested.** `tests/test_curation.py::test_label_is_the_name_pages_show`.
+
+**Consequence.** A future dataset can carry any label. Its slug stays the file-name token, and the two can differ.
+
+---
+
+## D-013 — The Step-1 sanity rules are registered again, before any count exists
 
 **Date:** 2026-09-28 · **Status:** decided
 

@@ -6,7 +6,7 @@ r"""Walk through the tutorial as a student would, with the modules built so far:
 
 Each step prints what it teaches, runs the real command, and times it. Everything is written
 under --root, a course folder outside the repository. The study accession is an argument, so
-no cohort is fixed in code (the tier-1 dataset is decision D5).
+no cohort is fixed in code (the Step-1 dataset is decision D5).
 
 Usage:
     pixi run python scripts/python/tutorial_test_run.py --study <ERP/PRJEB accession> \\

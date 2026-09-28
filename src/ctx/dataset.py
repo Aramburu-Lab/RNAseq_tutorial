@@ -155,6 +155,14 @@ class Dataset:
     function: FunctionSpec | None = None
     sanity: Mapping[str, Any] = field(default_factory=dict)
 
+    @property
+    def name(self) -> str:
+        """The name pages show: ``[dataset] label`` where given, else the slug.
+
+        The slug names files, so it is lowercase with underscores; the label need not be.
+        """
+        return str(self.info.get("label", self.slug))
+
     def resource(self, name: str) -> Resource:
         """The resource with this name."""
         return next(r for r in self.resources if r.name == name)
@@ -315,6 +323,8 @@ def load(path: Path) -> Dataset:
     problems = [f"unknown table [{name}]" for name in sorted(set(raw) - TABLES)]
     info = raw.get("dataset", {})
     slug = _need(info, "slug", str, "dataset", problems)
+    if "label" in info:
+        _need(info, "label", str, "dataset", problems)
     resources = _resources(raw.get("resources", []), problems)
     columns = _columns(raw.get("columns", {}), problems)
     sdrf = _sdrf(raw["sdrf"], resources, problems) if "sdrf" in raw else None

@@ -236,3 +236,20 @@ def test_slug_must_match(tmp_path):
     done = _gather(tmp_path, other)
     assert done.returncode == 1
     assert "is for 'other', not --dataset 'synthetic'" in done.stderr
+
+
+def test_label_is_the_name_pages_show(tmp_path):
+    # The slug names files and stays lowercase; the label is what a reader sees (D-014).
+    assert load(SPEC).name == "synthetic"
+    labelled = tmp_path / "labelled.toml"
+    labelled.write_text(
+        SPEC.read_text().replace('slug = "synthetic"', 'slug = "synthetic"\nlabel = "Step-9"')
+    )
+    spec = load(labelled)
+    assert (spec.slug, spec.name) == ("synthetic", "Step-9")
+    wrong = tmp_path / "wrong.toml"
+    wrong.write_text(
+        SPEC.read_text().replace('slug = "synthetic"', 'slug = "synthetic"\nlabel = 9')
+    )
+    with pytest.raises(DatasetError, match="label"):
+        load(wrong)

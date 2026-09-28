@@ -1,7 +1,7 @@
-"""Track B at tier-1 size: 60,000 genes by 171 samples, the tier-1 contrasts at their real n.
+"""Track B at Step-1 size: 60,000 genes by 171 samples, the Step-1 contrasts at their real n.
 
 Marked ``budget`` and deselected by default; run once with ``-m budget -s`` and paste the
-printed measurements into TODO.md. The synthetic design mirrors tier 1's layout (cell types,
+printed measurements into TODO.md. The synthetic design mirrors Step-1's layout (cell types,
 batches, individuals shared across cell types and conditions, repeated samples), not its
 biology.
 """

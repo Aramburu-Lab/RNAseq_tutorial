@@ -81,7 +81,7 @@ def test_schema_errors_listed_together():
     assert "B: no source" in message and "rule id 'A' appears twice" in message
 
 
-# --- the tier-1 record (P2C.3), against the rules as committed before any count (P2C.1) ------
+# --- the Step-1 record (P2C.3), against the rules as committed before any count (P2C.1) ------
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -119,7 +119,7 @@ def rule_commit() -> str:
     A re-registration (D-013) moves it forward; it must still precede the record.
     """
     found = git("log", "--format=%H", "-G", r"^registered = ", "--", str(SPEC))
-    assert found, "no commit registers the tier-1 [sanity] rules"
+    assert found, "no commit registers the Step-1 [sanity] rules"
     return found.split()[0]
 
 
@@ -147,7 +147,7 @@ def test_frozen_since_registration():
     changed += git("ls-files", "--others", "--exclude-standard", "--", *FROZEN).split()
     assert not changed, (
         f"changed since the registration {rule_commit()[:7]}: {changed}. Revert the change, "
-        "or, only while no tier-1 count exists, register again: set [sanity] registered in "
+        "or, only while no Step-1 count exists, register again: set [sanity] registered in "
         "conf/datasets/tier1.toml and record why in knowledge/decisions.md (D-013)."
     )
 
@@ -157,7 +157,7 @@ def need_record():
         pytest.skip("shallow clone: CI checks out depth 1, so the rule commit is absent")
     verdicts, metrics = records()
     if verdicts is None or metrics is None:
-        pytest.skip("no tier-1 record in deliverables/ yet; it is written in P2C.3")
+        pytest.skip("no Step-1 record in deliverables/ yet; it is written in P2C.3")
     return verdicts, metrics
 
 

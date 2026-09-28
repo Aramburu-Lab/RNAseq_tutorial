@@ -510,7 +510,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
-        title=f"M1 Gather: {dataset}",
+        title=f"M1 Gather: {spec.name if spec else dataset}",
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,

@@ -895,7 +895,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     budget = runtime.budget(MODULE)
     bound = usage.peak_rss_self + settings.threads * usage.peak_rss_children
     page = ModulePage(
-        title=f"M5 Differential expression: {dataset}",
+        title=f"M5 Differential expression: {spec.name}",
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,

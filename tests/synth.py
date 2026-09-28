@@ -253,7 +253,7 @@ def demo_bar(synthetic: Synthetic, horizontal: bool = False):  # BarData
 
 
 def demo_bars_at_scale(horizontal: bool):  # BarData
-    """Bars at tier-1 scale: 20 labelled groups stacked by 2 batches, or 210 unlabelled runs."""
+    """Bars at Step-1 scale: 20 labelled groups stacked by 2 batches, or 210 unlabelled runs."""
     from ctx.viz.bar import BarData  # noqa: PLC0415
     from ctx.viz.style import category_colours  # noqa: PLC0415
 
@@ -278,7 +278,7 @@ def demo_bars_at_scale(horizontal: bool):  # BarData
     return BarData(
         frame=frame, columns=columns, category=category, value=value, category_label="Group",
         value_label=label, series="batch", colours=category_colours(["short", "long"]),
-        caption="Counts at the tier-1 scale; no test.", horizontal=horizontal,
+        caption="Counts at the Step-1 scale; no test.", horizontal=horizontal,
         stacked=True, width="double",
     )  # fmt: skip
 
@@ -403,7 +403,7 @@ def write_gene_sets(path, n_genes: int = 1000, seed: int = 5, n_random: int = 20
     rng = np.random.default_rng(seed)
     planted = [f"G{i + 1:05d}" for i in range(int(0.1 * n_genes))]
     others = [f"G{i + 1:05d}" for i in range(int(0.3 * n_genes), n_genes - len(SEX_GENES))]
-    # At most 100 genes each, near the tier-1 IFN-alpha set's 97 and under GSEA's 500.
+    # At most 100 genes each, near the Step-1 IFN-alpha set's 97 and under GSEA's 500.
     sets = {"UP_SET": planted[0::2][:100], "DOWN_SET": planted[1::2][:100]}
     sets |= {
         f"RANDOM_{j:02d}": list(rng.choice(others, int(rng.integers(15, 200)), replace=False))

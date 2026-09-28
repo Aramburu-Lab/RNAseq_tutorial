@@ -235,7 +235,7 @@ def test_split_is_seeded_and_stratified():
 
 
 def test_adjusted_removes_batch_genes():
-    """The D5 lesson at tier-1 sizes: case all long; control 4 long, 13 short."""
+    """The D5 lesson at Step-1 sizes: case all long; control 4 long, 13 short."""
     synthetic = design_counts(
         (("control", "short", 13), ("control", "long", 4), ("case", "long", 14)), batch_lfc=2.0
     )
