@@ -114,9 +114,21 @@ def rows(path: Path) -> list[dict[str, str]]:
 
 
 def rule_commit() -> str:
-    found = git("log", "--reverse", "--format=%H", "-S", "[[sanity.rules]]", "--", str(SPEC))
-    assert found, "no commit adds the tier-1 [sanity] rules"
+    """The registration: the newest commit that changed the ``[sanity] registered`` line.
+
+    A re-registration (D-013) moves it forward; it must still precede the record.
+    """
+    found = git("log", "--format=%H", "-G", r"^registered = ", "--", str(SPEC))
+    assert found, "no commit registers the tier-1 [sanity] rules"
     return found.split()[0]
+
+
+def test_registration_is_the_committed_date():
+    if git("rev-parse", "--is-shallow-repository") == "true":
+        pytest.skip("shallow clone: CI checks out depth 1, so the registration is absent")
+    registered = load(SPEC).sanity["registered"]
+    at_commit = git("show", f"{rule_commit()}:{SPEC.relative_to(ROOT).as_posix()}")
+    assert f'registered = "{registered}"' in at_commit
 
 
 def need_record():

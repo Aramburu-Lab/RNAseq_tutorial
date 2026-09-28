@@ -27,6 +27,39 @@ it were reversed.
 
 ---
 
+## D-013 — The tier-1 sanity rules are registered again, before any count exists
+
+**Date:** 2026-09-28 · **Status:** decided
+
+**Context.** The rules were registered on 2026-09-27 in commit 8219d16. `tests/test_sanity_record.py::test_rule_unchanged` then froze every file a verdict depends on, until the record commit:
+- `src/ctx/de` and `src/ctx/function`;
+- `src/ctx/viz/annotate.py` and `src/ctx/report/hub.py`;
+- the dataset files.
+
+The page redesign had to change those files: the call rule (D-012), the page text and the PERMANOVA without a movable label. Two of the rules, R3 and R7, also moved to the `significant` metric.
+
+**Options.**
+- **Two phases.** Change the pages now, and M5, M6 and the hub only after the record, when the cluster run is done.
+- **Narrow the freeze list,** which would still mean one edit to frozen files.
+- **Register again,** before any count exists.
+
+**Decision.** Register again. This is Rytis's choice of 2026-09-28.
+- The `[sanity]` table of `conf/datasets/tier1.toml` now holds `registered = "2026-09-28"`.
+- `rule_commit()` returns the newest commit that changed that line. The record must still come after it, and the freeze runs from it.
+- R1 to R8 keep their thresholds. R3 and R7 read `calls.<c>.significant`, BH padj < 0.05 at any fold change, which is the meaning they had, now under an explicit name.
+
+**Evidence that no count existed at registration.** On 2026-09-28, before this commit:
+- `~/ctx_tier1/data/raw` held only `tier1_meta`, the metadata-only fetchngs run.
+- `find ~/ctx_tier1 -iname '*counts*'` and `-iname '*salmon*'` found nothing.
+- No cluster step had returned output to this Mac. The cluster block's step 7, the only step that copies counts here, waits for this commit.
+
+**Consequence.**
+- **The freeze.** Any change to a frozen path between this commit and the record fails `test_rule_unchanged` when the record is committed.
+- **Registering once more** is allowed only while no count exists, and needs the same evidence line.
+- **An early warning** is possible: a test that fails as soon as a frozen path changes after registration, rather than at the record. It is not added, because it would block every M5 or M6 fix before P2C.3.
+
+---
+
 ## D-012 — A gene is called at padj < 0.05 and |log2 FC| at least 1; four adjustments on the page
 
 **Date:** 2026-09-28 · **Status:** decided

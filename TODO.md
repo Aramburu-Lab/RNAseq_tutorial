@@ -1218,7 +1218,7 @@ Tier 1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session p
   - Timing:
     - steps 0–3 can start now;
     - steps 4–6 wait for P2A.2;
-    - step 7 waits for the P2C.1 rule commit.
+    - step 7 waits for the P2R.5 re-registration commit (D-013).
   - Proven by the pasted checks, each with its expected value.
   - Any count short of 210 stops 2C until it is explained.
 
@@ -1519,7 +1519,7 @@ Exit gate:
 
 ### Phase 2C — Tier 1 plugs in; close
 
-- [x] **P2C.1 Tier-1 inputs and pre-registered rules.** The rule commit lands before step 7 copies any count.
+- [x] **P2C.1 Tier-1 inputs and pre-registered rules.** The rule commit lands before step 7 copies any count. (2026-09-28: registered again before any count, D-013; R3 and R7 now read `calls.<c>.significant`.)
   - Metadata-only fetchngs into `~/ctx_tier1/data/raw/tier1_meta`, with the command shape of `tutorial_test_run.py` `fetch()` (this run predates its `--monochrome_logs true`, D-006).
   - `ctx --root ~/ctx_tier1 setup --dataset-file conf/datasets/tier1.toml`.
   - Complete `tier1.toml`:
@@ -1676,7 +1676,7 @@ Rytis's decisions, 2026-09-28:
   Evidence, 2026-09-28:
   - **In the browser.** At 8 settings (all four methods, raw p, log2 and %, a fold-change threshold of 10), the page's counts and line height equal a Python recount of the results parquet. The no-line branch was checked on a scratch page with every p set to 0.5. The text a no-JavaScript reader sees equals the script's, word for word.
   - **Under node.** `tests/test_page_script.py` runs `_calls.js.j2` over 80 settings: the four adjusted columns and raw p, 4 cutoffs and 4 thresholds, including boundary rows. It compares against `classify`, and 5 mutations of the script were each caught. nodejs 26.10.0 is pinned in ctx-dev; the lock only gained packages.
-- [ ] **P2R.5 Rules and records.**
+- [x] **P2R.5 Rules and records.**
   - CONVENTIONS.md:51 and TODO.md:806 move the caption below the plot.
   - D-011 covers the caption, D-012 the call rule and adjustments, D-013 the re-registration.
   - The re-registration commit sets `[sanity] registered`, and `rule_commit()` reads it.
@@ -1714,7 +1714,7 @@ Rytis's decisions, 2026-09-28:
 ```
 # Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
 # Steps 0-3 can start now. Steps 4-6 wait until I confirm P2A.2 passed. Step 7 waits for the
-# P2C.1 rule commit. P2A.2 may rename files in steps 6 and 7.
+# P2R.5 re-registration commit (D-013). P2A.2 may rename files in steps 6 and 7.
 
 # ---- 0. Run root, space, allocation, Nextflow ----
 export P=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
@@ -1824,7 +1824,7 @@ du -sh "$P/nfcore_rnaseq/results" "$P/nfcore_rnaseq/work" "$P/nfcore_fetchngs/re
 sacct -X -n -S 2026-09-27 --name=nf_fetchngs,nf_rnaseq_tier1 --format=JobID,JobName,Elapsed,MaxRSS,State  # PASTE
 # Keep work/ and the FASTQs until I confirm the P2C.2 gather checks; after that it is your call.
 
-# ---- 7. On the Mac, after I confirm the rule commit: COPIED_FILES only, unchanged ----
+# ---- 7. On the Mac, after I confirm the re-registration commit: COPIED_FILES only, unchanged ----
 mkdir -p ~/ctx_tier1/data/raw/tier1_rnaseq
 rsync -avm --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1/nfcore_rnaseq/results/ ~/ctx_tier1/data/raw/tier1_rnaseq/
 du -sh ~/ctx_tier1/data/raw/tier1_rnaseq                               # PASTE
