@@ -1681,7 +1681,7 @@ Rytis's decisions, 2026-09-28:
   - D-011 covers the caption, D-012 the call rule and adjustments, D-013 the re-registration.
   - The re-registration commit sets `[sanity] registered`, and `rule_commit()` reads it.
   - Cluster step 7 waits for that commit.
-- [ ] **P2R.6 Verification.**
+- [x] **P2R.6 Verification.**
   - preflight;
   - pages at 1280 and 375 px in both themes, with one origin;
   - `pytest -m budget` with every page under 15 MB;
@@ -1698,6 +1698,13 @@ Rytis's decisions, 2026-09-28:
     | function | 16.5 s | 1,630,175,232 B | 6,642,839 B |
 
     Before the redesign the pages were 11,167,022 B and 6,602,147 B.
+  - **Tables, before and after.** Every M5 and M6 table on the synthetic pipeline was diffed column by column; each change is one D-012 intended.
+    - The results gain `padj_by`, `padj_holm` and `padj_bonferroni`. `call` changes in the 4 contrasts that have genes at padj < 0.05 with |log2 FC| < 1. log2FoldChange, pvalue, padj, stat and baseMean are identical.
+    - The contrasts table gains `genes_fitted`, and its up and down counts follow the new rule.
+    - The ORA tables change, because their input is the calls. The GSEA tables are identical.
+    - The metrics grow from 34 to 46 with `.up` and `.down`. Every old metric keeps its value, `.called` read as `.significant`, except `permanova.all.cell_type.p`. That goes from 1.0 to no p-value, because each synthetic individual gives one sample, so permuting within individuals cannot move a label. No rule reads it.
+  - **Frozen paths.** Their diff from the registration commit 350341e to HEAD is empty.
+  - **Before and after.** The M5, M6 and hub pages of both builds went to Rytis.
 
 **Not in Phase 2:**
 - Track A (M2–M4), strandedness in the sheet, and the teaching subset: Phase 3.
