@@ -15,12 +15,13 @@ import numpy as np
 import polars as pl
 import pytest
 
-from ctx.de.stats import ADJUSTMENTS, adjust, classify
+from ctx.de.stats import ADJUSTMENTS, adjust, classify, p_line
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_calls.js.j2"
 CFG = {"gate": "padj", "lfc": "log2FoldChange", "p": "pvalue", "alpha": 0.05,
-       "min_cutoff": 0.0001, "max_cutoff": 0.1}  # fmt: skip
+       "min_cutoff": 0.0001, "max_cutoff": 0.1, "n_tested": 400}  # fmt: skip
+# The tested genes _rows makes; the untested one is not counted.
 BASES = (*ADJUSTMENTS, "pvalue")
 CUTOFFS = (0.1, 0.05, 0.01, 0.001)
 THRESHOLDS = (0.0, math.log2(1.2), 1.0, 2.0)
@@ -29,7 +30,7 @@ THRESHOLDS = (0.0, math.log2(1.2), 1.0, 2.0)
 def _rows() -> pl.DataFrame:
     """Random tested genes, plus the boundary cases the rule must get exactly right."""
     rng = np.random.default_rng(7)
-    n = 400
+    n = CFG["n_tested"]
     p = np.concatenate([rng.uniform(0, 1e-4, 40), rng.uniform(0, 1, n - 40)])
     lfc = rng.normal(0, 1.5, n)
     lfc[:6] = [1.0, 1.0 - 1e-9, -1.0, -1.0 + 1e-9, 2.0, 0.0]  # at and just inside |LFC| = 1
@@ -48,14 +49,14 @@ def _rows() -> pl.DataFrame:
 
 
 def _python(rows: pl.DataFrame, basis: str, alpha: float, t: float) -> dict[str, float | None]:
-    """The oracle: classify on the chosen p, over tested genes only; the line from raw p."""
+    """The oracle: classify on the chosen p, over tested genes only; p_line for the line."""
     chosen = pl.when(pl.col("padj").is_not_null()).then(pl.col(basis))
     calls = rows.select(classify(chosen, pl.col("log2FoldChange"), alpha, t)).to_series()
-    passing = rows.filter(pl.col("padj").is_not_null() & (pl.col(basis) < alpha))["pvalue"]
+    passing = rows.filter(pl.col("padj").is_not_null() & (pl.col(basis) < alpha)).height
     return {
         "up": int((calls == "up").sum()),
         "down": int((calls == "down").sum()),
-        "line": float(passing.max()) if passing.len() else None,
+        "line": p_line(basis, alpha, CFG["n_tested"], passing),
     }
 
 
@@ -104,7 +105,9 @@ def test_counts_and_line_match_classify(ran):
     rows, grid, out = ran
     assert len(out["grid"]) == len(grid) == 80
     for (basis, alpha, t), page in zip(grid, out["grid"], strict=True):
-        assert page == _python(rows, basis, alpha, t), (basis, alpha, t)
+        # The BY constant is summed pairwise by numpy and in order by the page: last bits differ.
+        want = _python(rows, basis, alpha, t)
+        assert page == want | {"line": pytest.approx(want["line"], rel=1e-12)}, (basis, alpha, t)
 
 
 def test_the_grid_exercises_the_boundaries(ran):

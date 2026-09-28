@@ -10,7 +10,7 @@ from synth import design_counts
 
 from ctx.dataset import Contrast
 from ctx.de.deseq import fit
-from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, classify, p_cutoff
+from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, classify, p_line
 
 BASIC = Contrast("basic", "condition", "control", "case", (6, 6))
 # statsmodels names for the same four methods: the oracle, installed but not a ctx dependency.
@@ -113,12 +113,12 @@ def test_imports_without_polars():
         "import sys; sys.modules['polars'] = None\n"
         "import numpy as np\n"
         "from ctx.de import stats\n"
-        "print(stats.p_cutoff(np.array([0.01, 0.5]), stats.adjust(np.array([0.01, 0.5]), "
-        "'padj_holm'), stats.ALPHA))\n"
+        "print(stats.adjust(np.array([0.01, 0.5]), 'padj_holm')[0], "
+        "stats.p_line('padj_holm', stats.ALPHA, 2, 1))\n"
     )
     done = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, check=False)
     assert done.returncode == 0, done.stderr
-    assert done.stdout.strip() == "0.01"
+    assert done.stdout.strip() == "0.02 0.025"
 
 
 # --- the call rule at its boundaries ----------------------------------------------------------
@@ -158,29 +158,64 @@ def test_classify_takes_its_thresholds():
 # --- the volcano's horizontal line ------------------------------------------------------------
 
 
-def scan(p: np.ndarray, adjusted: np.ndarray, alpha: float) -> float | None:
-    """The cutoff by brute force: every gene visited, the largest passing p kept."""
-    best = None
-    for raw, adj in zip(p.tolist(), adjusted.tolist(), strict=True):
-        if adj < alpha and (best is None or raw > best):
-            best = raw
-    return best
+BASES = (*ADJUSTMENTS, "pvalue")
 
 
-@pytest.mark.parametrize("method", list(ADJUSTMENTS))
+def passing(p: np.ndarray, basis: str, alpha: float) -> np.ndarray:
+    """Which genes pass the cutoff on one basis: the rule, from the adjustment itself."""
+    return (p if basis == "pvalue" else adjust(p, basis)) < alpha
+
+
+def line_for(p: np.ndarray, basis: str, alpha: float) -> float:
+    line = p_line(basis, alpha, p.size, int(passing(p, basis, alpha).sum()))
+    assert line is not None
+    return line
+
+
+@pytest.mark.parametrize("basis", BASES)
 @pytest.mark.parametrize("alpha", [0.1, ALPHA, 0.01, 0.001])
-def test_p_cutoff_brute_force(method, alpha):
+def test_line_splits_passing_from_failing(basis, alpha):
+    # Exact because every adjustment is monotone in p, over data with ties and p = 1.
     p = random_p()
-    adjusted = adjust(p, method)
-    cutoff = p_cutoff(p, adjusted, alpha)
-    assert cutoff is not None and cutoff == scan(p, adjusted, alpha)
-    # Exact because the adjustment is monotone: the line splits passing from failing genes.
-    assert ((adjusted < alpha) == (p <= cutoff)).all()
+    assert ((p < line_for(p, basis, alpha)) == passing(p, basis, alpha)).all()
 
 
-@pytest.mark.parametrize("method", list(ADJUSTMENTS))
-def test_p_cutoff_none_pass(method):
+@pytest.mark.parametrize("basis", BASES)
+@pytest.mark.parametrize("alpha", [0.1, ALPHA, 0.001])
+def test_line_is_the_bar_the_weakest_gene_cleared(basis, alpha):
+    # Any value between the weakest passing p and the strongest failing one would split them;
+    # the line is the bar itself: the weakest passing gene moved just under it still passes,
+    # just over it fails. Ties removed, so moving one gene does not reorder its twin.
+    p = np.unique(random_p())
+    passes = passing(p, basis, alpha)
+    line = line_for(p, basis, alpha)
+    weakest = np.flatnonzero(passes)[np.argmax(p[passes])]
+    for factor, passes_after in ((1 - 1e-9, True), (1 + 1e-9, False)):
+        moved = p.copy()
+        moved[weakest] = line * factor
+        assert passing(moved, basis, alpha)[weakest] == passes_after, factor
+
+
+def test_line_moves_with_the_cutoff():
+    # The reported fault: no BH-adjusted p lies between 0.02 and 0.05, so both call the same
+    # two genes, and a line at the weakest passing gene's p did not move between them.
+    p = np.array([1e-6, 2e-6, 0.3, 0.6, 0.9])
+    assert passing(p, "padj", 0.05).sum() == passing(p, "padj", 0.02).sum() == 2
+    assert line_for(p, "padj", 0.05) == pytest.approx(2.5 * line_for(p, "padj", 0.02))
+
+
+@pytest.mark.parametrize("basis", BASES)
+def test_line_when_none_pass(basis):
+    # The first bar: what the strongest gene would have had to clear. No gene is under it.
     p = np.array([0.2, 0.5, 0.5, 1.0])
-    adjusted = adjust(p, method)
-    assert scan(p, adjusted, ALPHA) is None
-    assert p_cutoff(p, adjusted, ALPHA) is None
+    assert not passing(p, basis, ALPHA).any()
+    line = line_for(p, basis, ALPHA)
+    first = {"pvalue": ALPHA, "padj_by": ALPHA / (4 * (1 + 1 / 2 + 1 / 3 + 1 / 4))}
+    assert line == pytest.approx(first.get(basis, ALPHA / 4))
+    assert not (p < line).any()
+
+
+def test_no_line_without_tested_genes():
+    assert p_line("padj", ALPHA, 0, 0) is None
+    with pytest.raises(ValueError, match="unknown basis"):
+        p_line("fdr_bh", ALPHA, 10, 1)

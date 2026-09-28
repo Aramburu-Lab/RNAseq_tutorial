@@ -42,7 +42,7 @@ from ctx.de.page import (
     think,
     volcano_text,
 )
-from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, P_FLOOR, classify, p_cutoff
+from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, P_FLOOR, classify, p_line
 from ctx.gather.curation import rank_replicates
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
@@ -233,7 +233,7 @@ def _volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
     frame = result.results.join(genes, on="gene_id", how="left").filter(
         pl.col("padj").is_not_null()
     )
-    line = p_cutoff(frame["pvalue"].to_numpy(), frame["padj"].to_numpy(), ALPHA)
+    line = p_line("padj", ALPHA, frame.height, int((frame["padj"] < ALPHA).sum()))
     frame = frame.with_columns(
         gene=pl.coalesce("gene_name", "gene_id"),
         neg_log10_p=-pl.max_horizontal(pl.col("pvalue"), pl.lit(P_FLOOR)).log10(),

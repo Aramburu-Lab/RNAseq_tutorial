@@ -97,20 +97,40 @@ def adjust(p: np.ndarray, method: str) -> np.ndarray:
     raise ValueError(f"unknown adjustment {method!r}; one of {list(ADJUSTMENTS)}")
 
 
-def p_cutoff(p: np.ndarray, adjusted: np.ndarray, alpha: float) -> float | None:
-    """The largest raw p whose adjusted p is below alpha: the volcano's horizontal line.
+def p_line(basis: str, alpha: float, n_tested: int, n_passing: int) -> float | None:
+    """The raw p the cutoff sits at: the volcano's horizontal line, for any basis.
 
-    Exact, not an approximation, because every adjustment in ``ADJUSTMENTS`` is monotone
-    non-decreasing in p: a gene passes if and only if its raw p is at most this value. It
-    holds over the genes the adjustment was computed on, and nowhere else.
+    A tested gene has ``basis`` below ``alpha`` if and only if its raw p is below this value.
+    The value is the bar the weakest passing gene cleared in the procedure itself (rank k of
+    BH or BY, step k of Holm), or the first bar when no gene passes. So it is proportional to
+    ``alpha`` while no gene crosses, and the line moves with every cutoff, where the weakest
+    passing gene's own p stood still between cutoffs that call the same genes.
 
     Args:
-        p: Raw p-values.
-        adjusted: Their adjusted p-values, same order.
-        alpha: Threshold on the adjusted p, strict.
+        basis: ``"pvalue"`` for the raw p, or a key of ``ADJUSTMENTS``.
+        alpha: The cutoff on that basis, strict.
+        n_tested: Genes the adjustment counted over.
+        n_passing: Of those, the genes whose ``basis`` is below ``alpha``.
 
     Returns:
-        The cutoff on raw p, or None when no gene passes.
+        The line on the raw-p scale, or None when no gene was tested.
+
+    Raises:
+        ValueError: If ``basis`` is unknown.
     """
-    passing = p[adjusted < alpha]
-    return float(passing.max()) if passing.size else None
+    if n_tested == 0:
+        return None
+    m, rank = n_tested, max(n_passing, 1)
+    if basis == "pvalue":
+        return alpha
+    if basis == "padj":
+        return rank * alpha / m
+    if basis == "padj_by":
+        # The constant scipy's BY multiplies by, summed as scipy sums it.
+        harmonic = float(np.sum(1.0 / np.arange(1, m + 1)))
+        return rank * alpha / (m * harmonic)
+    if basis == "padj_holm":
+        return alpha / (m - rank + 1)
+    if basis == "padj_bonferroni":
+        return alpha / m
+    raise ValueError(f"unknown basis {basis!r}; pvalue or one of {list(ADJUSTMENTS)}")

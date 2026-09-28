@@ -27,6 +27,58 @@ it were reversed.
 
 ---
 
+## D-015 — The volcano's cutoff line sits at the bar the weakest passing gene cleared
+
+**Date:** 2026-09-28 · **Status:** decided
+
+**Context.** Rytis reported that the volcano's p-value cutoff "doesn't seem to work properly": only some cutoffs moved the dashed line. The line sat at the largest raw p among passing genes (D-012). That value moves only when a gene crosses the cutoff, and no gene's BH-adjusted p lay between several of the preset cutoffs, so the line stood still between them.
+
+**Options.**
+- Keep the line at the weakest passing gene and explain on the page why it does not move.
+- Draw the line at the bar the procedure itself sets, which moves with every cutoff and still separates passing from failing genes.
+
+**Decision.** The procedure's own bar, defined once in `ctx.de.stats.p_line` and repeated in `ctxCalls.line` in `templates/_calls.js.j2`. With m tested genes, k of them passing and j = max(k, 1):
+
+| Basis | Line on the raw-p scale |
+|---|---|
+| raw p | α |
+| BH | j·α/m |
+| BY | j·α/(m·c(m)), with c(m) = 1 + 1/2 + ... + 1/m |
+| Holm | α/(m − j + 1) |
+| Bonferroni | α/m |
+
+A tested gene passes if and only if its raw p is below the line. When no gene passes, the line is the first bar, the one the strongest gene would have had to clear. A line is missing only when no gene was tested.
+
+**Evidence.**
+- **Before and after, on the same page.** Synthetic M5 volcano, 999 tested genes, BH, measured in the browser pane:
+
+| Cutoff | Genes passing | Old line, -log10 p | New line, -log10 p |
+|---|---|---|---|
+| 0.1 | 106 | 2.00 | 1.97 |
+| 0.05 | 103 | 2.32 | 2.29 |
+| 0.02 | 100 | 4.85 | 2.70 |
+| 0.01 | 100 | 4.85 | 3.00 |
+| 0.005 | 100 | 4.85 | 3.30 |
+| 0.001 | 100 | 4.85 | 4.00 |
+
+- **The line still separates.** At 30 settings, 5 bases times 6 cutoffs, 0 tested genes on the page sit on the wrong side of the drawn line.
+- **Tested in `tests/test_stats.py`.** Covered at every basis and four cutoffs:
+  - the line splits passing from failing genes;
+  - the weakest passing gene, moved to 1 − 1e-9 of the line, still passes, and at 1 + 1e-9 it fails;
+  - the reported case: two cutoffs that call the same genes give lines 2.5 times apart.
+- **The page script is tested against Python.** `tests/test_page_script.py` checks the page script's line against `p_line` over 80 settings. The BY constant is summed pairwise by numpy and in order by the page, so the two agree to a relative 1e-12.
+- **Five mutants fail the tests:**
+  - k in place of max(k, 1);
+  - (k + 1)·α/m for BH;
+  - α/(m − k) for Holm;
+  - BY without c(m);
+  - the page's BH line times 1.01.
+- **Registered again.** `src/ctx/de` is frozen (D-013), so this commit changes `[sanity] registered`. At 2026-09-28 21:24, `~/ctx_tier1/data/raw` held only `tier1_meta`. A search under `~/ctx_tier1` for counts, salmon, rnaseq or quant files found nothing.
+
+**Consequence.** The line's height and the reading sentence "above the dashed line at -log10 p = X" change for every volcano, in the PDF and on the page. The calls, counts and tables do not change. The no-line sentence now covers only the case where no gene was tested.
+
+---
+
 ## D-014 — The cohort tiers are called Steps; pages show a dataset's label
 
 **Date:** 2026-09-28 · **Status:** decided
@@ -123,7 +175,7 @@ The page redesign had to change those files: the call rule (D-012), the page tex
 
 **Consequence.**
 - **Changed counts.** Every "up" and "down" count, the ORA input and the call-count bars now need the fold change, so they differ from pages written before 2026-09-28.
-- **The height is not the call.** The volcano's height is the raw p-value. Its horizontal line sits at the largest raw p whose adjusted p passes, which is exact because each adjustment is monotone in p. The page says so.
+- **The height is not the call.** The volcano's height is the raw p-value. Its horizontal line sits at the largest raw p whose adjusted p passes, which is exact because each adjustment is monotone in p. The page says so. Superseded by D-015: the line now sits at the bar the weakest passing gene cleared, which moves with the cutoff.
 - **Percent thresholds.** A percent is asymmetric in log2: +20 % is log2 1.2 = 0.263, and the same threshold down is 16.7 %. The page shows both.
 - **Reversing it.** Going back would change the rule, the metrics names and the sanity rules. It would need a new registration (D-013).
 

@@ -80,7 +80,7 @@ VOLCANO_SUMMARY = (
     "{basis} below {cutoff}."
 )
 LINE_RULE = "above the dashed line at -log10 p = {y_line}, where {basis} falls below {cutoff}"
-NO_LINE_RULE = "{basis} below {cutoff}, which no gene reaches here, so no line is drawn"
+NO_LINE_RULE = "{basis} below {cutoff}; no gene was tested, so no line is drawn"
 
 
 def _terms(design: str) -> set[str]:

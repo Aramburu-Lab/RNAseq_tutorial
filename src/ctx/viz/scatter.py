@@ -83,11 +83,12 @@ class Calls:
             thinned.
         n_tested: Points the adjustment counted over, drawn or thinned.
         p_floor: p-values below this are drawn at it; -log10 of 0 has no place on an axis.
-        p_line: The largest raw p whose default adjusted p passes, or None when none passes.
+        p_line: The raw p the default cutoff sits at (``ctx.de.stats.p_line``), or None
+            when no point was tested.
         reading: "How to read" lines with ``{placeholders}``, filled for any setting.
         summary: The one-line result with ``{placeholders}``.
         line_rule: How the horizontal line reads, with ``{placeholders}``.
-        no_line_rule: The same when no point passes, so no line is drawn.
+        no_line_rule: The same when no point was tested, so no line is drawn.
         levels: The colour column's level for up, down and not called.
     """
 

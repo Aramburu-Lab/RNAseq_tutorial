@@ -146,7 +146,7 @@ def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6): 
     """A volcano contract from the type_a samples: Welch t-test per gene, BH, live calls."""
     from scipy.stats import false_discovery_control, ttest_ind  # noqa: PLC0415
 
-    from ctx.de.stats import ALPHA, LFC_MIN, classify  # noqa: PLC0415 - keeps synth importable
+    from ctx.de.stats import ALPHA, LFC_MIN, classify, p_line  # noqa: PLC0415
     from ctx.viz.scatter import CUTOFF_PRESETS, Calls, ScatterData  # noqa: PLC0415
     from ctx.viz.style import ROLES  # noqa: PLC0415
 
@@ -186,7 +186,7 @@ def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6): 
         lfc="lfc", p="p", adjusted={"padj": "BH-adjusted p"}, raw_words="raw p",
         tested="case", reference="control", alpha=ALPHA, lfc_min=LFC_MIN,
         max_cutoff=max(CUTOFF_PRESETS), n_tested=frame.height, p_floor=1e-300,
-        p_line=float(passing.max()) if passing.len() else None,
+        p_line=p_line("padj", ALPHA, frame.height, passing.len()),
         reading=("Each dot is one of {n_tested} genes.", "Up in {tested}: {line_rule}."),
         summary="Up in {tested}: {n_up}. Down: {n_down}.",
         line_rule="above -log10 p = {y_line}", no_line_rule="none passes {basis} < {cutoff}",

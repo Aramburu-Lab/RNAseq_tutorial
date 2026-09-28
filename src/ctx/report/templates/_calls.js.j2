@@ -35,18 +35,34 @@ var ctxCalls = {
     if (!isFinite(v)) return cfg.alpha;
     return Math.min(cfg.max_cutoff, Math.max(cfg.min_cutoff, v));
   },
+  /* The raw p the cutoff sits at, as ctx.de.stats.p_line defines it: the bar the weakest
+     passing gene cleared, so it moves with every cutoff. passing counts the tested genes
+     whose chosen p is below alpha; cfg.n_tested counts every tested gene, drawn or not. */
+  line: function (basis, alpha, cfg, passing) {
+    var m = cfg.n_tested, rank = Math.max(passing, 1), harmonic = 0, i;
+    if (m === 0) return null;
+    if (basis === cfg.p) return alpha;
+    if (basis === "padj") return rank * alpha / m;
+    if (basis === "padj_by") {
+      for (i = 1; i <= m; i++) harmonic += 1.0 / i;
+      return rank * alpha / (m * harmonic);
+    }
+    if (basis === "padj_holm") return alpha / (m - rank + 1);
+    if (basis === "padj_bonferroni") return alpha / m;
+    throw new Error("unknown basis " + basis);
+  },
   call: function (rows, cfg, t, column, alpha) {
-    var parts = { up: [], down: [], ns: [] }, line = null;
+    var parts = { up: [], down: [], ns: [] }, passing = 0;
     rows.forEach(function (r) {
       var tested = r[cfg.gate] !== null && r[cfg.gate] !== undefined;
       var q = r[column], level = "ns";
       var called = tested && q !== null && q !== undefined && q < alpha;
       if (called && r[cfg.lfc] >= t) level = "up";
       else if (called && r[cfg.lfc] <= -t) level = "down";
-      if (called && (line === null || r[cfg.p] > line)) line = r[cfg.p];
+      if (called) passing += 1;
       parts[level].push(r);
     });
-    return { parts: parts, line: line };
+    return { parts: parts, line: ctxCalls.line(column, alpha, cfg, passing) };
   }
 };
 {% endraw %}
