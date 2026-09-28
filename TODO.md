@@ -1617,6 +1617,58 @@ Exit gate:
     - D-009: the tier-1 design, with the Fig. 4d PDAC IFN finding stated correctly.
     - D-010: deferrals, including the M5 top-50 heatmap (TODO.md:171) and notebooks.
 
+### Phase 2R — Page redesign, call rule and re-registration (approved 2026-09-28)
+
+Rytis asked for pages that look striking, read professionally, stay uncluttered, and explain every figure in practice with the run's own thresholds. The plan is `~/.claude/plans/parsed-tinkering-blanket.md`. The design base is the Editorial proposal, with 24 critique findings folded in.
+
+Rytis's decisions, 2026-09-28:
+- re-register the sanity rules before any tier-1 count, so the frozen files can change now;
+- a gene is called at padj < 0.05 and |log2 FC| ≥ 1, the fold change filtered after the Wald test;
+- the interactive volcano takes a fold-change cutoff (log2 or %), an adjusted or raw p cutoff, and one of four adjustment methods: BH, BY, Holm or Bonferroni;
+- R3 and R7 stay on padj alone, under the metric name `significant`;
+- captions go below the plot only.
+
+- [ ] **P2R.1 Statistics.** Changes:
+  - `de/stats.py` holds `ALPHA`, `LFC_MIN`, `classify(padj, lfc, alpha, lfc_min)`, `ADJUSTMENTS`, `adjust()` and `p_cutoff()`.
+  - `deseq.py` adds `padj_by`, `padj_holm` and `padj_bonferroni` over the BH-tested genes.
+  - The metrics are `calls.<c>.significant`, plus `.up` and `.down`.
+  - The rules in `tier1.toml` and `de_synthetic.toml` are renamed to match.
+
+  Proven by:
+  - BH equals pydeseq2 padj within 1e-12;
+  - each method equals statsmodels;
+  - `classify` at its boundaries;
+  - `p_cutoff` against brute force;
+  - mutation checks.
+- [ ] **P2R.2 Visual system.**
+  - Tokens in `viz/style.py`.
+  - `_page.css.j2`, `_page.js.j2` and `_cards.html.j2`.
+  - Masthead, contents rail, key numbers at the top of Results, groups and tabs, figure cards, collapsed card effects and versions, Copy, hub pills.
+  - The caption is dropped from inside the plot, and the reference-line labels are restored.
+  - `viz/axes.axis_title`.
+- [ ] **P2R.3 Page content.** Changes:
+  - `FigureText` carries a title, a lead and the "How to read" lines, all filled from data.
+  - M5 copy moves to the new `de/page.py`, with dataset-neutral self-checks.
+  - M6, M1, M0 and the hub are restructured.
+
+  Proven by:
+  - no tier-1 wording on the synthetic pages;
+  - no em dashes in `src/`.
+- [ ] **P2R.4 Interactive volcano.** It has fold-change (log2 or %), p basis, cutoff and method controls. A live sentence, the colours and the cutoff lines update together. Only points that no setting can call are thinned.
+
+  Proven by page counts equal to Python counts at 6 or more settings, in the browser.
+- [ ] **P2R.5 Rules and records.**
+  - CONVENTIONS.md:51 and TODO.md:806 move the caption below the plot.
+  - D-011 covers the caption, D-012 the call rule and adjustments, D-013 the re-registration.
+  - The re-registration commit sets `[sanity] registered`, and `rule_commit()` reads it.
+  - Cluster step 7 waits for that commit.
+- [ ] **P2R.6 Verification.**
+  - preflight;
+  - pages at 1280 and 375 px in both themes, with one origin;
+  - `pytest -m budget` with every page under 15 MB;
+  - tables diffed before and after;
+  - before-and-after screenshots to Rytis.
+
 **Not in Phase 2:**
 - Track A (M2–M4), strandedness in the sheet, and the teaching subset: Phase 3.
 - Heatmaps, UpSet, Venn, paired Wilcoxon: Phase 4.
@@ -1643,22 +1695,22 @@ projinfo                                                              # PASTE
 source /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/nextflow_env.sh
 nextflow -version                                                     # PASTE
 
-# ---- 1. Full download with the lab launcher, unchanged (fetchngs 1.12.0) ----
-# The launcher takes no extra flags, so this launch-directory config carries them; Nextflow
-# reads it. monochrome_logs reaches the run and stops nf-validation 1.1.3's monochromeLogs
-# warning (D-006). A publish_dir_mode here would NOT reach publishDir, which fetchngs resolves
-# while parsing its own config: tested on the Mac 2026-09-27, `nextflow config` still shows
-# mode:'copy' for SRA_FASTQ_FTP and every published file had one link. So the FASTQs are
-# copied: results/ and work/ each hold the 287 GB.
+# ---- 1. Full download with the lab launcher (fetchngs 1.12.0) ----
+# On the Mac first, deploy the launcher's PUBLISH_DIR_MODE setting (General_tools, 2026-09-28):
+#   cd /Users/rytis/Scripts/General_tools && hpc_sync push code    # dry run; review the list
+#   hpc_sync push code --apply
+# The launcher takes no other flags, so this launch-directory config carries monochrome_logs;
+# Nextflow reads it, and it stops nf-validation 1.1.3's monochromeLogs warning (D-006). A
+# publish_dir_mode there would NOT reach publishDir (D-006), so PUBLISH_DIR_MODE=link below
+# makes the launcher pass --publish_dir_mode link: results/ and work/ share one 287 GB copy.
 printf 'executor {\n    queueSize = 50\n}\nparams {\n    monochrome_logs = true\n}\n' > "$P/nfcore_fetchngs/nextflow.config"
 printf 'PRJEB49000\n' > "$P/ids.txt"
-# STOP and paste if less than about 900 GB is free: 287 GB in fetchngs results/, 287 GB in its
-# work/, up to as much again of trimmed reads in the rnaseq work/, plus references and index.
-# My arithmetic from 287 GB of FASTQ, not a measurement. To keep one copy instead, the
-# launcher would have to pass --publish_dir_mode link on the command line, which does
-# hard-link (tested the same day); it is your script, so that is your call.
-DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq     # PASTE
-sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq
+# STOP and paste if less than about 600 GB is free: 287 GB of FASTQ once, up to as much again
+# of trimmed reads in the rnaseq work/, plus references and index. My arithmetic from 287 GB
+# of FASTQ, not a measurement. STOP too if the dry run lacks either "publish mode : link" or
+# "--publish_dir_mode link": the cluster launcher is then the old one, which copies (~900 GB).
+PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq     # PASTE
+PUBLISH_DIR_MODE=link sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq
 
 # ---- 2. GENCODE 50; MD5 values from release_50/MD5SUMS, read 2026-09-27 ----
 cd "$P/refs"
@@ -1670,11 +1722,12 @@ cd "$P"
 # ---- 3. After the fetchngs job ends ----
 R="$P/nfcore_fetchngs/results"
 tail -n 25 "$P"/slurm-nf_fetchngs-*.out                               # PASTE
+grep -h 'publish mode' "$P"/slurm-nf_fetchngs-*.out                    # PASTE, expect link
 ls "$R"/fastq/*.fastq.gz | wc -l                                      # PASTE, expect 210
 ls "$R"/fastq/md5/*.md5 | wc -l                                       # PASTE, expect 210
 awk 'END{print NR}' "$R/samplesheet/samplesheet.csv"                  # PASTE, expect 211
-find "$R/fastq" -name '*.fastq.gz' -links 1 | wc -l                   # PASTE, expect 210: copies, not links
-du -sh "$R/fastq" "$P/nfcore_fetchngs/work"                           # PASTE
+find "$R/fastq" -name '*.fastq.gz' -links 1 | wc -l                   # PASTE, expect 0: each hard-linked to work/
+du -sh "$R/fastq" "$P/nfcore_fetchngs/work"                           # PASTE; du counts a linked file once, so work/ looks small
 
 # ---- 4. rnaseq samplesheet: the fetchngs sheet cut to four columns, a new file beside it ----
 python3 -c "
