@@ -1218,7 +1218,7 @@ Step-1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session p
   - Timing:
     - steps 0–3 can start now;
     - steps 4–6 wait for P2A.2;
-    - step 7 waits for the newest registration commit (D-013 to D-015), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
+    - step 7 waits for the newest registration commit (D-013 to D-016), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
   - Proven by the pasted checks, each with its expected value.
   - Any count short of 210 stops 2C until it is explained.
 
@@ -1629,7 +1629,7 @@ Rytis's decisions, 2026-09-28:
 - captions go below the plot only.
 
 - [x] **P2R.1 Statistics.** Changes:
-  - `de/stats.py` holds `ALPHA`, `LFC_MIN`, `classify(padj, lfc, alpha, lfc_min)`, `ADJUSTMENTS`, `adjust()` and `p_cutoff()`.
+  - `de/stats.py` holds `ALPHA`, `LFC_MIN`, `classify(padj, lfc, alpha, lfc_min)`, `ADJUSTMENTS`, `adjust()` and `p_cutoff()`. `p_cutoff()` was replaced by `p_line()` (D-015).
   - `deseq.py` adds `padj_by`, `padj_holm` and `padj_bonferroni` over the BH-tested genes.
   - The metrics are `calls.<c>.significant`, plus `.up` and `.down`.
   - The rules in `tier1.toml` and `de_synthetic.toml` are renamed to match.
@@ -1638,7 +1638,7 @@ Rytis's decisions, 2026-09-28:
   - BH equals pydeseq2 padj within 1e-12;
   - each method equals statsmodels;
   - `classify` at its boundaries;
-  - `p_cutoff` against brute force;
+  - `p_cutoff` against brute force, since replaced by the `p_line` tests (D-015);
   - mutation checks.
 
   Evidence, 2026-09-28:
@@ -1674,7 +1674,7 @@ Rytis's decisions, 2026-09-28:
   Proven by page counts equal to Python counts at 6 or more settings, in the browser.
 
   Evidence, 2026-09-28:
-  - **In the browser.** At 8 settings (all four methods, raw p, log2 and %, a fold-change threshold of 10), the page's counts and line height equal a Python recount of the results parquet. The no-line branch was checked on a scratch page with every p set to 0.5. The text a no-JavaScript reader sees equals the script's, word for word.
+  - **In the browser.** At 8 settings (all four methods, raw p, log2 and %, a fold-change threshold of 10), the page's counts and line height equal a Python recount of the results parquet. The no-line branch was checked on a scratch page with every p set to 0.5; since D-015 that page draws the first bar instead. The text a no-JavaScript reader sees equals the script's, word for word.
   - **Under node.** `tests/test_page_script.py` runs `_calls.js.j2` over 80 settings: the four adjusted columns and raw p, 4 cutoffs and 4 thresholds, including boundary rows. It compares against `classify`, and 5 mutations of the script were each caught. nodejs 26.10.0 is pinned in ctx-dev; the lock only gained packages.
 - [x] **P2R.5 Rules and records.**
   - CONVENTIONS.md:51 and TODO.md:806 move the caption below the plot.
@@ -1732,7 +1732,7 @@ Rytis's decisions, 2026-09-28:
 ```
 # Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
 # Steps 0-3 can start now. Steps 4-6 wait until I confirm P2A.2 passed. Step 7 waits for the
-# newest registration commit (D-013 to D-015). P2A.2 may rename files in steps 6 and 7.
+# newest registration commit (D-013 to D-016). P2A.2 may rename files in steps 6 and 7.
 
 # ---- 0. Run root, space, allocation, Nextflow ----
 export P=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1

@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 import pytest
-from synth import design_counts
+from synth import design_counts, filtered_counts
 
 from ctx.dataset import Contrast, Split
 from ctx.de import deseq
@@ -294,18 +294,7 @@ def test_na_reasons():
     # Moderate effects and 600 low-count null genes: filtering them lets BH reject more, which
     # is when pydeseq2's independent filtering removes genes (ds.py _independent_filtering).
     synthetic = design_counts(condition_lfc=1.0)
-    rng = np.random.default_rng(1)
-    names = synthetic.samples["sample"].to_list()
-    low = pl.DataFrame(
-        {"gene_id": [f"low{i:03d}" for i in range(600)],
-         **{c: rng.negative_binomial(10, 10 / 30, 600).astype(np.int32) for c in names}}
-    )  # fmt: skip
-    first = names[0]
-    counts = pl.concat([synthetic.counts, low]).with_columns(
-        pl.when(pl.col("gene_id") == "g00500").then(pl.col(first) * 100 + 5000)
-        .otherwise(pl.col(first)).alias(first)
-    )  # fmt: skip
-    result = fit(counts, synthetic.samples, BASIC, {}, threads=1).results
+    result = fit(filtered_counts(synthetic), synthetic.samples, BASIC, {}, threads=1).results
     reason = dict(result.select("gene_id", "na_reason").rows())
     assert reason["g00500"] == "cooks_outlier"
     assert set(reason.values()) == {"tested", "cooks_outlier", "independent_filter"}

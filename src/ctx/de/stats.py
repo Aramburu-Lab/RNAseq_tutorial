@@ -100,7 +100,9 @@ def adjust(p: np.ndarray, method: str) -> np.ndarray:
 def p_line(basis: str, alpha: float, n_tested: int, n_passing: int) -> float | None:
     """The raw p the cutoff sits at: the volcano's horizontal line, for any basis.
 
-    A tested gene has ``basis`` below ``alpha`` if and only if its raw p is below this value.
+    A tested gene has ``basis`` below ``alpha`` if and only if its raw p is below this value,
+    in exact arithmetic. In floating point a p within one unit in the last place of the bar
+    can land on either side, because ``adjust`` rounds p * m / i and this rounds k * alpha / m.
     The value is the bar the weakest passing gene cleared in the procedure itself (rank k of
     BH or BY, step k of Holm), or the first bar when no gene passes. So it is proportional to
     ``alpha`` while no gene crosses, and the line moves with every cutoff, where the weakest
@@ -120,6 +122,8 @@ def p_line(basis: str, alpha: float, n_tested: int, n_passing: int) -> float | N
     """
     if n_tested == 0:
         return None
+    # ponytail: the bar, not a value clamped between the weakest passing and the strongest
+    # failing p. Clamp if p-values on an exact grid (rounded to 1e-6, say) ever reach a page.
     m, rank = n_tested, max(n_passing, 1)
     if basis == "pvalue":
         return alpha

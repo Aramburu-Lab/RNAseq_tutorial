@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import polars as pl
 import pytest
-from synth import design_counts
+from synth import design_counts, filtered_counts
 
 from ctx.dataset import Contrast
 from ctx.de.deseq import fit
@@ -31,17 +31,7 @@ def filtered():
     and the test could not tell them apart.
     """
     synthetic = design_counts(condition_lfc=1.0)
-    rng = np.random.default_rng(1)
-    names = synthetic.samples["sample"].to_list()
-    low = pl.DataFrame(
-        {"gene_id": [f"low{i:03d}" for i in range(600)],
-         **{c: rng.negative_binomial(10, 10 / 30, 600).astype(np.int32) for c in names}}
-    )  # fmt: skip
-    counts = pl.concat([synthetic.counts, low]).with_columns(
-        pl.when(pl.col("gene_id") == "g00500").then(pl.col(names[0]) * 100 + 5000)
-        .otherwise(pl.col(names[0])).alias(names[0])
-    )  # fmt: skip
-    return fit(counts, synthetic.samples, BASIC, {}, threads=1).results
+    return fit(filtered_counts(synthetic), synthetic.samples, BASIC, {}, threads=1).results
 
 
 def random_p(seed: int = 3) -> np.ndarray:
@@ -181,7 +171,7 @@ def test_line_splits_passing_from_failing(basis, alpha):
 
 
 @pytest.mark.parametrize("basis", BASES)
-@pytest.mark.parametrize("alpha", [0.1, ALPHA, 0.001])
+@pytest.mark.parametrize("alpha", [0.1, ALPHA, 0.01, 0.001])
 def test_line_is_the_bar_the_weakest_gene_cleared(basis, alpha):
     # Any value between the weakest passing p and the strongest failing one would split them;
     # the line is the bar itself: the weakest passing gene moved just under it still passes,

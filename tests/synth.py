@@ -352,6 +352,25 @@ def design_counts(  # noqa: PLR0913 - each argument is one knob of the planted d
     return Synthetic(matrix.insert_column(0, truth["gene_id"]), sheet, truth)
 
 
+def filtered_counts(synthetic: Synthetic, outlier: str = "g00500") -> pl.DataFrame:
+    """The counts plus 600 low null genes and one Cook's outlier in ``outlier``.
+
+    Both of pydeseq2's filters then remove genes, which a test needs whenever the tested set
+    must differ from every gene: the reasons, BH over the tested set, the volcano's m.
+    """
+    rng = np.random.default_rng(1)
+    names = synthetic.samples["sample"].to_list()
+    low = pl.DataFrame(
+        {"gene_id": [f"low{i:03d}" for i in range(600)],
+         **{c: rng.negative_binomial(10, 10 / 30, 600).astype(np.int32) for c in names}}
+    )  # fmt: skip
+    first = names[0]
+    return pl.concat([synthetic.counts, low]).with_columns(
+        pl.when(pl.col("gene_id") == outlier).then(pl.col(first) * 100 + 5000)
+        .otherwise(pl.col(first)).alias(first)
+    )  # fmt: skip
+
+
 SEX_GENES = ("XIST", "RPS4Y1", "DDX3Y", "KDM5D", "UTY", "EIF1AY")
 
 

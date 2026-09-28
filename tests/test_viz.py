@@ -24,7 +24,7 @@ from synth import (
     demo_volcano,
 )
 
-from ctx.de.stats import classify
+from ctx.de.stats import classify, p_line
 from ctx.io.naming import stem
 from ctx.report.builder import FigureText
 from ctx.viz import box
@@ -464,19 +464,23 @@ def test_empty_bars_refused():
         dataclasses.replace(data, frame=data.frame.head(0))
 
 
-def _live_volcano() -> ScatterData:
+def _live_volcano(padj: list | None = None) -> ScatterData:
     frame = pl.DataFrame(
         {
             "gene_id": [f"g{i}" for i in range(10)],
             "lfc": [1.0, -1.0, 2.0, -2.0, 0.5, -0.5, 1.5, 3.0, -3.0, 0.999],
             "p": [1e-4, 2e-4, 1e-3, 0.02, 0.01, 0.03, 0.2, 0.001, 0.5, 1e-5],
-            "padj": [0.001, 0.001, 0.01, 0.05, 0.04, 0.1, 0.2, None, float("nan"), 0.0001],
+            "padj": padj or [0.001, 0.001, 0.01, 0.05, 0.04, 0.1, 0.2, None, float("nan"), 1e-4],
         }
     ).with_columns(y=-pl.col("p").log10(), call=classify(pl.col("padj"), pl.col("lfc")))
+    # None and NaN are untested: the page embeds NaN as null.
+    tested = frame.filter(pl.col("padj").is_not_nan())
+    passing = tested.filter(pl.col("padj") < 0.05).height
     calls = Calls(
         lfc="lfc", p="p", adjusted={"padj": "BH-adjusted p"}, raw_words="raw p", tested="case",
-        reference="control", alpha=0.05, lfc_min=1.0, max_cutoff=0.1, n_tested=7,
-        p_floor=1e-300, p_line=0.01, reading=("{n_up} up in {tested}; {line_rule}",),
+        reference="control", alpha=0.05, lfc_min=1.0, max_cutoff=0.1, n_tested=tested.height,
+        p_floor=1e-300, p_line=p_line("padj", 0.05, tested.height, passing),
+        reading=("{n_up} up in {tested}; {line_rule}",),
         summary="{n_up} up, {n_down} down", line_rule="line at {y_line}",
         no_line_rule="no line",
     )  # fmt: skip
@@ -502,8 +506,9 @@ def test_live_volcano_default_from_figure():
     assert len(xs["down"]) == sum(p < 0.05 and fc <= -1 for p, fc in rows) == 1
     fc_up, fc_down, p_line = (fig.data[i] for i in controls["cutoff_lines"])
     assert (fc_up.x, fc_down.x) == ((1.0, 1.0), (-1.0, -1.0))
-    assert p_line.y == pytest.approx((2.0, 2.0))  # -log10 of p_line = 0.01
-    assert data.reading() == ("2 up in case; line at 2.00",)
+    # The bar of the 5th of 8 tested genes: 5 x 0.05 / 8, written without p_line.
+    assert p_line.y == pytest.approx((-math.log10(5 * 0.05 / 8),) * 2)
+    assert data.reading() == ("2 up in case; line at 1.51",)
     assert data.summary() == "2 up, 1 down"
     assert list(data.page_table().columns) == ["gene_id", "lfc", "p", "padj"]
 
@@ -517,13 +522,20 @@ def test_live_volcano_refuses_what_the_page_cannot_redraw():
         figure_block(data, "x", FigureText(reading=("A line the page would overwrite.",)))
 
 
-def test_live_volcano_no_line_when_nothing_passes():
+def test_live_volcano_line_when_nothing_passes():
+    # D-015: the first bar, 0.05 / 8, which no gene clears; not a hidden line.
+    data = _live_volcano([0.5] * 7 + [None, float("nan"), 0.5])
+    line = data.interactive().data[data.controls()["cutoff_lines"][2]]
+    assert line.visible is not False
+    assert line.y == pytest.approx((-math.log10(0.05 / 8),) * 2)
+    assert data.reading() == ("0 up in case; line at 2.20",)
+
+
+def test_live_volcano_hides_a_missing_line():
+    # The contract's own no-line state; p_line gives it only when no gene was tested.
     data = _live_volcano()
-    calls = dataclasses.replace(data.calls, p_line=None)
-    data = dataclasses.replace(data, calls=calls)
-    fig = data.interactive()
-    p_line = fig.data[data.controls()["cutoff_lines"][2]]
-    assert p_line.visible is False
+    data = dataclasses.replace(data, calls=dataclasses.replace(data.calls, p_line=None))
+    assert data.interactive().data[data.controls()["cutoff_lines"][2]].visible is False
     assert data.reading() == ("2 up in case; no line",)
 
 

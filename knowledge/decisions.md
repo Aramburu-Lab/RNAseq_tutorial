@@ -27,6 +27,38 @@ it were reversed.
 
 ---
 
+## D-016 — Registered again for the fixes an adversarial review of D-015 found
+
+**Date:** 2026-09-28 · **Status:** decided
+
+**Context.** An adversarial review of commit f95010b (D-015) gave 10 findings. One skeptic per finding tried to refute it; 8 survived, and one of those was reported twice. None changes a shipped page. The fixes touch `src/ctx/de/stats.py` and `conf/datasets/tier1.toml`, which are frozen (D-013).
+
+**Options.**
+- Leave the frozen files as they are and correct only the tests and documents.
+- Register again, which is allowed while no Step-1 count exists.
+
+**Decision.** Register again, and fix each finding:
+
+| Finding | Fix |
+|---|---|
+| `p_line`'s "if and only if" breaks at the last bit | The docstring and D-015 say where it holds, and a `ponytail:` comment names the clamp that would close it |
+| `tests/test_viz.py`'s live-volcano fixture drew the old line, with n_tested 7 against 8 tested rows | It computes its line with `p_line` over its tested rows; the test writes the bar out as 5 × 0.05 / 8 |
+| Nothing checked that the static line equals the line the page script draws on load | `tests/test_page_script.py::test_static_line_is_the_line_the_page_draws_on_load` runs `run._volcano` on a fit with filtered genes through `figure_block` and the page script |
+| A viz test still expected no line when nothing passes | It now expects the first bar; a second test keeps the contract's own no-line state |
+| The registration comment, TODO.md and D-012 still described the old line or `p_cutoff` | Updated in place, with pointers to D-015 |
+| D-015 overstated its test coverage | Reworded, and the tightness test now runs at 0.01 as well |
+
+**Evidence.**
+- **The parity test discriminates.** A producer that counts m over every gene, not the tested ones, passes on the default design, where every gene is tested. On `tests/synth.py::filtered_counts`, where Cook's and independent filtering remove genes, it fails. That helper now builds this matrix for `test_de`, `test_stats` and the parity test, in place of two inline copies.
+- **No count exists.** At 2026-09-28 21:45, `~/ctx_tier1/data/raw` held only `tier1_meta`.
+- **Refuted findings, not acted on.** Two findings were refuted:
+  - `ScatterData.all_lines` raises on an empty frame. That happens before f95010b too, so this commit did not cause it.
+  - `tests/synth.py`'s no-line sentence can show only when no gene was tested.
+
+**Consequence.** Step 7 of the cluster block waits for this registration commit.
+
+---
+
 ## D-015 — The volcano's cutoff line sits at the bar the weakest passing gene cleared
 
 **Date:** 2026-09-28 · **Status:** decided
@@ -47,7 +79,7 @@ it were reversed.
 | Holm | α/(m − j + 1) |
 | Bonferroni | α/m |
 
-A tested gene passes if and only if its raw p is below the line. When no gene passes, the line is the first bar, the one the strongest gene would have had to clear. A line is missing only when no gene was tested.
+A tested gene passes if and only if its raw p is below the line, in exact arithmetic. In floating point, a p within one unit in the last place of the bar can land on either side. The review behind D-016 built such cases from p-values on the bar's own double, and found 0 of them in 1,600 settings with continuous p-values. When no gene passes, the line is the first bar, the one the strongest gene would have had to clear. A line is missing only when no gene was tested.
 
 **Evidence.**
 - **Before and after, on the same page.** Synthetic M5 volcano, 999 tested genes, BH, measured in the browser pane:
@@ -62,10 +94,10 @@ A tested gene passes if and only if its raw p is below the line. When no gene pa
 | 0.001 | 100 | 4.85 | 4.00 |
 
 - **The line still separates.** At 30 settings, 5 bases times 6 cutoffs, 0 tested genes on the page sit on the wrong side of the drawn line.
-- **Tested in `tests/test_stats.py`.** Covered at every basis and four cutoffs:
-  - the line splits passing from failing genes;
-  - the weakest passing gene, moved to 1 − 1e-9 of the line, still passes, and at 1 + 1e-9 it fails;
-  - the reported case: two cutoffs that call the same genes give lines 2.5 times apart.
+- **Tested in `tests/test_stats.py`.**
+  - At every basis and four cutoffs, the line splits passing from failing genes.
+  - At every basis and four cutoffs, the weakest passing gene still passes when moved to 1 − 1e-9 of the line, and fails at 1 + 1e-9. The first commit tested three cutoffs here; D-016 added 0.01.
+  - The reported case, BH only: cutoffs 0.05 and 0.02 call the same genes and give lines 2.5 times apart.
 - **The page script is tested against Python.** `tests/test_page_script.py` checks the page script's line against `p_line` over 80 settings. The BY constant is summed pairwise by numpy and in order by the page, so the two agree to a relative 1e-12.
 - **Five mutants fail the tests:**
   - k in place of max(k, 1);
@@ -171,7 +203,7 @@ The page redesign had to change those files: the call rule (D-012), the page tex
 
   All planted-truth tests pass unchanged.
 - **Mutation checks.** Four mutations of the rule and the adjustments each failed a test (`tests/test_stats.py`, 47 tests).
-- **Page.** On the synthetic M5 page, the live counts and the cutoff-line height equal a Python recount from the results parquet at 8 settings: all four methods, raw p, log2 and percent thresholds, and a fold-change threshold of 10 that no gene reaches. The branch for a cutoff no gene passes cannot be reached on this fixture, whose minimum cutoff of 0.0001 still passes genes, so it ran on a scratch copy of the page with every embedded p-value set to 0.5: the line hid, 0 up and 0 down, and the reading switched to its no-line sentence.
+- **Page.** On the synthetic M5 page, the live counts and the cutoff-line height equal a Python recount from the results parquet at 8 settings: all four methods, raw p, log2 and percent thresholds, and a fold-change threshold of 10 that no gene reaches. The branch for a cutoff no gene passes cannot be reached on this fixture, whose minimum cutoff of 0.0001 still passes genes, so it ran on a scratch copy of the page with every embedded p-value set to 0.5: the line hid, 0 up and 0 down, and the reading switched to its no-line sentence. Superseded by D-015: with no gene passing, the line now sits at the first bar and stays drawn.
 
 **Consequence.**
 - **Changed counts.** Every "up" and "down" count, the ORA input and the call-count bars now need the fold change, so they differ from pages written before 2026-09-28.

@@ -14,8 +14,13 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 import pytest
+from synth import design_counts, filtered_counts
 
+from ctx.dataset import Contrast
+from ctx.de.deseq import fit
+from ctx.de.run import _volcano
 from ctx.de.stats import ADJUSTMENTS, adjust, classify, p_line
+from ctx.viz.save import figure_block
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_calls.js.j2"
@@ -127,6 +132,38 @@ def test_threshold_and_cutoff_parsing(ran):
     # 0 and values below the minimum are raised to it, empty and junk give the default,
     # values above the maximum are lowered to it.
     assert out["cutoffs"] == [0.0001, 0.05, 0.1, 0.0001, 0.05, 0.01]
+
+
+LOAD = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const cfg = input.cfg;
+const found = ctxCalls.call(input.rows, cfg, cfg.lfc_min, cfg.gate, cfg.alpha);
+console.log(JSON.stringify({ line: found.line, up: found.parts.up.length,
+                             down: found.parts.down.length }));
+"""
+
+
+def test_static_line_is_the_line_the_page_draws_on_load():
+    # The PDF, the SVG and the no-JavaScript view show Calls.p_line; the script redraws the
+    # line on load from the embedded rows and cfg.n_tested. A producer counting m or k on
+    # other genes than the page does would ship two lines, and only this test would see it.
+    # Filtered genes, so the tested set is not every gene and m has one right value.
+    synthetic = design_counts(condition_lfc=1.0)
+    counts = filtered_counts(synthetic)
+    result = fit(counts, synthetic.samples,
+                 Contrast("c", "condition", "control", "case", (6, 6)), {}, threads=1)  # fmt: skip
+    assert result.results["padj"].null_count() > 0
+    data = _volcano(result, counts.select("gene_id", gene_name=pl.col("gene_id")))
+    block = figure_block(data, "x")
+    rows = [{k: None if isinstance(v, float) and not math.isfinite(v) else v
+             for k, v in r.items()} for r in block.rows]  # fmt: skip
+    out = _node({"rows": rows, "cfg": block.controls}, LOAD)
+    calls = data.frame["call"].value_counts()
+    assert out == {
+        "line": pytest.approx(data.calls.p_line, rel=1e-12),
+        "up": dict(calls.rows())["up"],
+        "down": dict(calls.rows())["down"],
+    }
 
 
 SWITCH = """
