@@ -291,3 +291,15 @@ def test_hub_prints_counts_whole():
     assert _measured(10523.0) == "10,523"
     assert _measured(0.0123456) == "0.01235"
     assert _measured(float("nan")) == "not measured"
+
+
+def test_text_runs_to_the_column():
+    # Only the page is capped: a width cap on the question, paragraphs and captions wrapped
+    # sentences that fit on one line at 60 % of the column (reported 2026-09-28).
+    css = (ROOT / "src" / "ctx" / "report" / "templates" / "_page.css.j2").read_text()
+    capped = [
+        selector.strip()
+        for selector, body in re.findall(r"([^{};]+)\{([^{}]*)\}", css)
+        if re.search(r"max-width:(?!none)", body) and ".page" not in selector
+    ]
+    assert not capped, capped

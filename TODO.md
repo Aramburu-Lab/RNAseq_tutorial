@@ -1712,6 +1712,10 @@ Rytis's decisions, 2026-09-28:
     - **Real data exposed two slips, both fixed:**
       - the "FASTQ files" key number counted not_downloaded rows; it is now "FASTQ files on disk", pinned by a test;
       - "1 runs" now reads "1 run".
+    - **Rytis, on the tier-1 M0 page:**
+      - **Text width.** Sentences wrapped with room to spare, because text was capped at 40 to 68 characters. The caps are gone, the page column is the only limit, and `test_text_runs_to_the_column` pins that.
+      - **Text size.** All page text and the plots on the page are 3 pt (4 px) larger: `PAGE_BOOST_PX`, base 18 px. The PDFs and SVGs keep 14 pt.
+      - **Layout for the larger text.** The column is 1,040 px and the reading panel 320 px. Byte counts in the measured table wrap. No page scrolls sideways at 375 px.
 
 **Not in Phase 2:**
 - Track A (M2–M4), strandedness in the sheet, and the teaching subset: Phase 3.

@@ -27,7 +27,6 @@ section>h2::before{content:counter(section,decimal-leading-zero);font-size:var(-
 h3,h4{color:var(--ink);line-height:1.35}
 /* Gene-set and contrast names can be one long word with underscores. */
 h1,h2,h3,h4,.fig-title,.toc a,.key-value,.question{overflow-wrap:anywhere}
-p,li,dd{max-width:var(--measure)}
 a{color:var(--link);text-decoration:underline;text-decoration-thickness:var(--rule);text-underline-offset:.2em}
 a:hover{text-decoration-thickness:var(--rule-mid)}
 :focus-visible{outline:var(--rule-mid) solid var(--ink);outline-offset:var(--rule-mid)}
@@ -37,7 +36,7 @@ button{font:inherit}
 strong{color:var(--ink)}
 
 /* Question, idea, terms */
-.question{margin:0;font-size:var(--fs-lg);line-height:1.45;color:var(--ink);max-width:40ch}
+.question{margin:0;font-size:var(--fs-lg);line-height:1.45;color:var(--ink)}
 .idea{font-size:var(--fs-md);line-height:1.6}
 details.terms{margin-top:var(--space-4);font-size:var(--fs-sm)}
 details.terms dl{display:grid;grid-template-columns:max-content 1fr;gap:var(--space-2) var(--space-5);margin:var(--space-3) 0 0}
@@ -89,7 +88,7 @@ html:not(.js) .tabs{display:none}
 .reading-title{margin:0 0 var(--space-2);font-size:var(--fs-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
 .reading ul{margin:0;padding-left:var(--space-4)}
 .reading li{margin:var(--space-1) 0;color:var(--text)}
-.fig figcaption{margin-top:var(--space-3);font-size:var(--fs-sm);line-height:1.55;color:var(--muted);max-width:var(--measure)}
+.fig figcaption{margin-top:var(--space-3);font-size:var(--fs-sm);line-height:1.55;color:var(--muted)}
 .fig-files{display:flex;flex-wrap:wrap;gap:var(--space-1) var(--space-4);margin:var(--space-2) 0 0;font-size:var(--fs-xs);color:var(--muted)}
 .only-black{display:none}
 :root[data-theme="black"] .only-black{display:inline}
@@ -105,11 +104,11 @@ html:not(.js) .calls{display:none}
 .calls input:focus,.calls select:focus{border-color:var(--ink)}
 .calls button{font-size:var(--fs-sm);color:var(--ink);background:none;border:var(--rule) solid var(--reference);border-radius:var(--radius);padding:var(--space-1) var(--space-3);min-height:calc(var(--space-6) + var(--space-2));cursor:pointer}
 .calls button:hover{border-color:var(--ink)}
-.calls-summary{margin:var(--space-3) 0 0;font-size:var(--fs-md);color:var(--ink);max-width:none}
+.calls-summary{margin:var(--space-3) 0 0;font-size:var(--fs-md);color:var(--ink)}
 .calls-summary .up,.calls-summary .down{font-weight:700}
 
 /* In practice, self-checks, mistakes */
-.practice{margin:0;padding:var(--space-4) var(--space-5);background:var(--surface);border-left:var(--rule-strong) solid var(--ink);border-radius:0 var(--radius) var(--radius) 0;font-size:var(--fs-md);color:var(--ink);max-width:none}
+.practice{margin:0;padding:var(--space-4) var(--space-5);background:var(--surface);border-left:var(--rule-strong) solid var(--ink);border-radius:0 var(--radius) var(--radius) 0;font-size:var(--fs-md);color:var(--ink)}
 ol.think{list-style:none;counter-reset:q;padding:0;margin:0}
 ol.think>li{counter-increment:q;position:relative;margin:var(--space-5) 0;padding-left:var(--space-7)}
 ol.think>li::before{content:counter(q);position:absolute;left:0;top:0;font-size:var(--fs-xl);font-weight:700;line-height:1;color:var(--muted)}
@@ -126,6 +125,8 @@ ul.mistakes li{padding:var(--space-3) 0;border-bottom:var(--rule) solid var(--gr
 .copy:hover{border-color:var(--ink)}
 html:not(.js) .copy{display:none}
 table.measured th{width:16em;font-weight:400;color:var(--muted)}
+/* Byte counts are one long word; at phone width they must wrap, not push the page wider. */
+table.measured td{overflow-wrap:anywhere}
 .key-packages{display:flex;flex-wrap:wrap;gap:var(--space-1) var(--space-4);margin:var(--space-4) 0 var(--space-2);font-size:var(--fs-sm);color:var(--muted)}
 .key-packages span strong{font-weight:400}
 details.versions{font-size:var(--fs-sm)}
@@ -144,7 +145,7 @@ details.versions dd{margin:0;color:var(--muted)}
 .toc-title{margin:0 0 var(--space-3);font-size:var(--fs-xs);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 
 /* Hub */
-.lede{margin:0 0 var(--space-6);font-size:var(--fs-lg);line-height:1.45;color:var(--ink);max-width:48ch}
+.lede{margin:0 0 var(--space-6);font-size:var(--fs-lg);line-height:1.45;color:var(--ink)}
 ol.modules{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--card-min),1fr));gap:var(--space-4);list-style:none;margin:0 0 var(--space-4);padding:0}
 ol.modules li{display:flex;flex-direction:column;gap:var(--space-1);padding:var(--space-4);border:var(--rule) solid var(--grid);border-top:var(--rule-strong) solid var(--ink);border-radius:var(--radius)}
 .module-name{font-size:var(--fs-md);font-weight:700}

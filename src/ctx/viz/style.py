@@ -95,12 +95,23 @@ CHROME = {
     },
 }  # fmt: skip
 MONO_CHAIN = ("ui-monospace", "SF Mono", "Menlo", "Consolas", "Liberation Mono", "monospace")
-# Page type scale in px around SIZES["base"]; the plots keep SIZES.
+# Everything read on screen, page text and the plots on the page, runs 3 pt larger than the
+# figure sizes (Rytis, 2026-09-28): 3 pt is 4 px at CSS's 96 px to 72 pt. The PDF and SVG
+# files keep SIZES, which their 85 mm layout checks are measured at.
+PAGE_BOOST_PX = 3 * 96 / 72
+# Page type scale in px around SIZES["base"], before the boost.
 TYPE_PX = {"xs": 12, "sm": 13, "md": 16, "lg": 20, "xl": 28, "display": 44}
+
+
+def on_page(size: float) -> float:
+    """A text size as a page shows it: the figure size plus ``PAGE_BOOST_PX``."""
+    return size + PAGE_BOOST_PX
+
+
 SPACE_PX = (4, 8, 12, 16, 24, 32, 48, 64, 96)
 LAYOUT = {
-    "measure": "68ch", "content": "880px", "rail": "208px", "gap": "56px", "gutter": "16px",
-    "gutter-wide": "32px", "key-min": "150px", "card-min": "240px", "reading": "272px",
+    "content": "1040px", "rail": "208px", "gap": "56px", "gutter": "16px",
+    "gutter-wide": "32px", "key-min": "150px", "card-min": "240px", "reading": "320px",
     "radius": "4px",
     "rule": "1px", "rule-mid": "2px", "rule-strong": "4px",
 }  # fmt: skip
@@ -212,13 +223,13 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
 
 def _plotly_axis(theme: Theme) -> dict[str, Any]:
     """Axes as the static figures draw them: ink lines and ticks, no grid, room for titles."""
-    small = {"size": SIZES["tick"], "color": theme.ink}
+    small = {"size": on_page(SIZES["tick"]), "color": theme.ink}
     return {
         "showgrid": False, "showline": True, "linecolor": theme.ink,
         "linewidth": LINE_WIDTHS["axes"], "ticks": "outside", "ticklen": PLOTLY_TICK_PX,
         "tickcolor": theme.ink, "tickwidth": LINE_WIDTHS["axes"], "tickfont": small,
         "zeroline": False, "automargin": True,
-        "title": {"font": {"size": SIZES["axis_label"], "color": theme.ink},
+        "title": {"font": {"size": on_page(SIZES["axis_label"]), "color": theme.ink},
                   "standoff": PLOTLY_TITLE_STANDOFF_PX},
     }  # fmt: skip
 
@@ -234,12 +245,12 @@ def plotly_templates() -> dict[str, Any]:
     templates = {}
     for name, theme in THEMES.items():
         template = pio.templates["plotly_white"].to_plotly_json()
-        small = {"size": SIZES["tick"], "color": theme.ink}
+        small = {"size": on_page(SIZES["tick"]), "color": theme.ink}
         template["layout"].update(
             {
                 "font": {
                     "family": ", ".join([*FONT_CHAIN, "sans-serif"]),
-                    "size": SIZES["base"],
+                    "size": on_page(SIZES["base"]),
                     "color": theme.ink,
                 },
                 "colorway": list(DATA_COLOURS),
@@ -275,7 +286,7 @@ def css_variables(theme: Theme) -> str:
         **{f"--role-{role}": colour for role, colour in ROLES.items()},
         **{f"--{key}": colour for key, colour in CHROME[theme.name].items()},
         "--font": ", ".join([*(f'"{f}"' for f in FONT_CHAIN), "sans-serif"]),
-        "--size-base": f"{SIZES['base']}px",
+        "--size-base": f"{on_page(SIZES['base']):g}px",
     }
     return "; ".join(f"{k}: {v}" for k, v in pairs.items()) + ";"
 
@@ -283,7 +294,7 @@ def css_variables(theme: Theme) -> str:
 def css_layout() -> str:
     """Type scale, spacing and layout as CSS custom properties; the same in both themes."""
     pairs = {
-        **{f"--fs-{name}": f"{px}px" for name, px in TYPE_PX.items()},
+        **{f"--fs-{name}": f"{on_page(px):g}px" for name, px in TYPE_PX.items()},
         **{f"--space-{i + 1}": f"{px}px" for i, px in enumerate(SPACE_PX)},
         **{f"--{name}": value for name, value in LAYOUT.items()},
         "--font-mono": ", ".join(f'"{f}"' if " " in f else f for f in MONO_CHAIN),

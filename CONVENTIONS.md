@@ -54,7 +54,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 ## HTML reports
 
 - Self-contained single files: `plotly.min.js` embedded, no CDN, no external requests except optional gene links opened on click. Size < 15 MB; heatmaps capped at 100 genes; embedded tables capped to tested genes with ≤ 8 columns.
-- Theme toggle via CSS variables and `Plotly.relayout`; Helvetica 14 px base; Okabe–Ito.
+- Theme toggle via CSS variables and `Plotly.relayout`; Helvetica 18 px base, the figures' 14 pt plus 3 pt for reading on screen, the interactive plots raised by the same 3 pt (`ctx.viz.style.PAGE_BOOST_PX`, Rytis 2026-09-28); Okabe–Ito.
 - Report skeleton, in this order: big question → concept in plain English → parameter cards (parameter, plain-English meaning, default, what changes if you move it) → annotated results → what it means in practice → think-about-it prompts and `<details>` self-check answers → common mistakes → reproduction block with exact command, wall time, peak RAM, versions.
 - Every parameter exposed in the CLI must have a parameter card; a test reads CLI defaults and fails if a card is missing or stale.
 
