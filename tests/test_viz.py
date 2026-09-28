@@ -423,7 +423,9 @@ def test_no_text_overlap(case):
 def test_write_refuses_clipped_text(tmp_path):
     data = demo_bar(counts())
     long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 3)
-    with pytest.raises(ValueError, match="off the page"):
+    # matplotlib says so first: tight_layout gives up on a title it cannot fit.
+    with (pytest.raises(ValueError, match="off the page"),
+          pytest.warns(UserWarning, match="Tight layout not applied")):  # fmt: skip
         write_figure(long, tmp_path, stem("de", "clipped", 1, day=date(2026, 9, 27)),
                      title="t", data_releases={})  # fmt: skip
     assert not list(tmp_path.iterdir())

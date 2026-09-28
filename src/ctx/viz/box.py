@@ -161,18 +161,28 @@ def static(data: BoxData, theme: Theme) -> Any:
     # Figure, not pyplot: a GUI backend rounds the canvas to whole pixels (84.84 mm, not 85).
     fig = Figure(figsize=(width, height))
     ax = fig.subplots()
-    reference, comparison = data.groups
-    order = {"x": "feature", "y": "value", "hue": "group", "hue_order": list(data.groups)}
-    palette = {reference: ROLES["reference"], comparison: ROLES["comparison"]}
-    sns.boxplot(
-        data.frame, **order, palette=palette, linecolor=theme.ink, saturation=1,
-        linewidth=LINE_WIDTHS["box"], showfliers=False, ax=ax,
-    )  # fmt: skip
-    # No jitter: every run draws the same points, so the same data give the same file.
-    sns.stripplot(
-        data.frame, **order, palette=dict.fromkeys(data.groups, theme.ink), dodge=True,
-        jitter=False, size=MARKER_SIZE, linewidth=LINE_WIDTHS["marker_edge"], legend=False, ax=ax,
-    )  # fmt: skip
+    # matplotlib's own boxplot, not seaborn's: seaborn 0.13.2 passes bxp the vert argument
+    # matplotlib 3.11 deprecates. Geometry as seaborn dodges two groups: boxes 0.4 wide at
+    # +-0.2 around each feature, caps half a box.
+    ink = {"color": theme.ink, "linewidth": LINE_WIDTHS["box"]}
+    for offset, role, group in zip((-0.2, 0.2), ("reference", "comparison"), data.groups,
+                                   strict=True):  # fmt: skip
+        values = [_values(data.frame, f, group) for f in features]
+        positions = [i + offset for i in range(len(features))]
+        ax.boxplot(
+            values, positions=positions, widths=0.4, capwidths=0.2, orientation="vertical",
+            patch_artist=True, showfliers=False, manage_ticks=False, label=group,
+            boxprops={"facecolor": ROLES[role], "edgecolor": theme.ink,
+                      "linewidth": LINE_WIDTHS["box"]},
+            medianprops={**ink, "solid_capstyle": "butt"},
+            whiskerprops={**ink, "solid_capstyle": "butt"}, capprops=ink,
+        )  # fmt: skip
+        # No jitter: every run draws the same points, so the same data give the same file.
+        for x, v in zip(positions, values, strict=True):
+            ax.scatter([x] * len(v), v, s=MARKER_SIZE**2, color=theme.ink,
+                       linewidths=LINE_WIDTHS["marker_edge"], zorder=3)  # fmt: skip
+    ax.set_xticks(range(len(features)), features)
+    ax.set_xlim(-0.5, len(features) - 0.5)
     top = float(data.frame["value"].to_numpy().max())
     for i, feature in enumerate(features):
         label = data.caption.label(feature)
@@ -186,6 +196,12 @@ def static(data: BoxData, theme: Theme) -> Any:
     sns.despine(fig=fig)
     place_caption(fig, data.caption.text(), width, height)
     return fig
+
+
+def _values(frame: pl.DataFrame, feature: str, group: str) -> list[float]:
+    """One feature's measured values in one group; a missing value is not drawn."""
+    rows = frame.filter((pl.col("feature") == feature) & (pl.col("group") == group))
+    return rows["value"].drop_nulls().drop_nans().to_list()
 
 
 def interactive(data: BoxData) -> Any:
