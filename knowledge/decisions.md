@@ -27,6 +27,27 @@ it were reversed.
 
 ---
 
+## D-023 — Rytis's draft v3.10 merged: contour figures and cividis for continuous colour
+
+**Date:** 2026-09-29 · **Status:** decided
+
+**Context.** Rytis put draft v3.10 in `TEMP/` (`todo7.md`, `CLAUDE7.md`): contour figures in M2, M5, M6, M7 and M10 (two-knob maps, power maps, density contours, a likelihood concept figure) and cividis for continuous colour in both themes.
+
+**Options.** Carry the draft as written, or item by item as in D-020 and D-021.
+
+**Decision.** Item by item; what was carried and why is in TODO.md, "Merge of draft v3.10".
+- Cividis is for sequential values, with isolines and labels in ink. The P2Q.6 heatmap keeps its diverging two-colour scale.
+- The contour helpers and the M5 contour figures go in Phase 2D, after the record, because `src/ctx/de` is frozen until then.
+
+**Evidence.**
+- Cividis's ends, measured with the WCAG formula on matplotlib 3.11.2's map: #FEE838 is 1.25:1 against white and #00224E is 1.34:1 against black. A line or label in either end colour vanishes on that theme's page.
+- The draft's claims checked on 2026-09-29, one verdict each in the merge record: cividis in both renderers and its source (PMID 30067751), the 1.92 and 3.00 likelihood drops (χ² quantiles halved: 1.9207, 2.9957), Schoenfeld (PMID 6354290) and the continuous-covariate form (Hsieh and Lavori, PMID 11146149), and pydeseq2 0.5.4's dispersion attributes, which answer the draft's one verify item.
+- No frozen file changed; `~/ctx_tier1/data/raw` still held only `tier1_meta`.
+
+**Consequence.** The style tokens gain cividis's stops when the helpers are built, so the measured-colour tests accept it. The drafts moved to `../RNAseq_tutorial_archive/TEMP_2026-09-29c/`.
+
+---
+
 ## D-022 — The Trim Galore reports leave the cluster; the GENCODE 50 GTF is a resource; registered again
 
 **Date:** 2026-09-29 · **Status:** decided

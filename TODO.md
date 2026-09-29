@@ -193,6 +193,7 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 - **Planted problems** (synthetic, labelled as such): an adapter-heavy sample (short inserts), a quality-degraded sample, and a sex-label swap in a labelled copy of the Track A subset's curation input; the Zenodo fetchngs outdir is never edited.
 - Knob: fastp `-q`, `-u`, `-l`, `--cut_tail` window/mean; band context (library type, read length, platform); MAD multiplier. Each has a parameter card.
 - Figures: per-position quality curves with the threshold line; per-metric strip plots with bands shaded and the dataset MAD band; sample × metric band heatmap in three colours from `viz/style.py`; GC and duplication distributions; before/after read-count Sankey (Mermaid in notebook, Plotly in report); strandedness bars; sex-check scatter (XIST against the chrY genes, coloured by recorded sex); PCA with QC-flag symbols.
+- Contour figures: two-knob map of reads kept by fastp across `-q` × `-l`; for full cohorts, density contours of QC metric pairs (e.g. library size vs genes detected) with flagged samples as points.
 - Stats: descriptive; robust z (MAD) per metric; Spearman for replicate concordance; Mann–Whitney or Fisher test of each QC metric against condition, BH across metrics (the confounding check). On Step-1, read length is confounded with condition by design (D5), so metrics tied to read length are expected to differ by condition; the page says so rather than excluding.
 - Output: the atlas page and its figures under `outputs/02_qc/`; the generated MultiQC config beside them, and MultiQC's report under `outputs/02_qc/multiqc/`; the QC status table; `_README.md` with the registry's SHA-256 and the MultiQC version.
 
@@ -219,6 +220,7 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 - Teaches: pre-filtering (edgeR-style "≥10 counts in ≥ smallest group"), size factors (median-of-ratios), dispersion trend/shrinkage, Wald test, FDR in plain English, NA `padj` meaning, effect size vs significance, shrinkage, paired vs unpaired design, cell type as the dominant axis with disease nested inside it (contrasts and interaction terms), p-value histogram as a health check, batch inspection (sequencing batch in Step-1; TCGA barcode TSS/plate in Step-3).
 - Knob: design (paired / unpaired; with / without cell type), contrast selector, the volcano's fold-change threshold (log2 or %), p basis (BH, BY, Holm, Bonferroni or raw) and cutoff (D-012, D-015), LFC shrinkage on or off (`ctx de --no-lfc-shrink`, on by default; a CLI switch, D-019), `lfc_null` threshold, min-count filter (precomputed grid); after the Step-1 record: the volcano's x axis as the raw or the shrunk estimate, colours always following the call on the raw one and the page saying so (Rytis 2026-09-29, D-020), and a QC exclusion set (none / exclude / exclude + flag) read from the M2 status table, each set with its own expected n per contrast.
 - Figures: PCA (VST, top-500 variable genes; PERMANOVA pseudo-F and p annotated; colour = condition, symbol = cell type or batch); dispersion plot; p-value histogram; volcano (sliders, top-gene labels, up/down counts); MA (raw vs shrunk); heatmap of top 50 (z-scored VST, clustered, group colour bar); box + violin of top genes with paired lines, Wilcoxon signed-rank (paired) or Mann–Whitney, BH across plotted genes, rank-biserial effect size, DESeq2 `padj` shown alongside with a note on why they differ; Venn/UpSet: paired vs unpaired, shrunk vs raw thresholds, neutrophil vs monocyte cancer responses (Step-1), KIRC vs BRCA vs LUAD (Step-3).
+- Contour figures: two-knob maps (DE genes across `padj` × |LFC| cut-offs, and across min-count filter × `padj`); power map (power across samples per group × fold change, by simulation from this cohort's fitted mean–dispersion trend with the same pydeseq2 settings, precomputed on the `hpc` profile; α stated, 80 % isoline, cohort marked); MA plot and large-cohort PCA (e.g. breast tumours per PAM50 subtype) with density contours; likelihood concept figure (negative-binomial log-likelihood over mean × dispersion for a low-count and a high-count gene, with gene-wise, trend and shrunk dispersion estimates marked: in pydeseq2 0.5.4 `dds.var["genewise_dispersions"]`, `["fitted_dispersions"]` and `["MAP_dispersions"]`, read from its source 2026-09-29).
 - Output: results table (Parquet + CSV) with data dictionary; `_README.md` records design, versions, filters.
 
 ### M6 — Function and disease association
@@ -227,6 +229,7 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 - Teaches: ORA vs GSEA; the background trap (same list, three backgrounds → inflated results demo); ranking metric choice; term redundancy; "association ≠ causation" for disease sets; how Step-1 results map onto emergency granulopoiesis and immunosuppressive myeloid states, and how KIRC hypoxia/glycolysis output maps onto VHL biology and therapy.
 - Knob: background choice, ranking metric, DE thresholds feeding ORA (live, client-side hypergeometric on embedded Hallmark + Reactome).
 - Figures: dot/bar plots (−log10 FDR, gene ratio, count); GSEA running-score plots; enrichment-map network (Jaccard-linked terms); disease-association bars (Open Targets score, DisGeNET ORA); gene-to-term heatmap.
+- Contour figure: two-knob map of significant pathways (ORA) across DE thresholds; a click sets the thresholds and reruns the live ORA.
 - Stats: hypergeometric/Fisher with BH; GSEA permutation FDR; term-similarity Jaccard.
 
 ### M7 — Is the transcript a template? RNA versus protein
@@ -235,6 +238,7 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 - Teaches: what MS proteomics measures (peptides → protein groups; TMT ratios; missing values are not zeros; ratio compression); joining layers by case ID and gene symbol / UniProt mapping (isoforms, many-to-one); three questions — does protein track RNA across samples (per-gene Spearman ρ), does the tumour-vs-normal change carry to protein (log2FC concordance), which genes change at RNA only or protein only; reasons for discordance: translational control, protein half-life, complex stoichiometry (subunits buffered), secretion, timing of synthesis (neutrophil granule proteins), and genuinely non-coding function; Ribo-seq as the missing middle layer (translation efficiency; microproteins/smORFs) — concept only (D12).
 - Knob: correlation method, minimum samples with protein quantified, log2FC concordance threshold, gene class (complex subunits / enzymes / secreted), predicted vs validated protein evidence.
 - Figures: RNA log2FC vs protein log2FC scatter with quadrant counts and Spearman ρ (bootstrap 95 % CI); violin of per-gene ρ by gene class; concordance MA (mean abundance vs RNA−protein LFC difference); Venn/UpSet of DE at RNA vs protein; heatmap of paired RNA/protein z-scores for top genes; Step-1: neutrophil-vs-monocyte RNA fold change vs protein copy-number fold change with granule proteins highlighted.
+- Density contours (50 %/90 %) on the RNA-vs-protein fold-change scatter, with discordant and highlighted genes overlaid as points.
 - Stats: per-gene Spearman with BH; across-gene concordance ρ; class comparisons Kruskal–Wallis + Dunn with BH and effect sizes; protein DE by Welch t-test on log2 ratios (moderated t if available) with BH; missingness reported per protein and per sample.
 - Output: merged RNA–protein table (Parquet + CSV) with data dictionary; per-gene class labels with source.
 
@@ -282,6 +286,7 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 - Genome-wide: pydeseq2 contrasts within tumours (ER− vs ER+, PAM50 subtype, stage III–IV vs I–II, LUAD smokers vs never-smokers, male vs female in lung and kidney) with covariates. Design lesson: patient-level covariates (sex, age) drop out of paired tumour–normal designs, while their interaction with condition stays estimable (`~ patient + condition + condition:sex`). Confounding map: Cramér's V across clinical variables, sequencing plate and tissue source site; sex-chromosome genes flagged in sex contrasts.
 - Treatment: TCGA's case quality-control forms make systemic therapy before procurement exclusionary, so treatment of the sampled tumour came after sampling, with exceptions: the CDR counts 42 patients (0.3 %) with neoadjuvant treatment who entered anyway, GDC holds 102 "Neoadjuvant therapy" notifications (read 2026-09-29; the difference is unexplained), and treatment for a prior or other malignancy, which GDC notifies as "Prior malignancy" (406), may predate sampling. M10 logs both categories per patient. Expression-by-treatment associations therefore show treatment selection (ER-positive disease leads to endocrine therapy), and survival by treatment received is confounded by indication and prone to immortal-time bias. Treatment effects on expression need pre/on-treatment biopsies (D28).
 - Survival: endpoints per TCGA-CDR Table 3. Breast: PFI and DFI; OS and DSS need longer follow-up (OS 151 events among 1,097 patients), and DSS is approximated. LUAD and LUSC: all four, DSS approximated. Kidney (KIRC): OS and PFI (Table 3; the paper's STAR Methods list KIRC as PFI with caution, likely meaning KICH, which Table 3 and the Results name); DFI has few events (15); DSS approximated. Kaplan–Meier with number-at-risk table, censor marks, median survival with 95 % CI; log-rank (two groups) or trend test (ordered groups); RMST difference at a stated horizon as effect size; Cox PH with continuous expression per SD as the primary model, univariable and adjusted for age, stage and subtype or histology, HR with 95 % CI, Schoenfeld PH test, C-index; cumulative incidence for competing risks as an advanced option. Median follow-up (reverse Kaplan–Meier), events per group and a power calculator (events needed for a given HR) beside every model. Fits in `lifelines` on the laptop.
+- Power map (contour): power across number of events × hazard ratio (Schoenfeld 1983, PMID 6354290; for per-SD hazard ratios of a continuous covariate, Hsieh and Lavori 2000, PMID 11146149), α stated, 80 % isoline, each endpoint of the cohort marked (breast OS: 151 events); computed live in the browser.
 - Cut-point lesson: pre-specified splits (median, tertiles) by default; a slider scans cut-offs and shows the minimum log-rank p shrinking next to the corrected p of the maximally selected statistic (Lausen and Schumacher 1992; permutation, as R maxstat's `condMC`, whose default `pmethod = "none"` corrects nothing). Portals that keep the best-separating cut-off are read with this in mind: the Human Protein Atlas tests cut-offs from the 20th to the 80th percentile and keeps the lowest log-rank p, calling a gene prognostic at p < 0.001; bc-GenExMiner's "optimal" split tests percentiles 20 to 80 in steps of 5; neither states a correction.
 - Swimmer ("lifeline") plot linked to the KM curve: one line per patient from diagnosis to last contact or event, markers for progression, death and censoring, coloured by group; hovering a patient highlights their step in the curve, which makes censoring visible. The link uses the linked-view controls kind built in P2Q.4.
 - Genome-wide Cox screen (continuous, adjusted for age and stage, BH): laptop profile limited to DE genes and gene-set scores; full screen on HPC.
@@ -299,12 +304,13 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 
 ## 📊 Figure and statistics conventions
 
-- Palette: Okabe–Ito; font Helvetica 14 pt base; `sns.set_context("paper")`, `sns.despine()`, `plt.tight_layout()`; panel letters bold lowercase (Nature style); exact p-values, n per group, test name and effect size inside the PDF and SVG figure; an interactive figure prints the same caption once, under the plot, not inside it (D-011).
+- Palette: Okabe–Ito for categories (including per-group contour lines); cividis (Nuñez et al. 2018, PMID 30067751) for sequential continuous values (filled contours, colour bars) in both themes, with isolines and their labels in ink, because cividis's ends measure 1.25:1 against white (#FEE838) and 1.34:1 against black (#00224E); the diverging heatmap scale of P2Q.6 keeps its two data colours, since cividis has no centre. Font Helvetica 14 pt base; `sns.set_context("paper")`, `sns.despine()`, `plt.tight_layout()`; panel letters bold lowercase (Nature style); exact p-values, n per group, test name and effect size inside the PDF and SVG figure; an interactive figure prints the same caption once, under the plot, not inside it (D-011).
 - Every figure as `_white` and `_black` PDF and SVG from one render (Seaborn/Matplotlib, vector), one HTML with a theme toggle (Plotly, `plotly_white` base + custom dark template; hover shows all relevant variables), and its numbers as CSV with `_README.md` (D16).
 - Phase 2D: every figure has a stable ID (`<cohort>_<module>_<figure>`, recorded in its `_README.md`; file names still follow the naming lint), a parameter model as a frozen dataclass with one loader that reports every error together, as `src/ctx/dataset.py` does (Rytis 2026-09-29, D-020), and a params file; `ctx figure <id> --params …` regenerates it from its inputs alone (see Reproduce panel).
 - Fonts: Helvetica where installed, then Arial, Liberation Sans, DejaVu Sans (`ctx.viz.style.FONT_CHAIN`); the container adds TeX Gyre Heros, free and Helvetica-metric-compatible, because Helvetica cannot be redistributed. PDFs embed fonts as Type 42 (done); Phase 2D drops their creation timestamp, so reruns compare byte for byte.
 - Single implementation per figure type in `ctx.viz` with `static()` and `interactive()` methods sharing one data contract, so the two renderings cannot drift.
 - Statistical annotation helper `ctx.viz.annotate` writes the same caption block to both renderers.
+- Contour plots only for a continuous value over two continuous axes: computed surfaces (parameter grids, power, likelihood) or densities from ≥ 30 points per group; never for categorical axes (tissue × exon, gene × sample stay heatmaps). Density levels mark the 50 % and 90 % highest-density regions, computed once from a smoothed 2D histogram (`numpy.histogram2d` + `scipy.ndimage.gaussian_filter`) that both renderers draw (Plotly `go.Contour`, matplotlib `contour`); points of interest are overlaid; n and bandwidth go in the caption. Two-knob maps mark the current setting, and a click sets both sliders and, from Phase 2D, updates the Reproduce panel.
 
 | Figure | Test / annotation |
 | --- | --- |
@@ -323,6 +329,10 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 | Cox forest | HR, 95 % CI, p, covariates, PH-test p, n, events |
 | Swimmer (lifeline) | Patients shown, endpoint, censoring legend, grouping rule |
 | Expression by clinical group | Test (Mann–Whitney, Kruskal–Wallis + Dunn, Spearman trend), BH, effect size, n per group, missing count |
+| Contour — two-knob map | Both parameters and the output quantity; labelled isolines; current setting marked; grid resolution |
+| Contour — power map | α, method (simulation or Schoenfeld), dispersion or event source, 80 % isoline, cohort position |
+| Contour — density | n per group, levels as 50 %/90 % highest-density regions, bandwidth, overlaid points defined |
+| Contour — likelihood | Model and gene; gene-wise, trend and shrunk estimates marked; isolines at log-likelihood drops of 1.92 (profile 95 %) and 3.00 (joint 95 %) |
 
 ---
 
@@ -494,8 +504,10 @@ Built after P2C.3, so the registered Step-1 analysis stays as registered; the fr
 - [ ] Cohort bundles: `conf/cohorts/<cancer>.toml` lists the cohort's dataset files per Step and module, with laptop caps and teaching notes; contrasts, covariates, sanity rules and worked-example genes stay in the dataset files (one definition); global `--cohort` (default from `CTX_COHORT`); the hub's cohort × module availability grid. Schema, loader and one cohort (pancreas = Step-1) end to end.
 - [ ] Containers: the `figures` target of `containers/analysis.Dockerfile`, published to GHCR and pinned by digest (Rytis: GHCR access), before CI runs any Reproduce panel; the `full` target stays in Phase 6.
 - [ ] `FigureSpec` and figure IDs; `ctx figure <id> --params`, `ctx source <id>`, `ctx verify-figure`; parameter dataclasses with cards; the Reproduce panel for one figure end to end (the volcano), with the volcano's raw or shrunk x axis; CI extracts the panel's Docker block and runs it on fixtures. Then every figure type.
+- [ ] Contour helpers in `ctx.viz`: shared density grid with highest-density levels, two-knob and power-map templates with click-to-set sliders, cividis in both themes with its stops as style tokens, so the measured-colour tests accept it.
 - [ ] Figure files without a creation timestamp, so reruns compare byte for byte; TeX Gyre Heros added to `FONT_CHAIN` and to the image.
 - [ ] Once `src/ctx/de` is free after the record: the M5 page's gene picker feeding M9, the QC exclusion set as an M5 knob (after M2b), and the volcano's raw or shrunk x axis (D-020).
+- [ ] M5 contour figures for Step-1: two-knob maps, simulated power grid (`hpc` profile, fixed seed), MA and PCA density contours, likelihood concept figure.
 - [ ] Review: what changed from this plan and why; measured budgets; lessons.
 
 ### Phase 3 — Track A on the Step-1 subset
@@ -550,6 +562,7 @@ Built after P2C.3, so the registered Step-1 analysis stays as registered; the fr
 - [ ] Planted problems are caught: the adapter-heavy and degraded samples flagged at M2a, the sex-label swap flagged at M2b by the sex check
 - [ ] Gene cards open offline and carry releases, retrieval date and citations; a failed API call degrades to a cached or "unavailable" panel; the NPTX2 card matches HPA for the pinned release (at v25.1, read 2026-09-29: blood immunoassay 2.5 µg/L; highest single-cell expression in corticotrophs, 335.9 nCPM)
 - [ ] M10: `km.js` survival curves and log-rank p match lifelines on fixtures; CDR event counts per cohort match Table 3 of Liu et al. 2018 for the pinned file (breast OS: 151 events among 1,097 patients); every KM figure has a risk table, censor marks and its split rule; data-driven cut-offs always carry the corrected p; every annotation-based exclusion is logged
+- [ ] Contour figures: two-knob maps equal the underlying grid values at grid nodes; density levels enclose 50 % and 90 % of points within ±1 % on fixtures; the survival power map equals Schoenfeld values at test points; the DE power grid is reproducible with its seed; the likelihood figure's gene-wise estimate matches pydeseq2 within tolerance.
 - [ ] Every figure in every report has a Reproduce panel; CI extracts each Docker block, runs it on fixture inputs in a clean container, matches the figure's data hash, and compares the rendered PNG within a tolerance (matplotlib image comparison)
 - [ ] `ctx run` on a second dataset file reproduces what the module commands give one by one, byte for byte on the tables
 - [ ] Each cohort bundle validates against its schema; the availability grid matches the files present; cohort sanity checks pass, written into each cohort's dataset files and registered before its counts: breast, adipocyte genes lower and proliferation hallmarks higher in tumour than in adjacent normal (the first from 54 TCGA pairs in a conference abstract, the second from a microarray study whose normals were not necessarily adjacent; both to confirm); lung, TP63, KRT5 and SOX2 higher in LUSC and NKX2-1 and NAPSA higher in LUAD (established as immunohistochemistry markers, so the mRNA direction is an expectation; SOX2 marks a 3q26 amplification); kidney, CA9 and NDUFA4L2 up with hypoxia and glycolysis enriched, as the Biology sanity line says
@@ -2217,3 +2230,31 @@ The v3.7 claims, checked 2026-09-29:
 | The maximally selected statistic has a corrected p | verified | Lausen and Schumacher 1992; R maxstat, default uncorrected |
 | lifelines installs in Pyodide | partly | 0.30.3 fails (pandas < 3); 0.30.0 installs and runs |
 | GTEx open donor fields: sex, age bracket, Hardy scale | verified | v8 SubjectPhenotypesDS: SUBJID, SEX, AGE, DTHHRDY; 980 donors |
+
+## 🧾 Merge of draft v3.10 (2026-09-29; D-023)
+
+Rytis's draft v3.10 (`todo7.md`, `CLAUDE7.md`) adds contour figures: two-knob maps, power maps, density contours and a likelihood concept figure, with cividis for continuous colour. Diffed against v3.9 (`todo5.md`, merged in D-021): 17 lines added or changed, and one in `CLAUDE7.md` against `CLAUDE4.md`. The drafts moved to `../RNAseq_tutorial_archive/TEMP_2026-09-29c/`.
+
+Carried: the contour lines of M2, M5, M6, M7 and M10; the cividis clause of the palette rule; the contour rule; four figure-table rows; the contour helpers item; the M5 contour item; the contour verification line; the `CLAUDE7.md` rule, into CONVENTIONS.md.
+
+Not carried, or changed:
+
+| Draft text | Why |
+|---|---|
+| Status line "draft v3.10" | this file has its own status |
+| "cividis ... in both themes", unqualified | its ends measure 1.25:1 against white (#FEE838) and 1.34:1 against black (#00224E), so isolines and labels go in ink; the P2Q.6 heatmap scale stays diverging, because cividis has no centre |
+| Contour helpers beside FigureSpec, M5 contours in Phase 2 | helpers in Phase 2D beside FigureSpec, as drafted; M5 on Step-1 waits for the record because `src/ctx/de` is frozen, so the M5 item is in Phase 2D too |
+| "tier 1" | Step-1 (D-020) |
+| Verify item: pydeseq2's dispersion attribute names | answered and moved into the M5 contour line |
+| "a click ... updates the Reproduce panel" | from Phase 2D, when the panel exists |
+
+The v3.10 claims, checked 2026-09-29:
+
+| Claim | Verdict | At the source |
+|---|---|---|
+| cividis exists in both renderers | verified | matplotlib 3.11.2 `colormaps["cividis"]`; plotly 7.1.0 `colors.sequential.Cividis` |
+| cividis reads for colour-vision deficiency | verified | Nuñez, Anderton and Renslow 2018, PLoS ONE, PMID 30067751 |
+| Likelihood isolines at drops of 1.92 (profile 95 %) and 3.00 (joint 95 %) | verified | χ²(1) and χ²(2) 95 % quantiles halved: 1.9207 and 2.9957 (scipy) |
+| Power from events and HR by Schoenfeld; a continuous-covariate form for per-SD HRs | verified | Schoenfeld 1983 Biometrics, PMID 6354290; Hsieh and Lavori 2000 Control Clin Trials, PMID 11146149 |
+| Gene-wise, trend and shrunk dispersions are stored by pydeseq2 | verified | 0.5.4 `dds.var`: `genewise_dispersions`, `fitted_dispersions`, `MAP_dispersions`, final `dispersions` |
+| `numpy.histogram2d` and `scipy.ndimage.gaussian_filter` | verified | both present in the pinned environment |
