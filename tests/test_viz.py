@@ -17,11 +17,13 @@ from pypdf.generic import ContentStream
 from scipy.stats import mannwhitneyu
 from synth import (
     counts,
+    demo_band_map,
     demo_bar,
     demo_bars_at_scale,
     demo_box,
     demo_bubble,
     demo_curves,
+    demo_heatmap,
     demo_ma,
     demo_pca,
     demo_strip,
@@ -35,6 +37,7 @@ from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.axes import axis_title
 from ctx.viz.curve import CurveData
+from ctx.viz.heatmap import HeatmapData
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
 from ctx.viz.scatter import THIN_MAX, Calls, ScatterData, bubble_pt
 from ctx.viz.strip import StripData
@@ -320,6 +323,8 @@ def _contracts():
         "strip_log_double": demo_strip(log=True, width="double"),
         "bubble": demo_bubble(),
         "curves": demo_curves(),
+        "heatmap": demo_heatmap(),
+        "band_map": demo_band_map(),
     }
 
 
@@ -339,6 +344,8 @@ def axis_titles(data) -> list[tuple[str, str]]:
         return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
     if isinstance(data, StripData):
         return [(data.value_label, data.columns[data.value][0])]
+    if isinstance(data, HeatmapData):
+        return [(data.column_label, "none")]
     if isinstance(data, CurveData):
         return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
     return [(data.value_label, data.columns[data.value][0])]
@@ -449,6 +456,9 @@ OVERLAP_CASES = {
     "bubble": lambda s: demo_bubble(),
     "curves": lambda s: demo_curves(),
     "curves_double": lambda s: demo_curves(width="double"),
+    "heatmap": lambda s: demo_heatmap(),
+    "heatmap_unlabelled_rows": lambda s: demo_heatmap(n_genes=80),
+    "band_map": lambda s: demo_band_map(),
 }
 
 
@@ -669,3 +679,29 @@ def test_a_curve_keeps_one_colour():
     traces = [t for t in data.interactive().data if t.mode == "lines" and t.legendgroup]
     assert len(traces) == data.frame["sample"].n_unique()
     assert sum(bool(t.showlegend) for t in traces) == 2
+
+
+def test_cluster_order_keeps_planted_blocks_together():
+    from ctx.viz.heatmap import cluster_order  # noqa: PLC0415
+
+    rng = np.random.default_rng(0)
+    pattern = rng.normal(size=20)
+    rows = [pattern + rng.normal(0, 0.2, 20) if i % 2 else -pattern + rng.normal(0, 0.2, 20)
+            for i in range(10)]  # fmt: skip
+    labels = [f"{'a' if i % 2 else 'b'}{i}" for i in range(10)]
+    order = cluster_order(np.vstack([*rows, np.ones(20)]), [*labels, "flat"])
+    blocks = [name[0] for name in order[:-1]]
+    assert blocks in (["a"] * 5 + ["b"] * 5, ["b"] * 5 + ["a"] * 5)
+    assert order[-1] == "flat"
+
+
+def test_diverging_levels_bin_at_their_edges():
+    from ctx.viz.heatmap import diverging_levels  # noqa: PLC0415
+
+    values = [-3.0, -2.0, -1.0, -0.5, 0.0, 0.5, 1.0, 2.0, 3.0, None, float("nan")]
+    levels, swatches = diverging_levels(values)
+    assert levels == ["< -2", "-2 to -1", "-1 to -0.5", "-0.5 to 0.5", "-0.5 to 0.5",
+                      "0.5 to 1", "1 to 2", "≥ 2", "≥ 2", None, None]  # fmt: skip
+    assert [s.colour for s in swatches] == [ROLES["reference"]] * 3 + [None] + [
+        ROLES["comparison"]] * 3  # fmt: skip
+    assert [s.alpha for s in swatches[:3]] == sorted(s.alpha for s in swatches[4:])[::-1]

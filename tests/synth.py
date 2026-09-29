@@ -611,3 +611,71 @@ def demo_curves(width: str = "single"):  # returns ctx CurveData
                     Line("warn, fail", ends, (20.0, 20.0), dash=True)),
         width=width,
     )  # fmt: skip
+
+
+def demo_heatmap(n_genes: int = 30):  # returns ctx HeatmapData
+    """z-scored log CPM of the planted genes, clustered both ways, two tracks, a p per row."""
+    from scipy.stats import false_discovery_control, ttest_ind  # noqa: PLC0415
+
+    from ctx.viz.heatmap import HeatmapData, Track, cluster_order, diverging_levels  # noqa: PLC0415
+    from ctx.viz.style import DATA_COLOURS  # noqa: PLC0415
+
+    synthetic = design_counts(
+        (("control", "short", 6, "type_a"), ("case", "short", 6, "type_a"),
+         ("control", "short", 6, "type_b"), ("case", "short", 6, "type_b")), seed=3)  # fmt: skip
+    sheet = synthetic.samples
+    log_cpm = _log_cpm(synthetic)[:n_genes]
+    genes = synthetic.counts["gene_id"].to_list()[:n_genes]
+    z = (log_cpm - log_cpm.mean(axis=1, keepdims=True)) / log_cpm.std(axis=1, keepdims=True)
+    samples = sheet["sample"].to_list()
+    case = (sheet["condition"] == "case").to_numpy()
+    p = ttest_ind(log_cpm[:, case], log_cpm[:, ~case], axis=1).pvalue
+    stats = dict(zip(genes, (float(q) for q in false_discovery_control(p)), strict=True))
+    values = [float(v) for row in z for v in row]
+    levels, swatches = diverging_levels(values)
+    frame = pl.DataFrame({
+        "gene": [g for g in genes for _ in samples], "sample": samples * len(genes),
+        "z": values, "level": levels,
+    })  # fmt: skip
+    tracks = (
+        Track("cell type", dict(zip(samples, sheet["cell_type"], strict=True)),
+              {"type_a": DATA_COLOURS[2], "type_b": DATA_COLOURS[6]}),
+        Track("condition", dict(zip(samples, sheet["condition"], strict=True)),
+              {"control": DATA_COLOURS[1], "case": DATA_COLOURS[0]}),
+    )  # fmt: skip
+    return HeatmapData(
+        frame=frame, row="gene", column="sample", value="z", level="level",
+        columns={"gene": ("none", "Synthetic gene."), "sample": ("none", "Synthetic sample."),
+                 "z": ("SD", "log2 CPM, centred and scaled per gene."),
+                 "level": ("none", "The z step the cell is drawn in.")},
+        row_label="Gene", column_label="Sample", swatches=swatches,
+        caption="z-scored log2 CPM; rows and columns ordered by average-linkage clustering on "
+        "1 − Pearson. Right: BH-adjusted Welch t-test p, case against control. Synthetic data.",
+        row_order=cluster_order(z, genes), column_order=cluster_order(z.T, samples),
+        tracks=tracks, row_stats=stats, row_stats_label="BH-adjusted p",
+        row_stats_format=".1g",
+    )  # fmt: skip
+
+
+def demo_band_map():  # returns ctx HeatmapData
+    """Samples × metrics coloured by QC band, one metric with no band."""
+    from ctx.viz.heatmap import HeatmapData, Swatch  # noqa: PLC0415
+    from ctx.viz.style import BAND_COLOURS  # noqa: PLC0415
+
+    metrics = ("Reads", "Q30 bases", "Adapter content", "Genes detected")
+    bands = ("good", "usable", "bad", "no band")
+    rows = [(f"S{i:03d}", m, bands[(i * 7 + j * 3) % 4] if m != "Genes detected" else "no band")
+            for i in range(12) for j, m in enumerate(metrics)]  # fmt: skip
+    frame = pl.DataFrame(rows, schema=["sample", "metric", "band"], orient="row", strict=False)
+    frame = frame.with_columns(value=pl.lit(None, pl.Float64))
+    return HeatmapData(
+        frame=frame, row="sample", column="metric", value="value", level="band",
+        columns={"sample": ("none", "Synthetic sample."), "metric": ("none", "QC metric."),
+                 "band": ("none", "The metric's band; empty when it has none."),
+                 "value": ("none", "Not used by this map.")},
+        row_label="Sample", column_label="Metric",
+        swatches=(*(Swatch(b, BAND_COLOURS[b]) for b in ("good", "usable", "bad")),
+                  Swatch("no band", None)),
+        caption="Each metric's absolute band per sample; grey: no band. Synthetic data; no test.",
+        width="single",
+    )  # fmt: skip

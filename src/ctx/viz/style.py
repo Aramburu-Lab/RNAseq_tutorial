@@ -59,6 +59,13 @@ MARKERS = (
     ("D", "diamond"),
     ("v", "triangle-down"),
 )
+# A heatmap's cells: the three opacities of a stepped diverging scale, weakest first; the row
+# pitch that holds a 9 pt label (as BAR_ROW_MM); room for axes, tracks, legend and caption;
+# and the most rows or columns that are labelled, above which hover and the CSV name them.
+HEAT_ALPHAS = (0.33, 0.67, 1.0)
+HEAT = {"row_mm": 4.5, "margin_mm": 70.0, "label_rows": 60, "label_columns": 40,
+        "max_rows_drawn": 60}  # fmt: skip
+PLOTLY_HEAT_ROW_PX, PLOTLY_HEAT_BASE_PX = 18, 220
 # A strip plot spreads a category's points over this share of its slot either side of the
 # centre, and draws its median ± k MAD bar over a little more.
 STRIP = {"jitter": 0.3, "range": 0.4}

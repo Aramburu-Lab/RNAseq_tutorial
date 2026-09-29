@@ -15,10 +15,12 @@ from polars.testing import assert_frame_equal
 from pypdf import PdfReader
 from synth import (
     counts,
+    demo_band_map,
     demo_bar,
     demo_box,
     demo_bubble,
     demo_curves,
+    demo_heatmap,
     demo_pca,
     demo_strip,
     demo_volcano,
@@ -58,6 +60,8 @@ DEMOS = {
     "strip": lambda s: demo_strip(),
     "bubble": lambda s: demo_bubble(),
     "curves": lambda s: demo_curves(),
+    "heatmap": lambda s: demo_heatmap(),
+    "band_map": lambda s: demo_band_map(),
 }
 
 
@@ -134,7 +138,7 @@ def test_round_trip(figure):
     columns = list(data.page_table().columns)
     assert rows.columns == columns
     assert_frame_equal(rows, csv.select(columns).fill_nan(None), check_dtypes=False)
-    for column in data.hover:
+    for column in getattr(data, "hover", ()):
         assert f"{column}: %{{customdata" in _plotly_script(html)
 
 
