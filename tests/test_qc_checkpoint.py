@@ -144,10 +144,13 @@ def test_categories_and_strandedness_are_judged_without_bands():
 
 def test_status_takes_each_runs_sample_flags():
     runs = pl.DataFrame({"run_accession": ["r1", "r2", "r3"], "sample": ["a", "a", "b"]})
-    flags = pl.DataFrame({"sample": ["a", "a"], "metric": ["mt_fraction", "library_size"],
-                          "reason": ["one", "two"]})  # fmt: skip
+    # Two reasons for one metric, its absolute band and its MAD band, count as one flag.
+    flags = pl.DataFrame({"sample": ["a", "a", "a"],
+                          "metric": ["mt_fraction", "library_size", "library_size"],
+                          "reason": ["one", "two", "three"]})  # fmt: skip
     table = checkpoint.status(runs, flags, REG)
-    assert table.rows() == [("r1", "a", "flag", "one; two", 2), ("r2", "a", "flag", "one; two", 2),
+    both = "one; two; three"
+    assert table.rows() == [("r1", "a", "flag", both, 2), ("r2", "a", "flag", both, 2),
                             ("r3", "b", "pass", "", 0)]  # fmt: skip
     excluding = reg_of(metric("mt_fraction", action="exclude"), metric("library_size"))
     assert checkpoint.status(runs, flags, excluding)["qc_status"].to_list()[0] == "exclude"

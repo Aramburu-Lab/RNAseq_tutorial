@@ -321,7 +321,7 @@ def status(runs: pl.DataFrame, flags: pl.DataFrame, registry: Registry) -> pl.Da
     """
     excluding = [m.id for m in registry.metrics.values() if m.action == "exclude"]
     per = flags.group_by("sample", maintain_order=True).agg(
-        n_flags=pl.len(),
+        n_flags=pl.col("metric").n_unique(),
         qc_reason=pl.col("reason").str.join("; "),
         excluded=pl.col("metric").is_in(excluding).any(),
     )
