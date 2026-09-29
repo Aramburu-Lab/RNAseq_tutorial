@@ -31,6 +31,18 @@ bytes = 48686
 sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
 dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
 
+# The annotation the cluster run used (TODO.md cluster block, step 2), for the gene types of the
+# rRNA fraction in `ctx qc` (D-022). Publisher MD5 289b91e5e95e8b0450d223246f10a12e
+# (release_50/MD5SUMS), matched on the download of 2026-09-29, which measured the size and hash.
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
 # Patterns are checked against the ENA read_run report of the study by
 # tests/test_repo.py::test_guard_patterns_cover_study (runs ERR7425257-466, experiments
 # ERX6994339-548, samples SAMEA11307688-897, secondary samples ERS8952829-53038, 2026-09-27)
@@ -249,9 +261,10 @@ running = ["ndn_hsct_early", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
 # the call rule changed (D-012, D-013), once more the same day for the shown name (D-014),
 # for the volcano's cutoff line (D-015), for the fixes its review found (D-016), and for
 # the M5 page's caveat on what BH promises (D-018), for the switch that turns LFC
-# shrinkage off (D-019), and for rule sources that name their target (D-020).
+# shrinkage off (D-019), for rule sources that name their target (D-020), and for the
+# Trim Galore reports and the GTF that `ctx qc` reads (D-022).
 # The time makes each registration a change to this line, which is how it is found.
-registered = "2026-09-29 14:00"
+registered = "2026-09-29 15:36"
 
 [[sanity.rules]]
 id = "R1"

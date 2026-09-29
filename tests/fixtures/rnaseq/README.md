@@ -12,7 +12,8 @@ A real nf-core/rnaseq run on its test profile, copied as written, never edited. 
 | Salmon | 2.7.0 |
 | Profile | test,docker,arm64 |
 | Host | Darwin 24.6.0 arm64 |
-| Date (UTC) | 2026-09-27 |
+| Run date (from the params file) | 2026-09-27 |
+| Copied (UTC) | 2026-09-29 |
 | Params as recorded by the run | `salmon_index` = null, `transcript_fasta` = null, `additional_fasta` = null |
 
 ## Left out
@@ -300,14 +301,6 @@ A real nf-core/rnaseq run on its test profile, copied as written, never edited. 
 | `salmon/salmon.merged.transcript_tpm.tsv` | 7592 |
 | `salmon/salmon.merged.tx2gene.tsv` | 2910 |
 | `salmon/salmon.merged.tx2gene_augmented.tsv` | 2910 |
-| `trimgalore/RAP1_IAA_30M_REP1_trimmed_1.fastq.gz_trimming_report.txt` | 2606 |
-| `trimgalore/RAP1_IAA_30M_REP1_trimmed_2.fastq.gz_trimming_report.txt` | 2944 |
-| `trimgalore/RAP1_UNINDUCED_REP1_trimmed.fastq.gz_trimming_report.txt` | 2614 |
-| `trimgalore/RAP1_UNINDUCED_REP2_trimmed.fastq.gz_trimming_report.txt` | 2620 |
-| `trimgalore/WT_REP1_trimmed_1.fastq.gz_trimming_report.txt` | 2663 |
-| `trimgalore/WT_REP1_trimmed_2.fastq.gz_trimming_report.txt` | 2963 |
-| `trimgalore/WT_REP2_trimmed_1.fastq.gz_trimming_report.txt` | 2612 |
-| `trimgalore/WT_REP2_trimmed_2.fastq.gz_trimming_report.txt` | 2911 |
 
 ## Scope
 

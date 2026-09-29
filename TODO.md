@@ -477,7 +477,7 @@ cancer-transcriptomics-teaching/
 
 Rytis asked for a bubble chart of raw against useful reads with a hover that says where the rest went, heatmaps of gene-set patterns across sample groups, and linked multi-colour brushing like plotly's parallel-categories example. His choices: the Step-1 Trim Galore reports are copied off the cluster and parsed by MultiQC; contamination is shown through mitochondrial and rRNA fractions from counts; set scores are the mean per-gene z-score of the blind VST; brushing is over samples. Only the copy rule and the GTF resource touch frozen files, so they go first, as D-022, before cluster step 7; the heatmaps on M5 and M6 wait for the Step-1 record.
 
-- [ ] **P2Q.1 D-022, registered again.** `COPIED_FILES` gains `trimgalore/*_trimming_report.txt`, and step 7's rsync the same include; the rnaseq fixture rebuilt so every pattern matches (`tests/test_rnaseq_fixture.py`), and a test that the rsync command and `COPIED_FILES` agree. `conf/datasets/tier1.toml` gains the GENCODE 50 GTF the cluster used as a checksummed resource; its first download waits for Rytis's approval.
+- [x] **P2Q.1 D-022, registered again.** `COPIED_FILES` gains `trimgalore/*_trimming_report.txt`, and step 7's rsync the same include; the rnaseq fixture rebuilt so every pattern matches (`tests/test_rnaseq_fixture.py`), and a test that the rsync command and `COPIED_FILES` agree. `conf/datasets/tier1.toml` gains the GENCODE 50 GTF the cluster used as a checksummed resource; its first download waits for Rytis's approval. Done 2026-09-29: the GTF downloaded on approval, MD5 equal to the publisher's; fixture rebuilt from the 2026-09-27 run, 14 files byte-identical plus 8 reports; `test_rsync_matches_copied_files` added; registered at 15:36 (D-022).
 - [ ] **P2Q.2 MultiQC as the parser.** `ctx.qc.multiqc_io` runs MultiQC 1.35 by subprocess on the copied Trim Galore reports and Salmon folders, writes `outputs/02_qc/multiqc/` (exempted from the naming lint, as AGENTS.md exempts nf-core's `results/`), reads `multiqc_trim_galore.txt` and `multiqc_salmon.txt`, and refuses a sample name it cannot map. MultiQC is pinned in a feature laptops install; the environment's size change is measured.
 - [ ] **P2Q.3 Read fates and composition.** `conf/qc_metrics.toml` holds the metrics used, each with its source. A bubble chart (`ScatterData` with a size column): raw fragments (Trim Galore) against useful fragments (Salmon mapped), log axes, bubble size the MT + rRNA share, colour the cell type, y = x and a median ± 3 MAD band of the useful fraction; the hover names every fate, with low quality "not measured" for Trim Galore and Salmon decoys explained as genome-like, not contamination. A composition scatter of MT % against rRNA %. A QC status table (pass / flag with reasons); nothing is excluded.
 - [ ] **P2Q.4 Linked brushing.** `LinkedData` (scatter views plus parcats of tissue, cell type, condition, batch, QC status), a `kind` discriminator for page controls, `ctxBrush` pure logic tested under node, lasso and parcats taps restyling both traces, a colour picker, Clear, a live summary; a vector parallel-sets diagram for the PDF and SVG.
@@ -1446,7 +1446,7 @@ Step-1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session p
   - Timing:
     - steps 0–3 can start now;
     - steps 4–6 wait for P2A.2;
-    - step 7 waits for the newest registration commit (D-013 to D-016, D-018 to D-020), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
+    - step 7 waits for the newest registration commit (D-013 to D-016, D-018 to D-020, D-022), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
   - Proven by the pasted checks, each with its expected value.
   - Any count short of 210 stops 2C until it is explained.
 
@@ -1960,7 +1960,7 @@ Rytis's decisions, 2026-09-28:
 ```
 # Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
 # Steps 0-3 can start now. Steps 4-6 wait until I confirm P2A.2 passed. Step 7 waits for the
-# newest registration commit (D-013 to D-016, D-018 to D-020). P2A.2 may rename files in steps 6 and 7.
+# newest registration commit (D-013 to D-016, D-018 to D-020, D-022). P2A.2 may rename files in steps 6 and 7.
 
 # ---- 0. Run root, space, allocation, Nextflow ----
 export P=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
@@ -2072,7 +2072,7 @@ sacct -X -n -S 2026-09-27 --name=nf_fetchngs,nf_rnaseq_tier1 --format=JobID,JobN
 
 # ---- 7. On the Mac, after I confirm the newest registration commit: COPIED_FILES only, unchanged ----
 mkdir -p ~/ctx_tier1/data/raw/tier1_rnaseq
-rsync -avm --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1/nfcore_rnaseq/results/ ~/ctx_tier1/data/raw/tier1_rnaseq/
+rsync -avm --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.txt' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1/nfcore_rnaseq/results/ ~/ctx_tier1/data/raw/tier1_rnaseq/
 du -sh ~/ctx_tier1/data/raw/tier1_rnaseq                               # PASTE
 ```
 

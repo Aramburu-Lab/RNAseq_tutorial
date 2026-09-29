@@ -1,0 +1,108 @@
+SUMMARISING RUN PARAMETERS
+=========================
+Input filename: RAP1_UNINDUCED_REP2_trimmed.fastq.gz
+Trimming mode: single-end
+Trim Galore version: 2.3.0
+Quality Phred score cutoff: 20
+Quality encoding type selected: ASCII+33
+Adapter sequence: 'AGATCGGAAGAGC' (user-specified or auto-detected)
+Maximum trimming error rate: 0.1
+Minimum required adapter overlap (stringency): 1 bp
+Minimum required sequence length single-end: 20 bp
+Output file will be GZIP compressed
+
+
+Trim Galore 2.3.0 — adapter trimming built in
+This is cutadapt 4.0 (compatible; for MultiQC backwards compatibility)
+Command line parameters: -j 1 -e 0.1 -q 20 -O 1 -a AGATCGGAAGAGC RAP1_UNINDUCED_REP2_trimmed.fastq.gz
+Processing reads on 1 core in single-end mode ...
+
+=== Summary ===
+
+Total reads processed:              100,000
+Reads with adapters:                 40,242 (40.2%)
+Reads written (passing filters):    100,000 (100.0%)
+
+Total basepairs processed:     10,100,000 bp
+Quality-trimmed:                   21,863 bp (0.2%)
+Total written (filtered):       9,912,317 bp (98.1%)
+
+=== Adapter 1 ===
+
+Sequence: AGATCGGAAGAGC; Type: regular 3'; Length: 13; Trimmed: 40242 times.
+
+No. of allowed errors:
+1-9 bp: 0; 10-13 bp: 1
+
+Overview of removed sequences
+length	count	expect	max.err	error counts
+1	23281	25000.0	0	23281
+2	6565	6250.0	0	6565
+3	1976	1562.5	0	1976
+4	1062	390.6	0	1062
+5	545	97.7	0	545
+6	466	24.4	0	466
+7	449	6.1	0	449
+8	421	1.5	0	421
+9	382	0.4	0	382
+10	426	0.1	1	426
+11	299	0.0	1	299
+12	331	0.0	1	331
+13	287	0.0	1	287
+14	293	0.0	1	293
+15	266	0.0	1	266
+16	267	0.0	1	267
+17	254	0.0	1	254
+18	240	0.0	1	240
+19	210	0.0	1	210
+20	166	0.0	2	166
+21	178	0.0	2	178
+22	171	0.0	2	171
+23	182	0.0	2	182
+24	159	0.0	2	159
+25	136	0.0	2	136
+26	116	0.0	2	116
+27	125	0.0	2	125
+28	112	0.0	2	112
+29	97	0.0	2	97
+30	91	0.0	3	91
+31	77	0.0	3	77
+32	77	0.0	3	77
+33	44	0.0	3	44
+34	57	0.0	3	57
+35	46	0.0	3	46
+36	45	0.0	3	45
+37	34	0.0	3	34
+38	38	0.0	3	38
+39	40	0.0	3	40
+40	43	0.0	4	43
+41	35	0.0	4	35
+42	10	0.0	4	10
+43	20	0.0	4	20
+44	12	0.0	4	12
+45	11	0.0	4	11
+46	15	0.0	4	15
+47	16	0.0	4	16
+48	10	0.0	4	10
+49	8	0.0	4	8
+50	15	0.0	5	15
+51	7	0.0	5	7
+52	4	0.0	5	4
+53	4	0.0	5	4
+54	6	0.0	5	6
+55	2	0.0	5	2
+56	2	0.0	5	2
+57	2	0.0	5	2
+58	1	0.0	5	1
+59	4	0.0	5	4
+60	3	0.0	6	3
+61	1	0.0	6	1
+
+
+RUN STATISTICS FOR INPUT FILE: RAP1_UNINDUCED_REP2_trimmed.fastq.gz
+=============================================
+100000 sequences processed in total
+Sequences removed because they became shorter than the length cutoff of 20 bp:	29 (0.0%)
+Sequences removed because they were longer than the upper length cutoff:	0 (0.0%)
+Sequences removed because of too many N bases:	0 (0.0%)
+

@@ -12,6 +12,9 @@ ctx.gather.rnaseq with MANIFEST.sha256 and a README. Standard library only: it r
 Usage:
     pixi run -e fetch python scripts/python/make_rnaseq_fixture.py \\
         --out tests/fixtures/rnaseq --scratch <dir outside the repo> [--profile test,docker,arm64]
+
+With ``--from-run`` it copies from the run already in ``<scratch>/run`` instead of running
+again, as when COPIED_FILES grows and the run that made the fixture is still at hand.
 """
 
 from __future__ import annotations
@@ -74,6 +77,14 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def command_for(work: Path, version: str, profile: str) -> list[str]:
+    """The pipeline command, as run() runs it."""
+    return [
+        "nextflow", "run", "nf-core/rnaseq", "-r", version, "-profile", profile,
+        "-params-file", "params.yml", "-c", "cap.config", "-work-dir", str(work / "work"),
+    ]  # fmt: skip
+
+
 def run(scratch: Path, version: str, profile: str) -> list[str]:
     """Run the pipeline into scratch/run/out and return the command as run."""
     work = scratch / "run"
@@ -83,10 +94,7 @@ def run(scratch: Path, version: str, profile: str) -> list[str]:
     # JSON is valid YAML, and it writes null and true exactly.
     (work / "params.yml").write_text(json.dumps(PARAMS, indent=2) + "\n")
     (work / "cap.config").write_text(CAP)
-    command = [
-        "nextflow", "run", "nf-core/rnaseq", "-r", version, "-profile", profile,
-        "-params-file", "params.yml", "-c", "cap.config", "-work-dir", str(work / "work"),
-    ]  # fmt: skip
+    command = command_for(work, version, profile)
     env = {**os.environ, "NXF_SYNTAX_PARSER": "v2", "NXF_ANSI_LOG": "false",
            "NXF_HOME": str(scratch / "nxf_home")}  # fmt: skip
     subprocess.run(command, cwd=work, env=env, check=True)
@@ -117,6 +125,8 @@ def write_readme(out: Path, command: list[str], profile: str, omitted: list) -> 
     found = dict(re.findall(r"^\s+(nf-core/rnaseq|Nextflow|salmon): (\S+)$", text, re.MULTILINE))
     (params_file,) = (out / "pipeline_info").glob("params_*.json")
     recorded = json.loads(params_file.read_text())
+    # The run's own date, so a fixture copied again from the same run keeps it.
+    run_date = re.search(r"params_(\d{4}-\d{2}-\d{2})", params_file.name).group(1)
     nulls = ", ".join(f"`{k}` = {json.dumps(recorded.get(k))}" for k in NULLED)
     lines = [
         "# nf-core/rnaseq fixture: Salmon only",
@@ -134,7 +144,8 @@ def write_readme(out: Path, command: list[str], profile: str, omitted: list) -> 
         f"| Salmon | {found.get('salmon', 'not found')} |",
         f"| Profile | {profile} |",
         f"| Host | {platform.system()} {platform.release()} {platform.machine()} |",
-        f"| Date (UTC) | {datetime.now(UTC).date().isoformat()} |",
+        f"| Run date (from the params file) | {run_date} |",
+        f"| Copied (UTC) | {datetime.now(UTC).date().isoformat()} |",
         f"| Params as recorded by the run | {nulls} |",
         "",
         "## Left out",
@@ -163,13 +174,22 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--scratch", type=Path, required=True, help="outside the repository")
     parser.add_argument("--profile", default=PROFILE, help="emulate_amd64 if an arm64 image fails")
+    parser.add_argument(
+        "--from-run", action="store_true",
+        help="copy from the run already in --scratch/run, as when COPIED_FILES grows",
+    )  # fmt: skip
     args = parser.parse_args(argv)
     if args.out.exists() and any(args.out.iterdir()):
         raise FileExistsError(f"{args.out} is not empty; a fixture is rebuilt into a fresh dir")
     if args.scratch.resolve().is_relative_to(ROOT):
         raise ValueError(f"{args.scratch} is inside the repository")
     version, patterns = definitions()
-    command = run(args.scratch, version, args.profile)
+    if args.from_run:
+        if not (args.scratch / "run" / "out").is_dir():
+            raise FileNotFoundError(f"no run in {args.scratch / 'run' / 'out'}")
+        command = command_for(args.scratch / "run", version, args.profile)
+    else:
+        command = run(args.scratch, version, args.profile)
     omitted = copy(args.scratch / "run" / "out", args.out, patterns)
     write_readme(args.out, command, args.profile, omitted)
     print(f"{sum(1 for p in args.out.rglob('*') if p.is_file())} files in {args.out}")

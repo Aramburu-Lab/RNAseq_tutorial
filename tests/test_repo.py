@@ -1,6 +1,7 @@
 """Repository layout after adopting codebase_template (D-002), and dataset independence."""
 
 import csv
+import fnmatch
 import io
 import re
 import subprocess
@@ -11,7 +12,7 @@ from pathlib import Path
 import pytest
 
 from ctx.gather.fetchngs import FETCHNGS_VERSION
-from ctx.gather.rnaseq import RNASEQ_VERSION
+from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 PRECEDENCE = (
@@ -212,3 +213,22 @@ def test_fetchngs_runs_monochrome():
         assert writes and all("monochrome_logs = true" in line for line in writes), block[:200]
         first_call = call.search(block)
         assert first_call and block.index(writes[0]) < first_call.start(), "config after call"
+
+
+def test_rsync_matches_copied_files():
+    """Step 7's rsync copies exactly COPIED_FILES (D-022): what leaves the cluster is one list.
+
+    A pattern the rsync lacks is never copied, and ctx fails on the Mac after the cluster run;
+    an include with no pattern copies a file nothing reads.
+    """
+    (command,) = [
+        line
+        for line in (ROOT / "TODO.md").read_text().splitlines()
+        if line.startswith("rsync ") and "tier1_rnaseq" in line
+    ]
+    includes = [i for i in re.findall(r"--include='([^']+)'", command) if i != "*/"]
+    assert "--exclude='*'" in command
+    for pattern in COPIED_FILES:
+        assert any(i == pattern or fnmatch.fnmatch(pattern, i) for i in includes), pattern
+    for include in includes:
+        assert any(p == include or fnmatch.fnmatch(p, include) for p in COPIED_FILES), include
