@@ -303,3 +303,26 @@ def test_text_runs_to_the_column():
         if re.search(r"max-width:(?!none)", body) and ".page" not in selector
     ]
     assert not capped, capped
+
+
+def _over(fill: str, ground: str, share: float) -> str:
+    """The colour of ``fill`` mixed into ``ground`` at ``share``, as CSS color-mix draws it."""
+    pairs = [(int(fill[i : i + 2], 16), int(ground[i : i + 2], 16)) for i in (1, 3, 5)]
+    return "#" + "".join(f"{round(share * f + (1 - share) * g):02X}" for f, g in pairs)
+
+
+def test_text_contrast():
+    """Every text colour reads at 4.5:1 or more on every surface it is set on, in both themes.
+
+    ALI's faint grey measured 3.00:1 on its own inset panel, which is why it is not used.
+    """
+    from ctx.viz.style import CHROME, TEXT_ON, TINT, contrast  # noqa: PLC0415
+
+    share = float(TINT["fill"].rstrip("%")) / 100
+    for theme, chrome in CHROME.items():
+        for text, grounds in TEXT_ON.items():
+            for ground in grounds:
+                assert contrast(chrome[text], chrome[ground]) >= 4.5, (theme, text, ground)
+        for text, fill in (("text", "good-fill"), ("text", "warn-fill"), ("warn", "warn-fill")):
+            tinted = _over(chrome[fill], chrome["page"], share)
+            assert contrast(chrome[text], tinted) >= 4.5, (theme, text, fill)

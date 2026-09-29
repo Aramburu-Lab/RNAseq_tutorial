@@ -398,7 +398,8 @@ def test_hub_links_resolve_after_move(pipeline, tmp_path):
     moved = tmp_path / "copied_outputs"
     shutil.copytree(root / "outputs", moved)
     (hub,) = (moved / "09_report").glob("*_desynth_hub_v1.html")
-    hrefs = re.findall(r'href="([^"]+)"', hub.read_text())
+    # Links off the page; the skip link stays on it.
+    hrefs = [h for h in re.findall(r'href="([^"]+)"', hub.read_text()) if not h.startswith("#")]
     # Only de and function wrote pages here; setup and gather are listed as not run.
     assert [h.split("/")[1] for h in hrefs] == ["05_de", "06_function"]
     assert "Not run yet: M0 Setup, M1 Gather" in hub.read_text()

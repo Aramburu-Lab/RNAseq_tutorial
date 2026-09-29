@@ -93,21 +93,39 @@ THEMES = {
         "black", ink="#F2F2F2", background="#111111", grid="#39424A", reference="#8C8C8C"
     ),
 }
-# Page furniture per theme, never a data colour, so a link or a pill cannot read as a series.
-# Contrast on the background (surface): text 17.40 (16.07), muted 6.69 (6.18), link 8.39 (7.75)
-# light; 14.85 (13.40), 7.94 (7.17), 9.20 (8.30) dark; each pill's ink on its fill >= 6.83.
+# Page furniture per theme, from the ALI report's design (Rytis, 2026-09-29, D-024): a
+# near-white page, white cards on it, an inset grey, hairlines. Never a data colour for a link
+# or a pill, so neither reads as a series; ALI's blue accent is #0072B2, a data colour, so the
+# link keeps its own blue, and ALI's faint grey (3.00:1 on the inset) is not used for text.
+# tests/test_report.py::test_text_contrast measures every text colour on every surface.
 CHROME = {
     "white": {
-        "surface": "#F6F6F3", "text": "#1A1A1A", "muted": "#5C5C5C", "link": "#1D4E89",
+        "page": "#FCFCFD", "surface": "#FFFFFF", "surface-2": "#F6F7F9",
+        "text": "#181B1F", "muted": "#5B6168", "line": "#E4E7EB", "line-strong": "#D2D7DD",
+        "link": "#1D4E89", "warn": "#B45309", "warn-fill": "#E69F00", "good-fill": "#009E73",
         "pass-fg": "#1B5E20", "pass-bg": "#E6F2E7", "fail-fg": "#8E1B1B", "fail-bg": "#FBE9E7",
         "recorded-fg": "#4D4D4D", "recorded-bg": "#EDEDED",
+        "shadow": "0 1px 2px rgba(16,24,40,.04), 0 8px 24px -12px rgba(16,24,40,.18)",
     },
     "black": {
-        "surface": "#1C1C1C", "text": "#E4E4E4", "muted": "#A8A8A8", "link": "#8CB8F0",
+        "page": "#101316", "surface": "#1A1E22", "surface-2": "#23282E",
+        "text": "#E7E9EC", "muted": "#9BA2AA", "line": "#2A2F36", "line-strong": "#3A4047",
+        "link": "#8CB8F0", "warn": "#F0B45E", "warn-fill": "#E69F00", "good-fill": "#34D399",
         "pass-fg": "#9BD3A5", "pass-bg": "#16301C", "fail-fg": "#F4ABA3", "fail-bg": "#3D1816",
         "recorded-fg": "#C8C8C8", "recorded-bg": "#262626",
+        "shadow": "0 1px 2px rgba(0,0,0,.4), 0 14px 34px -18px rgba(0,0,0,.7)",
     },
 }  # fmt: skip
+# Text colour, and the surfaces it is read on, for the contrast test; tints are mixed in.
+TEXT_ON = {
+    "text": ("page", "surface", "surface-2"), "muted": ("page", "surface", "surface-2"),
+    "link": ("page", "surface", "surface-2"), "warn": ("page", "surface-2"),
+    "pass-fg": ("pass-bg",), "fail-fg": ("fail-bg",), "recorded-fg": ("recorded-bg",),
+}  # fmt: skip
+# How much of a fill colour tints a callout, and its border, over the page (ALI's color-mix).
+TINT = {"fill": "9%", "border": "45%"}
+# The page text's own chain, ALI's; Arial, first in the figures' chain, has Helvetica's widths.
+PAGE_FONT_CHAIN = ("Helvetica Neue", "Helvetica", "Arial", "Liberation Sans")
 MONO_CHAIN = ("ui-monospace", "SF Mono", "Menlo", "Consolas", "Liberation Mono", "monospace")
 # The plots on a page run 3 pt larger than the figure sizes (Rytis, 2026-09-28). The PDF and
 # SVG files keep SIZES, which their 85 mm layout checks are measured at.
@@ -123,11 +141,14 @@ def on_page(size: float) -> float:
 
 
 SPACE_PX = (4, 8, 12, 16, 24, 32, 48, 64, 96)
+# ALI's page geometry: a 1120 px column with 24 px gutters, 14 px card and 9 px inset radii,
+# a sticky top bar blurred behind; the top bar's height offsets every sticky or anchored thing.
 LAYOUT = {
-    "content": "1040px", "rail": "208px", "gap": "56px", "gutter": "16px",
-    "gutter-wide": "32px", "key-min": "150px", "card-min": "240px", "reading": "320px",
-    "radius": "4px",
-    "rule": "1px", "rule-mid": "2px", "rule-strong": "4px",
+    "content": "1072px", "rail": "208px", "gap": "56px", "gutter": "16px",
+    "gutter-wide": "24px", "key-min": "160px", "card-min": "240px", "reading": "320px",
+    "radius": "14px", "radius-sm": "9px", "radius-xs": "6px",
+    "rule": "1px", "rule-mid": "2px", "rule-accent": "3px", "rule-strong": "4px",
+    "topbar": "60px", "topbar-blur": "8px", "dot": "11px",
 }  # fmt: skip
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640
@@ -310,6 +331,7 @@ def css_variables(theme: Theme) -> str:
         **{f"--role-{role}": colour for role, colour in ROLES.items()},
         **{f"--{key}": colour for key, colour in CHROME[theme.name].items()},
         "--font": ", ".join([*(f'"{f}"' for f in FONT_CHAIN), "sans-serif"]),
+        "--font-page": ", ".join([*(f'"{f}"' for f in PAGE_FONT_CHAIN), "sans-serif"]),
         "--size-base": f"{PAGE_BASE_PX}px",
     }
     return "; ".join(f"{k}: {v}" for k, v in pairs.items()) + ";"
@@ -321,6 +343,7 @@ def css_layout() -> str:
         **{f"--fs-{name}": f"{px}px" for name, px in TYPE_PX.items()},
         **{f"--space-{i + 1}": f"{px}px" for i, px in enumerate(SPACE_PX)},
         **{f"--{name}": value for name, value in LAYOUT.items()},
+        **{f"--tint-{name}": value for name, value in TINT.items()},
         "--font-mono": ", ".join(f'"{f}"' if " " in f else f for f in MONO_CHAIN),
     }
     return "; ".join(f"{k}: {v}" for k, v in pairs.items()) + ";"

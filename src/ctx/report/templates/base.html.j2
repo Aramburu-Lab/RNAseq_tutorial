@@ -27,11 +27,16 @@
 <script>{{ plotly_js }}</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to the content</a>
+<header class="topbar"><div class="topbar-inner">
+<p class="brand"><span class="dot" aria-hidden="true"></span>{{ heading.suite }}{% if heading.dataset %} <small>{{ heading.dataset }}</small>{% endif %}</p>
+<button id="ctx-theme-toggle" type="button" aria-label="Switch between light and dark"><span class="t-light">Light</span><span class="t-sep">/</span><span class="t-dark">Dark</span></button>
+</div></header>
 <div class="page{% block page_class %}{% endblock %}">
 {% block rail %}{% endblock %}
-<main class="content">
+<main class="content" id="main">
 <header class="masthead">
-<div class="masthead-top"><p class="kicker">{{ heading.kicker }}</p><button id="ctx-theme-toggle" type="button" aria-label="Switch between light and dark"><span class="t-light">Light</span><span class="t-sep">/</span><span class="t-dark">Dark</span></button></div>
+<p class="kicker">{{ heading.kicker }}</p>
 <h1>{{ heading.headline }}</h1>
 {% if heading.dataset %}<p class="deck">Dataset <strong>{{ heading.dataset }}</strong></p>{% endif %}
 {% block deck %}{% endblock %}

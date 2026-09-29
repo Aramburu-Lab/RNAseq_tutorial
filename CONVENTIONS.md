@@ -60,7 +60,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 ## HTML reports
 
 - Self-contained single files: `plotly.min.js` embedded, no CDN, no external requests except optional gene links opened on click. Size < 15 MB; heatmaps capped at 100 genes; embedded tables capped to tested genes with ≤ 8 columns.
-- Theme toggle via CSS variables and `Plotly.relayout`; an 18 px page base; the interactive plots at the figure sizes plus 3 pt, converted to px at 96/72 (`ctx.viz.style.on_page`, Rytis 2026-09-28); Okabe–Ito.
+- Design of the ALI report (D-024): a frosted sticky top bar, an eyebrow above the title, numbered sections under hairlines, white cards with a soft shadow on a near-white page, stat tiles, rounded table wraps, tinted callouts for practice and mistakes; a skip link and focus rings, which ALI lacks; every text colour at 4.5:1 or more on each surface it sits on (`tests/test_report.py::test_text_contrast`). Theme toggle via CSS variables and `Plotly.relayout`; an 18 px page base; the interactive plots at the figure sizes plus 3 pt, converted to px at 96/72 (`ctx.viz.style.on_page`, Rytis 2026-09-28); Okabe–Ito.
 - Report skeleton, in this order: big question → concept in plain English → parameter cards (parameter, plain-English meaning, default, what changes if you move it) → annotated results → what it means in practice → think-about-it prompts and `<details>` self-check answers → common mistakes → reproduction block with exact command, wall time, peak RAM, versions.
 - Every parameter exposed in the CLI must have a parameter card; a test reads CLI defaults and fails if a card is missing or stale.
 

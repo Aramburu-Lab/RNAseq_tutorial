@@ -53,6 +53,9 @@ PLOTLY_CONFIG = {
 HEX = re.compile(r"#[0-9A-Fa-f]{6}")
 TITLE = re.compile(r"(?:M(?P<n>\d+)[a-z]? )?(?P<headline>[^:]+?)(?:: (?P<dataset>.+))?")
 
+# The top bar names the course on every page.
+SUITE = "Cancer Transcriptomics Teaching Suite"
+
 
 @dataclass(frozen=True)
 class ParameterCard:
@@ -358,14 +361,15 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
 def _heading(page: FigurePage | ModulePage | HubPage) -> dict[str, str]:
     """Kicker, headline and dataset, parsed from the page title."""
     if isinstance(page, FigurePage):
-        return {"kicker": "Figure", "headline": page.title, "dataset": ""}
+        return {"kicker": "Figure", "headline": page.title, "dataset": "", "suite": SUITE}
     match = TITLE.fullmatch(page.title)
     assert match is not None  # noqa: S101 - the pattern accepts any title
     if isinstance(page, HubPage):
-        kicker = "Cancer Transcriptomics Teaching Suite"
+        kicker = SUITE
     else:
         kicker = f"Module {match['n']}" if match["n"] is not None else "Module"
-    return {"kicker": kicker, "headline": match["headline"], "dataset": match["dataset"] or ""}
+    dataset = match["dataset"] or ""
+    return {"kicker": kicker, "headline": match["headline"], "dataset": dataset, "suite": SUITE}
 
 
 def render(page: FigurePage | ModulePage | HubPage) -> str:
