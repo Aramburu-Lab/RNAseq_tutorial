@@ -46,6 +46,9 @@ jobs:
         run: |
           if [ -f pixi.lock ]; then
             pixi install --locked -e default
+            # The read-level tools ctx runs by subprocess (ctx.tools); tests that run them fail
+            # without it rather than skip (D-027).
+            pixi install --locked -e reads
           else
             echo "::warning::no pixi.lock committed — resolving fresh. Run 'pixi install' and commit the lock."
             pixi install -e default

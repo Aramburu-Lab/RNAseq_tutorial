@@ -29,9 +29,9 @@ platforms = [{ platform = "linux-64", name = "linux-64-glibc-2-35", glibc = "2.3
 # (`help: e.g. platforms = [{ platform = "linux-64", cuda = "12" }]`). Following it literally is
 # what made this look impossible; prefix-dev/pixi#6814 has the exchange and the correction.
 
-# Platforms are split per feature rather than declared once, because bioconda's
-# osx-arm64 coverage is partial: a single global list makes the laptop
-# environment unsolvable the first time an aligner is added (build plan §5.4).
+# Platforms are declared per feature, so one can stay linux-only: `tools` does, which keeps
+# `prod`, the container environment, on linux-64. The read-level tools themselves all have
+# osx-arm64 builds (pixi search, 2026-09-29) and live in `reads`.
 
 [feature.analysis]
 platforms = ["linux-64-glibc-2-35", "osx-arm64"]
@@ -63,12 +63,36 @@ scipy = ">=1.11"
 # .labtemplate.yml must not carry a second one.
 labcore = { git = "https://github.com/aramburu-lab/labcore.git", tag = "v0.6.5", extras = ["all"] }
 
-# Anything that only ever runs on the cluster: aligners, callers, samtools.
-# Keeping it linux-64 lets the laptop environment stay solvable.
+# Cluster-only tools; none yet. Aligners, samtools and the QC tools are in `reads`, because
+# laptops run them too.
 [feature.tools]
 platforms = ["linux-64-glibc-2-35"]
 
 [feature.tools.dependencies]
+
+# Read-level tools for Track A (M2-M4) and `ctx qc`, on laptops and the cluster alike. Its own
+# environment, outside the main solve group, as `fetch` is: MultiQC 1.35 caps plotly below 7,
+# and htslib 1.21 needs a libdeflate the locked libtiff excludes, so one shared solve would move
+# the analysis environment after the Step-1 rules were registered (D-027). ctx runs these by
+# subprocess, finding them in this environment (ctx.tools). Versions are nf-core/rnaseq
+# 3.27.0's module pins; seqtk 1.4 is nf-core/modules seqtk/sample's; samtools and htslib 1.21
+# are the STAR module's pair, which also leaves osx-arm64 STAR its one htslib-1.21 build.
+[feature.reads]
+platforms = ["linux-64-glibc-2-35", "osx-arm64"]
+
+[feature.reads.dependencies]
+fastqc = "==0.12.1"
+fastp = "==1.1.0"
+seqkit = "==2.13.0"
+seqtk = "==1.4"
+multiqc = "==1.35"
+star = "==2.7.11b"
+samtools = "==1.22.1"
+htslib = "==1.22.1"
+subread = "==2.1.1"
+salmon = "==2.7.0"
+trim-galore = "==2.3.0"
+hisat2 = "==2.2.3"
 
 [feature.dev]
 platforms = ["linux-64-glibc-2-35", "osx-arm64"]
@@ -88,6 +112,8 @@ laptop = { features = ["analysis", "ctx"], solve-group = "main" }
 # Nextflow for nf-core/fetchngs runs on a laptop (D-006). Its own environment, outside the
 # main solve-group, so default, laptop, prod and CI resolve exactly as before.
 fetch = { features = ["fetch"] }
+# The read-level tools; ctx calls them by subprocess from the default or laptop environment.
+reads = { features = ["reads"] }
 prod = { features = ["analysis", "tools"], solve-group = "main" }
 
 [tasks]

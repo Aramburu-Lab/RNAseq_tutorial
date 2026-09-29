@@ -461,7 +461,7 @@ cancer-transcriptomics-teaching/
 - [x] D3, D6–D9 defaults accepted (Rytis's draft v3.9): STAR on chr22 with an optional HISAT2 full-genome path; Zenodo with DOI; Python CLI first, Nextflow wrapper later; code MIT, materials CC BY 4.0; MSc level, English
 - [x] Merge Rytis's drafts v3.7–v3.9 (TEMP/, 2026-09-29; D-021): see "Merge of drafts v3.7–v3.9" at the end of this file
 - [x] Merge Rytis's parallel drafts v3.4 and v3.6 (TEMP/, 2026-09-29; D-020): see "Merge of drafts v3.4 and v3.6" at the end of this file for what was carried, what was not, and why
-- [ ] Pin tool versions in `pixi.toml` (verify list at the end); FastQC 0.12.1 and MultiQC 1.35 go in a feature that laptops install, not the cluster-only `[feature.tools]` (both noarch on bioconda, read 2026-09-29)
+- [x] Pin tool versions in `pixi.toml` (verify list at the end); FastQC 0.12.1 and MultiQC 1.35 go in a feature that laptops install, not the cluster-only `[feature.tools]` (both noarch on bioconda, read 2026-09-29). Done 2026-09-30: every read-level tool in the `reads` environment (D-027)
 
 ### Phase 1 — Foundations
 
@@ -482,6 +482,27 @@ cancer-transcriptomics-teaching/
 - [ ] M5 pydeseq2 on Step-1: cell-type axis, cancer-vs-healthy contrasts within cell type, all M5 figures, precomputed knob grid. Batch lesson (D5): read length (75/76 vs 101 nt, a sequencing-batch proxy joined from ENA by run) is confounded with PDAC and IPMN; show the naive cancer-vs-healthy contrast beside the within-batch one at 101 nt (NDN 4 healthy vs 14 PDAC; monocytes 2 vs 12), with the PCA coloured by read length and the n per group stated; the G-CSF and HSC-T vs steady-state contrasts are fitted within the 76-nt batch, and the published IFN response in HSC-T neutrophils but not monocytes is the positive control
 - [ ] M6 ORA/GSEA/disease association with immune gene sets; `ctx.function.lite` validated against gseapy
 - [ ] Reports M1, M5, M6 + hub; sanity checks pass (see verification)
+
+### Phase 2M — Stage 0 and M2 to its full spec (approved 2026-09-30)
+
+Rytis asked for the Step-1 counts and for M2-M4 and M7-M10; his choices: full spec, one module at a time, in the order M2, M3, M4, the GDC breast download, M10, M9, M8, M7; all four download groups approved for when each module is built. Designed by three designers and an adversarial reviewer each (2026-09-30); their fixes are folded in below. Phase 2Q's P2Q.2-P2Q.6 are built here as parts of M2.
+
+Stage 0, before or beside the cluster run:
+- [x] **D-025** The Trim Galore reports leave the cluster as JSON, which the run now publishes; registered again (1d02c34).
+- [x] **S0.1** `scripts/python/record_sanity.py` writes the Step-1 record: the hub's verdicts byte for byte and the M5+M6 metrics union (D-026, 143923a).
+- [x] **S0.2** A `reads` pixi environment, outside the `main` solve group, so the analysis environment does not move before the record (MultiQC 1.35 needs plotly < 7; htslib 1.21 conflicts with the locked libtiff): fastqc 0.12.1, fastp 1.3.6, seqkit 2.13.0, seqtk 1.4, multiqc 1.35, star 2.7.11b, samtools and htslib 1.21, subread 2.1.1, salmon 2.7.0, trim-galore 2.3.0, hisat2 2.2.3, the nf-core/rnaseq 3.27.0 pins where it has one. `ctx.tools` finds each binary in the sibling `reads` environment, else `$CTX_TOOLS`, and refuses a version other than the pin. `pixi list` of default and laptop unchanged; the new environment's size measured. pytximport waits for M4. Done 2026-09-30 (D-027): no other environment moved; fastp 1.1.0 and samtools 1.22.1, because no osx-arm64 solve holds STAR beside fastp 1.3.6; 1.6 GB.
+- [ ] **S0.3** A single-end chr22 fixture beside `tests/fixtures/chr22/` (Step-1 is single-end 75-101 nt): four reverse-stranded samples and one unstranded, a planted adapter-heavy and a degraded sample, from the committed transcripts with a fixed seed; generator in `scripts/python/`.
+- [ ] **S0.4** The Track A teaching subset: `scripts/python/pick_teaching_subset.py` picks 8 runs from the gathered sheet (4 distinct donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; monocyte isolation matched across strata; an empty sex never preferred), and a "Phase 3 cluster commands (P3.0)" block: a separate fetchngs run on those runs, `seqtk sample -s42` to 1M reads, rewritten md5s, chr22 genome, GTF, transcripts and tx2gene from GENCODE 50, a STAR chr22 index and Salmon chr22 indices with and without decoys, each measured, copied to `data/raw/` on the Mac. The 8 accessions go in after P2C.2.
+
+M2 to its full spec (TODO.md M2 section, P2Q.2-P2Q.6, the Phase 3 M2 items):
+- [ ] **M2.1** `ctx.qc.multiqc_io`: MultiQC by subprocess from the `reads` environment, module tables read with Polars, every sample name mapped or refused, every expected Trim Galore and Salmon source present; `outputs/02_qc/multiqc/` exempt from the naming lint (D-entry). Tested on the rnaseq fixture's JSON reports; read fates add up to Salmon's `num_processed`.
+- [ ] **M2.2** `conf/qc_metrics.toml` and `ctx.qc.registry`: every metric with its bands and source type, or `dataset_only` with a rationale; the MultiQC config generator (conditional formatting from band tokens, section comments); no `exclude` action before the record.
+- [ ] **M2.3** Checkpoint on counts: library size, genes detected, top-gene share, mitochondrial, mitochondrial rRNA and nuclear rRNA shares as disjoint classes (GENCODE 50 has no 45S genes, said on the page), globin, Spearman replicate concordance, PCA distance, strandedness from Salmon, the sex check imported from M5; the status table (pass, flag; reasons from content); confounding tests within PB × cell-type strata, one run per individual, reference from the dataset's contrasts, Mann-Whitney with rank-biserial r and Fisher's exact test with the odds ratio, BH over all.
+- [ ] **M2.4** M2a on reads: FastQC, fastp and seqkit on the gathered FASTQs, paths from the sheet resolved against `--fetchngs-dir` (D-entry for reading them); planted problems caught; the fastp `-q` × `-l` grid on one sample.
+- [ ] **M2.5** Figure contracts: shared bands and MAD; `ScatterData` bubble size; `StripData`; `CurveData`; `HeatmapData` (P2Q.6); `FlowData`, the read-count Sankey with D16's full set; `LinkedData` with the controls kind and `_brush.js.j2` (P2Q.4); `SurfaceData` and `DensityData` with cividis tokens. Each joins the measured PDF/SVG, overlap and round-trip tests.
+- [ ] **M2.6** `ctx qc`: CLI, parameter cards, `content/qc.toml`, the page with every M2 figure, end-to-end tests on the rnaseq fixture, synthetic counts and the fetchngs fixture, the hub linking it, budget tests.
+- [ ] **M2.7** Browser check at 1280 and 375 px in both themes; page sizes; the Track A budget measured; a review section.
+- [ ] **M2.8** On Step-1 once step 7 lands: `ctx qc` with flags only; exclusions wait for the record and Phase 2D.
 
 ### Phase 2S — Candida figure style, ALI page design, editable page text (approved 2026-09-29)
 
