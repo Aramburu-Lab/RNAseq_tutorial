@@ -14,6 +14,8 @@ import polars as pl
 from ctx.viz.annotate import fit_title, place_caption
 from ctx.viz.axes import axis_title
 from ctx.viz.style import (
+    BUBBLE_KEYS,
+    BUBBLE_PT,
     LINE_WIDTHS,
     MARKER_SIZE,
     MARKERS,
@@ -21,6 +23,7 @@ from ctx.viz.style import (
     PLOTLY_HEIGHT_PX,
     PLOTLY_MARKER_PX,
     POINT_ALPHA,
+    PX_PER_PT,
     SIZES,
     THEMES,
     THRESHOLD_DASH,
@@ -42,6 +45,8 @@ CUTOFF_PRESETS = (0.1, 0.05, 0.01, 0.001)
 # The strictest cutoff the page accepts; a smaller typed value is raised to it.
 MIN_CUTOFF = 0.0001
 CUTOFF_NAME = "cutoff"
+# A log axis spanning fewer decades than this labels 1, 2 and 5 of each, not the decades alone.
+LOG_SUBS, LOG_SUBS_BELOW = (1.0, 2.0, 5.0), 2.0
 
 
 @dataclass(frozen=True)
@@ -134,6 +139,13 @@ class Calls:
         return values | {"line_rule": rule.format_map(values)}
 
 
+def bubble_pt(values: list[float], top: float) -> list[float]:
+    """Point diameters in pt: ``BUBBLE_PT["min"]`` at 0, ``["max"]`` at ``top``, area linear."""
+    low, high = BUBBLE_PT["min"], BUBBLE_PT["max"]
+    return [math.sqrt(low**2 + (high**2 - low**2) * max(v, 0.0) / top) if top > 0 else low
+            for v in values]  # fmt: skip
+
+
 def _js_number(value: float) -> str:
     """A number as JavaScript's String() writes it, for the cutoffs the controls offer."""
     return f"{value:.10g}"
@@ -182,6 +194,8 @@ class ScatterData:
         keep: Boolean column of points always drawn on the page; the others are thinned.
         names: Legend text per colour level, where the level itself is terse.
         calls: How the page calls points again under the reader's cutoffs, or None.
+        size: Non-negative numeric column that sets each point's area, or None.
+        size_label: What the size shows, for its legend keys.
     """
 
     frame: pl.DataFrame
@@ -203,10 +217,21 @@ class ScatterData:
     keep: str | None = None
     names: Mapping[str, str] | None = None
     calls: Calls | None = None
+    size: str | None = None
+    size_label: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
-        named = [self.x, self.y, self.colour, self.symbol, self.label, self.keep, *self.hover]
+        named = [
+            self.x,
+            self.y,
+            self.colour,
+            self.symbol,
+            self.label,
+            self.keep,
+            self.size,
+            *self.hover,
+        ]
         if self.calls:
             named += [self.calls.lfc, self.calls.p, *self.calls.adjusted]
         if missing := [c for c in named if c is not None and c not in self.frame.columns]:
@@ -220,6 +245,8 @@ class ScatterData:
         if self.calls and self.symbol:
             # The page script finds one trace per colour level; shapes would split them.
             raise ValueError("live calls cannot be combined with a symbol column")
+        if self.size and not (self.frame[self.size].fill_null(0) >= 0).all():
+            raise ValueError(f"{self.size}: sizes must be non-negative")
         if self.symbol and self.frame[self.symbol].n_unique() > len(MARKERS):
             raise ValueError(f"{self.symbol}: more levels than the {len(MARKERS)} marker shapes")
 
@@ -332,6 +359,29 @@ class ScatterData:
         """Legend text of a colour level."""
         return (self.names or {}).get(level, str(level))
 
+    def _diameters(self, rows: pl.DataFrame) -> list[float] | float:
+        """Each point's diameter in pt: from ``size``, else the one marker size."""
+        if self.size is None:
+            return MARKER_SIZE
+        top = float(self.frame[self.size].max() or 0.0)  # type: ignore[arg-type]
+        return bubble_pt(rows[self.size].fill_null(0.0).to_list(), top)
+
+    def _size_keys(self) -> list[tuple[str, float]]:
+        """(legend text, diameter in pt) of the size keys; none without ``size``."""
+        if self.size is None:
+            return []
+        top = float(self.frame[self.size].max() or 0.0)  # type: ignore[arg-type]
+        values = [float(f"{share * top:.2g}") for share in BUBBLE_KEYS]
+        return [(f"{self.size_label} {v:g}", d) for v, d in zip(values, bubble_pt(values, top),
+                                                                   strict=True)]  # fmt: skip
+
+    def _px(self, rows: pl.DataFrame) -> list[float] | float:
+        """Plotly marker diameters in px: the static diameters, on screen."""
+        diameters = self._diameters(rows)
+        if isinstance(diameters, list):
+            return [d * PX_PER_PT for d in diameters]
+        return PLOTLY_MARKER_PX
+
     def _hover_format(self, column: str) -> str:
         """Plotly number format for a column: none for text, digits for numbers."""
         dtype = self.frame.schema[column]
@@ -362,8 +412,10 @@ class ScatterData:
                 rows = self.frame.filter(pl.col(self.colour) == level)
                 if self.symbol:
                     rows = rows.filter(pl.col(self.symbol) == shape)
+                diameters = self._diameters(rows)
                 ax.scatter(
-                    rows[self.x].to_numpy(), rows[self.y].to_numpy(), s=MARKER_SIZE**2,
+                    rows[self.x].to_numpy(), rows[self.y].to_numpy(),
+                    s=[d**2 for d in diameters] if isinstance(diameters, list) else diameters**2,
                     c=colour, marker=MARKERS[j][0], linewidths=LINE_WIDTHS["marker_edge"],
                     alpha=POINT_ALPHA,
                 )  # fmt: skip
@@ -373,9 +425,11 @@ class ScatterData:
             ax.plot(line.x, line.y, linewidth=LINE_WIDTHS["line"], **_line_style(line, theme))
         ax.set_xscale("log" if self.log_x else "linear")
         ax.set_yscale("log" if self.log_y else "linear")
-        for axis, log in ((ax.xaxis, self.log_x), (ax.yaxis, self.log_y)):
+        for axis, log, column in ((ax.xaxis, self.log_x, self.x), (ax.yaxis, self.log_y, self.y)):
             if log:
-                plain_log_ticks(axis)
+                values = self.frame[column].filter(self.frame[column] > 0)
+                decades = math.log10(float(values.max()) / float(values.min()))  # type: ignore[arg-type]
+                plain_log_ticks(axis, subs=LOG_SUBS if decades < LOG_SUBS_BELOW else None)
         ax.set_xlabel(self._axis_title(self.x_label, self.x))
         ax.set_ylabel(fit_title(self._axis_title(self.y_label, self.y), height))
         present = set(self.frame[self.colour].unique())
@@ -389,6 +443,10 @@ class ScatterData:
                 Line2D([], [], marker=MARKERS[j][0], linestyle="", color=theme.ink, label=str(s))
                 for j, s in enumerate(shapes)
             ]
+        handles += [
+            Line2D([], [], marker="o", linestyle="", color=theme.reference, markersize=d, label=t)
+            for t, d in self._size_keys()
+        ]
         handles += [
             Line2D([], [], label=line.name, **_line_style(line, theme))
             for line in {ln.name: ln for ln in self.all_lines() if not math.isnan(ln.y[0])}.values()
@@ -484,7 +542,7 @@ class ScatterData:
                     x=rows[self.x].to_list(), y=rows[self.y].to_list(), mode="markers",
                     name=self._name(level) if shape is None else f"{self._name(level)}, {shape}",
                     marker={"color": self.colours[level] or light.reference,
-                            "symbol": MARKERS[j][1], "size": PLOTLY_MARKER_PX,
+                            "symbol": MARKERS[j][1], "size": self._px(rows),
                             "opacity": POINT_ALPHA},
                     customdata=rows.select(self.hover).rows(), hovertemplate=template,
                 )

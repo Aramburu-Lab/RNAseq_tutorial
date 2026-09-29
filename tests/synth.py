@@ -527,3 +527,48 @@ def demo_strip(log: bool = False, width: str = "single"):  # returns ctx StripDa
                Span("good", "good", 8000.0 * scale, None)),
         ranges=tuple(ranges), range_label="median ± 3 MAD", log=log, width=width,
     )  # fmt: skip
+
+
+def demo_bubble(width: str = "double"):  # returns ctx ScatterData
+    """Read fates as bubbles: raw against useful fragments, size the MT + rRNA share.
+
+    Log axes, the identity line, and the median ± 3 scaled MAD of the useful fraction as
+    three lines y = f x; one planted sample keeps a third of what the others keep.
+    """
+    from scipy.stats import median_abs_deviation  # noqa: PLC0415
+
+    from ctx.viz.scatter import Line, ScatterData  # noqa: PLC0415
+    from ctx.viz.style import category_colours  # noqa: PLC0415
+
+    rng = np.random.default_rng(11)
+    cells = ("NDN", "LDN", "Monocyte")
+    raw = np.exp(rng.normal(np.log(2.5e7), 0.6, 24))
+    useful_share = np.clip(rng.normal(0.8, 0.03, 24), 0, 1)
+    useful_share[5] = 0.27
+    frame = pl.DataFrame({
+        "sample": [f"S{i:03d}" for i in range(24)], "cell_type": [cells[i % 3] for i in range(24)],
+        "raw": raw, "useful": raw * useful_share, "useful_share": useful_share,
+        "mt_rrna_share": np.clip(rng.normal(0.08, 0.03, 24), 0.0, 1.0),
+    })  # fmt: skip
+    median = float(np.median(useful_share))
+    mad = float(median_abs_deviation(useful_share, scale="normal"))
+    ends = (float(raw.min()) * 0.8, float(raw.max()) * 1.2)
+    lines = (Line("y = x", ends, ends),) + tuple(
+        Line(name, ends, (f * ends[0], f * ends[1]), dash=True)
+        for name, f in (("median ± 3 MAD", median - 3 * mad), ("median ± 3 MAD", median + 3 * mad))
+    )  # fmt: skip
+    columns = {
+        "sample": ("none", "Synthetic sample."), "cell_type": ("none", "Cell type."),
+        "raw": ("fragments", "Fragments sequenced."),
+        "useful": ("fragments", "Fragments Salmon assigned to a transcript."),
+        "useful_share": ("fraction", "useful / raw."),
+        "mt_rrna_share": ("fraction", "Share of counted reads on MT and rRNA genes."),
+    }  # fmt: skip
+    return ScatterData(
+        frame=frame, columns=columns, x="raw", y="useful", x_label="Raw", y_label="Useful",
+        colour="cell_type", colours=category_colours(list(cells)),
+        caption="Bubble area: MT + rRNA share. Dashed: the useful fraction's median ± 3 scaled "
+        "MAD. Synthetic data; no test.",
+        hover=("sample", "useful_share", "mt_rrna_share"), lines=lines, log_x=True, log_y=True,
+        width=width, size="mt_rrna_share", size_label="MT + rRNA",
+    )  # fmt: skip

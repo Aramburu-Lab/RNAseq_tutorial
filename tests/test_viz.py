@@ -20,6 +20,7 @@ from synth import (
     demo_bar,
     demo_bars_at_scale,
     demo_box,
+    demo_bubble,
     demo_ma,
     demo_pca,
     demo_strip,
@@ -33,7 +34,7 @@ from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.axes import axis_title
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
-from ctx.viz.scatter import THIN_MAX, Calls, ScatterData
+from ctx.viz.scatter import THIN_MAX, Calls, ScatterData, bubble_pt
 from ctx.viz.strip import StripData
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
@@ -315,6 +316,7 @@ def _contracts():
         "library_sizes_210_runs": demo_bars_at_scale(horizontal=False),
         "strip": demo_strip(),
         "strip_log_double": demo_strip(log=True, width="double"),
+        "bubble": demo_bubble(),
     }
 
 
@@ -439,6 +441,7 @@ OVERLAP_CASES = {
     "library_sizes_210_runs": lambda s: demo_bars_at_scale(horizontal=False),
     "strip": lambda s: demo_strip(),
     "strip_log": lambda s: demo_strip(log=True),
+    "bubble": lambda s: demo_bubble(),
 }
 
 
@@ -634,3 +637,16 @@ def test_fit_title_wraps_to_axis_length():
     assert wrapped.replace("\n", " ") == title
     assert "\n" in wrapped
     assert fit_title("Samples (runs)", height) == "Samples (runs)"
+
+
+def test_bubble_area_grows_linearly_with_the_size_value():
+    from ctx.viz.style import BUBBLE_PT  # noqa: PLC0415
+
+    low, mid, high = bubble_pt([0.0, 5.0, 10.0], 10.0)
+    assert (low, high) == pytest.approx((BUBBLE_PT["min"], BUBBLE_PT["max"]))
+    assert mid**2 - low**2 == pytest.approx((high**2 - low**2) / 2)
+    data = demo_bubble()
+    with pytest.raises(ValueError, match="non-negative"):
+        dataclasses.replace(data, frame=data.frame.with_columns(mt_rrna_share=pl.lit(-0.1)))
+    diameters = [t.marker.size for t in _marker_traces(data.interactive())]
+    assert all(isinstance(d, tuple | list) and len(d) > 0 for d in diameters)

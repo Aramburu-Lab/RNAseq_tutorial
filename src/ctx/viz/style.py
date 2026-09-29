@@ -39,6 +39,10 @@ LINE_WIDTHS = {"axes": 1.0, "line": 1.0, "box": 1.5, "errorbar": 1.5, "marker_ed
 TICK_PT = {"major": 3.0, "minor": 1.5}
 # Point diameter in pt, and its opacity, so overplotted points still show their density.
 MARKER_SIZE = 6.0
+# A bubble's diameter in pt at a size value of 0 and at the largest value; area grows linearly.
+BUBBLE_PT = {"min": 3.0, "max": 14.0}
+# Size values the legend shows, as shares of the largest.
+BUBBLE_KEYS = (0.25, 0.5, 1.0)
 POINT_ALPHA = 0.5
 PX_PER_PT = 96 / 72
 # Plotly marker diameter in pixels: MARKER_SIZE on screen.

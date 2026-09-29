@@ -14,7 +14,7 @@ import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
 from ctx.viz.axes import axis_title
-from ctx.viz.scatter import FLOAT_HOVER, plain_log_ticks
+from ctx.viz.scatter import FLOAT_HOVER, LOG_SUBS, plain_log_ticks
 from ctx.viz.style import (
     BAND_ALPHA,
     BAND_COLOURS,
@@ -37,8 +37,6 @@ from ctx.viz.style import (
 
 # The golden ratio's fraction: successive points of a category land far apart in its slot.
 SPREAD = (math.sqrt(5) - 1) / 2
-# A metric's strata seldom span two decades: label 1, 2 and 5 of each, not the decades alone.
-LOG_SUBS = (1.0, 2.0, 5.0)
 RANGE_COLUMNS = {
     "range_median": "Median of the category's values, the centre of its grey bar.",
     "range_low": "Lower end of the category's grey bar.",
