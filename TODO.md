@@ -1829,7 +1829,7 @@ Exit gate:
 
 - [ ] **P2C.3 M5, M6 and hub on Step-1; the verdicts.**
   - `ctx de`, `ctx function` and `ctx report` run on the laptop profile.
-  - The verdicts go to `deliverables/YYYY-MM-DD_de_tier1_sanity_v1.csv` with a README and its SHA-256 recorded here (minor 17). A failing rule is reported, never retuned.
+  - The verdicts go to `deliverables/YYYY-MM-DD_de_tier1_sanity_v1.csv`, and the metrics they were decided on, the union of the M5 and M6 metrics tables, to `…_de_tier1_metrics_v1.csv`, both written by `scripts/python/record_sanity.py` with READMEs and their SHA-256 recorded here (minor 17; D-026). Run the freeze test first: it skips from the moment the record exists. A failing rule is reported, never retuned.
   - Eye check at real size. Offline in the browser pane, light and dark, with one origin.
   - Proven by:
     - `::test_decision_follows_rule`;
