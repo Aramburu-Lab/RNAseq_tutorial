@@ -27,6 +27,36 @@ it were reversed.
 
 ---
 
+## D-018 — The M5 page says what BH promises and when it does not hold
+
+**Date:** 2026-09-29 · **Status:** decided
+
+**Context.** The M5 glossary said BH and BY "control the false discovery rate", with no condition attached. D-017 measured that DESeq2's Wald p-values run small because each gene's estimated dispersion is taken as known. On synthetic data, the share of false genes at padj < 0.05 is therefore about twice what BH promises. Rytis asked for the small-sample caveat on the page.
+
+**Options.**
+- A caveat that uses this run's own numbers. No run knows its false genes, so there are none to fill in.
+- A fixed, measured example, stated with what it was measured on.
+
+**Decision.** The measured example, on the M5 page in two places:
+- **Glossary.** The BH and BY line now says they control the false discovery rate "when the p-values are exact".
+- **Common mistakes.** A new entry covers reading padj < 0.05 as at most 5 % false genes. BH bounds the average share, and only when the p-values of unchanged genes are exact. The entry gives the measured numbers below.
+
+**Evidence.** Measured on the committed `tests/synth.py` `design_counts` defaults: 6 vs 6, 1,000 genes, 100 of them changed, seeds 0 to 199, one fit each.
+
+| Share of false genes | Mean | Standard error | Max |
+|---|---|---|---|
+| BH's promise, 0.05 × m0/m | 0.045 | | |
+| padj < 0.05, any fold change | 0.084 | 0.0019 | 0.149 |
+| the page's call, which also needs abs(log2 FC) ≥ 1 | 0.032 | 0.0012 | 0.084 |
+
+D-017 gives the cause. With the true dispersion put in place, the null p-values are nominal, and R DESeq2 1.46.0 gives the same excess as ctx.
+
+**Consequence.**
+- **Frozen file.** `src/ctx/de/page.py` is frozen, so this commit registers again. At 2026-09-29 10:10, `~/ctx_tier1/data/raw` held only `tier1_meta`.
+- **Fixed numbers.** The numbers in the mistake are a fixed reference, not this run's. If `design_counts`, the call rule or pydeseq2 changes, they have to be measured again.
+
+---
+
 ## D-017 — Synthetic dispersion follows a trend; the planted tests rest on measured spreads
 
 **Date:** 2026-09-28 · **Status:** decided

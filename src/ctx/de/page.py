@@ -28,7 +28,7 @@ TERMS = (
     ("Wald test", "Asks whether a gene's log2 fold change differs from 0, given its variation."),
     ("padj", "The p-value adjusted over all tested genes; DESeq2 uses BH."),
     ("BH, BY", "Benjamini-Hochberg and Benjamini-Yekutieli: they control the false discovery "
-     "rate, BY under any dependence."),
+     "rate when the p-values are exact, BY under any dependence."),
     ("Holm, Bonferroni", "They control the chance of even one false call; stricter."),
     ("Called", f"padj below {ALPHA} and a log2 fold change of at least {LFC_MIN:g} either way."),
     ("Shrunk fold change", "An estimate pulled toward 0 where the data are thin; ranks genes."),
@@ -46,6 +46,12 @@ MISTAKES = (
     "becomes overconfident.",
     "Reading the volcano's height as the call: it is the raw p-value, and the call uses the "
     "adjusted one.",
+    # Measured in D-018 on tests/synth.py design_counts, seeds 0-199; not this run's numbers.
+    "Reading padj < 0.05 as at most 5 % false genes: BH bounds the average share, and only "
+    "if the p-values of unchanged genes are exact. DESeq2 takes each gene's estimated "
+    "dispersion as known, so they run small. On synthetic data with 6 samples per group, "
+    "8.4 % of the genes at padj < 0.05 were false on average, against the 4.5 % BH "
+    "promised; the call's fold-change filter brought it to 3.2 %.",
 )
 NA_CHECK = SelfCheck(
     "Why can a gene with a large fold change have padj = NA?",
