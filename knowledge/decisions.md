@@ -54,7 +54,7 @@ it were reversed.
 | Step-1 cohort QC | Sample-level checks only. MultiQC stays on the cluster (critique M3). |
 | The drafts in `TEMP/` | Moved out of the repo. |
 | When to build the reuse layer: cohort bundles, `ctx run`, `ctx figure`, Reproduce panels | After the Step-1 record, as Phase 2D. |
-| The volcano's `lfc_type` | The x axis may show the shrunk estimate for display. Colours always follow the call on the raw estimate (D-012), and the page says so. |
+| The volcano's `lfc_type` | The x axis may show the shrunk estimate for display. Colours always follow the call on the raw estimate (D-012), and the page says so. This reverses the page control D-019 turned down, by Rytis's choice. On a shrunk axis the vertical fold-change lines are not drawn, because the call's threshold applies to the raw estimate; `x_estimate = "shrunk"` is refused, with the reason, when `--no-lfc-shrink` left the shrunk columns empty. |
 | Figure parameter models | Frozen dataclasses, as `src/ctx/dataset.py` validates, not pydantic. |
 
 - **Renumbering.** Draft decisions get new numbers:
@@ -84,7 +84,7 @@ it were reversed.
 
 ## D-019 — LFC shrinkage is a switch, on by default
 
-**Date:** 2026-09-29 · **Status:** decided
+**Date:** 2026-09-29 · **Status:** decided; its rejected page control is partly taken up by D-020 (the volcano's x axis may show the shrunk estimate for display)
 
 **Context.** Rytis asked for an option to turn off LFC shrinkage, on by default, with an explanation of what it does. `ctx de` always ran apeGLM shrinkage. Its output feeds two places only:
 - the `log2FoldChange_shrunk` and `lfcSE_shrunk` columns;
@@ -426,7 +426,7 @@ The page redesign had to change those files: the call rule (D-012), the page tex
 **Decision.** Printed once, below the plot. This is Rytis's choice of 2026-09-28.
 - The PDFs and SVGs keep their caption in the figure.
 - The plotly toolbar, and with it the PNG export, is off. That export would now carry no statistics, and over a phone-width plot the toolbar covered the legend.
-- CONVENTIONS.md:51 now says where the caption goes.
+- CONVENTIONS.md (Figures, the Plotly rule) now says where the caption goes.
 
 **Evidence.** `test_round_trip` checks the caption tokens:
 - in the page's caption, the PDF and the SVG;
