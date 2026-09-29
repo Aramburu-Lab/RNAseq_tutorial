@@ -1,0 +1,6 @@
+sample	read_length	fragment_min	fragment_max	profile	library_type	planted
+se_a	76	150	350	1	SR	none
+se_b	76	150	350	2	SR	none
+se_c	101	60	200	1	SR	adapter: fragments shorter than the read
+se_d	101	150	350	2	SR	degraded: last 30 qualities fall from 30 to 2
+se_e	76	150	350	1	U	none; unstranded
