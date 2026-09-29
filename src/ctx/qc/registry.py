@@ -111,6 +111,7 @@ class Registry:
     path: Path
     mad_multiplier: float
     mad_scaled: bool
+    min_samples: int
     source: str
     rationale: str
     metrics: Mapping[str, Metric]
@@ -176,8 +177,8 @@ def load(path: Path) -> Registry:
     """
     raw = tomllib.loads(path.read_text())
     head = raw.get("registry", {})
-    problems = [f"[registry] needs {f}" for f in ("mad_multiplier", "mad_scaled", "source",
-                                                   "rationale") if f not in head]  # fmt: skip
+    fields = ("mad_multiplier", "mad_scaled", "min_samples", "source", "rationale")
+    problems = [f"[registry] needs {f}" for f in fields if f not in head]
     metrics = {}
     for key, entry in raw.get("metrics", {}).items():
         metric, found = _metric(key, entry)
@@ -189,7 +190,8 @@ def load(path: Path) -> Registry:
     if problems:
         raise RegistryError(f"{path}:\n  " + "\n  ".join(problems))
     return Registry(path, float(head["mad_multiplier"]), bool(head["mad_scaled"]),
-                    head["source"], head["rationale"], metrics)  # fmt: skip
+                    int(head["min_samples"]), head["source"], head["rationale"],
+                    metrics)  # fmt: skip
 
 
 def cond_rules(metric: Metric) -> dict[str, list[dict[str, float]]]:

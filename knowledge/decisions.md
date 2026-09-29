@@ -27,6 +27,64 @@ it were reversed.
 
 ---
 
+## D-030 — The checkpoint on counts: bands per stratum, agreement per peer group, confounding on M5's own selections
+
+**Date:** 2026-09-30 · **Status:** decided
+
+**Context.** M2.3 judges every sample on its counts before M5 fits anything, and asks whether the judgement is confounded with the comparisons M5 makes. The registry marks all ten count metrics `dataset_only`, so each is judged against its own dataset's median ± 3 scaled MAD. Two things had to be chosen: which samples a band is computed over, and which samples a metric is tested between.
+
+**Options.** Bands over the whole dataset (neutrophils and monocytes differ in genes detected by biology, so whole cell types would be flagged), per stratum, or per stratum and condition (a condition that shifts a metric would then never show as flags). For the confounding test, every condition pair in each stratum, or exactly the samples each registered contrast compares.
+
+**Decision.** `src/ctx/qc/checkpoint.py`, in three steps:
+- **Metrics.** Library size, genes detected (count ≥ 1), top-gene share, and four disjoint composition classes from the GENCODE gene types of the run's own GTF. The classes are: Mt_rRNA; the other chrM genes; nuclear rRNA and rRNA_pseudogene; and HBA1, HBA2 and HBB. A counted gene absent from the annotation stops the run. The sex check is `ctx.de.run.sex_check`, imported.
+- **Agreement with the peer group.** The peer group is the stratum and the condition:
+  - replicate agreement is the median Spearman correlation with each other peer, over the genes read in any of them;
+  - PCA distance is the distance from the peers' median on PC1 and PC2 of one blind VST of every sample, the PCA M5 draws.
+  - A sample with no peer has neither.
+- **Bands.**
+  - **Where computed.** Per stratum, not per condition: a condition that shifts a metric then shows as flags in one group, and the confounding test catches it rather than the band hiding it.
+  - **Which side flags.** Only the bad side, from `direction`; both sides for `none`.
+  - **When a stratum gets no band.** It needs at least `min_samples = 3` samples, now in `[registry]`: with two, each lies exactly one MAD from their median, so neither could ever be flagged. A MAD of 0 gives no band either, and says so.
+  - **Metrics that never flag.** A metric with action keep is judged and never flagged.
+  - **The judge is generic.** It also handles banded, status, category and strandedness metrics. A strand call flags when it is undetermined or differs from its stratum's usual call.
+- **Status.** One row per run, from its sample's flags: pass, flag, or exclude where a flagged metric's action says exclude. None does, so nothing is excluded. Each reason is filled from `content/qc.toml`.
+- **Confounding.**
+  - **Which samples.** Each unpaired contrast's samples are exactly those of `ctx.de.deseq.select_samples`, one run per individual in each group. Contrasts that select the same samples are tested once, and the row names them all.
+  - **Which tests.** Numeric metrics by Mann-Whitney through `annotate.compare_groups`, with the rank-biserial r. The other metrics' flags, and any flag at all, by Fisher's exact test with the odds ratio of tested over reference. Haldane's 0.5 is added only when a cell is 0.
+  - **Correction.** BH runs over every test in the table.
+  - **What is left out.** A paired contrast gets one row saying why it is not tested: its groups share individuals, and both tests assume they do not.
+- `strata` and `peers` are arguments, not cohort logic. The CLI and its parameter cards come in M2.6, where Step-1 passes tissue × cell type.
+
+**Evidence.**
+- **The GENCODE 50 GTF**, `gene_types` on `gencode.v50.primary_assembly.annotation.gtf.gz`, took 6.0 s at 211 MB peak RSS. Every count below agrees with an independent `awk` count where one was run:
+
+  | Class | Genes |
+  |---|---|
+  | All gene records | 78,941 (awk: 78,941), IDs all unique |
+  | chrM | 37 (awk: 37): 2 Mt_rRNA, 22 Mt_tRNA, 13 others |
+  | Nuclear rRNA | 53 (awk: 53) |
+  | Nuclear rRNA_pseudogene | 497 |
+  | HBA1, HBA2, HBB | all three present |
+
+- **A correction to D-022:** the file holds no gene ID ending in `_PAR_Y`. D-022's "so gene IDs including `_PAR_Y` match the counts" was never measured. The IDs match because it is the file the cluster run used.
+- **Tests.** `tests/test_qc_checkpoint.py` has 12 tests. Every value in the count test is computed by hand. Six mutations were each caught:
+  - Mt_rRNA counted in the mitochondrial class;
+  - no merging of identical selections;
+  - Haldane's correction applied always;
+  - both sides flagged;
+  - a keep metric flagged;
+  - a strand call not compared with its stratum's.
+
+**Consequence.** M2.6 does four things with this:
+- it writes the metrics, bands, status and confounding tables;
+- it feeds the per-sample MultiQC values (read 1 rows, never the summed group rows) into the same `judge`, which is how the strandedness values arrive;
+- it gives `--strata` and `--peers` their cards;
+- its page states the 45S gap.
+
+M5 joins the status table after the Step-1 record.
+
+---
+
 ## D-029 — The QC registry: 30 metrics, their bands at their sources; MultiQC coloured by the same bands, on raw counts
 
 **Date:** 2026-09-30 · **Status:** decided

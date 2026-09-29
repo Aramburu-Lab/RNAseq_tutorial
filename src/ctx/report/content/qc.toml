@@ -1,0 +1,27 @@
+# The M2 QC page. The checkpoint on counts (ctx.qc.checkpoint) writes its reasons and notes
+# from here; the page skeleton joins with the page itself (TODO.md, M2.6).
+
+# Why a sample is flagged: one of these per metric it fails, joined by "; ".
+[reasons]
+low = "{title} {value} is below {bound}, {k} MAD under the median of the {n} samples of {stratum}"
+high = "{title} {value} is above {bound}, {k} MAD over the median of the {n} samples of {stratum}"
+band = "{title} {value} is in the bad band ({source})"
+category = "{title}: {value}"
+strand = "{title}: {call}, where {stratum} is mostly {usual}"
+
+# Why a band or a test is missing.
+[notes]
+small_stratum = "no band: {n} samples, fewer than the {minimum} a band needs"
+no_spread = "no band: the MAD is 0, so every value but the median would be an outlier"
+no_values = "no test: a group has no value"
+constant = "no test: every sample has the same value"
+no_flags = "no test: no sample is flagged"
+all_flagged = "no test: every sample is flagged"
+paired = "not tested: paired, so its groups share individuals, which Mann-Whitney and Fisher's test assume they do not"
+
+[tests]
+fisher = "Fisher's exact test, two-sided"
+
+[effects]
+r = "rank-biserial r, tested over reference"
+odds = "odds ratio, tested over reference; 0.5 added to every cell when one is 0"

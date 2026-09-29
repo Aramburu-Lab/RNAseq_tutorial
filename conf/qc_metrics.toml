@@ -17,6 +17,9 @@ mad_multiplier = 3.0
 # scipy.stats.median_abs_deviation(scale="normal"): the MAD times 1.4826, so k scaled MADs
 # match k standard deviations when the data are normal.
 mad_scaled = true
+# With two samples each lies exactly one MAD from their median, so no sample can ever be
+# flagged; three is the fewest in which one can. A smaller stratum gets no band, and says so.
+min_samples = 3
 source = "robust z-score, median ± 3 scaled MAD"
 source_type = "course_convention"
 rationale = "Many RNA-seq metrics have no universal cut-off; a sample far from its own dataset is a question worth asking. 3 scaled MADs is 3 SD for normal data, and it flags, never excludes."
@@ -555,8 +558,8 @@ source_type = "course_convention"
 [metrics.replicate_spearman]
 stage = "counts"
 title = "Agreement with its group"
-meaning = "How well a sample's gene ranking agrees with the other samples of its cell type and condition."
-computed = "median Spearman correlation of log counts with the other samples of the same cell type and condition"
+meaning = "How well a sample's gene ranking agrees with the other samples of its peer group: those sharing its cell type and condition, or whichever sheet columns ctx qc groups peers by."
+computed = "median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it"
 unit = "rho"
 table = "counts"
 column = "replicate_spearman"
@@ -574,8 +577,8 @@ source_type = "course_convention"
 [metrics.pca_distance]
 stage = "counts"
 title = "Distance from its group"
-meaning = "How far a sample lies from the centre of its cell type and condition on the first two principal components of the blind VST."
-computed = "Euclidean distance to the group's median on PC1 and PC2"
+meaning = "How far a sample lies from the centre of its peer group on the first two principal components of the blind VST of every sample, the PCA M5 draws."
+computed = "Euclidean distance to the peer group's median on PC1 and PC2"
 unit = "VST units"
 table = "counts"
 column = "pca_distance"
