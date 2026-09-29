@@ -297,8 +297,10 @@ def _volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
 
 
 def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
-    """Mean against fold change, raw and shrunk as two series."""
+    """Mean against fold change, raw and shrunk as two series; raw alone without shrinkage."""
     base = result.results.join(genes, on="gene_id", how="left").filter(pl.col("baseMean") > 0)
+    shrunk = base["log2FoldChange_shrunk"].is_not_null().any()
+    estimates = (("log2FoldChange", "raw"), ("log2FoldChange_shrunk", "shrunk"))[: 1 + shrunk]
     frame = pl.concat(
         [
             base.select(
@@ -310,7 +312,7 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
                 pl.col(column).alias("lfc"),
                 pl.lit(label).alias("estimate"),
             )
-            for column, label in (("log2FoldChange", "raw"), ("log2FoldChange_shrunk", "shrunk"))
+            for column, label in estimates
         ]
     ).with_columns(keep=pl.col("call") != "ns")
     columns = {
@@ -327,6 +329,9 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
         f"{result.contrast.name}: raw and shrunk LFC against mean expression for "
         f"{base.height:,} genes. Shrinkage pulls noisy, weakly expressed genes toward "
         "0; the test uses the raw estimate."
+        if shrunk
+        else f"{result.contrast.name}: raw LFC against mean expression for {base.height:,} "
+        "genes; shrinkage was off (--no-lfc-shrink). The test uses the raw estimate."
     )
     return ScatterData(
         frame=frame,
@@ -336,7 +341,7 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
         x_label="Mean expression",
         y_label="log2 fold change",
         colour="estimate",
-        colours=category_colours(["raw", "shrunk"]),
+        colours=category_colours([label for _, label in estimates]),
         names={"raw": "raw estimate", "shrunk": "shrunk estimate"},
         caption=caption,
         hover=("gene_name", "padj"),
@@ -775,7 +780,8 @@ def _figures(
     groups.append(Group(
         f"Featured contrast: {name}",
         (writer.figure(_volcano(featured, genes), f"volcano_{name}", volcano_text(c)),
-         writer.figure(_ma(featured, genes), f"ma_{name}", ma_text(c))),
+         writer.figure(_ma(featured, genes), f"ma_{name}",
+                       ma_text(c, featured.results["log2FoldChange_shrunk"].is_not_null().any()))),
         lead="Which genes changed, and by how much?", tabs=True,
     ))  # fmt: skip
     phist, flat, low = p_histogram(featured)
@@ -843,6 +849,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     *,
     dataset_file: Path,
     min_count: int,
+    lfc_shrink: bool,
 ) -> list[Path]:
     """Fit the dataset's contrasts and write the M5 tables, figures and page.
 
@@ -853,6 +860,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
         dataset: Slug naming the dataset.
         dataset_file: The dataset file, with ``[[contrasts]]`` and ``[de]``.
         min_count: The expression filter's reads at the median library size.
+        lfc_shrink: Add the apeGLM-shrunk fold changes; off leaves them empty.
 
     Returns:
         The page, then every table and figure file.
@@ -873,7 +881,15 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
         **{f"sha256:{p.name}": _sha256(p) for p in inputs.values()},
     }
     fits = {
-        c.name: fit(counts, sheet, c, spec.order, threads=settings.threads, min_count=min_count)
+        c.name: fit(
+            counts,
+            sheet,
+            c,
+            spec.order,
+            threads=settings.threads,
+            min_count=min_count,
+            shrink=lfc_shrink,
+        )  # fmt: skip
         for c in spec.contrasts
     }
     writer = Writer(

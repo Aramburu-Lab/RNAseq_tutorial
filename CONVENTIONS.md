@@ -61,7 +61,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 ## Statistics rules
 
 - Multiple testing: BH everywhere, stated in the figure. Report effect sizes next to p-values.
-- DE: pre-filter by expression (edgeR-style rule) before pydeseq2; paired or nested designs when the data have them; show the p-value histogram and dispersion plot as health checks; shrunken and raw LFC both available.
+- DE: pre-filter by expression (edgeR-style rule) before pydeseq2; paired or nested designs when the data have them; show the p-value histogram and dispersion plot as health checks; shrunken and raw LFC both available, shrinkage on unless `ctx de --no-lfc-shrink` turns it off (D-019).
 - ORA uses an explicit background of tested genes; GSEA uses the Wald statistic, 1000 permutations, seed 42, min size 15, max size 500.
 - Proteomics: missing values are not zeros; restrict tests to proteins quantified in ≥ 70 % of samples; state TMT batch design.
 - Non-coding: stratify by biotype; never claim miRNA quantities from standard RNA-seq; predicted and validated targets shown separately.

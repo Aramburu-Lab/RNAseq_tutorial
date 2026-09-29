@@ -54,6 +54,14 @@ CARDS: dict[str, tuple[str, str]] = {
         "Higher tests fewer, better-measured genes, so BH corrects for fewer tests, but weakly "
         "expressed biology drops out.",
     ),
+    "--lfc-shrink": (
+        "Also estimate each gene's log2 fold change with apeGLM shrinkage, which pulls it "
+        "toward 0 as far as its counts leave it uncertain, so a weakly expressed gene cannot "
+        "top a ranking on noise. --no-lfc-shrink turns it off.",
+        "Off: the shrunk columns stay empty, the MA plot shows the raw estimate alone, and M5 "
+        "skips the shrinkage step of each contrast. The test, p-values, calls, volcano and "
+        "enrichment use the raw estimate either way, so none of them change.",
+    ),
     "--rnaseq-dir": (
         "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset: no counts.",
         "Set: gather checks the release and the samples, rounds the length-scaled counts to "
@@ -99,11 +107,12 @@ def parameter_cards(*commands: Any) -> tuple[ParameterCard, ...]:
     for option in options:
         meaning, effect = CARDS[option.opts[0]]
         effect = CARD_EFFECTS.get((command, option.opts[0]), effect)
-        default = (
-            "required"
-            if option.required
-            else ("unset" if option.default is None else str(option.default))
-        )
+        if option.required:
+            default = "required"
+        elif option.secondary_opts:  # an on/off switch, such as --lfc-shrink/--no-lfc-shrink
+            default = "on" if option.default else "off"
+        else:
+            default = "unset" if option.default is None else str(option.default)
         cards.append(ParameterCard(option.opts[0], meaning, default, effect))
     return tuple(cards)
 
@@ -221,6 +230,9 @@ def de(
     dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
     dataset_file: Annotated[Path, typer.Option(help=CARDS["--dataset-file"][0])],
     min_count: Annotated[int, typer.Option(help=CARDS["--min-count"][0])] = 10,
+    lfc_shrink: Annotated[
+        bool, typer.Option("--lfc-shrink/--no-lfc-shrink", help=CARDS["--lfc-shrink"][0])
+    ] = True,
 ) -> None:
     """Fit the dataset's contrasts with DESeq2 and write the M5 tables, figures and page."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -232,7 +244,7 @@ def de(
     try:
         written = module.run(
             ctx.obj["settings"], cards, command, dataset, dataset_file=dataset_file,
-            min_count=min_count,
+            min_count=min_count, lfc_shrink=lfc_shrink,
         )  # fmt: skip
     except (DatasetError, ContrastError) as error:
         typer.echo(str(error), err=True)

@@ -248,9 +248,10 @@ running = ["ndn_hsct_early", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
 # 2026-09-27 (8219d16); registered again 2026-09-28, before any Step-1 count existed, after
 # the call rule changed (D-012, D-013), once more the same day for the shown name (D-014),
 # for the volcano's cutoff line (D-015), for the fixes its review found (D-016), and for
-# the M5 page's caveat on what BH promises (D-018).
+# the M5 page's caveat on what BH promises (D-018), and for the switch that turns LFC
+# shrinkage off (D-019).
 # The time makes each registration a change to this line, which is how it is found.
-registered = "2026-09-29 10:10"
+registered = "2026-09-29 10:20"
 
 [[sanity.rules]]
 id = "R1"

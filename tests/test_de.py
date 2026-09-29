@@ -17,7 +17,8 @@ from ctx.dataset import Contrast, Split
 from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
-from ctx.de.run import _fit_metrics
+from ctx.de.page import ma_text
+from ctx.de.run import _fit_metrics, _ma
 from ctx.de.stats import ALPHA, LFC_MIN, classify
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -89,6 +90,30 @@ def test_planted_recovered(basic):
              called.filter(pl.col("gene_id").is_in([g for g, v in truth.items() if v]))
              .select("gene_id", "log2FoldChange").rows()]  # fmt: skip
     assert all(signs)
+
+
+def test_no_shrink_changes_nothing_tested(basic):
+    # --no-lfc-shrink skips the shrinkage fit: every other column is the same to the bit,
+    # so the test, the calls and the enrichment cannot depend on it; the shrunk ones are empty.
+    synthetic, result = basic
+    plain = fit(synthetic.counts, synthetic.samples, BASIC, {}, threads=1, shrink=False)
+    shrunk = ["log2FoldChange_shrunk", "lfcSE_shrunk"]
+    assert plain.results.select(shrunk).null_count().row(0) == (plain.results.height,) * 2
+    assert plain.results.drop(shrunk).equals(result.results.drop(shrunk))
+    assert result.results.select(shrunk).null_count().row(0) == (0, 0)
+
+
+def test_ma_draws_the_estimates_the_fit_has(basic):
+    synthetic, result = basic
+    genes = synthetic.counts.select("gene_id", gene_name=pl.col("gene_id"))
+    empty = pl.lit(None, pl.Float64)
+    plain = dataclasses.replace(
+        result, results=result.results.with_columns(log2FoldChange_shrunk=empty, lfcSE_shrunk=empty)
+    )
+    assert set(_ma(result, genes).frame["estimate"]) == {"raw", "shrunk"}
+    assert set(_ma(plain, genes).frame["estimate"]) == {"raw"}
+    assert "--no-lfc-shrink" in _ma(plain, genes).caption
+    assert "--no-lfc-shrink" in ma_text(BASIC, shrunk=False).lead
 
 
 def test_significant_counts_any_fold_change(basic):

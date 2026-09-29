@@ -27,6 +27,45 @@ it were reversed.
 
 ---
 
+## D-019 — LFC shrinkage is a switch, on by default
+
+**Date:** 2026-09-29 · **Status:** decided
+
+**Context.** Rytis asked for an option to turn off LFC shrinkage, on by default, with an explanation of what it does. `ctx de` always ran apeGLM shrinkage. Its output feeds two places only:
+- the `log2FoldChange_shrunk` and `lfcSE_shrunk` columns;
+- the MA plot.
+
+The test, the p-values, the call, the volcano and the enrichment use the raw estimate (D-012).
+
+**Options.**
+- A switch on `ctx de`, with the parameter card that every CLI option carries.
+- A control on the page that swaps the estimate the figures show. That would put the shrunk fold change beside a call made on the raw one, which D-012 decided against.
+
+**Decision.** `ctx de --lfc-shrink/--no-lfc-shrink`, on by default.
+- **Defined once.** The default is `ctx.de.deseq.LFC_SHRINK`, and the CLI's default is tested against it.
+- **When off,** `fit(shrink=False)` skips the second `DeseqStats` and its `lfc_shrink`, and leaves the two shrunk columns empty. The MA plot draws the raw estimate alone, and its caption, lead and reading say that shrinkage was off.
+- **The card.** It says what shrinkage does: it pulls each fold change toward 0 as far as its counts leave it uncertain, so a weakly expressed gene cannot top a ranking on noise. It also says what turning it off changes.
+- **How a switch's default prints.** A switch's card and its test now print the default as "on" or "off", where "True" would have appeared.
+- **CONVENTIONS.md** says shrunken and raw LFC are both available. It now names the switch.
+
+**Evidence.**
+- **Nothing tested or called changes.** Synthetic `ctx de`, 6 contrasts, run with and without the switch:
+  - all six results tables are equal in every column but the two shrunk ones, which are empty when off;
+  - the metrics, contrasts and sex-check tables are identical.
+- **Time.** 32.71 s wall with shrinkage and 31.62 s without, both at 0.58 GB peak, on 1,000 genes. The card promises no speed-up.
+- **Tests.**
+  - `test_de.py::test_no_shrink_changes_nothing_tested` compares the two fits column by column.
+  - `test_ma_draws_the_estimates_the_fit_has` checks the MA plot's series and its text.
+  - `test_cli.py::test_lfc_shrink_reaches_the_fit` checks that the flag reaches `run` in both spellings and by default.
+  - `test_lfc_shrink_default_single_source` checks the default against `LFC_SHRINK`.
+  - Three mutants each fail one of these tests: shrinking whatever the switch says, the CLI dropping the flag, and the MA plot always drawing both series.
+- **In the browser.** The shrinkage-off page shows the card with default "on", its effect text and `--no-lfc-shrink` in the reproduce command. The MA page draws one series, "raw estimate", for 997 genes. The default page still draws both series.
+- **Registered again.** `src/ctx/de` is frozen. At 2026-09-29 10:20, `~/ctx_tier1/data/raw` held only `tier1_meta`.
+
+**Consequence.** A table written with the switch off has empty shrunk columns. A reader ranking genes needs shrinkage on, and the page's "In practice" advice still says to rank by the shrunk estimate.
+
+---
+
 ## D-018 — The M5 page says what BH promises and when it does not hold
 
 **Date:** 2026-09-29 · **Status:** decided

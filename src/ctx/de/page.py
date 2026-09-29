@@ -168,8 +168,20 @@ def volcano_text(contrast: Contrast) -> FigureText:
     )
 
 
-def ma_text(contrast: Contrast) -> FigureText:
-    """Title, lead and reading guide of the MA plot."""
+def ma_text(contrast: Contrast, shrunk: bool = True) -> FigureText:
+    """Title, lead and reading guide of the MA plot; the raw estimate alone without shrinkage."""
+    if not shrunk:
+        return FigureText(
+            title=f"Fold change against expression: {contrast.tested} over {contrast.reference}",
+            lead="Shrinkage was off for this run (--no-lfc-shrink): the raw estimate alone.",
+            reading=(
+                "Each gene is one point: its raw log2 fold change against its mean expression.",
+                "Weakly expressed genes spread widest, because few reads make a noisy fold "
+                "change. Shrinkage, on by default, would pull them toward 0.",
+                "The test uses this raw estimate either way.",
+            ),
+            tab="MA plot",
+        )
     return FigureText(
         title=f"Fold change against expression: {contrast.tested} over {contrast.reference}",
         lead="Shrinkage tames the noisy fold changes of weakly expressed genes.",

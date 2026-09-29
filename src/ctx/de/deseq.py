@@ -25,6 +25,8 @@ TOP_GENES = 500
 SPLIT_LEVELS = ("a", "b")
 # The coefficient pydeseq2 names for the tested level once "group" is recoded.
 COEFFICIENT = "group[T.tested]"
+# The shrunk estimate is added unless ``ctx de --no-lfc-shrink`` turns it off.
+LFC_SHRINK = True
 RESULT_COLUMNS = {
     "gene_id": ("none", "Gene identifier."),
     "baseMean": ("normalised reads", "Mean of size-factor-normalised counts over the samples."),
@@ -38,8 +40,14 @@ RESULT_COLUMNS = {
         for column, name in ADJUSTMENTS.items()
         if column != "padj"
     },
-    "log2FoldChange_shrunk": ("log2 fold change", "LFC after apeGLM-style shrinkage."),
-    "lfcSE_shrunk": ("log2 fold change", "Posterior SE of the shrunk LFC."),
+    "log2FoldChange_shrunk": (
+        "log2 fold change",
+        "LFC after apeGLM-style shrinkage; empty with --no-lfc-shrink.",
+    ),
+    "lfcSE_shrunk": (
+        "log2 fold change",
+        "Posterior SE of the shrunk LFC; empty with --no-lfc-shrink.",
+    ),
     "na_reason": ("none", "tested, cooks_outlier (no p-value) or independent_filter (no padj)."),
     "call": (
         "none",
@@ -183,6 +191,7 @@ def fit(  # noqa: PLR0913 - every argument is a separate input of the fit
     *,
     threads: int,
     min_count: int = MIN_COUNT,
+    shrink: bool = LFC_SHRINK,
 ) -> Fit:
     """Fit one contrast with pydeseq2.
 
@@ -194,6 +203,8 @@ def fit(  # noqa: PLR0913 - every argument is a separate input of the fit
         threads: CPUs for every pydeseq2 object: both the dataset and each stats object,
             which otherwise starts its own inference on every CPU.
         min_count: The pre-filter's reads at the median library size.
+        shrink: Add apeGLM-shrunk fold changes beside the raw ones. Off skips that fit and
+            leaves the two shrunk columns empty; nothing tested or called depends on them.
 
     Returns:
         The fit: one row per tested gene, with raw and shrunk LFC and why a value is missing.
@@ -231,15 +242,19 @@ def fit(  # noqa: PLR0913 - every argument is a separate input of the fit
     raw = DeseqStats(dds, contrast=wald, alpha=ALPHA, inference=inference, quiet=True)
     raw.summary()
     results = raw.results_df.copy()
-    # Shrinkage overwrites results_df and needs the Wald SE, so it gets its own object.
-    shrink = DeseqStats(dds, contrast=wald, alpha=ALPHA, inference=inference, quiet=True)
-    shrink.summary()
-    shrink.lfc_shrink(coeff=COEFFICIENT)
+    empty = pl.lit(None, pl.Float64)
+    shrunk: dict[str, pl.Expr | pl.Series] = {"log2FoldChange_shrunk": empty, "lfcSE_shrunk": empty}
+    if shrink:
+        # Shrinkage overwrites results_df and needs the Wald SE, so it gets its own object.
+        stats = DeseqStats(dds, contrast=wald, alpha=ALPHA, inference=inference, quiet=True)
+        stats.summary()
+        stats.lfc_shrink(coeff=COEFFICIENT)
+        shrunk = {
+            "log2FoldChange_shrunk": pl.Series(stats.results_df["log2FoldChange"].to_numpy()),
+            "lfcSE_shrunk": pl.Series(stats.results_df["lfcSE"].to_numpy()),
+        }
     _shutdown_workers()
-    out = pl.from_pandas(results.reset_index(names="gene_id")).with_columns(
-        log2FoldChange_shrunk=pl.Series(shrink.results_df["log2FoldChange"].to_numpy()),
-        lfcSE_shrunk=pl.Series(shrink.results_df["lfcSE"].to_numpy()),
-    )
+    out = pl.from_pandas(results.reset_index(names="gene_id")).with_columns(**shrunk)
     out = out.with_columns(pl.col(pl.Float64).fill_nan(None)).with_columns(
         na_reason=pl.when(pl.col("pvalue").is_null()).then(pl.lit("cooks_outlier"))
         .when(pl.col("padj").is_null()).then(pl.lit("independent_filter"))

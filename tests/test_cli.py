@@ -139,11 +139,12 @@ def test_parameter_cards_match_cli(request, command):
     )
     assert set(shown) == set(options)
     for name, param in options.items():
-        expected = (
-            "required"
-            if param.required
-            else ("unset" if param.default is None else str(param.default))
-        )
+        if param.required:
+            expected = "required"
+        elif param.secondary_opts:  # an on/off switch reads "on" or "off", never "True"
+            expected = "on" if param.default else "off"
+        else:
+            expected = "unset" if param.default is None else str(param.default)
         assert shown[name] == expected, name
     if command != "setup":
         return
@@ -420,6 +421,31 @@ def test_min_count_default_single_source():
     command = typer.main.get_command(app).commands["de"]
     (option,) = [p for p in command.params if p.opts[0] == "--min-count"]
     assert option.default == MIN_COUNT
+
+
+def test_lfc_shrink_default_single_source():
+    from ctx.de.deseq import LFC_SHRINK  # noqa: PLC0415
+
+    command = typer.main.get_command(app).commands["de"]
+    (option,) = [p for p in command.params if p.opts[0] == "--lfc-shrink"]
+    assert option.default is LFC_SHRINK
+    assert option.secondary_opts == ["--no-lfc-shrink"]
+
+
+def test_lfc_shrink_reaches_the_fit(monkeypatch):
+    # In process, with the profile and the module stubbed: the flag is all that is tested.
+    from typer.testing import CliRunner  # noqa: PLC0415
+
+    import ctx.de.run  # noqa: PLC0415
+    from ctx import runtime  # noqa: PLC0415
+
+    seen: dict = {}
+    monkeypatch.setattr(runtime, "start", lambda profile, root: None)
+    monkeypatch.setattr(ctx.de.run, "run", lambda *a, **k: seen.update(k) or [])
+    for flag, expected in (([], True), (["--no-lfc-shrink"], False), (["--lfc-shrink"], True)):
+        done = CliRunner().invoke(app, ["de", "--dataset", "d", "--dataset-file", "d.toml", *flag])
+        assert done.exit_code == 0, done.output
+        assert seen["lfc_shrink"] is expected, flag
 
 
 def test_de_runs_from_wheel(pipeline, tmp_path):

@@ -1218,7 +1218,7 @@ Step-1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session p
   - Timing:
     - steps 0–3 can start now;
     - steps 4–6 wait for P2A.2;
-    - step 7 waits for the newest registration commit (D-013 to D-016, D-018), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
+    - step 7 waits for the newest registration commit (D-013 to D-016, D-018, D-019), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
   - Proven by the pasted checks, each with its expected value.
   - Any count short of 210 stops 2C until it is explained.
 
@@ -1732,7 +1732,7 @@ Rytis's decisions, 2026-09-28:
 ```
 # Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
 # Steps 0-3 can start now. Steps 4-6 wait until I confirm P2A.2 passed. Step 7 waits for the
-# newest registration commit (D-013 to D-016, D-018). P2A.2 may rename files in steps 6 and 7.
+# newest registration commit (D-013 to D-016, D-018, D-019). P2A.2 may rename files in steps 6 and 7.
 
 # ---- 0. Run root, space, allocation, Nextflow ----
 export P=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
