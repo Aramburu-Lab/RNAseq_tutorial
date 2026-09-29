@@ -89,8 +89,13 @@ def figure_files(figure_stem: str) -> list[str]:
     return [*rendered, f"{figure_stem}.html", f"{figure_stem}.csv", f"{figure_stem}_README.md"]
 
 
+# Tool-native output folders keep the tool's own file names, as nf-core's `results/` does
+# (AGENTS.md): MultiQC's report and tables under `outputs/02_qc/multiqc/` (D-028).
+NATIVE_DIRS = frozenset({"multiqc"})
+
+
 def lint(directory: Path) -> tuple[int, list[str]]:
-    """Check every non-hidden file under a directory.
+    """Check every non-hidden file under a directory, outside tool-native folders.
 
     Args:
         directory: The output directory to scan, recursively.
@@ -101,6 +106,8 @@ def lint(directory: Path) -> tuple[int, list[str]]:
     files = [
         p
         for p in sorted(directory.rglob("*"))
-        if p.is_file() and not any(part.startswith(".") for part in p.relative_to(directory).parts)
+        if p.is_file()
+        and not any(part.startswith(".") for part in p.relative_to(directory).parts)
+        and not NATIVE_DIRS & set(p.relative_to(directory).parts[:-1])
     ]
     return len(files), [str(p.relative_to(directory)) for p in files if not check(p.name)]
