@@ -1,6 +1,6 @@
 {% extends "base.html.j2" %}
-{% from "_figure.html.j2" import figure_block %}
-{% block deck %}{% if figure.text.back %}<p class="deck"><a href="{{ figure.text.back }}">Back to the module page</a></p>{% endif %}{% endblock %}
+{% from "_figure.html.j2" import figure_block with context %}
+{% block deck %}{% if figure.text.back %}<p class="deck"><a href="{{ figure.text.back }}">{{ ui.figures.back }}</a></p>{% endif %}{% endblock %}
 {% block content %}
 {{ figure_block(figure, standalone=true) }}
 {% endblock %}

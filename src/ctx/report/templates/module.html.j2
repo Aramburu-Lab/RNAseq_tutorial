@@ -1,10 +1,10 @@
 {% extends "base.html.j2" %}
-{% from "_figure.html.j2" import figure_block, result_table %}
-{% from "_cards.html.j2" import cards_table %}
+{% from "_figure.html.j2" import figure_block, result_table with context %}
+{% from "_cards.html.j2" import cards_table with context %}
 {% macro item(kind, it, tab=false) %}{% if kind == "figure" %}{{ figure_block(it, tab=tab) }}{% elif kind == "table" %}{{ result_table(it) }}{% else %}<p class="note">{{ it }}</p>{% endif %}{% endmacro %}
 {% block page_class %} has-rail{% endblock %}
 {% block rail %}
-<nav class="toc" aria-label="Contents"><p class="toc-title">On this page</p><ol>
+<nav class="toc" aria-label="{{ ui.contents.label }}"><p class="toc-title">{{ ui.contents.title }}</p><ol>
 {% for id, title in sections %}<li><a href="#{{ id }}">{{ title }}</a>{% if id == "results" and outline %}<ol class="sub">{% for anchor, label in outline %}<li><a href="#{{ anchor }}">{{ label }}</a></li>{% endfor %}</ol>{% endif %}</li>
 {% endfor %}</ol></nav>
 {% endblock %}
@@ -16,7 +16,7 @@
 <p class="question">{{ page.question }}</p>
 {% elif id == "concept" %}
 <p class="idea">{{ page.concept }}</p>
-{% if page.terms %}<details class="terms"><summary>Terms used on this page</summary><dl>{% for term, meaning in page.terms %}<dt>{{ term }}</dt><dd>{{ meaning }}</dd>{% endfor %}</dl></details>{% endif %}
+{% if page.terms %}<details class="terms"><summary>{{ ui.page.terms }}</summary><dl>{% for term, meaning in page.terms %}<dt>{{ term }}</dt><dd>{{ meaning }}</dd>{% endfor %}</dl></details>{% endif %}
 {% elif id == "parameters" %}
 {{ cards_table(page.parameters) }}
 {% elif id == "results" %}
@@ -40,7 +40,7 @@
 {% elif id == "think" %}
 <ol class="think">
 {% for check in page.think %}
-<li><p class="prompt">{{ check.prompt }}</p><details><summary>Answer</summary><p>{{ check.answer }}</p></details></li>
+<li><p class="prompt">{{ check.prompt }}</p><details><summary>{{ ui.page.answer }}</summary><p>{{ check.answer }}</p></details></li>
 {% endfor %}
 </ol>
 {% elif id == "mistakes" %}
@@ -50,17 +50,17 @@
 </ul>
 {% elif id == "reproduce" %}
 {% set r = page.reproduce %}
-<div class="command"><pre><code id="ctx-command">{{ r.command }}</code></pre><button type="button" class="copy" data-copy="ctx-command">Copy</button></div>
+<div class="command"><pre><code id="ctx-command">{{ r.command }}</code></pre><button type="button" class="copy" data-copy="ctx-command" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.copy }}</button></div>
 <table class="measured">
-<tr><th>Wall time</th><td class="wall">{{ "%.3f"|format(r.wall_seconds) }} s</td></tr>
-<tr><th>Peak RSS, this process</th><td class="rss-self">{{ "%.1f"|format(r.peak_rss_self / 1048576) }} MiB ({{ r.peak_rss_self }} bytes)</td></tr>
-<tr><th>Peak RSS, largest child process</th><td class="rss-children">{{ "%.1f"|format(r.peak_rss_children / 1048576) }} MiB ({{ r.peak_rss_children }} bytes)</td></tr>
-<tr><th>Profile</th><td>{{ r.profile }}</td></tr>
-<tr><th>Budget</th><td>{{ r.budget }}</td></tr>
-{% if r.inputs %}<tr><th>Inputs</th><td>{{ r.inputs|join(", ") }}</td></tr>{% endif %}
+<tr><th>{{ ui.reproduce.wall }}</th><td class="wall">{{ "%.3f"|format(r.wall_seconds) }} s</td></tr>
+<tr><th>{{ ui.reproduce.rss_self }}</th><td class="rss-self">{{ "%.1f"|format(r.peak_rss_self / 1048576) }} MiB ({{ r.peak_rss_self }} bytes)</td></tr>
+<tr><th>{{ ui.reproduce.rss_children }}</th><td class="rss-children">{{ "%.1f"|format(r.peak_rss_children / 1048576) }} MiB ({{ r.peak_rss_children }} bytes)</td></tr>
+<tr><th>{{ ui.reproduce.profile }}</th><td>{{ r.profile }}</td></tr>
+<tr><th>{{ ui.reproduce.budget }}</th><td>{{ r.budget }}</td></tr>
+{% if r.inputs %}<tr><th>{{ ui.reproduce.inputs }}</th><td>{{ r.inputs|join(", ") }}</td></tr>{% endif %}
 </table>
 {% if key_versions %}<p class="key-packages">{% for name, version in key_versions %}<span>{{ name }} <strong>{{ version }}</strong></span>{% endfor %}</p>{% endif %}
-<details class="versions"><summary>All {{ r.versions|length }} package versions</summary><dl>{% for name, version in r.versions.items() %}<div><dt>{{ name }}</dt><dd>{{ version }}</dd></div>{% endfor %}</dl></details>
+<details class="versions"><summary>{{ ui.reproduce.versions.format(n=r.versions|length) }}</summary><dl>{% for name, version in r.versions.items() %}<div><dt>{{ name }}</dt><dd>{{ version }}</dd></div>{% endfor %}</dl></details>
 {% endif %}
 </section>
 {% endfor %}

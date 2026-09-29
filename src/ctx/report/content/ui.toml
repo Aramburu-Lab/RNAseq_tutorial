@@ -1,0 +1,85 @@
+# Words the page templates print on every page: headings, buttons, labels and table heads.
+# Placeholders in {braces} are filled by the code; keep their names.
+
+suite = "Cancer Transcriptomics Teaching Suite"
+skip = "Skip to the content"
+dataset = "Dataset"
+module = "Module"
+module_n = "Module {n}"
+figure = "Figure"
+figure_n = "Figure {n}"
+not_run = "Not run yet:"
+written = "Written"
+
+# The report skeleton's headings, in the order CONVENTIONS.md fixes; the keys are anchors.
+[sections]
+question = "The question"
+concept = "The idea"
+parameters = "Parameters"
+results = "Results"
+practice = "In practice"
+think = "Check yourself"
+mistakes = "Common mistakes"
+reproduce = "Reproduce this page"
+
+[theme]
+toggle = "Switch between light and dark"
+light = "Light"
+dark = "Dark"
+
+[contents]
+label = "Contents"
+title = "On this page"
+
+[page]
+terms = "Terms used on this page"
+answer = "Answer"
+
+[cards]
+parameter = "Parameter"
+default = "Default"
+meaning = "What it does"
+effect = "If you change it"
+report = "Parameters of ctx report"
+
+[reproduce]
+copy = "Copy"
+copied = "Copied"
+selected = "Selected: press Ctrl+C or Cmd+C"
+wall = "Wall time"
+rss_self = "Peak RSS, this process"
+rss_children = "Peak RSS, largest child process"
+profile = "Profile"
+budget = "Budget"
+inputs = "Inputs"
+versions = "All {n} package versions"
+
+[figures]
+reading = "How to read this"
+reading_label = "How to read this figure"
+open = "Open alone"
+back = "Back to the module page"
+data = "Data (CSV)"
+columns = "Column meanings"
+
+# The volcano's cutoff controls.
+[calls]
+label = "Cutoffs for calling genes"
+fc = "Fold change at least"
+fc_input = "Fold-change threshold"
+fc_unit = "Fold-change unit"
+log2 = "log2 FC"
+pct = "% change"
+basis = "Significance"
+cutoff = "Below"
+cutoff_input = "Cutoff; the arrow keys step through {presets}"
+stricter = "Stricter: the next smaller cutoff"
+looser = "Looser: the next larger cutoff"
+reset = "Reset"
+noscript = "This is the default rule; turn on JavaScript to move the cutoffs."
+
+[hub]
+rules = "Sanity rules"
+rule = "Rule"
+checks = "What it checks, and what was measured"
+verdict = "Verdict"

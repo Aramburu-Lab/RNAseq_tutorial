@@ -81,3 +81,11 @@ def test_wheel_renders_a_page(tmp_path):
     assert Path(out[0]).is_relative_to(site)
     assert out[1] == "True"
     assert int(out[2]) > 1_000_000
+
+
+def test_wheel_ships_every_content_file(tmp_path):
+    """Pages read their text from the package, so every content file must be in the wheel."""
+    site = build_wheel(tmp_path)
+    content = ROOT / "src" / "ctx" / "report" / "content"
+    shipped = {p.name for p in (site / "ctx" / "report" / "content").iterdir()}
+    assert {p.name for p in content.iterdir()} <= shipped

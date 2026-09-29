@@ -1,0 +1,68 @@
+# M0 Setup page (ctx setup). Placeholders in {braces} are filled by the code; keep their names.
+
+title = "M0 Setup"
+budget = "Track B: under {minutes} min and {ram_gb} GB"
+question = "Is this computer ready for the course, and what will a run cost it?"
+concept = "An analysis is reproducible only if you can say which software ran it, on what machine, and at what cost. This page records the versions every later module relies on, the threads and memory a run may use, and what this run took."
+practice = "Keep this page with your results. When a number changes between two runs, compare the package versions first: a changed library is the commonest reason."
+# "Term: rest" in a mistake prints Term in bold.
+mistakes = [
+    "Comparing timings measured under different profiles: hpc and laptop use different thread counts.",
+    "Quoting a version from memory: read it from this page, which recorded what ran.",
+]
+
+[[terms]]
+term = "Profile"
+meaning = "laptop or hpc: it sets the threads and memory a run may use, never results."
+
+[[terms]]
+term = "Peak RSS"
+meaning = "The most memory a process held at once."
+
+[[terms]]
+term = "Child process"
+meaning = "A tool this run started; its memory is measured on its own."
+
+[[think]]
+prompt = "Why does the page list the peak memory of the largest child process separately?"
+answer = "Tools such as aligners run as separate processes. Their memory is not part of this process's peak, and a laptop runs out of memory on the total, not on either half."
+
+[[think]]
+prompt = "Why might a colleague get a different font on the same figure?"
+answer = "The font chain takes the first installed family. A machine without Arial draws with Liberation Sans, which has the same widths, or else DejaVu Sans, which changes text width but not the data."
+
+# The four numbers at the top of Results.
+[keys]
+cores = "CPU cores"
+cores_detail = "reported by the OS"
+memory = "Memory"
+memory_value = "{gib:.1f} GiB"
+memory_missing = "not reported"
+threads = "Threads"
+threads_detail = "{profile} profile"
+python = "Python"
+
+[machine]
+title = "This machine"
+columns = ["Check", "Result"]
+system = "System"
+system_value = "{system} {release}, {machine}"
+thread_pools = "Thread pools"
+thread_pools_value = "polars thread pool: {polars}; BLAS thread pools: {blas}"
+root = "Output root"
+font = "Figure font"
+font_value = "{font}, first found of {chain}"
+font_missing = "none of the chain; matplotlib's default"
+
+[colours]
+title = "Data colours"
+columns = ["Colour", "Contrast on white", "What the ratio means"]
+ratio = "{ratio:.2f}:1"
+unsafe = "not for text, thin lines or projection"
+meets = "meets 3:1 for graphics"
+below = "below 3:1: marks need size, or a second cue such as shape"
+
+[resources]
+title = "Resources, recorded in {manifest}"
+columns = ["Resource", "Bytes", "Checksum", "Source", "Retrieved"]
+checksum = "sha256 {sha256}"

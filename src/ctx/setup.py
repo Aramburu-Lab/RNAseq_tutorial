@@ -3,6 +3,7 @@
 Downloads nothing (Phase 1). Every fact on the page is measured in this run, not assumed.
 """
 
+import functools
 import hashlib
 import json
 import os
@@ -22,13 +23,13 @@ from ctx import runtime
 from ctx.dataset import Resource, load
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
+from ctx.report import text
 from ctx.report.builder import (
     KeyNumber,
     ModulePage,
     ParameterCard,
     Reproduction,
     ResultTable,
-    SelfCheck,
     write,
 )
 from ctx.viz.style import DATA_COLOURS, FONT_CHAIN, PROJECTOR_UNSAFE, THEMES, contrast
@@ -36,39 +37,7 @@ from ctx.viz.style import DATA_COLOURS, FONT_CHAIN, PROJECTOR_UNSAFE, THEMES, co
 MODULE = "setup"
 # WCAG 2.1 success criterion 1.4.11: non-text contrast for graphics.
 GRAPHICS_CONTRAST = 3.0
-QUESTION = "Is this computer ready for the course, and what will a run cost it?"
-CONCEPT = (
-    "An analysis is reproducible only if you can say which software ran it, on what machine, "
-    "and at what cost. This page records the versions every later module relies on, the "
-    "threads and memory a run may use, and what this run took."
-)
-TERMS = (
-    ("Profile", "laptop or hpc: it sets the threads and memory a run may use, never results."),
-    ("Peak RSS", "The most memory a process held at once."),
-    ("Child process", "A tool this run started; its memory is measured on its own."),
-)
-PRACTICE = (
-    "Keep this page with your results. When a number changes between two runs, compare the "
-    "package versions first: a changed library is the commonest reason."
-)
-THINK = (
-    SelfCheck(
-        "Why does the page list the peak memory of the largest child process separately?",
-        "Tools such as aligners run as separate processes. Their memory is not part of this "
-        "process's peak, and a laptop runs out of memory on the total, not on either half.",
-    ),
-    SelfCheck(
-        "Why might a colleague get a different font on the same figure?",
-        "The font chain takes the first installed family. A machine without Arial draws with "
-        "Liberation Sans, which has the same widths, or else DejaVu Sans, which changes text "
-        "width but not the data.",
-    ),
-)
-MISTAKES = (
-    "Comparing timings measured under different profiles: hpc and laptop use different "
-    "thread counts.",
-    "Quoting a version from memory: read it from this page, which recorded what ran.",
-)
+PAGE = MODULE
 VERSION_COLUMNS = {
     "package": ("none", "Python distribution imported by this run, or python/ctx."),
     "version": ("none", "Version string as installed."),
@@ -93,49 +62,71 @@ def _resolved_font() -> str:
         except ValueError:
             continue
         return family
-    return "none of the chain; matplotlib's default"
+    return text.word(PAGE, "machine.font_missing")
 
 
 def _keys(settings: runtime.Settings) -> tuple[KeyNumber, ...]:
     """The four numbers a reader checks first, measured now."""
     memory = _memory_bytes()
+    word = functools.partial(text.word, PAGE)
+    shown = (
+        text.fill(PAGE, "keys.memory_value", gib=memory / 2**30)
+        if memory
+        else word("keys.memory_missing")
+    )
     return (
-        KeyNumber("CPU cores", f"{os.cpu_count()}", "reported by the OS"),
-        KeyNumber("Memory", f"{memory / 2**30:.1f} GiB" if memory else "not reported"),
-        KeyNumber("Threads", f"{settings.threads}", f"{settings.profile} profile"),
-        KeyNumber("Python", platform.python_version()),
+        KeyNumber(word("keys.cores"), f"{os.cpu_count()}", word("keys.cores_detail")),
+        KeyNumber(word("keys.memory"), shown),
+        KeyNumber(
+            word("keys.threads"),
+            f"{settings.threads}",
+            text.fill(PAGE, "keys.threads_detail", profile=settings.profile),
+        ),
+        KeyNumber(word("keys.python"), platform.python_version()),
     )
 
 
 def _colour_use(colour: str, ratio: float) -> str:
     """What a data colour's contrast on white allows, against WCAG's 3:1 for graphics."""
     if colour in PROJECTOR_UNSAFE:
-        return "not for text, thin lines or projection"
+        return text.word(PAGE, "colours.unsafe")
     if ratio >= GRAPHICS_CONTRAST:
-        return "meets 3:1 for graphics"
-    return "below 3:1: marks need size, or a second cue such as shape"
+        return text.word(PAGE, "colours.meets")
+    return text.word(PAGE, "colours.below")
 
 
 def _facts(settings: runtime.Settings) -> tuple[ResultTable, ...]:
     """The measured state of this machine and run, as tables."""
     numpy.zeros(1)  # loads BLAS, so its thread pool can be read
     blas = [p["num_threads"] for p in threadpoolctl.threadpool_info() if p["user_api"] == "blas"]
+    word = functools.partial(text.word, PAGE)
+    system = text.fill(
+        PAGE,
+        "machine.system_value",
+        system=platform.system(),
+        release=platform.release(),
+        machine=platform.machine(),
+    )
+    pools = text.fill(PAGE, "machine.thread_pools_value", polars=pl.thread_pool_size(), blas=blas)
+    font = text.fill(PAGE, "machine.font_value", font=_resolved_font(), chain=", ".join(FONT_CHAIN))
     machine = ResultTable(
-        "This machine",
-        ("Check", "Result"),
+        word("machine.title"),
+        text.words(PAGE, "machine.columns"),
         (
-            ("System", f"{platform.system()} {platform.release()}, {platform.machine()}"),
-            ("Thread pools", f"polars thread pool: {pl.thread_pool_size()}; "
-                             f"BLAS thread pools: {blas}"),
-            ("Output root", runtime.shown_path(settings.root)),
-            ("Figure font", f"{_resolved_font()}, first found of {', '.join(FONT_CHAIN)}"),
+            (word("machine.system"), system),
+            (word("machine.thread_pools"), pools),
+            (word("machine.root"), runtime.shown_path(settings.root)),
+            (word("machine.font"), font),
         ),
     )  # fmt: skip
     ratios = {c: contrast(c, THEMES["white"].background) for c in DATA_COLOURS}
     colours = ResultTable(
-        "Data colours",
-        ("Colour", "Contrast on white", "What the ratio means"),
-        tuple((c, f"{r:.2f}:1", _colour_use(c, r)) for c, r in ratios.items()),
+        word("colours.title"),
+        text.words(PAGE, "colours.columns"),
+        tuple(
+            (c, text.fill(PAGE, "colours.ratio", ratio=r), _colour_use(c, r))
+            for c, r in ratios.items()
+        ),
         numeric=(1,),
         swatch=0,
     )
@@ -147,11 +138,13 @@ def _resources(fetched: list[dict[str, Any]]) -> tuple[ResultTable, ...]:
     if not fetched:
         return ()
     rows = tuple(
-        (e["name"], f"{e['bytes']:,}", f"sha256 {e['sha256']}", e["url"], e["retrieved"])
+        (e["name"], f"{e['bytes']:,}", text.fill(PAGE, "resources.checksum", sha256=e["sha256"]),
+         e["url"], e["retrieved"])
         for e in fetched
-    )
-    columns = ("Resource", "Bytes", "Checksum", "Source", "Retrieved")
-    return (ResultTable(f"Resources, recorded in {MANIFEST}", columns, rows, numeric=(1,)),)
+    )  # fmt: skip
+    columns = text.words(PAGE, "resources.columns")
+    title = text.fill(PAGE, "resources.title", manifest=MANIFEST)
+    return (ResultTable(title, columns, rows, numeric=(1,)),)
 
 
 MANIFEST = Path("resources") / "manifest.json"
@@ -276,23 +269,18 @@ def run(
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
-        title="M0 Setup",
-        question=QUESTION,
-        concept=CONCEPT,
+        title=text.word(PAGE, "title"),
+        **text.skeleton(PAGE),
         parameters=cards,
         results=facts,
-        practice=PRACTICE,
-        think=THINK,
-        mistakes=MISTAKES,
         key_numbers=_keys(settings),
-        terms=TERMS,
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,
             peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children,
             profile=f"{settings.profile}, {settings.threads} threads",
-            budget=f"Track B: under {budget.minutes} min and {budget.ram_gb} GB",
+            budget=text.fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
             versions=installed,
         ),
     )

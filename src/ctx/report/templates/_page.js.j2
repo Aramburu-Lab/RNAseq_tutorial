@@ -70,16 +70,17 @@
   document.querySelectorAll("button[data-copy]").forEach(function (button) {
     guard("copy", function () {
       var code = document.getElementById(button.getAttribute("data-copy"));
+      var label = button.textContent;
       function select() {
         var range = document.createRange(); range.selectNodeContents(code);
         var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
-        button.textContent = "Selected: press Ctrl+C or Cmd+C";
+        button.textContent = button.getAttribute("data-selected");
       }
       button.addEventListener("click", function () {
         if (!navigator.clipboard || !window.isSecureContext) { select(); return; }
         navigator.clipboard.writeText(code.textContent).then(function () {
-          button.textContent = "Copied";
-          setTimeout(function () { button.textContent = "Copy"; }, 1500);
+          button.textContent = button.getAttribute("data-copied");
+          setTimeout(function () { button.textContent = label; }, 1500);
         }, select);
       });
     });

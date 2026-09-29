@@ -1,0 +1,108 @@
+# M1 Gather page (ctx gather). Placeholders in {braces} are filled by the code; keep their names.
+
+title = "M1 Gather: {dataset}"
+budget = "Track B: under {minutes} min and {ram_gb} GB"
+question = "Which runs did the download bring, are the files intact, and what do we know about each sample?"
+concept = "nf-core/fetchngs downloads the reads and writes a sample sheet, but a finished download can still be incomplete. Files go missing or arrive corrupted, one experiment can hold several runs, and public metadata is free text. gather checks the download against its own records and the published checksums, then writes the one sample sheet every later module reads."
+practice = "Run gather after every download and resolve what its checks report before any analysis. From then on, treat its sample sheet as the only record of what each sample is."
+# "Term: rest" in a mistake prints Term in bold.
+mistakes = [
+    "Treating the runs of one experiment as biological replicates.",
+    "Re-running fetchngs into an existing outdir: it rebuilds the samplesheet from the new input only.",
+]
+
+[[terms]]
+term = "Run"
+meaning = "One sequencing run, one accession such as SRR or ERR, with one or two FASTQ files."
+
+[[terms]]
+term = "Experiment"
+meaning = "The library a run was sequenced from; one experiment can hold several runs."
+
+[[terms]]
+term = "no_md5"
+meaning = "Fetched through sra-tools, which publishes no checksum to verify against."
+
+[[think]]
+prompt = "Why does gather resolve FASTQ files by name instead of the path in samplesheet.csv?"
+answer = "fetchngs writes the path as it was given on its own machine; after a copy to a laptop or from Zenodo that path points nowhere."
+
+[[think]]
+prompt = "Why is a run with no md5 file reported, not rejected?"
+answer = "Runs with no FASTQ at ENA are fetched through sra-tools, which writes no md5; the file is still usable, but it was not checked against a published checksum."
+
+# The four numbers at the top of Results.
+[keys]
+runs = "Runs"
+experiments = "Experiments"
+on_disk = "FASTQ files on disk"
+none = "none"
+unlisted = "Unlisted FASTQs"
+unlisted_detail = "in fastq/, in no row"
+
+[checks]
+title = "Download checks"
+columns = ["Check", "Result"]
+none = "none"
+source = "Source"
+source_value = "nf-core/fetchngs {fetchngs} (commit {commit}), Nextflow {nextflow}"
+by_status = "FASTQ files by status"
+multi_run = "Experiments with more than one run"
+wide = "Runs with more than two ENA files"
+unlisted = "FASTQ files that no row names"
+curation = "Curation"
+not_curated = "Not curated: without --dataset-file, donor, cell type, condition, replicate and batch stay empty."
+
+[curation]
+title = "Curation"
+join = "Join"
+# The join sentence is these three parts; the middle one only when the SDRF is cross-checked.
+joined = "Curation from {file}: each of {runs} runs joined to one SDRF row on {column}, in both directions"
+agrees = "; {checked} agrees for every run"
+mapped = "; every value is in the dataset file's value maps."
+read_length = "Read length"
+batch = "Batch"
+all = "all"
+repeated = "Repeated runs"
+repeated_one = "1 run beyond the first of a donor, cell type and condition"
+repeated_many = "{n} runs beyond the first of a donor, cell type and condition"
+
+[counts]
+title = "Counts"
+matrix = "Matrix"
+matrix_value = "{genes:,} genes by {samples} samples, the length-scaled gene matrix"
+source = "Source"
+source_value = "nf-core/rnaseq {rnaseq}, Salmon {salmon}"
+rounded = "Rounded"
+rounded_value = "{fractional:,} of {values:,} values were fractional and were rounded half to even"
+stored = "Stored as"
+stored_value = "{kind}, {bytes:,} bytes in memory"
+
+[samples]
+group = "Samples"
+
+[composition]
+title = "Samples by cell type and condition"
+lead_one = "{groups} groups; the smallest, {name}, holds 1 run, which limits what any contrast on it can find."
+lead_many = "{groups} groups; the smallest, {name}, holds {runs} runs, which limits what any contrast on it can find."
+bars = "Each bar is one cell type and condition; its length counts the runs in it."
+# Shown only when the runs fall in more than one batch.
+batches = "Colours split each bar by batch ({batches}): a group that sits in one batch alone cannot be told apart from that batch."
+individuals = "Hover a bar for the individuals behind it; one individual can give several cell types, so individuals do not add up across bars."
+caption = "{runs} runs from {individuals} individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars."
+category = "Cell type and condition"
+value = "Runs"
+
+[library]
+title = "Sequencing depth per run"
+lead = "The median run holds {depth} reads."
+depth_millions = "{millions:.1f} million"
+bars = "Each bar is one run; its height is the reads ENA reports for it, in millions."
+sorted_batched = "Runs are grouped by batch and sorted by depth; colour marks the batch."
+sorted = "Runs are sorted by depth."
+failed_batched = "A run far below the others in its batch may be a failed library: DESeq2's size factors correct depth, not quality."
+failed = "A run far below the others may be a failed library: DESeq2's size factors correct depth, not quality."
+caption = "Reads per run as ENA reports them, no test. {medians}."
+batch_median = "{batch}: n = {n} runs, median {median:,.0f} reads"
+category = "Run, by batch and depth"
+value = "Reads"

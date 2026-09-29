@@ -489,7 +489,7 @@ Rytis asked for the figure styling and parameters of the Candida FINAL figures, 
 
 - [x] **P2S.1 Candida figure values in `style.py`**, the one config: Arial, Liberation Sans, DejaVu Sans; 12 panel, 10 axis title, 9 tick, legend, annotation and caption, 8 floor; 3 pt ticks; 6 pt points at alpha 0.5; grid #E6E6E6 (dark #39424A) at 1 pt; no seaborn `paper`; `on_page` converts points to pixels and serves the Plotly templates only. Layout constants measured at 14 pt re-measured. D-024. Done 2026-09-29 (ccac291): 30 synthetic figures measured, ArialMT, Tf {9, 10}, widths {0, 1, 1.5}.
 - [x] **P2S.2 ALI page design:** its tokens in `style.py`, `_page.css.j2` rewritten on the current markup (top bar, hero, numbered sections, stat tiles, table wraps, pills, callouts, figure cards, print), focus rings and a skip link, a contrast test on every text token. Browser check at 1280 and 375 px in both themes. Done 2026-09-29: checked on the synthetic M5 page and hub (D-024).
-- [ ] **P2S.3 Editable page text:** `src/ctx/report/content/*.toml` with a README, read by `ctx.report.text` (strict placeholders, `CTX_CONTENT` for an edited copy); `ui`, `cards`, `setup` and `gather` moved; tests for unresolved placeholders, unused keys, load-bearing strings and the wheel.
+- [x] **P2S.3 Editable page text:** `src/ctx/report/content/*.toml` with a README, read by `ctx.report.text` (strict placeholders, `CTX_CONTENT` for an edited copy); `ui`, `cards`, `setup` and `gather` moved; tests for unresolved placeholders, unused keys, load-bearing strings and the wheel. Done 2026-09-29: `content/{ui,cards,setup,gather}.toml` with a README; `tests/test_text.py`; both mutations caught (D-024).
 
 ### Phase 2Q — Read fates, pathway heatmaps, linked brushing (approved 2026-09-29)
 

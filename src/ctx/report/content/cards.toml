@@ -1,0 +1,50 @@
+# Parameter cards: what each command-line option means (also its --help text), and what
+# changes if you move it. [effects.<command>] overrides the effect on one command.
+
+[options."--profile"]
+meaning = "Where this runs: laptop (at most 4 threads) or hpc (inside a Slurm job). Unset: CTX_PROFILE, else laptop."
+effect = "Changes threads and memory, never results. hpc reads both from Slurm and needs --root."
+
+[options."--root"]
+meaning = "The project directory every output is written under. Unset: CTX_ROOT, else the working directory on a laptop."
+effect = "Moves every output. Nothing is ever written inside the installed package."
+
+[options."--dataset"]
+meaning = "Short name of the dataset, lowercase words joined by underscores; every output name starts with it."
+effect = "Renames every output and selects which dataset's earlier outputs this command reads."
+
+[options."--fetchngs-dir"]
+meaning = "The nf-core/fetchngs outdir to read. Unset: <root>/data/raw/<dataset>."
+effect = "Points gather at another download. gather only reads it, never writes into it."
+
+[options."--dataset-file"]
+meaning = "The dataset's TOML file, conf/datasets/<slug>.toml: its resources, sample curation, contrasts, gene sets and sanity rules."
+effect = "Changes what this command reads from the dataset; each page says what it uses."
+
+[options."--min-count"]
+meaning = "Reads a gene needs at the median library size, in at least the smallest group's samples, to be tested (edgeR filterByExpr's min.count)."
+effect = "Higher tests fewer, better-measured genes, so BH corrects for fewer tests, but weakly expressed biology drops out."
+
+[options."--lfc-shrink"]
+meaning = "Also estimate each gene's log2 fold change with apeGLM shrinkage, which pulls it toward 0 as far as its counts leave it uncertain, so a weakly expressed gene cannot top a ranking on noise. --no-lfc-shrink turns it off."
+effect = "Off: the shrunk columns stay empty, the MA plot shows the raw estimate alone, and M5 skips the shrinkage step of each contrast. The test, p-values, calls, volcano and enrichment use the raw estimate either way, so none of them change."
+
+[options."--rnaseq-dir"]
+meaning = "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset: no counts."
+effect = "Set: gather checks the release and the samples, rounds the length-scaled counts to integers and writes them. It only reads the outdir."
+
+[effects.setup]
+"--dataset-file" = "Set: fetches each resource and keeps it only if its size and SHA-256 match. Unset: fetches nothing."
+
+[effects.gather]
+"--dataset-file" = "Set: fills donor, cell type, condition, replicate and batch from the SDRF, and stops on any mismatch. Unset: they stay empty."
+"--dataset" = "Renames every output. Unless --fetchngs-dir is set, gather reads <root>/data/raw/<dataset>."
+
+[effects.report]
+"--dataset-file" = "Set: the hub also decides and shows the file's sanity rules."
+
+[effects.de]
+"--dataset-file" = "Selects the contrasts, their designs and expected n, the featured contrast, the lessons and the PCA subsets this page fits and draws."
+
+[effects.function]
+"--dataset-file" = "Selects the gene sets, the featured set and the running score this page tests."

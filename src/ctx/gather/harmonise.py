@@ -1,5 +1,6 @@
 """M1c: turn one checked fetchngs outdir into the harmonised sample sheet and its page."""
 
+import functools
 import hashlib
 from dataclasses import replace
 from datetime import date
@@ -15,6 +16,7 @@ from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate
 from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
+from ctx.report import text
 from ctx.report.builder import (
     FigureText,
     Group,
@@ -24,7 +26,6 @@ from ctx.report.builder import (
     Reproduction,
     Result,
     ResultTable,
-    SelfCheck,
     write,
 )
 from ctx.viz.bar import BarData
@@ -32,6 +33,7 @@ from ctx.viz.save import figure_block, write_figure
 from ctx.viz.style import category_colours
 
 MODULE = "gather"
+PAGE = MODULE
 # FASTQ statuses (ctx.gather.fetchngs.STATUSES) of a file that is in fastq/.
 ON_DISK = ("verified", "mismatch", "no_md5")
 # Below this, "0.0 million reads" would hide the depth: print the reads themselves.
@@ -164,13 +166,17 @@ def _statuses(frame: pl.DataFrame) -> dict[str, int]:
 def _keys(outdir: Outdir, frame: pl.DataFrame) -> tuple[KeyNumber, ...]:
     """Runs, experiments and files: the first three things to check after a download."""
     statuses = _statuses(frame)
-    detail = ", ".join(f"{n} {k}" for k, n in statuses.items()) or "none"
+    word = functools.partial(text.word, PAGE)
+    detail = ", ".join(f"{n} {k}" for k, n in statuses.items()) or word("keys.none")
+    on_disk = sum(statuses.get(k, 0) for k in ON_DISK)
     return (
-        KeyNumber("Runs", f"{frame.height:,}"),
-        KeyNumber("Experiments", f"{frame['sample'].n_unique():,}"),
+        KeyNumber(word("keys.runs"), f"{frame.height:,}"),
+        KeyNumber(word("keys.experiments"), f"{frame['sample'].n_unique():,}"),
         # On disk, not listed: a metadata-only download lists every file as not_downloaded.
-        KeyNumber("FASTQ files on disk", f"{sum(statuses.get(k, 0) for k in ON_DISK):,}", detail),
-        KeyNumber("Unlisted FASTQs", f"{len(outdir.unlisted_fastq)}", "in fastq/, in no row"),
+        KeyNumber(word("keys.on_disk"), f"{on_disk:,}", detail),
+        KeyNumber(
+            word("keys.unlisted"), f"{len(outdir.unlisted_fastq)}", word("keys.unlisted_detail")
+        ),
     )
 
 
@@ -179,101 +185,56 @@ def _facts(outdir: Outdir, frame: pl.DataFrame, curated: bool) -> ResultTable:
     multi = frame.filter(pl.col("n_runs") > 1)["sample"].unique().sort().to_list()
     wide = frame.filter(pl.col("ena_files") > FTP_KEEPS)["run_accession"].to_list()
     counted = ", ".join(f"{k} {n}" for k, n in _statuses(frame).items())
+    word = functools.partial(text.word, PAGE)
+    none = word("checks.none")
+    source = text.fill(PAGE, "checks.source_value", fetchngs=outdir.provenance["fetchngs"],
+                       commit=outdir.provenance["fetchngs_commit"],
+                       nextflow=outdir.provenance["nextflow"])  # fmt: skip
     rows = [
-        ("Source", f"nf-core/fetchngs {outdir.provenance['fetchngs']} (commit "
-                   f"{outdir.provenance['fetchngs_commit']}), Nextflow "
-                   f"{outdir.provenance['nextflow']}"),
-        ("FASTQ files by status", counted or "none"),
-        ("Experiments with more than one run", ", ".join(multi) or "none"),
-        ("Runs with more than two ENA files", ", ".join(wide) or "none"),
-        ("FASTQ files that no row names", ", ".join(outdir.unlisted_fastq) or "none"),
-    ]  # fmt: skip
+        (word("checks.source"), source),
+        (word("checks.by_status"), counted or none),
+        (word("checks.multi_run"), ", ".join(multi) or none),
+        (word("checks.wide"), ", ".join(wide) or none),
+        (word("checks.unlisted"), ", ".join(outdir.unlisted_fastq) or none),
+    ]
     if not curated:
-        rows.append(("Curation", "Not curated: without --dataset-file, donor, cell type, "
-                                 "condition, replicate and batch stay empty."))  # fmt: skip
-    return ResultTable("Download checks", ("Check", "Result"), tuple(rows))
-
-
-QUESTION = (
-    "Which runs did the download bring, are the files intact, and what do we know about "
-    "each sample?"
-)
-CONCEPT = (
-    "nf-core/fetchngs downloads the reads and writes a sample sheet, but a finished download "
-    "can still be incomplete. Files go missing or arrive corrupted, one experiment can hold "
-    "several runs, and public metadata is free text. gather checks the download against its "
-    "own records and the published checksums, then writes the one sample sheet every later "
-    "module reads."
-)
-TERMS = (
-    ("Run", "One sequencing run, one accession such as SRR or ERR, with one or two FASTQ files."),
-    ("Experiment", "The library a run was sequenced from; one experiment can hold several runs."),
-    ("no_md5", "Fetched through sra-tools, which publishes no checksum to verify against."),
-)
-PRACTICE = (
-    "Run gather after every download and resolve what its checks report before any analysis. "
-    "From then on, treat its sample sheet as the only record of what each sample is."
-)
-THINK = (
-    SelfCheck(
-        "Why does gather resolve FASTQ files by name instead of the path in samplesheet.csv?",
-        "fetchngs writes the path as it was given on its own machine; after a copy to a laptop "
-        "or from Zenodo that path points nowhere.",
-    ),
-    SelfCheck(
-        "Why is a run with no md5 file reported, not rejected?",
-        "Runs with no FASTQ at ENA are fetched through sra-tools, which writes no md5; the file "
-        "is still usable, but it was not checked against a published checksum.",
-    ),
-)
-MISTAKES = (
-    "Treating the runs of one experiment as biological replicates.",
-    "Re-running fetchngs into an existing outdir: it rebuilds the samplesheet from the new "
-    "input only.",
-)
+        rows.append((word("checks.curation"), word("checks.not_curated")))
+    return ResultTable(word("checks.title"), text.words(PAGE, "checks.columns"), tuple(rows))
 
 
 def _composition_text(data: BarData) -> FigureText:
     """Title, lead and reading guide of the composition bars, from the counts drawn."""
     groups, batches = data.frame["group"].n_unique(), data.frame["batch"].unique().sort()
-    reading = [
-        "Each bar is one cell type and condition; its length counts the runs in it.",
-        "Hover a bar for the individuals behind it; one individual can give several cell "
-        "types, so individuals do not add up across bars.",
-    ]
+    reading = [text.word(PAGE, "composition.bars"), text.word(PAGE, "composition.individuals")]
     if batches.len() > 1:
-        reading.insert(
-            1,
-            f"Colours split each bar by batch ({', '.join(batches)}): a group "
-            "that sits in one batch alone cannot be told apart from that batch.",
-        )
+        reading.insert(1, text.fill(PAGE, "composition.batches", batches=", ".join(batches)))
     sizes = data.frame.group_by("group").agg(pl.col("n_samples").sum())
     name, runs = sizes.sort("n_samples", "group").row(0)
-    unit = "run" if runs == 1 else "runs"
+    lead = "composition.lead_one" if runs == 1 else "composition.lead_many"
     return FigureText(
-        title="Samples by cell type and condition",
-        lead=f"{groups} groups; the smallest, {name}, holds {runs} {unit}, which limits what "
-        "any contrast on it can find.",
+        title=text.word(PAGE, "composition.title"),
+        lead=text.fill(PAGE, lead, groups=groups, name=name, runs=runs),
         reading=tuple(reading),
-    )  # fmt: skip
+    )
 
 
 def _library_text(data: BarData) -> FigureText:
     """Title, lead and reading guide of the library sizes, from the depths drawn."""
     median = float(np.median(data.frame["read_count"].to_numpy()))
-    depth = f"{median / 1e6:.1f} million" if median >= DEPTH_IN_MILLIONS else f"{median:,.0f}"
+    depth = (
+        text.fill(PAGE, "library.depth_millions", millions=median / 1e6)
+        if median >= DEPTH_IN_MILLIONS
+        else f"{median:,.0f}"
+    )
     batched = data.frame["batch"].n_unique() > 1
+    word = functools.partial(text.word, PAGE)
     return FigureText(
-        title="Sequencing depth per run",
-        lead=f"The median run holds {depth} reads.",
+        title=word("library.title"),
+        lead=text.fill(PAGE, "library.lead", depth=depth),
         reading=(
-            "Each bar is one run; its height is the reads ENA reports for it, in millions.",
-            "Runs are grouped by batch and sorted by depth; colour marks the batch."
-            if batched
-            else "Runs are sorted by depth.",
-            "A run far below the others"
-            + (" in its batch" if batched else "")
-            + " may be a failed library: DESeq2's size factors correct depth, not quality.",
+            word("library.bars"),
+            word("library.sorted_batched" if batched else "library.sorted"),
+            word("library.failed_batched" if batched else "library.failed"),
         ),
     )
 
@@ -296,14 +257,12 @@ def _composition(frame: pl.DataFrame, spec: Dataset) -> BarData:
         "n_individuals": ("individuals", "Distinct donors among those runs."),
         "group": ("none", "Cell type and condition, the bar's label."),
     }
-    caption = (
-        f"{frame.height} runs from {frame['donor'].n_unique()} individuals, by cell type, "
-        "condition and batch; counts, no test. An individual can give several cell types, "
-        "so individuals do not add up across bars."
-    )
+    caption = text.fill(PAGE, "composition.caption", runs=frame.height,
+                        individuals=frame["donor"].n_unique())  # fmt: skip
     return BarData(
         frame=groups, columns=columns, category="group", value="n_samples",
-        category_label="Cell type and condition", value_label="Runs", series="batch",
+        category_label=text.word(PAGE, "composition.category"),
+        value_label=text.word(PAGE, "composition.value"), series="batch",
         colours=category_colours(levels), caption=caption, horizontal=True, stacked=True,
         hover=("n_individuals",), width="double",
     )  # fmt: skip
@@ -316,7 +275,7 @@ def _library_sizes(frame: pl.DataFrame, spec: Dataset) -> BarData:
     )
     levels = [b for b in (*spec.batch_bins, "all") if b in set(runs["batch"])]
     medians = "; ".join(
-        f"{b}: n = {n} runs, median {m:,.0f} reads"
+        text.fill(PAGE, "library.batch_median", batch=b, n=n, median=m)
         for b, n, m in runs.group_by("batch", maintain_order=True)
         .agg(pl.len(), pl.col("read_count").median())
         .rows()
@@ -334,9 +293,10 @@ def _library_sizes(frame: pl.DataFrame, spec: Dataset) -> BarData:
             pl.col("read_count").cast(pl.Int64), million_reads=pl.col("read_count") / 1e6
         ).select(*columns),
         columns=columns, category="run_accession", value="million_reads",
-        category_label="Run, by batch and depth", value_label="Reads", series="batch",
+        category_label=text.word(PAGE, "library.category"),
+        value_label=text.word(PAGE, "library.value"), series="batch",
         colours=category_colours(levels),
-        caption=f"Reads per run as ENA reports them, no test. {medians}.",
+        caption=text.fill(PAGE, "library.caption", medians=medians),
         stacked=True, hover=("cell_type", "condition"), width="double",
     )  # fmt: skip
 
@@ -347,25 +307,31 @@ def _curation_facts(frame: pl.DataFrame, spec: Dataset) -> ResultTable:
     lengths = ", ".join(
         f"{v:g} nt {n}" for v, n in frame["read_length"].value_counts().sort("read_length").rows()
     )
+    word = functools.partial(text.word, PAGE)
     batches = ", ".join(
-        f"{b or 'all'} {n}" for b, n in frame["batch"].value_counts().sort("batch").rows()
+        f"{b or word('curation.all')} {n}"
+        for b, n in frame["batch"].value_counts().sort("batch").rows()
     )
     checked = ", ".join(a for a, _ in spec.sdrf.cross_check)
     repeats = frame.filter(pl.col("replicate") > 1).height
     joined = (
-        f"Curation from {spec.path.name}: each of {frame.height} runs joined to one SDRF row "
-        f"on {spec.sdrf.join[0]}, in both directions"
-        + (f"; {checked} agrees for every run" if checked else "")
-        + "; every value is in the dataset file's value maps."
+        text.fill(PAGE, "curation.joined", file=spec.path.name, runs=frame.height,
+                  column=spec.sdrf.join[0])
+        + (text.fill(PAGE, "curation.agrees", checked=checked) if checked else "")
+        + word("curation.mapped")
+    )  # fmt: skip
+    repeated = (
+        word("curation.repeated_one")
+        if repeats == 1
+        else text.fill(PAGE, "curation.repeated_many", n=repeats)
     )
     rows = (
-        ("Join", joined),
-        ("Read length", lengths),
-        ("Batch", batches),
-        ("Repeated runs", f"{repeats} {'run' if repeats == 1 else 'runs'} beyond the first "
-                          "of a donor, cell type and condition"),
-    )  # fmt: skip
-    return ResultTable("Curation", ("Check", "Result"), rows)
+        (word("curation.join"), joined),
+        (word("curation.read_length"), lengths),
+        (word("curation.batch"), batches),
+        (word("curation.repeated"), repeated),
+    )
+    return ResultTable(word("curation.title"), text.words(PAGE, "checks.columns"), rows)
 
 
 def _counts_tables(
@@ -388,16 +354,20 @@ def _counts_tables(
 def _counts_facts(counts: rnaseq.Counts) -> ResultTable:
     """What the counts step read and did, counted."""
     genes, samples = counts.matrix.height, counts.matrix.width - 1
-    kind = counts.matrix.dtypes[1] if samples else "none"
+    word = functools.partial(text.word, PAGE)
+    kind = counts.matrix.dtypes[1] if samples else word("checks.none")
+    filled = functools.partial(text.fill, PAGE)
     rows = (
-        ("Matrix", f"{genes:,} genes by {samples} samples, the length-scaled gene matrix"),
-        ("Source", f"nf-core/rnaseq {counts.provenance['nf-core/rnaseq']}, Salmon "
-                   f"{counts.provenance['salmon']}"),
-        ("Rounded", f"{counts.fractional:,} of {genes * samples:,} values were fractional and "
-                    "were rounded half to even"),
-        ("Stored as", f"{kind}, {counts.matrix.estimated_size():,} bytes in memory"),
+        (word("counts.matrix"), filled("counts.matrix_value", genes=genes, samples=samples)),
+        (word("counts.source"), filled("counts.source_value",
+                                       rnaseq=counts.provenance["nf-core/rnaseq"],
+                                       salmon=counts.provenance["salmon"])),
+        (word("counts.rounded"), filled("counts.rounded_value", fractional=counts.fractional,
+                                        values=genes * samples)),
+        (word("counts.stored"), filled("counts.stored_value", kind=kind,
+                                       bytes=counts.matrix.estimated_size())),
     )  # fmt: skip
-    return ResultTable("Counts", ("Check", "Result"), rows)
+    return ResultTable(word("counts.title"), text.words(PAGE, "checks.columns"), rows)
 
 
 def _write_problems(
@@ -502,31 +472,26 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
             ("library_sizes", depth, _library_text(depth)),
         ):
             figure_stem = stem(MODULE, f"{dataset}_{name}", 1, day=day)
-            text = replace(words, back=f"{page_stem}.html")
-            files += write_figure(data, out, figure_stem, title=text.title,
-                                  data_releases=releases, text=text)  # fmt: skip
-            figures.append(figure_block(data, figure_stem, text))
-        results.append(Group("Samples", tuple(figures)))
+            shown = replace(words, back=f"{page_stem}.html")
+            files += write_figure(data, out, figure_stem, title=shown.title,
+                                  data_releases=releases, text=shown)  # fmt: skip
+            figures.append(figure_block(data, figure_stem, shown))
+        results.append(Group(text.word(PAGE, "samples.group"), tuple(figures)))
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
-        title=f"M1 Gather: {spec.name if spec else dataset}",
-        question=QUESTION,
-        concept=CONCEPT,
+        title=text.fill(PAGE, "title", dataset=spec.name if spec else dataset),
+        **text.skeleton(PAGE),
         parameters=cards,
         results=tuple(results),
-        practice=PRACTICE,
-        think=THINK,
-        mistakes=MISTAKES,
         key_numbers=_keys(checked, frame),
-        terms=TERMS,
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,
             peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children,
             profile=f"{settings.profile}, {settings.threads} threads",
-            budget=f"Track B: under {budget.minutes} min and {budget.ram_gb} GB",
+            budget=text.fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
             versions=runtime.versions(),
         ),
     )

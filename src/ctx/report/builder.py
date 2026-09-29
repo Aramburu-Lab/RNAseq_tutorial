@@ -17,6 +17,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from markupsafe import Markup
 
 from ctx.io.naming import figure_files
+from ctx.report import text
 from ctx.viz.style import (
     NARROW_PX,
     RAIL_FROM_PX,
@@ -27,17 +28,15 @@ from ctx.viz.style import (
 )
 
 MAX_BYTES = 15 * 10**6
-# The report skeleton, in the order CONVENTIONS.md fixes; ids are the section anchors.
-SECTIONS = (
-    ("question", "The question"),
-    ("concept", "The idea"),
-    ("parameters", "Parameters"),
-    ("results", "Results"),
-    ("practice", "In practice"),
-    ("think", "Check yourself"),
-    ("mistakes", "Common mistakes"),
-    ("reproduce", "Reproduce this page"),
-)
+# The report skeleton, in the order CONVENTIONS.md fixes; ids are the section anchors, and
+# the headings are in content/ui.toml.
+SECTIONS = tuple(
+    (section, text.word("ui", f"sections.{section}"))
+    for section in (
+        "question", "concept", "parameters", "results", "practice", "think", "mistakes",
+        "reproduce",
+    )
+)  # fmt: skip
 MAX_TABLE_COLUMNS = 8  # CONVENTIONS.md, HTML reports
 MAX_KEY_NUMBERS = 4
 # The packages a reader asks about first; the full list sits behind a disclosure.
@@ -54,7 +53,7 @@ HEX = re.compile(r"#[0-9A-Fa-f]{6}")
 TITLE = re.compile(r"(?:M(?P<n>\d+)[a-z]? )?(?P<headline>[^:]+?)(?:: (?P<dataset>.+))?")
 
 # The top bar names the course on every page.
-SUITE = "Cancer Transcriptomics Teaching Suite"
+SUITE = text.word("ui", "suite")
 
 
 @dataclass(frozen=True)
@@ -282,8 +281,9 @@ def _figure_html(block: FigureBlock, index: int) -> Markup:
 
 def _files(block: FigureBlock) -> list[tuple[str, str, str]]:
     """(label, theme or "", file name) of every file a reader may open beside the figure."""
+    data = text.word("ui", "figures.data")
     if not block.stem:
-        return [("Data (CSV)", "", block.data_file)]
+        return [(data, "", block.data_file)]
     names = figure_files(block.stem)
     rendered = [
         (ext.upper(), theme, name)
@@ -293,8 +293,8 @@ def _files(block: FigureBlock) -> list[tuple[str, str, str]]:
         if name == f"{block.stem}_{theme}.{ext}"
     ]
     return [
-        ("Data (CSV)", "", block.data_file),
-        ("Column meanings", "", f"{block.stem}_README.md"),
+        (data, "", block.data_file),
+        (text.word("ui", "figures.columns"), "", f"{block.stem}_README.md"),
         *rendered,
     ]
 
@@ -311,7 +311,7 @@ def _prepare(block: FigureBlock, index: int, number: int, level: int) -> dict[st
         "level": level,
         "text": block.text,
         "title": block.text.title,
-        "tab": block.text.tab or block.text.title or f"Figure {number}",
+        "tab": block.text.tab or block.text.title or text.fill("ui", "figure_n", n=number),
         "page": f"{block.stem}.html" if block.stem else "",
         "files": _files(block),
         "controls": _json_for_script(block.controls) if block.controls else None,
@@ -361,13 +361,17 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
 def _heading(page: FigurePage | ModulePage | HubPage) -> dict[str, str]:
     """Kicker, headline and dataset, parsed from the page title."""
     if isinstance(page, FigurePage):
-        return {"kicker": "Figure", "headline": page.title, "dataset": "", "suite": SUITE}
+        figure = text.word("ui", "figure")
+        return {"kicker": figure, "headline": page.title, "dataset": "", "suite": SUITE}
     match = TITLE.fullmatch(page.title)
     assert match is not None  # noqa: S101 - the pattern accepts any title
     if isinstance(page, HubPage):
         kicker = SUITE
     else:
-        kicker = f"Module {match['n']}" if match["n"] is not None else "Module"
+        numbered = match["n"] is not None
+        kicker = (
+            text.fill("ui", "module_n", n=match["n"]) if numbered else text.word("ui", "module")
+        )
     dataset = match["dataset"] or ""
     return {"kicker": kicker, "headline": match["headline"], "dataset": dataset, "suite": SUITE}
 
@@ -386,6 +390,7 @@ def render(page: FigurePage | ModulePage | HubPage) -> str:
     context: dict[str, Any] = {
         "page": page,
         "sections": SECTIONS,
+        "ui": text.load("ui"),
         "heading": _heading(page),
         # Our own constants, and CSS inside <style> must not be HTML-escaped.
         "css": {

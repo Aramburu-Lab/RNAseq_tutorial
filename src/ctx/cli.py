@@ -13,6 +13,7 @@ from typing import Annotated, Any
 import typer
 
 from ctx import __version__, runtime
+from ctx.report import text
 from ctx.report.builder import ParameterCard
 
 app = typer.Typer(
@@ -21,66 +22,18 @@ app = typer.Typer(
     help="Cancer Transcriptomics Teaching Suite.",
 )
 
-# (meaning, what changes if you move it), per CLI option; the default is read from click. The
-# meaning doubles as the --help text, so it describes the option on every command.
+# (meaning, what changes if you move it), per CLI option, from content/cards.toml; the default
+# is read from click. The meaning doubles as the --help text, so it describes the option on
+# every command.
 CARDS: dict[str, tuple[str, str]] = {
-    "--profile": (
-        "Where this runs: laptop (at most 4 threads) or hpc (inside a Slurm job). Unset: "
-        "CTX_PROFILE, else laptop.",
-        "Changes threads and memory, never results. hpc reads both from Slurm and needs --root.",
-    ),
-    "--root": (
-        "The project directory every output is written under. Unset: CTX_ROOT, else the "
-        "working directory on a laptop.",
-        "Moves every output. Nothing is ever written inside the installed package.",
-    ),
-    "--dataset": (
-        "Short name of the dataset, lowercase words joined by underscores; every output name "
-        "starts with it.",
-        "Renames every output and selects which dataset's earlier outputs this command reads.",
-    ),
-    "--fetchngs-dir": (
-        "The nf-core/fetchngs outdir to read. Unset: <root>/data/raw/<dataset>.",
-        "Points gather at another download. gather only reads it, never writes into it.",
-    ),
-    "--dataset-file": (
-        "The dataset's TOML file, conf/datasets/<slug>.toml: its resources, sample curation, "
-        "contrasts, gene sets and sanity rules.",
-        "Changes what this command reads from the dataset; each page says what it uses.",
-    ),
-    "--min-count": (
-        "Reads a gene needs at the median library size, in at least the smallest group's "
-        "samples, to be tested (edgeR filterByExpr's min.count).",
-        "Higher tests fewer, better-measured genes, so BH corrects for fewer tests, but weakly "
-        "expressed biology drops out.",
-    ),
-    "--lfc-shrink": (
-        "Also estimate each gene's log2 fold change with apeGLM shrinkage, which pulls it "
-        "toward 0 as far as its counts leave it uncertain, so a weakly expressed gene cannot "
-        "top a ranking on noise. --no-lfc-shrink turns it off.",
-        "Off: the shrunk columns stay empty, the MA plot shows the raw estimate alone, and M5 "
-        "skips the shrinkage step of each contrast. The test, p-values, calls, volcano and "
-        "enrichment use the raw estimate either way, so none of them change.",
-    ),
-    "--rnaseq-dir": (
-        "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset: no counts.",
-        "Set: gather checks the release and the samples, rounds the length-scaled counts to "
-        "integers and writes them. It only reads the outdir.",
-    ),
+    option: (card["meaning"], card["effect"])
+    for option, card in text.raw("cards", "options").items()
 }
 # Where one option does different things on different commands, the effect is per command.
 CARD_EFFECTS: dict[tuple[str, str], str] = {
-    ("setup", "--dataset-file"): "Set: fetches each resource and keeps it only if its size "
-    "and SHA-256 match. Unset: fetches nothing.",
-    ("gather", "--dataset-file"): "Set: fills donor, cell type, condition, replicate and "
-    "batch from the SDRF, and stops on any mismatch. Unset: they stay empty.",
-    ("report", "--dataset-file"): "Set: the hub also decides and shows the file's sanity rules.",
-    ("gather", "--dataset"): "Renames every output. Unless --fetchngs-dir is set, gather "
-    "reads <root>/data/raw/<dataset>.",
-    ("de", "--dataset-file"): "Selects the contrasts, their designs and expected n, the "
-    "featured contrast, the lessons and the PCA subsets this page fits and draws.",
-    ("function", "--dataset-file"): "Selects the gene sets, the featured set and the "
-    "running score this page tests.",
+    (command, option): effect
+    for command, effects in text.raw("cards", "effects").items()
+    for option, effect in effects.items()
 }
 _UNCARDED = {"--help", "--version"}
 

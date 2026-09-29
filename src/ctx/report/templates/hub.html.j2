@@ -1,18 +1,18 @@
 {% extends "base.html.j2" %}
-{% from "_cards.html.j2" import cards_table %}
+{% from "_cards.html.j2" import cards_table with context %}
 {# The only links off this page are the module pages: the hub must keep working after a copy. #}
 {% block content %}
 <section id="hub">
 <p class="lede">{{ page.intro }}</p>
 {% if page.key_numbers %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
-{% if page.links %}<ol class="modules">{% for link in page.links %}{% set number, _, name = link.module.partition(" ") %}<li><span class="kicker">{{ number }}</span><a class="module-name" href="{{ link.href }}">{{ name }}</a><span class="module-date">Written {{ link.written }}</span></li>{% endfor %}</ol>{% endif %}
-{% if page.missing %}<p class="missing">Not run yet: {{ page.missing|join(", ") }}.</p>{% endif %}
+{% if page.links %}<ol class="modules">{% for link in page.links %}{% set number, _, name = link.module.partition(" ") %}<li><span class="kicker">{{ number }}</span><a class="module-name" href="{{ link.href }}">{{ name }}</a><span class="module-date">{{ ui.written }} {{ link.written }}</span></li>{% endfor %}</ol>{% endif %}
+{% if page.missing %}<p class="missing">{{ ui.not_run }} {{ page.missing|join(", ") }}.</p>{% endif %}
 </section>
 {% if page.rules %}
 <section class="hub-section" id="rules">
-<h2>Sanity rules</h2>
+<h2>{{ ui.hub.rules }}</h2>
 <div class="table-scroll"><table class="rules">
-<thead><tr><th>Rule</th><th>What it checks, and what was measured</th><th>Verdict</th></tr></thead>
+<thead><tr><th>{{ ui.hub.rule }}</th><th>{{ ui.hub.checks }}</th><th>{{ ui.hub.verdict }}</th></tr></thead>
 <tbody>
 {% for r in page.rules %}
 <tr><th scope="row">{{ r.rule }}</th><td>{{ r.text }}<ul>{% for condition, measured, verdict in r.conditions %}<li><code>{{ condition }}</code>: {{ measured }} <span class="verdict" data-verdict="{{ verdict }}">{{ verdict }}</span></li>{% endfor %}</ul></td><td><span class="pill" data-verdict="{{ r.verdict }}">{{ r.verdict }}</span></td></tr>
@@ -21,5 +21,5 @@
 </table></div>
 </section>
 {% endif %}
-<details class="params"><summary>Parameters of ctx report</summary>{{ cards_table(page.parameters) }}</details>
+<details class="params"><summary>{{ ui.cards.report }}</summary>{{ cards_table(page.parameters) }}</details>
 {% endblock %}

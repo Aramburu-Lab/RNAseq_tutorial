@@ -1,30 +1,30 @@
 {% macro figure_block(f, standalone=false, tab=false) %}
 <figure class="fig" id="figure-{{ f.number }}"{% if tab %} role="tabpanel" aria-labelledby="tab-{{ f.number }}"{% endif %}>
 {% if not standalone %}
-<p class="fig-num">Figure {{ f.number }}</p>
+<p class="fig-num">{{ ui.figure_n.format(n=f.number) }}</p>
 {% if f.title %}<h{{ f.level }} class="fig-title">{{ f.title }}</h{{ f.level }}>{% endif %}
 {% endif %}
 {% if f.text.lead %}<p class="fig-lead">{{ f.text.lead }}</p>{% endif %}
 {% if f.controls %}
-<form class="calls" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="Cutoffs for calling genes">
-<label>Fold change at least<span class="pair"><input name="fc" type="number" min="0" step="any" value="{{ f.defaults.fc }}" aria-label="Fold-change threshold"><select name="fc_unit" aria-label="Fold-change unit"><option value="log2" selected>log2 FC</option><option value="pct">% change</option></select></span></label>
-<label>Significance<select name="basis">{% for column, words in f.defaults.bases %}<option value="{{ column }}"{% if loop.first %} selected{% endif %}>{{ words }}</option>{% endfor %}</select></label>
-<label>Below<span class="pair"><input name="cutoff" type="text" inputmode="decimal" autocomplete="off" value="{{ f.defaults.alpha }}" aria-label="Cutoff; the arrow keys step through {{ f.defaults.presets | join(', ') }}"><button type="button" data-step="-1" aria-label="Stricter: the next smaller cutoff" title="Stricter: the next smaller cutoff">&#9660;</button><button type="button" data-step="1" aria-label="Looser: the next larger cutoff" title="Looser: the next larger cutoff">&#9650;</button></span></label>
-<button type="reset">Reset</button>
+<form class="calls" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="{{ ui.calls.label }}">
+<label>{{ ui.calls.fc }}<span class="pair"><input name="fc" type="number" min="0" step="any" value="{{ f.defaults.fc }}" aria-label="{{ ui.calls.fc_input }}"><select name="fc_unit" aria-label="{{ ui.calls.fc_unit }}"><option value="log2" selected>{{ ui.calls.log2 }}</option><option value="pct">{{ ui.calls.pct }}</option></select></span></label>
+<label>{{ ui.calls.basis }}<select name="basis">{% for column, words in f.defaults.bases %}<option value="{{ column }}"{% if loop.first %} selected{% endif %}>{{ words }}</option>{% endfor %}</select></label>
+<label>{{ ui.calls.cutoff }}<span class="pair"><input name="cutoff" type="text" inputmode="decimal" autocomplete="off" value="{{ f.defaults.alpha }}" aria-label="{{ ui.calls.cutoff_input.format(presets=f.defaults.presets | join(', ')) }}"><button type="button" data-step="-1" aria-label="{{ ui.calls.stricter }}" title="{{ ui.calls.stricter }}">&#9660;</button><button type="button" data-step="1" aria-label="{{ ui.calls.looser }}" title="{{ ui.calls.looser }}">&#9650;</button></span></label>
+<button type="reset">{{ ui.calls.reset }}</button>
 </form>
-<noscript><p class="note">This is the default rule; turn on JavaScript to move the cutoffs.</p></noscript>
+<noscript><p class="note">{{ ui.calls.noscript }}</p></noscript>
 <p class="calls-summary" aria-live="polite">{{ f.defaults.summary }}</p>
 {% endif %}
 <div class="fig-body{% if f.text.reading %} has-reading{% endif %}">
 <div class="fig-plot">{{ f.html }}</div>
 {% if f.text.reading %}
-<aside class="reading" aria-label="How to read this figure"><p class="reading-title">How to read this</p><ul>
+<aside class="reading" aria-label="{{ ui.figures.reading_label }}"><p class="reading-title">{{ ui.figures.reading }}</p><ul>
 {% for line in f.text.reading %}<li{% if f.controls %} data-reading="{{ loop.index0 }}"{% endif %}>{{ line }}</li>
 {% endfor %}</ul></aside>
 {% endif %}
 </div>
 <figcaption>{{ f.caption }}</figcaption>
-<p class="fig-files">{% if f.page and not standalone %}<a href="{{ f.page }}">Open alone</a>{% endif %}{% for label, theme, href in f.files %}<a{% if theme %} class="only-{{ theme }}"{% endif %} href="{{ href }}">{{ label }}</a>{% endfor %}</p>
+<p class="fig-files">{% if f.page and not standalone %}<a href="{{ f.page }}">{{ ui.figures.open }}</a>{% endif %}{% for label, theme, href in f.files %}<a{% if theme %} class="only-{{ theme }}"{% endif %} href="{{ href }}">{{ label }}</a>{% endfor %}</p>
 {% if f.controls %}<script type="application/json" id="ctx-controls-{{ f.index }}">{{ f.controls }}</script>
 {% endif %}
 <script type="application/json" id="ctx-data-{{ f.index }}">{{ f.rows }}</script>

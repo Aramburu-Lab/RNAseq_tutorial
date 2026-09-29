@@ -274,7 +274,7 @@ def test_templates_use_tokens_only():
 def test_copy_has_no_dashes_or_arrows():
     # Pages are read by people: no em dash, no arrow, in any string that can reach one.
     for path in (ROOT / "src" / "ctx").rglob("*"):
-        if path.suffix in {".py", ".j2"}:
+        if path.suffix in {".py", ".j2", ".toml"}:
             text = path.read_text()
             assert "—" not in text and "→" not in text, path
 
