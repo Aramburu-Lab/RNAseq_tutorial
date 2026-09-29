@@ -39,7 +39,10 @@ N_READS = 1000
 # The Illumina TruSeq read 1 adapter as a read runs into it, then poly-A where the read is
 # longer still, as a sequencer reads past the library.
 ADAPTER = "AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
-QUALITY = "I"
+# NovaSeq-style binned qualities: Q37, and Q25 at every tenth base. One character below "@"
+# is what makes FastQC read the file as Phred+33; with "I" alone it guessed Illumina 1.5 and
+# reported every base at Q9.
+QUALITY_HIGH, QUALITY_LOW, LOW_EVERY = "F", ":", 10
 # Phred scores of the degraded sample's last bases: falling from 30 to 2.
 TAIL, TAIL_FROM, TAIL_TO = 30, 30, 2
 MANIFEST = "MANIFEST.sha256"
@@ -67,10 +70,14 @@ SAMPLES = (
 
 def quality(sample: Sample) -> str:
     """The quality string every read of a sample carries."""
+    binned = "".join(
+        QUALITY_LOW if i % LOW_EVERY == LOW_EVERY - 1 else QUALITY_HIGH
+        for i in range(sample.read_length)
+    )
     if not sample.planted.startswith("degraded"):
-        return QUALITY * sample.read_length
+        return binned
     steps = [TAIL_FROM - (TAIL_FROM - TAIL_TO) * i // (TAIL - 1) for i in range(TAIL)]
-    return QUALITY * (sample.read_length - TAIL) + "".join(chr(33 + q) for q in steps)
+    return binned[: sample.read_length - TAIL] + "".join(chr(33 + q) for q in steps)
 
 
 def shares(profile: int, n: int) -> list[float]:

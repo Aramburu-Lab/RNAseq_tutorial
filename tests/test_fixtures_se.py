@@ -101,7 +101,7 @@ def test_planted_problems_are_there():
     (_, _, quality) = next(reads("se_d"))
     phred = [ord(c) - 33 for c in quality[-30:]]
     assert phred[0] == 30 and phred[-1] == 2 and phred == sorted(phred, reverse=True)  # noqa: PLR2004
-    assert set(next(reads("se_a"))[2]) == {"I"}
+    assert set(next(reads("se_a"))[2]) == {"F", ":"}
 
 
 def test_rebuilds_byte_for_byte(script, tmp_path):
