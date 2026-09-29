@@ -1,6 +1,6 @@
 # Cancer Transcriptomics Teaching Suite — plan
 
-Status: **draft v3.3 (2026-09-27) — Phase 1 and 1b closed; D5 resolved: Step-1 is E-MTAB-11190 (ENA PRJEB49000 / ERP133445), with its read-length batch confound taught as a lesson; D1, D2, D4, D5, D11–D20 resolved; remaining Phase 0 item: version pinning for the Phase 2+ tools.**
+Status: **draft v3.7 (2026-09-29) — Phase 1 and 1b closed; D5 resolved: Step-1 is E-MTAB-11190 (ENA PRJEB49000 / ERP133445), with its read-length batch confound taught as a lesson; D1, D2, D4, D5, D11–D26 resolved and D10 superseded (D21–D26 merged 2026-09-29 from Rytis's parallel drafts v3.4 and v3.6, D-020); the reuse layer (cohort bundles, `ctx run`, `ctx figure`, Reproduce panels) is Phase 2D, after the Step-1 record; remaining Phase 0 item: version pinning for the Phase 2+ tools, now including FastQC and MultiQC.**
 Outputs of this plan: a Python package + CLI, one Jupyter notebook per module, and one self-contained interactive HTML report per module, linked from a hub page.
 
 ---
@@ -10,13 +10,15 @@ Outputs of this plan: a Python package + CLI, one Jupyter notebook per module, a
 Students analyse public human cancer RNA-seq (ENA / GEO / TCGA) end to end on a laptop, connect it to public proteomics, and leave able to:
 
 1. Choose the right data tier and repository for a question (raw reads vs processed counts; open vs controlled access), trace a paper's accession through GEO/SRA/ENA, and fetch reads reproducibly with nf-core/fetchngs.
-2. Judge whether reads are usable from QC metrics, and know what trimming/filtering parameters do.
+2. Read a MultiQC report metric by metric, place each value in a sourced good / usable / bad band, recognise when a FastQC "fail" is expected for RNA-seq, decide keep / flag / exclude with a stated reason, and know what trimming/filtering parameters do.
 3. Explain what an aligner, a pseudo-aligner and a read counter each produce, and why counts differ between them.
 4. Set up a differential-expression (DE) design correctly (pairing, covariates, filtering, multiple testing, shrinkage) and read the diagnostics.
 5. Translate a DE gene list into biology (pathways, cellular roles, disease associations) without over-interpreting.
 6. Read every figure type in the syllabus (box, violin, heatmap, volcano, MA, PCA, Venn/UpSet, enrichment) with its statistical annotation.
 7. Test whether an RNA change is carried through to protein, and name the reasons it may not be (translational control, protein stability, timing of synthesis, complex stoichiometry, non-coding function).
 8. State what standard RNA-seq can and cannot say about lncRNAs and miRNAs, and choose the right library type, annotation and filters for each.
+9. Place a gene of interest in its normal-tissue, cell-type, subcellular, cancer and blood context (GTEx, Human Protein Atlas) and plan its validation (qPCR primers, antibody, cell model).
+10. Regenerate any figure from its inputs with one copy-paste block, change one parameter, and explain the difference; run the whole analysis again on another RNA-seq dataset by writing one dataset file.
 
 Pedagogical device used throughout: **"turn the knob"** — every module exposes 2–4 parameters as interactive controls or precomputed alternatives, so students see how a choice changes the result.
 
@@ -29,10 +31,12 @@ A full human alignment does not fit the RAM/speed constraint (STAR full-genome i
 ```mermaid
 flowchart LR
     accTitle: Two-Track Teaching Architecture
-    accDescr: Track A runs the complete read-level pipeline on subsampled FASTQ files so it fits a laptop. Track B uses count tables from immune-cell cohorts and, at Step-3, from TCGA and GTEx, for realistic cohort statistics. Both tracks feed the same differential expression and functional annotation modules; two integration modules compare RNA changes with proteomics and handle non-coding RNAs before reporting.
+    accDescr: A cohort selector (kidney, breast, lung, pancreas) chooses the datasets for both tracks. Track A runs the complete read-level pipeline on subsampled FASTQ files so it fits a laptop. Track B uses count tables from immune-cell cohorts and, at Step-3, from TCGA and GTEx, for realistic cohort statistics. Both tracks pass a QC checkpoint and feed the same differential expression and functional annotation modules; two integration modules compare RNA changes with proteomics and handle non-coding RNAs, and gene cards add GTEx and Human Protein Atlas context for selected genes before reporting.
+
+    cohortsel["Cohort selector<br/>kidney · breast · lung · pancreas"]
 
     subgraph track_a["Track A — raw reads, laptop scale"]
-        fastq["nf-core/fetchngs 1.12.0<br/>ENA FASTQ + samplesheet, subsampled"] --> qc["fastp<br/>QC + trimming"]
+        fastq["nf-core/fetchngs 1.12.0<br/>ENA FASTQ + samplesheet, subsampled"] --> qc["FastQC + fastp<br/>M2a QC + trimming"]
         qc --> align["STAR on chr22 or HISAT2<br/>BAM + featureCounts"]
         qc --> salmon["Salmon<br/>full transcriptome"]
         salmon --> tximport["pytximport<br/>gene-level counts"]
@@ -42,28 +46,33 @@ flowchart LR
         gdc["ArrayExpress/GEO counts, Steps 1–2<br/>GDC + GTEx/TOIL, Step-3"] --> matrix["Polars count matrix<br/>+ harmonised sample sheet"]
     end
 
-    tximport --> de["pydeseq2 DE<br/>PCA, volcano, MA, heatmap,<br/>box/violin, Venn/UpSet"]
-    matrix --> de
+    cohortsel --> fastq
+    cohortsel --> gdc
+    tximport --> qcc["M2b QC checkpoint<br/>MultiQC + registry,<br/>per-sample status"]
+    matrix --> qcc
+    qcc --> de["pydeseq2 DE<br/>PCA, volcano, MA, heatmap,<br/>box/violin, Venn/UpSet"]
     align -.->|"compare count methods"| de
-    de --> func["gseapy + Open Targets<br/>ORA, GSEA, disease association"]
+    de --> func["ctx.function.lite + Open Targets<br/>ORA, GSEA, disease association"]
     de --> prot["CPTAC / PDC proteomics<br/>RNA–protein concordance"]
     de --> ncrna["Biotype-aware DE<br/>lncRNA, miRNA-seq targets"]
-    func --> report["Self-contained HTML reports<br/>light/dark, sliders, quizzes"]
+    func --> report["Self-contained HTML reports<br/>light/dark, sliders, quizzes,<br/>Reproduce panel per figure"]
     prot --> report
     ncrna --> report
+    de --> gene["M9 gene cards<br/>GTEx + Human Protein Atlas"]
+    gene --> report
 
     classDef reads fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
     classDef cohort fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
     classDef shared fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
 
     class fastq,qc,align,salmon,tximport reads
-    class gdc,matrix cohort
-    class de,func,prot,ncrna,report shared
+    class cohortsel,gdc,matrix cohort
+    class qcc,de,func,prot,ncrna,gene,report shared
 ```
 
 | Concern | Track A (raw reads) | Track B (count tables) |
 | --- | --- | --- |
-| Teaches | Modules 1–4 (fetch, QC, trim/align, quantify) | Modules 1, 5–8 (fetch, DE, function, RNA→protein, non-coding RNA) at realistic n |
+| Teaches | Modules 1–4 (fetch, QC, trim/align, quantify) | Modules 1, 2b, 5–9 (fetch, QC checkpoint, DE, function, RNA→protein, non-coding RNA, gene cards) at realistic n |
 | Data size | ~6–8 samples × 1M read pairs (~1 GB total) | Step-1 ≈ 200 samples (tens of MB); Step-3 ≈ 150–1000 samples (< 1 GB) |
 | Peak RAM target | < 6 GB | < 4 GB |
 | Wall time target | < 15 min on 4 cores | < 10 min on 4 cores |
@@ -80,22 +89,42 @@ Cohort ladder agreed at check-in: innate immune cells → other immune cells →
 | Step | Candidate | Design | Why | Verify before use |
 | --- | --- | --- | --- | --- |
 | 1 — innate immune cells (primary) | ArrayExpress E-MTAB-11190 (released 2022-11): bulk RNA-seq of normal-density neutrophils, low-density neutrophils and monocytes from blood; healthy controls n = 19, G-CSF-treated donors n = 17, HSCT recipients n = 8, PDAC n = 15, IPMN n = 14; 210 samples from 73 individuals; source publication Montaldo et al. 2022 Nat Immunol 23:1470–1483, doi:10.1038/s41590-022-01311-1, PubMed 36138183 (corrected 2026-09-27: the earlier "Caronni et al. 2023 Nature" was asserted from memory; Caronni is a co-author) | Cell type × condition, nested within donor | Neutrophils and monocytes in cancer vs healthy at usable n; stress-induced myelopoiesis story (G-CSF, LDN vs NDN); one dataset serves both tracks | ENA project accession and FASTQ availability, library layout and read length, SDRF fields (cell type, condition, donor, batch), processed counts provided or not, source publication and its positive-control genes, licence |
-| 1 — alternative | Cassetta et al. 2019 Cancer Cell: circulating monocytes from breast / endometrial cancer patients vs healthy donors; TAMs vs tissue-resident macrophages | Cell type × cancer status | Systemic and local myeloid reprogramming; complements the neutrophil dataset | GEO accession, FASTQs on ENA, group sizes |
+| 1 — breast cohort | Cassetta et al. 2019 Cancer Cell (PMID 30930117): circulating monocytes from women with breast cancer (n = 32) or endometrial cancer (n = 3) vs healthy controls (n = 45), non-classical monocytes (6, 7 and 5), and tumour-associated vs tissue-resident macrophages (breast 4 vs 4, endometrium 9 vs 5). GEO GSE117970 holds all of these (116 samples; resident and tumour macrophages are told apart by `condition` only), with open paired FASTQs at ENA PRJNA483877; GSE100925 is whole-tumour breast RNA-seq (ENA PRJNA393443, open, single-end), not monocytes (read 2026-09-29) | Cell type × cancer status | Systemic and local myeloid reprogramming in breast cancer; second innate-immune dataset | GEO lists 34 breast-cancer monocyte samples where the paper's 32 + 6 imply 38: map every sample to its group; metadata fields |
 | 2 — other immune cells | TCGA-LAML (myeloid leukaemia, ~150 cases) or TCGA-DLBC (B-cell lymphoma, ~48 cases) plus a healthy sorted-cell comparator from GEO (bone-marrow CD34+ / B cells) | Cancer vs healthy across studies | Teaches the cross-study batch problem explicitly: same lineage, different labs | Comparator accession, protocol match (poly-A vs total RNA), current TCGA case counts |
-| 3 — solid tumours, large cohorts | TCGA tumour vs solid-tissue-normal (KIRC ~70 pairs, BRCA ~110 pairs, LUAD ~55 pairs) and TCGA vs GTEx through the UCSC Xena TOIL recompute (uniformly processed, hundreds of healthy samples per tissue) | Paired (TCGA) and unpaired large-n (TOIL) | Large groups; VHL→HIF→hypoxia story in KIRC; harmonisation and batch lessons in the TOIL comparison | Pair counts in current GDC release; current TOIL file names and gene model |
-| Proteomics, Step-3 | CPTAC-3 ccRCC (Clark et al. 2019 Cell): tumour and normal-adjacent tissue with matched RNA-seq (open at GDC) and TMT proteomics (open at the Proteomic Data Commons); CPTAC LUAD / PDAC as alternatives | Same samples measured at RNA and protein level | Direct RNA–protein concordance on the Step-3 cancer; PDAC option echoes Step-1 | Case counts with both layers; PDC / `cptac` access route; TMT batch layout |
+| 3 — solid tumours, large cohorts | TCGA tumour vs solid-tissue-normal (open STAR-Counts at GDC Data Release 46, 2026-08-10, counted as cases with a primary tumour and a solid-tissue-normal sample: KIRC 72 pairs, BRCA 113, LUAD 58, LUSC 51; PAAD 4, too few for a tumour-normal design) and TCGA vs GTEx through the UCSC Xena TOIL recompute (uniformly processed, hundreds of healthy samples per tissue) | Paired (TCGA) and unpaired large-n (TOIL) | Large groups; VHL→HIF→hypoxia story in KIRC; harmonisation and batch lessons in the TOIL comparison | Pair counts in current GDC release; current TOIL file names and gene model |
+| Proteomics, Step-3 | CPTAC-3 ccRCC (Clark et al. 2019 Cell): tumour and normal-adjacent tissue with matched RNA-seq (open at GDC) and TMT proteomics (open at the Proteomic Data Commons); per cohort also CPTAC LUAD (Gillette et al. 2020 Cell: 110 tumours and 101 NATs, complete data for 101 and 96; a smoking-associated field effect in NATs) and LSCC (Satpathy et al. 2021 Cell: 108 tumours and 99 paired NATs analysed) for lung, CPTAC BRCA for breast (Krug et al. 2020 Cell: 122 treatment-naive tumours; 18 NATs were run and excluded on QC, so no NAT data), CPTAC PDAC for pancreas (optional) | Same samples measured at RNA and protein level | Direct RNA–protein concordance per cancer type | Case counts with both layers; PDC / `cptac` access route; TMT batch layout |
 | Proteomics, Step-1 | Rieckmann et al. 2017 Nat Immunol immune-cell proteome (PRIDE; healthy donors; protein copy numbers per cell type incl. neutrophils and monocytes) | Cross-dataset: RNA from Step-1 vs protein per cell type | Neutrophil vs monocyte RNA–protein discordance (granule proteins are transcribed early in granulopoiesis, so mature neutrophils carry high protein with low mRNA) | PRIDE accession; processed copy-number table availability; cell-type labels matching Step-1 |
-| miRNA-seq, Step-3 | TCGA-KIRC miRNA-seq (mature-miRNA and isoform quantification, open at GDC) for the same cases as mRNA-seq | Matched mRNA + miRNA per sample | miRNA–target anticorrelation and its protein footprint in CPTAC | Number of normals with miRNA-seq; GDC file types and normalisation |
+| miRNA-seq, Step-3 | TCGA miRNA-seq for the Step-3 cohorts, open at GDC as mature-miRNA and isoform quantification for the same cases as mRNA-seq (Data Release 46, cases with a tumour and a solid-tissue normal: KIRC 71, BRCA 103, LUAD 46, LUSC 45, fewer than for mRNA-seq) | Matched mRNA + miRNA per sample | miRNA–target anticorrelation and its protein footprint in CPTAC | Number of normals with miRNA-seq; GDC file types and normalisation |
 | ncRNA resources | GENCODE biotypes; TargetScan predicted targets (context++ scores); miRTarBase validated targets; LncBook / Lnc2Cancer for disease-linked lncRNAs; GENCODE Ribo-seq ORF annotation to flag "non-coding" genes with translation evidence | — | Annotation is a status, not a proof | Download terms (miRTarBase academic licence); current versions |
+| Gene-card sources | GTEx Portal API v2 (public, no key; versioned GENCODE IDs; `gtex_v8` = GENCODE v26, `gtex_v10` = GENCODE v39; the default `datasetId` differs by endpoint, so every call passes it; read 2026-09-29); Human Protein Atlas v25.1 (2026-05-25): per-gene JSON/TSV/XML, `api/search_download.php`, bulk TSVs; Ensembl REST for MANE Select and exon structure | — | Normal-tissue, cell-type, protein, cancer and blood context for selected genes; qPCR design | GTEx terms of use (UNVERIFIED: the page rendered no text on 2026-09-29); which HPA sections sit under user terms (HPA's licence page lists TCGA, IntAct, BioPlex, OpenCell, Tabula Sapiens and DepMap); `unit` of median exon and junction values; HPA bulk file names; CORS from the browser |
 | Track A subset | 3–4 donors × 2–3 cell types from Step-1, subsampled (`seqtk sample -s42`, 1M pairs/sample) on Kebnekaise, hosted on Zenodo with DOI + md5, as one nf-core/fetchngs outdir from a fetchngs run whose input is exactly the subset runs (fetchngs names and samplesheet; `fastq/md5/` rewritten for the subsampled bytes) | — | Students never download tens of GB; same biology as Track B | Zenodo quota, redistribution terms |
 | References | GENCODE primary assembly + GTF (current release), chr22 slice for STAR, transcript FASTA for Salmon, tx2gene from GTF | — | Versions pinned in every `_README.md` | Current GENCODE release; GENCODE version behind current GDC STAR-Counts |
 | Gene sets | MSigDB Hallmark, GO BP, Reactome (GMTs cached by `ctx setup`); Enrichr disease libraries (DisGeNET, Jensen DISEASES, GWAS Catalog) as GMTs; Open Targets GraphQL for per-gene disease scores; NCG cancer-gene list; immune sets (MSigDB C7 ImmuneSigDB, neutrophil/monocyte state signatures from the source paper) | — | Offline-capable, permissive; immune sets make Step-1 results interpretable | Current MSigDB version string; Enrichr library names |
+
+### Cohort bundles: selectable cancer types (D24–D26; built in Phase 2D)
+
+Cancer type is a first-class parameter. Each cohort is a bundle in `conf/cohorts/<cancer>.toml` that lists its dataset files (`conf/datasets/<slug>.toml`) per Step and module, with laptop caps, worked-example genes and teaching notes; contrasts, covariates and sanity rules stay in the dataset files, so each is defined once. Module code contains no cohort-specific logic. Not every module exists for every cohort; the hub shows a cohort × module availability grid. Counts were read on 2026-09-29: TCGA at GDC Data Release 46 (a pair is a case with a primary tumour and a solid-tissue-normal sample, open files only), CPTAC from the papers, GTEx v8 from its sample attributes.
+
+| Cohort | Step-1: immune cells | Step-3: tissue (TCGA + GTEx via TOIL) | M7 proteomics | M8 miRNA | Teaching focus |
+| --- | --- | --- | --- | --- | --- |
+| Kidney (ccRCC) | — | TCGA-KIRC, 72 pairs; GTEx kidney cortex | CPTAC ccRCC | TCGA-KIRC, 71 pairs | Clean tumour–normal separation; VHL → HIF → hypoxia; worked examples CA9, NPTX2 |
+| Breast | Cassetta et al. 2019 (GSE117970): monocytes of breast-cancer patients vs healthy women; tumour-associated vs tissue-resident macrophages | TCGA-BRCA, 113 pairs; GTEx breast restricted to female donors (GTEx v8 breast: 291 male and 168 female samples) | CPTAC BRCA: 122 treatment-naive tumours and no NAT data (18 NATs failed QC), so per-gene correlation across tumours and subtype-contrast concordance; ERBB2 amplicon as worked example | TCGA-BRCA, 103 pairs | PAM50 subtypes as hidden structure; adipocyte genes (ADIPOQ, FABP4, CD36, LPL, PPARG) are higher in adjacent normal in 54 TCGA pairs, per a conference abstract, so "down in tumour" can partly reflect tissue composition; confirmed on our own run before it is taught |
+| Lung (LUAD, LUSC) | Scout bulk sorted neutrophils or monocytes; fallback pseudo-bulk from Zilionis et al. 2019 (GSE127465: tumours of 7 and blood of 6 patients, unsorted cells with myeloid cells selected in the analysis; human reads not public, processed counts only), labelled as pseudo-bulk | TCGA-LUAD, 58 pairs, and TCGA-LUSC, 51 pairs; GTEx lung | CPTAC LUAD (110 tumours, 101 NATs) and LSCC (108 tumours, 99 NATs analysed) | TCGA-LUAD, 46 pairs; TCGA-LUSC, 45 pairs | Two histologies (LUAD vs LUSC programmes); smoking as covariate; adjacent normal is not healthy (CPTAC LUAD reports a smoking-associated field effect in NATs) |
+| Pancreas | E-MTAB-11190, the Step-1 dataset: neutrophils, low-density neutrophils, monocytes; PDAC, IPMN, G-CSF, HSCT vs healthy (D5) | Not in v1: TCGA-PAAD has 4 pairs | CPTAC PDAC (optional) | — | Emergency myelopoiesis; LDN vs NDN |
+
+- Selection: `ctx --cohort <cancer> [--dataset <slug>] <module>`, the default cohort from `CTX_COHORT`. Outputs stay under `outputs/NN_<module>/`, named by dataset slug; the hub groups them per cohort; figure IDs carry the cohort (`breast_m5_volcano`).
+- Laptop caps: paired designs use all pairs; unpaired large-n comparisons (TCGA vs GTEx, all BRCA tumours) are subsampled to ≤ 150 per group, stratified by subtype or histology; the `hpc` profile uses full n; subsampling is recorded in `_README.md`.
+- Cross-cohort views: pan-cancer UpSet of Step-3 DE sets; the same gene's statistics across cohorts in M9 gene cards; LUAD vs LUSC contrast.
 
 ---
 
 ## 🧩 Module specification
 
 Each module = one CLI subcommand (`ctx <module>`), one notebook (`notebooks/0N_<module>.ipynb`, student + solution variants), one HTML report. Every report follows the same skeleton: **big question → concept in plain English → parameter cards → annotated results → what it means in practice → think-about-it prompts / self-check quiz → exact reproduction command with runtime and peak RAM**.
+
+### Cohort and dataset selection (all modules)
+
+- Every module reads the active cohort bundle and, through it, the dataset files; every report header shows cohort, dataset IDs and releases; switching cohort or dataset never changes module code (Phase 2D). See Datasets → Cohort bundles.
 
 ### M0 — Setup
 
@@ -139,13 +168,26 @@ Three lessons, because finding data, fetching it and making it usable are differ
 - Stats: none inferential; descriptive tables.
 - Output: the fetchngs outdir under `data/raw/<slug>/`, untouched; `outputs/01_gather/YYYY-MM-DD_gather_<slug>_samplesheet_v<N>` (Parquet + CSV) + `_README.md`; count matrices assembled lazily (`scan_csv`, comment rows dropped, count column selected, Int32 downcast, `estimated_size()` recorded).
 
-### M2 — Read QC
+### M2 — QC atlas: is this data usable?
 
-- Tools: `fastp` (JSON parsed into Plotly), `seqkit stats`, MultiQC for the classic aggregate.
-- Teaches: per-position quality, GC content, adapter content, duplication, insert size, Q30 rate; what "unusable" looks like (planted bad sample: adapter-heavy or low-Q30 subset); why neutrophil libraries are special (low RNA content, granule-protein and ribosomal signal, degradation), read from the real Step-1 data.
-- Knob: quality threshold `-q`, unqualified-base % `-u`, min length `-l`, `--cut_tail` window/mean.
-- Figures: per-position quality curves with threshold line; GC/duplication distributions; before/after read-count Sankey (Mermaid in notebook, Plotly in report).
-- Stats: descriptive; flag rules explained (why Q30 < 80 % is a warning, not a verdict).
+One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on the Track A subset; M2b reads alignment and quantification output before M5 (both Phase 3).
+
+- Tools: FastQC (raw), `fastp` (trim/filter), `seqkit stats`, MultiQC with a config generated from the registry.
+- Teaches: per-position quality, GC content, adapter content, duplication, insert size, Q30 rate; a QC "fail" is a question, not a verdict; why neutrophil libraries are special (low RNA content, granule-protein and ribosomal signal, degradation), read from the real Step-1 data.
+- **Registry** (`conf/qc_metrics.toml`, project-owned, passed to `ctx qc` by an option with a parameter card, as dataset files are, because ctx runs from the wheel outside the repo): one entry per metric with plain-English meaning; how it is computed (tool, formula); its MultiQC key per track where they differ (nf-core/rnaseq names its FastQC runs per instance, `fastqc_raw` and `fastqc_trimmed`, and since 3.26.0 suffixes General Statistics columns "(raw)", "(trim)", "(filt)"; a plain MultiQC run on Track A keeps `fastqc`); direction; bands `good / usable / bad`; context modifiers (library selection, layout, read length, platform chemistry, sample type); typical causes of a bad value; action (keep / flag / fix and rerun / exclude); whether it matters for DE; mandatory `source` and `source_type` (`tool_code`, `tool_docs`, `consortium_standard`, `pipeline_default`, `literature`, `course_convention`). Course conventions are labelled wherever shown and carry a rationale; Q30 < 80 % is one unless a source is found. Each metric also carries a dataset-relative rule, median ± 3 MAD (log scale for counts; the entry states whether MAD is scaled), shown beside the absolute bands, because many RNA-seq metrics have no universal cut-off. One loader in the pattern of `src/ctx/dataset.py` (tomllib, frozen dataclasses, every schema error raised together).
+- **MultiQC**, pinned `==` in `pixi.toml` (1.35: the latest on PyPI on 2026-09-29 and the release nf-core/rnaseq 3.27.0 pins), is the only parser of tool QC logs: the atlas takes every number from it (Python API `parse_logs` / `get_module_data`, or `multiqc.parquet`, named so since MultiQC 1.31; 1.29 and 1.30 wrote `BETA-multiqc.parquet`) through `ctx.qc.multiqc_io`, with a TSV fallback, and a parity test holds the atlas to MultiQC's parsed values. The registry generates `outputs/02_qc/YYYY-MM-DD_qc_<slug>_multiqc_config_v<N>.yml`, passed with `-c` beside fetchngs's `samplesheet/multiqc_config.yml`; `table_cond_formatting_rules` colour the General Statistics table by the bands, and `section_comments` put the plain-English meaning under each section. Open until M2a is built: MultiQC's own report keeps MultiQC's file names, which the naming lint rejects, and ctx writes only under `outputs/` (CONVENTIONS.md), so either one MultiQC directory under `outputs/02_qc/` is exempted from the lint, as AGENTS.md exempts nf-core's `results/`, or the course keeps no MultiQC report of its own.
+- **M2a, pre-alignment** metrics: read count and length, per-base and per-sequence quality, Q20/Q30, N content, GC distribution, per-base sequence content, duplication, overrepresented sequences, adapter and polyG content, fastp pass/filter reasons, and insert size for paired-end runs (Step-1 is single-end). The Step-1 cluster run trims with Trim Galore 2.3.0, nf-core/rnaseq 3.27.0's default trimmer, not fastp, so trimming metrics are registered per tool.
+- Anchors from FastQC 0.12.1, the release nf-core/rnaseq 3.27.0 runs, read from its `Configuration/limits.txt` and module docs: per-base sequence content warns above a 10 % A/T or G/C difference and fails above 20 %, and random-hexamer priming makes that "fail" expected in RNA-seq; duplication warns when fewer than 70 % of reads would remain after deduplication (more than 30 % duplicated) and fails below 50 %, while the module docs say warn above 20 % non-unique, so the registry records both, the code's value as `tool_code`; highly expressed transcripts push RNA-seq past both; adapter content warns above 5 % and fails above 10 %; per-base quality warns at a lower quartile below 10 or a median below 25 and fails below 5 or 20; polyG is an artefact of 2-colour chemistry, which Step-1's NovaSeq 6000 uses.
+- Thresholds with sources: nf-core/rnaseq 3.27.0 defaults (`nextflow.config`, also in `tests/fixtures/rnaseq/pipeline_info/params_2026-09-27_15-54-32.json`): `min_mapped_reads` 5 (% uniquely mapped; a genome-alignment filter, so not applicable to the Salmon-only Step-1 run), `min_trimmed_reads` 10000, `stranded_threshold` 0.8, `unstranded_threshold` 0.1. Conesa et al. 2016 (Genome Biol 17:13): 70–90 % of RNA-seq reads map to the human genome, depending on the mapper; a genome band, so it does not apply to Salmon's mapping rate. UNVERIFIED until read at the source (the page did not load on 2026-09-29): ENCODE bulk RNA-seq standards, 30 M aligned reads per replicate and replicate Spearman > 0.9 isogenic, > 0.8 anisogenic. Step-1 runs hold 5.5 M to 232 M reads, median 26.2 M, before alignment, so an absolute 30 M band would mark at least half the cohort; the dataset-relative rule sits beside it.
+- **M2b, post-alignment and quantification** (before M5): STAR (uniquely mapped %, multimapped %, unmapped too short, mismatch rate, splice types); Salmon (mapping rate and inferred library type, from `aux_info/meta_info.json` and `lib_format_counts.json`); featureCounts (assigned %, biotype fractions); library size, genes detected, top-gene share, sample–sample Spearman, PCA outliers. RSeQC, Qualimap (gene-body coverage) and dupRadar wait until their Java and R dependencies are checked on osx-arm64 (the packages themselves are noarch on bioconda, read 2026-09-29). `ctx qc` is budgeted as Track A (15 min, 6 GB; `ctx.runtime.TRACK_A_MODULES`), also when it reads Track B counts, and the page says so.
+- **Step-1 cohort** (Rytis 2026-09-29): sample-level checks only. The cluster run is Salmon-only (`skip_alignment: true`) and its MultiQC stays on the cluster (critique M3), so M2b on Step-1 reads what the copied files already hold: the per-sample Salmon mapping rate and library type (`COPIED_FILES` includes both JSON files), library size, genes detected, top-gene share, globin and mitochondrial fractions, the sex check and PCA outliers. Step-3 (counts only): the same sample-level checks.
+- **Identity and composition**: the sex check is `ctx.de.run.sex_check` (XIST against RPS4Y1, DDX3Y, KDM5D, UTY and EIF1AY; HSCT samples against donor sex; rule R8), imported, not copied; it moves to `ctx.qc.identity` after the Step-1 record (P2C.3), when `src/ctx/de` is no longer frozen, and M5 then imports it from there. Globin read fraction (HBA1, HBA2, HBB) for blood-derived samples; mitochondrial fraction from `MT-` genes; rRNA and biotype fractions once a GENCODE GTF is in `resources/`; intronic fraction only where a genome alignment exists (Track A). On Track A these read Salmon (M4) counts, because XIST (chrX), the chrY genes, HBA1, HBA2 (chr16) and HBB (chr11) are not in the chr22 reference.
+- **Decision**: M2 writes its own status table, `outputs/02_qc/YYYY-MM-DD_qc_<slug>_status_v<N>` (Parquet + CSV), one row per run with `qc_status` (pass / flag / exclude) and `qc_reason`, keyed on `run_accession`. The gather sheet is another step's output and is never edited in place; M5 joins the status table. Exclusion needs a stated reason, and students test whether QC metrics differ by condition before excluding.
+- **Planted problems** (synthetic, labelled as such): an adapter-heavy sample (short inserts), a quality-degraded sample, and a sex-label swap in a labelled copy of the Track A subset's curation input; the Zenodo fetchngs outdir is never edited.
+- Knob: fastp `-q`, `-u`, `-l`, `--cut_tail` window/mean; band context (library type, read length, platform); MAD multiplier. Each has a parameter card.
+- Figures: per-position quality curves with the threshold line; per-metric strip plots with bands shaded and the dataset MAD band; sample × metric band heatmap in three colours from `viz/style.py`; GC and duplication distributions; before/after read-count Sankey (Mermaid in notebook, Plotly in report); strandedness bars; sex-check scatter (XIST against the chrY genes, coloured by recorded sex); PCA with QC-flag symbols.
+- Stats: descriptive; robust z (MAD) per metric; Spearman for replicate concordance; Mann–Whitney or Fisher test of each QC metric against condition, BH across metrics (the confounding check). On Step-1, read length is confounded with condition by design (D5), so metrics tied to read length are expected to differ by condition; the page says so rather than excluding.
+- Output: the atlas page and its figures under `outputs/02_qc/`; the generated MultiQC config; the QC status table; `_README.md` with the registry's SHA-256 and the MultiQC version.
 
 ### M3 — Trim, filter, align, count
 
@@ -166,14 +208,15 @@ Three lessons, because finding data, fetching it and making it usable are differ
 ### M5 — Differential expression
 
 - Tools: `pydeseq2` (design formulas `~ donor + condition` for paired tissue, `~ cell_type + condition` or `~ cell_type * condition` for Step-1; `DeseqStats` with BH, independent filtering, Cook's; `lfc_shrink`; `lfc_null` threshold test; `vst()` for PCA/heatmap), `scipy.stats`, `scikit-bio` PERMANOVA.
+- Cohort-specific designs come from each cohort's dataset files, never from module code: breast `~ subtype + condition` or subtype-stratified contrasts; lung per histology plus a LUAD-vs-LUSC contrast; smoking as a covariate where recorded.
 - Teaches: pre-filtering (edgeR-style "≥10 counts in ≥ smallest group"), size factors (median-of-ratios), dispersion trend/shrinkage, Wald test, FDR in plain English, NA `padj` meaning, effect size vs significance, shrinkage, paired vs unpaired design, cell type as the dominant axis with disease nested inside it (contrasts and interaction terms), p-value histogram as a health check, batch inspection (sequencing batch in Step-1; TCGA barcode TSS/plate in Step-3).
-- Knob: design (paired / unpaired; with / without cell type), contrast selector, `padj` and |LFC| sliders, shrunken vs raw LFC toggle, `lfc_null` threshold, min-count filter (precomputed grid).
+- Knob: design (paired / unpaired; with / without cell type), contrast selector, the volcano's fold-change threshold (log2 or %), p basis (BH, BY, Holm, Bonferroni or raw) and cutoff (D-012, D-015), LFC shrinkage on or off (`ctx de --no-lfc-shrink`, on by default; a CLI switch, D-019), `lfc_null` threshold, min-count filter (precomputed grid); after the Step-1 record: the volcano's x axis as the raw or the shrunk estimate, colours always following the call on the raw one and the page saying so (Rytis 2026-09-29, D-020), and a QC exclusion set (none / exclude / exclude + flag) read from the M2 status table, each set with its own expected n per contrast.
 - Figures: PCA (VST, top-500 variable genes; PERMANOVA pseudo-F and p annotated; colour = condition, symbol = cell type or batch); dispersion plot; p-value histogram; volcano (sliders, top-gene labels, up/down counts); MA (raw vs shrunk); heatmap of top 50 (z-scored VST, clustered, group colour bar); box + violin of top genes with paired lines, Wilcoxon signed-rank (paired) or Mann–Whitney, BH across plotted genes, rank-biserial effect size, DESeq2 `padj` shown alongside with a note on why they differ; Venn/UpSet: paired vs unpaired, shrunk vs raw thresholds, neutrophil vs monocyte cancer responses (Step-1), KIRC vs BRCA vs LUAD (Step-3).
 - Output: results table (Parquet + CSV) with data dictionary; `_README.md` records design, versions, filters.
 
 ### M6 — Function and disease association
 
-- Tools: `gseapy` (`enrich` with explicit background = tested genes; `prerank` on Wald stat, 1000 permutations, seed 42, `min_size 15`, `max_size 500`), ImmuneSigDB and source-paper signatures as extra GMTs, optional `decoupler` PROGENy pathway activity, Open Targets GraphQL, NCG list; `ctx.function.lite` pure-NumPy ORA and prerank-GSEA (validated against gseapy in tests) for the browser.
+- Tools: `ctx.function.lite` (P2B.5; numpy, scipy and the standard library only, so the same code runs in Pyodide; validated against gseapy in tests): ORA with an explicit background = tested genes, preranked GSEA on the Wald stat, 1000 permutations, seed 42, `min_size 15`, `max_size 500`; ImmuneSigDB and source-paper signatures as extra GMTs, optional `decoupler` PROGENy pathway activity, Open Targets GraphQL, NCG list.
 - Teaches: ORA vs GSEA; the background trap (same list, three backgrounds → inflated results demo); ranking metric choice; term redundancy; "association ≠ causation" for disease sets; how Step-1 results map onto emergency granulopoiesis and immunosuppressive myeloid states, and how KIRC hypoxia/glycolysis output maps onto VHL biology and therapy.
 - Knob: background choice, ranking metric, DE thresholds feeding ORA (live, client-side hypergeometric on embedded Hallmark + Reactome).
 - Figures: dot/bar plots (−log10 FDR, gene ratio, count); GSEA running-score plots; enrichment-map network (Jaccard-linked terms); disease-association bars (Open Targets score, DisGeNET ORA); gene-to-term heatmap.
@@ -197,16 +240,41 @@ Three lessons, because finding data, fetching it and making it usable are differ
 - Stats: biotype-stratified DE with BH; Spearman anticorrelation with BH; KS and Mann–Whitney for target shifts with median-shift effect size; Fisher test for target enrichment among DE genes with matched background.
 - Output: biotype-annotated DE results; miRNA results; target tables with evidence source.
 
+### M9 — Gene cards: what is known about my gene?
+
+- Input: gene symbols given to `ctx genecard GENE …`, or a gene list read from the `gene_name` column of an M5 results table (`outputs/05_de/…_de_<slug>_<contrast>_results_v<N>`). The drafts' gene picker on the M5 page itself waits for the Step-1 record, because `src/ctx/de` is frozen until then. Worked examples (D23): CA9 and NPTX2 for kidney; breast and lung examples chosen from their DE results; for Step-1, the paper-named `box_genes` registered in `conf/datasets/tier1.toml` before any count (ISG15, IFI6, STAT1, OAS2, CD274, AIM2, GBP5). The HPA v25 cancer summary for NPTX2 (antibody HPA049799) reports moderate-to-strong cytoplasmic staining in rare carcinoid and renal cancers (read 2026-09-29).
+- Principle (D22): fetch through documented APIs and bulk files, render our own figures with statistical annotation, deep-link every panel to the exact source page. No page mirroring, scraping or iframes: the source pages are dynamic, would break offline use, and cannot place the student's own results beside the reference data.
+- Card layout: our evidence (DE statistics under the D-012 call rule, box/violin with paired lines, isoform usage from Salmon only where transcript-level quantifications exist; Step-1's copied files hold none) → normal tissues → cell types → protein → cancer → blood → models → structure and interactions → validation brief → synthesis prompts. Each panel names its annotation release, because HPA, GTEx and our own data sit on different GENCODE and Ensembl versions.
+- Cross-cohort row: the gene's DE statistics in every available cohort, beside HPA data for the same cancer types.
+- **GTEx Portal API v2** (public, no key; versioned GENCODE IDs, so resolve the symbol first; paginated, 250 items by default; the default `datasetId` differs by endpoint, so every call passes it): per-sample gene TPM by tissue (violins); median transcript expression (isoform stacks); median exon read counts on the collapsed gene model plus collapsed-exon coordinates (exon heatmap); median junction read counts (junction arcs). The gene-median TPM file is cached once; exon and junction data are fetched per gene only (the v8 exon-read parquet is 11,459,952,826 bytes).
+- **Exon panel and qPCR design brief**: exon share of the gene signal per tissue, evenness across tissues (CV), junction support, MANE Select transcript and exons shared by the major isoforms (Ensembl REST `lookup/id/<ENSG>?expand=1;mane=1`; for CA9 it returns ENST00000378357 = NM_001216.3, 11 exons, Ensembl 116, read 2026-09-29), 3′-bias flag; output candidate constitutive exon pairs with a well-supported junction and a link to NCBI Primer-BLAST; stretch: `primer3-py` candidates, pinned only when built. Caveats taught: collapsed-model exons are not transcript exons; uneven exon coverage can be technical (3′ bias from RNA degradation, mappability, overlapping genes) rather than splicing, so check junctions; GTEx is post-mortem non-diseased tissue, so tumour splicing may differ; cross-check in our own data.
+- **Human Protein Atlas** (release pinned, v25.1 on 2026-09-29; per-gene JSON/TSV/XML at `www.proteinatlas.org/<ENSG>.json`; custom columns via `api/search_download.php`; bulk TSVs for the offline cache; cited through `v<NN>.proteinatlas.org`):
+  - Tissue: RNA consensus nTPM and IHC protein level with antibody reliability → RNA vs protein per tissue (links M7).
+  - Single cell: cell-type nCPM. Immune cell: HPA's 18 immune cell types, including neutrophils and classical monocytes (Step-1); the section also shows Monaco (29 types) and Schmiedel (15). Tau specificity.
+  - Subcellular: ICC main and additional locations with reliability → own cell schematic.
+  - Cancer: RNA cancer category and IHC summary; the prognostic summary across TCGA cancers comes under TCGA's user terms on HPA's licence page, so it is linked, not drawn.
+  - Blood: secretome annotation (secreted to blood vs locally secreted), immunoassay and mass-spectrometry concentrations, Olink / SomaScan availability.
+  - Cell line: nTPM across lines; model choice for knock-down (myeloid lines for Step-1).
+  - Structure: AlphaFold 2 model (CC BY 4.0), linked; AlphaFold 3 content is CC BY-NC-SA 4.0, so link only. No embedded viewer.
+  - Interaction: partners drawn only from sources under CC BY 4.0; IntAct, BioPlex and OpenCell sit under user terms on HPA's licence page, so they are linked; STRING link.
+- Teaching prompts: does the tumour signal come from tumour cells or from infiltrating cells (single-cell and immune-cell panels)? Is the protein detected, and how reliable is the antibody? Could it be a blood biomarker (secreted to blood or locally, which assay)? Which model, antibody and primers would you use? A prognostic association is not a mechanism.
+- Stats: external data are summaries, so annotation is descriptive (n, median, IQR; tau computed by us after Yanai et al. 2005, Bioinformatics 21:650–659, shown beside HPA's own tau and category); no inferential tests on external medians; our-data panels keep the M5 inference and its call rule (D-012).
+- Provenance and licence: cache `resources/cache/{gtex,hpa,ensembl}/<release>/<ENSG>.json`, written only by `ctx genecard`, with its own `resources/cache/manifest.json` recording each response's retrieval time and the SHA-256 measured on arrival (`ctx setup` alone writes `resources/manifest.json`, and its declared-checksum fetch cannot apply to a live API). Gene-card inputs are re-fetched from pinned releases (GTEx dataset ID, versioned `v<NN>.proteinatlas.org` URLs), not redistributed. The card footer lists releases, retrieval date and citations per HPA's licence page (primary publication, proteinatlas.org, versioned URL). HPA content under CC BY 4.0 is embedded with citation; content HPA lists under user terms (TCGA, IntAct, BioPlex, OpenCell, Tabula Sapiens, DepMap) is linked, not embedded. GTEx data are drawn as our own figures with the GTEx Portal acknowledgement and retrieval date, without implying endorsement; GTEx's terms of use stay UNVERIFIED until the external-data spike reads them. AlphaFold 3 (CC BY-NC-SA 4.0), IUPHAR (CC BY-SA 4.0), TCDB (CC BY-SA 3.0) and Metabolic Atlas (CC BY-SA 4.0) layers are linked, not embedded.
+- JupyterLite: 09 joins the site after the external-data spike shows CORS works; until then its worked-example cards are precomputed. `ctx genecard` runs locally.
+- Output: one self-contained HTML per gene set (< 15 MB); per-gene tables (Parquet + CSV) with data dictionary, under `outputs/11_genecard/` (module number 11, so no existing output directory moves).
+
 ### Hub
 
-- `reports/index.html`: module cards, glossary, "start here" path, teacher notes link; offline; no external requests except optional gene links (GeneCards/NCBI/Open Targets) opened on click.
+- `outputs/09_report/YYYY-MM-DD_report_<slug>_hub_v<N>.html` (`ctx report`, built in P2B.6): module cards with relative links to each module's newest page, key numbers and sanity verdicts; from Phase 2D a cohort selector (kidney, breast, lung, pancreas) with a cohort × module availability grid and pan-cancer views; glossary, "start here" path and teacher notes link in Phase 5; offline; no external requests except optional gene links (GeneCards/NCBI/Open Targets) opened on click.
 
 ---
 
 ## 📊 Figure and statistics conventions
 
-- Palette: Okabe–Ito; font Helvetica 14 pt base; `sns.set_context("paper")`, `sns.despine()`, `plt.tight_layout()`; panel letters bold lowercase (Nature style); exact p-values, n per group, test name and effect size in-figure.
-- Every figure in four variants: PDF light + dark (Seaborn, vector) and HTML with theme toggle (Plotly, `plotly_white` base + custom dark template; hover shows all relevant variables).
+- Palette: Okabe–Ito; font Helvetica 14 pt base; `sns.set_context("paper")`, `sns.despine()`, `plt.tight_layout()`; panel letters bold lowercase (Nature style); exact p-values, n per group, test name and effect size inside the PDF and SVG figure; an interactive figure prints the same caption once, under the plot, not inside it (D-011).
+- Every figure as `_white` and `_black` PDF and SVG from one render (Seaborn/Matplotlib, vector), one HTML with a theme toggle (Plotly, `plotly_white` base + custom dark template; hover shows all relevant variables), and its numbers as CSV with `_README.md` (D16).
+- Phase 2D: every figure has a stable ID (`<cohort>_<module>_<figure>`, recorded in its `_README.md`; file names still follow the naming lint), a parameter model as a frozen dataclass with one loader that reports every error together, as `src/ctx/dataset.py` does (Rytis 2026-09-29, D-020), and a params file; `ctx figure <id> --params …` regenerates it from its inputs alone (see Reproduce panel).
+- Fonts: Helvetica where installed, then Arial, Liberation Sans, DejaVu Sans (`ctx.viz.style.FONT_CHAIN`); the container adds TeX Gyre Heros, free and Helvetica-metric-compatible, because Helvetica cannot be redistributed. PDFs embed fonts as Type 42 (done); Phase 2D drops their creation timestamp, so reruns compare byte for byte.
 - Single implementation per figure type in `ctx.viz` with `static()` and `interactive()` methods sharing one data contract, so the two renderings cannot drift.
 - Statistical annotation helper `ctx.viz.annotate` writes the same caption block to both renderers.
 
@@ -221,17 +289,59 @@ Three lessons, because finding data, fetching it and making it usable are differ
 | Concordance scatter | Spearman ρ with 95 % CI (bootstrap) |
 | RNA–protein scatter | Spearman ρ with 95 % CI; quadrant counts; n genes; missingness stated |
 | Target CDF | Kolmogorov–Smirnov D and p; median log2FC shift; target and background sizes |
+| QC strip / band heatmap | Band and its source type per metric; dataset median ± 3 MAD; n samples |
+| Gene-card reference panels (GTEx, HPA) | Descriptive only: n per group, median, IQR, tau; data release and retrieval date |
 
 ---
 
 ## 🖥️ Interactive HTML design
 
-- One self-contained file per module (Jinja2 template; `plotly.min.js` embedded; no CDN). Light/dark toggle via CSS variables + `Plotly.relayout` with embedded light/dark layout templates. Helvetica 14 px, Okabe–Ito.
+- One self-contained page per module, plus one standalone page per figure (Jinja2 template; `plotly.min.js` embedded; no CDN). Light/dark toggle via CSS variables + `Plotly.relayout` with embedded light/dark layout templates. Helvetica 18 px base, the figures' 14 pt plus 3 pt for reading on screen, the interactive plots raised by the same 3 pt (`ctx.viz.style.PAGE_BOOST_PX`, Rytis 2026-09-28); Okabe–Ito.
 - Interactivity without a server: results tables embedded as JSON; vanilla-JS sliders/toggles call `Plotly.react`; client-side hypergeometric ORA on a small embedded gene-set library; precomputed grids for heavy knobs (design, filters).
 - Parameter cards: table of parameter → plain-English meaning → default → what changes if you move it.
 - Pedagogy elements: think-about-it prompts, `<details>` self-check answers, "common mistakes" callouts, reproduction block with measured runtime/RAM.
 - Size guard: heatmaps capped at 50–100 genes; embedded tables capped to tested genes with ≤ 8 columns.
-- In-browser Python (D4, agreed; DE strategy D17, settled by the P1.5 spike, D-005): a JupyterLite site (`jupyter lite build`, static, GitHub Pages) ships notebooks 05–08 with the count tables and DE results bundled as CSV/JSON (< 50 MB total), so students re-run M5–M8 in the browser with nothing installed. Pyodide rules: `pandas`/`numpy`/`scipy`/`plotly` only (no Polars, no compiled bioinformatics tools). DE in the browser is precomputed grids plus live nonparametric tests (scipy Mann–Whitney U with BH), not live `pydeseq2`. In Pyodide 314.0.6, micropip installs pydeseq2 0.5.4, but its default fit fails at every spike size because joblib's threading fallback rejects `inner_max_num_threads`. Its public backend argument makes a toy 1,000 x 24 fit pass stage A, but at 20,000 x 24 the fits disagree and at 20,000 x 200 the wheels plus data (56,385,918 bytes) exceed the cap. The scipy tests matched CPython to max |dpadj| 5.6e-16 at all three sizes, and plotly 7.1.0 installs. At 20,000 x 200 the fallback leaves 3,188,506 bytes of the 50 MB for the precomputed grids, before the runtime. Enrichment uses `ctx.function.lite`. Track A (M2–M4) stays CLI-only.
+- **Reproduce panel on every figure** (Phase 2D; D25). The page already ends with one "Reproduce this page" block: command, wall time, peak RAM, versions. Each figure also gets a "Reproduce" button that opens copy-paste-ready bash (Linux, macOS, WSL2) in three tabs: Docker (default), Apptainer + SLURM (HPC) and pixi (no container). Commands are grouped and commented in plain English: 1 Environment (image pinned by digest, working folder) → 2 Inputs (download + checksum, or the local path from the previous step) → 3 Figure parameters (heredoc params file, one comment per parameter) → 4 Generate (`ctx figure`, with a comment naming the plotting file and how to read it) → 5 Check (outputs listed; data hash verified). Collapsed extras: Upstream (the commands that produced each input, back to nf-core/fetchngs) and Variations (another threshold, dataset or cohort).
+- Buttons: Copy (the page's existing Clipboard API code with its select-the-text fallback for `file://` pages) and Download `.sh`. The pasted block has no `set -e`, which would close the user's shell on the first error; the downloaded script starts with `set -euo pipefail`. Docker runs with `-u "$(id -u):$(id -g)"` so outputs are not root-owned. No secrets, absolute home paths or project IDs appear; HPC tabs use `<project>` placeholders.
+- Generated, not hand-written: `FigureSpec` (figure ID, cohort, dataset, plotting function and file, parameter dataclass, inputs with SHA-256 and source URL or upstream command, outputs, image digest, git commit) renders the panel, writes the params file and feeds the figure's `_README.md`.
+- Adjustable figures: every parameter a reader may want to change is a field of the figure's parameter dataclass, with a parameter card, settable in the params file and, where the page can redraw without a refit, as a live control beside the figure, as the volcano's thresholds already are (D-012, D-015). Examples: thresholds and p basis, the number of labelled genes, which genes to label or show, colour-by and shape-by columns for PCA, the volcano's x axis as the raw or the shrunk estimate (colours always follow the call on the raw one, D-020), themes to write.
+- Images: the template's `containers/analysis.Dockerfile` gets two targets, `figures` (slim, Python only, multi-arch, used by every Reproduce panel) and `full` (read-level tools for Track A); published to GHCR and pinned by digest; Apptainer uses the same digest.
+- Example (Docker tab, abridged; illustrative, generated from `FigureSpec` once built; names follow the naming lint):
+
+```bash
+# 1 · Environment: pinned image (figures target) and a clean working folder
+IMG="ghcr.io/<org>/ctx-figures:<version>@sha256:<digest>"
+docker pull "$IMG"
+mkdir -p repro_breast_m5_volcano && cd repro_breast_m5_volcano
+
+# 2 · Inputs: download, then confirm the file is byte-identical (macOS: shasum -a 256 -c -)
+curl -L -o <date>_de_<slug>_<contrast>_results_v1.parquet "https://zenodo.org/records/<id>/files/<date>_de_<slug>_<contrast>_results_v1.parquet"
+echo "<sha256>  <date>_de_<slug>_<contrast>_results_v1.parquet" | sha256sum -c -
+
+# 3 · Figure parameters: edit any value, then re-run step 4
+cat > <date>_de_<slug>_volcano_params_v1.toml <<'EOF'
+figure_id = "breast_m5_volcano"
+alpha = 0.05          # genes need an adjusted p-value below this to be called
+basis = "padj"        # padj (BH), padj_by, padj_holm, padj_bonferroni or pvalue
+lfc_min = 1.0         # ... and an absolute log2 fold change of at least this (1.0 = two-fold)
+x_estimate = "raw"    # raw, or shrunk for display; colours always follow the raw call
+label_top_n = 15      # how many of the strongest genes get a name label
+themes = ["white", "black"]
+EOF
+
+# 4 · Generate: plotting code src/ctx/viz/scatter.py @ <commit>
+#     read it: docker run --rm "$IMG" ctx source breast_m5_volcano | less
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work "$IMG" \
+  ctx figure breast_m5_volcano --params <date>_de_<slug>_volcano_params_v1.toml \
+    --input <date>_de_<slug>_<contrast>_results_v1.parquet --outdir figures/
+
+# 5 · Check: PDF and SVG in both themes, the HTML, the CSV, and the data hash
+ls figures/
+docker run --rm -u "$(id -u):$(id -g)" -v "$PWD":/work -w /work "$IMG" \
+  ctx verify-figure figures/ --expected-data-sha256 "<sha256>"
+```
+
+- In-browser Python (D4, agreed; DE strategy D17, settled by the P1.5 spike, D-005): a JupyterLite site (`jupyter lite build`, static, GitHub Pages) ships notebooks 05–08 with the count tables and DE results bundled as gzip CSV/JSON (< 50 MB total; from Phase 2D ≤ 15 MB per cohort, loaded on demand once the first cell picks the cohort; 09 joins after the external-data spike shows CORS works, and until then its worked-example cards are precomputed), so students re-run M5–M8 in the browser with nothing installed. Pyodide rules: `pandas`/`numpy`/`scipy`/`plotly` only (no Polars, no compiled bioinformatics tools). DE in the browser is precomputed grids plus live nonparametric tests (scipy Mann–Whitney U with BH), not live `pydeseq2`. In Pyodide 314.0.6, micropip installs pydeseq2 0.5.4, but its default fit fails at every spike size because joblib's threading fallback rejects `inner_max_num_threads`. Its public backend argument makes a toy 1,000 x 24 fit pass stage A, but at 20,000 x 24 the fits disagree and at 20,000 x 200 the wheels plus data (56,385,918 bytes) exceed the cap. The scipy tests matched CPython to max |dpadj| 5.6e-16 at all three sizes, and plotly 7.1.0 installs. At 20,000 x 200 the fallback leaves 3,188,506 bytes of the 50 MB for the precomputed grids, before the runtime. Enrichment uses `ctx.function.lite`. Track A (M2–M4) stays CLI-only.
 
 ---
 
@@ -241,36 +351,37 @@ Scaffold from Aramburu-Lab `codebase_template` (Copier): pixi multi-stage contai
 
 ```text
 cancer-transcriptomics-teaching/
-├── pixi.toml, pixi.lock, pyproject.toml; containers/ (template: analysis.Dockerfile, build.sh, digests.lock)
+├── pixi.toml, pixi.lock, pyproject.toml; containers/ (template: analysis.Dockerfile, build.sh, digests.lock; Phase 2D: targets `figures`, slim and multi-arch, and `full`, with the read-level tools)
 ├── README.md, TODO.md, CONVENTIONS.md (project rules), AGENTS.md + CLAUDE.md (template), LICENSE (MIT; CC BY 4.0 file with the first materials), CITATION.cff (later)
 ├── knowledge/     decisions.md (D-001 on), lessons.md, generated codebase map and API index
 ├── src/ctx/
-│   ├── gather/    fetchngs.py (the only ctx reader of the fetchngs layout, Phase 1b); curation.py sdrf.py (Phase 2); gdc.py xena.py geo.py (Phase 4); no ENA/SRA access code
-│   ├── qc/        fastp_parse.py
+│   ├── gather/    fetchngs.py (the only ctx reader of the fetchngs layout, Phase 1b); curation.py harmonise.py (Phase 2; the SDRF join is declared in the dataset file); rnaseq.py (the one reader of an nf-core/rnaseq 3.27.0 Salmon-only outdir, P2A.2); gdc.py xena.py geo.py (Phase 4); no ENA/SRA access code
+│   ├── qc/        registry.py (the one reader of conf/qc_metrics.toml) multiqc_io.py (the one reader of MultiQC output, TSV fallback) identity.py (globin, MT and rRNA fractions; the sex check after the Step-1 record) checkpoint.py (M2b)
 │   ├── process/   trim.py align.py count.py strandedness.py
 │   ├── quant/     salmon.py tximport.py
-│   ├── de/        deseq.py filters.py stats.py
-│   ├── function/  ora.py gsea.py disease.py lite.py
+│   ├── de/        deseq.py filters.py stats.py sanity.py (pre-registered rules) run.py (`ctx de`) page.py (page copy)
+│   ├── function/  lite.py (ORA and preranked GSEA, numpy/scipy/stdlib only, so it runs in Pyodide) run.py (`ctx function`) page.py; disease.py (not built)
 │   ├── proteo/    cptac.py pdc.py concordance.py
 │   ├── ncrna/     biotypes.py mirna.py targets.py
-│   ├── viz/       style.py (the one style config) annotate.py save.py, one module per figure type: box.py
-│   ├── report/    builder.py templates/{base,figure,module,_figure}.html.j2
-│   ├── io/        naming.py readme_companion.py (polars_utils.py in Phase 2)
-│   ├── runtime.py profiles, roots, measurement, versions; setup.py (M0)
-│   └── cli.py     (typer)
-├── notebooks/     01_gather … 08_ncrna (student + solutions; 05–08 also run in JupyterLite)
+│   ├── genecard/  gtex.py hpa.py ensembl.py qpcr.py cache.py (M9)
+│   ├── viz/       style.py (the one style config) annotate.py save.py axes.py, one module per figure type: box.py bar.py scatter.py; Phase 2D: spec.py (FigureSpec and the parameter dataclasses) registry.py (figure IDs)
+│   ├── report/    builder.py hub.py (`ctx report`) templates/{base,figure,module,hub,_figure,_cards}.html.j2 _page.css.j2 _page.js.j2 _calls.js.j2; Phase 2D: repro.py (Reproduce panel)
+│   ├── io/        naming.py readme_companion.py
+│   ├── dataset.py the one reader of conf/datasets/*.toml; runtime.py profiles, roots, measurement, versions; setup.py (M0)
+│   └── cli.py     (typer; Phase 2D: global --cohort; run, figure, source, verify-figure)
+├── notebooks/     01_gather … 08_ncrna, 09_genecard (student + solutions; 05–08 also run in JupyterLite, 09 after the CORS spike); notebook numbers are module numbers, output directories follow `ctx.io.naming.MODULES`
 ├── lite/          JupyterLite config + bundled data (built by `ctx lite-build`)
-├── resources/     references, indices, GMTs (gitignored; fetched by ctx setup)
+├── resources/     references, indices, GMTs (gitignored; fetched by ctx setup, which alone writes manifest.json); cache/{gtex,hpa,ensembl}/<release>/ written only by `ctx genecard`, with its own cache/manifest.json (retrieval time, SHA-256 measured on arrival)
 ├── data/raw/      external inputs as fetched: fetchngs outdirs, GDC/Xena downloads; read-only to ctx (gitignored)
-├── scripts/python/ one-off instructor steps: make_chr22_fixture.py, spike_pyodide.py, pyodide_harness.py, make_fetchngs_fixture.py
+├── scripts/python/ one-off instructor steps: make_chr22_fixture.py, make_fetchngs_fixture.py, make_rnaseq_fixture.py, spike_pyodide.py, pyodide_harness.py, tutorial_test_run.py
 ├── outputs/NN_<module>/  run outputs (gitignored); deliverables/ what leaves the project (reports, figures, the spike record)
-├── tests/         pytest; synth.py (synthetic counts); fixtures/chr22/ and fixtures/fetchngs/ (real nf-core/fetchngs 1.12.0 output), committed
+├── tests/         pytest; synth.py (synthetic counts); fixtures/chr22/, fixtures/fetchngs/ (real nf-core/fetchngs 1.12.0 output), fixtures/rnaseq/ (real nf-core/rnaseq 3.27.0 Salmon output), fixtures/datasets/ (synthetic dataset files), committed
 ├── docs/          glossary.md accessions.md teacher_guide.md parameter_cards/
-├── conf/          datasets/<dataset>.toml: title regex or SDRF join, groups, contrasts (project-owned)
+├── conf/          datasets/<dataset>.toml: title regex or SDRF join, groups, contrasts, sanity rules (project-owned); cohorts/<cancer>.toml (Phase 2D: which dataset files make a cohort); qc_metrics.toml (the M2 QC registry, read only by ctx.qc.registry)
 └── .github/workflows/ci.yml
 ```
 
-- Runtime profiles (D2): one CLI, three profiles — `laptop` (pixi on Linux / WSL2 / Intel Mac; Docker image for Apple-silicon Macs), `hpc` (Apptainer SIF + SLURM submit script from the template; HPC2N configs), `lite` (browser). Thread and memory budgets come from the profile; commands do not change.
+- Runtime profiles (D2): one CLI. `laptop` (pixi on Linux and Apple-silicon Macs, the `pixi.toml` platforms linux-64 and osx-arm64; WSL2 and Intel Mac attempted in Phase 6) and `hpc` (Apptainer SIF + SLURM submit script from the template; HPC2N configs) are the profiles `ctx.runtime.PROFILES` accepts; `lite` (browser) is the Phase 5 JupyterLite site, not yet a profile. STAR, Salmon, fastp, seqkit, subread, HISAT2 and samtools have osx-arm64 builds on bioconda, and FastQC and MultiQC are noarch (read 2026-09-29; their dependencies not checked), so the Docker image is the Mac fallback, not the plan. Thread and memory budgets come from the profile; commands do not change.
 - Polars everywhere for tables (lazy scan, chunked concat, Int32/Float32 downcast after range check, `estimated_size()` printed).
 - Google-style docstrings + type hints on every function; `ruff`, `mypy`, `interrogate` in CI.
 - Output naming `YYYY-MM-DD_<module>_<description>_v<X>.<ext>`; companion `_README.md` (timestamp, source script, versions, data dictionary) written by `ctx.io.readme_companion`.
@@ -296,7 +407,14 @@ cancer-transcriptomics-teaching/
     - No processed files: BioStudies holds only the IDF and SDRF, so counts come from the planned one-off Salmon run on Kebnekaise.
     - IDF: no publication and no licence field; contacts Lusito, Ostuni. The source publication is Montaldo et al. 2022 Nat Immunol (PubMed 36138183, PMC7615267, open access). Its abstract names the positive control: an interferon-stimulated-gene response in HSC-T neutrophils, not in monocytes. Named marker genes are UNVERIFIED until the full text is read.
     - Design constraint: read length, a sequencing-batch proxy, is confounded with the cancer groups. PDAC (35) and IPMN (31) are all 101 nt; steady state is 29 of 41 at 76 nt. Blood samples at 101 nt: NDN steady state 4, G-CSF 4, HSCT 2, PDAC 14, IPMN 11; LDN G-CSF 5, PDAC 9, IPMN 7, no steady state; Monocyte steady state 2, G-CSF 3, HSCT 3, PDAC 12, IPMN 13. A within-batch cancer-vs-healthy contrast exists only at small n; the stress contrasts (G-CSF, HSCT vs steady state) sit mostly in the 76-nt batch. Blood counts by cell type and condition (individuals): NDN 18 (17) / 17 (17) / 13 (7) / 14 (14) / 11 (11); LDN 0 / 16 (16) / 6 (4) / 9 (9) / 7 (7); Monocyte 11 (10) / 11 (11) / 13 (7) / 12 (12) / 13 (13), in the order steady state, G-CSF, HSCT, PDAC, IPMN.
-- [ ] Pin tool versions in `pixi.toml` (verify list at the end)
+- [x] D21 Step-1 counts: nf-core/rnaseq 3.27.0, Salmon only, on Kebnekaise, fed by the fetchngs samplesheet (rehearsed in P2A.2; cluster run P2A.3)
+- [x] D22 gene cards: documented APIs and bulk files, own figures, deep links
+- [x] D23 worked examples: CA9 + NPTX2 (kidney); breast and lung genes from their DE results; Step-1: the paper-named `box_genes` in its dataset file
+- [x] D24 cohorts: kidney, breast, lung (LUAD + LUSC), pancreas (Step-1 only in v1)
+- [x] D25 Reproduce tabs: Docker (default), Apptainer + SLURM, pixi
+- [x] D26 first tissue cohort: breast, then kidney and lung
+- [x] Merge Rytis's parallel drafts v3.4 and v3.6 (TEMP/, 2026-09-29; D-020): see "Merge of drafts v3.4 and v3.6" at the end of this file for what was carried, what was not, and why
+- [ ] Pin tool versions in `pixi.toml` (verify list at the end); FastQC 0.12.1 and MultiQC 1.35 go in a feature that laptops install, not the cluster-only `[feature.tools]` (both noarch on bioconda, read 2026-09-29)
 
 ### Phase 1 — Foundations
 
@@ -309,42 +427,60 @@ cancer-transcriptomics-teaching/
 
 ### Phase 1b — `ctx gather` core on real fetchngs output, no dataset (D19)
 
-- [ ] Implementation order and proofs: see "Phase 1b" at the end of this file (P1b.0–P1b.5)
+- [x] Implementation order and proofs: see "Phase 1b" at the end of this file (P1b.0–P1b.5)
 
 ### Phase 2 — Step-1 cohort (highest value first)
 
-- [ ] M1c Step-1 (after D5 and Phase 1b): metadata-only fetchngs run of the Step-1 ENA study (ERP/PRJEB); curation engine and `conf/datasets/tier1.toml` (title regex or SDRF join, groups, contrasts); `ctx gather` on it; processed counts if provided, otherwise Salmon counts produced once on Kebnekaise and released with the teaching subset
+- [ ] M1c Step-1 (after D5 and Phase 1b): metadata-only fetchngs run of the Step-1 ENA study (ERP/PRJEB); curation engine and `conf/datasets/tier1.toml` (title regex or SDRF join, groups, contrasts); `ctx gather` on it; counts from the nf-core/rnaseq 3.27.0 Salmon-only run on Kebnekaise (D21; rehearsed in P2A.2, cluster run P2A.3), since BioStudies holds no processed files (D5), released with the teaching subset
 - [ ] M5 pydeseq2 on Step-1: cell-type axis, cancer-vs-healthy contrasts within cell type, all M5 figures, precomputed knob grid. Batch lesson (D5): read length (75/76 vs 101 nt, a sequencing-batch proxy joined from ENA by run) is confounded with PDAC and IPMN; show the naive cancer-vs-healthy contrast beside the within-batch one at 101 nt (NDN 4 healthy vs 14 PDAC; monocytes 2 vs 12), with the PCA coloured by read length and the n per group stated; the G-CSF and HSC-T vs steady-state contrasts are fitted within the 76-nt batch, and the published IFN response in HSC-T neutrophils but not monocytes is the positive control
 - [ ] M6 ORA/GSEA/disease association with immune gene sets; `ctx.function.lite` validated against gseapy
 - [ ] Reports M1, M5, M6 + hub; sanity checks pass (see verification)
+
+### Phase 2D — Reuse: any dataset, any figure (after the Step-1 record; Rytis 2026-09-29, D-020)
+
+Built after P2C.3, so the registered Step-1 analysis stays as registered; the frozen paths are free again once the record exists. Order: the dataset path first, because every later item runs on it.
+
+- [ ] `ctx run --dataset <slug> --dataset-file <toml>`: gather, de, function and report in order, each module unchanged and called as its own command would call it; one Reproduce block for the whole run; stops at the first module that fails and says which. Proven by running it on the synthetic dataset file and on a second one, and comparing every table with the module-by-module run.
+- [ ] New dataset in one file: `docs/new_dataset.md` walks from an accession to fetchngs, nf-core/rnaseq and a dataset file to `ctx run`; a commented dataset-file template; `ctx gather` and the dataset loader name every missing or wrong field at once, with the line to add.
+- [ ] Cohort bundles: `conf/cohorts/<cancer>.toml` lists the cohort's dataset files per Step and module, with laptop caps and worked-example genes; contrasts, covariates and sanity rules stay in the dataset files (one definition); global `--cohort` (default from `CTX_COHORT`); the hub's cohort × module availability grid. Schema, loader and one cohort (pancreas = Step-1) end to end.
+- [ ] `FigureSpec` and figure IDs; `ctx figure <id> --params`, `ctx source <id>`, `ctx verify-figure`; parameter dataclasses with cards; the Reproduce panel for one figure end to end (the volcano), with the volcano's raw or shrunk x axis; CI extracts the panel's Docker block and runs it on fixtures. Then every figure type.
+- [ ] Figure files without a creation timestamp, so reruns compare byte for byte; TeX Gyre Heros added to `FONT_CHAIN` and to the image.
+- [ ] Containers: `figures` and `full` targets of `containers/analysis.Dockerfile`; digests pinned.
+- [ ] Review: what changed from this plan and why; measured budgets; lessons.
 
 ### Phase 3 — Track A on the Step-1 subset
 
 - [ ] Instructor-side: on Kebnekaise, through the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`, `NXF_SYNTAX_PARSER=v1`, `monochrome_logs = true` in `<project_dir>/nfcore_fetchngs/nextflow.config`, a fresh project directory per run), fetch exactly the chosen subset runs with nf-core/fetchngs -r 1.12.0 (a full-study run, metadata-only or for Salmon counts, stays a separate outdir); subsample with `seqtk sample -s42` keeping fetchngs file names; write new `fastq/md5/*.md5` for the subsampled files and a README naming the samplesheet columns that describe the original runs (`read_count`, `base_count`, `fastq_bytes`, `fastq_md5`); build chr22 STAR index; host subset outdir + indices on Zenodo
 - [ ] M1a/M1b content: `docs/accessions.md` (three routes, ID hierarchy, budget from `fastq_bytes`), class exercises (a metadata-only run; the 2–4 smallest runs downloaded, checked by `ctx gather`)
-- [ ] M2 fastp/seqkit/MultiQC parsing and report
+- [ ] QC registry `conf/qc_metrics.toml`: schema, loader and MultiQC config generator; one metric end to end (registry, MultiQC colouring, atlas strip plot) with its source
+- [ ] M2a on the laptop subset: FastQC + fastp + seqkit into MultiQC with the generated config; QC atlas and status table; planted problems (adapter-heavy, quality-degraded, sex-label swap)
+- [ ] M2b QC checkpoint: registry filled for every metric used; QC atlas; status table; on the laptop subset, and on the Step-1 cohort's sample-level checks after the P2C.3 record, because the hub is frozen until then and an exclusion would change the registered analysis
 - [ ] M3 STAR-chr22 / featureCounts / strandedness; HISAT2 optional path
 - [ ] M4 Salmon + pytximport; cross-method Venn; per-sample comparison against the cohort counts of the same samples
 
 ### Phase 4 — Steps 2 and 3, integration modules
 
-- [ ] Step-3: GDC acquisition, TCGA paired analysis (KIRC), TOIL tumour-vs-GTEx comparison with batch diagnostics
+- [ ] Step-3 cohorts in D26 order, breast first, then kidney and lung (LUAD, LUSC): GDC acquisition, paired TCGA analyses, TOIL tumour-vs-GTEx comparisons with batch diagnostics. Breast specifics: PAM50 labels from a documented source, GTEx breast restricted to female donors, TCGA-BRCA male cases flagged, adipose composition shown beside tumour-vs-normal results
+- [ ] Breast Step-1: Cassetta et al. 2019 monocytes and macrophages, FASTQ access permitting; lung Step-1 scout, else the labelled pseudo-bulk fallback
 - [ ] Step-2: TCGA-LAML or DLBC vs healthy comparator; cross-study batch lesson
 - [ ] Pan-cancer / pan-cell-type Venn and UpSet views
-- [ ] M7 Step-3: CPTAC-3 ccRCC RNA–protein join, concordance analyses, all M7 figures
+- [ ] M7 Step-3, breast first: CPTAC BRCA has tumours only, so per-gene RNA–protein correlation across tumours and concordance of subtype contrasts (ER− vs ER+, Basal-like vs Luminal A) at RNA and protein level, with the ERBB2 amplicon as worked example; tumour-vs-NAT concordance follows with ccRCC, LUAD and LSCC
 - [ ] M7 Step-1: neutrophil vs monocyte RNA vs protein copy-number comparison (Rieckmann 2017)
-- [ ] M8: biotype-stratified QC/DE on Steps 1 and 3; TCGA-KIRC miRNA-seq target analysis with its protein footprint
+- [ ] M8: biotype-stratified QC/DE on Steps 1 and 3; TCGA miRNA-seq target analyses (BRCA first, then KIRC, LUAD, LUSC) with their protein footprint
+- [ ] External-data spike (before M9): GTEx API v2 and HPA per-gene JSON from Python and from Pyodide (CORS), response sizes, releases and terms of use; record the outcome with sources
+- [ ] M9 gene cards: GTEx, HPA and Ensembl clients with cache and release stamps; card template; qPCR design brief; worked examples: breast genes from the BRCA DE results first, CA9 and NPTX2 when kidney is built, Step-1's registered genes (D23)
 
 ### Phase 5 — JupyterLite and pedagogy layer
 
 - [ ] `ctx lite-build`: bundle notebooks 05–08 + data; deploy to GitHub Pages; offline fallback documented
 - [ ] Parameter cards, prompts, quizzes, glossary, "common mistakes" for all modules
+- [ ] Reproduce panels on every figure of every cohort; processed inputs released on Zenodo per cohort with checksums
 - [ ] Notebooks (student + solutions) executed headless in CI; JupyterLite smoke test in a headless browser
 - [ ] Teacher guide with timing per module
 
 ### Phase 6 — Packaging and pilot
 
-- [ ] Docker + Apptainer builds; Apple-silicon and Windows/WSL2 smoke tests; HPC profile test on Kebnekaise
+- [ ] Docker targets `figures` (multi-arch) and `full` published to GHCR, digests pinned; Apptainer from the same digests; Apple-silicon and Windows/WSL2 smoke tests; HPC profile test on Kebnekaise
 - [ ] Runtime/RAM benchmarks recorded in reports
 - [ ] Pilot with 2–3 students; collect friction points into `knowledge/lessons.md`; release v1.0 with Zenodo DOI
 
@@ -356,7 +492,13 @@ cancer-transcriptomics-teaching/
 - [ ] HTML opens with network disabled; no `<script src="http…">`; size < 15 MB
 - [ ] All figures exist in PDF light/dark + HTML; captions carry test, n, p, effect size
 - [ ] Every output has `_README.md` with data dictionary; names pass the naming lint
-- [ ] `ctx gather` reads a real fetchngs 1.12.0 fixture and the Zenodo subset through the same code path with equal columns; an md5 mismatch, a missing FASTQ or an input ID with no metadata fails loudly and writes no sample sheet; a run with no md5 file (the sra-tools path) is reported, not failed
+- [ ] `ctx gather` reads a real fetchngs 1.12.0 fixture and the Zenodo subset through the same code path with equal columns; an md5 mismatch, a missing FASTQ, an unparsed sample title or an input ID with no metadata fails loudly and writes no sample sheet; a run with no md5 file (the sra-tools path) is reported, not failed
+- [ ] QC registry: every metric has meaning, bands, action and a source; `course_convention` entries carry a rationale; the generated MultiQC config loads in the pinned MultiQC and colours General Statistics as the registry says; atlas values equal MultiQC's parsed values (parity test)
+- [ ] Planted problems are caught: the adapter-heavy and degraded samples flagged at M2a, the sex-label swap flagged at M2b by the sex check
+- [ ] Gene cards open offline and carry releases, retrieval date and citations; a failed API call degrades to a cached or "unavailable" panel; the NPTX2 card matches HPA for the pinned release (at v25.1, read 2026-09-29: blood immunoassay 2.5 µg/L; highest single-cell expression in corticotrophs, 335.9 nCPM)
+- [ ] Every figure in every report has a Reproduce panel; CI extracts each Docker block, runs it on fixture inputs in a clean container, matches the figure's data hash, and compares the rendered PNG within a tolerance (matplotlib image comparison)
+- [ ] `ctx run` on a second dataset file reproduces what the module commands give one by one, byte for byte on the tables
+- [ ] Each cohort bundle validates against its schema; the availability grid matches the files present; cohort sanity checks pass, written into each cohort's dataset files and registered before its counts: breast, adipocyte genes lower and proliferation hallmarks higher in tumour than in adjacent normal (the first from 54 TCGA pairs in a conference abstract, the second from a microarray study whose normals were not all adjacent; both to confirm); lung, TP63, KRT5 and SOX2 higher in LUSC and NKX2-1 and NAPSA higher in LUAD (established as immunohistochemistry markers, so the mRNA direction is an expectation; SOX2 marks a 3q26 amplification); kidney, CA9 and NDUFA4L2 up with hypoxia and glycolysis enriched, as the Biology sanity line says
 - [ ] Biology sanity, Step-1: PCA separates cell types before disease; cancer-vs-healthy contrasts recover the source paper's reported signatures; p-value histograms show the expected anti-conservative shape. Step-3: KIRC shows CA9/NDUFA4L2 up and hypoxia/glycolysis enriched
 - [ ] JupyterLite notebooks reproduce the CLI results on the bundled data within tolerance (tests compare tables)
 - [ ] M7 sanity: per-gene RNA–protein ρ distribution matches the source publication; complex subunits show lower ρ than metabolic enzymes; missingness plotted before any test
@@ -380,13 +522,22 @@ cancer-transcriptomics-teaching/
 | Report files large (embedded plotly.js ~3.5 MB each) | Accepted for self-containment; heatmap/table caps |
 | Students over-interpret enrichment | Background-trap demo and "association ≠ causation" callouts in M6 |
 | Pyodide lacks a needed package (`pydeseq2` deps, `gseapy` Rust backend) | Phase 1 spike decides; pure-NumPy `ctx.function.lite`; precomputed DE grids as fallback |
-| Step-1 processed counts absent or built with a different pipeline | Re-quantify all samples once on Kebnekaise with the course Salmon setup; versions documented |
+| Step-1 processed counts absent or built with a different pipeline | Materialised: BioStudies holds only the IDF and SDRF (D5). All 210 runs are to be quantified once with nf-core/rnaseq 3.27.0, Salmon only, GENCODE 50, on Kebnekaise (D21; the cluster run P2A.3 has not run yet); `ctx gather --rnaseq-dir` refuses any other release and records versions and the SHA-256 of every file read (P2B.3) |
 | Cross-study comparisons (TCGA vs GTEx, TCGA-LAML vs GEO) confounded by batch | Presented as the lesson, not hidden: TOIL-harmonised data, batch diagnostics, limits stated in reports |
 | Proteomics access changes (`cptac` package, PDC API) | Processed tables cached in `resources/` at setup; PDC GraphQL as fallback; versions recorded |
 | Proteomics pitfalls mislead students (missing values, TMT ratio compression, batch) | Explicit QC section in M7; missingness plotted; tests restricted to proteins quantified in ≥ 70 % of samples |
 | miRNA target lists are noisy | Predicted and validated targets shown separately; enrichment tests use matched backgrounds |
 | fetchngs quirks: a run with > 2 ENA files (FTP keeps the last two), a run with no ENA FASTQ link (automatic sra-tools fallback, no md5 file), an accession skipped with exit 0, one invalid ID aborting the run, a re-run into an existing outdir replacing its samplesheet | Metadata-only run first; `--download_method sratools` for runs with > 2 files; `ctx gather` checks input IDs against `metadata/`, runs against the samplesheet and md5 per file, and reports runs without md5; one fresh outdir per run |
 | fetchngs 1.12.0 is no longer the latest (1.13.0, 2026-09-15) and needs `NXF_SYNTAX_PARSER=v1` on Nextflow 26 | Pinned by D18; `ctx gather` refuses any other release, so an upgrade is one deliberate change with a new fixture |
+| nf-core/rnaseq 3.27.0 needs Nextflow `!>=25.10.4`; Kebnekaise's 26.04.4 has not run it | Rehearsed on this Mac under Nextflow 26.04.6 with `NXF_SYNTAX_PARSER=v2` (P2A.2); the cluster run P2A.3 is the first on Kebnekaise, and a failure there is reported before any count is used |
+| QC bands misapplied (universal cut-offs where none exist; FastQC fails over-read) | Context modifiers and dataset-relative MAD rules in the registry; source type shown with every band; confounding check before exclusion |
+| MultiQC parquet format changes (the v1.35 docs still head it BETA; the 1.31 CHANGELOG calls it stable since 1.29 and renamed `BETA-multiqc.parquet` to `multiqc.parquet`) | Pin MultiQC; `ctx.qc.multiqc_io` adapter with a TSV fallback; parity test |
+| GTEx / HPA API or release changes, rate limits, CORS | Cache per release with retrieval date; small bulk files cached, exon/junction data per gene; external-data spike before M9; graceful degradation |
+| Third-party terms inside HPA / GTEx content | Embed HPA CC BY 4.0 content with citation; link, never embed, what HPA lists under user terms (TCGA, IntAct, BioPlex, OpenCell, Tabula Sapiens, DepMap), AlphaFold 3 and CC BY-SA layers; GTEx drawn as our own figures, its terms read in the external-data spike |
+| Laptop budget exceeded by large cohorts (all BRCA tumours; TCGA vs GTEx) | Paired designs use all pairs; unpaired comparisons subsampled to ≤ 150 per group, stratified, on the laptop profile; full n on HPC; recorded in `_README.md` |
+| "Normal" comparators that are not healthy (field effect in lung NATs; adipose-rich breast NATs) | Taught explicitly; NAT vs GTEx view; composition-aware interpretation |
+| Reproduce blocks drift from the code | Generated from `FigureSpec` at build time; image pinned by digest; CI executes every block |
+| Step-1 immune data missing for some cohorts | Availability grid; lung pseudo-bulk fallback labelled as such |
 
 ---
 
@@ -403,7 +554,7 @@ cancer-transcriptomics-teaching/
 | D7 | Orchestration | **Python CLI first**, Nextflow wrapper later / Nextflow from the start |
 | D8 | Licences | **Code MIT, materials CC BY 4.0** |
 | D9 | Audience and language | **MSc level, English** / BSc / other |
-| D10 | Step-3 primary solid tumour | **KIRC** / BRCA / LUAD |
+| D10 | Step-3 primary solid tumour | Superseded 2026-09-29 by cohort selection (D24) and build order (D26) |
 | D11 | Step-1 proteomics source | Resolved: Rieckmann 2017 immune-cell proteome, cross-dataset |
 | D12 | Ribo-seq bridge | Resolved: concept only inside M7 |
 | D13 | Small-RNA-seq raw reads in Track A | Resolved: processed TCGA miRNA-seq only |
@@ -414,6 +565,12 @@ cancer-transcriptomics-teaching/
 | D18 | nf-core/fetchngs release | Resolved: 1.12.0, Rytis's choice in knowledge/recommendation1 and what the lab runs on Kebnekaise; 1.13.0 recorded as a risk (D-006) |
 | D19 | Placement of the dataset-independent `ctx gather` core | Resolved 2026-09-26: Phase 1b now, on nf-core/fetchngs's own test IDs |
 | D20 | Proof of multi-run handling | Resolved 2026-09-26: a real metadata-only fetchngs fixture of nf-core's full test list; `test_no_cohort_identifiers` skips `tests/fixtures/fetchngs/metadata_only/` only, guarded by a test pinning its input list to nf-core's |
+| D21 | Step-1 counts | Resolved 2026-09-27 (in Rytis's draft v3.4 as D14; merged 2026-09-29): nf-core/rnaseq 3.27.0, Salmon only (`pseudo_aligner: salmon`, `skip_alignment: true`), GENCODE 50, on Kebnekaise with `-profile singularity` and `NXF_SYNTAX_PARSER=v2`, fed by the fetchngs samplesheet cut to four columns; rehearsed in P2A.2 under Nextflow 26.04.6 on this Mac. Draft v3.4 had the run align too, for M2b's alignment metrics; the repo's run does not, and Step-1 QC is sample-level only (Rytis 2026-09-29) |
+| D22 | Gene-card data access | Resolved (draft v3.4 D15; merged 2026-09-29): documented APIs and bulk files, own figures, deep links to source pages; no scraping, mirroring or iframes |
+| D23 | Worked-example genes | Resolved (draft v3.4 and v3.6 D16; merged 2026-09-29): CA9 and NPTX2 for kidney; breast and lung examples from their DE results; for Step-1, the paper-named `box_genes` registered in its dataset file before any count (Rytis 2026-09-29), where the drafts had genes from the DE results |
+| D24 | Cohort list | Resolved (draft v3.6 D18; merged 2026-09-29): kidney, breast, lung (LUAD + LUSC), pancreas (Step-1 only in v1) |
+| D25 | Reproduce panel runtimes | Resolved (draft v3.6 D19; merged 2026-09-29): Docker (default), Apptainer + SLURM, pixi tabs |
+| D26 | First Step-3 cohort to build | Resolved (draft v3.6 D20; merged 2026-09-29): breast first, then kidney and lung |
 
 ### Items you could search or verify for me (saves tokens)
 
@@ -430,6 +587,14 @@ cancer-transcriptomics-teaching/
 - TargetScan and miRTarBase current versions and download terms; GENCODE Ribo-seq ORF annotation availability.
 - `inmoose` (Python ports of limma/edgeR/DESeq2): current status for moderated t-tests.
 - nf-core/fetchngs 1.12.0 on the Step-1 study: whether its ERP/PRJEB accession resolves in a metadata-only run, the total `fastq_bytes`, and whether any run has more than two ENA files or no ENA FASTQ link. Known already: minimum Nextflow `!>=23.04.0`; `-profile singularity` ran on Kebnekaise with Nextflow 26.04.4 under `NXF_SYNTAX_PARSER=v1` (D-006).
+- ENCODE bulk RNA-seq standards (30 M aligned reads per replicate; replicate Spearman > 0.9 isogenic, > 0.8 anisogenic): read the page before either enters the QC registry (it did not load on 2026-09-29).
+- GTEx Portal API v2: `unit` of median exon and junction values; CORS; terms of use (UNVERIFIED). Read 2026-09-29: `gtex_v8` = GENCODE v26, `gtex_v10` = GENCODE v39, the default dataset differs by endpoint.
+- Human Protein Atlas: bulk file names for tissue, single-cell, immune-cell, subcellular, pathology, blood and cell-line data; CORS for per-gene JSON. Read 2026-09-29: release v25.1; per-gene JSON and `search_download.php` answer.
+- Cassetta et al. 2019: GEO GSE117970 lists 34 breast-cancer monocyte samples where the paper's 32 in total plus 6 non-classical imply 38; map each sample to the paper's groups before use. Read 2026-09-29: open paired FASTQs at ENA PRJNA483877.
+- TCGA-BRCA: number of male cases; source file and terms for PAM50 subtype labels.
+- Open-FASTQ tumour / adjacent-normal RNA-seq studies for breast, lung and kidney (Track A candidates per cohort); bulk sorted myeloid RNA-seq from lung cancer patients vs healthy donors.
+- Breast tumour vs adjacent normal: a peer-reviewed source for adipocyte genes lower and proliferation higher in tumour (read 2026-09-29: a conference abstract and a microarray study only).
+- Clipboard API behaviour on `file://` pages (Chrome, Firefox, Safari); GHCR multi-arch build of the figures target.
 
 ---
 
@@ -835,7 +1000,7 @@ it. P1.2 pins every dependency the project adds.
     - Not done: plotly draws its box fills half-transparent by default, so the HTML boxes look lighter than the PDF ones; the colours are the same palette roles.
 
 - [x] P1.9 `ctx setup` environment report as the end-to-end consumer (after P1.6, P1.8)
-  - This is the M0 subset from `TODO.md:102`; it downloads nothing.
+  - This is the M0 subset from `TODO.md:131`; it downloads nothing.
   - Every CLI parameter gets a parameter card (meaning and effect), including the global `--profile` and `--root`, which are rendered once as a shared block.
   - Outputs under `<root>/outputs/00_setup/`:
     - `YYYY-MM-DD_setup_environment_v1.html`, a module page showing:
@@ -1023,7 +1188,7 @@ it. P1.2 pins every dependency the project adds.
 | Platforms | linux-64 (glibc 2.35) and osx-arm64 | Linux, WSL2, Intel Mac | Unchanged in Phase 1; osx-64 attempted in Phase 6 |
 | "laptop" | A pixi environment | A runtime profile | Both kept; ctx reads only `--profile` and `CTX_PROFILE` |
 | Licence | One answer, no LICENSE file | Code MIT, materials CC BY 4.0 | MIT and `LICENSE` now; the CC BY file with the first materials (Phase 5) |
-| Report sections | none | TODO.md:98 lists 7, CLAUDE.md:56 lists 8 | CLAUDE.md:56's eight are the contract |
+| Report sections | none | TODO.md:123 lists 7, CLAUDE.md:56 lists 8 | CLAUDE.md:56's eight are the contract |
 | CI comment | "while the repo is private" (ci.yml.jinja:33) | none | labcore is public; the comment is harmless and reported upstream, not edited |
 | nf-core outputs | `results/**` naming-exempt (AGENTS.md); `.gitignore` ignores `results/` only for the pipeline flavour | fetchngs outdirs | Under `/data/raw/<slug>/`, never renamed, read-only to ctx; anchored `/results/` added to `.gitignore` as a guard (D-006) |
 | `conf/` | Renders `conf/*.config` only when an HPC2N answer is set | Per-dataset curation files | Project-owned `conf/datasets/*.toml`; no template file shares the path |
@@ -1218,7 +1383,7 @@ Step-1 is E-MTAB-11190 = PRJEB49000 (D5). Plan, research and critique: session p
   - Timing:
     - steps 0–3 can start now;
     - steps 4–6 wait for P2A.2;
-    - step 7 waits for the newest registration commit (D-013 to D-016, D-018, D-019), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
+    - step 7 waits for the newest registration commit (D-013 to D-016, D-018 to D-020), the first line of `git log --format=%h -G '^registered = ' -- conf/datasets/tier1.toml`.
   - Proven by the pasted checks, each with its expected value.
   - Any count short of 210 stops 2C until it is explained.
 
@@ -1286,7 +1451,7 @@ Exit gate:
     6. `rank_replicates(frame, keys, order)`, the one function that picks one sample per key, reused by de.
     7. Check `[expect]`.
   - Any problem writes `…_curation_problems_v1.csv`, writes no sheet, and exits 1.
-  - Curated columns: donor, cell_type, condition, replicate, batch, plus the declared extras tissue, read_length, time_point, isolation (M9), sex and donor_sex (M8).
+  - Curated columns: donor, cell_type, condition, replicate, batch, plus the declared extras tissue, read_length, time_point, isolation (critique M9), sex and donor_sex (critique M8).
   - The M1 page gains:
     - a composition bar: cell type by condition, coloured by batch, with n samples and n individuals;
     - library-size bars coloured by batch (minor 2);
@@ -1610,12 +1775,12 @@ Exit gate:
 - [ ] **P2C.5 Close.**
   - Fresh clone: preflight passes and the test run is under 5 min.
   - A measured table: the rehearsal, the cluster steps from the trace, each ctx command, the tests and the budget test.
-  - Review, lessons, and the TODO.md tree updated by grep-verified edits. TODO.md:299 "Pin tool versions" is closed or deferred with its reason.
+  - Review, lessons, and the TODO.md tree updated by grep-verified edits. TODO.md:417 "Pin tool versions" is closed or deferred with its reason.
   - D-entries:
     - D-007: rnaseq 3.27.0 and the rounded length-scaled matrix; pandas at the boundary.
     - D-008: `ctx.function.lite` with gseapy as the oracle; numpy PERMANOVA.
     - D-009: the Step-1 design, with the Fig. 4d PDAC IFN finding stated correctly.
-    - D-010: deferrals, including the M5 top-50 heatmap (TODO.md:171) and notebooks.
+    - D-010: deferrals, including the M5 top-50 heatmap (TODO.md:214) and notebooks.
 
 ### Phase 2R — Page redesign, call rule and re-registration (approved 2026-09-28)
 
@@ -1677,7 +1842,7 @@ Rytis's decisions, 2026-09-28:
   - **In the browser.** At 8 settings (all four methods, raw p, log2 and %, a fold-change threshold of 10), the page's counts and line height equal a Python recount of the results parquet. The no-line branch was checked on a scratch page with every p set to 0.5; since D-015 that page draws the first bar instead. The text a no-JavaScript reader sees equals the script's, word for word.
   - **Under node.** `tests/test_page_script.py` runs `_calls.js.j2` over 80 settings: the four adjusted columns and raw p, 4 cutoffs and 4 thresholds, including boundary rows. It compares against `classify`, and 5 mutations of the script were each caught. nodejs 26.10.0 is pinned in ctx-dev; the lock only gained packages.
 - [x] **P2R.5 Rules and records.**
-  - CONVENTIONS.md:51 and TODO.md:806 move the caption below the plot.
+  - CONVENTIONS.md:51 and TODO.md:971 move the caption below the plot.
   - D-011 covers the caption, D-012 the call rule and adjustments, D-013 the re-registration.
   - The re-registration commit sets `[sanity] registered`, and `rule_commit()` reads it.
   - Cluster step 7 waits for that commit.
@@ -1732,7 +1897,7 @@ Rytis's decisions, 2026-09-28:
 ```
 # Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
 # Steps 0-3 can start now. Steps 4-6 wait until I confirm P2A.2 passed. Step 7 waits for the
-# newest registration commit (D-013 to D-016, D-018, D-019). P2A.2 may rename files in steps 6 and 7.
+# newest registration commit (D-013 to D-016, D-018 to D-020). P2A.2 may rename files in steps 6 and 7.
 
 # ---- 0. Run root, space, allocation, Nextflow ----
 export P=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
@@ -1863,3 +2028,52 @@ The cluster settings come from:
 | nf-core/rnaseq | cluster and `fetch` environment | 3.27.0 as `RNASEQ_VERSION` |
 | GENCODE 50, MSigDB h.all 2026.1.Hs, SDRF | cluster and `resources/` | the hashes above |
 | Not added | | scikit-bio, upsetplot, decoupler, pytximport |
+
+## 🧾 Merge of drafts v3.4 and v3.6 (2026-09-29; D-020)
+
+Rytis put two parallel drafts of this plan in `TEMP/` on 2026-09-29: v3.4 (`todo.md`, `CLAUDE.md`) and v3.6 (`todo1.md`, byte-identical to `todo2.md`, and `CLAUDE1.md`). Both branched from this plan before Phase 1b and Phase 2 were recorded here.
+- **v3.4.** Six section agents diffed it against this file and CONVENTIONS.md, giving 181 items. 89 factual claims were checked at their sources: 86 verified, 2 wrong and corrected, 1 unverified. A critic found 21 problems in the first merge plan, all fixed before any edit.
+- **v3.6.** Its additions were diffed separately, and 21 of its new claims were checked at their sources: 16 verified, 3 wrong in detail and corrected, 2 partly verified and marked so.
+
+The drafts were moved to `../RNAseq_tutorial_archive/TEMP_2026-09-29/`, so no session reads them as rules.
+
+Carried, with the choices Rytis made on 2026-09-29:
+- M9 gene cards (D22, D23), output number 11; Step-1's worked examples are the registered `box_genes`.
+- The M2 QC atlas:
+  - the registry, with MultiQC as the only parser;
+  - M2a and M2b;
+  - M2b on the Step-1 cohort is sample-level only, and the cohort's MultiQC stays on the cluster.
+- Decisions:
+  - D21: Step-1 counts, from the repo's Salmon-only run.
+  - D24 to D26: cohorts, Reproduce tabs, breast first.
+  - D10 superseded.
+- Cohort bundles and a Reproduce panel per figure, as Phase 2D after the Step-1 record. With them:
+  - `ctx run` and a new-dataset guide, for Rytis's request to repeat the whole analysis on another dataset;
+  - figure parameters as frozen dataclasses;
+  - the volcano's x axis may show the shrunk estimate, with colours still following the raw call.
+- Learning outcomes 2, 9 and 10; the diagram's cohort selector, QC checkpoint and gene-card nodes; risks, verification and verify items.
+- CONVENTIONS.md rules on samplesheet parsing, the rnaseq pin, QC bands, external summaries, external knowledge bases, licences, cohorts, figure IDs and fonts.
+
+Not carried, with reasons:
+
+| Draft text | Why not |
+|---|---|
+| `todo.md` and `lessons.md` at the root | D14: TODO.md and knowledge/lessons.md; `test_layout` fails on the draft's names |
+| HTML base 14 px | 18 px since 2026-09-28 |
+| Statistics "in annotations" inside interactive plots | D-011: the caption sits under the plot |
+| `/usr/bin/time -v` | fails on macOS; the repo rule names `-l` there |
+| The shorter fetchngs rule and course command | they drop `-r 1.12.0`, `--monochrome_logs true` and `data/raw/<slug>/`, which D18 and D-006 require and `test_fetchngs_runs_monochrome` checks |
+| `NXF_VER` and Nextflow 25.10.4 for fetchngs | D18 and D-006: Nextflow 26 with `NXF_SYNTAX_PARSER=v1` |
+| D5 pending, and v3.6's fallback to Cassetta if the FASTQs are closed | D5 resolved 2026-09-27; every Step-1 run has an open ENA FASTQ |
+| The Caronni citation for E-MTAB-11190 | the source is Montaldo et al. 2022 (D5) |
+| "ENA can lag" | no source found (P1b.0) |
+| The ID-level knob, the `ids.csv` wording, `*.runinfo.tsv`, "minutes, no disk" | wrong for fetchngs 1.12.0 (D-006) |
+| The id_mappings join, `--merge-runs`, a versions glob, `data/interim/` | Phase 1b deviations and the naming rule |
+| gseapy as the M6 engine | P2B.5 made `ctx.function.lite` the engine |
+| Live pydeseq2 in JupyterLite | D17 and D-005 |
+| The drafts' repository tree: `acquire/`, `ena.py`, `palette/static/interactive`, a `figures/` package, a root `Dockerfile`, `reports/` | the P1.11 layout: figures live in `viz/`, pages in `outputs/`, containers in `containers/` |
+| Reports under `reports/<cohort>/` | outputs stay under `outputs/NN_<module>/`, named by dataset slug; the hub groups them per cohort |
+| "Three files (PDF light, PDF dark, HTML)" per figure | D16: PDF and SVG in both themes, HTML, and CSV with `_README.md` |
+| pydantic parameter models | frozen dataclasses, the loader pattern of `src/ctx/dataset.py` (Rytis 2026-09-29) |
+| A second rsync of the cluster's `multiqc.parquet` | it reverses critique M3 and makes a second copy rule beside `COPIED_FILES` |
+| The fetchngs 1.13.0 diff item | D-006 covers it; deferred |

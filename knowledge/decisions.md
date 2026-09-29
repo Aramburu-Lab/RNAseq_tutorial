@@ -27,6 +27,61 @@ it were reversed.
 
 ---
 
+## D-020 — Rytis's drafts v3.4 and v3.6 merged; the reuse layer follows the Step-1 record
+
+**Date:** 2026-09-29 · **Status:** decided
+
+**Context.** Rytis put two parallel drafts of the plan in `TEMP/`, draft v3.4 and draft v3.6, and asked for "more adjustability in selecting result visualisation, and an ability to easily repeat this whole analysis and generate these reports by providing different RNA-seq datasets". Both drafts branched from TODO.md before Phase 1b and Phase 2 were recorded.
+- **Draft v3.4** adds:
+  - M9 gene cards;
+  - an M2 QC atlas;
+  - the nf-core/rnaseq reference run.
+- **Draft v3.6** adds:
+  - cohort bundles with `--cohort`;
+  - a Reproduce panel per figure, with `ctx figure`.
+- **What both drafts restate.** They restate rules the repo has since changed, and they reuse the decision numbers D14 to D20 for different decisions.
+
+**Options.**
+- Copy a draft over TODO.md and CONVENTIONS.md. That would undo D5, D14, D16, D18, D-011, D-012, D-019, the 18 px base and the Step names.
+- Merge item by item, keeping every later repo decision, with Rytis's choices where a draft changes direction.
+
+**Decision.** Merge item by item. What was carried, what was not and why is recorded in TODO.md, "Merge of drafts v3.4 and v3.6". Rytis's choices on 2026-09-29:
+
+| Question | Choice |
+|---|---|
+| M9 gene cards | Yes, Phase 4, output number 11. Step-1's worked examples are the `box_genes` registered before any count. |
+| M2 QC atlas | Yes. The checkpoint runs in Track B too, from Phase 3. |
+| Step-1 cohort QC | Sample-level checks only. MultiQC stays on the cluster (critique M3). |
+| The drafts in `TEMP/` | Moved out of the repo. |
+| When to build the reuse layer: cohort bundles, `ctx run`, `ctx figure`, Reproduce panels | After the Step-1 record, as Phase 2D. |
+| The volcano's `lfc_type` | The x axis may show the shrunk estimate for display. Colours always follow the call on the raw estimate (D-012), and the page says so. |
+| Figure parameter models | Frozen dataclasses, as `src/ctx/dataset.py` validates, not pydantic. |
+
+- **Renumbering.** Draft decisions get new numbers:
+  - D14 to D16 of v3.4 become D21 to D23;
+  - D18 to D20 of v3.6 become D24 to D26;
+  - D17 of v3.4 is already covered by D18 and D-006.
+- **`ctx run`.** This is not in either draft. It is added as the direct answer to "easily repeat this whole analysis with a different dataset".
+
+**Evidence.**
+- **Diff and plan.** Six section agents, one fact-check pass, a planner and a critic.
+  - The diff produced 181 items.
+  - 89 claims were checked at their sources: 86 verified, 2 wrong and corrected, 1 unverified.
+  - The critique found 21 problems in the first plan, all fixed before any edit.
+  - The v3.6 claims: 21 of its new claims were checked at their sources: 16 verified, 3 wrong in detail and corrected, 2 partly verified and marked so.
+- **Frozen rule sources.** Registered rules R1, R2 and R7 cited "TODO.md:360" and "TODO.md:364". The merge moved those lines, so the sources now name their target ("TODO.md, Verification: …") and cannot go stale again.
+  - That changes the frozen `conf/datasets/tier1.toml`, so the rules are registered again.
+  - At 2026-09-29 14:00, `~/ctx_tier1/data/raw` held only `tier1_meta`.
+- **Line references inside TODO.md** were remapped to the lines they pointed at.
+- **Tests.** `pixi run preflight` passes on the merged files.
+
+**Consequence.**
+- Phase 2D sits between the Step-1 record and Phase 3.
+- Any draft item marked UNVERIFIED stays so until it is read at its source.
+- Step 7 of the cluster block waits for this registration commit.
+
+---
+
 ## D-019 — LFC shrinkage is a switch, on by default
 
 **Date:** 2026-09-29 · **Status:** decided
@@ -423,6 +478,9 @@ Two warnings appeared on fetchngs runs from this Mac's default `~/.nextflow`; ru
   - Every file a process publishes was linked, 4 of 13. The other 9 are written by the launcher, by Nextflow's `pipeline_info`, or by `collectFile(storeDir:)` (`workflows/sra/main.nf:154,163,182`), and none is a FASTQ.
   - The cluster block's step 1 now sets `PUBLISH_DIR_MODE=link` and budgets for one copy. Whether the cluster filesystem hard-links is measured in step 3, not assumed.
 - **The committed fixtures predate the flag** and stay as built; their READMEs record the command that made them. With the flag, a metadata_only rebuild matched the committed fixture in all 13 samplesheet and metadata files, and in its versions file. The timestamped params file and trace differed, the params file only in `monochrome_logs`. So did README.md, whose command row now carries the flag and a new date, and MANIFEST.sha256, which hashes those files. Two download rebuilds, the second a retry, stalled in `SRATOOLS_PREFETCH` for 10 min 22 s and 9 min 14 s, from the first prefetch submit in the execution trace to the SIGTERM that stopped them. Each prefetch task wrote one informational line and nothing more, with an empty `.command.trace`. That is the symptom of the stall recorded above; its cause was not logged this time. (A first version of this sentence said 10 min 23 s and 9 min 15 s, counted from the NCBI-settings task.)
+
+
+**Correction 2026-09-29.** The Options paragraph says fetchngs 1.13.0 "changes the samplesheet row order". It changes the sort key: 1.12.0 sorts the per-sample files by their `<EXP>_<RUN>` name (`workflows/sra/main.nf:152`, `sort: { it.baseName }`), 1.13.0 sorts on the row text (`collectFile(sort: true)`, PR #379). The two orders differ only when one accession is a string prefix of another; on both committed fixtures they are the same (simulated; 1.13.0 was not run). The consequence stands: `ctx gather` reads by column name and compares runs as sets, now a rule in CONVENTIONS.md (D-020).
 
 
 ## D-005 — JupyterLite DE: precomputed grids plus live scipy tests, not live pydeseq2 (TODO.md D17)
