@@ -13,7 +13,16 @@ import polars as pl
 import pytest
 from polars.testing import assert_frame_equal
 from pypdf import PdfReader
-from synth import counts, demo_bar, demo_box, demo_bubble, demo_pca, demo_strip, demo_volcano
+from synth import (
+    counts,
+    demo_bar,
+    demo_box,
+    demo_bubble,
+    demo_curves,
+    demo_pca,
+    demo_strip,
+    demo_volcano,
+)
 
 from ctx.io.naming import figure_files, lint, stem
 from ctx.report.builder import (
@@ -48,6 +57,7 @@ DEMOS = {
     "bar": demo_bar,
     "strip": lambda s: demo_strip(),
     "bubble": lambda s: demo_bubble(),
+    "curves": lambda s: demo_curves(),
 }
 
 

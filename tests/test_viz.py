@@ -21,6 +21,7 @@ from synth import (
     demo_bars_at_scale,
     demo_box,
     demo_bubble,
+    demo_curves,
     demo_ma,
     demo_pca,
     demo_strip,
@@ -33,6 +34,7 @@ from ctx.report.builder import FigureText
 from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.axes import axis_title
+from ctx.viz.curve import CurveData
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
 from ctx.viz.scatter import THIN_MAX, Calls, ScatterData, bubble_pt
 from ctx.viz.strip import StripData
@@ -317,6 +319,7 @@ def _contracts():
         "strip": demo_strip(),
         "strip_log_double": demo_strip(log=True, width="double"),
         "bubble": demo_bubble(),
+        "curves": demo_curves(),
     }
 
 
@@ -336,6 +339,8 @@ def axis_titles(data) -> list[tuple[str, str]]:
         return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
     if isinstance(data, StripData):
         return [(data.value_label, data.columns[data.value][0])]
+    if isinstance(data, CurveData):
+        return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
     return [(data.value_label, data.columns[data.value][0])]
 
 
@@ -442,6 +447,8 @@ OVERLAP_CASES = {
     "strip": lambda s: demo_strip(),
     "strip_log": lambda s: demo_strip(log=True),
     "bubble": lambda s: demo_bubble(),
+    "curves": lambda s: demo_curves(),
+    "curves_double": lambda s: demo_curves(width="double"),
 }
 
 
@@ -650,3 +657,15 @@ def test_bubble_area_grows_linearly_with_the_size_value():
         dataclasses.replace(data, frame=data.frame.with_columns(mt_rrna_share=pl.lit(-0.1)))
     diameters = [t.marker.size for t in _marker_traces(data.interactive())]
     assert all(isinstance(d, tuple | list) and len(d) > 0 for d in diameters)
+
+
+def test_a_curve_keeps_one_colour():
+    data = demo_curves()
+    mixed = data.frame.with_columns(
+        group=pl.when(pl.col("position") == 1).then(pl.lit("degraded")).otherwise("group")
+    )
+    with pytest.raises(ValueError, match="more than one group"):
+        dataclasses.replace(data, frame=mixed)
+    traces = [t for t in data.interactive().data if t.mode == "lines" and t.legendgroup]
+    assert len(traces) == data.frame["sample"].n_unique()
+    assert sum(bool(t.showlegend) for t in traces) == 2

@@ -572,3 +572,42 @@ def demo_bubble(width: str = "double"):  # returns ctx ScatterData
         hover=("sample", "useful_share", "mt_rrna_share"), lines=lines, log_x=True, log_y=True,
         width=width, size="mt_rrna_share", size_label="MT + rRNA",
     )  # fmt: skip
+
+
+def demo_curves(width: str = "single"):  # returns ctx CurveData
+    """Mean quality per position for eight samples, one with a degraded tail.
+
+    FastQC's three shaded regions and its median thresholds (limits.txt, 0.12.1) over them.
+    """
+    from ctx.viz.curve import CurveData  # noqa: PLC0415
+    from ctx.viz.scatter import Line  # noqa: PLC0415
+    from ctx.viz.strip import Span  # noqa: PLC0415
+    from ctx.viz.style import category_colours  # noqa: PLC0415
+
+    rng = np.random.default_rng(5)
+    positions = np.arange(1, 102)
+    rows = []
+    for i in range(8):
+        quality = 36.0 - 0.02 * positions + rng.normal(0.0, 0.3, positions.size)
+        if i == 3:
+            quality[-30:] = np.linspace(30.0, 2.0, 30)
+        rows += [(f"S{i:03d}", "degraded" if i == 3 else "typical", int(x), float(q))
+                 for x, q in zip(positions, quality, strict=True)]  # fmt: skip
+    frame = pl.DataFrame(rows, schema=["sample", "group", "position", "quality"], orient="row")
+    columns = {
+        "sample": ("none", "Synthetic sample."), "group": ("none", "Planted degraded or typical."),
+        "position": ("nt", "Position in the read."), "quality": ("Phred", "Mean base quality."),
+    }  # fmt: skip
+    ends = (1.0, 101.0)
+    return CurveData(
+        frame=frame, columns=columns, series="sample", x="position", y="quality",
+        x_label="Position in read", y_label="Mean quality", colour="group",
+        colours=category_colours(["typical", "degraded"]),
+        caption="Shaded as FastQC shades it: good from Phred 28, reasonable from 20. Dashed: "
+        "FastQC's median warn (25) and fail (20). Synthetic data; no test.",
+        spans=(Span("good", "good", 28.0, None), Span("usable", "reasonable", 20.0, 28.0),
+               Span("bad", "poor", None, 20.0)),
+        thresholds=(Line("warn, fail", ends, (25.0, 25.0), dash=True),
+                    Line("warn, fail", ends, (20.0, 20.0), dash=True)),
+        width=width,
+    )  # fmt: skip

@@ -6,7 +6,7 @@ across the axis where a source gives one, and each stratum's median ± k MAD as 
 """
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -52,6 +52,46 @@ class Span:
     label: str
     low: float | None
     high: float | None
+
+
+def shade(ax: Any, spans: Sequence[Span]) -> None:
+    """Shade absolute bands across the axes, behind everything, within the current y range."""
+    bottom, top = ax.get_ylim()
+    for span in spans:
+        low = bottom if span.low is None else max(span.low, bottom)
+        high = top if span.high is None else min(span.high, top)
+        if low < high:
+            ax.axhspan(low, high, color=BAND_COLOURS[span.band], alpha=BAND_ALPHA,
+                       linewidth=LINE_WIDTHS["band_edge"], zorder=0)  # fmt: skip
+    ax.set_ylim(bottom, top)
+
+
+def span_handles(spans: Sequence[Span]) -> list[Any]:
+    """A legend patch per band, tinted as it is shaded."""
+    from matplotlib.patches import Patch  # noqa: PLC0415 - heavy
+
+    return [Patch(facecolor=BAND_COLOURS[s.band], alpha=BAND_ALPHA, label=s.label) for s in spans]
+
+
+def span_traces(spans: Sequence[Span], x: tuple[float, float], values: pl.Series) -> list[Any]:
+    """The bands as filled plotly traces across ``x``, an open end reaching past the values.
+
+    Filled traces, not layout shapes, so a band sits in data coordinates on a log axis too.
+    """
+    import plotly.graph_objects as go  # noqa: PLC0415 - heavy
+
+    present = values.drop_nulls()
+    bottom, top = float(present.min()), float(present.max())  # type: ignore[arg-type]
+    traces = []
+    for span in spans:
+        low = min(bottom, span.high or bottom) if span.low is None else span.low
+        high = max(top, span.low or top) if span.high is None else span.high
+        traces.append(go.Scatter(
+            x=[x[0], x[1], x[1], x[0], x[0]], y=[low, low, high, high, low], fill="toself",
+            mode="lines", line={"width": LINE_WIDTHS["band_edge"]}, name=span.label,
+            fillcolor=tint(BAND_COLOURS[span.band], BAND_ALPHA), hoverinfo="skip",
+        ))  # fmt: skip
+    return traces
 
 
 @dataclass(frozen=True)
@@ -208,12 +248,7 @@ class StripData:
         from matplotlib.patches import Rectangle  # noqa: PLC0415 - heavy
 
         bottom, top = ax.get_ylim()
-        for span in self.spans:
-            low = bottom if span.low is None else max(span.low, bottom)
-            high = top if span.high is None else min(span.high, top)
-            if low < high:
-                ax.axhspan(low, high, color=BAND_COLOURS[span.band], alpha=BAND_ALPHA,
-                           linewidth=LINE_WIDTHS["band_edge"], zorder=0)  # fmt: skip
+        shade(ax, self.spans)
         slot = {level: i for i, level in enumerate(self.levels())}
         half = STRIP["range"]
         for r in self.ranges:
@@ -248,9 +283,7 @@ class StripData:
         if self.ranges:
             handles.append(Patch(facecolor=theme.reference, alpha=BAND_ALPHA,
                                  label=self.range_label))  # fmt: skip
-        handles += [Patch(facecolor=BAND_COLOURS[s.band], alpha=BAND_ALPHA, label=s.label)
-                    for s in self.spans]  # fmt: skip
-        return handles
+        return handles + span_handles(self.spans)
 
     def interactive(self) -> Any:
         """Render the plotly figure; hover shows the category, the value and ``hover``.
@@ -295,17 +328,7 @@ class StripData:
         """The shaded bands and bars as filled traces, legend entries once each."""
         import plotly.graph_objects as go  # noqa: PLC0415 - heavy
 
-        values = self.frame[self.value].drop_nulls()
-        bottom, top = float(values.min()), float(values.max())  # type: ignore[arg-type]
-        traces = []
-        for span in self.spans:
-            low = min(bottom, span.high or bottom) if span.low is None else span.low
-            high = max(top, span.low or top) if span.high is None else span.high
-            traces.append(go.Scatter(
-                x=[-0.5, n - 0.5, n - 0.5, -0.5, -0.5], y=[low, low, high, high, low],
-                fill="toself", mode="lines", line={"width": 0}, name=span.label,
-                fillcolor=tint(BAND_COLOURS[span.band], BAND_ALPHA), hoverinfo="skip",
-            ))  # fmt: skip
+        traces = span_traces(self.spans, (-0.5, n - 0.5), self.frame[self.value])
         slot = {level: i for i, level in enumerate(self.levels())}
         half = STRIP["range"]
         for k, r in enumerate(self.ranges):
