@@ -20,6 +20,8 @@ MAX_CATEGORIES = len(DATA_COLOURS)
 PROJECTOR_UNSAFE = frozenset({"#F0E442"})
 # Colours by role, never by list position, so a legend cannot drift from its data.
 ROLES = {"reference": "#0072B2", "comparison": "#D55E00"}
+# A QC band's colour, from the Okabe-Ito data colours (ctx.qc.registry, conf/qc_metrics.toml).
+BAND_COLOURS = {"good": "#009E73", "usable": "#E69F00", "bad": "#D55E00"}
 
 # Liberation Sans is Arial's metric twin, which a machine without Arial may redistribute.
 FONT_CHAIN = ("Arial", "Liberation Sans", "DejaVu Sans")

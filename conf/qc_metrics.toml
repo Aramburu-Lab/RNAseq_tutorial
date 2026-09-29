@@ -1,0 +1,609 @@
+# The QC registry: every metric `ctx qc` judges, with its bands and where each band comes from
+# (CONVENTIONS.md, Statistics rules: QC bands live only here). Read by `ctx.qc.registry`; the
+# generated MultiQC config colours MultiQC's General Statistics table from it.
+#
+# A metric is judged two ways, side by side. Its absolute bands (`good`, `usable`), where a
+# source gives one; `bands = "dataset_only"` with a `rationale` where none does, which is most
+# RNA-seq metrics. And always against its own dataset: median ± k·MAD (the [registry] rule).
+#
+# source_type is one of tool_code, tool_docs, consortium_standard, pipeline_default,
+# literature, course_convention (TODO.md, M2); a course convention always carries a rationale.
+# `direction` says which side is good: "higher", "lower", or "none" (a category or a spread).
+# `action` is keep or flag; nothing is excluded before the Step-1 record (P2M M2.8).
+
+[registry]
+schema = 1
+mad_multiplier = 3.0
+# scipy.stats.median_abs_deviation(scale="normal"): the MAD times 1.4826, so k scaled MADs
+# match k standard deviations when the data are normal.
+mad_scaled = true
+source = "robust z-score, median ± 3 scaled MAD"
+source_type = "course_convention"
+rationale = "Many RNA-seq metrics have no universal cut-off; a sample far from its own dataset is a question worth asking. 3 scaled MADs is 3 SD for normal data, and it flags, never excludes."
+
+# ---- M2a, reads before alignment (FastQC 0.12.1, fastp 1.1.0, seqkit 2.13.0) --------------
+
+[metrics.total_sequences]
+stage = "reads"
+title = "Reads"
+meaning = "How many reads the run holds."
+computed = "FastQC Total Sequences"
+unit = "reads"
+table = "general_stats"
+column = "fastqc-total_sequences"
+module = "fastqc"
+scale = "log10"
+direction = "higher"
+bands = "dataset_only"
+rationale = "Depth needs depend on the question; the ENCODE figure of 30 M aligned reads is UNVERIFIED (TODO.md, M2) and would mark half of Step-1."
+causes = ["a lane shared with many libraries", "a failed library"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.read_length]
+stage = "reads"
+title = "Read length"
+meaning = "The mean read length, in bases."
+computed = "FastQC average sequence length"
+unit = "nt"
+table = "general_stats"
+column = "fastqc-avg_sequence_length"
+module = "fastqc"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "Set by the sequencing run, not by the sample; a length unlike the rest of its batch is a different run."
+causes = ["a different sequencing run", "trimmed before upload"]
+action = "flag"
+matters_for_de = false
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.percent_gc]
+stage = "reads"
+title = "GC content"
+meaning = "The share of G and C bases."
+computed = "FastQC %GC"
+unit = "%"
+table = "general_stats"
+column = "fastqc-percent_gc"
+module = "fastqc"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "The expected GC depends on the transcripts a cell expresses; FastQC's own GC check compares each read with the sample's own distribution."
+causes = ["contamination with another organism", "rRNA", "adapter dimers"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.percent_duplicates]
+stage = "reads"
+title = "Duplicated reads"
+meaning = "The share of reads that are exact copies of another read."
+computed = "100 - FastQC total_deduplicated_percentage"
+unit = "%"
+table = "general_stats"
+column = "fastqc-percent_duplicates"
+module = "fastqc"
+scale = "linear"
+direction = "lower"
+good = 30.0
+usable = 50.0
+causes = ["highly expressed transcripts, which RNA-seq always has", "low input", "over-amplification"]
+action = "keep"
+matters_for_de = false
+read_length_tied = false
+source = "FastQC 0.12.1 Configuration/limits.txt: duplication warn 70, error 50 (% of reads left after deduplication)"
+source_type = "tool_code"
+
+[metrics.q30_rate]
+stage = "reads"
+title = "Q30 bases"
+meaning = "The share of bases called with at most a 1 in 1000 chance of error, before trimming."
+computed = "seqkit stats -a Q30(%)"
+unit = "%"
+table = "general_stats"
+column = "seqkit_seqkit-Q30_pct"
+module = "seqkit"
+scale = "linear"
+direction = "higher"
+good = 80.0
+usable = 80.0
+causes = ["a degraded run", "late cycles of a long read"]
+action = "flag"
+matters_for_de = true
+read_length_tied = true
+source = "Q30 below 80 % (TODO.md, M2)"
+source_type = "course_convention"
+rationale = "No source for a Q30 cut-off was found (TODO.md, M2); 80 % is the course's line, shown as such."
+
+[metrics.fastp_surviving]
+stage = "reads"
+title = "Reads passing fastp"
+meaning = "The share of reads fastp keeps with its default filters."
+computed = "fastp pct_surviving_reads"
+unit = "%"
+table = "general_stats"
+column = "fastp-pct_surviving_reads"
+module = "fastp"
+scale = "linear"
+direction = "higher"
+bands = "dataset_only"
+rationale = "What fastp removes depends on its settings, which the page lets you move; the dataset shows which runs lose more than the rest."
+causes = ["low quality", "short inserts", "many N bases"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.fastp_passed_reads]
+stage = "reads"
+title = "Reads after fastp"
+meaning = "How many reads remain after fastp's filters."
+computed = "fastp filtering_result.passed_filter_reads"
+unit = "reads"
+table = "general_stats"
+column = "fastp-filtering_result_passed_filter_reads"
+module = "fastp"
+scale = "log10"
+direction = "higher"
+good = 10000.0
+usable = 10000.0
+causes = ["a failed library", "heavy filtering"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "nf-core/rnaseq 3.27.0 min_trimmed_reads 10000 (nextflow.config; the fixture's params file), set for Trim Galore output and transferred here to fastp's"
+source_type = "pipeline_default"
+
+# FastQC's own module verdicts: pass, warn and fail are FastQC's, from its limits.txt.
+[metrics.fastqc_per_base_quality]
+stage = "reads"
+title = "Per-base quality"
+meaning = "Whether the base quality holds up along the read."
+computed = "FastQC per_base_sequence_quality"
+unit = "status"
+table = "fastqc"
+column = "per_base_sequence_quality"
+module = "fastqc"
+kind = "status"
+direction = "none"
+causes = ["a degraded run", "late cycles"]
+action = "flag"
+matters_for_de = true
+read_length_tied = true
+source = "FastQC 0.12.1 limits.txt: quality_base_lower warn 10 error 5, quality_base_median warn 25 error 20"
+source_type = "tool_code"
+
+[metrics.fastqc_adapter]
+stage = "reads"
+title = "Adapter content"
+meaning = "Whether reads run into the sequencing adapter, which happens when the insert is shorter than the read."
+computed = "FastQC adapter_content"
+unit = "status"
+table = "fastqc"
+column = "adapter_content"
+module = "fastqc"
+kind = "status"
+direction = "none"
+causes = ["short inserts", "degraded RNA", "adapter dimers"]
+action = "flag"
+matters_for_de = true
+read_length_tied = true
+source = "FastQC 0.12.1 limits.txt: adapter warn 5, error 10 (% of reads)"
+source_type = "tool_code"
+
+[metrics.fastqc_n_content]
+stage = "reads"
+title = "N bases"
+meaning = "Whether many bases were called N, unknown."
+computed = "FastQC per_base_n_content"
+unit = "status"
+table = "fastqc"
+column = "per_base_n_content"
+module = "fastqc"
+kind = "status"
+direction = "none"
+causes = ["a failed cycle"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "FastQC 0.12.1 limits.txt: n_content warn 5, error 20 (% at any position)"
+source_type = "tool_code"
+
+[metrics.fastqc_sequence_content]
+stage = "reads"
+title = "Per-base sequence content"
+meaning = "Whether the four bases occur evenly along the read."
+computed = "FastQC per_base_sequence_content"
+unit = "status"
+table = "fastqc"
+column = "per_base_sequence_content"
+module = "fastqc"
+kind = "status"
+direction = "none"
+causes = ["random-hexamer priming, which makes a fail expected in RNA-seq"]
+action = "keep"
+matters_for_de = false
+read_length_tied = false
+source = "FastQC 0.12.1 limits.txt: sequence warn 10, error 20 (% A/T or G/C difference)"
+source_type = "tool_code"
+
+[metrics.fastqc_gc_distribution]
+stage = "reads"
+title = "GC distribution"
+meaning = "Whether reads' GC follows one smooth distribution."
+computed = "FastQC per_sequence_gc_content"
+unit = "status"
+table = "fastqc"
+column = "per_sequence_gc_content"
+module = "fastqc"
+kind = "status"
+direction = "none"
+causes = ["contamination", "a few very highly expressed transcripts"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "FastQC 0.12.1 limits.txt: gc_sequence warn 15, error 30 (% deviation from normal)"
+source_type = "tool_code"
+
+[metrics.fastqc_overrepresented]
+stage = "reads"
+title = "Overrepresented sequences"
+meaning = "Whether single sequences make up a large share of the reads."
+computed = "FastQC overrepresented_sequences"
+unit = "status"
+table = "fastqc"
+column = "overrepresented_sequences"
+module = "fastqc"
+kind = "status"
+direction = "none"
+causes = ["highly expressed transcripts", "rRNA", "adapter dimers"]
+action = "keep"
+matters_for_de = false
+read_length_tied = false
+source = "FastQC 0.12.1 limits.txt: overrepresented warn 0.1, error 1 (% of reads)"
+source_type = "tool_code"
+
+# ---- Trimming on the cluster (Trim Galore 2.3.0, nf-core/rnaseq 3.27.0's default trimmer) --
+
+[metrics.tg_pct_with_adapter]
+stage = "trim"
+title = "Reads with adapter"
+meaning = "The share of reads in which Trim Galore found and cut adapter sequence."
+computed = "Trim Galore reads_with_adapter / total_reads"
+unit = "%"
+table = "general_stats"
+column = "trim_galore-tg_pct_with_adapter"
+module = "trim_galore"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "Trim Galore counts a read with a single adapter base (stringency 1), so every run shows a share; a run far above its batch has short inserts."
+causes = ["short inserts", "degraded RNA"]
+action = "flag"
+matters_for_de = true
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.tg_pct_passing]
+stage = "trim"
+title = "Reads kept by Trim Galore"
+meaning = "The share of reads Trim Galore wrote; the rest were too short, too long or had too many N."
+computed = "Trim Galore reads_written / total_reads"
+unit = "%"
+table = "general_stats"
+column = "trim_galore-tg_pct_passing"
+module = "trim_galore"
+scale = "linear"
+direction = "higher"
+bands = "dataset_only"
+rationale = "What is removed depends on the insert sizes a library has; the dataset shows which runs lose more than the rest."
+causes = ["short inserts", "degraded RNA"]
+action = "flag"
+matters_for_de = true
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.tg_pct_quality_trimmed]
+stage = "trim"
+title = "Bases trimmed for quality"
+meaning = "The share of bases Trim Galore cut from read ends below Phred 20; it trims bases, never whole reads, for quality."
+computed = "Trim Galore quality_trimmed_bp / total_bp_processed"
+unit = "%"
+table = "general_stats"
+column = "trim_galore-tg_pct_quality_trimmed"
+module = "trim_galore"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "No source gives a cut-off; a run trimmed far more than its batch had poorer late cycles."
+causes = ["a degraded run", "late cycles of a long read"]
+action = "flag"
+matters_for_de = true
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.tg_total_reads]
+stage = "trim"
+title = "Reads written by Trim Galore"
+meaning = "How many reads Trim Galore processed."
+computed = "Trim Galore total_reads"
+unit = "reads"
+table = "general_stats"
+column = "trim_galore-tg_total_reads"
+module = "trim_galore"
+scale = "log10"
+direction = "higher"
+good = 10000.0
+usable = 10000.0
+causes = ["a failed library"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "nf-core/rnaseq 3.27.0 min_trimmed_reads 10000 (nextflow.config; the fixture's params file)"
+source_type = "pipeline_default"
+
+# ---- Quantification (Salmon 2.7.0) -------------------------------------------------------
+
+[metrics.salmon_percent_mapped]
+stage = "quant"
+title = "Reads Salmon assigned"
+meaning = "The share of reads Salmon placed on an annotated transcript."
+computed = "Salmon percent_mapped (meta_info.json)"
+unit = "%"
+table = "general_stats"
+column = "salmon-percent_mapped"
+module = "salmon"
+scale = "linear"
+direction = "higher"
+bands = "dataset_only"
+rationale = "Conesa et al. 2016's 70-90 % is for reads mapped to the genome; Salmon maps to transcripts, and a decoy-aware index sends intronic, genome-like reads to decoys, so no genome band applies."
+causes = ["intronic reads from pre-mRNA", "contamination", "rRNA"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.salmon_strand_bias]
+stage = "quant"
+title = "Strand of the reads"
+meaning = "The share of reads on the transcript's own strand: near 0 or 1 in a stranded library, near 0.5 in an unstranded one."
+computed = "Salmon lib_format_counts.json: SF / (SF + SR)"
+unit = "fraction"
+table = "general_stats"
+column = "salmon-strand_mapping_bias"
+module = "salmon"
+kind = "strandedness"
+direction = "none"
+stranded = 0.8
+unstranded = 0.1
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config; the fixture's params file)"
+source_type = "pipeline_default"
+
+[metrics.salmon_compatible_ratio]
+stage = "quant"
+title = "Reads compatible with the library type"
+meaning = "The share of reads that fit the library type Salmon inferred."
+computed = "Salmon lib_format_counts.json compatible_fragment_ratio"
+unit = "fraction"
+table = "general_stats"
+column = "salmon-compatible_fragment_ratio"
+module = "salmon"
+scale = "linear"
+direction = "higher"
+bands = "dataset_only"
+rationale = "No source gives a cut-off; the dataset shows which runs stand apart."
+causes = ["a mix of library types", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+# ---- Counts: computed by ctx from the gene matrix and the GENCODE 50 gene types --------------
+
+[metrics.library_size]
+stage = "counts"
+title = "Library size"
+meaning = "How many reads were counted on genes."
+computed = "column sum of the gene counts"
+unit = "reads"
+table = "counts"
+column = "library_size"
+scale = "log10"
+direction = "higher"
+bands = "dataset_only"
+rationale = "DESeq2's size factors correct depth; a library far below the rest is noisier, not wrong. The ENCODE 30 M figure is UNVERIFIED (TODO.md, M2)."
+causes = ["a failed library", "low input"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.genes_detected]
+stage = "counts"
+title = "Genes detected"
+meaning = "How many genes have at least one read."
+computed = "genes with count >= 1"
+unit = "genes"
+table = "counts"
+column = "genes_detected"
+scale = "linear"
+direction = "higher"
+bands = "dataset_only"
+rationale = "Depends on depth and on the cell type's RNA content, which is low in neutrophils (TODO.md, M2)."
+causes = ["low depth", "degraded RNA", "a few transcripts taking most reads"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.top_gene_share]
+stage = "counts"
+title = "Share of the top gene"
+meaning = "The share of all counted reads that fall on the single most-read gene."
+computed = "largest gene count / library size"
+unit = "fraction"
+table = "counts"
+column = "top_gene_share"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "Neutrophil libraries are dominated by a few granule and ribosomal transcripts by biology; the dataset shows which run is more dominated than its peers."
+causes = ["one transcript taking most reads", "rRNA", "globin"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.mt_fraction]
+stage = "counts"
+title = "Mitochondrial transcripts"
+meaning = "The share of reads on genes of the mitochondrial genome, its rRNA genes apart."
+computed = "counts on chrM genes other than Mt_rRNA / library size"
+unit = "fraction"
+table = "counts"
+column = "mt_fraction"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "Mitochondrial content varies with cell type and state; a high share in one sample can mean stressed or dying cells."
+causes = ["dying cells", "cytoplasmic RNA loss"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.mt_rrna_fraction]
+stage = "counts"
+title = "Mitochondrial rRNA"
+meaning = "The share of reads on the two mitochondrial rRNA genes, MT-RNR1 and MT-RNR2."
+computed = "counts on GENCODE gene_type Mt_rRNA / library size"
+unit = "fraction"
+table = "counts"
+column = "mt_rrna_fraction"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "Poly-A selection removes most rRNA, not all; the dataset shows which library kept more."
+causes = ["incomplete poly-A selection or rRNA depletion"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.rrna_fraction]
+stage = "counts"
+title = "Nuclear rRNA"
+meaning = "The share of reads on nuclear rRNA genes and pseudogenes. GENCODE 50 annotates the 5S and 5.8S genes, not the 45S precursor, so 18S and 28S reads are not counted here at all."
+computed = "counts on GENCODE gene_type rRNA or rRNA_pseudogene / library size"
+unit = "fraction"
+table = "counts"
+column = "rrna_fraction"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "A lower bound on rRNA content, since most rRNA reads have no gene to land on; comparable between samples, not an absolute contamination figure."
+causes = ["incomplete poly-A selection or rRNA depletion"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.globin_fraction]
+stage = "counts"
+title = "Globin"
+meaning = "The share of reads on the haemoglobin genes HBA1, HBA2 and HBB."
+computed = "counts on HBA1, HBA2, HBB / library size"
+unit = "fraction"
+table = "counts"
+column = "globin_fraction"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "Blood-derived samples carry reticulocyte globin mRNA in varying amounts; the dataset shows which sample holds more."
+causes = ["red cell or reticulocyte carry-over"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.replicate_spearman]
+stage = "counts"
+title = "Agreement with its group"
+meaning = "How well a sample's gene ranking agrees with the other samples of its cell type and condition."
+computed = "median Spearman correlation of log counts with the other samples of the same cell type and condition"
+unit = "rho"
+table = "counts"
+column = "replicate_spearman"
+scale = "linear"
+direction = "higher"
+bands = "dataset_only"
+rationale = "ENCODE's replicate Spearman above 0.9 (isogenic) or 0.8 (anisogenic) is UNVERIFIED (TODO.md, M2), and these samples are different donors, not replicates of one."
+causes = ["a mislabelled sample", "a failed library", "a different cell population"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.pca_distance]
+stage = "counts"
+title = "Distance from its group"
+meaning = "How far a sample lies from the centre of its cell type and condition on the first two principal components of the blind VST."
+computed = "Euclidean distance to the group's median on PC1 and PC2"
+unit = "VST units"
+table = "counts"
+column = "pca_distance"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "A PCA outlier has no absolute scale; it is judged against its own group."
+causes = ["a mislabelled sample", "a batch", "a failed library"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.sex_check]
+stage = "counts"
+title = "Recorded sex against expression"
+meaning = "Whether XIST and the chrY genes agree with the sex recorded for the donor."
+computed = "ctx.de.run.sex_check: XIST against RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY (rule R8)"
+unit = "category"
+table = "counts"
+column = "sex_agrees"
+kind = "category"
+direction = "none"
+causes = ["a mislabelled sample", "a sample swap", "an HSCT recipient carrying donor cells"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "rule R8 of conf/datasets/tier1.toml; the sex genes of ctx.de.run"
+source_type = "course_convention"
+rationale = "A disagreement is a question for the metadata, never a reason on its own to drop a sample; HSCT samples are compared with donor sex."
