@@ -1,5 +1,6 @@
 """Repository layout after adopting codebase_template (D-002), and dataset independence."""
 
+import ast
 import csv
 import fnmatch
 import io
@@ -232,3 +233,20 @@ def test_rsync_matches_copied_files():
         assert any(i == pattern or fnmatch.fnmatch(pattern, i) for i in includes), pattern
     for include in includes:
         assert any(p == include or fnmatch.fnmatch(p, include) for p in COPIED_FILES), include
+
+
+def test_publish_override_single_source():
+    """The cluster run and the fixture publish the Trim Galore JSON with one override text (D-025).
+
+    Without it nf-core/rnaseq 3.27.0 publishes only the .txt reports, which MultiQC 1.35 skips for
+    Trim Galore 2.x, and the read fates of ctx qc would be empty.
+    """
+    source = (ROOT / "scripts" / "python" / "make_rnaseq_fixture.py").read_text()
+    (publish,) = [
+        node.value.value
+        for node in ast.parse(source).body
+        if isinstance(node, ast.Assign) and getattr(node.targets[0], "id", "") == "PUBLISH"
+    ]
+    todo = (ROOT / "TODO.md").read_text()
+    assert f"""cat >> "$P/rnaseq_kebnekaise.config" <<'EOF'\n{publish}EOF""" in todo
+    assert '-c "$P/rnaseq_kebnekaise.config"' in todo

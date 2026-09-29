@@ -4,15 +4,16 @@ A real nf-core/rnaseq run on its test profile, copied as written, never edited. 
 
 | Field | Value |
 | --- | --- |
-| Command | `NXF_SYNTAX_PARSER=v2 nextflow run nf-core/rnaseq -r 3.27.0 -profile test,docker,arm64 -params-file params.yml -c cap.config -work-dir <scratch>/work` |
+| Command | `NXF_SYNTAX_PARSER=v2 nextflow run nf-core/rnaseq -r 3.27.0 -profile test,docker,arm64 -params-file params.yml -c cap.config -c publish.config -work-dir <scratch>/work` |
 | Params file | `{"outdir": "out", "pseudo_aligner": "salmon", "skip_alignment": true, "save_reference": true, "salmon_index": null, "transcript_fasta": null, "additional_fasta": null, "skip_bbsplit": true}` |
 | Resource cap | `process {     resourceLimits = [cpus: 4, memory: 8.GB, time: 1.h] }` |
+| Publish override | `publish.config`: TRIMGALORE also publishes `*_trimming_report.json` (D-025) |
 | nf-core/rnaseq | v3.27.0-ga1fcddd |
 | Nextflow | 26.04.6 |
 | Salmon | 2.7.0 |
 | Profile | test,docker,arm64 |
 | Host | Darwin 24.6.0 arm64 |
-| Run date (from the params file) | 2026-09-27 |
+| Run date (from the params file) | 2026-09-30 |
 | Copied (UTC) | 2026-09-29 |
 | Params as recorded by the run | `salmon_index` = null, `transcript_fasta` = null, `additional_fasta` = null |
 
@@ -87,7 +88,7 @@ A real nf-core/rnaseq run on its test profile, copied as written, never edited. 
 | `genome/rsem/genome.seq` | 162031 |
 | `genome/rsem/genome.ti` | 46837 |
 | `genome/rsem/genome.transcripts.fa` | 151547 |
-| `multiqc/multiqc_report.html` | 2958559 |
+| `multiqc/multiqc_report.html` | 2958993 |
 | `multiqc/multiqc_report_data/fastqc_raw-status-check-heatmap.txt` | 599 |
 | `multiqc/multiqc_report_data/fastqc_raw_adapter_content_plot.txt` | 5706 |
 | `multiqc/multiqc_report_data/fastqc_raw_overrepresented_sequences_plot.txt` | 318 |
@@ -110,9 +111,9 @@ A real nf-core/rnaseq run on its test profile, copied as written, never edited. 
 | `multiqc/multiqc_report_data/fastqc_trimmed_sequence_counts_plot.txt` | 284 |
 | `multiqc/multiqc_report_data/fastqc_trimmed_sequence_duplication_levels_plot.txt` | 3093 |
 | `multiqc/multiqc_report_data/fastqc_trimmed_top_overrepresented_sequences_table.txt` | 1581 |
-| `multiqc/multiqc_report_data/llms-full.txt` | 195783 |
-| `multiqc/multiqc_report_data/multiqc.log` | 54930 |
-| `multiqc/multiqc_report_data/multiqc.parquet` | 154039 |
+| `multiqc/multiqc_report_data/llms-full.txt` | 195969 |
+| `multiqc/multiqc_report_data/multiqc.log` | 54927 |
+| `multiqc/multiqc_report_data/multiqc.parquet` | 154072 |
 | `multiqc/multiqc_report_data/multiqc_citations.txt` | 187 |
 | `multiqc/multiqc_report_data/multiqc_data.json` | 2329836 |
 | `multiqc/multiqc_report_data/multiqc_fastqc_fastqc_raw.txt` | 1884 |
@@ -221,9 +222,9 @@ A real nf-core/rnaseq run on its test profile, copied as written, never edited. 
 | `multiqc/multiqc_report_plots/svg/trim_galore_filtered_reads_plot-cnt.svg` | 14598 |
 | `multiqc/multiqc_report_plots/svg/trim_galore_filtered_reads_plot-pct.svg` | 14597 |
 | `multiqc/multiqc_report_plots/svg/trim_galore_pair_validation_table.svg` | 51791 |
-| `pipeline_info/execution_report_2026-09-27_15-54-26.html` | 1776622 |
-| `pipeline_info/execution_timeline_2026-09-27_15-54-26.html` | 267156 |
-| `pipeline_info/pipeline_dag_2026-09-27_15-54-26.html` | 22296 |
+| `pipeline_info/execution_report_2026-09-30_00-01-05.html` | 1776551 |
+| `pipeline_info/execution_timeline_2026-09-30_00-01-05.html` | 267510 |
+| `pipeline_info/pipeline_dag_2026-09-30_00-01-05.html` | 22296 |
 | `salmon/RAP1_IAA_30M_REP1/aux_info/ambig_info.tsv` | 607 |
 | `salmon/RAP1_IAA_30M_REP1/aux_info/expected_bias.gz` | 25 |
 | `salmon/RAP1_IAA_30M_REP1/aux_info/fld.gz` | 407 |
@@ -301,6 +302,14 @@ A real nf-core/rnaseq run on its test profile, copied as written, never edited. 
 | `salmon/salmon.merged.transcript_tpm.tsv` | 7592 |
 | `salmon/salmon.merged.tx2gene.tsv` | 2910 |
 | `salmon/salmon.merged.tx2gene_augmented.tsv` | 2910 |
+| `trimgalore/RAP1_IAA_30M_REP1_trimmed_1.fastq.gz_trimming_report.txt` | 2606 |
+| `trimgalore/RAP1_IAA_30M_REP1_trimmed_2.fastq.gz_trimming_report.txt` | 2944 |
+| `trimgalore/RAP1_UNINDUCED_REP1_trimmed.fastq.gz_trimming_report.txt` | 2614 |
+| `trimgalore/RAP1_UNINDUCED_REP2_trimmed.fastq.gz_trimming_report.txt` | 2620 |
+| `trimgalore/WT_REP1_trimmed_1.fastq.gz_trimming_report.txt` | 2663 |
+| `trimgalore/WT_REP1_trimmed_2.fastq.gz_trimming_report.txt` | 2963 |
+| `trimgalore/WT_REP2_trimmed_1.fastq.gz_trimming_report.txt` | 2612 |
+| `trimgalore/WT_REP2_trimmed_2.fastq.gz_trimming_report.txt` | 2911 |
 
 ## Scope
 

@@ -22,14 +22,15 @@ MATRIX_FILE = "salmon/salmon.merged.gene_counts_length_scaled.tsv"
 # is the length-scaled one (D-007).
 READ_FILES = (MATRIX_FILE, VERSIONS_FILE, "pipeline_info/params_*.json")
 # What leaves the cluster, the fixture and the bundle: READ_FILES plus per-sample library
-# format and mapping facts, the Trim Galore reports (the read fates of `ctx qc`, D-022) and the
-# trace (measured time and memory). Transcript matrices, .rds files, MultiQC and the HTML
+# format and mapping facts, the Trim Galore JSON reports (the read fates of `ctx qc`, D-022; JSON
+# because MultiQC 1.35 reads Trim Galore 2.x from nothing else, D-025) and the trace (measured
+# time and memory). Transcript matrices, .rds files, MultiQC and the HTML
 # reports stay on the cluster.
 COPIED_FILES = (
     *READ_FILES,
     "salmon/*/lib_format_counts.json",
     "salmon/*/aux_info/meta_info.json",
-    "trimgalore/*_trimming_report.txt",
+    "trimgalore/*_trimming_report.json",
     "pipeline_info/execution_trace_*.txt",
 )
 # Every params file of one outdir must agree on these; -resume adds a file per launch.

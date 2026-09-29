@@ -51,6 +51,38 @@ PARAMS = {
 NULLED = ("salmon_index", "transcript_fasta", "additional_fasta")
 # The test profile allows 15 GB; fetchngs failed at 36 GB on a 24 GB Mac (D-006).
 CAP = "process {\n    resourceLimits = [cpus: 4, memory: 8.GB, time: 1.h]\n}\n"
+# nf-core/rnaseq 3.27.0 publishes only TRIMGALORE's *.txt reports
+# (conf/modules/qc_trim_filter.config), and MultiQC 1.35 reads Trim Galore 2.x only from
+# *_trimming_report.json (D-025). The same three entries, the last widened to the JSON report;
+# the cluster block in TODO.md carries this text, held equal by
+# tests/test_repo.py::test_publish_override_single_source. One Groovy line is split in two
+# literals only to keep this file within the line length.
+PUBLISH = (
+    """process {
+    withName: '.*:FASTQ_FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE' {
+        publishDir = [
+            [
+                path: { "${params.outdir}/${task.ext.publish_prefix}fastqc/trim" },
+                mode: params.publish_dir_mode,
+                pattern: "*.{html,zip}"
+            ],
+            [
+                path: { params.save_trimmed ? "${params.outdir}/${task.ext.publish_prefix}"""
+    """${params.trimmer}" : params.outdir },
+                mode: params.publish_dir_mode,
+                pattern: "*.fq.gz",
+                saveAs: { filename -> params.save_trimmed ? filename : null }
+            ],
+            [
+                path: { "${params.outdir}/${task.ext.publish_prefix}${params.trimmer}" },
+                mode: params.publish_dir_mode,
+                pattern: "*_trimming_report.{txt,json}"
+            ]
+        ]
+    }
+}
+"""
+)
 CANNOT = (
     "GENCODE and `--gencode`; single-end 75-101 nt human reads; the cluster's Nextflow "
     "26.04.4 with Apptainer; the test GTF has transcripts with empty IDs, which the cluster "
@@ -81,7 +113,8 @@ def command_for(work: Path, version: str, profile: str) -> list[str]:
     """The pipeline command, as run() runs it."""
     return [
         "nextflow", "run", "nf-core/rnaseq", "-r", version, "-profile", profile,
-        "-params-file", "params.yml", "-c", "cap.config", "-work-dir", str(work / "work"),
+        "-params-file", "params.yml", "-c", "cap.config", "-c", "publish.config",
+        "-work-dir", str(work / "work"),
     ]  # fmt: skip
 
 
@@ -94,6 +127,7 @@ def run(scratch: Path, version: str, profile: str) -> list[str]:
     # JSON is valid YAML, and it writes null and true exactly.
     (work / "params.yml").write_text(json.dumps(PARAMS, indent=2) + "\n")
     (work / "cap.config").write_text(CAP)
+    (work / "publish.config").write_text(PUBLISH)
     command = command_for(work, version, profile)
     env = {**os.environ, "NXF_SYNTAX_PARSER": "v2", "NXF_ANSI_LOG": "false",
            "NXF_HOME": str(scratch / "nxf_home")}  # fmt: skip
@@ -139,6 +173,8 @@ def write_readme(out: Path, command: list[str], profile: str, omitted: list) -> 
         f"| Command | `NXF_SYNTAX_PARSER=v2 {' '.join(command[:-1])} <scratch>/work` |",
         f"| Params file | `{json.dumps(PARAMS)}` |",
         f"| Resource cap | `{CAP.strip().replace(chr(10), ' ')}` |",
+        "| Publish override | `publish.config`: TRIMGALORE also publishes "
+        "`*_trimming_report.json` (D-025) |",
         f"| nf-core/rnaseq | {found.get('nf-core/rnaseq', 'not found')} |",
         f"| Nextflow | {found.get('Nextflow', 'not found')} |",
         f"| Salmon | {found.get('salmon', 'not found')} |",
