@@ -492,7 +492,7 @@ Stage 0, before or beside the cluster run:
 - [x] **S0.1** `scripts/python/record_sanity.py` writes the Step-1 record: the hub's verdicts byte for byte and the M5+M6 metrics union (D-026, 143923a).
 - [x] **S0.2** A `reads` pixi environment, outside the `main` solve group, so the analysis environment does not move before the record (MultiQC 1.35 needs plotly < 7; htslib 1.21 conflicts with the locked libtiff): fastqc 0.12.1, fastp 1.3.6, seqkit 2.13.0, seqtk 1.4, multiqc 1.35, star 2.7.11b, samtools and htslib 1.21, subread 2.1.1, salmon 2.7.0, trim-galore 2.3.0, hisat2 2.2.3, the nf-core/rnaseq 3.27.0 pins where it has one. `ctx.tools` finds each binary in the sibling `reads` environment, else `$CTX_TOOLS`, and refuses a version other than the pin. `pixi list` of default and laptop unchanged; the new environment's size measured. pytximport waits for M4. Done 2026-09-30 (D-027): no other environment moved; fastp 1.1.0 and samtools 1.22.1, because no osx-arm64 solve holds STAR beside fastp 1.3.6; 1.6 GB.
 - [x] **S0.3** A single-end chr22 fixture beside `tests/fixtures/chr22/` (Step-1 is single-end 75-101 nt): four reverse-stranded samples and one unstranded, a planted adapter-heavy and a degraded sample, from the committed transcripts with a fixed seed; generator in `scripts/python/`. Done 2026-09-30: `tests/fixtures/chr22_se/`, 5 × 1,000 reads, 1.1 MB; 276 of se_c's reads run into the adapter; `tests/test_fixtures_se.py` checks every read against its name with its own parser and rebuilds the fixture byte for byte.
-- [ ] **S0.4** The Track A teaching subset: `scripts/python/pick_teaching_subset.py` picks 8 runs from the gathered sheet (4 distinct donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; monocyte isolation matched across strata; an empty sex never preferred), and a "Phase 3 cluster commands (P3.0)" block: a separate fetchngs run on those runs, `seqtk sample -s42` to 1M reads, rewritten md5s, chr22 genome, GTF, transcripts and tx2gene from GENCODE 50, a STAR chr22 index and Salmon chr22 indices with and without decoys, each measured, copied to `data/raw/` on the Mac. The 8 accessions go in after P2C.2.
+- [x] **S0.4** The Track A teaching subset: `scripts/python/pick_teaching_subset.py` picks 8 runs from the gathered sheet (4 distinct donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; monocyte isolation matched across strata; an empty sex never preferred), and a "Phase 3 cluster commands (P3.0)" block: a separate fetchngs run on those runs, `seqtk sample -s42` to 1M reads, rewritten md5s, chr22 genome, GTF, transcripts and tx2gene from GENCODE 50, a STAR chr22 index and Salmon chr22 indices with and without decoys, each measured, copied to `data/raw/` on the Mac. The 8 accessions go in after P2C.2. Done 2026-09-30, changed from this plan: the 8 runs were chosen now from the gathered sheet, which the rule reads alone, so the cluster can fetch them beside P2A.3; the donor for healthy at 101 nt has no recorded sex, the only one left once monocyte isolation is matched; the indices move to M3 on the laptop (about 1 GB for chr22), so the cluster block only fetches and subsamples ("Phase 3 cluster commands (P3.0)").
 
 M2 to its full spec (TODO.md M2 section, P2Q.2-P2Q.6, the Phase 3 M2 items):
 - [ ] **M2.1** `ctx.qc.multiqc_io`: MultiQC by subprocess from the `reads` environment, module tables read with Polars, every sample name mapped or refused, every expected Trim Galore and Salmon source present; `outputs/02_qc/multiqc/` exempt from the naming lint (D-entry). Tested on the rnaseq fixture's JSON reports; read fates add up to Salmon's `num_processed`.
@@ -542,7 +542,7 @@ Built after P2C.3, so the registered Step-1 analysis stays as registered; the fr
 
 ### Phase 3 — Track A on the Step-1 subset
 
-- [ ] Instructor-side: on Kebnekaise, through the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`, `NXF_SYNTAX_PARSER=v1`, `monochrome_logs = true` in `<project_dir>/nfcore_fetchngs/nextflow.config`, a fresh project directory per run), fetch exactly the chosen subset runs with nf-core/fetchngs -r 1.12.0 (a full-study run, metadata-only or for Salmon counts, stays a separate outdir); subsample with `seqtk sample -s42` keeping fetchngs file names; write new `fastq/md5/*.md5` for the subsampled files and a README naming the samplesheet columns that describe the original runs (`read_count`, `base_count`, `fastq_bytes`, `fastq_md5`); build chr22 STAR index; host subset outdir + indices on Zenodo
+- [ ] Instructor-side: on Kebnekaise, through the lab's `SHARED_run_fetchngs.sbatch` (`-profile singularity`, `NXF_SYNTAX_PARSER=v1`, `monochrome_logs = true` in `<project_dir>/nfcore_fetchngs/nextflow.config`, a fresh project directory per run), fetch exactly the chosen subset runs with nf-core/fetchngs -r 1.12.0 (a full-study run, metadata-only or for Salmon counts, stays a separate outdir); subsample with `seqtk sample -s42` keeping fetchngs file names; write new `fastq/md5/*.md5` for the subsampled files and a README naming the samplesheet columns that describe the original runs (`read_count`, `base_count`, `fastq_bytes`, `fastq_md5`); build chr22 STAR index; host subset outdir + indices on Zenodo. Since 2026-09-30: the runs are chosen and the commands written ("Phase 3 cluster commands (P3.0)", P2M S0.4); the chr22 indices are built by M3 on the laptop
 - [ ] M1a/M1b content: `docs/accessions.md` (three routes, ID hierarchy, budget from `fastq_bytes`), class exercises (a metadata-only run; the 2–4 smallest runs downloaded, checked by `ctx gather`)
 - [ ] QC registry `conf/qc_metrics.toml`: schema, loader and MultiQC config generator; one metric end to end (registry, MultiQC colouring, atlas strip plot) with its source; P2Q.3 starts the file with the metrics the read-fates chart uses
 - [ ] M2a on the laptop subset: FastQC + fastp + seqkit into MultiQC with the generated config; QC atlas and status table; planted problems (adapter-heavy, quality-degraded, sex-label swap)
@@ -2146,6 +2146,78 @@ The cluster settings come from:
 - `SHARED_run_fetchngs.sbatch`: the account, the `nextflow_env.sh` path and the launch directory;
 - `hpc2n_verified.md`: queueSize 50 and Nextflow 26.04.4;
 - the 3.27.0 `nextflow.config` and `base.config`: the rnaseq keys, bbsplit off by default, and 36 GB × attempt, so there is no memory override.
+
+### Phase 3 cluster commands (P3.0), the only copy
+
+The Track A teaching subset: the 8 runs `scripts/python/pick_teaching_subset.py` chose from the gathered Step-1 sheet on 2026-09-30 (P2M S0.4; 4 donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; neutrophil-kit NDN and FACS monocytes throughout), fetched by fetchngs into their own outdir, then subsampled to 1M reads each. The STAR and Salmon chr22 indices are built on the laptop in M3, where chr22 needs about 1 GB, not here.
+
+```
+# Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
+# Runs beside P2A.3 and never touches its directory. It downloads its own copy of the 8 runs:
+# 12,571,333,511 bytes of FASTQ by ENA's fastq_bytes. A relaunch uses a fresh $Q, because
+# -resume writes a second params file, which ctx gather refuses.
+
+# ---- 0. Run root and space ----
+export Q=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1_teach
+mkdir -p "$Q/nfcore_fetchngs" "$Q/containers" "$Q/logs"
+cd "$Q"
+df -h /proj/nobackup/hpc2n2024-150                                    # PASTE
+
+# ---- 1. The 8 runs with the lab launcher (nf-core/fetchngs 1.12.0) ----
+printf 'executor {\n    queueSize = 50\n}\nparams {\n    monochrome_logs = true\n}\n' > "$Q/nfcore_fetchngs/nextflow.config"
+printf '%s\n' ERR7425381 ERR7425382 ERR7425405 ERR7425406 ERR7425288 ERR7425289 ERR7425270 ERR7425271 > "$Q/ids.txt"
+PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$Q" "$Q/ids.txt" rnaseq     # PASTE, expect 8 accessions and "publish mode : link"
+PUBLISH_DIR_MODE=link sbatch /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$Q" "$Q/ids.txt" rnaseq
+
+# ---- 2. After the fetchngs job ----
+R="$Q/nfcore_fetchngs/results"
+tail -n 12 "$Q"/slurm-nf_fetchngs-*.out                               # PASTE
+ls "$R" "$R/fastq"                                                    # PASTE, expect the launcher's accession list and 8 FASTQs
+(cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done)   # PASTE, expect 8 OK
+
+# ---- 3. The seqtk 1.4 image: 6,545,408 bytes from depot.galaxyproject.org (HEAD, 2026-09-30) ----
+wget -nv -O "$Q/containers/seqtk_1.4.sif" https://depot.galaxyproject.org/singularity/seqtk:1.4--he4a0461_1
+apptainer exec "$Q/containers/seqtk_1.4.sif" seqtk 2>&1 | grep -i version    # PASTE, expect 1.4-r122
+
+# ---- 4. Subsample to 1M reads, fetchngs's names kept, md5s rewritten: one job ----
+cat > "$Q/subsample.sbatch" <<'EOF'
+#!/usr/bin/env bash
+#SBATCH -J teach_subsample
+#SBATCH -A hpc2n2026-161
+#SBATCH -n 1
+#SBATCH -c 2
+#SBATCH --mem=8G
+#SBATCH -t 0-04:00:00
+#SBATCH -o slurm-%x-%j.out
+set -euo pipefail
+R="$Q/nfcore_fetchngs/results"; O="$Q/outdir"
+cd "$Q"
+ls -l /usr/bin/time
+rsync -a --exclude fastq/ "$R/" "$O/"
+mkdir -p "$O/fastq/md5"
+for f in "$R"/fastq/*.fastq.gz; do
+    n=$(basename "$f")
+    /usr/bin/time -v -o "logs/seqtk_${n%.fastq.gz}.time" apptainer exec -B /proj/nobackup/hpc2n2024-150 "$Q/containers/seqtk_1.4.sif" seqtk sample -s42 "$f" 1000000 | gzip -n > "$O/fastq/$n"
+    (cd "$O/fastq" && md5sum "$n" > "md5/$n.md5")
+done
+{ printf '# Teaching subset\n\nThe fetchngs 1.12.0 outdir of 8 runs; each FASTQ replaced by `seqtk sample -s42 <file> 1000000 | gzip -n` (seqtk 1.4); fastq/md5/ rewritten. read_count, base_count, fastq_bytes and fastq_md5 in samplesheet/ and metadata/ describe the ORIGINAL runs.\n\n| file | reads | bytes | md5 |\n|---|---|---|---|\n'
+  for f in "$O"/fastq/*.fastq.gz; do n=$(basename "$f"); printf '| %s | %s | %s | %s |\n' "$n" "$(gzip -dc "$f" | awk 'END{print NR/4}')" "$(stat -c %s "$f")" "$(cut -d' ' -f1 "$O/fastq/md5/$n.md5")"; done
+} > "$O/README.md"
+EOF
+sbatch --export=ALL,Q="$Q" "$Q/subsample.sbatch"
+
+# ---- 5. When the job ends ----
+tail -n 5 "$Q"/slurm-teach_subsample-*.out                            # PASTE
+cat "$Q/outdir/README.md"                                             # PASTE, expect 8 files of 1000000 reads
+grep -H -e 'Elapsed (wall' -e 'Maximum resident' "$Q"/logs/*.time     # PASTE
+du -sh "$Q/outdir"                                                    # PASTE
+
+# ---- 6. On the Mac ----
+mkdir -p ~/ctx_tier1/data/raw/tier1_teach
+rsync -av rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1_teach/outdir/ ~/ctx_tier1/data/raw/tier1_teach/
+du -sh ~/ctx_tier1/data/raw/tier1_teach                               # PASTE
+# Later, Rytis: Zenodo, once the redistribution terms are decided (the IDF names no licence).
+```
 
 ### Phase 2 dependencies
 
