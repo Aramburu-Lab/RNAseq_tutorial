@@ -90,6 +90,21 @@ class Metric:
             return "good" if v >= self.good else "usable" if v >= self.usable else "bad"
         return "good" if v <= self.good else "usable" if v <= self.usable else "bad"
 
+    def spans(self) -> list[tuple[str, float | None, float | None]]:
+        """The absolute bands as ranges of values, (band, low, high), None at an open end.
+
+        The ranges ``band()`` assigns; a usable band with no width, where a source gives one
+        cut-off, is left out.
+        """
+        if not self.banded or self.good is None or self.usable is None:
+            return []
+        good, usable = self.good, self.usable
+        if self.direction == "higher":
+            ranges = [("good", good, None), ("usable", usable, good), ("bad", None, usable)]
+        else:
+            ranges = [("good", None, good), ("usable", good, usable), ("bad", usable, None)]
+        return [r for r in ranges if r[1] is None or r[2] is None or r[1] < r[2]]
+
     def strandedness(self, bias: float) -> str:
         """The library type a strand bias SF / (SF + SR) shows, by nf-core/rnaseq's thresholds.
 

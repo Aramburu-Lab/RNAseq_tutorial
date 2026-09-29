@@ -22,6 +22,7 @@ from synth import (
     demo_box,
     demo_ma,
     demo_pca,
+    demo_strip,
     demo_volcano,
 )
 
@@ -33,6 +34,7 @@ from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.axes import axis_title
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
 from ctx.viz.scatter import THIN_MAX, Calls, ScatterData
+from ctx.viz.strip import StripData
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
     AXIS_TITLE_SHARE,
@@ -311,6 +313,8 @@ def _contracts():
         "bar_horizontal": demo_bar(synthetic, horizontal=True),
         "composition_20_groups": demo_bars_at_scale(horizontal=True),
         "library_sizes_210_runs": demo_bars_at_scale(horizontal=False),
+        "strip": demo_strip(),
+        "strip_log_double": demo_strip(log=True, width="double"),
     }
 
 
@@ -328,6 +332,8 @@ def axis_titles(data) -> list[tuple[str, str]]:
         return [(data.value_label, data.unit)]
     if isinstance(data, ScatterData):
         return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
+    if isinstance(data, StripData):
+        return [(data.value_label, data.columns[data.value][0])]
     return [(data.value_label, data.columns[data.value][0])]
 
 
@@ -431,6 +437,8 @@ OVERLAP_CASES = {
     "bar_horizontal": lambda s: demo_bar(s, horizontal=True),
     "composition_20_groups": lambda s: demo_bars_at_scale(horizontal=True),
     "library_sizes_210_runs": lambda s: demo_bars_at_scale(horizontal=False),
+    "strip": lambda s: demo_strip(),
+    "strip_log": lambda s: demo_strip(log=True),
 }
 
 

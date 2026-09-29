@@ -472,3 +472,58 @@ def write_gene_sets(path, n_genes: int = 1000, seed: int = 5, n_random: int = 20
     path.write_text(
         "".join(f"{name}\tsynthetic\t" + "\t".join(genes) + "\n" for name, genes in sets.items())
     )
+
+
+def demo_strip(log: bool = False, width: str = "single"):  # returns ctx StripData
+    """A QC strip: one metric in three strata of eight, one planted low sample, two bands.
+
+    The grey bars are each stratum's median ± 3 scaled MAD, computed here with scipy, so the
+    figure's numbers are checked against a second computation.
+    """
+    from scipy.stats import median_abs_deviation  # noqa: PLC0415
+
+    from ctx.viz.strip import Range, Span, StripData  # noqa: PLC0415
+    from ctx.viz.style import category_colours  # noqa: PLC0415
+
+    rng = np.random.default_rng(3)
+    centres = {"PB / NDN": 9000.0, "PB / Mono": 12000.0, "BM / NDN": 10000.0}
+    scale = 1000.0 if log else 1.0
+    rows = [
+        (f"S{8 * k + i:03d}", stratum, "case" if i % 2 else "control",
+         float(centre * scale * np.exp(rng.normal(0.0, 0.05))))
+        for k, (stratum, centre) in enumerate(centres.items()) for i in range(8)
+    ]  # fmt: skip
+    rows[3] = (*rows[3][:3], 4000.0 * scale)
+    frame = pl.DataFrame(rows, schema=["sample", "stratum", "condition", "value"], orient="row")
+    ranges = []
+    for stratum in centres:
+        values = frame.filter(pl.col("stratum") == stratum)["value"].to_numpy()
+        x = np.log10(values) if log else values
+        median, mad = np.median(x), median_abs_deviation(x, scale="normal")
+        ends = np.array([median, median - 3 * mad, median + 3 * mad])
+        centre, low, high = (float(v) for v in (10**ends if log else ends))
+        ranges.append(Range(stratum, centre, low, high))
+    low = {r.level: r.low for r in ranges}
+    frame = frame.with_columns(
+        flagged=pl.col("value") < pl.col("stratum").replace_strict(low, return_dtype=pl.Float64)
+    ).with_columns(
+        reason=pl.when("flagged").then(pl.lit("below its stratum")).otherwise(pl.lit(""))
+    )
+    columns = {
+        "sample": ("none", "Synthetic sample."), "stratum": ("none", "Tissue / cell type."),
+        "condition": ("none", "Condition."),
+        "value": ("reads" if log else "genes", "Library size." if log else "Genes detected."),
+        "flagged": ("none", "Below its stratum's median minus 3 scaled MAD."),
+        "reason": ("none", "Why the sample is flagged."),
+    }  # fmt: skip
+    return StripData(
+        frame=frame, columns=columns, category="stratum", value="value",
+        category_label="Stratum", value_label="Library size" if log else "Genes detected",
+        colour="condition", colours=category_colours(["control", "case"]),
+        caption="Grey bars: median ± 3 scaled MAD per stratum; triangles are flagged. "
+        "Shaded: the metric's absolute bands. Synthetic data; no test.",
+        flagged="flagged", flag_label="flagged", hover=("sample", "reason"),
+        spans=(Span("bad", "bad", None, 5000.0 * scale),
+               Span("good", "good", 8000.0 * scale, None)),
+        ranges=tuple(ranges), range_label="median ± 3 MAD", log=log, width=width,
+    )  # fmt: skip

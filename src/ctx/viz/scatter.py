@@ -139,7 +139,7 @@ def _js_number(value: float) -> str:
     return f"{value:.10g}"
 
 
-def _plain_log_ticks(axis: Any) -> None:
+def plain_log_ticks(axis: Any, subs: tuple[float, ...] | None = None) -> None:
     """Label a log axis 100, 1,000, 10,000.
 
     Matplotlib's own log labels are mathtext: the exponent is drawn at 0.7 of the tick size,
@@ -147,9 +147,13 @@ def _plain_log_ticks(axis: Any) -> None:
 
     Args:
         axis: A matplotlib axis already on a log scale.
+        subs: Labelled multiples within each decade, e.g. (1, 2, 5) for an axis spanning less
+            than one; None keeps matplotlib's decades.
     """
-    from matplotlib.ticker import FuncFormatter, NullFormatter  # noqa: PLC0415 - heavy
+    from matplotlib.ticker import FuncFormatter, LogLocator, NullFormatter  # noqa: PLC0415
 
+    if subs:
+        axis.set_major_locator(LogLocator(base=10, subs=subs))
     axis.set_major_formatter(FuncFormatter(lambda value, _: f"{value:,.10g}"))
     axis.set_minor_formatter(NullFormatter())
 
@@ -371,7 +375,7 @@ class ScatterData:
         ax.set_yscale("log" if self.log_y else "linear")
         for axis, log in ((ax.xaxis, self.log_x), (ax.yaxis, self.log_y)):
             if log:
-                _plain_log_ticks(axis)
+                plain_log_ticks(axis)
         ax.set_xlabel(self._axis_title(self.x_label, self.x))
         ax.set_ylabel(fit_title(self._axis_title(self.y_label, self.y), height))
         present = set(self.frame[self.colour].unique())

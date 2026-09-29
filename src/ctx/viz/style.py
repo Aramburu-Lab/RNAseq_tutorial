@@ -22,6 +22,8 @@ PROJECTOR_UNSAFE = frozenset({"#F0E442"})
 ROLES = {"reference": "#0072B2", "comparison": "#D55E00"}
 # A QC band's colour, from the Okabe-Ito data colours (ctx.qc.registry, conf/qc_metrics.toml).
 BAND_COLOURS = {"good": "#009E73", "usable": "#E69F00", "bad": "#D55E00"}
+# Opacity of a band shaded behind points: a tint, so the points drawn over it keep their colour.
+BAND_ALPHA = 0.15
 
 # Liberation Sans is Arial's metric twin, which a machine without Arial may redistribute.
 FONT_CHAIN = ("Arial", "Liberation Sans", "DejaVu Sans")
@@ -31,7 +33,9 @@ SIZES = {
 }  # fmt: skip
 # No text below this; a mathtext superscript on a 9 pt tick would be 6.3 pt, so none is drawn.
 MIN_TEXT_PT = 8.0
-LINE_WIDTHS = {"axes": 1.0, "line": 1.0, "box": 1.5, "errorbar": 1.5, "marker_edge": 0.0}
+# A shaded band has no outline, as a point has no edge.
+LINE_WIDTHS = {"axes": 1.0, "line": 1.0, "box": 1.5, "errorbar": 1.5, "marker_edge": 0.0,
+               "band_edge": 0.0}  # fmt: skip
 TICK_PT = {"major": 3.0, "minor": 1.5}
 # Point diameter in pt, and its opacity, so overplotted points still show their density.
 MARKER_SIZE = 6.0
@@ -42,7 +46,7 @@ PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT
 # Panel letters: bold capitals at the top left, nudged up by dy_pt (no figure has panels yet).
 PANEL_LABEL = {"size": SIZES["panel"], "weight": "bold", "dx_pt": 0.0, "dy_pt": 2.0}
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
-ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0}
+ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1}
 # Point shapes for a second category, in level order: (matplotlib, plotly).
 MARKERS = (
     ("o", "circle"),
@@ -51,6 +55,9 @@ MARKERS = (
     ("D", "diamond"),
     ("v", "triangle-down"),
 )
+# A strip plot spreads a category's points over this share of its slot either side of the
+# centre, and draws its median ± k MAD bar over a little more.
+STRIP = {"jitter": 0.3, "range": 0.4}
 # Average glyph width in em, used to wrap the caption to the width a figure really has.
 AVERAGE_CHAR_EM = 0.55
 # Above this many features a box plot takes the double column: at 9 pt the p and r labels of
@@ -154,7 +161,7 @@ LAYOUT = {
 }  # fmt: skip
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640
-PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400}
+PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440}
 # Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed
@@ -179,6 +186,12 @@ def category_colours(levels: list[str]) -> dict[str, str]:
     if len(levels) > MAX_CATEGORIES:
         raise ValueError(f"{len(levels)} categories; at most {MAX_CATEGORIES} can be coloured")
     return dict(zip(levels, DATA_COLOURS, strict=False))
+
+
+def tint(colour: str, alpha: float) -> str:
+    """A hex colour as CSS rgba at an opacity: a filled area's tint, its outline left whole."""
+    red, green, blue = (int(colour[i : i + 2], 16) for i in (1, 3, 5))
+    return f"rgba({red},{green},{blue},{alpha})"
 
 
 def figure_inches(width: str, kind: str) -> tuple[float, float]:
