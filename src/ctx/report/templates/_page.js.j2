@@ -186,6 +186,17 @@
       fc.value = ctxCalls.switchUnit(state, fc.value, unit.value);
       update(true);
     });
+    function stepCutoff(dir) {
+      cutoff.value = String(ctxCalls.step(cutoff.value, dir, cfg));
+      update(true);
+    }
+    cutoff.addEventListener("keydown", function (e) {
+      var dir = e.key === "ArrowUp" ? 1 : e.key === "ArrowDown" ? -1 : 0;
+      if (dir) { e.preventDefault(); stepCutoff(dir); }
+    });
+    form.querySelectorAll("[data-step]").forEach(function (b) {
+      b.addEventListener("click", function () { stepCutoff(Number(b.getAttribute("data-step"))); });
+    });
     form.addEventListener("input", function (e) { if (e.target !== unit) update(false); });
     form.addEventListener("change", function (e) { if (e.target !== unit) update(true); });
     form.addEventListener("submit", function (e) { e.preventDefault(); });

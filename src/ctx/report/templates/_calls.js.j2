@@ -31,9 +31,20 @@ var ctxCalls = {
   /* The cutoff actually applied: the default for an empty box, else clamped to the range the
      box states, so the box and the rule never disagree. */
   cutoff: function (value, cfg) {
-    var v = parseFloat(value);
+    var v = parseFloat(String(value).replace(",", "."));
     if (!isFinite(v)) return cfg.alpha;
     return Math.min(cfg.max_cutoff, Math.max(cfg.min_cutoff, v));
+  },
+  /* One rung stricter (dir < 0) or looser (dir > 0) on the ladder of the presets and the two
+     bounds. A typed value between rungs goes to the next rung; at either end it stays. */
+  step: function (value, dir, cfg) {
+    var v = ctxCalls.cutoff(value, cfg);
+    var rungs = cfg.presets.map(Number).concat([cfg.min_cutoff, cfg.max_cutoff])
+      .sort(function (a, b) { return a - b; });
+    var next = dir < 0
+      ? rungs.filter(function (r) { return r < v; }).pop()
+      : rungs.filter(function (r) { return r > v; })[0];
+    return next === undefined ? v : next;
   },
   /* The raw p the cutoff sits at, as ctx.de.stats.p_line defines it: the bar the weakest
      passing gene cleared, so it moves with every cutoff. passing counts the tested genes

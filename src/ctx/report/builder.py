@@ -322,9 +322,7 @@ def _defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
         "fc": f"{controls['lfc_min']:g}",
         "bases": list(controls["bases"].items()),
         "alpha": f"{controls['alpha']:g}",
-        "max_cutoff": f"{controls['max_cutoff']:g}",
-        "min_cutoff": f"{controls['min_cutoff']:g}",
-        "presets": controls["presets"],
+        "presets": sorted({*controls["presets"], f"{controls['min_cutoff']:g}"}, key=float),
         "summary": controls["default_summary"],
     }
 

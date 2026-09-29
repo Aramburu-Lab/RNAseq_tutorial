@@ -9,8 +9,7 @@
 <form class="calls" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="Cutoffs for calling genes">
 <label>Fold change at least<span class="pair"><input name="fc" type="number" min="0" step="any" value="{{ f.defaults.fc }}" aria-label="Fold-change threshold"><select name="fc_unit" aria-label="Fold-change unit"><option value="log2" selected>log2 FC</option><option value="pct">% change</option></select></span></label>
 <label>Significance<select name="basis">{% for column, words in f.defaults.bases %}<option value="{{ column }}"{% if loop.first %} selected{% endif %}>{{ words }}</option>{% endfor %}</select></label>
-<label>Below<input name="cutoff" type="number" min="{{ f.defaults.min_cutoff }}" max="{{ f.defaults.max_cutoff }}" step="any" value="{{ f.defaults.alpha }}" list="cutoffs-{{ f.index }}"></label>
-<datalist id="cutoffs-{{ f.index }}">{% for c in f.defaults.presets %}<option value="{{ c }}"></option>{% endfor %}</datalist>
+<label>Below<span class="pair"><input name="cutoff" type="text" inputmode="decimal" autocomplete="off" value="{{ f.defaults.alpha }}" aria-label="Cutoff; the arrow keys step through {{ f.defaults.presets | join(', ') }}"><button type="button" data-step="-1" aria-label="Stricter: the next smaller cutoff" title="Stricter: the next smaller cutoff">&#9660;</button><button type="button" data-step="1" aria-label="Looser: the next larger cutoff" title="Looser: the next larger cutoff">&#9650;</button></span></label>
 <button type="reset">Reset</button>
 </form>
 <noscript><p class="note">This is the default rule; turn on JavaScript to move the cutoffs.</p></noscript>

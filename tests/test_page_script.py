@@ -21,11 +21,14 @@ from ctx.de.deseq import fit
 from ctx.de.run import _volcano
 from ctx.de.stats import ADJUSTMENTS, adjust, classify, p_line
 from ctx.viz.save import figure_block
+from ctx.viz.scatter import CUTOFF_PRESETS, MIN_CUTOFF, _js_number
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_calls.js.j2"
+# The presets as the page's controls carry them, from their one definition.
 CFG = {"gate": "padj", "lfc": "log2FoldChange", "p": "pvalue", "alpha": 0.05,
-       "min_cutoff": 0.0001, "max_cutoff": 0.1, "n_tested": 400}  # fmt: skip
+       "min_cutoff": MIN_CUTOFF, "max_cutoff": max(CUTOFF_PRESETS), "n_tested": 400,
+       "presets": [_js_number(c) for c in CUTOFF_PRESETS]}  # fmt: skip
 # The tested genes _rows makes; the untested one is not counted.
 BASES = (*ADJUSTMENTS, "pvalue")
 CUTOFFS = (0.1, 0.05, 0.01, 0.001)
@@ -81,6 +84,14 @@ const out = {
   }),
   thresholds: input.thresholds.map(([v, unit]) => ctxCalls.threshold(v, unit)),
   cutoffs: input.cutoffs.map((v) => ctxCalls.cutoff(v, input.cfg)),
+  walks: [-1, 1].map((dir) => {
+    let v = String(input.cfg.alpha); const seen = [];
+    for (let i = 0; i < 6; i++) {
+      v = String(ctxCalls.step(v, dir, input.cfg)); seen.push(Number(v));
+    }
+    return seen;
+  }),
+  between: [ctxCalls.step("0.03", -1, input.cfg), ctxCalls.step("0,03", 1, input.cfg)],
 };
 console.log(JSON.stringify(out));
 """
@@ -101,7 +112,7 @@ def ran():
         "cfg": CFG,
         "grid": grid,
         "thresholds": [["20", "pct"], ["1", "log2"], ["-3", "log2"], ["", "log2"], ["100", "pct"]],
-        "cutoffs": ["0", "", "0.5", "0.00001", "abc", "0.01"],
+        "cutoffs": ["0", "", "0.5", "0.00001", "abc", "0.01", "0,01"],
     }
     return rows, grid, _node(payload)
 
@@ -131,7 +142,19 @@ def test_threshold_and_cutoff_parsing(ran):
     assert out["thresholds"] == pytest.approx([math.log2(1.2), 1.0, 0.0, 0.0, 1.0])
     # 0 and values below the minimum are raised to it, empty and junk give the default,
     # values above the maximum are lowered to it.
-    assert out["cutoffs"] == [0.0001, 0.05, 0.1, 0.0001, 0.05, 0.01]
+    assert out["cutoffs"] == [0.0001, 0.05, 0.1, 0.0001, 0.05, 0.01, 0.01]
+
+
+def test_arrows_walk_every_preset(ran):
+    """The arrows reach every preset from the default and hold at both ends.
+
+    A number box's own arrows went from 0.05 to 0.0001 and then nowhere: they step by 1 from
+    the minimum, which the range 0.0001 to 0.1 cannot hold.
+    """
+    *_, out = ran
+    assert out["walks"] == [[0.01, 0.001, 0.0001, 0.0001, 0.0001, 0.0001],
+                            [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]]  # fmt: skip
+    assert out["between"] == [0.01, 0.05]
 
 
 LOAD = """
