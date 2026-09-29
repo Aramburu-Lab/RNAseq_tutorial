@@ -1,7 +1,8 @@
 """The only place a colour, font, size, line width or figure dimension is set.
 
-Order and font follow CONVENTIONS.md (Figures); line widths, figure widths, black as ink
-and the seven-category cap follow the global figure rules where the project is silent.
+Sizes, fonts, line widths, ticks and points are those of the Candida Ribo-seq figures
+(Rytis, 2026-09-29, D-024), which are the global figure rules; the palette order follows
+CONVENTIONS.md (Figures).
 """
 
 from dataclasses import dataclass
@@ -20,12 +21,24 @@ PROJECTOR_UNSAFE = frozenset({"#F0E442"})
 # Colours by role, never by list position, so a legend cannot drift from its data.
 ROLES = {"reference": "#0072B2", "comparison": "#D55E00"}
 
-FONT_CHAIN = ("Helvetica", "Arial", "Liberation Sans", "DejaVu Sans")
-SIZES = {"base": 14.0, "axis_label": 14.0, "tick": 12.0, "annotation": 12.0, "caption": 12.0}
+# Liberation Sans is Arial's metric twin, which a machine without Arial may redistribute.
+FONT_CHAIN = ("Arial", "Liberation Sans", "DejaVu Sans")
+SIZES = {
+    "base": 9.0, "axis_label": 10.0, "tick": 9.0, "legend": 9.0, "annotation": 9.0,
+    "caption": 9.0, "panel": 12.0,
+}  # fmt: skip
+# No text below this; a mathtext superscript on a 9 pt tick would be 6.3 pt, so none is drawn.
+MIN_TEXT_PT = 8.0
 LINE_WIDTHS = {"axes": 1.0, "line": 1.0, "box": 1.5, "errorbar": 1.5, "marker_edge": 0.0}
-MARKER_SIZE = 4.0
-# Plotly marker diameter in pixels, the on-screen size of MARKER_SIZE.
-PLOTLY_MARKER_PX = 6.0
+TICK_PT = {"major": 3.0, "minor": 1.5}
+# Point diameter in pt, and its opacity, so overplotted points still show their density.
+MARKER_SIZE = 6.0
+POINT_ALPHA = 0.5
+PX_PER_PT = 96 / 72
+# Plotly marker diameter in pixels: MARKER_SIZE on screen.
+PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT
+# Panel letters: bold capitals at the top left, nudged up by dy_pt (no figure has panels yet).
+PANEL_LABEL = {"size": SIZES["panel"], "weight": "bold", "dx_pt": 0.0, "dy_pt": 2.0}
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
 ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0}
 # Point shapes for a second category, in level order: (matplotlib, plotly).
@@ -38,9 +51,9 @@ MARKERS = (
 )
 # Average glyph width in em, used to wrap the caption to the width a figure really has.
 AVERAGE_CHAR_EM = 0.55
-# Above this many features a box plot takes the double column: at 14 pt the labels of more
-# features do not fit in 85 mm (measured 2026-09-26, 8 genes: every label overlapped).
-SINGLE_COLUMN_MAX_FEATURES = 3
+# Above this many features a box plot takes the double column: at 9 pt the p and r labels of
+# 5 features overlap in 85 mm and those of 4 do not (measured 2026-09-29).
+SINGLE_COLUMN_MAX_FEATURES = 4
 # Empty space above the tallest box for the p/r labels, as a fraction of the data range.
 HEADROOM = 0.35
 LINE_SPACING = 1.3
@@ -50,8 +63,9 @@ LEGEND_MAX_COLUMNS = 4
 # Category labels under vertical bars run upward, so long names never collide.
 BAR_LABEL_ROTATION = 90.0
 # Horizontal bars grow the figure: this much height per category, plus room for the axis,
-# legend and caption, so 20 categories stay readable at 14 pt.
-BAR_ROW_MM = 7.0
+# legend and caption. 20 categories at 9 pt stop overlapping from 3.0 mm (measured
+# 2026-09-29); 4.5 mm holds a label's line pitch, 9 pt x LINE_SPACING = 4.1 mm, with a gap.
+BAR_ROW_MM = 4.5
 # The share of a figure's height a vertical axis title may use before it wraps.
 AXIS_TITLE_SHARE = 0.55
 BAR_MARGIN_MM = 45.0
@@ -73,10 +87,10 @@ class Theme:
 # graphics threshold). The earlier light grey, #999999, was 2.85:1.
 THEMES = {
     "white": Theme(
-        "white", ink=INK_COLOUR, background="#FFFFFF", grid="#E5E5E5", reference="#8C8C8C"
+        "white", ink=INK_COLOUR, background="#FFFFFF", grid="#E6E6E6", reference="#8C8C8C"
     ),
     "black": Theme(
-        "black", ink="#F2F2F2", background="#111111", grid="#333333", reference="#8C8C8C"
+        "black", ink="#F2F2F2", background="#111111", grid="#39424A", reference="#8C8C8C"
     ),
 }
 # Page furniture per theme, never a data colour, so a link or a pill cannot read as a series.
@@ -95,17 +109,17 @@ CHROME = {
     },
 }  # fmt: skip
 MONO_CHAIN = ("ui-monospace", "SF Mono", "Menlo", "Consolas", "Liberation Mono", "monospace")
-# Everything read on screen, page text and the plots on the page, runs 3 pt larger than the
-# figure sizes (Rytis, 2026-09-28): 3 pt is 4 px at CSS's 96 px to 72 pt. The PDF and SVG
-# files keep SIZES, which their 85 mm layout checks are measured at.
-PAGE_BOOST_PX = 3 * 96 / 72
-# Page type scale in px around SIZES["base"], before the boost.
-TYPE_PX = {"xs": 12, "sm": 13, "md": 16, "lg": 20, "xl": 28, "display": 44}
+# The plots on a page run 3 pt larger than the figure sizes (Rytis, 2026-09-28). The PDF and
+# SVG files keep SIZES, which their 85 mm layout checks are measured at.
+PAGE_BOOST_PT = 3.0
+# Page text in px, set on its own: it no longer follows the figure sizes.
+PAGE_BASE_PX = 18
+TYPE_PX = {"xs": 16, "sm": 17, "md": 20, "lg": 24, "xl": 32, "display": 48}
 
 
 def on_page(size: float) -> float:
-    """A text size as a page shows it: the figure size plus ``PAGE_BOOST_PX``."""
-    return size + PAGE_BOOST_PX
+    """A figure text size in pt as a plot on the page shows it, in px: 3 pt larger."""
+    return (size + PAGE_BOOST_PT) * PX_PER_PT
 
 
 SPACE_PX = (4, 8, 12, 16, 24, 32, 48, 64, 96)
@@ -171,42 +185,52 @@ def contrast(first: str, second: str) -> float:
 
 
 def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
-    """Set matplotlib's rc for a theme: seaborn's paper context first, then this file's values.
+    """Set matplotlib's rc for a theme from this file's values alone.
 
-    The order matters: ``set_context("paper")`` rescales fonts and line widths, so applying
-    it afterwards would silently replace every size set here.
+    No seaborn context: ``set_context("paper")`` also set 4.8 pt ticks, 0.8 pt minor ticks
+    and 4.8 pt markers that no value here named.
 
     Args:
         theme: One of ``THEMES``.
         fonts: The font chain; tests pass a chain with a missing first font.
     """
     import matplotlib as mpl  # noqa: PLC0415 - heavy; imported after the runtime profile
-    import seaborn as sns  # noqa: PLC0415 - heavy; imported after the runtime profile
     from cycler import cycler  # noqa: PLC0415 - ships with matplotlib
 
-    sns.set_context("paper")
     mpl.rcParams.update(
         {
+            "xtick.major.size": TICK_PT["major"],
+            "ytick.major.size": TICK_PT["major"],
+            "xtick.minor.size": TICK_PT["minor"],
+            "ytick.minor.size": TICK_PT["minor"],
+            "xtick.major.width": LINE_WIDTHS["axes"],
+            "ytick.major.width": LINE_WIDTHS["axes"],
+            "xtick.minor.width": LINE_WIDTHS["axes"],
+            "ytick.minor.width": LINE_WIDTHS["axes"],
+            "xtick.direction": "out",
+            "ytick.direction": "out",
+            "xtick.labelsize": SIZES["tick"],
+            "ytick.labelsize": SIZES["tick"],
+            "xtick.color": theme.ink,
+            "ytick.color": theme.ink,
             "font.family": "sans-serif",
             "font.sans-serif": list(fonts),
             "font.size": SIZES["base"],
             "axes.labelsize": SIZES["axis_label"],
             "axes.titlesize": SIZES["axis_label"],
-            "xtick.labelsize": SIZES["tick"],
-            "ytick.labelsize": SIZES["tick"],
-            "legend.fontsize": SIZES["tick"],
-            "legend.title_fontsize": SIZES["tick"],
+            "legend.fontsize": SIZES["legend"],
+            "legend.title_fontsize": SIZES["legend"],
             "axes.linewidth": LINE_WIDTHS["axes"],
-            "xtick.major.width": LINE_WIDTHS["axes"],
-            "ytick.major.width": LINE_WIDTHS["axes"],
+            "axes.formatter.use_mathtext": False,
             "lines.linewidth": LINE_WIDTHS["line"],
+            "lines.markersize": MARKER_SIZE,
+            "grid.color": theme.grid,
+            "grid.linewidth": LINE_WIDTHS["axes"],
             "patch.linewidth": LINE_WIDTHS["box"],
             "lines.markeredgewidth": LINE_WIDTHS["marker_edge"],
             "text.color": theme.ink,
             "axes.labelcolor": theme.ink,
             "axes.edgecolor": theme.ink,
-            "xtick.color": theme.ink,
-            "ytick.color": theme.ink,
             "axes.prop_cycle": cycler(color=list(DATA_COLOURS)),
             "figure.facecolor": "none",
             "axes.facecolor": "none",
@@ -286,7 +310,7 @@ def css_variables(theme: Theme) -> str:
         **{f"--role-{role}": colour for role, colour in ROLES.items()},
         **{f"--{key}": colour for key, colour in CHROME[theme.name].items()},
         "--font": ", ".join([*(f'"{f}"' for f in FONT_CHAIN), "sans-serif"]),
-        "--size-base": f"{on_page(SIZES['base']):g}px",
+        "--size-base": f"{PAGE_BASE_PX}px",
     }
     return "; ".join(f"{k}: {v}" for k, v in pairs.items()) + ";"
 
@@ -294,7 +318,7 @@ def css_variables(theme: Theme) -> str:
 def css_layout() -> str:
     """Type scale, spacing and layout as CSS custom properties; the same in both themes."""
     pairs = {
-        **{f"--fs-{name}": f"{on_page(px):g}px" for name, px in TYPE_PX.items()},
+        **{f"--fs-{name}": f"{px}px" for name, px in TYPE_PX.items()},
         **{f"--space-{i + 1}": f"{px}px" for i, px in enumerate(SPACE_PX)},
         **{f"--{name}": value for name, value in LAYOUT.items()},
         "--font-mono": ", ".join(f'"{f}"' if " " in f else f for f in MONO_CHAIN),

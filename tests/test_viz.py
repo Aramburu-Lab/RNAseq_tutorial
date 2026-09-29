@@ -20,6 +20,7 @@ from synth import (
     demo_bar,
     demo_bars_at_scale,
     demo_box,
+    demo_ma,
     demo_pca,
     demo_volcano,
 )
@@ -33,6 +34,8 @@ from ctx.viz.axes import axis_title
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
 from ctx.viz.scatter import THIN_MAX, Calls, ScatterData
 from ctx.viz.style import (
+    AVERAGE_CHAR_EM,
+    AXIS_TITLE_SHARE,
     DATA_COLOURS,
     FONT_CHAIN,
     INK_COLOUR,
@@ -97,10 +100,16 @@ def test_no_style_literals():
     assert not hits
 
 
-def test_context_then_sizes():
+def test_rc_from_style_alone():
+    """Every size comes from style.py: no seaborn context resizes ticks or markers after it."""
+    from ctx.viz.style import MARKER_SIZE, TICK_PT  # noqa: PLC0415
+
     with mpl.rc_context():
         apply_matplotlib(THEMES["white"])
         rc = mpl.rcParams
+        assert rc["xtick.major.size"] == rc["ytick.major.size"] == TICK_PT["major"]
+        assert rc["xtick.minor.width"] == rc["ytick.minor.width"] == LINE_WIDTHS["axes"]
+        assert rc["lines.markersize"] == MARKER_SIZE
         assert rc["font.size"] == SIZES["base"]
         assert rc["axes.labelsize"] == SIZES["axis_label"]
         assert rc["xtick.labelsize"] == rc["ytick.labelsize"] == SIZES["tick"]
@@ -297,6 +306,7 @@ def _contracts():
         "volcano_single": demo_volcano(synthetic),
         "volcano_double": demo_volcano(synthetic, width="double"),
         "pca": demo_pca(synthetic),
+        "ma_log_x": demo_ma(synthetic),
         "bar": demo_bar(synthetic),
         "bar_horizontal": demo_bar(synthetic, horizontal=True),
         "composition_20_groups": demo_bars_at_scale(horizontal=True),
@@ -353,6 +363,19 @@ def written(request, tmp_path_factory):
     return out, figure_stem, data, files
 
 
+def test_on_page_is_points_plus_three_in_pixels():
+    """A plot on the page draws text 3 pt larger than the figure, in px (96 px to 72 pt).
+
+    The first version added 4 to a size in pt and used it as px: a 12 pt tick came out at
+    16 px, which is 12 pt, not the 15 pt the rule asks for.
+    """
+    from ctx.viz.style import on_page  # noqa: PLC0415
+
+    assert on_page(9) == pytest.approx(16.0)
+    assert on_page(10) == pytest.approx(52 / 3)
+    assert "--size-base: 18px;" in css_variables(THEMES["white"])
+
+
 def test_caption_wrap_keeps_words_whole():
     caption = demo_box(counts(), planted=1, null=1).caption
     for width in (30, 36, 40, 73):
@@ -388,12 +411,11 @@ def test_static_files_measured(written):
 
         svg = ElementTree.parse(out / f"{figure_stem}_{theme.name}.svg")
         families = {
-            name.strip().strip("'\"")
+            tuple(name.strip().strip("'\"") for name in match.split(","))
             for element in svg.iter()
             for match in re.findall(r"font-family:\s*([^;]+)", element.get("style", ""))
-            for name in match.split(",")
         }
-        assert families and families <= {*FONT_CHAIN, "sans-serif"}
+        assert families == {(*FONT_CHAIN, "sans-serif")}, families
         assert not [e for e in svg.iter() if e.tag.endswith("image")]
 
 
@@ -404,6 +426,7 @@ OVERLAP_CASES = {
     "volcano_double": lambda s: demo_volcano(s, width="double"),
     "volcano_crowded": lambda s: demo_volcano(s, labels=10),
     "pca": demo_pca,
+    "ma_log_x": demo_ma,
     "bar": demo_bar,
     "bar_horizontal": lambda s: demo_bar(s, horizontal=True),
     "composition_20_groups": lambda s: demo_bars_at_scale(horizontal=True),
@@ -422,7 +445,7 @@ def test_no_text_overlap(case):
 
 def test_write_refuses_clipped_text(tmp_path):
     data = demo_bar(counts())
-    long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 3)
+    long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 9)
     # matplotlib says so first: tight_layout gives up on a title it cannot fit.
     with (pytest.raises(ValueError, match="off the page"),
           pytest.warns(UserWarning, match="Tight layout not applied")):  # fmt: skip
@@ -595,8 +618,10 @@ def test_permanova_strata():
 def test_fit_title_wraps_to_axis_length():
     from ctx.viz.annotate import fit_title  # noqa: PLC0415
 
-    title = "mono_hsct_early (log2 FC)"
     height = WIDTHS_MM["single"] * 1.1 / 25.4
+    # Longer than the axis holds at the axis-title size, whatever that size is.
+    fits = int(height * 72 * AXIS_TITLE_SHARE / (SIZES["axis_label"] * AVERAGE_CHAR_EM))
+    title = "mono_hsct_early " + "x" * fits + " (log2 FC)"
     wrapped = fit_title(title, height)
     assert wrapped.replace("\n", " ") == title
     assert "\n" in wrapped

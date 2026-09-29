@@ -27,6 +27,47 @@ it were reversed.
 
 ---
 
+## D-024 — Figures take the Candida Ribo-seq style; the Helvetica and 14 pt overrides are dropped
+
+**Date:** 2026-09-29 · **Status:** decided
+
+**Context.** Rytis asked for the figure styling and parameters of the Candida FINAL figures (`riboseq_public_candida/deliverables/FINAL/figures/pdf`). This project had overridden the global figure rules with Helvetica and a 14 pt base (TODO.md, Phase 1 table); the Candida figures follow the global rules. The same day he asked for the ALI report's page design and the riboseq status report's split of page text into files (Phase 2S).
+
+**Options.** Copy Candida's mechanism too, one TOML read by one module with an environment override, or change the values in `style.py`, which is already the one place a size or colour is set. The TOML adds a loader and its validation for one reader; `style.py` it is.
+
+**Decision.** Taken from Candida, measured on its 32 PDFs and its `settings/figure_style.toml`:
+- Arial, Liberation Sans, DejaVu Sans; 12 pt panel letters (bold capitals), 10 pt axis titles, 9 pt ticks, legends, annotations and captions, nothing under 8 pt.
+- 3 pt ticks pointing out, minor ticks at the axis width; 6 pt points at alpha 0.5; grid #E6E6E6 at 1 pt (#39424A dark, from Candida's own dark scripts).
+- No seaborn `paper` context: every rc is set in `style.py`.
+
+Not taken, and why:
+- Candida's light-only output: CONVENTIONS requires `_white` and `_black`.
+- Its condition pair (blue and purple) and its domain colours: here the role pair reference #0072B2 and comparison #D55E00 matches the volcano's down and up.
+- Free page heights: heights stay derived from aspect ratios.
+- Creation timestamps: from Phase 2D figure files carry none.
+- dpi 1000: only PDF and SVG are written, so it would change nothing.
+- A panel-letter helper: no figure has panels yet; the style is set in `PANEL_LABEL`.
+
+Two defects found on the way, fixed at their source:
+- **Log-axis labels.** Matplotlib labels a log axis in mathtext, whose exponent is 0.7 of the tick size (8.4 pt at 12 pt, 6.3 pt at 9 pt) and whose SVG names one font instead of the chain. The MA and dispersion figures carried both. `scatter._plain_log_ticks` labels 100, 1,000, 10,000. The measured-figure test had no log axis; an MA contract joins it, and the SVG check is now equality per text element.
+- **Screen sizes (mine, 2026-09-28).** `on_page` added 4 to a size in pt and used it as px, so the plots on a page ran 0 pt larger, not 3. It now returns `(pt + 3) * 96/72` px, serves the Plotly templates only, and a test holds the numbers; page text is set in px on its own (18 px base, unchanged).
+
+**Evidence.** Every figure of the synthetic M5 run, 20 files in both themes, measured from the PDF and SVG before and after:
+
+| Measure | Before | After |
+|---|---|---|
+| PDF font | Helvetica | ArialMT |
+| PDF text sizes (Tf) | 8.4, 12, 14 | 9, 10 |
+| PDF line widths | 0, 0.8, 1, 1.5 | 0, 1, 1.5 |
+| SVG font-family | the chain, and `'Helvetica'` alone on log labels | `'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif` only |
+| Page widths | 240.945, 481.890 pt | the same |
+
+The M6 figures (10 files) measure the same as M5's after. Layout constants measured at 14 pt, measured again: at 9 pt a box plot fits 4 features in 85 mm and overlaps at 5 (`SINGLE_COLUMN_MAX_FEATURES` 3 to 4); 20 horizontal bars stop overlapping from 3.0 mm per row, and `BAR_ROW_MM` goes from 7 to 4.5 mm, the 4.1 mm line pitch of a 9 pt label plus a gap. Mutations that each fail a test: the log labels back to mathtext, a 14 pt annotation, a two-font SVG chain.
+
+**Consequence.** No frozen file changed; `annotate.py` reads the new sizes through the names it already imports. Phase 1's records of the 14 pt figures stay as history.
+
+---
+
 ## D-023 — Rytis's draft v3.10 merged: contour figures and cividis for continuous colour
 
 **Date:** 2026-09-29 · **Status:** decided

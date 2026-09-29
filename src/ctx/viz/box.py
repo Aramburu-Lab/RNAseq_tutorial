@@ -17,6 +17,8 @@ from ctx.viz.style import (
     LINE_WIDTHS,
     MARKER_SIZE,
     PLOTLY_HEIGHT_PX,
+    PLOTLY_MARKER_PX,
+    POINT_ALPHA,
     ROLES,
     SINGLE_COLUMN_MAX_FEATURES,
     SIZES,
@@ -179,7 +181,7 @@ def static(data: BoxData, theme: Theme) -> Any:
         )  # fmt: skip
         # No jitter: every run draws the same points, so the same data give the same file.
         for x, v in zip(positions, values, strict=True):
-            ax.scatter([x] * len(v), v, s=MARKER_SIZE**2, color=theme.ink,
+            ax.scatter([x] * len(v), v, s=MARKER_SIZE**2, color=theme.ink, alpha=POINT_ALPHA,
                        linewidths=LINE_WIDTHS["marker_edge"], zorder=3)  # fmt: skip
     ax.set_xticks(range(len(features)), features)
     ax.set_xlim(-0.5, len(features) - 0.5)
@@ -235,7 +237,7 @@ def interactive(data: BoxData) -> Any:
                 x=rows["feature"].to_list(),
                 y=rows["value"].to_list(),
                 name=group,
-                marker_color=ROLES[role],
+                marker={"color": ROLES[role], "opacity": POINT_ALPHA, "size": PLOTLY_MARKER_PX},
                 boxpoints="all",
                 jitter=0,
                 pointpos=0,

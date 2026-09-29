@@ -20,6 +20,7 @@ from ctx.viz.style import (
     MAX_CATEGORIES,
     PLOTLY_HEIGHT_PX,
     PLOTLY_MARKER_PX,
+    POINT_ALPHA,
     SIZES,
     THEMES,
     THRESHOLD_DASH,
@@ -136,6 +137,21 @@ class Calls:
 def _js_number(value: float) -> str:
     """A number as JavaScript's String() writes it, for the cutoffs the controls offer."""
     return f"{value:.10g}"
+
+
+def _plain_log_ticks(axis: Any) -> None:
+    """Label a log axis 100, 1,000, 10,000.
+
+    Matplotlib's own log labels are mathtext: the exponent is drawn at 0.7 of the tick size,
+    6.3 pt at 9 pt, and the SVG names one font for it instead of the chain.
+
+    Args:
+        axis: A matplotlib axis already on a log scale.
+    """
+    from matplotlib.ticker import FuncFormatter, NullFormatter  # noqa: PLC0415 - heavy
+
+    axis.set_major_formatter(FuncFormatter(lambda value, _: f"{value:,.10g}"))
+    axis.set_minor_formatter(NullFormatter())
 
 
 @dataclass(frozen=True)
@@ -345,6 +361,7 @@ class ScatterData:
                 ax.scatter(
                     rows[self.x].to_numpy(), rows[self.y].to_numpy(), s=MARKER_SIZE**2,
                     c=colour, marker=MARKERS[j][0], linewidths=LINE_WIDTHS["marker_edge"],
+                    alpha=POINT_ALPHA,
                 )  # fmt: skip
         for line in self.all_lines():
             if math.isnan(line.y[0]):
@@ -352,6 +369,9 @@ class ScatterData:
             ax.plot(line.x, line.y, linewidth=LINE_WIDTHS["line"], **_line_style(line, theme))
         ax.set_xscale("log" if self.log_x else "linear")
         ax.set_yscale("log" if self.log_y else "linear")
+        for axis, log in ((ax.xaxis, self.log_x), (ax.yaxis, self.log_y)):
+            if log:
+                _plain_log_ticks(axis)
         ax.set_xlabel(self._axis_title(self.x_label, self.x))
         ax.set_ylabel(fit_title(self._axis_title(self.y_label, self.y), height))
         present = set(self.frame[self.colour].unique())
@@ -460,7 +480,8 @@ class ScatterData:
                     x=rows[self.x].to_list(), y=rows[self.y].to_list(), mode="markers",
                     name=self._name(level) if shape is None else f"{self._name(level)}, {shape}",
                     marker={"color": self.colours[level] or light.reference,
-                            "symbol": MARKERS[j][1], "size": PLOTLY_MARKER_PX},
+                            "symbol": MARKERS[j][1], "size": PLOTLY_MARKER_PX,
+                            "opacity": POINT_ALPHA},
                     customdata=rows.select(self.hover).rows(), hovertemplate=template,
                 )
             )  # fmt: skip

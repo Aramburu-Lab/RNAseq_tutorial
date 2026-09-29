@@ -304,10 +304,10 @@ One metric registry, MultiQC as the engine. M2a reads raw and trimmed reads on t
 
 ## 📊 Figure and statistics conventions
 
-- Palette: Okabe–Ito for categories (including per-group contour lines); cividis (Nuñez et al. 2018, PMID 30067751) for sequential continuous values (filled contours, colour bars) in both themes, with isolines and their labels in ink, because cividis's ends measure 1.25:1 against white (#FEE838) and 1.34:1 against black (#00224E); the diverging heatmap scale of P2Q.6 keeps its two data colours, since cividis has no centre. Font Helvetica 14 pt base; `sns.set_context("paper")`, `sns.despine()`, `plt.tight_layout()`; panel letters bold lowercase (Nature style); exact p-values, n per group, test name and effect size inside the PDF and SVG figure; an interactive figure prints the same caption once, under the plot, not inside it (D-011).
+- Palette: Okabe–Ito for categories (including per-group contour lines); cividis (Nuñez et al. 2018, PMID 30067751) for sequential continuous values (filled contours, colour bars) in both themes, with isolines and their labels in ink, because cividis's ends measure 1.25:1 against white (#FEE838) and 1.34:1 against black (#00224E); the diverging heatmap scale of P2Q.6 keeps its two data colours, since cividis has no centre. Sizes and parameters of the Candida Ribo-seq figures (D-024): Arial 12/10/9/8 pt, 3 pt ticks, 6 pt points at alpha 0.5, no seaborn context; `sns.despine()`, `plt.tight_layout()`; panel letters bold capitals; exact p-values, n per group, test name and effect size inside the PDF and SVG figure; an interactive figure prints the same caption once, under the plot, not inside it (D-011).
 - Every figure as `_white` and `_black` PDF and SVG from one render (Seaborn/Matplotlib, vector), one HTML with a theme toggle (Plotly, `plotly_white` base + custom dark template; hover shows all relevant variables), and its numbers as CSV with `_README.md` (D16).
 - Phase 2D: every figure has a stable ID (`<cohort>_<module>_<figure>`, recorded in its `_README.md`; file names still follow the naming lint), a parameter model as a frozen dataclass with one loader that reports every error together, as `src/ctx/dataset.py` does (Rytis 2026-09-29, D-020), and a params file; `ctx figure <id> --params …` regenerates it from its inputs alone (see Reproduce panel).
-- Fonts: Helvetica where installed, then Arial, Liberation Sans, DejaVu Sans (`ctx.viz.style.FONT_CHAIN`); the container adds TeX Gyre Heros, free and Helvetica-metric-compatible, because Helvetica cannot be redistributed. PDFs embed fonts as Type 42 (done); Phase 2D drops their creation timestamp, so reruns compare byte for byte.
+- Fonts: Arial, then Liberation Sans, then DejaVu Sans (`ctx.viz.style.FONT_CHAIN`, D-024); the container adds Liberation Sans, free and Arial-metric-compatible, because Arial cannot be redistributed. PDFs embed fonts as Type 42 (done); Phase 2D drops their creation timestamp, so reruns compare byte for byte.
 - Single implementation per figure type in `ctx.viz` with `static()` and `interactive()` methods sharing one data contract, so the two renderings cannot drift.
 - Statistical annotation helper `ctx.viz.annotate` writes the same caption block to both renderers.
 - Contour plots only for a continuous value over two continuous axes: computed surfaces (parameter grids, power, likelihood) or densities from ≥ 30 points per group; never for categorical axes (tissue × exon, gene × sample stay heatmaps). Density levels mark the 50 % and 90 % highest-density regions, computed once from a smoothed 2D histogram (`numpy.histogram2d` + `scipy.ndimage.gaussian_filter`) that both renderers draw (Plotly `go.Contour`, matplotlib `contour`); points of interest are overlaid; n and bandwidth go in the caption. Two-knob maps mark the current setting, and a click sets both sliders and, from Phase 2D, updates the Reproduce panel.
@@ -483,6 +483,14 @@ cancer-transcriptomics-teaching/
 - [ ] M6 ORA/GSEA/disease association with immune gene sets; `ctx.function.lite` validated against gseapy
 - [ ] Reports M1, M5, M6 + hub; sanity checks pass (see verification)
 
+### Phase 2S — Candida figure style, ALI page design, editable page text (approved 2026-09-29)
+
+Rytis asked for the figure styling and parameters of the Candida FINAL figures, the design of the ALI modular report, and the riboseq status report's split of page text into files that are easy to edit. His choices: text in frozen files moves after the Step-1 record; one TOML file per page with `{placeholders}`. None of S1 to S3a touches a frozen file.
+
+- [ ] **P2S.1 Candida figure values in `style.py`**, the one config: Arial, Liberation Sans, DejaVu Sans; 12 panel, 10 axis title, 9 tick, legend, annotation and caption, 8 floor; 3 pt ticks; 6 pt points at alpha 0.5; grid #E6E6E6 (dark #39424A) at 1 pt; no seaborn `paper`; `on_page` converts points to pixels and serves the Plotly templates only. Layout constants measured at 14 pt re-measured. D-024.
+- [ ] **P2S.2 ALI page design:** its tokens in `style.py`, `_page.css.j2` rewritten on the current markup (top bar, hero, numbered sections, stat tiles, table wraps, pills, callouts, figure cards, print), focus rings and a skip link, a contrast test on every text token. Browser check at 1280 and 375 px in both themes.
+- [ ] **P2S.3 Editable page text:** `src/ctx/report/content/*.toml` with a README, read by `ctx.report.text` (strict placeholders, `CTX_CONTENT` for an edited copy); `ui`, `cards`, `setup` and `gather` moved; tests for unresolved placeholders, unused keys, load-bearing strings and the wheel.
+
 ### Phase 2Q — Read fates, pathway heatmaps, linked brushing (approved 2026-09-29)
 
 Rytis asked for a bubble chart of raw against useful reads with a hover that says where the rest went, heatmaps of gene-set patterns across sample groups, and linked multi-colour brushing like plotly's parallel-categories example. His choices: the Step-1 Trim Galore reports are copied off the cluster and parsed by MultiQC; contamination is shown through mitochondrial and rRNA fractions from counts; set scores are the mean per-gene z-score of the blind VST; brushing is over samples. Only the copy rule and the GTF resource touch frozen files, so they go first, as D-022, before cluster step 7; the heatmaps on M5 and M6 wait for the Step-1 record. The plan file lies outside the repo and the next plan overwrites it, so this section is the record.
@@ -505,7 +513,8 @@ Built after P2C.3, so the registered Step-1 analysis stays as registered; the fr
 - [ ] Containers: the `figures` target of `containers/analysis.Dockerfile`, published to GHCR and pinned by digest (Rytis: GHCR access), before CI runs any Reproduce panel; the `full` target stays in Phase 6.
 - [ ] `FigureSpec` and figure IDs; `ctx figure <id> --params`, `ctx source <id>`, `ctx verify-figure`; parameter dataclasses with cards; the Reproduce panel for one figure end to end (the volcano), with the volcano's raw or shrunk x axis; CI extracts the panel's Docker block and runs it on fixtures. Then every figure type.
 - [ ] Contour helpers in `ctx.viz`: shared density grid with highest-density levels, two-knob and power-map templates with click-to-set sliders, cividis in both themes with its stops as style tokens, so the measured-colour tests accept it.
-- [ ] Figure files without a creation timestamp, so reruns compare byte for byte; TeX Gyre Heros added to `FONT_CHAIN` and to the image.
+- [ ] Figure files without a creation timestamp, so reruns compare byte for byte; Liberation Sans, already second in `FONT_CHAIN`, added to the image (D-024).
+- [ ] P2S.4, after the record: the page text of `de/page.py`, `de/run.py`, the volcano's live templates (through `text.raw`), `function/`, `hub.py` and `annotate.py` moves into `content/*.toml`.
 - [ ] Once `src/ctx/de` is free after the record: the M5 page's gene picker feeding M9, the QC exclusion set as an M5 knob (after M2b), and the volcano's raw or shrunk x axis (D-020).
 - [ ] M5 contour figures for Step-1: two-knob maps, simulated power grid (`hpc` profile, fixed seed), MA and PCA density contours, likelihood concept figure.
 - [ ] Review: what changed from this plan and why; measured budgets; lessons.
@@ -1271,8 +1280,6 @@ it. P1.2 pins every dependency the project adds.
 | Nextflow | `languages: nextflow` adds it to the linux-64 `tools` feature (prod only) | Needed on the Mac for fixtures and class runs | Project feature and environment `fetch`, both platforms, pinned `==`; no copier re-answer |
 
 Where the project overrides the global rules:
-- Helvetica, not Arial.
-- A 14 pt base, not 12/10/9/8.
 - The project's palette order, which keeps yellow in position 4.
 - Sidecar README provenance instead of a stamp in the table.
 
@@ -1282,8 +1289,7 @@ Where the project is silent, the global rules apply:
 - Line widths of 1 and 1.5 pt.
 - PDF and SVG from one render (D16).
 - Every axis names its unit, and every figure ships its numbers.
-
-If 14 pt proves unworkable at 85 mm, that gets raised, not changed silently.
+- Since D-024 (2026-09-29), also Arial and the 12/10/9/8 pt sizes: the Helvetica and 14 pt overrides above were dropped at Rytis's request to use the Candida figures' style.
 
 Not in Phase 1:
 - anything tied to a dataset;

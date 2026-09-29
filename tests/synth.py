@@ -209,6 +209,21 @@ def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6): 
     )  # fmt: skip
 
 
+def demo_ma(synthetic: Synthetic):  # ScatterData
+    """An MA contract: mean counts on a log x axis, the way M5's MA plot draws it."""
+    import dataclasses  # noqa: PLC0415
+
+    volcano = demo_volcano(synthetic)
+    mean = synthetic.counts.select(pl.exclude("gene_id")).mean_horizontal() + 1
+    frame = volcano.frame.with_columns(mean_count=mean)
+    columns = {**volcano.columns, "mean_count": ("reads", "Mean count over samples, plus 1.")}
+    return dataclasses.replace(
+        volcano, frame=frame, columns=columns, x="mean_count", y="lfc", x_label="Mean count",
+        y_label="Fold change", log_x=True, calls=None, keep=None, label=None,
+        caption="Mean count against log2 fold change; no test.",
+    )  # fmt: skip
+
+
 def demo_pca(synthetic: Synthetic):  # ScatterData
     """A PCA contract: all samples, coloured by cell type, shaped by condition."""
     from ctx.viz.annotate import permanova  # noqa: PLC0415

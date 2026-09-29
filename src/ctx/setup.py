@@ -59,8 +59,9 @@ THINK = (
     ),
     SelfCheck(
         "Why might a colleague get a different font on the same figure?",
-        "The font chain takes the first installed family. A machine without Helvetica or Arial "
-        "draws with the next one, which changes text width but not the data.",
+        "The font chain takes the first installed family. A machine without Arial draws with "
+        "Liberation Sans, which has the same widths, or else DejaVu Sans, which changes text "
+        "width but not the data.",
     ),
 )
 MISTAKES = (
