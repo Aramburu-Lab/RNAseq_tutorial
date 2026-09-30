@@ -33,6 +33,22 @@ effect = "Off: the shrunk columns stay empty, the MA plot shows the raw estimate
 meaning = "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset: no counts."
 effect = "Set: gather checks the release and the samples, rounds the length-scaled counts to integers and writes them. It only reads the outdir."
 
+[options."--registry"]
+meaning = "The QC registry: every metric ctx qc judges, its bands and their sources. Unset: CTX_QC_REGISTRY, else conf/qc_metrics.toml of this repository."
+effect = "Another registry judges with other bands; the page names the file it used."
+
+[options."--strata"]
+meaning = "Comma-separated sheet columns whose shared values make a stratum, such as tissue,cell_type. Each metric's median and MAD band is computed within a stratum."
+effect = "Finer strata compare a sample with fewer, more alike samples; below 3 samples a stratum gets no band. Leave condition out, or a condition's effect on a metric can never show as flags."
+
+[options."--peers"]
+meaning = "Comma-separated sheet columns whose shared values make a peer group, such as cell_type,condition. Agreement with the group and distance from it on the PCA are measured within it."
+effect = "Wider groups make biology look like disagreement; a group of one has no peer and no value."
+
+[options."--mad"]
+meaning = "How many scaled MADs from its stratum's median a value may lie before it is flagged. Unset: the registry's mad_multiplier."
+effect = "Lower flags more samples, higher fewer; three matches three standard deviations for normal data. Nothing is ever excluded by this."
+
 [effects.setup]
 "--dataset-file" = "Set: fetches each resource and keeps it only if its size and SHA-256 match. Unset: fetches nothing."
 
@@ -42,6 +58,9 @@ effect = "Set: gather checks the release and the samples, rounds the length-scal
 
 [effects.report]
 "--dataset-file" = "Set: the hub also decides and shows the file's sanity rules."
+
+[effects.qc]
+"--dataset-file" = "Selects the contrasts whose samples the confounding tests compare, their level orders, and the annotation that gives the genes their types."
 
 [effects.de]
 "--dataset-file" = "Selects the contrasts, their designs and expected n, the featured contrast, the lessons and the PCA subsets this page fits and draws."

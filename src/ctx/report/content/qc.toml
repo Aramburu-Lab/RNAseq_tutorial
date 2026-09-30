@@ -1,5 +1,39 @@
-# The M2 QC page. The checkpoint on counts (ctx.qc.checkpoint) writes its reasons and notes
-# from here; the page skeleton joins with the page itself (TODO.md, M2.6).
+# The M2 QC page (ctx qc). Placeholders in {braces} are filled by the code; keep their names.
+
+title = "M2 Quality control: {dataset}"
+budget = "Track A: under {minutes} min and {ram_gb} GB"
+question = "Which samples should you look at twice before trusting a comparison, and would setting them aside change the comparison itself?"
+concept = "Quality control asks one question per metric: is this sample unlike the others it should resemble? Few RNA-seq metrics have a universal cut-off, so each sample is judged against its own stratum: a band of the median plus or minus three scaled MADs, on the side that is bad. A flag is a question, never a verdict. Before you set a flagged sample aside, test whether the metric differs between the groups you compare: if it does, excluding samples on it would bias the comparison."
+practice = "Read the flagged runs first, then the confounding table. A metric that differs by condition cannot be used to exclude samples in that comparison, and a flag that tracks the read-length batch says more about the batch than about the sample."
+mistakes = [
+    "Excluding on a flag alone: a flag says the sample differs from its stratum, not that it is wrong. Neutrophils detect fewer genes than monocytes by biology.",
+    "Using a cut-off from another dataset: depth, cell type and library protocol all move these numbers; the stratum is the fairer yardstick.",
+    "Ignoring confounding: if flagged samples sit mostly in one condition, removing them changes the comparison you set out to make.",
+]
+
+[[terms]]
+term = "Stratum"
+meaning = "The samples sharing the columns given to --strata, such as a cell type. A band is computed within it."
+
+[[terms]]
+term = "MAD"
+meaning = "Median absolute deviation, times 1.4826 so it matches the standard deviation of normal data. Robust: one outlier barely moves it."
+
+[[terms]]
+term = "Peer group"
+meaning = "The samples sharing the columns given to --peers, such as cell type and condition. Agreement and PCA distance are measured against it."
+
+[[terms]]
+term = "Confounding"
+meaning = "A metric that differs between the groups of a comparison, so it cannot be told apart from the comparison itself."
+
+[[think]]
+prompt = "A sample has half the median library size of its stratum and is flagged. What would you check before excluding it?"
+answer = "Whether library size differs by condition in the comparisons it takes part in, whether its other metrics agree with its peers, and whether DESeq2's size factors already handle it: a smaller library is noisier, not wrong."
+
+[[think]]
+prompt = "Why is a band computed per stratum and not per condition?"
+answer = "A condition that shifts a metric would then never show as flags. Per stratum, the shift appears as flags gathered in one condition, which the confounding test catches."
 
 # Why a sample is flagged: one of these per metric it fails, joined by "; ".
 [reasons]
@@ -18,6 +52,8 @@ constant = "no test: every sample has the same value"
 no_flags = "no test: no sample is flagged"
 all_flagged = "no test: every sample is flagged"
 paired = "not tested: paired, so its groups share individuals, which Mann-Whitney and Fisher's test assume they do not"
+no_annotation = "Composition shares not measured: the dataset file names no {resource} resource, so no gene has a type."
+not_fetched = "Composition shares not measured: the annotation is not at {path}; run ctx setup with this dataset file."
 
 [tests]
 fisher = "Fisher's exact test, two-sided"
@@ -25,3 +61,75 @@ fisher = "Fisher's exact test, two-sided"
 [effects]
 r = "rank-biserial r, tested over reference"
 odds = "odds ratio, tested over reference; 0.5 added to every cell when one is 0"
+
+[columns]
+sample = "Sample, as nf-core/rnaseq names it."
+run_accession = "Run accession."
+
+[keys]
+samples = "Samples judged"
+flagged = "Runs flagged"
+flagged_detail = "of {runs:,}; none excluded"
+metrics = "Metrics judged"
+confounded = "Confounded tests"
+confounded_detail = "BH-adjusted p below {alpha}"
+
+[status]
+title = "Flagged runs: {flagged:,} of {runs:,}"
+columns = ["Run", "Sample", "Status", "Reasons"]
+
+[confounding]
+title = "Confounding tests, smallest adjusted p first: {shown} of {tests}"
+columns = ["Contrasts", "Metric", "Test", "Effect", "BH-adjusted p", "Read length"]
+tied = "tied to read length"
+
+[tables.bands]
+units = {}
+columns.metric = "Registry metric."
+columns.stratum = "The stratum: its values of the --strata columns."
+columns.n = "Samples with a value in the stratum."
+columns.median = "Median of the values, in the metric's unit."
+columns.mad = "Scaled MAD, on the metric's scale (log10 for a log metric)."
+columns.low = "Median minus k scaled MADs, in the metric's unit."
+columns.high = "Median plus k scaled MADs, in the metric's unit."
+columns.note = "Why the stratum has no band, if it has none."
+
+[tables.flags]
+units = {}
+columns.sample = "Sample flagged."
+columns.metric = "Registry metric that flagged it."
+columns.reason = "Why, in words."
+
+[tables.status]
+units = { n_flags = "metrics" }
+columns.run_accession = "Run accession."
+columns.sample = "Sample the run belongs to."
+columns.qc_status = "pass, flag, or exclude where a flagged metric's action says so."
+columns.qc_reason = "Every reason, joined by semicolons."
+columns.n_flags = "Metrics that flagged the run's sample."
+
+[tables.confounding]
+units = { n_reference = "samples", n_tested = "samples", statistic = "U", effect = "dimensionless", p = "dimensionless", p_adj = "dimensionless" }
+columns.contrasts = "The contrasts whose samples these are; contrasts selecting the same samples are tested once."
+columns.reference = "Reference level."
+columns.tested = "Tested level."
+columns.n_reference = "Samples in the reference group."
+columns.n_tested = "Samples in the tested group."
+columns.metric = "Registry metric, or qc_status for any flag."
+columns.read_length_tied = "Whether the metric moves with read length, which Step-1 confounds with condition."
+columns.test = "The test: Mann-Whitney U for a value, Fisher's exact for a flag."
+columns.statistic = "Mann-Whitney U; empty for Fisher's test."
+columns.effect_name = "What the effect is."
+columns.effect = "Rank-biserial r, or the odds ratio."
+columns.p = "Two-sided p, before adjustment."
+columns.note = "Why the metric was not tested, where it was not."
+columns.p_adj = "Benjamini-Hochberg adjusted p over every test in this table."
+
+[tables.sex_check]
+units = { xist_log2cpm = "log2 CPM", chry_log2cpm = "log2 CPM" }
+columns.sample = "Sample."
+columns.expected = "Recorded sex, or the donor's for a transplanted sample."
+columns.xist_log2cpm = "log2 CPM + 1 of XIST."
+columns.chry_log2cpm = "Mean log2 CPM + 1 of RPS4Y1, DDX3Y, KDM5D, UTY and EIF1AY."
+columns.expression_sex = "The sex the expression says: M when chrY exceeds XIST."
+columns.agrees = "Whether they agree; empty with no recorded sex."

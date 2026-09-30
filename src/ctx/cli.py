@@ -176,6 +176,40 @@ def gather(
         typer.echo(path)
 
 
+def _columns(value: str) -> tuple[str, ...]:
+    """A comma-separated option as its column names."""
+    return tuple(c.strip() for c in value.split(",") if c.strip())
+
+
+@app.command()
+@profiled
+def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
+    dataset_file: Annotated[Path, typer.Option(help=CARDS["--dataset-file"][0])],
+    registry: Annotated[Path | None, typer.Option(help=CARDS["--registry"][0])] = None,
+    strata: Annotated[str, typer.Option(help=CARDS["--strata"][0])] = "cell_type",
+    peers: Annotated[str, typer.Option(help=CARDS["--peers"][0])] = "cell_type,condition",
+    mad: Annotated[float | None, typer.Option(help=CARDS["--mad"][0])] = None,
+) -> None:
+    """Judge every sample by the QC registry and test the flags for confounding (M2)."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.qc import QcError  # noqa: PLC0415 - same reason
+    from ctx.qc import run as module  # noqa: PLC0415 - heavy; imported after the runtime profile
+    from ctx.qc.registry import RegistryError  # noqa: PLC0415 - same reason
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = runtime.retypable(sys.argv[1:])
+    options = module.Options(dataset_file, registry, _columns(strata), _columns(peers), mad)
+    try:
+        written = module.run(ctx.obj["settings"], cards, command, dataset, options)
+    except (DatasetError, QcError, RegistryError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
 @app.command()
 @profiled
 def de(

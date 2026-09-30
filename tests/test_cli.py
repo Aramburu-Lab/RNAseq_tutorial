@@ -115,7 +115,19 @@ def report_run(pipeline):
     return pipeline[0], _page(pipeline[0], "09_report", "desynth_hub")
 
 
-COMMANDS = ["setup", "gather", "de", "function", "report"]
+@pytest.fixture(scope="module")
+def qc_run(tmp_path_factory):
+    from test_qc_run import plant  # noqa: PLC0415 - the planted gather outputs of the qc tests
+
+    root = tmp_path_factory.mktemp("qc_cli")
+    plant(root)
+    done = _ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file",
+                str(DE_SPEC), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "02_qc", "desynth_overview")
+
+
+COMMANDS = ["setup", "gather", "qc", "de", "function", "report"]
 
 
 def test_every_subcommand_has_a_card_test():

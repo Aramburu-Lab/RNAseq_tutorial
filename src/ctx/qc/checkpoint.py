@@ -68,16 +68,30 @@ def gene_types(gtf: Path) -> pl.DataFrame:
     ).unique("gene_id", keep="first", maintain_order=True)
 
 
-def count_metrics(counts: pl.DataFrame, types: pl.DataFrame) -> pl.DataFrame:
+def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFrame:
     """Library size, genes detected, top-gene share and the four composition shares per sample.
 
     The shares are of disjoint gene classes: mitochondrial rRNA (Mt_rRNA), the other chrM
-    genes, nuclear rRNA and its pseudogenes, and the three globin genes.
+    genes, nuclear rRNA and its pseudogenes, and the three globin genes. Without gene types
+    the shares are left out.
 
     Raises:
         QcError: If a gene of the counts is not in the annotation; the counts then came from
             another annotation, and every share would be wrong.
     """
+    if types is None:
+        matrix = counts.drop("gene_id").to_numpy().astype(float)
+        size = matrix.sum(axis=0)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            top = matrix.max(axis=0) / size
+        return pl.DataFrame(
+            {
+                "sample": counts.columns[1:],
+                "library_size": size,
+                "genes_detected": (matrix >= 1).sum(axis=0),
+                "top_gene_share": top,
+            }
+        )
     typed = counts.join(types, on="gene_id", how="left")
     missing = typed.filter(pl.col("gene_type").is_null())["gene_id"]
     if missing.len():
@@ -145,7 +159,7 @@ def sample_metrics(
     counts: pl.DataFrame,
     sheet: pl.DataFrame,
     genes: pl.DataFrame,
-    types: pl.DataFrame,
+    types: pl.DataFrame | None,
     peers: Sequence[str],
     threads: int,
 ) -> tuple[pl.DataFrame, pl.DataFrame | None]:
@@ -155,7 +169,8 @@ def sample_metrics(
         counts: ``gene_id`` then one column per sample, as gather writes it.
         sheet: The harmonised sheet, one row per run.
         genes: Gather's ``gene_id`` and ``gene_name``, which the sex check reads.
-        types: ``gene_types`` of the annotation the counts were made with.
+        types: ``gene_types`` of the annotation the counts were made with; None leaves the
+            composition shares out.
         peers: Sheet columns whose shared values make a peer group.
         threads: CPUs for the VST.
 

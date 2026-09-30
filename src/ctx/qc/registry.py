@@ -6,6 +6,7 @@ MultiQC config that colours MultiQC's General Statistics table by the same bands
 page and MultiQC's report cannot disagree about a value.
 """
 
+import os
 import tomllib
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -182,6 +183,23 @@ def _band_problems(key: str, raw: Mapping[str, Any], kind: str) -> list[str]:
     if kind == "strandedness" and not {"stranded", "unstranded"} <= set(raw):
         problems.append(f"[metrics.{key}] strandedness needs stranded and unstranded")
     return problems
+
+
+REGISTRY_ENV = "CTX_QC_REGISTRY"
+
+
+def resolve(given: Path | None) -> Path:
+    """The registry file: the one given, else ``$CTX_QC_REGISTRY``, else the repo's own.
+
+    Raises:
+        RegistryError: If none of them exists.
+    """
+    repo = Path(__file__).resolve().parents[3] / "conf" / "qc_metrics.toml"
+    env = os.environ.get(REGISTRY_ENV)
+    path = given or (Path(env) if env else repo)
+    if not path.is_file():
+        raise RegistryError(f"no QC registry at {path}; pass --registry or set {REGISTRY_ENV}")
+    return path
 
 
 def load(path: Path) -> Registry:
