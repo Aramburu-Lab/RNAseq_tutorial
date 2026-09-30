@@ -57,7 +57,7 @@ The P3.0 block takes the same settings. `ctx gather`'s one-params-file rule is u
 
 For M3, step 2b cuts chr22 out of the cluster's MD5-checked GENCODE 50 genome, so the Mac's STAR index aligns to the sequence the Step-1 counts were quantified against, with no new download.
 
-**Evidence.** `nextflow config nf-core/fetchngs -r 1.12.0 -profile singularity`, run here with `NXF_SYNTAX_PARSER=v1` against this config, shows it merged over the pipeline's: the new `ext.args`, `maxForks 10`, `maxRetries 6`, the backoff closure, and the module's own `publishDir` kept. Not yet checked: that the cluster's wget 1.20.1 image has both options. Step 1b's first PASTE line checks it.
+**Evidence.** `nextflow config nf-core/fetchngs -r 1.12.0 -profile singularity`, run here with `NXF_SYNTAX_PARSER=v1` against this config, shows it merged over the pipeline's: the new `ext.args`, `maxForks 10`, `maxRetries 6`, the backoff closure, and the module's own `publishDir` kept. Rytis's paste, 2026-09-30 07:35: the cluster's wget 1.20.1 image lists both `--retry-connrefused` and `--waitretry`; the relaunch is job 47484816, and exactly 10 `SRA_FASTQ_FTP` jobs ran at once, so `maxForks` holds. Step 2b: one header, `>chr22 22`; 50,818,468 bases; 11,389,750 bytes gzipped; SHA-256 `32f2639716283f0d8599f540a9a6105d9e6577ea4599e9ea5c0fbc2365872771`, the same on the cluster and on the Mac after rsync, at `~/ctx_tier1/data/raw/reference/GRCh38.primary_assembly.chr22.fa.gz`.
 
 **Consequence.** The relaunch re-downloads the 2 finished FASTQs. The failed run's 47 GB `work/` can be removed once the new run is checked; that is Rytis's call.
 
