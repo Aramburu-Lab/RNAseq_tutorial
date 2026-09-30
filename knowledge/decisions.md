@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-044 — The hub counts the course modules M0 to M10; registered again
+
+**Date:** 2026-09-30 · **Status:** decided (Rytis asked for every module in the preview)
+
+**Context.** The hub's "Modules run" came from `naming.MODULES` minus the report: M0 to M8 and the JupyterLite build, 10 in all. Gene cards (M9) and clinical (M10), which TODO.md files under `outputs/11_genecard` and `outputs/12_clinical`, were missing, and the JupyterLite build, which writes a site and never a module page, was counted. The preview hub read "4 of 10"; Rytis asked for every module. `hub.py` is frozen, so the fix registers again.
+
+**Decision.** `MODULES` gains `genecard` (11) and `clinical` (12), the folder numbers TODO.md already gives them. The hub skips `NOT_MODULES`, the report and the JupyterLite build, and titles M9 and M10. It now counts 11 modules, M0 to M10, in course order. `tests/test_report.py::test_hub_lists_the_course_modules_in_order` asserts the order and each title's number, not only the count.
+
+**Evidence.** The hub, naming and CLI tests pass: 50, plus the order test. The hub's verdicts, the only part of it the Step-1 record copies, read nothing that changed. At registration (2026-09-30 11:04) the Mac held no Step-1 count matrix; nf-core/rnaseq job 47485533 was still running.
+
+**Consequence.** A Step-1 hub reads "N of 11". Pages for M9 and M10 get names the lint accepts (`*_genecard_*`, `*_clinical_*`), which the preview needs before those modules exist.
+
+---
+
 ## D-043 — The read-length batch is named by its read lengths; registered again
 
 **Date:** 2026-09-30 · **Status:** decided (Rytis)

@@ -369,3 +369,16 @@ def test_each_kind_of_control_gets_its_own_form(tmp_path):
     assert '<p class="brush-summary" aria-live="polite">Nothing painted yet.</p>' in linked
     assert '<form class="calls"' in volcano and '<form class="brush"' not in volcano
     assert '"kind": "brush"' in linked and '"kind": "calls"' in volcano
+
+
+def test_hub_lists_the_course_modules_in_order():
+    """The hub counts M0 to M10 in course order, each titled with its own number (D-044).
+
+    The JupyterLite build writes a site, not a module page, so it is never counted.
+    """
+    from ctx.io.naming import MODULES  # noqa: PLC0415
+    from ctx.report.hub import NOT_MODULES, TITLES  # noqa: PLC0415
+
+    course = [module for module, _ in MODULES if module not in NOT_MODULES]
+    assert [TITLES[m].split()[0] for m in course] == [f"M{i}" for i in range(11)]
+    assert "lite_build" not in course

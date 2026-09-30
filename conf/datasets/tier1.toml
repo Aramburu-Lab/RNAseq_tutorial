@@ -264,9 +264,10 @@ running = ["ndn_hsct_early", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
 # shrinkage off (D-019), for rule sources that name their target (D-020), for the
 # Trim Galore reports and the GTF that `ctx qc` reads (D-022), and for those reports as JSON,
 # the only form MultiQC 1.35 reads from Trim Galore 2.x (D-025), and for batch names that
-# say the read lengths, since "long" reads as long-read sequencing (D-043).
+# say the read lengths, since "long" reads as long-read sequencing (D-043), and for the hub
+# listing the course modules M0 to M10, gene cards and clinical included (D-044).
 # The time makes each registration a change to this line, which is how it is found.
-registered = "2026-09-30 10:44"
+registered = "2026-09-30 11:04"
 
 [[sanity.rules]]
 id = "R1"

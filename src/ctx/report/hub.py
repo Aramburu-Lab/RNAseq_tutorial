@@ -32,8 +32,11 @@ TITLES = {
     "function": "M6 Function",
     "proteo": "M7 RNA versus protein",
     "ncrna": "M8 Non-coding RNA",
-    "lite_build": "JupyterLite build",
+    "genecard": "M9 Gene cards",
+    "clinical": "M10 Clinical and survival",
 }
+# Built with the pages, not a module of the course: it writes a site, never an overview page.
+NOT_MODULES = (MODULE, "lite_build")
 # The module is one of the MODULES tokens, longest first, so "lite_build" is not read as "lite".
 _TOKENS = "|".join(sorted((t for t, _ in MODULES), key=len, reverse=True))
 PAGE = re.compile(
@@ -158,7 +161,7 @@ def run(
     out.mkdir(parents=True, exist_ok=True)
     links, missing = [], []
     for module, number in MODULES:
-        if module == MODULE:
+        if module in NOT_MODULES:
             continue
         what = "environment" if module == "setup" else f"{dataset}_overview"
         page = _newest(outputs / f"{number:02d}_{module}", what)

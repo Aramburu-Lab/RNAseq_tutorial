@@ -21,6 +21,8 @@ MODULES: tuple[tuple[str, int], ...] = (
     ("ncrna", 8),
     ("report", 9),
     ("lite_build", 10),
+    ("genecard", 11),
+    ("clinical", 12),
 )
 THEMES = ("white", "black")
 # Theme words may only appear as the trailing token, or `volcano_white_v1` would pass.
