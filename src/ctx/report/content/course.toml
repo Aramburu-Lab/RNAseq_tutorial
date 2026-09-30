@@ -1,0 +1,60 @@
+# The course home page of a student kit (ctx.report.course) and the kit's README
+# (scripts/python/build_kit.py). Every string here passes the prose lint (ctx.report.prose).
+
+title = "Course home"
+intro = "Every module of the course in order, with a link to each dataset's page of it. Each page says what the module does, then what it found."
+note = "Real pages come from public data. Made-up pages come from a seeded simulation with planted genes, a batch and planted QC problems. No number on a made-up page describes a real sample."
+# Opened from inside the zip, the page shows but its links fail; the page itself must say why.
+unzip = "If a link here does not open, unzip the kit and open START.html from the unzipped folder."
+hubs = "Course hubs"
+hubs_lead = "A dataset's hub lists its newest module pages and the verdicts of the rules registered before its data were seen."
+modules = "Modules"
+real = "Real"
+made_up = "Made-up"
+none = "No page in this kit yet."
+# M0 describes the computer that built the pages, not a dataset, so its title names none.
+machine = "The computer that built the kit"
+
+[keys]
+modules = "Modules with a page"
+real = "Data modules on real data"
+value = "{n} of {total}"
+
+# The kit's README.md; build_kit.py fills the placeholders from the kit it has just written.
+[readme]
+text = """# Cancer Transcriptomics course kit
+
+Double-click `START.html`. The course home page opens in your browser, on macOS, Windows and Linux alike. Every report of the course is one click from there.
+
+Nothing is installed, and nothing is sent anywhere.
+
+## Open the course
+
+Unzip the kit first. A page opened from inside the zip cannot reach the pages beside it.
+
+Then double-click `START.html` in the unzipped folder. `START.command` on macOS, `START.cmd` on Windows and `START.sh` on Linux open the same page.
+
+If Terminal answers `no such file or directory`, your shell's startup read a key meant for the path. Double-click `START.html` instead.
+
+## What is here
+
+The pages, figures and tables the course generated: {files} files, {size} in all. No reads, alignments or other large inputs.
+
+{datasets}
+
+Real pages come from public data. Made-up pages come from a seeded simulation; each says so, and no number on it describes a real sample.
+
+## Checking a copy
+
+`MANIFEST.json` lists every file with its size and SHA-256. A file whose hash differs from the manifest is not the file the course built.
+
+With Python installed, `python check_kit.py` checks every file against the manifest, every link and every name. It needs nothing else.
+
+## Rerunning a module
+
+This kit only reads. Rerunning a module needs the course codebase and its environment; the codebase's own README gives the commands.
+
+Built on {built} from codebase commit `{commit}`.
+"""
+# One line per dataset folder in the README's list.
+dataset = "- `{folder}/`: {names}; {kind} data."

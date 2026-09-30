@@ -553,7 +553,7 @@ Rytis asked for every module in the preview, and for Figure 2 of the gather page
 ### Phase 2G — Cluster guide for students (planned 2026-09-30; decisions open)
 
 Rytis: the cluster side packed into a page students use to reproduce the course on their own dataset, on Kebnekaise under their own project, as an HTML page in the course design. The plan (8 agents: three readers, two designs, two adversarial reviews, a synthesis) sits outside the repo; these items are the record. Its D-entries take the next free numbers when G.0 writes them, and the page follows the prose rules (D-045). Rytis's choices, 2026-09-30: (1) Nextflow for students from the repo's pixi `fetch` environment, not an HPC2N module; (2) 5 downloads per student, with `queueSize = 50`, staggered starts and rnaseq `work/` kept until `ctx gather` exits 0 as the other class defaults; (3) the rehearsal on the 4 smallest Step-1 runs by ENA `fastq_bytes`, 1,268,992,130 bytes, not the 8 teaching runs.
-- [ ] **G.0** Documents (decisions answered 2026-09-30; the cluster check still to run): D-046 (the student route: four scripts in `scripts/bash`, `ctx gather --cluster-guide`, Nextflow from the `fetch` environment, completion markers gating rnaseq and the subset) and D-047 (a study without an SDRF curated from the student's own table as a `file://` `[sdrf]` resource); Rytis runs the cluster check and answers (1) to (3).
+- [x] **G.0** Decisions answered 2026-09-30; the cluster check run the same day ("Phase 2G cluster commands (G.0)"). HPC2N's Nextflow modules stop at 25.10.0, below the 25.10.4 nf-core/rnaseq 3.27.0 needs, so students take Nextflow from the `fetch` environment; installed from the lock in 11.26 s at 297 MiB (environment 178 MB, cache 140 MB) and activated from `env -i` as Nextflow 26.04.6, OpenJDK 25.0.2, Python 3.12.14. Apptainer 1.3.6; Java modules 1.8.0 to 25.36; no submit-job ceiling on the account's associations (QOS limits not checked); the storage-quota command still to name. For the scripts: pixi's installer honours `PIXI_HOME` and edits `~/.bashrc` unless `PIXI_NO_PATH_UPDATE=1`; without `PIXI_CACHE_DIR` pixi redirects its home cache off the network filesystem to `/tmp`; `command -v` prints the physical path (`/pfs/proj/nobackup/...`), so paths are compared resolved. The D-entries (the student route, and a study without an SDRF curated from the student's own table) take the next free numbers when G.4 writes them.
 - [ ] **G.1** `scripts/bash/kebnekaise_env.sh`, `fetchngs.sbatch`, `rnaseq.sbatch`, `subsample.sbatch`, each with an `exempt:` block and tests run by `bash -n` and stubs; each planted mutation fails its test.
 - [ ] **G.2** A `Code` result kind in the builder and template: a script shown as it is in the file, with its SHA-256 and a Copy button.
 - [ ] **G.3** `conf/dataset_template.toml`: the SDRF, own-table and `subset_of` routes, commented; the filled template curates the fixture.
@@ -567,11 +567,11 @@ Rytis: the cluster side packed into a page students use to reproduce the course 
 
 Rytis's experience: (1) the student downloads the course's results and reports, already generated, with no FASTQ, BAM or other large file; (2) downloads the codebase and the containers; (3) goes to the folder; (4) double-clicks START, on macOS or Windows; (5) one HTML page opens, from which every report is reached. The kit follows the FINAL-package rules of the lab: nothing found by where it happens to sit, every input with its SHA-256, a check that needs nothing the kit does not carry.
 - [x] **K.0** Decisions (Rytis 2026-09-30): the kit is a release asset of the private repo now, and the same kit on Zenodo with a DOI when the repo goes public at the first session; START only opens the course home page, and rerunning a module is a separate, documented command.
-- [ ] **K.1** `START.command` (macOS: a `.cmd` file does not run on a double-click there), `START.cmd` (Windows) and `START.sh` (Linux): each opens the course home page in the default browser from its own folder, with no server, no install and no network; the macOS one says how to pass Gatekeeper's first-open prompt. Each tested: `bash -n`, and the Windows file run through `cmd /c` where CI has Windows.
-- [ ] **K.2** The course home page, generated, not hand-written: M0 to M10 in course order, each dataset's pages (Step-1, the Track A subset, the made-up preview), the hub of each, the glossary and the cluster guide, each marked real or made-up; built by one command from the dataset roots, text in `content/course.toml` to the prose rules.
-- [ ] **K.3** The kit builder: copies each root's `outputs/` (pages, figures, tables, READMEs) under `kit/<dataset>/`, writes the home page, the START files, a README (what is here, what is made up, how to run your own dataset) and `MANIFEST.json` with every file's SHA-256; refuses a FASTQ, BAM or any file over a size cap; states the kit's size.
-- [ ] **K.4** Proof in an empty place: the kit unpacked in a fresh folder on macOS and Windows (or a Windows VM), START double-clicked, every link of the home page opened, no request leaves the machine, pages work offline in both themes.
-- [ ] **K.5** The containers: the `figures` image of Phase 2D pinned by digest, and the pixi environments, with the one command that reruns a module into the kit's folder; the kit's README gives it.
+- [x] **K.1** Done 2026-09-30 (D-047), changed from this plan: the home page itself is `START.html`, which every system opens in the browser with no shell. On Rytis's Mac `START.command` failed because Terminal types the path into the login shell, where oh-my-zsh's overdue update prompt read its first character. `START.command`, `START.cmd` (CRLF, `%~dp0`) and `START.sh` stay beside it and open it; the shell ones are run in a test from another folder with `open` and `xdg-open` stubbed. CI has no Windows runner, and no CI job starts at all while the organisation's billing is failed.
+- [x] **K.2** Done 2026-09-30 (D-047; the glossary and the cluster guide are not built, so it does not link them). The course home page, generated, not hand-written: M0 to M10 in course order, each dataset's pages (Step-1, the Track A subset, the made-up preview), the hub of each, the glossary and the cluster guide, each marked real or made-up; built by one command from the dataset roots, text in `content/course.toml` to the prose rules.
+- [x] **K.3** Done 2026-09-30 (D-047): `scripts/python/build_kit.py`, with `check_kit.py` shipped in the kit. The kit builder: copies each root's `outputs/` (pages, figures, tables, READMEs) under `kit/<dataset>/`, writes the home page, the START files, a README (what is here, what is made up, how to run your own dataset) and `MANIFEST.json` with every file's SHA-256; refuses a FASTQ, BAM or any file over a size cap; states the kit's size.
+- [ ] **K.4** Proof in an empty place: the kit unpacked in a fresh folder on macOS and Windows (or a Windows VM), START double-clicked, every link of the home page opened, no request leaves the machine, pages work offline in both themes. Progress 2026-09-30: on this Mac the home page's 19 links open with none leaving the machine; the file-level Windows checks (path length after "Extract all", forbidden characters, reserved names, case) pass and run in every build. Open, by Rytis's choice: a Windows PC with a checklist (no Windows machine or runner here), and the macOS download prompt, which needs the zip downloaded in a browser, so it waits for the release he has not yet approved.
+- [ ] **K.5** The containers: the `figures` image of Phase 2D pinned by digest, and the pixi environments, with the one command that reruns a module into the kit's folder; the kit's README gives it. Blocked 2026-09-30: release images go through CI only (D-004), and CI starts no job while the organisation's GitHub billing is failed; the Phase 2D image is not built.
 
 ### Phase 2L — Glossary and term tooltips (draft v3.12, 2026-09-30)
 
@@ -2454,9 +2454,304 @@ for D in "$M" "$W"; do
     R="$D/nfcore_fetchngs/results"
     tail -n 12 "$D"/slurm-nf_fetchngs-*.out
     ls "$R/fastq"/*.fastq.gz | wc -l
-    (cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done) | grep -vc ': OK$'
+    # Counted both ways: a missing folder or md5 file printed 0 failures on 2026-09-30.
+    (cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done) 2>&1 | awk '/: OK$/{ok++; next} {bad++} END{print ok+0, "OK;", bad+0, "not OK"}'
     du -sh "$R/fastq"
-done                                                                  # PASTE, expect 44 then 103 FASTQs, 0 and 0 md5 failures
+done                                                                  # PASTE, expect 44 then 103 FASTQs; 44 OK; 0 not OK, then 103 OK; 0 not OK
+```
+
+### Phase 4 cluster commands (P4.1), the only copy
+
+Counting the 22 Cassetta tissue-macrophage runs (P4.0 part 1, job 47486038) with Step-1's own rnaseq files, reused by path. As run on 2026-09-30, with the corrections an independent check found (D-047 records the lesson): Step-1's `rnaseq_params.yml` on the cluster predates `publish_dir_mode: copy` (D-025's amendment), so the copy gains the line before submission and the submission is refused without it; `P` is exported before `sbatch`, because Slurm's documentation and its source disagree on whether `--export=ALL,P=` overrides an exported `P`. The first submission, 47489146, ran 83 s before it was cancelled: it left one params file and a header-only trace in `results/pipeline_info` and no published file; `ctx gather` accepts both params files because they agree on every `AGREE` key. The run is job 47489148.
+
+```
+# Kebnekaise login node. Paste back every line marked PASTE.
+export T=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
+export M=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mac
+
+# ---- 0. The Cassetta download, checked (done 2026-09-30: link, 44, 23 lines, 129G) ----
+R="$M/nfcore_fetchngs/results"
+grep -h 'publish mode' "$M"/slurm-nf_fetchngs-*.out                   # PASTE, expect link
+ls "$R"/fastq/*.fastq.gz | wc -l                                      # PASTE, expect 44
+ls "$R"/fastq/md5/*.md5 | wc -l                                       # PASTE, expect 44
+(cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done) 2>&1 | awk '/: OK$/{ok++; next} {bad++} END{print ok+0, "OK;", bad+0, "not OK"}'   # PASTE, expect 44 OK; 0 not OK
+awk 'END{print NR}' "$R/samplesheet/samplesheet.csv"                  # PASTE, expect 23: a header and 22 runs
+
+# ---- 1. rnaseq samplesheet: the fetchngs sheet cut to four columns, by name ----
+P="$M" python3 -c "
+import csv, os
+p = os.environ['P']
+rows = list(csv.DictReader(open(p + '/nfcore_fetchngs/results/samplesheet/samplesheet.csv')))
+keep = ['sample', 'fastq_1', 'fastq_2', 'strandedness']
+with open(p + '/rnaseq_samplesheet.csv', 'w', newline='') as fh:
+    w = csv.DictWriter(fh, fieldnames=keep)
+    w.writeheader()
+    w.writerows({k: r[k] for k in keep} for r in rows)
+print(len(rows), 'rows;', len({r['sample'] for r in rows}), 'samples;', sum(bool(r['fastq_2']) for r in rows), 'paired')
+"                                                                     # PASTE, expect 22 rows; 22 samples; 22 paired
+
+# ---- 2. nf-core/rnaseq 3.27.0, Salmon only, with Step-1's own files ----
+df -h /proj/nobackup/hpc2n2024-150                                    # PASTE; stop if under about 200 GB free (arithmetic, not measured)
+cat "$T/rnaseq_params.yml"                                            # PASTE: Step-1's params, reused below
+sed -e "s#^input: .*#input: $M/rnaseq_samplesheet.csv#" -e "s#^outdir: .*#outdir: $M/nfcore_rnaseq/results#" "$T/rnaseq_params.yml" > "$M/rnaseq_params.yml"
+# Step-1's file predates publish_dir_mode in the recipe (D-025): add it if missing.
+grep -qx 'publish_dir_mode: copy' "$M/rnaseq_params.yml" || printf 'publish_dir_mode: copy\n' >> "$M/rnaseq_params.yml"
+diff "$T/rnaseq_params.yml" "$M/rnaseq_params.yml"                    # PASTE: input and outdir changed, publish_dir_mode added if it was missing
+cp "$T/rnaseq_kebnekaise.config" "$T/run_rnaseq.sbatch" "$M/"
+mkdir -p "$M/nfcore_rnaseq"
+cd "$M"
+export P="$M"                                                         # the batch script reads $P; Step-1's older P must not reach the job
+grep -qx 'publish_dir_mode: copy' "$M/rnaseq_params.yml" && sbatch -J nf_rnaseq_breast_mac --export=ALL,P="$M" "$M/run_rnaseq.sbatch" || echo "NOT SUBMITTED: no publish_dir_mode"
+# About one hour after it starts:
+tail -n 30 "$M"/slurm-nf_rnaseq_breast_mac-*.out                      # PASTE
+
+# ---- 3. When the rnaseq job ends ----
+S="$M/nfcore_rnaseq/results/salmon"
+test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && echo "matrix present" || echo "NO MATRIX: the run has not finished; stop here"   # PASTE
+tail -n 40 "$M"/slurm-nf_rnaseq_breast_mac-*.out                      # PASTE
+head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}'   # PASTE, expect 22
+awk 'END{print NR - 1, "genes"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"                        # PASTE, expect 78470
+diff <(cut -f1,2 "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv") <(cut -f1,2 "$S/salmon.merged.gene_counts_length_scaled.tsv") | wc -l   # PASTE, expect 0: exactly Step-1's genes
+cat "$M"/nfcore_rnaseq/results/pipeline_info/*versions*.yml                                              # PASTE, expect rnaseq 3.27.0, salmon 2.7.0
+grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c                               # PASTE: the libType quant ran with
+sacct -n -S 2026-09-30 --name=nf_rnaseq_breast_mac --format=JobID,JobName,Elapsed,MaxRSS,State           # PASTE; without -X, so the batch step's memory shows
+find "$M/nfcore_rnaseq/results" -type l | wc -l                                                          # PASTE, expect 0: publish_dir_mode copy
+# If the count above is not 0, turn each link into a copy of its target before work/ goes (P2A.3 step 6):
+#   (cd "$M/nfcore_rnaseq/results" && find . -type l -print0 | while IFS= read -r -d '' f; do cp --remove-destination -- "$(readlink -f -- "$f")" "$f"; done)
+du -sh "$M/nfcore_rnaseq/results" "$M/nfcore_rnaseq/work"                                                # PASTE
+# Keep work/ until the Mac copy below checks out.
+```
+
+On the Mac, after step 3. The fetchngs outdir is not copied without its FASTQs: `ctx gather` reports every run's FASTQ missing in such a copy (measured on `tier1_teach`). `breast_mac_meta` comes from a metadata-only fetchngs run on the Mac when the breast dataset file is built, as `tier1_meta` did.
+
+```bash
+mkdir -p ~/ctx_breast/data/raw/breast_mac_rnaseq
+rsync -avmL --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mac/nfcore_rnaseq/results/ ~/ctx_breast/data/raw/breast_mac_rnaseq/
+test -s ~/ctx_breast/data/raw/breast_mac_rnaseq/salmon/salmon.merged.gene_counts_length_scaled.tsv && echo "matrix copied" || echo "NO MATRIX: rerun after step 3"
+ls ~/ctx_breast/data/raw/breast_mac_rnaseq/trimgalore/*_trimming_report.json | wc -l
+```
+
+### Phase 2G cluster commands (G.0), the only copy
+
+Run 2026-09-30 on login node b-an01, after `pixi.toml` and `pixi.lock` were copied to `student_check/` from the Mac. Results in G.0 above. The first run assumed pixi in `~/.pixi`; the installer honours `PIXI_HOME`, so the second run names the binary.
+
+```
+module spider Nextflow 2>&1 | grep -oE 'Nextflow/[0-9.]+' | sort -u        # PASTE
+module spider Java 2>&1 | grep -oE 'Java/[0-9.]+' | sort -u                # PASTE
+apptainer --version                                                        # PASTE
+python3 --version                                                          # PASTE
+command -v sbatch                                                          # PASTE
+projinfo                                                                   # PASTE
+sacctmgr -nP show assoc cluster=kebnekaise format=account,user,grpsubmitjobs,maxsubmitjobs | awk -F'|' '$3||$4'   # PASTE: job ceilings, empty if none
+cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/student_check
+echo "PIXI_HOME=$PIXI_HOME"                                                # PASTE
+PX=${PIXI_HOME:-$HOME/.pixi}/bin/pixi
+ls -l "$PX" || curl -fsSL https://pixi.sh/install.sh | PIXI_VERSION=v0.76.2 PIXI_NO_PATH_UPDATE=1 bash
+"$PX" --version                                                            # PASTE, expect pixi 0.76.2
+export PIXI_CACHE_DIR=$PWD/pixi_cache
+/usr/bin/time -v "$PX" install --manifest-path pixi.toml -e fetch --frozen 2>&1 | grep -i -e 'Elapsed (wall' -e 'Maximum resident' -e 'installed'   # PASTE
+du -sh .pixi/envs/fetch pixi_cache                                         # PASTE
+env -i HOME="$HOME" USER="$USER" PATH=/usr/bin:/bin PX="$PX" bash -c 'set -euo pipefail; hook=$("$PX" shell-hook --manifest-path pixi.toml -e fetch --as-is); eval "$hook"; command -v nextflow java python3; nextflow -version 2>&1 | grep -i version; java -version 2>&1 | head -1; python3 --version'   # PASTE, expect Nextflow 26.04.6, OpenJDK 25.0.2, Python 3.12.14
+```
+
+### Phase 4 GDC breast download (P4.2), the only copy
+
+On the Mac, into `~/ctx_breast/data/raw/tcga_brca/` as fetched, each counts file in gdc-client's `<file_id>/<file_name>` layout. Every expected value was measured on 2026-09-30 against GDC Data Release 46.0, except the TCGA-CDR's md5 and size, from GDC's PanCan manifest of 2024-03-26. An independent check re-ran every metadata query and reproduced every value; it added `preservation_method` (13 FFPE tumour files; 4 of the 113 pairs have one) and five robustness fixes, all in the block below. The metadata stage, run for real with the downloads switched off: 14.5 s, 88 MB peak RSS, 16 MB. Not measured: the 1,231 counts files and the CDR served bytes, download speed, and GDC's limits at 4 parallel downloads. The root `~/ctx_breast`, the slug `tcga_brca` and this layout become the input contract of the breast ingestion reader, which is not written yet.
+
+```bash
+mkdir -p ~/ctx_breast/data/raw/tcga_brca && cat >| ~/ctx_breast/data/raw/tcga_brca/_fetch_tcga_brca.sh <<'SH'
+# TCGA-BRCA open-access GDC data for Phase 4's breast ingestion and M10, saved as fetched.
+# Restartable: paste the same block again. Metadata saved by an earlier run is kept, so a
+# rerun stays on the manifest of its first run; a counts file is skipped once its md5 matches.
+# Every "expect" below was measured 2026-09-30 against GDC Data Release 46.0 (2026-08-10), except
+# the TCGA-CDR's md5 and size, which come from GDC's PanCan manifest of 2024-03-26.
+# No -e: one failed file must not stop the other 1,230; the checks at the end count failures.
+set -uo pipefail
+
+OUT=${OUT:-$HOME/ctx_breast/data/raw/tcga_brca}
+GDC_API=${GDC_API:-https://api.gdc.cancer.gov}
+GDC_DATA=${GDC_DATA:-$GDC_API/data}
+GDC_WEB=${GDC_WEB:-https://gdc.cancer.gov}
+JOBS=${JOBS:-4}
+PY=/usr/bin/python3
+export OUT GDC_API GDC_DATA GDC_WEB
+
+fetch() { curl -sS --fail --retry 6 --retry-all-errors --connect-timeout 30 --max-time 900 "$@"; }
+
+# One row per retrieval, so every file carries its own retrieval date and the release it came from.
+log() { printf '%s\t%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${NOW:-unknown}" "$1" "$2" >> "$OUT/_retrieval_log.tsv"; }
+
+# download <url> <dest> <md5>: lands in <dest>.part and is moved into place only when the md5 matches.
+download() {
+    local url=$1 dest=$2 want=$3
+    if [ -f "$dest" ] && [ "$(md5 -q "$dest")" = "$want" ]; then return 0; fi
+    mkdir -p "$(dirname "$dest")"
+    # A finished file whose md5 no longer matches is moved aside, never deleted.
+    if [ -f "$dest" ]; then mv "$dest" "$dest.md5_mismatch_$(date -u +%Y%m%dT%H%M%SZ)"; fi
+    fetch -o "$dest.part" "$url" || { echo "FAIL download $url"; return 1; }
+    if [ "$(md5 -q "$dest.part")" = "$want" ]; then
+        mv "$dest.part" "$dest" && log "${dest#"$OUT"/}" "GET $url"
+        return 0
+    fi
+    echo "FAIL md5 $dest.part: $(md5 -q "$dest.part"), the manifest says $want"
+    return 1
+}
+
+# xargs calls this script back once per counts file, into gdc-client's layout <file_id>/<file_name>.
+if [ "${1:-}" = "--one" ]; then download "$GDC_DATA/$2" "$OUT/$2/$3" "$4"; exit $?; fi
+[ -f "$0" ] || { echo "FAIL: run this file as: bash <path to this file>"; exit 1; }
+
+mkdir -p "$OUT"
+T0=$(date +%s)
+echo "PASTE start $(date -u +%Y-%m-%dT%H:%M:%SZ) into $OUT"
+df -h "$OUT" | tail -n 1 | sed 's/^/PASTE disk: /'
+
+# The release GDC serves now, and the one the saved metadata came from (copied on the first run only).
+fetch -o "$OUT/_status_last_run.json" "$GDC_API/status" || { echo "FAIL: no answer from $GDC_API/status"; exit 1; }
+release() { sed -n 's/.*"data_release": *"\([^"]*\)".*/\1/p' "$1"; }
+NOW=$(release "$OUT/_status_last_run.json")
+export NOW
+[ -s "$OUT/_retrieval_log.tsv" ] || printf 'retrieved_utc\tgdc_release\tfile\tsource\n' > "$OUT/_retrieval_log.tsv"
+if [ -s "$OUT/gdc_status.json" ]; then :; else cp "$OUT/_status_last_run.json" "$OUT/gdc_status.json" && log gdc_status.json "GET $GDC_API/status"; fi
+FIRST=$(release "$OUT/gdc_status.json")
+echo "PASTE release now: $NOW; saved metadata from: $FIRST; expect Data Release 46.0 - August 10, 2026 for both"
+[ "$NOW" = "$FIRST" ] || echo "WARNING: GDC changed release since the first run; the saved manifest still decides what is fetched. For the new release, move $OUT aside and paste again."
+
+# post <file> <endpoint> <json>: fetched once; its query is saved beside it as <file>.query.json.
+post() {
+    if [ -s "$OUT/$1" ]; then echo "kept $1 from an earlier run"; return 0; fi
+    printf '%s\n' "$3" > "$OUT/$1.query.json"
+    fetch -H 'Content-Type: application/json' --data-binary @"$OUT/$1.query.json" -o "$OUT/$1.part" "$GDC_API/$2" || { echo "FAIL $1"; return 1; }
+    mv "$OUT/$1.part" "$OUT/$1" && log "$1" "POST $GDC_API/$2 with $1.query.json"
+}
+get() {
+    if [ -s "$OUT/$1" ]; then echo "kept $1 from an earlier run"; return 0; fi
+    fetch -o "$OUT/$1.part" "$2" || { echo "FAIL $1"; return 1; }
+    mv "$OUT/$1.part" "$OUT/$1" && log "$1" "GET $2"
+}
+
+# Filters and field names were each checked on 2026-09-30: the API answered with warnings {}.
+STAR='{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["TCGA-BRCA"]}},{"op":"in","content":{"field":"data_type","value":["Gene Expression Quantification"]}},{"op":"in","content":{"field":"analysis.workflow_type","value":["STAR - Counts"]}},{"op":"in","content":{"field":"access","value":["open"]}}]}'
+BRCA='{"op":"in","content":{"field":"project.project_id","value":["TCGA-BRCA"]}}'
+# preservation_method tells FFPE tumour files from frozen ones, which the tumour-normal pairing needs.
+FIELDS=file_id,file_name,md5sum,file_size,cases.case_id,cases.submitter_id,cases.samples.submitter_id,cases.samples.sample_type,cases.samples.preservation_method,cases.samples.portions.analytes.aliquots.submitter_id
+# follow_ups.molecular_tests carries ESR1, PGR and ERBB2 status, which the M10 ER exercise needs.
+EXPAND=demographic,diagnoses,diagnoses.treatments,exposures,follow_ups,follow_ups.molecular_tests
+
+# 1. Manifest and per-file metadata first, then the clinical side, so all metadata is from one moment.
+post gdc_manifest_star_counts.txt files "{\"filters\":$STAR,\"size\":10000,\"return_type\":\"manifest\"}"
+# A table saved by the first version of this script lacks preservation_method: move it aside, never delete.
+if [ -s "$OUT/gdc_files_star_counts.tsv" ] && ! head -n 1 "$OUT/gdc_files_star_counts.tsv" | grep -q preservation_method; then
+    stamp=$(date -u +%Y%m%dT%H%M%SZ)
+    mv "$OUT/gdc_files_star_counts.tsv" "$OUT/gdc_files_star_counts.tsv.no_preservation_$stamp"
+    mv "$OUT/gdc_files_star_counts.tsv.query.json" "$OUT/gdc_files_star_counts.tsv.query.json.no_preservation_$stamp" 2>/dev/null
+    echo "moved aside the metadata table without preservation_method; fetching it again"
+fi
+post gdc_files_star_counts.tsv files "{\"filters\":$STAR,\"size\":10000,\"format\":\"TSV\",\"fields\":\"$FIELDS\"}"
+post gdc_cases_clinical.json cases "{\"filters\":$BRCA,\"size\":10000,\"format\":\"JSON\",\"expand\":\"$EXPAND\"}"
+post gdc_annotations.json annotations "{\"filters\":$BRCA,\"size\":10000,\"format\":\"JSON\"}"
+get PanCan-General_Open_GDC-Manifest_2.txt "$GDC_WEB/system/files/public/file/PanCan-General_Open_GDC-Manifest_2.txt"
+
+# 2. TCGA-CDR, by the UUID and md5 in GDC's own PanCan manifest (the PanCanAtlas page links both).
+CDR_ID=1b5f413e-a8d1-4d10-92eb-7c4ae739ed81
+[ -s "$OUT/PanCan-General_Open_GDC-Manifest_2.txt" ] || echo "FAIL: the PanCan manifest was not fetched, so the CDR cannot be checked"
+CDR_NAME=$(awk -F'\t' -v id="$CDR_ID" '$1 == id {print $2}' "$OUT/PanCan-General_Open_GDC-Manifest_2.txt" 2>/dev/null)
+CDR_MD5=$(awk -F'\t' -v id="$CDR_ID" '$1 == id {print $3}' "$OUT/PanCan-General_Open_GDC-Manifest_2.txt" 2>/dev/null)
+if [ -n "$CDR_MD5" ]; then
+    download "$GDC_DATA/$CDR_ID" "$OUT/$CDR_NAME" "$CDR_MD5"
+    echo "PASTE CDR: $CDR_NAME md5 $(md5 -q "$OUT/$CDR_NAME" 2>/dev/null) bytes $(stat -f %z "$OUT/$CDR_NAME" 2>/dev/null); expect TCGA-CDR-SupplementalTableS1.xlsx md5 a4591b2dcee39591f59e5e25a6ce75fa bytes 2945129, values from GDC's PanCan manifest of 2024-03-26"
+else
+    echo "FAIL: $CDR_ID is not in PanCan-General_Open_GDC-Manifest_2.txt"
+fi
+
+# 3. The STAR - Counts files. xargs treats blanks, quotes and backslashes specially: allow only safe names.
+M="$OUT/gdc_manifest_star_counts.txt"
+[ -s "$M" ] || { echo "FAIL: no manifest at $M"; exit 1; }
+[ "$(head -n 1 "$M")" = "$(printf 'id\tfilename\tmd5\tsize\tstate')" ] || { echo "FAIL: the manifest header is not id, filename, md5, size, state"; exit 1; }
+if awk -F'\t' 'NR > 1 && (NF != 5 || $1 !~ /^[0-9a-f-]+$/ || $2 ~ /[^A-Za-z0-9._-]/)' "$M" | grep -q .; then echo "FAIL: a manifest row is not 5 fields or its id or name holds a character other than letters, digits, dot, underscore or hyphen"; exit 1; fi
+echo "fetching $(awk 'NR > 1' "$M" | wc -l | tr -d ' ') counts files, $JOBS at a time"
+awk -F'\t' 'NR > 1 {print $1, $2, $3}' "$M" | xargs -n 3 -P "$JOBS" bash "$0" --one
+
+# 4. Checks. Every manifest row on disk with its md5:
+awk -F'\t' 'NR > 1 {print $1 "\t" $2 "\t" $3 "\t" $4}' "$M" | {
+    ok=0; bad=0; missing=0; bytes=0; listed=0
+    while IFS=$'\t' read -r id name want size; do
+        listed=$((listed + size)); f="$OUT/$id/$name"
+        if [ -f "$f" ]; then
+            if [ "$(md5 -q "$f")" = "$want" ]; then ok=$((ok + 1)); bytes=$((bytes + $(stat -f %z "$f"))); else bad=$((bad + 1)); echo "bad md5: $f"; fi
+        else
+            missing=$((missing + 1))
+        fi
+    done
+    echo "PASTE counts files: $ok md5 OK, $bad bad, $missing missing; expect 1231, 0, 0"
+    echo "PASTE counts bytes: $bytes on disk of $listed in the manifest; expect 5223473855 of 5223473855"
+}
+echo "PASTE leftovers: $(find "$OUT" -name '*.part' | wc -l | tr -d ' ') .part; expect 0"
+find "$OUT" -name '*.md5_mismatch_*' | sed 's/^/moved aside for inspection: /'
+
+# The metadata TSV, read by column name (GDC sorts its columns and ends lines with CRLF):
+awk -F'\t' '
+    NR == FNR { if (FNR > 1) inman[$1] = 1; next }
+    { sub(/\r$/, "") }
+    FNR == 1 {
+        for (i = 1; i <= NF; i++) c[$i] = i
+        if (("cases.0.samples.0.sample_type" in c) == 0 || ("cases.0.samples.0.preservation_method" in c) == 0 || ("cases.0.submitter_id" in c) == 0 || ("file_id" in c) == 0) { print "FAIL: metadata TSV lacks a column"; bad = 1; exit 1 }
+        next
+    }
+    {
+        n++; t = $c["cases.0.samples.0.sample_type"]; k = $c["cases.0.submitter_id"]
+        st[t]++; cs[k] = 1; pm[$c["cases.0.samples.0.preservation_method"]]++
+        if (t == "Primary Tumor" && $c["cases.0.samples.0.preservation_method"] == "FFPE") ffpe[k] = 1
+        if (t == "Primary Tumor") tum[k] = 1
+        if (t == "Solid Tissue Normal") nor[k] = 1
+        if (($c["file_id"] in inman) == 0) notin++
+    }
+    END {
+        if (bad) exit 1
+        for (k in cs) ncase++
+        for (k in nor) if (k in tum) pairs++
+        printf "PASTE metadata: %d files, %d cases, %d not in the manifest; expect 1231, 1095, 0\n", n, ncase, notin
+        printf "PASTE sample types: Primary Tumor %d, Solid Tissue Normal %d, Metastatic %d; expect 1111, 113, 7\n", st["Primary Tumor"], st["Solid Tissue Normal"], st["Metastatic"]
+        printf "PASTE pairs, cases with a primary tumour and a solid tissue normal: %d; expect 113\n", pairs
+        for (k in ffpe) if ((k in nor) && (k in tum)) pffpe++
+        printf "PASTE preservation: OCT %d, Unknown %d, FFPE %d; pairs with an FFPE tumour file %d; expect 749, 469, 13; 4\n", pm["OCT"], pm["Unknown"], pm["FFPE"], pffpe
+    }' "$M" "$OUT/gdc_files_star_counts.tsv"
+
+# Clinical and annotations. The expected counts came from GDC facet and filter queries, not from these files.
+"$PY" - "$OUT" <<'PY'
+import collections, json, os, sys
+out = sys.argv[1]
+missing = [f for f in ("gdc_cases_clinical.json", "gdc_annotations.json") if not os.path.isfile(os.path.join(out, f))]
+if missing:
+    sys.exit("FAIL: not fetched: %s; paste the block again" % ", ".join(missing))
+c = json.load(open(os.path.join(out, "gdc_cases_clinical.json")))
+hits = c["data"]["hits"]
+print("PASTE clinical: %d cases of %d, warnings %s; expect 1098 of 1098, {}" % (len(hits), c["data"]["pagination"]["total"], c.get("warnings")))
+n = lambda key: sum(1 for h in hits if h.get(key))
+treated = sum(1 for h in hits if any(d.get("treatments") for d in h.get("diagnoses") or []))
+print("PASTE cases with demographic %d, diagnoses %d, a treatment record %d, follow_ups %d, exposures %d; expect 1097, 1097, 1097, 1096, 1"
+      % (n("demographic"), n("diagnoses"), treated, n("follow_ups"), n("exposures")))
+sex = collections.Counter((h.get("demographic") or {}).get("sex_at_birth") for h in hits)
+print("PASTE sex_at_birth: female %d, male %d, none %d; expect 1085, 12, 1" % (sex["female"], sex["male"], sex[None]))
+er = sum(1 for h in hits if any(m.get("gene_symbol") == "ESR1" for f in h.get("follow_ups") or [] for m in f.get("molecular_tests") or []))
+print("PASTE cases with an ESR1 molecular test: %d; expect 1048" % er)
+a = json.load(open(os.path.join(out, "gdc_annotations.json")))
+ah = a["data"]["hits"]
+print("PASTE annotations: %d of %d, warnings %s; expect 6934 of 6934, {}" % (len(ah), a["data"]["pagination"]["total"], a.get("warnings")))
+cl = collections.Counter(x.get("classification") for x in ah)
+print("PASTE classification: %s; expect CenterNotification 52, Notification 5605, Observation 23, Redaction 1254"
+      % ", ".join("%s %d" % kv for kv in sorted(cl.items(), key=lambda kv: str(kv[0]))))
+cat = collections.Counter(x.get("category") for x in ah)
+print("PASTE categories: Neoadjuvant therapy %d, Prior malignancy %d; expect 7, 16" % (cat["Neoadjuvant therapy"], cat["Prior malignancy"]))
+PY
+
+echo "PASTE wall time $(( $(date +%s) - T0 )) s"
+du -sh "$OUT" | sed 's/^/PASTE du: /'
+SH
+```
+
+```bash
+bash ~/ctx_breast/data/raw/tcga_brca/_fetch_tcga_brca.sh 2>&1 | tee -a ~/ctx_breast/data/raw/tcga_brca/_fetch_tcga_brca.log
 ```
 
 ### Phase 2 dependencies

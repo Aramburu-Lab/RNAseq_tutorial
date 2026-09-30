@@ -151,6 +151,7 @@ CHROME = {
         "link": "#1D4E89", "warn": "#B45309", "warn-fill": "#E69F00", "good-fill": "#009E73",
         "pass-fg": "#1B5E20", "pass-bg": "#E6F2E7", "fail-fg": "#8E1B1B", "fail-bg": "#FBE9E7",
         "recorded-fg": "#4D4D4D", "recorded-bg": "#EDEDED",
+        "made-fg": "#7A4B00", "made-bg": "#FBEFD9",
         "shadow": "0 1px 2px rgba(16,24,40,.04), 0 8px 24px -12px rgba(16,24,40,.18)",
     },
     "black": {
@@ -159,6 +160,7 @@ CHROME = {
         "link": "#8CB8F0", "warn": "#F0B45E", "warn-fill": "#E69F00", "good-fill": "#34D399",
         "pass-fg": "#9BD3A5", "pass-bg": "#16301C", "fail-fg": "#F4ABA3", "fail-bg": "#3D1816",
         "recorded-fg": "#C8C8C8", "recorded-bg": "#262626",
+        "made-fg": "#F0C27A", "made-bg": "#3A2A10",
         "shadow": "0 1px 2px rgba(0,0,0,.4), 0 14px 34px -18px rgba(0,0,0,.7)",
     },
 }  # fmt: skip
@@ -167,6 +169,7 @@ TEXT_ON = {
     "text": ("page", "surface", "surface-2"), "muted": ("page", "surface", "surface-2"),
     "link": ("page", "surface", "surface-2"), "warn": ("page", "surface-2"),
     "pass-fg": ("pass-bg",), "fail-fg": ("fail-bg",), "recorded-fg": ("recorded-bg",),
+    "made-fg": ("made-bg",),
 }  # fmt: skip
 # How much of a fill colour tints a callout, and its border, over the page (ALI's color-mix).
 TINT = {"fill": "9%", "border": "45%"}

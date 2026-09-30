@@ -44,6 +44,9 @@ from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.strip import StripData
 from ctx.viz.style import CIVIDIS, DATA_COLOURS, category_colours
 
+# The made-up dataset's name on the page, one word for every preview (content/ui.toml).
+SHOWN = ("ui", "preview.dataset")
+
 MODULE = PAGE = "quant"
 SEED = 4
 # A gene is detected at this many reads; the figures only, the real module has no such option.
@@ -433,7 +436,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
     )  # fmt: skip
     usage, budget = runtime.measure(started), runtime.budget(MODULE)
     report = ModulePage(
-        title=text.fill(PAGE, "title", dataset=dataset), **text.skeleton(PAGE),
+        title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)), **text.skeleton(PAGE),
         parameters=cards(), results=(text.word("ui", "preview.note"), samples, genes),
         key_numbers=keys,
         reproduce=Reproduction(

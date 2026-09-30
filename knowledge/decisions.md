@@ -27,6 +27,32 @@ it were reversed.
 
 ---
 
+## D-047 — The student kit: the newest outputs and what their pages link, START.html, one checker
+
+**Date:** 2026-09-30 · **Status:** decided (Rytis's K.0; the rules below are the builder's)
+
+**Context.** Rytis's experience for a student (Phase 2K): download the course's generated results and reports, open the folder, double-click START, and reach every report from one page. The kit is a release asset of the private repo, and on Zenodo with a DOI at the first session (K.0).
+
+**Decision.**
+- `scripts/python/build_kit.py --out <kit> --real <folder>=<ctx root> --made-up <folder>=<ctx root> [--zip]` builds it in `<kit>.partial` and renames it only when every check passes; the kit, its partial folder and its zip are never written over.
+- What ships from each root's `outputs/` (resolved, so a symlinked folder works): the newest dated copy of every output in each module folder, plus every file the shipped pages link to, followed through linked pages (MultiQC's report sits in an undated subfolder). Undated files no page links stay behind.
+- Refused before anything is written: reads, alignments and their indexes by extension; any file over 50,000,000 bytes (the largest output on 2026-09-30 is Step-1's counts CSV, 39.5 MB); any link in a source page that does not resolve or that fetches from off the machine. Every attribute a browser follows counts (`href`, `src`, `srcset`, `data`, `poster`, `xlink:href`, CSS `url()` and `@import`); a clicked `http`, `https` or `mailto` link is allowed, a `file:` link never.
+- Checked after writing: the same link rule over every page of the kit, and every name against Windows: the full path after Explorer's "Extract all" into `C:\Users\<20 characters>\Downloads\<kit>\<kit>\` within 259 characters, no forbidden character or reserved name, no two names differing only by case.
+- The checks are `scripts/python/check_kit.py`, standard library only, which the builder imports and copies into the kit: `python check_kit.py` in a copy checks every file against `MANIFEST.json`, every link and every name.
+- The home page is `START.html` (`ctx.report.course`), built from the pages the kit holds: one card per module M0 to M10, one link per dataset's newest overview page, each marked Real or Made-up by its root, and each dataset's hub. M0 checks the computer, the same in every root, so it is listed from real roots only, and the count of modules on real data runs over M1 to M10. The page tells a reader whose links fail to unzip first. Text is `content/course.toml`, under the prose lint, which a test now runs.
+- START is the HTML file, because a double-clicked `.command` is typed into the user's login shell, and on Rytis's Mac oh-my-zsh's overdue update prompt read its first character. `START.command`, `START.cmd` and `START.sh` stay beside it for readers who look for them, and open it.
+- `MANIFEST.json` lists every other file with its size and SHA-256, the commit that built the kit, marked `-dirty` when any code path (`src`, `scripts`, `conf`, the pixi and pyproject files) has a change, an untracked file included, and each root's folder and kind.
+- The made-up dataset is named "Made-up study" on every page (`ui.toml` `preview.dataset`, also its dataset file's label), not its slug.
+
+**Evidence.**
+- The first kit, built before the review from the uncommitted tree: 1,064 files, 785.1 MB, zipped 253.5 MB, in 17.8 s at 280 MB peak RSS; longest zip entry 128 characters, 193 with a 20-character user name after "Extract all", against 259; no forbidden character, reserved name, non-ASCII name or case collision.
+- An adversarial review of that build (6 agents) confirmed 9 defects, all fixed here: the web-load check saw only `src`; a failed check left a half-written kit that blocked every rerun; M0 counted as real data; a symlinked `outputs/` refused every link; the home page gave no sign that the kit must be unzipped; the widened unused-key test passed three planted dead keys; nothing ran the prose lint; one test file was not formatted; the tests missed the newest-page rule, the size cap, broken-link refusal and the START target; untracked builder code did not mark the commit dirty. Five other claims were refuted.
+- `tests/test_kit.py`, 14 tests; each of 10 planted mutations fails one (the newest-page rule, the cap, source-link refusal, the resolved outputs folder, M0 in the data count, the START target, manifest hashes, clicked links, the Windows length, the rename). Not tested: the dirty mark, which depends on git state.
+
+**Not done.** K.4 on Windows (a PC with a checklist, by Rytis's choice) and the macOS download prompt, which waits for the release; K.5, blocked on CI billing and the Phase 2D image.
+
+---
+
 ## D-046 — The Step-1 record: 7 of 8 registered rules pass; R4 fails on its monocyte condition
 
 **Date:** 2026-09-30 · **Status:** decided (the record, as registered)

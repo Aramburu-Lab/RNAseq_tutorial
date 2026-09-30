@@ -55,6 +55,7 @@ def synthetic(root: Path) -> Path:
     from test_qc_run import plant, with_annotation  # noqa: PLC0415
 
     from ctx.dataset import load  # noqa: PLC0415
+    from ctx.report.text import word  # noqa: PLC0415
 
     plant(root)
     spec = with_annotation(root, root)
@@ -64,7 +65,8 @@ def synthetic(root: Path) -> Path:
     text = spec.read_text()
     for old, new in BATCH.items():
         text = text.replace(f'batch = ["{old}"]', f'batch = ["{new}"]')
-    spec.write_text(text)
+    label = word("ui", "preview.dataset")
+    spec.write_text(text.replace("[dataset]\n", f'[dataset]\nlabel = "{label}"\n', 1))
     write_gene_sets(root / load(spec).resource("sets").dest)
     return spec
 

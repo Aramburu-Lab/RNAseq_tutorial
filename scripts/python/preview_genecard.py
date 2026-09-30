@@ -46,6 +46,9 @@ from ctx.viz.heatmap import HeatmapData, diverging_levels
 from ctx.viz.strip import Range, StripData
 from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, category_colours
 
+# The made-up dataset's name on the page, one word for every preview (content/ui.toml).
+SHOWN = ("ui", "preview.dataset")
+
 MODULE = PAGE = "genecard"
 SEED = 9
 # Not an HGNC symbol: no real gene is drawn with made-up values.
@@ -238,7 +241,8 @@ def page(root: Path, dataset: str, day: date) -> Path:
                   for flag, c in text.raw(PAGE, "planned").items())  # fmt: skip
     usage, budget = runtime.measure(started), runtime.budget(MODULE)
     built = ModulePage(
-        title=text.fill(PAGE, "title", dataset=dataset), **text.skeleton(PAGE), parameters=cards,
+        title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)), **text.skeleton(PAGE),
+        parameters=cards,
         results=results, key_numbers=keys,
         reproduce=Reproduction(
             command=text.fill(PAGE, "command", gene=GENE, dataset=dataset),

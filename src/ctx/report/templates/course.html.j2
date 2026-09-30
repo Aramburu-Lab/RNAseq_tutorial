@@ -1,0 +1,22 @@
+{% extends "base.html.j2" %}
+{# A kit's first page: every link is relative and points inside the kit, which may be opened from anywhere. #}
+{% macro link(l) %}<li><span class="pill" data-kind="{{ 'real' if l.real else 'made-up' }}">{{ course.real if l.real else course.made_up }}</span><a href="{{ l.href }}">{{ l.label }}</a></li>{% endmacro %}
+{% block content %}
+<section id="course">
+<p class="lede">{{ course.intro }}</p>
+{% if page.key_numbers %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
+<p class="note">{{ course.note }}</p>
+<p class="note">{{ course.unzip }}</p>
+</section>
+{% if page.hubs %}
+<section class="hub-section" id="hubs">
+<h2>{{ course.hubs }}</h2>
+<p class="note">{{ course.hubs_lead }}</p>
+<ul class="course-links">{% for l in page.hubs %}{{ link(l) }}{% endfor %}</ul>
+</section>
+{% endif %}
+<section class="hub-section" id="modules">
+<h2>{{ course.modules }}</h2>
+<ol class="modules">{% for row in page.rows %}<li><span class="kicker">{{ row.number }}</span><span class="module-name">{{ row.name }}</span>{% if row.links %}<ul class="course-links">{% for l in row.links %}{{ link(l) }}{% endfor %}</ul>{% else %}<span class="missing">{{ course.none }}</span>{% endif %}</li>{% endfor %}</ol>
+</section>
+{% endblock %}

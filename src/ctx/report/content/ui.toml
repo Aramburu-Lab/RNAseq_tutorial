@@ -103,4 +103,6 @@ verdict = "Verdict"
 
 # The first result of a preview page, a module not built yet (scripts/python/build_preview.py).
 [preview]
+# The made-up dataset's name on every page of the preview, and its dataset file's label.
+dataset = "Made-up study"
 note = "Preview: this module is not built yet. Every number on this page comes from made-up data, drawn to show how the page will look."

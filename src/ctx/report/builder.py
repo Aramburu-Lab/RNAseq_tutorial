@@ -223,6 +223,34 @@ class HubPage:
     key_numbers: tuple[KeyNumber, ...] = ()
 
 
+@dataclass(frozen=True)
+class CourseLink:
+    """One page on the course home page, and whether its data are real or made up."""
+
+    label: str
+    href: str
+    real: bool
+
+
+@dataclass(frozen=True)
+class CourseRow:
+    """One module of the course, with a link to each dataset's page of it."""
+
+    number: str
+    name: str
+    links: tuple[CourseLink, ...]
+
+
+@dataclass(frozen=True)
+class CoursePage:
+    """The course home page of a kit: every module in course order, and each dataset's hub."""
+
+    title: str
+    rows: tuple[CourseRow, ...]
+    hubs: tuple[CourseLink, ...]
+    key_numbers: tuple[KeyNumber, ...] = ()
+
+
 Result = Group | FigureBlock | ResultTable | str
 
 
@@ -260,6 +288,8 @@ class ModulePage:
         if len(self.key_numbers) > MAX_KEY_NUMBERS:
             raise ValueError(f"{len(self.key_numbers)} key numbers; at most {MAX_KEY_NUMBERS}")
 
+
+Page = FigurePage | ModulePage | HubPage | CoursePage
 
 _ENV = Environment(
     loader=PackageLoader("ctx.report", "templates"),
@@ -404,14 +434,14 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
     return out, outline, counter > 0
 
 
-def _heading(page: FigurePage | ModulePage | HubPage) -> dict[str, str]:
+def _heading(page: Page) -> dict[str, str]:
     """Kicker, headline and dataset, parsed from the page title."""
     if isinstance(page, FigurePage):
         figure = text.word("ui", "figure")
         return {"kicker": figure, "headline": page.title, "dataset": "", "suite": SUITE}
     match = TITLE.fullmatch(page.title)
     assert match is not None  # noqa: S101 - the pattern accepts any title
-    if isinstance(page, HubPage):
+    if isinstance(page, HubPage | CoursePage):
         kicker = SUITE
     else:
         numbered = match["n"] is not None
@@ -422,11 +452,11 @@ def _heading(page: FigurePage | ModulePage | HubPage) -> dict[str, str]:
     return {"kicker": kicker, "headline": match["headline"], "dataset": dataset, "suite": SUITE}
 
 
-def render(page: FigurePage | ModulePage | HubPage) -> str:
+def render(page: Page) -> str:
     """Render a page to one self-contained HTML string.
 
     Args:
-        page: A figure page, a module report or the hub.
+        page: A figure page, a module report, the hub or the course home page.
 
     Returns:
         The HTML.
@@ -448,6 +478,9 @@ def render(page: FigurePage | ModulePage | HubPage) -> str:
     if isinstance(page, HubPage):
         context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing
         return _ENV.get_template("hub.html.j2").render(**context)
+    if isinstance(page, CoursePage):
+        context |= {"plotly_js": "", "course": text.load("course")}
+        return _ENV.get_template("course.html.j2").render(**context)
     if isinstance(page, FigurePage):
         context["figure"] = _prepare(page.figure, 0, 1, 3)
         return _ENV.get_template("figure.html.j2").render(**context)
@@ -463,7 +496,7 @@ def render(page: FigurePage | ModulePage | HubPage) -> str:
     return _ENV.get_template("module.html.j2").render(**context)
 
 
-def write(page: FigurePage | ModulePage | HubPage, path: Path) -> Path:
+def write(page: Page, path: Path) -> Path:
     """Render and write a page, refusing one over 15 MB before anything is written.
 
     Args:

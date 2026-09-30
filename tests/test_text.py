@@ -38,20 +38,29 @@ def _code() -> str:
     return "\n".join(p.read_text() for p in files if p.suffix in {".py", ".j2"})
 
 
+def _templates() -> str:
+    """The page templates, where a content file is read under its own name (course.intro)."""
+    return "\n".join(p.read_text() for p in (ROOT / "src/ctx/report/templates").glob("*.j2"))
+
+
 def test_every_key_is_read_somewhere():
     """A key no code names is text no page shows: edited, it would change nothing.
 
     A key counts as read when its path, or a table above it that the code reads whole, is
-    named as a string ("machine.title", f"sections.{id}") or in a template (ui.calls.fc).
+    named as a string ("machine.title", f"sections.{id}") anywhere, or in a template under its
+    file's name (ui.calls.fc, course.intro). The name counts only in a template and never
+    after a dot, so process.argv or ctx.qc.multiqc_io in code cannot vouch for a dead key.
     """
-    code = _code()
+    code, templates = _code(), _templates()
     unused = []
     for file in sorted(CONTENT.glob("*.toml")):
         for path in _paths(tomllib.loads(file.read_text())):
             parts = path.split(".")
             prefixes = [".".join(parts[:i]) for i in range(len(parts), 0, -1)]
             named = any(
-                re.search(rf"""(["']|\bui\.){re.escape(p)}(["'.{{]|\b)""", code) for p in prefixes
+                re.search(rf"""["']{re.escape(p)}(["'.{{]|\b)""", code)
+                or re.search(rf"(?<![\w.]){file.stem}\.{re.escape(p)}\b", templates)
+                for p in prefixes
             )
             if not named:
                 unused.append(f"{file.name}: {path}")

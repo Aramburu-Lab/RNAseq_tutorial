@@ -50,6 +50,9 @@ from ctx.viz.heatmap import HeatmapData, Track, diverging_levels
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE
 
+# The made-up dataset's name on the page, one word for every preview (content/ui.toml).
+SHOWN = ("ui", "preview.dataset")
+
 MODULE = PAGE = "proteo"
 SEED = 7
 N_GENES = 3000
@@ -423,7 +426,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
     usage, budget = runtime.measure(started), runtime.budget(MODULE)
     track = "A" if MODULE in runtime.TRACK_A_MODULES else "B"
     built = ModulePage(
-        title=text.fill(PAGE, "title", dataset=dataset), **text.skeleton(PAGE),
+        title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)), **text.skeleton(PAGE),
         parameters=cards, results=(text.word("ui", "preview.note"), *figures),
         reproduce=Reproduction(
             command=" ".join(["ctx", MODULE, "--dataset", dataset,

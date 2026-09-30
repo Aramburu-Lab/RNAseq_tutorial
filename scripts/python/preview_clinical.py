@@ -44,6 +44,9 @@ from ctx.viz.heatmap import HeatmapData, Swatch
 from ctx.viz.scatter import Line
 from ctx.viz.style import HEAT_ALPHAS, ROLES
 
+# The made-up dataset's name on the page, one word for every preview (content/ui.toml).
+SHOWN = ("ui", "preview.dataset")
+
 PAGE = MODULE = "clinical"
 SEED = 10
 PATIENTS = 420
@@ -506,7 +509,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
                f"--horizon {HORIZON} --covariates {','.join(COVARIATES)}")  # fmt: skip
     usage, budget = runtime.measure(started), runtime.budget(MODULE)
     built = ModulePage(
-        title=fill("title", dataset=dataset), **text.skeleton(PAGE), parameters=cards(),
+        title=fill("title", dataset=text.word(*SHOWN)), **text.skeleton(PAGE), parameters=cards(),
         results=tuple(results), key_numbers=key_numbers(cohort, adjusted),
         reproduce=Reproduction(
             command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,

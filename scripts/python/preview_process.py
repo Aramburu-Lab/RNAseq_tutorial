@@ -46,6 +46,9 @@ from ctx.viz.bar import BarData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, ROLES, category_colours
 
+# The made-up dataset's name on the page, one word for every preview (content/ui.toml).
+SHOWN = ("ui", "preview.dataset")
+
 PAGE = MODULE = "process"
 SEED = 3
 # The planned default (--aligner star); its outcome classes are STAR's Log.final.out rows.
@@ -356,7 +359,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
     usage, budget = runtime.measure(started), runtime.budget(MODULE)
     command = f"ctx process --dataset {dataset} --dataset-file {dataset}.toml --genome genome.fa.gz"
     built = ModulePage(
-        title=text.fill(PAGE, "title", dataset=dataset), **text.skeleton(PAGE),
+        title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)), **text.skeleton(PAGE),
         parameters=cards(), results=results, key_numbers=keys,
         reproduce=Reproduction(
             command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,

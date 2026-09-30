@@ -261,17 +261,20 @@ def test_rsync_matches_copied_files():
     A pattern the rsync lacks is never copied, and ctx fails on the Mac after the cluster run;
     an include with no pattern copies a file nothing reads.
     """
-    (command,) = [
+    # Every copy of an rnaseq outdir to the Mac, Step-1's and each later study's (P4.1).
+    commands = [
         line
         for line in (ROOT / "TODO.md").read_text().splitlines()
-        if line.startswith("rsync ") and "tier1_rnaseq" in line
+        if line.startswith("rsync ") and "_rnaseq/" in line
     ]
-    includes = [i for i in re.findall(r"--include='([^']+)'", command) if i != "*/"]
-    assert "--exclude='*'" in command
-    for pattern in COPIED_FILES:
-        assert any(i == pattern or fnmatch.fnmatch(pattern, i) for i in includes), pattern
-    for include in includes:
-        assert any(p == include or fnmatch.fnmatch(p, include) for p in COPIED_FILES), include
+    assert len(commands) >= 2, commands
+    for command in commands:
+        includes = [i for i in re.findall(r"--include='([^']+)'", command) if i != "*/"]
+        assert "--exclude='*'" in command
+        for pattern in COPIED_FILES:
+            assert any(i == pattern or fnmatch.fnmatch(pattern, i) for i in includes), pattern
+        for include in includes:
+            assert any(p == include or fnmatch.fnmatch(p, include) for p in COPIED_FILES), include
 
 
 def eager_params(config: str) -> set[str]:

@@ -43,3 +43,14 @@ def test_lists_and_cards_have_budgets():
 def test_a_caption_has_no_backticks():
     page = {**CLEAN, "figures": {"f": {"caption": "Made up; `fastp` kept {n} reads."}}}
     assert any("a backtick" in p for p in prose.check_page("page", page))
+
+
+def test_page_files_pass():
+    """Every content file obeys the rules: CONVENTIONS says a violation fails CI, and this is it."""
+    assert prose.lint() == []
+
+
+def test_course_text_is_checked():
+    """The course page and kit README have no skeleton, so every string of them is checked."""
+    found = list(prose.check_all("course", {"intro": "We dive in with 12 genes."}))
+    assert any("banned word 'We'" in f for f in found) and any("typed number" in f for f in found)

@@ -45,6 +45,9 @@ from ctx.viz.curve import CurveData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, ROLES
 
+# The made-up dataset's name on the page, one word for every preview (content/ui.toml).
+SHOWN = ("ui", "preview.dataset")
+
 PAGE = "ncrna"
 SEED = 8
 LNCRNA, CODING, MT_RRNA = "lncRNA", "protein_coding", "Mt_rRNA"
@@ -411,7 +414,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
     usage, budget = runtime.measure(started), runtime.budget(PAGE)
     profile = runtime.resolve_profile(None, os.environ)
     report = ModulePage(
-        title=text.fill(PAGE, "title", dataset=dataset), **text.skeleton(PAGE),
+        title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)), **text.skeleton(PAGE),
         parameters=cards(), results=(text.word("ui", "preview.note"), *groups),
         key_numbers=key_numbers(genes, results),
         reproduce=Reproduction(

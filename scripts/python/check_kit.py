@@ -1,0 +1,175 @@
+#!/usr/bin/env python3
+# /// codebase-meta
+# exempt: ships inside the student kit; checks a copy of the kit with the standard library alone
+# ///
+"""Check a course kit: every file against MANIFEST.json, every link, and every name on Windows.
+
+Standard library only, so it runs wherever Python does, with nothing installed; the kit
+builder imports the same functions, so a kit is checked by one definition when it is built
+and when a copy of it is checked.
+
+Usage:
+    python check_kit.py            # the kit this file sits in
+    python check_kit.py KIT_FOLDER
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+import sys
+from html.parser import HTMLParser
+from pathlib import Path
+from urllib.parse import unquote, urlsplit
+
+# Every attribute through which a browser follows or fetches a URL.
+ATTRIBUTES = ("href", "src", "srcset", "data", "poster", "xlink:href")
+_CSS = re.compile(r"""url\(\s*['"]?([^'")\s]+)|@import\s+['"]([^'"]+)""")
+# Windows' MAX_PATH is 260 with the terminating NUL. Explorer's "Extract all" unpacks into
+# Downloads\<zip name>\, and the zip holds <kit>/ again; a 20-character user name is assumed.
+WINDOWS_LIMIT = 259
+WINDOWS_PREFIX = "C:\\Users\\" + "x" * 20 + "\\Downloads\\{kit}\\"
+_FORBIDDEN = re.compile(r'[<>:"|?*\\\x00-\x1f]')
+_RESERVED = {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(1, 10)),
+             *(f"LPT{i}" for i in range(1, 10))}  # fmt: skip
+
+
+class _Links(HTMLParser):
+    """Every URL a page's tags or style carry, as (tag, attribute, value)."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.found: list[tuple[str, str, str]] = []
+        self._style = False
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        """Keep link attributes, each srcset candidate, and URLs inside style attributes."""
+        self._style = tag == "style"
+        for key, value in attrs:
+            if not value:
+                continue
+            if key == "srcset":
+                # Candidates end at a comma and a space; a data: URI holds a bare comma.
+                self.found += [
+                    (tag, key, c.split()[0]) for c in re.split(r",\s+", value) if c.strip()
+                ]
+            elif key in ATTRIBUTES:
+                self.found.append((tag, key, value))
+            elif key == "style":
+                self.found += [(tag, key, a or b) for a, b in _CSS.findall(value)]
+
+    def handle_endtag(self, tag: str) -> None:
+        """Leave a style element."""
+        if tag == "style":
+            self._style = False
+
+    def handle_data(self, data: str) -> None:
+        """URLs in a style element's CSS; a script's text is not read."""
+        if self._style:
+            self.found += [("style", "url", a or b) for a, b in _CSS.findall(data)]
+
+
+def links(page: Path) -> list[tuple[str, str, str]]:
+    """The (tag, attribute, value) of every URL on one page."""
+    parser = _Links()
+    parser.feed(page.read_text(encoding="utf-8", errors="replace"))
+    return parser.found
+
+
+def fetches(tag: str, attribute: str, value: str) -> bool:
+    """Whether a URL leaves the kit: anything off the machine but a clicked web link.
+
+    A ``file:`` URL names the builder's own disk, so even a clicked one fails elsewhere.
+    """
+    url = urlsplit(value)
+    if url.scheme == "data" or not (url.scheme or url.netloc):
+        return False
+    clicked = tag == "a" and attribute == "href" and url.scheme in ("http", "https", "mailto")
+    return not clicked
+
+
+def target(page: Path, value: str) -> Path | None:
+    """The file a relative URL names, resolved; None for a URL that names no local file."""
+    url = urlsplit(value)
+    if url.scheme or url.netloc or not url.path:
+        return None
+    return (page.parent / unquote(url.path)).resolve()
+
+
+def link_problems(root: Path, pages: list[Path]) -> list[str]:
+    """Every URL that fetches from off the machine, or names a file missing or outside root."""
+    root = root.resolve()
+    problems = []
+    for page in pages:
+        where = page.resolve().relative_to(root)
+        for tag, attribute, value in links(page):
+            found = target(page, value)
+            if fetches(tag, attribute, value):
+                problems.append(f"{where}: loads {value[:80]}")
+            elif found is not None and not (found.is_file() and found.is_relative_to(root)):
+                problems.append(f"{where}: {value} does not resolve")
+    return problems
+
+
+def windows_problems(names: list[str], kit: str) -> list[str]:
+    """Names a Windows copy of the kit cannot hold, each relative to the kit's folder."""
+    prefix = len(WINDOWS_PREFIX.format(kit=kit)) + len(kit) + 1
+    problems, seen = [], {}
+    for name in names:
+        parts = name.split("/")
+        if prefix + len(name) > WINDOWS_LIMIT:
+            problems.append(f"{name}: {prefix + len(name)} characters after extraction")
+        if any(_FORBIDDEN.search(p) or p.endswith((".", " ")) for p in parts):
+            problems.append(f"{name}: a character or ending Windows refuses")
+        if any(p.split(".")[0].upper() in _RESERVED for p in parts):
+            problems.append(f"{name}: a name Windows reserves")
+        if (other := seen.setdefault(name.lower(), name)) != name:
+            problems.append(f"{name}: differs from {other} only by case")
+    return problems
+
+
+def sha256(path: Path) -> str:
+    """A file's SHA-256, read in blocks."""
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def manifest_problems(kit: Path) -> list[str]:
+    """Files missing, changed or unlisted against the kit's MANIFEST.json."""
+    record = json.loads((kit / "MANIFEST.json").read_text(encoding="utf-8"))
+    listed = {e["path"]: e for e in record["entries"]}
+    present = {p.relative_to(kit).as_posix() for p in kit.rglob("*") if p.is_file()}
+    problems = [f"{name}: listed, not present" for name in sorted(listed.keys() - present)]
+    problems += [f"{name}: present, not listed" for name in sorted(present - listed.keys())
+                 if name != "MANIFEST.json"]  # fmt: skip
+    for name in sorted(listed.keys() & present):
+        entry, path = listed[name], kit / name
+        if path.stat().st_size != entry["bytes"] or sha256(path) != entry["sha256"]:
+            problems.append(f"{name}: not the file the course built")
+    return problems
+
+
+def check(kit: Path) -> list[str]:
+    """Every problem with one kit folder: its manifest, its links and its names."""
+    names = sorted(p.relative_to(kit).as_posix() for p in kit.rglob("*") if p.is_file())
+    return [
+        *manifest_problems(kit),
+        *link_problems(kit, sorted(kit.rglob("*.html"))),
+        *windows_problems(names, kit.name),
+    ]
+
+
+def main() -> None:
+    """Check the kit named on the command line, or the one this file sits in."""
+    kit = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parent
+    problems = check(kit)
+    print("\n".join(problems) or f"{kit.name}: every file, link and name checks out")
+    sys.exit(1 if problems else 0)
+
+
+if __name__ == "__main__":
+    main()

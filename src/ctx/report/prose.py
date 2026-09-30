@@ -97,8 +97,17 @@ def check_cards(raw: Mapping[str, Any]) -> Iterator[str]:
             yield from check_text(f"cards: effects.{command}.{flag}", effect, CARD_WORDS)
 
 
+def check_all(name: str, node: Any) -> Iterator[str]:
+    """Every string in a file with no skeleton, such as the course page and the kit README."""
+    if isinstance(node, str):
+        yield from check_text(name, node, None)
+    elif isinstance(node, dict):
+        for key, value in node.items():
+            yield from check_all(f"{name}.{key}", value)
+
+
 def lint(content: Path = CONTENT) -> list[str]:
-    """Every violation in the page files that follow the skeleton, and in the cards."""
+    """Every violation in the page files that follow the skeleton, the cards and the course."""
     problems: list[str] = []
     for path in sorted(content.glob("*.toml")):
         raw = tomllib.loads(path.read_text())
@@ -106,6 +115,8 @@ def lint(content: Path = CONTENT) -> list[str]:
             problems += check_page(path.stem, raw)
         if path.stem == "cards":
             problems += check_cards(raw)
+        if path.stem == "course":
+            problems += check_all("course", raw)
     return problems
 
 
