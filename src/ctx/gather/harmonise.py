@@ -1,7 +1,9 @@
 """M1c: turn one checked fetchngs outdir into the harmonised sample sheet and its page."""
 
+import csv
 import functools
 import hashlib
+import io
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
@@ -12,7 +14,7 @@ import polars as pl
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.gather import rnaseq
-from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate
+from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate, normalise
 from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
@@ -382,6 +384,27 @@ def _write_problems(
     return written[0]
 
 
+def subset_rows(sdrf_text: str, key: str, runs: set[str]) -> tuple[str, int, int]:
+    """The SDRF cut to the rows whose join key names a run of the outdir.
+
+    For a dataset declaring ``[dataset] subset_of``: its outdir holds some of the study's runs,
+    so the rows of the others are not errors (D-042). A run with no row still fails in
+    curation. A missing key header passes the text unchanged, for curation to report.
+
+    Returns:
+        The cut SDRF, then the rows kept and the rows read.
+    """
+    rows = list(csv.reader(io.StringIO(sdrf_text), delimiter="\t"))
+    header, body = rows[0], [r for r in rows[1:] if any(cell.strip() for cell in r)]
+    if header.count(key) != 1:
+        return sdrf_text, len(body), len(body)
+    column = header.index(key)
+    kept = [r for r in body if normalise(r[column]) in runs]
+    buffer = io.StringIO()
+    csv.writer(buffer, delimiter="\t", lineterminator="\n").writerows([header, *kept])
+    return buffer.getvalue(), len(kept), len(body)
+
+
 def _curate(
     settings: runtime.Settings, spec: Dataset, checked: Outdir, out: Path, releases: dict[str, str]
 ) -> pl.DataFrame:
@@ -400,8 +423,13 @@ def _curate(
         f"sha256:{spec.path.name}": hashlib.sha256(spec.path.read_bytes()).hexdigest(),
         f"sha256:{sdrf.name}": hashlib.sha256(sdrf.read_bytes()).hexdigest(),
     }
+    sdrf_text = sdrf.read_text()
+    if parent := spec.info.get("subset_of"):
+        key, column = spec.sdrf.join
+        sdrf_text, kept, total = subset_rows(sdrf_text, key, set(checked.runs[column]))
+        releases["sdrf rows"] = f"{kept} of {total}, the runs of this subset of {parent}"
     try:
-        return curate(checked.runs, sdrf.read_text(), spec)
+        return curate(checked.runs, sdrf_text, spec)
     except CurationError as error:
         _write_problems(error, out, spec.slug, releases)
         raise

@@ -253,3 +253,37 @@ def test_label_is_the_name_pages_show(tmp_path):
     )
     with pytest.raises(DatasetError, match="label"):
         load(wrong)
+
+
+@pytest.mark.parametrize("subset", [False, True])
+def test_subset_curates_only_its_runs(runs, tmp_path, subset):
+    # An SDRF row for a run the outdir lacks fails a full study and is dropped from a declared
+    # subset, and said so in the README (D-042).
+    rows = sdrf_rows(runs)
+    rows.append({**rows[4], "Comment[ENA_RUN]": "XRR0", "Source Name": "x"})
+    _place_sdrf(tmp_path, rows)
+    spec = tmp_path / "synthetic.toml"
+    declared = 'slug = "synthetic"\nsubset_of = "parent"' if subset else 'slug = "synthetic"'
+    spec.write_text(SPEC.read_text().replace('slug = "synthetic"', declared))
+    done = _gather(tmp_path, spec)
+    out = tmp_path / "outputs" / "01_gather"
+    if not subset:
+        assert done.returncode == 1
+        assert "XRR0: SDRF row matches no run_accession" in done.stderr
+        return
+    assert done.returncode == 0, done.stderr
+    readme = next(out.glob("*_samplesheet_v1_README.md")).read_text()
+    assert "14 of 15, the runs of this subset of parent" in readme
+
+
+def test_subset_still_needs_a_row_per_run(runs, tmp_path):
+    rows = sdrf_rows(runs)
+    dropped = rows.pop(3)["Comment[ENA_RUN]"]
+    _place_sdrf(tmp_path, rows)
+    spec = tmp_path / "synthetic.toml"
+    spec.write_text(
+        SPEC.read_text().replace('slug = "synthetic"', 'slug = "synthetic"\nsubset_of = "parent"')
+    )
+    done = _gather(tmp_path, spec)
+    assert done.returncode == 1
+    assert f"{dropped}: run has no SDRF row" in done.stderr

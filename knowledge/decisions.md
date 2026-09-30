@@ -27,6 +27,30 @@ it were reversed.
 
 ---
 
+## D-042 — The Track A subset is its own dataset file, a declared subset of tier1, curated by tier1's rules
+
+**Date:** 2026-09-30 · **Status:** decided
+
+**Context.** Track A gathers the 8 teaching runs of P3.0 from their own fetchngs outdir. `tier1.toml` cannot curate it: its `[expect]` demands 210 runs. A second file repeating tier1's tables was the M3 plan (R4), and its premise failed when measured: curation checks the SDRF join both ways, so each of the 202 SDRF rows with no run in the outdir is a problem, and `curation.py` and `dataset.py` are frozen until the Step-1 record.
+
+**Options.**
+- **Change curation and register again** before step 7: an eleventh registration, and a change to a frozen file for a dataset the Step-1 record never reads.
+- **Wait for the record**, then change curation: Track A waits on P2C.3.
+- **Cut the SDRF in the caller.** `harmonise.py`, not frozen, reads the SDRF text and hands it to `curate`. A dataset declaring `[dataset] subset_of` gets only the rows whose join key names a run of its outdir. `dataset.py` keeps `[dataset]` whole in `info`, so the key needs no loader change.
+
+**Decision.** The cut in the caller. `conf/datasets/tier1_teach.toml` declares `subset_of = "tier1"` and repeats tier1's `[guard]`, `[sdrf]`, `[columns]`, `[order]` and `[derived]`, its `[dataset]` provenance, and the SDRF and GTF resources; `[expect]` pins 8 runs and their read lengths, conditions, cell types, tissue and donors. `tests/test_repo.py::test_subsets_curate_as_their_parent` holds every declared subset equal to its parent in those tables. Everything else curation checks still applies to the kept rows: a run with no row, cross-checks, value maps, `[expect]`. The README of the sheet states the rows kept. `tier1.toml` is frozen and has no `subset_of`, so Step-1's gather cannot take the new path.
+
+**Evidence.** Measured 2026-09-30 on a scratch copy of the metadata-only Step-1 outdir cut to the 8 runs, as fetchngs writes 8 run inputs (one `metadata/<run>.runinfo_ftp.tsv` each):
+- the file without `subset_of`: exit 1, 202 problems, every one "SDRF row matches no run_accession";
+- the same with that one check dropped in memory: exit 0, `[expect]` met; a donor count of 1 for UPN5 exits 1 with "donor = UPN5: 2 runs; expected 1";
+- the committed file, no patch: exit 0, 4.05 s, 432,013,312 bytes peak RSS, README "8 of 210, the runs of this subset of tier1".
+
+The equality test fails each of six planted edits to the subset file (a value map, a bin, a guard pattern, a resource hash, an extra table, the source line). The CLI tests fail both planted edits to the cut (keeping every row; reading another key).
+
+**Consequence.** Track A gathers as soon as P3.0's outdir reaches the Mac, with no change to the registration. A second cohort's teaching subset is one more file with `subset_of`.
+
+---
+
 ## D-036 — STAR runs on Linux, HISAT2 on Apple silicon; a probe at the door, never a silent fallback
 
 **Date:** 2026-09-30 · **Status:** decided (Rytis); the probe and its tests land in M3.4
