@@ -536,6 +536,20 @@ Rytis asked for the figure styling and parameters of the Candida FINAL figures, 
 - [x] **P2S.2 ALI page design:** its tokens in `style.py`, `_page.css.j2` rewritten on the current markup (top bar, hero, numbered sections, stat tiles, table wraps, pills, callouts, figure cards, print), focus rings and a skip link, a contrast test on every text token. Browser check at 1280 and 375 px in both themes. Done 2026-09-29: checked on the synthetic M5 page and hub (D-024).
 - [x] **P2S.3 Editable page text:** `src/ctx/report/content/*.toml` with a README, read by `ctx.report.text` (strict placeholders, `CTX_CONTENT` for an edited copy); `ui`, `cards`, `setup` and `gather` moved; tests for unresolved placeholders, unused keys, load-bearing strings and the wheel. Done 2026-09-29: `content/{ui,cards,setup,gather}.toml` with a README; `tests/test_text.py`; both mutations caught (D-024).
 
+### Phase 2P — Report prose, draft v3.11 (approved 2026-09-30)
+
+Rytis's draft v3.11 fixes the page prose: nine labels, word budgets, a lint (D-045). His choices: page text stays in `content/*.toml`; the frozen M5, M6 and hub pages are rewritten right after the Step-1 record.
+- [x] **P2P.1** The nine labels in the builder, the Input section, the section keys in the page files, CONVENTIONS' skeleton and prose rules; `ctx.report.prose`, `pixi run lint-prose` and `tests/test_prose.py`. Done 2026-09-30 (D-045): each rule fails its planted violation; 63 violations listed in the setup, gather and QC pages and the cards.
+- [ ] **P2P.2** Setup, gather and QC pages and the cards rewritten to the rules; the test that every page file passes the lint.
+- [ ] **P2P.3** After the Step-1 record, with P2S.4: M5, M6 and the hub to content files and the rules; `input` required; the `ModulePage` fields renamed to the section keys.
+
+### Phase 2V — Course preview (approved 2026-09-30)
+
+Rytis asked for every module in the preview, and for Figure 2 of the gather page to be filterable, with the median and a field standard drawn.
+- [x] **P2V.0** The hub counts M0 to M10 (D-044).
+- [ ] **P2V.1** Gather Figure 2: filters by cell type and condition; a line at the median of the runs shown, recomputed as the filters change; ENCODE's 30 M and 20 M from the registry, marked as aligned reads against sequenced reads.
+- [ ] **P2V.2** Preview pages on made-up data for M3, M4, M7, M8, M9 and M10, written to the prose rules, and a gather page for the made-up dataset; the build script; the hub reading 11 of 11; published.
+
 ### Phase 2Q — Read fates, pathway heatmaps, linked brushing (approved 2026-09-29)
 
 Rytis asked for a bubble chart of raw against useful reads with a hover that says where the rest went, heatmaps of gene-set patterns across sample groups, and linked multi-colour brushing like plotly's parallel-categories example. His choices: the Step-1 Trim Galore reports are copied off the cluster and parsed by MultiQC; contamination is shown through mitochondrial and rRNA fractions from counts; set scores are the mean per-gene z-score of the blind VST; brushing is over samples. Only the copy rule and the GTF resource touch frozen files, so they go first, as D-022, before cluster step 7; the heatmaps on M5 and M6 wait for the Step-1 record. The plan file lies outside the repo and the next plan overwrites it, so this section is the record.

@@ -120,15 +120,17 @@ def skeleton(page: str) -> dict[str, Any]:
         page: The content file's stem.
 
     Returns:
-        ``question``, ``concept``, ``terms``, ``practice``, ``think`` and ``mistakes``.
+        The page's purpose, input, method, terms, interpretation, questions and pitfalls,
+        under the ``ModulePage`` field names (``builder.FIELDS``).
     """
     from ctx.report.builder import SelfCheck  # noqa: PLC0415 - builder imports this module
 
     return {
-        "question": raw(page, "question"),
-        "concept": raw(page, "concept"),
+        "question": raw(page, "purpose"),
+        "input": raw(page, "input"),
+        "concept": raw(page, "method"),
         "terms": tuple((t["term"], t["meaning"]) for t in raw(page, "terms")),
-        "practice": raw(page, "practice"),
-        "think": tuple(SelfCheck(t["prompt"], t["answer"]) for t in raw(page, "think")),
-        "mistakes": tuple(raw(page, "mistakes")),
+        "practice": raw(page, "interpretation"),
+        "think": tuple(SelfCheck(t["prompt"], t["answer"]) for t in raw(page, "questions")),
+        "mistakes": tuple(raw(page, "pitfalls")),
     }

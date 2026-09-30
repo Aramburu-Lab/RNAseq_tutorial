@@ -2,11 +2,12 @@
 
 title = "M1 Gather: {dataset}"
 budget = "Track B: under {minutes} min and {ram_gb} GB"
-question = "Which runs did the download bring, are the files intact, and what do we know about each sample?"
-concept = "nf-core/fetchngs downloads the reads and writes a sample sheet, but a finished download can still be incomplete. Files go missing or arrive corrupted, one experiment can hold several runs, and public metadata is free text. gather checks the download against its own records and the published checksums, then writes the one sample sheet every later module reads."
-practice = "Run gather after every download and resolve what its checks report before any analysis. From then on, treat its sample sheet as the only record of what each sample is."
+purpose = "Which runs did the download bring, are the files intact, and what do we know about each sample?"
+input = "One nf-core/fetchngs outdir (`samplesheet/`, `fastq/`, `fastq/md5/`, `metadata/`, `pipeline_info/`), the dataset file with its SDRF, and, with `--rnaseq-dir`, an nf-core/rnaseq outdir for the gene counts."
+method = "nf-core/fetchngs downloads the reads and writes a sample sheet, but a finished download can still be incomplete. Files go missing or arrive corrupted, one experiment can hold several runs, and public metadata is free text. gather checks the download against its own records and the published checksums, then writes the one sample sheet every later module reads."
+interpretation = "Run gather after every download and resolve what its checks report before any analysis. From then on, treat its sample sheet as the only record of what each sample is."
 # "Term: rest" in a mistake prints Term in bold.
-mistakes = [
+pitfalls = [
     "Treating the runs of one experiment as biological replicates.",
     "Re-running fetchngs into an existing outdir: it rebuilds the samplesheet from the new input only.",
 ]
@@ -23,11 +24,11 @@ meaning = "The library a run was sequenced from; one experiment can hold several
 term = "no_md5"
 meaning = "Fetched through sra-tools, which publishes no checksum to verify against."
 
-[[think]]
+[[questions]]
 prompt = "Why does gather resolve FASTQ files by name instead of the path in samplesheet.csv?"
 answer = "fetchngs writes the path as it was given on its own machine; after a copy to a laptop or from Zenodo that path points nowhere."
 
-[[think]]
+[[questions]]
 prompt = "Why is a run with no md5 file reported, not rejected?"
 answer = "Runs with no FASTQ at ENA are fetched through sra-tools, which writes no md5; the file is still usable, but it was not checked against a published checksum."
 

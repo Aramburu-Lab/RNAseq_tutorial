@@ -5,16 +5,18 @@
 {% block page_class %} has-rail{% endblock %}
 {% block rail %}
 <nav class="toc" aria-label="{{ ui.contents.label }}"><p class="toc-title">{{ ui.contents.title }}</p><ol>
-{% for id, title in sections %}<li><a href="#{{ id }}">{{ title }}</a>{% if id == "results" and outline %}<ol class="sub">{% for anchor, label in outline %}<li><a href="#{{ anchor }}">{{ label }}</a></li>{% endfor %}</ol>{% endif %}</li>
+{% for id, title in sections if id != "input" or page.input %}<li><a href="#{{ id }}">{{ title }}</a>{% if id == "results" and outline %}<ol class="sub">{% for anchor, label in outline %}<li><a href="#{{ anchor }}">{{ label }}</a></li>{% endfor %}</ol>{% endif %}</li>
 {% endfor %}</ol></nav>
 {% endblock %}
 {% block content %}
-{% for id, title in sections %}
+{% for id, title in sections if id != "input" or page.input %}
 <section id="{{ id }}">
 <h2>{{ title }}</h2>
-{% if id == "question" %}
+{% if id == "purpose" %}
 <p class="question">{{ page.question }}</p>
-{% elif id == "concept" %}
+{% elif id == "input" %}
+<p class="input">{{ page.input }}</p>
+{% elif id == "method" %}
 <p class="idea">{{ page.concept }}</p>
 {% if page.terms %}<details class="terms"><summary>{{ ui.page.terms }}</summary><dl>{% for term, meaning in page.terms %}<dt>{{ term }}</dt><dd>{{ meaning }}</dd>{% endfor %}</dl></details>{% endif %}
 {% elif id == "parameters" %}
@@ -35,15 +37,15 @@
 {{ item(kind, it) }}
 {% endif %}
 {% endfor %}
-{% elif id == "practice" %}
+{% elif id == "interpretation" %}
 <p class="practice">{{ page.practice }}</p>
-{% elif id == "think" %}
+{% elif id == "questions" %}
 <ol class="think">
 {% for check in page.think %}
 <li><p class="prompt">{{ check.prompt }}</p><details><summary>{{ ui.page.answer }}</summary><p>{{ check.answer }}</p></details></li>
 {% endfor %}
 </ol>
-{% elif id == "mistakes" %}
+{% elif id == "pitfalls" %}
 <ul class="mistakes">
 {% for m in page.mistakes %}{% set head, colon, tail = m.partition(": ") %}<li>{% if colon %}<strong>{{ head }}:</strong> {{ tail }}{% else %}{{ m }}{% endif %}</li>
 {% endfor %}

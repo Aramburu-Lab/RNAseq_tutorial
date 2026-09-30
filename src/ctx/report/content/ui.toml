@@ -13,14 +13,15 @@ written = "Written"
 
 # The report skeleton's headings, in the order CONVENTIONS.md fixes; the keys are anchors.
 [sections]
-question = "The question"
-concept = "The idea"
+purpose = "Purpose"
+input = "Input"
+method = "Method"
 parameters = "Parameters"
 results = "Results"
-practice = "In practice"
-think = "Check yourself"
-mistakes = "Common mistakes"
-reproduce = "Reproduce this page"
+interpretation = "Interpretation"
+questions = "Questions"
+pitfalls = "Pitfalls"
+reproduce = "Reproduce"
 
 [theme]
 toggle = "Switch between light and dark"

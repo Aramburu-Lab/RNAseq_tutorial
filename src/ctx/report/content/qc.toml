@@ -2,10 +2,11 @@
 
 title = "M2 Quality control: {dataset}"
 budget = "Track A: under {minutes} min and {ram_gb} GB"
-question = "Which samples should you look at twice before trusting a comparison, and would setting them aside change the comparison itself?"
-concept = "Quality control asks one question per metric: is this sample unlike the others it should resemble? Few RNA-seq metrics have a universal cut-off, so each sample is judged against its own stratum: a band of the median plus or minus three scaled MADs, on the side that is bad. A flag is a question, never a verdict. Before you set a flagged sample aside, test whether the metric differs between the groups you compare: if it does, excluding samples on it would bias the comparison."
-practice = "Read the flagged runs first, then the confounding table. A metric that differs by condition cannot be used to exclude samples in that comparison, and a flag that tracks the read-length batch says more about the batch than about the sample."
-mistakes = [
+purpose = "Which samples should you look at twice before trusting a comparison, and would setting them aside change the comparison itself?"
+input = "The sample sheet and counts from `ctx gather`, the QC registry `conf/qc_metrics.toml`, and, when given, the nf-core/rnaseq reports (`--rnaseq-dir`) and the FASTQ files (`--reads`)."
+method = "Quality control asks one question per metric: is this sample unlike the others it should resemble? Few RNA-seq metrics have a universal cut-off, so each sample is judged against its own stratum: a band of the median plus or minus three scaled MADs, on the side that is bad. A flag is a question, never a verdict. Before you set a flagged sample aside, test whether the metric differs between the groups you compare: if it does, excluding samples on it would bias the comparison."
+interpretation = "Read the flagged runs first, then the confounding table. A metric that differs by condition cannot be used to exclude samples in that comparison, and a flag that tracks the read-length batch says more about the batch than about the sample."
+pitfalls = [
     "Excluding on a flag alone: a flag says the sample differs from its stratum, not that it is wrong. Neutrophils detect fewer genes than monocytes by biology.",
     "Using a cut-off from another dataset: depth, cell type and library protocol all move these numbers; the stratum is the fairer yardstick.",
     "Ignoring confounding: if flagged samples sit mostly in one condition, removing them changes the comparison you set out to make.",
@@ -27,11 +28,11 @@ meaning = "The samples sharing the columns given to --peers, such as cell type a
 term = "Confounding"
 meaning = "A metric that differs between the groups of a comparison, so it cannot be told apart from the comparison itself."
 
-[[think]]
+[[questions]]
 prompt = "A sample has half the median library size of its stratum and is flagged. What would you check before excluding it?"
 answer = "Whether library size differs by condition in the comparisons it takes part in, whether its other metrics agree with its peers, and whether DESeq2's size factors already handle it: a smaller library is noisier, not wrong."
 
-[[think]]
+[[questions]]
 prompt = "Why is a band computed per stratum and not per condition?"
 answer = "A condition that shifts a metric would then never show as flags. Per stratum, the shift appears as flags gathered in one condition, which the confounding test catches."
 

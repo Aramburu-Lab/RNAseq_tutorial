@@ -121,6 +121,7 @@ prod = { features = ["analysis", "tools"], solve-group = "main" }
 # on day one. Treat only that code as success; every other failure still fails.
 test = "sh -c 'pytest -q; c=$?; [ $c -eq 5 ] && exit 0; exit $c'"
 lint = "ruff check scripts"
+lint-prose = "python -m ctx.report.prose"
 docs = "labdocs render && labdocs api"
 check = "labdocs lint && labdocs render --check"
 

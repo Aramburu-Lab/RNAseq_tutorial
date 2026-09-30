@@ -33,10 +33,14 @@ MAX_BYTES = 15 * 10**6
 SECTIONS = tuple(
     (section, text.word("ui", f"sections.{section}"))
     for section in (
-        "question", "concept", "parameters", "results", "practice", "think", "mistakes",
-        "reproduce",
+        "purpose", "input", "method", "parameters", "results", "interpretation", "questions",
+        "pitfalls", "reproduce",
     )
 )  # fmt: skip
+# The ModulePage field behind each section. The frozen M5 and M6 pages still pass the old
+# names; P2S.4 renames the fields once the Step-1 record is taken (D-045).
+FIELDS = {"purpose": "question", "method": "concept", "interpretation": "practice",
+          "questions": "think", "pitfalls": "mistakes"}  # fmt: skip
 MAX_TABLE_COLUMNS = 8  # CONVENTIONS.md, HTML reports
 MAX_KEY_NUMBERS = 4
 # The packages a reader asks about first; the full list sits behind a disclosure.
@@ -237,13 +241,16 @@ class ModulePage:
     reproduce: Reproduction
     key_numbers: tuple[KeyNumber, ...] = ()
     terms: tuple[tuple[str, str], ...] = ()
+    input: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a page with an empty section; the skeleton is the teaching contract.
 
-        Key numbers and terms are optional: a page may have nothing to summarise.
+        Key numbers and terms are optional: a page may have nothing to summarise. Input is
+        optional until the frozen M5 and M6 pages gain one after the Step-1 record (D-045).
         """
-        required = ("title", *(section for section, _ in SECTIONS))
+        sections = (FIELDS.get(s, s) for s, _ in SECTIONS if s != "input")
+        required = ("title", *sections)
         if empty := [name for name in required if not getattr(self, name)]:
             raise ValueError(f"empty report sections: {empty}")
         if len(self.key_numbers) > MAX_KEY_NUMBERS:

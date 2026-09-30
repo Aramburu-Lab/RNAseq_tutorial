@@ -2,11 +2,12 @@
 
 title = "M0 Setup"
 budget = "Track B: under {minutes} min and {ram_gb} GB"
-question = "Is this computer ready for the course, and what will a run cost it?"
-concept = "An analysis is reproducible only if you can say which software ran it, on what machine, and at what cost. This page records the versions every later module relies on, the threads and memory a run may use, and what this run took."
-practice = "Keep this page with your results. When a number changes between two runs, compare the package versions first: a changed library is the commonest reason."
+purpose = "Is this computer ready for the course, and what will a run cost it?"
+input = "This computer: installed package versions, CPU, memory, fonts and the colour tokens. With `--dataset-file`, the dataset's resources, fetched and checked against their SHA-256."
+method = "An analysis is reproducible only if you can say which software ran it, on what machine, and at what cost. This page records the versions every later module relies on, the threads and memory a run may use, and what this run took."
+interpretation = "Keep this page with your results. When a number changes between two runs, compare the package versions first: a changed library is the commonest reason."
 # "Term: rest" in a mistake prints Term in bold.
-mistakes = [
+pitfalls = [
     "Comparing timings measured under different profiles: hpc and laptop use different thread counts.",
     "Quoting a version from memory: read it from this page, which recorded what ran.",
 ]
@@ -23,11 +24,11 @@ meaning = "The most memory a process held at once."
 term = "Child process"
 meaning = "A tool this run started; its memory is measured on its own."
 
-[[think]]
+[[questions]]
 prompt = "Why does the page list the peak memory of the largest child process separately?"
 answer = "Tools such as aligners run as separate processes. Their memory is not part of this process's peak, and a laptop runs out of memory on the total, not on either half."
 
-[[think]]
+[[questions]]
 prompt = "Why might a colleague get a different font on the same figure?"
 answer = "The font chain takes the first installed family. A machine without Arial draws with Liberation Sans, which has the same widths, or else DejaVu Sans, which changes text width but not the data."
 

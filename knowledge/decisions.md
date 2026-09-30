@@ -27,6 +27,24 @@ it were reversed.
 
 ---
 
+## D-045 — Report prose: nine fixed labels, word budgets and a lint (draft v3.11)
+
+**Date:** 2026-09-30 · **Status:** decided (Rytis)
+
+**Context.** Rytis's draft v3.11 (`TEMP/todo9.md`, `TEMP/CLAUDE9.md`, `TEMP/lessons9.md`) corrects the pages' prose: narrative headings ("The question", "The idea") and figurative phrasing ("a finished download can still be incomplete") came from the plan's own skeleton wording. Its one change from v3.10 is the prose rules. The rest of `CLAUDE9.md` predates decisions made here and does not replace them: Arial and 12/10/9 pt (D-024), not Helvetica at 14 pt; frozen dataclasses, not pydantic; Liberation Sans, not TeX Gyre Heros.
+
+**Options.** v3.11 puts prose in `src/ctx/report/prose/<module>.yaml` and runs `ctx lint-prose`. The repo already keeps page text in `content/<page>.toml` (D-024), read through `ctx.report.text` with tests for unused keys and unfilled placeholders; a `ctx` subcommand must be a module (`tests/test_cli.py::test_subcommands_in_modules`).
+
+**Decision.** Rytis chose to keep `content/*.toml`, and to rewrite the frozen M5, M6 and hub pages right after the Step-1 record (P2S.4), not register again for them.
+- Nine sections, labels verbatim: Purpose · Input · Method · Parameters · Results · Interpretation · Questions · Pitfalls · Reproduce. A page file names them `purpose`, `input`, `method`, `interpretation`, `questions`, `pitfalls`. `builder.FIELDS` maps them onto the `ModulePage` fields the frozen pages still pass, until P2S.4 renames the fields; `input` is optional until then, and a page without one shows no Input section.
+- `ctx.report.prose` holds the rules: Purpose 30 words, Input 40, Method 90, each figure caption 40, Interpretation 120, Questions and Pitfalls 3 items of 20, a card's meaning and effect 12 each; sentences at most 25 words, paragraphs at most 3 sentences; a banned list; a quantity only from a `{placeholder}` or in `code` (a digit inside a name, Step-1 or SHA-256, is not a quantity). `pixi run lint-prose` runs it, and a test runs it in CI.
+
+**Evidence.** `tests/test_prose.py`: each rule fails its planted violation, and names with digits, placeholders and code pass. `tests/test_report.py::test_skeleton_order` reads the labels from CONVENTIONS and compares them, in order, with the builder's. On the day it landed the lint listed 63 violations in the setup, gather and QC pages and the cards; the test that every page file passes lands with their rewrite.
+
+**Consequence.** Every new page, the previews included, is written to the rules from the start. M5, M6 and the hub keep their text, under the new headings, until P2S.4.
+
+---
+
 ## D-044 — The hub counts the course modules M0 to M10; registered again
 
 **Date:** 2026-09-30 · **Status:** decided (Rytis asked for every module in the preview)

@@ -179,6 +179,7 @@ def _module(**overrides) -> ModulePage:
     fields = {
         "title": "Setup",
         "question": "Is this machine ready?",
+        "input": "This machine.",
         "concept": "A concept.",
         "parameters": (ParameterCard("--root", "Where outputs go.", "cwd", "Moves outputs."),),
         "results": ("One result.",),
@@ -193,25 +194,22 @@ def _module(**overrides) -> ModulePage:
 
 
 def test_skeleton_order():
+    """The builder's sections carry CONVENTIONS' nine labels verbatim, in its order (D-045)."""
     rule = next(
         line
         for line in (ROOT / "CONVENTIONS.md").read_text().splitlines()
-        if "Report skeleton" in line
+        if line.startswith("- Report sections")
     )
-    parts = rule.split(":", 1)[1].split("→")
-    expected = [
-        ("big question", "question"), ("concept", "concept"), ("parameter cards", "parameters"),
-        ("annotated results", "results"), ("in practice", "practice"), ("think-about-it", "think"),
-        ("common mistakes", "mistakes"), ("reproduction", "reproduce"),
-    ]  # fmt: skip
-    assert len(parts) == len(SECTIONS) == len(expected)
-    assert all(keyword in part for (keyword, _), part in zip(expected, parts, strict=True))
-    assert [section for section, _ in SECTIONS] == [section for _, section in expected]
+    labels = [re.sub(r"\s*\(.*", "", part).strip(" .") for part in rule.split(":", 1)[1].split("·")]
+    assert labels == [label for _, label in SECTIONS]
     html = render(_module())
     positions = [html.index(f'<section id="{section}">') for section, _ in SECTIONS]
     assert positions == sorted(positions)
     with pytest.raises(ValueError, match="think"):
         _module(think=())
+    # The frozen M5 and M6 pages have no Input until P2S.4: no section, no contents link.
+    bare = render(_module(input=""))
+    assert '<section id="input">' not in bare and 'href="#input"' not in bare
 
 
 class _Elements(HTMLParser):

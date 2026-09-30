@@ -7,7 +7,7 @@ code only names a key and fills in the numbers. Rebuild a page by running its co
 |---|---|---|
 | Headings, buttons, labels and table heads on every page | `ui.toml` | edit the strings; `[sections]` holds the eight skeleton headings |
 | What a command-line option means, and what moving it changes | `cards.toml` | `[options."--name"]`; `[effects.<command>]` overrides the effect on one command |
-| The M0 Setup page | `setup.toml` | `question`, `concept`, `practice`, `mistakes`, `[[terms]]`, `[[think]]`, then one table per results block |
+| The M0 Setup page | `setup.toml` | `purpose`, `input`, `method`, `interpretation`, `pitfalls`, `[[terms]]`, `[[questions]]`, then one table per results block |
 | The M1 Gather page | `gather.toml` | the same skeleton, then the checks, curation, counts and the two figures |
 
 Not here yet: the M5 and M6 pages, the hub and the figure captions. Their code is frozen
@@ -22,7 +22,8 @@ until the Step-1 record, and their text moves after it (TODO.md, P2S.4).
   more) is two keys, and the code picks one: `lead_one` and `lead_many`.
 - **No dead text.** Every key must be read somewhere; a key no code names fails
   `tests/test_text.py`.
-- **Mistakes.** In `mistakes`, the words before the first `": "` print in bold.
+- **Pitfalls.** In `pitfalls`, the words before the first `": "` print in bold.
+- **Prose rules.** CONVENTIONS.md, Report prose: word budgets, sentence length, the banned list, numbers from `{placeholders}`. `pixi run lint-prose` lists every violation.
 - **No em dashes or arrows** anywhere, as on the rest of the pages.
 
 ## An edited copy, without touching the package
