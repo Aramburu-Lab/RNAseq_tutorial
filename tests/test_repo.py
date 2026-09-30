@@ -273,6 +273,32 @@ def test_rsync_matches_copied_files():
         assert any(p == include or fnmatch.fnmatch(p, include) for p in COPIED_FILES), include
 
 
+def eager_params(config: str) -> set[str]:
+    """Params a Nextflow config reads as it is parsed: outside every ``key: { }`` closure."""
+    return {
+        name
+        for line in config.splitlines()
+        for name in re.findall(r"params\.(\w+)", re.sub(r"\w+:\s*\{.*\}", "", line))
+    }
+
+
+def test_rnaseq_override_reads_only_given_params():
+    """Every param the publish override reads when parsed is set in the run's params (D-025).
+
+    Under NXF_SYNTAX_PARSER=v2 a -c config cannot see a param only the pipeline sets:
+    ``mode: params.publish_dir_mode`` came out empty and published symlinks into work/.
+    """
+    fixture = (ROOT / "scripts" / "python" / "make_rnaseq_fixture.py").read_text()
+    names = {node.targets[0].id: node.value for node in ast.parse(fixture).body
+             if isinstance(node, ast.Assign) and hasattr(node.targets[0], "id")}  # fmt: skip
+    publish, params = ast.literal_eval(names["PUBLISH"]), ast.literal_eval(names["PARAMS"])
+    assert eager_params(publish) == {"publish_dir_mode"}
+    assert eager_params(publish) <= set(params)
+    todo = (ROOT / "TODO.md").read_text()
+    (given,) = re.findall(r'cat > "\$P/rnaseq_params.yml" <<EOF\n(.*?)\nEOF', todo, re.S)
+    assert eager_params(publish) <= set(re.findall(r"^(\w+):", given, re.M))
+
+
 def test_publish_override_single_source():
     """The cluster run and the fixture publish the Trim Galore JSON with one override text (D-025).
 

@@ -2134,6 +2134,9 @@ print(len(rows), 'rows;', len({r['sample'] for r in rows}), 'samples')
 "                                                                     # PASTE, expect 210 rows; 210 samples
 
 # ---- 5. nf-core/rnaseq 3.27.0, Salmon only; parameters in a params file (nf-core/rnaseq #1860) ----
+# publish_dir_mode is stated, not left to the pipeline: under NXF_SYNTAX_PARSER=v2 the -c config
+# below cannot see a param only the pipeline sets, and on 2026-09-30 its publishDir fell back to
+# symlinks into work/ (D-025, amended).
 cat > "$P/rnaseq_params.yml" <<EOF
 input: $P/rnaseq_samplesheet.csv
 outdir: $P/nfcore_rnaseq/results
@@ -2143,6 +2146,7 @@ gencode: true
 pseudo_aligner: salmon
 skip_alignment: true
 save_reference: true
+publish_dir_mode: copy
 EOF
 cat > "$P/rnaseq_kebnekaise.config" <<'EOF'
 executor {

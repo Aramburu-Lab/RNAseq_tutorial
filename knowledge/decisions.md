@@ -430,6 +430,17 @@ M5 joins the status table after the Step-1 record.
 
 **Consequence.** Cluster step 5 must use the new `rnaseq_kebnekaise.config`; step 7 waits for this commit. The M2 read fates come from `multiqc_trim_galore.txt`.
 
+**Amendment, 2026-09-30: the override published symlinks.** On the cluster, job 47485533 published every Trim Galore report as an absolute symlink into `work/`, and a mid-run copy left 117 dangling links on the Mac. The run's params file says `publish_dir_mode = copy`; no launch-directory or `$NXF_HOME` config exists. The cause is the override's `mode: params.publish_dir_mode`, read when the `-c` file is parsed: under `NXF_SYNTAX_PARSER=v2` a param set only in the pipeline's own config is not visible there, so the mode is empty and Nextflow's default, symlink, applies. The `path` and `saveAs` closures read their params at task time and were right. Reproduced with Nextflow 26.04.6 on a one-process pipeline:
+
+| Parser | Override reads | Params file sets the mode | Published as |
+|---|---|---|---|
+| v1 | `params.publish_dir_mode` | no | run refused: unknown config attribute |
+| v2 | `params.publish_dir_mode` | no | symlink |
+| v2 | `params.publish_dir_mode` | yes | file |
+| v2 | literal `'copy'` | no | file |
+
+The fix is `publish_dir_mode: copy` in step 5's params file, one definition that every config file sees; `tests/test_repo.py::test_rnaseq_override_reads_only_given_params` requires every `params.X` the override reads outside a closure to be set there. Job 47485533 keeps its links: step 7 copies their targets (`rsync -L`), and its `work/` must stay until its `results/` is copied out with links followed.
+
 ---
 
 ## D-024 — Figures take the Candida Ribo-seq style; the Helvetica and 14 pt overrides are dropped

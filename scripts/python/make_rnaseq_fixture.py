@@ -47,6 +47,9 @@ PARAMS = {
     "transcript_fasta": None,
     "additional_fasta": None,
     "skip_bbsplit": True,
+    # Stated, not left to the pipeline: under NXF_SYNTAX_PARSER=v2 the -c override below cannot
+    # see a param only the pipeline sets, and its publishDir falls back to symlinks (D-025).
+    "publish_dir_mode": "copy",
 }
 NULLED = ("salmon_index", "transcript_fasta", "additional_fasta")
 # The test profile allows 15 GB; fetchngs failed at 36 GB on a 24 GB Mac (D-006).
@@ -138,6 +141,10 @@ def run(scratch: Path, version: str, profile: str) -> list[str]:
 def copy(source: Path, out: Path, patterns: tuple[str, ...]) -> list[tuple[str, int]]:
     """Copy the files matching patterns; every pattern must match. Return what was left out."""
     chosen = {p for pattern in patterns for p in source.glob(pattern) if p.is_file()}
+    # copyfile follows links, which hid the symlinked reports of D-025's rehearsal.
+    linked = sorted(p.relative_to(source).as_posix() for p in chosen if p.is_symlink())
+    if linked:
+        raise ValueError(f"published as symlinks into work/, so any other copy dangles: {linked}")
     empty = [pattern for pattern in patterns if not any(source.glob(pattern))]
     if empty:
         raise FileNotFoundError(f"no file in {source} matches {empty}")
