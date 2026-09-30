@@ -2209,11 +2209,15 @@ cat "$P"/nfcore_rnaseq/results/pipeline_info/*versions*.yml                     
 grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c                               # PASTE: the libType quant ran with
 du -sh "$P/nfcore_rnaseq/results" "$P/nfcore_rnaseq/work" "$P/nfcore_fetchngs/results" "$P/nfcore_fetchngs/work"   # PASTE
 sacct -X -n -S 2026-09-27 --name=nf_fetchngs,nf_rnaseq_tier1 --format=JobID,JobName,Elapsed,MaxRSS,State  # PASTE
+find "$P/nfcore_rnaseq/results" -type l | wc -l                                                     # PASTE: published files that are symlinks into work/
 # Keep work/ and the FASTQs until I confirm the P2C.2 gather checks; after that it is your call.
+# If the count above is not 0, results/ holds links into work/: removing work/ empties results/.
 
-# ---- 7. On the Mac, after I confirm the newest registration commit: COPIED_FILES only, unchanged ----
+# ---- 7. On the Mac, after step 6 and my confirmation of the newest registration commit: COPIED_FILES only ----
+# -L copies what a symlink points at: on 2026-09-30 a copy taken mid-run brought the Trim Galore
+# reports over as 117 absolute links into the cluster's work/, all dangling on the Mac.
 mkdir -p ~/ctx_tier1/data/raw/tier1_rnaseq
-rsync -avm --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1/nfcore_rnaseq/results/ ~/ctx_tier1/data/raw/tier1_rnaseq/
+rsync -avmL --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1/nfcore_rnaseq/results/ ~/ctx_tier1/data/raw/tier1_rnaseq/
 du -sh ~/ctx_tier1/data/raw/tier1_rnaseq                               # PASTE
 ```
 
