@@ -27,6 +27,32 @@ it were reversed.
 
 ---
 
+## D-036 — STAR runs on Linux, HISAT2 on Apple silicon; a probe at the door, never a silent fallback
+
+**Date:** 2026-09-30 · **Status:** decided (Rytis); the probe and its tests land in M3.4
+
+**Context.** M3 aligns with STAR, pinned at 2.7.11b in the `reads` environment (D-027), whose check is `STAR --version`. The osx-arm64 build passes that check and does not align. Pixi on Apple silicon is a student platform, so this decides what a Mac student runs, not only what this Mac runs.
+
+**Options.**
+- **A container** for STAR only, behind a per-tool engine switch: Docker's VM joins the Track A memory budget, and the image is either a third-party one outside `pixi.lock` or a project image that needs linux-aarch64 added to the `reads` feature.
+- **HISAT2 on Apple silicon, STAR on Linux** (CI, the cluster, Linux students).
+- **A STAR build carrying the unmerged fix** (PR #2691 for issue #2632): off the pin, and not shown to cure the second fault.
+
+**Decision.** HISAT2 on Apple silicon, STAR on Linux; `--aligner star` stays the default. Before any alignment, `ctx process` maps 10 exact reads through STAR with the production options (`--readFilesCommand gzip -dcf --quantMode GeneCounts --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within`) and requires all 10 read and every ReadsPerGene column to sum to 10. A failing probe stops the run, names this entry and both routes (`--aligner hisat2`, or a working STAR first on `CTX_TOOLS`), and writes no page; nothing switches aligner on its own. A test needing STAR may skip only when the probe fails on darwin-arm64 with `CI` unset, and fails everywhere else, a departure from D-027 that waits for Rytis's confirmation (M3 R6).
+
+**Evidence.** Reproduced here, 2026-09-30, `.pixi/envs/reads/bin/STAR` 2.7.11b on osx-arm64, the fixture slice index built by the same binary (`--genomeSAindexNbases 7`, `slice.gtf`), `tests/fixtures/chr22_se/se_a.fq`, 1,000 uncompressed reads:
+
+| Run | Exit | What STAR reports |
+|---|---|---|
+| `--outSAMtype BAM Unsorted` | 0 | `Number of input reads` 0, uniquely mapped 0.00 % |
+| the same with `--quantMode GeneCounts` | 109 | `could not open input file /geneInfo.tab`, although `geneInfo.tab` is in the index folder |
+
+The input is plain FASTQ, so the first fault is not about gzip. The second path has lost its genome-directory prefix; why is not traced. The same reads under linux STAR 2.7.11b (a linux/arm64 image already on this Mac, run with `--pull never`) against a slice index it built itself, with GeneCounts: 1,000 input reads, 99.90 % uniquely mapped. Index building works on the Mac: the real chr22 index built by the Mac binary (12.07 s, 757 MB peak) aligned a proxy input under that linux STAR. An exit code and `--version` both pass on the failing build, so neither can serve as the check.
+
+**Consequence.** The Mac's Track A page is a HISAT2 page (M3.9), without the STAR against featureCounts comparison, which needs STAR's own counts; the STAR page comes from Linux. If a fixed osx-arm64 STAR is pinned later, the probe passes and nothing else changes.
+
+---
+
 ## D-035 — The Step-1 download relaunched fresh, ten at a time, retrying refused connections; chr22 cut from the cluster's genome
 
 **Date:** 2026-09-30 · **Status:** decided

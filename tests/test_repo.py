@@ -202,18 +202,26 @@ def test_fetchngs_runs_monochrome():
     assert routes, "no prose route through the launcher"
     for line in routes:
         assert "monochrome_logs = true" in line and config in line, line
-    # Code: every fenced TODO block that calls the launcher writes that config with printf,
-    # with the setting, before the first call. Escape: a later non-printf write of the config
-    # (a heredoc, say) that drops the setting.
+    # Code: every fenced TODO block that calls the launcher writes that config, by printf or
+    # by a heredoc (D-035), with the setting, before the first call. Escape: a write by any
+    # other means (cp, tee) that drops the setting.
     call = re.compile(r"SHARED_run_fetchngs\.sbatch\s")
+    heredoc = re.compile(
+        r"^[^\n]*" + re.escape(config) + r"[^\n]*<<'(\w+)'\n(.*?)^\1$", re.M | re.S
+    )
     blocks = todo_text.split("```")[1::2]
     calls = [b for b in blocks if call.search(b)]
     assert calls, "no fenced block calls the launcher"
     for block in calls:
-        writes = [line for line in block.splitlines() if "printf" in line and config in line]
-        assert writes and all("monochrome_logs = true" in line for line in writes), block[:200]
+        writes = [
+            (block.index(line), line)
+            for line in block.splitlines()
+            if "printf" in line and config in line
+        ]
+        writes += [(m.start(), m.group(0)) for m in heredoc.finditer(block)]
+        assert writes and all("monochrome_logs = true" in w for _, w in writes), block[:200]
         first_call = call.search(block)
-        assert first_call and block.index(writes[0]) < first_call.start(), "config after call"
+        assert first_call and min(writes)[0] < first_call.start(), "config after call"
 
 
 def test_rsync_matches_copied_files():

@@ -399,7 +399,7 @@ cancer-transcriptomics-teaching/
 ├── src/ctx/
 │   ├── gather/    fetchngs.py (the only ctx reader of the fetchngs layout, Phase 1b); curation.py harmonise.py (Phase 2; the SDRF join is declared in the dataset file); rnaseq.py (the one reader of an nf-core/rnaseq 3.27.0 Salmon-only outdir, P2A.2); gdc.py xena.py geo.py (Phase 4); no ENA/SRA access code
 │   ├── qc/        registry.py (the one reader of conf/qc_metrics.toml) multiqc_io.py (runs MultiQC by subprocess and is the one reader of its tables) identity.py (globin, MT and rRNA fractions; the sex check after the Step-1 record) checkpoint.py (M2b); Phase 2Q: read_fates.py composition.py run.py page.py (`ctx qc`)
-│   ├── process/   trim.py align.py count.py strandedness.py
+│   ├── process/   cache.py reference.py align.py count.py context.py figures.py run.py (`ctx process`, M3); ctx/concordance.py beside it, which proteo/ imports
 │   ├── quant/     salmon.py tximport.py
 │   ├── de/        deseq.py filters.py stats.py sanity.py (pre-registered rules) run.py (`ctx de`) page.py (page copy)
 │   ├── function/  lite.py (ORA and preranked GSEA, numpy/scipy/stdlib only, so it runs in Pyodide) run.py (`ctx function`) page.py; disease.py (not built)
@@ -492,7 +492,7 @@ Stage 0, before or beside the cluster run:
 - [x] **S0.1** `scripts/python/record_sanity.py` writes the Step-1 record: the hub's verdicts byte for byte and the M5+M6 metrics union (D-026, 143923a).
 - [x] **S0.2** A `reads` pixi environment, outside the `main` solve group, so the analysis environment does not move before the record (MultiQC 1.35 needs plotly < 7; htslib 1.21 conflicts with the locked libtiff): fastqc 0.12.1, fastp 1.3.6, seqkit 2.13.0, seqtk 1.4, multiqc 1.35, star 2.7.11b, samtools and htslib 1.21, subread 2.1.1, salmon 2.7.0, trim-galore 2.3.0, hisat2 2.2.3, the nf-core/rnaseq 3.27.0 pins where it has one. `ctx.tools` finds each binary in the sibling `reads` environment, else `$CTX_TOOLS`, and refuses a version other than the pin. `pixi list` of default and laptop unchanged; the new environment's size measured. pytximport waits for M4. Done 2026-09-30 (D-027): no other environment moved; fastp 1.1.0 and samtools 1.22.1, because no osx-arm64 solve holds STAR beside fastp 1.3.6; 1.6 GB.
 - [x] **S0.3** A single-end chr22 fixture beside `tests/fixtures/chr22/` (Step-1 is single-end 75-101 nt): four reverse-stranded samples and one unstranded, a planted adapter-heavy and a degraded sample, from the committed transcripts with a fixed seed; generator in `scripts/python/`. Done 2026-09-30: `tests/fixtures/chr22_se/`, 5 × 1,000 reads, 1.1 MB; 276 of se_c's reads run into the adapter; `tests/test_fixtures_se.py` checks every read against its name with its own parser and rebuilds the fixture byte for byte.
-- [x] **S0.4** The Track A teaching subset: `scripts/python/pick_teaching_subset.py` picks 8 runs from the gathered sheet (4 distinct donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; monocyte isolation matched across strata; an empty sex never preferred), and a "Phase 3 cluster commands (P3.0)" block: a separate fetchngs run on those runs, `seqtk sample -s42` to 1M reads, rewritten md5s, chr22 genome, GTF, transcripts and tx2gene from GENCODE 50, a STAR chr22 index and Salmon chr22 indices with and without decoys, each measured, copied to `data/raw/` on the Mac. The 8 accessions go in after P2C.2. Done 2026-09-30, changed from this plan: the 8 runs were chosen now from the gathered sheet, which the rule reads alone, so the cluster can fetch them beside P2A.3; the donor for healthy at 101 nt has no recorded sex, the only one left once monocyte isolation is matched; the indices move to M3 on the laptop (about 1 GB for chr22), so the cluster block only fetches and subsamples ("Phase 3 cluster commands (P3.0)").
+- [x] **S0.4** The Track A teaching subset: `scripts/python/pick_teaching_subset.py` picks 8 runs from the gathered sheet (4 distinct donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; monocyte isolation matched across strata; an empty sex never preferred), and a "Phase 3 cluster commands (P3.0)" block: a separate fetchngs run on those runs, `seqtk sample -s42` to 1M reads, rewritten md5s, chr22 genome, GTF, transcripts and tx2gene from GENCODE 50, a STAR chr22 index and Salmon chr22 indices with and without decoys, each measured, copied to `data/raw/` on the Mac. The 8 accessions go in after P2C.2. Done 2026-09-30, changed from this plan: the 8 runs were chosen now from the gathered sheet, which the rule reads alone, so the cluster can fetch them beside P2A.3; the donor for healthy at 101 nt has no recorded sex, the only one left once monocyte isolation is matched; the indices move to M3 on the laptop (about 1 GB for chr22), so the cluster block only fetches and subsamples; since the M3 plan, M3 builds the STAR and HISAT2 chr22 indices and the Salmon chr22 indices move to M4 (D-037) ("Phase 3 cluster commands (P3.0)").
 
 M2 to its full spec (TODO.md M2 section, P2Q.2-P2Q.6, the Phase 3 M2 items):
 - [x] **M2.1** `ctx.qc.multiqc_io`: MultiQC by subprocess from the `reads` environment, module tables read with Polars, every sample name mapped or refused, every expected Trim Galore and Salmon source present; `outputs/02_qc/multiqc/` exempt from the naming lint (D-entry). Tested on the rnaseq fixture's JSON reports; read fates add up to Salmon's `num_processed`.
@@ -512,6 +512,21 @@ M2 to its full spec (TODO.md M2 section, P2Q.2-P2Q.6, the Phase 3 M2 items):
 
     **Review of M2.1 to M2.7.** `ctx qc` judges every sample against the registry's bands and its own stratum, runs by run for the reads, writes a status row per run and tests every metric and flag for confounding on M5's own selections; nothing is excluded. Defects found and fixed at their source on the way: MultiQC run in its output folder with relative inputs (a test now uses a relative path); relative FASTQ paths reaching tools that run in their log folders; an untyped empty flags table; a Copy button that printed `dict.copy` on every module page since S3a (D-033); a dropped `%` unit in `axis_title`; heatmaps and strips whose long labels or captions pushed text off an 85 mm page. What is not done: M2.8, which needs the Step-1 counts; click-to-set sliders for two-knob maps (Phase 2D); a real lasso in the browser.
 - [ ] **M2.8** On Step-1 once step 7 lands: `ctx qc` with flags only; exclusions wait for the record and Phase 2D.
+
+M3 to its full spec (plan 2026-09-30: three designs, three adversarial reviews, a chief plan; the plan file sits outside the repo, so these items are the record). Rytis's choices, 2026-09-30: STAR runs on Linux and HISAT2 on Apple silicon, with a probe at the door and no silent fallback (R1, D-036); the full-reference comparison is a cluster full-genome STAR run (R3). Defaults taken until he says otherwise: `conf/datasets/tier1_teach.toml` repeats tier1's tables and a test holds them equal (R4); the frozen hub stays split across tier1 and tier1_teach until it unfreezes (R5); the paired-slice lesson is not built (R7). Two departures wait for his confirmation at check-in (R6): agreement and descriptive M3 figures take their caption from content TOML under the "no test" exception, not from the frozen `ctx.viz.annotate`; a STAR test skips only when the probe fails on darwin-arm64 with `CI` unset, and fails everywhere else.
+- [x] **M3.0** This plan in TODO.md; the layout line; the Phase 3 M3 item split; D-036 drafted from the fault reproduced on this Mac. Documents only.
+- [ ] **M3.1** `ctx.concordance`, neutral so M7 reuses it: Spearman with a percentile bootstrap CI (1000 resamples over genes, seed 42), Pearson on log2(count + 1) with its Fisher z CI, Bland-Altman bias and limits (ddof 1) beside the empirical 2.5 and 97.5 percentiles of d; identical vectors short-circuit to ρ 1; no CI below n 4; a gene zero in one method only is kept. `tests/test_concordance.py`, each test with the mutation it catches; D-040. Evidence: bootstrap time at 1,747 genes.
+- [ ] **M3.2** Shared edits: the naming lint exempts `outputs/03_process/{multiqc,tools}/` at the first level only; the registry's "align" stage with `gene_strand_bias` (0.8 stranded, 0.1 unstranded, on featureCounts' forward share) and `reference_start_codons` (good 0.99, usable 0.9); `salmon_strand_bias.computed` says SF/(SF+SR) single-end, ISF/(ISF+ISR) paired; `multiqc_io` reads HISAT2, gains `plot_table`, resolves `dest` and `config`; `tools.run(stdout=)`; `reads.run_fastp(trimmed=)` with M2's calls unchanged. Their tests; D-039's registry half.
+- [ ] **M3.3** `process/__init__.py` (`ProcessError`, the `Aligner` and `Strandedness` StrEnums, the one `STRAND` map of STAR column to featureCounts `-s`), `cache.py` (content-keyed folders built into `.part`, reused only when the key and every listed size match, never overwritten), `reference.py` (genome facts, `sa_index_bases` = min(14, floor(log2(L)/2 - 1)), the GTF subset by exact contig, the first-half cut by gene end, the start-codon ATG share, the STAR and HISAT2 indices). Tests. Evidence: the real chr22 STAR and HISAT2 index builds through the code, and the ATG share, 8,852 of 8,866 measured by hand.
+- [ ] **M3.4** `align.py`: the per-run cap by `seqkit sample -p` with seed 42, fastp trimming, HISAT2 (plus an unspliced alignment of the featured sample), samtools, the derived multimapper limit 1, the STAR probe (10 exact reads through the production options; all 10 read, every ReadsPerGene column summing to 10) and `star_align`. The `needs_star` marker; D-036 final. The first CI run proves or disproves linux-64 STAR.
+- [ ] **M3.5** `count.py`: featureCounts `-s 0/1/2` over every BAM, then `-O`, `-O --fraction` and `-M` at the called strand; one MultiQC run per setting, each with one row per BAM; the Polars readers of ReadsPerGene and the featureCounts matrix; strand calls, an undetermined call stopping the run; invariants I1 to I6 (aligner input equals fastp's passed reads; the parsers agree; matrix sums equal Assigned; gene sets equal the subset GTF's; matrix headers in sheet order; flagstat primary mapped equals the aligner's). D-038.
+- [ ] **M3.6** `context.py` (`--compare-dataset`: the expected chr22 share and Salmon's strand call from the tier1 counts, refused when a sample or column is absent), `figures.py` (mapping bars, strandedness bars, counter scatters and agreement plots per comparison), `run.py`, `ctx process` and its cards, `content/process.toml`, the end-to-end tests with `--aligner hisat2` on `chr22_se`, `test_cli`; `pixi run docs`; interrogate and ruff on the new files.
+- [ ] **M3.7** The page at 1280 and 375 px in both themes on the HISAT2 fixture run; page size.
+- [ ] **M3.8** `conf/datasets/tier1_teach.toml` and its equality test with tier1; D-042.
+- [ ] **M3.9** Once P3.0's 8 runs are in `~/ctx_tier1/data/raw/tier1_teach/`: `ctx gather`, then a cold `ctx process --aligner hisat2`; wall time and peak RAM against Track A's 15 min and 6 GB; the defaults of `--settings` and `--reads-per-run` fixed from it; D-041 final; the budget test; review; lessons.
+- [ ] **M3.10** R1 settled as HISAT2 on Apple silicon: no container route is built. What remains is the probe's refusal text naming `--aligner hisat2`, tested with a fake STAR, which M3.4 already carries; this item closes when that test passes in CI on linux-64 and on the Mac.
+- [ ] **M3.11** R3, the cluster full-genome reference: the 8 runs' trimmed FASTQs from M3.9 copied to the cluster, so both sides share one fastp setting; a STAR 2.7.11b index of the MD5-checked GENCODE 50 genome and GTF in `$P/refs`; the 8 aligned with M3's STAR options; `Log.final.out` and `ReadsPerGene.out.tab` copied back; `ctx process` reads them as the full-reference side of the "chr22 against full" comparison, never as a default. Cluster commands written with the step; index RAM and size measured there, not assumed.
+- [ ] **M3.12** M2b on the align stage: `ctx qc` judges M3's one-row-per-sample alignment table with dataset-only bands.
 
 ### Phase 2S — Candida figure style, ALI page design, editable page text (approved 2026-09-29)
 
@@ -556,13 +571,15 @@ Built after P2C.3, so the registered Step-1 analysis stays as registered; the fr
 - [ ] QC registry `conf/qc_metrics.toml`: schema, loader and MultiQC config generator; one metric end to end (registry, MultiQC colouring, atlas strip plot) with its source; P2Q.3 starts the file with the metrics the read-fates chart uses
 - [ ] M2a on the laptop subset: FastQC + fastp + seqkit into MultiQC with the generated config; QC atlas and status table; planted problems (adapter-heavy, quality-degraded, sex-label swap)
 - [ ] M2b QC checkpoint: registry filled for every metric used; QC atlas; status table; on the laptop subset, and on the Step-1 cohort's sample-level checks after the P2C.3 record, because the hub is frozen until then and an exclusion would change the registered analysis; P2Q.5 shows Step-1 read fates and flags before the record and excludes nothing
-- [ ] M3 STAR-chr22 / featureCounts / strandedness; HISAT2 optional path
+- [ ] M3 on the Track A subset: HISAT2 chr22 on Apple silicon, STAR chr22 on Linux; featureCounts; strandedness (Phase 2M M3.9)
+- [ ] M3 full-reference comparison: cluster full-genome STAR on the same trimmed reads (Phase 2M M3.11)
 - [ ] M4 Salmon + pytximport; cross-method Venn; per-sample comparison against the cohort counts of the same samples
 
 ### Phase 4 — Steps 2 and 3, integration modules
 
 - [ ] Step-3 cohorts in D26 order, breast first, then kidney and lung (LUAD, LUSC): GDC acquisition, paired TCGA analyses, TOIL tumour-vs-GTEx comparisons with batch diagnostics. Breast specifics: PAM50 labels from a documented source, GTEx breast restricted to female donors, TCGA-BRCA male cases flagged, adipose composition shown beside tumour-vs-normal results
 - [ ] Breast Step-1: Cassetta et al. 2019 monocytes and macrophages (GSE117970, open FASTQs at ENA PRJNA483877); lung Step-1 scout, else the labelled pseudo-bulk fallback
+- [ ] P4.0 tissue downloads (Rytis 2026-09-30): Cassetta's 22 tissue macrophage runs and GSE100925 whole-tumour breast by the "Phase 4 cluster commands (P4.0)" block, once the Step-1 and teaching downloads end; TCGA tissue counts through GDC with the breast ingestion after M4
 - [ ] Step-2: TCGA-LAML or DLBC vs healthy comparator; cross-study batch lesson
 - [ ] Pan-cancer / pan-cell-type Venn and UpSet views
 - [ ] M7 Step-3, breast first: CPTAC BRCA has tumours only, so per-gene RNA–protein correlation across tumours and concordance of subtype contrasts (ER− vs ER+, Basal-like vs Luminal A) at RNA and protein level, with the ERBB2 amplicon as worked example; tumour-vs-NAT concordance follows with ccRCC, LUAD and LSCC
@@ -2207,7 +2224,7 @@ The cluster settings come from:
 
 ### Phase 3 cluster commands (P3.0), the only copy
 
-The Track A teaching subset: the 8 runs `scripts/python/pick_teaching_subset.py` chose from the gathered Step-1 sheet on 2026-09-30 (P2M S0.4; 4 donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; neutrophil-kit NDN and FACS monocytes throughout), fetched by fetchngs into their own outdir, then subsampled to 1M reads each. The STAR and Salmon chr22 indices are built on the laptop in M3, where chr22 needs about 1 GB, not here.
+The Track A teaching subset: the 8 runs `scripts/python/pick_teaching_subset.py` chose from the gathered Step-1 sheet on 2026-09-30 (P2M S0.4; 4 donors × NDN and monocytes; healthy and G-CSF at 76 nt, healthy and PDAC at 101 nt; neutrophil-kit NDN and FACS monocytes throughout), fetched by fetchngs into their own outdir, then subsampled to 1M reads each. The STAR and HISAT2 chr22 indices are built on the laptop by M3, the Salmon chr22 indices by M4, not here.
 
 ```
 # Kebnekaise login node unless marked "On the Mac". Paste back every line marked PASTE.
@@ -2292,6 +2309,88 @@ mkdir -p ~/ctx_tier1/data/raw/tier1_teach
 rsync -av rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1_teach/outdir/ ~/ctx_tier1/data/raw/tier1_teach/
 du -sh ~/ctx_tier1/data/raw/tier1_teach                               # PASTE
 # Later, Rytis: Zenodo, once the redistribution terms are decided (the IDF names no licence).
+```
+
+### Phase 4 cluster commands (P4.0), the only copy
+
+The tissue datasets Rytis asked for on 2026-09-30, each in its own fetchngs project directory with D-035's download settings. Run accessions and sizes from ENA's filereport, read 2026-09-30:
+- **Cassetta et al. 2019 tissue macrophages** (PRJNA483877, GSE117970): the 22 runs titled `MAC<n>`, paired; breast 4 normal and 4 cancer, endometrium 5 normal and 9 cancer, the paper's own counts; 137,937,197,084 bytes of FASTQ, 3.7 to 9.7 GB per run.
+- **GSE100925 whole-tumour breast** (PRJNA393443): 103 runs, single-end; 135,964,972,806 bytes, 0.37 to 3.3 GB per run. Fetched by project accession, so fetchngs lists every run itself.
+
+TCGA tissue counts come from GDC with the breast ingestion after M4, not from the cluster.
+
+```
+# Kebnekaise login node. Paste back every line marked PASTE.
+# Each run allows 5 downloads at a time, so the two together hold the 10 of D-035 that ENA accepted.
+# Launch them once the P2A.3 relaunch (job 47484816) and P3.0's download have ended.
+
+# ---- 0. Nothing else downloading, and space for about 274 GB ----
+squeue -u "$USER"                                                     # PASTE, expect no nf_fetchngs job
+df -h /proj/nobackup/hpc2n2024-150                                    # PASTE
+
+# ---- 1. Cassetta tissue macrophages, 22 paired runs ----
+export M=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mac
+mkdir -p "$M/nfcore_fetchngs"
+cat > "$M/nfcore_fetchngs/nextflow.config" <<'CONF'
+executor {
+    queueSize = 50
+}
+params {
+    monochrome_logs = true
+}
+process {
+    withName: 'SRA_FASTQ_FTP' {
+        ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
+        time          = { 30.min * task.attempt }
+        maxForks      = 5
+        maxRetries    = 6
+        errorStrategy = { sleep(Math.pow(2, task.attempt) * 30000 as long); return 'retry' }
+    }
+}
+CONF
+printf '%s\n' SRR7631637 SRR7631638 SRR7631639 SRR7631640 SRR7631641 SRR7631642 SRR7631643 SRR7631644 SRR7631645 SRR7631646 SRR7631647 SRR7631648 SRR7631649 SRR7631650 SRR7631651 SRR7631652 SRR7631653 SRR7631654 SRR7631655 SRR7631656 SRR7631657 SRR7631658 > "$M/ids.txt"
+wc -l < "$M/ids.txt"                                                  # PASTE, expect 22
+cd "$M"
+PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$M" "$M/ids.txt" rnaseq     # PASTE, expect 22 accessions and "publish mode : link"
+PUBLISH_DIR_MODE=link sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$M" "$M/ids.txt" rnaseq
+
+# ---- 2. GSE100925 whole-tumour breast, 103 single-end runs ----
+export W=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_tissue
+mkdir -p "$W/nfcore_fetchngs"
+cat > "$W/nfcore_fetchngs/nextflow.config" <<'CONF'
+executor {
+    queueSize = 50
+}
+params {
+    monochrome_logs = true
+}
+process {
+    withName: 'SRA_FASTQ_FTP' {
+        ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
+        time          = { 30.min * task.attempt }
+        maxForks      = 5
+        maxRetries    = 6
+        errorStrategy = { sleep(Math.pow(2, task.attempt) * 30000 as long); return 'retry' }
+    }
+}
+CONF
+printf '%s\n' PRJNA393443 > "$W/ids.txt"
+cd "$W"
+PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$W" "$W/ids.txt" rnaseq     # PASTE, expect PRJNA393443 and "publish mode : link"
+PUBLISH_DIR_MODE=link sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$W" "$W/ids.txt" rnaseq
+
+# ---- 3. While they run: refusals and 403s so far; a few, each retried, are fine ----
+grep -c "exit status (4)" "$M/nfcore_fetchngs/.nextflow.log" "$W/nfcore_fetchngs/.nextflow.log"     # PASTE when you look
+grep -c "403: Forbidden" "$M/nfcore_fetchngs/.nextflow.log" "$W/nfcore_fetchngs/.nextflow.log"      # PASTE when you look
+
+# ---- 4. After each job ends ----
+for D in "$M" "$W"; do
+    R="$D/nfcore_fetchngs/results"
+    tail -n 12 "$D"/slurm-nf_fetchngs-*.out
+    ls "$R/fastq"/*.fastq.gz | wc -l
+    (cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done) | grep -vc ': OK$'
+    du -sh "$R/fastq"
+done                                                                  # PASTE, expect 44 then 103 FASTQs, 0 and 0 md5 failures
 ```
 
 ### Phase 2 dependencies
