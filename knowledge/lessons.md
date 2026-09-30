@@ -48,3 +48,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A check that prints a count of failures also prints how many it checked: `md5sum -c ... | grep -vc ': OK$'` printed 0 for a folder that did not exist (2026-09-30).
 - pixi's installer honours `PIXI_HOME` and appends to `~/.bashrc` unless `PIXI_NO_PATH_UPDATE=1`; a block never assumes `~/.pixi`, and `command -v` on Kebnekaise prints the physical `/pfs/...` path, so compare resolved paths (G.0, 2026-09-30).
 - A builder checks its inputs before it writes and builds into a `.partial` folder renamed only when every check passes: a kit that failed its link check was left half-written and blocked every rerun (2026-09-30).
+- A check on a path runs after the path is made absolute, and a walk up a path must end for relative input too: G.1's first home-folder check walked `${here%/*}`, which never shortens a name with no slash, and hung its own test harness (2026-09-30).

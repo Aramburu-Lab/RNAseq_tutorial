@@ -180,8 +180,12 @@ def test_subsets_curate_as_their_parent():
     ("pipeline", "pinned"), [("fetchngs", FETCHNGS_VERSION), ("rnaseq", RNASEQ_VERSION)]
 )
 def test_version_single_source(pipeline, pinned):
+    # The cluster scripts in scripts/bash carry the pin too (a `-r 1.11.0` there fails here).
     sources = [ROOT / "TODO.md", ROOT / "CONVENTIONS.md"] + [
-        p for top in ("scripts", "src") for p in (ROOT / top).rglob("*.py")
+        p
+        for top in ("scripts", "src")
+        for p in (ROOT / top).rglob("*")
+        if p.suffix in {".py", ".sh", ".sbatch"}
     ]
     found = [
         (p.name, v)
@@ -301,6 +305,10 @@ def test_rnaseq_override_reads_only_given_params():
     todo = (ROOT / "TODO.md").read_text()
     (given,) = re.findall(r'cat > "\$P/rnaseq_params.yml" <<EOF\n(.*?)\nEOF', todo, re.S)
     assert eager_params(publish) <= set(re.findall(r"^(\w+):", given, re.M))
+    # The students' route writes its own params file; the same rule holds there.
+    script = (ROOT / "scripts" / "bash" / "rnaseq.sbatch").read_text()
+    (given,) = re.findall(r'cat > "\$LAUNCH/params.yml" <<EOF\n(.*?)\nEOF', script, re.S)
+    assert eager_params(publish) <= set(re.findall(r"^(\w+):", given, re.M))
 
 
 def test_publish_override_single_source():
@@ -318,3 +326,34 @@ def test_publish_override_single_source():
     todo = (ROOT / "TODO.md").read_text()
     assert f"""cat >> "$P/rnaseq_kebnekaise.config" <<'EOF'\n{publish}EOF""" in todo
     assert '-c "$P/rnaseq_kebnekaise.config"' in todo
+    script = (ROOT / "scripts" / "bash" / "rnaseq.sbatch").read_text()
+    assert f"""cat >> "$LAUNCH/kebnekaise.config" <<'EOF'\n{publish}EOF""" in script
+    assert '-c "$LAUNCH/kebnekaise.config"' in script
+
+
+DOWNLOAD_KEYS = ("ext.args", "time", "maxRetries", "errorStrategy")
+
+
+def download_settings(text: str) -> list[dict[str, str]]:
+    """Each ``withName: 'SRA_FASTQ_FTP'`` block's DOWNLOAD_KEYS, a trailing ``//`` note dropped."""
+    blocks = re.findall(r"withName: 'SRA_FASTQ_FTP' \{\n(.*?)\n\s*\}\n", text, re.S)
+    return [
+        {
+            key: value.split("//")[0].strip()
+            for key, value in re.findall(r"^\s*([\w.]+)\s*=\s*(.+)$", block, re.M)
+            if key in DOWNLOAD_KEYS
+        }
+        for block in blocks
+    ]
+
+
+def test_download_settings_single_source():
+    """fetchngs.sbatch downloads with the settings every TODO cluster block carries (D-035).
+
+    Without --retry-connrefused wget took a refused connection as final, and 2 of 210 Step-1
+    FASTQs arrived. maxForks is left out: it is a knob of the script and differs by design.
+    """
+    blocks = download_settings((ROOT / "TODO.md").read_text())
+    (script,) = download_settings((ROOT / "scripts" / "bash" / "fetchngs.sbatch").read_text())
+    assert set(script) == set(DOWNLOAD_KEYS), script
+    assert blocks and all(block == script for block in blocks), (script, blocks)
