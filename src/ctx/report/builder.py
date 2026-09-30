@@ -258,6 +258,18 @@ _ENV = Environment(
 )
 
 
+def plotly_js() -> str:
+    r"""plotly.js as a page embeds it, its one raw U+FFFD written as the escape ``\\uFFFD``.
+
+    The character sits in a regex literal, where JavaScript reads the escape as the same
+    character; a host that takes a raw replacement character for damaged text refuses the page.
+    """
+    import plotly.offline  # noqa: PLC0415 - heavy; imported after the runtime profile
+
+    library: str = plotly.offline.get_plotlyjs()
+    return library.replace("\ufffd", "\\uFFFD")
+
+
 def _json_for_script(value: Any) -> Markup:
     """JSON safe inside a ``<script>`` element: every ``<`` is escaped as a unicode escape.
 
@@ -390,8 +402,6 @@ def render(page: FigurePage | ModulePage | HubPage) -> str:
     Returns:
         The HTML.
     """
-    import plotly.offline  # noqa: PLC0415 - heavy; imported after the runtime profile
-
     context: dict[str, Any] = {
         "page": page,
         "sections": SECTIONS,
@@ -404,7 +414,7 @@ def render(page: FigurePage | ModulePage | HubPage) -> str:
         },
         "layout": {"rail_from": RAIL_FROM_PX, "narrow": NARROW_PX},
         "templates": _json_for_script(plotly_templates()),
-        "plotly_js": Markup(plotly.offline.get_plotlyjs()),
+        "plotly_js": Markup(plotly_js()),
     }
     if isinstance(page, HubPage):
         context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing

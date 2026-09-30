@@ -44,6 +44,7 @@ from ctx.report.builder import (
     Reproduction,
     ResultTable,
     SelfCheck,
+    plotly_js,
     render,
     write,
 )
@@ -152,8 +153,11 @@ def test_round_trip(figure):
 
 def test_html_offline(figure):
     *_, html = figure
-    js = plotly.offline.get_plotlyjs()
-    assert html.count(js) == 1
+    js, raw = plotly_js(), plotly.offline.get_plotlyjs()
+    assert html.count(js) == 1 and "\ufffd" not in html
+    # Only the raw character changed: each one became a six-character escape. Integers, since
+    # a failed == on two 4.8 MB strings sends pytest into a diff that runs for minutes.
+    assert (len(js), raw.count("\ufffd")) == (len(raw) + 5 * raw.count("\ufffd"), 1)
     outside = html.replace(js, "")
     assert not re.search(r"<script[^>]+\bsrc\s*=", outside, re.IGNORECASE)
     assert not re.search(r"<link[^>]+\bhref\s*=", outside, re.IGNORECASE)
