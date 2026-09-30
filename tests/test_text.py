@@ -29,9 +29,13 @@ def _paths(table: dict, prefix: str = "") -> list[str]:
 
 
 def _code() -> str:
-    """Every file that can read a key: the Python sources and the page templates."""
-    src = ROOT / "src" / "ctx"
-    return "\n".join(p.read_text() for p in src.rglob("*") if p.suffix in {".py", ".j2"})
+    """Every file that can read a key: the Python sources, the page templates and the scripts.
+
+    The scripts count because the course preview draws the pages of modules not built yet
+    from their content files (scripts/python/build_preview.py).
+    """
+    files = [*(ROOT / "src" / "ctx").rglob("*"), *(ROOT / "scripts" / "python").glob("*.py")]
+    return "\n".join(p.read_text() for p in files if p.suffix in {".py", ".j2"})
 
 
 def test_every_key_is_read_somewhere():
