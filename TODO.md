@@ -511,7 +511,7 @@ M2 to its full spec (TODO.md M2 section, P2Q.2-P2Q.6, the Phase 3 M2 items):
     - **Budget, Track A (15 min, 6 GB), measured:** `ctx qc --reads` on fetchngs's test download took 23.2 s, peak RSS 469 MiB for ctx and 1,067 MiB for its largest child; `tests/test_qc_run.py` asserts both under budget.
 
     **Review of M2.1 to M2.7.** `ctx qc` judges every sample against the registry's bands and its own stratum, runs by run for the reads, writes a status row per run and tests every metric and flag for confounding on M5's own selections; nothing is excluded. Defects found and fixed at their source on the way: MultiQC run in its output folder with relative inputs (a test now uses a relative path); relative FASTQ paths reaching tools that run in their log folders; an untyped empty flags table; a Copy button that printed `dict.copy` on every module page since S3a (D-033); a dropped `%` unit in `axis_title`; heatmaps and strips whose long labels or captions pushed text off an 85 mm page. What is not done: M2.8, which needs the Step-1 counts; click-to-set sliders for two-knob maps (Phase 2D); a real lasso in the browser.
-- [ ] **M2.8** On Step-1 once step 7 lands: `ctx qc` with flags only; exclusions wait for the record and Phase 2D.
+- [x] **M2.8** On Step-1 once step 7 lands: `ctx qc` with flags only; exclusions wait for the record and Phase 2D. Done 2026-09-30: all 210 samples with Trim Galore and Salmon, 50.2 s at 1.71 GB, page 6.76 MB, nothing excluded; the parallel sets, a strip with values near 1e-5 and the renamed batch levels each exposed a layout fault, fixed at its source.
 
 M3 to its full spec (plan 2026-09-30: three designs, three adversarial reviews, a chief plan; the plan file sits outside the repo, so these items are the record). Rytis's choices, 2026-09-30: STAR runs on Linux and HISAT2 on Apple silicon, with a probe at the door and no silent fallback (R1, D-036); the full-reference comparison is a cluster full-genome STAR run (R3). Defaults taken until he says otherwise: `conf/datasets/tier1_teach.toml` repeats tier1's tables and a test holds them equal (R4); the frozen hub stays split across tier1 and tier1_teach until it unfreezes (R5); the paired-slice lesson is not built (R7). Two departures wait for his confirmation at check-in (R6): agreement and descriptive M3 figures take their caption from content TOML under the "no test" exception, not from the frozen `ctx.viz.annotate`; a STAR test skips only when the probe fails on darwin-arm64 with `CI` unset, and fails everywhere else.
 - [x] **M3.0** This plan in TODO.md; the layout line; the Phase 3 M3 item split; D-036 drafted from the fault reproduced on this Mac. Documents only.
@@ -540,19 +540,19 @@ Rytis asked for the figure styling and parameters of the Candida FINAL figures, 
 
 Rytis's draft v3.11 fixes the page prose: nine labels, word budgets, a lint (D-045). His choices: page text stays in `content/*.toml`; the frozen M5, M6 and hub pages are rewritten right after the Step-1 record.
 - [x] **P2P.1** The nine labels in the builder, the Input section, the section keys in the page files, CONVENTIONS' skeleton and prose rules; `ctx.report.prose`, `pixi run lint-prose` and `tests/test_prose.py`. Done 2026-09-30 (D-045): each rule fails its planted violation; 63 violations listed in the setup, gather and QC pages and the cards.
-- [ ] **P2P.2** Setup, gather and QC pages and the cards rewritten to the rules; the test that every page file passes the lint.
+- [x] **P2P.2** Setup, gather and QC pages and the cards rewritten to the rules; the test that every page file passes the lint. Done 2026-09-30: nine writers, each on its own files; `lint-prose` reports no violation in any page file or the cards; backticked spans render as code on the page, and a caption may hold none (the PDF prints it).
 - [ ] **P2P.3** After the Step-1 record, with P2S.4: M5, M6 and the hub to content files and the rules; `input` required; the `ModulePage` fields renamed to the section keys.
 
 ### Phase 2V — Course preview (approved 2026-09-30)
 
 Rytis asked for every module in the preview, and for Figure 2 of the gather page to be filterable, with the median and a field standard drawn.
 - [x] **P2V.0** The hub counts M0 to M10 (D-044).
-- [ ] **P2V.1** Gather Figure 2: filters by cell type and condition; a line at the median of the runs shown, recomputed as the filters change; ENCODE's 30 M and 20 M from the registry, marked as aligned reads against sequenced reads.
+- [x] **P2V.1** Gather Figure 2: filters by cell type and condition; a line at the median of the runs shown, recomputed as the filters change; ENCODE's 30 M and 20 M from the registry, marked as aligned reads against sequenced reads. Done 2026-09-30: on Step-1 the median run holds 26.1 million reads and 135 of 210 runs sit below 30 million; the figure opened alone filters too.
 - [ ] **P2V.2** Preview pages on made-up data for M3, M4, M7, M8, M9 and M10, written to the prose rules, and a gather page for the made-up dataset; the build script; the hub reading 11 of 11; published.
 
 ### Phase 2G — Cluster guide for students (planned 2026-09-30; decisions open)
 
-Rytis: the cluster side packed into a page students use to reproduce the course on their own dataset, on Kebnekaise under their own project, as an HTML page in the course design. The plan (8 agents: three readers, two designs, two adversarial reviews, a synthesis) sits outside the repo; these items are the record. Its D-entries take the next free numbers, D-046 and D-047, and the page follows the prose rules (D-045). Rytis's choices, 2026-09-30: (1) Nextflow for students from the repo's pixi `fetch` environment, not an HPC2N module; (2) 5 downloads per student, with `queueSize = 50`, staggered starts and rnaseq `work/` kept until `ctx gather` exits 0 as the other class defaults; (3) the rehearsal on the 4 smallest Step-1 runs by ENA `fastq_bytes`, 1,268,992,130 bytes, not the 8 teaching runs.
+Rytis: the cluster side packed into a page students use to reproduce the course on their own dataset, on Kebnekaise under their own project, as an HTML page in the course design. The plan (8 agents: three readers, two designs, two adversarial reviews, a synthesis) sits outside the repo; these items are the record. Its D-entries take the next free numbers when G.0 writes them, and the page follows the prose rules (D-045). Rytis's choices, 2026-09-30: (1) Nextflow for students from the repo's pixi `fetch` environment, not an HPC2N module; (2) 5 downloads per student, with `queueSize = 50`, staggered starts and rnaseq `work/` kept until `ctx gather` exits 0 as the other class defaults; (3) the rehearsal on the 4 smallest Step-1 runs by ENA `fastq_bytes`, 1,268,992,130 bytes, not the 8 teaching runs.
 - [ ] **G.0** Documents (decisions answered 2026-09-30; the cluster check still to run): D-046 (the student route: four scripts in `scripts/bash`, `ctx gather --cluster-guide`, Nextflow from the `fetch` environment, completion markers gating rnaseq and the subset) and D-047 (a study without an SDRF curated from the student's own table as a `file://` `[sdrf]` resource); Rytis runs the cluster check and answers (1) to (3).
 - [ ] **G.1** `scripts/bash/kebnekaise_env.sh`, `fetchngs.sbatch`, `rnaseq.sbatch`, `subsample.sbatch`, each with an `exempt:` block and tests run by `bash -n` and stubs; each planted mutation fails its test.
 - [ ] **G.2** A `Code` result kind in the builder and template: a script shown as it is in the file, with its SHA-256 and a Copy button.
@@ -562,6 +562,25 @@ Rytis: the cluster side packed into a page students use to reproduce the course 
 - [ ] **G.6** CONVENTIONS' Nextflow line gains the student route; superseded TODO items closed; D-046 and D-047 decided.
 - [ ] **G.7** After the Step-1 record: the guide built with the rnaseq trace; browser check at 1280 and 375 px in both themes, every Copy clicked; Track B budget measured.
 - [ ] **G.8** The page as a deliverable after Rytis's OK; once the repo is public, a newcomer reproduces a 2 to 4 run public study from the page alone.
+
+### Phase 2K — The student kit: download, double-click START, every report from one page (Rytis 2026-09-30)
+
+Rytis's experience: (1) the student downloads the course's results and reports, already generated, with no FASTQ, BAM or other large file; (2) downloads the codebase and the containers; (3) goes to the folder; (4) double-clicks START, on macOS or Windows; (5) one HTML page opens, from which every report is reached. The kit follows the FINAL-package rules of the lab: nothing found by where it happens to sit, every input with its SHA-256, a check that needs nothing the kit does not carry.
+- [ ] **K.0** Decisions: where the kit is downloaded from (a release of the private repo now, Zenodo with a DOI at the first session), and whether START only opens the pages or also offers to run the analyses in the container.
+- [ ] **K.1** `START.command` (macOS: a `.cmd` file does not run on a double-click there), `START.cmd` (Windows) and `START.sh` (Linux): each opens the course home page in the default browser from its own folder, with no server, no install and no network; the macOS one says how to pass Gatekeeper's first-open prompt. Each tested: `bash -n`, and the Windows file run through `cmd /c` where CI has Windows.
+- [ ] **K.2** The course home page, generated, not hand-written: M0 to M10 in course order, each dataset's pages (Step-1, the Track A subset, the made-up preview), the hub of each, the glossary and the cluster guide, each marked real or made-up; built by one command from the dataset roots, text in `content/course.toml` to the prose rules.
+- [ ] **K.3** The kit builder: copies each root's `outputs/` (pages, figures, tables, READMEs) under `kit/<dataset>/`, writes the home page, the START files, a README (what is here, what is made up, how to run your own dataset) and `MANIFEST.json` with every file's SHA-256; refuses a FASTQ, BAM or any file over a size cap; states the kit's size.
+- [ ] **K.4** Proof in an empty place: the kit unpacked in a fresh folder on macOS and Windows (or a Windows VM), START double-clicked, every link of the home page opened, no request leaves the machine, pages work offline in both themes.
+- [ ] **K.5** The containers: the `figures` image of Phase 2D pinned by digest, and the pixi environments, with the one command that reruns a module into the kit's folder; the kit's README gives it.
+
+### Phase 2L — Glossary and term tooltips (draft v3.12, 2026-09-30)
+
+Rytis's draft v3.12 adds a glossary of 179 terms (`TEMP/glossary.yaml`, 8 marked `confirm`) and hover tooltips on jargon in every page. Page text stays in `content/*.toml` (D-045); the glossary is his YAML, read with PyYAML, pinned in `pixi.toml` before its first import.
+- [ ] **L.1** `src/ctx/report/glossary.yaml` from `TEMP/glossary.yaml`; `ctx.report.glossary` loads it; a lint (`pixi run lint-glossary` and a test): schema, unique ids and aliases, short at most 20 words and long at most 60, the prose rules on definitions, `see_also` targets exist, no `confirm` at a release tag.
+- [ ] **L.2** `[[term]]`, `[[term|display]]` and `[[term!]]` in content text; the `explain_terms` filter renders the first mention per section with the info icon (Okabe-Ito blue, 0.7 em, top right, a 24 px hit area); an unknown term fails the lint; terms left unmarked are listed as warnings.
+- [ ] **L.3** `tooltip.js`: hover, focus and tap open, Escape and an outside click close, one open at a time, `role="tooltip"` with `aria-describedby`, flipped to stay in the viewport; only the terms a page uses are embedded, so pages stay self-contained. Tested under node and in the browser with keyboard and touch.
+- [ ] **L.4** The glossary page, generated: by category, anchored by id, aliases, RNA-versus-DNA and typical values with their sources, a search box, the theme toggle; linked from every tooltip, the hub and the course home page.
+- [ ] **L.5** The 8 `confirm` entries resolved with sources, or listed as open.
 
 ### Phase 2Q — Read fates, pathway heatmaps, linked brushing (approved 2026-09-29)
 
@@ -599,6 +618,7 @@ Built after P2C.3, so the registered Step-1 analysis stays as registered; the fr
 - [ ] M2a on the laptop subset: FastQC + fastp + seqkit into MultiQC with the generated config; QC atlas and status table; planted problems (adapter-heavy, quality-degraded, sex-label swap)
 - [ ] M2b QC checkpoint: registry filled for every metric used; QC atlas; status table; on the laptop subset, and on the Step-1 cohort's sample-level checks after the P2C.3 record, because the hub is frozen until then and an exclusion would change the registered analysis; P2Q.5 shows Step-1 read fates and flags before the record and excludes nothing
 - [ ] M3 on the Track A subset: HISAT2 chr22 on Apple silicon, STAR chr22 on Linux; featureCounts; strandedness (Phase 2M M3.9)
+- [x] M1 and M2a on the Track A subset: `ctx gather` on the 8 runs exits 0 in 5.51 s at 472 MB; `ctx qc --reads` in 135.4 s at 1.61 GB, within Track A's budget, once tick labels that collided on a short axis were thinned (2026-09-30).
 - [ ] M3 full-reference comparison: cluster full-genome STAR on the same trimmed reads (Phase 2M M3.11)
 - [ ] M4 Salmon + pytximport; cross-method Venn; per-sample comparison against the cohort counts of the same samples
 
@@ -1894,14 +1914,14 @@ Exit gate:
     - `tests/test_sanity_record.py`: 11 `decide()` and schema tests pass. The four record tests (`test_rule_predates_record`, `test_rule_unchanged` over `FROZEN`, `test_decision_follows_rule`, `test_record_complete`) skip until P2C.3 writes the record.
   - Not done: the `ndn` PCA keeps each individual's first run, and G-CSF runs come first for the paired donors, so it shows steady state from 6 individuals. No rule reads it; its caption states one sample per individual.
 
-- [ ] **P2C.2 Real counts through gather (after step 7).**
+- [x] **P2C.2 Real counts through gather (after step 7).** Done 2026-09-30 (D-046): exit 0 in 5.47 s at 929 MB; the rnaseq copy's 634 files unchanged; 210 of 210 samples joined; 78,470 genes, Int32, none missing; `[expect]` met.
   - Command: `ctx --root ~/ctx_tier1 gather --dataset tier1 --fetchngs-dir … --dataset-file … --rnaseq-dir ~/ctx_tier1/data/raw/tier1_rnaseq`, under `/usr/bin/time -l`.
   - Proven by:
     - release, 210 = 210, Int range, `[expect]`, join 210/210 and 0 unmapped values;
     - SHA-256 lists of the rnaseq dir equal before and after;
     - under 10 min and 4 GB.
 
-- [ ] **P2C.3 M5, M6 and hub on Step-1; the verdicts.**
+- [x] **P2C.3 M5, M6 and hub on Step-1; the verdicts.** Done 2026-09-30 (D-046): 7 of 8 rules pass, R4 fails on its monocyte condition (NES 3.31 against 3.18); the record is committed with its SHA-256; every page under 15 MB. The eye check at real size in the browser follows with the preview.
   - `ctx de`, `ctx function` and `ctx report` run on the laptop profile.
   - The verdicts go to `deliverables/YYYY-MM-DD_de_tier1_sanity_v1.csv`, and the metrics they were decided on, the union of the M5 and M6 metrics tables, to `…_de_tier1_metrics_v1.csv`, both written by `scripts/python/record_sanity.py` with READMEs and their SHA-256 recorded here (minor 17; D-026). Run the freeze test first: it skips from the moment the record exists. A failing rule is reported, never retuned.
   - Eye check at real size. Offline in the browser pane, light and dark, with one origin.

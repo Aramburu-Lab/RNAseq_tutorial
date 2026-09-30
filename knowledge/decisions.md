@@ -27,6 +27,39 @@ it were reversed.
 
 ---
 
+## D-046 — The Step-1 record: 7 of 8 registered rules pass; R4 fails on its monocyte condition
+
+**Date:** 2026-09-30 · **Status:** decided (the record, as registered)
+
+**Context.** The counts of nf-core/rnaseq job 47485533 reached the Mac after the last registration (3620021). Nine writers were editing the page code in the main tree at the time, so the record ran from a clean checkout of 891ab62, whose frozen files are identical to the registration's; the checkout's branch, `step1-record`, carries the record.
+
+**Decision.** The verdicts stand as the hub decided them:
+
+| Rule | Measured | Verdict |
+|---|---|---|
+| R1 | PERMANOVA R² of cell type 0.684; condition 0.089; batch 0.026 | PASS |
+| R2 | p < 0.05: 6,370 against 2 × 488.8 (ndn_gcsf); 3,426 against 2 × 988.8 (ndn_hsct_early) | PASS |
+| R3 | 6 genes at padj < 0.05 in the null split, against 1 % of tested, 140 | PASS |
+| R4 | NDN: NES 3.18, FDR 0. Monocytes: NES 3.31, not below NDN's | FAIL |
+| R5 | NES −2.44, FDR 0 | PASS |
+| R6 | PERMANOVA p for batch 0.002 | PASS |
+| R7 | 6,290 genes paired against 4,570 unpaired | PASS |
+| R8 | 0 samples disagree with their recorded sex | PASS |
+| PDAC | NES 2.48 adjusted, 2.26 within the long batch | RECORDED |
+
+R4's first two conditions hold: HSCT neutrophils carry the interferon-alpha signature. Its third, monocytes less so, does not: in these bulk data the monocyte NES is 3.31 against the neutrophils' 3.18. The rule compared NES across two contrasts of different size (8 against 4 monocytes, 13 against 5 neutrophils), and NES is not calibrated across such contrasts; that is a limit of the rule as registered, stated here, not a reason to change it. The course teaches the failure beside the paper's claim.
+
+**Evidence.**
+- Gather with counts (P2C.2): exit 0, 5.47 s, 929,497,088 bytes peak RSS; the 634 files of the rnaseq copy hash the same before and after; 210 samples in the sheet and the counts, every one joined; 78,470 genes as Int32 from 0 to 20,313,260, none missing; `[expect]` met; nf-core/rnaseq 3.27.0, commit a1fcddd.
+- `ctx de` 131.2 s at 1,551,384,576 bytes; `ctx function` 16.3 s at 836,239,360 bytes; `ctx report` 0.63 s at 121,356,288 bytes. Pages: M1 4,963,184 bytes, M5 12,773,948, M6 5,365,560, hub 67,666, all under 15 MB.
+- `ctx function` first refused the ndn_hsct_early running-score figure: a 96-character caption line ended 0.07 in past a double page, because `style.caption_chars` budgeted the full width while `place_caption` draws at a 0.02 inset. The fix (d3d4f39) budgets the width inside the inset; layout only, and `style.py` is not frozen.
+- The record, written by `scripts/python/record_sanity.py` and committed as ac4a0b5: `2026-09-30_de_tier1_sanity_v1.csv`, 15 rows, SHA-256 `ebb82fd7aa98aca35581cf77304b7a90ea026a24945bd024d423916c4a59812e`; `2026-09-30_de_tier1_metrics_v1.csv`, 92 rows, SHA-256 `641121260c9a0663a77d7228743800a5a248b2173f8749b99045c538d9a90453`.
+- `tests/test_sanity_record.py` and `tests/test_record_sanity.py` on the branch: 22 passed; the freeze test skips once a record exists, by design, and `test_rule_unchanged` holds the freeze from there.
+
+**Consequence.** The frozen paths are free: P2S.4 and P2P.3 can move M5, M6 and the hub to content files and the prose rules, and `annotate.py`'s legend layout can be fixed. The hub counts 11 modules (D-044).
+
+---
+
 ## D-045 — Report prose: nine fixed labels, word budgets and a lint (draft v3.11)
 
 **Date:** 2026-09-30 · **Status:** decided (Rytis)
