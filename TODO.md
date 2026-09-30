@@ -2205,6 +2205,7 @@ tail -n 30 "$P"/slurm-nf_rnaseq_tier1-*.out                            # PASTE
 
 # ---- 6. When the rnaseq job ends ----
 S="$P/nfcore_rnaseq/results/salmon"
+test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && echo "matrix present: step 7 may run" || echo "NO MATRIX: the run has not finished; do not run step 7"   # PASTE
 tail -n 40 "$P"/slurm-nf_rnaseq_tier1-*.out                            # PASTE
 head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}'   # PASTE, expect 210
 awk 'END{print NR - 1, "genes"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"                        # PASTE
@@ -2269,7 +2270,7 @@ printf '%s\n' ERR7425381 ERR7425382 ERR7425405 ERR7425406 ERR7425288 ERR7425289 
 PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$Q" "$Q/ids.txt" rnaseq     # PASTE, expect 8 accessions and "publish mode : link"
 PUBLISH_DIR_MODE=link sbatch /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$Q" "$Q/ids.txt" rnaseq
 
-# ---- 2. After the fetchngs job ----
+# ---- 2. After the fetchngs job has ended (squeue shows no nf_fetchngs job for $Q) ----
 R="$Q/nfcore_fetchngs/results"
 tail -n 12 "$Q"/slurm-nf_fetchngs-*.out                               # PASTE
 ls "$R" "$R/fastq"                                                    # PASTE, expect the launcher's accession list and 8 FASTQs
@@ -2290,12 +2291,18 @@ cat > "$Q/subsample.sbatch" <<'EOF'
 #SBATCH -t 0-04:00:00
 #SBATCH -o slurm-%x-%j.out
 set -euo pipefail
+shopt -s nullglob
 R="$Q/nfcore_fetchngs/results"; O="$Q/outdir"
 cd "$Q"
+# Refuse early rather than write a hollow outdir: on 2026-09-30 this job ran while fetchngs was
+# still downloading, and seqtk was handed the literal pattern *.fastq.gz.
+fq=("$R"/fastq/*.fastq.gz)
+[ ${#fq[@]} -eq 8 ] || { echo "expected 8 FASTQs in $R/fastq, found ${#fq[@]}: has the fetchngs job ended?"; exit 1; }
+[ ! -e "$O" ] || { echo "$O exists: move it aside first"; exit 1; }
 ls -l /usr/bin/time
 rsync -a --exclude fastq/ "$R/" "$O/"
 mkdir -p "$O/fastq/md5"
-for f in "$R"/fastq/*.fastq.gz; do
+for f in "${fq[@]}"; do
     n=$(basename "$f")
     /usr/bin/time -v -o "logs/seqtk_${n%.fastq.gz}.time" apptainer exec -B /proj/nobackup/hpc2n2024-150 "$Q/containers/seqtk_1.4.sif" seqtk sample -s42 "$f" 1000000 | gzip -n > "$O/fastq/$n"
     (cd "$O/fastq" && md5sum "$n" > "md5/$n.md5")

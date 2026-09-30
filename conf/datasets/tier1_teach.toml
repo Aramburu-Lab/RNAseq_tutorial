@@ -102,7 +102,7 @@ values = { M = "M", F = "F", na = "" }
 time_point = ["", "fu1", "fu2", "fu3"]
 
 [derived.batch]
-bins = { short = [75, 76], long = [101] }
+bins = { "Reads ≤ 76 nt (min 35 nt)" = [75, 76], "Reads > 76 nt (max 500 nt)" = [101] }
 
 # Measured 2026-09-30 from the tier1 sheet of 2026-09-29, restricted to the 8 runs of the
 # P3.0 block: 4 donors, each with one NDN and one monocyte run; healthy and G-CSF at 76 nt,

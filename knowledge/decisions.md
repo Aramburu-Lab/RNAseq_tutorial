@@ -27,6 +27,41 @@ it were reversed.
 
 ---
 
+## D-043 — The read-length batch is named by its read lengths; registered again
+
+**Date:** 2026-09-30 · **Status:** decided (Rytis)
+
+**Context.** Step-1's batch, from read length, was named `short` (75 and 76 nt) and `long` (101 nt). Rytis: "long" reads as long-read sequencing, whose reads run to thousands of nt. He asked for "Reads ≤ 75 nt (min 35 nt)" and "Reads > 75 nt (max 500 nt)". `conf/datasets/tier1.toml` is frozen, so any rename registers again, and only while no Step-1 count is on the Mac.
+
+**Options.**
+- **The boundary at 75 nt, as first written.** Step-1 has 13 runs at 75 nt, 98 at 76 nt and 99 at 101 nt, all on one Illumina NovaSeq 6000, so read length is the only batch signal. The registered selection code on the gathered sheet gives, per contrast (reference/tested):
+
+  | Contrast | Registered | Lower group | Upper group |
+  |---|---|---|---|
+  | ndn_gcsf | 13/13 | 1/1 | 16/16 |
+  | mono_gcsf | 8/8 | 1/1 | 9/10 |
+  | ndn_hsct_early | 13/5 | 1/1 | 16/6 |
+  | mono_hsct_early | 8/4 | 1/1 | 9/5 |
+  | ndn_gcsf_paired | 9/9 | 1/1 | 10/10 |
+  | ndn_gcsf_unpaired9 | 9/9 | 1/1 | 8/8 |
+  | ndn_pdac_within | 4/14 | none | 16/14 |
+  | ndn_null_split | 7/6 | 1 sample | 8/8 |
+
+  Every within-batch fit would mix 76 and 101 nt, the PDAC batch lesson and rule R6 would lose their meaning, and every contrast would need a new registered n.
+- **The boundary at 76 nt,** Rytis's names with 76 in place of 75: the registered split, renamed.
+
+**Decision.** Rytis chose 76 nt once the table was in front of him. The levels are "Reads ≤ 76 nt (min 35 nt)" (75 and 76 nt) and "Reads > 76 nt (max 500 nt)" (101 nt); min and max are words in the name, not enforced limits, so `dataset.py` and `curation.py` are unchanged. `tier1.toml` changes its bins, the 8 contrast filters that name a level, the sources of R6 and the recorded PDAC rule, and `registered`; `tier1_teach.toml` takes the same bins (`test_subsets_curate_as_their_parent`). The synthetic test data keep `short` and `long`: no student reads them. The preview renames them when it is built.
+
+**Evidence.**
+- Gathered again with the renamed file: 111 runs in the lower group and 99 in the upper, as before.
+- All 10 contrasts select the same samples in the same groups as the committed file did on the 2026-09-29 sheet, compared sample by sample.
+- pydeseq2 accepts the names in a `~batch + group` design: `ctx de` on the synthetic data with its batch renamed exited 0 in 38.1 s and wrote the adjusted contrast's results.
+- **What was on the Mac at registration:** no count matrix. A copy taken while nf-core/rnaseq job 47485533 was still quantifying brought the 210 Trim Galore reports and, for 208 samples, Salmon's `lib_format_counts.json` and `meta_info.json` (library type and mapping summaries; all 208 report the library type `U`). No sanity rule reads any of them.
+
+**Consequence.** Pages, tables and legends say the read lengths instead of short and long. Anything written before this commit that filters on `short` or `long` would find no samples; `ctx de` stops on the registered n, so it cannot pass silently.
+
+---
+
 ## D-042 — The Track A subset is its own dataset file, a declared subset of tier1, curated by tier1's rules
 
 **Date:** 2026-09-30 · **Status:** decided

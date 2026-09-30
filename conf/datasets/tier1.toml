@@ -105,7 +105,7 @@ values = { M = "M", F = "F", na = "" }
 time_point = ["", "fu1", "fu2", "fu3"]
 
 [derived.batch]
-bins = { short = [75, 76], long = [101] }
+bins = { "Reads ≤ 76 nt (min 35 nt)" = [75, 76], "Reads > 76 nt (max 500 nt)" = [101] }
 
 [expect]
 runs = 210
@@ -136,7 +136,7 @@ variable = "condition"
 reference = "steady_state"
 tested = "gcsf"
 n = [13, 13]
-filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"] }
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min 35 nt)"] }
 
 [[contrasts]]
 name = "mono_gcsf"
@@ -144,7 +144,7 @@ variable = "condition"
 reference = "steady_state"
 tested = "gcsf"
 n = [8, 8]
-filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["short"] }
+filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["Reads ≤ 76 nt (min 35 nt)"] }
 
 [[contrasts]]
 name = "ndn_hsct_early"
@@ -152,7 +152,7 @@ variable = "condition"
 reference = "steady_state"
 tested = "hsct"
 n = [13, 5]
-filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"], time_point = ["", "fu1", "fu2"] }
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min 35 nt)"], time_point = ["", "fu1", "fu2"] }
 
 [[contrasts]]
 name = "mono_hsct_early"
@@ -160,7 +160,7 @@ variable = "condition"
 reference = "steady_state"
 tested = "hsct"
 n = [8, 4]
-filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["short"], time_point = ["", "fu1", "fu2"] }
+filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["Reads ≤ 76 nt (min 35 nt)"], time_point = ["", "fu1", "fu2"] }
 
 [[contrasts]]
 name = "ndn_gcsf_paired"
@@ -170,7 +170,7 @@ tested = "gcsf"
 n = [9, 9]
 design = "~donor + group"
 paired = true
-filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"] }
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min 35 nt)"] }
 
 [[contrasts]]
 name = "ndn_gcsf_unpaired9"
@@ -178,7 +178,7 @@ variable = "condition"
 reference = "steady_state"
 tested = "gcsf"
 n = [9, 9]
-filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"], donor = ["UPN1", "UPN2", "UPN3", "UPN4", "UPN5", "UPN6", "UPN7", "UPN9", "UPN11"] }
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min 35 nt)"], donor = ["UPN1", "UPN2", "UPN3", "UPN4", "UPN5", "UPN6", "UPN7", "UPN9", "UPN11"] }
 
 [[contrasts]]
 name = "ndn_pdac_naive"
@@ -203,7 +203,7 @@ variable = "condition"
 reference = "steady_state"
 tested = "pdac"
 n = [4, 14]
-filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["long"] }
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads > 76 nt (max 500 nt)"] }
 
 [[contrasts]]
 name = "ndn_null_split"
@@ -211,7 +211,7 @@ variable = "condition"
 reference = "steady_state"
 tested = "steady_state"
 n = [7, 6]
-filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["short"], condition = ["steady_state"] }
+filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min 35 nt)"], condition = ["steady_state"] }
 split = { seed = 42, strata = "sex" }
 
 [de]
@@ -263,9 +263,10 @@ running = ["ndn_hsct_early", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
 # the M5 page's caveat on what BH promises (D-018), for the switch that turns LFC
 # shrinkage off (D-019), for rule sources that name their target (D-020), for the
 # Trim Galore reports and the GTF that `ctx qc` reads (D-022), and for those reports as JSON,
-# the only form MultiQC 1.35 reads from Trim Galore 2.x (D-025).
+# the only form MultiQC 1.35 reads from Trim Galore 2.x (D-025), and for batch names that
+# say the read lengths, since "long" reads as long-read sequencing (D-043).
 # The time makes each registration a change to this line, which is how it is found.
-registered = "2026-09-30 00:04"
+registered = "2026-09-30 10:44"
 
 [[sanity.rules]]
 id = "R1"
@@ -315,7 +316,7 @@ conditions = [
 [[sanity.rules]]
 id = "R6"
 text = "The read-length batch is visible in healthy neutrophils alone."
-source = "D5; steady-state NDN, one sample per individual, 4 long against 13 short"
+source = "D5; steady-state NDN, one sample per individual, 4 over 76 nt against 13 at 76 nt or less"
 conditions = [{ metric = "permanova.ss_ndn.batch.p", op = "<", value = 0.05 }]
 
 [[sanity.rules]]
@@ -335,7 +336,7 @@ conditions = [{ metric = "sex.disagree", op = "<=", value = 0 }]
 [[sanity.rules]]
 id = "PDAC"
 text = "Recorded, not gating: interferon-alpha genes up in PDAC neutrophils."
-source = "PMC7615267 Fig. 4d; the long-batch reference is n = 4"
+source = "PMC7615267 Fig. 4d; the reference over 76 nt is n = 4"
 gate = false
 conditions = [
     { metric = "gsea.ndn_pdac_adjusted.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
