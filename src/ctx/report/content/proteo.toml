@@ -1,0 +1,164 @@
+# The M7 RNA versus protein page (ctx proteo). Until the module is built,
+# scripts/python/preview_proteo.py draws it on made-up data from this file.
+# Placeholders in {braces} are filled by the code; keep their names.
+
+title = "M7 RNA versus protein: {dataset}"
+budget = "Preview build on made-up data. The module's budget is Track {track}: under {minutes} min and {ram_gb} GB."
+profile = "Preview build, one Python process"
+purpose = "Measure how far protein abundance follows RNA across samples and in one contrast, and name the genes whose protein changes differ from their RNA."
+input = "The gather sample sheet, and RNA for the same samples: counts, or M5 results for the contrast. A protein table: CPTAC TMT log2 ratios from `cptac` or the PDC API, joined on case ID and gene symbol."
+method = """Mass spectrometry measures peptides, assembled into protein groups. TMT tags let one run measure several samples, each as a log2 ratio to a pooled reference channel. A protein not identified in a plex is missing, not zero.
+
+Proteins quantified in too few samples are dropped. Per gene, Spearman ρ between RNA and protein across samples tests whether protein tracks RNA, with BH over genes.
+
+Per contrast, M5's RNA fold changes and Welch t-test protein fold changes are compared across genes by Spearman ρ, with a bootstrap interval."""
+interpretation = """Most genes have a positive but partial per-gene ρ: RNA explains part of protein variation, not all of it. Read a low ρ against the gene's class. Complex subunits made in excess are degraded unless assembled, and secreted proteins leave the cell before lysis.
+
+Fold changes agree in sign more often than in size, because TMT ratio compression shrinks protein changes. Treat an RNA-only change as untested at protein level when the protein is missing in many samples. Treat a protein-only change as a lead for translational control or protein stability, to check with Ribo-seq or turnover data."""
+# "Term: rest" in a pitfall prints Term in bold.
+pitfalls = [
+    "Imputing zeros: a missing protein is unmeasured, not absent; a zero shifts its mean, fold change and ρ.",
+    "Matching on gene symbol alone: shared peptides and isoforms map one protein group to several genes.",
+    "Ignoring the plex design: a group measured in one plex alone cannot be told apart from that plex.",
+]
+
+[[terms]]
+term = "Protein group"
+meaning = "Proteins that share their identified peptides and cannot be told apart; one row in the table."
+
+[[terms]]
+term = "TMT plex"
+meaning = "Samples labelled with isobaric tags and measured in one run; ratios compare channels within it."
+
+[[terms]]
+term = "Ratio compression"
+meaning = "Co-isolated peptides pull TMT reporter ratios toward zero, so protein fold changes look smaller than they are."
+
+[[terms]]
+term = "Per-gene ρ"
+meaning = "Spearman correlation of one gene's RNA and protein across samples."
+
+[[questions]]
+prompt = "A complex subunit rises at RNA with no protein change. Name two explanations before calling it noise."
+answer = "Excess subunits are degraded unless assembled, so protein follows the limiting subunit. Or the protein was quantified in too few samples to test."
+
+[[questions]]
+prompt = "Why is a protein missing from one TMT plex not a zero in those samples?"
+answer = "No peptide of it was identified in that run; it may be present below detection. A zero would claim absence and pull its mean and fold change down."
+
+[[questions]]
+prompt = "RNA and protein fold changes agree in sign, but protein changes are smaller. What explains it?"
+answer = "TMT ratio compression: co-isolated peptides pull reporter ratios toward zero. Compare signs and ranks across layers, not sizes, unless the ratios were acquired with MS3 or corrected."
+
+# The options ctx proteo will take (TODO.md, M7); the defaults are in the preview script.
+[planned."--method"]
+meaning = "Correlation of RNA with protein across samples: spearman or pearson."
+effect = "Pearson weighs extreme samples; Spearman uses ranks and resists outliers."
+
+[planned."--min-quantified"]
+meaning = "Share of samples in which a protein needs a value."
+effect = "Higher tests fewer proteins, each measured in more samples."
+
+[planned."--lfc-min"]
+meaning = "Absolute log2 fold change a gene needs to count as changed."
+effect = "Higher calls fewer changes; compressed protein ratios drop out first."
+
+[planned."--gene-class"]
+meaning = "Genes shown: complex subunits, enzymes, secreted proteins, or all."
+effect = "A single class shows whether its proteins escape RNA control."
+
+[planned."--evidence"]
+meaning = "Protein evidence a gene needs: validated by MS, or predicted too."
+effect = "Predicted adds genes never detected as protein; their absence means little."
+
+# Gene classes, in the order the figures draw them.
+[classes]
+complex = "Complex subunit"
+enzyme = "Enzyme"
+secreted = "Secreted"
+other = "Other"
+count = "{name} {n:,}"
+
+[figures.quantified]
+title = "Protein groups quantified per sample"
+lead = "{n_kept:,} of {n_ids:,} protein groups have a value in at least {min_pct} % of samples; the rest are not tested."
+reading = [
+    "Each bar is one sample; its height counts the protein groups with a value in it.",
+    "Colour marks the TMT plex the sample was measured in.",
+    "Bars within a plex are close: a protein missed in a plex is missing from all its samples.",
+]
+caption = "Made-up data. {n_samples} samples in {n_plex} TMT plexes, each with a pooled reference channel; {n_ids:,} protein groups identified, {n_all:,} quantified in every sample. Counts, no test."
+category = "Sample, by plex"
+value = "Protein groups quantified"
+plex = "Plex {n}"
+
+[figures.rho]
+title = "Per-gene RNA-protein correlation, by gene class"
+lead = "Median ρ is {median:.2f}; {n_sig:,} of {n_genes:,} genes have ρ above zero at BH-adjusted p < {alpha}."
+reading = [
+    "Each curve is one gene class: the share of its genes with ρ at or below each value.",
+    "A curve crosses the dashed line at its class's median ρ; further right, protein follows RNA more.",
+    "ρ is Spearman's, between one gene's RNA and protein across {n_samples} samples.",
+]
+caption = "Made-up data. Spearman ρ per gene over {n_samples} samples, BH over {n_genes:,} genes; genes per class: {counts}. Kruskal-Wallis across classes: H = {h:.1f}, p = {p}, ε² = {eps:.2f}."
+x = "RNA-protein correlation"
+y = "Cumulative share of genes"
+median = "median"
+
+[figures.fold]
+title = "RNA against protein fold change: {tested} vs {reference}"
+lead = "Spearman ρ = {rho:.2f} across {n_genes:,} genes; {n_same:,} have the same sign at both levels."
+reading = [
+    "Each dot is one gene measured at both levels.",
+    "Colour: changed at RNA, at protein, at both, or neither: BH-adjusted p < {alpha} and |log2 FC| ≥ {lfc}.",
+    "Dashed lines split the quadrants; the solid diagonal is equal change.",
+]
+caption = "Made-up data. Welch t-test per gene and level, BH; n = {n_ref} {reference}, {n_tested} {tested}. Spearman ρ = {rho:.2f}, bootstrap {ci} % CI {lo:.2f} to {hi:.2f}; quadrants: {up_up} up-up, {down_down} down-down, {up_down} up-down, {down_up} down-up."
+x = "RNA fold change"
+y = "Protein fold change"
+both = "both"
+rna = "RNA only"
+protein = "protein only"
+neither = "neither"
+identity = "equal change"
+zero = "no change"
+
+[figures.paired]
+title = "Paired RNA and protein, sample by sample"
+lead = "Compare each RNA row with the protein row under it: the top {n_both} genes changed at both levels, the next {n_rna} at RNA only."
+reading = [
+    "Each cell is one sample's z-score for one gene and layer; rows pair RNA with protein.",
+    "Blue is below the row's mean, vermillion above; an empty cell is a missing protein value.",
+    "Right: the gene's Spearman ρ between RNA and protein over all {n_samples} samples.",
+]
+caption = "Made-up data. z-scores of log2 CPM and log2 TMT ratio per gene and layer over {n_shown} samples: {n_ref} {reference}, {n_tested} {tested}. Right: per-gene Spearman ρ over {n_samples} samples; no further test."
+row = "Gene and layer"
+column = "Sample"
+rna_row = "{gene} RNA"
+protein_row = "{gene} protein"
+track = "Condition"
+rho = "Spearman ρ"
+
+# Unit and meaning of every column the preview writes, for the README beside each file.
+[columns]
+sample = ["none", "Sample, from the gather sample sheet."]
+cell_type = ["none", "Cell type, from the gather sample sheet."]
+condition = ["none", "Condition, from the gather sample sheet."]
+plex = ["none", "Made-up TMT plex the sample was measured in."]
+n_quantified = ["protein groups", "Made-up protein groups with a value in this sample."]
+gene = ["none", "Made-up gene identifier."]
+gene_class = ["none", "Made-up gene class."]
+quantified_share = ["fraction", "Share of samples with a protein value."]
+rho = ["Spearman ρ", "Spearman correlation of RNA and protein across samples."]
+rho_p = ["dimensionless", "Two-sided p of the Spearman correlation."]
+rho_padj = ["dimensionless", "Benjamini-Hochberg adjusted rho_p over the genes tested."]
+share = ["fraction", "Share of the class's genes with rho at or below this gene's."]
+rna_lfc = ["log2 fold change", "Mean log2 CPM, tested minus reference."]
+rna_padj = ["dimensionless", "Welch t-test p on log2 CPM, Benjamini-Hochberg adjusted."]
+protein_lfc = ["log2 fold change", "Mean log2 TMT ratio, tested minus reference."]
+protein_padj = ["dimensionless", "Welch t-test p on log2 TMT ratio, Benjamini-Hochberg adjusted."]
+call = ["none", "Changed at RNA, protein, both or neither."]
+keep = ["none", "Changed at some level; always drawn on the page."]
+row = ["none", "Gene and layer: RNA or protein."]
+z = ["SD", "Value centred and scaled per gene and layer over the samples shown."]
+level = ["none", "The z step the cell is drawn in."]

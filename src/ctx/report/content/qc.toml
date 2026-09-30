@@ -2,39 +2,56 @@
 
 title = "M2 Quality control: {dataset}"
 budget = "Track A: under {minutes} min and {ram_gb} GB"
-purpose = "Which samples should you look at twice before trusting a comparison, and would setting them aside change the comparison itself?"
-input = "The sample sheet and counts from `ctx gather`, the QC registry `conf/qc_metrics.toml`, and, when given, the nf-core/rnaseq reports (`--rnaseq-dir`) and the FASTQ files (`--reads`)."
-method = "Quality control asks one question per metric: is this sample unlike the others it should resemble? Few RNA-seq metrics have a universal cut-off, so each sample is judged against its own stratum: a band of the median plus or minus three scaled MADs, on the side that is bad. A flag is a question, never a verdict. Before you set a flagged sample aside, test whether the metric differs between the groups you compare: if it does, excluding samples on it would bias the comparison."
-interpretation = "Read the flagged runs first, then the confounding table. A metric that differs by condition cannot be used to exclude samples in that comparison, and a flag that tracks the read-length batch says more about the batch than about the sample."
+purpose = "Flag samples and runs unlike their stratum on each QC metric, and test whether a metric or flag differs between a contrast's groups."
+input = "{samples} samples in {runs} runs from the `ctx gather` sample sheet, its counts where gather wrote them, and the registry `{registry}`. With `--rnaseq-dir`, the nf-core/rnaseq reports; with `--reads`, the FASTQ files."
+method = "No universal cut-off exists for most metrics, so a sample is flagged beyond its stratum's median ± {k} scaled MADs, on the bad side. Where the registry cites a cut-off, the value also gets an absolute band: good, usable or bad. Mann-Whitney U tests each metric, and Fisher's exact test each flag, between the groups of every unpaired contrast, with BH adjustment."
+interpretation = "{flagged} of {runs} runs are flagged, {excluded} of them excluded by a registry action; {confounded} of {tests} confounding tests have a BH-adjusted p below {alpha}. Do not set a sample aside on a metric that differs between the groups of a contrast: that removes part of the difference under test. A flag that tracks read length describes the batch, not the sample."
+# "Term: rest" in a pitfall prints Term in bold.
 pitfalls = [
-    "Excluding on a flag alone: a flag says the sample differs from its stratum, not that it is wrong. Neutrophils detect fewer genes than monocytes by biology.",
-    "Using a cut-off from another dataset: depth, cell type and library protocol all move these numbers; the stratum is the fairer yardstick.",
-    "Ignoring confounding: if flagged samples sit mostly in one condition, removing them changes the comparison you set out to make.",
+    "Excluding on a flag alone: a flag marks a difference from the stratum, not an error.",
+    "Borrowing a cut-off from another dataset: depth, cell type and library protocol each change these metrics.",
+    "Reading no flag as a pass: under {minimum} samples, a stratum gets no MAD band.",
 ]
 
 [[terms]]
 term = "Stratum"
-meaning = "The samples sharing the columns given to --strata, such as a cell type. A band is computed within it."
+meaning = "The samples sharing their values of the --strata columns, such as a cell type. Each MAD band is computed within one."
 
 [[terms]]
 term = "MAD"
-meaning = "Median absolute deviation, times 1.4826 so it matches the standard deviation of normal data. Robust: one outlier barely moves it."
+meaning = "Median absolute deviation, scaled to equal the standard deviation of normal data. One outlier barely changes it."
 
 [[terms]]
 term = "Peer group"
-meaning = "The samples sharing the columns given to --peers, such as cell type and condition. Agreement and PCA distance are measured against it."
+meaning = "The samples sharing their values of the --peers columns, such as cell type and condition. Agreement and PCA distance are measured within it."
 
 [[terms]]
 term = "Confounding"
-meaning = "A metric that differs between the groups of a comparison, so it cannot be told apart from the comparison itself."
+meaning = "A metric that differs between the groups of a contrast, so its effect cannot be separated from the contrast's."
+
+[[terms]]
+term = "Useful fragment"
+meaning = "A fragment Salmon assigned to a transcript."
+
+[[terms]]
+term = "Too short"
+meaning = "A read left shorter than the length floor after trimming. Trim Galore trims poor bases and drops no read for quality alone, so a poor read is counted as too short."
+
+[[terms]]
+term = "Decoy"
+meaning = "A fragment whose best match is the genome outside the transcripts. Salmon sets it aside; it is not contamination."
+
+[[terms]]
+term = "Highest-density region"
+meaning = "The smallest area holding a given share of a group's samples, on a smoothed histogram."
 
 [[questions]]
-prompt = "A sample has half the median library size of its stratum and is flagged. What would you check before excluding it?"
-answer = "Whether library size differs by condition in the comparisons it takes part in, whether its other metrics agree with its peers, and whether DESeq2's size factors already handle it: a smaller library is noisier, not wrong."
+prompt = "A flagged sample has half its stratum's median library size. What do you check before excluding it?"
+answer = "Whether library size differs between the groups of its contrasts, and whether its other metrics agree with its peers. DESeq2's size factors scale for depth: a smaller library is noisier, not wrong."
 
 [[questions]]
 prompt = "Why is a band computed per stratum and not per condition?"
-answer = "A condition that shifts a metric would then never show as flags. Per stratum, the shift appears as flags gathered in one condition, which the confounding test catches."
+answer = "Per condition, a condition that shifts a metric never shows as flags. Per stratum, the shift shows as flags gathered in one condition, which the confounding tests detect."
 
 # Why a sample is flagged: one of these per metric it fails, joined by "; ".
 [reasons]
@@ -73,7 +90,7 @@ run_accession = "Run accession."
 [keys]
 samples = "Samples judged"
 flagged = "Runs flagged"
-flagged_detail = "of {runs:,}; none excluded"
+flagged_detail = "of {runs:,}; {excluded:,} excluded"
 metrics = "Metrics judged"
 confounded = "Confounded tests"
 confounded_detail = "BH-adjusted p below {alpha}"
@@ -141,7 +158,7 @@ columns.agrees = "Whether they agree; empty with no recorded sex."
 # Read fates: every read of a sample, from Trim Galore's reports and then Salmon's.
 [figures.fates]
 title = "Read fates: raw against useful fragments"
-lead = "The useful fraction's median is {median:.2f}; a sample below the lower dashed line kept fewer reads than its peers."
+lead = "The useful fraction's median is {median:.2f}; a sample under the lower dashed line kept a smaller share than the rest."
 x = "Raw"
 y = "Useful"
 identity = "y = x: every read useful"
@@ -150,11 +167,11 @@ size = "MT + rRNA"
 all = "all samples"
 area = "Bubble area: the MT + rRNA share of counted reads."
 no_area = "Every bubble the same size: the counts had no gene types, so no MT or rRNA share."
-caption = "{area} Useful: fragments Salmon assigned to a transcript; the useful fraction's median is {median:.2f}. Dashed: its median ± {k} scaled MAD over the {n} samples. Hover names every fate. Trim Galore trims low-quality bases and never counts low-quality reads, so a read cut below the length floor counts as too short. Salmon's decoys are fragments whose best match is the genome outside the transcripts, not contamination. No test."
+caption = "{area} Useful: fragments Salmon assigned to a transcript. Dashed: the useful fraction's median ± {k} scaled MAD over {n} samples; no test."
 colour = "The sheet's {column} column, which colours the bubbles."
 reading = [
-    "Each bubble is one sample: across, the fragments it was sequenced with; up, the ones Salmon assigned to a transcript.",
-    "The solid line is every fragment useful; the dashed pair bounds the typical useful fraction.",
+    "Each bubble is one sample: across, the fragments sequenced; up, the fragments Salmon assigned to a transcript.",
+    "Solid line: every fragment useful. Dashed lines: the useful fraction's median ± {k} scaled MAD.",
 ]
 units = { total_reads = "fragments", reads_written = "fragments", reads_too_short = "fragments", reads_too_long = "fragments", reads_too_many_n = "fragments", reads_discarded_untrimmed = "fragments", num_processed = "fragments", num_mapped = "fragments", num_decoy_fragments = "fragments", not_assigned = "fragments", useful_share = "fraction", mt_rrna_share = "fraction", mt_fraction = "fraction", mt_rrna_fraction = "fraction", rrna_fraction = "fraction" }
 columns.sample = "Sample."
@@ -179,7 +196,12 @@ columns.mt_rrna_share = "mt_fraction + mt_rrna_fraction + rrna_fraction."
 title = "Where every read goes"
 lead = "Of {total:,} fragments, {useful:,} ({share:.1%}) were assigned to a transcript."
 stages = ["Sequenced", "Trim Galore", "Salmon"]
-caption = "Every fragment of the {n} samples, summed; a pair counts once, by read 1. Trim Galore's fates, then Salmon's for the fragments it wrote. No test."
+caption = "Every fragment of the {n} samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test."
+reading = [
+    "Each column is a stage; a block's height is the fragments with that fate, summed over the samples.",
+    "A band's width is the fragments passing from one fate to the next.",
+    "Blue: fragments sequenced. Green: fragments kept at a stage. Grey: fragments lost there.",
+]
 nodes.total_reads = "sequenced"
 nodes.reads_written = "written"
 nodes.reads_too_short = "too short"
@@ -220,17 +242,21 @@ columns.not_assigned = "Fragments processed but neither assigned nor decoys."
 
 [figures.quality]
 title = "Base quality along the read"
-lead = "Mean base quality at each position of read 1, for {n} runs."
+lead = "Mean base quality at each position of the first read, for {n} runs."
 x = "Position in read"
 y = "Mean quality"
 good = "good"
 usable = "reasonable"
 bad = "poor"
-caption = "Mean Phred quality at each position of read 1, one line per run, as FastQC measures it; its positions are FastQC's bins. Shaded as FastQC's own plot shades it ({source}). {n} runs; no test."
+caption = "Mean Phred quality at each position of the first read, one line per run, in FastQC's position bins. Shading as in FastQC's own plot ({source}). {n} runs; no test."
 reading = [
     "Each line is one run: across, the position in the read; up, the mean quality of the bases there.",
-    "A line that falls into the lower bands at the end is a run whose last cycles degraded.",
+    "Shading follows FastQC's plot: green good, orange reasonable, red poor.",
+    "A line that drops into the lower bands at the end is a run whose last cycles degraded.",
 ]
+# One of these two follows the reading guide, by how many runs the figure draws.
+styles_distinct = "Each run has its own colour and line pattern, named in the legend; the hover gives its sample."
+styles_shared = "Runs share their group's colour: more than {most} runs cannot each have their own style."
 units = { position = "nt", quality = "Phred" }
 columns.run_accession = "Run accession."
 columns.position = "Position in read 1, FastQC's bin."
@@ -240,12 +266,17 @@ columns.group = "Every run, where no sheet column has few enough levels to colou
 
 [figures.grid]
 title = "Reads fastp keeps, by its quality and length settings"
-lead = "On {run}: how many reads survive each pairing of -q and -l, the other settings fixed."
+lead = "On {run}, fastp keeps between {low:.1f} and {high:.1f} % of the reads across the grid."
 x = "fastp -q"
 y = "fastp -l"
 z = "Reads kept"
 mark = "the setting used (-q {q}, -l {l})"
-caption = "Reads fastp keeps from {run} at each -q and -l on a {nq} by {nl} grid, -u {u} and the other settings as used; eight equal bands; the line marks {isoline:.0f} % kept. No test."
+caption = "Reads fastp keeps from {run} at each -q and -l on a {nq} by {nl} grid, other settings as used (-u {u}). {bands} equal colour bands; the line marks {isoline:.0f} % kept. No test."
+reading = [
+    "Across, fastp -q; up, fastp -l. The colour at each point is the percentage of reads fastp keeps there.",
+    "Dark blue keeps the fewest reads, yellow the most, in {bands} equal bands; the labelled line joins settings keeping {isoline:.0f} %.",
+    "The dot marks the setting used: -q {q}, -l {l}.",
+]
 units = { q = "Phred", l = "nt", passed_reads = "reads", passed_pct = "%" }
 columns.q = "fastp -q: a base below this Phred quality is unqualified."
 columns.l = "fastp -l: a read shorter than this is dropped."
@@ -289,7 +320,13 @@ caption = "One point per sample or run, by stratum; the value is the {computed}.
 
 [figures.band_map]
 title = "Absolute bands, every metric that has one"
-lead = "Green good, orange usable, red bad, by the sources in the registry; grey has no band."
+lead = "{bad} of {cells} values are in the bad band and {usable} in the usable band."
+unit.sample = "sample"
+unit.run_accession = "run"
+reading = [
+    "Each column is one {unit}, each row one metric; a cell is that {unit}'s value on that metric.",
+    "Colour is the absolute band from the metric's registry source: green good, orange usable, red bad; grey, no value.",
+]
 none = "no band"
 metric = "Registry metric."
 band = "The metric's band for the sample or run."
@@ -298,36 +335,55 @@ caption = "The absolute band of each of {n} samples or runs on each of {m} metri
 
 [figures.density]
 title = "Library size against genes detected"
-lead = "Most samples of a group lie inside its solid line; flagged samples are drawn as points."
+lead = "{flagged} of {n} samples are flagged; look for those outside their group's dashed line."
+reading = [
+    "Solid line: the smallest region holding {inner} of a group's samples; dashed: {outer}. A group under {minimum} samples is drawn as points.",
+    "Triangles: flagged samples, drawn over the contours.",
+]
 x = "Library size"
 y = "Genes detected"
 library_size = "Reads counted on genes."
 genes_detected = "Genes with at least one read."
 flagged = "Whether any metric flagged the sample."
 none = "none, every group has fewer"
-caption = "Solid: 50 %, dashed: 90 % highest-density regions, per group of at least {minimum} samples ({n}); smaller groups are drawn as points. {bandwidth}. No test."
+caption = "Solid: {inner}, dashed: {outer} highest-density regions, per group of at least {minimum} samples ({n}); smaller groups are drawn as points. {bandwidth}. No test."
 
 [figures.sex]
 title = "Recorded sex against expression"
-lead = "Above the line a sample expresses the chrY genes more than XIST, and is called male."
+lead = "{disagree} of {n} samples disagree with their recorded sex."
+reading = [
+    "Each point is one sample: across, its XIST expression; up, the mean of its chrY genes.",
+    "Above the line, chrY exceeds XIST and the sample is called male; below it, female.",
+    "Colour: the recorded sex. A named point disagrees with its record.",
+]
 x = "XIST"
 y = "chrY genes"
 unknown = "not recorded"
 recorded = "The recorded sex, or not recorded."
 label = "The sample's name where expression and record disagree."
 boundary = "the call's boundary: chrY equal to XIST"
-caption = "log2 CPM + 1 of XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY and EIF1AY, one point per sample, coloured by the recorded sex; {disagree} of {n} disagree and are named. A transplanted sample is compared with its donor. No test."
+caption = "{xist} against the mean of {genes}, in log2 of CPM plus a pseudocount, for {n} samples. A transplanted sample is compared with its donor. No test."
 
 [figures.linked]
 title = "Samples on the PCA, beside their labels and QC status"
-lead = "Paint samples on the PCA or in the bands below to see where they sit in the other view."
+lead = "Paint samples in one view to find them in the other."
+reading = [
+    "Top: each point is one sample on PC1 and PC2 of the blind VST.",
+    "Bottom: each column is a label or the QC status; a band's width is the samples sharing the levels it joins.",
+    "Points and bands are grey until painted. In the PDF and SVG, bands into QC are green for pass, red for flag, orange for exclude.",
+]
 pc1 = "PC1 score of the blind VST."
 pc2 = "PC2 score of the blind VST."
 qc_status = "The worst QC status among the sample's runs."
 x = "PC1, {share:.0%} of variance"
 y = "PC2, {share:.0%} of variance"
 qc = "QC"
-caption = "PC1 and PC2 of the blind VST of {n} samples, beside their labels; bands into QC are coloured by status. The PDF and SVG draw the bands alone. No test."
+caption = "PC1 and PC2 of the blind VST of {n} samples, beside their labels and QC status. The PDF and SVG draw the bands alone, those into QC coloured by status. No test."
 names = ["orange", "sky blue", "bluish green", "yellow", "blue", "vermillion", "reddish purple"]
 summary = "{n} painted {colour}: {detail}"
 empty = "Nothing painted yet."
+
+# The reading-guide line naming what colours a figure's marks.
+[colour]
+by = "Colour: the sheet's {column} column."
+none = "One colour: no --peers column has {most} or fewer levels."

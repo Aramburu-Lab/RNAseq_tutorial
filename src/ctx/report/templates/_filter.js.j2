@@ -1,0 +1,79 @@
+{% raw %}
+/* The page's bar filter, apart from the page so tests/test_page_script.py runs it under node
+   against ctx.viz.bar.BarData. A row is shown when its value in every filter column equals
+   the level chosen there, "" standing for all; the median is BarData.lengths()'s rule over the
+   rows shown: each category's total when stacked, else each bar. */
+var ctxFilter = {
+  /* Indices of the rows shown, in row order. */
+  match: function (rows, chosen) {
+    var shown = [];
+    rows.forEach(function (r, i) {
+      var keep = Object.keys(chosen).every(function (c) {
+        return chosen[c] === "" || String(r[c]) === chosen[c];
+      });
+      if (keep) shown.push(i);
+    });
+    return shown;
+  },
+  lengths: function (rows, shown, cfg) {
+    if (!cfg.stacked) return shown.map(function (i) { return Number(rows[i][cfg.value]); });
+    var totals = {}, order = [];
+    shown.forEach(function (i) {
+      var k = cfg.labels[i];
+      if (!Object.prototype.hasOwnProperty.call(totals, k)) { totals[k] = 0; order.push(k); }
+      totals[k] += Number(rows[i][cfg.value]);
+    });
+    return order.map(function (k) { return totals[k]; });
+  },
+  median: function (values) {
+    if (!values.length) return null;
+    var s = values.slice().sort(function (a, b) { return a - b; }), mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+  },
+  /* Three significant digits, rounded half up by the arithmetic of ctx.viz.bar.significant,
+     so the page and the Python default print the same digits. */
+  number: function (v) {
+    var decimals = Math.max(0, 2 - (v ? Math.floor(Math.log10(Math.abs(v))) : 0));
+    var scale = Math.pow(10, decimals);
+    return (Math.floor(v * scale + 0.5) / scale).toLocaleString("en-US", {
+      minimumFractionDigits: decimals, maximumFractionDigits: decimals
+    });
+  },
+  /* What the plot draws for a choice: per trace, in trace order, the bars' positions, lengths
+     and hover values; the categories in row order; the median and the number of bars. */
+  view: function (rows, cfg, chosen) {
+    var shown = ctxFilter.match(rows, chosen), categories = [], seen = {};
+    shown.forEach(function (i) {
+      var k = cfg.labels[i];
+      if (!Object.prototype.hasOwnProperty.call(seen, k)) { seen[k] = true; categories.push(k); }
+    });
+    var parts = cfg.traces.map(function (level) {
+      return shown.filter(function (i) { return String(rows[i][cfg.series]) === level; });
+    });
+    var at = parts.map(function (p) { return p.map(function (i) { return cfg.labels[i]; }); });
+    var along = parts.map(function (p) { return p.map(function (i) { return rows[i][cfg.value]; }); });
+    var lengths = ctxFilter.lengths(rows, shown, cfg);
+    return {
+      x: cfg.horizontal ? along : at, y: cfg.horizontal ? at : along,
+      customdata: parts.map(function (p) {
+        return p.map(function (i) { return cfg.hover.map(function (h) { return rows[i][h]; }); });
+      }),
+      categories: categories, bars: lengths.length, median: ctxFilter.median(lengths)
+    };
+  },
+  fill: function (text, values) {
+    return text.replace(/\{(\w+)\}/g, function (all, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : all;
+    });
+  },
+  /* The live line; with no bar shown, the none line. */
+  summary: function (view, cfg, template, none) {
+    if (!view.bars) return none;
+    var median = ctxFilter.number(view.median) + (cfg.unit ? " " + cfg.unit : "");
+    return ctxFilter.fill(template, {
+      shown: view.bars.toLocaleString("en-US"), total: cfg.total.toLocaleString("en-US"),
+      median: median
+    });
+  }
+};
+{% endraw %}

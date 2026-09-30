@@ -1,0 +1,287 @@
+# The M3 Trim, align, count page (ctx process). Placeholders in {braces} are filled by the
+# code; keep their names. Until the module is built, scripts/python/preview_process.py draws
+# this page on made-up data.
+
+title = "M3 Trim, align, count: {dataset}"
+budget = "Preview build on made-up data; no read was aligned. The real run's budget is Track A: under {minutes} min and {ram_gb} GB."
+profile = "preview build, one process"
+purpose = "Align each sample's trimmed reads, count reads per gene, and check the settings that change those counts: strandedness, multimappers and the reference."
+input = "The sample sheet from `ctx gather`, each run's FASTQ files under `--fetchngs-dir`, a genome FASTA (`--genome`) and the dataset file's annotation GTF. Optional: `--compare-dataset`, a dataset with Salmon counts for the same samples."
+method = """fastp trims each run with the same settings as M2. A splice-aware aligner places reads across introns: STAR on Linux, HISAT2 on Apple silicon. A read fitting several loci equally well is a multimapper.
+
+featureCounts assigns reads to genes at `-s 0` (either strand), `-s 1` (the gene's strand) and `-s 2` (the opposite). The strand call uses the forward share, `-s 1` reads over `-s 1` plus `-s 2` reads.
+
+Two counters can correlate closely and still disagree. Correlation measures whether counts rise together; the Bland-Altman bias and limits measure how far apart they are."""
+interpretation = """Read the mapping bars first; check M2's metrics for any sample whose uniquely mapped share sits well below the rest. The featured sample's bars change one setting each. On half the genome, reads from the missing genes go unmapped or align to similar genes, so no genome-wide band applies.
+
+Take the library's strand from the forward share, never from the largest bar, and count at that setting.
+
+Two counters that correlate closely can still disagree. Read the bias and limits in the agreement plot. Genes far from zero gain reads under one rule; those genes show whether the choice of counter matters."""
+pitfalls = [
+    "Choosing `-s` from the kit name: protocols differ between kit versions; measure the forward share on the reads.",
+    "Judging a partial-genome mapping rate by a genome band: reads from missing chromosomes cannot align there.",
+    "Reading a high ρ as agreement: two counters can rank genes alike and still differ in their counts.",
+]
+
+[[terms]]
+term = "Uniquely mapped"
+meaning = "A read aligned to one locus only. featureCounts counts only these unless `-M` is set."
+
+[[terms]]
+term = "Multimapper"
+meaning = "A read aligned equally well to several loci. STAR keeps it while the loci number at most `--outFilterMultimapNmax`."
+
+[[terms]]
+term = "Forward share"
+meaning = "Reads assigned at `-s 1` over reads at `-s 1` plus `-s 2`. Near `0`: reverse; near `1`: forward; near `0.5`: unstranded."
+
+[[terms]]
+term = "Bias and limits of agreement"
+meaning = "Bland-Altman's mean difference between two measurements, and that mean plus or minus `1.96` standard deviations of the differences."
+
+[[terms]]
+term = "Featured sample"
+meaning = "The sample aligned again under each setting, so one setting changes at a time."
+
+[[questions]]
+prompt = "Aligned to half the genome, the featured sample keeps fewer uniquely mapped reads. Where did the rest go?"
+answer = "Reads from genes on the removed half have no true locus. Most end unmapped as too short; some align to similar genes on the kept half and are counted there."
+
+[[questions]]
+prompt = "featureCounts assigns nearly equal reads at `-s 1` and `-s 2`. Which library type is this, and which `-s` counts it?"
+answer = "Unstranded: count at `-s 0`. At `-s 1` or `-s 2` about half of each gene's reads would be dropped."
+
+[[questions]]
+prompt = "Spearman's ρ between plain and `-M` counts is near `1`. Are the two counts interchangeable?"
+answer = "No. ρ compares ranks, and `-M` adds reads mostly to genes that share sequence with others. The agreement plot shows that bias; ρ does not."
+
+# The options ctx process will take (the M3 plan, section 5), until the CLI exists to read
+# them from. A fastp option without a default takes it from ctx.qc.Fastp, as M2 does.
+[planned."--dataset"]
+default = "required"
+meaning = "Short name of the dataset; every output name starts with it."
+effect = "Selects the gather sheet and the FASTQ files this command reads."
+
+[planned."--dataset-file"]
+default = "required"
+meaning = "The dataset's TOML file; its `annotation_gtf` resource is the annotation."
+effect = "Another annotation changes which genes exist and every count."
+
+[planned."--genome"]
+default = "required"
+meaning = "Genome FASTA, plain or gzipped; its contig names select the GTF lines."
+effect = "A partial genome lowers the mapping rate; genome bands stop applying."
+
+[planned."--aligner"]
+default = "star"
+meaning = "`star` or `hisat2`; use HISAT2 on Apple silicon, where pinned STAR fails."
+effect = "HISAT2 adds an unspliced alignment and drops the STAR comparison."
+
+[planned."--strandedness"]
+default = "auto"
+meaning = "`auto`, `unstranded`, `forward` or `reverse`: which featureCounts `-s` table is used."
+effect = "All three settings are always counted; this picks the one used."
+
+[planned."--multimap-max"]
+default = "unset"
+meaning = "Most loci a multimapped read may fit; unset keeps STAR's `10`."
+effect = "Lower turns more multimappers into unmapped too-many-loci reads."
+
+[planned."--settings"]
+default = "cut"
+meaning = "Extra featured-sample alignments: `cut` (half the genome), `untrimmed` (no fastp)."
+effect = "Each token adds one alignment and one bar to the settings figure."
+
+[planned."--featured-sample"]
+default = "unset"
+meaning = "The sample aligned again at each setting. Unset: the sheet's first sample."
+effect = "Pick a sample you suspect to see how settings change it."
+
+[planned."--reads-per-run"]
+default = "unset"
+meaning = "Reads kept per run by `seqkit sample`, seed `42`. Unset: every read."
+effect = "Fewer reads run faster; rates stay close, gene counts grow noisier."
+
+[planned."--compare-dataset"]
+default = "unset"
+meaning = "A dataset slug with Salmon counts for the same samples."
+effect = "Adds each run's expected share of reads on a partial genome."
+
+[planned."--fetchngs-dir"]
+default = "unset"
+meaning = "The fetchngs outdir the sheet's FASTQ paths are relative to."
+effect = "Reads FASTQ files from another download; nothing is written there."
+
+[planned."--registry"]
+default = "unset"
+meaning = "The QC registry; its strandedness thresholds decide the strand call."
+effect = "Other thresholds can turn a reverse call into undetermined."
+
+[planned."--fastp-q"]
+meaning = "fastp `-q`: a base below this Phred quality is unqualified."
+effect = "Higher marks more bases unqualified, so more reads fail `-u`."
+
+[planned."--fastp-u"]
+meaning = "fastp `-u`: most unqualified bases a read may have, in percent."
+effect = "Lower drops more reads before alignment."
+
+[planned."--fastp-l"]
+meaning = "fastp `-l`: shortest read kept after trimming, in bases."
+effect = "Higher drops short reads, which more often map to several loci."
+
+[planned."--cut-tail"]
+meaning = "fastp `--cut_tail`: trim read tails while their window quality is low."
+effect = "On: degraded tails are cut, so more reads fail `-l`."
+
+[planned."--cut-window"]
+meaning = "fastp `-W`: bases in the window `--cut-tail` averages."
+effect = "Wider smooths over single bad bases; used only with `--cut-tail`."
+
+[planned."--cut-mean"]
+meaning = "fastp `-M`: mean quality below which `--cut-tail` cuts."
+effect = "Higher cuts more of each tail; used only with `--cut-tail`."
+
+[groups]
+align = "Alignment"
+strand = "Strandedness"
+counters = "Two counters on the same alignments"
+
+[keys]
+samples = "Samples aligned"
+unique = "Median uniquely mapped"
+strand = "Strand call"
+strand_detail = "{n_call} of {n} samples"
+differ = "Genes counted differently"
+differ_detail = "of {n:,}, plain against -M"
+
+# The aligner's outcome for a read: STAR's Log.final.out rows, short enough for a legend.
+[outcomes]
+unique = "Unique"
+multi = "Several loci"
+too_many = "Too many loci"
+mismatches = "Mismatches"
+too_short = "Too short"
+other = "Other"
+
+# The featured sample's bars.
+[settings]
+main = "{sample}, as run"
+cut = "{sample}, half the genome"
+untrimmed = "{sample}, untrimmed"
+limit = "{sample}, unique only (derived)"
+
+[figures.mapping]
+title = "Where each sample's reads align"
+lead = "Median uniquely mapped: {median:.1f} % of input reads; lowest {low:.1f} % in {low_sample}."
+reading = [
+    "Each bar is one sample; its segments add up to every input read.",
+    "Unique and several loci are aligned reads; too many loci, mismatches, too short and other are reasons a read stayed unaligned.",
+]
+caption = "Made-up data: reads by {aligner} outcome, as % of each sample's input reads; {n} samples, median {reads:,} input reads. No test."
+category = "Sample"
+value = "Input reads"
+units = { percent = "%", reads = "reads", input_reads = "reads" }
+columns.sample = "Sample, from the gather sheet."
+columns.outcome = "The aligner's outcome, one of STAR's Log.final.out rows."
+columns.percent = "Share of the sample's input reads with this outcome."
+columns.reads = "Reads with this outcome."
+columns.input_reads = "Reads the aligner took in, after fastp."
+columns.group = "Cell type, condition and read-length batch, from the gather sheet."
+
+[figures.settings]
+title = "One sample under each alignment setting"
+lead = "Half the genome lowers {sample}'s uniquely mapped share from {main:.1f} % to {cut:.1f} %."
+reading = [
+    "Each bar is the featured sample under one setting; only that setting changes.",
+    "Compare each bar with the top one, the sample as run.",
+]
+caption = "Made-up data: featured sample {sample}, {reads:,} input reads: as run, aligned to half the genome, untrimmed, and with multimappers moved to too many loci. No test."
+category = "Setting"
+value = "Input reads"
+units = { percent = "%", reads = "reads" }
+columns.setting = "The featured sample under one alignment setting."
+columns.outcome = "The aligner's outcome, one of STAR's Log.final.out rows."
+columns.percent = "Share of the input reads with this outcome."
+columns.reads = "Reads with this outcome."
+
+[figures.strandedness]
+title = "Reads assigned at each strandedness setting"
+lead = "Forward share {low:.3f} to {high:.3f}: {n_call} of {n} samples are called {call}."
+reading = [
+    "Each group of three bars is one sample: reads featureCounts assigns at -s 0, -s 1 and -s 2.",
+    "In a reverse-stranded library -s 1 is short and -s 2 nearly matches -s 0.",
+]
+caption = "Made-up data: reads assigned to genes at each -s, as % of input reads; {n} samples. Median forward share {share:.3f}; calls at nf-core/rnaseq thresholds {stranded} and {unstranded}; no test."
+category = "Sample"
+value = "Assigned reads"
+names = { s0 = "-s 0 (STAR column 2)", s1 = "-s 1 (STAR column 3)", s2 = "-s 2 (STAR column 4)" }
+units = { percent = "%", reads = "reads", forward_share = "fraction" }
+columns.sample = "Sample, from the gather sheet."
+columns.setting = "featureCounts -s: s0 either strand, s1 the gene's strand, s2 the opposite."
+columns.percent = "Assigned reads as a share of the sample's input reads."
+columns.reads = "Reads assigned to a gene at this setting."
+columns.forward_share = "Reads at -s 1 over reads at -s 1 plus -s 2."
+columns.call = "The strand the forward share gives, by the registry's thresholds."
+
+[figures.counters]
+title = "Gene counts with and without multimappers"
+lead = "Spearman ρ {rho:.3f}, yet {n_diff:,} of {n:,} genes count more reads with -M."
+reading = [
+    "Each dot is one gene, its reads summed over all samples: plain featureCounts across, with -M up.",
+    "Dots on the line count the same; colour marks genes whose two counts differ.",
+]
+caption = "Made-up data: {n:,} genes, reads summed over {samples} samples. Spearman ρ {rho:.3f}, bootstrap {ci} % CI {rho_low:.3f} to {rho_high:.3f}; per sample, median {rho_med:.3f}, range {rho_min:.3f} to {rho_max:.3f}. Pearson r on log counts {r:.3f}, CI {r_low:.3f} to {r_high:.3f}; no test."
+x = "Plain count"
+y = "Count with -M"
+same = "Same"
+differs = "More with -M"
+identity = "Equal"
+units = { plain = "reads", multi = "reads", log2_plain = "log2(reads + 1)", log2_multi = "log2(reads + 1)" }
+columns.gene_id = "Gene, from the gather gene table."
+columns.plain = "Reads featureCounts assigns without -M, summed over samples."
+columns.multi = "Reads featureCounts assigns with -M, summed over samples."
+columns.log2_plain = "log2 of the plain count plus 1."
+columns.log2_multi = "log2 of the -M count plus 1."
+columns.agreement = "Whether the two counts are equal."
+columns.keep = "The counts differ; always drawn on the page."
+
+[figures.agreement]
+title = "How far the two counts differ, gene by gene"
+lead = "Bias {bias:.3f} in log counts; {n_out:,} of {n:,} genes lie beyond the limits of agreement."
+reading = [
+    "Each dot is one gene: across, the mean of its two log counts; up, -M minus plain.",
+    "The solid line is the bias; the dashed lines are the limits of agreement.",
+]
+caption = "Made-up data: {n:,} genes, {n_same:,} identical; d is -M minus plain, in log counts. Bias {bias:.3f}, {ci} % CI {bias_low:.3f} to {bias_high:.3f}, back-transformed {fold:.3f}; limits {loa_low:.3f} to {loa_high:.3f}; no test."
+x = "Mean of the two counts"
+y = "Difference, -M minus plain"
+bias = "Bias"
+limits = "Limits"
+units = { mean_log2 = "log2(reads + 1)", diff_log2 = "log2(reads + 1)" }
+columns.gene_id = "Gene, from the gather gene table."
+columns.mean_log2 = "Mean of the two counts' log2(count + 1)."
+columns.diff_log2 = "log2(count + 1) with -M minus without."
+columns.agreement = "Whether the two counts are equal."
+columns.keep = "The counts differ; always drawn on the page."
+
+[tables.concordance]
+units = { n_genes = "genes", n_identical = "genes", spearman = "dimensionless", spearman_low = "dimensionless", spearman_high = "dimensionless", pearson = "dimensionless", pearson_low = "dimensionless", pearson_high = "dimensionless", bias = "log2(reads + 1)", bias_low = "log2(reads + 1)", bias_high = "log2(reads + 1)", sd = "log2(reads + 1)", loa_low = "log2(reads + 1)", loa_high = "log2(reads + 1)", d_low = "log2(reads + 1)", d_high = "log2(reads + 1)", fold = "ratio" }
+columns.unit = "A sample, or all: the gene sums over every sample."
+columns.comparison = "The counters compared: featureCounts plain against -M."
+columns.n_genes = "Genes with a read in either count."
+columns.n_identical = "Genes whose two counts are equal."
+columns.spearman = "Spearman correlation of the two counts."
+columns.spearman_low = "Lower bound of its percentile bootstrap interval; computed for all only."
+columns.spearman_high = "Upper bound of its percentile bootstrap interval; computed for all only."
+columns.pearson = "Pearson correlation of log2(count + 1)."
+columns.pearson_low = "Lower bound of its Fisher z interval."
+columns.pearson_high = "Upper bound of its Fisher z interval."
+columns.bias = "Mean of d, the -M minus plain log2(count + 1)."
+columns.bias_low = "Lower bound of the bias's t interval."
+columns.bias_high = "Upper bound of the bias's t interval."
+columns.sd = "Standard deviation of d, one degree of freedom removed."
+columns.loa_low = "Lower limit of agreement: bias minus 1.96 sd."
+columns.loa_high = "Upper limit of agreement: bias plus 1.96 sd."
+columns.d_low = "Empirical 2.5th percentile of d."
+columns.d_high = "Empirical 97.5th percentile of d."
+columns.fold = "2 to the power of the bias, back-transformed."

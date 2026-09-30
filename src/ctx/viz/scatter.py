@@ -20,6 +20,7 @@ from ctx.viz.style import (
     MARKER_SIZE,
     MARKERS,
     MAX_CATEGORIES,
+    PAGE_SCALE,
     PLOTLY_HEIGHT_PX,
     PLOTLY_MARKER_PX,
     POINT_ALPHA,
@@ -389,7 +390,7 @@ class ScatterData:
         """Plotly marker diameters in px: the static diameters, on screen."""
         diameters = self._diameters(rows)
         if isinstance(diameters, list):
-            return [d * PX_PER_PT for d in diameters]
+            return [d * PX_PER_PT * PAGE_SCALE for d in diameters]
         return PLOTLY_MARKER_PX
 
     def _hover_format(self, column: str) -> str:

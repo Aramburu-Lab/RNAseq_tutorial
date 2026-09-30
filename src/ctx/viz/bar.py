@@ -1,9 +1,12 @@
 """Bars: one value per category and series, grouped or stacked, vertical or horizontal.
 
 Draws the M1 composition and library sizes, p-value histograms, ORA and GSEA bars and call
-counts. ``static()`` and ``interactive()`` read the same ``BarData``.
+counts. ``static()`` and ``interactive()`` read the same ``BarData``; with ``filters`` the
+page script (``templates/_filter.js.j2``) redraws the bars and the median line from the rows
+the reader picks.
 """
 
+import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -17,6 +20,7 @@ from ctx.viz.style import (
     BAR_LABEL_ROTATION,
     BAR_MARGIN_MM,
     BAR_ROW_MM,
+    DASHES,
     LINE_WIDTHS,
     MAX_CATEGORIES,
     MM_PER_INCH,
@@ -34,6 +38,22 @@ from ctx.viz.style import (
 # Above this many categories the category axis carries no tick labels; hover names each bar.
 MAX_TICK_LABELS = 30
 BAR_SPAN = 0.8
+# Reference lines take these dashes in turn, the first the threshold dash every figure uses;
+# the median line is solid, so no two lines of one figure share a style.
+REFERENCE_DASHES = (THRESHOLD_DASH, *DASHES[2:])
+MEDIAN_DASH = DASHES[0]
+# The median the page prints, to this many significant digits (ctxFilter.number).
+SIGNIFICANT = 3
+
+
+def significant(value: float) -> str:
+    """A number to three significant digits with thousands separators, as ctxFilter.number.
+
+    Rounded half up by the same arithmetic as the page script, so both print the same digits.
+    """
+    decimals = max(0, SIGNIFICANT - 1 - (math.floor(math.log10(abs(value))) if value else 0))
+    scale = 10**decimals
+    return f"{math.floor(value * scale + 0.5) / scale:,.{decimals}f}"
 
 
 @dataclass(frozen=True)
@@ -56,6 +76,10 @@ class BarData:
         hover: Columns shown on hover, besides category, series and value.
         width: ``"single"`` or ``"double"`` column.
         names: Legend text per series level, where the level itself is terse.
+        lines: (value, name) of further reference lines, drawn after ``hline``.
+        median: Name of a line at the median bar length, empty for none. The page moves it
+            to the median of the bars the filters show; the PDF and SVG show every bar.
+        filters: Columns of ``frame`` the page offers as filters, one select each.
     """
 
     frame: pl.DataFrame
@@ -73,12 +97,17 @@ class BarData:
     hover: tuple[str, ...] = ()
     width: str = "single"
     names: Mapping[str, str] | None = None
+    lines: tuple[tuple[float, str], ...] = ()
+    median: str = ""
+    filters: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
         if self.frame.is_empty():
             raise ValueError("no bars to draw: the table is empty")
-        named = [self.category, self.value, self.series, *self.hover]
+        if len(self._references()) > len(REFERENCE_DASHES):
+            raise ValueError(f"at most {len(REFERENCE_DASHES)} reference lines")
+        named = [self.category, self.value, self.series, *self.hover, *self.filters]
         if missing := [c for c in named if c not in self.frame.columns]:
             raise ValueError(f"missing columns {missing}")
         if len(self.colours) > MAX_CATEGORIES:
@@ -122,6 +151,56 @@ class BarData:
         """Legend text of a series level."""
         return (self.names or {}).get(level, str(level))
 
+    def _references(self) -> list[tuple[float, str]]:
+        """``hline``, then ``lines``."""
+        return [*([self.hline] if self.hline else []), *self.lines]
+
+    def lengths(self) -> np.ndarray:
+        """What the median is taken over: each category's total when stacked, else each bar."""
+        if not self.stacked:
+            return self.frame[self.value].to_numpy().astype(float)
+        totals = self.frame.group_by(self.category, maintain_order=True).agg(
+            pl.col(self.value).sum()
+        )
+        return totals[self.value].to_numpy().astype(float)
+
+    def rules(self) -> list[tuple[float, str, tuple[str, str]]]:
+        """Every line across the value axis: (value, name, (matplotlib, plotly) dash).
+
+        The reference lines, then the median; both renderers draw exactly these.
+        """
+        drawn: list[tuple[float, str, tuple[str, str]]] = [
+            (v, name, dash)
+            for (v, name), dash in zip(self._references(), REFERENCE_DASHES, strict=False)
+        ]
+        if self.median:
+            drawn.append((float(np.median(self.lengths())), self.median, MEDIAN_DASH))
+        return drawn
+
+    def controls(self) -> dict[str, Any] | None:
+        """What the page script needs to filter the bars, or None without ``filters``.
+
+        ``start`` fills the summary line before the reader moves a filter, with the numbers
+        the script computes for "All" (``tests/test_page_script.py`` compares the two).
+        """
+        if not self.filters:
+            return None
+        unit = self.columns[self.value][0]
+        unit = "" if unit == "none" else unit
+        total = len(self.lengths())
+        median = f"{significant(float(np.median(self.lengths())))} {unit}".strip()
+        present = set(self.frame[self.series])
+        return {
+            "kind": "filter", "category": self.category, "value": self.value,
+            "series": self.series, "stacked": self.stacked, "horizontal": self.horizontal,
+            "traces": [str(level) for level in self.colours if level in present],
+            "labels": [str(c) for c in self.frame[self.category]], "hover": list(self.hover),
+            "filters": {c: sorted({str(v) for v in self.frame[c]}) for c in self.filters},
+            "median_shape": len(self._references()) if self.median else None,
+            "max_tick_labels": MAX_TICK_LABELS, "unit": unit, "total": total,
+            "start": {"shown": f"{total:,}", "total": f"{total:,}", "median": median},
+        }  # fmt: skip
+
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
 
@@ -164,11 +243,12 @@ class BarData:
             Patch(color=self.colours[level] or theme.reference, label=self._name(level))
             for level in present
         ]
-        if self.hline:
-            line = ax.axvline if self.horizontal else ax.axhline
-            colour, dash = theme.reference, THRESHOLD_DASH[0]
-            line(self.hline[0], color=colour, linestyle=dash, linewidth=LINE_WIDTHS["line"])
-            handles.append(Line2D([], [], color=colour, linestyle=dash, label=self.hline[1]))
+        line = ax.axvline if self.horizontal else ax.axhline
+        for at, name, (dash, _) in self.rules():
+            style: dict[str, Any] = {"color": theme.reference, "linestyle": dash,
+                                     "linewidth": LINE_WIDTHS["line"]}  # fmt: skip
+            line(at, **style)
+            handles.append(Line2D([], [], label=name, **style))
         ticks = (ax.set_yticks, ax.set_ylabel, ax.set_xlabel) if self.horizontal else (
             ax.set_xticks, ax.set_xlabel, ax.set_ylabel)  # fmt: skip
         shown = len(categories) <= MAX_TICK_LABELS
@@ -215,11 +295,12 @@ class BarData:
                     + "<extra></extra>",
                 )
             )  # fmt: skip
-        if self.hline:
-            add = fig.add_vline if self.horizontal else fig.add_hline
-            add(self.hline[0], line_dash=THRESHOLD_DASH[1], line_color=light.reference,
-                line_width=LINE_WIDTHS["line"], annotation_text=self.hline[1],
-                annotation_position="bottom right" if self.horizontal else "top right")  # fmt: skip
+        # Shapes, in rules() order, named in the legend as the static figure names them; the
+        # page script moves the median's shape (controls()["median_shape"]).
+        add = fig.add_vline if self.horizontal else fig.add_hline
+        for at, name, (_, dash) in self.rules():
+            add(at, line_dash=dash, line_color=light.reference, line_width=LINE_WIDTHS["line"],
+                name=name, showlegend=True)  # fmt: skip
         categories = [str(c) for c in self._categories()]
         category_axis = {"title": {"text": self.category_label}, "categoryorder": "array",
                          "categoryarray": categories,
@@ -232,7 +313,7 @@ class BarData:
             template=plotly_templates()["white"],
             height=max(PLOTLY_HEIGHT_PX["bar"], rows_px) if self.horizontal
             else PLOTLY_HEIGHT_PX["bar"],
-            showlegend=len(fig.data) > 1,
+            showlegend=len(fig.data) > 1 or bool(self.rules()),
             barmode="stack" if self.stacked else "group",
             xaxis=value_axis if self.horizontal else category_axis,
             yaxis=category_axis if self.horizontal else value_axis,

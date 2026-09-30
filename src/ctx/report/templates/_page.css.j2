@@ -84,7 +84,8 @@ details.params .table-scroll{margin:0;border:0;border-top:var(--rule) solid var(
 /* Groups and tabs */
 .group>h3{margin:var(--space-7) 0 var(--space-1);font-size:var(--fs-md)}
 .group-lead{margin:0 0 var(--space-3);color:var(--muted)}
-.tabs{display:flex;gap:var(--space-2);margin:var(--space-4) 0 0;padding:var(--space-1);background:var(--surface-2);border:var(--rule) solid var(--line);border-radius:var(--radius-sm);overflow-x:auto;scrollbar-width:none}
+/* Tabs wrap onto as many lines as the width needs: a scrolled row hid the tabs past its edge. */
+.tabs{display:flex;flex-wrap:wrap;gap:var(--space-2);margin:var(--space-4) 0 0;padding:var(--space-1);background:var(--surface-2);border:var(--rule) solid var(--line);border-radius:var(--radius-sm)}
 .tabs [role="tab"]{border:0;border-radius:var(--radius-xs);background:none;padding:var(--space-1) var(--space-3);font-size:var(--fs-sm);color:var(--muted);cursor:pointer;white-space:nowrap}
 .tabs [role="tab"][aria-selected="true"]{background:var(--surface);color:var(--text);font-weight:700;box-shadow:var(--shadow)}
 html:not(.js) .tabs{display:none}
@@ -185,7 +186,8 @@ ol.modules li{display:flex;flex-direction:column;gap:var(--space-1);padding:var(
 
 /* Narrow and wide screens */
 @media (max-width:{{ layout.rail_from - 1 }}px){
-.toc{position:sticky;top:var(--topbar);z-index:2;margin:0 calc(-1 * var(--gutter-wide)) var(--space-5);padding:0 var(--gutter-wide);background:color-mix(in srgb,var(--page) 92%,transparent);backdrop-filter:blur(var(--topbar-blur));-webkit-backdrop-filter:blur(var(--topbar-blur));border-bottom:var(--rule) solid var(--line);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+/* One row, its scrollbar shown: a hidden one hid the sections past the edge. */
+.toc{position:sticky;top:var(--topbar);z-index:2;margin:0 calc(-1 * var(--gutter-wide)) var(--space-5);padding:0 var(--gutter-wide);background:color-mix(in srgb,var(--page) 92%,transparent);backdrop-filter:blur(var(--topbar-blur));-webkit-backdrop-filter:blur(var(--topbar-blur));border-bottom:var(--rule) solid var(--line);overflow-x:auto;white-space:nowrap;scrollbar-width:thin}
 .toc>ol{display:flex;gap:var(--space-4)}
 .toc a{padding:var(--space-3) 0;border-left:0;border-bottom:var(--rule-mid) solid transparent}
 .toc a[aria-current]{border-bottom-color:var(--link)}

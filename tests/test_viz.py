@@ -40,6 +40,7 @@ from ctx.report.builder import FigureText
 from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.axes import axis_title
+from ctx.viz.bar import BarData
 from ctx.viz.contour import SurfaceData
 from ctx.viz.curve import CurveData
 from ctx.viz.density import DensityData
@@ -316,6 +317,42 @@ def _same(a: tuple[float, ...], b: tuple[float, ...]) -> bool:
     return all(abs(x - y) <= 1 / 255 for x, y in zip(a, b, strict=True))
 
 
+def filtered_bars(kind: str = "runs") -> BarData:
+    """Bars the page filters, over two reference lines and a median line.
+
+    ``runs``: one bar per run, as the M1 depth figure draws them. ``groups``: two batches
+    stacked in each group, so a bar's length is a total. ``grouped``: the same side by side.
+    """
+    rng = np.random.default_rng(11)
+    types, conditions = ["NDN", "Monocyte", "LDN"], ["steady", "pdac"]
+    if kind == "runs":
+        n = 40
+        frame = pl.DataFrame({"bar": [f"r{i:02d}" for i in range(n)],
+                              "batch": ["short"] * 22 + ["long"] * 18,
+                              "reads": rng.uniform(5.0, 60.0, n),
+                              "cell_type": rng.choice(types, n).tolist(),
+                              "condition": rng.choice(conditions, n).tolist()})  # fmt: skip
+        unit = "million reads"
+    else:
+        pairs = [(t, c) for t in types for c in conditions]
+        frame = pl.DataFrame({"bar": [f"{t} {c}" for t, c in pairs] * 2,
+                              "batch": ["short"] * 6 + ["long"] * 6,
+                              "reads": rng.integers(1, 12, 12).astype(float),
+                              "cell_type": [t for t, _ in pairs] * 2,
+                              "condition": [c for _, c in pairs] * 2})  # fmt: skip
+        unit = "samples"
+    columns = {"bar": ("none", "Bar."), "batch": ("none", "Batch."), "reads": (unit, "Length."),
+               "cell_type": ("none", "Cell type."),
+               "condition": ("none", "Condition.")}  # fmt: skip
+    return BarData(
+        frame=frame, columns=columns, category="bar", value="reads", category_label="Run",
+        value_label="Reads", series="batch", colours=category_colours(["short", "long"]),
+        caption="Bars the page filters; no test.", stacked=kind != "grouped",
+        hover=("cell_type",), width="double", lines=((30.0, "thirty"), (20.0, "twenty")),
+        median="median of the bars shown", filters=("cell_type", "condition"),
+    )  # fmt: skip
+
+
 def _contracts():
     synthetic = counts()
     return {
@@ -328,6 +365,7 @@ def _contracts():
         "bar_horizontal": demo_bar(synthetic, horizontal=True),
         "composition_20_groups": demo_bars_at_scale(horizontal=True),
         "library_sizes_210_runs": demo_bars_at_scale(horizontal=False),
+        "bar_filtered_lines": filtered_bars(),
         "strip": demo_strip(),
         "strip_log_double": demo_strip(log=True, width="double"),
         "bubble": demo_bubble(),
@@ -414,8 +452,9 @@ def test_on_page_is_points_plus_three_in_pixels():
     """
     from ctx.viz.style import on_page  # noqa: PLC0415
 
-    assert on_page(9) == pytest.approx(16.0)
-    assert on_page(10) == pytest.approx(52 / 3)
+    # 3 pt larger, in px, then 25 % larger (Rytis 2026-09-28 and 2026-09-30).
+    assert on_page(9) == pytest.approx(20.0)
+    assert on_page(10) == pytest.approx(65 / 3)
     assert "--size-base: 18px;" in css_variables(THEMES["white"])
 
 
@@ -475,6 +514,10 @@ OVERLAP_CASES = {
     "bar_horizontal": lambda s: demo_bar(s, horizontal=True),
     "composition_20_groups": lambda s: demo_bars_at_scale(horizontal=True),
     "library_sizes_210_runs": lambda s: demo_bars_at_scale(horizontal=False),
+    "bar_filtered_lines": lambda s: filtered_bars(),
+    "bar_filtered_lines_horizontal": lambda s: dataclasses.replace(
+        filtered_bars("groups"), horizontal=True
+    ),
     "strip": lambda s: demo_strip(),
     "strip_log": lambda s: demo_strip(log=True),
     "bubble": lambda s: demo_bubble(),
@@ -542,6 +585,51 @@ def test_empty_bars_refused():
     data = demo_bar(counts())
     with pytest.raises(ValueError, match="no bars"):
         dataclasses.replace(data, frame=data.frame.head(0))
+
+
+@pytest.mark.parametrize(("kind", "horizontal"), [("runs", False), ("groups", True)])
+def test_bar_lines_drawn_alike_in_both_renderers(kind, horizontal):
+    """Reference lines, then the median line: one style each, named in both legends."""
+    data = dataclasses.replace(filtered_bars(kind), horizontal=horizontal)
+    totals = data.frame.group_by("bar").agg(pl.col("reads").sum())["reads"]
+    names = ["thirty", "twenty", "median of the bars shown"]
+    at = [30.0, 20.0, pytest.approx(float(np.median(totals)))]
+    assert [(v, n) for v, n, _ in data.rules()] == list(zip(at, names, strict=True))
+    ax = data.static(THEMES["white"]).axes[0]
+    lines = ax.get_lines()
+    assert [(line.get_xdata() if horizontal else line.get_ydata())[0] for line in lines] == at
+    assert [line.get_linestyle() for line in lines] == ["--", ":", "-"]
+    assert [t.get_text() for t in ax.get_legend().get_texts()][-3:] == names
+    shapes = data.interactive().layout.shapes
+    assert [s.name for s in shapes] == names and all(s.showlegend for s in shapes)
+    assert [s.x0 if horizontal else s.y0 for s in shapes] == at
+    assert [s.line.dash for s in shapes] == ["dash", "dot", "solid"]
+    assert data.controls()["median_shape"] == len(shapes) - 1
+
+
+def test_bar_hline_alone_as_frozen_callers_pass_it():
+    # src/ctx/de/run.py and src/ctx/function/run.py pass hline= and nothing new.
+    data = demo_bar(counts())
+    assert data.rules() == [(3.0, "half a group", ("--", "dash"))]
+    (shape,) = data.interactive().layout.shapes
+    assert (shape.y0, shape.name, shape.line.dash) == (3.0, "half a group", "dash")
+    assert data.controls() is None
+    with pytest.raises(ValueError, match="at most 3 reference lines"):
+        dataclasses.replace(data, lines=((1.0, "a"), (2.0, "b"), (4.0, "c")))
+    with pytest.raises(ValueError, match="missing columns"):
+        dataclasses.replace(data, filters=("donor",))
+
+
+def test_bar_filter_controls():
+    data = filtered_bars("groups")
+    controls = data.controls()
+    assert controls["filters"] == {"cell_type": ["LDN", "Monocyte", "NDN"],
+                                   "condition": ["pdac", "steady"]}  # fmt: skip
+    # Stacked: one bar per group, its length the total of both batches.
+    assert controls["total"] == 6 and controls["traces"] == ["short", "long"]
+    assert controls["labels"] == data.frame["bar"].to_list()
+    assert controls["start"]["shown"] == controls["start"]["total"] == "6"
+    assert controls["start"]["median"].endswith(" samples")
 
 
 def _live_volcano(padj: list | None = None) -> ScatterData:

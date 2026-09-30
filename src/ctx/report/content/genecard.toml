@@ -1,0 +1,188 @@
+# M9 Gene cards page (ctx genecard). Placeholders in {braces} are filled by the code; keep their names.
+# Until the module is built, scripts/python/preview_genecard.py draws this page on made-up data.
+
+title = "M9 Gene cards: {dataset}"
+command = "ctx genecard {gene} --dataset {dataset}"
+profile = "preview build, one process"
+budget = "Preview build on made-up data. The built module: under {minutes} min and {ram_gb} GB"
+purpose = "Place a gene's result in this dataset beside reference data on normal tissues, immune cells, protein and exons, each panel linked to its source."
+input = "Gene symbols as arguments, or the `gene_name` column of an M5 results table, and the dataset's M5 results and sample sheet. Reference data: GTEx Portal API v2, Human Protein Atlas and Ensembl REST responses, cached per release under `resources/cache/`."
+method = """`ctx genecard` resolves each symbol to a versioned Ensembl gene ID and its MANE Select transcript. It then fetches GTEx per-sample TPM, exon and junction counts, and HPA tissue, immune cell, subcellular and blood data. Each response is cached with its retrieval time and SHA-256.
+
+The card draws its own figures from these numbers and links each panel to its source page. Reference panels are descriptive: n, median, IQR and tau. The dataset's own panel keeps the M5 test and call rule."""
+interpretation = """Check which cells express the gene before reading a change in this dataset as a change inside those cells. A high tau means few cell types express it, so a shift in cell composition can raise it in a mixed sample.
+
+RNA is not protein: check the protein panel and the antibody's reliability before calling the gene a marker. Compare each reference panel within its own release: HPA, GTEx and this dataset use different GENCODE versions.
+
+For qPCR, choose adjacent exons that every major isoform shares, with an even share across tissues and a supported junction. A prognostic association on the card is not a mechanism."""
+# "Term: rest" in a pitfall prints Term in bold.
+pitfalls = [
+    "Tissue as tumour: GTEx samples are post-mortem, non-diseased tissue; tumour expression and splicing can differ.",
+    "Uneven exon coverage as splicing: degraded RNA raises the exons nearest the poly(A) tail; check the junction counts.",
+    "Collapsed exons as transcript exons: GTEx merges every transcript's exons into one model, so its exon numbers are not Ensembl's.",
+]
+
+[[terms]]
+term = "tau"
+meaning = "Tissue specificity index: `0` when every tissue or cell type expresses the gene evenly, `1` when one alone does (Yanai et al., Bioinformatics, `2005`)."
+
+[[terms]]
+term = "nTPM"
+meaning = "HPA's normalised transcripts per million, comparable across its tissues and cell types."
+
+[[terms]]
+term = "Collapsed gene model"
+meaning = "GTEx's merge of a gene's transcripts into one set of non-overlapping exons."
+
+[[terms]]
+term = "MANE Select"
+meaning = "One reference transcript per gene, agreed by Ensembl and NCBI RefSeq."
+
+[[questions]]
+prompt = "The gene rises in case samples and has a high tau. What must be checked before calling it induced?"
+answer = "Which cell types express it. A shift in cell composition between the groups raises a cell-type-restricted gene with no change inside any cell."
+
+[[questions]]
+prompt = "Why do the GTEx and HPA panels show no p-value?"
+answer = "They are summaries from other studies: a median per tissue, or one pooled value per cell type. A test would treat another study's summaries as samples of this one."
+
+[[questions]]
+prompt = "Why place qPCR primers in two adjacent exons that every major isoform shares?"
+answer = "The product then measures the gene rather than one isoform, and the intron between the exons keeps genomic DNA from giving the same product."
+
+# The options ctx genecard will take (TODO.md, M9). GENE is the positional argument.
+[planned.GENE]
+meaning = "Gene symbols to draw a card for, one card each."
+default = "none"
+effect = "More symbols add cards; each costs API requests unless cached."
+
+[planned."--genes-from"]
+meaning = "An M5 results table whose `gene_name` column lists the genes."
+default = "none"
+effect = "Replaces typed symbols; a long table means many cards and requests."
+
+[planned."--dataset"]
+meaning = "Dataset whose M5 results fill the card's own-evidence panel."
+default = "none"
+effect = "Changes the own-evidence panel; the reference panels stay the same."
+
+[planned."--contrast"]
+meaning = "M5 contrast drawn in the own-evidence panel."
+default = "every contrast of the dataset file"
+effect = "Fewer contrasts shorten the panel; tests and calls stay M5's."
+
+[planned."--hpa-release"]
+meaning = "Human Protein Atlas release every HPA request reads."
+default = "v25.1"
+effect = "Another release can change values, antibodies and categories."
+
+[planned."--gtex-dataset"]
+meaning = "GTEx Portal datasetId passed to every GTEx API call."
+default = "set by the external-data spike"
+effect = "Another GTEx release changes donors, tissues and the gene model."
+
+[planned."--offline"]
+meaning = "Read only `resources/cache/`; make no request."
+default = "off"
+effect = "On: a gene not yet cached stops the run, naming it."
+
+[groups]
+ours = "Our evidence"
+ours_lead = "Does the gene change between conditions, and in which cell type?"
+reference = "Normal tissues and immune cells"
+reference_lead = "Where is the gene expressed outside this dataset?"
+exons = "Exons and qPCR primers"
+exons_lead = "Which exons measure the gene evenly enough for qPCR?"
+
+[figures.ours]
+title = "{gene} in this dataset, by cell type"
+lead = "Largest median shift, {comparison} against {reference}: {shift:+.2f} log2 CPM in {cell_type}."
+reading = [
+    "A box is one condition in one cell type; a point is one sample.",
+    "Above each cell type: the BH-adjusted p, and the rank-biserial r of the second condition against the first.",
+]
+x = "Cell type"
+y = "Expression"
+caption = "Made-up log2 CPM, not measured. {stats}"
+
+[figures.ours.columns]
+feature = ["none", "Cell type of the sample, from the gather sample sheet."]
+group = ["none", "Condition of the sample, from the gather sample sheet."]
+sample = ["none", "Sample name, from the gather sample sheet."]
+batch = ["none", "Batch of the sample, from the gather sample sheet."]
+value = ["log2 CPM", "Made-up log2 counts per million plus one; not measured."]
+
+[figures.tissues]
+title = "{gene} across normal tissues"
+lead = "Highest median in {top}, {top_median:.1f} TPM; lowest in {bottom}, {bottom_median:.2f} TPM."
+reading = [
+    "A point is one donor's sample, on a log axis; its colour is the donor's sex.",
+    "The grey bar spans the tissue's interquartile range, its median marked.",
+]
+x = "Tissue"
+y = "Expression"
+range = "median and IQR"
+caption = "Made-up TPM in place of GTEx Portal API v2 per-sample data: {samples} samples in {tissues} tissues, {least} to {most} each. Median and IQR only; external data, no test."
+
+[figures.tissues.columns]
+tissue = ["none", "Tissue sampled."]
+donor = ["none", "Made-up donor identifier."]
+sex = ["none", "Made-up sex of the donor."]
+tpm = ["TPM", "Made-up transcripts per million; not measured."]
+
+[figures.immune]
+title = "{gene} across immune cell types"
+lead = "Highest in {top}, {top_ntpm:.0f} nTPM; tau {tau:.2f} across {cells} cell types."
+reading = [
+    "A bar is one cell type's pooled nTPM; its colour is the cell lineage.",
+    "tau near `1`: few cell types express the gene; near `0`: all do, evenly.",
+]
+x = "Cell type"
+y = "Expression"
+caption = "Made-up nTPM in place of HPA immune cell data: {cells} cell types, one pooled value each. tau {tau:.2f}, computed on log2 of nTPM plus one. External data, no test."
+
+[figures.immune.columns]
+cell_type = ["none", "HPA immune cell type."]
+lineage = ["none", "Lineage of the cell type."]
+ntpm = ["nTPM", "Made-up normalised transcripts per million; not measured."]
+
+[figures.exons]
+title = "Exon use of {gene} across tissues"
+lead = "Most even adjacent pair: {first} and {second}; least even: {uneven}, CV {uneven_cv:.2f}."
+reading = [
+    "A cell is one exon in one tissue: log2 of its share over the exon's median share.",
+    "Right of each row: the exon's CV of share across tissues; low CV suits qPCR.",
+]
+x = "Tissue"
+y = "Exon"
+stat = "CV across tissues"
+caption = "Made-up exon shares in place of GTEx median exon read counts on the collapsed gene model: {exons} exons by {tissues} tissues. CV: SD over mean. External data, no test."
+
+[figures.exons.columns]
+exon = ["none", "Exon of the collapsed gene model, numbered from the gene's start."]
+tissue = ["none", "Tissue sampled."]
+share = ["fraction", "Made-up share of the gene's exon reads on this exon."]
+log2_ratio = ["log2", "log2 of the share over the exon's median share across tissues."]
+level = ["none", "The step of the diverging scale the cell is drawn in."]
+
+[keys]
+samples = "Samples"
+tissues = "Tissues"
+tau = "Immune-cell tau"
+pair = "qPCR exon pair"
+pair_value = "{first} and {second}"
+
+[sources]
+title = "Card panels and their sources"
+columns = ["Panel", "Source", "On the card"]
+rows = [
+    ["Own evidence", "M5 results of this dataset", "drawn, with the M5 test and call rule"],
+    ["Normal tissues", "GTEx Portal API v2, per-sample TPM", "drawn, descriptive"],
+    ["Exons and junctions", "GTEx collapsed gene model; Ensembl REST for MANE Select", "drawn, descriptive"],
+    ["Immune and single cells", "HPA immune cell and single cell data", "drawn, descriptive"],
+    ["Protein and location", "HPA tissue IHC and subcellular data, with antibody reliability", "drawn, descriptive"],
+    ["Blood", "HPA secretome and blood concentrations", "drawn, descriptive"],
+    ["Cancer prognosis", "HPA, from TCGA data", "linked, not drawn"],
+    ["Structure", "AlphaFold model", "linked"],
+    ["Interactions", "BioGRID via HPA; STRING", "BioGRID drawn; STRING linked"],
+]

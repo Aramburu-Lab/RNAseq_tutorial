@@ -22,7 +22,8 @@ PRECEDENCE = (
     "each divergence is a D-entry in `knowledge/decisions.md`."
 )
 RULE_FILES = ("CONVENTIONS.md", "AGENTS.md", "CLAUDE.md")
-COHORT_ID = re.compile(r"E-MTAB-\d+|GSE\d+|TCGA-[A-Z]+|PXD\d+|PDC\d+")
+# TCGA-CDR is the Pan-Cancer Clinical Data Resource (Liu et al. 2018) M10 cites, not a cohort.
+COHORT_ID = re.compile(r"E-MTAB-\d+|GSE\d+|TCGA-(?!CDR\b)[A-Z]+|PXD\d+|PDC\d+")
 # D20: nf-core/fetchngs's own test list holds GEO IDs; this one directory is exempt, and
 # tests/test_fetchngs_fixture.py pins its input list to nf-core's byte for byte.
 NF_CORE_FIXTURE = Path("tests", "fixtures", "fetchngs", "metadata_only")

@@ -7,10 +7,11 @@ import numpy as np
 import polars as pl
 from scipy.stats import median_abs_deviation
 
+from ctx.de.run import SEX_X, SEX_Y
 from ctx.qc import Fastp
 from ctx.qc.registry import Metric, Registry
 from ctx.report import text
-from ctx.viz.contour import DENSITY_MIN_POINTS, Mark, SurfaceData
+from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES, Mark, SurfaceData
 from ctx.viz.curve import CurveData
 from ctx.viz.density import DensityData
 from ctx.viz.flow import FlowData, Node
@@ -18,7 +19,7 @@ from ctx.viz.heatmap import HeatmapData, Swatch
 from ctx.viz.linked import LinkedData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.strip import Range, Span, StripData
-from ctx.viz.style import BAND_COLOURS, MAX_CATEGORIES, ROLES, category_colours
+from ctx.viz.style import BAND_COLOURS, MAX_CATEGORIES, MAX_DISTINCT, ROLES, category_colours
 
 PAGE = "qc"
 # The composition shares a bubble's area adds up, where the counts had gene types.
@@ -26,6 +27,8 @@ SHARES = ("mt_fraction", "mt_rrna_fraction", "rrna_fraction")
 # Trim Galore's fates and Salmon's, in the order the Sankey stacks them.
 TRIM_FATES = ("reads_too_short", "reads_too_long", "reads_too_many_n", "reads_discarded_untrimmed")
 SALMON_FATES = ("num_mapped", "num_decoy_fragments", "not_assigned")
+# The two highest-density regions a density draws, as its caption and reading guide name them.
+HDR = {"inner": f"{HDR_MASSES[0] * 100:.0f} %", "outer": f"{HDR_MASSES[1] * 100:.0f} %"}
 
 
 def _band(useful: np.ndarray, k: float) -> tuple[float, float, float]:
@@ -55,7 +58,7 @@ def fates_bubble(
     if shares:
         frame = frame.with_columns(mt_rrna_share=pl.sum_horizontal(shares))
     levels = [str(v) for v in frame[colour].unique(maintain_order=True)]
-    median, low, high = _band(frame["useful_share"].to_numpy(), registry.mad_multiplier)
+    _, low, high = _band(frame["useful_share"].to_numpy(), registry.mad_multiplier)
     raw = frame["total_reads"].to_numpy().astype(float)
     ends = (float(raw.min()) * 0.9, float(raw.max()) * 1.1)
     lines = (Line(text.word(PAGE, "figures.fates.identity"), ends, ends),
@@ -66,7 +69,7 @@ def fates_bubble(
                    if c == colour else text.word(PAGE, f"figures.fates.columns.{c}"))
                for c in frame.columns}  # fmt: skip
     area = text.word(PAGE, "figures.fates.area" if shares else "figures.fates.no_area")
-    caption = text.fill(PAGE, "figures.fates.caption", n=frame.height, median=median,
+    caption = text.fill(PAGE, "figures.fates.caption", n=frame.height,
                         k=f"{registry.mad_multiplier:g}", area=area)  # fmt: skip
     return ScatterData(
         frame=frame.with_columns(pl.col(colour).cast(pl.String)), columns=columns,
@@ -135,10 +138,15 @@ def quality_figure(curves: pl.DataFrame, sheet: pl.DataFrame, metric: Metric,
                    if c == colour else text.word(PAGE, f"figures.quality.columns.{c}"))
                for c in frame.columns}  # fmt: skip
     levels = [str(v) for v in frame[colour].unique(maintain_order=True)]
+    # Each run its own colour and dash while they fit (Rytis 2026-09-30); the group moves to
+    # the hover. Beyond that, lines share their group's colour.
+    distinct = frame["run_accession"].n_unique() <= MAX_DISTINCT
+    hover = ("sample", colour) if distinct and colour != "group" else ("sample",)
     return CurveData(
         frame=frame, columns=columns, series="run_accession", x="position", y="quality",
         x_label=text.word(PAGE, "figures.quality.x"), y_label=text.word(PAGE, "figures.quality.y"),
-        colour=colour, colours=category_colours(levels), hover=("sample",), spans=spans,
+        colour="run_accession" if distinct else colour, colours=category_colours(levels),
+        distinct=distinct, hover=hover, spans=spans,
         caption=text.fill(PAGE, "figures.quality.caption", n=frame["run_accession"].n_unique(),
                           source=metric.plot_source or metric.source),
         width="double",
@@ -150,18 +158,20 @@ def grid_figure(grid: pl.DataFrame, fastp: Fastp, run: str) -> SurfaceData | Non
     if grid["passed_pct"].n_unique() == 1:
         return None
     units = text.raw(PAGE, "figures.grid.units")
-    return SurfaceData(
+    surface = SurfaceData(
         frame=grid, x="q", y="l", z="passed_pct",
         columns={c: (units.get(c, "none"), text.word(PAGE, f"figures.grid.columns.{c}"))
                  for c in grid.columns},  # fmt: skip
         x_label=text.word(PAGE, "figures.grid.x"), y_label=text.word(PAGE, "figures.grid.y"),
-        z_label=text.word(PAGE, "figures.grid.z"),
-        caption=text.fill(PAGE, "figures.grid.caption", run=run, u=fastp.u,
-                          nq=grid["q"].n_unique(), nl=grid["l"].n_unique(), isoline=GRID_ISOLINE),
+        z_label=text.word(PAGE, "figures.grid.z"), caption="",
         isolines=(GRID_ISOLINE,), isoline_format=".0f",
         mark=Mark(float(fastp.q), float(fastp.l), text.fill(PAGE, "figures.grid.mark", q=fastp.q,
                                                               l=fastp.l)),
     )  # fmt: skip
+    # The band count is the one the surface draws, so the caption cannot name another.
+    return replace(surface, caption=text.fill(
+        PAGE, "figures.grid.caption", run=run, u=fastp.u, nq=grid["q"].n_unique(),
+        nl=grid["l"].n_unique(), isoline=GRID_ISOLINE, bands=len(surface.edges()) - 1))  # fmt: skip
 
 
 def stratum_labels(strata: Sequence[str]) -> pl.Expr:
@@ -285,7 +295,7 @@ def density(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
         PAGE, "figures.density.none")  # fmt: skip
     return replace(data, caption=text.fill(PAGE, "figures.density.caption", n=n,
                                            bandwidth=data.bandwidth(),
-                                           minimum=DENSITY_MIN_POINTS))  # fmt: skip
+                                           minimum=DENSITY_MIN_POINTS, **HDR))  # fmt: skip
 
 
 def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
@@ -310,8 +320,8 @@ def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
         x="xist_log2cpm", y="chry_log2cpm", x_label=text.word(PAGE, "figures.sex.x"),
         y_label=text.word(PAGE, "figures.sex.y"), colour="recorded",
         colours=category_colours(levels), label="label",
-        caption=text.fill(PAGE, "figures.sex.caption", n=frame.height,
-                          disagree=int((frame["agrees"] == False).sum())),  # noqa: E712
+        caption=text.fill(PAGE, "figures.sex.caption", n=frame.height, xist=SEX_X,
+                          genes=", ".join(SEX_Y)),  # fmt: skip
         lines=(Line(text.word(PAGE, "figures.sex.boundary"), (0.0, top), (0.0, top)),),
         hover=("sample", "expected", "expression_sex"),
     )  # fmt: skip

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from jinja2 import Environment, PackageLoader, select_autoescape
-from markupsafe import Markup
+from markupsafe import Markup, escape
 
 from ctx.io.naming import figure_files
 from ctx.report import text
@@ -109,7 +109,7 @@ class FigureBlock:
         text: Title, lead and reading guide.
         stem: The figure's file stem, which names its PDF, SVG and README; empty for none.
         controls: Settings for the page script, with a ``kind``: "calls" for live calling,
-            "brush" for linked brushing; or None.
+            "brush" for linked brushing, "filter" for bars filtered by column; or None.
     """
 
     figure: Any
@@ -253,6 +253,10 @@ class ModulePage:
         required = ("title", *sections)
         if empty := [name for name in required if not getattr(self, name)]:
             raise ValueError(f"empty report sections: {empty}")
+        blocks = [i for r in self.results for i in (r.items if isinstance(r, Group) else (r,))]
+        if unread := [b.text.title or b.stem for b in blocks
+                      if isinstance(b, FigureBlock) and not b.text.reading]:  # fmt: skip
+            raise ValueError(f"figures without a reading guide: {unread}")
         if len(self.key_numbers) > MAX_KEY_NUMBERS:
             raise ValueError(f"{len(self.key_numbers)} key numbers; at most {MAX_KEY_NUMBERS}")
 
@@ -263,6 +267,15 @@ _ENV = Environment(
     trim_blocks=True,
     lstrip_blocks=True,
 )
+_CODE = re.compile(r"`([^`]+)`")
+
+
+def code_spans(value: str) -> Markup:
+    """Page text with each backticked span as code, everything else escaped (D-045)."""
+    return Markup(_CODE.sub(lambda m: f"<code>{m.group(1)}</code>", str(escape(value))))
+
+
+_ENV.filters["code"] = code_spans
 
 
 def plotly_js() -> str:
@@ -341,10 +354,19 @@ def _prepare(block: FigureBlock, index: int, number: int, level: int) -> dict[st
 
 
 def _defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
-    """What the controls show before the reader moves them: the default rule, or no paint."""
+    """What the controls show before the reader moves them: the default rule, no paint, or all.
+
+    A filter's live line is ``ui.toml`` [filter] summary, filled here with the numbers of every
+    bar and passed unfilled for the page script to fill again (``ctxFilter.summary``).
+    """
     if controls["kind"] == "brush":
         return {"colours": list(zip(controls["colours"], controls["names"], strict=True)),
                 "empty": controls["empty"]}  # fmt: skip
+    if controls["kind"] == "filter":
+        return {"filters": list(controls["filters"].items()),
+                "summary": text.fill("ui", "filter.summary", **controls["start"]),
+                "template": text.raw("ui", "filter.summary"),
+                "none": text.word("ui", "filter.none")}  # fmt: skip
     return {
         "fc": f"{controls['lfc_min']:g}",
         "bases": list(controls["bases"].items()),

@@ -162,6 +162,7 @@ def gather(
     from ctx.gather.curation import CurationError  # noqa: PLC0415 - same reason
     from ctx.gather.fetchngs import FetchngsError  # noqa: PLC0415 - same module, same reason
     from ctx.gather.rnaseq import RnaseqError  # noqa: PLC0415 - same reason
+    from ctx.qc.registry import RegistryError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
@@ -170,7 +171,7 @@ def gather(
             ctx.obj["settings"], cards, command, dataset, fetchngs_dir=fetchngs_dir,
             dataset_file=dataset_file, rnaseq_dir=rnaseq_dir,
         )  # fmt: skip
-    except (FetchngsError, DatasetError, CurationError, RnaseqError) as error:
+    except (FetchngsError, DatasetError, CurationError, RnaseqError, RegistryError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

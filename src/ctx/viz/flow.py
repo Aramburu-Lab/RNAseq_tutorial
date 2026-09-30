@@ -6,6 +6,7 @@ since matplotlib has no Sankey of this kind; ``interactive()`` uses plotly's. Bo
 same ``FlowData``, which refuses a node whose reads in and out differ: every read has a fate.
 """
 
+import textwrap
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -14,6 +15,7 @@ import polars as pl
 
 from ctx.viz.annotate import place_caption
 from ctx.viz.style import (
+    AVERAGE_CHAR_EM,
     FLOW,
     LINE_SPACING,
     LINE_WIDTHS,
@@ -125,7 +127,8 @@ class FlowData:
         held = self.held()
         column = {s: [n for n in self.nodes if n.stage == s] for s in stages}
         top = 1.0 - 2 * gap
-        scale = min((top - gap * (len(ns) - 1)) / max(sum(held[n.id] for n in ns), 1e-12)
+        # Half a label below the lowest node: its label is centred on it, whatever its height.
+        scale = min((top - gap * (len(ns) - 1) - gap / 2) / max(sum(held[n.id] for n in ns), 1e-12)
                     for ns in column.values())  # fmt: skip
         placed = {}
         for s, ns in column.items():
@@ -173,34 +176,63 @@ class FlowData:
 
         apply_matplotlib(theme)
         width, height = figure_inches(self.width, "flow")
-        fig = Figure(figsize=(width, height))
-        ax = fig.subplots()
-        ax.set_axis_off()
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-        place_caption(fig, self.caption, width, height)
-        axes_inches = ax.get_position().height * height
-        gap = SIZES["annotation"] * LINE_SPACING / 72 / axes_inches
-        placed, scale = self._layout(gap)
+        line = SIZES["annotation"] * LINE_SPACING / 72
+        most = max(sum(n.stage == s for n in self.nodes) for s in {n.stage for n in self.nodes})
+        # Long level names wrap into their column; when the wrapped labels need more height than
+        # the figure has, it grows, as a heatmap does for its labels. Two passes suffice: the
+        # wrap depends on the width alone.
+        for _ in range(2):
+            fig = Figure(figsize=(width, height))
+            ax = fig.subplots()
+            ax.set_axis_off()
+            ax.set_xlim(0, 1)
+            ax.set_ylim(0, 1)
+            place_caption(fig, self.caption, width, height)
+            axes_inches = ax.get_position().height * height
+            placed, scale = self._layout(line / axes_inches)
+            labels = self._labels(placed, ax.get_position().width * width)
+            lines = max(label.count("\n") + 1 for label in labels.values())
+            # _layout leaves gap * (nodes + 1.5) of the axes to labels and titles.
+            needed = line * lines * (most + 1.5) / FLOW["label_share"]
+            if needed <= axes_inches:
+                break
+            height += (needed - axes_inches) * 1.1
+        placed, scale = self._layout(line * lines / axes_inches)
         colour = {n.id: n.colour or theme.reference for n in self.nodes}
         for band in self._bands(placed, scale):
             ax.add_patch(_band_patch(band[:5], colour[band[5]]))
-        self._draw_nodes(ax, placed, colour, theme)
+        self._draw_nodes(ax, placed, colour, theme, labels)
         return fig
 
+    def _labels(self, placed: Mapping[str, tuple[float, float, float]],
+                axes_inches: float) -> dict[str, str]:  # fmt: skip
+        """Each node's label and reads, wrapped to the room before the next stage's bars.
+
+        Long level names ("Reads \u2264 76 nt (min 35 nt)") ran into the next stage on one line.
+        """
+        held = self.held()
+        starts = sorted({x for x, _, _ in placed.values()})
+        room = {x: (nxt if nxt else 1.0) - x - FLOW["node"] - 2 * FLOW["pad"]
+                for x, nxt in zip(starts, [*starts[1:], None], strict=True)}  # fmt: skip
+        chars = {x: max(1, int(r * axes_inches * 72 / (SIZES["annotation"] * AVERAGE_CHAR_EM)))
+                 for x, r in room.items()}  # fmt: skip
+        return {n.id: textwrap.fill(f"{n.label} {held[n.id]:,.0f}", chars[placed[n.id][0]],
+                                    break_long_words=False)
+                for n in self.nodes}  # fmt: skip
+
     def _draw_nodes(self, ax: Any, placed: Mapping[str, tuple[float, float, float]],
-                    colour: Mapping[str, str], theme: Theme) -> None:  # fmt: skip
+                    colour: Mapping[str, str], theme: Theme,
+                    labels: Mapping[str, str]) -> None:  # fmt: skip
         """Each node's bar and its label with its reads; each stage's title above it."""
         from matplotlib.patches import Rectangle  # noqa: PLC0415 - heavy
 
-        held = self.held()
         for n in self.nodes:
             x, top, h = placed[n.id]
             ax.add_patch(Rectangle((x, top - h), FLOW["node"], h, facecolor=colour[n.id],
                                    linewidth=LINE_WIDTHS["band_edge"]))  # fmt: skip
-            ax.text(x + FLOW["node"] + FLOW["pad"], top - h / 2,
-                    f"{n.label} {held[n.id]:,.0f}", va="center", ha="left",
-                    fontsize=SIZES["annotation"], color=theme.ink)  # fmt: skip
+            ax.text(x + FLOW["node"] + FLOW["pad"], top - h / 2, labels[n.id], va="center",
+                    ha="left", fontsize=SIZES["annotation"], color=theme.ink,
+                    linespacing=LINE_SPACING)  # fmt: skip
         stages = sorted({n.stage for n in self.nodes})
         for s, label in zip(stages, self.stage_labels, strict=True):
             x = min(placed[n.id][0] for n in self.nodes if n.stage == s)

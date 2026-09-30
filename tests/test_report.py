@@ -207,6 +207,10 @@ def test_skeleton_order():
     assert positions == sorted(positions)
     with pytest.raises(ValueError, match="think"):
         _module(think=())
+    # Every figure on a module page says how to read it (Rytis, 2026-09-30).
+    bare_figure = FigureBlock(go.Figure(), "caption", [], "a.csv", text=FigureText(title="Grid"))
+    with pytest.raises(ValueError, match="without a reading guide: \\['Grid'\\]"):
+        _module(results=(Group("A group", (bare_figure,)),))
     # The frozen M5 and M6 pages have no Input until P2S.4: no section, no contents link.
     bare = render(_module(input=""))
     assert '<section id="input">' not in bare and 'href="#input"' not in bare
@@ -258,7 +262,8 @@ def test_quiz_hidden():
 
 
 def _figure_block(title: str) -> FigureBlock:
-    return FigureBlock(go.Figure(), "caption", [], "d.csv", text=FigureText(title=title))
+    text = FigureText(title=title, reading=("A mark is one sample.",))
+    return FigureBlock(go.Figure(), "caption", [], "d.csv", text=text)
 
 
 def test_nav_and_tabs_resolve():
@@ -380,3 +385,68 @@ def test_hub_lists_the_course_modules_in_order():
     course = [module for module, _ in MODULES if module not in NOT_MODULES]
     assert [TITLES[m].split()[0] for m in course] == [f"M{i}" for i in range(11)]
     assert "lite_build" not in course
+
+
+def test_round_trip_of_bars_with_lines_and_filters(tmp_path):
+    """Bars over reference lines and a median: the round trip, and every line named in both
+    halves of the static figure."""
+    from test_viz import filtered_bars  # noqa: PLC0415
+
+    data = filtered_bars()
+    figure_stem = stem("gather", "filtered_demo", 1, day=date(2026, 9, 30))
+    write_figure(data, tmp_path, figure_stem, title="Demo", data_releases={})
+    html = (tmp_path / f"{figure_stem}.html").read_text()
+    test_round_trip((tmp_path, figure_stem, data, html))
+    pdf = " ".join(PdfReader(tmp_path / f"{figure_stem}_black.pdf").pages[0].extract_text().split())
+    svg = re.sub(r"<[^>]+>", " ", (tmp_path / f"{figure_stem}_white.svg").read_text())
+    for _, name, _ in data.rules():
+        assert name in pdf and name in " ".join(svg.split()), name
+
+
+def test_filter_form_on_a_module_page():
+    """A bar with filters gets one select per column, All first, and the live line filled at
+    every bar from ui.toml, whose unfilled template the page script fills again."""
+    from dataclasses import replace  # noqa: PLC0415
+
+    from test_viz import filtered_bars  # noqa: PLC0415
+
+    from ctx.report import text  # noqa: PLC0415
+    from ctx.viz.save import figure_block  # noqa: PLC0415
+
+    data = filtered_bars()
+    shown = FigureText(title="Depth", reading=("Each bar is one run.",))
+    block = replace(figure_block(data, "x", shown), controls=data.controls())
+    html = render(_module(results=(Group("Samples", (block,)),)))
+    (form,) = re.findall(r'<form class="calls filter".*?</form>', html, re.S)
+    for column, levels in data.controls()["filters"].items():
+        (select,) = re.findall(rf'<select data-column="{column}">(.*?)</select>', form, re.S)
+        options = re.findall(r'<option value="([^"]*)"[^>]*>([^<]*)</option>', select)
+        assert options == [("", text.word("ui", "filter.all")), *((v, v) for v in levels)]
+    (line,) = re.findall(r'<p class="calls-summary filter-summary"[^>]*>(.*?)</p>', html)
+    assert line == text.fill("ui", "filter.summary", **data.controls()["start"])
+    (template,) = re.findall(r'data-template="([^"]*)"', html)
+    assert unescape(template) == text.raw("ui", "filter.summary")
+    assert "var ctxFilter" in html and "form.calls:not(.filter)" in html
+    assert '"kind": "filter"' in html
+
+
+def test_backticks_render_as_code_and_the_rest_stays_escaped():
+    from ctx.report.builder import code_spans  # noqa: PLC0415
+
+    assert str(code_spans("Run `ctx qc` on <b>data</b>.")) == (
+        "Run <code>ctx qc</code> on &lt;b&gt;data&lt;/b&gt;."
+    )
+
+
+def test_a_bar_figure_page_carries_its_filters(tmp_path):
+    """The figure opened alone filters as the module page does (figure_block, not the caller)."""
+    from test_viz import filtered_bars  # noqa: PLC0415
+
+    from ctx.viz.save import write_figure  # noqa: PLC0415
+
+    text = FigureText(title="Depth", reading=("A bar is a run.",))
+    written = write_figure(filtered_bars(), tmp_path, "2026-09-30_gather_x_depth_v1",
+                           title="Depth", data_releases={}, text=text)  # fmt: skip
+    (page,) = [p for p in written if p.suffix == ".html"]
+    html = page.read_text()
+    assert 'class="calls filter"' in html and 'data-column="cell_type"' in html

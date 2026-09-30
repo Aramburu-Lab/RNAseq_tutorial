@@ -1,5 +1,6 @@
 {% include "_calls.js.j2" %}
 {% include "_brush.js.j2" %}
+{% include "_filter.js.j2" %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
    is logged and never stops the others; every feature degrades to a readable page without
@@ -117,8 +118,15 @@
   /* Live calling: ctxCalls holds the rule; this block reads the controls, redraws the points
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
-  document.querySelectorAll("form.calls").forEach(function (form) {
+  /* The filter form borrows the calls panel's look (class "calls"), not its script. */
+  document.querySelectorAll("form.calls:not(.filter)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
+  });
+
+  /* Filters: ctxFilter picks the rows; this block redraws every series from them, fits the
+     category axis to the bars shown, moves the median line and refills the live line. */
+  document.querySelectorAll("form.filter").forEach(function (form) {
+    guard("filter", function () { filtering(form); });
   });
 
   /* Linked brushing: ctxBrush holds the logic; this block paints the samples a lasso or a tap
@@ -156,6 +164,40 @@
       draw();
     });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
+  }
+
+  function filtering(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    var div = fig.querySelector(".js-plotly-plot");
+    var summary = fig.querySelector(".filter-summary");
+    var selects = Array.prototype.slice.call(form.querySelectorAll("select[data-column]"));
+    var axis = cfg.horizontal ? "yaxis" : "xaxis", along = cfg.horizontal ? "x" : "y";
+    var traces = cfg.traces.map(function (_, i) { return i; });
+    function update() {
+      var chosen = {};
+      selects.forEach(function (s) { chosen[s.getAttribute("data-column")] = s.value; });
+      var view = ctxFilter.view(rows, cfg, chosen), layout = {};
+      Plotly.restyle(div, { x: view.x, y: view.y, customdata: view.customdata }, traces);
+      layout[axis + ".categoryarray"] = view.categories;
+      layout[axis + ".showticklabels"] = view.categories.length <= cfg.max_tick_labels;
+      if (cfg.median_shape !== null) {
+        var shape = "shapes[" + cfg.median_shape + "].";
+        layout[shape + "visible"] = view.median !== null;
+        if (view.median !== null) {
+          layout[shape + along + "0"] = view.median;
+          layout[shape + along + "1"] = view.median;
+        }
+      }
+      Plotly.relayout(div, layout);
+      summary.textContent = ctxFilter.summary(view, cfg, summary.getAttribute("data-template"),
+                                              summary.getAttribute("data-none"));
+    }
+    form.addEventListener("change", update);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the selects without an event. */
+    update();
   }
 
   function liveCalls(form) {

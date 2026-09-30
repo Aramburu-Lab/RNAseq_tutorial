@@ -1,0 +1,190 @@
+# M4 Quantification page (ctx quant). Placeholders in {braces} are filled by the code; keep their names.
+# Until ctx quant exists, scripts/python/preview_quant.py draws this page from made-up data.
+
+title = "M4 Quantification: {dataset}"
+budget = "Preview build on made-up data; ctx quant itself is budgeted as Track A: under {minutes} min and {ram_gb} GB"
+profile = "preview build, one process for every preview page"
+purpose = "Quantify each sample's reads as gene counts with Salmon and pytximport, and check mapping, depth and agreement between samples before differential expression."
+input = "The trimmed FASTQ files of `ctx process` and the sample sheet of `ctx gather`. The Salmon index is built from the chr22 transcript sequences and genome; genes come from the transcript-to-gene table of the same GENCODE release."
+method = """Salmon maps each read to the transcripts it is compatible with and splits reads that fit several transcripts by expectation maximisation. It infers the library type (`-l A`) and corrects for fragment GC content and read-start sequence bias. A decoy-aware index assigns reads from genome sequence outside the transcriptome to decoys, not to a similar transcript.
+
+pytximport sums transcript estimates to genes. DESeq2 models counts, and pydeseq2 takes no per-gene length offset. So gene counts are TPM scaled to each library's size and the gene's average effective length (`length_scaled_tpm`)."""
+interpretation = """Compare genes within a sample on TPM, and samples on counts after DESeq2's size factors. A mapping rate that differs by read-length batch belongs to the batch; where batches follow the groups, it cannot be told apart from them.
+
+Compare detection at a depth every sample reaches: a deeper library detects more genes by sampling alone. Samples should cluster by cell type before condition; read the M2 flags of a sample that correlates poorly with all others.
+
+Genes only Salmon detects are often paralogs whose reads map to several loci. STAR and featureCounts discard such reads by default, so they count fewer reads for those genes."""
+# "Term: rest" in a mistake prints Term in bold.
+pitfalls = [
+    "Comparing genes on counts: at equal expression a longer gene collects more reads; compare genes within a sample on TPM.",
+    "TPM into DESeq2: TPM removes library size, so the count model's variance no longer fits; give DESeq2 counts.",
+    "An index without decoys: reads from unannotated genome sequence map to similar transcripts and inflate their counts.",
+]
+
+[[terms]]
+term = "TPM"
+meaning = "Transcripts per million: reads per base of effective length, scaled so the values of one sample sum to a million."
+
+[[terms]]
+term = "Effective length"
+meaning = "The positions in a transcript where a fragment can start: its length minus the mean length of the fragments that fit in it."
+
+[[terms]]
+term = "Mapping rate"
+meaning = "Reads Salmon assigns to a transcript, as a share of all reads. STAR's rate counts reads aligned to the genome, of which featureCounts assigns fewer to genes."
+
+[[terms]]
+term = "Multi-mapping read"
+meaning = "A read compatible with several transcripts or loci. Salmon splits it by expectation maximisation; STAR's gene counts and featureCounts leave it out by default."
+
+[[terms]]
+term = "Decoy"
+meaning = "Genome sequence added to a Salmon index, so reads from outside the transcriptome map there and not to a similar transcript."
+
+[[questions]]
+prompt = "Gene A has twice the TPM of gene B in one sample. Does gene A have twice the reads?"
+answer = "Only if both have the same effective length. Reads are TPM times effective length times one constant of the sample, so the longer gene collects more."
+
+[[questions]]
+prompt = "Why does pydeseq2 receive length-scaled TPM counts and not Salmon's estimated counts?"
+answer = "Estimated counts shift when a gene's isoform mix changes between samples. R's tximport passes that change to DESeq2 as an offset matrix, which pydeseq2 cannot take; length-scaled TPM builds the correction into the counts."
+
+[[questions]]
+prompt = "One sample detects fewer genes than the others. What do you check before calling it degraded?"
+answer = "Its depth first: read the curves at the depth every sample reaches. Then its mapping rate and its cell type, since cell types differ in how many genes they express."
+
+# The options ctx quant will have (TODO.md, M4), one parameter card each.
+[planned."--counts-from-abundance"]
+meaning = "How pytximport turns transcript estimates into gene counts."
+default = "length_scaled_tpm"
+effect = "The value no keeps Salmon's estimates; they shift with isoform use."
+
+[planned."--libtype"]
+meaning = "Salmon's library type; A infers strand and read orientation."
+default = "A"
+effect = "A wrong fixed type discards most reads; the mapping rate drops."
+
+[planned."--gc-bias"]
+meaning = "Correct fragment weights for GC content (Salmon --gcBias)."
+default = "on"
+effect = "Off: GC bias from library preparation stays in the abundances."
+
+[planned."--seq-bias"]
+meaning = "Correct for sequence preference at read starts (Salmon --seqBias)."
+default = "on"
+effect = "Off: priming bias at read starts stays in the abundances."
+
+[planned."--decoys"]
+meaning = "Add the chr22 genome to the Salmon index as decoys."
+default = "on"
+effect = "Off: a smaller index; genomic reads inflate similar transcripts."
+
+[groups]
+samples = "Samples: mapping, depth and agreement"
+genes = "Genes: units and tools"
+
+# The numbers at the top of Results.
+[keys]
+samples = "Samples"
+mapping = "Median mapping rate"
+mapping_detail = "Salmon, over {n} samples"
+shared = "Genes all three tools detect"
+shared_detail = "of {total:,} that any tool detects"
+
+# The data dictionary of every table and figure file; units are in the code.
+[columns]
+sample = "Sample, as the gather sheet names it."
+cell_type = "Cell type, from the gather sheet."
+condition = "Condition, from the gather sheet."
+batch = "Read-length batch, from the gather sheet."
+mapping_rate = "Reads Salmon mapped to a transcript, as a percentage of all reads. Made-up."
+assigned = "Reads Salmon assigned to transcripts, in millions. Made-up."
+genes_at_depth = "Genes detected at the depth every sample reaches. Made-up."
+depth = "Reads kept after subsampling, in millions. Made-up."
+genes = "Genes with at least the detection threshold of reads at this depth. Made-up."
+sample_row = "Sample of the row."
+sample_column = "Sample of the column."
+rho = "Spearman correlation of the two samples over detected genes. Made-up."
+level = "The rho bin the cell is drawn in; empty on the diagonal."
+gene = "Made-up gene identifier."
+tpm = "Transcripts per million. Made-up."
+reads = "Salmon's estimated reads for the gene. Made-up."
+effective_length = "Effective length of the gene: its transcripts' lengths weighted by abundance. Made-up."
+length_class = "Effective length class, as the legend names it."
+region = "The tools that detect these genes, and no other tool."
+salmon = "Whether Salmon is one of those tools."
+n_genes = "Genes in this combination of tools. Made-up."
+median_reads = "Median over these genes of the mean Salmon reads per sample. Made-up."
+
+[figures.mapping]
+title = "Salmon mapping rate by read-length batch"
+lead = "Median mapping rate: {medians}."
+median = "{batch}, {rate:.1f} % over {n} samples"
+reading = [
+    "Each point is one sample; its height is the percentage of its reads Salmon mapped to a transcript.",
+    "The slots are the read-length batches; colour marks the cell type.",
+]
+caption = "Made-up data. Salmon mapping rate of {n} samples by read-length batch; Mann-Whitney U = {u:g}, p = {p:.2g}, rank-biserial r = {r:.2f}, {tested} over {reference}."
+x = "Read-length batch"
+y = "Mapping rate"
+
+[figures.detection]
+title = "Genes detected against depth"
+lead = "At {depth:.1f} million reads, the median {reference} sample detects {ref_genes:,} genes and the median {tested} sample {test_genes:,}."
+reading = [
+    "Each line is one sample, subsampled to smaller depths; its height counts the genes with at least {min_reads} reads.",
+    "Colour marks the cell type; the dashed line is the depth every sample reaches.",
+    "A line still rising at its right end would detect more genes with more reads.",
+]
+caption = "Made-up data. Genes with at least {min_reads} reads as {n} samples are subsampled. At {depth:.1f} million reads, {tested} over {reference}: Mann-Whitney U = {u:g}, p = {p:.2g}, rank-biserial r = {r:.2f}."
+x = "Reads, subsampled"
+y = "Genes detected"
+depth_line = "Depth every sample reaches"
+
+[figures.correlation]
+title = "Spearman correlation between samples"
+lead = "Median rho is {within:.3f} within cell types and {between:.3f} between them."
+reading = [
+    "Each cell is the Spearman rho of two samples over the detected genes; its colour is the bin in the legend, dark for low.",
+    "Rows and columns follow the clustering, so samples that correlate sit together; the strips on top mark cell type and batch.",
+    "A row dark along its length is a sample unlike every other: read its M2 flags.",
+]
+caption = "Made-up data. Spearman rho of {n} samples over {genes:,} genes; average linkage on one minus rho, optimal leaf order. Mean rho within cell types minus between: {diff:.3f}; label permutation p = {p:.2g}, {perms:,} permutations."
+axis = "Sample"
+cell_type = "Cell type"
+batch = "Batch"
+
+[figures.correlation.bins]
+below = "rho < {edge:.3f}"
+between = "rho {low:.3f} to {high:.3f}"
+above = "rho ≥ {edge:.3f}"
+
+[figures.units]
+title = "Estimated reads against TPM in one sample"
+lead = "In {sample}, the median long gene has {ratio:.1f} times the reads per TPM of the median short gene."
+reading = [
+    "Each point is one gene: its TPM on the x axis, its estimated reads on the y axis, both on log scales.",
+    "Colour marks effective length; at equal TPM, a longer gene sits higher.",
+]
+caption = "Made-up data. Sample {sample}: {n:,} genes drawn at random from {total:,} with at least one read. Descriptive, no test: a gene's reads equal its TPM times its effective length times one constant of the sample."
+x = "Abundance"
+y = "Estimated reads"
+short = "Under {short:,} nt"
+medium = "{short:,} to {long:,} nt"
+long = "Over {long:,} nt"
+
+[figures.tools]
+title = "Genes detected by Salmon, STAR and featureCounts"
+lead = "{disagree:,} genes are detected by one or two tools; Salmon alone detects {salmon_only:,} of them."
+reading = [
+    "Each bar is one combination of tools; its length counts the genes those tools detect and no other tool does.",
+    "Colour marks whether Salmon is among them; hover a bar for the median reads of its genes.",
+]
+caption = "Made-up data; counts, no test. Genes with a mean of at least {min_reads} reads per sample over {n} samples, by tool. The {shared:,} of {total:,} detected genes that all three tools detect are not drawn."
+tools = ["Salmon", "STAR", "featureCounts"]
+only = "{tool} only"
+pair = "{first} and {second}"
+salmon_in = "With Salmon"
+salmon_out = "Without Salmon"
+x = "Tools"
+y = "Genes"

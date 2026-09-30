@@ -80,7 +80,7 @@ def test_an_edited_copy_changes_the_page(tmp_path):
     edited = (
         (copy / "setup.toml")
         .read_text()
-        .replace("Is this computer ready for the course", "Is this laptop ready for class")
+        .replace("before any analysis runs on it", "before class starts")
     )
     (copy / "setup.toml").write_text(edited)
     env = {"CTX_CONTENT": str(copy), "PATH": str(CTX.parent)}
@@ -91,8 +91,8 @@ def test_an_edited_copy_changes_the_page(tmp_path):
     assert done.returncode == 0, done.stderr
     (page,) = root.rglob("*_setup_environment_v1.html")
     html = page.read_text()
-    assert "Is this laptop ready for class" in html
-    assert "Is this computer ready for the course" not in html
+    assert "before class starts" in html
+    assert "before any analysis runs on it" not in html
     (copy / "ui.toml").unlink()
     gone = subprocess.run([str(CTX), "--root", str(root), "setup"], cwd=root, env=env,
                           capture_output=True, text=True, check=False)  # fmt: skip

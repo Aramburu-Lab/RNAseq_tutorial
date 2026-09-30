@@ -15,7 +15,9 @@ import pytest
 from ctx.dataset import DatasetError, load
 from ctx.gather.curation import CurationError, curate
 from ctx.gather.fetchngs import read
+from ctx.gather.harmonise import DEPTH_FILTERS, _depth_standard
 from ctx.io.naming import figure_files, lint
+from ctx.report import text
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "fetchngs" / "metadata_only"
@@ -211,7 +213,14 @@ def test_cli_curated_end_to_end(runs, tmp_path):
         written = sorted(p.name for p in out.glob(f"{csv.stem}*"))
         assert written == sorted(figure_files(csv.stem)), name
     (page,) = out.glob("*_synthetic_overview_v1.html")
-    assert "Curation from synthetic.toml" in page.read_text()
+    html = page.read_text()
+    assert "Curation from synthetic.toml" in html
+    # The depth figure: a select per filter column, and ENCODE's two lines from the registry.
+    assert all(f'<select data-column="{c}">' in html for c in DEPTH_FILTERS)
+    good, usable = (reads / 1e6 for reads in _depth_standard()[0])
+    for key, millions in (("good", good), ("usable", usable)):
+        name = text.fill("gather", f"figures.library.{key}", millions=millions)
+        assert f'"name":"{name}"' in html, name
     readme = next(out.glob("*_samplesheet_v1_README.md")).read_text()
     assert "sha256:synthetic.sdrf.txt" in readme
     assert (hashlib.sha256(sdrf.read_bytes()).hexdigest(), sdrf.stat().st_mtime_ns) == before
@@ -287,3 +296,16 @@ def test_subset_still_needs_a_row_per_run(runs, tmp_path):
     done = _gather(tmp_path, spec)
     assert done.returncode == 1
     assert f"{dropped}: run has no SDRF row" in done.stderr
+
+
+def test_a_missing_registry_is_reported_not_raised(runs, tmp_path):
+    # Gather reads the depth standards from the QC registry; a missing one is a clean exit 1.
+    _place_sdrf(tmp_path, sdrf_rows(runs))
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("SLURM_", "CTX_"))}
+    args = ["--root", str(tmp_path), "gather", "--dataset", "synthetic",
+            "--fetchngs-dir", str(FIXTURE), "--dataset-file", str(SPEC)]  # fmt: skip
+    done = subprocess.run([str(CTX), *args], cwd=tmp_path, capture_output=True, text=True,
+                          env={**env, "CTX_QC_REGISTRY": str(tmp_path / "none.toml")},
+                          check=False)  # fmt: skip
+    assert done.returncode == 1
+    assert "no QC registry at" in done.stderr and "Traceback" not in done.stderr

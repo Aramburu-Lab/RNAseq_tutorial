@@ -87,6 +87,14 @@ looser = "Looser: the next larger cutoff"
 reset = "Reset"
 noscript = "This is the default rule; turn on JavaScript to move the cutoffs."
 
+# Bars filtered by the values of a column; the page script fills summary again on each change.
+[filter]
+label = "Show only"
+all = "All"
+summary = "{shown} of {total} bars shown; median {median}."
+none = "No bar matches these filters."
+noscript = "This shows every bar; turn on JavaScript to filter them."
+
 [hub]
 rules = "Sanity rules"
 rule = "Rule"

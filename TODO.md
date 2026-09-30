@@ -550,6 +550,19 @@ Rytis asked for every module in the preview, and for Figure 2 of the gather page
 - [ ] **P2V.1** Gather Figure 2: filters by cell type and condition; a line at the median of the runs shown, recomputed as the filters change; ENCODE's 30 M and 20 M from the registry, marked as aligned reads against sequenced reads.
 - [ ] **P2V.2** Preview pages on made-up data for M3, M4, M7, M8, M9 and M10, written to the prose rules, and a gather page for the made-up dataset; the build script; the hub reading 11 of 11; published.
 
+### Phase 2G — Cluster guide for students (planned 2026-09-30; decisions open)
+
+Rytis: the cluster side packed into a page students use to reproduce the course on their own dataset, on Kebnekaise under their own project, as an HTML page in the course design. The plan (8 agents: three readers, two designs, two adversarial reviews, a synthesis) sits outside the repo; these items are the record. Its D-entries take the next free numbers, D-046 and D-047, and the page follows the prose rules (D-045). Rytis's choices, 2026-09-30: (1) Nextflow for students from the repo's pixi `fetch` environment, not an HPC2N module; (2) 5 downloads per student, with `queueSize = 50`, staggered starts and rnaseq `work/` kept until `ctx gather` exits 0 as the other class defaults; (3) the rehearsal on the 4 smallest Step-1 runs by ENA `fastq_bytes`, 1,268,992,130 bytes, not the 8 teaching runs.
+- [ ] **G.0** Documents (decisions answered 2026-09-30; the cluster check still to run): D-046 (the student route: four scripts in `scripts/bash`, `ctx gather --cluster-guide`, Nextflow from the `fetch` environment, completion markers gating rnaseq and the subset) and D-047 (a study without an SDRF curated from the student's own table as a `file://` `[sdrf]` resource); Rytis runs the cluster check and answers (1) to (3).
+- [ ] **G.1** `scripts/bash/kebnekaise_env.sh`, `fetchngs.sbatch`, `rnaseq.sbatch`, `subsample.sbatch`, each with an `exempt:` block and tests run by `bash -n` and stubs; each planted mutation fails its test.
+- [ ] **G.2** A `Code` result kind in the builder and template: a script shown as it is in the file, with its SHA-256 and a Copy button.
+- [ ] **G.3** `conf/dataset_template.toml`: the SDRF, own-table and `subset_of` routes, commented; the filled template curates the fixture.
+- [ ] **G.4** `ctx.gather.guide` and `ctx.gather.trace` (the nf-core trace read by its real columns: the sample is the text in parentheses in `name`), `content/cluster.toml` to the prose rules, the card and CLI option; built in `~/ctx_guide`, never `~/ctx_tier1`.
+- [ ] **G.5** Rytis's rehearsal on Kebnekaise from a clean environment through all four scripts, with a relaunch; versions, cached tasks, `ctx gather` exit 0, and `num_processed` equal to Step-1's per run.
+- [ ] **G.6** CONVENTIONS' Nextflow line gains the student route; superseded TODO items closed; D-046 and D-047 decided.
+- [ ] **G.7** After the Step-1 record: the guide built with the rnaseq trace; browser check at 1280 and 375 px in both themes, every Copy clicked; Track B budget measured.
+- [ ] **G.8** The page as a deliverable after Rytis's OK; once the repo is public, a newcomer reproduces a 2 to 4 run public study from the page alone.
+
 ### Phase 2Q — Read fates, pathway heatmaps, linked brushing (approved 2026-09-29)
 
 Rytis asked for a bubble chart of raw against useful reads with a hover that says where the rest went, heatmaps of gene-set patterns across sample groups, and linked multi-colour brushing like plotly's parallel-categories example. His choices: the Step-1 Trim Galore reports are copied off the cluster and parsed by MultiQC; contamination is shown through mitochondrial and rRNA fractions from counts; set scores are the mean per-gene z-score of the blind VST; brushing is over samples. Only the copy rule and the GTF resource touch frozen files, so they go first, as D-022, before cluster step 7; the heatmaps on M5 and M6 wait for the Step-1 record. The plan file lies outside the repo and the next plan overwrites it, so this section is the record.
@@ -2229,8 +2242,12 @@ grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c      
 du -sh "$P/nfcore_rnaseq/results" "$P/nfcore_rnaseq/work" "$P/nfcore_fetchngs/results" "$P/nfcore_fetchngs/work"   # PASTE
 sacct -X -n -S 2026-09-27 --name=nf_fetchngs,nf_rnaseq_tier1 --format=JobID,JobName,Elapsed,MaxRSS,State  # PASTE
 find "$P/nfcore_rnaseq/results" -type l | wc -l                                                     # PASTE: published files that are symlinks into work/
-# Keep work/ and the FASTQs until I confirm the P2C.2 gather checks; after that it is your call.
-# If the count above is not 0, results/ holds links into work/: removing work/ empties results/.
+# If the count above is not 0, results/ holds links into work/: turn each into a copy of its
+# target, so work/ holds only temporary files (job 47485533 had 840, from D-025's override).
+(cd "$P/nfcore_rnaseq/results" && find . -type l -xtype d | wc -l)                                     # PASTE, expect 0: no link to a folder
+(cd "$P/nfcore_rnaseq/results" && find . -type l -print0 | while IFS= read -r -d '' f; do cp --remove-destination -- "$(readlink -f -- "$f")" "$f"; done)
+find "$P/nfcore_rnaseq/results" -type l | wc -l                                                     # PASTE, expect 0
+# Keep work/ until the P2C.2 gather checks pass on the Mac; once the count is 0, removing it is your call.
 
 # ---- 7. On the Mac, after step 6 and my confirmation of the newest registration commit: COPIED_FILES only ----
 # -L copies what a symlink points at: on 2026-09-30 a copy taken mid-run brought the Trim Galore

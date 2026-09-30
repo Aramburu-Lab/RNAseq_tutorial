@@ -5,6 +5,7 @@ is JavaScript (templates/_calls.js.j2); this test runs the same file and compare
 and cutoff line with the Python definition over a grid of every basis, cutoff and threshold.
 """
 
+import dataclasses
 import json
 import math
 import shutil
@@ -16,11 +17,15 @@ import numpy as np
 import polars as pl
 import pytest
 from synth import demo_linked, design_counts, filtered_counts
+from test_viz import filtered_bars
 
 from ctx.dataset import Contrast
 from ctx.de.deseq import fit
 from ctx.de.run import _volcano
 from ctx.de.stats import ADJUSTMENTS, adjust, classify, p_line
+from ctx.report import text
+from ctx.report.builder import _defaults
+from ctx.viz.bar import significant
 from ctx.viz.save import figure_block
 from ctx.viz.scatter import CUTOFF_PRESETS, MIN_CUTOFF, _js_number
 
@@ -292,3 +297,74 @@ def test_brush_paints_both_views_and_counts_as_python_does():
     assert painted[:5] == [0, 0, 5, 0, 5]
     assert out[-1] == {"summary": cfg["empty"], "codes": [0] * len(rows)}
     assert "; " in out[-2]["summary"]
+
+
+FILTER = ROOT / "src" / "ctx" / "report" / "templates" / "_filter.js.j2"
+PICK = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const cfg = input.cfg;
+console.log(JSON.stringify({
+  views: input.choices.map((chosen) => {
+    const view = ctxFilter.view(input.rows, cfg, chosen);
+    return { view, summary: ctxFilter.summary(view, cfg, input.template, input.none) };
+  }),
+  numbers: input.numbers.map((v) => ctxFilter.number(v)),
+}));
+"""
+
+
+def _filter_oracle(data, chosen: dict[str, str]) -> dict:
+    """What the page must draw for one choice, from BarData itself: its rows, its lengths()."""
+    frame = data.frame
+    for column, level in chosen.items():
+        if level:
+            frame = frame.filter(pl.col(column).cast(pl.String) == level)
+    if frame.is_empty():
+        return {"categories": [], "bars": 0, "median": None, "traces": [[] for _ in data.colours]}
+    lengths = dataclasses.replace(data, frame=frame).lengths()
+    parts = [frame.filter(pl.col(data.series) == level) for level in data.colours]
+    return {
+        "categories": frame[data.category].unique(maintain_order=True).cast(pl.String).to_list(),
+        "bars": len(lengths),
+        "median": float(np.median(lengths)),
+        "traces": [p[data.category].cast(pl.String).to_list() for p in parts],
+        "values": [p[data.value].to_list() for p in parts],
+        "hover": [p.select(data.hover).rows() for p in parts],
+    }
+
+
+@pytest.mark.parametrize(("kind", "horizontal"),
+                         [("runs", False), ("groups", False), ("grouped", True)])  # fmt: skip
+def test_filter_draws_what_bardata_defines(kind, horizontal):
+    """ctxFilter against BarData: the rows kept, the bars per trace, the categories, the
+    median over lengths() (a total per category when stacked) and the live line."""
+    data = dataclasses.replace(filtered_bars(kind), horizontal=horizontal)
+    cfg = data.controls()
+    levels = {c: ["", *v] for c, v in cfg["filters"].items()}
+    choices = [{"cell_type": t, "condition": c}
+               for t in levels["cell_type"] for c in levels["condition"]]  # fmt: skip
+    choices.append({"cell_type": "NDN", "condition": "nowhere"})  # a choice no bar matches
+    template, none = text.raw("ui", "filter.summary"), text.word("ui", "filter.none")
+    numbers = [0.0, 0.5, 2.675, 7 / 3, 26.116325, 45.25, 99.96, 999.5, 1234.5, 0.0001234,
+               1_000_000.5, 123_456_789.0]  # fmt: skip
+    payload = {"rows": data.page_table().to_dicts(), "cfg": cfg, "choices": choices,
+               "template": template, "none": none, "numbers": numbers}  # fmt: skip
+    out = _node(payload, PICK, FILTER)
+    assert out["numbers"] == [significant(v) for v in numbers]
+    along, at = ("x", "y") if horizontal else ("y", "x")
+    for chosen, page in zip(choices, out["views"], strict=True):
+        want, view = _filter_oracle(data, chosen), page["view"]
+        assert view["categories"] == want["categories"], chosen
+        assert (view["bars"], view["median"]) == (want["bars"], pytest.approx(want["median"]))
+        if not want["bars"]:
+            assert page["summary"] == none
+            continue
+        assert view[at] == want["traces"] and view[along] == want["values"], chosen
+        assert view["customdata"] == [[list(r) for r in h] for h in want["hover"]]
+        filled = {"shown": f"{want['bars']:,}", "total": f"{cfg['total']:,}",
+                  "median": f"{significant(want['median'])} {cfg['unit']}"}  # fmt: skip
+        assert page["summary"] == template.format(**filled)
+    # "All" in every select is what the page shows before any change, and without JavaScript.
+    assert out["views"][0]["summary"] == _defaults(cfg)["summary"]
+    assert any(not p["view"]["bars"] for p in out["views"])
+    assert len({p["summary"] for p in out["views"]}) > len(choices) // 2

@@ -2,14 +2,19 @@
 
 title = "M1 Gather: {dataset}"
 budget = "Track B: under {minutes} min and {ram_gb} GB"
-purpose = "Which runs did the download bring, are the files intact, and what do we know about each sample?"
-input = "One nf-core/fetchngs outdir (`samplesheet/`, `fastq/`, `fastq/md5/`, `metadata/`, `pipeline_info/`), the dataset file with its SDRF, and, with `--rnaseq-dir`, an nf-core/rnaseq outdir for the gene counts."
-method = "nf-core/fetchngs downloads the reads and writes a sample sheet, but a finished download can still be incomplete. Files go missing or arrive corrupted, one experiment can hold several runs, and public metadata is free text. gather checks the download against its own records and the published checksums, then writes the one sample sheet every later module reads."
-interpretation = "Run gather after every download and resolve what its checks report before any analysis. From then on, treat its sample sheet as the only record of what each sample is."
+purpose = "Verify the nf-core/fetchngs download against its own records and ENA's checksums, and build the sample sheet every later module reads."
+input = "One nf-core/fetchngs outdir (`samplesheet/`, `fastq/`, `fastq/md5/`, `metadata/`, `pipeline_info/`), the dataset file and its SDRF, and, with `--rnaseq-dir`, an nf-core/rnaseq outdir with the gene counts."
+method = """A fetchngs run can end with files missing or corrupt, and one experiment can hold several runs. Each FASTQ is checked against the md5 that ENA publishes; runs fetched through sra-tools have none.
+
+ENA metadata is free text, so the SDRF supplies donor, cell type and condition, joined on the run accession and mapped to fixed levels. Read length is ENA's base count over its read count, per mate; the dataset file bins it into batches."""
+interpretation = """Resolve every problem the checks report before any analysis; a mismatched or missing file stops gather. From here on, the sample sheet is the only record of what each sample is. Runs of one experiment are technical replicates, combined before counting.
+
+Where read length splits the groups, batch and group are confounded: compare within a batch, or put batch in the design. A run below the ENCODE lines is noisier, not wrong: DESeq2's size factors correct depth."""
 # "Term: rest" in a mistake prints Term in bold.
 pitfalls = [
-    "Treating the runs of one experiment as biological replicates.",
+    "Treating the runs of one experiment as biological replicates: they are one library, sequenced more than once.",
     "Re-running fetchngs into an existing outdir: it rebuilds the samplesheet from the new input only.",
+    "Expecting size factors to fix a failed library: they correct depth, not quality.",
 ]
 
 [[terms]]
@@ -24,13 +29,25 @@ meaning = "The library a run was sequenced from; one experiment can hold several
 term = "no_md5"
 meaning = "Fetched through sra-tools, which publishes no checksum to verify against."
 
+[[terms]]
+term = "ENA read count"
+meaning = "The reads ENA reports for a run: sequenced reads, a read pair counted once."
+
+[[terms]]
+term = "Aligned reads"
+meaning = "The reads an aligner places on the genome; never more than the reads sequenced."
+
 [[questions]]
-prompt = "Why does gather resolve FASTQ files by name instead of the path in samplesheet.csv?"
-answer = "fetchngs writes the path as it was given on its own machine; after a copy to a laptop or from Zenodo that path points nowhere."
+prompt = "Why does gather find FASTQ files by name, not by the path in samplesheet.csv?"
+answer = "fetchngs writes each path on the machine that ran it; after a copy to a laptop or from Zenodo, that path no longer exists."
 
 [[questions]]
 prompt = "Why is a run with no md5 file reported, not rejected?"
-answer = "Runs with no FASTQ at ENA are fetched through sra-tools, which writes no md5; the file is still usable, but it was not checked against a published checksum."
+answer = "sra-tools fetches the runs that have no FASTQ at ENA and writes no md5. The file is usable but was never checked against a published checksum."
+
+[[questions]]
+prompt = "Why can a run above ENCODE's line still miss the standard?"
+answer = "ENA counts sequenced reads and ENCODE counts aligned reads. Reads from adapters, rRNA or low-quality bases may not align, so the aligned count is lower."
 
 # The four numbers at the top of Results.
 [keys]
@@ -65,7 +82,7 @@ read_length = "Read length"
 batch = "Batch"
 all = "all"
 repeated = "Repeated runs"
-repeated_one = "1 run beyond the first of a donor, cell type and condition"
+repeated_one = "{n} run beyond the first of a donor, cell type and condition"
 repeated_many = "{n} runs beyond the first of a donor, cell type and condition"
 
 [counts]
@@ -82,28 +99,33 @@ stored_value = "{kind}, {bytes:,} bytes in memory"
 [samples]
 group = "Samples"
 
-[composition]
+[figures.composition]
 title = "Samples by cell type and condition"
-lead_one = "{groups} groups; the smallest, {name}, holds 1 run, which limits what any contrast on it can find."
-lead_many = "{groups} groups; the smallest, {name}, holds {runs} runs, which limits what any contrast on it can find."
+lead_one = "{groups} groups; the smallest, {name}, has {runs} run, which limits what any contrast on it can find."
+lead_many = "{groups} groups; the smallest, {name}, has {runs} runs, which limits what any contrast on it can find."
 bars = "Each bar is one cell type and condition; its length counts the runs in it."
 # Shown only when the runs fall in more than one batch.
-batches = "Colours split each bar by batch ({batches}): a group that sits in one batch alone cannot be told apart from that batch."
+batches = "Colour splits each bar by batch: {batches}. A group found in one batch only is confounded with that batch."
 individuals = "Hover a bar for the individuals behind it; one individual can give several cell types, so individuals do not add up across bars."
 caption = "{runs} runs from {individuals} individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars."
 category = "Cell type and condition"
 value = "Runs"
 
-[library]
+[figures.library]
 title = "Sequencing depth per run"
-lead = "The median run holds {depth} reads."
+lead = "The median run has {depth} reads. {below} of {runs} runs have fewer than {good} million, ENCODE's standard for aligned reads."
 depth_millions = "{millions:.1f} million"
-bars = "Each bar is one run; its height is the reads ENA reports for it, in millions."
-sorted_batched = "Runs are grouped by batch and sorted by depth; colour marks the batch."
+# The reading guide: the bars, their order and colour, the lines.
+bars = "Each bar is one run: the reads ENA reports for it, a read pair counted once, in millions."
+batched = "Runs are grouped by read-length batch and sorted by depth: {lengths}."
+batch_lengths = "{batch} holds runs of {lengths} nt"
 sorted = "Runs are sorted by depth."
-failed_batched = "A run far below the others in its batch may be a failed library: DESeq2's size factors correct depth, not quality."
-failed = "A run far below the others may be a failed library: DESeq2's size factors correct depth, not quality."
-caption = "Reads per run as ENA reports them, no test. {medians}."
+lines = "Dashed and dotted lines: ENCODE's aligned-read standards; not every read aligns, so a run below a line cannot meet it. Solid line: the median of the runs shown."
+caption = "Reads per run as ENA reports them, a read pair counted once; no test. {medians}. ENCODE's standard counts aligned reads, so a run below {good} million cannot meet it after alignment, and one above may still miss it."
 batch_median = "{batch}: n = {n} runs, median {median:,.0f} reads"
 category = "Run, by batch and depth"
 value = "Reads"
+# The legend of the lines; the values come from conf/qc_metrics.toml, total_sequences.
+good = "ENCODE: {millions:g} million aligned reads"
+usable = "ENCODE, older projects: {millions:g} million"
+median = "Median of the runs shown"

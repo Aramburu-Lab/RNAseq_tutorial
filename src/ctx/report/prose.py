@@ -79,7 +79,11 @@ def check_page(name: str, raw: Mapping[str, Any]) -> Iterator[str]:
             yield from check_text(f"{name}: {key}[{i}]", text, each)
     for fig, entry in raw.get("figures", {}).items():
         if isinstance(entry, dict) and "caption" in entry:
-            yield from check_text(f"{name}: figures.{fig}.caption", entry["caption"], CAPTION_WORDS)
+            where = f"{name}: figures.{fig}.caption"
+            yield from check_text(where, entry["caption"], CAPTION_WORDS)
+            # The PDF prints a caption as it is, so a backtick would show there.
+            if "`" in entry["caption"]:
+                yield f"{where}: a backtick; the PDF prints it, so name the literal in words"
 
 
 def check_cards(raw: Mapping[str, Any]) -> Iterator[str]:

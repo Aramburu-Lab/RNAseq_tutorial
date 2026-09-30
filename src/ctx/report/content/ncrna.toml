@@ -1,0 +1,153 @@
+# The M8 Non-coding RNA page (ctx ncrna). Placeholders in {braces} are filled by the code; keep
+# their names. Until the module is built, scripts/python/preview_ncrna.py draws this page on
+# made-up data, and the [preview] table is that builder's alone.
+
+title = "M8 Non-coding RNA: {dataset}"
+purpose = "Test non-coding genes by biotype, within the limits the library type sets, and test whether a miRNA's targets shift in the mRNA fold changes."
+input = "The counts and sample sheet from `ctx gather`, GENCODE gene biotypes, the dataset file's contrasts, and miRNA target tables: TargetScan predictions and miRTarBase validations."
+method = "Each gene takes its GENCODE biotype; `pydeseq2` tests every gene that passes the expression filter, and BH adjusts p-values within each biotype. Fold changes of a miRNA's predicted and validated targets, kept apart, are compared with non-targets: Kolmogorov-Smirnov, Mann-Whitney, and the median shift. A lncRNA has no GO terms, so its correlated mRNAs and cis neighbours describe it: Spearman rho, BH over the pairs."
+interpretation = "The library type decides which RNAs are counted: poly-A selection misses non-polyadenylated lncRNAs and histone mRNAs, and no standard library holds mature miRNAs. A lncRNA the filter removed was never tested, so its absence from the results is not evidence against its expression. Targets shifted below non-targets fit repression only when matched small-RNA-seq measures the miRNA rising; a correlated neighbour is a lead, not a function."
+# "Term: rest" in a pitfall prints Term in bold.
+pitfalls = [
+    "Mature miRNAs from standard RNA-seq: size selection removes them; quantify miRNAs from small-RNA-seq only.",
+    "Antisense lncRNAs in unstranded data: reads of the overlapping mRNA cannot be told apart from the lncRNA's own.",
+    "Predicted targets reported as validated: keep TargetScan and miRTarBase apart, and name the source of every result.",
+]
+
+[[terms]]
+term = "Biotype"
+meaning = "The class GENCODE gives a gene, such as protein_coding, lncRNA or processed_pseudogene."
+
+[[terms]]
+term = "Poly-A selection"
+meaning = "Library preparation that keeps polyadenylated RNA. rRNA depletion keeps the rest as well, including non-polyadenylated lncRNAs and histone mRNAs."
+
+[[terms]]
+term = "isomiR"
+meaning = "A variant of a mature miRNA with a shifted or trimmed end; GDC lists isoforms beside the miRNA totals."
+
+[[terms]]
+term = "Non-coding"
+meaning = "An annotation status, not a proof: Ribo-seq finds translated sORFs inside annotated lncRNAs."
+
+[[questions]]
+prompt = "A lncRNA of interest is missing from the results. What would you check before calling it unexpressed?"
+answer = "The library type first: poly-A selection misses non-polyadenylated transcripts. Then the filter: a lncRNA below the minimum count was never tested. Then strandedness and reads shared with other genes."
+
+[[questions]]
+prompt = "Why adjust p-values within each biotype rather than over all genes at once?"
+answer = "Pooled BH holds the false discovery rate over all calls together. The lncRNAs, with less power, can carry a larger share of false calls than that rate. Per biotype, each rate holds on its own."
+
+[[questions]]
+prompt = "A lncRNA correlates with many targets of one miRNA. Does this support the ceRNA hypothesis?"
+answer = "Not by itself. A shared response to the condition correlates genes without any sponging. The hypothesis is also contested: most transcripts have too few copies to titrate a miRNA."
+
+# Parameter cards of the options the module will have.
+[planned."--biotypes"]
+meaning = "GENCODE biotypes to test, each a stratum with its own BH."
+default = "protein_coding,lncRNA"
+effect = "Each added biotype is one more stratum, adjusted on its own."
+
+[planned."--min-count"]
+meaning = "Reads a gene needs at the median library size, per biotype."
+default = "{min_count} for each biotype"
+effect = "Lower tests more weakly expressed lncRNAs, each with less power."
+
+[planned."--targets"]
+meaning = "Target source: predicted (TargetScan), validated (miRTarBase), or both apart."
+default = "both"
+effect = "One source alone drops the other source's curve and test."
+
+[planned."--context-score"]
+meaning = "TargetScan context++ score a predicted target must reach; lower is stronger."
+default = "unset"
+effect = "Stricter keeps fewer, stronger predictions; validated targets are unaffected."
+
+[planned."--library-type"]
+meaning = "Library type kept where both exist: poly-A or rRNA-depleted."
+default = "all"
+effect = "One type alone avoids comparing RNAs one library cannot capture."
+
+[groups]
+library = "What the library counts"
+de = "Differential expression by biotype"
+lncrna = "lncRNA neighbours"
+targets = "miRNA targets"
+
+[keys]
+tested = "Genes tested"
+tested_detail = "of {n_genes:,} in the tested biotypes"
+lncrna = "lncRNAs tested"
+lncrna_detail = "{pct:.0f} % of all lncRNAs"
+called = "Genes called"
+called_detail = "BH within biotype below {alpha:g}, |log2 FC| at least {lfc_min:g}"
+
+[figures.composition]
+title = "Counted reads by biotype, per sample"
+lead = "lncRNAs hold a median {lncrna:.1f} % of counted reads; mitochondrial rRNA ranges from {mt_low:.1f} to {mt_high:.1f} %."
+reading = [
+    "Each bar is one sample, in sample-sheet order; each band is one biotype's share of its counted reads.",
+    "small RNA pools snRNA, snoRNA and misc_RNA; pseudogene pools every pseudogene type.",
+    "Hover a bar for the sample's cell type and condition.",
+]
+caption = "Made-up data: {n_samples} samples, {n_genes:,} genes. Shares of counted reads by GENCODE biotype; descriptive, no test."
+x = "Sample"
+y = "Counted reads"
+
+[figures.filter]
+title = "Expression by biotype, against the filter"
+lead = "The filter keeps {protein_coding:.0f} % of protein-coding genes and {lncrna:.0f} % of lncRNAs."
+reading = [
+    "Each line is one biotype: the share of its genes at or below each value.",
+    "The value is the count, at the median library size, that at least {k} of the contrast's samples reach; the filter tests it.",
+    "The dashed line is the filter's cutoff; a gene left of it is not tested.",
+]
+caption = "Made-up data: {n_ref} {reference} and {n_test} {tested} samples of {cell_type}; cutoff {min_count} reads at the median library size. Mann-Whitney, lncRNA against protein-coding: p = {p:.2g}, rank-biserial r = {r:.2f}."
+x = "Reads at the median library size"
+y = "Share of genes"
+cutoff = "filter cutoff"
+
+[figures.volcano]
+title = "{tested} against {reference} in {cell_type}, by biotype"
+lead = "{called_protein_coding:,} protein-coding genes and {called_lncrna:,} lncRNAs pass the call rule."
+reading = [
+    "Each dot is one tested gene: fold change across, significance up.",
+    "Colour marks the biotype of a gene with BH-adjusted p below {alpha:g} within its biotype and |log2 FC| at least {lfc_min:g}; grey marks the rest.",
+    "The dashed lines mark the fold-change threshold.",
+]
+caption = "Made-up data: {n_ref} {reference} and {n_test} {tested} samples; {n_tested:,} genes tested. Welch t-test on log2 CPM; BH within each biotype, over {n_protein_coding:,} protein-coding genes and {n_lncrna:,} lncRNAs."
+x = "log2 fold change, {tested} over {reference}"
+y = "Significance"
+ns = "not called"
+threshold = "fold-change threshold"
+
+[figures.neighbour]
+title = "{lncrna} against its neighbour {neighbour}"
+lead = "Across samples, rho = {rho:.2f}; after removing each cell type and condition mean, rho = {rho_within:.2f}."
+reading = [
+    "Each point is one sample: the lncRNA across, its neighbour up.",
+    "Colour marks the condition, shape the cell type.",
+]
+caption = "Made-up data: {n_samples} samples. Spearman rho = {rho:.2f}, p = {p:.2g}; on residuals from each cell type and condition mean, rho = {rho_within:.2f}, p = {p_within:.2g}. A single pair, so no correction."
+x = "{lncrna}"
+y = "{neighbour}"
+
+[figures.targets]
+title = "Fold changes of {mirna} targets against non-targets"
+lead = "Median log2 fold change minus that of non-targets: {shift_validated:+.2f} for validated targets, {shift_predicted:+.2f} for predicted-only ones."
+reading = [
+    "Each line is one target class: the share of its genes at or below each fold change.",
+    "A line left of the non-targets' line marks lower fold changes, as repression by a rising miRNA predicts.",
+]
+caption = "Made-up data: {n_validated} validated, {n_predicted} predicted-only targets, {n_non:,} non-targets. KS against non-targets, BH over both tests: validated D = {d_validated:.2f}, p = {p_validated:.2g}; predicted D = {d_predicted:.2f}, p = {p_predicted:.2g}."
+x = "log2 fold change, {tested} over {reference}"
+y = "Share of genes"
+classes = ["validated", "predicted only", "non-target"]
+
+[preview]
+command = "ctx ncrna --dataset {dataset} --dataset-file conf/datasets/{dataset}.toml"
+budget = "Preview build on made-up data; the built module's Track B budget is {minutes} min and {ram_gb} GB."
+profile = "{profile}, preview build"
+mirna = "miR-X"
+lncrna = "LNC-X"
+neighbour = "GENE-Y"

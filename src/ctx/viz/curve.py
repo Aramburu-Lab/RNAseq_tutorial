@@ -16,14 +16,17 @@ from ctx.viz.axes import axis_title
 from ctx.viz.scatter import FLOAT_HOVER, Line
 from ctx.viz.strip import Span, shade, span_handles, span_traces
 from ctx.viz.style import (
+    DASHES,
     LINE_WIDTHS,
     MAX_CATEGORIES,
     PLOTLY_HEIGHT_PX,
     POINT_ALPHA,
     THEMES,
     THRESHOLD_DASH,
+    MplDash,
     Theme,
     apply_matplotlib,
+    distinct_styles,
     figure_inches,
     plotly_templates,
 )
@@ -48,6 +51,8 @@ class CurveData:
         spans: Bands shaded behind the lines.
         thresholds: Dashed reference lines, e.g. a tool's warn and fail values.
         width: ``"single"`` or ``"double"`` column.
+        distinct: One unique colour and dash per ``colour`` level, drawn opaque and thick, so
+            each line stays traceable; ``colours`` is then unused (``style.distinct_styles``).
     """
 
     frame: pl.DataFrame
@@ -64,15 +69,20 @@ class CurveData:
     spans: tuple[Span, ...] = ()
     thresholds: tuple[Line, ...] = ()
     width: str = "single"
+    distinct: bool = False
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
         named = [self.series, self.x, self.y, self.colour, *self.hover]
         if missing := [c for c in named if c not in self.frame.columns]:
             raise ValueError(f"missing columns {missing}")
-        if len(self.colours) > MAX_CATEGORIES:
+        if self.distinct:
+            self._styles()  # raises when there are more levels than distinct styles
+        elif len(self.colours) > MAX_CATEGORIES:
             raise ValueError(f"{len(self.colours)} colour levels; at most {MAX_CATEGORIES}")
-        if stray := set(self.frame[self.colour].unique()) - set(self.colours):
+        if not self.distinct and (
+            stray := set(self.frame[self.colour].unique()) - set(self.colours)
+        ):
             raise ValueError(f"{self.colour}: levels {sorted(stray)} have no colour")
         mixed = self.frame.group_by(self.series).agg(pl.col(self.colour).n_unique().alias("n"))
         if bad := sorted(mixed.filter(pl.col("n") > 1)[self.series].to_list()):
@@ -93,6 +103,15 @@ class CurveData:
     def caption_text(self) -> str:
         """The caption, unwrapped."""
         return self.caption
+
+    def _styles(self) -> dict[str, tuple[str, tuple[MplDash, str], float, float]]:
+        """(colour, (matplotlib dash, plotly dash), width, opacity) per ``colour`` level."""
+        levels = [str(v) for v in self.frame[self.colour].unique(maintain_order=True)]
+        if self.distinct:
+            return {level: (hexa, dash, LINE_WIDTHS["sample"], 1.0)
+                    for level, (hexa, dash) in distinct_styles(levels).items()}  # fmt: skip
+        return {level: (self.colours[level], DASHES[0], LINE_WIDTHS["line"], POINT_ALPHA)
+                for level in levels}  # fmt: skip
 
     def _lines(self) -> list[tuple[Any, str, pl.DataFrame]]:
         """(series, colour level, rows) per line, in first-appearance order."""
@@ -125,9 +144,11 @@ class CurveData:
         width, height = figure_inches(self.width, "scatter")
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
+        styles = self._styles()
         for _, level, rows in self._lines():
-            ax.plot(rows[self.x].to_numpy(), rows[self.y].to_numpy(), color=self.colours[level],
-                    alpha=POINT_ALPHA, linewidth=LINE_WIDTHS["line"])  # fmt: skip
+            hexa, dash, line_width, opacity = styles[level]
+            ax.plot(rows[self.x].to_numpy(), rows[self.y].to_numpy(), color=hexa,
+                    linestyle=dash[0], alpha=opacity, linewidth=line_width)  # fmt: skip
         for line in self.thresholds:
             ax.plot(line.x, line.y, color=theme.reference, linestyle=THRESHOLD_DASH[0],
                     linewidth=LINE_WIDTHS["line"])  # fmt: skip
@@ -135,9 +156,9 @@ class CurveData:
         x_title, y_title = self._titles()
         ax.set_xlabel(x_title)
         ax.set_ylabel(fit_title(y_title, height))
-        present = set(self.frame[self.colour].unique())
-        handles: list[Any] = [Line2D([], [], color=c, label=str(level))
-                              for level, c in self.colours.items() if level in present]  # fmt: skip
+        handles: list[Any] = [Line2D([], [], color=hexa, linestyle=dash[0], linewidth=lw,
+                                     label=level)
+                              for level, (hexa, dash, lw, _) in styles.items()]  # fmt: skip
         names = dict.fromkeys(t.name for t in self.thresholds)
         handles += [Line2D([], [], color=theme.reference, linestyle=THRESHOLD_DASH[0], label=n)
                     for n in names]  # fmt: skip
@@ -165,11 +186,13 @@ class CurveData:
             *(f"{c}: %{{customdata[{i + 1}]}}" for i, c in enumerate(self.hover)),
         ]) + "<extra></extra>"  # fmt: skip
         shown: set[str] = set()
+        styles = self._styles()
         for name, level, rows in self._lines():
+            hexa, dash, line_width, opacity = styles[level]
             fig.add_trace(go.Scatter(
                 x=rows[self.x].to_list(), y=rows[self.y].to_list(), mode="lines", name=level,
-                legendgroup=level, showlegend=level not in shown, opacity=POINT_ALPHA,
-                line={"color": self.colours[level], "width": LINE_WIDTHS["line"]},
+                legendgroup=level, showlegend=level not in shown, opacity=opacity,
+                line={"color": hexa, "width": line_width, "dash": dash[1]},
                 customdata=[(str(name), *r) for r in self._extra(rows)],
                 hovertemplate=template,
             ))  # fmt: skip

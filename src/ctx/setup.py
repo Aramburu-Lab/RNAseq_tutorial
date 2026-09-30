@@ -25,6 +25,7 @@ from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
 from ctx.report import text
 from ctx.report.builder import (
+    FIELDS,
     KeyNumber,
     ModulePage,
     ParameterCard,
@@ -37,6 +38,7 @@ from ctx.viz.style import DATA_COLOURS, FONT_CHAIN, PROJECTOR_UNSAFE, THEMES, co
 MODULE = "setup"
 # WCAG 2.1 success criterion 1.4.11: non-text contrast for graphics.
 GRAPHICS_CONTRAST = 3.0
+MINIMUM = f"{GRAPHICS_CONTRAST:g}:1"
 PAGE = MODULE
 VERSION_COLUMNS = {
     "package": ("none", "Python distribution imported by this run, or python/ctx."),
@@ -65,18 +67,20 @@ def _resolved_font() -> str:
     return text.word(PAGE, "machine.font_missing")
 
 
+def _memory_shown() -> str:
+    """Physical memory as the page prints it, or that the OS did not report it."""
+    memory = _memory_bytes()
+    if memory:
+        return text.fill(PAGE, "keys.memory_value", gib=memory / 2**30)
+    return text.word(PAGE, "keys.memory_missing")
+
+
 def _keys(settings: runtime.Settings) -> tuple[KeyNumber, ...]:
     """The four numbers a reader checks first, measured now."""
-    memory = _memory_bytes()
     word = functools.partial(text.word, PAGE)
-    shown = (
-        text.fill(PAGE, "keys.memory_value", gib=memory / 2**30)
-        if memory
-        else word("keys.memory_missing")
-    )
     return (
         KeyNumber(word("keys.cores"), f"{os.cpu_count()}", word("keys.cores_detail")),
-        KeyNumber(word("keys.memory"), shown),
+        KeyNumber(word("keys.memory"), _memory_shown()),
         KeyNumber(
             word("keys.threads"),
             f"{settings.threads}",
@@ -91,8 +95,28 @@ def _colour_use(colour: str, ratio: float) -> str:
     if colour in PROJECTOR_UNSAFE:
         return text.word(PAGE, "colours.unsafe")
     if ratio >= GRAPHICS_CONTRAST:
-        return text.word(PAGE, "colours.meets")
-    return text.word(PAGE, "colours.below")
+        return text.fill(PAGE, "colours.meets", minimum=MINIMUM)
+    return text.fill(PAGE, "colours.below", minimum=MINIMUM)
+
+
+def _ratios() -> dict[str, float]:
+    """Each data colour's contrast on the white theme's background."""
+    return {c: contrast(c, THEMES["white"].background) for c in DATA_COLOURS}
+
+
+def _skeleton() -> dict[str, Any]:
+    """The page's fixed sections, Method and Interpretation filled from this run's numbers."""
+    track_a = runtime.BUDGETS["A"]
+    interpretation = text.fill(
+        PAGE, "interpretation", minutes=track_a.minutes, ram_gb=track_a.ram_gb,
+        laptop_cores=runtime.LAPTOP_CORES, cores=os.cpu_count(), memory=_memory_shown(),
+        n_below=sum(r < GRAPHICS_CONTRAST for r in _ratios().values()),
+        n_colours=len(DATA_COLOURS), minimum=MINIMUM,
+    )  # fmt: skip
+    return text.skeleton(PAGE) | {
+        FIELDS["method"]: text.fill(PAGE, "method", laptop_cores=runtime.LAPTOP_CORES),
+        FIELDS["interpretation"]: interpretation,
+    }
 
 
 def _facts(settings: runtime.Settings) -> tuple[ResultTable, ...]:
@@ -119,7 +143,7 @@ def _facts(settings: runtime.Settings) -> tuple[ResultTable, ...]:
             (word("machine.font"), font),
         ),
     )  # fmt: skip
-    ratios = {c: contrast(c, THEMES["white"].background) for c in DATA_COLOURS}
+    ratios = _ratios()
     colours = ResultTable(
         word("colours.title"),
         text.words(PAGE, "colours.columns"),
@@ -270,7 +294,7 @@ def run(
     budget = runtime.budget(MODULE)
     page = ModulePage(
         title=text.word(PAGE, "title"),
-        **text.skeleton(PAGE),
+        **_skeleton(),
         parameters=cards,
         results=facts,
         key_numbers=_keys(settings),

@@ -38,13 +38,18 @@ module = "fastqc"
 scale = "log10"
 direction = "higher"
 bands = "dataset_only"
-rationale = "Depth needs depend on the question; the ENCODE figure of 30 M aligned reads is UNVERIFIED (TODO.md, M2) and would mark half of Step-1."
+rationale = "Depth needs depend on the question. ENCODE's bulk RNA-seq standard (June 2017) asks for 30 million aligned reads per replicate, 20 million in older projects; this metric counts sequenced reads, so the standard is a reference line, not a band."
 causes = ["a lane shared with many libraries", "a failed library"]
 action = "flag"
 matters_for_de = true
 read_length_tied = false
 source = "dataset only"
 source_type = "course_convention"
+# ENCODE's depth standard, in ALIGNED reads. The sentence was read verbatim from the page's
+# HTML on 2026-09-30 (the space before "projects" is a non-breaking one there). The M1 depth
+# figure draws both values as reference lines through ctx.qc.registry.
+plot_bands = [30000000.0, 20000000.0]
+plot_source = "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"Each replicate should have 30 million aligned reads, although older projects aimed for 20 million reads.\" Read 2026-09-30."
 
 [metrics.read_length]
 stage = "reads"
@@ -438,7 +443,7 @@ column = "library_size"
 scale = "log10"
 direction = "higher"
 bands = "dataset_only"
-rationale = "DESeq2's size factors correct depth; a library far below the rest is noisier, not wrong. The ENCODE 30 M figure is UNVERIFIED (TODO.md, M2)."
+rationale = "DESeq2's size factors correct depth; a library far below the rest is noisier, not wrong. ENCODE's bulk RNA-seq standard (June 2017) asks for 30 million aligned reads per replicate, 20 million in older projects; reads counted on genes are fewer than reads aligned."
 causes = ["a failed library", "low input"]
 action = "flag"
 matters_for_de = true

@@ -2,35 +2,46 @@
 
 title = "M0 Setup"
 budget = "Track B: under {minutes} min and {ram_gb} GB"
-purpose = "Is this computer ready for the course, and what will a run cost it?"
-input = "This computer: installed package versions, CPU, memory, fonts and the colour tokens. With `--dataset-file`, the dataset's resources, fetched and checked against their SHA-256."
-method = "An analysis is reproducible only if you can say which software ran it, on what machine, and at what cost. This page records the versions every later module relies on, the threads and memory a run may use, and what this run took."
-interpretation = "Keep this page with your results. When a number changes between two runs, compare the package versions first: a changed library is the commonest reason."
+purpose = "Record this computer's cores, memory, thread limit and package versions before any analysis runs on it; with `--dataset-file`, fetch and verify the dataset's resources."
+input = "This computer: installed packages, the CPU count and physical memory the OS reports, installed fonts, and on `hpc` the Slurm allocation. With `--dataset-file`, each listed resource's URLs, size and SHA-256."
+# method and interpretation are filled by ctx.setup: {laptop_cores} is runtime.LAPTOP_CORES,
+# the rest are measured in the run.
+method = "Every `ctx` command caps threads before polars and NumPy are imported: the CPU count up to {laptop_cores} on `laptop`, the Slurm allocation on `hpc`. `ctx setup` writes the version of every distribution the run imported to `outputs/00_setup/`, and measures each data colour's contrast on white. With `--dataset-file`, each resource is downloaded to `<dest>.part`, kept only if its size and SHA-256 match, and listed in `resources/manifest.json`."
+interpretation = "Track A is budgeted at {minutes} min and {ram_gb} GB on {laptop_cores} cores; this computer has {cores} cores, and its memory is {memory}. When a result changes between two runs, compare their versions tables before the code. {n_below} of {n_colours} data colours fall below {minimum} on white; give marks in those colours size, or a second cue such as shape."
 # "Term: rest" in a mistake prints Term in bold.
 pitfalls = [
-    "Comparing timings measured under different profiles: hpc and laptop use different thread counts.",
-    "Quoting a version from memory: read it from this page, which recorded what ran.",
+    "Comparing timings across profiles: `laptop` and `hpc` run different thread counts.",
+    "Quoting a version from memory: cite the versions table this run wrote.",
+    "Editing a fetched resource in place: its SHA-256 then differs, and the next `ctx setup --dataset-file` replaces it.",
 ]
 
 [[terms]]
 term = "Profile"
-meaning = "laptop or hpc: it sets the threads and memory a run may use, never results."
+meaning = "`laptop` or `hpc`; it sets the threads and memory a run may use, never its results."
 
 [[terms]]
 term = "Peak RSS"
-meaning = "The most memory a process held at once."
+meaning = "Peak resident set size: the most physical memory a process held at once."
 
 [[terms]]
 term = "Child process"
-meaning = "A tool this run started; its memory is measured on its own."
+meaning = "A program this run started, such as fastp; its memory is measured apart from this process."
+
+[[terms]]
+term = "SHA-256"
+meaning = "A checksum of a file's bytes; a change to any byte changes it."
 
 [[questions]]
-prompt = "Why does the page list the peak memory of the largest child process separately?"
-answer = "Tools such as aligners run as separate processes. Their memory is not part of this process's peak, and a laptop runs out of memory on the total, not on either half."
+prompt = "Why does Reproduce list the peak memory of the largest child process separately?"
+answer = "Tools such as fastp run as child processes, and their memory is outside this process's peak. A computer runs out of memory on what both hold at once."
 
 [[questions]]
-prompt = "Why might a colleague get a different font on the same figure?"
-answer = "The font chain takes the first installed family. A machine without Arial draws with Liberation Sans, which has the same widths, or else DejaVu Sans, which changes text width but not the data."
+prompt = "Why might a colleague's copy of the same figure use a different font?"
+answer = "The chain takes the first installed family. Liberation Sans keeps Arial's letter widths; DejaVu Sans changes text widths, never the data."
+
+[[questions]]
+prompt = "Why are thread limits set before polars and NumPy are imported?"
+answer = "Both size their thread pools when imported, so a limit set later changes neither. `ctx` stops if either was imported first."
 
 # The four numbers at the top of Results.
 [keys]
@@ -60,8 +71,8 @@ title = "Data colours"
 columns = ["Colour", "Contrast on white", "What the ratio means"]
 ratio = "{ratio:.2f}:1"
 unsafe = "not for text, thin lines or projection"
-meets = "meets 3:1 for graphics"
-below = "below 3:1: marks need size, or a second cue such as shape"
+meets = "meets {minimum} for graphics"
+below = "below {minimum}: marks need size, or a second cue such as shape"
 
 [resources]
 title = "Resources, recorded in {manifest}"

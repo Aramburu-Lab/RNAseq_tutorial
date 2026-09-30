@@ -23,6 +23,7 @@ from ctx.qc import Fastp, QcError, checkpoint, fates, figures, multiqc_io, reads
 from ctx.qc import registry as reg
 from ctx.report import text
 from ctx.report.builder import (
+    FIELDS,
     FigureBlock,
     FigureText,
     Group,
@@ -34,6 +35,8 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.viz.contour import DENSITY_MIN_POINTS
+from ctx.viz.style import MAX_CATEGORIES, MAX_DISTINCT
 
 MODULE = "qc"
 PAGE = MODULE
@@ -227,21 +230,22 @@ def read_figures(writer: Writer, seen: Reads, sheet: pl.DataFrame, registry: reg
     metric = registry.metrics["fastqc_per_base_quality"]
     curves = figures.quality_figure(seen.curves, sheet, metric,
                                     figures.colour_column(sheet, options.peers))  # fmt: skip
-    items.append(writer.figure(curves, "base_quality", FigureText(
-        title=text.word(PAGE, "figures.quality.title"),
-        lead=text.fill(PAGE, "figures.quality.lead", n=seen.curves["run_accession"].n_unique()),
-        reading=tuple(text.words(PAGE, "figures.quality.reading")))))  # fmt: skip
+    styles = (text.word(PAGE, "figures.quality.styles_distinct") if curves.distinct else
+              text.fill(PAGE, "figures.quality.styles_shared", most=MAX_DISTINCT))  # fmt: skip
+    items.append(_figure(writer, curves, "base_quality", "quality", styles,
+                         n=seen.curves["run_accession"].n_unique()))  # fmt: skip
     grid = figures.grid_figure(seen.grid, options.fastp, seen.grid_run)
     if grid is None:
         items.append(text.fill(PAGE, "notes.flat_grid", run=seen.grid_run,
                                pct=float(seen.grid["passed_pct"][0])))  # fmt: skip
     else:
-        items.append(writer.figure(grid, "fastp_grid", FigureText(
-            title=text.word(PAGE, "figures.grid.title"),
-            lead=text.fill(PAGE, "figures.grid.lead", run=seen.grid_run))))  # fmt: skip
+        kept, fastp, bands = seen.grid["passed_pct"], options.fastp, len(grid.edges()) - 1
+        items.append(_figure(writer, grid, "fastp_grid", "grid", run=seen.grid_run, q=fastp.q,
+                             l=fastp.l, low=kept.min(), high=kept.max(), bands=bands,
+                             isoline=figures.GRID_ISOLINE))  # fmt: skip
     run_bands = figures.band_map(seen.values, registry, "run_accession")
     if run_bands is not None:
-        items.append(_figure(writer, run_bands, "run_band_map", "band_map"))
+        items.append(_band_map(writer, run_bands, "run_band_map", "run_accession"))
     return Group(text.word(PAGE, "groups.reads"), tuple(items))
 
 
@@ -267,16 +271,52 @@ def strips(writer: Writer, stage: Stage, units: pl.DataFrame, registry: reg.Regi
     return blocks
 
 
-def _figure(writer: Writer, data: Any, what: str, key: str) -> FigureBlock:
-    """A page figure whose title and lead are ``figures.<key>`` in the content."""
-    return writer.figure(
-        data,
-        what,
-        FigureText(
-            title=text.word(PAGE, f"figures.{key}.title"),
-            lead=text.word(PAGE, f"figures.{key}.lead"),
-        ),
-    )
+def _lines(key: str, **values: Any) -> tuple[str, ...]:
+    """The list of text at a key, each line's placeholders filled from ``values``.
+
+    Raises:
+        TextError: If a line needs a value the code did not give.
+    """
+    lines = text.words(PAGE, key)
+    if missing := {n for line in lines for n in text.placeholders(line)} - values.keys():
+        raise text.TextError(f"content/{PAGE}.toml {key!r} needs {sorted(missing)}")
+    return tuple(line.format_map(values) for line in lines)
+
+
+def _colour_line(column: str | None) -> str:
+    """The reading-guide line naming the sheet column that colours a figure's marks."""
+    if column is None:
+        return text.fill(PAGE, "colour.none", most=MAX_CATEGORIES)
+    return text.fill(PAGE, "colour.by", column=column)
+
+
+def _figure(writer: Writer, data: Any, what: str, key: str, *extra: str,
+            **values: Any) -> FigureBlock:  # fmt: skip
+    """A page figure whose title, lead and reading guide are ``figures.<key>`` in the content.
+
+    Args:
+        writer: The step's writer.
+        data: The figure's data contract.
+        what: The figure's file description.
+        key: Its table under ``figures`` in ``content/qc.toml``.
+        extra: Lines added to the reading guide after the content's own.
+        values: The placeholders of the lead and the reading guide.
+
+    Returns:
+        The figure, written.
+    """
+    return writer.figure(data, what, FigureText(
+        title=text.word(PAGE, f"figures.{key}.title"),
+        lead=text.fill(PAGE, f"figures.{key}.lead", **values),
+        reading=(*_lines(f"figures.{key}.reading", **values), *extra)))  # fmt: skip
+
+
+def _band_map(writer: Writer, data: Any, what: str, key: str) -> FigureBlock:
+    """The band map, its lead counting the bad and usable values, one column per sample or run."""
+    bands = data.frame["band"]
+    return _figure(writer, data, what, "band_map", cells=bands.len(),
+                   bad=int((bands == "bad").sum()), usable=int((bands == "usable").sum()),
+                   unit=text.word(PAGE, f"figures.band_map.unit.{key}"))  # fmt: skip
 
 
 def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured | None,
@@ -287,19 +327,23 @@ def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured 
     groups, glance, identity = [], [], []
     bands = figures.band_map(stage.values, registry, "sample")
     if bands is not None:
-        glance.append(_figure(writer, bands, "band_map", "band_map"))
+        glance.append(_band_map(writer, bands, "band_map", "sample"))
     if measured is not None:
         dims = (*dict.fromkeys([*options.strata, *options.peers, "batch"]),)
         linked = figures.linked_pca(measured.scores, measured.share, sheet, status, dims)
         glance.append(_figure(writer, linked, "linked_pca", "linked"))
-        scatter = figures.density(stage.values, sheet, stage.flags,
-                                  figures.colour_column(sheet, options.peers))  # fmt: skip
+        colour = figures.colour_column(sheet, options.peers)
+        scatter = figures.density(stage.values, sheet, stage.flags, colour)
         if scatter is not None:
-            identity.append(_figure(writer, scatter, "size_genes", "density"))
+            identity.append(_figure(writer, scatter, "size_genes", "density", _colour_line(colour),
+                                    flagged=int(scatter.frame["flagged"].sum()),
+                                    n=scatter.frame.height, minimum=DENSITY_MIN_POINTS,
+                                    **figures.HDR))  # fmt: skip
         if measured.sexes is not None:
-            identity.append(
-                _figure(writer, figures.sex_scatter(measured.sexes), "sex_check", "sex")
-            )
+            sexes = figures.sex_scatter(measured.sexes)
+            disagree = sexes.frame.filter(pl.col("agrees").not_()).height
+            identity.append(_figure(writer, sexes, "sex_check", "sex", n=sexes.frame.height,
+                                    disagree=disagree))  # fmt: skip
     units = sheet.unique("sample", keep="first").select("sample", *options.strata)
     metrics = strips(writer, stage, units, registry, options, "sample")
     for title, items, tabs in (("glance", glance, False), ("metrics", metrics, True),
@@ -329,14 +373,10 @@ def fate_figures(writer: Writer, fate: pl.DataFrame, values: pl.DataFrame, sheet
     median = float(bubble.frame["useful_share"].median())  # type: ignore[arg-type]
     total, useful = int(fate["total_reads"].sum()), int(fate["num_mapped"].sum())
     blocks = (
-        writer.figure(bubble, "read_fates", FigureText(
-            title=text.word(PAGE, "figures.fates.title"),
-            lead=text.fill(PAGE, "figures.fates.lead", median=median),
-            reading=tuple(text.words(PAGE, "figures.fates.reading")))),
-        writer.figure(figures.fates_flow(fate), "read_flow", FigureText(
-            title=text.word(PAGE, "figures.flow.title"),
-            lead=text.fill(PAGE, "figures.flow.lead", total=total, useful=useful,
-                           share=useful / total if total else 0.0))),
+        _figure(writer, bubble, "read_fates", "fates", _colour_line(colour), median=median,
+                k=f"{registry.mad_multiplier:g}"),
+        _figure(writer, figures.fates_flow(fate), "read_flow", "flow", total=total, useful=useful,
+                share=useful / total if total else 0.0),
     )  # fmt: skip
     return Group(text.word(PAGE, "groups.fates"), blocks)
 
@@ -386,18 +426,39 @@ def _confounding_table(tests: pl.DataFrame) -> ResultTable:
     return ResultTable(title, columns, rows, numeric=(3, 4))
 
 
-def _keys(stage: Stage, status: pl.DataFrame, tests: pl.DataFrame) -> tuple[KeyNumber, ...]:
+def _tally(status: pl.DataFrame, tests: pl.DataFrame) -> dict[str, int]:
+    """Runs, flagged runs (excluded ones among them), tests run, and tests below ``ALPHA``."""
+    return {
+        "runs": status.height,
+        "flagged": status.filter(pl.col("qc_status") != "pass").height,
+        "excluded": status.filter(pl.col("qc_status") == "exclude").height,
+        "tests": int(tests["p_adj"].is_not_null().sum()),
+        "confounded": tests.filter(pl.col("p_adj") < ALPHA).height,
+    }
+
+
+def _keys(stage: Stage, tally: Mapping[str, int]) -> tuple[KeyNumber, ...]:
     """The numbers at the top of Results."""
-    flagged = status.filter(pl.col("qc_status") != "pass")
-    below = tests.filter(pl.col("p_adj") < ALPHA).height
     return (
         KeyNumber(text.word(PAGE, "keys.samples"), f"{stage.values.height:,}"),
-        KeyNumber(text.word(PAGE, "keys.flagged"), f"{flagged.height:,}",
-                  text.fill(PAGE, "keys.flagged_detail", runs=status.height)),
+        KeyNumber(text.word(PAGE, "keys.flagged"), f"{tally['flagged']:,}",
+                  text.fill(PAGE, "keys.flagged_detail", **tally)),
         KeyNumber(text.word(PAGE, "keys.metrics"), f"{stage.bands['metric'].n_unique():,}"),
-        KeyNumber(text.word(PAGE, "keys.confounded"), f"{below:,}",
+        KeyNumber(text.word(PAGE, "keys.confounded"), f"{tally['confounded']:,}",
                   text.fill(PAGE, "keys.confounded_detail", alpha=ALPHA)),
     )  # fmt: skip
+
+
+def _sections(stage: Stage, registry: reg.Registry, tally: Mapping[str, int]) -> dict[str, Any]:
+    """The page's fixed sections, those that state this run's numbers filled from it."""
+    filled = {
+        "input": text.fill(PAGE, "input", samples=stage.values.height, runs=tally["runs"],
+                           registry=registry.path.name),
+        "method": text.fill(PAGE, "method", k=f"{registry.mad_multiplier:g}"),
+        "interpretation": text.fill(PAGE, "interpretation", alpha=ALPHA, **tally),
+        "pitfalls": _lines("pitfalls", minimum=registry.min_samples),
+    }  # fmt: skip
+    return text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}
 
 
 def run(
@@ -460,9 +521,10 @@ def run(
             results.append(Group(text.word(PAGE, "groups.run_metrics"), tuple(run_strips),
                                  tabs=len(run_strips) > 1))  # fmt: skip
     usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
+    tally = _tally(status, tests)
     page = ModulePage(
-        title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE),
-        parameters=cards, results=tuple(results), key_numbers=_keys(stage, status, tests),
+        title=text.fill(PAGE, "title", dataset=spec.name), **_sections(stage, registry, tally),
+        parameters=cards, results=tuple(results), key_numbers=_keys(stage, tally),
         reproduce=Reproduction(
             command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children,

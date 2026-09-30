@@ -38,3 +38,8 @@ def test_lists_and_cards_have_budgets():
     assert any("4 items" in p for p in prose.check_page("page", items))
     cards = {"options": {"--x": {"meaning": " ".join(["word"] * 13), "effect": "Moves it."}}}
     assert any("13 words; at most 12" in p for p in prose.check_cards(cards))
+
+
+def test_a_caption_has_no_backticks():
+    page = {**CLEAN, "figures": {"f": {"caption": "Made up; `fastp` kept {n} reads."}}}
+    assert any("a backtick" in p for p in prose.check_page("page", page))

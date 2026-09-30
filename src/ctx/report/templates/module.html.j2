@@ -13,12 +13,12 @@
 <section id="{{ id }}">
 <h2>{{ title }}</h2>
 {% if id == "purpose" %}
-<p class="question">{{ page.question }}</p>
+<p class="question">{{ page.question | code }}</p>
 {% elif id == "input" %}
-<p class="input">{{ page.input }}</p>
+<p class="input">{{ page.input | code }}</p>
 {% elif id == "method" %}
-<p class="idea">{{ page.concept }}</p>
-{% if page.terms %}<details class="terms"><summary>{{ ui.page.terms }}</summary><dl>{% for term, meaning in page.terms %}<dt>{{ term }}</dt><dd>{{ meaning }}</dd>{% endfor %}</dl></details>{% endif %}
+<p class="idea">{{ page.concept | code }}</p>
+{% if page.terms %}<details class="terms"><summary>{{ ui.page.terms }}</summary><dl>{% for term, meaning in page.terms %}<dt>{{ term }}</dt><dd>{{ meaning | code }}</dd>{% endfor %}</dl></details>{% endif %}
 {% elif id == "parameters" %}
 {{ cards_table(page.parameters) }}
 {% elif id == "results" %}
@@ -38,16 +38,16 @@
 {% endif %}
 {% endfor %}
 {% elif id == "interpretation" %}
-<p class="practice">{{ page.practice }}</p>
+<p class="practice">{{ page.practice | code }}</p>
 {% elif id == "questions" %}
 <ol class="think">
 {% for check in page.think %}
-<li><p class="prompt">{{ check.prompt }}</p><details><summary>{{ ui.page.answer }}</summary><p>{{ check.answer }}</p></details></li>
+<li><p class="prompt">{{ check.prompt | code }}</p><details><summary>{{ ui.page.answer }}</summary><p>{{ check.answer | code }}</p></details></li>
 {% endfor %}
 </ol>
 {% elif id == "pitfalls" %}
 <ul class="mistakes">
-{% for m in page.mistakes %}{% set head, colon, tail = m.partition(": ") %}<li>{% if colon %}<strong>{{ head }}:</strong> {{ tail }}{% else %}{{ m }}{% endif %}</li>
+{% for m in page.mistakes %}{% set head, colon, tail = m.partition(": ") %}<li>{% if colon %}<strong>{{ head }}:</strong> {{ tail | code }}{% else %}{{ m | code }}{% endif %}</li>
 {% endfor %}
 </ul>
 {% elif id == "reproduce" %}

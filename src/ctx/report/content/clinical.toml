@@ -1,0 +1,252 @@
+# The M10 Clinical and survival page (ctx clinical). Placeholders in {braces} are filled by the
+# code; keep their names. Until the module is built, scripts/python/preview_clinical.py draws
+# this page on made-up data; its keys are under [preview] and in the {source} placeholders.
+
+title = "M10 Clinical and survival: {dataset}"
+purpose = "Relate gene expression to clinical covariates and to survival, on the endpoint TCGA-CDR recommends for the cancer, with each model's assumptions tested."
+input = "The sample sheet and counts from `ctx gather` and the results of `ctx de`. Per patient: TCGA-CDR endpoints with event flags, GDC `cases` fields for stage, age and treatment, and GDC annotations."
+method = """Kaplan-Meier estimates the share of patients still free of the event at each time; a censored patient leaves the risk set without an event. The log-rank test compares two curves, and the restricted mean survival time gives their difference in months. Groups are pre-specified: a median split or tertiles.
+
+A Cox proportional-hazards model, fitted in `lifelines`, gives the hazard ratio per standard deviation of expression, alone and adjusted for age and stage. The Schoenfeld residual test checks proportional hazards; the C-index measures how well the model ranks patients by risk."""
+interpretation = """A hazard ratio above one means a higher event rate with higher expression, per standard deviation. Read the adjusted model first: expression that tracks stage loses part of its hazard ratio once stage enters the model. A small log-rank p shows the curves differ, not by how much; the RMST difference gives the size in months.
+
+Trust a model only with enough events: the power map gives the events a hazard ratio needs. A scanned cut-off finds a small p by chance; report the corrected one. Survival by treatment received shows who was treated, not what treatment did."""
+# "Term: rest" in a pitfall prints Term in bold.
+pitfalls = [
+    "Optimal cut-offs: the lowest log-rank p over scanned splits is biased low; pre-specify the split or report the corrected p.",
+    "Treatment as exposure: survival by treatment received is confounded by indication and open to immortal-time bias.",
+    "Crossing curves: they break proportional hazards, and one hazard ratio then averages effects of opposite sign.",
+]
+
+[[terms]]
+term = "Censored"
+meaning = "Follow-up ended without the event: the patient counts as event-free until then, and not after."
+
+[[terms]]
+term = "PFI"
+meaning = "Progression-free interval, as TCGA-CDR defines it: time to a new tumour event of any kind, or to death with the cancer."
+
+[[terms]]
+term = "Hazard ratio"
+meaning = "The ratio of event rates, here per standard deviation of expression; the Cox model assumes it is constant over time."
+
+[[terms]]
+term = "RMST"
+meaning = "Restricted mean survival time: the area under the Kaplan-Meier curve up to a stated horizon, in months."
+
+[[terms]]
+term = "C-index"
+meaning = "The share of comparable patient pairs the model orders correctly by risk; `0.5` is chance."
+
+[[terms]]
+term = "Cramér's V"
+meaning = "Association of two categorical variables, from `0`, none, to `1`, where one fixes the other."
+
+[[questions]]
+prompt = "Why does TCGA-CDR advise against overall survival as the endpoint for breast cancer?"
+answer = "Follow-up is short and few patients have died, so OS has few events and little power; TCGA-CDR recommends PFI and DFI."
+
+[[questions]]
+prompt = "A gene's best cut-off gives a log-rank p far below that of the median split. What must you report?"
+answer = "The p corrected for the scan: the maximally selected statistic's p, by permutation. The minimum over many cut-offs is small by chance alone."
+
+[[questions]]
+prompt = "Why can expression by treatment received in TCGA not show a treatment effect?"
+answer = "Tumours were sampled before systemic therapy, and treatment followed the tumour's features: ER-positive disease leads to endocrine therapy. The association shows that selection."
+
+# The preview's words: where its numbers come from, and what its build measured.
+[preview]
+source = "Made-up cohort"
+sheet = "Made-up sample sheet of {dataset}"
+release = "made up for the course preview, numpy seed {seed}"
+release_name = "data"
+budget = "Preview build on made-up data; the built module's budget is under {minutes} min and {ram_gb} GB."
+profile = "preview build, one process"
+
+# Parameters the module will have (TODO.md, M10: endpoint, split rule, horizon, covariates, strata).
+[planned."--endpoint"]
+meaning = "Survival endpoint: OS, DSS, DFI or PFI from TCGA-CDR."
+default = "{endpoint}"
+effect = "Changes which events count; OS needs the longest follow-up."
+
+[planned."--split"]
+meaning = "How expression groups patients for Kaplan-Meier: median or tertiles."
+default = "median"
+effect = "Tertiles compare extremes; a scanned cut-off needs the corrected p."
+
+[planned."--horizon"]
+meaning = "Months up to which restricted mean survival is compared."
+default = "{horizon}"
+effect = "A later horizon uses more follow-up but fewer patients at risk."
+
+[planned."--covariates"]
+meaning = "Clinical variables the adjusted Cox model includes."
+default = "{covariates}"
+effect = "Adding stage removes the prognosis expression shares with stage."
+
+[planned."--strata"]
+meaning = "Variables given separate baseline hazards in the Cox model."
+default = "none"
+effect = "Handles a covariate that breaks proportional hazards, without estimating it."
+
+[split]
+low = "Below the median"
+high = "At or above the median"
+
+[results]
+survival = "{endpoint} by expression of {gene}"
+cox = "Cox model"
+cox_lead = "Hazard ratio per SD of {gene}: {hr_uni:.2f} alone, {hr_adj:.2f} adjusted for {covariates}."
+# Joins the last two names of a list, as in "age and stage".
+and = "{rest} and {last}"
+scan = "Cut-off scan"
+power = "Power"
+confounding = "Confounding between sample-sheet variables"
+
+[keys]
+patients = "Patients"
+events = "{endpoint} events"
+events_detail = "{pct:.0f} % of patients"
+follow_up = "Median follow-up"
+follow_up_value = "{months:.0f} months"
+follow_up_detail = "reverse Kaplan-Meier"
+hr = "HR per SD, adjusted"
+hr_detail = "{level:.0f} % CI {low:.2f} to {high:.2f}"
+
+[summary]
+title = "Events, median {endpoint} and RMST at {horizon} months, per group"
+not_reached = "not reached"
+interval = "{low} to {high}"
+columns.group = "Group"
+columns.patients = "Patients"
+columns.events = "Events"
+columns.median = "Median (months)"
+columns.ci = "{level:.0f} % CI (months)"
+columns.rmst = "RMST (months)"
+
+[risk]
+title = "Patients at risk, by months since diagnosis"
+group = "Group"
+
+[cox]
+title = "Cox model of {endpoint}: hazard ratio per SD of {gene}"
+alone = "{gene} alone"
+adjusted = "{gene}, adjusted for {covariates}"
+columns = ["Model", "Patients", "Events", "HR per SD", "CI", "p", "PH test p", "C-index"]
+ci = "{low:.2f} to {high:.2f}"
+
+[figures.km]
+title = "Kaplan-Meier estimate of {endpoint}, split at the median of {gene}"
+lead = "Median {endpoint}: {median_low} below the median, {median_high} at or above it; log-rank p = {p}."
+reading = [
+    "Each line is one group's Kaplan-Meier estimate: the share of its patients still free of the event.",
+    "A step down is one or more events; a short vertical tick is a censored patient.",
+    "Colour: expression of {gene} below, or at or above, the cohort median.",
+]
+x = "Time since diagnosis"
+y = "Free of {endpoint}"
+step = "step"
+censored = "censored"
+caption = "{source}: {n} patients, {events} {endpoint} events, split at the median of {gene}. Log-rank chi-squared {chi2:.2f}, p = {p}. RMST difference, high minus low, at {horizon} months: {rmst:.1f} months."
+
+[figures.scan]
+title = "Log-rank p of every cut-off from the {low}th to the {high}th percentile of {gene}"
+lead = "The smallest p, {min_p}, falls at the {best}th percentile; corrected for the scan it is {corrected}."
+lead_floor = "The smallest p, {min_p}, falls at the {best}th percentile; corrected for the scan it is at most {floor}, the smallest p {perms} permutations can give."
+reading = [
+    "The line is the log-rank p of a split at each percentile of {gene}, as -log10 p: higher means smaller p.",
+    "Lower dashed line: p = {alpha} for one cut-off. Upper dashed line: the height the scan's smallest p needs for a corrected p of {alpha}.",
+]
+line = "each cut-off"
+x = "Cut-off, percentile of {gene}"
+y = "Log-rank p"
+uncorrected = "uncorrected p = {alpha}"
+corrected = "corrected p = {alpha}"
+caption = "{source}: {n} patients, {events} events. Maximally selected log-rank statistic over {cuts} cut-offs; corrected p from {perms} permutations of expression. The pre-specified median split gives p = {median_p}."
+
+[figures.power]
+title = "Power of a Cox model by number of events and hazard ratio per SD"
+lead = "This cohort's {events} events give {power:.0f} % power at its adjusted hazard ratio of {hr:.2f}."
+reading = [
+    "Colour: power of a two-sided Wald test at alpha = {alpha}, for a covariate scaled to one SD.",
+    "The labelled line is {target:.0f} % power; the point marks this cohort's events and adjusted hazard ratio.",
+]
+x = "Events"
+y = "Hazard ratio per SD"
+z = "Power"
+mark = "this cohort"
+caption = "Computed from Hsieh and Lavori's formula for a per-SD hazard ratio, two-sided alpha = {alpha}; no data drawn. Point: {source}, {events} events, adjusted HR {hr:.2f}."
+
+[figures.confounding]
+title = "Cramér's V between the variables of the sample sheet"
+lead = "Strongest pair: {a} and {b}, Cramér's V = {v:.2f}, over {n} samples."
+reading = [
+    "Each cell is one pair of variables; its shade is the Cramér's V bin in the legend.",
+    "A dark cell between condition and a technical variable, such as batch, marks a confounded contrast.",
+]
+row = "Variable"
+column = "Variable"
+below = "< {a:g}"
+between = "{a:g} to {b:g}"
+above = "≥ {a:g}"
+caption = "{source}: Cramér's V from each pair's contingency table over {n} samples, without bias correction; the diagonal is blank. Descriptive, no test."
+
+# Column dictionaries: [unit, meaning] per column of each table and figure.
+[columns.cohort]
+patient = ["none", "Made-up patient identifier."]
+age = ["years", "Age at diagnosis."]
+stage = ["stage", "Pathological stage, I to IV, as an ordinal number."]
+log2cpm = ["log2 CPM", "Expression of the gene, log2 counts per million plus 1."]
+z = ["SD", "Expression centred and scaled over the cohort."]
+group = ["none", "Split at the cohort median of expression."]
+days = ["days", "Time from diagnosis to the event or to censoring."]
+months = ["months", "Days divided by the mean days per month."]
+event = ["none", "1 for an event, 0 for censored."]
+
+[columns.km_estimates]
+group = ["none", "Split at the cohort median of expression."]
+months = ["months", "A time at which a patient had the event or was censored."]
+at_risk = ["patients", "Patients still followed just before this time."]
+events = ["patients", "Events at this time."]
+censored = ["patients", "Patients censored at this time."]
+survival = ["fraction", "Kaplan-Meier estimate just after this time."]
+lower = ["fraction", "Lower bound of the pointwise confidence interval, log-log Greenwood."]
+upper = ["fraction", "Upper bound of the pointwise confidence interval, log-log Greenwood."]
+
+[columns.km]
+group = ["none", "Split at the cohort median of expression."]
+months = ["months", "Time since diagnosis of this vertex of the drawn line."]
+survival = ["fraction", "Height of the vertex: the Kaplan-Meier estimate, or a censor tick's end."]
+at_risk = ["patients", "Patients still followed just before this time."]
+mark = ["none", "step for the estimate, censored for a censor tick."]
+
+[columns.cox]
+model = ["none", "Covariates in the model."]
+patients = ["patients", "Patients in the fit."]
+events = ["events", "Events in the fit."]
+hr = ["ratio", "Hazard ratio per SD of expression."]
+low = ["ratio", "Lower bound of the Wald confidence interval of the hazard ratio."]
+high = ["ratio", "Upper bound of the Wald confidence interval of the hazard ratio."]
+p = ["dimensionless", "Two-sided Wald p of the expression term."]
+ph_p = ["dimensionless", "Grambsch-Therneau test of proportional hazards for the expression term, rank time."]
+c_index = ["dimensionless", "Harrell's C of the model's linear predictor."]
+
+[columns.scan]
+line = ["none", "The one line drawn."]
+percentile = ["percentile", "Cut-off as a percentile of expression; at or above it is high."]
+cutoff = ["log2 CPM", "Cut-off as expression."]
+chi2 = ["dimensionless", "Log-rank chi-squared, one degree of freedom."]
+p = ["dimensionless", "Log-rank p of this cut-off alone, uncorrected."]
+neglog10p = ["-log10", "-log10 of p."]
+
+[columns.power]
+events = ["events", "Events in the cohort."]
+hr = ["ratio", "Hazard ratio per SD of a covariate."]
+power = ["%", "Power of the two-sided Wald test."]
+
+[columns.confounding]
+row_variable = ["none", "Sample-sheet column of the row."]
+column_variable = ["none", "Sample-sheet column of the column."]
+v = ["dimensionless", "Cramér's V, empty on the diagonal and for a constant column."]
+level = ["none", "The bin of V the cell is drawn in."]
+n = ["samples", "Samples with a value in both columns."]

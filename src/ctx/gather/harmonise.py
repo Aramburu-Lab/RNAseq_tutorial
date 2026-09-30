@@ -18,6 +18,7 @@ from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate, normalis
 from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
+from ctx.qc import registry
 from ctx.report import text
 from ctx.report.builder import (
     FigureText,
@@ -40,6 +41,10 @@ PAGE = MODULE
 ON_DISK = ("verified", "mismatch", "no_md5")
 # Below this, "0.0 million reads" would hide the depth: print the reads themselves.
 DEPTH_IN_MILLIONS = 100_000
+# The registry metric whose plot_bands hold ENCODE's depth standard, in aligned reads.
+DEPTH_STANDARD = "total_sequences"
+# The depth figure's filters, columns of the curated sheet (Rytis, 2026-09-30).
+DEPTH_FILTERS = ("cell_type", "condition")
 ENA_SOURCE = "ENA Portal API returnFields, result=read_run, retrieved 2026-09-26"
 # (unit, meaning) per column; ENA meanings quote ENA's own field description.
 ENA_COLUMNS = {
@@ -207,37 +212,49 @@ def _facts(outdir: Outdir, frame: pl.DataFrame, curated: bool) -> ResultTable:
 def _composition_text(data: BarData) -> FigureText:
     """Title, lead and reading guide of the composition bars, from the counts drawn."""
     groups, batches = data.frame["group"].n_unique(), data.frame["batch"].unique().sort()
-    reading = [text.word(PAGE, "composition.bars"), text.word(PAGE, "composition.individuals")]
+    reading = [
+        text.word(PAGE, "figures.composition.bars"),
+        text.word(PAGE, "figures.composition.individuals"),
+    ]
     if batches.len() > 1:
-        reading.insert(1, text.fill(PAGE, "composition.batches", batches=", ".join(batches)))
+        batch_line = text.fill(PAGE, "figures.composition.batches", batches=", ".join(batches))
+        reading.insert(1, batch_line)
     sizes = data.frame.group_by("group").agg(pl.col("n_samples").sum())
     name, runs = sizes.sort("n_samples", "group").row(0)
-    lead = "composition.lead_one" if runs == 1 else "composition.lead_many"
+    lead = "figures.composition.lead_one" if runs == 1 else "figures.composition.lead_many"
     return FigureText(
-        title=text.word(PAGE, "composition.title"),
+        title=text.word(PAGE, "figures.composition.title"),
         lead=text.fill(PAGE, lead, groups=groups, name=name, runs=runs),
         reading=tuple(reading),
     )
 
 
-def _library_text(data: BarData) -> FigureText:
+def _library_text(data: BarData, good_reads: float) -> FigureText:
     """Title, lead and reading guide of the library sizes, from the depths drawn."""
-    median = float(np.median(data.frame["read_count"].to_numpy()))
+    reads = data.frame["read_count"]
+    median = float(np.median(reads.to_numpy()))
     depth = (
-        text.fill(PAGE, "library.depth_millions", millions=median / 1e6)
+        text.fill(PAGE, "figures.library.depth_millions", millions=median / 1e6)
         if median >= DEPTH_IN_MILLIONS
         else f"{median:,.0f}"
     )
-    batched = data.frame["batch"].n_unique() > 1
     word = functools.partial(text.word, PAGE)
+    order = word("figures.library.sorted")
+    if data.frame["batch"].n_unique() > 1:
+        # The read lengths each batch holds, measured, beside the name the dataset file gives it.
+        held = data.frame.group_by("batch").agg(pl.col("read_length").unique().sort())
+        lengths = dict(held.rows())
+        each = [text.fill(PAGE, "figures.library.batch_lengths", batch=b,
+                          lengths=", ".join(f"{v:g}" for v in lengths[b]))
+                for b in data.colours if b in lengths]  # fmt: skip
+        order = text.fill(PAGE, "figures.library.batched", lengths="; ".join(each))
+    below = int((reads < good_reads).sum())
+    lead = text.fill(PAGE, "figures.library.lead", depth=depth, runs=f"{reads.len():,}",
+                     below=f"{below:,}", good=f"{good_reads / 1e6:g}")  # fmt: skip
     return FigureText(
-        title=word("library.title"),
-        lead=text.fill(PAGE, "library.lead", depth=depth),
-        reading=(
-            word("library.bars"),
-            word("library.sorted_batched" if batched else "library.sorted"),
-            word("library.failed_batched" if batched else "library.failed"),
-        ),
+        title=word("figures.library.title"),
+        lead=lead,
+        reading=(word("figures.library.bars"), order, word("figures.library.lines")),
     )
 
 
@@ -259,25 +276,42 @@ def _composition(frame: pl.DataFrame, spec: Dataset) -> BarData:
         "n_individuals": ("individuals", "Distinct donors among those runs."),
         "group": ("none", "Cell type and condition, the bar's label."),
     }
-    caption = text.fill(PAGE, "composition.caption", runs=frame.height,
+    caption = text.fill(PAGE, "figures.composition.caption", runs=frame.height,
                         individuals=frame["donor"].n_unique())  # fmt: skip
     return BarData(
         frame=groups, columns=columns, category="group", value="n_samples",
-        category_label=text.word(PAGE, "composition.category"),
-        value_label=text.word(PAGE, "composition.value"), series="batch",
+        category_label=text.word(PAGE, "figures.composition.category"),
+        value_label=text.word(PAGE, "figures.composition.value"), series="batch",
         colours=category_colours(levels), caption=caption, horizontal=True, stacked=True,
         hover=("n_individuals",), width="double",
     )  # fmt: skip
 
 
-def _library_sizes(frame: pl.DataFrame, spec: Dataset) -> BarData:
-    """Reads per run, grouped by batch, largest first."""
+def _depth_standard() -> tuple[tuple[float, float], dict[str, str]]:
+    """ENCODE's two depths in aligned reads, from the QC registry, and where they come from.
+
+    Raises:
+        registry.RegistryError: If no registry resolves, or its metric has no plot_bands.
+    """
+    path = registry.resolve(None)
+    metric = registry.load(path).metrics[DEPTH_STANDARD]
+    if metric.plot_bands is None:
+        raise registry.RegistryError(f"{path}: [metrics.{DEPTH_STANDARD}] has no plot_bands")
+    return metric.plot_bands, {"QC registry": str(path), "depth standard": metric.plot_source}
+
+
+def _library_sizes(frame: pl.DataFrame, spec: Dataset, bands: tuple[float, float]) -> BarData:
+    """Reads per run, grouped by batch, largest first, over ENCODE's two depths and the median.
+
+    The page filters the runs by ``DEPTH_FILTERS`` and moves the median line with them.
+    """
     runs = frame.with_columns(batch=pl.col("batch").replace("", "all")).sort(
         "batch", "read_count", descending=[False, True]
     )
     levels = [b for b in (*spec.batch_bins, "all") if b in set(runs["batch"])]
+    good, usable = (reads / 1e6 for reads in bands)
     medians = "; ".join(
-        text.fill(PAGE, "library.batch_median", batch=b, n=n, median=m)
+        text.fill(PAGE, "figures.library.batch_median", batch=b, n=n, median=m)
         for b, n, m in runs.group_by("batch", maintain_order=True)
         .agg(pl.len(), pl.col("read_count").median())
         .rows()
@@ -289,17 +323,21 @@ def _library_sizes(frame: pl.DataFrame, spec: Dataset) -> BarData:
         "batch": ("none", "Batch from read length; all when the dataset declares none."),
         "cell_type": ("none", "Cell type, curated."),
         "condition": ("none", "Condition, curated."),
+        "read_length": DERIVED_COLUMNS["read_length"],
     }
     return BarData(
         frame=runs.with_columns(
             pl.col("read_count").cast(pl.Int64), million_reads=pl.col("read_count") / 1e6
         ).select(*columns),
         columns=columns, category="run_accession", value="million_reads",
-        category_label=text.word(PAGE, "library.category"),
-        value_label=text.word(PAGE, "library.value"), series="batch",
+        category_label=text.word(PAGE, "figures.library.category"),
+        value_label=text.word(PAGE, "figures.library.value"), series="batch",
         colours=category_colours(levels),
-        caption=text.fill(PAGE, "library.caption", medians=medians),
+        caption=text.fill(PAGE, "figures.library.caption", medians=medians, good=f"{good:g}"),
         stacked=True, hover=("cell_type", "condition"), width="double",
+        lines=((good, text.fill(PAGE, "figures.library.good", millions=good)),
+               (usable, text.fill(PAGE, "figures.library.usable", millions=usable))),
+        median=text.word(PAGE, "figures.library.median"), filters=DEPTH_FILTERS,
     )  # fmt: skip
 
 
@@ -322,11 +360,8 @@ def _curation_facts(frame: pl.DataFrame, spec: Dataset) -> ResultTable:
         + (text.fill(PAGE, "curation.agrees", checked=checked) if checked else "")
         + word("curation.mapped")
     )  # fmt: skip
-    repeated = (
-        word("curation.repeated_one")
-        if repeats == 1
-        else text.fill(PAGE, "curation.repeated_many", n=repeats)
-    )
+    key = "curation.repeated_one" if repeats == 1 else "curation.repeated_many"
+    repeated = text.fill(PAGE, key, n=repeats)
     rows = (
         (word("curation.join"), joined),
         (word("curation.read_length"), lengths),
@@ -482,6 +517,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     frame = sheet(checked, curated)
     # Read before anything is written, so a bad outdir leaves no sheet behind.
     counts = rnaseq.read(rnaseq_dir.resolve(), set(frame["sample"])) if rnaseq_dir else None
+    standard = _depth_standard() if spec else None
     files = write_table(frame, out, sheet_stem, columns=columns(spec), data_releases=releases)
     results: list[Result] = [_facts(checked, frame, curated is not None)]
     if counts is not None:
@@ -491,18 +527,19 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
             files += write_table(table, out, table_stem, columns=described,
                                  data_releases=counts_releases)  # fmt: skip
         results.append(_counts_facts(counts))
-    if spec and curated is not None:
+    if spec and curated is not None and standard is not None:
+        bands, sources = standard
         results.append(_curation_facts(frame, spec))
-        composition, depth = _composition(frame, spec), _library_sizes(frame, spec)
+        composition, depth = _composition(frame, spec), _library_sizes(frame, spec, bands)
         figures = []
-        for name, data, words in (
-            ("composition", composition, _composition_text(composition)),
-            ("library_sizes", depth, _library_text(depth)),
+        for name, data, words, cited in (
+            ("composition", composition, _composition_text(composition), releases),
+            ("library_sizes", depth, _library_text(depth, bands[0]), releases | sources),
         ):
             figure_stem = stem(MODULE, f"{dataset}_{name}", 1, day=day)
             shown = replace(words, back=f"{page_stem}.html")
             files += write_figure(data, out, figure_stem, title=shown.title,
-                                  data_releases=releases, text=shown)  # fmt: skip
+                                  data_releases=cited, text=shown)  # fmt: skip
             figures.append(figure_block(data, figure_stem, shown))
         results.append(Group(text.word(PAGE, "samples.group"), tuple(figures)))
     usage = runtime.measure(settings.started)

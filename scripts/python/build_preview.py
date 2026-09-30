@@ -69,6 +69,137 @@ def synthetic(root: Path) -> Path:
     return spec
 
 
+# Read length per made-up batch, so gather derives the batch as it does for a real study.
+LENGTHS = {BATCH["short"]: 76, BATCH["long"]: 101}
+FIXTURE = REPO / "tests" / "fixtures" / "fetchngs" / "metadata_only"
+SDRF_COLUMNS = {
+    f"Characteristics[{header}]": column
+    for header, column in (("individual", "donor"), ("cell type", "cell_type"),
+                           ("condition", "condition"), ("time point", "time_point"),
+                           ("sex", "sex"), ("donor sex", "donor_sex"), ("tissue", "tissue"))
+}  # fmt: skip
+
+
+def _rows(path: Path, delimiter: str) -> tuple[list[str], dict[str, str]]:
+    """A fixture table's header and first row, the template of every made-up row."""
+    import csv  # noqa: PLC0415
+
+    with path.open(newline="") as handle:
+        reader = csv.DictReader(handle, delimiter=delimiter)
+        return list(reader.fieldnames or []), next(reader)
+
+
+def _write(path: Path, header: list[str], rows: list[dict[str, str]], delimiter: str) -> None:
+    """One table in the fixture's own format."""
+    import csv  # noqa: PLC0415
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    quoting = csv.QUOTE_ALL if delimiter == "," else csv.QUOTE_MINIMAL
+    with path.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, header, delimiter=delimiter, quoting=quoting,
+                                lineterminator="\n")  # fmt: skip
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def made_up_download(root: Path, spec: Path) -> Path:
+    """A metadata-only fetchngs outdir and an SDRF for the made-up samples; extend the spec.
+
+    Written from the planted sheet, so gather curates exactly the samples, groups and sexes the
+    counts carry. Accessions are made up (XRR, XRX, XRS, XRP); read counts are the counted reads
+    over a made-up assigned share, drawn per run from a seeded generator.
+    """
+    import hashlib  # noqa: PLC0415
+    import json  # noqa: PLC0415
+    import shutil  # noqa: PLC0415
+
+    import numpy as np  # noqa: PLC0415
+    import polars as pl  # noqa: PLC0415
+
+    gathered = root / "outputs" / "01_gather"
+    sheet = pl.read_parquet(next(gathered.glob("*_samplesheet_v1.parquet")))
+    counts = pl.read_parquet(next(gathered.glob("*_counts_v1.parquet")))
+    counted = {c: int(counts[c].sum()) for c in counts.columns[1:]}
+    assigned = np.random.default_rng(7).uniform(0.7, 0.9, sheet.height)
+    outdir = root / "data" / "raw" / DATASET
+    head_meta, meta = _rows(next((FIXTURE / "metadata").glob("*.tsv")), "\t")
+    head_sheet, template = _rows(FIXTURE / "samplesheet" / "samplesheet.csv", ",")
+    head_ids, id_row = _rows(FIXTURE / "samplesheet" / "id_mappings.csv", ",")
+    sheet_rows, id_rows, sdrf = [], [], []
+    for i, r in enumerate(sheet.iter_rows(named=True)):
+        run, n = r["run_accession"], i + 1
+        reads = int(counted[r["sample"]] / assigned[i])
+        length = LENGTHS[r["batch"]]
+        fields = {
+            "run_accession": run, "experiment_accession": f"XRX{n:06d}",
+            "sample_accession": f"XRS{n:06d}", "secondary_sample_accession": f"XRS{n:06d}",
+            "study_accession": "XRP000001", "secondary_study_accession": "XRP000001",
+            "submission_accession": "XRA000001", "run_alias": run, "experiment_alias": run,
+            "sample_alias": r["sample"], "study_alias": "made-up", "library_layout": "SINGLE",
+            "library_strategy": "RNA-Seq", "library_source": "TRANSCRIPTOMIC",
+            "library_selection": "cDNA", "library_name": r["sample"],
+            "instrument_model": "Illumina NovaSeq 6000", "instrument_platform": "ILLUMINA",
+            "base_count": str(reads * length), "read_count": str(reads), "tax_id": "9606",
+            "scientific_name": "Homo sapiens", "sample_title": r["sample"],
+            "experiment_title": "made-up run", "study_title": "made-up study",
+            "sample_description": "made up by scripts/python/build_preview.py", "fastq_md5": "",
+            "fastq_bytes": "", "fastq_ftp": "", "fastq_galaxy": "", "fastq_aspera": "",
+            "fastq_1": "", "fastq_2": "", "md5_1": "", "md5_2": "", "single_end": "true",
+        }  # fmt: skip
+        row = {**meta, **{k: v for k, v in fields.items() if k in head_meta}, "id": run}
+        _write(outdir / "metadata" / f"{run}.runinfo_ftp.tsv", head_meta, [row], "\t")
+        sheet_rows.append({**template, **{k: v for k, v in fields.items() if k in head_sheet},
+                           "sample": r["sample"], "fastq_1": f"made-up/{run}.fastq.gz",
+                           "fastq_2": "", "strandedness": "auto"})  # fmt: skip
+        id_rows.append({**id_row, **{k: v for k, v in fields.items() if k in head_ids},
+                        "sample": r["sample"]})  # fmt: skip
+        sdrf.append({"Source Name": r["sample"], "Comment[ENA_RUN]": run,
+                     **{k: str(r.get(c) or "") for k, c in SDRF_COLUMNS.items()}})  # fmt: skip
+    _write(outdir / "samplesheet" / "samplesheet.csv", head_sheet, sheet_rows, ",")
+    _write(outdir / "samplesheet" / "id_mappings.csv", head_ids, id_rows, ",")
+    (outdir / "ids.csv").write_text("\n".join(sheet["run_accession"]) + "\n")
+    for name in (
+        "samplesheet/multiqc_config.yml",
+        "pipeline_info/nf_core_fetchngs_software_mqc_versions.yml",
+    ):
+        (outdir / name).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(FIXTURE / name, outdir / name)
+    (params,) = (FIXTURE / "pipeline_info").glob("params_*.json")
+    recorded = json.loads(params.read_text()) | {
+        "input": str(outdir / "ids.csv"),
+        "outdir": str(outdir),
+    }
+    (outdir / "pipeline_info" / params.name).write_text(json.dumps(recorded, indent=4))
+    sdrf_path = root / "resources" / "datasets" / DATASET / "made_up.sdrf.txt"
+    header = ["Source Name", *SDRF_COLUMNS, "Comment[ENA_RUN]"]
+    _write(sdrf_path, header, sdrf, "\t")
+    digest = hashlib.sha256(sdrf_path.read_bytes()).hexdigest()
+    columns = "\n".join(f'[columns.{c}]\nsource = "{k}"\nmeaning = "Made up."\n'
+                        for k, c in SDRF_COLUMNS.items())  # fmt: skip
+    bins = ", ".join(f'"{b}" = [{n}]' for b, n in LENGTHS.items())
+    spec.write_text(
+        spec.read_text()
+        + f"""
+[[resources]]
+name = "sdrf"
+urls = ["http://127.0.0.1/made_up.sdrf.txt"]
+bytes = {sdrf_path.stat().st_size}
+sha256 = "{digest}"
+dest = "{sdrf_path.relative_to(root).as_posix()}"
+
+[sdrf]
+resource = "sdrf"
+join = ["Comment[ENA_RUN]", "run_accession"]
+cross_check = [["Source Name", "sample_title"]]
+
+{columns}
+[derived.batch]
+bins = {{ {bins} }}
+"""
+    )
+    return outdir
+
+
 def main() -> None:
     """Build every page, or only the preview modules named."""
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -81,7 +212,18 @@ def main() -> None:
             sys.exit(f"{root} exists; move it aside first")
         root.mkdir(parents=True)
         spec = synthetic(root)
+        outdir = made_up_download(root, spec)
         ctx(root, "setup")
+        ctx(
+            root,
+            "gather",
+            "--dataset",
+            DATASET,
+            "--fetchngs-dir",
+            str(outdir),
+            "--dataset-file",
+            str(spec),
+        )
         for command in ("qc", "de", "function"):
             ctx(root, command, "--dataset", DATASET, "--dataset-file", str(spec))
     for module in args.only or PREVIEWS:

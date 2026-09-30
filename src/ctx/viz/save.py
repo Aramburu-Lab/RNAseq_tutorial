@@ -10,6 +10,7 @@ import polars as pl
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
 from ctx.report.builder import FigureBlock, FigurePage, FigureText, write
+from ctx.viz.bar import BarData
 from ctx.viz.linked import LinkedData
 from ctx.viz.scatter import ScatterData
 from ctx.viz.style import THEMES, Theme
@@ -41,15 +42,22 @@ class Figure(Protocol):
 
 
 def drawn_texts(fig: Any) -> list[Any]:
-    """Visible, non-empty texts, without the labels of ticks outside the view limits.
+    """Visible, non-empty texts, without the tick labels matplotlib does not draw.
 
     matplotlib keeps a label for every tick its locator proposes but draws only those inside
-    the view interval; an undrawn label sits wherever its tick would be.
+    the view interval; an undrawn label sits wherever its tick would be. An axis switched off
+    draws none of its labels, though each still reports itself visible: on Step-1's 210
+    samples the parallel sets' undrawn 0 to 1 labels sat past the page (2026-09-30).
     """
     from matplotlib.text import Text  # noqa: PLC0415 - heavy; imported after the profile
 
     hidden = set()
     for ax in fig.axes:
+        if not ax.axison:
+            for axis in (ax.xaxis, ax.yaxis):
+                labels = (*axis.get_ticklabels(), *axis.get_ticklabels(minor=True))
+                hidden |= {id(t) for t in labels}
+            continue
         for axis in (ax.xaxis, ax.yaxis):
             low, high = sorted(axis.get_view_interval())
             span = high - low
@@ -61,6 +69,29 @@ def drawn_texts(fig: Any) -> list[Any]:
         for t in fig.findobj(Text)
         if t.get_visible() and t.get_text().strip() and id(t) not in hidden
     ]
+
+
+def thin_tick_labels(fig: Any) -> None:
+    """Show every k-th tick label of an axis whose labels collide, with the smallest k that fits.
+
+    A tick locator knows an axis's length, not its labels' size: 990,000 to 1,000,000 reads in
+    steps of 2,000 on a short value axis stacked the labels on each other (2026-09-30).
+    """
+    from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
+
+    renderer = FigureCanvasAgg(fig).get_renderer()  # type: ignore[no-untyped-call]
+    fig.draw(renderer)
+    for ax in fig.axes:
+        for axis in (ax.xaxis, ax.yaxis):
+            labels = [t for t in axis.get_ticklabels() if t.get_visible() and t.get_text()]
+            boxes = [t.get_window_extent(renderer) for t in labels]
+            step = 1
+            while step < len(labels) and any(
+                a.overlaps(b) for a, b in zip(boxes[::step], boxes[step::step], strict=False)
+            ):
+                step += 1
+            for i, label in enumerate(labels):
+                label.set_visible(i % step == 0)
 
 
 def layout_problems(fig: Any) -> list[str]:
@@ -88,10 +119,11 @@ def layout_problems(fig: Any) -> list[str]:
 def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> FigureBlock:
     """The interactive figure, caption, data rows and words, for a figure or a module page.
 
-    A scatter with live calling also carries its controls and, unless ``text`` brings its
-    own, the "How to read" lines at the default setting.
+    A figure with page controls carries them (a scatter's live calls, a linked view's brush,
+    a bar's filters); a scatter with live calling also takes, unless ``text`` brings its own,
+    the "How to read" lines at the default setting.
     """
-    controls = data.controls() if isinstance(data, ScatterData | LinkedData) else None
+    controls = data.controls() if isinstance(data, ScatterData | LinkedData | BarData) else None
     if isinstance(data, ScatterData) and data.calls:
         # The page script refills these lines by position from the figure's own templates;
         # lines from elsewhere would be overwritten, or leave a template with no line.
@@ -141,6 +173,7 @@ def write_figure(
     validate(rows, figure_stem, columns, ("csv",))
     figures = {theme.name: data.static(theme) for theme in THEMES.values()}
     for name, fig in figures.items():
+        thin_tick_labels(fig)
         if problems := layout_problems(fig):
             raise ValueError(f"{figure_stem} ({name}): " + "; ".join(problems[:5]))
     directory.mkdir(parents=True, exist_ok=True)

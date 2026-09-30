@@ -5,6 +5,7 @@ Sizes, fonts, line widths, ticks and points are those of the Candida Ribo-seq fi
 CONVENTIONS.md (Figures).
 """
 
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -40,8 +41,10 @@ SIZES = {
 # No text below this; a mathtext superscript on a 9 pt tick would be 6.3 pt, so none is drawn.
 MIN_TEXT_PT = 8.0
 # A shaded band has no outline, as a point has no edge.
+# "sample": one line per sample, three times a plot line so each stays traceable (Rytis
+# 2026-09-30, the base-quality curves).
 LINE_WIDTHS = {"axes": 1.0, "line": 1.0, "box": 1.5, "errorbar": 1.5, "marker_edge": 0.0,
-               "band_edge": 0.0}  # fmt: skip
+               "band_edge": 0.0, "sample": 3.0}  # fmt: skip
 TICK_PT = {"major": 3.0, "minor": 1.5}
 # Point diameter in pt, and its opacity, so overplotted points still show their density.
 MARKER_SIZE = 6.0
@@ -51,8 +54,11 @@ BUBBLE_PT = {"min": 3.0, "max": 14.0}
 BUBBLE_KEYS = (0.25, 0.5, 1.0)
 POINT_ALPHA = 0.5
 PX_PER_PT = 96 / 72
-# Plotly marker diameter in pixels: MARKER_SIZE on screen.
-PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT
+# A plot on the page draws its text, points and marks 25 % larger than the figure file does
+# (Rytis 2026-09-30); the PDF and SVG keep the journal sizes above.
+PAGE_SCALE = 1.25
+# Plotly marker diameter in pixels: MARKER_SIZE on screen, at the page's scale.
+PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT * PAGE_SCALE
 # Panel letters: bold capitals at the top left, nudged up by dy_pt (no figure has panels yet).
 PANEL_LABEL = {"size": SIZES["panel"], "weight": "bold", "dx_pt": 0.0, "dy_pt": 2.0}
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
@@ -74,7 +80,8 @@ HEAT = {"row_mm": 4.5, "margin_mm": 70.0, "label_rows": 60, "label_columns": 40,
 PLOTLY_HEAT_ROW_PX, PLOTLY_HEAT_BASE_PX = 18, 220
 # A flow diagram: node width and the share of the width kept for the last stage's labels,
 # both as fractions of the axes; the gap between nodes is one label's pitch.
-FLOW = {"node": 0.02, "label_room": 0.3, "pad": 0.01}
+# label_share: the most of a flow's height its labels and gaps may take; the rest is bars.
+FLOW = {"node": 0.02, "label_room": 0.3, "pad": 0.01, "label_share": 0.6}
 PLOTLY_FLOW = {"node_px": 16, "pad_px": 18}
 # A density's outer highest-density region is dashed, its inner one solid.
 DENSITY_DASH: dict[str, tuple[Literal["-", "--"], Literal["solid", "dash"]]] = {
@@ -87,6 +94,9 @@ LABEL_BOX_PAD = 0.15
 STRIP = {"jitter": 0.3, "range": 0.4}
 # Average glyph width in em, used to wrap the caption to the width a figure really has.
 AVERAGE_CHAR_EM = 0.55
+# The caption's inset from each side, as a share of the figure's width: annotate.place_caption
+# draws it at x = 0.02 (tests/test_caption_fit.py holds the two equal).
+CAPTION_INSET = 0.02
 # Above this many features a box plot takes the double column: at 9 pt the p and r labels of
 # 5 features overlap in 85 mm and those of 4 do not (measured 2026-09-29).
 SINGLE_COLUMN_MAX_FEATURES = 4
@@ -172,8 +182,8 @@ TYPE_PX = {"xs": 16, "sm": 17, "md": 20, "lg": 24, "xl": 32, "display": 48}
 
 
 def on_page(size: float) -> float:
-    """A figure text size in pt as a plot on the page shows it, in px: 3 pt larger."""
-    return (size + PAGE_BOOST_PT) * PX_PER_PT
+    """A figure text size in pt as a plot on the page shows it, in px: 3 pt larger, then scaled."""
+    return (size + PAGE_BOOST_PT) * PX_PER_PT * PAGE_SCALE
 
 
 SPACE_PX = (4, 8, 12, 16, 24, 32, 48, 64, 96)
@@ -197,6 +207,28 @@ PLOTLY_TICK_PX, PLOTLY_TITLE_STANDOFF_PX = 4, 8
 TRANSPARENT = "rgba(0,0,0,0)"
 # Dash of a threshold line, in both renderers.
 THRESHOLD_DASH: tuple[Literal["--"], Literal["dash"]] = ("--", "dash")
+# One line per sample, each a unique colour and dash pair. The colours are the data colours with
+# at least 3:1 contrast on both theme backgrounds, measured 2026-09-30 (white, black): #009E73
+# 3.42, 5.52; #0072B2 5.19, 3.64; #D55E00 3.87, 4.88; #CC79A7 3.06, 6.17. The yellow measured
+# 1.32 on white. Dashes as (matplotlib, plotly) names; all colours solid first, then dashed.
+LINE_COLOURS = ("#009E73", "#0072B2", "#D55E00", "#CC79A7")
+MplDash = Literal["solid", "dashed", "dotted", "dashdot"]
+DASHES: tuple[tuple[MplDash, str], ...] = (
+    ("solid", "solid"), ("dashed", "dash"), ("dotted", "dot"), ("dashdot", "dashdot"),
+)  # fmt: skip
+MAX_DISTINCT = len(LINE_COLOURS) * len(DASHES)
+
+
+def distinct_styles(levels: Sequence[str]) -> dict[str, tuple[str, tuple[MplDash, str]]]:
+    """A unique (colour, (matplotlib dash, plotly dash)) per level, in the order given.
+
+    Raises:
+        ValueError: If there are more levels than colour and dash pairs.
+    """
+    if len(levels) > MAX_DISTINCT:
+        raise ValueError(f"{len(levels)} lines; at most {MAX_DISTINCT} distinct styles")
+    n = len(LINE_COLOURS)
+    return {level: (LINE_COLOURS[i % n], DASHES[i // n]) for i, level in enumerate(levels)}
 
 
 def category_colours(levels: list[str]) -> dict[str, str]:
@@ -238,8 +270,13 @@ def figure_inches(width: str, kind: str) -> tuple[float, float]:
 
 
 def caption_chars(width_inches: float) -> int:
-    """How many caption characters fit on one line of a figure this wide."""
-    return int(width_inches * 72 / (SIZES["caption"] * AVERAGE_CHAR_EM))
+    """How many caption characters fit on one line of a figure this wide, inside its insets.
+
+    The full width let a 96-character line of Step-1's running-score caption end 0.07 in past
+    a double-column page (2026-09-30).
+    """
+    usable = width_inches * (1 - 2 * CAPTION_INSET)
+    return int(usable * 72 / (SIZES["caption"] * AVERAGE_CHAR_EM))
 
 
 def contrast(first: str, second: str) -> float:
@@ -295,6 +332,10 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
             "legend.title_fontsize": SIZES["legend"],
             "axes.linewidth": LINE_WIDTHS["axes"],
             "axes.formatter.use_mathtext": False,
+            # Every tick carries its full value: no detached multiplier or offset above the
+            # axis, which on Step-1's rRNA strip (values near 1e-5) landed on the legend.
+            "axes.formatter.useoffset": False,
+            "axes.formatter.limits": (-9, 9),
             "lines.linewidth": LINE_WIDTHS["line"],
             "lines.markersize": MARKER_SIZE,
             "grid.color": theme.grid,
