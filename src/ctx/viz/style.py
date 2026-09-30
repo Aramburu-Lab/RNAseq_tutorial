@@ -87,6 +87,9 @@ LABEL_BOX_PAD = 0.15
 STRIP = {"jitter": 0.3, "range": 0.4}
 # Average glyph width in em, used to wrap the caption to the width a figure really has.
 AVERAGE_CHAR_EM = 0.55
+# The caption's inset from each side, as a share of the figure's width: annotate.place_caption
+# draws it at x = 0.02 (tests/test_caption_fit.py holds the two equal).
+CAPTION_INSET = 0.02
 # Above this many features a box plot takes the double column: at 9 pt the p and r labels of
 # 5 features overlap in 85 mm and those of 4 do not (measured 2026-09-29).
 SINGLE_COLUMN_MAX_FEATURES = 4
@@ -238,8 +241,13 @@ def figure_inches(width: str, kind: str) -> tuple[float, float]:
 
 
 def caption_chars(width_inches: float) -> int:
-    """How many caption characters fit on one line of a figure this wide."""
-    return int(width_inches * 72 / (SIZES["caption"] * AVERAGE_CHAR_EM))
+    """How many caption characters fit on one line of a figure this wide, inside its insets.
+
+    The full width let a 96-character line of Step-1's running-score caption end 0.07 in past
+    a double-column page (2026-09-30).
+    """
+    usable = width_inches * (1 - 2 * CAPTION_INSET)
+    return int(usable * 72 / (SIZES["caption"] * AVERAGE_CHAR_EM))
 
 
 def contrast(first: str, second: str) -> float:
