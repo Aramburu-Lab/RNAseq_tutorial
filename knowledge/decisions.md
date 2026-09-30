@@ -27,6 +27,42 @@ it were reversed.
 
 ---
 
+## D-035 — The Step-1 download relaunched fresh, ten at a time, retrying refused connections; chr22 cut from the cluster's genome
+
+**Date:** 2026-09-30 · **Status:** decided
+
+**Context.** P2A.3 step 1, fetchngs 1.12.0 on all 210 Step-1 runs through the lab launcher, ended "Pipeline completed with errors". `SRA_FASTQ_FTP` got `wget ... failed: Connection refused` (exit 4) again and again, and fetchngs killed 48 running transfers. Rytis pasted the state:
+- 2 FASTQs and 2 md5 files published (2.0 GB), both hard-linked;
+- no samplesheet;
+- 47 GB in `work/`, mostly killed partial transfers.
+
+The compute nodes did download data, so network access itself works. The refusals are consistent with ENA turning connections away under the launch's 50 concurrent downloads (`queueSize = 50`), but ENA's limit was not looked up and the cause is not proven.
+
+**What made it fatal.**
+- fetchngs passes `wget -t 5 -nv -c -T 60` (`modules/local/sra_fastq_ftp/nextflow.config`).
+- GNU wget treats a refused connection as final unless given `--retry-connrefused`, so the five tries never happened.
+- The process's `error_retry` label allows 2 retries (`conf/base.config`), then fetchngs ends the whole run.
+
+**Options.**
+- **`-resume` into the same outdir:** reuses 2 GB, and writes a second `params_*.json`, which `ctx gather` refuses by design, since two params files in one outdir normally mean two runs.
+- **Adding `--retry-connrefused` to `ext.args` and resuming:** changes every download task's script and hash, so the resume re-downloads everything anyway.
+- **A fresh run:** move the failed `nfcore_fetchngs/` aside, and relaunch with the download settings changed.
+
+**Decision.** A fresh run. Moving the failed directory aside keeps it (never deleted) and gives the relaunch a new launch directory, so the launcher's `-resume` finds no cache and one params file is written. The launch-directory `nextflow.config` adds, for `SRA_FASTQ_FTP` only:
+- `ext.args = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'`;
+- `maxForks = 10`, my choice, not an ENA figure;
+- `maxRetries = 6`, with exponential backoff: 1, 2, 4 and so on up to 32 minutes between attempts.
+
+The P3.0 block takes the same settings. `ctx gather`'s one-params-file rule is unchanged.
+
+For M3, step 2b cuts chr22 out of the cluster's MD5-checked GENCODE 50 genome, so the Mac's STAR index aligns to the sequence the Step-1 counts were quantified against, with no new download.
+
+**Evidence.** `nextflow config nf-core/fetchngs -r 1.12.0 -profile singularity`, run here with `NXF_SYNTAX_PARSER=v1` against this config, shows it merged over the pipeline's: the new `ext.args`, `maxForks 10`, `maxRetries 6`, the backoff closure, and the module's own `publishDir` kept. Not yet checked: that the cluster's wget 1.20.1 image has both options. Step 1b's first PASTE line checks it.
+
+**Consequence.** The relaunch re-downloads the 2 finished FASTQs. The failed run's 47 GB `work/` can be removed once the new run is checked; that is Rytis's call.
+
+---
+
 ## D-034 — `ctx qc` runs three stages into one judgement: counts, the pipeline's reports, and the reads
 
 **Date:** 2026-09-30 · **Status:** decided

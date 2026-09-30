@@ -2037,12 +2037,60 @@ printf 'PRJEB49000\n' > "$P/ids.txt"
 PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq     # PASTE
 PUBLISH_DIR_MODE=link sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq
 
+# ---- 1b. Relaunch after the refused downloads of 2026-09-30 (D-035) ----
+# The first launch ended "completed with errors": SRA_FASTQ_FTP's wget got "Connection
+# refused" (exit 4) again and again, 2 of 210 FASTQs were published, and 48 transfers were
+# killed. wget treats a refused connection as fatal unless told otherwise, so its -t 5 never
+# retried, and fetchngs gives each download 3 attempts. The relaunch starts fresh: a resume
+# would reuse 2 GB, and its second params file would make ctx gather refuse the outdir.
+# The failed run is moved aside, not deleted; its 47 GB work/ can go once this run is checked.
+cd "$P"
+squeue -u "$USER"                                                     # PASTE, expect no nf_fetchngs job left
+apptainer exec /proj/nobackup/hpc2n2024-150/Rytis/Cache/Apptainer/nf-core_fetchngs_1.12.0/depot.galaxyproject.org-singularity-wget-1.20.1.img wget --help | grep -e retry-connrefused -e waitretry     # PASTE, expect both options
+mv "$P/nfcore_fetchngs" "$P/nfcore_fetchngs_failed_2026-09-30"
+mv "$P"/slurm-nf_fetchngs-*.out "$P/nfcore_fetchngs_failed_2026-09-30/"
+mkdir -p "$P/nfcore_fetchngs"
+cat > "$P/nfcore_fetchngs/nextflow.config" <<'CONF'
+executor {
+    queueSize = 50
+}
+params {
+    monochrome_logs = true
+}
+process {
+    withName: 'SRA_FASTQ_FTP' {
+        ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
+        maxForks      = 10
+        maxRetries    = 6
+        errorStrategy = { sleep(Math.pow(2, task.attempt) * 30000 as long); return 'retry' }
+    }
+}
+CONF
+PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq     # PASTE
+PUBLISH_DIR_MODE=link sbatch -t 3-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$P" "$P/ids.txt" rnaseq
+# While it runs: refusals so far; a few, each retried, are fine.
+grep -c "exit status (4)" "$P/nfcore_fetchngs/.nextflow.log"             # PASTE when you look
+
 # ---- 2. GENCODE 50; MD5 values from release_50/MD5SUMS, read 2026-09-27 ----
 cd "$P/refs"
 wget -nv https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/GRCh38.primary_assembly.genome.fa.gz
 wget -nv https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz
 printf '%s  %s\n' da1a11258be075cfa7af718162c894e7 GRCh38.primary_assembly.genome.fa.gz 289b91e5e95e8b0450d223246f10a12e gencode.v50.primary_assembly.annotation.gtf.gz | md5sum -c -     # PASTE, expect two OK
 cd "$P"
+
+# ---- 2b. chr22 of the same genome, for M3's STAR index on the Mac (D-035) ----
+# From the MD5-checked GENCODE 50 genome above, so Track A aligns to the sequence the Step-1
+# counts were quantified against. About 12 MB gzipped; no new download.
+cd "$P/refs"
+gzip -dc GRCh38.primary_assembly.genome.fa.gz | awk '/^>/ {keep = ($1 == ">chr22")} keep' | gzip -n > GRCh38.primary_assembly.chr22.fa.gz
+gzip -dc GRCh38.primary_assembly.chr22.fa.gz | grep '^>'                 # PASTE, expect one header, >chr22
+gzip -dc GRCh38.primary_assembly.chr22.fa.gz | grep -v '^>' | tr -d '\n' | wc -c    # PASTE, the chr22 length in bases
+sha256sum GRCh38.primary_assembly.chr22.fa.gz                          # PASTE
+cd "$P"
+# On the Mac:
+#   mkdir -p ~/ctx_tier1/data/raw/reference
+#   rsync -av rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1/refs/GRCh38.primary_assembly.chr22.fa.gz ~/ctx_tier1/data/raw/reference/
+#   shasum -a 256 ~/ctx_tier1/data/raw/reference/GRCh38.primary_assembly.chr22.fa.gz    # PASTE, expect the cluster's
 
 # ---- 3. After the fetchngs job ends ----
 R="$P/nfcore_fetchngs/results"
@@ -2173,7 +2221,23 @@ cd "$Q"
 df -h /proj/nobackup/hpc2n2024-150                                    # PASTE
 
 # ---- 1. The 8 runs with the lab launcher (nf-core/fetchngs 1.12.0) ----
-printf 'executor {\n    queueSize = 50\n}\nparams {\n    monochrome_logs = true\n}\n' > "$Q/nfcore_fetchngs/nextflow.config"
+# The download settings of P2A.3 step 1b (D-035): wget retries a refused connection.
+cat > "$Q/nfcore_fetchngs/nextflow.config" <<'CONF'
+executor {
+    queueSize = 50
+}
+params {
+    monochrome_logs = true
+}
+process {
+    withName: 'SRA_FASTQ_FTP' {
+        ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
+        maxForks      = 10
+        maxRetries    = 6
+        errorStrategy = { sleep(Math.pow(2, task.attempt) * 30000 as long); return 'retry' }
+    }
+}
+CONF
 printf '%s\n' ERR7425381 ERR7425382 ERR7425405 ERR7425406 ERR7425288 ERR7425289 ERR7425270 ERR7425271 > "$Q/ids.txt"
 PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$Q" "$Q/ids.txt" rnaseq     # PASTE, expect 8 accessions and "publish mode : link"
 PUBLISH_DIR_MODE=link sbatch /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$Q" "$Q/ids.txt" rnaseq
