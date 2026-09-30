@@ -1,0 +1,93 @@
+module,metric,value,detail
+de,permanova.pb.cell_type.r2,0.6844913871720103,"171 samples, 3 groups, top 500 genes by VST variance"
+de,permanova.pb.cell_type.p,0.001,"171 samples, 3 groups, top 500 genes by VST variance"
+de,permanova.pb.condition.r2,0.08876526458011126,"171 samples, 5 groups, top 500 genes by VST variance"
+de,permanova.pb.batch.r2,0.025787223368735446,"171 samples, 2 groups, top 500 genes by VST variance"
+de,permanova.ndn.condition.r2,0.39846444103427603,"55 samples, 5 groups, top 500 genes by VST variance"
+de,permanova.ndn.condition.p,0.001,"55 samples, 5 groups, top 500 genes by VST variance"
+de,permanova.ss_ndn.batch.r2,0.1260082192360241,"17 samples, 2 groups, top 500 genes by VST variance"
+de,permanova.ss_ndn.batch.p,0.002,"17 samples, 2 groups, top 500 genes by VST variance"
+de,spearman.ndn_pdac_naive.ndn_pdac_adjusted,0.570203941798968,"raw LFC, genes tested in both"
+de,spearman.ndn_hsct_early.mono_hsct_early,0.29448763008211754,"raw LFC, genes tested in both"
+de,phist.ndn_gcsf.low,6370.0,p < 0.05
+de,phist.ndn_gcsf.flat,244.4,"mean count per bin over [0.5, 1]"
+de,calls.ndn_gcsf.significant,5506.0,"padj < 0.05, any fold change"
+de,calls.ndn_gcsf.up,1683.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_gcsf.down,2020.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_gcsf.tested,12796.0,genes with an adjusted p
+de,phist.mono_gcsf.low,2442.0,p < 0.05
+de,phist.mono_gcsf.flat,566.8,"mean count per bin over [0.5, 1]"
+de,calls.mono_gcsf.significant,620.0,"padj < 0.05, any fold change"
+de,calls.mono_gcsf.up,296.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.mono_gcsf.down,199.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.mono_gcsf.tested,13896.0,genes with an adjusted p
+de,phist.ndn_hsct_early.low,3426.0,p < 0.05
+de,phist.ndn_hsct_early.flat,494.4,"mean count per bin over [0.5, 1]"
+de,calls.ndn_hsct_early.significant,1301.0,"padj < 0.05, any fold change"
+de,calls.ndn_hsct_early.up,703.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_hsct_early.down,570.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_hsct_early.tested,14668.0,genes with an adjusted p
+de,phist.mono_hsct_early.low,1649.0,p < 0.05
+de,phist.mono_hsct_early.flat,799.1,"mean count per bin over [0.5, 1]"
+de,calls.mono_hsct_early.significant,164.0,"padj < 0.05, any fold change"
+de,calls.mono_hsct_early.up,88.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.mono_hsct_early.down,75.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.mono_hsct_early.tested,14693.0,genes with an adjusted p
+de,phist.ndn_gcsf_paired.low,7006.0,p < 0.05
+de,phist.ndn_gcsf_paired.flat,221.3,"mean count per bin over [0.5, 1]"
+de,calls.ndn_gcsf_paired.significant,6290.0,"padj < 0.05, any fold change"
+de,calls.ndn_gcsf_paired.up,2028.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_gcsf_paired.down,1990.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_gcsf_paired.tested,12939.0,genes with an adjusted p
+de,phist.ndn_gcsf_unpaired9.low,5717.0,p < 0.05
+de,phist.ndn_gcsf_unpaired9.flat,283.9,"mean count per bin over [0.5, 1]"
+de,calls.ndn_gcsf_unpaired9.significant,4570.0,"padj < 0.05, any fold change"
+de,calls.ndn_gcsf_unpaired9.up,1670.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_gcsf_unpaired9.down,1787.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_gcsf_unpaired9.tested,12939.0,genes with an adjusted p
+de,phist.ndn_pdac_naive.low,3146.0,p < 0.05
+de,phist.ndn_pdac_naive.flat,397.8,"mean count per bin over [0.5, 1]"
+de,calls.ndn_pdac_naive.significant,1256.0,"padj < 0.05, any fold change"
+de,calls.ndn_pdac_naive.up,266.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_pdac_naive.down,435.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_pdac_naive.tested,12754.0,genes with an adjusted p
+de,phist.ndn_pdac_adjusted.low,1004.0,p < 0.05
+de,phist.ndn_pdac_adjusted.flat,597.6,"mean count per bin over [0.5, 1]"
+de,calls.ndn_pdac_adjusted.significant,40.0,"padj < 0.05, any fold change"
+de,calls.ndn_pdac_adjusted.up,35.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_pdac_adjusted.down,5.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_pdac_adjusted.tested,11739.0,genes with an adjusted p
+de,phist.ndn_pdac_within.low,1152.0,p < 0.05
+de,phist.ndn_pdac_within.flat,676.3,"mean count per bin over [0.5, 1]"
+de,calls.ndn_pdac_within.significant,47.0,"padj < 0.05, any fold change"
+de,calls.ndn_pdac_within.up,43.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_pdac_within.down,4.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_pdac_within.tested,13675.0,genes with an adjusted p
+de,phist.ndn_null_split.low,708.0,p < 0.05
+de,phist.ndn_null_split.flat,722.1,"mean count per bin over [0.5, 1]"
+de,calls.ndn_null_split.significant,6.0,"padj < 0.05, any fold change"
+de,calls.ndn_null_split.up,3.0,padj < 0.05 and raw LFC >= 1.0
+de,calls.ndn_null_split.down,3.0,padj < 0.05 and raw LFC <= -1.0
+de,calls.ndn_null_split.tested,14000.0,genes with an adjusted p
+de,sex.compared,208.0,"2 with no recorded sex: ERX6994370, ERX6994371"
+de,sex.disagree,0.0,none
+function,gsea.ndn_gcsf.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,-2.442591841057869,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_gcsf
+function,gsea.ndn_gcsf.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_gcsf
+function,gsea.mono_gcsf.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,-1.3311118385751894,HALLMARK_INTERFERON_ALPHA_RESPONSE in mono_gcsf
+function,gsea.mono_gcsf.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.13016621743036838,HALLMARK_INTERFERON_ALPHA_RESPONSE in mono_gcsf
+function,gsea.ndn_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,3.1769893378656,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_hsct_early
+function,gsea.ndn_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_hsct_early
+function,gsea.mono_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,3.310699632960037,HALLMARK_INTERFERON_ALPHA_RESPONSE in mono_hsct_early
+function,gsea.mono_hsct_early.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in mono_hsct_early
+function,gsea.ndn_gcsf_paired.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,-2.5226800564956173,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_gcsf_paired
+function,gsea.ndn_gcsf_paired.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_gcsf_paired
+function,gsea.ndn_gcsf_unpaired9.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,-2.560420681704185,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_gcsf_unpaired9
+function,gsea.ndn_gcsf_unpaired9.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_gcsf_unpaired9
+function,gsea.ndn_pdac_naive.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,2.2239282170172223,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_pdac_naive
+function,gsea.ndn_pdac_naive.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_pdac_naive
+function,gsea.ndn_pdac_adjusted.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,2.4802093437986366,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_pdac_adjusted
+function,gsea.ndn_pdac_adjusted.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_pdac_adjusted
+function,gsea.ndn_pdac_within.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,2.2556330428396136,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_pdac_within
+function,gsea.ndn_pdac_within.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_pdac_within
+function,gsea.ndn_null_split.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes,-2.645599086855244,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_null_split
+function,gsea.ndn_null_split.HALLMARK_INTERFERON_ALPHA_RESPONSE.fdr,0.0,HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_null_split
