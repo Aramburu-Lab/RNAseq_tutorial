@@ -2060,6 +2060,7 @@ params {
 process {
     withName: 'SRA_FASTQ_FTP' {
         ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
+        time          = { 30.min * task.attempt }   // later launches; job 47484816 ran on fetchngs's 4 h
         maxForks      = 10
         maxRetries    = 6
         errorStrategy = { sleep(Math.pow(2, task.attempt) * 30000 as long); return 'retry' }
@@ -2232,6 +2233,7 @@ params {
 process {
     withName: 'SRA_FASTQ_FTP' {
         ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
+        time          = { 30.min * task.attempt }
         maxForks      = 10
         maxRetries    = 6
         errorStrategy = { sleep(Math.pow(2, task.attempt) * 30000 as long); return 'retry' }

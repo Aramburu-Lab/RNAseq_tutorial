@@ -53,7 +53,7 @@ The compute nodes did download data, so network access itself works. The refusal
 - `maxForks = 10`, my choice, not an ENA figure;
 - `maxRetries = 6`, with exponential backoff: 1, 2, 4 and so on up to 32 minutes between attempts.
 
-The P3.0 block takes the same settings. `ctx gather`'s one-params-file rule is unchanged.
+The P3.0 block takes the same settings. `ctx gather`'s one-params-file rule is unchanged. Rytis asked, at 08:35, for a 30-minute limit per download: `time = { 30.min * task.attempt }` replaces fetchngs's `process_low` 4 h (checked with `nextflow config`: `withName` wins over `withLabel`), and grows with each retry so a slow transfer is not killed for good. It applies to later launches: the running job 47484816 keeps 4 h, because its head job never rereads the config and a restart would resume into the same outdir.
 
 For M3, step 2b cuts chr22 out of the cluster's MD5-checked GENCODE 50 genome, so the Mac's STAR index aligns to the sequence the Step-1 counts were quantified against, with no new download.
 
