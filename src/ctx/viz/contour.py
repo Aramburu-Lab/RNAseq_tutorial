@@ -27,6 +27,7 @@ from ctx.viz.style import (
     Theme,
     apply_matplotlib,
     figure_inches,
+    plotly_steps,
     plotly_templates,
 )
 
@@ -226,7 +227,7 @@ class SurfaceData:
             x=xs, y=ys, z=z, zmin=edges[0], zmax=edges[-1], autocontour=False,
             contours={"start": edges[0], "end": edges[-1], "size": edges[1] - edges[0],
                       "coloring": "fill"},
-            colorscale=_bands(), line={"width": LINE_WIDTHS["band_edge"]},
+            colorscale=plotly_steps(list(CIVIDIS)), line={"width": LINE_WIDTHS["band_edge"]},
             colorbar={"title": {"text": z_title}},
             hovertemplate=f"{x_title}: %{{x}}<br>{y_title}: %{{y}}<br>{z_title}: %{{z:.4g}}"
             "<extra></extra>",
@@ -249,12 +250,3 @@ class SurfaceData:
             xaxis={"title": {"text": x_title}}, yaxis={"title": {"text": y_title}},
         )  # fmt: skip
         return fig
-
-
-def _bands() -> list[list[Any]]:
-    """A plotly colorscale of the eight cividis stops, each held across its band."""
-    n = len(CIVIDIS)
-    scale: list[list[Any]] = []
-    for k, colour in enumerate(CIVIDIS):
-        scale += [[k / n, colour], [(k + 1) / n, colour]]
-    return scale

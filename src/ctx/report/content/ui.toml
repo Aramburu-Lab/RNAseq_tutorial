@@ -43,7 +43,7 @@ effect = "If you change it"
 report = "Parameters of ctx report"
 
 [reproduce]
-copy = "Copy"
+button = "Copy"
 copied = "Copied"
 selected = "Selected: press Ctrl+C or Cmd+C"
 wall = "Wall time"
@@ -61,6 +61,14 @@ open = "Open alone"
 back = "Back to the module page"
 data = "Data (CSV)"
 columns = "Column meanings"
+
+# Linked brushing: paint samples in one view, see them in the other.
+[brush]
+label = "Paint samples"
+colour = "Paint colour"
+erase = "Clear"
+how = "Draw a lasso round points, or tap a category or band below them."
+noscript = "Turn on JavaScript to paint samples."
 
 # The volcano's cutoff controls.
 [calls]

@@ -284,7 +284,7 @@ class ScatterData:
         c = self.calls
         first_line = len(self.colours) + len(self.lines)
         return {
-            "lfc": c.lfc, "p": c.p, "gate": next(iter(c.adjusted)),
+            "kind": "calls", "lfc": c.lfc, "p": c.p, "gate": next(iter(c.adjusted)),
             "bases": {**c.adjusted, c.p: c.raw_words}, "tested": c.tested,
             "reference": c.reference, "alpha": c.alpha, "lfc_min": c.lfc_min,
             "max_cutoff": c.max_cutoff, "min_cutoff": MIN_CUTOFF, "n_tested": c.n_tested,

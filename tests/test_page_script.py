@@ -9,12 +9,13 @@ import json
 import math
 import shutil
 import subprocess
+from collections import Counter
 from pathlib import Path
 
 import numpy as np
 import polars as pl
 import pytest
-from synth import design_counts, filtered_counts
+from synth import demo_linked, design_counts, filtered_counts
 
 from ctx.dataset import Contrast
 from ctx.de.deseq import fit
@@ -68,11 +69,11 @@ def _python(rows: pl.DataFrame, basis: str, alpha: float, t: float) -> dict[str,
     }
 
 
-def _node(payload: dict, harness: str | None = None) -> dict:
-    """Run the template's rule under node on one payload; returns what the harness prints."""
+def _node(payload: dict, harness: str | None = None, script: Path = SCRIPT) -> dict:
+    """Run a template's logic under node on one payload; returns what the harness prints."""
     node = shutil.which("node")
     assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
-    rule = SCRIPT.read_text().replace("{% raw %}", "").replace("{% endraw %}", "")
+    rule = script.read_text().replace("{% raw %}", "").replace("{% endraw %}", "")
     harness = (
         harness
         or """
@@ -233,3 +234,61 @@ def test_unit_switch_keeps_the_exact_threshold():
     # A number the reader types replaces the kept one.
     assert got["typed 0.420"]["t"] == 0.42
     assert got["typed 0.420"]["up"] == ["edge", "strong"]
+
+
+BRUSH = ROOT / "src" / "ctx" / "report" / "templates" / "_brush.js.j2"
+PAINT = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const cfg = input.cfg, rows = input.rows;
+let painted = ctxBrush.start(rows.length);
+const out = [];
+for (const [indices, event, k] of input.steps) {
+  painted = ctxBrush.paint(painted, event ? ctxBrush.indices(event) : indices, k);
+  out.push({ summary: ctxBrush.summary(painted, rows, cfg),
+             markers: ctxBrush.markers(painted, cfg), codes: ctxBrush.codes(painted) });
+}
+painted = ctxBrush.clear(painted);
+out.push({ summary: ctxBrush.summary(painted, rows, cfg), codes: ctxBrush.codes(painted) });
+console.log(JSON.stringify(out));
+"""
+
+
+def _brush_oracle(painted: list[int], rows: list[dict], cfg: dict) -> str:
+    """The live line in Python: per paint in palette order, n and the detail, most first."""
+    lines = []
+    for k in range(len(cfg["colours"])):
+        members = [str(rows[i][cfg["detail"]]) for i, p in enumerate(painted) if p == k]
+        if members:
+            counts = sorted(Counter(members).items(), key=lambda kv: (-kv[1], kv[0]))
+            detail = ", ".join(f"{level} {n:,}" for level, n in counts)
+            lines.append(cfg["summary"].format(n=f"{len(members):,}", colour=cfg["names"][k],
+                                               detail=detail))  # fmt: skip
+    return "; ".join(lines) or cfg["empty"]
+
+
+def test_brush_paints_both_views_and_counts_as_python_does():
+    data = demo_linked()
+    block = figure_block(data, "x")
+    rows, cfg = list(block.rows), dict(block.controls)
+    selected = {"points": [{"curveNumber": 0, "pointIndex": i, "pointNumber": i}
+                           for i in (10, 11, 12)]}  # fmt: skip
+    tapped = {"points": [{"curveNumber": 1, "pointNumber": i} for i in (20, 21, 3)]}
+    steps = [[[0, 1, 2, 3], None, 0], [[2, 3, 4], None, 5], [[], selected, 2], [[], tapped, 0]]
+    out = _node({"rows": rows, "cfg": cfg, "steps": steps}, PAINT, BRUSH)
+    painted = [-1] * len(rows)
+    for (indices, event, k), page in zip(steps, out, strict=False):
+        picked = (
+            [p.get("pointNumber", p.get("pointIndex")) for p in event["points"]]
+            if event
+            else indices
+        )
+        for i in picked:
+            painted[i] = k
+        assert page["summary"] == _brush_oracle(painted, rows, cfg)
+        assert page["codes"] == [p + 1 for p in painted]
+        assert page["markers"] == [cfg["reference"] if p < 0 else cfg["colours"][p]
+                                   for p in painted]  # fmt: skip
+    # A repaint moves a sample: 2 and 3 went from orange to vermillion, then 3 back.
+    assert painted[:5] == [0, 0, 5, 0, 5]
+    assert out[-1] == {"summary": cfg["empty"], "codes": [0] * len(rows)}
+    assert "; " in out[-2]["summary"]

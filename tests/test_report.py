@@ -23,6 +23,7 @@ from synth import (
     demo_density,
     demo_flow,
     demo_heatmap,
+    demo_linked,
     demo_pca,
     demo_strip,
     demo_surface,
@@ -68,6 +69,7 @@ DEMOS = {
     "flow": lambda s: demo_flow(),
     "surface": lambda s: demo_surface(),
     "density": lambda s: demo_density(),
+    "linked": lambda s: demo_linked(),
 }
 
 
@@ -348,3 +350,18 @@ def test_text_contrast():
         for text, fill in (("text", "good-fill"), ("text", "warn-fill"), ("warn", "warn-fill")):
             tinted = _over(chrome[fill], chrome["page"], share)
             assert contrast(chrome[text], tinted) >= 4.5, (theme, text, fill)
+
+
+def test_each_kind_of_control_gets_its_own_form(tmp_path):
+    """A linked figure gets the brush, a volcano the cutoffs; neither gets the other's form."""
+    pages = {}
+    for name, data in (("linked", demo_linked()), ("volcano", demo_volcano(counts()))):
+        figure_stem = stem("qc", f"{name}_demo", 1, day=date(2026, 9, 30))
+        write_figure(data, tmp_path, figure_stem, title="Demo", data_releases={})
+        pages[name] = (tmp_path / f"{figure_stem}.html").read_text()
+    linked, volcano = pages["linked"], pages["volcano"]
+    assert '<form class="brush"' in linked and '<form class="calls"' not in linked
+    assert len(re.findall(r'<input type="radio" name="colour"', linked)) == 7
+    assert '<p class="brush-summary" aria-live="polite">Nothing painted yet.</p>' in linked
+    assert '<form class="calls"' in volcano and '<form class="brush"' not in volcano
+    assert '"kind": "brush"' in linked and '"kind": "calls"' in volcano

@@ -5,7 +5,16 @@
 {% if f.title %}<h{{ f.level }} class="fig-title">{{ f.title }}</h{{ f.level }}>{% endif %}
 {% endif %}
 {% if f.text.lead %}<p class="fig-lead">{{ f.text.lead }}</p>{% endif %}
-{% if f.controls %}
+{% if f.kind == "brush" %}
+<form class="brush" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="{{ ui.brush.label }}">
+<fieldset><legend>{{ ui.brush.colour }}</legend>{% for hex, name in f.defaults.colours %}<label class="paint"><input type="radio" name="colour" value="{{ loop.index0 }}"{% if loop.first %} checked{% endif %}><span class="sw" style="--sw: {{ hex }}"></span>{{ name }}</label>{% endfor %}</fieldset>
+<button type="button" data-clear>{{ ui.brush.erase }}</button>
+<p class="brush-how">{{ ui.brush.how }}</p>
+</form>
+<noscript><p class="note">{{ ui.brush.noscript }}</p></noscript>
+<p class="brush-summary" aria-live="polite">{{ f.defaults.empty }}</p>
+{% endif %}
+{% if f.kind == "calls" %}
 <form class="calls" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="{{ ui.calls.label }}">
 <label>{{ ui.calls.fc }}<span class="pair"><input name="fc" type="number" min="0" step="any" value="{{ f.defaults.fc }}" aria-label="{{ ui.calls.fc_input }}"><select name="fc_unit" aria-label="{{ ui.calls.fc_unit }}"><option value="log2" selected>{{ ui.calls.log2 }}</option><option value="pct">{{ ui.calls.pct }}</option></select></span></label>
 <label>{{ ui.calls.basis }}<select name="basis">{% for column, words in f.defaults.bases %}<option value="{{ column }}"{% if loop.first %} selected{% endif %}>{{ words }}</option>{% endfor %}</select></label>
@@ -19,7 +28,7 @@
 <div class="fig-plot">{{ f.html }}</div>
 {% if f.text.reading %}
 <aside class="reading" aria-label="{{ ui.figures.reading_label }}"><p class="reading-title">{{ ui.figures.reading }}</p><ul>
-{% for line in f.text.reading %}<li{% if f.controls %} data-reading="{{ loop.index0 }}"{% endif %}>{{ line }}</li>
+{% for line in f.text.reading %}<li{% if f.kind == "calls" %} data-reading="{{ loop.index0 }}"{% endif %}>{{ line }}</li>
 {% endfor %}</ul></aside>
 {% endif %}
 </div>

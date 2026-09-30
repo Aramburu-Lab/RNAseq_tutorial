@@ -104,7 +104,8 @@ class FigureBlock:
         data_file: The CSV beside the page.
         text: Title, lead and reading guide.
         stem: The figure's file stem, which names its PDF, SVG and README; empty for none.
-        controls: Settings for the page script's live calling, or None.
+        controls: Settings for the page script, with a ``kind``: "calls" for live calling,
+            "brush" for linked brushing; or None.
     """
 
     figure: Any
@@ -315,12 +316,16 @@ def _prepare(block: FigureBlock, index: int, number: int, level: int) -> dict[st
         "page": f"{block.stem}.html" if block.stem else "",
         "files": _files(block),
         "controls": _json_for_script(block.controls) if block.controls else None,
+        "kind": block.controls["kind"] if block.controls else None,
         "defaults": _defaults(block.controls) if block.controls else None,
     }
 
 
 def _defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
-    """What the controls show before the reader moves them: the page's default rule."""
+    """What the controls show before the reader moves them: the default rule, or no paint."""
+    if controls["kind"] == "brush":
+        return {"colours": list(zip(controls["colours"], controls["names"], strict=True)),
+                "empty": controls["empty"]}  # fmt: skip
     return {
         "fc": f"{controls['lfc_min']:g}",
         "bases": list(controls["bases"].items()),

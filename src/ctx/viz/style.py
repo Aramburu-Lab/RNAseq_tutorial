@@ -189,7 +189,7 @@ LAYOUT = {
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640
 PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow": 460,
-                    "contour": 460}  # fmt: skip
+                    "contour": 460, "linked": 820}  # fmt: skip
 # Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed
@@ -220,6 +220,15 @@ def tint(colour: str, alpha: float) -> str:
     """A hex colour as CSS rgba at an opacity: a filled area's tint, its outline left whole."""
     red, green, blue = (int(colour[i : i + 2], 16) for i in (1, 3, 5))
     return f"rgba({red},{green},{blue},{alpha})"
+
+
+def plotly_steps(colours: list[str]) -> list[list[Any]]:
+    """A plotly colorscale over 0 to n - 1 in which integer k, and only k, takes colour k."""
+    n = len(colours)
+    scale: list[list[Any]] = []
+    for k, colour in enumerate(colours):
+        scale += [[k / n, colour], [(k + 1) / n, colour]]
+    return scale
 
 
 def figure_inches(width: str, kind: str) -> tuple[float, float]:

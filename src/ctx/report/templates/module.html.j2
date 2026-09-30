@@ -50,7 +50,7 @@
 </ul>
 {% elif id == "reproduce" %}
 {% set r = page.reproduce %}
-<div class="command"><pre><code id="ctx-command">{{ r.command }}</code></pre><button type="button" class="copy" data-copy="ctx-command" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.copy }}</button></div>
+<div class="command"><pre><code id="ctx-command">{{ r.command }}</code></pre><button type="button" class="copy" data-copy="ctx-command" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div>
 <table class="measured">
 <tr><th>{{ ui.reproduce.wall }}</th><td class="wall">{{ "%.3f"|format(r.wall_seconds) }} s</td></tr>
 <tr><th>{{ ui.reproduce.rss_self }}</th><td class="rss-self">{{ "%.1f"|format(r.peak_rss_self / 1048576) }} MiB ({{ r.peak_rss_self }} bytes)</td></tr>

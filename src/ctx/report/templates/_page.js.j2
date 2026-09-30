@@ -1,4 +1,5 @@
 {% include "_calls.js.j2" %}
+{% include "_brush.js.j2" %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
    is logged and never stops the others; every feature degrades to a readable page without
@@ -119,6 +120,43 @@
   document.querySelectorAll("form.calls").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
+
+  /* Linked brushing: ctxBrush holds the logic; this block paints the samples a lasso or a tap
+     names, in both traces, and keeps the live line in step. */
+  document.querySelectorAll("form.brush").forEach(function (form) {
+    guard("brush", function () { brushing(form); });
+  });
+
+  function brushing(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    var div = fig.querySelector(".js-plotly-plot");
+    var summary = fig.querySelector(".brush-summary");
+    var painted = ctxBrush.start(rows.length);
+    /* A painted sample shows its paint at full strength: the lasso's own dimming of the
+       samples it missed, and its outline, go once the paint is laid. */
+    function draw() {
+      Plotly.restyle(div, { "marker.color": [ctxBrush.markers(painted, cfg)],
+                            selectedpoints: [null] }, [cfg.scatter]);
+      Plotly.relayout(div, { selections: [] });
+      Plotly.restyle(div, { "line.color": [ctxBrush.codes(painted)] }, [cfg.parcats]);
+      summary.textContent = ctxBrush.summary(painted, rows, cfg);
+    }
+    function paint(event) {
+      var picked = ctxBrush.indices(event);
+      if (!picked.length) return;
+      painted = ctxBrush.paint(painted, picked, Number(form.elements.colour.value));
+      draw();
+    }
+    div.on("plotly_selected", paint);
+    div.on("plotly_click", paint);
+    form.querySelector("[data-clear]").addEventListener("click", function () {
+      painted = ctxBrush.clear(painted);
+      draw();
+    });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+  }
 
   function liveCalls(form) {
     var fig = form.closest(".fig");

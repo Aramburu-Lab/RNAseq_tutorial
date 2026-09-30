@@ -28,6 +28,7 @@ from ctx.viz.style import (
     WIDTHS_MM,
     Theme,
     apply_matplotlib,
+    plotly_steps,
     plotly_templates,
     tint,
 )
@@ -304,7 +305,7 @@ class HeatmapData:
         text = [[f"{lookup.get((r, c), (None, None))[1]}" for c in cols] for r in rows]
         fig.add_trace(go.Heatmap(
             z=z, x=cols, y=rows, text=text, showscale=False, xgap=0, ygap=0,
-            colorscale=_steps([tint(s.colour or light.grid, s.alpha) for s in self.swatches]),
+            colorscale=plotly_steps([tint(s.colour or light.grid, s.alpha) for s in self.swatches]),
             zmin=-0.5, zmax=len(self.swatches) - 0.5,
             hovertemplate=f"{self.row_label}: %{{y}}<br>{self.column_label}: %{{x}}<br>"
             "%{text}<extra></extra>",
@@ -314,7 +315,7 @@ class HeatmapData:
             fig.add_trace(go.Heatmap(
                 z=[[codes[track.values[c]] for c in cols]], x=cols, y=[track.name],
                 text=[[track.values[c] for c in cols]], showscale=False,
-                colorscale=_steps(list(track.colours.values())), zmin=-0.5,
+                colorscale=plotly_steps(list(track.colours.values())), zmin=-0.5,
                 zmax=len(codes) - 0.5, hovertemplate=f"{track.name}: %{{text}}<extra></extra>",
             ))  # fmt: skip
         for s in self.swatches:
@@ -350,12 +351,3 @@ class HeatmapData:
             return []
         return [{"x": 1.0, "xref": "paper", "xanchor": "left", "y": r, "yref": "y",
                  "text": self._stat(r), "showarrow": False} for r in rows]  # fmt: skip
-
-
-def _steps(colours: list[str]) -> list[list[Any]]:
-    """A plotly colorscale in which integer k, and only k, takes colour k."""
-    n = len(colours)
-    scale: list[list[Any]] = []
-    for k, colour in enumerate(colours):
-        scale += [[k / n, colour], [(k + 1) / n, colour]]
-    return scale

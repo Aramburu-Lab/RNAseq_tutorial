@@ -26,6 +26,7 @@ from synth import (
     demo_density,
     demo_flow,
     demo_heatmap,
+    demo_linked,
     demo_ma,
     demo_pca,
     demo_strip,
@@ -44,6 +45,7 @@ from ctx.viz.curve import CurveData
 from ctx.viz.density import DensityData
 from ctx.viz.flow import FlowData
 from ctx.viz.heatmap import HeatmapData
+from ctx.viz.linked import LinkedData
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
 from ctx.viz.scatter import THIN_MAX, Calls, ScatterData, bubble_pt
 from ctx.viz.strip import StripData
@@ -335,6 +337,7 @@ def _contracts():
         "flow": demo_flow(),
         "surface": demo_surface(),
         "density": demo_density(),
+        "linked": demo_linked(),
     }
 
 
@@ -364,6 +367,7 @@ def axis_titles(data) -> list[tuple[str, str]]:
         StripData: value,
         HeatmapData: lambda: [(data.column_label, "none")],
         FlowData: list,
+        LinkedData: list,
     }
     return rules.get(type(data), value)()
 
@@ -483,6 +487,7 @@ OVERLAP_CASES = {
     "surface": lambda s: demo_surface(),
     "surface_double": lambda s: demo_surface(width="double"),
     "density": lambda s: demo_density(),
+    "linked": lambda s: demo_linked(),
 }
 
 

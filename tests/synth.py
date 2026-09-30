@@ -764,3 +764,44 @@ def demo_density(width: str = "single"):  # returns ctx DensityData
                f"Monocyte (n = {n['Monocyte']}); LDN (n = 12) is drawn as points, too few for a "
                f"density. {data.bandwidth()}. Synthetic data; no test.")  # fmt: skip
     return dataclasses.replace(data, caption=caption)
+
+
+# Okabe and Ito's own names for the seven data colours, in DATA_COLOURS order.
+COLOUR_NAMES = ("orange", "sky blue", "bluish green", "yellow", "blue", "vermillion",
+                "reddish purple")  # fmt: skip
+
+
+def demo_linked(n: int = 48):  # returns ctx LinkedData
+    """Samples on two PCs beside their tissue, cell type, condition, batch and QC status."""
+    from ctx.viz.linked import LinkedData  # noqa: PLC0415
+    from ctx.viz.style import BAND_COLOURS  # noqa: PLC0415
+
+    rng = np.random.default_rng(4)
+    cells = rng.choice(["NDN", "Monocyte", "LDN"], n, p=[0.5, 0.35, 0.15])
+    shift = {"NDN": (-6.0, 0.0), "Monocyte": (6.0, 1.0), "LDN": (-2.0, 5.0)}
+    frame = pl.DataFrame({
+        "sample": [f"S{i:03d}" for i in range(n)],
+        "pc1": [shift[c][0] + rng.normal() for c in cells],
+        "pc2": [shift[c][1] + rng.normal() for c in cells],
+        "tissue": rng.choice(["PB", "BM"], n, p=[0.8, 0.2]).tolist(),
+        "cell_type": cells.tolist(),
+        "condition": rng.choice(["steady_state", "gcsf", "pdac"], n).tolist(),
+        "batch": rng.choice(["short", "long"], n).tolist(),
+        "qc_status": rng.choice(["pass", "flag"], n, p=[0.85, 0.15]).tolist(),
+    })  # fmt: skip
+    return LinkedData(
+        frame=frame, x="pc1", y="pc2", x_label="PC1", y_label="PC2",
+        columns={"sample": ("none", "Synthetic sample."), "pc1": ("VST units", "PC1 score."),
+                 "pc2": ("VST units", "PC2 score."), "tissue": ("none", "Tissue."),
+                 "cell_type": ("none", "Cell type."), "condition": ("none", "Condition."),
+                 "batch": ("none", "Read-length batch."),
+                 "qc_status": ("none", "QC status: pass or flag.")},
+        dimensions=("tissue", "cell_type", "condition", "batch", "qc_status"),
+        dimension_labels=("Tissue", "Cell type", "Condition", "Batch", "QC"),
+        colour_dimension="qc_status",
+        colours={"pass": BAND_COLOURS["good"], "flag": BAND_COLOURS["bad"]},
+        caption="Samples by tissue, cell type, condition, batch and QC status; bands into QC "
+        "are coloured by status. Synthetic data; no test.",
+        names=COLOUR_NAMES, summary="{n} painted {colour}: {detail}",
+        empty="Nothing painted yet.", detail="cell_type", hover=("sample", "qc_status"),
+    )  # fmt: skip

@@ -93,3 +93,13 @@ def test_an_edited_copy_changes_the_page(tmp_path):
     gone = subprocess.run([str(CTX), "--root", str(root), "setup"], cwd=root, env=env,
                           capture_output=True, text=True, check=False)  # fmt: skip
     assert gone.returncode != 0 and "ui.toml" in gone.stderr
+
+
+def test_no_ui_key_shadows_a_dict_method():
+    """Templates read ``ui`` keys as attributes, and Jinja finds a dict's own method first: a
+    key named ``clear`` printed "<built-in method clear of dict object>" on the brush button.
+    The other files are read by dotted path in Python, where a key named ``keys`` is safe.
+    """
+    methods = set(dir(dict))
+    ui = tomllib.loads((CONTENT / "ui.toml").read_text())
+    assert [path for path in _paths(ui) if methods & set(path.split("."))] == []

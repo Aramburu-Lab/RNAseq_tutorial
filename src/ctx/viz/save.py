@@ -10,6 +10,7 @@ import polars as pl
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
 from ctx.report.builder import FigureBlock, FigurePage, FigureText, write
+from ctx.viz.linked import LinkedData
 from ctx.viz.scatter import ScatterData
 from ctx.viz.style import THEMES, Theme
 
@@ -90,7 +91,7 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
     A scatter with live calling also carries its controls and, unless ``text`` brings its
     own, the "How to read" lines at the default setting.
     """
-    controls = data.controls() if isinstance(data, ScatterData) else None
+    controls = data.controls() if isinstance(data, ScatterData | LinkedData) else None
     if isinstance(data, ScatterData) and data.calls:
         # The page script refills these lines by position from the figure's own templates;
         # lines from elsewhere would be overwritten, or leave a template with no line.

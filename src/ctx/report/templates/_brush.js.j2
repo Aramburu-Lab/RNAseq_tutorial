@@ -1,0 +1,58 @@
+{% raw %}
+/* The page's brush, apart from the page so tests/test_page_script.py runs it under node
+   against a Python oracle. Each sample holds a paint index, or -1 for none; the scatter shows
+   the paint's colour, the parallel sets its index + 1, 0 being the unpainted grey. */
+var ctxBrush = {
+  start: function (n) {
+    var out = [];
+    for (var i = 0; i < n; i++) out.push(-1);
+    return out;
+  },
+  /* Paint samples; a later paint over a painted sample replaces it. */
+  paint: function (painted, indices, k) {
+    var out = painted.slice();
+    indices.forEach(function (i) { if (i >= 0 && i < out.length) out[i] = k; });
+    return out;
+  },
+  clear: function (painted) { return painted.map(function () { return -1; }); },
+  markers: function (painted, cfg) {
+    return painted.map(function (k) { return k < 0 ? cfg.reference : cfg.colours[k]; });
+  },
+  codes: function (painted) { return painted.map(function (k) { return k + 1; }); },
+  fill: function (text, values) {
+    return text.replace(/\{(\w+)\}/g, function (all, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : all;
+    });
+  },
+  /* The live line: for each paint in palette order that holds a sample, its count and the
+     count of each level of cfg.detail, most first, ties by level. */
+  summary: function (painted, rows, cfg) {
+    var lines = [];
+    cfg.colours.forEach(function (_, k) {
+      var counts = {}, n = 0;
+      painted.forEach(function (p, i) {
+        if (p !== k) return;
+        var level = String(rows[i][cfg.detail]);
+        counts[level] = (counts[level] || 0) + 1;
+        n += 1;
+      });
+      if (!n) return;
+      var detail = Object.keys(counts).sort(function (a, b) {
+        return counts[b] - counts[a] || (a < b ? -1 : a > b ? 1 : 0);
+      }).map(function (level) { return level + " " + counts[level].toLocaleString("en-US"); });
+      lines.push(ctxBrush.fill(cfg.summary, {
+        n: n.toLocaleString("en-US"), colour: cfg.names[k], detail: detail.join(", ")
+      }));
+    });
+    return lines.length ? lines.join("; ") : cfg.empty;
+  },
+  /* The samples a plotly event names: the scatter's selected or clicked points, or the
+     samples of a clicked parallel-sets category or band. */
+  indices: function (event) {
+    if (!event || !event.points) return [];
+    return event.points.map(function (p) {
+      return p.pointNumber !== undefined ? p.pointNumber : p.pointIndex;
+    }).filter(function (i) { return typeof i === "number"; });
+  }
+};
+{% endraw %}
