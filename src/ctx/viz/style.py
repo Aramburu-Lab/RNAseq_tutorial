@@ -22,6 +22,12 @@ PROJECTOR_UNSAFE = frozenset({"#F0E442"})
 ROLES = {"reference": "#0072B2", "comparison": "#D55E00"}
 # A QC band's colour, from the Okabe-Ito data colours (ctx.qc.registry, conf/qc_metrics.toml).
 BAND_COLOURS = {"good": "#009E73", "usable": "#E69F00", "bad": "#D55E00"}
+# Cividis (Nuñez et al. 2018) for continuous values, in both themes: matplotlib 3.11.2's
+# colormap at the midpoints of eight equal bands; its ends are #00224E and #FEE838. The stops
+# run from 13.1:1 to 1.4:1 against white and back against black, so an isoline's label sits on
+# a box of the theme's grid grey (tests/test_viz.py holds the stops to the colormap).
+CIVIDIS = ("#002E6A", "#32436D", "#535A6D", "#6F7073", "#8C8878", "#ABA072", "#CDBB63",
+           "#F0D846")  # fmt: skip
 # Opacity of a band shaded behind points: a tint, so the points drawn over it keep their colour.
 BAND_ALPHA = 0.15
 
@@ -50,7 +56,7 @@ PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT
 # Panel letters: bold capitals at the top left, nudged up by dy_pt (no figure has panels yet).
 PANEL_LABEL = {"size": SIZES["panel"], "weight": "bold", "dx_pt": 0.0, "dy_pt": 2.0}
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
-ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1}
+ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1, "contour": 1.1}
 # Point shapes for a second category, in level order: (matplotlib, plotly).
 MARKERS = (
     ("o", "circle"),
@@ -70,6 +76,12 @@ PLOTLY_HEAT_ROW_PX, PLOTLY_HEAT_BASE_PX = 18, 220
 # both as fractions of the axes; the gap between nodes is one label's pitch.
 FLOW = {"node": 0.02, "label_room": 0.3, "pad": 0.01}
 PLOTLY_FLOW = {"node_px": 16, "pad_px": 18}
+# A density's outer highest-density region is dashed, its inner one solid.
+DENSITY_DASH: dict[str, tuple[Literal["-", "--"], Literal["solid", "dash"]]] = {
+    "inner": ("-", "solid"), "outer": ("--", "dash"),
+}  # fmt: skip
+# Space a label box leaves around its text, in font-size units.
+LABEL_BOX_PAD = 0.15
 # A strip plot spreads a category's points over this share of its slot either side of the
 # centre, and draws its median ± k MAD bar over a little more.
 STRIP = {"jitter": 0.3, "range": 0.4}
@@ -176,7 +188,8 @@ LAYOUT = {
 }  # fmt: skip
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640
-PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow": 460}
+PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow": 460,
+                    "contour": 460}  # fmt: skip
 # Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed

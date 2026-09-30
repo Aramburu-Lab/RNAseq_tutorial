@@ -146,6 +146,16 @@ def bubble_pt(values: list[float], top: float) -> list[float]:
             for v in values]  # fmt: skip
 
 
+def log_ticks(axis: Any, values: pl.Series) -> None:
+    """Plain log labels, 1-2-5 of each decade on an axis spanning few decades.
+
+    Fewer than ``LOG_SUBS_BELOW`` decades label 1, 2 and 5 of each; more, the decades alone.
+    """
+    positive = values.filter(values > 0)
+    decades = math.log10(float(positive.max()) / float(positive.min()))  # type: ignore[arg-type]
+    plain_log_ticks(axis, subs=LOG_SUBS if decades < LOG_SUBS_BELOW else None)
+
+
 def _js_number(value: float) -> str:
     """A number as JavaScript's String() writes it, for the cutoffs the controls offer."""
     return f"{value:.10g}"
@@ -427,9 +437,7 @@ class ScatterData:
         ax.set_yscale("log" if self.log_y else "linear")
         for axis, log, column in ((ax.xaxis, self.log_x, self.x), (ax.yaxis, self.log_y, self.y)):
             if log:
-                values = self.frame[column].filter(self.frame[column] > 0)
-                decades = math.log10(float(values.max()) / float(values.min()))  # type: ignore[arg-type]
-                plain_log_ticks(axis, subs=LOG_SUBS if decades < LOG_SUBS_BELOW else None)
+                log_ticks(axis, self.frame[column])
         ax.set_xlabel(self._axis_title(self.x_label, self.x))
         ax.set_ylabel(fit_title(self._axis_title(self.y_label, self.y), height))
         present = set(self.frame[self.colour].unique())

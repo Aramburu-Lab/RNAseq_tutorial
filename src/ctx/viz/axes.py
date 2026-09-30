@@ -24,6 +24,8 @@ def axis_title(label: str, unit: str) -> str:
     Returns:
         The title the figure prints.
     """
-    if unit in NO_UNIT or _words(unit) <= _words(label):
+    words = _words(unit)
+    # A unit with no word in it, such as %, is never already named by the label.
+    if unit in NO_UNIT or (words and words <= _words(label)):
         return label
     return f"{label} ({unit})"

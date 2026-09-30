@@ -27,6 +27,58 @@ it were reversed.
 
 ---
 
+## D-032 — Seven figure contracts for M2; the density and cividis half of Phase 2D's contour helpers moves into M2
+
+**Date:** 2026-09-30 · **Status:** decided
+
+**Context.** M2.5 asks for the figures the QC page draws: strips with bands, a bubble chart, curves, heatmaps, the read-count Sankey, and contours. Each one sets a number of drawing rules a reader could have set otherwise. The Phase 2D item "contour helpers" held the density grid, the highest-density levels and the cividis tokens that M2's contours need now. It also held click-to-set sliders, which belong with FigureSpec's Reproduce panel.
+
+**Decision.** Each contract is one frozen dataclass read by both renderers, and each has the rules below.
+- **`StripData`.**
+  - It draws points per category, spread by the golden ratio, and flagged points as triangles.
+  - A metric's absolute bands (`Metric.spans()`, the ranges `band()` assigns) are shaded in the band colours at 0.15 opacity.
+  - Each stratum's median ± k MAD is a grey bar with its median line. The bar's numbers go into the CSV.
+- **`ScatterData.size`.** Bubble area grows linearly with the value, from 3 to 14 pt in diameter, with three legend keys.
+- **`CurveData`.** It draws one line per series, and each series keeps one colour.
+- **`HeatmapData`.**
+  - Every cell holds a level and every level has a swatch, so one contract draws the QC band map and the expression map.
+  - `diverging_levels` gives [a, b) bins in the two role colours at opacities 0.33, 0.67 and 1.0, with a blank middle.
+  - `cluster_order` is average linkage on 1 − Pearson, with constant rows last.
+  - The row statistic is carried as a number and formatted only where it is printed. A formatted string had made the CSV and the page disagree.
+  - Above 60 rows the labels are left off and the drawn height stops growing.
+- **`FlowData`.**
+  - The Sankey is drawn by hand as vector Bézier bands for the PDF and SVG, and with plotly's own Sankey on the page.
+  - It refuses a node whose reads in and out differ, a backward link and a doubled link.
+- **`SurfaceData`.**
+  - It fills eight equal cividis bands. The stops are matplotlib 3.11.2's colormap at the band midpoints, kept as style tokens.
+  - Its isolines are in ink, and each label sits on a box of the grid grey. The stops run from 13.1:1 to 1.4:1 against white, so no ink reads on all of them.
+  - On the page, isolines are black in both themes, because they sit on the fill and the theme does not change it.
+  - The current setting is marked.
+- **`DensityData`.**
+  - It draws the 50 % and 90 % highest-density regions from one smoothed histogram (64 bins, σ 2 bins, a 10 % margin) on a grid every group shares.
+  - A group needs at least 30 points to get a density. Smaller groups and highlighted samples are drawn as points.
+  - Each sample's region is in the CSV.
+- **Shared rules.**
+  - A log axis spanning fewer than two decades labels 1, 2 and 5 of each (`log_ticks`).
+  - `axis_title` now prints a unit that is only a symbol: "Reads kept (%)". It had dropped `%`, because a unit with no word in it counted as already named. No existing figure used such a unit.
+- **Phase 2D's contour-helper item, split.** The density grid, the highest-density levels and the cividis tokens are done here. The two-knob and power-map templates with click-to-set sliders stay in Phase 2D, with FigureSpec.
+
+**Evidence.**
+- **Tests.** Each contract has a demo in `tests/synth.py`, enrolled in the measured PDF/SVG test (fonts, painted colours, Tf sizes, line widths, the 85 or 170 mm width, caption and axis titles), the overlap test and the page round trip. The suite passes with `UserWarning` raised as an error.
+- **What the new unit tests pin:**
+  - the spans against `band()` at every edge;
+  - bubble area linear in the value;
+  - clustering recovering two planted blocks, with a constant row last;
+  - each diverging bin at its edges;
+  - the flow refusing lost reads and a backward link;
+  - the cividis stops against the colormap;
+  - `hdr_levels` against its definition: the cells at or above the level hold at least the mass, and those above it less.
+- **Coverage.** At n = 60 and 45, the 50 % region of the smoothed density holds 41 of 60 and 32 of 45 points. Smoothing spreads the mass, and each sample's region is in the CSV. At n = 5,000 the levels meet their definition exactly.
+
+**Consequence.** M2.6 builds the QC page from these contracts. LinkedData (P2Q.4) remains.
+
+---
+
 ## D-031 — `ctx qc` opens the FASTQ files the sheet names; fastp is titled by run; read 1 stands for a pair
 
 **Date:** 2026-09-30 · **Status:** decided

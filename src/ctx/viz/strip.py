@@ -14,7 +14,7 @@ import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
 from ctx.viz.axes import axis_title
-from ctx.viz.scatter import FLOAT_HOVER, LOG_SUBS, plain_log_ticks
+from ctx.viz.scatter import FLOAT_HOVER, log_ticks
 from ctx.viz.style import (
     BAND_ALPHA,
     BAND_COLOURS,
@@ -232,7 +232,7 @@ class StripData:
                            linewidths=LINE_WIDTHS["marker_edge"])  # fmt: skip
         ax.set_yscale("log" if self.log else "linear")
         if self.log:
-            plain_log_ticks(ax.yaxis, subs=LOG_SUBS)
+            log_ticks(ax.yaxis, self.frame[self.value])
         self._draw_bands(ax, theme)
         slots = self.levels()
         ax.set_xticks(range(len(slots)), slots, rotation=BAR_LABEL_ROTATION)

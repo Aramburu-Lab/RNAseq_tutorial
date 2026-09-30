@@ -23,11 +23,13 @@ from synth import (
     demo_box,
     demo_bubble,
     demo_curves,
+    demo_density,
     demo_flow,
     demo_heatmap,
     demo_ma,
     demo_pca,
     demo_strip,
+    demo_surface,
     demo_volcano,
 )
 
@@ -37,7 +39,9 @@ from ctx.report.builder import FigureText
 from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.axes import axis_title
+from ctx.viz.contour import SurfaceData
 from ctx.viz.curve import CurveData
+from ctx.viz.density import DensityData
 from ctx.viz.flow import FlowData
 from ctx.viz.heatmap import HeatmapData
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
@@ -46,6 +50,7 @@ from ctx.viz.strip import StripData
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
     AXIS_TITLE_SHARE,
+    CIVIDIS,
     DATA_COLOURS,
     FONT_CHAIN,
     INK_COLOUR,
@@ -328,6 +333,8 @@ def _contracts():
         "heatmap": demo_heatmap(),
         "band_map": demo_band_map(),
         "flow": demo_flow(),
+        "surface": demo_surface(),
+        "density": demo_density(),
     }
 
 
@@ -352,6 +359,8 @@ def axis_titles(data) -> list[tuple[str, str]]:
         box.BoxData: lambda: [(data.value_label, data.unit)],
         ScatterData: xy,
         CurveData: xy,
+        DensityData: xy,
+        SurfaceData: lambda: [*xy(), (data.z_label, data.columns[data.z][0])],
         StripData: value,
         HeatmapData: lambda: [(data.column_label, "none")],
         FlowData: list,
@@ -372,6 +381,8 @@ def test_axis_title_rule():
     assert axis_title("PC1", "VST units") == "PC1 (VST units)"
     assert axis_title("Dispersion", "dimensionless") == "Dispersion (dimensionless)"
     assert axis_title("Gene set", "none") == "Gene set"
+    # A unit that is only a symbol was taken as named by any label, and dropped.
+    assert axis_title("Reads kept", "%") == "Reads kept (%)"
 
 
 def column_width(data) -> str:
@@ -417,7 +428,8 @@ def test_static_files_measured(written):
         pdf = out / f"{figure_stem}_{theme.name}.pdf"
         assert _pdf_fonts(pdf) <= {f.replace(" ", "") for f in FONT_CHAIN} | {"ArialMT"}
         colours, sizes, widths, page_fill = _painted(pdf)
-        allowed = [_rgb(c) for c in (*DATA_COLOURS, theme.ink, theme.grid, theme.reference)]
+        allowed = [_rgb(c) for c in (*DATA_COLOURS, *CIVIDIS, theme.ink, theme.grid,
+                                     theme.reference)]  # fmt: skip
         assert all(any(_same(c, a) for a in allowed) for c in colours), colours
         assert any(_same(c, _rgb(theme.ink)) for c in colours)
         assert sizes and sizes <= set(SIZES.values())
@@ -468,6 +480,9 @@ OVERLAP_CASES = {
     "heatmap_unlabelled_rows": lambda s: demo_heatmap(n_genes=80),
     "band_map": lambda s: demo_band_map(),
     "flow": lambda s: demo_flow(),
+    "surface": lambda s: demo_surface(),
+    "surface_double": lambda s: demo_surface(width="double"),
+    "density": lambda s: demo_density(),
 }
 
 
@@ -729,3 +744,23 @@ def test_a_flow_keeps_every_read():
         dataclasses.replace(data, links=backwards)
     sankey = data.interactive().data[0]
     assert sum(sankey.link.value) == data.links["value"].sum()
+
+
+def test_cividis_stops_are_the_colormap_at_band_midpoints():
+    stops = [mpl.colormaps["cividis"]((i + 0.5) / len(CIVIDIS))[:3] for i in range(len(CIVIDIS))]
+    assert all(_same(_rgb(c), tuple(s)) for c, s in zip(CIVIDIS, stops, strict=True))
+
+
+def test_hdr_levels_hold_their_mass_and_no_more_cells():
+    from ctx.viz.contour import density_grid, hdr_levels  # noqa: PLC0415
+
+    rng = np.random.default_rng(1)
+    x, y = rng.normal(size=5000), rng.normal(size=5000)
+    _, _, density = density_grid(x, y, (-5.0, 5.0, -5.0, 5.0))
+    for mass, level in zip((0.5, 0.9), hdr_levels(density), strict=True):
+        assert density[density >= level].sum() >= mass
+        assert density[density > level].sum() < mass
+    # Smoothing spreads the mass, so the points inside run a little above it at this n.
+    data = demo_density()
+    inner = (data.table()["region"] == "inner").sum() / data.table()["region"].is_not_null().sum()
+    assert 0.5 <= inner <= 0.75

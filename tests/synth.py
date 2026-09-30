@@ -708,3 +708,59 @@ def demo_flow(width: str = "double"):  # returns ctx FlowData
         "Salmon's for the reads it wrote. Synthetic data; no test.",
         width=width,
     )  # fmt: skip
+
+
+def demo_surface(width: str = "single"):  # returns ctx SurfaceData
+    """Reads kept across fastp -q and -l, a smooth synthetic surface; fastp's default marked."""
+    from ctx.viz.contour import Mark, SurfaceData  # noqa: PLC0415
+
+    rows = [
+        (q, n, float(100.0 / (1.0 + np.exp((q - 28.0) / 2.5)) * (1.0 - (n / 150.0) ** 2)))
+        for q in range(5, 40, 2) for n in range(15, 106, 5)
+    ]  # fmt: skip
+    frame = pl.DataFrame(rows, schema=["q", "l", "kept"], orient="row")
+    return SurfaceData(
+        frame=frame, x="q", y="l", z="kept", x_label="-q", y_label="-l", z_label="Reads kept",
+        columns={"q": ("Phred", "fastp -q: a base below this is unqualified."),
+                 "l": ("nt", "fastp -l: a read shorter than this is dropped."),
+                 "kept": ("%", "Reads that pass, of the reads in.")},
+        caption="Reads fastp keeps at each -q and -l, the other settings at fastp's defaults; "
+        "eight equal bands; the line marks 80 %. Synthetic surface, 18 x 19 grid.",
+        isolines=(80.0,), isoline_format=".0f", mark=Mark(15.0, 15.0, "fastp default"),
+        width=width,
+    )  # fmt: skip
+
+
+def demo_density(width: str = "single"):  # returns ctx DensityData
+    """Library size against genes detected: two groups with densities, one of 12 as points."""
+    import dataclasses  # noqa: PLC0415
+
+    from ctx.viz.density import DensityData  # noqa: PLC0415
+    from ctx.viz.style import category_colours  # noqa: PLC0415
+
+    rng = np.random.default_rng(21)
+    rows = []
+    for group, n, depth, genes in (("NDN", 60, 2.0e7, 9000.0), ("Monocyte", 45, 3.0e7, 12500.0),
+                                   ("LDN", 12, 2.5e7, 10000.0)):  # fmt: skip
+        size = np.exp(rng.normal(np.log(depth), 0.35, n))
+        detected = genes + 1800.0 * np.log(size / depth) + rng.normal(0.0, 500.0, n)
+        rows += [(f"{group}_{i:02d}", group, float(s), float(g)) for i, (s, g) in
+                 enumerate(zip(size, detected, strict=True))]  # fmt: skip
+    schema = ["sample", "cell_type", "library_size", "genes"]
+    frame = pl.DataFrame(rows, schema=schema, orient="row")
+    frame = frame.with_columns(flagged=pl.col("sample").is_in(["NDN_03", "NDN_17", "Monocyte_05"]))
+    data = DensityData(
+        frame=frame, x="library_size", y="genes", group="cell_type",
+        x_label="Library size", y_label="Genes detected",
+        columns={"sample": ("none", "Synthetic sample."), "cell_type": ("none", "Cell type."),
+                 "library_size": ("reads", "Reads counted on genes."),
+                 "genes": ("genes", "Genes with at least one read."),
+                 "flagged": ("none", "Flagged by the QC checkpoint.")},
+        colours=category_colours(["NDN", "Monocyte", "LDN"]), caption="", highlight="flagged",
+        highlight_label="flagged", hover=("sample", "flagged"), log_x=True, width=width,
+    )  # fmt: skip
+    n = {g: d.n for g, d in data.densities.items()}
+    caption = (f"Solid: 50 %, dashed: 90 % highest-density regions of NDN (n = {n['NDN']}) and "
+               f"Monocyte (n = {n['Monocyte']}); LDN (n = 12) is drawn as points, too few for a "
+               f"density. {data.bandwidth()}. Synthetic data; no test.")  # fmt: skip
+    return dataclasses.replace(data, caption=caption)

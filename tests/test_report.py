@@ -20,10 +20,12 @@ from synth import (
     demo_box,
     demo_bubble,
     demo_curves,
+    demo_density,
     demo_flow,
     demo_heatmap,
     demo_pca,
     demo_strip,
+    demo_surface,
     demo_volcano,
 )
 
@@ -64,6 +66,8 @@ DEMOS = {
     "heatmap": lambda s: demo_heatmap(),
     "band_map": lambda s: demo_band_map(),
     "flow": lambda s: demo_flow(),
+    "surface": lambda s: demo_surface(),
+    "density": lambda s: demo_density(),
 }
 
 
