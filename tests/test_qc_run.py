@@ -245,3 +245,34 @@ def test_reads_add_curves_the_grid_and_their_own_multiqc_report(with_reads):
     assert lint(out)[1] == []
     page = next(out.glob("*_overview_v1.html")).read_text()
     assert "The reads themselves" in page and "built-in method" not in page
+
+
+FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs" / "download"
+
+
+def test_fetchngs_reads_alone_within_the_track_a_budget(tmp_path):
+    """Gather on fetchngs's own test download, then ctx qc --reads with no counts at all."""
+    import re  # noqa: PLC0415
+
+    from ctx.runtime import BUDGETS  # noqa: PLC0415
+
+    root = tmp_path / "root"
+    spec = tmp_path / "nfcore_test.toml"
+    spec.write_text('[dataset]\nslug = "nfcore_test"\n\n[guard]\nids = []\npatterns = []\n')
+    for args in (("gather", "--dataset", "nfcore_test", "--fetchngs-dir", str(FETCHNGS)),
+                 ("qc", "--dataset", "nfcore_test", "--dataset-file", str(spec), "--reads",
+                  "--fetchngs-dir", str(FETCHNGS))):  # fmt: skip
+        root.mkdir(exist_ok=True)
+        done = ctx("--root", str(root), *args, cwd=root)
+        assert done.returncode == 0, (args[0], done.stderr[-3000:])
+    out = root / "outputs" / "02_qc"
+    page = next(out.glob("*_overview_v1.html")).read_text()
+    assert "Counts not judged" in page
+    metrics = pl.read_csv(next(out.glob("*_read_metrics_v1.csv")))
+    assert metrics.height == 4 and (metrics["fastqc-total_sequences"] > 0).all()
+    assert lint(out)[1] == []
+    wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', page).group(1))
+    rss = [int(re.search(rf'<td class="{c}">[\d.]+ MiB \((\d+) bytes\)</td>', page).group(1))
+           for c in ("rss-self", "rss-children")]  # fmt: skip
+    assert 0 < wall < BUDGETS["A"].minutes * 60
+    assert 0 < sum(rss) < BUDGETS["A"].ram_gb * 10**9

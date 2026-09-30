@@ -206,9 +206,12 @@ def test_sample_metrics_on_gathered_counts(tmp_path):
     )
     genes = read["genes"]
     types = genes.with_columns(gene_type=pl.lit("protein_coding"), chrom=pl.lit("chr1"))
-    frame, sexes = checkpoint.sample_metrics(read["counts"], sheet, genes, types,
-                                             ["cell_type", "condition"], threads=1)  # fmt: skip
+    measured = checkpoint.sample_metrics(read["counts"], sheet, genes, types,
+                                         ["cell_type", "condition"], threads=1)  # fmt: skip
+    frame, sexes = measured.values, measured.sexes
     assert sexes is not None
+    assert measured.scores.columns == ["sample", "pc1", "pc2"]
+    assert 0 < measured.share[1] <= measured.share[0] < 1
     assert frame.height == 12
     assert frame.filter(pl.col("sex_agrees") == "disagrees")["sample"].to_list() == ["S001"]
     assert frame["pca_distance"].null_count() == 0

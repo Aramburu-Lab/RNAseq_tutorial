@@ -11,6 +11,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import polars as pl
 
@@ -115,15 +116,27 @@ def gene_types(root: Path, spec: Dataset) -> tuple[pl.DataFrame | None, str]:
 def counts_stage(
     settings: runtime.Settings, spec: Dataset, gathered: Mapping[str, pl.DataFrame],
     options: Options,
-) -> tuple[pl.DataFrame, pl.DataFrame | None, tuple[str, ...]]:  # fmt: skip
-    """The count metrics per sample, the sex check's own table, and what was left out."""
-    sheet, counts = gathered["samplesheet"], gathered["counts"]
-    if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
-        raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
+) -> tuple[checkpoint.Measured | None, tuple[str, ...]]:  # fmt: skip
+    """The count checkpoint, and what was left out: all of it where gather wrote no counts."""
+    if "counts" not in gathered:
+        return None, (text.word(PAGE, "notes.no_counts"),)
     types, note = gene_types(settings.root, spec)
-    values, sexes = checkpoint.sample_metrics(counts, sheet, gathered["genes"], types,
-                                              options.peers, settings.threads)  # fmt: skip
-    return values, sexes, (note,) if note else ()
+    measured = checkpoint.sample_metrics(gathered["counts"], gathered["samplesheet"],
+                                         gathered["genes"], types, options.peers,
+                                         settings.threads)  # fmt: skip
+    return measured, (note,) if note else ()
+
+
+def gathered_tables(root: Path, dataset: str) -> dict[str, Path]:
+    """Gather's newest sheet, and its counts and genes where it wrote them (with --rnaseq-dir)."""
+    folder = root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
+    inputs = {"samplesheet": newest(folder, dataset, "samplesheet")}
+    for what in ("counts", "genes"):
+        try:
+            inputs[what] = newest(folder, dataset, what)
+        except DatasetError:
+            continue
+    return inputs
 
 
 def rnaseq_stage(writer: Writer, rnaseq_dir: Path, samples: list[str],
@@ -226,7 +239,75 @@ def read_figures(writer: Writer, seen: Reads, sheet: pl.DataFrame, registry: reg
         items.append(writer.figure(grid, "fastp_grid", FigureText(
             title=text.word(PAGE, "figures.grid.title"),
             lead=text.fill(PAGE, "figures.grid.lead", run=seen.grid_run))))  # fmt: skip
+    run_bands = figures.band_map(seen.values, registry, "run_accession")
+    if run_bands is not None:
+        items.append(_figure(writer, run_bands, "run_band_map", "band_map"))
     return Group(text.word(PAGE, "groups.reads"), tuple(items))
+
+
+def strips(writer: Writer, stage: Stage, units: pl.DataFrame, registry: reg.Registry,
+           options: Options, key: str) -> list[FigureBlock]:  # fmt: skip
+    """A strip per numeric metric the values hold, one tab each, in registry order."""
+    values = stage.values if key == "sample" else stage.run_values
+    flags = stage.flags if key == "sample" else stage.run_flags
+    if values is None or flags is None:
+        return []
+    blocks = []
+    for metric in registry.metrics.values():
+        if metric.kind != "numeric" or metric.column not in values.columns:
+            continue
+        data = figures.strip(metric, values, (stage.bands, flags), units, options.strata, key)
+        if data is None:
+            continue
+        lead = text.fill(PAGE, "figures.strip.lead", flagged=int(data.frame["flagged"].sum()),
+                         n=data.frame.height, k=f"{registry.mad_multiplier:g}")  # fmt: skip
+        reading = (metric.meaning, metric.rationale) if metric.rationale else (metric.meaning,)
+        text_around = FigureText(title=metric.title, tab=metric.title, lead=lead, reading=reading)
+        blocks.append(writer.figure(data, f"strip_{metric.id}", text_around))
+    return blocks
+
+
+def _figure(writer: Writer, data: Any, what: str, key: str) -> FigureBlock:
+    """A page figure whose title and lead are ``figures.<key>`` in the content."""
+    return writer.figure(
+        data,
+        what,
+        FigureText(
+            title=text.word(PAGE, f"figures.{key}.title"),
+            lead=text.word(PAGE, f"figures.{key}.lead"),
+        ),
+    )
+
+
+def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured | None,
+                    context: tuple[pl.DataFrame, pl.DataFrame], registry: reg.Registry,
+                    options: Options) -> list[Group]:  # fmt: skip
+    """The groups every run draws: the glance, every metric, composition and identity."""
+    sheet, status = context
+    groups, glance, identity = [], [], []
+    bands = figures.band_map(stage.values, registry, "sample")
+    if bands is not None:
+        glance.append(_figure(writer, bands, "band_map", "band_map"))
+    if measured is not None:
+        dims = (*dict.fromkeys([*options.strata, *options.peers, "batch"]),)
+        linked = figures.linked_pca(measured.scores, measured.share, sheet, status, dims)
+        glance.append(_figure(writer, linked, "linked_pca", "linked"))
+        scatter = figures.density(stage.values, sheet, stage.flags,
+                                  figures.colour_column(sheet, options.peers))  # fmt: skip
+        if scatter is not None:
+            identity.append(_figure(writer, scatter, "size_genes", "density"))
+        if measured.sexes is not None:
+            identity.append(
+                _figure(writer, figures.sex_scatter(measured.sexes), "sex_check", "sex")
+            )
+    units = sheet.unique("sample", keep="first").select("sample", *options.strata)
+    metrics = strips(writer, stage, units, registry, options, "sample")
+    for title, items, tabs in (("glance", glance, False), ("metrics", metrics, True),
+                               ("identity", identity, False)):  # fmt: skip
+        if items:
+            groups.append(Group(text.word(PAGE, f"groups.{title}"), tuple(items),
+                                tabs=tabs and len(items) > 1))  # fmt: skip
+    return groups
 
 
 def by_first_run(run_frame: pl.DataFrame, sheet: pl.DataFrame, key: str) -> pl.DataFrame:
@@ -336,11 +417,15 @@ def run(
     if spec.slug != dataset:
         raise DatasetError(f"{options.dataset_file}: slug {spec.slug!r}, not {dataset!r}")
     registry = load_registry(options)
-    gathered_dir = settings.root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
-    inputs = {w: newest(gathered_dir, dataset, w) for w in ("samplesheet", "counts", "genes")}
+    inputs = gathered_tables(settings.root, dataset)
     gathered = {w: pl.read_parquet(p) for w, p in inputs.items()}
     sheet = gathered["samplesheet"]
-    values, sexes, notes = counts_stage(settings, spec, gathered, options)
+    if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
+        raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
+    measured, notes = counts_stage(settings, spec, gathered, options)
+    samples = sheet.unique("sample", keep="first", maintain_order=True).select("sample")
+    values = measured.values if measured else samples
+    sexes = measured.sexes if measured else None
     day = date.today()
     releases = {"registry": str(registry.path), **{f"input:{w}": p.name for w, p in inputs.items()}}
     writer = Writer(settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}", dataset,
@@ -364,10 +449,16 @@ def run(
         writer.table(seen.values, "read_metrics", columns_of(seen.values, registry))
     _write_tables(writer, stage.values, frames, registry)
     results: list[Result] = [*stage.notes, _status_table(status), _confounding_table(tests)]
+    results += overview_groups(writer, stage, measured, (sheet, status), registry, options)
     if fate is not None:
         results.append(fate_figures(writer, fate, values, sheet, registry, options))
     if seen is not None:
         results.append(read_figures(writer, seen, sheet, registry, options))
+        run_units = sheet.select("run_accession", *options.strata)
+        run_strips = strips(writer, stage, run_units, registry, options, "run_accession")
+        if run_strips:
+            results.append(Group(text.word(PAGE, "groups.run_metrics"), tuple(run_strips),
+                                 tabs=len(run_strips) > 1))  # fmt: skip
     usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
     page = ModulePage(
         title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE),

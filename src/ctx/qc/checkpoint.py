@@ -15,6 +15,7 @@ import gzip
 import math
 import re
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
@@ -46,6 +47,10 @@ STRATUM = "stratum"
 Selection = tuple[tuple[str, str], ...]
 # Typed, so an empty flags table still joins: an untyped one reads as Null and cannot.
 FLAG_COLUMNS = {"sample": pl.String, "metric": pl.String, "reason": pl.String}
+BAND_COLUMNS = {
+    "metric": pl.String, STRATUM: pl.String, "n": pl.Int64, "median": pl.Float64,
+    "mad": pl.Float64, "low": pl.Float64, "high": pl.Float64, "note": pl.String,
+}  # fmt: skip
 
 
 def gene_types(gtf: Path) -> pl.DataFrame:
@@ -140,20 +145,34 @@ def replicate_spearman(
                         orient="row")  # fmt: skip
 
 
-def pca_distance(
-    counts: pl.DataFrame, samples: pl.DataFrame, peers: Sequence[str], threads: int
-) -> pl.DataFrame:
-    """Each sample's distance from its peer group's median on PC1 and PC2 of one blind VST.
+def pca_distance(scores: pl.DataFrame, samples: pl.DataFrame, peers: Sequence[str]) -> pl.DataFrame:
+    """Each sample's distance from its peer group's median on PC1 and PC2; none without peers.
 
-    One PCA of every sample, the one M5 draws, so the distance is read on the plot students
-    see; a sample with no peer has none.
+    The scores are one PCA of every sample's blind VST, the one M5 draws, so the distance is
+    read on the plot students see.
     """
-    scores = pca(counts, samples["sample"].to_list(), threads=threads).scores
     scores = scores.join(samples.select("sample", *peers), on="sample", how="left")
     centre = [pl.col(c).median().over(peers) for c in ("pc1", "pc2")]
     distance = ((pl.col("pc1") - centre[0]) ** 2 + (pl.col("pc2") - centre[1]) ** 2).sqrt()
     alone = pl.len().over(peers) < 2  # noqa: PLR2004 - a centre needs a second sample
     return scores.select("sample", pca_distance=pl.when(alone).then(None).otherwise(distance))
+
+
+@dataclass(frozen=True)
+class Measured:
+    """The count checkpoint's measurements: the metrics, and what the page draws beside them.
+
+    Attributes:
+        values: One row per sample, a column per count metric.
+        sexes: The sex check's own table, or None where it could not run.
+        scores: PC1 and PC2 of the blind VST per sample.
+        share: The variance share of PC1 and PC2.
+    """
+
+    values: pl.DataFrame
+    sexes: pl.DataFrame | None
+    scores: pl.DataFrame
+    share: tuple[float, float]
 
 
 def sample_metrics(
@@ -163,8 +182,8 @@ def sample_metrics(
     types: pl.DataFrame | None,
     peers: Sequence[str],
     threads: int,
-) -> tuple[pl.DataFrame, pl.DataFrame | None]:
-    """Every count-stage metric, one row per sample, and the sex check's own table.
+) -> Measured:
+    """Every count-stage metric, one row per sample, with the sex check and the PCA.
 
     Args:
         counts: ``gene_id`` then one column per sample, as gather writes it.
@@ -176,13 +195,14 @@ def sample_metrics(
         threads: CPUs for the VST.
 
     Returns:
-        The metrics, and the sex check's table (None where it could not run).
+        The metrics, the sex check's table, and the PCA scores.
     """
     samples = sheet.unique("sample", keep="first", maintain_order=True)
     sexes, _ = sex_check(sheet, counts, genes)
+    found = pca(counts, samples["sample"].to_list(), threads=threads)
     frame = count_metrics(counts, types)
     for part in (replicate_spearman(counts, samples, peers),
-                 pca_distance(counts, samples, peers, threads)):  # fmt: skip
+                 pca_distance(found.scores, samples, peers)):  # fmt: skip
         frame = frame.join(part, on="sample", how="left")
     agrees = pl.Series("sex_agrees", [None] * frame.height, pl.String)
     if sexes is not None:
@@ -196,7 +216,7 @@ def sample_metrics(
         frame = frame.join(sexes.select("sample", sex_agrees=label), on="sample", how="left")
     else:
         frame = frame.with_columns(agrees)
-    return frame, sexes
+    return Measured(frame, sexes, found.scores, found.share)
 
 
 def _show(value: float) -> str:
@@ -325,7 +345,7 @@ def judge(
                 found += outside
             if metric.action != "keep":
                 flags += [(s, metric.id, r) for s, r in found]
-    return (pl.DataFrame(bands, infer_schema_length=None),
+    return (pl.DataFrame(bands, schema=BAND_COLUMNS),
             pl.DataFrame(flags, schema=FLAG_COLUMNS, orient="row"))  # fmt: skip
 
 

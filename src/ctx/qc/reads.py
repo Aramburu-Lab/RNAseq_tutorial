@@ -60,7 +60,8 @@ def fastq_files(sheet: pl.DataFrame, fetchngs_dir: Path) -> tuple[pl.DataFrame, 
             skipped.append((row["run_accession"], ", ".join(bad) or "not_downloaded"))
             continue
         for mate, relative, _ in mates:
-            path = fetchngs_dir / relative
+            # Absolute: each tool runs in its own log folder, where a relative path misses.
+            path = (fetchngs_dir / relative).resolve()
             absent += [str(path)] * (not path.is_file())
             rows.append((row["run_accession"], row["sample"], mate, str(path)))
     if absent:

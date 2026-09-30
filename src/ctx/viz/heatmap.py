@@ -16,6 +16,7 @@ import polars as pl
 
 from ctx.viz.annotate import place_caption
 from ctx.viz.style import (
+    AVERAGE_CHAR_EM,
     BAR_LABEL_ROTATION,
     HEAT,
     HEAT_ALPHAS,
@@ -24,6 +25,7 @@ from ctx.viz.style import (
     PLOTLY_HEAT_BASE_PX,
     PLOTLY_HEAT_ROW_PX,
     ROLES,
+    SIZES,
     THEMES,
     WIDTHS_MM,
     Theme,
@@ -224,10 +226,16 @@ class HeatmapData:
         return colours + [to_rgba(c) for t in self.tracks for c in t.colours.values()]
 
     def _inches(self) -> tuple[float, float]:
-        """Width by the column rule; height grows with the rows drawn, capped."""
+        """Width by the column rule; height by the rows drawn and the longest column label.
+
+        The rows drawn are capped; a column label runs upward and, unmeasured, squeezed the rows.
+        """
         drawn = min(len(self.rows_in_order()), HEAT["max_rows_drawn"]) + len(self.tracks) + GAP
+        columns = self.columns_in_order()
+        labels = max(map(len, columns)) if len(columns) <= HEAT["label_columns"] else 0
+        label_mm = labels * SIZES["tick"] * AVERAGE_CHAR_EM / 72 * MM_PER_INCH
         return (WIDTHS_MM[self.width] / MM_PER_INCH,
-                (drawn * HEAT["row_mm"] + HEAT["margin_mm"]) / MM_PER_INCH)  # fmt: skip
+                (drawn * HEAT["row_mm"] + HEAT["margin_mm"] + label_mm) / MM_PER_INCH)  # fmt: skip
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme; cells are vector quads.

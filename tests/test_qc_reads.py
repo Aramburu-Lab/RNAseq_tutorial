@@ -105,3 +105,14 @@ def test_fastp_grid_runs_each_cell_with_its_own_settings(tmp_path):
     # Every base is below Q38 ("F" is Q37), and no read is 102 nt long.
     assert kept == {(15, 15): 1000, (15, 102): 0, (38, 15): 0, (38, 102): 0}
     assert grid.filter((pl.col("q") == 15) & (pl.col("l") == 15))["passed_pct"][0] == 100.0
+
+
+def test_a_relative_outdir_still_reaches_the_tools(tmp_path, monkeypatch):
+    """Each tool runs in its own log folder; a relative FASTQ path once pointed nowhere."""
+    outdir(tmp_path / "fetchngs")
+    monkeypatch.chdir(tmp_path)
+    one = sheet().filter(pl.col("run_accession") == "R_se_a")
+    files, _ = reads.fastq_files(one, Path("fetchngs"))
+    assert Path(files["path"][0]).is_absolute()
+    reads.run_tools(files, tmp_path / "logs", threads=1, fastp=reads.Fastp())
+    assert (tmp_path / "logs" / "fastp" / "R_se_a.fastp.json").is_file()
