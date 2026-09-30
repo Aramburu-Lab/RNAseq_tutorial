@@ -44,7 +44,8 @@ FLAGGED_CATEGORY = "disagrees"
 STRATUM = "stratum"
 # One sample selection of M5: (sample, "reference" or "tested") pairs, sorted.
 Selection = tuple[tuple[str, str], ...]
-FLAG_COLUMNS = ["sample", "metric", "reason"]
+# Typed, so an empty flags table still joins: an untyped one reads as Null and cannot.
+FLAG_COLUMNS = {"sample": pl.String, "metric": pl.String, "reason": pl.String}
 
 
 def gene_types(gtf: Path) -> pl.DataFrame:
@@ -328,19 +329,28 @@ def judge(
             pl.DataFrame(flags, schema=FLAG_COLUMNS, orient="row"))  # fmt: skip
 
 
-def status(runs: pl.DataFrame, flags: pl.DataFrame, registry: Registry) -> pl.DataFrame:
-    """One row per run: qc_status pass, flag or exclude, the reasons, and how many.
+def status(
+    runs: pl.DataFrame, flags: pl.DataFrame, registry: Registry,
+    run_flags: pl.DataFrame | None = None,
+) -> pl.DataFrame:  # fmt: skip
+    """One row per run: qc_status pass, flag or exclude, the reasons, and how many metrics.
 
-    A run takes its sample's flags. Exclude only where a flagged metric's action says so;
-    none does before the Step-1 record, so no run is excluded here.
+    A run takes its sample's flags, and its own where the reads were judged run by run
+    (``run_flags``, keyed by run in its ``sample`` column). Exclude only where a flagged
+    metric's action says so; none does before the Step-1 record, so no run is excluded here.
     """
     excluding = [m.id for m in registry.metrics.values() if m.action == "exclude"]
-    per = flags.group_by("sample", maintain_order=True).agg(
+    by_run = runs.select("run_accession", "sample").join(flags, on="sample", how="inner")
+    if run_flags is not None:
+        own = run_flags.rename({"sample": "run_accession"}).join(
+            runs.select("run_accession", "sample"), on="run_accession", how="inner")  # fmt: skip
+        by_run = pl.concat([by_run, own.select(by_run.columns)])
+    per = by_run.group_by("run_accession", maintain_order=True).agg(
         n_flags=pl.col("metric").n_unique(),
         qc_reason=pl.col("reason").str.join("; "),
         excluded=pl.col("metric").is_in(excluding).any(),
     )
-    joined = runs.select("run_accession", "sample").join(per, on="sample", how="left")
+    joined = runs.select("run_accession", "sample").join(per, on="run_accession", how="left")
     return joined.select(
         "run_accession", "sample",
         qc_status=pl.when(pl.col("excluded")).then(pl.lit("exclude"))

@@ -13,6 +13,7 @@ from typing import Annotated, Any
 import typer
 
 from ctx import __version__, runtime
+from ctx.qc import Fastp
 from ctx.report import text
 from ctx.report.builder import ParameterCard
 
@@ -192,6 +193,17 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     peers: Annotated[str, typer.Option(help=CARDS["--peers"][0])] = "cell_type,condition",
     mad: Annotated[float | None, typer.Option(help=CARDS["--mad"][0])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=CARDS["--rnaseq-dir"][0])] = None,
+    reads: Annotated[bool, typer.Option("--reads/--no-reads", help=CARDS["--reads"][0])] = False,
+    fetchngs_dir: Annotated[Path | None, typer.Option(help=CARDS["--fetchngs-dir"][0])] = None,
+    fastp_q: Annotated[int, typer.Option(help=CARDS["--fastp-q"][0])] = Fastp.q,
+    fastp_u: Annotated[int, typer.Option(help=CARDS["--fastp-u"][0])] = Fastp.u,
+    fastp_l: Annotated[int, typer.Option(help=CARDS["--fastp-l"][0])] = Fastp.l,
+    cut_tail: Annotated[
+        bool, typer.Option("--cut-tail/--no-cut-tail", help=CARDS["--cut-tail"][0])
+    ] = Fastp.cut_tail,
+    cut_window: Annotated[int, typer.Option(help=CARDS["--cut-window"][0])] = Fastp.window,
+    cut_mean: Annotated[int, typer.Option(help=CARDS["--cut-mean"][0])] = Fastp.mean,
+    grid_run: Annotated[str | None, typer.Option(help=CARDS["--grid-run"][0])] = None,
 ) -> None:
     """Judge every sample by the QC registry and test the flags for confounding (M2)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -201,8 +213,9 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
+    fastp = Fastp(fastp_q, fastp_u, fastp_l, cut_tail, cut_window, cut_mean)
     options = module.Options(dataset_file, registry, _columns(strata), _columns(peers), mad,
-                             rnaseq_dir)  # fmt: skip
+                             rnaseq_dir, reads, fetchngs_dir, fastp, grid_run)  # fmt: skip
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, QcError, RegistryError) as error:

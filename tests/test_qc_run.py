@@ -181,3 +181,67 @@ def test_reports_add_fates_figures_and_the_multiqc_report(with_reports):
     page = next(out.glob("*_overview_v1.html")).read_text()
     assert "Where the reads went" in page and "built-in method" not in page
     assert not (RNASEQ / "multiqc").exists()
+
+
+SE = ROOT / "tests" / "fixtures" / "chr22_se"
+SE_SAMPLES = ("se_a", "se_b", "se_c", "se_d", "se_e")
+
+
+@pytest.fixture(scope="module")
+def with_reads(tmp_path_factory):
+    """The chr22_se reads as a fetchngs outdir, gather outputs naming them, ctx qc --reads."""
+    import gzip  # noqa: PLC0415
+    import shutil  # noqa: PLC0415
+
+    from synth import Synthetic  # noqa: PLC0415
+
+    root = tmp_path_factory.mktemp("qc_reads")
+    fastq = root / "data" / "raw" / "desynth" / "fastq"
+    fastq.mkdir(parents=True)
+    for name in SE_SAMPLES:
+        with (
+            (SE / f"{name}.fq").open("rb") as src,
+            gzip.open(fastq / f"{name}.fastq.gz", "wb") as dst,
+        ):
+            shutil.copyfileobj(src, dst)
+    synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
+    names = dict(zip(synthetic.samples["sample"], SE_SAMPLES, strict=True))
+    samples = synthetic.samples.with_columns(pl.col("sample").replace_strict(names))
+    renamed = Synthetic(synthetic.counts.rename(names), samples, synthetic.truth)
+    write_gather_outputs(root, "desynth", renamed, date(2026, 9, 30))
+    sheet_path = next((root / "outputs" / "01_gather").glob("*_samplesheet_v1.parquet"))
+    sheet = pl.read_parquet(sheet_path).with_columns(
+        fastq_1=pl.format("fastq/{}.fastq.gz", "sample"), status_1=pl.lit("verified"),
+        fastq_2=pl.lit(""), status_2=pl.lit(""))  # fmt: skip
+    sheet.write_parquet(sheet_path)
+    runs = dict(sheet.select("sample", "run_accession").rows())
+    done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(SPEC),
+               "--reads", "--grid-run", runs["se_d"], cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root / "outputs" / "02_qc", runs
+
+
+def test_reads_are_judged_run_by_run(with_reads):
+    out, runs = with_reads
+    metrics = pl.read_csv(next(out.glob("*_desynth_read_metrics_v1.csv")))
+    assert sorted(metrics["run_accession"]) == sorted(runs.values())
+    assert (metrics["fastqc-total_sequences"] == 1000).all()
+    flags = {(r, m) for r, m, _ in pl.read_csv(next(out.glob("*_read_flags_v1.csv"))).rows()}
+    assert (runs["se_c"], "fastqc_adapter") in flags
+    assert (runs["se_d"], "fastqc_per_base_quality") in flags
+    status = pl.read_csv(next(out.glob("*_desynth_status_v1.csv")))
+    reasons = dict(status.select("run_accession", "qc_reason").rows())
+    assert "Adapter content" in reasons[runs["se_c"]]
+    assert "Per-base quality" in reasons[runs["se_d"]]
+
+
+def test_reads_add_curves_the_grid_and_their_own_multiqc_report(with_reads):
+    out, runs = with_reads
+    for what in ("base_quality", "fastp_grid"):
+        assert len(list(out.glob(f"*_desynth_{what}_v1*"))) == 7, what
+    grid = pl.read_csv(next(out.glob("*_desynth_grid_v1.csv")))
+    assert grid.height == 36 and grid["passed_pct"].n_unique() > 1
+    assert (out / "multiqc" / "reads" / "multiqc_report.html").is_file()
+    assert lint(out)[1] == []
+    page = next(out.glob("*_overview_v1.html")).read_text()
+    assert "The reads themselves" in page and "built-in method" not in page

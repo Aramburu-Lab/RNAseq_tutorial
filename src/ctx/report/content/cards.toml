@@ -14,7 +14,7 @@ meaning = "Short name of the dataset, lowercase words joined by underscores; eve
 effect = "Renames every output and selects which dataset's earlier outputs this command reads."
 
 [options."--fetchngs-dir"]
-meaning = "The nf-core/fetchngs outdir to read. Unset: <root>/data/raw/<dataset>."
+meaning = "The nf-core/fetchngs outdir the FASTQ files are in. Unset: <root>/data/raw/<dataset>."
 effect = "Points gather at another download. gather only reads it, never writes into it."
 
 [options."--dataset-file"]
@@ -49,6 +49,38 @@ effect = "Wider groups make biology look like disagreement; a group of one has n
 meaning = "How many scaled MADs from its stratum's median a value may lie before it is flagged. Unset: the registry's mad_multiplier."
 effect = "Lower flags more samples, higher fewer; three matches three standard deviations for normal data. Nothing is ever excluded by this."
 
+[options."--reads"]
+meaning = "Also run FastQC, fastp and seqkit on every run's FASTQ files and judge the reads run by run. --no-reads judges counts and reports only."
+effect = "On: minutes per million reads, a second MultiQC report under multiqc/reads, the base-quality curves and the fastp grid. Off: no FASTQ is opened."
+
+[options."--fastp-q"]
+meaning = "fastp -q: a base below this Phred quality counts as unqualified."
+effect = "Higher counts more bases unqualified, so more reads fail -u; the grid shows how many for one run."
+
+[options."--fastp-u"]
+meaning = "fastp -u: a read with more than this percentage of unqualified bases is dropped."
+effect = "Lower drops more reads for quality."
+
+[options."--fastp-l"]
+meaning = "fastp -l: a read shorter than this after trimming is dropped."
+effect = "Higher drops more short reads, the ones adapters or trimming shortened; the grid shows where it bites."
+
+[options."--cut-tail"]
+meaning = "fastp --cut_tail: trim a read's 3' end while the mean quality in a sliding window is below --cut-mean. --no-cut-tail leaves the ends."
+effect = "On: degraded tails are cut, so reads shorten and may then fail -l."
+
+[options."--cut-window"]
+meaning = "fastp -W: the sliding window --cut-tail averages over, in bases."
+effect = "Wider smooths over single bad bases; only used with --cut-tail."
+
+[options."--cut-mean"]
+meaning = "fastp -M: the mean quality below which --cut-tail cuts."
+effect = "Higher cuts more of each tail; only used with --cut-tail."
+
+[options."--grid-run"]
+meaning = "The run the fastp -q by -l grid is drawn on. Unset: the first run read."
+effect = "Pick a run you suspect, such as one with a degraded tail, to see which settings would keep its reads."
+
 [effects.setup]
 "--dataset-file" = "Set: fetches each resource and keeps it only if its size and SHA-256 match. Unset: fetches nothing."
 
@@ -60,6 +92,7 @@ effect = "Lower flags more samples, higher fewer; three matches three standard d
 "--dataset-file" = "Set: the hub also decides and shows the file's sanity rules."
 
 [effects.qc]
+"--fetchngs-dir" = "With --reads: the sheet's FASTQ paths are read relative to it, never the rest of its layout."
 "--rnaseq-dir" = "Set: MultiQC reads its Trim Galore and Salmon reports, every sample's reads get fates, and trimming and mapping are judged too. Unset: counts only."
 "--dataset-file" = "Selects the contrasts whose samples the confounding tests compare, their level orders, and the annotation that gives the genes their types."
 

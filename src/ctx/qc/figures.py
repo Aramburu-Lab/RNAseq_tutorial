@@ -6,10 +6,14 @@ import numpy as np
 import polars as pl
 from scipy.stats import median_abs_deviation
 
-from ctx.qc.registry import Registry
+from ctx.qc import Fastp
+from ctx.qc.registry import Metric, Registry
 from ctx.report import text
+from ctx.viz.contour import Mark, SurfaceData
+from ctx.viz.curve import CurveData
 from ctx.viz.flow import FlowData, Node
 from ctx.viz.scatter import Line, ScatterData
+from ctx.viz.strip import Span
 from ctx.viz.style import BAND_COLOURS, MAX_CATEGORIES, ROLES, category_colours
 
 PAGE = "qc"
@@ -101,3 +105,56 @@ def colour_column(sheet: pl.DataFrame, candidates: Sequence[str]) -> str | None:
     """The first candidate column with few enough levels to colour by; None if none has."""
     fits = [c for c in candidates if c in sheet.columns and sheet[c].n_unique() <= MAX_CATEGORIES]
     return fits[0] if fits else None
+
+
+# The isoline a grid map draws: the settings that still keep this share of the reads.
+GRID_ISOLINE = 90.0
+
+
+def quality_figure(curves: pl.DataFrame, sheet: pl.DataFrame, metric: Metric,
+                   colour: str | None) -> CurveData:  # fmt: skip
+    """Mean quality along read 1 of every run, over the bands FastQC's own plot shades."""
+    runs = sheet.select("run_accession", "sample", *([colour] if colour else []))
+    frame = curves.join(runs, on="run_accession", how="left")
+    if colour is None:
+        colour = "group"
+        frame = frame.with_columns(group=pl.lit(text.word(PAGE, "figures.fates.all")))
+    frame = frame.with_columns(pl.col(colour).cast(pl.String))
+    good, usable = metric.plot_bands or (None, None)
+    spans = () if good is None else (
+        Span("good", text.word(PAGE, "figures.quality.good"), good, None),
+        Span("usable", text.word(PAGE, "figures.quality.usable"), usable, good),
+        Span("bad", text.word(PAGE, "figures.quality.bad"), None, usable),
+    )  # fmt: skip
+    units = text.raw(PAGE, "figures.quality.units")
+    columns = {c: (units.get(c, "none"), text.fill(PAGE, "figures.fates.colour", column=c)
+                   if c == colour else text.word(PAGE, f"figures.quality.columns.{c}"))
+               for c in frame.columns}  # fmt: skip
+    levels = [str(v) for v in frame[colour].unique(maintain_order=True)]
+    return CurveData(
+        frame=frame, columns=columns, series="run_accession", x="position", y="quality",
+        x_label=text.word(PAGE, "figures.quality.x"), y_label=text.word(PAGE, "figures.quality.y"),
+        colour=colour, colours=category_colours(levels), hover=("sample",), spans=spans,
+        caption=text.fill(PAGE, "figures.quality.caption", n=frame["run_accession"].n_unique(),
+                          source=metric.plot_source or metric.source),
+        width="double",
+    )  # fmt: skip
+
+
+def grid_figure(grid: pl.DataFrame, fastp: Fastp, run: str) -> SurfaceData | None:
+    """Reads fastp keeps across -q and -l on one run; None when every cell keeps the same."""
+    if grid["passed_pct"].n_unique() == 1:
+        return None
+    units = text.raw(PAGE, "figures.grid.units")
+    return SurfaceData(
+        frame=grid, x="q", y="l", z="passed_pct",
+        columns={c: (units.get(c, "none"), text.word(PAGE, f"figures.grid.columns.{c}"))
+                 for c in grid.columns},  # fmt: skip
+        x_label=text.word(PAGE, "figures.grid.x"), y_label=text.word(PAGE, "figures.grid.y"),
+        z_label=text.word(PAGE, "figures.grid.z"),
+        caption=text.fill(PAGE, "figures.grid.caption", run=run, u=fastp.u,
+                          nq=grid["q"].n_unique(), nl=grid["l"].n_unique(), isoline=GRID_ISOLINE),
+        isolines=(GRID_ISOLINE,), isoline_format=".0f",
+        mark=Mark(float(fastp.q), float(fastp.l), text.fill(PAGE, "figures.grid.mark", q=fastp.q,
+                                                              l=fastp.l)),
+    )  # fmt: skip

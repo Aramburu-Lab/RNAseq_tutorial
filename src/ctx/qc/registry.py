@@ -24,6 +24,8 @@ ACTIONS = ("keep", "flag", "fix_rerun", "exclude")
 SCALES = ("linear", "log10")
 # FastQC's own verdicts, as the three bands.
 STATUS_BANDS = {"pass": "good", "warn": "usable", "fail": "bad"}
+# A tool's own plot shades these, best first: good from the first value, usable from the second.
+PLOT_BANDS = ("good", "usable")
 # General Statistics shows read and base counts in millions by default, in its TSV as well, and
 # colours the scaled value: 100,000 reads read as 0.1 against a 10,000 band. Multipliers of 1
 # keep every count raw, in the table, the TSV and the rules alike (D-029).
@@ -68,6 +70,8 @@ class Metric:
     source_type: str
     stranded: float | None = None
     unstranded: float | None = None
+    plot_bands: tuple[float, float] | None = None
+    plot_source: str = ""
 
     @property
     def banded(self) -> bool:
@@ -161,6 +165,8 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
         read_length_tied=raw["read_length_tied"], source=raw["source"],
         source_type=raw["source_type"], stranded=raw.get("stranded"),
         unstranded=raw.get("unstranded"),
+        plot_bands=tuple(raw["plot_bands"]) if "plot_bands" in raw else None,
+        plot_source=raw.get("plot_source", ""),
     ), []  # fmt: skip
 
 
@@ -180,6 +186,11 @@ def _band_problems(key: str, raw: Mapping[str, Any], kind: str) -> list[str]:
         order = {"higher": 1, "lower": -1}.get(raw.get("direction", ""), 0)
         if banded and {"good", "usable"} <= set(raw) and order * (raw["good"] - raw["usable"]) < 0:
             problems.append(f"[metrics.{key}] good must lie on the good side of usable")
+    bands = raw.get("plot_bands")
+    if bands is not None and ("plot_source" not in raw or [*sorted(bands, reverse=True)] != bands
+                              or len(set(bands)) != len(PLOT_BANDS)):  # fmt: skip
+        problems.append(f"[metrics.{key}] plot_bands needs [good, usable], good above usable, "
+                        "and a plot_source")  # fmt: skip
     if kind == "strandedness" and not {"stranded", "unstranded"} <= set(raw):
         problems.append(f"[metrics.{key}] strandedness needs stranded and unstranded")
     return problems

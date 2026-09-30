@@ -235,6 +235,7 @@ class SurfaceData:
         for value in self.isolines:
             fig.add_trace(go.Contour(
                 x=xs, y=ys, z=z, autocontour=False, showscale=False, hoverinfo="skip",
+                showlegend=False,
                 contours={"start": value, "end": value, "size": 1, "coloring": "none",
                           "showlabels": True, "labelformat": self.isoline_format,
                           "labelfont": {"color": INK_COLOUR}},

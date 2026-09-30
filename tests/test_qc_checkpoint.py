@@ -213,3 +213,13 @@ def test_sample_metrics_on_gathered_counts(tmp_path):
     assert frame.filter(pl.col("sex_agrees") == "disagrees")["sample"].to_list() == ["S001"]
     assert frame["pca_distance"].null_count() == 0
     assert frame["replicate_spearman"].min() > 0.5
+
+
+def test_no_flags_still_joins():
+    """Nothing flagged: the empty flags table joins, and every run passes."""
+    values = pl.DataFrame({"sample": ["a", "b", "c"], "genes_detected": [100.0, 101.0, 99.0]})
+    samples = values.select("sample", cell=pl.lit("x"))
+    _, flags = checkpoint.judge(values, samples, reg_of(metric("genes_detected")), ["cell"])
+    assert flags.is_empty() and flags.schema["sample"] == pl.String
+    runs = pl.DataFrame({"run_accession": ["r1", "r2", "r3"], "sample": ["a", "b", "c"]})
+    assert checkpoint.status(runs, flags, REG, flags)["qc_status"].to_list() == ["pass"] * 3

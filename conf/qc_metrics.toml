@@ -185,6 +185,11 @@ matters_for_de = true
 read_length_tied = true
 source = "FastQC 0.12.1 limits.txt: quality_base_lower warn 10 error 5, quality_base_median warn 25 error 20"
 source_type = "tool_code"
+# The bands FastQC's own per-base quality plot shades, good from 28 and reasonable from 20,
+# read from the bytecode of FastQC 0.12.1's QualityBoxPlot class with javap on 2026-09-30
+# (constants 28.0 and 20.0 beside its GOOD, BAD and UGLY colours).
+plot_bands = [28.0, 20.0]
+plot_source = "FastQC 0.12.1 QualityBoxPlot: good from Phred 28, reasonable from 20, poor below"
 
 [metrics.fastqc_adapter]
 stage = "reads"
