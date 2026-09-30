@@ -679,3 +679,32 @@ def demo_band_map():  # returns ctx HeatmapData
         caption="Each metric's absolute band per sample; grey: no band. Synthetic data; no test.",
         width="single",
     )  # fmt: skip
+
+
+def demo_flow(width: str = "double"):  # returns ctx FlowData
+    """Where the reads of a cohort go: sequenced, Trim Galore's fates, Salmon's fates."""
+    from ctx.viz.flow import FlowData, Node  # noqa: PLC0415
+    from ctx.viz.style import DATA_COLOURS  # noqa: PLC0415
+
+    nodes = (
+        Node("raw", "sequenced", 0, DATA_COLOURS[4]),
+        Node("kept", "written", 1, DATA_COLOURS[2]), Node("short", "too short", 1),
+        Node("n", "too many N", 1),
+        Node("assigned", "assigned", 2, DATA_COLOURS[2]), Node("unassigned", "not assigned", 2),
+        Node("decoy", "decoy", 2, DATA_COLOURS[6]),
+    )  # fmt: skip
+    links = pl.DataFrame(
+        [("raw", "kept", 961_204.0), ("raw", "short", 36_512.0), ("raw", "n", 2_284.0),
+         ("kept", "assigned", 781_530.0), ("kept", "unassigned", 151_020.0),
+         ("kept", "decoy", 28_654.0)],
+        schema=["source", "target", "value"], orient="row",
+    )  # fmt: skip
+    columns = {"source": ("none", "Node the reads leave."), "target": ("none", "Node they reach."),
+               "value": ("reads", "Reads moving along the link.")}  # fmt: skip
+    return FlowData(
+        nodes=nodes, links=links, columns=columns,
+        stage_labels=("Sequenced", "Trim Galore", "Salmon"),
+        caption="Every read of the cohort, summed over samples: Trim Galore's fates, then "
+        "Salmon's for the reads it wrote. Synthetic data; no test.",
+        width=width,
+    )  # fmt: skip

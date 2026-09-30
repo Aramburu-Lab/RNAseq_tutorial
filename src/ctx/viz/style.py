@@ -50,7 +50,7 @@ PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT
 # Panel letters: bold capitals at the top left, nudged up by dy_pt (no figure has panels yet).
 PANEL_LABEL = {"size": SIZES["panel"], "weight": "bold", "dx_pt": 0.0, "dy_pt": 2.0}
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
-ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1}
+ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1}
 # Point shapes for a second category, in level order: (matplotlib, plotly).
 MARKERS = (
     ("o", "circle"),
@@ -66,6 +66,10 @@ HEAT_ALPHAS = (0.33, 0.67, 1.0)
 HEAT = {"row_mm": 4.5, "margin_mm": 70.0, "label_rows": 60, "label_columns": 40,
         "max_rows_drawn": 60}  # fmt: skip
 PLOTLY_HEAT_ROW_PX, PLOTLY_HEAT_BASE_PX = 18, 220
+# A flow diagram: node width and the share of the width kept for the last stage's labels,
+# both as fractions of the axes; the gap between nodes is one label's pitch.
+FLOW = {"node": 0.02, "label_room": 0.3, "pad": 0.01}
+PLOTLY_FLOW = {"node_px": 16, "pad_px": 18}
 # A strip plot spreads a category's points over this share of its slot either side of the
 # centre, and draws its median ± k MAD bar over a little more.
 STRIP = {"jitter": 0.3, "range": 0.4}
@@ -172,7 +176,7 @@ LAYOUT = {
 }  # fmt: skip
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640
-PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440}
+PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow": 460}
 # Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed

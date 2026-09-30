@@ -23,6 +23,7 @@ from synth import (
     demo_box,
     demo_bubble,
     demo_curves,
+    demo_flow,
     demo_heatmap,
     demo_ma,
     demo_pca,
@@ -37,6 +38,7 @@ from ctx.viz import box
 from ctx.viz.annotate import compare_groups, permanova
 from ctx.viz.axes import axis_title
 from ctx.viz.curve import CurveData
+from ctx.viz.flow import FlowData
 from ctx.viz.heatmap import HeatmapData
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
 from ctx.viz.scatter import THIN_MAX, Calls, ScatterData, bubble_pt
@@ -325,6 +327,7 @@ def _contracts():
         "curves": demo_curves(),
         "heatmap": demo_heatmap(),
         "band_map": demo_band_map(),
+        "flow": demo_flow(),
     }
 
 
@@ -338,17 +341,22 @@ def static_caption(data) -> str:
 
 def axis_titles(data) -> list[tuple[str, str]]:
     """(label, unit) of every value axis the static figure must print."""
-    if isinstance(data, box.BoxData):
-        return [(data.value_label, data.unit)]
-    if isinstance(data, ScatterData):
+
+    def xy():
         return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
-    if isinstance(data, StripData):
+
+    def value():
         return [(data.value_label, data.columns[data.value][0])]
-    if isinstance(data, HeatmapData):
-        return [(data.column_label, "none")]
-    if isinstance(data, CurveData):
-        return [(data.x_label, data.columns[data.x][0]), (data.y_label, data.columns[data.y][0])]
-    return [(data.value_label, data.columns[data.value][0])]
+
+    rules = {
+        box.BoxData: lambda: [(data.value_label, data.unit)],
+        ScatterData: xy,
+        CurveData: xy,
+        StripData: value,
+        HeatmapData: lambda: [(data.column_label, "none")],
+        FlowData: list,
+    }
+    return rules.get(type(data), value)()
 
 
 def _unit_words(unit: str) -> list[str]:
@@ -459,6 +467,7 @@ OVERLAP_CASES = {
     "heatmap": lambda s: demo_heatmap(),
     "heatmap_unlabelled_rows": lambda s: demo_heatmap(n_genes=80),
     "band_map": lambda s: demo_band_map(),
+    "flow": lambda s: demo_flow(),
 }
 
 
@@ -705,3 +714,18 @@ def test_diverging_levels_bin_at_their_edges():
     assert [s.colour for s in swatches] == [ROLES["reference"]] * 3 + [None] + [
         ROLES["comparison"]] * 3  # fmt: skip
     assert [s.alpha for s in swatches[:3]] == sorted(s.alpha for s in swatches[4:])[::-1]
+
+
+def test_a_flow_keeps_every_read():
+    data = demo_flow()
+    lost = data.links.with_columns(
+        value=pl.when(pl.col("target") == "decoy").then(0.0).otherwise("value")
+    )
+    with pytest.raises(ValueError, match=r"differ at \['kept'\]"):
+        dataclasses.replace(data, links=lost)
+    backwards = pl.concat([data.links, pl.DataFrame(
+        {"source": ["assigned"], "target": ["kept"], "value": [1.0]})])  # fmt: skip
+    with pytest.raises(ValueError, match="later stage"):
+        dataclasses.replace(data, links=backwards)
+    sankey = data.interactive().data[0]
+    assert sum(sankey.link.value) == data.links["value"].sum()
