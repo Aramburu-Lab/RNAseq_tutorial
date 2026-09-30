@@ -148,19 +148,7 @@ def run_values(mqc: multiqc_io.MultiqcRun, files: pl.DataFrame, registry: Regist
             raise QcError(f"MultiQC's {name} table has no {missing}")
         numbers = [m.column for m in wanted if m.kind == "numeric"]
         table = multiqc_io.numeric(table, numbers).select("Sample", *(m.column for m in wanted))
-        multiqc_io.map_names(table["Sample"], {n: n for n in ranks})
-        keyed = (
-            table.with_columns(
-                run_accession=pl.col("Sample").replace_strict(
-                    {n: r for n, (r, _) in ranks.items()}
-                ),
-                rank=pl.col("Sample").replace_strict({n: k for n, (_, k) in ranks.items()}),
-            )
-            .filter(pl.col("rank") < READ_2)
-            .sort("rank")
-        )
-        frames.append(keyed.group_by("run_accession", maintain_order=True).agg(
-            pl.exclude("Sample", "rank", "run_accession").drop_nulls().first()))  # fmt: skip
+        frames.append(multiqc_io.by_unit(table, ranks, "run_accession", READ_2))
     values = files.unique("run_accession", keep="first", maintain_order=True).select(
         "run_accession", "sample"
     )

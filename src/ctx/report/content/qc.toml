@@ -133,3 +133,78 @@ columns.xist_log2cpm = "log2 CPM + 1 of XIST."
 columns.chry_log2cpm = "Mean log2 CPM + 1 of RPS4Y1, DDX3Y, KDM5D, UTY and EIF1AY."
 columns.expression_sex = "The sex the expression says: M when chrY exceeds XIST."
 columns.agrees = "Whether they agree; empty with no recorded sex."
+
+# Read fates: every read of a sample, from Trim Galore's reports and then Salmon's.
+[figures.fates]
+title = "Read fates: raw against useful fragments"
+lead = "The useful fraction's median is {median:.2f}; a sample below the lower dashed line kept fewer reads than its peers."
+x = "Raw"
+y = "Useful"
+identity = "y = x: every read useful"
+band = "median ± {k} MAD of the useful fraction"
+size = "MT + rRNA"
+all = "all samples"
+area = "Bubble area: the MT + rRNA share of counted reads."
+no_area = "Every bubble the same size: the counts had no gene types, so no MT or rRNA share."
+caption = "{area} Useful: fragments Salmon assigned to a transcript; the useful fraction's median is {median:.2f}. Dashed: its median ± {k} scaled MAD over the {n} samples. Hover names every fate. Trim Galore trims low-quality bases and never counts low-quality reads, so a read cut below the length floor counts as too short. Salmon's decoys are fragments whose best match is the genome outside the transcripts, not contamination. No test."
+colour = "The sheet's {column} column, which colours the bubbles."
+reading = [
+    "Each bubble is one sample: across, the fragments it was sequenced with; up, the ones Salmon assigned to a transcript.",
+    "The solid line is every fragment useful; the dashed pair bounds the typical useful fraction.",
+]
+units = { total_reads = "fragments", reads_written = "fragments", reads_too_short = "fragments", reads_too_long = "fragments", reads_too_many_n = "fragments", reads_discarded_untrimmed = "fragments", num_processed = "fragments", num_mapped = "fragments", num_decoy_fragments = "fragments", not_assigned = "fragments", useful_share = "fraction", mt_rrna_share = "fraction", mt_fraction = "fraction", mt_rrna_fraction = "fraction", rrna_fraction = "fraction" }
+columns.sample = "Sample."
+columns.group = "Every sample, where no sheet column has few enough levels to colour by."
+columns.total_reads = "Fragments Trim Galore read: read 1 of a pair."
+columns.reads_written = "Fragments Trim Galore wrote."
+columns.reads_too_short = "Fragments shorter than the length floor after trimming."
+columns.reads_too_long = "Fragments longer than the ceiling, where one was set."
+columns.reads_too_many_n = "Fragments with too many N bases."
+columns.reads_discarded_untrimmed = "Fragments discarded for carrying no adapter, where that was asked."
+columns.num_processed = "Fragments Salmon processed: the ones Trim Galore wrote."
+columns.num_mapped = "Fragments Salmon assigned to a transcript: the useful ones."
+columns.num_decoy_fragments = "Fragments whose best match was a decoy, the genome outside the transcripts."
+columns.not_assigned = "Fragments processed but neither assigned nor decoys."
+columns.mt_fraction = "Share of counted reads on chrM genes other than Mt_rRNA."
+columns.mt_rrna_fraction = "Share of counted reads on the Mt_rRNA genes."
+columns.rrna_fraction = "Share of counted reads on nuclear rRNA genes and pseudogenes."
+columns.useful_share = "num_mapped / total_reads."
+columns.mt_rrna_share = "mt_fraction + mt_rrna_fraction + rrna_fraction."
+
+[figures.flow]
+title = "Where every read goes"
+lead = "Of {total:,} fragments, {useful:,} ({share:.1%}) were assigned to a transcript."
+stages = ["Sequenced", "Trim Galore", "Salmon"]
+caption = "Every fragment of the {n} samples, summed; a pair counts once, by read 1. Trim Galore's fates, then Salmon's for the fragments it wrote. No test."
+nodes.total_reads = "sequenced"
+nodes.reads_written = "written"
+nodes.reads_too_short = "too short"
+nodes.reads_too_long = "too long"
+nodes.reads_too_many_n = "too many N"
+nodes.reads_discarded_untrimmed = "discarded untrimmed"
+nodes.num_mapped = "assigned"
+nodes.num_decoy_fragments = "decoy"
+nodes.not_assigned = "not assigned"
+columns.source = "The fate the fragments leave."
+columns.target = "The fate they reach."
+columns.value = "Fragments along the link, summed over the samples."
+
+[groups]
+fates = "Where the reads went"
+
+[multiqc]
+comment = "Coloured by the course's QC registry: green good, orange usable, red bad, where a source gives a band. ctx qc also judges each sample against its own stratum."
+
+[tables.fates]
+units = { total_reads = "fragments", reads_written = "fragments", reads_too_short = "fragments", reads_too_long = "fragments", reads_too_many_n = "fragments", reads_discarded_untrimmed = "fragments", num_processed = "fragments", num_mapped = "fragments", num_decoy_fragments = "fragments", not_assigned = "fragments" }
+columns.sample = "Sample."
+columns.total_reads = "Fragments Trim Galore read: read 1 of a pair."
+columns.reads_written = "Fragments Trim Galore wrote."
+columns.reads_too_short = "Fragments shorter than the length floor after trimming."
+columns.reads_too_long = "Fragments longer than the ceiling, where one was set."
+columns.reads_too_many_n = "Fragments with too many N bases."
+columns.reads_discarded_untrimmed = "Fragments discarded for carrying no adapter, where that was asked."
+columns.num_processed = "Fragments Salmon processed: the ones Trim Galore wrote."
+columns.num_mapped = "Fragments Salmon assigned to a transcript."
+columns.num_decoy_fragments = "Fragments whose best match was a decoy, the genome outside the transcripts."
+columns.not_assigned = "Fragments processed but neither assigned nor decoys."

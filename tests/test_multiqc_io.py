@@ -113,3 +113,11 @@ def test_multiqc_folder_is_exempt_from_the_naming_lint(ran):
     (out.parent / "badly named.csv").write_text("x")
     assert lint(out.parent)[1] == ["badly named.csv"]
     assert scanned == 0
+
+
+def test_relative_inputs_are_read_from_the_callers_directory(tmp_path, monkeypatch):
+    """MultiQC runs in its output folder; a relative input once pointed nowhere from there."""
+    shutil.copytree(FIXTURE / "salmon", tmp_path / "salmon")
+    monkeypatch.chdir(tmp_path)
+    run = multiqc_io.run([Path("salmon")], tmp_path / "out", modules=("salmon",))
+    assert multiqc_io.table(run, "salmon").height == len(SAMPLES)

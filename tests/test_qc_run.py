@@ -141,3 +141,43 @@ def test_a_strata_column_the_sheet_lacks_stops_the_run(tmp_path):
                "--strata", "tissue,nowhere", cwd=root)  # fmt: skip
     assert done.returncode == 1
     assert "nowhere" in done.stderr
+
+
+RNASEQ = ROOT / "tests" / "fixtures" / "rnaseq"
+RNASEQ_SAMPLES = ("RAP1_IAA_30M_REP1", "RAP1_UNINDUCED_REP1", "RAP1_UNINDUCED_REP2", "WT_REP1",
+                  "WT_REP2")  # fmt: skip
+
+
+@pytest.fixture(scope="module")
+def with_reports(tmp_path_factory):
+    """Gather outputs named after the rnaseq fixture's samples, then ctx qc on its reports."""
+    from synth import Synthetic  # noqa: PLC0415
+
+    root = tmp_path_factory.mktemp("qc_rnaseq")
+    synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
+    names = dict(zip(synthetic.samples["sample"], RNASEQ_SAMPLES, strict=True))
+    renamed = Synthetic(synthetic.counts.rename(names),
+                        synthetic.samples.with_columns(pl.col("sample").replace_strict(names)),
+                        synthetic.truth)  # fmt: skip
+    write_gather_outputs(root, "desynth", renamed, date(2026, 9, 30))
+    done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(SPEC),
+               "--rnaseq-dir", str(RNASEQ), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, root / "outputs" / "02_qc"
+
+
+def test_reports_add_fates_figures_and_the_multiqc_report(with_reports):
+    root, out = with_reports
+    fates = pl.read_csv(next(out.glob("*_desynth_fates_v1.csv")))
+    assert sorted(fates["sample"]) == sorted(RNASEQ_SAMPLES)
+    assert (fates["num_processed"] == fates["reads_written"]).all()
+    metrics = pl.read_csv(next(out.glob("*_desynth_metrics_v1.csv")))
+    assert {"salmon-percent_mapped", "trim_galore-tg_total_reads"} <= set(metrics.columns)
+    for what in ("read_fates", "read_flow"):
+        assert len(list(out.glob(f"*_desynth_{what}_v1*"))) == 7, what
+    assert (out / "multiqc" / "multiqc_report.html").is_file()
+    assert next(out.glob("*_desynth_multiqc_config_v1.yml")).read_text().startswith("{")
+    assert lint(out)[1] == []
+    page = next(out.glob("*_overview_v1.html")).read_text()
+    assert "Where the reads went" in page and "built-in method" not in page
+    assert not (RNASEQ / "multiqc").exists()

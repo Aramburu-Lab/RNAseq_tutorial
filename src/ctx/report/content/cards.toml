@@ -30,7 +30,7 @@ meaning = "Also estimate each gene's log2 fold change with apeGLM shrinkage, whi
 effect = "Off: the shrunk columns stay empty, the MA plot shows the raw estimate alone, and M5 skips the shrinkage step of each contrast. The test, p-values, calls, volcano and enrichment use the raw estimate either way, so none of them change."
 
 [options."--rnaseq-dir"]
-meaning = "An nf-core/rnaseq outdir (Salmon only) whose gene matrix to read. Unset: no counts."
+meaning = "An nf-core/rnaseq outdir, Salmon only: gather reads its gene matrix, qc its Trim Galore and Salmon reports. Unset: none is read."
 effect = "Set: gather checks the release and the samples, rounds the length-scaled counts to integers and writes them. It only reads the outdir."
 
 [options."--registry"]
@@ -60,6 +60,7 @@ effect = "Lower flags more samples, higher fewer; three matches three standard d
 "--dataset-file" = "Set: the hub also decides and shows the file's sanity rules."
 
 [effects.qc]
+"--rnaseq-dir" = "Set: MultiQC reads its Trim Galore and Salmon reports, every sample's reads get fates, and trimming and mapping are judged too. Unset: counts only."
 "--dataset-file" = "Selects the contrasts whose samples the confounding tests compare, their level orders, and the annotation that gives the genes their types."
 
 [effects.de]

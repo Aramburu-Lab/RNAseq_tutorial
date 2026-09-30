@@ -6,6 +6,7 @@ stratum, writes one status row per run, and asks whether a metric, or a flag, di
 the groups of a comparison M5 makes. Nothing is excluded.
 """
 
+import json
 from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from datetime import date
@@ -17,10 +18,12 @@ from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
-from ctx.qc import checkpoint
+from ctx.qc import checkpoint, fates, figures
 from ctx.qc import registry as reg
 from ctx.report import text
 from ctx.report.builder import (
+    FigureText,
+    Group,
     KeyNumber,
     ModulePage,
     ParameterCard,
@@ -48,6 +51,7 @@ class Options:
         strata: Sheet columns whose shared values make a stratum, for the MAD bands.
         peers: Sheet columns whose shared values make a peer group.
         mad: The MAD multiplier; None keeps the registry's.
+        rnaseq_dir: An nf-core/rnaseq outdir whose Trim Galore and Salmon reports to read.
     """
 
     dataset_file: Path
@@ -55,6 +59,7 @@ class Options:
     strata: tuple[str, ...] = ("cell_type",)
     peers: tuple[str, ...] = ("cell_type", "condition")
     mad: float | None = None
+    rnaseq_dir: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -86,18 +91,52 @@ def gene_types(root: Path, spec: Dataset) -> tuple[pl.DataFrame | None, str]:
 
 def counts_stage(
     settings: runtime.Settings, spec: Dataset, gathered: Mapping[str, pl.DataFrame],
-    registry: reg.Registry, options: Options,
-) -> tuple[Stage, pl.DataFrame | None]:  # fmt: skip
-    """The checkpoint on counts, and the sex check's own table."""
+    options: Options,
+) -> tuple[pl.DataFrame, pl.DataFrame | None, tuple[str, ...]]:  # fmt: skip
+    """The count metrics per sample, the sex check's own table, and what was left out."""
     sheet, counts = gathered["samplesheet"], gathered["counts"]
     if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
         raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
     types, note = gene_types(settings.root, spec)
     values, sexes = checkpoint.sample_metrics(counts, sheet, gathered["genes"], types,
                                               options.peers, settings.threads)  # fmt: skip
-    samples = sheet.unique("sample", keep="first", maintain_order=True)
-    bands, flags = checkpoint.judge(values, samples, registry, options.strata)
-    return Stage(values, bands, flags, (note,) if note else ()), sexes
+    return values, sexes, (note,) if note else ()
+
+
+def rnaseq_stage(writer: Writer, rnaseq_dir: Path, samples: list[str],
+                 registry: reg.Registry) -> tuple[pl.DataFrame, pl.DataFrame]:  # fmt: skip
+    """Trim Galore's and Salmon's reports through MultiQC: values per sample, and the fates.
+
+    The MultiQC config the registry implies is written first, beside the tables, so
+    MultiQC's own report colours its table by the same bands.
+    """
+    writer.out.mkdir(parents=True, exist_ok=True)
+    config = writer.out / f"{writer.stem('multiqc_config')}.yml"
+    settings = reg.multiqc_config(registry, text.word(PAGE, "multiqc.comment"))
+    config.write_text(json.dumps(settings, indent=1) + "\n")
+    writer.files.append(config)
+    mqc = fates.run_multiqc(rnaseq_dir, writer.out / "multiqc", config, samples)
+    return fates.values(mqc, samples, registry), fates.fates(mqc, samples)
+
+
+def fate_figures(writer: Writer, fate: pl.DataFrame, values: pl.DataFrame, sheet: pl.DataFrame,
+                 registry: reg.Registry, options: Options) -> Group:  # fmt: skip
+    """The read-fates bubble chart and the Sankey, as one group of the page."""
+    colour = figures.colour_column(sheet, options.peers)
+    bubble = figures.fates_bubble(fate, values, sheet, colour, registry)
+    median = float(bubble.frame["useful_share"].median())  # type: ignore[arg-type]
+    total, useful = int(fate["total_reads"].sum()), int(fate["num_mapped"].sum())
+    blocks = (
+        writer.figure(bubble, "read_fates", FigureText(
+            title=text.word(PAGE, "figures.fates.title"),
+            lead=text.fill(PAGE, "figures.fates.lead", median=median),
+            reading=tuple(text.words(PAGE, "figures.fates.reading")))),
+        writer.figure(figures.fates_flow(fate), "read_flow", FigureText(
+            title=text.word(PAGE, "figures.flow.title"),
+            lead=text.fill(PAGE, "figures.flow.lead", total=total, useful=useful,
+                           share=useful / total if total else 0.0))),
+    )  # fmt: skip
+    return Group(text.word(PAGE, "groups.fates"), blocks)
 
 
 def columns_of(frame: pl.DataFrame, registry: reg.Registry) -> dict[str, tuple[str, str]]:
@@ -179,19 +218,29 @@ def run(
     gathered_dir = settings.root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
     inputs = {w: newest(gathered_dir, dataset, w) for w in ("samplesheet", "counts", "genes")}
     gathered = {w: pl.read_parquet(p) for w, p in inputs.items()}
-    stage, sexes = counts_stage(settings, spec, gathered, registry, options)
     sheet = gathered["samplesheet"]
-    status = checkpoint.status(sheet, stage.flags, registry)
-    tests = checkpoint.confounding(stage.values, stage.flags, sheet, spec.contrasts, spec.order,
-                                   registry)  # fmt: skip
+    values, sexes, notes = counts_stage(settings, spec, gathered, options)
     day = date.today()
     releases = {"registry": str(registry.path), **{f"input:{w}": p.name for w, p in inputs.items()}}
     writer = Writer(settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}", dataset,
                     day, releases)  # fmt: skip
+    fate = None
+    if options.rnaseq_dir:
+        found, fate = rnaseq_stage(writer, options.rnaseq_dir, values["sample"].to_list(), registry)
+        values = values.join(found, on="sample", how="left")
+    samples = sheet.unique("sample", keep="first", maintain_order=True)
+    bands, flags = checkpoint.judge(values, samples, registry, options.strata)
+    stage = Stage(values, bands, flags, notes)
+    status = checkpoint.status(sheet, stage.flags, registry)
+    tests = checkpoint.confounding(stage.values, stage.flags, sheet, spec.contrasts, spec.order,
+                                   registry)  # fmt: skip
     frames = {"bands": stage.bands, "flags": stage.flags, "status": status, "confounding": tests}
-    _write_tables(writer, stage.values, frames | ({"sex_check": sexes} if sexes is not None
-                                                  else {}), registry)  # fmt: skip
+    frames |= {"sex_check": sexes} if sexes is not None else {}
+    frames |= {"fates": fate} if fate is not None else {}
+    _write_tables(writer, stage.values, frames, registry)
     results: list[Result] = [*stage.notes, _status_table(status), _confounding_table(tests)]
+    if fate is not None:
+        results.append(fate_figures(writer, fate, values, sheet, registry, options))
     usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
     page = ModulePage(
         title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE),

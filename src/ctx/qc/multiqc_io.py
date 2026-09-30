@@ -53,7 +53,8 @@ def run(
     args += ["-c", str(config)] if config else []
     args += [f"--module={m}" for m in modules]
     try:
-        tools.run("multiqc", [*args, *(str(p) for p in inputs)], cwd=dest,
+        # MultiQC runs in dest, so a path relative to the caller would point nowhere.
+        tools.run("multiqc", [*args, *(str(Path(p).resolve()) for p in inputs)], cwd=dest,
                   log=dest / "multiqc_run.log")  # fmt: skip
     except tools.ToolError as error:
         raise QcError(str(error)) from error
@@ -98,6 +99,32 @@ def map_names(names: Iterable[str], aliases: Mapping[str, str]) -> dict[str, str
     if missing := sorted({n for n in names if n not in aliases}):
         raise QcError(f"MultiQC sample names that match no sample: {missing}")
     return {n: aliases[n] for n in names}
+
+
+def by_unit(
+    frame: pl.DataFrame, ranks: Mapping[str, tuple[str, int]], key: str, keep_below: int
+) -> pl.DataFrame:
+    """One row per unit from MultiQC's rows: each column from the best-ranked row that has it.
+
+    A sample appears under several names (a run's own row, its read-1 and read-2 rows, a
+    pair's summed row); ``ranks`` maps each name to (unit, rank), and rows ranked
+    ``keep_below`` or worse are never read.
+
+    Raises:
+        QcError: If a MultiQC name is not in ``ranks``.
+    """
+    map_names(frame["Sample"], {name: name for name in ranks})
+    keyed = (
+        frame.with_columns(
+            pl.col("Sample").replace_strict({n: u for n, (u, _) in ranks.items()}).alias(key),
+            _rank=pl.col("Sample").replace_strict({n: r for n, (_, r) in ranks.items()}),
+        )
+        .filter(pl.col("_rank") < keep_below)
+        .sort("_rank")
+    )
+    return keyed.group_by(key, maintain_order=True).agg(
+        pl.exclude("Sample", "_rank", key).drop_nulls().first()
+    )
 
 
 def require_sources(run: MultiqcRun, module: str, expected: Iterable[str],
