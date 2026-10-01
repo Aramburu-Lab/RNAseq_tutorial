@@ -2519,20 +2519,26 @@ grep -qx 'publish_dir_mode: copy' "$M/rnaseq_params.yml" && sbatch -J nf_rnaseq_
 # About one hour after it starts:
 tail -n 30 "$M"/slurm-nf_rnaseq_breast_mac-*.out                      # PASTE
 
-# ---- 3. When the rnaseq job ends ----
+# ---- 3. When the rnaseq job ends: paste the whole output ----
+# One guard around every check: on 2026-10-01 a line after "stop here" still ran and printed a count from a missing file.
 S="$M/nfcore_rnaseq/results/salmon"
-test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && echo "matrix present" || echo "NO MATRIX: the run has not finished; stop here"   # PASTE
-tail -n 40 "$M"/slurm-nf_rnaseq_breast_mac-*.out                      # PASTE
-head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}'   # PASTE, expect 22
-awk 'END{print NR - 1, "genes"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"                        # PASTE, expect 78470
-diff <(cut -f1,2 "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv") <(cut -f1,2 "$S/salmon.merged.gene_counts_length_scaled.tsv") | wc -l   # PASTE, expect 0: exactly Step-1's genes
-cat "$M"/nfcore_rnaseq/results/pipeline_info/*versions*.yml                                              # PASTE, expect rnaseq 3.27.0, salmon 2.7.0
-grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c                               # PASTE: the libType quant ran with
-sacct -n -S 2026-09-30 --name=nf_rnaseq_breast_mac --format=JobID,JobName,Elapsed,MaxRSS,State           # PASTE; without -X, so the batch step's memory shows
-find "$M/nfcore_rnaseq/results" -type l | wc -l                                                          # PASTE, expect 0: publish_dir_mode copy
-# If the count above is not 0, turn each link into a copy of its target before work/ goes (P2A.3 step 6):
+if test -s "$S/salmon.merged.gene_counts_length_scaled.tsv"; then
+    echo "matrix present"
+    tail -n 3 "$M"/slurm-nf_rnaseq_breast_mac-*.out
+    head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns; expect 22"}'
+    awk 'END{print NR - 1, "genes; expect 78470"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"
+    diff <(cut -f1,2 "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv") <(cut -f1,2 "$S/salmon.merged.gene_counts_length_scaled.tsv") | wc -l | sed 's/$/ lines differ from Step-1; expect 0/'
+    cat "$M"/nfcore_rnaseq/results/pipeline_info/*versions*.yml | grep -E "nf-core/rnaseq|salmon:|Nextflow"
+    grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c
+    sacct -n -S 2026-09-30 --name=nf_rnaseq_breast_mac --format=JobID,JobName,Elapsed,MaxRSS,State   # without -X, so the batch step's memory shows
+    find "$M/nfcore_rnaseq/results" -type l | wc -l | sed 's/$/ symlinks; expect 0: publish_dir_mode copy/'
+    du -sh "$M/nfcore_rnaseq/results" "$M/nfcore_rnaseq/work"
+else
+    echo "NO MATRIX: the run has not finished; nothing checked"
+    squeue -u "$USER"
+fi
+# If the symlink count is not 0, turn each link into a copy of its target before work/ goes (P2A.3 step 6):
 #   (cd "$M/nfcore_rnaseq/results" && find . -type l -print0 | while IFS= read -r -d '' f; do cp --remove-destination -- "$(readlink -f -- "$f")" "$f"; done)
-du -sh "$M/nfcore_rnaseq/results" "$M/nfcore_rnaseq/work"                                                # PASTE
 # Keep work/ until the Mac copy below checks out.
 ```
 
@@ -2544,6 +2550,8 @@ rsync -avmL --include='*/' --include='salmon/salmon.merged.gene_counts_length_sc
 test -s ~/ctx_breast/data/raw/breast_mac_rnaseq/salmon/salmon.merged.gene_counts_length_scaled.tsv && echo "matrix copied" || echo "NO MATRIX: rerun after step 3"
 ls ~/ctx_breast/data/raw/breast_mac_rnaseq/trimgalore/*_trimming_report.json | wc -l
 ```
+
+GSE100925 whole-tumour breast (`breast_tissue`) counted the same way on 2026-10-01, with `breast_tissue` for `breast_mac` and 103 for 22, as job 47504033: 1 h 04 min, 6,928,336 KiB peak for the batch step (the macrophages 6.2 GiB, both of an 8 GB request). The guarded step 3: 103 sample columns, 78,470 genes, 0 lines differing from Step-1, rnaseq v3.27.0-ga1fcddd, salmon 2.7.0, Nextflow 26.04.4, libType SR on all 103, 0 symlinks, results 74 GB, `work/` 405 GB. The Mac copy (`~/ctx_breast/data/raw/breast_tissue_rnaseq`): 66 MB, 103 Trim Galore reports, 103 `lib_format_counts.json`, 0 symlinks, 734 trace tasks COMPLETED and none other; `ctx.gather.rnaseq.read` accepts it (78,470 genes x 103 samples; 3,216,655 fractional values rounded), so `work/` is Rytis's to remove.
 
 ### Phase 4 GDC downloads (P4.3), the only copy
 
@@ -3054,6 +3062,8 @@ for d in ~/ctx_breast/data/raw/tcga_brca ~/ctx_breast/data/raw/tcga_brca_mirna ~
 # and so does tcga_brca until step 4 has run, because P4.2 logged to _fetch_tcga_brca.log.
 ```
 
+Run on the Mac: TCGA-KIRC star, 2026-10-01, 24 of 24 equal to their expectation in 665 s, 2.9 GB on disk. Four transfers failed and curl retried each (`--retry 6 --retry-all-errors`): one HTTP 500, one cut transfer, two connection resets. Rechecked apart from the script, every file against `gdc_manifest_star_counts.txt`: 614 of 614 md5 and size equal, 2,604,662,993 bytes, 0 `.part` files, 0 data folders outside the manifest.
+
 ### Phase 4 cluster commands (P4.4), the only copy
 
 Cassetta et al. 2019 blood monocytes (GSE117970, PRJNA483877): the 102 runs that are not P4.0's 22 MAC runs, 94 GEO samples (8 sequenced as two runs, merged by nf-core/rnaseq as the authors pooled them), all paired; 580,591,689,686 bytes of FASTQ by ENA's filereport, read 2026-10-01. Researched and checked by an independent skeptic, who corrected 9 minor issues (a space check for the count before the download, the reused config and batch script compared with breast_mac's, counts that printed 0 when nothing was checked). By GEO condition: breast cancer 37 runs of 34 samples, endometrial cancer 13 of 10, normal 52 of 50; the endometrial and normal monocytes are kept, as P4.0 kept the endometrial macrophages. Not decided here, for the breast dataset file: GEO does not mark which samples are non-classical monocytes (the paper's 45 healthy against 32 breast total monocytes needs its Table S1); 4 batch-6 breast samples are DCIS; sample numbers repeat across batches (MON103 to MON107 and mon103 to mon107; MON112 and MON118 against mon112 and mon118) and are not shown to be the same donors; sequencing batch is partly confounded with condition.
@@ -3125,18 +3135,23 @@ export M=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mac
 
 # ---- 3. After the fetchngs job has ended (squeue shows no nf_fetchngs job) ----
 R="$B/nfcore_fetchngs/results"
-test -s "$R/samplesheet/samplesheet.csv" && echo "samplesheet present" || echo "NO SAMPLESHEET: the fetchngs run has not finished or has failed; stop here"   # PASTE
-tail -n 12 "$B"/slurm-nf_fetchngs-*.out                               # PASTE, expect "102 row(s) in samplesheet vs 102 requested" and "all 102 accessions are present"
-grep -h 'publish mode' "$B"/slurm-nf_fetchngs-*.out                   # PASTE, expect link
-ls "$R"/fastq/*.fastq.gz | wc -l                                      # PASTE, expect 204
-ls "$R"/fastq/md5/*.md5 | wc -l                                       # PASTE, expect 204
-# Counted both ways: a missing folder or md5 file printed 0 failures on 2026-09-30. The result is kept for step 5's guard.
-(cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done) 2>&1 | awk '/: OK$/{ok++; next} {bad++} END{print ok+0, "OK;", bad+0, "not OK"}' | tee "$B/md5_check.txt"   # PASTE, expect 204 OK; 0 not OK
-find "$R/fastq" -name '*.fastq.gz' -printf '%s\n' | awk '{n++; s+=$1} END{printf "%d files, %.0f bytes\n", n, s}'   # PASTE, expect 204 files, 580591689686 bytes (ENA's fastq_bytes)
-# Link counts tallied, not a count of failures: a missing folder printed 0 failures on 2026-09-30.
-find "$R/fastq" -name '*.fastq.gz' -printf '%n\n' | sort | uniq -c        # PASTE, expect "204 2": each of 204 hard-linked to work/
-awk 'END{print NR}' "$R/samplesheet/samplesheet.csv"                  # PASTE, expect 103: a header and 102 runs
-du -sh "$R/fastq"                                                     # PASTE, expect about 541G
+if test -s "$R/samplesheet/samplesheet.csv"; then
+    echo "samplesheet present"   # PASTE the whole output of this block
+    tail -n 12 "$B"/slurm-nf_fetchngs-*.out                               # PASTE, expect "102 row(s) in samplesheet vs 102 requested" and "all 102 accessions are present"
+    grep -h 'publish mode' "$B"/slurm-nf_fetchngs-*.out                   # PASTE, expect link
+    ls "$R"/fastq/*.fastq.gz | wc -l                                      # PASTE, expect 204
+    ls "$R"/fastq/md5/*.md5 | wc -l                                       # PASTE, expect 204
+    # Counted both ways: a missing folder or md5 file printed 0 failures on 2026-09-30. The result is kept for step 5's guard.
+    (cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done) 2>&1 | awk '/: OK$/{ok++; next} {bad++} END{print ok+0, "OK;", bad+0, "not OK"}' | tee "$B/md5_check.txt"   # PASTE, expect 204 OK; 0 not OK
+    find "$R/fastq" -name '*.fastq.gz' -printf '%s\n' | awk '{n++; s+=$1} END{printf "%d files, %.0f bytes\n", n, s}'   # PASTE, expect 204 files, 580591689686 bytes (ENA's fastq_bytes)
+    # Link counts tallied, not a count of failures: a missing folder printed 0 failures on 2026-09-30.
+    find "$R/fastq" -name '*.fastq.gz' -printf '%n\n' | sort | uniq -c        # PASTE, expect "204 2": each of 204 hard-linked to work/
+    awk 'END{print NR}' "$R/samplesheet/samplesheet.csv"                  # PASTE, expect 103: a header and 102 runs
+    du -sh "$R/fastq"                                                     # PASTE, expect about 541G
+else
+    echo "NO SAMPLESHEET: the fetchngs run has not finished or has failed; nothing checked"
+    squeue -u "$USER"
+fi
 
 # ---- 4. rnaseq samplesheet: the fetchngs sheet cut to four columns, by name ----
 # fetchngs names each sample by its experiment (SRX), so the 8 two-run experiments become 8 samples of
@@ -3188,18 +3203,23 @@ export T=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
 
 # ---- 6. When the rnaseq job ends ----
 S="$B/nfcore_rnaseq/results/salmon"
-test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && echo "matrix present" || echo "NO MATRIX: the run has not finished; stop here"   # PASTE
-tail -n 40 "$B"/slurm-nf_rnaseq_breast_mono-*.out                     # PASTE
-head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}'   # PASTE, expect 94
-awk 'END{print NR - 1, "genes"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"                        # PASTE, expect 78470
-test -s "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv" && test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && diff <(cut -f1,2 "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv") <(cut -f1,2 "$S/salmon.merged.gene_counts_length_scaled.tsv") | wc -l || echo "a matrix is missing: nothing compared"   # PASTE, expect 0: exactly Step-1's genes
-cat "$B"/nfcore_rnaseq/results/pipeline_info/*versions*.yml                                              # PASTE, expect rnaseq 3.27.0, salmon 2.7.0
-grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c                               # PASTE: the libType, counts summing to 94; the 22 MAC runs, same library kit, were all IU
-sacct -n -S 2026-10-01 --name=nf_rnaseq_breast_mono --format=JobID,JobName,Elapsed,MaxRSS,State          # PASTE; without -X, so the batch step's memory shows
-find "$B/nfcore_rnaseq/results" -printf '%y\n' | sort | uniq -c                                            # PASTE, expect d and f lines and no l line: publish_dir_mode copy, every entry counted
-# If an l line shows, turn each link into a copy of its target before work/ goes (P2A.3 step 6):
-#   (cd "$B/nfcore_rnaseq/results" && find . -type l -print0 | while IFS= read -r -d '' f; do cp --remove-destination -- "$(readlink -f -- "$f")" "$f"; done)
-du -sh "$B/nfcore_rnaseq/results" "$B/nfcore_rnaseq/work"                                                # PASTE
+if test -s "$S/salmon.merged.gene_counts_length_scaled.tsv"; then
+    echo "matrix present"   # PASTE the whole output of this block
+    tail -n 40 "$B"/slurm-nf_rnaseq_breast_mono-*.out                     # PASTE
+    head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}'   # PASTE, expect 94
+    awk 'END{print NR - 1, "genes"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"                        # PASTE, expect 78470
+    test -s "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv" && test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && diff <(cut -f1,2 "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv") <(cut -f1,2 "$S/salmon.merged.gene_counts_length_scaled.tsv") | wc -l || echo "a matrix is missing: nothing compared"   # PASTE, expect 0: exactly Step-1's genes
+    cat "$B"/nfcore_rnaseq/results/pipeline_info/*versions*.yml                                              # PASTE, expect rnaseq 3.27.0, salmon 2.7.0
+    grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c                               # PASTE: the libType, counts summing to 94; the 22 MAC runs, same library kit, were all IU
+    sacct -n -S 2026-10-01 --name=nf_rnaseq_breast_mono --format=JobID,JobName,Elapsed,MaxRSS,State          # PASTE; without -X, so the batch step's memory shows
+    find "$B/nfcore_rnaseq/results" -printf '%y\n' | sort | uniq -c                                            # PASTE, expect d and f lines and no l line: publish_dir_mode copy, every entry counted
+    # If an l line shows, turn each link into a copy of its target before work/ goes (P2A.3 step 6):
+    #   (cd "$B/nfcore_rnaseq/results" && find . -type l -print0 | while IFS= read -r -d '' f; do cp --remove-destination -- "$(readlink -f -- "$f")" "$f"; done)
+    du -sh "$B/nfcore_rnaseq/results" "$B/nfcore_rnaseq/work"                                                # PASTE
+else
+    echo "NO MATRIX: the run has not finished; nothing checked"
+    squeue -u "$USER"
+fi
 # Keep work/ until the Mac copy below checks out.
 ```
 
