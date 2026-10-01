@@ -3,16 +3,16 @@
 title = "M0 Setup"
 budget = "Track B: under {minutes} min and {ram_gb} GB"
 purpose = "Record this computer's cores, memory, thread limit and package versions before any analysis runs on it; with `--dataset-file`, fetch and verify the dataset's resources."
-input = "This computer: installed packages, the CPU count and physical memory the OS reports, installed fonts, and on `hpc` the Slurm allocation. With `--dataset-file`, each listed resource's URLs, size and SHA-256."
+input = "This computer: installed packages, the CPU count and physical memory the OS reports, installed fonts, and on `hpc` the Slurm allocation. With `--dataset-file`, each listed resource's URLs, size and [[checksum|SHA-256]]."
 # method and interpretation are filled by ctx.setup: {laptop_cores} is runtime.LAPTOP_CORES,
 # the rest are measured in the run.
-method = "Every `ctx` command caps threads before polars and NumPy are imported: the CPU count up to {laptop_cores} on `laptop`, the Slurm allocation on `hpc`. `ctx setup` writes the version of every distribution the run imported to `outputs/00_setup/`, and measures each data colour's contrast on white. With `--dataset-file`, each resource is downloaded to `<dest>.part`, kept only if its size and SHA-256 match, and listed in `resources/manifest.json`."
+method = "Every `ctx` command caps threads before polars and NumPy are imported: the CPU count up to {laptop_cores} on `laptop`, the Slurm allocation on `hpc`. `ctx setup` writes the version of every distribution the run imported to `outputs/00_setup/`, and measures each data colour's contrast on white. With `--dataset-file`, each resource is downloaded to `<dest>.part`, kept only if its size and [[checksum|SHA-256]] match, and listed in `resources/manifest.json`."
 interpretation = "Track A is budgeted at {minutes} min and {ram_gb} GB on {laptop_cores} cores; this computer has {cores} cores, and its memory is {memory}. When a result changes between two runs, compare their versions tables before the code. {n_below} of {n_colours} data colours fall below {minimum} on white; give marks in those colours size, or a second cue such as shape."
 # "Term: rest" in a mistake prints Term in bold.
 pitfalls = [
     "Comparing timings across profiles: `laptop` and `hpc` run different thread counts.",
     "Quoting a version from memory: cite the versions table this run wrote.",
-    "Editing a fetched resource in place: its SHA-256 then differs, and the next `ctx setup --dataset-file` replaces it.",
+    "Editing a fetched resource in place: its [[checksum|SHA-256]] then differs, and the next `ctx setup --dataset-file` replaces it.",
 ]
 
 [[terms]]

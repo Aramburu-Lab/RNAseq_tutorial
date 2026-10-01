@@ -3,15 +3,15 @@
 # made-up data, and the [preview] table is that builder's alone.
 
 title = "M8 Non-coding RNA: {dataset}"
-purpose = "Test non-coding genes by biotype, within the limits the library type sets, and test whether a miRNA's targets shift in the mRNA fold changes."
-input = "The counts and sample sheet from `ctx gather`, GENCODE gene biotypes, the dataset file's contrasts, and miRNA target tables: TargetScan predictions and miRTarBase validations."
-method = "Each gene takes its GENCODE biotype; `pydeseq2` tests every gene that passes the expression filter, and BH adjusts p-values within each biotype. Fold changes of a miRNA's predicted and validated targets, kept apart, are compared with non-targets: Kolmogorov-Smirnov, Mann-Whitney, and the median shift. A lncRNA has no GO terms, so its correlated mRNAs and cis neighbours describe it: Spearman rho, BH over the pairs."
-interpretation = "The library type decides which RNAs are counted: poly-A selection misses non-polyadenylated lncRNAs and histone mRNAs, and no standard library holds mature miRNAs. A lncRNA the filter removed was never tested, so its absence from the results is not evidence against its expression. Targets shifted below non-targets fit repression only when matched small-RNA-seq measures the miRNA rising; a correlated neighbour is a lead, not a function."
+purpose = "Test non-coding genes by [[biotype]], within the limits the [[library type]] sets, and test whether a [[miRNA|miRNA's]] targets shift in the mRNA fold changes."
+input = "The counts and sample sheet from `ctx gather`, [[GENCODE]] gene biotypes, the dataset file's contrasts, and [[miRNA target]] tables: TargetScan predictions and miRTarBase validations."
+method = "Each gene takes its [[GENCODE]] biotype; `pydeseq2` tests every gene that passes the [[expression filter]], and [[BH]] adjusts p-values within each biotype. Fold changes of a miRNA's predicted and validated targets, kept apart, are compared with non-targets: [[KS test|Kolmogorov-Smirnov]], [[Mann-Whitney]], and the median shift. A [[lncRNA]] has no [[GO]] terms, so its correlated mRNAs and cis neighbours describe it: Spearman rho, BH over the pairs."
+interpretation = "The library type decides which RNAs are counted: [[poly-A selection]] misses non-polyadenylated lncRNAs and histone mRNAs, and no standard library holds mature miRNAs. A lncRNA the filter removed was never tested, so its absence from the results is not evidence against its expression. Targets shifted below non-targets fit repression only when matched [[small-RNA-seq]] measures the miRNA rising; a correlated neighbour is a lead, not a function."
 # "Term: rest" in a pitfall prints Term in bold.
 pitfalls = [
-    "Mature miRNAs from standard RNA-seq: size selection removes them; quantify miRNAs from small-RNA-seq only.",
-    "Antisense lncRNAs in unstranded data: reads of the overlapping mRNA cannot be told apart from the lncRNA's own.",
-    "Predicted targets reported as validated: keep TargetScan and miRTarBase apart, and name the source of every result.",
+    "Mature miRNAs from standard RNA-seq: size selection removes them; quantify miRNAs from [[small-RNA-seq]] only.",
+    "Antisense lncRNAs in [[unstranded]] data: reads of the overlapping mRNA cannot be distinguished from the lncRNA's own.",
+    "Predicted targets reported as validated: keep [[TargetScan]] and miRTarBase apart, and name the source of every result.",
 ]
 
 [[terms]]
@@ -31,15 +31,15 @@ term = "Non-coding"
 meaning = "An annotation status, not a proof: Ribo-seq finds translated sORFs inside annotated lncRNAs."
 
 [[questions]]
-prompt = "A lncRNA of interest is missing from the results. What would you check before calling it unexpressed?"
-answer = "The library type first: poly-A selection misses non-polyadenylated transcripts. Then the filter: a lncRNA below the minimum count was never tested. Then strandedness and reads shared with other genes."
+prompt = "A [[lncRNA]] of interest is missing from the results. What would you check before calling it unexpressed?"
+answer = "The library type first: [[poly-A selection]] misses non-polyadenylated transcripts. Then the filter: a lncRNA below the minimum count was never tested. Then strandedness and reads shared with other genes."
 
 [[questions]]
 prompt = "Why adjust p-values within each biotype rather than over all genes at once?"
-answer = "Pooled BH holds the false discovery rate over all calls together. The lncRNAs, with less power, can carry a larger share of false calls than that rate. Per biotype, each rate holds on its own."
+answer = "Pooled [[BH]] holds the false discovery rate over all calls together. The lncRNAs, with less power, can carry a larger share of false calls than that rate. Per biotype, each rate holds on its own."
 
 [[questions]]
-prompt = "A lncRNA correlates with many targets of one miRNA. Does this support the ceRNA hypothesis?"
+prompt = "A lncRNA correlates with many targets of one [[miRNA]]. Does this support the ceRNA hypothesis?"
 answer = "Not by itself. A shared response to the condition correlates genes without any sponging. The hypothesis is also contested: most transcripts have too few copies to titrate a miRNA."
 
 # Parameter cards of the options the module will have.
@@ -90,7 +90,7 @@ reading = [
     "small RNA pools snRNA, snoRNA and misc_RNA; pseudogene pools every pseudogene type.",
     "Hover a bar for the sample's cell type and condition.",
 ]
-caption = "Made-up data: {n_samples} samples, {n_genes:,} genes. Shares of counted reads by GENCODE biotype; descriptive, no test."
+caption = "Made-up data: {n_samples} samples, {n_genes:,} genes. Shares of counted reads by GENCODE [[biotype]]; descriptive, no test."
 x = "Sample"
 y = "Counted reads"
 
@@ -128,7 +128,7 @@ reading = [
     "Each point is one sample: the lncRNA across, its neighbour up.",
     "Colour marks the condition, shape the cell type.",
 ]
-caption = "Made-up data: {n_samples} samples. Spearman rho = {rho:.2f}, p = {p:.2g}; on residuals from each cell type and condition mean, rho = {rho_within:.2f}, p = {p_within:.2g}. A single pair, so no correction."
+caption = "Made-up data: {n_samples} samples. [[Spearman]] rho = {rho:.2f}, p = {p:.2g}; on residuals from each cell type and condition mean, rho = {rho_within:.2f}, p = {p_within:.2g}. A single pair, so no correction."
 x = "{lncrna}"
 y = "{neighbour}"
 

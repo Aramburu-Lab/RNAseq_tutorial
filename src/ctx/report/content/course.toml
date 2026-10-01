@@ -12,6 +12,7 @@ modules = "Modules"
 real = "Real"
 made_up = "Made-up"
 none = "No page in this kit yet."
+glossary = "Glossary: every term the pages explain, with its sources where it gives them."
 # M0 describes the computer that built the pages, not a dataset, so its title names none.
 machine = "The computer that built the kit"
 

@@ -13,6 +13,7 @@ import numpy as np
 import polars as pl
 from scipy.stats import false_discovery_control, mannwhitneyu
 
+from ctx.report.marks import plain
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
     AXIS_TITLE_SHARE,
@@ -117,7 +118,8 @@ def place_caption(
     """
     from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
 
-    caption = wrap(text, caption_chars(width))
+    # Wrapped as printed: a glossary mark is its display text off the page (D-048).
+    caption = wrap(plain(text), caption_chars(width))
     fig.text(0.02, 0.01, caption, ha="left", va="bottom", fontsize=SIZES["caption"])
     caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
     rect = (0, caption_inches / height, 1, 1)

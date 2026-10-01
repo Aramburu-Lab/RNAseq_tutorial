@@ -5,21 +5,21 @@
 title = "M3 Trim, align, count: {dataset}"
 budget = "Preview build on made-up data; no read was aligned. The real run's budget is Track A: under {minutes} min and {ram_gb} GB."
 profile = "preview build, one process"
-purpose = "Align each sample's trimmed reads, count reads per gene, and check the settings that change those counts: strandedness, multimappers and the reference."
-input = "The sample sheet from `ctx gather`, each run's FASTQ files under `--fetchngs-dir`, a genome FASTA (`--genome`) and the dataset file's annotation GTF. Optional: `--compare-dataset`, a dataset with Salmon counts for the same samples."
-method = """fastp trims each run with the same settings as M2. A splice-aware aligner places reads across introns: STAR on Linux, HISAT2 on Apple silicon. A read fitting several loci equally well is a multimapper.
+purpose = "Align each sample's trimmed reads, count reads per gene, and check the settings that change those counts: [[strandedness]], [[multimappers]] and the [[reference]]."
+input = "The sample sheet from `ctx gather`, each run's [[FASTQ]] files under `--fetchngs-dir`, a genome FASTA (`--genome`) and the dataset file's [[GTF|annotation GTF]]. Optional: `--compare-dataset`, a dataset with [[Salmon]] counts for the same samples."
+method = """[[fastp]] trims each run with the same settings as M2. A splice-aware [[aligner]] places reads across introns: [[STAR]] on Linux, [[HISAT2]] on Apple silicon. A read fitting several loci equally well is a [[multimappers|multimapper]].
 
-featureCounts assigns reads to genes at `-s 0` (either strand), `-s 1` (the gene's strand) and `-s 2` (the opposite). The strand call uses the forward share, `-s 1` reads over `-s 1` plus `-s 2` reads.
+[[featureCounts]] assigns reads to genes at `-s 0` (either strand), `-s 1` (the gene's strand) and `-s 2` (the opposite). The strand call uses the forward share, `-s 1` reads over `-s 1` plus `-s 2` reads.
 
 Two counters can correlate closely and still disagree. Correlation measures whether counts rise together; the Bland-Altman bias and limits measure how far apart they are."""
-interpretation = """Read the mapping bars first; check M2's metrics for any sample whose uniquely mapped share sits well below the rest. The featured sample's bars change one setting each. On half the genome, reads from the missing genes go unmapped or align to similar genes, so no genome-wide band applies.
+interpretation = """Read the mapping bars first; check M2's metrics for any sample whose [[uniquely mapped reads|uniquely mapped]] share sits well below the rest. The featured sample's bars change one setting each. On half the genome, reads from the missing genes go unmapped or align to similar genes, so no genome-wide band applies.
 
 Take the library's strand from the forward share, never from the largest bar, and count at that setting.
 
 Two counters that correlate closely can still disagree. Read the bias and limits in the agreement plot. Genes far from zero gain reads under one rule; those genes show whether the choice of counter matters."""
 pitfalls = [
     "Choosing `-s` from the kit name: protocols differ between kit versions; measure the forward share on the reads.",
-    "Judging a partial-genome mapping rate by a genome band: reads from missing chromosomes cannot align there.",
+    "Judging a partial-genome [[mapping rate]] by a genome band: reads from missing chromosomes cannot align there.",
     "Reading a high ρ as agreement: two counters can rank genes alike and still differ in their counts.",
 ]
 
@@ -44,11 +44,11 @@ term = "Featured sample"
 meaning = "The sample aligned again under each setting, so one setting changes at a time."
 
 [[questions]]
-prompt = "Aligned to half the genome, the featured sample keeps fewer uniquely mapped reads. Where did the rest go?"
+prompt = "Aligned to half the genome, the featured sample keeps fewer [[uniquely mapped reads]]. Where did the rest go?"
 answer = "Reads from genes on the removed half have no true locus. Most end unmapped as too short; some align to similar genes on the kept half and are counted there."
 
 [[questions]]
-prompt = "featureCounts assigns nearly equal reads at `-s 1` and `-s 2`. Which library type is this, and which `-s` counts it?"
+prompt = "[[featureCounts]] assigns nearly equal reads at `-s 1` and `-s 2`. Which [[library type]] is this, and which `-s` counts it?"
 answer = "Unstranded: count at `-s 0`. At `-s 1` or `-s 2` about half of each gene's reads would be dropped."
 
 [[questions]]
@@ -230,7 +230,7 @@ reading = [
     "Each dot is one gene, its reads summed over all samples: plain featureCounts across, with -M up.",
     "Dots on the line count the same; colour marks genes whose two counts differ.",
 ]
-caption = "Made-up data: {n:,} genes, reads summed over {samples} samples. Spearman ρ {rho:.3f}, bootstrap {ci} % CI {rho_low:.3f} to {rho_high:.3f}; per sample, median {rho_med:.3f}, range {rho_min:.3f} to {rho_max:.3f}. Pearson r on log counts {r:.3f}, CI {r_low:.3f} to {r_high:.3f}; no test."
+caption = "Made-up data: {n:,} genes, reads summed over {samples} samples. [[Spearman]] ρ {rho:.3f}, [[bootstrap]] {ci} % CI {rho_low:.3f} to {rho_high:.3f}; per sample, median {rho_med:.3f}, range {rho_min:.3f} to {rho_max:.3f}. Pearson r on log counts {r:.3f}, CI {r_low:.3f} to {r_high:.3f}; no test."
 x = "Plain count"
 y = "Count with -M"
 same = "Same"

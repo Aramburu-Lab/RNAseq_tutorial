@@ -22,11 +22,11 @@ meaning = "The dataset file, conf/datasets/<slug>.toml: resources, curation, con
 effect = "Changes what this command reads; each page names what it uses."
 
 [options."--min-count"]
-meaning = "Gene filter, edgeR filterByExpr min.count: reads required at median library size."
+meaning = "Gene filter, edgeR filterByExpr min.count: reads required at median [[library size]]."
 effect = "Higher tests fewer, better-measured genes; weakly expressed genes are not tested."
 
 [options."--lfc-shrink"]
-meaning = "Also estimate apeGLM log2 fold changes, shrunk toward zero by uncertainty."
+meaning = "Also estimate apeGLM [[log2 fold change|log2 fold changes]], shrunk toward zero by uncertainty."
 effect = "Off: shrunk columns empty, MA plot raw; p-values and calls unchanged."
 
 [options."--rnaseq-dir"]
@@ -38,15 +38,15 @@ meaning = "The QC registry of metrics, bands and sources. Unset: CTX_QC_REGISTRY
 effect = "Samples are judged against its bands; the page names the file used."
 
 [options."--strata"]
-meaning = "Comma-separated sheet columns defining strata for each metric's median and MAD."
+meaning = "Comma-separated sheet columns defining strata for each metric's median and [[MAD]]."
 effect = "Finer: fewer, closer samples per band; adding condition hides its effect."
 
 [options."--peers"]
-meaning = "Comma-separated sheet columns defining peer groups for agreement and PCA distance."
+meaning = "Comma-separated sheet columns defining peer groups for agreement and [[PCA]] distance."
 effect = "Wider groups score biology as disagreement; a lone sample has no value."
 
 [options."--mad"]
-meaning = "Flag distance, in scaled MADs from the stratum median. Unset: registry's mad_multiplier."
+meaning = "Flag distance, in scaled [[MAD|MADs]] from the stratum median. Unset: registry's mad_multiplier."
 effect = "Lower flags more samples, higher fewer; nothing is ever excluded."
 
 [options."--reads"]
@@ -54,7 +54,7 @@ meaning = "Also run FastQC, fastp and seqkit on each run's FASTQ files."
 effect = "On: base-quality curves and the fastp grid, at minutes per million reads."
 
 [options."--fastp-q"]
-meaning = "fastp -q: a base below this Phred quality counts as unqualified."
+meaning = "fastp -q: a base below this [[Phred]] quality counts as unqualified."
 effect = "Higher: more unqualified bases, so more reads fail -u; see the grid."
 
 [options."--fastp-u"]

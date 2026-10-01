@@ -7,6 +7,7 @@
 {% if page.key_numbers %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
 <p class="note">{{ course.note }}</p>
 <p class="note">{{ course.unzip }}</p>
+{% if page.glossary %}<p class="note"><a href="{{ page.glossary }}">{{ course.glossary }}</a></p>{% endif %}
 </section>
 {% if page.hubs %}
 <section class="hub-section" id="hubs">

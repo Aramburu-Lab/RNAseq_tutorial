@@ -304,8 +304,9 @@ def test_templates_use_tokens_only():
 
 def test_copy_has_no_dashes_or_arrows():
     # Pages are read by people: no em dash, no arrow, in any string that can reach one.
+    # Mutation: an em dash in a glossary.yaml definition fails it (D-048).
     for path in (ROOT / "src" / "ctx").rglob("*"):
-        if path.suffix in {".py", ".j2", ".toml"}:
+        if path.suffix in {".py", ".j2", ".toml", ".yaml"}:  # the glossary reaches pages too
             text = path.read_text()
             assert "—" not in text and "→" not in text, path
 

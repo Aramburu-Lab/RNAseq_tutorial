@@ -198,6 +198,8 @@ LAYOUT = {
     "radius": "14px", "radius-sm": "9px", "radius-xs": "6px",
     "rule": "1px", "rule-mid": "2px", "rule-accent": "3px", "rule-strong": "4px",
     "topbar": "60px", "topbar-blur": "8px", "dot": "11px",
+    # A glossary icon's target, WCAG 2.2's minimum target size (2.5.8), and its tooltip's width.
+    "hit": "24px", "tip": "352px",
 }  # fmt: skip
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640

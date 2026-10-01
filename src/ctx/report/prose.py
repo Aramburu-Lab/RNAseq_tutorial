@@ -2,8 +2,10 @@
 
 A page file carries the prose sections of the nine-label skeleton. Each section has a word
 budget; every sentence is at most 25 words and every paragraph at most three sentences; no
-banned word appears; and a number in the prose comes from a ``{placeholder}`` or sits in
-``code``, never typed as a literal. Run with ``python -m ctx.report.prose``; exit 1 lists
+banned word appears, a figurative verb in none of its forms; a number in the prose comes from a
+``{placeholder}`` or sits in ``code``, never typed as a literal; and no text but the Questions
+asks one: a question mark in a title, a heading or a sentence is a violation. A glossary mark
+counts as its display text (D-048). Run with ``python -m ctx.report.prose``; exit 1 lists
 every violation.
 """
 
@@ -13,6 +15,8 @@ import tomllib
 from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import Any
+
+from ctx.report.marks import plain
 
 CONTENT = Path(__file__).parent / "content"
 # Words per section, per item for lists (CONVENTIONS.md, Report prose).
@@ -25,15 +29,24 @@ PARAGRAPH_SENTENCES = 3
 BANNED = (
     "we", "let's", "you will", "in this module", "crucial", "powerful", "robust", "seamless",
     "simply", "actually", "very", "unlock", "dive", "journey", "landscape", "leverage",
-    "delve", "awesome", "exciting", "arrive", "arrives", "bring", "brings", "knows", "wants",
-    "tells",
+    "delve", "awesome", "exciting",
+    # Software and data do not know, bring, want, tell or arrive, in any form (D-048).
+    "know", "knows", "knew", "known", "knowing", "bring", "brings", "brought", "bringing",
+    "want", "wants", "wanted", "wanting", "tell", "tells", "told", "telling",
+    "arrive", "arrives", "arrived", "arriving",
 )  # fmt: skip
 _BANNED = re.compile(r"\b(" + "|".join(re.escape(b) for b in BANNED) + r")\b", re.I)
 # A placeholder, or text in backticks, is not prose: its digits come from code.
 _NOT_PROSE = re.compile(r"\{[^{}]*\}|`[^`]*`")
-_SENTENCE = re.compile(r"(?<=[.!?])\s+(?=[A-Z`{])")
-# A quantity standing alone; digits inside a name (Step-1, M5, SHA-256, chr22) are not one.
-_NUMBER = re.compile(r"(?<![\w-])\d[\d,.]*(?![\w-])")
+# A sentence may start in lower case (fastp, lncRNAs, nf-core), so a stop before a lower-case
+# word ends one too, unless it closes an abbreviation that runs on (e.g., i.e., vs., cf., et al.).
+_SENTENCE = re.compile(
+    r"(?<=[.!?])\s+(?=[A-Z`{])"
+    r"|(?<![Ee]\.g\.)(?<!\bi\.e\.)(?<!\bvs\.)(?<!\bal\.)(?<!\bcf\.)(?<=[.!?])\s+(?=[a-z])"
+)
+# A quantity standing alone; digits inside a name (Step-1, M5, SHA-256, chr22) are not one,
+# nor a strand end (5', 3'). A trailing full stop or comma ends the sentence, not the number.
+_NUMBER = re.compile(r"(?<![\w-])\d+(?:[,.]\d+)*(?![\w'-])")
 
 
 def words(text: str) -> int:
@@ -46,8 +59,27 @@ def _sentences(paragraph: str) -> list[str]:
     return [s for s in _SENTENCE.split(paragraph.strip()) if s]
 
 
-def check_text(where: str, text: str, budget: int | None) -> Iterator[str]:
-    """Every violation in one piece of prose, each naming where it is."""
+def outside_code(text: str) -> str:
+    """The text with each placeholder and backticked span blanked: what is left is prose."""
+    return _NOT_PROSE.sub(" ", text)
+
+
+def quantities(text: str) -> list[str]:
+    """The numbers typed in a text, outside placeholders and code, a mark read as displayed."""
+    return _NUMBER.findall(outside_code(plain(text)))
+
+
+def check_text(where: str, text: str, budget: int | None, *, numbers: bool = True) -> Iterator[str]:
+    """Every violation in one piece of prose, each naming where it is.
+
+    Args:
+        where: The file and key, printed with each violation.
+        text: The prose; a glossary mark counts as its display text.
+        budget: Most words allowed, or None.
+        numbers: Whether a typed number is a violation; a glossary definition states numbers
+            and gives their source instead (D-048).
+    """
+    text = plain(text)
     if budget is not None and (n := words(text)) > budget:
         yield f"{where}: {n} words; at most {budget}"
     for paragraph in text.split("\n\n"):
@@ -61,8 +93,27 @@ def check_text(where: str, text: str, budget: int | None) -> Iterator[str]:
     prose = _NOT_PROSE.sub(" ", text)
     for match in _BANNED.finditer(prose):
         yield f"{where}: banned word {match.group(0)!r}"
-    if _NUMBER.search(prose):
+    if numbers and quantities(text):
         yield f"{where}: a typed number; take it from a {{placeholder}} or put it in `code`"
+
+
+def asks(where: str, text: str) -> Iterator[str]:
+    """A question mark outside placeholders and code: only the Questions section asks."""
+    if "?" in outside_code(plain(text)):
+        yield f"{where}: a question; state it, or ask it under Questions"
+
+
+def check_asks(name: str, node: Any) -> Iterator[str]:
+    """Every string of a content file but the Questions: titles, headings, leads and prose."""
+    if isinstance(node, str):
+        yield from asks(name, node)
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            yield from check_asks(f"{name}[{i}]", item)
+    elif isinstance(node, dict):
+        for key, value in node.items():
+            if key != "questions":
+                yield from check_asks(f"{name}.{key}", value)
 
 
 def check_page(name: str, raw: Mapping[str, Any]) -> Iterator[str]:
@@ -117,6 +168,7 @@ def lint(content: Path = CONTENT) -> list[str]:
             problems += check_cards(raw)
         if path.stem == "course":
             problems += check_all("course", raw)
+        problems += check_asks(path.stem, raw)
     return problems
 
 

@@ -122,6 +122,7 @@ prod = { features = ["analysis", "tools"], solve-group = "main" }
 test = "sh -c 'pytest -q; c=$?; [ $c -eq 5 ] && exit 0; exit $c'"
 lint = "ruff check scripts"
 lint-prose = "python -m ctx.report.prose"
+lint-glossary = "python -m ctx.report.glossary_lint"
 docs = "labdocs render && labdocs api"
 check = "labdocs lint && labdocs render --check"
 
@@ -158,6 +159,8 @@ pydeseq2 = "==0.5.4"
 joblib = "==1.6.0"
 formulaic = "==1.2.2"
 pandas = "==3.0.6"
+# ctx.report.glossary reads Rytis's glossary.yaml (Phase 2L, D-048); the version the lock already held.
+pyyaml = "==6.0.3"
 
 [feature.ctx.pypi-dependencies]
 cancer-transcriptomics-teaching = { path = ".", editable = true }

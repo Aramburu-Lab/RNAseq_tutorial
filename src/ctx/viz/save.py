@@ -1,15 +1,18 @@
 """Write every file of one figure (D16): PDF and SVG per theme, one HTML page, data and README."""
 
-from collections.abc import Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Protocol
 
+import numpy as np
 import polars as pl
 
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
+from ctx.report import glossary
 from ctx.report.builder import FigureBlock, FigurePage, FigureText, write
+from ctx.report.marks import MARK
 from ctx.viz.bar import BarData
 from ctx.viz.linked import LinkedData
 from ctx.viz.scatter import ScatterData
@@ -94,6 +97,34 @@ def thin_tick_labels(fig: Any) -> None:
                 label.set_visible(i % step == 0)
 
 
+def _refuse_marks(where: str, texts: Iterable[str]) -> None:
+    """Refuse a glossary mark anywhere in a figure but its caption.
+
+    Only the caption under the plot draws a mark as a term with its tooltip, and
+    ``place_caption`` prints it as its display text in the PDF and SVG. A title, an axis
+    label or a hover text would print the brackets in the plotly figure (D-048).
+
+    Raises:
+        ValueError: Naming the first marked text.
+    """
+    if found := next((t for t in texts if MARK.search(t)), None):
+        raise ValueError(f"{where}: a glossary mark outside the caption: {found!r}")
+
+
+def _strings(node: Any) -> Iterator[str]:
+    """Every string in a plotly figure's JSON: titles, labels, hover templates and text."""
+    if isinstance(node, str):
+        yield node
+    elif isinstance(node, dict):
+        for value in node.values():
+            yield from _strings(value)
+    elif isinstance(node, list | tuple):
+        for value in node:
+            yield from _strings(value)
+    elif isinstance(node, np.ndarray) and node.dtype.kind in "OUS":
+        yield from _strings(node.tolist())
+
+
 def layout_problems(fig: Any) -> list[str]:
     """Texts that leave the page or overlap another text, measured on the drawn figure."""
     from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
@@ -122,6 +153,10 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
     A figure with page controls carries them (a scatter's live calls, a linked view's brush,
     a bar's filters); a scatter with live calling also takes, unless ``text`` brings its own,
     the "How to read" lines at the default setting.
+
+    Raises:
+        ValueError: If the figure's title or plotly text holds a glossary mark, or a scatter
+            with live calls brings its own reading.
     """
     controls = data.controls() if isinstance(data, ScatterData | LinkedData | BarData) else None
     if isinstance(data, ScatterData) and data.calls:
@@ -130,8 +165,10 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
         if text.reading:
             raise ValueError("a figure with live calls takes its reading from calls.reading")
         text = replace(text, reading=data.reading())
+    figure = data.interactive()
+    _refuse_marks(figure_stem, [text.title, *_strings(figure.to_plotly_json())])
     return FigureBlock(
-        data.interactive(), data.caption_text(), data.page_table().to_dicts(),
+        figure, data.caption_text(), data.page_table().to_dicts(),
         f"{figure_stem}.csv", text=text, stem=figure_stem, controls=controls,
     )  # fmt: skip
 
@@ -163,16 +200,25 @@ def write_figure(
         The written files, in ``ctx.io.naming.figure_files()`` order.
 
     Raises:
-        ValueError: On an illegal stem or an undescribed column, before any file is written;
-            or if a text leaves the page or overlaps another.
+        ValueError: Before any file is written: on an illegal stem, an undescribed column, a
+            glossary mark outside the caption, or a text that leaves the page or overlaps
+            another.
+        GlossaryError: Before any file is written, if the caption marks a term the glossary
+            does not hold.
     """
+    from matplotlib.text import Text  # noqa: PLC0415 - heavy; imported after the profile
+
     if not check(f"{figure_stem}.pdf"):
         raise ValueError(f"not a legal output stem: {figure_stem!r}")
     rows = data.table()
     columns = dict(data.table_columns())
     validate(rows, figure_stem, columns, ("csv",))
+    block = figure_block(data, figure_stem, text)
+    _refuse_marks(figure_stem, [title])
+    glossary.used([block.caption])
     figures = {theme.name: data.static(theme) for theme in THEMES.values()}
     for name, fig in figures.items():
+        _refuse_marks(f"{figure_stem} ({name})", (t.get_text() for t in fig.findobj(Text)))
         thin_tick_labels(fig)
         if problems := layout_problems(fig):
             raise ValueError(f"{figure_stem} ({name}): " + "; ".join(problems[:5]))
@@ -182,7 +228,6 @@ def write_figure(
         for ext in ("pdf", "svg"):
             rendered[(name, ext)] = directory / f"{figure_stem}_{name}.{ext}"
             fig.savefig(rendered[(name, ext)])
-    block = figure_block(data, figure_stem, text)
     page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     table = write_table(
         rows, directory, figure_stem, columns=columns, data_releases=data_releases, formats=("csv",)

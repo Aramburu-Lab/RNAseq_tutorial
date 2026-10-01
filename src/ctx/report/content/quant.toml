@@ -4,20 +4,20 @@
 title = "M4 Quantification: {dataset}"
 budget = "Preview build on made-up data; ctx quant itself is budgeted as Track A: under {minutes} min and {ram_gb} GB"
 profile = "preview build, one process for every preview page"
-purpose = "Quantify each sample's reads as gene counts with Salmon and pytximport, and check mapping, depth and agreement between samples before differential expression."
-input = "The trimmed FASTQ files of `ctx process` and the sample sheet of `ctx gather`. The Salmon index is built from the chr22 transcript sequences and genome; genes come from the transcript-to-gene table of the same GENCODE release."
-method = """Salmon maps each read to the transcripts it is compatible with and splits reads that fit several transcripts by expectation maximisation. It infers the library type (`-l A`) and corrects for fragment GC content and read-start sequence bias. A decoy-aware index assigns reads from genome sequence outside the transcriptome to decoys, not to a similar transcript.
+purpose = "Quantify each sample's reads as gene counts with [[Salmon]] and pytximport, and check mapping, depth and agreement between samples before differential expression."
+input = "The trimmed [[FASTQ]] files of `ctx process` and the sample sheet of `ctx gather`. The [[Salmon index]] is built from the chr22 transcript sequences and genome; genes come from the [[transcript-to-gene map|transcript-to-gene table]] of the same [[GENCODE release]]."
+method = """[[Salmon]] maps each read to the [[transcripts]] it is compatible with and splits reads that fit several transcripts by expectation maximisation. It infers the [[library type]] (`-l A`) and corrects for fragment [[GC bias|GC content]] and read-start sequence bias. A decoy-aware [[index (alignment)|index]] assigns reads from genome sequence outside the transcriptome to decoys, not to a similar transcript.
 
-pytximport sums transcript estimates to genes. DESeq2 models counts, and pydeseq2 takes no per-gene length offset. So gene counts are TPM scaled to each library's size and the gene's average effective length (`length_scaled_tpm`)."""
-interpretation = """Compare genes within a sample on TPM, and samples on counts after DESeq2's size factors. A mapping rate that differs by read-length batch belongs to the batch; where batches follow the groups, it cannot be told apart from them.
+pytximport sums transcript estimates to genes. DESeq2 models counts, and pydeseq2 takes no per-gene length offset. So gene counts are [[TPM]] scaled to each library's size and the gene's average [[effective length]] (`length_scaled_tpm`)."""
+interpretation = """Compare genes within a sample on [[TPM]], and samples on counts after DESeq2's [[size factors]]. A [[mapping rate]] that differs by read-length [[batch]] belongs to the batch; where batches follow the groups, it cannot be distinguished from them.
 
 Compare detection at a depth every sample reaches: a deeper library detects more genes by sampling alone. Samples should cluster by cell type before condition; read the M2 flags of a sample that correlates poorly with all others.
 
 Genes only Salmon detects are often paralogs whose reads map to several loci. STAR and featureCounts discard such reads by default, so they count fewer reads for those genes."""
 # "Term: rest" in a mistake prints Term in bold.
 pitfalls = [
-    "Comparing genes on counts: at equal expression a longer gene collects more reads; compare genes within a sample on TPM.",
-    "TPM into DESeq2: TPM removes library size, so the count model's variance no longer fits; give DESeq2 counts.",
+    "Comparing genes on counts: at equal expression a longer gene collects more reads; compare genes within a sample on [[TPM]].",
+    "TPM into DESeq2: TPM removes [[library size]], so the count model's variance no longer fits; give DESeq2 counts.",
     "An index without decoys: reads from unannotated genome sequence map to similar transcripts and inflate their counts.",
 ]
 
@@ -42,8 +42,8 @@ term = "Decoy"
 meaning = "Genome sequence added to a Salmon index, so reads from outside the transcriptome map there and not to a similar transcript."
 
 [[questions]]
-prompt = "Gene A has twice the TPM of gene B in one sample. Does gene A have twice the reads?"
-answer = "Only if both have the same effective length. Reads are TPM times effective length times one constant of the sample, so the longer gene collects more."
+prompt = "Gene A has twice the [[TPM]] of gene B in one sample. Does gene A have twice the reads?"
+answer = "Only if both have the same [[effective length]]. Reads are TPM times effective length times one constant of the sample, so the longer gene collects more."
 
 [[questions]]
 prompt = "Why does pydeseq2 receive length-scaled TPM counts and not Salmon's estimated counts?"
@@ -124,7 +124,7 @@ reading = [
     "Each point is one sample; its height is the percentage of its reads Salmon mapped to a transcript.",
     "The slots are the read-length batches; colour marks the cell type.",
 ]
-caption = "Made-up data. Salmon mapping rate of {n} samples by read-length batch; Mann-Whitney U = {u:g}, p = {p:.2g}, rank-biserial r = {r:.2f}, {tested} over {reference}."
+caption = "Made-up data. [[Salmon]] mapping rate of {n} samples by read-length batch; [[Mann-Whitney]] U = {u:g}, p = {p:.2g}, [[rank-biserial]] r = {r:.2f}, {tested} over {reference}."
 x = "Read-length batch"
 y = "Mapping rate"
 
@@ -149,7 +149,7 @@ reading = [
     "Rows and columns follow the clustering, so samples that correlate sit together; the strips on top mark cell type and batch.",
     "A row dark along its length is a sample unlike every other: read its M2 flags.",
 ]
-caption = "Made-up data. Spearman rho of {n} samples over {genes:,} genes; average linkage on one minus rho, optimal leaf order. Mean rho within cell types minus between: {diff:.3f}; label permutation p = {p:.2g}, {perms:,} permutations."
+caption = "Made-up data. [[Spearman]] rho of {n} samples over {genes:,} genes; average linkage on one minus rho, optimal leaf order. Mean rho within cell types minus between: {diff:.3f}; label permutation p = {p:.2g}, {perms:,} permutations."
 axis = "Sample"
 cell_type = "Cell type"
 batch = "Batch"

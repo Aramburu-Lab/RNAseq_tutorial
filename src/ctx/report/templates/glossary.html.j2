@@ -1,0 +1,30 @@
+{% extends "base.html.j2" %}
+{# Generated from glossary.yaml; every entry is anchored by its id, which tooltips link to. #}
+{% set g = ui.glossary %}
+{% block page_class %} has-rail{% endblock %}
+{% block rail %}
+<nav class="toc" aria-label="{{ ui.contents.label }}"><p class="toc-title">{{ g.topics }}</p><ol>
+{% for category, entries in page.groups if entries %}<li><a href="#topic-{{ category }}">{{ g.categories[category] }}</a></li>
+{% endfor %}</ol></nav>
+{% endblock %}
+{% block deck %}<p class="deck">{{ g.deck.format(n=names | length) }}</p>{% endblock %}
+{% block content %}
+<div class="glossary-search"><label for="ctx-glossary-search">{{ g.search }}</label><input id="ctx-glossary-search" type="search" autocomplete="off" spellcheck="false"><p class="glossary-count" aria-live="polite" data-template="{{ g.count }}"></p></div>
+{% for category, entries in page.groups if entries %}
+<section class="glossary-group" id="topic-{{ category }}">
+<h2>{{ g.categories[category] }}</h2>
+{% for e in entries %}
+<article class="entry" id="{{ e.id }}" data-search="{{ e.search_text() }}">
+<h3>{{ e.term }}{% if e.confirm %} <span class="pill" data-kind="unverified">{{ g.unverified }}</span>{% endif %}</h3>
+{% if e.aliases %}<p class="aliases"><span>{{ g.aliases }}</span> {{ e.aliases | join(", ") }}</p>{% endif %}
+<p class="short">{{ e.short | code }}</p>
+<p>{{ e.long | code }}</p>
+{% if e.rna_vs_dna %}<p class="field"><strong>{{ g.rna_vs_dna }}</strong> {{ e.rna_vs_dna | code }}</p>{% endif %}
+{% if e.typical %}<p class="field"><strong>{{ g.typical }}</strong> {{ e.typical | code }}</p>{% endif %}
+{% if e.source %}<p class="field source"><strong>{{ g.source }}</strong> {{ e.source }}</p>{% endif %}
+{% if e.see_also %}<p class="see-also"><span>{{ g.see_also }}</span> {% for s in e.see_also %}<a href="#{{ s }}">{{ names[s] }}</a>{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+</article>
+{% endfor %}
+</section>
+{% endfor %}
+{% endblock %}

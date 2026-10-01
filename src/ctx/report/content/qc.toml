@@ -3,14 +3,14 @@
 title = "M2 Quality control: {dataset}"
 budget = "Track A: under {minutes} min and {ram_gb} GB"
 purpose = "Flag samples and runs unlike their stratum on each QC metric, and test whether a metric or flag differs between a contrast's groups."
-input = "{samples} samples in {runs} runs from the `ctx gather` sample sheet, its counts where gather wrote them, and the registry `{registry}`. With `--rnaseq-dir`, the nf-core/rnaseq reports; with `--reads`, the FASTQ files."
-method = "No universal cut-off exists for most metrics, so a sample is flagged beyond its stratum's median ± {k} scaled MADs, on the bad side. Where the registry cites a cut-off, the value also gets an absolute band: good, usable or bad. Mann-Whitney U tests each metric, and Fisher's exact test each flag, between the groups of every unpaired contrast, with BH adjustment."
-interpretation = "{flagged} of {runs} runs are flagged, {excluded} of them excluded by a registry action; {confounded} of {tests} confounding tests have a BH-adjusted p below {alpha}. Do not set a sample aside on a metric that differs between the groups of a contrast: that removes part of the difference under test. A flag that tracks read length describes the batch, not the sample."
+input = "{samples} samples in {runs} runs from the `ctx gather` sample sheet, its counts where gather wrote them, and the registry `{registry}`. With `--rnaseq-dir`, the nf-core/rnaseq reports; with `--reads`, the [[FASTQ]] files."
+method = "No universal cut-off exists for most metrics, so a sample is flagged beyond its stratum's median ± {k} scaled [[MAD|MADs]], on the bad side. Where the registry cites a cut-off, the value also gets an [[QC bands|absolute band]]: good, usable or bad. [[Mann-Whitney]] U tests each metric, and [[Fisher's exact test]] each flag, between the groups of every unpaired contrast, with [[BH]] adjustment."
+interpretation = "{flagged} of {runs} runs are flagged, {excluded} of them excluded by a registry action; {confounded} of {tests} confounding tests have a [[padj|BH-adjusted p]] below {alpha}. Do not set a sample aside on a metric that differs between the groups of a contrast: that removes part of the difference under test. A flag that tracks [[read length]] describes the [[batch]], not the sample."
 # "Term: rest" in a pitfall prints Term in bold.
 pitfalls = [
     "Excluding on a flag alone: a flag marks a difference from the stratum, not an error.",
     "Borrowing a cut-off from another dataset: depth, cell type and library protocol each change these metrics.",
-    "Reading no flag as a pass: under {minimum} samples, a stratum gets no MAD band.",
+    "Reading no flag as a pass: under {minimum} samples, a stratum gets no [[MAD]] band.",
 ]
 
 [[terms]]
@@ -46,8 +46,8 @@ term = "Highest-density region"
 meaning = "The smallest area holding a given share of a group's samples, on a smoothed histogram."
 
 [[questions]]
-prompt = "A flagged sample has half its stratum's median library size. What do you check before excluding it?"
-answer = "Whether library size differs between the groups of its contrasts, and whether its other metrics agree with its peers. DESeq2's size factors scale for depth: a smaller library is noisier, not wrong."
+prompt = "A flagged sample has half its stratum's median [[library size]]. What do you check before excluding it?"
+answer = "Whether library size differs between the groups of its contrasts, and whether its other metrics agree with its peers. DESeq2's [[size factors]] scale for depth: a smaller library is noisier, not wrong."
 
 [[questions]]
 prompt = "Why is a band computed per stratum and not per condition?"
@@ -167,7 +167,7 @@ size = "MT + rRNA"
 all = "all samples"
 area = "Bubble area: the MT + rRNA share of counted reads."
 no_area = "Every bubble the same size: the counts had no gene types, so no MT or rRNA share."
-caption = "{area} Useful: fragments Salmon assigned to a transcript. Dashed: the useful fraction's median ± {k} scaled MAD over {n} samples; no test."
+caption = "{area} Useful: fragments [[Salmon]] assigned to a transcript. Dashed: the useful fraction's median ± {k} scaled [[MAD]] over {n} samples; no test."
 colour = "The sheet's {column} column, which colours the bubbles."
 reading = [
     "Each bubble is one sample: across, the fragments sequenced; up, the fragments Salmon assigned to a transcript.",
@@ -248,7 +248,7 @@ y = "Mean quality"
 good = "good"
 usable = "reasonable"
 bad = "poor"
-caption = "Mean Phred quality at each position of the first read, one line per run, in FastQC's position bins. Shading as in FastQC's own plot ({source}). {n} runs; no test."
+caption = "Mean [[Phred]] quality at each position of the first read, one line per run, in FastQC's position bins. Shading as in FastQC's own plot ({source}). {n} runs; no test."
 reading = [
     "Each line is one run: across, the position in the read; up, the mean quality of the bases there.",
     "Shading follows FastQC's plot: green good, orange reasonable, red poor.",
@@ -378,7 +378,7 @@ qc_status = "The worst QC status among the sample's runs."
 x = "PC1, {share:.0%} of variance"
 y = "PC2, {share:.0%} of variance"
 qc = "QC"
-caption = "PC1 and PC2 of the blind VST of {n} samples, beside their labels and QC status. The PDF and SVG draw the bands alone, those into QC coloured by status. No test."
+caption = "[[PC1]] and PC2 of the blind [[VST]] of {n} samples, beside their labels and QC status. The PDF and SVG draw the bands alone, those into QC coloured by status. No test."
 names = ["orange", "sky blue", "bluish green", "yellow", "blue", "vermillion", "reddish purple"]
 summary = "{n} painted {colour}: {detail}"
 empty = "Nothing painted yet."

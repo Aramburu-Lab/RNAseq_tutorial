@@ -16,6 +16,7 @@ from ctx import __version__, runtime
 from ctx.qc import Fastp
 from ctx.report import text
 from ctx.report.builder import ParameterCard
+from ctx.report.marks import plain
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -25,11 +26,12 @@ app = typer.Typer(
 
 # (meaning, what changes if you move it), per CLI option, from content/cards.toml; the default
 # is read from click. The meaning doubles as the --help text, so it describes the option on
-# every command.
+# every command; --help prints a glossary mark as its display text (D-048).
 CARDS: dict[str, tuple[str, str]] = {
     option: (card["meaning"], card["effect"])
     for option, card in text.raw("cards", "options").items()
 }
+HELP = {option: plain(meaning) for option, (meaning, _) in CARDS.items()}
 # Where one option does different things on different commands, the effect is per command.
 CARD_EFFECTS: dict[tuple[str, str], str] = {
     (command, option): effect
@@ -88,8 +90,8 @@ def _print_version(value: bool) -> None:
 @app.callback()
 def main(
     ctx: typer.Context,
-    profile: Annotated[str | None, typer.Option(help=CARDS["--profile"][0])] = None,
-    root: Annotated[Path | None, typer.Option(help=CARDS["--root"][0])] = None,
+    profile: Annotated[str | None, typer.Option(help=HELP["--profile"])] = None,
+    root: Annotated[Path | None, typer.Option(help=HELP["--root"])] = None,
     _version: Annotated[
         bool,
         typer.Option(
@@ -130,7 +132,7 @@ def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
 @profiled
 def setup(
     ctx: typer.Context,
-    dataset_file: Annotated[Path | None, typer.Option(help=CARDS["--dataset-file"][0])] = None,
+    dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
 ) -> None:
     """Report this machine: versions, hardware, profile, fonts and colour contrast."""
     from ctx import setup as module  # noqa: PLC0415 - heavy; imported after the runtime profile
@@ -151,10 +153,10 @@ def setup(
 @profiled
 def gather(
     ctx: typer.Context,
-    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
-    fetchngs_dir: Annotated[Path | None, typer.Option(help=CARDS["--fetchngs-dir"][0])] = None,
-    dataset_file: Annotated[Path | None, typer.Option(help=CARDS["--dataset-file"][0])] = None,
-    rnaseq_dir: Annotated[Path | None, typer.Option(help=CARDS["--rnaseq-dir"][0])] = None,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
+    dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
+    rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
 ) -> None:
     """Check one nf-core/fetchngs outdir and write the harmonised sample sheet (M1c)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -187,24 +189,24 @@ def _columns(value: str) -> tuple[str, ...]:
 @profiled
 def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     ctx: typer.Context,
-    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
-    dataset_file: Annotated[Path, typer.Option(help=CARDS["--dataset-file"][0])],
-    registry: Annotated[Path | None, typer.Option(help=CARDS["--registry"][0])] = None,
-    strata: Annotated[str, typer.Option(help=CARDS["--strata"][0])] = "cell_type",
-    peers: Annotated[str, typer.Option(help=CARDS["--peers"][0])] = "cell_type,condition",
-    mad: Annotated[float | None, typer.Option(help=CARDS["--mad"][0])] = None,
-    rnaseq_dir: Annotated[Path | None, typer.Option(help=CARDS["--rnaseq-dir"][0])] = None,
-    reads: Annotated[bool, typer.Option("--reads/--no-reads", help=CARDS["--reads"][0])] = False,
-    fetchngs_dir: Annotated[Path | None, typer.Option(help=CARDS["--fetchngs-dir"][0])] = None,
-    fastp_q: Annotated[int, typer.Option(help=CARDS["--fastp-q"][0])] = Fastp.q,
-    fastp_u: Annotated[int, typer.Option(help=CARDS["--fastp-u"][0])] = Fastp.u,
-    fastp_l: Annotated[int, typer.Option(help=CARDS["--fastp-l"][0])] = Fastp.l,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    registry: Annotated[Path | None, typer.Option(help=HELP["--registry"])] = None,
+    strata: Annotated[str, typer.Option(help=HELP["--strata"])] = "cell_type",
+    peers: Annotated[str, typer.Option(help=HELP["--peers"])] = "cell_type,condition",
+    mad: Annotated[float | None, typer.Option(help=HELP["--mad"])] = None,
+    rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
+    reads: Annotated[bool, typer.Option("--reads/--no-reads", help=HELP["--reads"])] = False,
+    fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
+    fastp_q: Annotated[int, typer.Option(help=HELP["--fastp-q"])] = Fastp.q,
+    fastp_u: Annotated[int, typer.Option(help=HELP["--fastp-u"])] = Fastp.u,
+    fastp_l: Annotated[int, typer.Option(help=HELP["--fastp-l"])] = Fastp.l,
     cut_tail: Annotated[
-        bool, typer.Option("--cut-tail/--no-cut-tail", help=CARDS["--cut-tail"][0])
+        bool, typer.Option("--cut-tail/--no-cut-tail", help=HELP["--cut-tail"])
     ] = Fastp.cut_tail,
-    cut_window: Annotated[int, typer.Option(help=CARDS["--cut-window"][0])] = Fastp.window,
-    cut_mean: Annotated[int, typer.Option(help=CARDS["--cut-mean"][0])] = Fastp.mean,
-    grid_run: Annotated[str | None, typer.Option(help=CARDS["--grid-run"][0])] = None,
+    cut_window: Annotated[int, typer.Option(help=HELP["--cut-window"])] = Fastp.window,
+    cut_mean: Annotated[int, typer.Option(help=HELP["--cut-mean"])] = Fastp.mean,
+    grid_run: Annotated[str | None, typer.Option(help=HELP["--grid-run"])] = None,
 ) -> None:
     """Judge every sample by the QC registry and test the flags for confounding (M2)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -230,11 +232,11 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
 @profiled
 def de(
     ctx: typer.Context,
-    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
-    dataset_file: Annotated[Path, typer.Option(help=CARDS["--dataset-file"][0])],
-    min_count: Annotated[int, typer.Option(help=CARDS["--min-count"][0])] = 10,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    min_count: Annotated[int, typer.Option(help=HELP["--min-count"])] = 10,
     lfc_shrink: Annotated[
-        bool, typer.Option("--lfc-shrink/--no-lfc-shrink", help=CARDS["--lfc-shrink"][0])
+        bool, typer.Option("--lfc-shrink/--no-lfc-shrink", help=HELP["--lfc-shrink"])
     ] = True,
 ) -> None:
     """Fit the dataset's contrasts with DESeq2 and write the M5 tables, figures and page."""
@@ -260,8 +262,8 @@ def de(
 @profiled
 def function(
     ctx: typer.Context,
-    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
-    dataset_file: Annotated[Path, typer.Option(help=CARDS["--dataset-file"][0])],
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
 ) -> None:
     """Enrichment of every contrast (ORA and preranked GSEA); the M6 tables, figures and page."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -284,8 +286,8 @@ def function(
 @profiled
 def report(
     ctx: typer.Context,
-    dataset: Annotated[str, typer.Option(help=CARDS["--dataset"][0])],
-    dataset_file: Annotated[Path | None, typer.Option(help=CARDS["--dataset-file"][0])] = None,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
 ) -> None:
     """Write the hub linking every module's newest page, and decide the sanity rules."""
     from ctx.report import hub  # noqa: PLC0415 - imported after the runtime profile

@@ -1,0 +1,2103 @@
+# Glossary for report tooltips and the glossary page.
+# One entry per term. Fields:
+#   id         stable anchor (snake_case)
+#   term       display name
+#   aliases    other spellings the prose may use (case-insensitive match)
+#   category   sequencing | quality | library | genome | alignment | quantification | qc_metrics |
+#              statistics | survival | function | proteomics | data | clinical | tools
+#   short      tooltip text, <= 20 words, plain English
+#   long       glossary-page text, <= 60 words
+#   rna_vs_dna what changes between RNA-seq and DNA-seq (optional)
+#   typical    what good looks like, with the source of any number (optional)
+#   source     reference for numeric claims (optional)
+#   confirm    true when a number or claim still needs source verification before release
+#   see_also   ids of related entries (optional)
+# Style: no metaphors, no intensifiers, numbers carry a source. The prose rules of CONVENTIONS.md
+# apply, all but the typed number (D-048); `python -m ctx.report.glossary_lint` checks them.
+
+# ---------------------------------------------------------------- sequencing basics
+- id: read
+  term: read
+  aliases: [sequencing read, reads]
+  category: sequencing
+  short: One sequence produced by the sequencer from one end of one DNA fragment.
+  long: >-
+    A read is the base sequence the instrument reports for one fragment end, with a quality
+    score per base. Paired-end runs give two reads per fragment. Read counts in FASTQ files
+    are per read; counting tools for RNA-seq count fragments.
+  see_also: [fragment, paired_end, fastq]
+
+- id: fragment
+  term: fragment
+  aliases: [insert, DNA fragment, cDNA fragment]
+  category: sequencing
+  short: The piece of DNA or cDNA between the adapters; paired-end reads come from its two ends.
+  long: >-
+    Libraries are made of fragments with adapters on both ends. The insert is the fragment
+    without adapters. Its length (insert size) decides whether paired reads overlap and
+    whether reads run into adapter sequence.
+  see_also: [insert_size, adapter, read]
+
+- id: insert_size
+  term: insert size
+  aliases: [fragment length, insert length]
+  category: sequencing
+  short: Length of the sequenced fragment without adapters; estimated from paired-end reads.
+  long: >-
+    Estimated from the distance between the mapped positions of read 1 and read 2, or by fastp
+    from read overlap. If the insert is shorter than the read length, the read continues into
+    the adapter and must be trimmed.
+  typical: Library-dependent; many RNA-seq libraries peak between 150 and 350 bp.
+  see_also: [adapter, adapter_content]
+
+- id: paired_end
+  term: paired-end sequencing
+  aliases: [paired-end, PE, single-end, SE, single-end sequencing]
+  category: sequencing
+  short: Both ends of each fragment are sequenced (paired-end); single-end sequences one end only.
+  long: >-
+    Paired-end reads give the fragment length, resolve repeats better and cross more splice
+    junctions, so isoform analyses prefer them. Gene-level differential expression works with
+    either. Count fragments, not reads, when comparing depth between the two designs.
+  see_also: [read, fragment, sequencing_depth]
+
+- id: read_length
+  term: read length
+  aliases: [read lengths, bp reads]
+  category: sequencing
+  short: Number of bases sequenced per read, for example 2 × 100 bp.
+  long: >-
+    Longer reads cross more splice junctions and map more uniquely. For gene-level counting,
+    50 bp is usually enough; ENCODE requires at least 50 bp for uniform processing. Read
+    length is fixed by the run, not by the sample.
+  source: ENCODE bulk RNA-seq data standards (read length >= 50 bp)
+  see_also: [paired_end, splice_junction]
+
+- id: sequencing_depth
+  term: sequencing depth
+  aliases: [depth, library depth, reads per sample, number of reads]
+  category: sequencing
+  short: How many fragments were sequenced per sample; state whether raw, mapped or assigned.
+  long: >-
+    Depth is quoted in millions of reads or fragments. Only mapped, exonic, non-duplicate
+    fragments contribute to gene counts, so the same "30 M reads" can mean different usable
+    depths. Replicates add more power to differential expression than extra depth.
+  typical: "ENCODE: at least 30 M aligned reads per replicate; Liu et al. 2014: replicates outweigh depth."
+  source: ENCODE bulk RNA-seq data standards; Liu et al. 2014 Bioinformatics 30:301
+  see_also: [coverage, library_size, replicate]
+
+- id: coverage
+  term: coverage
+  aliases: [fold coverage, 30x]
+  category: sequencing
+  short: Average number of reads covering each base; a DNA-seq concept, not used for RNA-seq depth.
+  long: >-
+    In genome sequencing, coverage is total sequenced bases divided by genome size, for example
+    30x. RNA-seq coverage varies by orders of magnitude between genes because it follows
+    expression, so depth is quoted in reads per sample instead.
+  rna_vs_dna: Genome coverage is uniform by design in DNA-seq; RNA-seq coverage tracks expression.
+  see_also: [sequencing_depth]
+
+- id: library
+  term: sequencing library
+  aliases: [library, library preparation, library prep]
+  category: library
+  short: The collection of adapter-ligated fragments prepared from one sample for sequencing.
+  long: >-
+    Library preparation fragments the RNA or cDNA, adds adapters and indexes, and amplifies by
+    PCR. Choices made here (poly-A selection or rRNA depletion, stranded or not, insert size)
+    decide what the data can show later.
+  see_also: [adapter, index, poly_a_selection, rrna_depletion, strandedness]
+
+- id: adapter
+  term: adapter
+  aliases: [adapters, adapter sequence, sequencing adapters]
+  category: library
+  short: Synthetic DNA attached to both fragment ends so the sequencer can bind and read them.
+  long: >-
+    Adapters carry the sequences the flow cell and primers bind to, plus the sample index.
+    They are not part of the biological sequence. When a fragment is shorter than the read,
+    the read runs into the adapter, which must be trimmed before alignment.
+  see_also: [adapter_content, insert_size, index]
+
+- id: index
+  term: sample index
+  aliases: [index, barcode, dual index, i5, i7]
+  category: library
+  short: Short sequence in the adapter that tags which sample a read came from.
+  long: >-
+    Many samples are sequenced together; the index lets the instrument sort reads by sample
+    (demultiplexing). Index hopping and index errors assign a small fraction of reads to the
+    wrong sample. It is one reason to run sample identity checks.
+  see_also: [adapter, sex_check]
+
+- id: pcr_amplification
+  term: PCR amplification
+  aliases: [PCR, amplification, PCR cycles]
+  category: library
+  short: Copying the library by PCR so there is enough material to sequence.
+  long: >-
+    Amplification is needed for low input, but every extra cycle raises the share of duplicate
+    fragments and GC bias. Library kits report cycle numbers; fewer is better.
+  see_also: [duplication_rate, gc_bias, library_complexity]
+
+- id: library_complexity
+  term: library complexity
+  aliases: [complexity, unique fragments]
+  category: library
+  short: Number of distinct fragments in the library; low complexity means many duplicates.
+  long: >-
+    A complex library contains many different fragments, so deeper sequencing keeps finding new
+    ones. Preseq extrapolates how many distinct fragments further sequencing would add. Low
+    input and heavy PCR reduce complexity.
+  see_also: [duplication_rate, pcr_amplification]
+
+- id: umi
+  term: unique molecular identifier
+  aliases: [UMI, UMIs, molecular barcode]
+  category: library
+  short: Random tag added to each original molecule so PCR copies can be recognised and collapsed.
+  long: >-
+    With UMIs, reads carrying the same tag and position come from the same molecule and count
+    once. Without UMIs, RNA-seq duplicates cannot be separated into PCR copies and true
+    biological duplicates, so they are usually kept.
+  see_also: [duplication_rate, pcr_duplicate]
+
+- id: poly_a_selection
+  term: poly(A) selection
+  aliases: [poly-A selection, polyA selection, mRNA enrichment, oligo-dT]
+  category: library
+  short: Capturing RNAs with a poly(A) tail (most mRNAs) with oligo-dT beads before library prep.
+  long: >-
+    Removes ribosomal RNA cheaply but also loses non-polyadenylated RNAs (histone mRNAs, many
+    lncRNAs, circular RNAs) and gives 3' bias when RNA is degraded. Recorded in ENA metadata as
+    library selection "PolyA".
+  see_also: [rrna_depletion, gene_body_coverage, lncrna]
+
+- id: rrna_depletion
+  term: rRNA depletion
+  aliases: [ribo-depletion, total RNA-seq, ribosomal depletion, RiboZero]
+  category: library
+  short: Removing ribosomal RNA with probes; keeps non-polyadenylated RNAs and pre-mRNA.
+  long: >-
+    Ribosomal RNA is about 80 to 90 % of total RNA and must be removed either way. Depletion
+    keeps lncRNAs, histone mRNAs and circular RNAs and works for degraded samples. The cost:
+    more intronic reads, and any rRNA that escapes the probes.
+  rna_vs_dna: Not applicable to DNA-seq.
+  see_also: [poly_a_selection, rrna_fraction, intronic_fraction]
+
+- id: strandedness
+  term: strandedness
+  aliases: [stranded library, strand-specific, unstranded, dUTP, library type]
+  category: library
+  short: Whether reads keep the information of which DNA strand the RNA came from.
+  long: >-
+    Stranded protocols (usually dUTP) let a read be assigned to the correct gene when two genes
+    overlap on opposite strands, which matters for antisense lncRNAs. TCGA mRNA-seq is
+    unstranded. Salmon and RSeQC infer the type from the data; counting tools need it set.
+  typical: "nf-core/rnaseq calls a library stranded at >= 0.8 agreement and unstranded when forward and reverse differ by < 0.1."
+  source: nf-core/rnaseq 3.27.0 parameters --stranded_threshold and --unstranded_threshold
+  see_also: [strandedness_inference, lncrna]
+
+- id: random_hexamer_bias
+  term: random hexamer priming bias
+  aliases: [hexamer bias, priming bias]
+  category: library
+  short: Skewed base composition in the first bases of RNA-seq reads, caused by random primers.
+  long: >-
+    Reverse transcription is primed with random hexamers, which do not bind uniformly. The
+    first 10 to 15 positions of nearly all RNA-seq reads show an uneven base composition.
+    FastQC flags this as a failure; it is expected and does not need trimming.
+  rna_vs_dna: Expected in RNA-seq; in DNA-seq a positional bias points to a real problem.
+  source: FastQC v0.12.1 module documentation (Per Base Sequence Content); Hansen et al. 2010 NAR
+  see_also: [per_base_content]
+
+- id: spike_in
+  term: spike-in
+  aliases: [spike-ins, ERCC]
+  category: library
+  short: Synthetic RNAs added to a sample at a defined concentration to check quantification.
+  long: >-
+    ERCC spike-ins are 92 synthetic transcripts added in defined amounts. Their measured
+    counts show the dynamic range and detection limit of the run. Most public datasets have
+    none.
+  see_also: [tpm]
+
+- id: rin
+  term: RNA integrity number
+  aliases: [RIN, RNA integrity, DV200]
+  category: library
+  short: Bench measure of RNA degradation before sequencing, from 1 (degraded) to 10 (intact).
+  long: >-
+    RIN comes from capillary electrophoresis of the RNA. DV200, the share of fragments over
+    200 nt, is used for degraded samples such as FFPE. Public metadata rarely reports either;
+    the in-silico proxies are TIN and gene body coverage.
+  see_also: [tin, gene_body_coverage]
+
+- id: replicate
+  term: biological replicate
+  aliases: [replicates, technical replicate, biological replicates]
+  category: sequencing
+  short: Independent samples of the same condition; technical replicates re-measure one sample.
+  long: >-
+    Biological replicates capture variation between individuals and are what statistical tests
+    need. Technical replicates (the same library sequenced twice, several runs of one
+    experiment) are merged, not treated as independent. Public data often hides which is which.
+  typical: "ENCODE: at least two replicates; more replicates add more power than more depth (Liu et al. 2014)."
+  source: ENCODE bulk RNA-seq data standards; Liu et al. 2014 Bioinformatics 30:301
+  see_also: [sequencing_depth, power]
+
+- id: batch_effect
+  term: batch effect
+  aliases: [batch, technical batch, plate effect, batch effects]
+  category: sequencing
+  short: Technical differences between groups of samples processed separately (date, kit, lab, plate).
+  long: >-
+    Batches change expression measurements without any biology. If batch lines up with the
+    condition, the two cannot be separated. Record batch variables (plate, centre, date) and
+    check them against the condition before any comparison.
+  see_also: [covariate, tissue_source_site]
+
+# ---------------------------------------------------------------- read quality
+- id: phred
+  term: Phred quality score
+  aliases: [Phred, Q score, quality score, base quality, Phred score]
+  category: quality
+  short: Probability that a base call is wrong, on a log scale; Q30 means 1 error in 1,000.
+  long: >-
+    Q = −10 · log10(P_error): Q20 is a 1 % error chance, Q30 0.1 %, Q40 0.01 %. FASTQ stores
+    one score per base as an ASCII character (Phred+33). The instrument estimates the score
+    from signal quality, so it is a prediction, not a measurement.
+  source: Ewing & Green 1998 Genome Research (Phred); FASTQ Phred+33 encoding
+  see_also: [q30, per_base_quality, fastq]
+
+- id: q30
+  term: Q30
+  aliases: [Q30 rate, percent Q30, "% >= Q30", Q20]
+  category: quality
+  short: Share of bases with a quality score of at least 30 (error chance of 0.1 % or less).
+  long: >-
+    A run-level summary of accuracy. Illumina specifications promise a minimum share of bases
+    at Q30 or better that depends on instrument and read length. A lower Q30 rate means more
+    mismatches, more unmapped reads and more quality trimming, not necessarily an unusable
+    sample.
+  typical: >-
+    Illumina specifies 70 to 90 % of bases above Q30, by instrument and read length. It
+    specifies 85 % at 2 x 150 bp on NovaSeq and 70 % at 2 x 300 bp on MiSeq v3. These figures
+    are measured on Illumina's PhiX control library, not on a customer library.
+  source: >-
+    Illumina specification pages for NovaSeq 6000, NovaSeq X, NextSeq 550, NextSeq 1000/2000,
+    MiSeq and MiSeq i100, read 2026-09-30
+  see_also: [phred, per_base_quality]
+
+- id: per_base_quality
+  term: per-base sequence quality
+  aliases: [per-base quality, quality by position, quality curve]
+  category: quality
+  short: Quality score distribution at each position along the read; usually falls toward the 3' end.
+  long: >-
+    Shown as a box per read position; quality drops toward the end of long reads because
+    signal decays over cycles. Trim the low-quality tail or let the aligner soft-clip it.
+    Read 2 of a pair is usually slightly worse than read 1.
+  typical: "FastQC warns when the lower quartile at any position is below 10 or the median below 25, and fails below 5 or 20."
+  source: FastQC v0.12.1 module documentation (Per Base Sequence Quality)
+  see_also: [phred, quality_trimming]
+
+- id: per_sequence_quality
+  term: per-sequence quality score
+  aliases: [mean read quality, per-sequence quality]
+  category: quality
+  short: Distribution of the mean quality per read; a second peak at low quality marks a bad subset.
+  long: >-
+    Averages the quality over each whole read and plots how many reads have each mean. Most
+    reads should sit well above Q30. A shoulder or second peak at low quality points to a
+    subset of poor reads, for example from the edge of the flow cell.
+  typical: "FastQC warns when the most common mean quality is below 27 and fails below 20."
+  source: >-
+    FastQC 0.12.1 Configuration/limits.txt (quality_sequence warn 27, error 20) and module
+    documentation (Per Sequence Quality Scores)
+  see_also: [per_base_quality]
+
+- id: n_content
+  term: N bases
+  aliases: [N content, per-base N content, uncalled bases, Ns]
+  category: quality
+  short: Positions where the sequencer could not call a base; written as N in the read.
+  long: >-
+    An N means no base was confidently called. A few Ns are harmless; many at one position
+    point to a cycle that failed on the instrument. Reads with many Ns are removed by fastp
+    (--n_base_limit).
+  typical: "FastQC warns when any position has more than 5 % N and fails above 20 %."
+  source: >-
+    FastQC 0.12.1 Configuration/limits.txt (n_content warn 5, error 20) and module
+    documentation (Per Base N Content); fastp 1.1.0 --help (--n_base_limit default 5)
+  see_also: [per_base_quality, fastp]
+
+- id: per_base_content
+  term: per-base sequence content
+  aliases: [base composition by position, sequence content]
+  category: quality
+  short: Share of A, C, G and T at each read position; should be flat for random fragments.
+  long: >-
+    In a random library the four bases keep a constant ratio along the read. RNA-seq reads
+    show a wobble in the first 10 to 15 bases from random hexamer priming, which FastQC
+    reports as a failure; it is expected. A drift along the whole read or a poly-G tail is
+    not.
+  typical: "FastQC warns above a 10 % difference between A and T or G and C at any position and fails above 20 %."
+  source: FastQC v0.12.1 module documentation (Per Base Sequence Content)
+  rna_vs_dna: Expected to fail in RNA-seq; should pass in whole-genome DNA-seq.
+  see_also: [random_hexamer_bias, polyg]
+
+- id: gc_content
+  term: GC content distribution
+  aliases: [GC content, per-sequence GC content, GC distribution, GC%]
+  category: quality
+  short: Histogram of the GC share per read; its shape depends on what was sequenced.
+  long: >-
+    DNA-seq of a whole genome gives one roughly bell-shaped peak near the genome average
+    (about 41 % for human). RNA-seq follows the expressed transcripts, GC-richer than the
+    genome and dominated by a few abundant genes, so the curve is often shifted, wider or
+    bimodal. Sharp extra peaks suggest rRNA, adapter dimers or a contaminant.
+  rna_vs_dna: One narrow peak in DNA-seq; an irregular, GC-shifted curve is normal in RNA-seq.
+  typical: "FastQC compares the curve to a fitted normal distribution and warns when the summed deviation exceeds 15 % of reads, failing above 30 %."
+  source: >-
+    FastQC 0.12.1 Configuration/limits.txt (gc_sequence warn 15, error 30) and module
+    documentation (Per Sequence GC Content); human genome GC 41 % (Lander et al. 2001, Nature
+    409:860)
+  see_also: [gc_bias, rrna_fraction]
+
+- id: gc_bias
+  term: GC bias
+  aliases: [GC-content bias, fragment GC bias]
+  category: quality
+  short: >-
+    Fragments with extreme GC content, high or low, are sequenced less efficiently than
+    expected.
+  long: >-
+    PCR and cluster generation under-represent GC-extreme fragments, so counts drift with a
+    gene's GC content and differ between batches. Salmon's --gcBias models it; the effect is
+    a batch-effect source when libraries were made on different days.
+  see_also: [gc_content, batch_effect]
+
+- id: duplication_rate
+  term: duplicated reads
+  aliases: [duplication rate, duplicates, sequence duplication levels, duplication]
+  category: quality
+  short: Share of reads whose sequence (or alignment position) has already been seen.
+  long: >-
+    Duplicates are PCR copies of one fragment (technical) or identical fragments of one
+    abundant transcript (biological); without UMIs the two cannot be distinguished. In
+    RNA-seq, highly expressed genes produce identical fragments legitimately, so 30 to 60 %
+    duplication is common and duplicates are kept. In DNA-seq, identical fragments are
+    almost always PCR or optical copies and are removed.
+  rna_vs_dna: "RNA-seq: expected, keep them (check with dupRadar). DNA-seq: artefacts, remove them."
+  typical: "FastQC warns above 30 % non-unique sequences and fails above 50 %; its documentation notes that RNA-seq libraries are expected to exceed this."
+  source: FastQC v0.12.1 module documentation (Duplicate Sequences); Sayols et al. 2016 BMC Bioinformatics (dupRadar)
+  see_also: [pcr_duplicate, umi, dupradar, library_complexity]
+
+- id: pcr_duplicate
+  term: PCR duplicate
+  aliases: [PCR duplicates, optical duplicate, technical duplicate]
+  category: quality
+  short: Two reads that are copies of the same original fragment made during amplification.
+  long: >-
+    PCR duplicates inflate counts without new information; optical duplicates are one
+    cluster read twice by the instrument. In DNA-seq both are marked with tools such as
+    samtools markdup or Picard. In RNA-seq they are indistinguishable from biological
+    duplicates unless UMIs were used.
+  see_also: [duplication_rate, umi]
+
+- id: overrepresented
+  term: overrepresented sequences
+  aliases: [overrepresented sequence, over-represented sequences]
+  category: quality
+  short: Single sequences that make up an unusually large share of all reads.
+  long: >-
+    FastQC lists every sequence that makes up more than 0.1 % of the reads, tracking only
+    sequences first seen in the first 100,000 reads. Adapter dimers and rRNA fragments are the
+    usual causes in RNA-seq. In a library dominated by one gene, such as globin in blood, the
+    top sequences can be real transcripts.
+  typical: "FastQC warns when a sequence exceeds 0.1 % of reads and fails above 1 %."
+  source: >-
+    FastQC 0.12.1 Configuration/limits.txt (overrepresented warn 0.1, error 1) and module
+    documentation (Overrepresented Sequences)
+  see_also: [adapter_content, rrna_fraction, globin_fraction]
+
+- id: adapter_content
+  term: adapter content
+  aliases: [adapter contamination, adapter read-through]
+  category: quality
+  short: Share of reads containing adapter sequence at each position; rises toward read ends.
+  long: >-
+    When the insert is shorter than the read, the sequencer reads into the adapter. Adapter
+    bases do not map and cause soft clipping or lost reads. fastp detects and trims adapters
+    automatically; the curve should drop to near zero after trimming.
+  typical: "FastQC warns when adapter sequence is found in more than 5 % of reads at any position and fails above 10 %."
+  source: FastQC v0.12.1 module documentation (Adapter Content)
+  see_also: [adapter, insert_size, fastp]
+
+- id: polyg
+  term: poly-G tail
+  aliases: [polyG, poly G, G tail, two-colour chemistry artefact]
+  category: quality
+  short: Runs of G at read ends produced when a two-colour instrument sees no signal.
+  long: >-
+    On NovaSeq and NextSeq, "no light" is read as G, so once real signal ends the read fills
+    with G. fastp trims poly-G tails automatically for these platforms (--trim_poly_g). The
+    artefact is absent on four-colour instruments such as HiSeq.
+  see_also: [per_base_content, fastp]
+
+- id: kmer_content
+  term: k-mer content
+  aliases: [k-mer, kmer, k-mers]
+  category: quality
+  short: Short subsequences (k bases) that appear more often at certain read positions than expected.
+  long: >-
+    FastQC counts 7-base k-mers by position. Enrichment at read starts reflects priming bias;
+    at read ends it usually means adapter. The module is sensitive and often warns on healthy
+    RNA-seq data.
+  see_also: [random_hexamer_bias, adapter_content]
+
+- id: quality_trimming
+  term: quality trimming
+  aliases: [trimming, read trimming, quality filtering, read filtering]
+  category: quality
+  short: Cutting low-quality bases and adapters from reads and dropping reads that become too short.
+  long: >-
+    fastp removes adapter sequence, cuts low-quality tails (--cut_tail), drops reads with
+    too many low-quality bases (-q, -u) or Ns, and those shorter than -l. Aggressive
+    trimming loses reads; gentle trimming leaves bases that lower mapping. The before/after
+    counts show the trade-off.
+  see_also: [fastp, per_base_quality, adapter_content]
+
+# ---------------------------------------------------------------- genome and annotation
+- id: reference_genome
+  term: reference genome
+  aliases: [reference, genome assembly, GRCh38, hg38, GRCh37, hg19]
+  category: genome
+  short: The standard human genome sequence reads are aligned to; GRCh38 is the current build.
+  long: >-
+    GRCh38 (hg38) replaced GRCh37 (hg19) in 2013; coordinates differ between builds, so
+    annotations and results must match the build. Aligning to a subset (one chromosome)
+    mis-maps reads from elsewhere, which is why the teaching chr22 index is a demonstration
+    only.
+  see_also: [annotation, gencode]
+
+- id: annotation
+  term: gene annotation
+  aliases: [annotation, GTF, GFF, GTF file, gene models]
+  category: genome
+  short: The catalogue of genes, transcripts and exons with their coordinates on the genome.
+  long: >-
+    Stored as a GTF file, one line per exon, transcript or gene. Counting tools read it to
+    assign reads to genes. Versions differ in gene numbers and IDs, so every result records
+    the annotation release it used.
+  see_also: [gencode, gene_model, biotype]
+
+- id: gencode
+  term: GENCODE
+  aliases: [Ensembl annotation, GENCODE release, Ensembl]
+  category: genome
+  short: The reference human gene annotation, released with Ensembl; versioned (v36, v47, ...).
+  long: >-
+    GENCODE annotates protein-coding genes, lncRNAs, small RNAs and pseudogenes with Ensembl
+    IDs. GDC STAR counts were built on one GENCODE version and GTEx on another. Gene sets
+    change between versions, so joins must use the same release or map between them.
+  see_also: [annotation, ensembl_id]
+
+- id: ensembl_id
+  term: Ensembl gene ID
+  aliases: [ENSG, gene ID, Ensembl ID, gene symbol, HGNC symbol]
+  category: genome
+  short: Stable identifier such as ENSG00000106236; gene symbols (NPTX2) are readable but can change.
+  long: >-
+    Use Ensembl IDs for joins and symbols for display. The number after the dot (ENSG...236.3)
+    is the annotation version and differs between releases; strip it before matching. A few
+    symbols map to several IDs and vice versa.
+  see_also: [gencode, annotation]
+
+- id: gene_model
+  term: gene model
+  aliases: [collapsed gene model, transcript model]
+  category: genome
+  short: The set of exons and transcripts that define one gene in the annotation.
+  long: >-
+    A gene usually has several transcripts sharing some exons. A collapsed gene model merges
+    all exons of a gene into one non-overlapping set, which is how GTEx counts exon-level
+    expression. Collapsed exons are therefore not the exons of any single transcript.
+  see_also: [transcript, exon]
+
+- id: transcript
+  term: transcript (isoform)
+  aliases: [isoform, transcripts, isoforms, splice variant]
+  category: genome
+  short: One RNA product of a gene; most genes make several isoforms by alternative splicing.
+  long: >-
+    Isoforms differ in exons, start sites or ends. Salmon quantifies transcripts and sums them
+    to genes; gene-level differential expression is more reliable than isoform-level, which
+    needs more depth and paired-end reads.
+  see_also: [exon, splicing, effective_length]
+
+- id: exon
+  term: exon and intron
+  aliases: [exon, intron, exons, introns, exonic, intronic]
+  category: genome
+  short: Exons are the transcript parts kept after splicing; introns are removed.
+  long: >-
+    Mature mRNA reads map to exons. Reads in introns come from pre-mRNA (more in total-RNA
+    libraries) or genomic DNA contamination. The exonic share of reads is a core RNA-seq QC
+    metric.
+  see_also: [splicing, intronic_fraction]
+
+- id: splicing
+  term: splicing
+  aliases: [alternative splicing, splice site, spliced]
+  category: genome
+  short: Removal of introns from pre-mRNA; alternative splicing produces different isoforms.
+  long: >-
+    Reads that span the junction between two exons prove splicing happened. Splice-aware
+    aligners (STAR, HISAT2) can split a read across an intron; DNA aligners cannot, which is
+    why they are not used for RNA-seq.
+  see_also: [splice_junction, transcript]
+
+- id: utr
+  term: untranslated region
+  aliases: [UTR, 5' UTR, 3' UTR, UTRs]
+  category: genome
+  short: Transcript parts before (5') and after (3') the coding sequence; not translated.
+  long: >-
+    3' UTRs hold most miRNA binding sites and are often long, so they carry many RNA-seq
+    reads. Read distribution reports (CDS, 5' UTR, 3' UTR, intron, intergenic) show where
+    reads land.
+  see_also: [cds, mirna, read_distribution]
+
+- id: cds
+  term: coding sequence
+  aliases: [CDS, coding region, open reading frame, ORF]
+  category: genome
+  short: The transcript part translated into protein, from start codon to stop codon.
+  long: >-
+    An open reading frame (ORF) is any stretch that could be translated; the annotated CDS is
+    the one that is. Small ORFs (smORFs) inside "non-coding" RNAs can produce microproteins,
+    which is why "non-coding" is an annotation status rather than a proof.
+  see_also: [utr, smorf, biotype]
+
+- id: smorf
+  term: small open reading frame
+  aliases: [smORF, microprotein, sORF, ncORF, Ribo-seq ORF]
+  category: genome
+  short: A short translated region, often in a lncRNA or UTR, producing a microprotein.
+  long: >-
+    Ribosome profiling finds many translated smORFs outside annotated coding sequences.
+    GENCODE keeps a catalogue of Ribo-seq ORFs. RNA-seq alone cannot show translation; that
+    needs Ribo-seq or mass spectrometry.
+  see_also: [cds, lncrna, ribo_seq]
+
+- id: biotype
+  term: gene biotype
+  aliases: [biotype, gene type, transcript type, protein_coding]
+  category: genome
+  short: "Annotation class of a gene: protein-coding, lncRNA, miRNA, pseudogene, rRNA and others."
+  long: >-
+    Biotype comes from the GTF. The share of counts per biotype is a QC check (rRNA, mito).
+    It is also the basis for analysing coding and non-coding genes separately, because
+    filters and expression levels differ between them.
+  see_also: [lncrna, mirna, pseudogene, rrna_fraction]
+
+- id: lncrna
+  term: long non-coding RNA
+  aliases: [lncRNA, lncRNAs, long non-coding RNAs, antisense RNA]
+  category: genome
+  short: RNA longer than 200 nt without an annotated protein product.
+  long: >-
+    lncRNAs are usually lowly expressed, tissue-specific and multi-isoform. Many lack a
+    poly(A) tail, so poly(A) libraries miss them; antisense lncRNAs overlap coding genes and
+    need stranded data. Low counts make them the first genes removed by expression filters.
+  see_also: [biotype, strandedness, poly_a_selection, smorf]
+
+- id: mirna
+  term: microRNA
+  aliases: [miRNA, miRNAs, mature miRNA, pri-miRNA, pre-miRNA, isomiR]
+  category: genome
+  short: About 22-nt RNA that represses target mRNAs; invisible in standard RNA-seq.
+  long: >-
+    Mature miRNAs are too short for standard library size selection, so they need small-RNA
+    sequencing; standard RNA-seq sees only the primary transcript (pri-miRNA). Isoforms with
+    shifted ends are isomiRs. Repression often shows more at protein than at mRNA level.
+  rna_vs_dna: Requires a small-RNA library; standard mRNA-seq and DNA-seq do not measure it.
+  see_also: [small_rna_seq, mirna_target]
+
+- id: small_rna_seq
+  term: small RNA sequencing
+  aliases: [small-RNA-seq, miRNA-seq, sRNA-seq]
+  category: genome
+  short: Library size-selected for 18 to 30 nt RNAs; the assay that quantifies mature miRNAs.
+  long: >-
+    Because inserts are shorter than the read, every read runs into adapter and adapter
+    trimming is mandatory. Fold changes of miRNAs at 1 read per million or more were
+    reproducible at about 5 million reads per sample. TCGA provides mature-miRNA counts from
+    its own small-RNA libraries.
+  typical: >-
+    About 5 M reads per sample gave reproducible fold changes for miRNAs at 1 read per million
+    or more (Campbell et al. 2015). Metpally et al. 2013 conclude that the depth must be
+    decided on the samples at hand.
+  source: Campbell et al. 2015 RNA 21:164-171; Metpally et al. 2013 Front Genet 4:20
+  see_also: [mirna, adapter_content]
+
+- id: mirna_target
+  term: miRNA target
+  aliases: [predicted target, validated target, TargetScan, miRTarBase, seed match]
+  category: genome
+  short: An mRNA a miRNA is predicted (TargetScan) or shown (miRTarBase) to repress.
+  long: >-
+    Predictions rest on seed matches in 3' UTRs and have many false positives; validated
+    targets come from experiments. Anticorrelation between a miRNA and its targets across
+    matched samples supports, but does not prove, regulation.
+  see_also: [mirna, utr]
+
+- id: circrna
+  term: circular RNA
+  aliases: [circRNA, circRNAs, back-splice]
+  category: genome
+  short: RNA joined head to tail; detected only by reads across the back-splice junction.
+  long: >-
+    circRNAs have no poly(A) tail, so poly(A) libraries lose them; total-RNA libraries keep
+    them. Standard pipelines discard the back-splice reads as unmapped; dedicated tools are
+    needed. Mentioned here as a nuance, not analysed in the course.
+  see_also: [rrna_depletion, splicing]
+
+- id: pseudogene
+  term: pseudogene
+  aliases: [pseudogenes, processed pseudogene]
+  category: genome
+  short: A gene copy that no longer codes; reads often multi-map between it and its parent gene.
+  long: >-
+    Processed pseudogenes look like spliced copies of a parent gene, so short reads map to
+    both. Multi-mapping and pseudogene counts are a recognised source of noise for genes with
+    many copies, such as ribosomal proteins.
+  see_also: [multimapped, biotype]
+
+- id: mane
+  term: MANE Select transcript
+  aliases: [MANE, MANE Select, canonical transcript]
+  category: genome
+  short: The one transcript per gene agreed by Ensembl and RefSeq as the representative isoform.
+  long: >-
+    MANE Select gives a stable choice for primer design, variant reporting and exon
+    numbering. It is the isoform the gene card uses when one transcript must stand for the
+    gene.
+  see_also: [transcript, qpcr_primer]
+
+- id: qpcr_primer
+  term: qPCR primer design
+  aliases: [qPCR, RT-qPCR, primers, exon-junction primers]
+  category: genome
+  short: Primers should span an exon-exon junction in exons shared by the isoforms of interest.
+  long: >-
+    Junction-spanning primers do not amplify genomic DNA. Choose exons present in the MANE
+    Select or the isoforms expressed in the tissue, supported by junction reads, and check
+    specificity with Primer-BLAST. Exon coverage in reference data hints at which exons are
+    used but is not a substitute for junction evidence.
+  see_also: [mane, exon, splice_junction]
+
+# ---------------------------------------------------------------- alignment
+- id: aligner
+  term: aligner
+  aliases: [alignment, read alignment, mapping, mapper]
+  category: alignment
+  short: Software that finds where each read came from on the reference genome.
+  long: >-
+    RNA-seq needs a splice-aware aligner (STAR, HISAT2) that can split a read across an
+    intron. Alignment produces a BAM file with coordinates, mismatches and a mapping quality
+    per read. Pseudoalignment skips base-level alignment and only assigns reads to
+    transcripts.
+  see_also: [star, hisat2, pseudoalignment, bam]
+
+- id: star
+  term: STAR
+  aliases: [STAR aligner, STAR alignment]
+  category: tools
+  short: Splice-aware aligner used by GDC for TCGA; fast, memory-hungry for a full genome index.
+  long: >-
+    STAR builds a suffix-array index (at least 16 GB of RAM for a mammalian genome,
+    ideally 32 GB). It reports
+    unique and multi-mapped alignments and splice junctions; with --quantMode GeneCounts,
+    per-gene counts in the unstranded and both stranded conventions, the table GDC exposes.
+  typical: >-
+    Defaults: a read that maps to more than 10 loci gets no alignment and counts as 'mapped to
+    too many loci' (--outFilterMultimapNmax 10). Matched bases and score must each reach 66 %
+    of the read length, mates summed, or the read is 'unmapped: too short'
+    (--outFilterMatchNminOverLread, --outFilterScoreMinOverLread 0.66).
+  source: >-
+    STAR 2.7.11b manual (sections 4.1, 8, 17) and README; STAR 2.7.11b --help defaults
+  see_also: [aligner, uniquely_mapped, multimapped, unmapped_too_short]
+
+- id: hisat2
+  term: HISAT2
+  aliases: [HISAT]
+  category: tools
+  short: Splice-aware aligner with a small memory footprint (a few GB for human).
+  long: >-
+    HISAT2 uses a hierarchical FM index and runs on a laptop with the full human genome. It
+    is an alternative to STAR when memory is limited; results are similar for gene counting.
+  see_also: [aligner, star]
+
+- id: pseudoalignment
+  term: pseudoalignment / selective alignment
+  aliases: [pseudoalignment, selective alignment, quasi-mapping, kallisto]
+  category: alignment
+  short: Assigning reads to transcripts without base-by-base alignment; fast and light on memory.
+  long: >-
+    Salmon and kallisto match read k-mers to a transcriptome index and estimate transcript
+    abundance with an expectation-maximisation model. They give no BAM and no genome
+    coordinates, so intronic reads and novel transcripts are invisible; decoy sequences
+    reduce false assignments of such reads.
+  see_also: [salmon, effective_length, tpm]
+
+- id: salmon
+  term: Salmon
+  aliases: [salmon quant, quant.sf]
+  category: tools
+  short: Transcript quantifier by selective alignment; outputs TPM and estimated counts per transcript.
+  long: >-
+    Salmon writes quant.sf (transcript name, length, effective length, TPM, estimated reads)
+    and infers the library type with -l A. Options --gcBias and --seqBias correct fragment
+    biases. Decoy-aware indexes need much memory to build; hosted indexes avoid that.
+  see_also: [pseudoalignment, effective_length, strandedness_inference]
+
+- id: index_alignment
+  term: index (alignment)
+  aliases: [genome index, transcriptome index, STAR index, Salmon index]
+  category: alignment
+  short: Pre-processed data structure that lets an aligner search the genome quickly.
+  long: >-
+    Building the index is done once per reference and annotation version and dominates
+    memory use. Indexing a full human genome for STAR needs about 32 GB of RAM; a single
+    chromosome needs little, so the teaching demo uses chr22.
+  see_also: [reference_genome, star]
+
+- id: mapping_rate
+  term: mapping rate
+  aliases: [alignment rate, percent mapped, mapped reads]
+  category: alignment
+  short: Share of reads the aligner placed on the reference; the first global check after alignment.
+  long: >-
+    Low mapping rates come from adapter read-through, contamination, a wrong reference or
+    species, or reads too short to map. Mapping to the transcriptome (Salmon) gives lower
+    rates than to the genome because intronic and intergenic reads cannot map.
+  typical: >-
+    Roughly 70 to 90 % of human RNA-seq reads map to the genome (Conesa et al. 2016).
+    nf-core/rnaseq removes samples below 5 % uniquely mapped reads.
+  source: >-
+    Conesa et al. 2016 Genome Biology 17:13; nf-core/rnaseq 3.27.0 --min_mapped_reads
+    (nextflow_schema.json, workflows/rnaseq/main.nf)
+  see_also: [uniquely_mapped, multimapped, unmapped_too_short]
+
+- id: uniquely_mapped
+  term: uniquely mapped reads
+  aliases: [unique mappers, uniquely mapping]
+  category: alignment
+  short: Reads with exactly one best alignment position; the reads that gene counting uses.
+  long: >-
+    STAR gives them mapping quality 255. featureCounts counts only unique mappers by default.
+    A low unique rate with a high multi-mapped rate points to rRNA, repeats or a
+    low-complexity library.
+  see_also: [multimapped, mapq, featurecounts]
+
+- id: multimapped
+  term: multi-mapped reads
+  aliases: [multimappers, multi-mapping, multimapped, mapped to multiple loci]
+  category: alignment
+  short: Reads that align equally well to more than one place (repeats, paralogues, pseudogenes).
+  long: >-
+    Their true origin is unknown, so they are excluded from counts by default or shared
+    fractionally (featureCounts -M --fraction). Ribosomal proteins, histone clusters and
+    recently duplicated genes lose reads this way; salmon distributes them by its model.
+  see_also: [uniquely_mapped, pseudogene]
+
+- id: unmapped_too_short
+  term: unmapped (too short)
+  aliases: [too short, unmapped reads, "unmapped: too short"]
+  category: alignment
+  short: STAR category for reads whose best alignment covered too little of the read.
+  long: >-
+    Usually adapter read-through, low quality tails, or reads from another organism.
+    "Too short" refers to the aligned part, not the read length. A rise after a library
+    change points to shorter inserts.
+  see_also: [mapping_rate, adapter_content, star]
+
+- id: soft_clipping
+  term: soft clipping
+  aliases: [soft-clipped, clipped bases]
+  category: alignment
+  short: Read ends left unaligned by the aligner but kept in the record.
+  long: >-
+    Aligners clip adapter bases and low-quality ends instead of forcing them to align. Heavy
+    soft clipping across a sample means trimming was insufficient or inserts are short.
+  see_also: [adapter_content, bam]
+
+- id: mismatch_rate
+  term: mismatch rate
+  aliases: [mismatches per base, error rate]
+  category: alignment
+  short: Share of aligned bases that differ from the reference.
+  long: >-
+    Combines sequencing errors, real variants and RNA editing. A sample with a much higher
+    rate than the others in the same run has a quality or contamination problem. The
+    difference between samples matters more than the absolute value.
+  see_also: [phred, per_base_quality]
+
+- id: splice_junction
+  term: splice junction
+  aliases: [junction, junctions, junction reads, canonical junction, novel junction]
+  category: alignment
+  short: The point where two exons are joined; a read spanning it proves the splice event.
+  long: >-
+    Annotated junctions confirm annotated isoforms; novel junctions may be new isoforms or
+    noise. Canonical junctions have GT-AG intron ends. Junction saturation shows whether
+    depth is enough to find the junctions present.
+  see_also: [splicing, junction_saturation]
+
+- id: bam
+  term: BAM file
+  aliases: [SAM, BAM, CRAM, alignment file]
+  category: alignment
+  short: Binary file of aligned reads with position, strand, mismatches and mapping quality.
+  long: >-
+    SAM is the text form, BAM its compressed binary, CRAM a reference-based compression.
+    Sorted and indexed BAMs are needed for browsing in IGV and for counting. samtools flagstat
+    and idxstats summarise them.
+  see_also: [aligner, mapq]
+
+- id: mapq
+  term: mapping quality
+  aliases: [MAPQ]
+  category: alignment
+  short: Aligner's confidence that a read is placed correctly; STAR uses 255 for unique mappers.
+  long: >-
+    Scales differ between aligners, so MAPQ is compared only within one tool. Counting tools
+    can require a minimum MAPQ to exclude ambiguous reads.
+  see_also: [uniquely_mapped, bam]
+
+- id: featurecounts
+  term: featureCounts
+  aliases: [read counting, counting reads, subread featureCounts]
+  category: tools
+  short: Assigns aligned reads to genes from the GTF and reports counts and unassigned categories.
+  long: >-
+    Key options: -s (strandedness), -p --countReadPairs (count fragments), -O (reads
+    overlapping several genes), -M --fraction (share multi-mappers). Unassigned_NoFeatures
+    are reads outside annotated exons; Unassigned_Ambiguity are reads in two genes at once.
+  see_also: [assigned_reads, strandedness, multimapped]
+
+- id: assigned_reads
+  term: assigned reads
+  aliases: [assignment rate, unassigned, Unassigned_NoFeatures, Unassigned_Ambiguity]
+  category: alignment
+  short: Aligned reads that were counted to exactly one gene; the depth that matters for counts.
+  long: >-
+    Assignment rate = assigned / aligned. Losses go to no-feature (intronic, intergenic),
+    ambiguity (overlapping genes) and multi-mapping. Report library size as assigned
+    fragments when comparing samples.
+  see_also: [featurecounts, library_size, intronic_fraction]
+
+- id: strandedness_inference
+  term: strandedness inference
+  aliases: [infer_experiment, library type inference, lib_format_counts]
+  category: alignment
+  short: Estimating from the data whether reads follow the transcript strand, its reverse, or neither.
+  long: >-
+    Salmon (-l A) and RSeQC infer_experiment compare read orientation with annotated genes.
+    A wrong setting halves the counts in stranded data or doubles noise in unstranded data.
+    The inferred type is checked against the metadata before counting.
+  see_also: [strandedness, salmon]
+
+# ---------------------------------------------------------------- quantification
+- id: raw_counts
+  term: raw counts
+  aliases: [counts, read counts, count matrix, gene counts]
+  category: quantification
+  short: Number of fragments assigned to each gene in each sample; the input for DESeq2-type tests.
+  long: >-
+    Counts scale with depth and gene length and are integers with sampling noise, which
+    negative-binomial models expect. Never test DE on TPM or FPKM; keep the counts and let
+    the model normalise.
+  see_also: [library_size, size_factor, negative_binomial]
+
+- id: library_size
+  term: library size
+  aliases: [total counts, sequencing depth per sample, column sum]
+  category: quantification
+  short: Total assigned fragments per sample; differences between samples must be normalised away.
+  long: >-
+    A sample with twice the library size has roughly twice the count for every gene. Size
+    factors (DESeq2) or CPM scaling correct for it. Small libraries are a QC exclusion
+    criterion.
+  see_also: [size_factor, cpm, assigned_reads]
+
+- id: size_factor
+  term: size factor
+  aliases: [size factors, median of ratios, normalisation factor]
+  category: quantification
+  short: DESeq2's per-sample scaling constant, from the median ratio of each sample to a reference.
+  long: >-
+    The median-of-ratios method assumes most genes are not differentially expressed, and a
+    few highly abundant genes barely move it. Normalised count = raw count / size factor. It
+    corrects depth and composition, not gene length.
+  see_also: [library_size, normalisation]
+
+- id: normalisation
+  term: normalisation
+  aliases: [normalization, normalised counts, normalized counts]
+  category: quantification
+  short: Making counts comparable between samples (depth, composition) or genes (length).
+  long: >-
+    Between-sample normalisation (size factors, TMM, CPM) removes library size effects.
+    Within-sample normalisation (TPM, FPKM) additionally divides by gene length so genes can
+    be ranked within one sample. Choose by the comparison being made.
+  see_also: [size_factor, cpm, tpm]
+
+- id: cpm
+  term: counts per million
+  aliases: [CPM, log-CPM]
+  category: quantification
+  short: Count divided by library size in millions; comparable between samples, not between genes.
+  long: >-
+    CPM removes depth differences only. log2(CPM + 1) is a common display scale. A filter such
+    as "CPM above 1 in at least n samples" is a typical expression filter before testing.
+  see_also: [library_size, tpm, expression_filter]
+
+- id: tpm
+  term: transcripts per million
+  aliases: [TPM, FPKM, RPKM]
+  category: quantification
+  short: Abundance normalised for gene length and depth; TPMs sum to one million within a sample.
+  long: >-
+    TPM divides by effective length first, then scales to a million, so values are
+    comparable between genes in one sample. FPKM/RPKM normalise in the other order and do
+    not sum consistently. Neither is suitable as input for count-based tests.
+  see_also: [effective_length, cpm, raw_counts]
+
+- id: effective_length
+  term: effective length
+  aliases: [effective transcript length]
+  category: quantification
+  short: Transcript length corrected for the fragment length distribution; used in TPM.
+  long: >-
+    A fragment cannot start in the last part of a transcript shorter than the fragment, so
+    the usable length is shorter than the annotated one. Salmon reports both; the difference
+    matters most for short transcripts.
+  see_also: [tpm, salmon, insert_size]
+
+- id: tx2gene
+  term: tx2gene
+  aliases: [transcript-to-gene map, gene-level aggregation, tximport]
+  category: quantification
+  short: Table mapping each transcript to its gene, used to sum transcript estimates into gene counts.
+  long: >-
+    Built from the GTF. pytximport sums Salmon estimates per gene and can rescale them by
+    length (lengthScaledTPM) so gene counts reflect changes in abundance rather than in
+    isoform length.
+  see_also: [transcript, salmon]
+
+- id: vst
+  term: variance-stabilising transformation
+  aliases: [VST, rlog, log transformation, vst counts]
+  category: quantification
+  short: Transformation of counts to a scale where variance no longer depends on the mean.
+  long: >-
+    Raw and log counts have mean-dependent variance, which dominates PCA and clustering. VST
+    (DESeq2, pydeseq2) removes that dependence. It is for visualisation, PCA and heatmaps,
+    not for the differential expression test itself.
+  see_also: [pca, heatmap, negative_binomial]
+
+- id: log2fc
+  term: log2 fold change
+  aliases: [log2FC, LFC, fold change, log fold change]
+  category: quantification
+  short: log2 of the expression ratio between groups; +1 means doubled, −1 means halved.
+  long: >-
+    Symmetric around zero, which is why it is used instead of a plain ratio. Estimates for
+    low-count genes are noisy and can be large by chance; shrinkage pulls those toward zero
+    while leaving well-measured genes alone.
+  see_also: [lfc_shrinkage, effect_size, volcano_plot]
+
+- id: lfc_shrinkage
+  term: LFC shrinkage
+  aliases: [shrunken LFC, shrinkage, apeGLM, shrunk log2 fold change]
+  category: quantification
+  short: Statistical correction that reduces noisy fold changes of low-count genes toward zero.
+  long: >-
+    A prior centred on zero is combined with each gene's data. Genes with little information
+    move a lot; genes with many counts hardly move. Shrunken values are better for ranking
+    and plotting; the significance test is unchanged.
+  see_also: [log2fc, dispersion_shrinkage]
+
+- id: expression_filter
+  term: expression filter
+  aliases: [low-count filter, min-count filter, prefiltering, filterByExpr]
+  category: quantification
+  short: Removing genes with too few counts before testing; fewer tests, more power for the rest.
+  long: >-
+    Genes with almost no counts cannot be tested meaningfully. A typical rule keeps genes
+    with at least 10 counts in at least as many samples as the smallest group. lncRNAs and
+    tissue-specific genes are removed first, so the threshold is a real choice.
+  see_also: [independent_filtering, lncrna]
+
+# ---------------------------------------------------------------- QC after alignment
+- id: gene_body_coverage
+  term: gene body coverage
+  aliases: [5'-3' bias, 3' bias, coverage along transcripts, 5' to 3' bias]
+  category: qc_metrics
+  short: Read coverage from the 5' to the 3' end of transcripts; degraded RNA piles up at the 3' end.
+  long: >-
+    Intact RNA gives a flat profile over the transcript body. Degradation with poly(A)
+    selection gives 3' bias, because only the 3' fragments still carry the tail. Random
+    priming can give mild 5' or 3' dips; Qualimap and RSeQC report the profile.
+  see_also: [rin, tin, poly_a_selection]
+
+- id: tin
+  term: transcript integrity number
+  aliases: [TIN, median TIN]
+  category: qc_metrics
+  short: Per-transcript evenness of coverage from RSeQC; an in-silico RIN.
+  long: >-
+    TIN ranges from 0 to 100 per transcript; the sample median summarises RNA integrity when
+    no RIN is available. Compare within a dataset rather than to a universal cut-off.
+  source: Wang et al. 2016 BMC Bioinformatics 17:58 (RSeQC TIN)
+  see_also: [rin, gene_body_coverage]
+
+- id: read_distribution
+  term: read distribution
+  aliases: [genomic origin of reads, CDS/UTR/intron/intergenic]
+  category: qc_metrics
+  short: Share of reads in coding exons, UTRs, introns and intergenic regions.
+  long: >-
+    RSeQC read_distribution and Qualimap report it. Poly(A) libraries are mostly exonic;
+    total-RNA libraries have more intronic reads (pre-mRNA). A large intergenic share points
+    to genomic DNA contamination.
+  see_also: [intronic_fraction, exon, utr]
+
+- id: intronic_fraction
+  term: intronic fraction
+  aliases: [intronic reads, intergenic reads, intergenic fraction]
+  category: qc_metrics
+  short: Share of aligned reads that fall in introns (pre-mRNA, DNA contamination) rather than exons.
+  long: >-
+    Expected to be higher in rRNA-depleted libraries, which capture unspliced pre-mRNA.
+    Intergenic reads have no transcript source and suggest genomic DNA in the sample. Compare
+    against libraries of the same type.
+  rna_vs_dna: In DNA-seq nearly all reads are "intergenic" by this definition; the metric is RNA-specific.
+  see_also: [read_distribution, rrna_depletion]
+
+- id: rrna_fraction
+  term: rRNA fraction
+  aliases: [ribosomal RNA fraction, rRNA contamination, rRNA reads]
+  category: qc_metrics
+  short: Share of reads from ribosomal RNA that escaped poly(A) selection or depletion.
+  long: >-
+    rRNA reads are wasted depth and distort normalisation when the share varies between
+    samples. Estimated from biotype counts (rRNA genes in the GTF) or with SortMeRNA. A few
+    percent is common; a large or variable share is a library problem.
+  see_also: [rrna_depletion, biotype]
+
+- id: mito_fraction
+  term: mitochondrial fraction
+  aliases: [mitochondrial reads, chrM fraction, mito reads]
+  category: qc_metrics
+  short: Share of reads mapping to the mitochondrial genome; tissue-dependent, high in muscle and heart.
+  long: >-
+    Mitochondrial transcripts are abundant and vary by tissue and cell state. A sample far
+    from its dataset's range signals damage or a different cell composition rather than an
+    error by itself.
+  see_also: [biotype, read_distribution]
+
+- id: globin_fraction
+  term: globin fraction
+  aliases: [haemoglobin reads, globin reads, HBB, HBA1, HBA2]
+  category: qc_metrics
+  short: Share of reads from haemoglobin genes; red-cell carry-over in blood-derived samples.
+  long: >-
+    Sorted blood cells and whole blood carry reticulocyte RNA rich in HBA1, HBA2 and HBB. A
+    high globin share consumes depth and can differ between donors. It is recorded as a
+    covariate in blood-cell datasets such as neutrophil and monocyte studies.
+  see_also: [overrepresented, library_size]
+
+- id: junction_saturation
+  term: junction saturation
+  aliases: [saturation curve, sequencing saturation]
+  category: qc_metrics
+  short: Whether more depth would still discover more splice junctions or genes.
+  long: >-
+    RSeQC subsamples the reads and counts the junctions found at each fraction. A curve that
+    is still rising at full depth means the sample is under-sequenced for junction or isoform
+    analysis, even if gene-level counts are fine.
+  see_also: [splice_junction, sequencing_depth]
+
+- id: dupradar
+  term: dupRadar
+  aliases: [duplication vs expression]
+  category: tools
+  short: Plots duplication rate against expression per gene to separate PCR duplicates from biology.
+  long: >-
+    In a good RNA-seq library, duplication rises with expression and is low for lowly
+    expressed genes. High duplication at low expression indicates PCR over-amplification.
+    The fitted intercept and slope summarise the library.
+  source: Sayols et al. 2016 BMC Bioinformatics 17:428
+  see_also: [duplication_rate, pcr_duplicate]
+
+- id: sample_correlation
+  term: sample-sample correlation
+  aliases: [replicate concordance, correlation heatmap, Spearman between samples]
+  category: qc_metrics
+  short: Correlation of expression between every pair of samples; replicates should be most alike.
+  long: >-
+    Computed on log-scale or VST values. Replicates cluster together; a sample that correlates
+    poorly with its group is an outlier or a label swap. ENCODE expects Spearman above 0.9
+    between replicates from the same individual and above 0.8 between different donors.
+  source: ENCODE bulk RNA-seq data standards (replicate concordance)
+  see_also: [pca, sex_check, spearman]
+
+- id: sex_check
+  term: sex check
+  aliases: [sample identity check, XIST, chrY genes, label swap]
+  category: qc_metrics
+  short: Comparing XIST (female) and Y-chromosome gene expression with the recorded sex to catch label swaps.
+  long: >-
+    XIST is expressed in female samples; RPS4Y1, DDX3Y, UTY and KDM5D are expressed in male
+    samples. A mismatch with the metadata reveals a swapped or mislabelled sample, which
+    public datasets contain more often than expected.
+  see_also: [sample_correlation, index]
+
+- id: mad
+  term: median absolute deviation
+  aliases: [MAD, robust z-score, robust outlier rule]
+  category: qc_metrics
+  short: >-
+    A spread measure outliers barely move; values more than 3 MAD from the median are
+    flagged as outliers.
+  long: >-
+    MAD is the median of absolute distances from the median; multiplied by 1.4826 it
+    estimates the standard deviation without being pulled by outliers. Dataset-relative rules
+    based on MAD complement fixed thresholds, which many RNA-seq metrics do not have.
+  see_also: [qc_bands]
+
+- id: qc_bands
+  term: good / usable / bad bands
+  aliases: [QC bands, QC thresholds, traffic light]
+  category: qc_metrics
+  short: The report's three-way judgement of a metric, each band with a stated source or labelled as course convention.
+  long: >-
+    Good means no action, usable means proceed and note it, bad means fix or exclude. Bands
+    come from tool documentation, consortium standards, pipeline defaults or the literature;
+    where none exists, the band is a course convention and says so. A dataset-relative rule
+    (median ± 3 MAD) is shown beside every absolute band.
+  see_also: [mad, multiqc]
+
+# ---------------------------------------------------------------- statistics
+- id: p_value
+  term: p-value
+  aliases: [p value, significance, nominal p]
+  category: statistics
+  short: Probability of data at least this extreme if there were no real effect.
+  long: >-
+    A small p-value says the data would be unusual under "no effect". It gives neither the
+    probability that the effect is real nor its size. With 20,000 genes, thousands of small
+    p-values arise by chance, which is why adjusted p-values are used.
+  see_also: [padj, effect_size, multiple_testing]
+
+- id: multiple_testing
+  term: multiple testing
+  aliases: [multiple comparisons, multiple hypothesis testing, garden of forking paths]
+  category: statistics
+  short: Testing thousands of genes at once produces many false positives unless corrected.
+  long: >-
+    At p < 0.05, about 1,000 of 20,000 non-changing genes would pass by chance. Corrections
+    (Benjamini-Hochberg, Bonferroni) control the false discovery rate or the family-wise
+    error rate. Choosing thresholds after looking at results is the same problem in disguise.
+  see_also: [padj, cutpoint_bias]
+
+- id: padj
+  term: adjusted p-value (FDR)
+  aliases: [padj, FDR, false discovery rate, Benjamini-Hochberg, BH, q-value]
+  category: statistics
+  short: p-value corrected for many tests; padj < 0.05 means about 5 % of called genes are expected false.
+  long: >-
+    Benjamini-Hochberg adjustment controls the expected share of false discoveries among the
+    genes called significant. An NA in DESeq2 output means the gene was removed by independent
+    filtering or flagged as an outlier, not that it was untested by accident.
+  see_also: [p_value, independent_filtering, multiple_testing]
+
+- id: effect_size
+  term: effect size
+  aliases: [effect sizes, magnitude of effect, rank-biserial, Cliff's delta]
+  category: statistics
+  short: How large a difference is, independent of sample size; log2 fold change, hazard ratio, ρ.
+  long: >-
+    With enough samples, tiny effects become significant. Every test in the reports pairs
+    its p-value with an effect size and its confidence interval. For expression it is the
+    log2 fold change; for two groups, rank-biserial r; for correlations, Spearman ρ; for
+    survival, the hazard ratio.
+  see_also: [log2fc, confidence_interval, hazard_ratio]
+
+- id: confidence_interval
+  term: confidence interval
+  aliases: [CI, 95 % CI, 95% confidence interval]
+  category: statistics
+  short: Range of effect sizes compatible with the data at a given level, usually 95 %.
+  long: >-
+    A wide interval means the effect is poorly determined even if significant. Intervals
+    that exclude zero (or a hazard ratio of 1) correspond to p < 0.05. Bootstrap intervals
+    are used where no formula exists, for example for Spearman ρ.
+  see_also: [effect_size, bootstrap]
+
+- id: power
+  term: statistical power
+  aliases: [power, power analysis, sample size]
+  category: statistics
+  short: Probability of detecting an effect of a given size when it exists; 80 % is the usual target.
+  long: >-
+    Power rises with sample size, effect size and, in RNA-seq, expression level. For
+    survival it depends on the number of events, not of patients. The power maps show how
+    many samples or events a study needs for a chosen effect.
+  see_also: [replicate, hazard_ratio, sequencing_depth]
+
+- id: negative_binomial
+  term: negative binomial model
+  aliases: [NB model, negative binomial distribution, overdispersion]
+  category: statistics
+  short: Count distribution with extra variance between replicates; the model behind DESeq2 and edgeR.
+  long: >-
+    A Poisson model expects variance equal to the mean; biological replicates vary more.
+    The negative binomial adds a dispersion term: variance = mean + dispersion × mean².
+    Each gene gets its own dispersion estimate, stabilised across genes.
+  see_also: [dispersion, wald_test]
+
+- id: dispersion
+  term: dispersion
+  aliases: [gene-wise dispersion, dispersion estimate, dispersion trend]
+  category: statistics
+  short: Biological variability of a gene between replicates, beyond counting noise.
+  long: >-
+    Dispersion 0.1 means a coefficient of variation of about 32 % between replicates. With
+    few replicates the per-gene estimate is unreliable, so DESeq2 fits a trend over the mean
+    and shrinks each gene toward it. The dispersion plot shows the raw, trend and final
+    estimates.
+  see_also: [negative_binomial, dispersion_shrinkage]
+
+- id: dispersion_shrinkage
+  term: dispersion shrinkage
+  aliases: [MAP dispersion, empirical Bayes shrinkage, fitted dispersion]
+  category: statistics
+  short: Pulling unreliable per-gene dispersion estimates toward the trend fitted across all genes.
+  long: >-
+    Genes with few counts have flat likelihoods and move far toward the trend; well-measured
+    genes barely move. Genes far above the trend are left alone to avoid hiding true
+    outliers. The likelihood figure in M5 shows both cases.
+  see_also: [dispersion, lfc_shrinkage]
+
+- id: wald_test
+  term: Wald test
+  aliases: [Wald statistic, likelihood ratio test, LRT]
+  category: statistics
+  short: "DESeq2's default test: the log2 fold change divided by its standard error, compared with a normal distribution."
+  long: >-
+    The Wald statistic ranks genes by evidence, combining effect size and precision, which is
+    why it is used as the GSEA ranking metric. The likelihood ratio test compares full and
+    reduced models and suits multi-level factors.
+  see_also: [log2fc, gsea]
+
+- id: independent_filtering
+  term: independent filtering
+  aliases: [automatic filtering, mean-count filter, filtered by mean]
+  category: statistics
+  short: DESeq2 drops genes with low mean counts before adjustment to improve power for the rest.
+  long: >-
+    The filter uses only the mean count, which is independent of the test statistic, so it
+    does not bias results. Filtered genes get padj NA. The threshold is chosen to maximise
+    the number of discoveries.
+  see_also: [padj, expression_filter]
+
+- id: cooks_distance
+  term: Cook's distance
+  aliases: [Cook's, outlier count, count outlier]
+  category: statistics
+  short: Measure of how much one sample's count changes a gene's fit; flags single-sample outliers.
+  long: >-
+    A gene whose result depends on one extreme sample is unreliable. DESeq2 flags such genes
+    (padj NA) with few replicates, or replaces the outlier count with more replicates. The
+    count of flagged genes per sample is itself a QC signal.
+  see_also: [padj, sample_correlation]
+
+- id: design_formula
+  term: design formula
+  aliases: [design, model formula, "~ condition", design matrix]
+  category: statistics
+  short: The statement of which variables explain expression, for example ~ patient + condition.
+  long: >-
+    Every term absorbs variation attributed to that variable. A paired design includes the
+    patient, so the tumour-normal comparison is made within each person. Variables constant
+    within a patient (sex, age) cannot enter a paired design as main effects, but their
+    interaction with condition can.
+  see_also: [paired_design, covariate, interaction]
+
+- id: paired_design
+  term: paired design
+  aliases: [paired samples, matched samples, blocking, within-patient comparison]
+  category: statistics
+  short: Comparing conditions within the same individual, which removes between-person variation.
+  long: >-
+    Tumour and adjacent normal from one patient share genetics and environment. Modelling the
+    patient as a factor gives far more power than an unpaired test on the same samples. The
+    Venn of paired versus unpaired results shows the difference.
+  see_also: [design_formula, covariate]
+
+- id: covariate
+  term: covariate and confounder
+  aliases: [covariate, confounder, confounding, adjustment, adjusted for]
+  category: statistics
+  short: A variable that also affects expression; a confounder is one that differs between the groups compared.
+  long: >-
+    Age, sex, stage, batch and tumour purity can all shift expression. If such a variable is
+    unevenly spread across groups, its effect is mixed into the group difference. Adding it to
+    the design separates the two, provided it is not perfectly aligned with the group.
+  see_also: [design_formula, batch_effect, tumour_purity]
+
+- id: interaction
+  term: interaction term
+  aliases: [interaction, condition:sex, effect modification]
+  category: statistics
+  short: Tests whether one effect differs by another variable, for example tumour effect by sex.
+  long: >-
+    Written as condition:sex. A significant interaction means the tumour-normal difference is
+    not the same in men and women. Interactions need more samples than main effects and are
+    interpreted with the plot of both groups, not from the coefficient alone.
+  see_also: [design_formula, covariate]
+
+- id: pca
+  term: principal component analysis
+  aliases: [PCA, PC1, PC2, principal components, variance explained]
+  category: statistics
+  short: Rotation of the data so that the first axes capture the largest sources of variation.
+  long: >-
+    Computed on VST values of the most variable genes; the axes state the percentage of
+    variance per component. Samples separating by condition on PC1 is reassuring; separating
+    by batch or tissue source site is a warning. Small groups make density contours
+    unreliable, so points are shown.
+  see_also: [vst, batch_effect, permanova]
+
+- id: permanova
+  term: PERMANOVA
+  aliases: [permutational MANOVA, adonis]
+  category: statistics
+  short: Permutation test of whether groups differ in multivariate space, for example on PCA distances.
+  long: >-
+    Compares between-group and within-group distances and obtains the p-value by permuting
+    group labels, so no distributional assumption is needed. Reported with the pseudo-F
+    statistic and the number of permutations.
+  source: Anderson 2001 Austral Ecology 26:32
+  see_also: [pca, permutation_test]
+
+- id: spearman
+  term: Spearman and Pearson correlation
+  aliases: [Spearman, Pearson, correlation coefficient, rho, ρ]
+  category: statistics
+  short: Pearson measures linear association; Spearman measures monotonic association on ranks.
+  long: >-
+    Spearman resists outliers and skew, which is why it is used for expression data and
+    replicate concordance. Both range from −1 to 1. Correlation says nothing about which
+    variable causes the other.
+  see_also: [sample_correlation, confidence_interval]
+
+- id: mann_whitney
+  term: Mann-Whitney U and Wilcoxon signed-rank tests
+  aliases: [Mann-Whitney, Wilcoxon, Wilcoxon signed-rank, rank-sum test, Wilcoxon rank-sum]
+  category: statistics
+  short: "Rank-based tests for two groups: Mann-Whitney for independent, Wilcoxon signed-rank for paired."
+  long: >-
+    They compare rank distributions, need no normality and resist outliers; their effect
+    size is the rank-biserial correlation. They test one gene at a time and have less power
+    than the count model for genome-wide questions. The reports use them for the genes shown
+    in box plots and label the difference.
+  see_also: [effect_size, kruskal_wallis]
+
+- id: kruskal_wallis
+  term: Kruskal-Wallis and Dunn tests
+  aliases: [Kruskal-Wallis, Dunn's test, Dunn, post hoc]
+  category: statistics
+  short: Rank-based test for three or more groups, followed by Dunn's pairwise comparisons with BH correction.
+  long: >-
+    Kruskal-Wallis says whether any group differs; Dunn's test says which pairs, with a
+    multiple-testing correction across pairs. For ordered groups such as tumour stage, a trend
+    test (Spearman with stage coded 1 to 4) is more informative.
+  see_also: [mann_whitney, padj]
+
+- id: ks_test
+  term: Kolmogorov-Smirnov test
+  aliases: [KS test, KS statistic, cumulative distribution comparison]
+  category: statistics
+  short: Compares two distributions by the largest gap between their cumulative curves.
+  long: >-
+    Used to ask whether miRNA targets have lower fold changes than non-targets: the two
+    cumulative curves are drawn and D is the maximal vertical distance. Sensitive to any
+    difference in shape, not only in location.
+  see_also: [mirna_target, effect_size]
+
+- id: fisher_test
+  term: Fisher's exact and hypergeometric tests
+  aliases: [Fisher test, hypergeometric test, hypergeometric, Fisher's exact test]
+  category: statistics
+  short: Tests whether a set of genes contains more members of a category than chance would give.
+  long: >-
+    The basis of over-representation analysis. The result depends on the background: the
+    genes that could have been selected, which are the tested genes, not the whole genome.
+    Changing the background changes the p-values.
+  see_also: [ora, background]
+
+- id: permutation_test
+  term: permutation test
+  aliases: [permutation, permutations, label shuffling]
+  category: statistics
+  short: Obtaining a p-value by recomputing the statistic many times with shuffled labels.
+  long: >-
+    Makes no assumption about the distribution. The number of permutations limits the
+    smallest p-value obtainable (1,000 permutations cannot give p below 0.001), which matters
+    when many tests are corrected together.
+  see_also: [gsea, permanova, cutpoint_bias]
+
+- id: bootstrap
+  term: bootstrap
+  aliases: [bootstrapping, resampling, bootstrap CI]
+  category: statistics
+  short: Estimating uncertainty by resampling the data with replacement many times.
+  long: >-
+    Used for confidence intervals of quantities without a closed formula, such as Spearman ρ
+    or the concordance of two fold-change sets. The number of resamples is stated with the
+    interval.
+  see_also: [confidence_interval]
+
+- id: cramers_v
+  term: Cramér's V
+  aliases: [Cramer's V, association between categorical variables]
+  category: statistics
+  short: Strength of association between two categorical variables, from 0 (none) to 1 (perfect).
+  long: >-
+    Derived from the chi-square statistic. The confounding map uses it to show which clinical
+    and technical variables travel together, for example subtype with stage or plate with
+    condition.
+  see_also: [covariate, batch_effect]
+
+# ---------------------------------------------------------------- survival
+- id: kaplan_meier
+  term: Kaplan-Meier curve
+  aliases: [KM curve, survival curve, KM plot, Kaplan–Meier]
+  category: survival
+  short: Step curve of the share of patients still event-free over time, accounting for censoring.
+  long: >-
+    Each step is an event; ticks mark censored patients; the number at risk under the plot
+    shows how many patients still contribute at each time. The tail of a curve with few
+    patients at risk is unreliable.
+  see_also: [censoring, log_rank, number_at_risk]
+
+- id: censoring
+  term: censoring
+  aliases: [censored, right-censoring, lost to follow-up]
+  category: survival
+  short: A patient whose event has not happened by the last contact; their time is a lower bound.
+  long: >-
+    Censored patients count while followed and drop out of the at-risk set afterwards. This
+    is what makes survival methods different from ordinary comparisons of times. The swimmer
+    plot shows each patient's follow-up and how it feeds the curve.
+  see_also: [kaplan_meier, follow_up]
+
+- id: number_at_risk
+  term: number at risk
+  aliases: [at-risk table, risk table, at risk]
+  category: survival
+  short: Patients still under observation and event-free at each time point on a survival plot.
+  long: >-
+    Printed under every Kaplan-Meier curve. When the number at risk drops to a handful, the
+    curve can jump on single events and confidence bands widen. Conclusions should not rest
+    on that part of the curve.
+  see_also: [kaplan_meier, censoring]
+
+- id: log_rank
+  term: log-rank test
+  aliases: [log rank, Mantel-Cox test, log-rank p]
+  category: survival
+  short: Test of whether two or more survival curves differ across the whole follow-up.
+  long: >-
+    Compares observed and expected events in each group at every event time. It gives no
+    effect size; the hazard ratio from a Cox model does. With ordered groups a trend version
+    exists.
+  see_also: [kaplan_meier, hazard_ratio]
+
+- id: hazard_ratio
+  term: hazard ratio (Cox model)
+  aliases: [HR, Cox regression, Cox proportional hazards, Cox model]
+  category: survival
+  short: Relative event rate between groups from a Cox model; HR 2 means events occur at twice the rate.
+  long: >-
+    Cox regression estimates hazard ratios with confidence intervals and adjusts for
+    covariates such as age and stage. For a continuous predictor the HR is per unit, here per
+    standard deviation of expression. It assumes the ratio is constant over time.
+  see_also: [proportional_hazards, log_rank, c_index]
+
+- id: proportional_hazards
+  term: proportional hazards assumption
+  aliases: [PH assumption, Schoenfeld residuals, PH test]
+  category: survival
+  short: The Cox model assumes the hazard ratio does not change over follow-up; tested with Schoenfeld residuals.
+  long: >-
+    When curves cross, the assumption fails and one hazard ratio misrepresents the effect. The
+    test's p-value is reported with every model; when it fails, the restricted mean survival
+    time difference is reported instead.
+  see_also: [hazard_ratio, rmst]
+
+- id: rmst
+  term: restricted mean survival time
+  aliases: [RMST, RMST difference]
+  category: survival
+  short: Average event-free time up to a chosen horizon; its difference between groups is an effect size in time units.
+  long: >-
+    The area under the Kaplan-Meier curve up to the horizon. It does not need proportional
+    hazards and is read directly as months gained or lost. The horizon must be stated and
+    should lie where both groups still have patients at risk.
+  see_also: [kaplan_meier, proportional_hazards]
+
+- id: c_index
+  term: concordance index
+  aliases: [C-index, Harrell's C, concordance statistic]
+  category: survival
+  short: How often the model ranks the patient with the earlier event as higher risk; 0.5 is chance.
+  long: >-
+    A measure of discrimination for survival models, comparable to an AUC. Values for single
+    genes are usually close to 0.5; clinical models reach 0.7 or more.
+  see_also: [hazard_ratio]
+
+- id: cutpoint_bias
+  term: optimal cut-point bias
+  aliases: [cut-point hacking, optimal cutpoint, best separation cutoff, minimum p-value]
+  category: survival
+  short: Choosing the expression cut-off that gives the smallest p-value inflates significance.
+  long: >-
+    Scanning many cut-offs and reporting the best is a multiple-testing problem; the minimum
+    p-value is far too small. Pre-specify the split (median, tertiles) or correct the scan
+    (maximally selected statistics, permutation). Portals that report best-separation
+    cut-offs are read with this in mind.
+  source: Altman et al. 1994 J Natl Cancer Inst 86:829; Lausen & Schumacher 1992 Biometrics 48:73
+  see_also: [multiple_testing, permutation_test]
+
+- id: survival_endpoints
+  term: OS, DSS, DFI and PFI
+  aliases: [overall survival, OS, disease-specific survival, DSS, disease-free interval, DFI, progression-free interval, PFI, endpoint]
+  category: survival
+  short: TCGA's four curated outcomes; the event is death (OS), cancer death (DSS), recurrence (DFI) or progression (PFI).
+  long: >-
+    Defined by the TCGA Pan-Cancer Clinical Data Resource, which also recommends which
+    endpoints suit each cancer type. Breast cancer follow-up is too short for OS and DSS,
+    while PFI and DFI are recommended. PFI counts distant metastasis among its events;
+    metastasis-free survival is not a TCGA endpoint.
+  source: Liu et al. 2018 Cell 173:400 (TCGA-CDR)
+  see_also: [censoring, follow_up]
+
+- id: follow_up
+  term: follow-up
+  aliases: [median follow-up, follow-up time, reverse Kaplan-Meier]
+  category: survival
+  short: How long patients were observed; short follow-up means few events and low power.
+  long: >-
+    Median follow-up is estimated with the reverse Kaplan-Meier method, treating censoring as
+    the event. Power for survival analysis depends on the number of events, not the number of
+    patients: breast OS in TCGA has 151 events among 1,097 patients.
+  source: Liu et al. 2018 Cell 173:400 (event counts)
+  see_also: [censoring, power, survival_endpoints]
+
+- id: confounding_by_indication
+  term: confounding by indication
+  aliases: [treatment selection, immortal time bias, treatment confounding]
+  category: survival
+  short: Patients receive a treatment because of their prognosis, so treatment groups differ before treatment starts.
+  long: >-
+    Comparing survival by treatment received in observational data mixes the treatment effect
+    with the reasons for choosing it. Immortal time bias adds to it: patients must survive
+    long enough to start treatment. TCGA samples were taken before therapy, so expression
+    cannot reflect treatment effects either.
+  see_also: [covariate, hazard_ratio]
+
+# ---------------------------------------------------------------- functional analysis
+- id: gene_set
+  term: gene set
+  aliases: [gene sets, pathway, term, GMT file, gene set library]
+  category: function
+  short: A named list of genes that share a function, pathway or origin.
+  long: >-
+    Sources include Gene Ontology (functions and processes), Reactome and KEGG (pathways),
+    MSigDB Hallmark (curated summary sets) and disease libraries. Stored as GMT files, one
+    set per line. Set sizes matter: tiny and huge sets give unstable results.
+  see_also: [ora, gsea, msigdb]
+
+- id: msigdb
+  term: MSigDB and Hallmark sets
+  aliases: [MSigDB, Hallmark, Hallmark gene sets, C7 ImmuneSigDB, Gene Ontology, GO, Reactome, KEGG]
+  category: function
+  short: "The main gene-set collections: 50 Hallmark summaries, Gene Ontology, Reactome, KEGG and more."
+  long: >-
+    Hallmark sets condense many overlapping sets into 50 well-defined processes and are the
+    first choice for an overview. GO is large and redundant; Reactome and KEGG are pathway
+    maps, and KEGG has licence conditions for non-academic use. Versions are pinned in every
+    result.
+  see_also: [gene_set, ora, gsea]
+
+- id: ora
+  term: over-representation analysis
+  aliases: [ORA, enrichment analysis, Enrichr, hypergeometric enrichment]
+  category: function
+  short: Asks whether a list of selected genes contains more of a gene set than expected by chance.
+  long: >-
+    Uses Fisher's exact or hypergeometric test. The result depends on the threshold that made
+    the list and on the background. Using all genes as background instead of the tested
+    genes inflates every result, which the background-trap demo shows.
+  see_also: [fisher_test, background, gsea]
+
+- id: background
+  term: background (universe)
+  aliases: [universe, background genes, reference set]
+  category: function
+  short: The set of genes that could have been selected; for RNA-seq, the genes that were tested.
+  long: >-
+    Genes not expressed in the tissue could never appear in the list, so counting them as
+    candidates makes every set look enriched. The correct background is the tested genes
+    after expression filtering.
+  see_also: [ora, expression_filter]
+
+- id: gsea
+  term: gene set enrichment analysis
+  aliases: [GSEA, prerank, preranked GSEA, running score]
+  category: function
+  short: Tests whether a gene set concentrates at the top or bottom of a ranked gene list; no threshold needed.
+  long: >-
+    Genes are ranked by a statistic (here the Wald statistic), and a running score walks
+    down the list. Significance comes from permutations. The normalised enrichment score
+    (NES) gives direction and strength; the leading edge lists the genes that drive it.
+  source: Subramanian et al. 2005 PNAS 102:15545
+  see_also: [nes, leading_edge, ora]
+
+- id: nes
+  term: normalised enrichment score
+  aliases: [NES, enrichment score, ES]
+  category: function
+  short: GSEA's effect size, scaled so sets of different sizes are comparable; sign gives direction.
+  long: >-
+    Positive NES means the set is enriched among up-regulated genes, negative among
+    down-regulated. Compare NES across sets only within one analysis. The FDR q-value
+    accompanies it.
+  see_also: [gsea, leading_edge]
+
+- id: leading_edge
+  term: leading edge
+  aliases: [leading-edge genes, core enrichment]
+  category: function
+  short: The subset of a gene set that accounts for its enrichment; the genes worth looking at.
+  long: >-
+    Genes before the peak of the running score. Overlapping leading edges between sets show
+    that several enriched terms reflect the same genes, which the enrichment map visualises.
+  see_also: [gsea, enrichment_map]
+
+- id: enrichment_map
+  term: enrichment map
+  aliases: [term network, term similarity network]
+  category: function
+  short: Network of enriched sets, linked when they share genes, to reveal redundant terms.
+  long: >-
+    Sets sharing many genes cluster into one theme. Reading the clusters instead of the raw
+    list prevents counting the same biology ten times under different names. Links use the
+    Jaccard index of the gene overlap.
+  see_also: [leading_edge, gene_set]
+
+- id: disease_association
+  term: disease association
+  aliases: [Open Targets, DisGeNET, disease gene sets, prognostic gene]
+  category: function
+  short: Evidence linking a gene to a disease from genetics, literature or expression; association is not mechanism.
+  long: >-
+    Open Targets scores combine several evidence types; DisGeNET and similar libraries list
+    gene-disease pairs. A prognostic association in survival data likewise shows correlation
+    with outcome, not a cause. Both inform hypotheses for validation.
+  see_also: [gene_set, cutpoint_bias]
+
+# ---------------------------------------------------------------- proteomics
+- id: mass_spectrometry
+  term: mass spectrometry proteomics
+  aliases: [MS proteomics, LC-MS/MS, shotgun proteomics, bottom-up proteomics]
+  category: proteomics
+  short: Measuring proteins by digesting them into peptides, which are identified and quantified by mass.
+  long: >-
+    Peptides are matched to a sequence database; protein abundance is inferred from its
+    peptides. Coverage depends on abundance and peptide properties, so low-abundance and
+    membrane proteins are often missing rather than absent.
+  see_also: [protein_group, missing_values, tmt]
+
+- id: tmt
+  term: TMT labelling
+  aliases: [TMT, tandem mass tag, isobaric labelling, label-free quantification, LFQ]
+  category: proteomics
+  short: Chemical tags that let several samples be measured together; values are ratios within a batch.
+  long: >-
+    Each TMT batch reports abundance relative to a pooled reference, so comparisons across
+    batches need the reference. Ratio compression makes large differences look smaller than
+    they are. Label-free quantification measures samples separately with more missing
+    values.
+  see_also: [ratio_compression, mass_spectrometry, batch_effect]
+
+- id: protein_group
+  term: protein group
+  aliases: [protein groups, razor peptide, shared peptides]
+  category: proteomics
+  short: Proteins that their peptides cannot distinguish are reported together.
+  long: >-
+    Isoforms and paralogues share peptides, so quantification is at the group level. Mapping
+    groups to gene symbols is many-to-one; joins to RNA data must handle this explicitly.
+  see_also: [mass_spectrometry, rna_protein_correlation]
+
+- id: missing_values
+  term: missing values (proteomics)
+  aliases: [missingness, not detected, NA in proteomics]
+  category: proteomics
+  short: Proteins not quantified in a sample; usually below detection, sometimes truly absent.
+  long: >-
+    Missing values are not zeros and are not random: low-abundance proteins go missing more
+    often. Tests are restricted to proteins quantified in most samples, and the missing
+    share is reported per protein and per sample.
+  see_also: [mass_spectrometry, tmt]
+
+- id: ratio_compression
+  term: ratio compression
+  aliases: [compressed ratios, co-isolation interference]
+  category: proteomics
+  short: TMT ratios are pushed toward 1 by interference from co-isolated peptides.
+  long: >-
+    A true four-fold change may appear as two-fold. Ranking and correlation are affected less
+    than absolute fold changes. It is one reason RNA and protein fold changes are compared by
+    rank rather than by value.
+  see_also: [tmt, rna_protein_correlation]
+
+- id: rna_protein_correlation
+  term: RNA-protein correlation
+  aliases: [mRNA-protein correlation, concordance, RNA versus protein]
+  category: proteomics
+  short: How well a gene's mRNA level predicts its protein level across samples; often only moderate.
+  long: >-
+    Translation control, protein half-life, complex stoichiometry, secretion and timing of
+    synthesis all break the link. Per-gene Spearman ρ across samples and concordance of
+    fold changes are the two standard views. Neutrophil granule proteins are an extreme case:
+    transcribed early in development, present later as protein.
+  see_also: [spearman, protein_group, ribo_seq]
+
+- id: ribo_seq
+  term: ribosome profiling
+  aliases: [Ribo-seq, translation efficiency, ribosome footprinting]
+  category: proteomics
+  short: Sequencing of ribosome-protected fragments; shows which RNAs are being translated.
+  long: >-
+    Translation efficiency is Ribo-seq signal divided by RNA-seq signal. It is the missing
+    layer between mRNA and protein and the method that finds translated smORFs. Discussed in
+    the course; not run.
+  see_also: [smorf, rna_protein_correlation]
+
+# ---------------------------------------------------------------- data sources and formats
+- id: fastq
+  term: FASTQ file
+  aliases: [FASTQ, fastq.gz, raw reads file]
+  category: data
+  short: "Text file with one read per four lines: name, sequence, separator, quality string."
+  long: >-
+    Almost always gzip-compressed. Paired-end data come as two files (_1 and _2) with reads
+    in the same order. Roughly 0.4 to 0.5 bytes per base when compressed; a 40 M fragment
+    2 × 100 bp sample is about 3 to 4 GB.
+  see_also: [phred, read]
+
+- id: accession
+  term: accession
+  aliases: [accession ID, GSE, GSM, SRP, SRX, SRR, PRJNA, PRJEB, ERP, ERR, E-MTAB]
+  category: data
+  short: Identifier of a public dataset; the prefix says which archive and which level (study, sample, run).
+  long: >-
+    GEO uses GSE (series) and GSM (sample); SRA uses SRP (study), SRX (experiment), SRR
+    (run), with BioProject PRJNA. ENA uses ERP, ERX, ERR and PRJEB; ArrayExpress uses
+    E-MTAB, mirrored to ENA. A study ID pulls every run; a run ID selects one file set.
+  see_also: [geo, ena, fetchngs]
+
+- id: geo
+  term: GEO and SRA
+  aliases: [GEO, Gene Expression Omnibus, SRA, Sequence Read Archive, NCBI]
+  category: data
+  short: "NCBI archives: GEO holds metadata and processed data, SRA holds the raw reads."
+  long: >-
+    A GEO series links to its SRA study. SRA stores reads in its own .sra format, converted
+    with sra-tools. ENA mirrors the same reads as ready-made FASTQ files, so downloads
+    usually come from ENA.
+  see_also: [ena, accession, fetchngs]
+
+- id: ena
+  term: ENA
+  aliases: [European Nucleotide Archive, ArrayExpress, BioStudies, DDBJ]
+  category: data
+  short: EBI's read archive; mirrors SRA and DDBJ and serves FASTQ files by FTP and Aspera.
+  long: >-
+    ENA provides run-level metadata (library layout, read count, file size, md5) through its
+    portal API. ArrayExpress and BioStudies hold array and sequencing study descriptions whose
+    reads live in ENA. New submissions can lag between the three archives.
+  see_also: [geo, accession, md5]
+
+- id: fetchngs
+  term: nf-core/fetchngs
+  aliases: [fetchngs]
+  category: tools
+  short: Nextflow pipeline that turns a list of accessions into downloaded FASTQ files and a sample sheet.
+  long: >-
+    Resolves GEO, SRA, ENA and DDBJ IDs, downloads from ENA (or sra-tools), verifies md5 sums
+    and writes samplesheet.csv with ENA metadata columns. With --skip_fastq_download it
+    produces metadata only, which is a fast way to inspect a study before committing disk.
+  see_also: [accession, md5, ena]
+
+- id: md5
+  term: md5 checksum
+  aliases: [md5, checksum, md5sum, sha256]
+  category: data
+  short: A fingerprint of a file's bytes; matching the published value proves the download is intact.
+  long: >-
+    Any changed byte gives a different checksum. ENA publishes md5 values per FASTQ;
+    fetchngs checks them. Checksums detect corruption, not tampering; sha256 is used where a
+    stronger fingerprint is needed, for example in the Reproduce panels.
+  see_also: [fetchngs, fastq]
+
+- id: open_access
+  term: open and controlled access
+  aliases: [controlled access, dbGaP, data access tier, open-access data]
+  category: data
+  short: Open data can be downloaded by anyone; controlled data need an approved application.
+  long: >-
+    TCGA raw reads are controlled (dbGaP) because they contain germline variants; processed
+    counts and clinical data are open. Some GEO human datasets withhold reads for privacy.
+    The course uses open data only.
+  see_also: [tcga, geo]
+
+- id: parquet
+  term: Parquet file
+  aliases: [Parquet, columnar file, .parquet]
+  category: data
+  short: Compressed, typed, column-oriented file format; faster and smaller than CSV for tables.
+  long: >-
+    Results are written as Parquet for computation and CSV for reading by eye. Parquet keeps
+    column types (integer, float, category), which CSV loses, and reads selected columns
+    without loading the whole file.
+  see_also: []
+
+- id: multiqc
+  term: MultiQC
+  aliases: [MultiQC report, general statistics table]
+  category: tools
+  short: Tool that collects QC output from many programs into one report and one table.
+  long: >-
+    MultiQC parses FastQC, fastp, STAR, Salmon, featureCounts, RSeQC, Qualimap and others.
+    The general statistics table gives one row per sample. Every number in the QC atlas is
+    taken from MultiQC's parsed data, so the two never disagree.
+  see_also: [fastp, qc_bands]
+
+- id: fastp
+  term: fastp
+  aliases: [fastp JSON, fastp report]
+  category: tools
+  short: Fast read trimmer and filter that also reports quality metrics before and after trimming.
+  long: >-
+    Detects adapters automatically, trims quality tails and poly-G, and filters by quality,
+    N count and length. It writes a JSON with per-position quality, GC, duplication and
+    insert size. It replaces FastQC plus a trimmer in one pass.
+  see_also: [quality_trimming, adapter_content, polyg]
+
+# ---------------------------------------------------------------- clinical and cohorts
+- id: tcga
+  term: TCGA and GDC
+  aliases: [TCGA, The Cancer Genome Atlas, GDC, Genomic Data Commons]
+  category: clinical
+  short: TCGA profiled about 11,000 tumours across 33 cancer types; GDC distributes the data.
+  long: >-
+    Each project is one cancer type (BRCA breast, KIRC clear-cell kidney, LUAD lung
+    adenocarcinoma, LUSC lung squamous). GDC provides uniformly processed STAR counts,
+    miRNA counts and clinical tables through its API. Tumours were collected before systemic
+    therapy.
+  see_also: [tcga_barcode, open_access, nat]
+
+- id: tcga_barcode
+  term: TCGA barcode and sample type
+  aliases: [TCGA barcode, sample type code, 01 tumour, 11 normal, aliquot]
+  category: clinical
+  short: >-
+    TCGA-<site>-<patient>-01A: project, tissue source site, patient, sample type (01 tumour,
+    11 normal), vial.
+  long: >-
+    The first 12 characters identify the patient. Characters 14 to 15 give the sample type:
+    01 primary tumour, 06 metastasis, 11 solid tissue normal, 10 blood-derived normal; plate
+    and centre follow. One patient can have several aliquots; keep one per sample.
+  see_also: [tcga, nat, batch_effect]
+
+- id: tissue_source_site
+  term: tissue source site
+  aliases: [TSS, collection site, plate, sequencing centre]
+  category: clinical
+  short: The hospital or biobank that contributed the TCGA sample, encoded in the barcode.
+  long: >-
+    Sites differ in surgery, fixation and processing, so tissue source site and plate are
+    batch variables. Checking them against the condition shows whether a comparison is
+    confounded.
+  see_also: [tcga_barcode, batch_effect]
+
+- id: nat
+  term: normal adjacent tissue
+  aliases: [NAT, adjacent normal, solid tissue normal, tumour-adjacent]
+  category: clinical
+  short: Histologically normal tissue taken near the tumour; the "normal" in most tumour-normal comparisons.
+  long: >-
+    It is not healthy tissue from a healthy person. Field effects (smoking-related changes
+    in lung NAT), inflammation and different cell composition (fat-rich breast NAT) shape
+    the comparison. GTEx provides tissue from donors without cancer as a second reference.
+  see_also: [gtex, field_effect, tumour_purity]
+
+- id: field_effect
+  term: field effect
+  aliases: [field cancerisation, field cancerization]
+  category: clinical
+  short: Molecular changes in normal-looking tissue around a tumour, from the same exposures.
+  long: >-
+    CPTAC lung adenocarcinoma reported smoking-associated changes in the adjacent normal
+    tissue. A gene that looks unchanged between tumour and NAT may still differ from healthy
+    tissue.
+  source: Gillette et al. 2020 Cell 182:200 (CPTAC LUAD)
+  see_also: [nat, gtex]
+
+- id: gtex
+  term: GTEx
+  aliases: [Genotype-Tissue Expression, GTEx Portal, TOIL]
+  category: clinical
+  short: RNA-seq of about 50 tissues from post-mortem donors without cancer; the normal-tissue reference.
+  long: >-
+    Expression is available per tissue and per sample, with exon and junction level counts on
+    a collapsed gene model. Donors are older, tissues are post-mortem, and both sexes
+    contribute to tissues such as breast. Comparing TCGA with GTEx needs uniformly processed
+    data (the TOIL recompute).
+  see_also: [nat, gene_model, batch_effect]
+
+- id: cptac
+  term: CPTAC
+  aliases: [Clinical Proteomic Tumor Analysis Consortium, PDC, Proteomic Data Commons]
+  category: clinical
+  short: Consortium that measured proteins (and phosphosites) on tumours with matched RNA-seq.
+  long: >-
+    Cohorts include clear-cell kidney, lung adenocarcinoma and squamous, breast and pancreas.
+    Lung cohorts have matched normal adjacent tissue; the breast cohort has tumours only.
+    Data are open through the Proteomic Data Commons.
+  see_also: [tmt, rna_protein_correlation, nat]
+
+- id: tumour_purity
+  term: tumour purity
+  aliases: [purity, tumor purity, stromal contamination, immune infiltration]
+  category: clinical
+  short: Share of tumour cells in a bulk sample; the rest is stroma, immune cells and normal tissue.
+  long: >-
+    Bulk RNA-seq averages over all cells. A gene "up in tumour" may reflect infiltrating
+    immune cells, and purity differences between groups create false differential
+    expression. Purity estimates (from DNA) are used as a covariate; single-cell references
+    show which cell type expresses a gene.
+  see_also: [covariate, nat]
+
+- id: pam50
+  term: PAM50 subtype
+  aliases: [PAM50, intrinsic subtype, luminal A, luminal B, HER2-enriched, basal-like]
+  category: clinical
+  short: Breast cancer classification into five subtypes from 50 genes' expression.
+  long: >-
+    Luminal A, luminal B, HER2-enriched, basal-like and normal-like differ in biology and
+    outcome. Subtype is the dominant source of variation in breast tumour expression, so
+    analyses ignoring it compare mixtures.
+  source: Parker et al. 2009 J Clin Oncol 27:1160
+  see_also: [receptor_status, covariate]
+
+- id: receptor_status
+  term: ER, PR and HER2 status
+  aliases: [ER status, PR status, HER2 status, ER-positive, ER-negative, hormone receptor, triple-negative]
+  category: clinical
+  short: Clinical markers of breast cancer measured by pathology; they guide treatment and align with subtype.
+  long: >-
+    ER-positive tumours receive endocrine therapy, HER2-positive tumours anti-HER2 therapy.
+    Because treatment follows receptor status, expression-by-treatment comparisons in TCGA
+    mostly reflect receptor status.
+  see_also: [pam50, confounding_by_indication]
+
+- id: stage
+  term: tumour stage (TNM)
+  aliases: [stage, TNM, pathologic stage, AJCC stage, grade]
+  category: clinical
+  short: "How far a cancer has spread: tumour size (T), lymph nodes (N), metastasis (M), summarised as stage I to IV."
+  long: >-
+    Stage is ordered, so trend tests suit it better than treating stages as unrelated
+    groups. Grade describes how abnormal the cells look and is separate from stage. Both are
+    standard covariates in survival models.
+  see_also: [covariate, kruskal_wallis]
+
+- id: immune_cell_types
+  term: innate immune cells
+  aliases: [neutrophils, monocytes, macrophages, low-density neutrophils, LDN, NDN, tumour-associated neutrophils, TAM]
+  category: clinical
+  short: Neutrophils, monocytes and macrophages; first responders whose transcriptomes change in cancer.
+  long: >-
+    Normal-density neutrophils (NDN) and low-density neutrophils (LDN) are separated by
+    density-gradient isolation; LDNs expand in cancer and after G-CSF. Tumour-associated
+    neutrophils and macrophages differ from their circulating counterparts. Mature
+    neutrophils carry little RNA, which lowers library yield.
+  see_also: [globin_fraction, rna_protein_correlation]
+
+# ---------------------------------------------------------------- figure types
+- id: volcano_plot
+  term: volcano plot
+  aliases: [volcano]
+  category: statistics
+  short: "Each gene as a point: effect size (log2 fold change) against significance (−log10 adjusted p)."
+  long: >-
+    Genes in the upper corners are both large and significant. The vertical and horizontal
+    lines are the chosen cut-offs; moving them changes the gene list, which the sliders show.
+    Shrunken fold changes pull low-count genes toward the centre.
+  see_also: [log2fc, padj, lfc_shrinkage]
+
+- id: ma_plot
+  term: MA plot
+  aliases: [MA-plot, mean-difference plot]
+  category: statistics
+  short: log2 fold change (M) against mean expression (A) for every gene; shows where estimates are noisy.
+  long: >-
+    Fold changes fan out at low mean expression because few counts give noisy estimates;
+    shrinkage narrows that fan. Significant genes are coloured; the density contours show
+    where most genes lie.
+  see_also: [log2fc, lfc_shrinkage, volcano_plot]
+
+- id: heatmap
+  term: heatmap
+  aliases: [clustered heatmap, expression heatmap, z-score heatmap]
+  category: statistics
+  short: Grid of colour-coded values, usually genes by samples, with rows and columns clustered.
+  long: >-
+    Values are scaled per gene (z-scores) so that each row shows deviation from its own mean,
+    not absolute expression. Clustering order, distance metric and the scaling are stated in
+    the caption; without them a heatmap cannot be read.
+  see_also: [vst, pca]
+
+- id: upset_venn
+  term: Venn and UpSet plots
+  aliases: [Venn diagram, Venn, UpSet, UpSet plot, set overlap]
+  category: statistics
+  short: Show how gene sets from different analyses overlap; UpSet scales to many sets where Venn does not.
+  long: >-
+    Overlap size is compared with what chance would give (Fisher's test) when two sets are
+    involved. Differences between paired and unpaired designs, or between cohorts, are read
+    from these plots.
+  see_also: [fisher_test, paired_design]
