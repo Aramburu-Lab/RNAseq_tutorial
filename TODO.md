@@ -448,6 +448,7 @@ Each item starts when the one before it is merged, because they change the same 
 10. [ ] M8 controls: the neighbour drop-down and the biotype volcano's cut-offs.
 11. [ ] M10, breast first, with GS.7 and its controls designed in, including the GDC count ingest it needs: planned and brought to Rytis before building.
 12. [ ] The external-data research, then M9 with GS.9: planned and brought to Rytis before building.
+13. [ ] When 1 to 12 and the side items are merged (Rytis, 2026-10-01): go through this file again, every unchecked item of every phase, and implement each with a long-term, root-cause solution, never a workaround. Items that need Rytis (a decision, a cluster run, an account, a release, CI billing) are brought to him with the recommended answer first; the rest are planned, built, reviewed and merged in phase order.
 
 Alongside: the heatmap fix; M3.6, then M3.7 (the page at 1280 and 375 px), M3.9 (a cold run on the 8 teaching runs) and kit v5; the monocyte download and count (P4.4).
 
