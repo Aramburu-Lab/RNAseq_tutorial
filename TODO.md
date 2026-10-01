@@ -3063,6 +3063,7 @@ for d in ~/ctx_breast/data/raw/tcga_brca ~/ctx_breast/data/raw/tcga_brca_mirna ~
 ```
 
 Run on the Mac: TCGA-KIRC star, 2026-10-01, 24 of 24 equal to their expectation in 665 s, 2.9 GB on disk. Four transfers failed and curl retried each (`--retry 6 --retry-all-errors`): one HTTP 500, one cut transfer, two connection resets. Rechecked apart from the script, every file against `gdc_manifest_star_counts.txt`: 614 of 614 md5 and size equal, 2,604,662,993 bytes, 0 `.part` files, 0 data folders outside the manifest.
+TCGA-LUAD star, 2026-10-01: 24 of 24 in 625 s, 2.8 GB on disk; curl retried 20 failed transfers (18 connection resets, 2 cut transfers). Rechecked apart from the script: 601 of 601 md5 and size equal, 2,546,560,815 bytes, 0 `.part` files, 0 data folders outside the manifest.
 
 ### Phase 4 cluster commands (P4.4), the only copy
 
