@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-051 — Every interactive figure carries a control that changes what it shows or selects data, wherever the data allow one
+
+**Date:** 2026-10-01 · **Status:** decided
+
+**Context.** Rytis, 2026-10-01, after a day of page review: "whenever possible, interactive figures should have some sort of interactive regulation which would change how the figure looks like or selects specific data". Three figures had controls (D-033's linked brush, the volcano's live calls, a bar's filters); the others only hover. His drafts' "turn the knob" device (v3.11/v3.12 TODO: every module exposes 2 to 4 parameters as controls or precomputed alternatives) asked for this per module; this asks for it per figure. The same day he asked for a selectable FDR on two M6 figures (P2S.5) and for the static files to follow whatever a control changed (the qc-page-fixes export).
+
+**Options.** A control per figure wherever the data allow one; controls on chosen figures only; the module-level knobs alone.
+
+**Decision.** A control per figure wherever the data allow one: a threshold, a filter, a grouping, a choice of what is plotted, or a selection painted across views, recomputed in the page from data the page already carries. A figure with none records why (no meaningful choice in its data, or one that needs a recomputation the page cannot do). The PDF and SVG buttons export the view as set. An audit of every figure proposes each control, Rytis approves, and the controls are built module by module (P2S.6).
+
+**Evidence.** None: a teaching choice by the course's author.
+
+**Consequence.** Each new figure contract states its control or why it has none; M3.6 builds its figures with controls from the start. Page size grows with the data a control needs, under the 15 MB cap.
+
+---
+
 ## D-050 — Read-level pages show the full Step-1 cohort; the 8-run subset is an optional laptop exercise; made-up pages leave at the release
 
 **Date:** 2026-10-01 · **Status:** decided
