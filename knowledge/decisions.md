@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-052 — QC background bands: 11 sourced, 4 course conventions, 6 reference lines or call regions, 6 left to the stratum check
+
+**Date:** 2026-10-01 · **Status:** decided, to be built (P2Q.9)
+
+**Context.** Rytis asked that every tab of M2's "Every metric, sample by sample" shade good, usable and bad, and chose research first, then course conventions he approves. 5 of 32 metrics had a sourced cut-off; the other 27 were judged only against their stratum (median ± k scaled MAD).
+
+**Options.** Per metric: a cut-off from a source (tool code, pipeline default, consortium standard, paper); a course convention with its reasoning; a reference line or call regions where good, usable and bad do not map onto the data; or none.
+
+**Decision.** Rytis, 2026-10-01, approved the proposal's 16 recommended answers as written: 11 metrics take a verified sourced cut-off (ENCODE's 30 M and 20 M reads for total_sequences and library_size; FastQC 0.12.1's limits for adapter 5 and 10, N content 5 and 20, sequence content 10 and 20 from position 14, GC distribution 15 and 30, overrepresented 0.1 and 1; Salmon 2.7.0's mapping rate 30 and 10; and the per-base quality bands as they stand); 4 take a course convention (fastp surviving 95 and 90 %, Trim Galore kept 99.9 and 99 %, quality-trimmed 2.3 and 20 %, globin 0.1 and 1 %); 6 take a reference line or call regions (read length 50 nt, GC 49.8 %, adapter share 33.3 %, compatible ratio 95 %, mitochondrial rRNA 0.1, the strand-call regions, the sex half-planes); 6 stay unshaded (genes detected, top-gene share, mitochondrial fraction, nuclear rRNA, agreement with group, distance from group), each tab saying why. 10 bands only shade (plot_bands, plot_line); 5 judge, 4 of them FastQC verdicts that judge already, and Salmon's mapping rate the one new judging band. The adapter band goes on FastQC run on the raw reads of all 210 samples, copied from nf-core's run. top_gene_share and rrna_fraction get corrected definitions before any band; until then rrna_fraction's action is keep. The 53 globin MAD flags stay. checkpoint `_show` stops printing "100 is below 100".
+
+**Evidence.** The proposal and its sources, each opened and quoted, every count recounted by a second agent: `scratchpad/bands/PROPOSAL_approved_2026-10-01.md` and `proposal.json` (session scratch, copied into the repo with the build). On Step-1, 0 flags change under the approved rows; nuclear rRNA's keep unflags 4 samples; full-cohort FastQC flags are counted when the files arrive.
+
+**Consequence.** The strip figure draws plot_bands and a single line where a metric has no good or usable; the registry checks a band's order against its direction and refuses unknown keys; the FastQC status tabs draw per-position curves behind the bands; `ctx gather` reads the raw-read FastQC reports through MultiQC. Any later change to a band is a new D-entry.
+
+---
+
 ## D-051 — Every interactive figure carries a control that changes what it shows or selects data, wherever the data allow one
 
 **Date:** 2026-10-01 · **Status:** decided
@@ -40,6 +56,8 @@ it were reversed.
 **Evidence.** None: a teaching choice by the course's author.
 
 **Consequence.** Each new figure contract states its control or why it has none; M3.6 builds its figures with controls from the start. Page size grows with the data a control needs, under the 15 MB cap.
+
+**Plan approved 2026-10-01 (Rytis, all 12 recommended answers).** The audit of 75 figures (59 built, 3 with a control) proposes a control for 51, defers 5, cites 2 planned elsewhere, writes the control into the contract of 12 planned figures and finds 5 with none. Four shared kinds: `subset` (from today's filter), `view`, `threshold` (from today's calls, a JS twin tested against the Python definition), `brush`. A changed view exports in the browser (the qc-page-fixes route), the Matplotlib files staying the default view's; the embedded Liberation Sans is subset to the characters the pages set and the M5 dispersion trend thinned before that merge, since the export measured 1,607,890 B per page (1,100,261 B of it fonts) and the M5 overview would reach 14,387,080 B; words a control cannot keep true go in a live line appended to the caption; presets where a source names the values; M1 and M2 kinds first, then P2S.4 and P2S.5 as one threshold rule, M5, M6, M3, M8; on made-up previews only the two M8 controls Rytis named, every other preview control written into its module's contract and measured on real data first. Step 0 defects are fixed regardless, among them the bar filter whose lead never follows it (6 pages) and M6's 1681 up genes against M5's 1,683 up calls, unexplained. The plan: `scratchpad/interactivity/approved/PLAN_approved_2026-10-01.md` (session scratch; its tables go into TODO.md P2S.6 with the first build).
 
 ---
 
@@ -881,6 +899,8 @@ Checked in the browser on the synthetic M5 page and hub: 1280 px light, the togg
 
 **Consequence.** No frozen file changed; `annotate.py` reads the new sizes through the names it already imports. Phase 1's records of the 14 pt figures stay as history.
 
+
+**Amended 2026-10-01 (Rytis): every figure takes the double column.** A figure's height is the single column's 85 mm times its type's aspect (1.0 to 1.1), so every 85 mm figure stood taller than wide: 9 of Step-1's 58, for example 85 x 93 mm, and M8's expression filter. `style.FIGURE_WIDTH` is "double", every figure contract defaults to it, and the two rules that chose 85 mm by count (a box plot of up to 4 features, a strip of up to 4 strata) are gone; `tests/test_viz.py::test_every_figure_takes_the_double_column` fails on any "single" outside `style.py`. Heights are unchanged, so a figure is 170 by 85 to 94 mm. The journal sizes of text and lines are unchanged (Rytis kept them the same day).
 ---
 
 ## D-023 — Rytis's draft v3.10 merged: contour figures and cividis for continuous colour
