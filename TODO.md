@@ -3054,6 +3054,170 @@ for d in ~/ctx_breast/data/raw/tcga_brca ~/ctx_breast/data/raw/tcga_brca_mirna ~
 # and so does tcga_brca until step 4 has run, because P4.2 logged to _fetch_tcga_brca.log.
 ```
 
+### Phase 4 cluster commands (P4.4), the only copy
+
+Cassetta et al. 2019 blood monocytes (GSE117970, PRJNA483877): the 102 runs that are not P4.0's 22 MAC runs, 94 GEO samples (8 sequenced as two runs, merged by nf-core/rnaseq as the authors pooled them), all paired; 580,591,689,686 bytes of FASTQ by ENA's filereport, read 2026-10-01. Researched and checked by an independent skeptic, who corrected 9 minor issues (a space check for the count before the download, the reused config and batch script compared with breast_mac's, counts that printed 0 when nothing was checked). By GEO condition: breast cancer 37 runs of 34 samples, endometrial cancer 13 of 10, normal 52 of 50; the endometrial and normal monocytes are kept, as P4.0 kept the endometrial macrophages. Not decided here, for the breast dataset file: GEO does not mark which samples are non-classical monocytes (the paper's 45 healthy against 32 breast total monocytes needs its Table S1); 4 batch-6 breast samples are DCIS; sample numbers repeat across batches (MON103 to MON107 and mon103 to mon107; MON112 and MON118 against mon112 and mon118) and are not shown to be the same donors; sequencing batch is partly confounded with condition.
+
+1. Download the 102 monocyte runs (P4.0 settings, new project dir breast_mono):
+
+```
+# Kebnekaise login node. Paste back every line marked PASTE.
+# Cassetta et al. 2019 blood monocytes (GSE117970, PRJNA483877): the 102 runs that are not P4.0's
+# 22 MAC runs. 94 GEO samples, 8 of them sequenced as two runs; all paired, 2 x 100 nt.
+# 580,591,689,686 bytes of FASTQ by ENA's fastq_bytes (filereport read 2026-10-01T08:10:01Z),
+# 1.1 to 10.2 GB per run: 4.2 times P4.0's 22 MAC runs (137,937,197,084 bytes).
+# fetchngs resolves each SRR to every run of its experiment, so each two-run experiment is looked
+# up twice. fetchngs 1.12.0's two metadata scripts, run on the Mac for SRR7631577 and SRR7631578,
+# gave the same two rows both times, so its .unique() keeps one copy; step 4 counts it.
+
+# ---- 0. Nothing else downloading; space; the MAC download as the measured rate ----
+squeue -u "$USER"                                                     # PASTE, expect at most P4.0's breast_tissue nf_fetchngs job: two runs at 5 each are D-035's 10
+df -h /proj/nobackup/hpc2n2024-150                                    # PASTE; stop if under about 700G free: 541G of FASTQ kept once (link), plus margin
+# The count in block 2 needs about 1.9T more on top of the FASTQ (P4.1's work/ and results/ times 4.21; arithmetic,
+# not measured). Under about 2.4T free now, the download can run, but the count waits until space is freed.
+sacct -X -n -j 47486038 --format=JobID,JobName,Elapsed,State          # PASTE: wall time of the 138 GB MAC download; this one has 4.2 times the bytes
+M=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mac
+# Each download has 30 min on its first attempt (D-035); the largest run here is 10.2 GB, the largest MAC run 9.7 GB.
+ls "$M"/nfcore_fetchngs/results/pipeline_info/execution_trace_*.txt && awk -F'\t' 'FNR == 1 {for (i = 1; i <= NF; i++) c[$i] = i; next} $c["name"] ~ /SRA_FASTQ_FTP/ {n[$c["status"]]++; print $c["name"], $c["status"], $c["realtime"]} END {for (s in n) print "SRA_FASTQ_FTP", s, n[s]}' "$M"/nfcore_fetchngs/results/pipeline_info/execution_trace_*.txt     # PASTE: each MAC download's time and status
+
+# ---- 1. The 102 monocyte runs with the lab launcher (nf-core/fetchngs 1.12.0) ----
+export B=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mono
+mkdir -p "$B/nfcore_fetchngs"
+cat > "$B/nfcore_fetchngs/nextflow.config" <<'CONF'
+executor {
+    queueSize = 50
+}
+params {
+    monochrome_logs = true
+}
+process {
+    withName: 'SRA_FASTQ_FTP' {
+        ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
+        time          = { 30.min * task.attempt }
+        maxForks      = 5
+        maxRetries    = 6
+        errorStrategy = { sleep(Math.pow(2, task.attempt) * 30000 as long); return 'retry' }
+    }
+}
+CONF
+printf '%s\n' SRR7631576 SRR7631577 SRR7631578 SRR7631579 SRR7631580 SRR7631581 SRR7631582 SRR7631583 SRR7631584 SRR7631585 SRR7631586 SRR7631587 SRR7631588 SRR7631589 SRR7631590 SRR7631591 SRR7631592 SRR7631593 SRR7631594 SRR7631595 SRR7631596 SRR7631597 SRR7631598 SRR7631599 SRR7631600 SRR7631601 SRR7631602 SRR7631603 SRR7631604 SRR7631605 SRR7631606 SRR7631607 SRR7631608 SRR7631609 SRR7631610 SRR7631611 SRR7631612 SRR7631613 SRR7631614 SRR7631615 SRR7631616 SRR7631617 SRR7631618 SRR7631619 SRR7631620 SRR7631621 SRR7631622 SRR7631623 SRR7631624 SRR7631625 SRR7631626 SRR7631627 SRR7631628 SRR7631629 SRR7631630 SRR7631631 SRR7631632 SRR7631633 SRR7631634 SRR7631635 SRR7631636 SRR8512442 SRR8512443 SRR8512444 SRR8512445 SRR8512446 SRR8512447 SRR8512448 SRR8512449 SRR8512450 SRR8512451 SRR8512452 SRR8512453 SRR8512454 SRR8512455 SRR8512456 SRR8512457 SRR8512458 SRR8512459 SRR8512460 SRR8512461 SRR8512462 SRR8512463 SRR8512464 SRR8512465 SRR8512466 SRR8512467 SRR8512468 SRR8512469 SRR8512470 SRR8512471 SRR8512472 SRR8512473 SRR8512474 SRR8512475 SRR8512476 SRR8512477 SRR8512478 SRR8512479 SRR8512480 SRR8512481 SRR8512482 > "$B/ids.txt"
+wc -l < "$B/ids.txt"                                                  # PASTE, expect 102
+sort -u "$B/ids.txt" | wc -l                                          # PASTE, expect 102: no run listed twice
+grep -c -E '^SRR76316(3[7-9]|4[0-9]|5[0-8])$' "$B/ids.txt"            # PASTE, expect 0: none of P4.0's 22 MAC runs
+cd "$B"
+PUBLISH_DIR_MODE=link DRY_RUN=1 bash /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$B" "$B/ids.txt" rnaseq     # PASTE, expect 102 accessions and "publish mode : link"
+# 7 days, not P4.0's 3: a head job that runs out of time can only resume, and a resume writes the second params file ctx gather refuses (D-035).
+PUBLISH_DIR_MODE=link sbatch -t 7-00:00:00 /proj/nobackup/hpc2n2024-150/Rytis/Scripts/cluster_utils/SHARED_run_fetchngs.sbatch "$B" "$B/ids.txt" rnaseq
+
+# ---- 2. While it runs: refusals and 403s so far; a few, each retried, are fine ----
+grep -c "exit status (4)" "$B/nfcore_fetchngs/.nextflow.log"         # PASTE when you look
+grep -c "403: Forbidden" "$B/nfcore_fetchngs/.nextflow.log"          # PASTE when you look
+```
+
+2. Check the download (counted md5 line), write the rnaseq sheet, submit the P4.1 count (guarded):
+
+```
+# Kebnekaise login node, once squeue shows no nf_fetchngs job. Paste back every line marked PASTE.
+# Steps 3 to 5 of the monocyte recipe; each block sets its own paths, so a new login shell works.
+export B=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mono
+export T=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
+export M=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mac
+
+# ---- 3. After the fetchngs job has ended (squeue shows no nf_fetchngs job) ----
+R="$B/nfcore_fetchngs/results"
+test -s "$R/samplesheet/samplesheet.csv" && echo "samplesheet present" || echo "NO SAMPLESHEET: the fetchngs run has not finished or has failed; stop here"   # PASTE
+tail -n 12 "$B"/slurm-nf_fetchngs-*.out                               # PASTE, expect "102 row(s) in samplesheet vs 102 requested" and "all 102 accessions are present"
+grep -h 'publish mode' "$B"/slurm-nf_fetchngs-*.out                   # PASTE, expect link
+ls "$R"/fastq/*.fastq.gz | wc -l                                      # PASTE, expect 204
+ls "$R"/fastq/md5/*.md5 | wc -l                                       # PASTE, expect 204
+# Counted both ways: a missing folder or md5 file printed 0 failures on 2026-09-30. The result is kept for step 5's guard.
+(cd "$R/fastq" && for f in *.fastq.gz; do md5sum -c "md5/$f.md5"; done) 2>&1 | awk '/: OK$/{ok++; next} {bad++} END{print ok+0, "OK;", bad+0, "not OK"}' | tee "$B/md5_check.txt"   # PASTE, expect 204 OK; 0 not OK
+find "$R/fastq" -name '*.fastq.gz' -printf '%s\n' | awk '{n++; s+=$1} END{printf "%d files, %.0f bytes\n", n, s}'   # PASTE, expect 204 files, 580591689686 bytes (ENA's fastq_bytes)
+# Link counts tallied, not a count of failures: a missing folder printed 0 failures on 2026-09-30.
+find "$R/fastq" -name '*.fastq.gz' -printf '%n\n' | sort | uniq -c        # PASTE, expect "204 2": each of 204 hard-linked to work/
+awk 'END{print NR}' "$R/samplesheet/samplesheet.csv"                  # PASTE, expect 103: a header and 102 runs
+du -sh "$R/fastq"                                                     # PASTE, expect about 541G
+
+# ---- 4. rnaseq samplesheet: the fetchngs sheet cut to four columns, by name ----
+# fetchngs names each sample by its experiment (SRX), so the 8 two-run experiments become 8 samples of
+# two rows, which nf-core/rnaseq 3.27.0 concatenates before trimming (CAT_FASTQ). The authors pooled the
+# same 8: their GEO count files for exactly these samples are named "pooled".
+P="$B" python3 -c "
+import csv, os
+p = os.environ['P']
+rows = list(csv.DictReader(open(p + '/nfcore_fetchngs/results/samplesheet/samplesheet.csv')))
+asked = {line.strip() for line in open(p + '/ids.txt') if line.strip()}
+runs = [r['run_accession'] for r in rows]
+keep = ['sample', 'fastq_1', 'fastq_2', 'strandedness']
+with open(p + '/rnaseq_samplesheet.csv', 'w', newline='') as fh:
+    w = csv.DictWriter(fh, fieldnames=keep)
+    w.writeheader()
+    w.writerows({k: r[k] for k in keep} for r in rows)
+print(len(rows), 'rows;', len(set(runs)), 'runs;', len({r['sample'] for r in rows}), 'samples;', sum(bool(r['fastq_2']) for r in rows), 'paired')
+print('asked, not in the sheet:', sorted(asked - set(runs)), '; in the sheet, not asked:', sorted(set(runs) - asked))
+"                                                                     # PASTE, expect 102 rows; 102 runs; 94 samples; 102 paired, then [] and []
+
+# ---- 5. nf-core/rnaseq 3.27.0, Salmon only, with Step-1's own files ----
+# P4.1's 22 MAC runs (138 GB of FASTQ) left work/ at 384G and results/ at 66G; times 4.2 that is about
+# 1.6 TB and 0.28 TB here (arithmetic, not measured). breast_mac's work/ is Rytis's to remove (P4.1).
+df -h /proj/nobackup/hpc2n2024-150                                    # PASTE; stop if under about 2 TB free
+du -sh "$M/nfcore_rnaseq/work"                                        # PASTE: what removing breast_mac's work/ would free
+cat "$T/rnaseq_params.yml"                                            # PASTE: Step-1's params, reused below
+sed -e "s#^input: .*#input: $B/rnaseq_samplesheet.csv#" -e "s#^outdir: .*#outdir: $B/nfcore_rnaseq/results#" "$T/rnaseq_params.yml" > "$B/rnaseq_params.yml"
+# Step-1's file predates publish_dir_mode in the recipe (D-025): add it if missing.
+grep -qx 'publish_dir_mode: copy' "$B/rnaseq_params.yml" || printf 'publish_dir_mode: copy\n' >> "$B/rnaseq_params.yml"
+diff "$T/rnaseq_params.yml" "$B/rnaseq_params.yml"                    # PASTE: input and outdir changed, publish_dir_mode added if it was missing
+cp "$T/rnaseq_kebnekaise.config" "$T/run_rnaseq.sbatch" "$B/"
+# Reused files are checked, not trusted: they must be the bytes that gave the checked breast_mac count (P4.1).
+cmp "$B/rnaseq_kebnekaise.config" "$M/rnaseq_kebnekaise.config" && cmp "$B/run_rnaseq.sbatch" "$M/run_rnaseq.sbatch" && echo "same config and batch script as the checked breast_mac run" | tee "$B/reused_check.txt" || { rm -f "$B/reused_check.txt"; echo "DIFFERENT from breast_mac: paste both diffs before submitting"; }   # PASTE
+mkdir -p "$B/nfcore_rnaseq"
+cd "$B"
+export P="$B"                                                         # the batch script reads $P; Step-1's older P must not reach the job
+# Refuses unless step 3's md5 count, step 4's sheet and the reused files are what they should be.
+grep -qx 'publish_dir_mode: copy' "$B/rnaseq_params.yml" && grep -qx '204 OK; 0 not OK' "$B/md5_check.txt" && [ "$(awk 'END{print NR}' "$B/rnaseq_samplesheet.csv")" = 103 ] && test -s "$B/reused_check.txt" && sbatch -J nf_rnaseq_breast_mono --export=ALL,P="$B" "$B/run_rnaseq.sbatch" || echo "NOT SUBMITTED: publish_dir_mode, 204 OK md5s, the 102-run sheet or breast_mac's config and batch script is missing"
+# About one hour after it starts:
+tail -n 30 "$B"/slurm-nf_rnaseq_breast_mono-*.out                     # PASTE
+```
+
+3. Post-run checks of the rnaseq count (guarded on the matrix):
+
+```
+# Kebnekaise login node, once squeue shows no nf_rnaseq_breast_mono job. Paste back every line marked PASTE.
+export B=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mono
+export T=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/tier1
+
+# ---- 6. When the rnaseq job ends ----
+S="$B/nfcore_rnaseq/results/salmon"
+test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && echo "matrix present" || echo "NO MATRIX: the run has not finished; stop here"   # PASTE
+tail -n 40 "$B"/slurm-nf_rnaseq_breast_mono-*.out                     # PASTE
+head -1 "$S/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}'   # PASTE, expect 94
+awk 'END{print NR - 1, "genes"}' "$S/salmon.merged.gene_counts_length_scaled.tsv"                        # PASTE, expect 78470
+test -s "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv" && test -s "$S/salmon.merged.gene_counts_length_scaled.tsv" && diff <(cut -f1,2 "$T/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv") <(cut -f1,2 "$S/salmon.merged.gene_counts_length_scaled.tsv") | wc -l || echo "a matrix is missing: nothing compared"   # PASTE, expect 0: exactly Step-1's genes
+cat "$B"/nfcore_rnaseq/results/pipeline_info/*versions*.yml                                              # PASTE, expect rnaseq 3.27.0, salmon 2.7.0
+grep -h '"expected_format"' "$S"/*/lib_format_counts.json | sort | uniq -c                               # PASTE: the libType, counts summing to 94; the 22 MAC runs, same library kit, were all IU
+sacct -n -S 2026-10-01 --name=nf_rnaseq_breast_mono --format=JobID,JobName,Elapsed,MaxRSS,State          # PASTE; without -X, so the batch step's memory shows
+find "$B/nfcore_rnaseq/results" -printf '%y\n' | sort | uniq -c                                            # PASTE, expect d and f lines and no l line: publish_dir_mode copy, every entry counted
+# If an l line shows, turn each link into a copy of its target before work/ goes (P2A.3 step 6):
+#   (cd "$B/nfcore_rnaseq/results" && find . -type l -print0 | while IFS= read -r -d '' f; do cp --remove-destination -- "$(readlink -f -- "$f")" "$f"; done)
+du -sh "$B/nfcore_rnaseq/results" "$B/nfcore_rnaseq/work"                                                # PASTE
+# Keep work/ until the Mac copy below checks out.
+```
+
+4. Guarded Mac copy of the count outdir into ~/ctx_breast/data/raw/breast_mono_rnaseq:
+
+```bash
+# On the Mac, after cluster step 6 printed "matrix present". The copy runs only when the cluster
+# has the count matrix: on 2026-09-30 a copy of a mid-run outdir came without it. The ssh check
+# opens one connection and rsync its own.
+ssh rstak@kebnekaise.hpc2n.umu.se "test -s /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mono/nfcore_rnaseq/results/salmon/salmon.merged.gene_counts_length_scaled.tsv" && mkdir -p ~/ctx_breast/data/raw/breast_mono_rnaseq && \
+rsync -avmL --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mono/nfcore_rnaseq/results/ ~/ctx_breast/data/raw/breast_mono_rnaseq/ || echo "NOT COPIED: no count matrix on the cluster yet, or the copy failed"
+D=~/ctx_breast/data/raw/breast_mono_rnaseq
+test -s "$D/salmon/salmon.merged.gene_counts_length_scaled.tsv" && head -1 "$D/salmon/salmon.merged.gene_counts_length_scaled.tsv" | awk -F'\t' '{print NF - 2, "sample columns"}' || echo "NO MATRIX in $D"   # PASTE, expect 94
+test -d "$D/trimgalore" && find "$D/trimgalore" -name '*_trimming_report.json' | wc -l || echo "NO trimgalore folder in $D"   # PASTE, expect 188: Trim Galore names every sample's pair <sample>_1 and _2, merged or not
+test -d "$D" && echo "$(find "$D" -type f | wc -l | tr -d ' ') files, $(find "$D" -type l | wc -l | tr -d ' ') symlinks" || echo "NO folder $D"   # PASTE, expect 0 symlinks
+du -sh "$D"                                                           # PASTE
+```
+
 ### Phase 2G cluster commands (G.0), the only copy
 
 Run 2026-09-30 on login node b-an01, after `pixi.toml` and `pixi.lock` were copied to `student_check/` from the Mac. Results in G.0 above. The first run assumed pixi in `~/.pixi`; the installer honours `PIXI_HOME`, so the second run names the binary.
