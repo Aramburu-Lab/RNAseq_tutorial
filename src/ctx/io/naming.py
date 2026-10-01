@@ -25,12 +25,15 @@ MODULES: tuple[tuple[str, int], ...] = (
     ("clinical", 12),
 )
 THEMES = ("white", "black")
+# A description: lower-case words joined by underscores. A dataset slug and a contrast name
+# are descriptions too, as the output names that carry them require (ctx.report.genes).
+DESCRIPTION = r"[a-z0-9]+(?:_[a-z0-9]+)*"
 # Theme words may only appear as the trailing token, or `volcano_white_v1` would pass.
 _RESERVED = {*THEMES, "light", "dark", "readme"}
 _TOKENS = "|".join(sorted((t for t, _ in MODULES), key=len, reverse=True))
 _NAME = re.compile(
     rf"(?P<day>\d{{4}}-\d{{2}}-\d{{2}})_(?P<module>{_TOKENS})_"
-    r"(?P<desc>[a-z0-9]+(?:_[a-z0-9]+)*)_v(?P<version>[1-9]\d*)"
+    rf"(?P<desc>{DESCRIPTION})_v(?P<version>[1-9]\d*)"
     rf"(?:_(?P<theme>{'|'.join(THEMES)}))?"
     r"(?:(?P<readme>_README\.md)|\.(?P<ext>[a-z0-9]+))"
 )
