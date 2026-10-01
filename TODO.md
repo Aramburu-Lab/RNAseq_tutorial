@@ -3145,6 +3145,8 @@ else
 fi
 ```
 
+Run 2026-10-01: the MAC download took 9,999 s, so the limit became 24 h (23.3 h computed, the 1-day floor). The reason changed at once from ReqNodeNotAvail to None, start estimated 16:00. `scontrol show res` listed 61 one-hour `reboot_b-cn*` node reservations starting between 2026-10-01 11:55 and 10-08 04:18; a 7-day window overlaps far more of them than a 1-day one, which is consistent with the change but not shown to cause it; the course's `fetchngs.sbatch` and `rnaseq.sbatch` ask for 1 day from the same date.
+
 2. Check the download (counted md5 line), write the rnaseq sheet, submit the P4.1 count (guarded):
 
 ```

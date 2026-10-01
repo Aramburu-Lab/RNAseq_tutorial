@@ -222,8 +222,8 @@ def test_shell_rules(name):
 # What each head job asks Slurm for: one task, its cores, 8 GB (the head job's 4 GB heap under
 # it) and a walltime its pipeline fits in.
 RESOURCES = {
-    "fetchngs.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "3-00:00:00"},
-    "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "7-00:00:00"},
+    "fetchngs.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
+    "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
     "subsample.sbatch": {"-n": "1", "-c": "2", "--mem": "8G", "-t": "0-04:00:00"},
 }
 

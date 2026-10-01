@@ -3,11 +3,14 @@
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH --mem=8G
-#SBATCH -t 3-00:00:00
+#SBATCH -t 1-00:00:00
 #SBATCH -o slurm-%x-%j.out
 # /// codebase-meta
 # exempt: runs on Kebnekaise into the student's run folder, never into outputs/
 # ///
+# One day: Step-1's download of 210 runs took 1 h 39 min and its count, the Salmon index included,
+# 1 h 52 min (2026-09-30). A 7-day head job waited on ReqNodeNotAvail until its limit was lowered to
+# 1 day, which cleared it at once (2026-10-01).
 # One accession list through nf-core/fetchngs into a fresh outdir, laid out as ctx gather reads
 # it. The account is never written here: sbatch -A names the compute project. Run the Usage
 # lines on a login node with CTX_REPO and CTX_STORE exported (kebnekaise_env.sh).

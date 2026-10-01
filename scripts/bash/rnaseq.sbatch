@@ -3,11 +3,14 @@
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH --mem=8G
-#SBATCH -t 7-00:00:00
+#SBATCH -t 1-00:00:00
 #SBATCH -o slurm-%x-%j.out
 # /// codebase-meta
 # exempt: runs on Kebnekaise into the student's run folder, never into outputs/
 # ///
+# One day: Step-1's download of 210 runs took 1 h 39 min and its count, the Salmon index included,
+# 1 h 52 min (2026-09-30). A 7-day head job waited on ReqNodeNotAvail until its limit was lowered to
+# 1 day, which cleared it at once (2026-10-01).
 # Gene counts with nf-core/rnaseq, Salmon only, from the FASTQs fetchngs.sbatch downloaded. It
 # starts only once fetchngs.sbatch has written nfcore_fetchngs/results.complete in the run folder.
 #
