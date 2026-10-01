@@ -17,7 +17,7 @@ from ctx.viz.style import BAND_COLOURS
 
 SOURCE_TYPES = frozenset({"tool_code", "tool_docs", "consortium_standard", "pipeline_default",
                           "literature", "course_convention"})  # fmt: skip
-STAGES = ("reads", "trim", "quant", "counts")
+STAGES = ("reads", "trim", "align", "quant", "counts")
 KINDS = ("numeric", "status", "strandedness", "category")
 DIRECTIONS = ("higher", "lower", "none")
 ACTIONS = ("keep", "flag", "fix_rerun", "exclude")
@@ -111,7 +111,9 @@ class Metric:
         return [r for r in ranges if r[1] is None or r[2] is None or r[1] < r[2]]
 
     def strandedness(self, bias: float) -> str:
-        """The library type a strand bias SF / (SF + SR) shows, by nf-core/rnaseq's thresholds.
+        """The library type a forward-strand share shows, by nf-core/rnaseq's thresholds.
+
+        The share is Salmon's strand_mapping_bias, or featureCounts' -s 1 over -s 1 plus -s 2.
 
         Forward or reverse when one strand holds at least `stranded` of the reads, unstranded
         when the two differ by less than `unstranded`, and undetermined in between.

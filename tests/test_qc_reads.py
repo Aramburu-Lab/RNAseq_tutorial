@@ -116,3 +116,63 @@ def test_a_relative_outdir_still_reaches_the_tools(tmp_path, monkeypatch):
     assert Path(files["path"][0]).is_absolute()
     reads.run_tools(files, tmp_path / "logs", threads=1, fastp=reads.Fastp())
     assert (tmp_path / "logs" / "fastp" / "R_se_a.fastp.json").is_file()
+
+
+def fastq_lengths(path: Path) -> list[int]:
+    """Each read's length in a gzipped FASTQ, read here without the tools."""
+    with gzip.open(path, "rt") as handle:
+        return [len(line.rstrip("\n")) for i, line in enumerate(handle) if i % 4 == 1]
+
+
+def test_run_fastp_writes_the_reads_it_passes(tmp_path):
+    """M3 trims with M2's filter and keeps the reads: as many as fastp's report says passed,
+    as long as it says. se_d's planted tail trims every read from 101 to 81 nt.
+
+    Mutations caught: -o or -O left out (no file); read 2 written to read 1's name."""
+    root = outdir(tmp_path / "fetchngs")
+    trimmed = tmp_path / "trimmed"
+    single = reads.run_fastp([str(root / "fastq" / "se_d.fastq.gz")], tmp_path, "se_d",
+                             reads.Fastp(cut_tail=True), 2, trimmed=trimmed)  # fmt: skip
+    pair = reads.run_fastp([str(root / "fastq" / f"{PAIR}_{m}.fastq.gz") for m in (1, 2)],
+                           tmp_path, "pair", reads.Fastp(), 2, trimmed=trimmed)  # fmt: skip
+    assert single == [trimmed / "se_d.fastq.gz"]
+    assert pair == [trimmed / "pair_1.fastq.gz", trimmed / "pair_2.fastq.gz"]
+    for title, files in (("se_d", single), ("pair", pair)):
+        report = json.loads((tmp_path / f"{title}.fastp.json").read_text())
+        passed = report["filtering_result"]["passed_filter_reads"]
+        lengths = [fastq_lengths(f) for f in files]
+        assert {len(n) for n in lengths} == {passed // len(files)}, title
+        after = report["summary"]["after_filtering"]["read1_mean_length"]
+        assert round(sum(lengths[0]) / len(lengths[0])) == after, title
+    assert set(fastq_lengths(single[0])) == {81}
+    # The mates are equally long, so only their names tell read 1's file from read 2's.
+    for mate, path in zip((1, 2), pair, strict=True):
+        with gzip.open(path, "rt") as handle:
+            names = [line.rstrip("\n") for i, line in enumerate(handle) if i % 4 == 0]
+        assert names and all(name.endswith(f"/{mate}") for name in names), path.name
+
+
+def test_run_fastp_reaches_relative_folders(tmp_path, monkeypatch):
+    """fastp runs in its report folder, so a path relative to the caller pointed nowhere: the
+    trimmed reads failed the run, and a missed report path passed silently.
+
+    Mutations caught: the input, the report folder or the trimmed folder passed as given."""
+    monkeypatch.chdir(tmp_path)
+    shutil.copy(SE / "se_a.fq", tmp_path)
+    Path("logs").mkdir()
+    written = reads.run_fastp(["se_a.fq"], Path("logs"), "se_a", reads.Fastp(), 1,
+                              trimmed=Path("trimmed"))  # fmt: skip
+    assert written == [tmp_path / "trimmed" / "se_a.fastq.gz"]
+    assert len(fastq_lengths(written[0])) == 1000
+    assert (tmp_path / "logs" / "se_a.fastp.json").is_file()
+
+
+def test_m2_writes_no_reads(ran):
+    """M2's fastp runs filter and report; they never write reads.
+
+    Mutation caught: M2's run_tools passing trimmed= (its fastp folder gains FASTQ files)."""
+    out = ran[3]
+    assert list((out / "logs" / "fastp").glob("*.json"))
+    assert not list((out / "logs" / "fastp").glob("*.f*q*"))
+    for report in (out / "logs" / "fastp").glob("*.json"):
+        assert " -o " not in json.loads(report.read_text())["command"]

@@ -1,7 +1,7 @@
 """MultiQC, the one parser of tool QC logs (CONVENTIONS.md, Statistics rules): run and read.
 
-MultiQC runs by subprocess from the `reads` environment (D-027), never imported, into
-`outputs/02_qc/multiqc/`, which keeps MultiQC's own file names (naming lint exemption, D-028).
+MultiQC runs by subprocess from the `reads` environment (D-027), never imported, into a
+module's `multiqc/` folder, which keeps MultiQC's own file names (naming lint exemption, D-028).
 Its per-module tables are read with Polars as text, so no value is reinterpreted on the way
 in; a table's sample names are mapped to the course's units (runs or samples) by an explicit
 alias table, and one name that maps to nothing stops the run with every such name listed.
@@ -16,9 +16,9 @@ import polars as pl
 from ctx import tools
 from ctx.qc import QcError
 
-# The MultiQC modules M2 reads; each runs only where its tool's output is among the inputs.
-MODULES = ("fastqc", "fastp", "seqkit", "trim_galore", "salmon", "star", "featurecounts",
-           "samtools")  # fmt: skip
+# The MultiQC modules M2 and M3 read; each runs only where its tool's output is among the inputs.
+MODULES = ("fastqc", "fastp", "seqkit", "trim_galore", "salmon", "star", "hisat2",
+           "featurecounts", "samtools")  # fmt: skip
 DATA = "multiqc_data"
 
 
@@ -48,12 +48,14 @@ def run(
     Raises:
         QcError: If MultiQC fails, or writes no data folder.
     """
+    # MultiQC runs in dest, so every path relative to the caller would point nowhere: with a
+    # relative -o MultiQC exits 1, with a relative -c it exits 2 (measured, MultiQC 1.35).
+    dest = dest.resolve()
     dest.mkdir(parents=True, exist_ok=True)
     args = ["--force", "--no-version-check", "--no-ansi", "-o", str(dest)]
-    args += ["-c", str(config)] if config else []
+    args += ["-c", str(config.resolve())] if config else []
     args += [f"--module={m}" for m in modules]
     try:
-        # MultiQC runs in dest, so a path relative to the caller would point nowhere.
         tools.run("multiqc", [*args, *(str(Path(p).resolve()) for p in inputs)], cwd=dest,
                   log=dest / "multiqc_run.log")  # fmt: skip
     except tools.ToolError as error:
@@ -74,6 +76,25 @@ def table(run: MultiqcRun, module: str) -> pl.DataFrame:
         raise QcError(f"MultiQC found no {module} input: {path.name} was not written")
     frame = pl.read_csv(path, separator="\t", infer_schema=False)
     return frame.with_columns(pl.all().replace("None", None))
+
+
+def plot_table(run: MultiqcRun, name: str) -> pl.DataFrame:
+    """A plot's data, `<name>.txt` (e.g. `star_gene_counts_Unstranded`), every value a number.
+
+    A module's `multiqc_<module>.txt` holds only what it parsed for the table; some totals
+    exist only as plot data, such as STAR's reads per gene-count category.
+
+    Raises:
+        QcError: If MultiQC wrote no such plot, or a value is not a number.
+    """
+    path = run.data / f"{name}.txt"
+    if not path.is_file():
+        raise QcError(f"MultiQC wrote no {path.name}: its module found none of its inputs")
+    frame = pl.read_csv(path, separator="\t", infer_schema=False)
+    try:
+        return numeric(frame, [c for c in frame.columns if c != "Sample"])
+    except pl.exceptions.InvalidOperationError as error:
+        raise QcError(f"{path.name} holds a value that is not a number: {error}") from error
 
 
 def numeric(frame: pl.DataFrame, columns: Iterable[str]) -> pl.DataFrame:
