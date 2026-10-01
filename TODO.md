@@ -3124,6 +3124,26 @@ grep -c "exit status (4)" "$B/nfcore_fetchngs/.nextflow.log"         # PASTE whe
 grep -c "403: Forbidden" "$B/nfcore_fetchngs/.nextflow.log"          # PASTE when you look
 ```
 
+1b. Submitted 2026-10-01 as job 47505302, pending on "ReqNodeNotAvail, May be reserved for other job". Rytis asked for a shorter limit than 7 days; this block lowers it from a measured time, not a guess:
+
+```
+# Kebnekaise login node. Paste back the whole output.
+# Slurm lets you lower a pending job's time limit, never raise it. The new limit is the MAC download's
+# measured wall time scaled by bytes (581 GB against 138 GB, 4.2 times) and doubled, and at least 1 day.
+squeue -j 47505302 -o "%.10i %.12l %.20S %.40R"
+scontrol show res | grep -E "ReservationName=|No reservations"
+E=$(sacct -X -n -P -j 47486038 --format=ElapsedRaw | head -1)
+if [ -n "$E" ] && [ "$E" -gt 0 ] 2>/dev/null; then
+    H=$(( (E * 84 / 10 + 3599) / 3600 ))
+    [ "$H" -lt 24 ] && H=24
+    echo "MAC download: $E s for 138 GB; new limit for 581 GB: $H h"
+    scontrol update JobId=47505302 TimeLimit=$(( H / 24 ))-$(( H % 24 )):00:00
+    squeue -j 47505302 -o "%.10i %.12l %.20S %.40R"
+else
+    echo "no wall time for 47486038; nothing changed"
+fi
+```
+
 2. Check the download (counted md5 line), write the rnaseq sheet, submit the P4.1 count (guarded):
 
 ```
@@ -3189,7 +3209,9 @@ mkdir -p "$B/nfcore_rnaseq"
 cd "$B"
 export P="$B"                                                         # the batch script reads $P; Step-1's older P must not reach the job
 # Refuses unless step 3's md5 count, step 4's sheet and the reused files are what they should be.
-grep -qx 'publish_dir_mode: copy' "$B/rnaseq_params.yml" && grep -qx '204 OK; 0 not OK' "$B/md5_check.txt" && [ "$(awk 'END{print NR}' "$B/rnaseq_samplesheet.csv")" = 103 ] && test -s "$B/reused_check.txt" && sbatch -J nf_rnaseq_breast_mono --export=ALL,P="$B" "$B/run_rnaseq.sbatch" || echo "NOT SUBMITTED: publish_dir_mode, 204 OK md5s, the 102-run sheet or breast_mac's config and batch script is missing"
+# 1 day, not the batch script's 7 (Rytis 2026-10-01): the counts took 55 min 54 s (breast_mac, 22 paired, 138 GB) and
+# 1 h 04 min (breast_tissue, 103 single-end, 127 GB); this one has 4.2 times breast_mac's bytes (arithmetic, not measured).
+grep -qx 'publish_dir_mode: copy' "$B/rnaseq_params.yml" && grep -qx '204 OK; 0 not OK' "$B/md5_check.txt" && [ "$(awk 'END{print NR}' "$B/rnaseq_samplesheet.csv")" = 103 ] && test -s "$B/reused_check.txt" && sbatch -J nf_rnaseq_breast_mono -t 1-00:00:00 --export=ALL,P="$B" "$B/run_rnaseq.sbatch" || echo "NOT SUBMITTED: publish_dir_mode, 204 OK md5s, the 102-run sheet or breast_mac's config and batch script is missing"
 # About one hour after it starts:
 tail -n 30 "$B"/slurm-nf_rnaseq_breast_mono-*.out                     # PASTE
 ```
