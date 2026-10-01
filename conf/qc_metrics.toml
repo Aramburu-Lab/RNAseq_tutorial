@@ -9,7 +9,9 @@
 # source_type is one of tool_code, tool_docs, consortium_standard, pipeline_default,
 # literature, course_convention (TODO.md, M2); a course convention always carries a rationale.
 # `direction` says which side is good: "higher", "lower", or "none" (a category or a spread).
-# `action` is keep or flag; nothing is excluded before the Step-1 record (P2M M2.8).
+# `action` is keep or flag; nothing was excluded before the Step-1 record (P2M M2.8). Since
+# the record, `exclude` marks a value that makes every later number meaningless: a genome
+# and annotation from different assemblies (reference_start_codons, D-039).
 
 [registry]
 schema = 1
@@ -368,6 +370,49 @@ read_length_tied = false
 source = "nf-core/rnaseq 3.27.0 min_trimmed_reads 10000 (nextflow.config; the fixture's params file)"
 source_type = "pipeline_default"
 
+# ---- Alignment and counting on a partial reference (M3, `ctx process`; D-039) -------------
+# Judged by `ctx process` from its own tables, not from MultiQC's General Statistics.
+
+[metrics.reference_start_codons]
+stage = "align"
+title = "Start codons that read ATG"
+meaning = "The share of the annotation's start codons whose genome sequence reads ATG: whether the genome and the annotation share one assembly."
+computed = "start_codon records 3 nt long, on the genome's contigs, read from the FASTA on the record's strand (reverse-complemented on minus); ATG over all"
+unit = "fraction"
+table = "reference"
+column = "atg_share"
+scale = "linear"
+direction = "higher"
+good = 0.99
+usable = 0.9
+rationale = "GENCODE 50 on the GRCh38 chr22 sequence: 8,852 of 8,866 read ATG (99.84 %), the rest CTG, GTG and ACG starts; the test fixture's 31 of 31. The same chr22 shifted by one base: 0 of 8,866. Both cut-offs are this course's, 0.99 below the measured share and 0.9 far above a shifted genome's."
+causes = ["a genome from another assembly", "an annotation from another assembly", "contig names matched to another sequence"]
+action = "exclude"
+matters_for_de = true
+read_length_tied = false
+source = "measured on GENCODE 50 and GRCh38 chr22 (2026-10-01)"
+source_type = "course_convention"
+
+[metrics.gene_strand_bias]
+stage = "align"
+title = "Strand of the gene-assigned reads"
+meaning = "The share of gene-assigned reads on the gene's own strand: near 0 or 1 in a stranded library, near 0.5 in an unstranded one."
+computed = "featureCounts Assigned at -s 1 / (Assigned at -s 1 + Assigned at -s 2), on the main alignment"
+unit = "fraction"
+table = "strandedness"
+column = "forward_share"
+kind = "strandedness"
+direction = "none"
+stranded = 0.8
+unstranded = 0.1
+rationale = "nf-core sets these thresholds on Salmon's fragments over transcripts. Reads featureCounts assigns to genes are a different measurement: a read on two genes of opposite strands is ambiguous and left out. Applying the same cut-offs here is this course's choice."
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), applied to gene-assigned reads"
+source_type = "course_convention"
+
 # ---- Quantification (Salmon 2.7.0) -------------------------------------------------------
 
 [metrics.salmon_percent_mapped]
@@ -394,7 +439,7 @@ source_type = "course_convention"
 stage = "quant"
 title = "Strand of the reads"
 meaning = "The share of reads on the transcript's own strand: near 0 or 1 in a stranded library, near 0.5 in an unstranded one."
-computed = "Salmon lib_format_counts.json: SF / (SF + SR)"
+computed = "Salmon lib_format_counts.json strand_mapping_bias: SF / (SF + SR) for single-end runs, ISF / (ISF + ISR) for paired-end ones"
 unit = "fraction"
 table = "general_stats"
 column = "salmon-strand_mapping_bias"

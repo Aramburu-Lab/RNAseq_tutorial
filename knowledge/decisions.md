@@ -245,6 +245,101 @@ The equality test fails each of six planted edits to the subset file (a value ma
 
 ---
 
+## D-040 — Agreement beside correlation: Spearman with a percentile bootstrap, Pearson with Fisher's z, Bland-Altman on log2(count + 1)
+
+**Date:** 2026-10-01 · **Status:** decided; the caption half (M3 R6.1, approved by Rytis 2026-10-01) is recorded with the figures in M3.6
+
+**Context.** M3 compares two counts of one gene: STAR's against featureCounts', and one featureCounts option against another. M7 will compare RNA with protein. A correlation near 1 says two methods order the genes alike, not that they give the same numbers (Bland and Altman 1986). No helper existed: `ctx.viz.annotate` is frozen and tests groups with Mann-Whitney only.
+
+**Options.**
+- **Correlation alone**, as TODO.md's figure table asks: Spearman with a bootstrap interval.
+- **Correlation beside Bland-Altman's bias and limits of agreement** on log2(count + 1).
+- **Lin's concordance correlation coefficient**, one number for both; kept as a think prompt.
+- For Spearman's interval: BCa, percentile, or a closed form (Bonett-Wright, Fieller), the closed forms read only in secondary sources.
+
+**Decision.** `ctx.concordance.agreement(a, b)`, one definition for every module:
+- genes with a + b > 0, filtered before any transform; a gene zero in one method only is kept, because it is a disagreement;
+- the size rules come first, for identical counts as for any: no correlation from fewer than two genes or a constant vector, no SD from fewer than two genes, no interval from fewer than four;
+- both correlations come from one formula, Pearson's r as the sum of products of centred values over the root of the product of their sums of squares, clipped to [-1, 1] as `pearsonr` clips it: on average ranks it is Spearman's rho, for the estimate and every resample alike, and on log2(count + 1) Pearson's r. It is exactly 1 on identical counts, and rho exactly 1 on counts with identical ranks, so no short-circuit is needed;
+- Spearman's rho as `scipy.stats.spearmanr` defines it; its interval from the draws of `scipy.stats.bootstrap` with `paired=True`, 1,000 resamples of genes, seed 42: the 2.5th and 97.5th percentiles of the finite draws. The statistic is the vectorised rank correlation above. A resample of tied values has no rank correlation: it is dropped and counted, where scipy's own interval turns one such resample into NaN. scipy's own interval is not read, so its `method="percentile"` only spares scipy the BCa jackknife;
+- Pearson's r on log2(count + 1), with Fisher's z interval tanh(atanh(r) ± 1.959964 / √(n - 3)), the formula of `PearsonRResult.confidence_interval`, and the point itself when |r| = 1;
+- d = log2(b + 1) - log2(a + 1); bias = mean(d) with a t interval; limits bias ± 1.96 SD, the SD with n - 1; the empirical 2.5th and 97.5th percentiles of d beside them; fold = 2^bias, a ratio of (count + 1) values, never called a log ratio (Euser et al. 2008);
+- `per_unit` gives one row per sample and an `all` row on each gene's sums over samples, so the gene stays the resampled unit.
+
+Percentile, not BCa, because BCa's jackknife returned NaN on degenerate input (M3 review 1), not for speed. No hypothesis is tested, so there is no BH. The intervals are nominal: the genes are the chromosome's whole annotated set, not a sample of genes, so a page leads with the spread across samples. Intervals for the limits of agreement wait until Bland and Altman 1999 is read in full.
+
+**Evidence.** Measured 2026-10-01 on this Mac, scipy 1.18.1:
+- coverage: 1,000 bivariate normal datasets, n = 60, Pearson 0.6, whose population Spearman is (6/π)·asin(0.3) = 0.5819. The 95 % interval covered it 960 times; a [5, 95] interval 913 times;
+- identical counts: `spearmanr` of a 17-gene vector with itself gave 0.9999999999999998. Over 2,000 non-constant random count vectors of 2 to 399 genes, `spearmanr` of a vector with itself missed 1 on 500 and `pearsonr` on log2(count + 1) on 784; the one formula missed on none, and `agreement` gave r 1 on 1,999 and no r on the one left with a single gene;
+- corrected after the M3 review, 2026-10-01: the first build answered identical counts with a short-circuit before the size rules, so one identical gene got rho 1 and the interval [1, 1], and it took the estimate from `spearmanr`, so counts one read apart with identical ranks gave rho 0.9999999999999998 below its own interval [1, 1]. Both came from the short-circuit and the second formula, which are gone;
+- time at 1,747 genes, chr22's count in GENCODE 50 (synthetic Poisson counts, 1,682 kept), measured again after the review fix: `agreement()` took 0.155 to 0.167 s in five runs, and 0.150 to 0.154 s on identical counts, which now run the bootstrap; the whole process 2.66 s and 290,390,016 bytes peak RSS (`/usr/bin/time -l`), most of it the imports. Before the fix: 0.164 to 0.167 s;
+- `tests/test_concordance.py`, 16 tests: 25 of 26 planted mutations fail their test. They are Pearson on the raw counts as the estimate, ordinal ranks, 1/√n, z = 1.96, a [5, 95] interval, a basic interval, resampling gene × sample points, a nonzero-in-both filter, genes zero in both kept, ddof 0, d as a - b, an interval from three genes, scipy's NaN interval, no check on negative counts, the estimate from `spearmanr`, r from `pearsonr`, r not clipped, the old short-circuit before the size rules and from four genes on, seed 43, 200 resamples, the seed argument ignored for 7 or for `SEED`, no guard on zero genes, and `per_unit` without its duplicate check. The 26th, `method="basic"` passed to scipy, changes no output, since scipy's own interval is not read. The first record here said 12; that sweep held 13.
+
+**Consequence.** M3's concordance table and agreement figures read these fields, and M7 imports the same module. A change of interval method changes every agreement caption at once.
+
+---
+
+## D-039 — The strand is called from featureCounts' forward share under its own registry entry; the registry gains an "align" stage
+
+**Date:** 2026-10-01 · **Status:** decided; the registry half landed in M3.2. The per-sample call, the stop on an undetermined call and the comparison with Salmon land in M3.5 and M3.6.
+
+**Context.** M3 counts at the library's strand, and the sheet says "auto" (`harmonise`). On Track A, M3 runs before M4, so the subset has no Salmon output of its own; Salmon's call reaches M3 only through `--compare-dataset`. The registry knew four stages, and `test_qc_registry.py` requires every stage to have a metric. `salmon_strand_bias.computed` said SF / (SF + SR), which holds for single-end runs only.
+
+**Options.**
+- **Reuse `salmon_strand_bias`** for featureCounts' share: one entry for two measurements.
+- **STAR's ReadsPerGene columns 3 and 4**: no call under HISAT2.
+- **featureCounts' forward share** (Assigned at `-s 1` over `-s 1` plus `-s 2`) under its own entry with nf-core's thresholds, and Salmon's call shown beside it when `--compare-dataset` brings one.
+
+**Decision.** The third. `conf/qc_metrics.toml` gains stage "align" (`registry.STAGES`) with two metrics:
+- `gene_strand_bias`: kind strandedness, stranded 0.8, unstranded 0.1, on process's `strandedness` table, column `forward_share`. The thresholds are nf-core/rnaseq 3.27.0's, set on Salmon's fragments over transcripts, so applying them to gene-assigned reads is a course convention with that rationale;
+- `reference_start_codons`: numeric, higher is better, good 0.99, usable 0.9, action exclude, on process's `reference` table, column `atg_share`. A genome and annotation from different assemblies make every later number meaningless.
+
+`salmon_strand_bias.computed` now says SF / (SF + SR) for single-end runs and ISF / (ISF + ISR) for paired-end ones. `Metric.strandedness` serves both strand entries. Neither new metric is in MultiQC's General Statistics, so the generated MultiQC config is unchanged, and `ctx qc`'s judge skips both, since its tables carry neither column.
+
+**Evidence.** Measured 2026-10-01:
+- the 5 `lib_format_counts.json` of `tests/fixtures/rnaseq`: `strand_mapping_bias` equals SF / (SF + SR) for the 2 single-end reports (RAP1_UNINDUCED_REP1 0.1300) and ISF / (ISF + ISR) for the 3 paired-end ones (WT_REP1 0.1037), where SF / (SF + SR) gives 0.5016;
+- start codons, by hand on GENCODE 50 and the GRCh38 chr22 sequence of D-035: 8,852 of 8,866 read ATG (99.84 %; 7 CTG, 6 GTG, 1 ACG; 12 split records skipped), and 0 of 8,866 with the sequence shifted by one base;
+- `tests/test_qc_registry.py` fails each planted mutation: gene_strand_bias's unstranded set to 0.01, its stranded set to 0.85 or 0.75, no "align" stage, the single-end-only Salmon text, the start-codon good band at 0.995 and usable band at 0.96.
+
+**Consequence.** M3.5 calls each sample from `gene_strand_bias`; M3.6 refuses a reference under `reference_start_codons`' usable band; M3.12 adds M2b's dataset-only align bands to the same stage.
+
+---
+
+## D-037 — M3 builds its own chr22 indices into content-keyed tool folders under `outputs/03_process/tools/`
+
+**Date:** 2026-10-01 · **Status:** decided; the lint rule, the keyed folders and the index builds landed in M3.2 and M3.3. `--genome`, the ATG refusal and `tools/README.md` land with the command in M3.6.
+
+**Context.** STAR, HISAT2, fastp and featureCounts write files under their own names (`SAindex`, `genome.1.ht2`, `ReadsPerGene.out.tab`), which the naming lint fails, and MultiQC finds a tool's logs only by those names. Where the indices are built was contradictory: `ctx setup` builds indices into `resources/` (TODO.md M0), while S0.4 and P3.0 say M3 builds the chr22 indices on the laptop. An index, a trimmed run or an alignment is costly to redo and cheap to reuse, and a rerun with one option changed must not overwrite what an earlier page describes.
+
+**Options.**
+- **Renamed copies** of every tool file under the naming rule: MultiQC no longer finds them, and every tool output is written twice.
+- **`outputs/03_process/tools/` exempt at any depth**, as `multiqc` was: a `tools` folder anywhere in any module escapes the lint (M3 reviews 1 and 2).
+- **Exempt only directly under the module folder**, with content-keyed subfolders.
+- **Indices in `resources/` by `ctx setup`**: setup fetches published files with checksums, and a chr22 index has no URL.
+
+**Decision.**
+- `naming.NATIVE_DIRS` is {multiqc, tools}, matched only as the first folder under the module folder; a `tools` or `multiqc` folder deeper down is linted.
+- `ctx.process.cache.keyed` names a folder `<prefix>_<first 12 of the SHA-256 of its inputs as canonical JSON>`, builds it into `.part`, writes `ctx_manifest.json` (key, inputs, each file's size) and renames it only after the build returns. It is reused only when the manifest names the key and every listed file has its listed size. A damaged folder (a listed file short or gone) or a leftover `.part` is renamed to `.stale<N>`, never deleted and never reused. The folder is resolved to an absolute path, because each builder runs its tool inside it: with a relative parent, STAR exited 104 and hisat2-build 1 (M3 review). One helper serves the reference, the indices, and later the trimmed runs, alignments and counts.
+- M3 builds the indices (`ctx.process.reference`): `prepare` writes the genome uncompressed (STAR refuses gzip) and the GTF lines on its contigs, matched exactly, into `tools/index/reference_<key>/`; with `half`, each contig's first floor(L / 2) bases and the genes whose gene record ends inside them. `star_index` and `hisat2_index` key on the tool, its pinned version, the copied genome's and subset GTF's SHA-256, `half`, and for STAR `--genomeSAindexNbases` = min(14, floor(log2(L) / 2 - 1)) and `--sjdbOverhang` 100, STAR's default and the ideal for 101 nt reads. HISAT2's index is the plain one. `hisat2-build` joins `tools.TOOLS` at the hisat2 pin.
+- The genome is given by path and recorded by the SHA-256 of the file as given, beside the start-codon check (D-039); the Salmon chr22 indices move to M4.
+
+**Evidence.** Through the code on this Mac, 2026-10-01, 4 threads, `/usr/bin/time -l`, into a scratch folder outside the repo; genome `GRCh38.primary_assembly.chr22.fa.gz` (SHA-256 32f26397..., D-035), annotation GENCODE 50 (SHA-256 89bbad69..., as `tier1.toml` declares):
+
+| Step | Wall | Peak RSS, bytes | On disk, bytes | What it found |
+|---|---|---|---|---|
+| reference | 6.45 s | 200,261,632 | 51,665,450 genome | 50,818,468 bases, 11,658,691 N; 1,747 genes, 278,849 lines; 8,852 of 8,866 start codons ATG |
+| STAR index, SAindexNbases 11 | 13.04 s | 757,301,248 (STAR) | 434,837,566 | |
+| HISAT2 index | 5.87 s | 300,236,800 (hisat2-build) | 64,166,924 | |
+| half reference | 6.21 s | 211,566,592 | 25,832,729 genome | 25,409,234 bases; 713 genes; 2,242 of 2,243 ATG |
+| half STAR index | 4.60 s | 539,181,056 | 174,690,876 | |
+| half HISAT2 index | 2.72 s | 174,981,120 | 25,392,050 | |
+
+A second run reused all three folders in 0.05 to 0.06 s each. On the fixture slice, the STAR index the Mac binary built into `.part` and renamed then mapped `se_a` under linux STAR 2.7.11b with GeneCounts (the D-036 image, `--pull never`): 1,000 input reads, 99.90 % unique; the index records the `.part` path in `genomeParameters.txt`, and mapping succeeded with that path gone. After the review fix, the same three builds from a relative parent folder: reference 6.54 s and 199,442,432 bytes, STAR 12.69 s and 756,793,344 bytes, HISAT2 5.73 s and 293,470,208 bytes, the same sizes on disk and 8,852 of 8,866 ATG. `tests/test_process_cache.py` and `tests/test_process_reference.py` fail each of 21 planted mutations, among them a key without one input, reuse without the size check, a missing file read without checking it is there, a leftover `.part` finished by renaming, `round` or `ceil` in the SA rule, prefix matching of contigs, a gene kept by its start, `half` left out of the reference's key, the annotation out of STAR's, the genome out of HISAT2's, and the folder left relative. The first record here said 14; that sweep held 16.
+
+**Consequence.** `outputs/03_process/tools/` holds content-keyed folders that datasets and reruns share, and `lint(outputs/03_process)` skips it whole. A change of key fields rebuilds beside the old folder; deleting the folders is the reader's call.
+
+---
+
 ## D-036 — STAR runs on Linux, HISAT2 on Apple silicon; a probe at the door, never a silent fallback
 
 **Date:** 2026-09-30 · **Status:** decided (Rytis); the probe and its tests land in M3.4

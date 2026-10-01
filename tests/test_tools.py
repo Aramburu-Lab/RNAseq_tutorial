@@ -65,3 +65,33 @@ def test_a_failed_run_says_why(tmp_path):
         tools.run("seqkit", ["stats", str(tmp_path / "absent.fq")], cwd=tmp_path,
                   log=tmp_path / "seqkit.log")  # fmt: skip
     assert os.path.getsize(tmp_path / "seqkit.log") > 0
+
+
+def test_stdout_is_kept_apart_from_messages(tmp_path):
+    """A tool's result on stdout goes to its own file, its messages to the log, and a failed
+    run's error names its messages.
+
+    seqkit sample writes reads to stdout and "[INFO] sample by proportion" to stderr.
+
+    Mutations caught: stdout ignored (the names land in the log, and the file is never made);
+    messages sent into the stdout file (the log stays empty, and the error loses its tail)."""
+    if not tools.SIBLING.is_dir():
+        pytest.fail(f"{tools.SIBLING} missing: run `pixi install -e reads` (D-027)")
+    tools.require.cache_clear()
+    reads = ROOT / "tests" / "fixtures" / "chr22_se" / "se_a.fq"
+    names, log = tmp_path / "names.txt", tmp_path / "seqkit.log"
+    tools.run("seqkit", ["seq", "-n", str(reads)], cwd=tmp_path, log=log, stdout=names)
+    lines = names.read_text().splitlines()
+    assert len(lines) == 1000
+    assert lines[0] not in log.read_text()
+    sampled = tmp_path / "sampled.fq"
+    tools.run("seqkit", ["sample", "-p", "0.5", "-s", "11", str(reads)], cwd=tmp_path, log=log,
+              stdout=sampled)  # fmt: skip
+    records = sampled.read_text().splitlines()
+    assert records and len(records) % 4 == 0
+    assert all(line.startswith("@") for line in records[::4])
+    assert "sample by proportion" in log.read_text()
+    with pytest.raises(tools.ToolError, match="no such file"):
+        tools.run("seqkit", ["seq", "-n", str(reads), str(tmp_path / "absent.fq")],
+                  cwd=tmp_path, log=log, stdout=names)  # fmt: skip
+    assert "no such file" in log.read_text() and "no such file" not in names.read_text()

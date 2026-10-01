@@ -77,11 +77,59 @@ def test_multiqc_rules_colour_as_the_registry_bands(reg):
             assert names[multiqc_class(rule, value)] == metric.band(value), (column, value)
 
 
-def test_strandedness_follows_nf_core(reg):
-    metric = reg.metrics["salmon_strand_bias"]
+@pytest.mark.parametrize("metric_id", ["salmon_strand_bias", "gene_strand_bias"])
+def test_strandedness_follows_nf_core(reg, metric_id):
+    """Mutation caught: gene_strand_bias's unstranded 0.1 set to 0.01 (0.52 undetermined)."""
+    metric = reg.metrics[metric_id]
     assert [metric.strandedness(b) for b in (0.9, 0.1, 0.5, 0.52, 0.6)] == [
         "forward", "reverse", "unstranded", "unstranded", "undetermined",
     ]  # fmt: skip
+
+
+@pytest.mark.parametrize("metric_id", ["salmon_strand_bias", "gene_strand_bias"])
+@pytest.mark.parametrize(
+    ("share", "call"),
+    [(0.8, "forward"), (0.79, "undetermined"), (0.2, "reverse"), (0.21, "undetermined"),
+     (0.549, "unstranded"), (0.55, "undetermined")],
+)  # fmt: skip
+def test_strand_cut_offs_are_nf_cores(reg, metric_id, share, call):
+    """Each side of stranded 0.8 and of unstranded 0.1, as TODO.md M3.2 sets them.
+
+    Mutations caught: gene_strand_bias's stranded at 0.85 (0.8 undetermined) or 0.75 (0.79
+    forward)."""
+    assert reg.metrics[metric_id].strandedness(share) == call
+
+
+def test_salmon_strand_bias_is_computed_as_stated(reg):
+    """Salmon's strand_mapping_bias is SF / (SF + SR) for single-end runs and ISF / (ISF + ISR)
+    for paired-end ones, in every fixture report; the registry's text says both.
+
+    Mutation caught: the old text, SF / (SF + SR) alone."""
+    computed = reg.metrics["salmon_strand_bias"].computed
+    assert "SF / (SF + SR)" in computed and "ISF / (ISF + ISR)" in computed
+    reports = sorted((FIXTURE / "salmon").glob("*/lib_format_counts.json"))
+    assert reports
+    for path in reports:
+        counts = json.loads(path.read_text())
+        paired = counts["expected_format"].startswith("I")
+        forward, reverse = ("ISF", "ISR") if paired else ("SF", "SR")
+        share = counts[forward] / (counts[forward] + counts[reverse])
+        assert share == pytest.approx(counts["strand_mapping_bias"], abs=1e-12), path.parent.name
+
+
+def test_reference_start_codons_judge_the_measured_shares(reg):
+    """GENCODE 50 on chr22 is good (8,852 of 8,866), a genome shifted by one base is bad.
+
+    Mutations caught: usable at 0.96 (0.95 turns bad); good at 0.995 (0.99 turns usable)."""
+    metric = reg.metrics["reference_start_codons"]
+    assert (metric.stage, metric.table, metric.column) == ("align", "reference", "atg_share")
+    assert metric.band(8852 / 8866) == "good"
+    assert metric.band(0.95) == "usable"
+    assert metric.band(0 / 8866) == "bad"
+    # Each side of good 0.99 and usable 0.9, as TODO.md M3.2 sets them.
+    assert [metric.band(v) for v in (0.99, 0.989, 0.9, 0.899)] == ["good", "usable", "usable",
+                                                                   "bad"]  # fmt: skip
+    assert metric.action == "exclude"
 
 
 def test_multiqc_reads_the_generated_config(reg, tmp_path):

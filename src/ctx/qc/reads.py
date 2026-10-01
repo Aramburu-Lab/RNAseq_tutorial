@@ -73,15 +73,39 @@ def fastq_files(sheet: pl.DataFrame, fetchngs_dir: Path) -> tuple[pl.DataFrame, 
             pl.DataFrame(skipped, schema=["run_accession", "status"], orient="row"))  # fmt: skip
 
 
-def _fastp(paths: list[str], out: Path, title: str, params: Fastp, threads: int) -> None:
+def run_fastp(
+    paths: list[str], out: Path, title: str, params: Fastp, threads: int,
+    trimmed: Path | None = None,
+) -> list[Path]:  # fmt: skip
     """One fastp run on a run's files, titled so MultiQC names its sample by the title.
 
-    No -o: fastp then filters and reports without writing the reads.
+    Args:
+        paths: The run's FASTQ files, read 1 first.
+        out: Where the JSON report and the log go.
+        title: The report's title, the run's name in MultiQC.
+        params: The filter.
+        threads: fastp's worker threads.
+        trimmed: A folder for the reads fastp keeps, ``<title>.fastq.gz`` or ``<title>_1`` and
+            ``_2`` for a pair; None (M2) filters and reports without writing reads.
+
+    Returns:
+        The trimmed FASTQ files written, read 1 first, absolute; none without ``trimmed``.
     """
+    # Absolute: fastp runs in `out`, where a relative path misses, and a missed -j is silent.
+    paths, out = [str(Path(p).resolve()) for p in paths], out.resolve()
+    trimmed = trimmed.resolve() if trimmed is not None else None
     pair = ["-I", paths[1]] if len(paths) > 1 else []
     args = ["-i", paths[0], *pair, "-R", title, "-j", str(out / f"{title}.fastp.json"),
             "-h", os.devnull, "-w", str(threads), *params.args()]  # fmt: skip
+    written = []
+    if trimmed is not None:
+        trimmed.mkdir(parents=True, exist_ok=True)
+        names = [f"{title}_{m}.fastq.gz" for m in (1, 2)] if pair else [f"{title}.fastq.gz"]
+        written = [trimmed / name for name in names]
+        for flag, path in zip(("-o", "-O"), written, strict=False):
+            args += [flag, str(path)]
     tools.run("fastp", args, cwd=out, log=out / f"{title}.fastp.log")
+    return written
 
 
 def run_tools(files: pl.DataFrame, logs: Path, *, threads: int, fastp: Fastp) -> list[Path]:
@@ -103,7 +127,7 @@ def run_tools(files: pl.DataFrame, logs: Path, *, threads: int, fastp: Fastp) ->
     tools.run("fastqc", ["--quiet", "--threads", str(threads), "--outdir", str(folders[0]),
                          *paths], cwd=folders[0], log=folders[0] / "fastqc.log")  # fmt: skip
     for (run,), mates in files.sort("mate").group_by("run_accession", maintain_order=True):
-        _fastp(mates["path"].to_list(), folders[1], str(run), fastp, threads)
+        run_fastp(mates["path"].to_list(), folders[1], str(run), fastp, threads)
     tools.run("seqkit", ["stats", "-a", "-T", "-j", str(threads), "-o",
                          str(folders[2] / "seqkit_stats.tsv"), *paths],
               cwd=folders[2], log=folders[2] / "seqkit.log")  # fmt: skip
@@ -184,7 +208,7 @@ def fastp_grid(
     logs.mkdir(parents=True, exist_ok=True)
     cells = {f"grid_q{q}_l{length}": (q, length) for q in grid[0] for length in grid[1]}
     for title, (q, length) in cells.items():
-        _fastp(list(paths), logs, title, replace(fastp, q=q, l=length), threads)
+        run_fastp(list(paths), logs, title, replace(fastp, q=q, l=length), threads)
     mqc = multiqc_io.run([logs], dest, config=raw_config(logs / "multiqc_config.json"),
                          modules=("fastp",))  # fmt: skip
     table = multiqc_io.numeric(multiqc_io.table(mqc, "general_stats"), GRID_COLUMNS)

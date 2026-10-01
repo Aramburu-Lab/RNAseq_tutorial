@@ -12,6 +12,7 @@ import re
 import shutil
 import subprocess
 import sys
+from contextlib import ExitStack
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -47,6 +48,7 @@ TOOLS = {
     "salmon": Tool("salmon", "2.7.0", ("--version",), r"salmon (\S+)"),
     "trim_galore": Tool("trim-galore", "2.3.0", ("--version",), r"trim_galore (\S+)"),
     "hisat2": Tool("hisat2", "2.2.3", ("--version",), r"version (\S+)"),
+    "hisat2-build": Tool("hisat2", "2.2.3", ("--version",), r"hisat2-build version (\S+)"),
 }
 
 
@@ -94,23 +96,29 @@ def _env(path: Path) -> dict[str, str]:
     return {**os.environ, "PATH": f"{path.parent}{os.pathsep}{os.environ.get('PATH', '')}"}
 
 
-def run(name: str, args: list[str], *, cwd: Path, log: Path) -> None:
-    """Run a pinned tool; its output goes to ``log``.
+def run(name: str, args: list[str], *, cwd: Path, log: Path, stdout: Path | None = None) -> None:
+    """Run a pinned tool; its messages go to ``log``.
 
     Args:
         name: A key of ``TOOLS``.
         args: The arguments after the executable.
         cwd: The working directory.
-        log: Where stdout and stderr go, kept beside the tool's own outputs.
+        log: Where stderr goes, and stdout too unless ``stdout`` is given; kept beside the
+            tool's own outputs.
+        stdout: A file for stdout alone, for a tool whose result is its stdout (samtools
+            flagstat), so no message is mixed into it.
 
     Raises:
         ToolError: If the tool is not the pinned one, or exits non-zero; the message ends
             with the last lines it wrote.
     """
     path = require(name)
-    with log.open("w") as handle:
-        done = subprocess.run([str(path), *args], cwd=cwd, stdout=handle,
-                              stderr=subprocess.STDOUT, env=_env(path), check=False)  # fmt: skip
+    with ExitStack() as files:
+        handle = files.enter_context(log.open("w"))
+        out = files.enter_context(stdout.open("w")) if stdout else handle
+        done = subprocess.run([str(path), *args], cwd=cwd, stdout=out,
+                              stderr=handle if stdout else subprocess.STDOUT,
+                              env=_env(path), check=False)  # fmt: skip
     if done.returncode != 0:
         tail = "\n".join(log.read_text().splitlines()[-15:])
         raise ToolError(f"{name} exited {done.returncode}; the end of {log}:\n{tail}")

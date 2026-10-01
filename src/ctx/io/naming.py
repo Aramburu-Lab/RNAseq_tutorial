@@ -95,24 +95,26 @@ def figure_files(figure_stem: str) -> list[str]:
 
 
 # Tool-native output folders keep the tool's own file names, as nf-core's `results/` does
-# (AGENTS.md): MultiQC's report and tables under `outputs/02_qc/multiqc/` (D-028).
-NATIVE_DIRS = frozenset({"multiqc"})
+# (AGENTS.md): MultiQC's report and tables under `outputs/02_qc/multiqc/` (D-028), and M3's
+# indices, trimmed reads, alignments and counts under `outputs/03_process/tools/` (D-037).
+# Only directly under the module folder: a "tools" folder deeper down is linted.
+NATIVE_DIRS = frozenset({"multiqc", "tools"})
 
 
 def lint(directory: Path) -> tuple[int, list[str]]:
-    """Check every non-hidden file under a directory, outside tool-native folders.
+    """Check every non-hidden file under a directory, outside its tool-native folders.
 
     Args:
-        directory: The output directory to scan, recursively.
+        directory: A module's output directory, scanned recursively; a folder named in
+            ``NATIVE_DIRS`` directly inside it is skipped.
 
     Returns:
         The number of files scanned, and the relative paths whose names break the rule.
     """
-    files = [
-        p
-        for p in sorted(directory.rglob("*"))
-        if p.is_file()
-        and not any(part.startswith(".") for part in p.relative_to(directory).parts)
-        and not NATIVE_DIRS & set(p.relative_to(directory).parts[:-1])
-    ]
+    files = []
+    for path in sorted(directory.rglob("*")):
+        parts = path.relative_to(directory).parts
+        native = len(parts) > 1 and parts[0] in NATIVE_DIRS
+        if path.is_file() and not native and not any(p.startswith(".") for p in parts):
+            files.append(path)
     return len(files), [str(p.relative_to(directory)) for p in files if not check(p.name)]
