@@ -6,8 +6,9 @@ r"""Build the student kit: each root's current outputs and the course home page,
 
 The kit is what a student downloads: the pages, figures and tables the course generated, and
 nothing to install. ``START.html``, the course home page, links every dataset's pages. The
-checks are ``check_kit.py``'s, which ships in the kit: every link resolves inside it, no page
-loads anything from the web, and every name fits Windows. The kit is built in
+checks are ``check_kit.py``'s, which ships in the kit with ``check_kit.ps1`` for Windows:
+every link resolves inside it, no page loads anything from the web, and every name fits
+Windows. The kit is built in
 ``<out>.partial`` and renamed only once every check passes. ``MANIFEST.json`` holds every
 file's SHA-256; ``--zip`` packs one folder.
 
@@ -35,6 +36,8 @@ from ctx.report import text  # noqa: E402
 from ctx.report.course import label, newest, write_home  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
+# The same checks for a Windows reader without Python, reading the kit's own MANIFEST.json.
+CHECK_PS1 = REPO / "scripts" / "powershell" / "check_kit.ps1"
 # Reads, alignments and their indexes: a kit never carries them (Rytis 2026-09-30).
 REFUSED = (".fastq", ".fq", ".fastq.gz", ".fq.gz", ".bam", ".bai", ".sam", ".cram", ".crai",
            ".sra")  # fmt: skip
@@ -196,6 +199,7 @@ def build(out: Path, roots: list[tuple[str, Path, bool]]) -> list[Path]:
         (out / name).write_bytes(body.encode())
         (out / name).chmod(mode)
     shutil.copy2(check_kit.__file__, out / "check_kit.py")
+    shutil.copy2(CHECK_PS1, out / "check_kit.ps1")
     return shipped
 
 

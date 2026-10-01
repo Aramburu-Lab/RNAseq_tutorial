@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import re
 import subprocess
 import sys
 import zipfile
@@ -182,7 +183,7 @@ def test_start_scripts_open_the_page_beside_them(tmp_path):
     assert done.returncode == 0, done.stderr
     top = sorted(p.name for p in kit.iterdir() if p.is_file())
     assert top == ["MANIFEST.json", "README.md", "START.cmd", "START.command", course.INDEX,
-                   "START.sh", "check_kit.py"]  # fmt: skip
+                   "START.sh", "check_kit.ps1", "check_kit.py"]  # fmt: skip
     runnable = {p.name for p in kit.rglob("*") if p.is_file() and p.stat().st_mode & 0o111}
     assert runnable == {"START.command", "START.sh"}
     # Run each script from elsewhere, as a double-click does, with open and xdg-open stubbed.
@@ -233,3 +234,16 @@ def test_windows_names(checker):
              "a/" + "x" * 220]  # fmt: skip
     found = checker.windows_problems(names, "kit")
     assert len(found) == 5 and not any(f.startswith("a/ok.csv") for f in found)
+
+
+def test_the_windows_checker_reads_its_kit_and_is_plain_ascii(tmp_path):
+    """check_kit.ps1 runs under Windows PowerShell 5.1, which reads a file without a BOM as ANSI,
+    and must check any kit: so ASCII only, and no value of one kit (a hash, a count, a name)."""
+    kit, done = build(tmp_path)
+    assert done.returncode == 0, done.stderr
+    text = (kit / "check_kit.ps1").read_bytes()
+    assert text == (ROOT / "scripts" / "powershell" / "check_kit.ps1").read_bytes()
+    assert text.isascii()
+    script = text.decode()
+    assert "ConvertFrom-Json" in script and "MANIFEST.json" in script
+    assert not re.search(r"[0-9a-fA-F]{64}|course_kit|\b10[56][56]\b", script)

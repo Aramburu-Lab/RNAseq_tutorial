@@ -51,6 +51,8 @@ Real pages come from public data. Made-up pages come from a seeded simulation; e
 
 With Python installed, `python check_kit.py` checks every file against the manifest, every link and every name. It needs nothing else.
 
+On Windows without Python, `powershell -NoProfile -ExecutionPolicy Bypass -File check_kit.ps1` checks every file, the path lengths, START and every page in Edge, offline.
+
 ## Rerunning a module
 
 This kit only reads. Rerunning a module needs the course codebase and its environment; the codebase's own README gives the commands.
