@@ -3,6 +3,7 @@
 import json
 import re
 import shutil
+from fractions import Fraction
 from pathlib import Path
 
 import pytest
@@ -98,6 +99,25 @@ def test_strand_cut_offs_are_nf_cores(reg, metric_id, share, call):
     Mutations caught: gene_strand_bias's stranded at 0.85 (0.8 undetermined) or 0.75 (0.79
     forward)."""
     assert reg.metrics[metric_id].strandedness(share) == call
+
+
+@pytest.mark.parametrize("metric_id", ["salmon_strand_bias", "gene_strand_bias"])
+def test_a_share_and_its_mirror_get_mirrored_calls(reg, metric_id):
+    """Every pair of strand counts up to 200 reads, as a Fraction and as the float share: a
+    share and one minus it get mirrored calls (forward with reverse), and the float agrees
+    with the Fraction. 9 of 20 and 11 of 20 sit on the unstranded band's edge: undetermined.
+
+    Mutation caught: the call made in floats (9 / 20 unstranded, 11 / 20 undetermined)."""
+    metric = reg.metrics[metric_id]
+    mirror = {"forward": "reverse", "reverse": "forward"}
+    for total in range(1, 201):
+        for forward in range(total + 1):
+            call = metric.strandedness(Fraction(forward, total))
+            assert metric.strandedness(forward / total) == call, (forward, total)
+            back = metric.strandedness(Fraction(total - forward, total))
+            assert back == mirror.get(call, call), (forward, total)
+    assert metric.strandedness(Fraction(9, 20)) == "undetermined"
+    assert metric.strandedness(float("nan")) == "undetermined"
 
 
 def test_salmon_strand_bias_is_computed_as_stated(reg):

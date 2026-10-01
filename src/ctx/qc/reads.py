@@ -73,6 +73,11 @@ def fastq_files(sheet: pl.DataFrame, fetchngs_dir: Path) -> tuple[pl.DataFrame, 
             pl.DataFrame(skipped, schema=["run_accession", "status"], orient="row"))  # fmt: skip
 
 
+def trimmed_names(title: str, mates: int) -> list[str]:
+    """File names of one run's reads as ``run_fastp`` writes them, read 1 first."""
+    return [f"{title}_{m}.fastq.gz" for m in (1, 2)] if mates > 1 else [f"{title}.fastq.gz"]
+
+
 def run_fastp(
     paths: list[str], out: Path, title: str, params: Fastp, threads: int,
     trimmed: Path | None = None,
@@ -100,8 +105,7 @@ def run_fastp(
     written = []
     if trimmed is not None:
         trimmed.mkdir(parents=True, exist_ok=True)
-        names = [f"{title}_{m}.fastq.gz" for m in (1, 2)] if pair else [f"{title}.fastq.gz"]
-        written = [trimmed / name for name in names]
+        written = [trimmed / name for name in trimmed_names(title, len(paths))]
         for flag, path in zip(("-o", "-O"), written, strict=False):
             args += [flag, str(path)]
     tools.run("fastp", args, cwd=out, log=out / f"{title}.fastp.log")
