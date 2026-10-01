@@ -2,10 +2,10 @@
 # exempt: ships inside the student kit; checks a copy of the kit on Windows with nothing installed
 # ///
 # Checks an unpacked course kit on Windows with Windows' own tools, for a reader without Python:
-# every file against MANIFEST.json, the longest full path against Windows' limit, START.cmd's
-# lookup of the page beside it, and every page START.html links, loaded by headless Edge from disk
-# with every network lookup refused. Every expected value comes from the kit's own MANIFEST.json
-# and START.html. Windows PowerShell 5.1; run from cmd or PowerShell in the kit's folder:
+# every file against MANIFEST.json, the longest full path against Windows' limit, and every
+# page START.html links, loaded by headless Edge from disk with every network lookup refused.
+# Every expected value comes from the kit's own MANIFEST.json and START.html. Windows
+# PowerShell 5.1; run from cmd or PowerShell in the kit's folder:
 #   powershell -NoProfile -ExecutionPolicy Bypass -File check_kit.ps1
 # or name another kit folder: ... -File check_kit.ps1 C:\path\to\kit
 # Results also go to %TEMP%\check_kit.log, never into the kit. Exit code 0 only when every check
@@ -52,23 +52,7 @@ $longest = ($present | ForEach-Object { $_.FullName.Length } | Measure-Object -M
 if ($longest -gt 259) { $bad++ }
 Say ("RESULT longest full path {0} characters; expect at most 259" -f $longest)
 
-# 3. START.cmd finds START.html beside it: a copy with "start" swapped for "echo", run from
-#    another folder so the working folder cannot help it, removed even if the run fails.
-$echoCmd = Join-Path $Kit 'check_kit_start_echo.cmd'
-$wantStart = Join-Path $Kit 'START.html'
-try {
-    (Get-Content -LiteralPath (Join-Path $Kit 'START.cmd') -Raw) -replace 'start ""', 'echo' |
-        Set-Content -LiteralPath $echoCmd -Encoding ASCII -NoNewline
-    Push-Location $env:TEMP
-    $named = (& cmd.exe /c $echoCmd | Out-String).Trim().Trim('"')
-} finally {
-    Pop-Location
-    Remove-Item -LiteralPath $echoCmd -ErrorAction SilentlyContinue
-}
-if ($named -ne $wantStart -or -not (Test-Path -LiteralPath $named)) { $bad++ }
-Say ("RESULT START.cmd opens {0}; exists {1}; expect {2}, True" -f $named, (Test-Path -LiteralPath $named), $wantStart)
-
-# 4. Every page START.html links, and START.html itself, in headless Edge with every network
+# 3. Every page START.html links, and START.html itself, in headless Edge with every network
 #    lookup refused. Each launch is bounded: --timeout caps the page, WaitForExit the process.
 #    A page counts as loaded only when Edge shows its own title, since Edge's error page has one
 #    too; a figure counts once, by the container Plotly adds only when its code has run.

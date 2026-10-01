@@ -38,9 +38,7 @@ Nothing is installed, and nothing is sent anywhere.
 
 Unzip the kit first. A page opened from inside the zip cannot reach the pages beside it.
 
-Then double-click `START.html` in the unzipped folder. `START.command` on macOS, `START.cmd` on Windows and `START.sh` on Linux open the same page.
-
-If Terminal answers `no such file or directory`, your shell's startup read a key meant for the path. Double-click `START.html` instead.
+Then double-click `START.html` in the unzipped folder.
 
 ## What is here
 
@@ -56,7 +54,7 @@ Real pages come from public data. Made-up pages come from a seeded simulation; e
 
 With Python installed, `python check_kit.py` checks every file against the manifest, every link and every name. It needs nothing else.
 
-On Windows without Python, `powershell -NoProfile -ExecutionPolicy Bypass -File check_kit.ps1` checks every file, the path lengths, START and every page in Edge, offline.
+On Windows without Python, `powershell -NoProfile -ExecutionPolicy Bypass -File check_kit.ps1` checks every file, the path lengths and every page in Edge, offline.
 
 ## Rerunning a module
 
@@ -66,8 +64,3 @@ Built on {built} from codebase commit `{commit}`.
 """
 # One line per dataset folder in the README's list.
 dataset = "- `{folder}/`: {names}; {kind} data."
-
-# What START.cmd, START.command and START.sh print when START.html is not beside them. Plain
-# words only: the builder refuses a character that cmd or sh would read as an instruction.
-[start]
-zipped = "This kit is still inside its zip file. Extract the whole zip first, then open START in the folder it makes."
