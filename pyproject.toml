@@ -38,5 +38,6 @@ testpaths = ["tests"]
 markers = [
     "network: needs the network; deselected by default, run with -m network",
     "budget: real-size run against the Track B budget; minutes; run with -m budget",
+    "needs_star: needs a STAR that maps; a failing probe skips only on darwin-arm64 with CI unset, and fails everywhere else (R6.2, D-036)",
 ]
 addopts = "-m 'not network and not budget'"

@@ -6,10 +6,12 @@ MultiQC config that colours MultiQC's General Statistics table by the same bands
 page and MultiQC's report cannot disagree about a value.
 """
 
+import math
 import os
 import tomllib
 from collections.abc import Mapping
 from dataclasses import dataclass
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -110,20 +112,27 @@ class Metric:
             ranges = [("good", None, good), ("usable", good, usable), ("bad", usable, None)]
         return [r for r in ranges if r[1] is None or r[2] is None or r[1] < r[2]]
 
-    def strandedness(self, bias: float) -> str:
+    def strandedness(self, bias: float | Fraction) -> str:
         """The library type a forward-strand share shows, by nf-core/rnaseq's thresholds.
 
         The share is Salmon's strand_mapping_bias, or featureCounts' -s 1 over -s 1 plus -s 2.
 
         Forward or reverse when one strand holds at least `stranded` of the reads, unstranded
-        when the two differ by less than `unstranded`, and undetermined in between.
+        when the two differ by less than `unstranded`, and undetermined in between. Decided
+        in exact arithmetic on the share as given, a Fraction of two counts as it is and a
+        float as it prints, so a share and its mirror get mirrored calls; in floats, 9 of 20
+        fell inside the unstranded band and 11 of 20 outside it.
         """
         assert self.stranded is not None and self.unstranded is not None  # noqa: S101 - load() checked
-        if bias >= self.stranded:
+        if isinstance(bias, float) and math.isnan(bias):
+            return "undetermined"
+        share, stranded = Fraction(str(bias)), Fraction(str(self.stranded))
+        if share >= stranded:
             return "forward"
-        if 1 - bias >= self.stranded:
+        if 1 - share >= stranded:
             return "reverse"
-        return "unstranded" if abs(2 * bias - 1) < self.unstranded else "undetermined"
+        within = abs(2 * share - 1) < Fraction(str(self.unstranded))
+        return "unstranded" if within else "undetermined"
 
 
 @dataclass(frozen=True)
