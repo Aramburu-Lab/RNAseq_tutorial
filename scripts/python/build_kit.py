@@ -47,11 +47,21 @@ DATED = re.compile(r"\d{4}-\d{2}-\d{2}_")
 # Scripts for readers who look for START in their own system's form; each opens START.html.
 # A double-clicked .command is typed into the user's shell, which runs it from the home
 # folder, so each script finds the page beside itself; %~dp0 is the .cmd file's own folder.
+# Each first checks that START.html is there: Windows, asked to run a file inside a zip, copies
+# that one file out alone. cmd needs CRLF lines for its goto label. {zipped} is course.toml's
+# start.zipped, so no sentence is written here.
+_SH = (
+    '#!/bin/sh\ncd "$(dirname "$0")" || exit 1\n'
+    '[ -f START.html ] || {{ echo "{zipped}"; exit 1; }}\n'
+)
 START = {
-    "START.command": ('#!/bin/sh\ncd "$(dirname "$0")" && open START.html\n', 0o755),
-    "START.sh": ('#!/bin/sh\ncd "$(dirname "$0")" && xdg-open START.html\n', 0o755),
-    "START.cmd": ('@echo off\r\nstart "" "%~dp0START.html"\r\n', 0o644),
-}
+    "START.command": (_SH + "open START.html\n", 0o755),
+    "START.sh": (_SH + "xdg-open START.html\n", 0o755),
+    "START.cmd": ('@echo off\r\nif exist "%~dp0START.html" goto open\r\necho {zipped}\r\npause\r\n'
+                  'exit /b 1\r\n:open\r\nstart "" "%~dp0START.html"\r\n', 0o644),
+}  # fmt: skip
+# Characters cmd or sh would read as an instruction inside the message.
+SPECIAL = re.compile(r'["$`\\!&|<>^%()]')
 FOLDER = re.compile(r"[a-z0-9_]+")
 # Code a kit is built from; a change here, even an untracked file, marks the commit dirty.
 CODE = ("src", "scripts", "conf", "pixi.toml", "pixi.lock", "pyproject.toml")
@@ -195,12 +205,22 @@ def build(out: Path, roots: list[tuple[str, Path, bool]]) -> list[Path]:
             dest.parent.mkdir(parents=True, exist_ok=True)
             shipped.append(Path(shutil.copy2(p, dest)))
     write_home(out, [(out / folder, real) for folder, _, real in roots])
-    for name, (body, mode) in START.items():
-        (out / name).write_bytes(body.encode())
-        (out / name).chmod(mode)
+    write_start(out)
+    # Its load proves START.html is beside the kit; see course.html.j2.
+    (out / "kit.js").write_text("window.ctxKit = true;\n", encoding="utf-8")
     shutil.copy2(check_kit.__file__, out / "check_kit.py")
     shutil.copy2(CHECK_PS1, out / "check_kit.ps1")
     return shipped
+
+
+def write_start(out: Path) -> None:
+    """START.command, START.sh and START.cmd, each refusing politely when START.html is absent."""
+    zipped = text.word("course", "start.zipped")
+    if SPECIAL.search(zipped):
+        sys.exit(f"course.toml start.zipped holds a character cmd or sh would act on: {zipped}")
+    for name, (body, mode) in START.items():
+        (out / name).write_bytes(body.format(zipped=zipped).encode())
+        (out / name).chmod(mode)
 
 
 def main() -> None:

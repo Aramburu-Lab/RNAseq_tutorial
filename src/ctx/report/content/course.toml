@@ -6,6 +6,11 @@ intro = "Every module of the course in order, with a link to each dataset's page
 note = "Real pages come from public data. Made-up pages come from a seeded simulation with planted genes, a batch and planted QC problems. No number on a made-up page describes a real sample."
 # Opened from inside the zip, the page shows but its links fail; the page itself must say why.
 unzip = "If a link here does not open, unzip the kit and open START.html from the unzipped folder."
+# Shown only when kit.js, beside START.html in every kit, fails to load: Windows Explorer, asked to
+# open a file inside a zip, copies that one file alone into a temporary folder.
+zipped_title = "Opened from inside the zip."
+zipped = "This page was copied out of the zip alone, so its links cannot open. Unzip the whole kit first: on Windows, right-click the zip and choose Extract All. Then open START.html in the folder that appears."
+
 hubs = "Course hubs"
 hubs_lead = "A dataset's hub lists its newest module pages and the verdicts of the rules registered before its data were seen."
 modules = "Modules"
@@ -61,3 +66,8 @@ Built on {built} from codebase commit `{commit}`.
 """
 # One line per dataset folder in the README's list.
 dataset = "- `{folder}/`: {names}; {kind} data."
+
+# What START.cmd, START.command and START.sh print when START.html is not beside them. Plain
+# words only: the builder refuses a character that cmd or sh would read as an instruction.
+[start]
+zipped = "This kit is still inside its zip file. Extract the whole zip first, then open START in the folder it makes."

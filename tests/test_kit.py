@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -12,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from ctx.report import course
+from ctx.report import course, text
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "python" / "build_kit.py"
@@ -183,7 +184,7 @@ def test_start_scripts_open_the_page_beside_them(tmp_path):
     assert done.returncode == 0, done.stderr
     top = sorted(p.name for p in kit.iterdir() if p.is_file())
     assert top == ["MANIFEST.json", "README.md", "START.cmd", "START.command", course.INDEX,
-                   "START.sh", "check_kit.ps1", "check_kit.py"]  # fmt: skip
+                   "START.sh", "check_kit.ps1", "check_kit.py", "kit.js"]  # fmt: skip
     runnable = {p.name for p in kit.rglob("*") if p.is_file() and p.stat().st_mode & 0o111}
     assert runnable == {"START.command", "START.sh"}
     # Run each script from elsewhere, as a double-click does, with open and xdg-open stubbed.
@@ -192,13 +193,56 @@ def test_start_scripts_open_the_page_beside_them(tmp_path):
     for opener in ("open", "xdg-open"):
         (stubs / opener).write_text('#!/bin/sh\nprintf "%s/%s" "$PWD" "$1" > "$OPENED"\n')
         (stubs / opener).chmod(0o755)
+    zipped = text.word("course", "start.zipped")
     for script in ("START.command", "START.sh"):
         opened = tmp_path / f"{script}.opened"
         env = {**os.environ, "PATH": f"{stubs}:{os.environ['PATH']}", "OPENED": str(opened)}
         subprocess.run([str(kit / script)], cwd=tmp_path, env=env, check=True)
         assert Path(opened.read_text()).resolve() == (kit / "START.html").resolve()
+        # Copied out of the zip alone, as Windows does with a file opened inside one: no page
+        # beside it, so it says why and opens nothing.
+        alone = tmp_path / f"alone_{script}"
+        alone.mkdir()
+        shutil.copy2(kit / script, alone / script)
+        opened.unlink()
+        run = subprocess.run([str(alone / script)], cwd=tmp_path, env=env, capture_output=True,
+                             text=True, check=False)  # fmt: skip
+        assert run.returncode == 1 and zipped in run.stdout and not opened.exists()
     cmd = (kit / "START.cmd").read_bytes()
-    assert cmd.count(b"\r\n") == cmd.count(b"\n") and b'"%~dp0START.html"' in cmd
+    assert cmd.count(b"\r\n") == cmd.count(b"\n")  # cmd.exe needs CRLF to find a goto label
+    lines = cmd.decode().split("\r\n")
+    assert lines[1] == 'if exist "%~dp0START.html" goto open'
+    assert lines[2] == f"echo {zipped}" and "pause" in lines and ":open" in lines
+    assert lines[lines.index(":open") + 1] == 'start "" "%~dp0START.html"'
+
+
+def test_start_html_warns_when_copied_out_of_the_zip(tmp_path):
+    """kit.js beside START.html loads; copied out alone, its failed load shows the warning."""
+    kit, done = build(tmp_path)
+    assert done.returncode == 0, done.stderr
+    html = (kit / "START.html").read_text()
+    assert '<div class="zipped" id="ctx-zipped" role="alert" hidden>' in html
+    assert (
+        '<script src="kit.js" onerror="document.getElementById(\'ctx-zipped\').hidden = false">'
+        in html
+    )
+    assert (kit / "kit.js").read_text().startswith("window.ctxKit")
+
+
+def test_a_start_message_cmd_or_sh_would_act_on_is_refused(tmp_path):
+    content = tmp_path / "content"
+    shutil.copytree(ROOT / "src" / "ctx" / "report" / "content", content)
+    course_toml = content / "course.toml"
+    zipped = text.word("course", "start.zipped")
+    course_toml.write_text(course_toml.read_text().replace(zipped, zipped + " & del *"))
+    real, made = a_root(tmp_path / "real", "Study", "study"), a_root(tmp_path / "made", "M", "made")
+    done = subprocess.run(
+        [sys.executable, str(SCRIPT), "--out", str(tmp_path / "kit"), f"--real=step={real}",
+         f"--made-up=preview={made}"],
+        capture_output=True, text=True, check=False,
+        env={**os.environ, "CTX_CONTENT": str(content)},
+    )  # fmt: skip
+    assert done.returncode == 1 and "a character cmd or sh would act on" in done.stderr
 
 
 def test_check_kit_finds_a_changed_file(tmp_path):
