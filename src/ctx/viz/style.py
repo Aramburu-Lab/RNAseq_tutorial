@@ -92,10 +92,10 @@ LABEL_BOX_PAD = 0.15
 # A strip plot spreads a category's points over this share of its slot either side of the
 # centre, and draws its median ± k MAD bar over a little more.
 STRIP = {"jitter": 0.3, "range": 0.4}
-# Average glyph width in em, used to wrap the caption to the width a figure really has.
+# Average glyph width in em, used to wrap axis titles and labels to the room they have.
 AVERAGE_CHAR_EM = 0.55
-# The caption's inset from each side, as a share of the figure's width: annotate.place_caption
-# draws it at x = 0.02 (tests/test_caption_fit.py holds the two equal).
+# The caption's inset from each side, as a share of the figure's width; annotate.place_caption
+# draws at it and wraps inside it.
 CAPTION_INSET = 0.02
 # Above this many features a box plot takes the double column: at 9 pt the p and r labels of
 # 5 features overlap in 85 mm and those of 4 do not (measured 2026-09-29).
@@ -274,16 +274,6 @@ def figure_inches(width: str, kind: str) -> tuple[float, float]:
     return inches, WIDTHS_MM["single"] / MM_PER_INCH * ASPECT[kind]
 
 
-def caption_chars(width_inches: float) -> int:
-    """How many caption characters fit on one line of a figure this wide, inside its insets.
-
-    The full width let a 96-character line of Step-1's running-score caption end 0.07 in past
-    a double-column page (2026-09-30).
-    """
-    usable = width_inches * (1 - 2 * CAPTION_INSET)
-    return int(usable * 72 / (SIZES["caption"] * AVERAGE_CHAR_EM))
-
-
 def contrast(first: str, second: str) -> float:
     """WCAG 2 contrast ratio between two hex colours, from 1 to 21."""
 
@@ -354,6 +344,9 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
             "figure.facecolor": "none",
             "axes.facecolor": "none",
             "savefig.transparent": True,
+            # Layout measured as the PDF and SVG set text: hinted glyphs measured a caption line
+            # 238.3 pt that both files set at 227.8 pt (2026-10-01), and only vector files ship.
+            "text.hinting": "no_hinting",
             "legend.frameon": False,
             "legend.handlelength": LEGEND["handlelength"],
             "legend.columnspacing": LEGEND["columnspacing"],

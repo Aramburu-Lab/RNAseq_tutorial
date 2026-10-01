@@ -17,10 +17,10 @@ from ctx.report.marks import plain
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
     AXIS_TITLE_SHARE,
+    CAPTION_INSET,
     LEGEND_MAX_COLUMNS,
     LINE_SPACING,
     SIZES,
-    caption_chars,
 )
 
 TEST_NAME = "Mann-Whitney U, two-sided"
@@ -80,6 +80,35 @@ def wrap(text: str, width: int = 0) -> str:
     return textwrap.fill(text, width, break_on_hyphens=False) if width else text
 
 
+def wrap_to_width(text: str, points: float, size: float) -> str:
+    """Wrap ``text`` so each line holds as many words as fit in ``points`` at ``size`` pt.
+
+    Measured in the figure's own font, so a line ends only where its next word would cross the
+    edge: an average glyph width left about a word of space at the right of every caption line
+    (Rytis, 2026-10-01). Never splits a word, so never at a hyphen.
+
+    Args:
+        text: The text, unwrapped; any line breaks in it are treated as spaces.
+        points: The width a line may take, in points.
+        size: The font size, in points.
+
+    Returns:
+        The text with a line break before each word that would not fit.
+    """
+    from matplotlib.font_manager import FontProperties  # noqa: PLC0415 - heavy
+    from matplotlib.textpath import text_to_path  # noqa: PLC0415 - heavy
+
+    prop = FontProperties(size=size)
+    lines: list[str] = []
+    for word in text.split():
+        trial = f"{lines[-1]} {word}" if lines else word
+        if lines and text_to_path.get_text_width_height_descent(trial, prop, False)[0] <= points:
+            lines[-1] = trial
+        else:
+            lines.append(word)
+    return "\n".join(lines)
+
+
 def fit_title(text: str, height: float) -> str:
     """Wrap a vertical axis title to the length its axis has: a share of the figure height.
 
@@ -119,8 +148,9 @@ def place_caption(
     from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
 
     # Wrapped as printed: a glossary mark is its display text off the page (D-048).
-    caption = wrap(plain(text), caption_chars(width))
-    fig.text(0.02, 0.01, caption, ha="left", va="bottom", fontsize=SIZES["caption"])
+    usable = width * 72 * (1 - 2 * CAPTION_INSET)
+    caption = wrap_to_width(plain(text), usable, SIZES["caption"])
+    fig.text(CAPTION_INSET, 0.01, caption, ha="left", va="bottom", fontsize=SIZES["caption"])
     caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
     rect = (0, caption_inches / height, 1, 1)
     if not handles:
