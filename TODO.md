@@ -98,7 +98,7 @@ Cohort ladder agreed at check-in: innate immune cells → other immune cells →
 | 3 — solid tumours, large cohorts | TCGA tumour vs solid-tissue-normal (open STAR-Counts at GDC Data Release 46, 2026-08-10, counted as cases with a primary tumour and a solid-tissue-normal sample: KIRC 72 pairs, BRCA 113, LUAD 58, LUSC 51; PAAD 4, too few for a tumour-normal design) and TCGA vs GTEx through the UCSC Xena TOIL recompute (uniformly processed, hundreds of healthy samples per tissue) | Paired (TCGA) and unpaired large-n (TOIL) | Large groups; VHL→HIF→hypoxia story in KIRC; harmonisation and batch lessons in the TOIL comparison | Pair counts in current GDC release; current TOIL file names and gene model |
 | Proteomics, Step-3 | CPTAC-3 ccRCC (Clark et al. 2019 Cell): tumour and normal-adjacent tissue with matched RNA-seq (open at GDC) and TMT proteomics (open at the Proteomic Data Commons); per cohort also CPTAC LUAD (Gillette et al. 2020 Cell: 110 tumours and 101 NATs, complete data for 101 and 96; a smoking-associated field effect in NATs) and LSCC (Satpathy et al. 2021 Cell: 108 tumours and 99 paired NATs analysed) for lung, CPTAC BRCA for breast (Krug et al. 2020 Cell: 122 treatment-naive tumours; 18 NATs were run and excluded on QC, so no NAT data), CPTAC PDAC for pancreas (optional) | Same samples measured at RNA and protein level | Direct RNA–protein concordance per cancer type | Case counts with both layers; PDC / `cptac` access route; TMT batch layout |
 | Proteomics, Step-1 | Rieckmann et al. 2017 Nat Immunol immune-cell proteome (PRIDE; healthy donors; protein copy numbers per cell type incl. neutrophils and monocytes) | Cross-dataset: RNA from Step-1 vs protein per cell type | Neutrophil vs monocyte RNA–protein discordance (granule proteins are transcribed early in granulopoiesis, so mature neutrophils carry high protein with low mRNA) | PRIDE accession; processed copy-number table availability; cell-type labels matching Step-1 |
-| miRNA-seq, Step-3 | TCGA miRNA-seq for the Step-3 cohorts, open at GDC as mature-miRNA and isoform quantification for the same cases as mRNA-seq (Data Release 46, cases with a tumour and a solid-tissue normal: KIRC 71, BRCA 103, LUAD 46, LUSC 45, fewer than for mRNA-seq) | Matched mRNA + miRNA per sample | miRNA–target anticorrelation and its protein footprint in CPTAC | Number of normals with miRNA-seq; GDC file types and normalisation |
+| miRNA-seq, Step-3 | TCGA miRNA-seq for the Step-3 cohorts, open at GDC as miRNA quantification per precursor hairpin and as isoform quantification, from which mature miRNAs come by MIMAT accession (corrected 2026-10-01, P4.3) for the same cases as mRNA-seq (Data Release 46, cases with a tumour and a solid-tissue normal: KIRC 71, BRCA 103, LUAD 46, LUSC 45, fewer than for mRNA-seq) | Matched mRNA + miRNA per sample | miRNA–target anticorrelation and its protein footprint in CPTAC | Number of normals with miRNA-seq; GDC file types and normalisation |
 | Clinical, Step-3 | TCGA-CDR (Liu et al. 2018 Cell, PMID 29625055: 11,160 patients, 33 cancer types): OS, DSS, DFI, PFI with per-cancer recommendations (Table 3) and competing-risk status (Table S1); GDC clinical (demographic, diagnoses, treatments, exposures, follow-ups) and GDC annotations (neoadjuvant and prior malignancy are notifications; redactions remove cases) | One row per patient | Survival endpoints and covariates for kidney, breast, lung | The CDR file's own time unit; new-tumour-event fields; receptor status, PAM50 and purity sources |
 | Clinical, breast validation | SCAN-B (GEO GSE96058; Brueffer et al. 2018): 3,273 breast cancer patients with RNA-seq and overall survival (336 deaths), median follow-up 52 months; processed expression only, reads not released (read 2026-09-29) | Population-based cohort | Long-follow-up OS validation for breast (Track B only) | Which 3,273 or the 3,217 treatment-naive subset of Brueffer et al. 2020 (75 months' follow-up, not marked in GEO); terms of the processed data |
 | ncRNA resources | GENCODE biotypes; TargetScan predicted targets (context++ scores); miRTarBase validated targets; LncBook / Lnc2Cancer for disease-linked lncRNAs; GENCODE Ribo-seq ORF annotation to flag "non-coding" genes with translation evidence | — | Annotation is a status, not a proof | Download terms (miRTarBase academic licence); current versions |
@@ -648,6 +648,7 @@ Built after P2C.3, so the registered Step-1 analysis stays as registered; the fr
 - [ ] **GS.8** M10 for the Step-1 root, scored on TCGA-BRCA (D-049, decision 1), declared in the pancreas cohort bundle; the coverage table on the page (Step-1's featured calls: 3,201 of 3,703 in GENCODE v36); M5's M10 link on.
 - [ ] **GS.9** M9 selection, after the external-data spike and M10: the genes-by-contrasts evidence view and box; cards on demand up to the measured byte cap; the missing-card command; M9's entry page.
 - [ ] **GS.10** Proof: the kit rebuilt; the selection carried M5 to M6 to M10 to M9 and back in four browsers, 1280 and 375 px, both themes, keyboard only; Safari by Rytis from a checklist; the round trip added to K.4's Windows checklist; sizes, wall time and peak RAM; a review section and lessons.
+- [ ] Every page that draws GDC data acknowledges the TCGA project accession and the GDC, as GDC's terms ask (read 2026-10-01, P4.3): M5 and M6 on Step-3, M8 and M10.
 - [ ] M10 exercise: TCGA-CDR's ER-positive vs ER-negative breast survival under all four endpoints
 - [ ] D28 treatment dataset, breast first: paired design `~ patient + timepoint`, response as an interaction (`timepoint:response`), same QC, Reproduce and clinical rules; then lung
 
@@ -2542,6 +2543,515 @@ mkdir -p ~/ctx_breast/data/raw/breast_mac_rnaseq
 rsync -avmL --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.json' --include='pipeline_info/*versions*.yml' --include='pipeline_info/params_*.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/breast_mac/nfcore_rnaseq/results/ ~/ctx_breast/data/raw/breast_mac_rnaseq/
 test -s ~/ctx_breast/data/raw/breast_mac_rnaseq/salmon/salmon.merged.gene_counts_length_scaled.tsv && echo "matrix copied" || echo "NO MATRIX: rerun after step 3"
 ls ~/ctx_breast/data/raw/breast_mac_rnaseq/trimgalore/*_trimming_report.json | wc -l
+```
+
+### Phase 4 GDC downloads (P4.3), the only copy
+
+One script for every open-access GDC fetch of a TCGA project, generalised from P4.2 (whose run of TCGA-BRCA it reproduces: the BRCA queries are byte-identical to P4.2's), researched and checked 2026-10-01 against GDC Data Release 46.0 with metadata queries only: `bash ~/ctx_fetch_gdc.sh <project> star|mirna|isoform`. Roots follow D24's cohorts (`~/ctx_breast`, `~/ctx_kidney`, `~/ctx_lung` holding LUAD and LUSC); slugs `tcga_<project>`, `tcga_<project>_mirna`, `tcga_<project>_isoform`. The TCGA-CDR is copied from the breast folder after its md5 matches the PanCan manifest, downloaded only if that copy is absent or differs. One clinical query for every project (an independent check found LUSC's dropping `follow_ups.molecular_tests`, which 16 LUSC cases carry). The miRNA files count reads per precursor hairpin; mature miRNAs come from the isoform files. GDC's terms (read 2026-10-01): open access without login; no attempt to identify participants; acknowledge the TCGA project and the GDC on every page that draws these data. The block below writes the script; it was written and checked again at the commit: identical bytes from zsh and bash 3.2, md5 7aaeda9ef1129dd37d5bcacdb5998381, and dry runs (`DATA=0`) for KIRC, LUAD and LUSC whose metadata checks all equal their expectation.
+
+```bash
+cat >| ~/ctx_fetch_gdc.sh <<'SH'
+# Open-access GDC files of one TCGA project, saved as fetched into ~/ctx_<cohort>/data/raw/<slug>/.
+#   bash ~/ctx_fetch_gdc.sh <project> star     STAR - Counts, clinical, annotations, the TCGA-CDR
+#   bash ~/ctx_fetch_gdc.sh <project> mirna    miRNA Expression Quantification (BCGSC miRNA Profiling)
+#   bash ~/ctx_fetch_gdc.sh <project> isoform  Isoform Expression Quantification, the same aliquots
+# A mirna file has one row per hairpin (hsa-let-7a-1, -2, -3); only the isoform file names the mature
+# miRNA a read came from (miRNA_region "mature,MIMAT...").
+# The case statement below names each project's folder; the table in step 4 holds its measured
+# expectations. TCGA-BRCA star is P4.2's run of 2026-09-30: same queries, byte for byte, same files.
+# Restartable: run the same command again. Metadata saved by an earlier run is kept, so a rerun
+# stays on the manifest of its first run; a data file is skipped once its md5 matches.
+# No -e: one failed file must not stop the others; the checks at the end count failures.
+# JOBS sets the parallel downloads (4, as P4.2 ran). For tests only: OUT, GDC_API, GDC_DATA, GDC_WEB,
+# CDR_FROM, STAR_TSV, DATA=0 (fetch no data file), EXPECT_TSV (expectations from that file).
+set -uo pipefail
+
+GDC_API=${GDC_API:-https://api.gdc.cancer.gov}
+GDC_DATA=${GDC_DATA:-$GDC_API/data}
+GDC_WEB=${GDC_WEB:-https://gdc.cancer.gov}
+JOBS=${JOBS:-4}
+DATA=${DATA:-1}
+PY=/usr/bin/python3
+export GDC_API GDC_DATA GDC_WEB DATA
+
+fetch() { curl -sS --fail --retry 6 --retry-all-errors --connect-timeout 30 --max-time 900 "$@"; }
+
+# One row per retrieval, so every file carries its own retrieval date and the release it came from.
+log() { printf '%s\t%s\t%s\t%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "${NOW:-unknown}" "$1" "$2" >> "$OUT/_retrieval_log.tsv"; }
+
+# download <url> <dest> <md5>: lands in <dest>.part and is moved into place only when the md5 matches.
+download() {
+    local url=$1 dest=$2 want=$3
+    if [ -f "$dest" ] && [ "$(md5 -q "$dest")" = "$want" ]; then return 0; fi
+    [ "$DATA" = 0 ] && { echo "not fetched (DATA=0): $url"; return 1; }
+    mkdir -p "$(dirname "$dest")"
+    # A finished file whose md5 no longer matches is moved aside, never deleted.
+    if [ -f "$dest" ]; then mv "$dest" "$dest.md5_mismatch_$(date -u +%Y%m%dT%H%M%SZ)"; fi
+    fetch -o "$dest.part" "$url" || { echo "FAIL download $url"; return 1; }
+    if [ "$(md5 -q "$dest.part")" = "$want" ]; then
+        mv "$dest.part" "$dest" && log "${dest#"$OUT"/}" "GET $url"
+        return 0
+    fi
+    echo "FAIL md5 $dest.part: $(md5 -q "$dest.part"), the manifest says $want"
+    return 1
+}
+
+# xargs calls this script back once per data file, into gdc-client's layout <file_id>/<file_name>.
+if [ "${1:-}" = "--one" ]; then download "$GDC_DATA/$2" "$OUT/$2/$3" "$4"; exit $?; fi
+[ -f "$0" ] || { echo "FAIL: run this file as: bash <path to this file> <project> <star|mirna|isoform>"; exit 1; }
+
+# Where each project goes. A lung root holds both lung projects, each in its own slug.
+PROJECT=${1:-}; KIND=${2:-}
+case "$PROJECT:$KIND" in
+    TCGA-BRCA:star)  DEST=$HOME/ctx_breast/data/raw/tcga_brca ;;
+    TCGA-BRCA:mirna) DEST=$HOME/ctx_breast/data/raw/tcga_brca_mirna ;;
+    TCGA-BRCA:isoform) DEST=$HOME/ctx_breast/data/raw/tcga_brca_isoform ;;
+    TCGA-KIRC:star)  DEST=$HOME/ctx_kidney/data/raw/tcga_kirc ;;
+    TCGA-KIRC:mirna) DEST=$HOME/ctx_kidney/data/raw/tcga_kirc_mirna ;;
+    TCGA-KIRC:isoform) DEST=$HOME/ctx_kidney/data/raw/tcga_kirc_isoform ;;
+    TCGA-LUAD:star)  DEST=$HOME/ctx_lung/data/raw/tcga_luad ;;
+    TCGA-LUAD:mirna) DEST=$HOME/ctx_lung/data/raw/tcga_luad_mirna ;;
+    TCGA-LUAD:isoform) DEST=$HOME/ctx_lung/data/raw/tcga_luad_isoform ;;
+    TCGA-LUSC:star)  DEST=$HOME/ctx_lung/data/raw/tcga_lusc ;;
+    TCGA-LUSC:mirna) DEST=$HOME/ctx_lung/data/raw/tcga_lusc_mirna ;;
+    TCGA-LUSC:isoform) DEST=$HOME/ctx_lung/data/raw/tcga_lusc_isoform ;;
+    *) echo "FAIL: no row for '$PROJECT $KIND'. Use TCGA-BRCA, TCGA-KIRC, TCGA-LUAD or TCGA-LUSC, then star, mirna or isoform."; exit 1 ;;
+esac
+OUT=${OUT:-$DEST}
+# The STAR - Counts metadata of the same project, read by the mirna and isoform checks to count shared pairs.
+STAR_DIR=${DEST%_mirna}
+STAR_TSV=${STAR_TSV:-${STAR_DIR%_isoform}/gdc_files_star_counts.tsv}
+export OUT
+
+# follow_ups.molecular_tests for every project, so no project's clinical file lacks a field another
+# has, and a count of zero from it is a count (cases, 2026-10-01: BRCA ESR1 1048, PGR 1047, ERBB2 984;
+# KIRC laboratory values, haemoglobin 456 to LDH 92; LUAD KRAS 62, EGFR 24; LUSC KRAS 15, EGFR 2).
+EXPAND=demographic,diagnoses,diagnoses.treatments,exposures,follow_ups,follow_ups.molecular_tests
+case "$KIND" in
+    star)    DATA_TYPE="Gene Expression Quantification"; WORKFLOW="STAR - Counts"; NAME=star_counts ;;
+    mirna)   DATA_TYPE="miRNA Expression Quantification"; WORKFLOW="BCGSC miRNA Profiling"; NAME=mirna ;;
+    isoform) DATA_TYPE="Isoform Expression Quantification"; WORKFLOW="BCGSC miRNA Profiling"; NAME=isoform ;;
+esac
+
+mkdir -p "$OUT"
+exec > >(tee -a "$OUT/_fetch_gdc.log") 2>&1
+T0=$(date +%s)
+echo "PASTE start $(date -u +%Y-%m-%dT%H:%M:%SZ): $PROJECT $KIND into $OUT"
+# This script is kept beside what it fetched; an older, different copy is moved aside.
+if [ -f "$OUT/_fetch_gdc.sh" ] && ! cmp -s "$0" "$OUT/_fetch_gdc.sh"; then mv "$OUT/_fetch_gdc.sh" "$OUT/_fetch_gdc.sh.superseded_$(date -u +%Y%m%dT%H%M%SZ)"; fi
+[ -f "$OUT/_fetch_gdc.sh" ] || cp -p "$0" "$OUT/_fetch_gdc.sh"
+echo "PASTE script md5 $(md5 -q "$0")"
+df -h "$OUT" | tail -n 1 | sed 's/^/PASTE disk: /'
+
+# The release GDC serves now, and the one the saved metadata came from (copied on the first run only).
+fetch -o "$OUT/_status_last_run.json" "$GDC_API/status" || { echo "FAIL: no answer from $GDC_API/status"; exit 1; }
+release() { sed -n 's/.*"data_release": *"\([^"]*\)".*/\1/p' "$1"; }
+NOW=$(release "$OUT/_status_last_run.json")
+export NOW
+[ -s "$OUT/_retrieval_log.tsv" ] || printf 'retrieved_utc\tgdc_release\tfile\tsource\n' > "$OUT/_retrieval_log.tsv"
+if [ -s "$OUT/gdc_status.json" ]; then :; else cp "$OUT/_status_last_run.json" "$OUT/gdc_status.json" && log gdc_status.json "GET $GDC_API/status"; fi
+[ "$NOW" = "$(release "$OUT/gdc_status.json")" ] || echo "WARNING: GDC changed release since the first run; the saved manifest still decides what is fetched. For the new release, move $OUT aside and run again."
+
+# post <file> <endpoint> <json>: fetched once; its query is saved beside it as <file>.query.json.
+post() {
+    if [ -s "$OUT/$1" ]; then echo "kept $1 from an earlier run"; return 0; fi
+    printf '%s\n' "$3" > "$OUT/$1.query.json"
+    fetch -H 'Content-Type: application/json' --data-binary @"$OUT/$1.query.json" -o "$OUT/$1.part" "$GDC_API/$2" || { echo "FAIL $1"; return 1; }
+    mv "$OUT/$1.part" "$OUT/$1" && log "$1" "POST $GDC_API/$2 with $1.query.json"
+}
+get() {
+    if [ -s "$OUT/$1" ]; then echo "kept $1 from an earlier run"; return 0; fi
+    fetch -o "$OUT/$1.part" "$2" || { echo "FAIL $1"; return 1; }
+    mv "$OUT/$1.part" "$OUT/$1" && log "$1" "GET $2"
+}
+
+# Filters and field names were each checked: the API answered with warnings {}.
+FILES='{"op":"and","content":[{"op":"in","content":{"field":"cases.project.project_id","value":["'"$PROJECT"'"]}},{"op":"in","content":{"field":"data_type","value":["'"$DATA_TYPE"'"]}},{"op":"in","content":{"field":"analysis.workflow_type","value":["'"$WORKFLOW"'"]}},{"op":"in","content":{"field":"access","value":["open"]}}]}'
+CASES='{"op":"in","content":{"field":"project.project_id","value":["'"$PROJECT"'"]}}'
+# preservation_method tells FFPE tumour files from frozen ones, which the tumour-normal pairing needs.
+# A miRNA file joins its mRNA file on the sample barcode: their aliquots differ (BRCA shares none).
+FIELDS=file_id,file_name,md5sum,file_size,cases.case_id,cases.submitter_id,cases.samples.submitter_id,cases.samples.sample_type,cases.samples.preservation_method,cases.samples.portions.analytes.aliquots.submitter_id
+
+# 1. Manifest and per-file metadata first, then the clinical side, so all metadata is from one moment.
+post "gdc_manifest_$NAME.txt" files "{\"filters\":$FILES,\"size\":10000,\"return_type\":\"manifest\"}"
+# A table saved by the first version of P4.2 lacks preservation_method: move it aside, never delete.
+if [ -s "$OUT/gdc_files_$NAME.tsv" ] && ! head -n 1 "$OUT/gdc_files_$NAME.tsv" | grep -q preservation_method; then
+    stamp=$(date -u +%Y%m%dT%H%M%SZ)
+    mv "$OUT/gdc_files_$NAME.tsv" "$OUT/gdc_files_$NAME.tsv.no_preservation_$stamp"
+    mv "$OUT/gdc_files_$NAME.tsv.query.json" "$OUT/gdc_files_$NAME.tsv.query.json.no_preservation_$stamp" 2>/dev/null
+    echo "moved aside the metadata table without preservation_method; fetching it again"
+fi
+post "gdc_files_$NAME.tsv" files "{\"filters\":$FILES,\"size\":10000,\"format\":\"TSV\",\"fields\":\"$FIELDS\"}"
+# Clinical, annotations and the CDR are per project: the star folder holds them, mirna and isoform do not.
+if [ "$KIND" = star ]; then
+    post gdc_cases_clinical.json cases "{\"filters\":$CASES,\"size\":10000,\"format\":\"JSON\",\"expand\":\"$EXPAND\"}"
+    post gdc_annotations.json annotations "{\"filters\":$CASES,\"size\":10000,\"format\":\"JSON\"}"
+    get PanCan-General_Open_GDC-Manifest_2.txt "$GDC_WEB/system/files/public/file/PanCan-General_Open_GDC-Manifest_2.txt"
+
+    # 2. TCGA-CDR, one pan-cancer file, by the UUID and md5 in GDC's own PanCan manifest. A copy
+    # already on this Mac whose md5 matches is copied, not downloaded again.
+    CDR_ID=1b5f413e-a8d1-4d10-92eb-7c4ae739ed81
+    CDR_FROM=${CDR_FROM:-$HOME/ctx_breast/data/raw/tcga_brca/TCGA-CDR-SupplementalTableS1.xlsx}
+    [ -s "$OUT/PanCan-General_Open_GDC-Manifest_2.txt" ] || echo "FAIL: the PanCan manifest was not fetched, so the CDR cannot be checked"
+    CDR_NAME=$(awk -F'\t' -v id="$CDR_ID" '$1 == id {print $2}' "$OUT/PanCan-General_Open_GDC-Manifest_2.txt" 2>/dev/null)
+    CDR_MD5=$(awk -F'\t' -v id="$CDR_ID" '$1 == id {print $3}' "$OUT/PanCan-General_Open_GDC-Manifest_2.txt" 2>/dev/null)
+    if [ -n "$CDR_MD5" ]; then
+        if [ ! -f "$OUT/$CDR_NAME" ] && [ -f "$CDR_FROM" ] && [ "$(md5 -q "$CDR_FROM")" = "$CDR_MD5" ]; then
+            cp -p "$CDR_FROM" "$OUT/$CDR_NAME.part" && [ "$(md5 -q "$OUT/$CDR_NAME.part")" = "$CDR_MD5" ] && mv "$OUT/$CDR_NAME.part" "$OUT/$CDR_NAME" && log "$CDR_NAME" "copied from $CDR_FROM, md5 equal to the PanCan manifest's; that copy's own row in its folder's _retrieval_log.tsv says when GDC served it"
+        fi
+        download "$GDC_DATA/$CDR_ID" "$OUT/$CDR_NAME" "$CDR_MD5"
+    else
+        echo "FAIL: $CDR_ID is not in PanCan-General_Open_GDC-Manifest_2.txt"
+    fi
+fi
+
+# 3. The data files. xargs treats blanks, quotes and backslashes specially: allow only safe names.
+M="$OUT/gdc_manifest_$NAME.txt"
+[ -s "$M" ] || { echo "FAIL: no manifest at $M"; exit 1; }
+[ "$(head -n 1 "$M")" = "$(printf 'id\tfilename\tmd5\tsize\tstate')" ] || { echo "FAIL: the manifest header is not id, filename, md5, size, state"; exit 1; }
+if awk -F'\t' 'NR > 1 && (NF != 5 || $1 !~ /^[0-9a-f-]+$/ || $2 ~ /[^A-Za-z0-9._-]/)' "$M" | grep -q .; then echo "FAIL: a manifest row is not 5 fields or its id or name holds a character other than letters, digits, dot, underscore or hyphen"; exit 1; fi
+if [ "$DATA" = 0 ]; then
+    echo "DATA=0: no data file fetched"
+else
+    echo "fetching $(awk 'NR > 1' "$M" | wc -l | tr -d ' ') data files, $JOBS at a time"
+    awk -F'\t' 'NR > 1 {print $1, $2, $3}' "$M" | xargs -n 3 -P "$JOBS" bash "$0" --one
+fi
+find "$OUT" -name '*.md5_mismatch_*' | sed 's/^/moved aside for inspection: /'
+
+# 4. Checks: every measured value against this project's row of the table, and how many were checked.
+EXPECT_TABLE=$(cat <<'TABLE'
+# project	kind	check	expected value. Each number was measured 2026-10-01 against GDC Data Release 46.0
+# (2026-08-10) by GDC facet and filter queries; names are spelled as GDC's files spell them. TCGA-BRCA star's are
+# P4.2's of 2026-09-30, measured again. The CDR's md5 and size come from GDC's PanCan manifest of 2024-03-26.
+*	*	release now	Data Release 46.0 - August 10, 2026
+*	*	release of the saved metadata	Data Release 46.0 - August 10, 2026
+*	*	.part leftovers	0
+*	*	metadata files not in the manifest	0
+*	star	CDR	TCGA-CDR-SupplementalTableS1.xlsx md5 a4591b2dcee39591f59e5e25a6ce75fa bytes 2945129
+*	star	clinical warnings	{}
+*	star	annotation warnings	{}
+TCGA-BRCA	star	data files md5 OK, bad, missing	1231, 0, 0
+TCGA-BRCA	star	bytes on disk, in the manifest	5223473855, 5223473855
+TCGA-BRCA	star	metadata files, cases	1231, 1095
+TCGA-BRCA	star	sample types	Metastatic 7, Primary Tumor 1111, Solid Tissue Normal 113
+TCGA-BRCA	star	pairs, cases with a primary tumour and a solid tissue normal	113
+TCGA-BRCA	star	preservation	FFPE 13, OCT 749, Unknown 469
+TCGA-BRCA	star	pairs with an FFPE tumour file	4
+TCGA-BRCA	star	clinical cases	1098 of 1098
+TCGA-BRCA	star	cases with demographic, diagnoses, a treatment record, follow_ups, exposures	1097, 1097, 1097, 1096, 1
+TCGA-BRCA	star	sex_at_birth	female 1085, male 12, none 1
+TCGA-BRCA	star	cases with a molecular test	1049
+TCGA-BRCA	star	molecular tests, cases per gene_symbol	ERBB2 984, ESR1 1048, Not Applicable 105, PGR 1047
+TCGA-BRCA	star	molecular tests, cases per laboratory_test	none
+TCGA-BRCA	star	tobacco_smoking_status, cases per value	none 1098
+TCGA-BRCA	star	annotations	6934 of 6934
+TCGA-BRCA	star	annotation classification	CenterNotification 52, Notification 5605, Observation 23, Redaction 1254
+TCGA-BRCA	star	annotations Neoadjuvant therapy, Prior malignancy	7, 16
+TCGA-BRCA	mirna	data files md5 OK, bad, missing	1207, 0, 0
+TCGA-BRCA	mirna	bytes on disk, in the manifest	60611958, 60611958
+TCGA-BRCA	mirna	metadata files, cases	1207, 1079
+TCGA-BRCA	mirna	sample types	Metastatic 7, Primary Tumor 1096, Solid Tissue Normal 104
+TCGA-BRCA	mirna	pairs, cases with a primary tumour and a solid tissue normal	103
+TCGA-BRCA	mirna	preservation	FFPE 13, OCT 733, Unknown 461
+TCGA-BRCA	mirna	pairs with an FFPE tumour file	4
+TCGA-BRCA	mirna	pairs also paired in STAR - Counts	103
+TCGA-KIRC	star	data files md5 OK, bad, missing	614, 0, 0
+TCGA-KIRC	star	bytes on disk, in the manifest	2604662993, 2604662993
+TCGA-KIRC	star	metadata files, cases	614, 533
+TCGA-KIRC	star	sample types	Additional - New Primary 1, Primary Tumor 541, Solid Tissue Normal 72
+TCGA-KIRC	star	pairs, cases with a primary tumour and a solid tissue normal	72
+TCGA-KIRC	star	preservation	FFPE 4, OCT 13, Unknown 597
+TCGA-KIRC	star	pairs with an FFPE tumour file	0
+TCGA-KIRC	star	clinical cases	537 of 537
+TCGA-KIRC	star	cases with demographic, diagnoses, a treatment record, follow_ups, exposures	537, 537, 310, 537, 537
+TCGA-KIRC	star	sex_at_birth	female 191, male 346
+TCGA-KIRC	star	cases with a molecular test	462
+TCGA-KIRC	star	molecular tests, cases per gene_symbol	Not Applicable 462
+TCGA-KIRC	star	molecular tests, cases per laboratory_test	Calcium 367, Erythrocyte Sedimentation Rate 19, Hemoglobin 456, Lactate Dehydrogenase 92, Leukocytes 443, Platelets 446
+TCGA-KIRC	star	tobacco_smoking_status, cases per value	Current Reformed Smoker for < or = 15 yrs 10, Current Reformed Smoker for > 15 yrs 10, Current Reformed Smoker, Duration Not Specified 3, Current Smoker 17, Lifelong Non-Smoker 47, Not Reported 381, Unknown 69
+TCGA-KIRC	star	annotations	2865 of 2865
+TCGA-KIRC	star	annotation classification	CenterNotification 33, Notification 2657, Observation 13, Redaction 162
+TCGA-KIRC	star	annotations Neoadjuvant therapy, Prior malignancy	9, 63
+TCGA-LUAD	star	data files md5 OK, bad, missing	601, 0, 0
+TCGA-LUAD	star	bytes on disk, in the manifest	2546560815, 2546560815
+TCGA-LUAD	star	metadata files, cases	601, 518
+TCGA-LUAD	star	sample types	Primary Tumor 540, Recurrent Tumor 2, Solid Tissue Normal 59
+TCGA-LUAD	star	pairs, cases with a primary tumour and a solid tissue normal	58
+TCGA-LUAD	star	preservation	FFPE 12, OCT 83, Unknown 506
+TCGA-LUAD	star	pairs with an FFPE tumour file	6
+TCGA-LUAD	star	clinical cases	585 of 585
+TCGA-LUAD	star	cases with demographic, diagnoses, a treatment record, follow_ups, exposures	522, 522, 500, 521, 522
+TCGA-LUAD	star	sex_at_birth	female 280, male 242, none 63
+TCGA-LUAD	star	cases with a molecular test	73
+TCGA-LUAD	star	molecular tests, cases per gene_symbol	EGFR 24, KRAS 62
+TCGA-LUAD	star	molecular tests, cases per laboratory_test	none
+TCGA-LUAD	star	tobacco_smoking_status, cases per value	Current Reformed Smoker for < or = 15 yrs 170, Current Reformed Smoker for > 15 yrs 137, Current Reformed Smoker, Duration Not Specified 4, Current Smoker 122, Lifelong Non-Smoker 75, Not Reported 12, Unknown 2, none 63
+TCGA-LUAD	star	annotations	3945 of 3945
+TCGA-LUAD	star	annotation classification	CenterNotification 30, Notification 3733, Observation 1, Redaction 181
+TCGA-LUAD	star	annotations Neoadjuvant therapy, Prior malignancy	4, 51
+TCGA-LUSC	star	data files md5 OK, bad, missing	562, 0, 0
+TCGA-LUSC	star	bytes on disk, in the manifest	2384478377, 2384478377
+TCGA-LUSC	star	metadata files, cases	562, 501
+TCGA-LUSC	star	sample types	Primary Tumor 511, Solid Tissue Normal 51
+TCGA-LUSC	star	pairs, cases with a primary tumour and a solid tissue normal	51
+TCGA-LUSC	star	preservation	OCT 82, Unknown 480
+TCGA-LUSC	star	pairs with an FFPE tumour file	0
+TCGA-LUSC	star	clinical cases	504 of 504
+TCGA-LUSC	star	cases with demographic, diagnoses, a treatment record, follow_ups, exposures	504, 504, 463, 504, 504
+TCGA-LUSC	star	sex_at_birth	female 131, male 373
+TCGA-LUSC	star	cases with a molecular test	16
+TCGA-LUSC	star	molecular tests, cases per gene_symbol	EGFR 2, KRAS 15
+TCGA-LUSC	star	molecular tests, cases per laboratory_test	none
+TCGA-LUSC	star	tobacco_smoking_status, cases per value	Current Reformed Smoker for < or = 15 yrs 252, Current Reformed Smoker for > 15 yrs 83, Current Reformed Smoker, Duration Not Specified 5, Current Smoker 134, Lifelong Non-Smoker 18, Not Reported 9, Unknown 3
+TCGA-LUSC	star	annotations	4061 of 4061
+TCGA-LUSC	star	annotation classification	CenterNotification 39, Notification 3623, Observation 3, Redaction 396
+TCGA-LUSC	star	annotations Neoadjuvant therapy, Prior malignancy	6, 47
+TCGA-KIRC	mirna	data files md5 OK, bad, missing	616, 0, 0
+TCGA-KIRC	mirna	bytes on disk, in the manifest	30885253, 30885253
+TCGA-KIRC	mirna	metadata files, cases	616, 516
+TCGA-KIRC	mirna	sample types	Additional - New Primary 1, Primary Tumor 544, Solid Tissue Normal 71
+TCGA-KIRC	mirna	pairs, cases with a primary tumour and a solid tissue normal	71
+TCGA-KIRC	mirna	preservation	FFPE 4, OCT 13, Unknown 599
+TCGA-KIRC	mirna	pairs with an FFPE tumour file	0
+TCGA-KIRC	mirna	pairs also paired in STAR - Counts	71
+TCGA-LUAD	mirna	data files md5 OK, bad, missing	567, 0, 0
+TCGA-LUAD	mirna	bytes on disk, in the manifest	28505599, 28505599
+TCGA-LUAD	mirna	metadata files, cases	567, 513
+TCGA-LUAD	mirna	sample types	Primary Tumor 519, Recurrent Tumor 2, Solid Tissue Normal 46
+TCGA-LUAD	mirna	pairs, cases with a primary tumour and a solid tissue normal	46
+TCGA-LUAD	mirna	preservation	FFPE 3, OCT 84, Unknown 480
+TCGA-LUAD	mirna	pairs with an FFPE tumour file	0
+TCGA-LUAD	mirna	pairs also paired in STAR - Counts	19
+TCGA-LUSC	mirna	data files md5 OK, bad, missing	533, 0, 0
+TCGA-LUSC	mirna	bytes on disk, in the manifest	26819352, 26819352
+TCGA-LUSC	mirna	metadata files, cases	533, 488
+TCGA-LUSC	mirna	sample types	Primary Tumor 488, Solid Tissue Normal 45
+TCGA-LUSC	mirna	pairs, cases with a primary tumour and a solid tissue normal	45
+TCGA-LUSC	mirna	preservation	OCT 82, Unknown 451
+TCGA-LUSC	mirna	pairs with an FFPE tumour file	0
+TCGA-LUSC	mirna	pairs also paired in STAR - Counts	38
+TCGA-BRCA	isoform	data files md5 OK, bad, missing	1207, 0, 0
+TCGA-BRCA	isoform	bytes on disk, in the manifest	416580937, 416580937
+TCGA-BRCA	isoform	metadata files, cases	1207, 1079
+TCGA-BRCA	isoform	sample types	Metastatic 7, Primary Tumor 1096, Solid Tissue Normal 104
+TCGA-BRCA	isoform	pairs, cases with a primary tumour and a solid tissue normal	103
+TCGA-BRCA	isoform	preservation	FFPE 13, OCT 733, Unknown 461
+TCGA-BRCA	isoform	pairs with an FFPE tumour file	4
+TCGA-BRCA	isoform	pairs also paired in STAR - Counts	103
+TCGA-KIRC	isoform	data files md5 OK, bad, missing	616, 0, 0
+TCGA-KIRC	isoform	bytes on disk, in the manifest	200249266, 200249266
+TCGA-KIRC	isoform	metadata files, cases	616, 516
+TCGA-KIRC	isoform	sample types	Additional - New Primary 1, Primary Tumor 544, Solid Tissue Normal 71
+TCGA-KIRC	isoform	pairs, cases with a primary tumour and a solid tissue normal	71
+TCGA-KIRC	isoform	preservation	FFPE 4, OCT 13, Unknown 599
+TCGA-KIRC	isoform	pairs with an FFPE tumour file	0
+TCGA-KIRC	isoform	pairs also paired in STAR - Counts	71
+TCGA-LUAD	isoform	data files md5 OK, bad, missing	567, 0, 0
+TCGA-LUAD	isoform	bytes on disk, in the manifest	224152873, 224152873
+TCGA-LUAD	isoform	metadata files, cases	567, 513
+TCGA-LUAD	isoform	sample types	Primary Tumor 519, Recurrent Tumor 2, Solid Tissue Normal 46
+TCGA-LUAD	isoform	pairs, cases with a primary tumour and a solid tissue normal	46
+TCGA-LUAD	isoform	preservation	FFPE 3, OCT 84, Unknown 480
+TCGA-LUAD	isoform	pairs with an FFPE tumour file	0
+TCGA-LUAD	isoform	pairs also paired in STAR - Counts	19
+TCGA-LUSC	isoform	data files md5 OK, bad, missing	533, 0, 0
+TCGA-LUSC	isoform	bytes on disk, in the manifest	211968074, 211968074
+TCGA-LUSC	isoform	metadata files, cases	533, 488
+TCGA-LUSC	isoform	sample types	Primary Tumor 488, Solid Tissue Normal 45
+TCGA-LUSC	isoform	pairs, cases with a primary tumour and a solid tissue normal	45
+TCGA-LUSC	isoform	preservation	OCT 82, Unknown 451
+TCGA-LUSC	isoform	pairs with an FFPE tumour file	0
+TCGA-LUSC	isoform	pairs also paired in STAR - Counts	38
+TABLE
+)
+export EXPECT_TABLE
+"$PY" - "$OUT" "$PROJECT" "$KIND" "$NAME" "$STAR_TSV" <<'PY'
+import collections, csv, hashlib, json, os, sys
+out, project, kind, name, star_tsv = sys.argv[1:6]
+src = os.environ.get("EXPECT_TSV")
+lines = open(src).read().splitlines() if src else os.environ["EXPECT_TABLE"].splitlines()
+expect = collections.OrderedDict()
+for line in lines:
+    if line.strip() and not line.startswith("#"):
+        p, k, check, value = line.split("\t")
+        assert ": " not in check, "a check name may not hold ': ', which separates it from its value: " + check
+        if p in ("*", project) and k in ("*", kind):
+            expect[check] = value
+got = {}
+def path(f):
+    return os.path.join(out, f)
+def counts(c):
+    return ", ".join("%s %d" % kv for kv in sorted(c.items())) or "none"
+def release(f):
+    try:
+        return json.load(open(path(f)))["data_release"]
+    except (OSError, ValueError, KeyError):
+        return "MISSING " + f
+got["release now"] = release("_status_last_run.json")
+got["release of the saved metadata"] = release("gdc_status.json")
+
+manifest = "gdc_manifest_%s.txt" % name
+inman = set()
+if os.path.isfile(path(manifest)):
+    ok = bad = gone = on_disk = listed = 0
+    for row in csv.DictReader(open(path(manifest), newline=""), delimiter="\t"):
+        inman.add(row["id"]); listed += int(row["size"]); f = path(os.path.join(row["id"], row["filename"]))
+        if not os.path.isfile(f):
+            gone += 1; continue
+        h = hashlib.md5()
+        with open(f, "rb") as fh:
+            for block in iter(lambda: fh.read(1 << 20), b""):
+                h.update(block)
+        if h.hexdigest() == row["md5"]:
+            ok += 1; on_disk += os.path.getsize(f)
+        else:
+            bad += 1; print("bad md5: " + f)
+    got["data files md5 OK, bad, missing"] = "%d, %d, %d" % (ok, bad, gone)
+    got["bytes on disk, in the manifest"] = "%d, %d" % (on_disk, listed)
+else:
+    got["data files md5 OK, bad, missing"] = got["bytes on disk, in the manifest"] = "MISSING " + manifest
+got[".part leftovers"] = str(sum(f.endswith(".part") for _, _, fs in os.walk(out) for f in fs))
+
+def pairs_of(tsv):
+    """Per file: case, sample type, preservation; read by column name (GDC sorts its columns, ends lines with CRLF)."""
+    rows = list(csv.DictReader(open(tsv, newline=""), delimiter="\t"))
+    need = ["file_id", "cases.0.submitter_id", "cases.0.samples.0.sample_type", "cases.0.samples.0.preservation_method"]
+    lacking = [c for c in need if rows and c not in rows[0]]
+    if lacking:
+        raise KeyError("lacks column " + ", ".join(lacking))
+    tum = {r["cases.0.submitter_id"] for r in rows if r["cases.0.samples.0.sample_type"] == "Primary Tumor"}
+    nor = {r["cases.0.submitter_id"] for r in rows if r["cases.0.samples.0.sample_type"] == "Solid Tissue Normal"}
+    return rows, tum & nor
+tsv = "gdc_files_%s.tsv" % name
+meta_checks = ["metadata files, cases", "metadata files not in the manifest", "sample types",
+               "pairs, cases with a primary tumour and a solid tissue normal", "preservation", "pairs with an FFPE tumour file"]
+try:
+    rows, pairs = pairs_of(path(tsv))
+    got[meta_checks[0]] = "%d, %d" % (len(rows), len({r["cases.0.submitter_id"] for r in rows}))
+    got[meta_checks[1]] = str(sum(r["file_id"] not in inman for r in rows)) if inman else "MISSING " + manifest
+    got[meta_checks[2]] = counts(collections.Counter(r["cases.0.samples.0.sample_type"] for r in rows))
+    got[meta_checks[3]] = str(len(pairs))
+    got[meta_checks[4]] = counts(collections.Counter(r["cases.0.samples.0.preservation_method"] for r in rows))
+    ffpe = {r["cases.0.submitter_id"] for r in rows if r["cases.0.samples.0.sample_type"] == "Primary Tumor" and r["cases.0.samples.0.preservation_method"] == "FFPE"}
+    got[meta_checks[5]] = str(len(ffpe & pairs))
+    if kind != "star":
+        try:
+            got["pairs also paired in STAR - Counts"] = str(len(pairs & pairs_of(star_tsv)[1]))
+        except (OSError, KeyError) as e:
+            got["pairs also paired in STAR - Counts"] = "MISSING %s (%s); fetch star first" % (star_tsv, e)
+except (OSError, KeyError) as e:
+    for c in meta_checks:
+        got[c] = "MISSING %s (%s)" % (tsv, e)
+
+if kind == "star":
+    try:
+        cdr = [l.split("\t") for l in open(path("PanCan-General_Open_GDC-Manifest_2.txt")).read().splitlines()]
+        cdr_name = [r[1] for r in cdr if r[0] == "1b5f413e-a8d1-4d10-92eb-7c4ae739ed81"][0]
+        got["CDR"] = "%s md5 %s bytes %d" % (cdr_name, hashlib.md5(open(path(cdr_name), "rb").read()).hexdigest(), os.path.getsize(path(cdr_name)))
+    except (OSError, IndexError) as e:
+        got["CDR"] = "MISSING (%s)" % e
+    clin = ["clinical cases", "clinical warnings", "cases with demographic, diagnoses, a treatment record, follow_ups, exposures",
+            "sex_at_birth", "cases with a molecular test", "molecular tests, cases per gene_symbol",
+            "molecular tests, cases per laboratory_test", "tobacco_smoking_status, cases per value"]
+    try:
+        c = json.load(open(path("gdc_cases_clinical.json")))
+        hits = c["data"]["hits"]
+        query = json.load(open(path("gdc_cases_clinical.json.query.json")))
+        got[clin[0]] = "%d of %d" % (len(hits), c["data"]["pagination"]["total"])
+        got[clin[1]] = str(c.get("warnings"))
+        n = lambda key: sum(1 for h in hits if h.get(key))
+        treated = sum(1 for h in hits if any(d.get("treatments") for d in h.get("diagnoses") or []))
+        got[clin[2]] = "%d, %d, %d, %d, %d" % (n("demographic"), n("diagnoses"), treated, n("follow_ups"), n("exposures"))
+        got[clin[3]] = counts(collections.Counter(str((h.get("demographic") or {}).get("sex_at_birth") or "none") for h in hits))
+        tests = [[m for f in h.get("follow_ups") or [] for m in f.get("molecular_tests") or []] for h in hits]
+        expanded = "follow_ups.molecular_tests" in query["expand"].split(",")
+        per_case = lambda field: counts(collections.Counter(v for t in tests for v in {m.get(field) for m in t} if v))
+        got[clin[4]] = str(sum(1 for t in tests if t)) if expanded else "not expanded"
+        got[clin[5]] = per_case("gene_symbol") if expanded else "not expanded"
+        got[clin[6]] = per_case("laboratory_test") if expanded else "not expanded"
+        smoke = collections.Counter()
+        for h in hits:
+            values = {e.get("tobacco_smoking_status") for e in h.get("exposures") or []} - {None}
+            smoke.update(values or {"none"})
+        got[clin[7]] = counts(smoke)
+    except (OSError, ValueError, KeyError) as e:
+        for k in clin:
+            got[k] = "MISSING gdc_cases_clinical.json (%s)" % e
+    ann = ["annotations", "annotation warnings", "annotation classification", "annotations Neoadjuvant therapy, Prior malignancy"]
+    try:
+        a = json.load(open(path("gdc_annotations.json")))
+        ah = a["data"]["hits"]
+        got[ann[0]] = "%d of %d" % (len(ah), a["data"]["pagination"]["total"])
+        got[ann[1]] = str(a.get("warnings"))
+        got[ann[2]] = counts(collections.Counter(str(x.get("classification")) for x in ah))
+        cat = collections.Counter(x.get("category") for x in ah)
+        got[ann[3]] = "%d, %d" % (cat["Neoadjuvant therapy"], cat["Prior malignancy"])
+    except (OSError, ValueError, KeyError) as e:
+        for k in ann:
+            got[k] = "MISSING gdc_annotations.json (%s)" % e
+
+same = 0
+for check, want in expect.items():
+    have = got.pop(check, "NOT MEASURED")
+    same += have == want
+    print("PASTE %s: %s; expect %s%s" % (check, have, want, "" if have == want else "   <-- DIFFERS"))
+for check, have in got.items():
+    print("PASTE %s: %s; NO EXPECTATION in the table" % (check, have))
+print("PASTE checks: %d of %d equal their expectation, %d measured without one" % (same, len(expect), len(got)))
+sys.exit(0 if same == len(expect) and not got else 1)
+PY
+STATUS=$?
+
+echo "PASTE wall time $(( $(date +%s) - T0 )) s"
+du -sh "$OUT" | sed 's/^/PASTE du: /'
+exit $STATUS
+SH
+md5 -q ~/ctx_fetch_gdc.sh    # PASTE, expect 7aaeda9ef1129dd37d5bcacdb5998381
+```
+
+```bash
+# ---- 1. Start here: TCGA-BRCA miRNA for M8 ----
+bash ~/ctx_fetch_gdc.sh TCGA-BRCA mirna
+# PASTE every PASTE line. Expect: PASTE script md5 7aaeda9ef1129dd37d5bcacdb5998381, and
+#   PASTE checks: 12 of 12 equal their expectation, 0 measured without one:
+#   1207 files md5 OK, 60611958 bytes, 1207 files of 1079 cases, 103 pairs, all 103 also paired in tcga_brca.
+# Any FAIL line: paste the same command again; files whose md5 matches are kept.
+# The run's output is also in ~/ctx_breast/data/raw/tcga_brca_mirna/_fetch_gdc.log
+# Time: from about 15 s at P4.2's 4.1 MB/s to about 21 min at P4.2's 1.03 s per file (arithmetic, not measured).
+
+# ---- 2. Kidney and lung STAR - Counts with clinical, annotations and the CDR ----
+bash ~/ctx_fetch_gdc.sh TCGA-KIRC star    # PASTE; expect 24 of 24: 614 files, 2604662993 bytes, 72 pairs, CDR copied
+bash ~/ctx_fetch_gdc.sh TCGA-LUAD star    # PASTE; expect 24 of 24: 601 files, 2546560815 bytes, 58 pairs
+bash ~/ctx_fetch_gdc.sh TCGA-LUSC star    # PASTE; expect 24 of 24: 562 files, 2384478377 bytes, 51 pairs, 16 cases with a molecular test
+# Each run prints PASTE script md5 7aaeda9ef1129dd37d5bcacdb5998381.
+# About 10 min each at P4.2's 4.1 MB/s (arithmetic, not measured). Restartable: paste a line again after a FAIL.
+
+# ---- 3. miRNA for kidney and lung, after step 2 ----
+bash ~/ctx_fetch_gdc.sh TCGA-KIRC mirna   # PASTE; expect 12 of 12: 616 files, 30885253 bytes, 71 pairs, 71 also mRNA pairs
+bash ~/ctx_fetch_gdc.sh TCGA-LUAD mirna   # PASTE; expect 12 of 12: 567 files, 28505599 bytes, 46 pairs, 19 also mRNA pairs
+bash ~/ctx_fetch_gdc.sh TCGA-LUSC mirna   # PASTE; expect 12 of 12: 533 files, 26819352 bytes, 45 pairs, 38 also mRNA pairs
+# The shared-pair check reads the star folder of step 2; run before it, that one check says MISSING ... fetch star first.
+# Time per project: from under 10 s at P4.2's byte rate to about 10 min at its per-file pace (arithmetic, not measured).
+
+# ---- 3b. Isoform Expression Quantification, the mature-miRNA level M8 needs, after step 2 ----
+bash ~/ctx_fetch_gdc.sh TCGA-BRCA isoform   # PASTE; expect 12 of 12: 1207 files, 416580937 bytes, 103 pairs, 103 also mRNA pairs
+bash ~/ctx_fetch_gdc.sh TCGA-KIRC isoform   # PASTE; expect 12 of 12: 616 files, 200249266 bytes, 71 pairs, 71 also mRNA pairs
+bash ~/ctx_fetch_gdc.sh TCGA-LUAD isoform   # PASTE; expect 12 of 12: 567 files, 224152873 bytes, 46 pairs, 19 also mRNA pairs
+bash ~/ctx_fetch_gdc.sh TCGA-LUSC isoform   # PASTE; expect 12 of 12: 533 files, 211968074 bytes, 45 pairs, 38 also mRNA pairs
+# One isoform file per mirna file, from the same aliquot (2,923 of 2,923 file-name stems shared); 1,052,951,150 bytes in all.
+# All four: from about 4 min at P4.2's byte rate to about 50 min at its per-file pace (arithmetic, not measured).
+
+# ---- 4. Optional: the new script over the existing BRCA folder (fetches nothing) ----
+wc -l < ~/ctx_breast/data/raw/tcga_brca/_retrieval_log.tsv    # PASTE, expect 1239 (1238 rows and a header)
+bash ~/ctx_fetch_gdc.sh TCGA-BRCA star    # PASTE; expect 24 of 24 and no FAIL line; it prints "fetching 1231 data files, 4 at a time", then skips every file whose md5 matches
+wc -l < ~/ctx_breast/data/raw/tcga_brca/_retrieval_log.tsv    # PASTE, expect 1239 again: no file was fetched
+# Measured on an APFS clone of this folder with GDC's data endpoint unreachable: 24 of 24, 13.4 s, 129 MB peak RSS, _retrieval_log.tsv md5 unchanged.
+# It adds _fetch_gdc.sh and _fetch_gdc.log beside P4.2's files and rewrites _status_last_run.json, as P4.2's own script does on every run.
+
+# ---- 5. One line per folder: the last check summary ----
+for d in ~/ctx_breast/data/raw/tcga_brca ~/ctx_breast/data/raw/tcga_brca_mirna ~/ctx_breast/data/raw/tcga_brca_isoform ~/ctx_kidney/data/raw/tcga_kirc ~/ctx_kidney/data/raw/tcga_kirc_mirna ~/ctx_kidney/data/raw/tcga_kirc_isoform ~/ctx_lung/data/raw/tcga_luad ~/ctx_lung/data/raw/tcga_luad_mirna ~/ctx_lung/data/raw/tcga_luad_isoform ~/ctx_lung/data/raw/tcga_lusc ~/ctx_lung/data/raw/tcga_lusc_mirna ~/ctx_lung/data/raw/tcga_lusc_isoform; do printf '%s: %s\n' "$d" "$(grep 'PASTE checks' "$d/_fetch_gdc.log" 2>/dev/null | tail -n 1)"; done
+# PASTE; expect 24 of 24 or 12 of 12 for every folder run so far. A folder not run yet prints nothing after its colon,
+# and so does tcga_brca until step 4 has run, because P4.2 logged to _fetch_tcga_brca.log.
 ```
 
 ### Phase 2G cluster commands (G.0), the only copy
