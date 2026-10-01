@@ -72,8 +72,11 @@ from ctx.viz.style import (
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+# A plotly font or marker as a dict literal, {"size": 12}, passed the keyword form alone
+# (2026-10-01); a contour's "size" is a step in data units, not a style.
 STYLE_LITERAL = re.compile(
     r"#[0-9A-Fa-f]{6}\b|rgb\(|\b(?:fontsize|linewidth|size)\s*=\s*\d|figsize\s*=\s*\(\s*\d"
+    r"""|(?:font|marker)["']?\s*[:=]\s*\{[^}]*["']size["']\s*:\s*\d"""
 )
 
 
@@ -116,6 +119,14 @@ def test_no_style_literals():
         if STYLE_LITERAL.search(line)
     ]
     assert not hits
+
+
+def test_style_literal_reads_dict_sizes():
+    typed = ('"tickfont": {"size": 12}', 'legend={"font": {"size": 11}}',
+             'marker={"symbol": "square", "size": 6}', "title_font=dict(size=12)")  # fmt: skip
+    for line in typed:
+        assert STYLE_LITERAL.search(line), line
+    assert not STYLE_LITERAL.search('contours={"start": level, "end": level, "size": 1}')
 
 
 def test_rc_from_style_alone():
