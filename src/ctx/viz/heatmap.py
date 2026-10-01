@@ -119,7 +119,7 @@ class HeatmapData:
         row_stats: Row to the number printed at its right, e.g. an adjusted p.
         row_stats_label: What that number is.
         row_stats_format: Its format spec on the figure; the CSV keeps the number.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
     """
 
     frame: pl.DataFrame

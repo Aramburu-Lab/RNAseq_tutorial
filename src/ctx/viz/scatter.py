@@ -16,6 +16,7 @@ from ctx.viz.axes import axis_title
 from ctx.viz.style import (
     BUBBLE_KEYS,
     BUBBLE_PT,
+    FIGURE_WIDTH,
     LINE_WIDTHS,
     MARKER_SIZE,
     MARKERS,
@@ -201,7 +202,7 @@ class ScatterData:
         lines: Lines drawn in ink over the points.
         log_x: Log-scaled x axis.
         log_y: Log-scaled y axis.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
         keep: Boolean column of points always drawn on the page; the others are thinned.
         names: Legend text per colour level, where the level itself is terse.
         calls: How the page calls points again under the reader's cutoffs, or None.
@@ -224,7 +225,7 @@ class ScatterData:
     lines: tuple[Line, ...] = ()
     log_x: bool = False
     log_y: bool = False
-    width: str = "single"
+    width: str = FIGURE_WIDTH
     keep: str | None = None
     names: Mapping[str, str] | None = None
     calls: Calls | None = None

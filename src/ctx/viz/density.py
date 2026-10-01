@@ -28,6 +28,7 @@ from ctx.viz.contour import (
 from ctx.viz.scatter import FLOAT_HOVER, log_ticks
 from ctx.viz.style import (
     DENSITY_DASH,
+    FIGURE_WIDTH,
     LINE_WIDTHS,
     MARKER_SIZE,
     MARKERS,
@@ -74,7 +75,7 @@ class DensityData:
         hover: Columns shown on hover of a drawn point.
         log_x: Log-scaled x axis; the density is computed on log10 x.
         log_y: Log-scaled y axis; likewise.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
     """
 
     frame: pl.DataFrame
@@ -92,7 +93,7 @@ class DensityData:
     hover: tuple[str, ...] = ()
     log_x: bool = False
     log_y: bool = False
-    width: str = "single"
+    width: str = FIGURE_WIDTH
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""

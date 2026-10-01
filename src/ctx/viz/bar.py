@@ -21,6 +21,7 @@ from ctx.viz.style import (
     BAR_MARGIN_MM,
     BAR_ROW_MM,
     DASHES,
+    FIGURE_WIDTH,
     LINE_WIDTHS,
     MAX_CATEGORIES,
     MM_PER_INCH,
@@ -74,7 +75,7 @@ class BarData:
         stacked: Series stack within a category instead of standing side by side.
         hline: (value, name) of a reference line across the value axis, or None.
         hover: Columns shown on hover, besides category, series and value.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
         names: Legend text per series level, where the level itself is terse.
         lines: (value, name) of further reference lines, drawn after ``hline``.
         median: Name of a line at the median bar length, empty for none. The page moves it
@@ -95,7 +96,7 @@ class BarData:
     stacked: bool = False
     hline: tuple[float, str] | None = None
     hover: tuple[str, ...] = ()
-    width: str = "single"
+    width: str = FIGURE_WIDTH
     names: Mapping[str, str] | None = None
     lines: tuple[tuple[float, str], ...] = ()
     median: str = ""

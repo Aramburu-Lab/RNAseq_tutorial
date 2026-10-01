@@ -230,12 +230,7 @@ def strip(
         flagged="flagged", flag_label=text.word(PAGE, "figures.strip.flagged_label"),
         hover=(key, "reason"), spans=spans, ranges=ranges,
         range_label=text.word(PAGE, "figures.strip.range"), log=log,
-        width="double" if len(present) > STRIP_SINGLE_MAX else "single",
     )  # fmt: skip
-
-
-# Above this many strata, a strip takes the double column so their labels keep apart.
-STRIP_SINGLE_MAX = 4
 
 
 def band_map(values: pl.DataFrame, registry: Registry, key: str) -> HeatmapData | None:

@@ -151,7 +151,7 @@ def _log_cpm(synthetic: Synthetic) -> np.ndarray:
     return np.log2(matrix / matrix.sum(axis=0) * 1e6 + 1)
 
 
-def demo_volcano(synthetic: Synthetic, width: str = "single", labels: int = 6):  # ScatterData
+def demo_volcano(synthetic: Synthetic, width: str = "double", labels: int = 6):  # ScatterData
     """A volcano contract from the type_a samples: Welch t-test per gene, BH, live calls."""
     from scipy.stats import false_discovery_control, ttest_ind  # noqa: PLC0415
 
@@ -474,7 +474,7 @@ def write_gene_sets(path, n_genes: int = 1000, seed: int = 5, n_random: int = 20
     )
 
 
-def demo_strip(log: bool = False, width: str = "single"):  # returns ctx StripData
+def demo_strip(log: bool = False, width: str = "double"):  # returns ctx StripData
     """A QC strip: one metric in three strata of eight, one planted low sample, two bands.
 
     The grey bars are each stratum's median ± 3 scaled MAD, computed here with scipy, so the
@@ -574,7 +574,7 @@ def demo_bubble(width: str = "double"):  # returns ctx ScatterData
     )  # fmt: skip
 
 
-def demo_curves(width: str = "single"):  # returns ctx CurveData
+def demo_curves(width: str = "double"):  # returns ctx CurveData
     """Mean quality per position for eight samples, one with a degraded tail.
 
     FastQC's three shaded regions and its median thresholds (limits.txt, 0.12.1) over them.
@@ -677,7 +677,6 @@ def demo_band_map():  # returns ctx HeatmapData
         swatches=(*(Swatch(b, BAND_COLOURS[b]) for b in ("good", "usable", "bad")),
                   Swatch("no band", None)),
         caption="Each metric's absolute band per sample; grey: no band. Synthetic data; no test.",
-        width="single",
     )  # fmt: skip
 
 
@@ -710,7 +709,7 @@ def demo_flow(width: str = "double"):  # returns ctx FlowData
     )  # fmt: skip
 
 
-def demo_surface(width: str = "single"):  # returns ctx SurfaceData
+def demo_surface(width: str = "double"):  # returns ctx SurfaceData
     """Reads kept across fastp -q and -l, a smooth synthetic surface; fastp's default marked."""
     from ctx.viz.contour import Mark, SurfaceData  # noqa: PLC0415
 
@@ -731,7 +730,7 @@ def demo_surface(width: str = "single"):  # returns ctx SurfaceData
     )  # fmt: skip
 
 
-def demo_density(width: str = "single"):  # returns ctx DensityData
+def demo_density(width: str = "double"):  # returns ctx DensityData
     """Library size against genes detected: two groups with densities, one of 12 as points."""
     import dataclasses  # noqa: PLC0415
 

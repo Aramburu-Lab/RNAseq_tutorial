@@ -13,6 +13,7 @@ import polars as pl
 from ctx.viz.annotate import Caption, compare_groups, fit_title, place_caption
 from ctx.viz.axes import axis_title
 from ctx.viz.style import (
+    FIGURE_WIDTH,
     HEADROOM,
     LINE_WIDTHS,
     MARKER_SIZE,
@@ -20,7 +21,6 @@ from ctx.viz.style import (
     PLOTLY_MARKER_PX,
     POINT_ALPHA,
     ROLES,
-    SINGLE_COLUMN_MAX_FEATURES,
     SIZES,
     Theme,
     apply_matplotlib,
@@ -158,8 +158,7 @@ def static(data: BoxData, theme: Theme) -> Any:
 
     apply_matplotlib(theme)
     features = data.frame["feature"].unique(maintain_order=True).to_list()
-    column = "single" if len(features) <= SINGLE_COLUMN_MAX_FEATURES else "double"
-    width, height = figure_inches(column, "box")
+    width, height = figure_inches(FIGURE_WIDTH, "box")
     # Figure, not pyplot: a GUI backend rounds the canvas to whole pixels (84.84 mm, not 85).
     fig = Figure(figsize=(width, height))
     ax = fig.subplots()

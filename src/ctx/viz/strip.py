@@ -19,6 +19,7 @@ from ctx.viz.style import (
     BAND_ALPHA,
     BAND_COLOURS,
     BAR_LABEL_ROTATION,
+    FIGURE_WIDTH,
     LINE_WIDTHS,
     MARKER_SIZE,
     MARKERS,
@@ -125,7 +126,7 @@ class StripData:
         ranges: Per-category bars, e.g. median ± 3 MAD.
         range_label: Legend text of the grey bar.
         log: Log-scaled value axis.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
     """
 
     frame: pl.DataFrame
@@ -144,7 +145,7 @@ class StripData:
     ranges: tuple[Range, ...] = ()
     range_label: str = ""
     log: bool = False
-    width: str = "single"
+    width: str = FIGURE_WIDTH
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""

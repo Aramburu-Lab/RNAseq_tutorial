@@ -62,6 +62,9 @@ PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT * PAGE_SCALE
 # Panel letters: bold capitals at the top left, nudged up by dy_pt (no figure has panels yet).
 PANEL_LABEL = {"size": SIZES["panel"], "weight": "bold", "dx_pt": 0.0, "dy_pt": 2.0}
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
+# Every figure takes the double column (Rytis, 2026-10-01): a height is the single column's
+# 85 mm times the type's aspect, so at 85 mm wide every figure stood taller than wide.
+FIGURE_WIDTH = "double"
 ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1, "contour": 1.1}
 # Point shapes for a second category, in level order: (matplotlib, plotly).
 MARKERS = (
@@ -97,9 +100,6 @@ AVERAGE_CHAR_EM = 0.55
 # The caption's inset from each side, as a share of the figure's width; annotate.place_caption
 # draws at it and wraps inside it.
 CAPTION_INSET = 0.02
-# Above this many features a box plot takes the double column: at 9 pt the p and r labels of
-# 5 features overlap in 85 mm and those of 4 do not (measured 2026-09-29).
-SINGLE_COLUMN_MAX_FEATURES = 4
 # Empty space above the tallest box for the p/r labels, as a fraction of the data range.
 HEADROOM = 0.35
 LINE_SPACING = 1.3
@@ -177,7 +177,7 @@ TINT = {"fill": "9%", "border": "45%"}
 PAGE_FONT_CHAIN = ("Helvetica Neue", "Helvetica", "Arial", "Liberation Sans")
 MONO_CHAIN = ("ui-monospace", "SF Mono", "Menlo", "Consolas", "Liberation Mono", "monospace")
 # The plots on a page run 3 pt larger than the figure sizes (Rytis, 2026-09-28). The PDF and
-# SVG files keep SIZES, which their 85 mm layout checks are measured at.
+# SVG files keep SIZES, which their layout checks are measured at.
 PAGE_BOOST_PT = 3.0
 # Page text in px, set on its own: it no longer follows the figure sizes.
 PAGE_BASE_PX = 18

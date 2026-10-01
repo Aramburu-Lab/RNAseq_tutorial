@@ -17,6 +17,7 @@ from ctx.viz.annotate import fit_title, place_caption
 from ctx.viz.axes import axis_title
 from ctx.viz.style import (
     CIVIDIS,
+    FIGURE_WIDTH,
     INK_COLOUR,
     LABEL_BOX_PAD,
     LINE_WIDTHS,
@@ -101,7 +102,7 @@ class SurfaceData:
         isolines: Values drawn as labelled lines, e.g. 80 % of reads kept.
         isoline_format: Format spec of their labels.
         mark: The current setting, or None.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
     """
 
     frame: pl.DataFrame
@@ -116,7 +117,7 @@ class SurfaceData:
     isolines: tuple[float, ...] = ()
     isoline_format: str = ".3g"
     mark: Mark | None = None
-    width: str = "single"
+    width: str = FIGURE_WIDTH
 
     def __post_init__(self) -> None:
         """Refuse anything but a full grid of finite values that vary."""

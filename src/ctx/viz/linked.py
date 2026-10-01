@@ -53,7 +53,7 @@ class LinkedData:
         empty: The line while nothing is painted.
         detail: The dimension the live line breaks each colour down by.
         hover: Columns shown on hover of a point.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
     """
 
     frame: pl.DataFrame

@@ -441,7 +441,7 @@ def confounding_group(writer: Writer, sheet: pl.DataFrame, dataset: str) -> Grou
         row_label=fill("figures.confounding.row"), column_label=fill("figures.confounding.column"),
         swatches=(Swatch(names[0], None), *(Swatch(n, ROLES["comparison"], a) for n, a in shades)),
         caption=fill("figures.confounding.caption", **values),
-        row_order=CONFOUNDERS, column_order=CONFOUNDERS, width="single",
+        row_order=CONFOUNDERS, column_order=CONFOUNDERS,
     )  # fmt: skip
     words = FigureText(title=fill("figures.confounding.title"),
                        lead=fill("figures.confounding.lead", **values),

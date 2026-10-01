@@ -61,7 +61,6 @@ from ctx.viz.style import (
     MAX_CATEGORIES,
     PROJECTOR_UNSAFE,
     ROLES,
-    SINGLE_COLUMN_MAX_FEATURES,
     SIZES,
     THEMES,
     WIDTHS_MM,
@@ -428,11 +427,24 @@ def test_axis_title_rule():
 
 
 def column_width(data) -> str:
-    """The column width the figure should take."""
-    if isinstance(data, box.BoxData):
-        many = len(data.caption.tests) > SINGLE_COLUMN_MAX_FEATURES
-        return "double" if many else "single"
-    return data.width
+    """The column width the figure should take: the double column, for every figure."""
+    return "double" if isinstance(data, box.BoxData) else data.width
+
+
+def test_every_figure_takes_the_double_column():
+    """Rytis, 2026-10-01: at 85 mm every figure stood taller than wide, since a height is 85 mm
+    times the type's aspect. Mutation caught: a contract default or a call site back at "single"."""
+    root = Path(__file__).resolve().parents[1]
+    sources = [*(root / "src").rglob("*.py"), *(root / "scripts").rglob("*.py")]
+    named = [f"{p.relative_to(root)}:{n}" for p in sources if p.name != "style.py"
+             for n, line in enumerate(p.read_text(encoding="utf-8").splitlines(), 1)
+             if '"single"' in line]  # fmt: skip
+    assert named == [], named
+    contracts = [BarData, SurfaceData, CurveData, DensityData, FlowData, HeatmapData, LinkedData,
+                 ScatterData, StripData]  # fmt: skip
+    widths = {c.__name__: next(f.default for f in dataclasses.fields(c) if f.name == "width")
+              for c in contracts}  # fmt: skip
+    assert widths == {c.__name__: "double" for c in contracts}
 
 
 @pytest.fixture(scope="module", params=KINDS)
@@ -545,8 +557,8 @@ def test_no_text_overlap(case):
 
 def test_write_refuses_clipped_text(tmp_path):
     data = demo_bar(counts())
-    long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 9)
-    # matplotlib says so first: tight_layout gives up on a title it cannot fit.
+    long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 30)
+    # matplotlib says so first: tight_layout gives up on a title it cannot fit, even at 170 mm.
     with (pytest.raises(ValueError, match="off the page"),
           pytest.warns(UserWarning, match="Tight layout not applied")):  # fmt: skip
         write_figure(long, tmp_path, stem("de", "clipped", 1, day=date(2026, 9, 27)),

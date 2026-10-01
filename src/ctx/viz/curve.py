@@ -17,6 +17,7 @@ from ctx.viz.scatter import FLOAT_HOVER, Line
 from ctx.viz.strip import Span, shade, span_handles, span_traces
 from ctx.viz.style import (
     DASHES,
+    FIGURE_WIDTH,
     LINE_WIDTHS,
     MAX_CATEGORIES,
     PLOTLY_HEIGHT_PX,
@@ -50,7 +51,7 @@ class CurveData:
         hover: Columns shown on hover, besides series, x and y.
         spans: Bands shaded behind the lines.
         thresholds: Dashed reference lines, e.g. a tool's warn and fail values.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
         distinct: One unique colour and dash per ``colour`` level, drawn opaque and thick, so
             each line stays traceable; ``colours`` is then unused (``style.distinct_styles``).
     """
@@ -68,7 +69,7 @@ class CurveData:
     hover: tuple[str, ...] = ()
     spans: tuple[Span, ...] = ()
     thresholds: tuple[Line, ...] = ()
-    width: str = "single"
+    width: str = FIGURE_WIDTH
     distinct: bool = False
 
     def __post_init__(self) -> None:

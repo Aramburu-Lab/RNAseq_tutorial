@@ -54,7 +54,7 @@ class FlowData:
         columns: (unit, meaning) for every column of ``links``.
         stage_labels: A title above each stage's column, in stage order.
         caption: The caption, unwrapped.
-        width: ``"single"`` or ``"double"`` column.
+        width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
     """
 
     nodes: tuple[Node, ...]
