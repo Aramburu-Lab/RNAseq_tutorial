@@ -432,6 +432,25 @@ cancer-transcriptomics-teaching/
 
 ---
 
+## ▶️ Work order (Rytis, 2026-10-01)
+
+Each item starts when the one before it is merged, because they change the same page script and QC files; the side column runs alongside. Ticked here as each merges.
+
+1. [ ] Finish the qc-page-fixes: the embedded Liberation Sans subset to the characters the pages set and re-measured, M5's dispersion trend thinned, then merge (D-051 amendment).
+2. [ ] Step 0 of the controls plan: the defects the audit found (the bar filter's lead, M1's two medians, M2 size against genes, the fastp grid bands, the registry's fastp sentence, the M3 preview caption, "every 3th", M5's MA thinning, M6's bars, words, hovers and 1681 against 1,683).
+3. [ ] P2Q.9: the QC bands (D-052), with the 210 raw-read FastQC reports.
+4. [ ] P2S.4 and P2S.5: M5 and M6 text into content, plain titles and labels, readable gene-set names; the FDR control, which builds the `threshold` kind.
+5. [ ] M1 and M2 controls: `subset` from the filter, `view`, the M2 judge (the sex view after `ctx.qc.identity`).
+6. [ ] M5 controls (per-contrast volcano pages after item 9).
+7. [ ] M6 controls (the ORA cut-offs after GS.5).
+8. [ ] M3 controls: those M3.6 listed as needing a new kind.
+9. [ ] GS.2 to GS.4: entry pages, the unthinned volcano, the M5 picker.
+10. [ ] M8 controls: the neighbour drop-down and the biotype volcano's cut-offs.
+11. [ ] M10, breast first, with GS.7 and its controls designed in, including the GDC count ingest it needs: planned and brought to Rytis before building.
+12. [ ] The external-data research, then M9 with GS.9: planned and brought to Rytis before building.
+
+Alongside: the heatmap fix; M3.6, then M3.7 (the page at 1280 and 375 px), M3.9 (a cold run on the 8 teaching runs) and kit v5; the monocyte download and count (P4.4).
+
 ## ✅ Phased checklist
 
 ### Phase 0 — Decide and pin (this check-in)
