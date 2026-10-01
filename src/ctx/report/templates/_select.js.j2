@@ -1,0 +1,209 @@
+{% raw %}
+/* A gene selection, the page twin of ctx.report.genes (D-049), apart from the page so
+   tests/test_select.py runs both with the same cases. A gene is its unversioned Ensembl
+   number, negated when its raw log2 FC in the source contrast is below 0. Each function
+   names its Python twin where the name differs. */
+var ctxSelect = {
+  VERSION: 1,
+  /* Longest fragment read, in UTF-16 units with its '#', as location.hash counts them. */
+  LIMIT: 500000,
+  ID: /^ENSG([0-9]{11})(?:\.[0-9]+)?$/i,
+  SOURCE: /^[a-z0-9]+(?:_[a-z0-9]+)*:[a-z0-9]+(?:_[a-z0-9]+)*$/,
+  HEAD: /^#v=([^&]+)(?:&|$)/,
+  /* Written last by encode: no field holds an '&', so a link cut anywhere lacks it. */
+  END: "&end",
+  /* The fields, which decode closes with END; the version is HEAD's to check, against
+     VERSION alone. */
+  FIELDS: "^#v=[^&]+&src=([^&]*)&n=([^&]*)&g=([^&]*)",
+  COUNT: /^(?:0|[1-9][0-9]*)$/,
+  GENE: /^-?[1-9][0-9]{0,10}$/,
+  /* A word starts and ends with a letter or digit; one joined by slashes that is no symbol
+     is read as its PARTs. */
+  WORD: /[A-Za-z0-9](?:[A-Za-z0-9._\/-]*[A-Za-z0-9])?/g,
+  PART: /[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?/g,
+  LINE: /\r\n|\r|\n/,
+  number: function (id) {
+    var m = ctxSelect.ID.exec(id);
+    if (!m) throw new Error(id + " is not an Ensembl gene ID (ENSG, 11 digits, a version)");
+    return Number(m[1]);
+  },
+  ensembl: function (gene) {
+    return "ENSG" + ("0000000000" + Math.abs(gene)).slice(-11);
+  },
+  group: function (value) {
+    return String(value).replace(/\B(?=(?:[0-9]{3})+(?![0-9]))/g, ",");
+  },
+  /* table(), on the page's columns, which the build checked with table() itself. */
+  index: function (numbers, symbols, lfc) {
+    var row = Object.create(null), bySymbol = Object.create(null);
+    numbers.forEach(function (n, i) {
+      var k = symbols[i] ? symbols[i].toUpperCase() : "";
+      row[n] = i;
+      if (k) (bySymbol[k] = bySymbol[k] || []).push(n);
+    });
+    Object.keys(bySymbol).forEach(function (k) {
+      bySymbol[k].sort(function (a, b) { return a - b; });
+    });
+    return { symbols: symbols, lfc: lfc || null, row: row, bySymbol: bySymbol };
+  },
+  /* The one order: strip the version (or a number's sign), attach the sign, drop repeats,
+     sort by number. */
+  select: function (src, genes, index) {
+    var signed = Object.create(null), out = [];
+    if (!index.lfc) throw new Error("a table without log2 FC cannot sign a selection");
+    genes.forEach(function (gene) {
+      var n = typeof gene === "number" ? Math.abs(gene) : ctxSelect.number(gene);
+      var at = index.row[n];
+      if (at === undefined) throw new Error(ctxSelect.ensembl(n) + " is not in the gene table");
+      signed[n] = index.lfc[at] < 0 ? -n : n;
+    });
+    Object.keys(signed).forEach(function (k) { out.push(signed[k]); });
+    out.sort(function (a, b) { return Math.abs(a) - Math.abs(b); });
+    return ctxSelect.check({ src: src, genes: out });
+  },
+  /* Selection.__post_init__: refuse what no fragment carries, so encode and decode stay
+     inverses. */
+  check: function (sel) {
+    var numbers = sel.genes.map(function (gene) { return Math.abs(gene); });
+    var carried = numbers.every(function (n) { return Number.isInteger(n) && n > 0 && n < 1e11; });
+    if (!ctxSelect.SOURCE.test(sel.src) || !carried) {
+      throw new Error("no fragment carries source " + sel.src + " or these numbers");
+    }
+    if (numbers.some(function (n, i) { return i > 0 && numbers[i - 1] >= n; })) {
+      throw new Error("a selection's numbers ascend without repeats");
+    }
+    return sel;
+  },
+  carries: function (fragment) {
+    return fragment.indexOf("#v=") === 0;
+  },
+  encode: function (sel) {
+    var S = ctxSelect;
+    S.check(sel);
+    return S.withinLimit("#v=" + S.VERSION + "&src=" + sel.src + "&n=" + sel.genes.length +
+      "&g=" + sel.genes.join(",") + S.END);
+  },
+  /* _within_limit(): the fragment, if location.hash's count of it is at most LIMIT. */
+  withinLimit: function (fragment) {
+    var S = ctxSelect;
+    if (fragment.length > S.LIMIT) {
+      throw S.fail("select.long", { length: S.group(fragment.length), limit: S.group(S.LIMIT) });
+    }
+    return fragment;
+  },
+  /* A refusal (SelectionError): its key in ui.toml and the values of its placeholders. */
+  fail: function (key, values) {
+    var error = new Error(key);
+    error.key = key; error.values = values;
+    return error;
+  },
+  /* A refusal's page text; ui holds ui.toml's tables, as ctx.report.text reads them. */
+  message: function (error, ui) {
+    var template = error.key.split(".").reduce(function (node, k) { return node[k]; }, ui);
+    return template.replace(/\{(\w+)\}/g, function (all, k) {
+      return Object.prototype.hasOwnProperty.call(error.values, k) ? error.values[k] : all;
+    });
+  },
+  /* _field(): key quoting what the field holds, or empty if it holds none. */
+  field: function (key, empty, found, values) {
+    var all = { found: found };
+    Object.keys(values).forEach(function (k) { all[k] = values[k]; });
+    return found ? ctxSelect.fail(key, all) : ctxSelect.fail(empty, values);
+  },
+  decode: function (fragment) {
+    var S = ctxSelect, version = { version: String(S.VERSION) }, head, fields, items, held;
+    /* _DIGITS: a fragment within LIMIT holds fewer than LIMIT / 2 numbers, so a longer count
+       is refused before group() formats it, which takes time quadratic in its digits. */
+    var digits = String(Math.floor(S.LIMIT / 2)).length;
+    S.withinLimit(fragment);
+    if (!(head = S.HEAD.exec(fragment))) throw S.fail("select.form", version);
+    if (head[1] !== String(S.VERSION)) {
+      throw S.fail("select.version", { found: head[1], expected: String(S.VERSION) });
+    }
+    /* Before the fields, which end in END too: decode() in genes.py says why. */
+    if (fragment.slice(-S.END.length) !== S.END) throw S.fail("select.cut", {});
+    if (!(fields = new RegExp(S.FIELDS + S.END + "$").exec(fragment))) {
+      throw S.fail("select.form", version);
+    }
+    if (!S.SOURCE.test(fields[1])) {
+      throw S.field("select.source", "select.source_empty", fields[1], {});
+    }
+    if (!S.COUNT.test(fields[2]) || fields[2].length > digits) {
+      throw S.field("select.n", "select.n_empty", fields[2], { digits: String(digits) });
+    }
+    /* With the end mark checked, a count that differs is an edit; it counts the items that
+       hold something, so genes() names an empty one as such. */
+    items = fields[3] ? fields[3].split(",") : [];
+    held = items.filter(function (item) { return item !== ""; }).length;
+    if (fields[2] !== String(held)) {
+      throw S.fail("select.count", { expected: S.group(fields[2]), decoded: S.group(held) });
+    }
+    return { src: fields[1], genes: S.genes(items) };
+  },
+  /* _genes(): the signed numbers of a fragment's g, each checked in turn. */
+  genes: function (items) {
+    var S = ctxSelect, genes = [], seen = Object.create(null);
+    items.forEach(function (item) {
+      var gene, n;
+      if (!S.GENE.test(item)) throw S.field("select.number", "select.number_empty", item, {});
+      gene = Number(item); n = Math.abs(gene);
+      if (seen[n]) throw S.fail("select.duplicate", { gene: S.ensembl(n) });
+      if (genes.length && n < Math.abs(genes[genes.length - 1])) {
+        throw S.fail("select.order", { gene: S.ensembl(n) });
+      }
+      seen[n] = true; genes.push(gene);
+    });
+    return genes;
+  },
+  /* Pasted text: symbols or IDs, any separator, any case; '#' starts a comment. On a line
+     with an ID the table has, a symbol naming that ID's gene is its label, not a name. */
+  parse: function (pasted, index) {
+    var S = ctxSelect, out = { found: [], ambiguous: [], missing: [] };
+    var seen = { found: Object.create(null), ambiguous: Object.create(null),
+                 missing: Object.create(null) };
+    function keep(part, key, value) {
+      if (!seen[part][key]) { seen[part][key] = true; out[part].push(value); }
+    }
+    pasted.split(S.LINE).forEach(function (line) {
+      var words = S.words(line.split("#")[0], index), ids = Object.create(null);
+      words.forEach(function (w) {
+        if (S.ID.test(w) && index.row[S.number(w)] !== undefined) ids[S.number(w)] = true;
+      });
+      words.forEach(function (word) {
+        var named, key;
+        if (S.ID.test(word)) {
+          key = "#" + S.number(word);
+          named = ids[S.number(word)] ? [S.number(word)] : [];
+        } else {
+          key = word.toUpperCase();
+          named = index.bySymbol[key] || [];
+          if (named.some(function (n) { return ids[n]; })) return;
+        }
+        if (named.length === 1) keep("found", named[0], named[0]);
+        else if (named.length) keep("ambiguous", key, [word, named.map(S.ensembl)]);
+        else keep("missing", key, word);
+      });
+    });
+    return out;
+  },
+  /* _words(): a line's words; one joined by slashes is its parts, unless it is a symbol. */
+  words: function (text, index) {
+    var out = [];
+    (text.match(ctxSelect.WORD) || []).forEach(function (word) {
+      if (word.indexOf("/") < 0 || index.bySymbol[word.toUpperCase()]) out.push(word);
+      else (word.match(ctxSelect.PART) || []).forEach(function (part) { out.push(part); });
+    });
+    return out;
+  },
+  /* The Save-list file read_list reads: source, time and count, then one gene per line, its
+     ID and, where the table has one, its symbol. */
+  listText: function (sel, index, time) {
+    var lines = ["# source: " + sel.src, "# time: " + time, "# count: " + sel.genes.length];
+    sel.genes.forEach(function (gene) {
+      var at = index.row[Math.abs(gene)], symbol = at === undefined ? "" : index.symbols[at];
+      lines.push(ctxSelect.ensembl(gene) + (symbol ? "\t" + symbol : ""));
+    });
+    return lines.join("\n") + "\n";
+  }
+};
+{% endraw %}

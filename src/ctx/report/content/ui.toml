@@ -95,6 +95,23 @@ summary = "{shown} of {total} bars shown; median {median}."
 none = "No bar matches these filters."
 noscript = "This shows every bar; turn on JavaScript to filter them."
 
+# A gene list carried in a link (ctx.report.genes, D-049): why a page refuses one. The
+# placeholders are filled from the link, numbers grouped by thousands.
+[select]
+long = "The link holds {length} characters; a gene list may take at most {limit}."
+form = "The link holds no gene list in the form #v={version}&src=dataset:contrast&n=count&g=genes&end."
+version = "The link holds a version {found} gene list; this page reads version {expected}."
+cut = "The link does not end with its end mark: it was cut short or has text added after it. Copy the whole link again."
+source = "The link names its source {found}; a source is a dataset and a contrast, as dataset:contrast."
+source_empty = "The link names no source; a source is a dataset and a contrast, as dataset:contrast."
+n = "The link gives its gene count as {found}; a count is up to {digits} digits, with no leading zero."
+n_empty = "The link gives no gene count; a count is up to {digits} digits, with no leading zero."
+count = "The link gives a gene count of {expected}, but its list holds {decoded}: it was edited."
+number = "The link holds {found} where a gene number belongs."
+number_empty = "The link's gene list has an empty entry where a gene number belongs."
+duplicate = "The link names {gene} twice."
+order = "The link names {gene} out of order: genes follow in ascending number."
+
 # The glossary page and the term tooltips (ctx.report.glossary, D-048).
 [glossary]
 title = "Glossary"
