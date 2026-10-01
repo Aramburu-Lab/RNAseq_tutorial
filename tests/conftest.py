@@ -2,11 +2,33 @@
 
 import os
 import platform
+from pathlib import Path
 
 import pytest
 
 # The needs_star hook is tested by running a one-test file through it (test_process_align).
 pytest_plugins = ("pytester",)
+
+
+def tested_tree_problem(package_file: str, checkout: Path) -> str | None:
+    """Why a test run would test another checkout's code, or None when it tests this one."""
+    src = (checkout / "src").resolve()
+    # A copy of this file outside a checkout (pytester's runs) has no src to compare with.
+    if not (src / "ctx").is_dir() or Path(package_file).resolve().is_relative_to(src):
+        return None
+    return (f"ctx imports from {Path(package_file).parent}, not from {src}: the shared editable "
+            "install was re-pointed by `pixi run` or `pixi install` in another checkout. Run "
+            "`pixi install` in this checkout, or set PYTHONPATH to its src.")  # fmt: skip
+
+
+def pytest_configure(config: pytest.Config) -> None:
+    # One environment serves several worktrees; on 2026-10-01 it pointed at a worktree, and
+    # the main tree's tests ran that worktree's code. A run of the wrong code stops here.
+    import ctx  # noqa: PLC0415 - after pytest's own path setup
+
+    problem = tested_tree_problem(ctx.__file__, Path(__file__).resolve().parents[1])
+    if problem:
+        raise pytest.UsageError(problem)
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:

@@ -357,3 +357,17 @@ def test_download_settings_single_source():
     (script,) = download_settings((ROOT / "scripts" / "bash" / "fetchngs.sbatch").read_text())
     assert set(script) == set(DOWNLOAD_KEYS), script
     assert blocks and all(block == script for block in blocks), (script, blocks)
+
+
+def test_a_foreign_tree_stops_the_run(tmp_path):
+    """The guard in conftest: ctx imported from another checkout is refused, this one passes.
+
+    Mutation caught: the guard comparing against the wrong folder or always passing."""
+    from conftest import tested_tree_problem  # noqa: PLC0415
+
+    here = Path(__file__).resolve().parents[1]
+    assert tested_tree_problem(str(here / "src" / "ctx" / "__init__.py"), here) is None
+    other = tmp_path / "wt" / "src" / "ctx" / "__init__.py"
+    assert "re-pointed" in tested_tree_problem(str(other), here)
+    # pytester runs a copy of conftest.py in a folder with no src; nothing to compare there.
+    assert tested_tree_problem(str(here / "src" / "ctx" / "__init__.py"), tmp_path) is None

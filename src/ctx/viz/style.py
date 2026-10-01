@@ -80,7 +80,6 @@ MARKERS = (
 HEAT_ALPHAS = (0.33, 0.67, 1.0)
 HEAT = {"row_mm": 4.5, "margin_mm": 70.0, "label_rows": 60, "label_columns": 40,
         "max_rows_drawn": 60}  # fmt: skip
-PLOTLY_HEAT_ROW_PX, PLOTLY_HEAT_BASE_PX = 18, 220
 # A flow diagram: node width and the share of the width kept for the last stage's labels,
 # both as fractions of the axes; the gap between nodes is one label's pitch.
 # label_share: the most of a flow's height its labels and gaps may take; the rest is bars.
@@ -104,7 +103,8 @@ CAPTION_INSET = 0.02
 HEADROOM = 0.35
 LINE_SPACING = 1.3
 # Legend geometry in font-size units; marker handles need less than matplotlib's line default.
-LEGEND = {"handlelength": 1.0, "columnspacing": 1.0, "handletextpad": 0.4}
+# handleheight is matplotlib's own 0.7, set here so the page's swatch reads the same value.
+LEGEND = {"handlelength": 1.0, "handleheight": 0.7, "columnspacing": 1.0, "handletextpad": 0.4}
 LEGEND_MAX_COLUMNS = 4
 # Category labels under vertical bars run upward, so long names never collide.
 BAR_LABEL_ROTATION = 90.0
@@ -209,6 +209,32 @@ PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow"
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed
 PLOTLY_TICK_PX, PLOTLY_TITLE_STANDOFF_PX = 4, 8
+# A legend entry's line on the page: plotly.js adds 3 px to each entry's text line
+# (legend/draw.js, Math.max(h, 16) + 3; 29 px at a 20 px font, measured 2026-10-01), draws
+# its symbol in 40 px before the text (itemwidth 30 and an item gap of 5 each side), and pads
+# the legend by that gap above and below.
+PLOTLY_LEGEND_LINE_PX = on_page(SIZES["legend"]) * LINE_SPACING + 3
+PLOTLY_LEGEND_SYMBOL_PX, PLOTLY_LEGEND_PAD_PX = 40, 10
+# A legend swatch on the page is the static's patch height at the legend's page size:
+# plotly's default 6 px square beside a 20 px label hid the palest levels (2026-10-01).
+PLOTLY_LEGEND_SWATCH_PX = LEGEND["handleheight"] * on_page(SIZES["legend"])
+# The narrowest page a figure is checked at is a 375 px phone. Its plot is that less the
+# gutters, the card's padding (--space-3 below NARROW_PX) and its border on each side: 317 px,
+# as measured in Chromium (2026-10-01). Text a plot draws beside its cells wraps to fit it.
+# The stylesheet sets those three again; tests/test_viz_heatmap.py reads them against this.
+PHONE_PX = 375
+PLOTLY_NARROW_PX = PHONE_PX - 2 * (int(LAYOUT["gutter"].removesuffix("px")) + SPACE_PX[2]
+                                   + int(LAYOUT["rule"].removesuffix("px")))  # fmt: skip
+# A hover line on that phone: plotly pads the text 3 px inside its box and draws a 6 px arrow
+# (fx/constants.js HOVERTEXTPAD, HOVERARROWSIZE); a wider box ran off the plot (2026-10-01).
+PLOTLY_HOVER_PX = PLOTLY_NARROW_PX - 2 * (3 + 6)
+# A heatmap row on the page holds its label as HEAT's row_mm holds a 9 pt one in the file:
+# the same pitch per point of label, at the label's page size. 18 px held a 20 px label
+# only on every other row, and plotly dropped the rest (2026-10-01).
+PLOTLY_HEAT_ROW_PX = HEAT["row_mm"] / MM_PER_INCH * 72 / SIZES["tick"] * on_page(SIZES["tick"])
+# Below a heatmap's column labels and title: the bottom margin, the title's standoff and the
+# tick labels' pad. Above it the legend takes the top margin, or the margin the legend.
+PLOTLY_HEAT_BASE_PX = PLOTLY_MARGIN_PX["b"] + PLOTLY_TITLE_STANDOFF_PX + PLOTLY_TICK_PX
 TRANSPARENT = "rgba(0,0,0,0)"
 # Dash of a threshold line, in both renderers.
 THRESHOLD_DASH: tuple[Literal["--"], Literal["dash"]] = ("--", "dash")
@@ -257,6 +283,36 @@ def tint(colour: str, alpha: float) -> str:
     """A hex colour as CSS rgba at an opacity: a filled area's tint, its outline left whole."""
     red, green, blue = (int(colour[i : i + 2], 16) for i in (1, 3, 5))
     return f"rgba({red},{green},{blue},{alpha})"
+
+
+def _translucent(targets: tuple[str, str], grounds: tuple[str, str]) -> tuple[str, float]:
+    """The one colour and opacity that, laid over each ground, land nearest its target.
+
+    Over ground g at opacity a, colour c shows as a·c + (1 − a)·g. The two grounds share a
+    and c, so 1 − a is the least-squares slope of the targets' difference on the grounds'
+    difference; c then splits each channel's error evenly between them.
+
+    Returns:
+        The colour as hex, and its opacity.
+    """
+    (t1, t2), (g1, g2) = ([[int(c[i : i + 2], 16) for i in (1, 3, 5)] for c in pair]
+                          for pair in (targets, grounds))  # fmt: skip
+    channels = list(zip(t1, t2, g1, g2, strict=True))
+    keep = sum((a - b) * (c - d) for a, b, c, d in channels) / sum(
+        (c - d) ** 2 for _, _, c, d in channels
+    )
+    colour = [round((a + b - keep * (c + d)) / 2 / (1 - keep)) for a, b, c, d in channels]
+    return "#" + "".join(f"{min(max(v, 0), 255):02X}" for v in colour), round(1 - keep, 3)
+
+
+# A heatmap's "nothing to show" level on the page. A plotly trace keeps its colour when the
+# theme flips (as the reference grey does), so it is the one translucent colour that, over
+# each theme's figure card, lands nearest that theme's grid: within 3 of 255 per channel on
+# both. The white grid had been the brightest cell on a dark page (2026-10-01).
+PLOTLY_NO_LEVEL = _translucent(
+    (THEMES["white"].grid, THEMES["black"].grid),
+    (CHROME["white"]["surface"], CHROME["black"]["surface"]),
+)
 
 
 def plotly_steps(colours: list[str]) -> list[list[Any]]:
@@ -349,6 +405,7 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
             "text.hinting": "no_hinting",
             "legend.frameon": False,
             "legend.handlelength": LEGEND["handlelength"],
+            "legend.handleheight": LEGEND["handleheight"],
             "legend.columnspacing": LEGEND["columnspacing"],
             "legend.handletextpad": LEGEND["handletextpad"],
             "pdf.fonttype": 42,
