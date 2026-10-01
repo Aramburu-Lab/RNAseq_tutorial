@@ -27,6 +27,24 @@ it were reversed.
 
 ---
 
+## D-050 — Read-level pages show the full Step-1 cohort; the 8-run subset is an optional laptop exercise; made-up pages leave at the release
+
+**Date:** 2026-10-01 · **Status:** decided
+
+**Context.** Rytis asked why the course needs a teaching subset: at the end it should hold full real data and no made-up results. The read-level modules (M2's read stage, M3) were designed for Track A: 8 real Step-1 runs, reads capped, aligned to chr22 on a laptop within 15 min and 6 GB on 4 cores, because the 210 runs need a cluster (a full human STAR index needs about 32 GB; TODO.md, Track A design). The count-level modules (M1, M5, M6) already show all 210 samples. Made-up previews (P2V.2) give M3, M4 and M7 to M10 a page before their real data exist; a kit holds them only through `build_kit.py --made-up`.
+
+**Options.**
+- Read level: the full cohort on every page with the subset kept as an optional laptop exercise; the full cohort only, the subset retired, so no reader can rerun alignment on a laptop; or the pages on the subset, as designed.
+- Made-up pages: out of every kit from v5, or kept in development kits and out of the release kit.
+
+**Decision.** Rytis, 2026-10-01: the first of each. Every page a reader gets for M2's read stage and M3 shows all 210 Step-1 runs, aligned to the full GENCODE 50 genome on Kebnekaise. The 8-run subset stays as the laptop exercise, under Track A's budget, and its pages say it is the optional exercise. Development kits keep the made-up previews, marked Made-up; the release kit is built with no made-up root.
+
+**Evidence.** None: a teaching choice by the course's author. Its cost is stated, not measured: 210 full-genome alignments on the cluster, with RAM, wall time and disk still to be measured on M3.11's 8-run pilot.
+
+**Consequence.** M3.6 is unchanged, because `ctx process` and its page run on any dataset. M3.9 still measures the laptop exercise. M3.11 becomes the pilot of M3.13, the full-cohort M3; P2Q.8 runs M2's read stage on the full cohort; K.6 builds the release kit with no made-up root. Students still download only the subset, never the full FASTQs.
+
+---
+
 ## D-049 — One gene selection drives M6, M9 and M10: carried in links, never in browser storage
 
 **Date:** 2026-10-01 · **Status:** decided (Rytis's three answers, 2026-10-01); built by GS.1 to GS.10
