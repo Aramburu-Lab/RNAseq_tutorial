@@ -246,6 +246,7 @@ def expression_filter(writer: Writer, genes: pl.DataFrame, counts: Any,
         hover=("gene_id",),
         thresholds=(Line(text.word(PAGE, "figures.filter.cutoff"), (cutoff, cutoff), (0.0, 1.0),
                          dash=True),),
+        width="double",  # landscape like the biotype shares above it (Rytis, 2026-10-01)
     )  # fmt: skip
     words = _text("filter", protein_coding=kept[CODING], lncrna=kept[LNCRNA], k=k)
     return writer.figure(data, "filter_by_biotype", words), keep
