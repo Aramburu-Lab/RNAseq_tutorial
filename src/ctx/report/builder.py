@@ -1,8 +1,10 @@
 """Render self-contained HTML pages: plotly.js inlined once, no external request, light/dark.
 
-Three page kinds share one base template, so there is one theme toggle and one look: a figure
-page (one figure with its reading guide, caption and data), a module report with the eight
-sections of the report skeleton (CONVENTIONS.md, HTML reports), and the course hub.
+Every page kind shares one base template, so there is one theme toggle and one look: a figure
+page (one figure with its reading guide, caption and data), a module report with the nine
+sections of the report skeleton (CONVENTIONS.md, HTML reports), the course hub, the course home
+page and the glossary page. A page that marks a glossary term links the glossary page and
+embeds the tooltips of the terms it marks, and writing it writes the glossary too (D-048).
 """
 
 import json
@@ -13,11 +15,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from jinja2 import Environment, PackageLoader, select_autoescape
-from markupsafe import Markup, escape
+from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
+from markupsafe import Markup
 
 from ctx.io.naming import figure_files
-from ctx.report import text
+from ctx.report import glossary, marks, text
 from ctx.viz.style import (
     NARROW_PX,
     RAIL_FROM_PX,
@@ -249,6 +251,15 @@ class CoursePage:
     rows: tuple[CourseRow, ...]
     hubs: tuple[CourseLink, ...]
     key_numbers: tuple[KeyNumber, ...] = ()
+    glossary: str = ""
+
+
+@dataclass(frozen=True)
+class GlossaryPage:
+    """The glossary: every entry of ``glossary.yaml``, by category, each anchored by its id."""
+
+    title: str
+    groups: tuple[tuple[str, tuple[glossary.Entry, ...]], ...]
 
 
 Result = Group | FigureBlock | ResultTable | str
@@ -289,7 +300,7 @@ class ModulePage:
             raise ValueError(f"{len(self.key_numbers)} key numbers; at most {MAX_KEY_NUMBERS}")
 
 
-Page = FigurePage | ModulePage | HubPage | CoursePage
+Page = FigurePage | ModulePage | HubPage | CoursePage | GlossaryPage
 
 _ENV = Environment(
     loader=PackageLoader("ctx.report", "templates"),
@@ -297,15 +308,45 @@ _ENV = Environment(
     trim_blocks=True,
     lstrip_blocks=True,
 )
-_CODE = re.compile(r"`([^`]+)`")
 
 
 def code_spans(value: str) -> Markup:
-    """Page text with each backticked span as code, everything else escaped (D-045)."""
-    return Markup(_CODE.sub(lambda m: f"<code>{m.group(1)}</code>", str(escape(value))))
+    """Page text with each backticked span as code, everything else escaped (D-045).
+
+    A glossary mark shows its display text: only ``explain_terms`` draws the icon.
+    """
+    return marks.html(value)
+
+
+@pass_context
+def explain_terms(context: Any, value: str, section: str) -> Markup:
+    """Page text with each backticked span as code and each glossary mark as a term (D-048).
+
+    The first mention of an entry in a section carries the info icon; a later one shows its
+    display text alone, unless its mark ends in ``!``.
+    """
+    terms: glossary.Terms = context["terms"]
+    return terms.html(value, section)
 
 
 _ENV.filters["code"] = code_spans
+_ENV.filters["explain_terms"] = explain_terms
+
+
+def _marked(page: Page) -> list[str]:
+    """Every text of a page that ``explain_terms`` renders: sections, captions and cards."""
+    if isinstance(page, FigurePage):
+        return [page.figure.caption]
+    cards = getattr(page, "parameters", ())
+    texts = [t for card in cards for t in (card.meaning, card.effect)]
+    if not isinstance(page, ModulePage):
+        return texts if isinstance(page, HubPage) else []
+    blocks = [i for r in page.results for i in (r.items if isinstance(r, Group) else (r,))]
+    return [
+        *texts, page.question, page.input, page.concept, page.practice, *page.mistakes,
+        *(t for check in page.think for t in (check.prompt, check.answer)),
+        *(b.caption for b in blocks if isinstance(b, FigureBlock)),
+    ]  # fmt: skip
 
 
 def plotly_js() -> str:
@@ -441,7 +482,7 @@ def _heading(page: Page) -> dict[str, str]:
         return {"kicker": figure, "headline": page.title, "dataset": "", "suite": SUITE}
     match = TITLE.fullmatch(page.title)
     assert match is not None  # noqa: S101 - the pattern accepts any title
-    if isinstance(page, HubPage | CoursePage):
+    if isinstance(page, HubPage | CoursePage | GlossaryPage):
         kicker = SUITE
     else:
         numbered = match["n"] is not None
@@ -452,15 +493,19 @@ def _heading(page: Page) -> dict[str, str]:
     return {"kicker": kicker, "headline": match["headline"], "dataset": dataset, "suite": SUITE}
 
 
-def render(page: Page) -> str:
+def render(page: Page, glossary_href: str = "") -> str:
     """Render a page to one self-contained HTML string.
 
     Args:
-        page: A figure page, a module report, the hub or the course home page.
+        page: A figure page, a module report, the hub, the course home page or the glossary.
+        glossary_href: The glossary page as this page links it, which ``write`` supplies; the
+            course home page carries its own. Empty, the page and its tooltips link none.
 
     Returns:
         The HTML.
     """
+    used = glossary.used(_marked(page))
+    glossary_href = page.glossary if isinstance(page, CoursePage) else glossary_href
     context: dict[str, Any] = {
         "page": page,
         "sections": SECTIONS,
@@ -474,7 +519,15 @@ def render(page: Page) -> str:
         "layout": {"rail_from": RAIL_FROM_PX, "narrow": NARROW_PX},
         "templates": _json_for_script(plotly_templates()),
         "plotly_js": Markup(plotly_js()),
+        "terms": glossary.Terms(),
+        "glossary_href": glossary_href,
+        # Only the entries this page marks: a page carries its own tooltips, and no more.
+        "tooltips": _json_for_script(glossary.tooltips(used, glossary_href)) if used else "",
     }
+    if isinstance(page, GlossaryPage):
+        names = {e.id: e.term for _, entries in page.groups for e in entries}
+        context |= {"plotly_js": "", "names": names}
+        return _ENV.get_template("glossary.html.j2").render(**context)
     if isinstance(page, HubPage):
         context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing
         return _ENV.get_template("hub.html.j2").render(**context)
@@ -499,6 +552,11 @@ def render(page: Page) -> str:
 def write(page: Page, path: Path) -> Path:
     """Render and write a page, refusing one over 15 MB before anything is written.
 
+    The hub, and a page that marks a glossary term, link the glossary page of their ctx root
+    (``glossary.page_path``), which is written first, unless the same page is there already:
+    a page never links a file that does not exist (D-048). Outside a ctx root such a page keeps
+    its tooltips and links no glossary.
+
     Args:
         page: The page.
         path: Destination ``.html`` file.
@@ -507,10 +565,25 @@ def write(page: Page, path: Path) -> Path:
         The written path.
 
     Raises:
-        ValueError: If the page exceeds ``MAX_BYTES``.
+        ValueError: If the page or its glossary exceeds ``MAX_BYTES``.
     """
-    html = render(page).encode()
-    if len(html) > MAX_BYTES:
-        raise ValueError(f"{path.name}: {len(html)} bytes, over the {MAX_BYTES}-byte cap")
+    target = None
+    if isinstance(page, HubPage) or glossary.used(_marked(page)):
+        target = glossary.page_path(path)
+    html = _sized(render(page, glossary.href(path, target) if target else ""), path)
+    if target is not None:
+        book = GlossaryPage(text.word("ui", "glossary.title"), glossary.grouped())
+        entries = _sized(render(book), target)
+        if not (target.is_file() and target.read_bytes() == entries):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(entries)
     path.write_bytes(html)
     return path
+
+
+def _sized(html: str, path: Path) -> bytes:
+    """A page's bytes, refused over ``MAX_BYTES`` before anything is written."""
+    data = html.encode()
+    if len(data) > MAX_BYTES:
+        raise ValueError(f"{path.name}: {len(data)} bytes, over the {MAX_BYTES}-byte cap")
+    return data

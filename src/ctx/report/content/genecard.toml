@@ -5,20 +5,20 @@ title = "M9 Gene cards: {dataset}"
 command = "ctx genecard {gene} --dataset {dataset}"
 profile = "preview build, one process"
 budget = "Preview build on made-up data. The built module: under {minutes} min and {ram_gb} GB"
-purpose = "Place a gene's result in this dataset beside reference data on normal tissues, immune cells, protein and exons, each panel linked to its source."
-input = "Gene symbols as arguments, or the `gene_name` column of an M5 results table, and the dataset's M5 results and sample sheet. Reference data: GTEx Portal API v2, Human Protein Atlas and Ensembl REST responses, cached per release under `resources/cache/`."
-method = """`ctx genecard` resolves each symbol to a versioned Ensembl gene ID and its MANE Select transcript. It then fetches GTEx per-sample TPM, exon and junction counts, and HPA tissue, immune cell, subcellular and blood data. Each response is cached with its retrieval time and SHA-256.
+purpose = "Place a gene's result in this dataset beside reference data on normal tissues, immune cells, protein and [[exons]], each panel linked to its source."
+input = "Gene symbols as arguments, or the `gene_name` column of an M5 results table, and the dataset's M5 results and sample sheet. Reference data: [[GTEx Portal]] API v2, Human Protein Atlas and Ensembl REST responses, cached per release under `resources/cache/`."
+method = """`ctx genecard` resolves each symbol to a versioned [[Ensembl gene ID]] and its [[MANE Select]] transcript. It then fetches [[GTEx]] per-sample [[TPM]], exon and junction counts, and HPA tissue, immune cell, subcellular and blood data. Each response is cached with its retrieval time and SHA-256.
 
 The card draws its own figures from these numbers and links each panel to its source page. Reference panels are descriptive: n, median, IQR and tau. The dataset's own panel keeps the M5 test and call rule."""
 interpretation = """Check which cells express the gene before reading a change in this dataset as a change inside those cells. A high tau means few cell types express it, so a shift in cell composition can raise it in a mixed sample.
 
-RNA is not protein: check the protein panel and the antibody's reliability before calling the gene a marker. Compare each reference panel within its own release: HPA, GTEx and this dataset use different GENCODE versions.
+RNA is not protein: check the protein panel and the antibody's reliability before calling the gene a marker. Compare each reference panel within its own release: HPA, GTEx and this dataset use different [[GENCODE]] versions.
 
-For qPCR, choose adjacent exons that every major isoform shares, with an even share across tissues and a supported junction. A prognostic association on the card is not a mechanism."""
+For [[qPCR]], choose adjacent exons that every major isoform shares, with an even share across tissues and a supported junction. A prognostic association on the card is not a mechanism."""
 # "Term: rest" in a pitfall prints Term in bold.
 pitfalls = [
     "Tissue as tumour: GTEx samples are post-mortem, non-diseased tissue; tumour expression and splicing can differ.",
-    "Uneven exon coverage as splicing: degraded RNA raises the exons nearest the poly(A) tail; check the junction counts.",
+    "Uneven exon coverage as splicing: degraded RNA raises the exons nearest the poly(A) tail; check the [[splice junction|junction]] counts.",
     "Collapsed exons as transcript exons: GTEx merges every transcript's exons into one model, so its exon numbers are not Ensembl's.",
 ]
 
@@ -47,7 +47,7 @@ prompt = "Why do the GTEx and HPA panels show no p-value?"
 answer = "They are summaries from other studies: a median per tissue, or one pooled value per cell type. A test would treat another study's summaries as samples of this one."
 
 [[questions]]
-prompt = "Why place qPCR primers in two adjacent exons that every major isoform shares?"
+prompt = "Why place [[qPCR]] primers in two adjacent exons that every major isoform shares?"
 answer = "The product then measures the gene rather than one isoform, and the intron between the exons keeps genomic DNA from giving the same product."
 
 # The options ctx genecard will take (TODO.md, M9). GENE is the positional argument.
@@ -88,11 +88,11 @@ effect = "On: a gene not yet cached stops the run, naming it."
 
 [groups]
 ours = "Our evidence"
-ours_lead = "Does the gene change between conditions, and in which cell type?"
+ours_lead = "Check whether the gene changes between conditions, and in which cell type."
 reference = "Normal tissues and immune cells"
-reference_lead = "Where is the gene expressed outside this dataset?"
+reference_lead = "Check where the gene is expressed outside this dataset."
 exons = "Exons and qPCR primers"
-exons_lead = "Which exons measure the gene evenly enough for qPCR?"
+exons_lead = "Find the exons that measure the gene evenly enough for qPCR."
 
 [figures.ours]
 title = "{gene} in this dataset, by cell type"
@@ -122,7 +122,7 @@ reading = [
 x = "Tissue"
 y = "Expression"
 range = "median and IQR"
-caption = "Made-up TPM in place of GTEx Portal API v2 per-sample data: {samples} samples in {tissues} tissues, {least} to {most} each. Median and IQR only; external data, no test."
+caption = "Made-up [[TPM]] in place of [[GTEx Portal]] API v2 per-sample data: {samples} samples in {tissues} tissues, {least} to {most} each. Median and IQR only; external data, no test."
 
 [figures.tissues.columns]
 tissue = ["none", "Tissue sampled."]
@@ -156,7 +156,7 @@ reading = [
 x = "Tissue"
 y = "Exon"
 stat = "CV across tissues"
-caption = "Made-up exon shares in place of GTEx median exon read counts on the collapsed gene model: {exons} exons by {tissues} tissues. CV: SD over mean. External data, no test."
+caption = "Made-up exon shares in place of GTEx median exon read counts on the [[collapsed gene model]]: {exons} exons by {tissues} tissues. CV: SD over mean. External data, no test."
 
 [figures.exons.columns]
 exon = ["none", "Exon of the collapsed gene model, numbered from the gene's start."]

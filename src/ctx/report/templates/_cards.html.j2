@@ -4,7 +4,7 @@
 <thead><tr><th>{{ ui.cards.parameter }}</th><th>{{ ui.cards.default }}</th><th>{{ ui.cards.meaning }}</th></tr></thead>
 <tbody>
 {% for card in parameters %}
-<tr id="card-{{ card.name }}"><th scope="row"><code>{{ card.name }}</code></th><td class="default-cell"><code class="default">{{ card.default }}</code></td><td>{{ card.meaning | code }}<details class="effect"><summary>{{ ui.cards.effect }}</summary><p>{{ card.effect | code }}</p></details></td></tr>
+<tr id="card-{{ card.name }}"><th scope="row"><code>{{ card.name }}</code></th><td class="default-cell"><code class="default">{{ card.default }}</code></td><td>{{ card.meaning | explain_terms("parameters") }}<details class="effect"><summary>{{ ui.cards.effect }}</summary><p>{{ card.effect | explain_terms("parameters") }}</p></details></td></tr>
 {% endfor %}
 </tbody>
 </table></div>

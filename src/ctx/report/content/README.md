@@ -24,6 +24,7 @@ until the Step-1 record, and their text moves after it (TODO.md, P2S.4).
   `tests/test_text.py`.
 - **Pitfalls.** In `pitfalls`, the words before the first `": "` print in bold.
 - **Prose rules.** CONVENTIONS.md, Report prose: word budgets, sentence length, the banned list, numbers from `{placeholders}`. `pixi run lint-prose` lists every violation.
+- **Glossary marks.** `[[term]]` marks a glossary term, `[[term|shown words]]` shows other words, and `[[term!]]` gives a later mention its icon too. The term is an id, term or alias in `../glossary.yaml`, in any case. Marks work in the sections, questions, pitfalls, figure captions and cards; the first mention per section gets the icon. A mark inside backticks is code, shown as written. `python -m ctx.report.glossary_lint` refuses an unknown term or a mark anywhere else, and lists glossary terms left unmarked or marked only after a bare first mention (D-048).
 - **No em dashes or arrows** anywhere, as on the rest of the pages.
 
 ## An edited copy, without touching the package

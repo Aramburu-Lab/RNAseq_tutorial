@@ -1,6 +1,7 @@
 {% include "_calls.js.j2" %}
 {% include "_brush.js.j2" %}
 {% include "_filter.js.j2" %}
+{% include "_glossary.js.j2" %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
    is logged and never stops the others; every feature degrades to a readable page without
@@ -37,6 +38,10 @@
     window.addEventListener("beforeprint", function () { retheme("white"); });
     window.addEventListener("afterprint", function () { retheme(root.getAttribute("data-theme")); });
   });
+
+  /* Glossary terms: a tooltip per marked term; on the glossary page, the search box. */
+  guard("tooltips", function () { ctxGlossary.tips(document, window); });
+  guard("glossary search", function () { ctxGlossary.search(document); });
 
   /* Tabs: every panel drew visible at full width; hide the inactive ones only now, and resize
      a panel's plot when it is shown, so plotly never lays out a hidden div. */

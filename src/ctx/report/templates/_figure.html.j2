@@ -40,7 +40,7 @@
 {% endfor %}</ul></aside>
 {% endif %}
 </div>
-<figcaption>{{ f.caption }}</figcaption>
+<figcaption>{{ f.caption | explain_terms("results") }}</figcaption>
 <p class="fig-files">{% if f.page and not standalone %}<a href="{{ f.page }}">{{ ui.figures.open }}</a>{% endif %}{% for label, theme, href in f.files %}<a{% if theme %} class="only-{{ theme }}"{% endif %} href="{{ href }}">{{ label }}</a>{% endfor %}</p>
 {% if f.controls %}<script type="application/json" id="ctx-controls-{{ f.index }}">{{ f.controls }}</script>
 {% endif %}

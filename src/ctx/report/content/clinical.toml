@@ -3,19 +3,19 @@
 # this page on made-up data; its keys are under [preview] and in the {source} placeholders.
 
 title = "M10 Clinical and survival: {dataset}"
-purpose = "Relate gene expression to clinical covariates and to survival, on the endpoint TCGA-CDR recommends for the cancer, with each model's assumptions tested."
-input = "The sample sheet and counts from `ctx gather` and the results of `ctx de`. Per patient: TCGA-CDR endpoints with event flags, GDC `cases` fields for stage, age and treatment, and GDC annotations."
-method = """Kaplan-Meier estimates the share of patients still free of the event at each time; a censored patient leaves the risk set without an event. The log-rank test compares two curves, and the restricted mean survival time gives their difference in months. Groups are pre-specified: a median split or tertiles.
+purpose = "Relate gene expression to clinical covariates and to survival, on the [[endpoint]] TCGA-CDR recommends for the cancer, with each model's assumptions tested."
+input = "The sample sheet and counts from `ctx gather` and the results of `ctx de`. Per patient: TCGA-CDR endpoints with event flags, [[GDC]] `cases` fields for stage, age and treatment, and GDC annotations."
+method = """[[Kaplan-Meier curve|Kaplan-Meier]] estimates the share of patients still free of the event at each time; a [[censored]] patient leaves the risk set without an event. The [[log-rank test]] compares two curves, and the [[restricted mean survival time]] gives their difference in months. Groups are pre-specified: a median split or tertiles.
 
-A Cox proportional-hazards model, fitted in `lifelines`, gives the hazard ratio per standard deviation of expression, alone and adjusted for age and stage. The Schoenfeld residual test checks proportional hazards; the C-index measures how well the model ranks patients by risk."""
-interpretation = """A hazard ratio above one means a higher event rate with higher expression, per standard deviation. Read the adjusted model first: expression that tracks stage loses part of its hazard ratio once stage enters the model. A small log-rank p shows the curves differ, not by how much; the RMST difference gives the size in months.
+A [[Cox proportional hazards|Cox proportional-hazards]] model, fitted in `lifelines`, gives the hazard ratio per standard deviation of expression, alone and adjusted for age and stage. The [[Schoenfeld residuals|Schoenfeld residual]] test checks proportional hazards; the [[C-index]] measures how well the model ranks patients by risk."""
+interpretation = """A [[HR|hazard ratio]] above one means a higher event rate with higher expression, per standard deviation. Read the adjusted model first: expression that tracks stage loses part of its hazard ratio once stage enters the model. A small [[log-rank p]] shows the curves differ, not by how much; the [[RMST]] difference gives the size in months.
 
-Trust a model only with enough events: the power map gives the events a hazard ratio needs. A scanned cut-off finds a small p by chance; report the corrected one. Survival by treatment received shows who was treated, not what treatment did."""
+Trust a model only with enough events: the [[power]] map gives the events a hazard ratio needs. A [[optimal cutpoint|scanned cut-off]] finds a small p by chance; report the corrected one. Survival by treatment received shows who was treated, not what treatment did."""
 # "Term: rest" in a pitfall prints Term in bold.
 pitfalls = [
-    "Optimal cut-offs: the lowest log-rank p over scanned splits is biased low; pre-specify the split or report the corrected p.",
-    "Treatment as exposure: survival by treatment received is confounded by indication and open to immortal-time bias.",
-    "Crossing curves: they break proportional hazards, and one hazard ratio then averages effects of opposite sign.",
+    "Optimal cut-offs: the lowest [[log-rank p]] over scanned splits is biased low; pre-specify the split or report the corrected p.",
+    "Treatment as exposure: survival by treatment received is confounded by indication and open to [[immortal time bias|immortal-time bias]].",
+    "Crossing curves: they break [[PH assumption|proportional hazards]], and one hazard ratio then averages effects of opposite sign.",
 ]
 
 [[terms]]
@@ -43,7 +43,7 @@ term = "Cramér's V"
 meaning = "Association of two categorical variables, from `0`, none, to `1`, where one fixes the other."
 
 [[questions]]
-prompt = "Why does TCGA-CDR advise against overall survival as the endpoint for breast cancer?"
+prompt = "Why does TCGA-CDR advise against [[overall survival]] as the endpoint for breast cancer?"
 answer = "Follow-up is short and few patients have died, so OS has few events and little power; TCGA-CDR recommends PFI and DFI."
 
 [[questions]]
@@ -147,7 +147,7 @@ x = "Time since diagnosis"
 y = "Free of {endpoint}"
 step = "step"
 censored = "censored"
-caption = "{source}: {n} patients, {events} {endpoint} events, split at the median of {gene}. Log-rank chi-squared {chi2:.2f}, p = {p}. RMST difference, high minus low, at {horizon} months: {rmst:.1f} months."
+caption = "{source}: {n} patients, {events} {endpoint} events, split at the median of {gene}. Log-rank chi-squared {chi2:.2f}, p = {p}. [[RMST]] difference, high minus low, at {horizon} months: {rmst:.1f} months."
 
 [figures.scan]
 title = "Log-rank p of every cut-off from the {low}th to the {high}th percentile of {gene}"
@@ -162,7 +162,7 @@ x = "Cut-off, percentile of {gene}"
 y = "Log-rank p"
 uncorrected = "uncorrected p = {alpha}"
 corrected = "corrected p = {alpha}"
-caption = "{source}: {n} patients, {events} events. Maximally selected log-rank statistic over {cuts} cut-offs; corrected p from {perms} permutations of expression. The pre-specified median split gives p = {median_p}."
+caption = "{source}: {n} patients, {events} events. Maximally selected [[log-rank test|log-rank]] statistic over {cuts} cut-offs; corrected p from {perms} [[permutations]] of expression. The pre-specified median split gives p = {median_p}."
 
 [figures.power]
 title = "Power of a Cox model by number of events and hazard ratio per SD"
@@ -175,7 +175,7 @@ x = "Events"
 y = "Hazard ratio per SD"
 z = "Power"
 mark = "this cohort"
-caption = "Computed from Hsieh and Lavori's formula for a per-SD hazard ratio, two-sided alpha = {alpha}; no data drawn. Point: {source}, {events} events, adjusted HR {hr:.2f}."
+caption = "Computed from Hsieh and Lavori's formula for a per-SD [[HR|hazard ratio]], two-sided alpha = {alpha}; no data drawn. Point: {source}, {events} events, adjusted HR {hr:.2f}."
 
 [figures.confounding]
 title = "Cramér's V between the variables of the sample sheet"
@@ -189,7 +189,7 @@ column = "Variable"
 below = "< {a:g}"
 between = "{a:g} to {b:g}"
 above = "≥ {a:g}"
-caption = "{source}: Cramér's V from each pair's contingency table over {n} samples, without bias correction; the diagonal is blank. Descriptive, no test."
+caption = "{source}: [[Cramér's V]] from each pair's contingency table over {n} samples, without bias correction; the diagonal is blank. Descriptive, no test."
 
 # Column dictionaries: [unit, meaning] per column of each table and figure.
 [columns.cohort]

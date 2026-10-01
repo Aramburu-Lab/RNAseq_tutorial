@@ -7,7 +7,7 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{margin:0;background:var(--page);color:var(--text);font:var(--size-base)/1.62 var(--font-page);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 .page{max-width:calc(var(--content) + 2 * var(--gutter-wide));margin:0 auto;padding:0 var(--gutter-wide) var(--space-9)}
 .content{min-width:0}
-section,.group,.fig{scroll-margin-top:calc(var(--topbar) + var(--space-4))}
+section,.group,.fig,.entry{scroll-margin-top:calc(var(--topbar) + var(--space-4))}
 
 /* Skip link and top bar */
 .skip{position:absolute;left:var(--space-4);top:calc(-1 * var(--topbar));z-index:60;padding:var(--space-2) var(--space-4);background:var(--surface);color:var(--link);border:var(--rule) solid var(--line-strong);border-radius:var(--radius-sm)}
@@ -21,6 +21,23 @@ section,.group,.fig{scroll-margin-top:calc(var(--topbar) + var(--space-4))}
 #ctx-theme-toggle:hover{border-color:var(--link)}
 :root[data-theme="white"] .t-light,:root[data-theme="black"] .t-dark{color:var(--text);font-weight:700}
 html:not(.js) #ctx-theme-toggle{display:none}
+.glossary-link{flex:none;margin-left:auto;font-size:var(--fs-xs);font-weight:600}
+
+/* Glossary terms (D-048): a circled i at the phrase's top right, in the link colour, inside a
+   target of --hit; the tooltip opens beside it, placed by the page script. The tooltip is
+   fixed, so a scrolling card table cannot clip it: no ancestor of a term may set transform,
+   filter, backdrop-filter, perspective, contain or will-change, which would trap it
+   (tests/test_tooltip.py reads this file for them). */
+.term{position:relative;padding-right:.9em;white-space:nowrap}
+.term .info{position:absolute;top:calc(-.1em - var(--hit) / 2);right:calc(.25em - var(--hit) / 2);display:flex;align-items:center;justify-content:center;width:var(--hit);height:var(--hit);padding:0;border:0;border-radius:50%;background:none;color:var(--link);cursor:pointer}
+.info-icon{width:.7em;height:.7em;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round}
+html:not(.js) .term{padding-right:0}
+html:not(.js) .term .info{display:none}
+.tip{position:fixed;left:0;top:0;z-index:40;display:block;width:min(var(--tip),calc(100vw - 2 * var(--space-3)));padding:var(--space-3) var(--space-4);background:var(--surface);color:var(--text);border:var(--rule) solid var(--line-strong);border-radius:var(--radius-sm);box-shadow:var(--shadow);font-size:var(--fs-sm);font-weight:400;line-height:1.5;letter-spacing:0;text-transform:none;text-align:left;white-space:normal}
+.tip[hidden]{display:none}
+.tip-term{display:block;margin-bottom:var(--space-1);font-weight:700;color:var(--text)}
+.tip-short{display:block}
+.tip-link{display:inline-block;margin-top:var(--space-2)}
 
 /* Hero */
 .masthead{padding:var(--space-8) 0 var(--space-5)}
@@ -188,6 +205,22 @@ ol.modules>li{display:flex;flex-direction:column;gap:var(--space-1);padding:var(
 .course-links{display:flex;flex-direction:column;gap:var(--space-1);list-style:none;margin:0;padding:0}
 .course-links li{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2)}
 
+/* Glossary page */
+.glossary-search{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2) var(--space-4);margin:0 0 var(--space-5)}
+.glossary-search label{font-size:var(--fs-xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.glossary-search input{flex:1 1 16em;min-width:0;font:inherit;font-size:var(--fs-sm);color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-2) var(--space-3)}
+.glossary-search input:focus{border-color:var(--link)}
+.glossary-count{margin:0;font-size:var(--fs-xs);color:var(--muted)}
+html:not(.js) .glossary-search{display:none}
+.entry{margin:var(--space-4) 0;padding:var(--space-4) var(--space-5);background:var(--surface);border:var(--rule) solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.entry:target{border-color:var(--link)}
+.entry h3{margin:0;font-size:var(--fs-md)}
+.entry p{margin:var(--space-2) 0 0}
+.entry .short{color:var(--text);font-weight:600}
+.aliases,.see-also,.entry .source{font-size:var(--fs-sm);color:var(--muted)}
+.entry[hidden],.glossary-group[hidden]{display:none}
+.pill[data-kind="unverified"]{color:var(--made-fg);background:var(--made-bg)}
+
 /* Narrow and wide screens */
 @media (max-width:{{ layout.rail_from - 1 }}px){
 /* One row, its scrollbar shown: a hidden one hid the sections past the edge. */
@@ -196,7 +229,7 @@ ol.modules>li{display:flex;flex-direction:column;gap:var(--space-1);padding:var(
 .toc a{padding:var(--space-3) 0;border-left:0;border-bottom:var(--rule-mid) solid transparent}
 .toc a[aria-current]{border-bottom-color:var(--link)}
 .toc .sub,.toc-title{display:none}
-section,.group,.fig{scroll-margin-top:calc(2 * var(--topbar) + var(--space-4))}
+section,.group,.fig,.entry{scroll-margin-top:calc(2 * var(--topbar) + var(--space-4))}
 }
 @media (min-width:{{ layout.rail_from }}px){
 .page.has-rail{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);column-gap:var(--gap);max-width:calc(var(--rail) + var(--gap) + var(--content) + 2 * var(--gutter-wide))}
@@ -217,7 +250,8 @@ table.measured th{width:auto}
 @media print{
 @page{size:A4 portrait;margin:12mm}
 :root,:root[data-theme="black"]{ {{ css.white }} color-scheme:light }
-.topbar,.skip,.toc,#ctx-theme-toggle,.copy,.fig-files,.tabs,.calls{display:none}
+.topbar,.skip,.toc,#ctx-theme-toggle,.copy,.fig-files,.tabs,.calls,.term .info,.tip,.glossary-search{display:none}
+.term{padding-right:0}
 .js .fig[hidden]{display:block}
 .page.has-rail{display:block;max-width:none;padding:0}
 .fig,.table-scroll,details{box-shadow:none}

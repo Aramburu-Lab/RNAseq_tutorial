@@ -1,0 +1,187 @@
+{% raw %}
+/* Glossary tooltips and the glossary page's search (D-048), with no library. ctxGlossary.place
+   is the placement rule and ctxGlossary.matches the search rule; tips() and search() attach
+   them to a document. tests/test_tooltip.py runs this file under node on a stand-in document.
+
+   A term's button opens its tooltip on mouse hover and on keyboard focus; a click or a tap
+   pins it open, or closes one that is pinned or was opened by focus. Escape, a click outside
+   the term and focus leaving it close the tooltip, and opening one closes any other.
+
+   The panel is position: fixed, placed in viewport coordinates, so no scrolling or clipping
+   ancestor (a card table) cuts it off; it follows its term when anything scrolls. */
+var ctxGlossary = (function () {
+  "use strict";
+  var GAP = 6, MARGIN = 8, CLOSE_MS = 250;
+
+  /* Below the phrase, unless that leaves the view and above fits; then moved sideways into
+     the view. All in viewport coordinates. */
+  function place(anchor, size, view) {
+    var top = anchor.bottom + GAP, above = false;
+    if (top + size.height > view.bottom - MARGIN &&
+        anchor.top - GAP - size.height >= view.top + MARGIN) {
+      top = anchor.top - GAP - size.height;
+      above = true;
+    }
+    var left = Math.min(anchor.left, view.right - MARGIN - size.width);
+    return { top: top, left: Math.max(left, view.left + MARGIN), above: above };
+  }
+
+  /* Every word of the query, in any case, somewhere in the text. */
+  function matches(text, query) {
+    var hay = text.toLowerCase();
+    return query.toLowerCase().split(/\s+/).every(function (w) {
+      return !w || hay.indexOf(w) >= 0;
+    });
+  }
+
+  function tips(doc, win) {
+    var data = doc.getElementById("ctx-glossary");
+    if (!data) return null;
+    var glossary = JSON.parse(data.textContent);
+    var panel = doc.createElement("span");
+    panel.className = "tip";
+    panel.id = "ctx-tip";
+    panel.setAttribute("role", "tooltip");
+    /* Focusable by a press, not by Tab: a click on the text keeps focus inside the term, so
+       focusout leaves a pinned tooltip open while the reader selects its words. */
+    panel.setAttribute("tabindex", "-1");
+    panel.hidden = true;
+    /* how: "hover", "focus" or "pinned". pointing: a pointer pressed the button, so the focus
+       that follows is the click's, not the keyboard's. returning: Escape gives focus back. */
+    var open = null, how = null, timer = null, pointing = false, returning = false;
+
+    function add(tag, cls, words) {
+      var el = doc.createElement(tag);
+      el.className = cls;
+      el.textContent = words;
+      panel.appendChild(el);
+      return el;
+    }
+    function fill(button) {
+      var id = button.getAttribute("data-term"), entry = glossary.entries[id];
+      while (panel.firstChild) panel.removeChild(panel.firstChild);
+      /* A span, not a strong: a section's rule for strong (the warning colour in Pitfalls)
+         must not reach the tooltip. */
+      add("span", "tip-term", entry.term);
+      add("span", "tip-short", entry.short);
+      if (glossary.href) add("a", "tip-link", glossary.link).setAttribute("href", glossary.href + "#" + id);
+    }
+    /* The page's own box: innerWidth counts a scrollbar and, on a phone, grows with anything
+       wider than the screen, the open panel included. */
+    function view() {
+      var bar = doc.querySelector(".topbar"), root = doc.documentElement;
+      var top = bar ? bar.getBoundingClientRect().bottom : 0;
+      return { left: 0, top: top, right: root.clientWidth, bottom: root.clientHeight };
+    }
+    function position() {
+      if (!open) return;
+      var spot = place(open.parentNode.getBoundingClientRect(),
+                       { width: panel.offsetWidth, height: panel.offsetHeight }, view());
+      panel.style.left = spot.left + "px";
+      panel.style.top = spot.top + "px";
+      panel.setAttribute("data-side", spot.above ? "above" : "below");
+    }
+    function hide() {
+      win.clearTimeout(timer);
+      if (!open) return;
+      open.setAttribute("aria-expanded", "false");
+      open.removeAttribute("aria-describedby");
+      panel.hidden = true;
+      open = null;
+      how = null;
+    }
+    function show(button, mode) {
+      win.clearTimeout(timer);
+      if (open === button) {
+        /* Focus or a click keeps a tooltip that hover opened when the pointer leaves. */
+        if (mode !== "hover") how = mode;
+        return;
+      }
+      hide();
+      fill(button);
+      button.parentNode.appendChild(panel);
+      /* Measured at the view's corner, so the unplaced panel never widens the page. */
+      panel.style.left = panel.style.top = MARGIN + "px";
+      panel.hidden = false;
+      button.setAttribute("aria-expanded", "true");
+      button.setAttribute("aria-describedby", panel.id);
+      open = button;
+      how = mode;
+      position();
+    }
+    Array.prototype.forEach.call(doc.querySelectorAll("button.info[data-term]"), function (button) {
+      var term = button.parentNode;
+      button.addEventListener("pointerenter", function (e) {
+        if (e.pointerType === "mouse") show(button, "hover");
+      });
+      term.addEventListener("pointerenter", function () {
+        if (open === button) win.clearTimeout(timer);
+      });
+      term.addEventListener("pointerleave", function () {
+        if (open === button && how === "hover") timer = win.setTimeout(hide, CLOSE_MS);
+      });
+      button.addEventListener("pointerdown", function () { pointing = true; });
+      button.addEventListener("focus", function () {
+        /* Spent here: a press that never became a click (a drag off the icon, a right click)
+           must not keep the next keyboard focus from opening a tooltip. */
+        var pressed = pointing;
+        pointing = false;
+        if (!pressed && !returning) show(button, "focus");
+      });
+      button.addEventListener("click", function () {
+        pointing = false;
+        if (open === button && how !== "hover") hide();
+        else show(button, "pinned");
+      });
+      term.addEventListener("focusout", function (e) {
+        if (open === button && !term.contains(e.relatedTarget)) hide();
+      });
+    });
+    doc.addEventListener("click", function (e) {
+      if (open && !open.parentNode.contains(e.target)) hide();
+    });
+    doc.addEventListener("keydown", function (e) {
+      /* A key press is not a pointer's: Safari focuses no button a press lands on. */
+      pointing = false;
+      if (e.key !== "Escape" || !open) return;
+      var button = open, inside = button.parentNode.contains(doc.activeElement);
+      hide();
+      if (inside && doc.activeElement !== button) {
+        returning = true;
+        button.focus();
+        returning = false;
+      }
+    });
+    win.addEventListener("resize", hide);
+    /* Capture: a scroll inside a card table does not bubble to the document. */
+    doc.addEventListener("scroll", position, true);
+    return panel;
+  }
+
+  /* The glossary page: hide the entries a query does not match, and the topics left empty. */
+  function search(doc) {
+    var input = doc.getElementById("ctx-glossary-search");
+    if (!input) return;
+    var entries = Array.prototype.slice.call(doc.querySelectorAll("article.entry"));
+    var groups = Array.prototype.slice.call(doc.querySelectorAll("section.glossary-group"));
+    var count = doc.querySelector(".glossary-count");
+    function update() {
+      var shown = 0;
+      entries.forEach(function (a) {
+        /* The entry's own words, not the page's labels ("Also written:", "Source:"). */
+        a.hidden = !matches(a.getAttribute("data-search") || "", input.value);
+        if (!a.hidden) shown += 1;
+      });
+      groups.forEach(function (g) {
+        g.hidden = !g.querySelector("article.entry:not([hidden])");
+      });
+      count.textContent = count.getAttribute("data-template")
+        .replace("{shown}", shown).replace("{total}", entries.length);
+    }
+    input.addEventListener("input", update);
+    update();
+  }
+
+  return { place: place, matches: matches, tips: tips, search: search };
+})();
+{% endraw %}

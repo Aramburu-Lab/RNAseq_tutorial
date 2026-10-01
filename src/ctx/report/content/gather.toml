@@ -2,19 +2,19 @@
 
 title = "M1 Gather: {dataset}"
 budget = "Track B: under {minutes} min and {ram_gb} GB"
-purpose = "Verify the nf-core/fetchngs download against its own records and ENA's checksums, and build the sample sheet every later module reads."
-input = "One nf-core/fetchngs outdir (`samplesheet/`, `fastq/`, `fastq/md5/`, `metadata/`, `pipeline_info/`), the dataset file and its SDRF, and, with `--rnaseq-dir`, an nf-core/rnaseq outdir with the gene counts."
-method = """A fetchngs run can end with files missing or corrupt, and one experiment can hold several runs. Each FASTQ is checked against the md5 that ENA publishes; runs fetched through sra-tools have none.
+purpose = "Verify the [[nf-core/fetchngs]] download against its own records and ENA's [[checksum|checksums]], and build the sample sheet every later module reads."
+input = "One nf-core/fetchngs outdir (`samplesheet/`, `fastq/`, `fastq/md5/`, `metadata/`, `pipeline_info/`), the dataset file and its SDRF, and, with `--rnaseq-dir`, an nf-core/rnaseq outdir with the [[gene counts]]."
+method = """A fetchngs run can end with files missing or corrupt, and one experiment can hold several runs. Each [[FASTQ]] is checked against the [[md5]] that [[ENA]] publishes; runs fetched through sra-tools have none.
 
-ENA metadata is free text, so the SDRF supplies donor, cell type and condition, joined on the run accession and mapped to fixed levels. Read length is ENA's base count over its read count, per mate; the dataset file bins it into batches."""
-interpretation = """Resolve every problem the checks report before any analysis; a mismatched or missing file stops gather. From here on, the sample sheet is the only record of what each sample is. Runs of one experiment are technical replicates, combined before counting.
+ENA metadata is free text, so the SDRF supplies donor, cell type and condition, joined on the run [[accession]] and mapped to fixed levels. [[Read length]] is ENA's base count over its read count, per mate; the dataset file bins it into batches."""
+interpretation = """Resolve every problem the checks report before any analysis; a mismatched or missing file stops gather. From here on, the sample sheet is the only record of what each sample is. Runs of one experiment are [[technical replicate|technical replicates]], combined before counting.
 
-Where read length splits the groups, batch and group are confounded: compare within a batch, or put batch in the design. A run below the ENCODE lines is noisier, not wrong: DESeq2's size factors correct depth."""
+Where read length splits the groups, [[batch]] and group are confounded: compare within a batch, or put batch in the design. A run below the ENCODE lines is noisier, not wrong: DESeq2's [[size factors]] correct depth."""
 # "Term: rest" in a mistake prints Term in bold.
 pitfalls = [
-    "Treating the runs of one experiment as biological replicates: they are one library, sequenced more than once.",
+    "Treating the runs of one experiment as [[biological replicates]]: they are one library, sequenced more than once.",
     "Re-running fetchngs into an existing outdir: it rebuilds the samplesheet from the new input only.",
-    "Expecting size factors to fix a failed library: they correct depth, not quality.",
+    "Expecting [[size factors]] to fix a failed library: they correct depth, not quality.",
 ]
 
 [[terms]]
@@ -38,16 +38,16 @@ term = "Aligned reads"
 meaning = "The reads an aligner places on the genome; never more than the reads sequenced."
 
 [[questions]]
-prompt = "Why does gather find FASTQ files by name, not by the path in samplesheet.csv?"
+prompt = "Why does gather find [[FASTQ]] files by name, not by the path in samplesheet.csv?"
 answer = "fetchngs writes each path on the machine that ran it; after a copy to a laptop or from Zenodo, that path no longer exists."
 
 [[questions]]
-prompt = "Why is a run with no md5 file reported, not rejected?"
+prompt = "Why is a run with no [[md5]] file reported, not rejected?"
 answer = "sra-tools fetches the runs that have no FASTQ at ENA and writes no md5. The file is usable but was never checked against a published checksum."
 
 [[questions]]
 prompt = "Why can a run above ENCODE's line still miss the standard?"
-answer = "ENA counts sequenced reads and ENCODE counts aligned reads. Reads from adapters, rRNA or low-quality bases may not align, so the aligned count is lower."
+answer = "ENA counts sequenced reads and ENCODE counts aligned reads. Reads from [[adapters]], rRNA or low-quality bases may not align, so the aligned count is lower."
 
 # The four numbers at the top of Results.
 [keys]
@@ -121,7 +121,7 @@ batched = "Runs are grouped by read-length batch and sorted by depth: {lengths}.
 batch_lengths = "{batch} holds runs of {lengths} nt"
 sorted = "Runs are sorted by depth."
 lines = "Dashed and dotted lines: ENCODE's aligned-read standards; not every read aligns, so a run below a line cannot meet it. Solid line: the median of the runs shown."
-caption = "Reads per run as ENA reports them, a read pair counted once; no test. {medians}. ENCODE's standard counts aligned reads, so a run below {good} million cannot meet it after alignment, and one above may still miss it."
+caption = "Reads per run as [[ENA]] reports them, a read pair counted once; no test. {medians}. ENCODE's standard counts aligned reads, so a run below {good} million cannot meet it after alignment, and one above may still miss it."
 batch_median = "{batch}: n = {n} runs, median {median:,.0f} reads"
 category = "Run, by batch and depth"
 value = "Reads"

@@ -84,7 +84,8 @@ def page(kit: Path, roots: Sequence[tuple[Path, bool]]) -> CoursePage:
         # M0 checks the computer and holds no data, so the real-data count leaves it out.
         if module != "setup":
             data.append(row)
-    hubs = _links(kit, roots, f"{dict(MODULES)['report']:02d}_report", "hub")
+    report = f"{dict(MODULES)['report']:02d}_report"
+    hubs = _links(kit, roots, report, "hub")
     counts = (
         ("modules", sum(bool(r.links) for r in rows), len(rows)),
         ("real", sum(any(link.real for link in r.links) for r in data), len(data)),
@@ -94,7 +95,17 @@ def page(kit: Path, roots: Sequence[tuple[Path, bool]]) -> CoursePage:
                   text.fill("course", "keys.value", n=n, total=total))
         for key, n, total in counts
     )  # fmt: skip
-    return CoursePage(text.word("course", "title"), tuple(rows), tuple(hubs), keys)
+    # The newest glossary any root holds; each root's pages link their own copy (D-048).
+    books = [p for root, _ in roots for p in newest(root / "outputs" / report, "glossary")]
+    newest_book = max(books, key=_dated, default=None)
+    book = Path(os.path.relpath(newest_book, kit)).as_posix() if newest_book else ""
+    return CoursePage(text.word("course", "title"), tuple(rows), tuple(hubs), keys, book)
+
+
+def _dated(page: Path) -> tuple[str, int]:
+    """A dated page's day and version, the order of its copies."""
+    m = PAGE.fullmatch(page.name)
+    return (m.group(1), int(m["version"])) if m else ("", 0)
 
 
 def write_home(kit: Path, roots: Sequence[tuple[Path, bool]]) -> Path:

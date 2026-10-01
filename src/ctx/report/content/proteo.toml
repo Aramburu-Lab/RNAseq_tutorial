@@ -6,20 +6,20 @@ title = "M7 RNA versus protein: {dataset}"
 budget = "Preview build on made-up data. The module's budget is Track {track}: under {minutes} min and {ram_gb} GB."
 profile = "Preview build, one Python process"
 purpose = "Measure how far protein abundance follows RNA across samples and in one contrast, and name the genes whose protein changes differ from their RNA."
-input = "The gather sample sheet, and RNA for the same samples: counts, or M5 results for the contrast. A protein table: CPTAC TMT log2 ratios from `cptac` or the PDC API, joined on case ID and gene symbol."
-method = """Mass spectrometry measures peptides, assembled into protein groups. TMT tags let one run measure several samples, each as a log2 ratio to a pooled reference channel. A protein not identified in a plex is missing, not zero.
+input = "The gather sample sheet, and RNA for the same samples: counts, or M5 results for the contrast. A protein table: [[CPTAC]] [[TMT]] log2 ratios from `cptac` or the PDC API, joined on case ID and gene symbol."
+method = """[[mass spectrometry proteomics|Mass spectrometry]] measures peptides, assembled into [[protein groups]]. [[TMT]] tags let one run measure several samples, each as a log2 ratio to a pooled reference channel. A protein not identified in a plex is missing, not zero.
 
-Proteins quantified in too few samples are dropped. Per gene, Spearman ρ between RNA and protein across samples tests whether protein tracks RNA, with BH over genes.
+Proteins quantified in too few samples are dropped. Per gene, [[Spearman]] ρ between RNA and protein across samples tests whether protein tracks RNA, with [[BH]] over genes.
 
-Per contrast, M5's RNA fold changes and Welch t-test protein fold changes are compared across genes by Spearman ρ, with a bootstrap interval."""
+Per contrast, M5's RNA fold changes and Welch t-test protein fold changes are compared across genes by Spearman ρ, with a [[bootstrap]] interval."""
 interpretation = """Most genes have a positive but partial per-gene ρ: RNA explains part of protein variation, not all of it. Read a low ρ against the gene's class. Complex subunits made in excess are degraded unless assembled, and secreted proteins leave the cell before lysis.
 
-Fold changes agree in sign more often than in size, because TMT ratio compression shrinks protein changes. Treat an RNA-only change as untested at protein level when the protein is missing in many samples. Treat a protein-only change as a lead for translational control or protein stability, to check with Ribo-seq or turnover data."""
+Fold changes agree in sign more often than in size, because TMT [[ratio compression]] shrinks protein changes. Treat an RNA-only change as untested at protein level when the protein is missing in many samples. Treat a protein-only change as a lead for translational control or protein stability, to check with [[Ribo-seq]] or turnover data."""
 # "Term: rest" in a pitfall prints Term in bold.
 pitfalls = [
     "Imputing zeros: a missing protein is unmeasured, not absent; a zero shifts its mean, fold change and ρ.",
-    "Matching on gene symbol alone: shared peptides and isoforms map one protein group to several genes.",
-    "Ignoring the plex design: a group measured in one plex alone cannot be told apart from that plex.",
+    "Matching on gene symbol alone: [[shared peptides]] and isoforms map one protein group to several genes.",
+    "Ignoring the plex design: a group measured in one plex alone cannot be distinguished from that plex.",
 ]
 
 [[terms]]
@@ -43,12 +43,12 @@ prompt = "A complex subunit rises at RNA with no protein change. Name two explan
 answer = "Excess subunits are degraded unless assembled, so protein follows the limiting subunit. Or the protein was quantified in too few samples to test."
 
 [[questions]]
-prompt = "Why is a protein missing from one TMT plex not a zero in those samples?"
+prompt = "Why is a protein missing from one [[TMT]] plex not a zero in those samples?"
 answer = "No peptide of it was identified in that run; it may be present below detection. A zero would claim absence and pull its mean and fold change down."
 
 [[questions]]
 prompt = "RNA and protein fold changes agree in sign, but protein changes are smaller. What explains it?"
-answer = "TMT ratio compression: co-isolated peptides pull reporter ratios toward zero. Compare signs and ranks across layers, not sizes, unless the ratios were acquired with MS3 or corrected."
+answer = "TMT [[ratio compression]]: co-isolated peptides pull reporter ratios toward zero. Compare signs and ranks across layers, not sizes, unless the ratios were acquired with MS3 or corrected."
 
 # The options ctx proteo will take (TODO.md, M7); the defaults are in the preview script.
 [planned."--method"]
@@ -87,7 +87,7 @@ reading = [
     "Colour marks the TMT plex the sample was measured in.",
     "Bars within a plex are close: a protein missed in a plex is missing from all its samples.",
 ]
-caption = "Made-up data. {n_samples} samples in {n_plex} TMT plexes, each with a pooled reference channel; {n_ids:,} protein groups identified, {n_all:,} quantified in every sample. Counts, no test."
+caption = "Made-up data. {n_samples} samples in {n_plex} [[TMT]] plexes, each with a pooled reference channel; {n_ids:,} protein groups identified, {n_all:,} quantified in every sample. Counts, no test."
 category = "Sample, by plex"
 value = "Protein groups quantified"
 plex = "Plex {n}"
@@ -100,7 +100,7 @@ reading = [
     "A curve crosses the dashed line at its class's median ρ; further right, protein follows RNA more.",
     "ρ is Spearman's, between one gene's RNA and protein across {n_samples} samples.",
 ]
-caption = "Made-up data. Spearman ρ per gene over {n_samples} samples, BH over {n_genes:,} genes; genes per class: {counts}. Kruskal-Wallis across classes: H = {h:.1f}, p = {p}, ε² = {eps:.2f}."
+caption = "Made-up data. Spearman ρ per gene over {n_samples} samples, BH over {n_genes:,} genes; genes per class: {counts}. [[Kruskal-Wallis]] across classes: H = {h:.1f}, p = {p}, ε² = {eps:.2f}."
 x = "RNA-protein correlation"
 y = "Cumulative share of genes"
 median = "median"

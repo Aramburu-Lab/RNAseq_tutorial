@@ -95,6 +95,38 @@ summary = "{shown} of {total} bars shown; median {median}."
 none = "No bar matches these filters."
 noscript = "This shows every bar; turn on JavaScript to filter them."
 
+# The glossary page and the term tooltips (ctx.report.glossary, D-048).
+[glossary]
+title = "Glossary"
+link = "Glossary"
+explain = "Explain: {term}"
+deck = "{n} terms by topic, each with its sources where it gives them."
+topics = "Topics"
+search = "Search"
+count = "{shown} of {total} terms"
+aliases = "Also written:"
+rna_vs_dna = "RNA-seq and DNA-seq:"
+typical = "Typical values:"
+source = "Source:"
+see_also = "See also:"
+unverified = "Not yet verified"
+
+[glossary.categories]
+sequencing = "Sequencing"
+quality = "Read quality"
+library = "Library preparation"
+genome = "Genome and annotation"
+alignment = "Alignment"
+quantification = "Quantification"
+qc_metrics = "QC metrics"
+statistics = "Statistics and plots"
+survival = "Survival analysis"
+function = "Gene sets and function"
+proteomics = "Proteomics"
+data = "Data and archives"
+clinical = "Clinical data"
+tools = "Tools"
+
 [hub]
 rules = "Sanity rules"
 rule = "Rule"

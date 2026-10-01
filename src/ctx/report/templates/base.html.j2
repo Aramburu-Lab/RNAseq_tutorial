@@ -30,6 +30,7 @@
 <a class="skip" href="#main">{{ ui.skip }}</a>
 <header class="topbar"><div class="topbar-inner">
 <p class="brand"><span class="dot" aria-hidden="true"></span>{{ heading.suite }}{% if heading.dataset %} <small>{{ heading.dataset }}</small>{% endif %}</p>
+{% if glossary_href %}<a class="glossary-link" href="{{ glossary_href }}">{{ ui.glossary.link }}</a>{% endif %}
 <button id="ctx-theme-toggle" type="button" aria-label="{{ ui.theme.toggle }}"><span class="t-light">{{ ui.theme.light }}</span><span class="t-sep">/</span><span class="t-dark">{{ ui.theme.dark }}</span></button>
 </div></header>
 <div class="page{% block page_class %}{% endblock %}">
@@ -45,6 +46,8 @@
 </main>
 </div>
 <script type="application/json" id="ctx-templates">{{ templates }}</script>
+{% if tooltips %}<script type="application/json" id="ctx-glossary">{{ tooltips }}</script>
+{% endif %}
 <script>
 {% include "_page.js.j2" %}
 </script>
