@@ -27,6 +27,29 @@ it were reversed.
 
 ---
 
+## D-049 — One gene selection drives M6, M9 and M10: carried in links, never in browser storage
+
+**Date:** 2026-10-01 · **Status:** decided (Rytis's three answers, 2026-10-01); built by GS.1 to GS.10
+
+**Context.** Rytis, 2026-09-30: "The M6, M9, M10 should be flexible and interactive. There should be an option to select a list of genes (maybe selecting them from a table, or in a Volcano plot - like in "Figure 2 Samples on the PCA, beside their labels and QC status") which would then automatically change the M6, M9, M10 shown results". Pages are separate self-contained files opened from disk, at most 15 MB each.
+
+**Options.** Three designs were prototyped and measured in Chrome 138, Edge 154, Chromium 152 and Firefox 156 (Safari untested): (A) the selection in the URL fragment of ordinary links between pages; (B) one selection in browser storage with a bar on every page; (C) one combined gene-explorer page per dataset. Two judges scored them; the plan (scratchpad `genesel/PLAN.md`, outside the repo; the GS items in TODO.md are the record) builds A with C's unthinned volcano, survival checks and symbol rules, and B's entry pages, genes-by-contrasts view and build-list notice.
+
+**Decision.**
+- A gene is its unversioned Ensembl number, with the sign of its raw log2 FC in the source contrast; a page holds one selection.
+- The selection travels in the fragment `#v=1&src=<dataset>:<contrast>&n=<count>&g=<numbers>` (plain decimal, `-` for a down gene), decoded strictly against `n`, rewritten with `history.replaceState` on every change. One definition, `ctx.report.genes`, with its JS twin `ctxSelect`.
+- Browser storage is not used: in Firefox at its default policy each local file has its own storage, and an open M6 tab kept a stale list with no warning. "Open beside" windows follow each change through `postMessage`.
+- Entry pages (Rytis, decision 3): each selection-consuming module writes `outputs/NN_<module>/index.html` on every build, forwarding to its newest page with the fragment; the naming lint exempts that one name in module folders. The kit's link walk reaches them, and a listed module that was not built refuses the kit.
+- M6 recomputes ORA live (Hallmark; direction and background knobs, the trap labelled), reproducing `ctx.function.lite.ora` to within 1.52e-10 relative in p on Step-1. GSEA stays static.
+- M10 (Rytis, decision 1): a Step-1 gene list is scored on TCGA-BRCA tumours, labelled cross-tissue: 1,089 patients and 145 PFI events after CDR redactions. The score is one definition (`ctx.clinical.score`, JS twin) in a fixed order: log2(CPM + 1), int16 storage, GENCODE v36 by unversioned ID, the expression filter, z per gene, the signed mean, scaled to SD 1.
+- M10 (Rytis, decision 2): Cox for a selection's score is fitted live in the page, univariable and adjusted for age and stage, validated against R and Python in tests; a monotone likelihood is refused. This diverges from the M10 plan's "Cox fits precomputed", because an arbitrary selection cannot be precomputed. The per-gene Cox screen stays precomputed.
+- M9: evidence across all contrasts for any tested gene; full cards only for the build's card list, packed to the byte cap; a gene without a card shows the command that builds one.
+- Every live result carries its test, n, adjusted p and effect size; the PDF and SVG show the build list, and the page says when the live selection differs.
+
+**Not done here.** Safari, Windows paths and touch lasso are untested; tabs not opened through Open beside do not update; GSEA, Reactome and the other contrasts' volcanoes are not live; no correction across the lists a student tries, which the page counts and says.
+
+---
+
 ## D-048 — Rytis's draft v3.12 merged: the glossary, term tooltips and the glossary page; three v3.11 prose rules applied
 
 **Date:** 2026-09-30 · **Status:** decided (the draft's rules; the defaults below set by the lead of the merge, open to Rytis)
