@@ -10,7 +10,7 @@ import pytest
 
 from ctx.viz import annotate
 from ctx.viz.save import layout_problems
-from ctx.viz.style import CAPTION_INSET, THEMES, WIDTHS_MM, apply_matplotlib
+from ctx.viz.style import CAPTION_BOTTOM, CAPTION_INSET, THEMES, WIDTHS_MM, apply_matplotlib
 
 CAPTION = (
     "HALLMARK_INTERFERON_ALPHA_RESPONSE in ndn_hsct_early: ES = 0.74, NES = 3.18, nominal "
@@ -32,4 +32,6 @@ def test_caption_stays_on_the_page(column):
 
 
 def test_inset_is_the_one_place_caption_draws_at():
-    assert f"fig.text({CAPTION_INSET}, " in inspect.getsource(annotate.place_caption)
+    # The insets are named once in style; a page's own PDF of a changed view reads them too.
+    assert "fig.text(CAPTION_INSET, CAPTION_BOTTOM, " in inspect.getsource(annotate.place_caption)
+    assert (CAPTION_INSET, CAPTION_BOTTOM) == (0.02, 0.01)

@@ -17,6 +17,8 @@ from ctx.report.marks import plain
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
     AXIS_TITLE_SHARE,
+    CAPTION_BOTTOM,
+    CAPTION_INSET,
     LEGEND_MAX_COLUMNS,
     LINE_SPACING,
     SIZES,
@@ -120,7 +122,8 @@ def place_caption(
 
     # Wrapped as printed: a glossary mark is its display text off the page (D-048).
     caption = wrap(plain(text), caption_chars(width))
-    fig.text(0.02, 0.01, caption, ha="left", va="bottom", fontsize=SIZES["caption"])
+    fig.text(CAPTION_INSET, CAPTION_BOTTOM, caption, ha="left", va="bottom",
+             fontsize=SIZES["caption"])  # fmt: skip
     caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
     rect = (0, caption_inches / height, 1, 1)
     if not handles:

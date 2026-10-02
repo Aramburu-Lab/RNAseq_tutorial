@@ -4,6 +4,10 @@
    the level chosen there, "" standing for all; the median is BarData.lengths()'s rule over the
    rows shown: each category's total when stacked, else each bar. */
 var ctxFilter = {
+  /* Whether any filter is set: the view the PDF and SVG buttons then draw (D-033). */
+  moved: function (chosen) {
+    return Object.keys(chosen).some(function (c) { return chosen[c] !== ""; });
+  },
   /* Indices of the rows shown, in row order. */
   match: function (rows, chosen) {
     var shown = [];

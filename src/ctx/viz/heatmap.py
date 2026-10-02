@@ -14,22 +14,30 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from ctx.viz.annotate import place_caption
+from ctx.viz.annotate import place_caption, wrap
+from ctx.viz.metrics import text_width, wrap_to
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
     BAR_LABEL_ROTATION,
     HEAT,
     HEAT_ALPHAS,
+    LINE_SPACING,
     LINE_WIDTHS,
     MM_PER_INCH,
+    PHONE_PLOT_PX,
     PLOTLY_HEAT_BASE_PX,
     PLOTLY_HEAT_ROW_PX,
+    PLOTLY_MARGIN_PX,
+    PLOTLY_MARKER_PX,
+    PLOTLY_TICK_PX,
+    PLOTLY_TITLE_STANDOFF_PX,
     ROLES,
     SIZES,
     THEMES,
     WIDTHS_MM,
     Theme,
     apply_matplotlib,
+    on_page,
     plotly_steps,
     plotly_templates,
     tint,
@@ -110,7 +118,7 @@ class HeatmapData:
         value: Column with the number a cell stands for (may be null).
         level: Column with the cell's level, a key of ``swatches`` (null draws nothing).
         row_label: What a row is.
-        column_label: What a column is.
+        column_label: What a column is, as hover names it.
         swatches: Every level's colour, in legend order.
         caption: The caption, unwrapped.
         row_order: Rows top to bottom; empty keeps first appearance.
@@ -120,6 +128,10 @@ class HeatmapData:
         row_stats_label: What that number is.
         row_stats_format: Its format spec on the figure; the CSV keeps the number.
         width: ``"single"`` or ``"double"`` column.
+        column_title: The column axis's title, where it says more than ``column_label``:
+            what a column is, how many there are and in what order.
+        row_display: Row to the label its axis prints, with a line break where it wraps, as
+            a band map's metric over its unit and cut-offs; the row itself where absent.
     """
 
     frame: pl.DataFrame
@@ -139,6 +151,8 @@ class HeatmapData:
     row_stats_label: str = ""
     row_stats_format: str = ".2g"
     width: str = "double"
+    column_title: str = ""
+    row_display: Mapping[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -225,17 +239,46 @@ class HeatmapData:
         colours = [to_rgba(s.colour or theme.grid, s.alpha) for s in self.swatches]
         return colours + [to_rgba(c) for t in self.tracks for c in t.colours.values()]
 
+    def _display(self, row: str) -> str:
+        """The label a row's axis prints; a line break where it wraps."""
+        return (self.row_display or {}).get(row, row)
+
+    def _lines(self) -> int:
+        """Lines in the tallest row label: each row is drawn that many lines high."""
+        return max((self._display(r).count("\n") + 1 for r in self.rows_in_order()), default=1)
+
+    def _column_label_length(self, size: float) -> float:
+        """The longest column label set at ``size``, or 0 where columns are left unlabelled.
+
+        A label runs upward, so this is how far it reaches below the cells; estimated at the
+        average glyph it fell 38 px short of a 19-character run name in capitals (2026-10-01).
+        """
+        columns = self.columns_in_order()
+        if len(columns) > HEAT["label_columns"]:
+            return 0.0
+        return max((text_width(c, size) for c in columns), default=0.0)
+
     def _inches(self) -> tuple[float, float]:
         """Width by the column rule; height by the rows drawn and the longest column label.
 
         The rows drawn are capped; a column label runs upward and, unmeasured, squeezed the rows.
         """
         drawn = min(len(self.rows_in_order()), HEAT["max_rows_drawn"]) + len(self.tracks) + GAP
-        columns = self.columns_in_order()
-        labels = max(map(len, columns)) if len(columns) <= HEAT["label_columns"] else 0
-        label_mm = labels * SIZES["tick"] * AVERAGE_CHAR_EM / 72 * MM_PER_INCH
+        label_mm = self._column_label_length(SIZES["tick"]) / 72 * MM_PER_INCH
+        rows_mm = drawn * HEAT["row_mm"] * self._lines()
         return (WIDTHS_MM[self.width] / MM_PER_INCH,
-                (drawn * HEAT["row_mm"] + HEAT["margin_mm"] + label_mm) / MM_PER_INCH)  # fmt: skip
+                (rows_mm + HEAT["margin_mm"] + label_mm) / MM_PER_INCH)  # fmt: skip
+
+    def _column_title(self, width: float) -> str:
+        """The column axis's title, wrapped to the width the cells leave beside the row labels.
+
+        A long title centred under cells pushed right by long row labels ran off the page.
+        """
+        lines = [line for r in self.rows_in_order() for line in self._display(r).split("\n")]
+        labels_pt = max(map(len, lines), default=0) * SIZES["tick"] * AVERAGE_CHAR_EM
+        room = width * 72 - labels_pt
+        return wrap(self.column_title or self.column_label,
+                    max(int(room / (SIZES["axis_label"] * AVERAGE_CHAR_EM)), 12))  # fmt: skip
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme; cells are vector quads.
@@ -261,6 +304,7 @@ class HeatmapData:
                       linewidth=LINE_WIDTHS["band_edge"])  # fmt: skip
         ax.invert_yaxis()
         self._label_axes(ax, labels)
+        ax.set_xlabel(self._column_title(width))
         for spine in ax.spines.values():
             spine.set_visible(False)
         handles = [Patch(facecolor=c, label=s.level) for s, c in zip(self.swatches, colours,
@@ -277,6 +321,7 @@ class HeatmapData:
         cell.
         """
         rows, cols = self.rows_in_order(), self.columns_in_order()
+        labels = [self._display(label) for label in labels]
         shown = labels if len(rows) <= HEAT["label_rows"] else labels[: len(labels) - len(rows)]
         ax.set_yticks(np.arange(len(shown)) + 0.5, shown)
         ax.tick_params(axis="both", length=0)
@@ -284,7 +329,6 @@ class HeatmapData:
             ax.set_xticks(np.arange(len(cols)) + 0.5, cols, rotation=BAR_LABEL_ROTATION)
         else:
             ax.set_xticks([])
-        ax.set_xlabel(self.column_label)
         if self.row_stats is not None and len(rows) <= HEAT["label_rows"]:
             right = ax.secondary_yaxis("right")
             start = len(labels) - len(rows)
@@ -310,7 +354,7 @@ class HeatmapData:
         lookup = {(r, c): (lv, v) for r, c, lv, v in
                   cells.select(self.row, self.column, self.level, self.value).rows()}  # fmt: skip
         z = [[index.get(lookup.get((r, c), (None, None))[0]) for c in cols] for r in rows]
-        text = [[f"{lookup.get((r, c), (None, None))[1]}" for c in cols] for r in rows]
+        text = [[_hover_value(*lookup.get((r, c), (None, None))) for c in cols] for r in rows]
         fig.add_trace(go.Heatmap(
             z=z, x=cols, y=rows, text=text, showscale=False, xgap=0, ygap=0,
             colorscale=plotly_steps([tint(s.colour or light.grid, s.alpha) for s in self.swatches]),
@@ -329,24 +373,94 @@ class HeatmapData:
         for s in self.swatches:
             fig.add_trace(
                 go.Scatter(
-                    x=[None],
-                    y=[None],
-                    mode="markers",
-                    name=s.level,
-                    marker={"symbol": "square", "color": tint(s.colour or light.grid, s.alpha)},
+                    x=[None], y=[None], mode="markers", name=s.level,
+                    marker={"symbol": "square", "size": PLOTLY_MARKER_PX,
+                            "color": tint(s.colour or light.grid, s.alpha)},
                 )
-            )
+            )  # fmt: skip
         order = [*reversed(rows), *reversed([t.name for t in self.tracks])]
+        # Rows are their one-line names, which hover prints; the axis prints each as wrapped.
+        names = [*rows, *(t.name for t in self.tracks)]
+        tick = on_page(SIZES["tick"])
+        labels_px = self._column_label_length(tick)
         fig.update_layout(
             template=plotly_templates()["white"],
-            height=PLOTLY_HEAT_BASE_PX + PLOTLY_HEAT_ROW_PX * (len(rows) + len(self.tracks)),
-            xaxis={"title": {"text": self.column_label}, "showline": False,
-                   "showticklabels": len(cols) <= HEAT["label_columns"]},
+            height=self._page_height(self._lines(), labels_px),
+            xaxis={"title": {"text": self.column_title or self.column_label}, "showline": False,
+                   "showticklabels": len(cols) <= HEAT["label_columns"],
+                   "tickangle": -BAR_LABEL_ROTATION},
             yaxis={"categoryorder": "array", "categoryarray": order, "showline": False,
-                   "showticklabels": len(rows) <= HEAT["label_rows"]},
+                   "showticklabels": len(rows) <= HEAT["label_rows"], "tickmode": "array",
+                   "tickvals": names, "ticktext": [self._shown(n) for n in names]},
             annotations=self._stat_notes(rows),
         )  # fmt: skip
+        if self.column_title:
+            self._title_under(fig, labels_px)
+        if self.row_display:
+            fig.update_layout(meta={"narrow": self._narrow(fig.layout.height, labels_px)})
         return fig
+
+    def _shown(self, row: str, room: float = 0.0) -> str:
+        """A row as the page's axis prints it: its lines, each wrapped to ``room`` px if set."""
+        lines = self._display(row).split("\n")
+        if room:
+            lines = [part for line in lines for part in wrap_to(line, room, on_page(SIZES["tick"]))]
+        return "<br>".join(lines)
+
+    def _page_height(self, lines: int, labels_px: float) -> float:
+        """The page plot's height for rows ``lines`` lines high, the column labels below them.
+
+        A row of wrapped labels is as tall as its lines; column labels run upward, as in the
+        figure files, and the plot grows by the longest, so neither squeezes the cells.
+        """
+        tick = on_page(SIZES["tick"])
+        row_px = PLOTLY_HEAT_ROW_PX if lines == 1 else lines * tick * LINE_SPACING
+        return (
+            PLOTLY_HEAT_BASE_PX
+            + row_px * (len(self.rows_in_order()) + len(self.tracks))
+            + labels_px
+        )
+
+    def _narrow(self, height: float, labels_px: float) -> dict[str, Any]:
+        """The layout the page script swaps in while the plot is too narrow for its row labels.
+
+        At 375 px the band map's two-line labels started up to 132 px left of the plot and
+        lost their unit (2026-10-01). Narrower than ``below`` px, the labels that fit beside
+        the cells, every row label wraps to half a phone's plot and the plot grows to hold it.
+        """
+        tick, rows = on_page(SIZES["tick"]), self.rows_in_order()
+        widest = max(text_width(line, tick) for r in rows for line in self._display(r).split("\n"))
+        columns = min(len(self.columns_in_order()), HEAT["label_columns"])
+        below = widest + PLOTLY_TICK_PX + PLOTLY_MARGIN_PX["l"] + columns * tick * LINE_SPACING
+        text = [self._shown(r, PHONE_PLOT_PX / 2) for r in rows]
+        lines = max(t.count("<br>") + 1 for t in text)
+        grow = self._page_height(lines, labels_px) - self._page_height(self._lines(), labels_px)
+        return {
+            "below": below,
+            "relayout": {
+                "yaxis.ticktext": [*text, *(t.name for t in self.tracks)],
+                "height": height + grow,
+            },
+        }
+
+    def _title_under(self, fig: Any, labels_px: float) -> None:
+        """A long column title, right-aligned under the column labels, wrapped to fit a phone.
+
+        Centred under cells that long row labels push to the right, it ran off the plot and
+        was clipped (Rytis 2026-10-01). It sits below the longest column label as set, plus
+        the tick, plotly's own gap before a label and the title's standoff.
+        """
+        size = on_page(SIZES["axis_label"])
+        room = PHONE_PLOT_PX - PLOTLY_MARGIN_PX["l"] - PLOTLY_MARGIN_PX["r"]
+        lines = wrap_to(self.column_title, room, size)
+        drop = labels_px + PLOTLY_TICK_PX + 2 * PLOTLY_TITLE_STANDOFF_PX
+        title_px = len(lines) * size * LINE_SPACING
+        fig.add_annotation(
+            text="<br>".join(lines), xref="paper", x=1, xanchor="right", yref="paper",
+            y=0, yanchor="top", yshift=-drop, align="right", showarrow=False, font={"size": size},
+        )  # fmt: skip
+        fig.update_layout(xaxis_title_text="", height=fig.layout.height + title_px,
+                          margin_b=PLOTLY_MARGIN_PX["b"] + drop + title_px)  # fmt: skip
 
     def _stat(self, row: str) -> str:
         """A row's statistic as the figure prints it; empty where it has none."""
@@ -359,3 +473,13 @@ class HeatmapData:
             return []
         return [{"x": 1.0, "xref": "paper", "xanchor": "left", "y": r, "yref": "y",
                  "text": self._stat(r), "showarrow": False} for r in rows]  # fmt: skip
+
+
+def _hover_value(level: str | None, value: Any) -> str:
+    """A cell's last hover line: its value, or its level where it has none.
+
+    A band map's cells carry a band and no value, and the line read "None" (2026-10-01).
+    """
+    if value is not None:
+        return f"{value}"
+    return "" if level is None else str(level)

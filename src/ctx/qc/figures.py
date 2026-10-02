@@ -9,6 +9,7 @@ from scipy.stats import median_abs_deviation
 
 from ctx.de.run import SEX_X, SEX_Y
 from ctx.qc import Fastp
+from ctx.qc.registry import STATUS_BANDS as FASTQC_BANDS
 from ctx.qc.registry import Metric, Registry
 from ctx.report import text
 from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES, Mark, SurfaceData
@@ -238,26 +239,60 @@ def strip(
 STRIP_SINGLE_MAX = 4
 
 
+def band_label(metric: Metric) -> tuple[str, ...]:
+    """A band map's row in its lines: the metric's title, then its unit and band cut-offs.
+
+    The rows had titles alone, so the map gave no unit and no cut-off (Rytis 2026-10-01). The
+    table and hover join the lines with a space; the axes print them one under the other.
+    """
+    if metric.kind == "status":
+        bands = ", ".join(text.fill(PAGE, "figures.band_map.verdict", verdict=v, band=b)
+                          for v, b in FASTQC_BANDS.items())  # fmt: skip
+    else:
+        # Metric.band() reads every direction but "higher" as lower. One cut-off where the
+        # source gives one: no value is usable, the rest is bad.
+        side = "higher" if metric.direction == "higher" else "lower"
+        key = side + ("" if metric.good == metric.usable else "_usable")
+        bands = text.fill(PAGE, f"figures.band_map.cuts.{key}", good=_cut(metric.good),
+                          usable=_cut(metric.usable))  # fmt: skip
+    return tuple(line.format(title=metric.title, unit=metric.unit, bands=bands)
+                 for line in text.words(PAGE, "figures.band_map.row"))  # fmt: skip
+
+
+def _cut(value: float | None) -> str:
+    """A band cut-off as a reader reads it: thousands grouped, no exponent, no trailing zero."""
+    return f"{value:,.10g}"
+
+
 def band_map(values: pl.DataFrame, registry: Registry, key: str) -> HeatmapData | None:
-    """Every unit's absolute band on every metric that has one; None where none has."""
+    """Every unit's absolute band on every metric that has one; None where none has.
+
+    A column per sample or run, in name order; a row per metric, labelled with its unit and
+    its cut-offs.
+    """
     metrics = [m for m in registry.metrics.values()
                if m.column in values.columns and (m.banded or m.kind == "status")]  # fmt: skip
     if not metrics:
         return None
     none = text.word(PAGE, "figures.band_map.none")
-    rows = [(unit, m.title, m.band(row[m.column]) or none)
+    lines = {m.id: band_label(m) for m in metrics}
+    rows = [(unit, " ".join(lines[m.id]), m.band(row[m.column]) or none)
             for row in values.iter_rows(named=True) for m in metrics
             for unit in (row[key],)]  # fmt: skip
     frame = pl.DataFrame(rows, schema=[key, "metric", "band"], orient="row").with_columns(
         value=pl.lit(None, pl.Float64))  # fmt: skip
+    order = tuple(sorted(str(u) for u in values[key].unique()))
+    unit = text.word(PAGE, f"figures.band_map.unit.{key}")
     return HeatmapData(
         frame=frame, row="metric", column=key, value="value", level="band",
         columns={key: ("none", text.word(PAGE, f"columns.{key}")),
                  "metric": ("none", text.word(PAGE, "figures.band_map.metric")),
                  "band": ("none", text.word(PAGE, "figures.band_map.band")),
                  "value": ("none", text.word(PAGE, "figures.band_map.value"))},
-        row_label=text.word(PAGE, "figures.band_map.metric"),
-        column_label=text.word(PAGE, f"columns.{key}"),
+        row_label=text.word(PAGE, "figures.band_map.row_label"),
+        column_label=text.word(PAGE, f"figures.band_map.hover.{key}"),
+        column_title=text.fill(PAGE, "figures.band_map.x", unit=unit, n=len(order)),
+        column_order=order, row_display={" ".join(v): "\n".join(v) for v in lines.values()},
         swatches=(*(Swatch(b, BAND_COLOURS[b]) for b in ("good", "usable", "bad")),
                   Swatch(none, None)),
         caption=text.fill(PAGE, "figures.band_map.caption", n=values.height, m=len(metrics)),

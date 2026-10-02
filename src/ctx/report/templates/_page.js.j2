@@ -1,6 +1,7 @@
 {% include "_calls.js.j2" %}
 {% include "_brush.js.j2" %}
 {% include "_filter.js.j2" %}
+{% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
@@ -134,18 +135,146 @@
     guard("filter", function () { filtering(form); });
   });
 
+  /* A plot wider than its box scrolls inside it: say so above the plot, and let the keyboard
+     reach the box, while it does. */
+  guard("scroll", function () {
+    document.querySelectorAll(".fig-plot, .fig-below").forEach(function (box) {
+      var hint = box.querySelector(".scroll-hint");
+      if (!hint) return;
+      function check() {
+        var over = box.scrollWidth > box.clientWidth + 1;
+        hint.hidden = !over;
+        if (over) box.setAttribute("tabindex", "0"); else box.removeAttribute("tabindex");
+      }
+      if (window.ResizeObserver) new ResizeObserver(check).observe(box);
+      window.addEventListener("resize", check);
+      /* plotly redraws a plot at its box's width a moment after the window changes, which
+         resizes no box: opened alone and narrowed, the hint stayed over a plot that fit. */
+      box.querySelectorAll(".js-plotly-plot").forEach(function (div) {
+        if (div.on) div.on("plotly_afterplot", check);
+      });
+      check();
+    });
+  });
+
+  /* A plot that names a narrow layout (layout.meta.narrow: a band map's row labels wrapped for
+     a phone, and the height they need) takes it while it is narrower than narrow.below px,
+     and its own again when wider. */
+  guard("narrow", function () {
+    if (!window.Plotly) return;
+    plots().forEach(function (div) {
+      var narrow = div.layout.meta && div.layout.meta.narrow;
+      if (!narrow) return;
+      var keys = Object.keys(narrow.relayout), wide = {}, state = null;
+      keys.forEach(function (k) {
+        wide[k] = ctxExport.plain(k.split(".").reduce(function (o, p) { return o && o[p]; }, div.layout));
+      });
+      function apply() {
+        var width = div.clientWidth, on = width < narrow.below;
+        if (!width || on === state) return;
+        state = on;
+        var update = on ? narrow.relayout : wide;
+        /* The div and plotly's wrapper keep the height they were written with; both take the
+           plot's new one. */
+        if ("height" in update) {
+          [div, div.parentElement].forEach(function (e) {
+            if (e.style.height) e.style.height = update.height + "px";
+          });
+        }
+        /* plotly pins the width it drew at when a relayout sets the height, and then never
+           redraws the plot at its box's width again: autosize, and no width, keep it free. */
+        Plotly.relayout(div, Object.assign({ autosize: true, width: null }, update));
+      }
+      if (window.ResizeObserver) new ResizeObserver(apply).observe(div);
+      window.addEventListener("resize", apply);
+      apply();
+    });
+  });
+
+  /* An x-axis title wider than the room under its plot wraps there, from its own words, so a
+     phone never clips one; on a wider screen it is one line again. The title as built stays in
+     layout.meta.xtitle, which the export draws: a view's files take the figure files' width,
+     never the screen's. */
+  guard("titles", function () {
+    if (!window.Plotly) return;
+    var canvas = document.createElement("canvas").getContext("2d");
+    plots().forEach(function (div) {
+      var original = null;
+      function fit() {
+        var full = div._fullLayout, axis = full && full.xaxis;
+        if (!axis || !axis.title || !axis.title.text || div.offsetParent === null) return;
+        if (original === null) {
+          original = String(div.layout.xaxis.title.text || "");
+          div.layout.meta = Object.assign({}, div.layout.meta, { xtitle: original });
+        }
+        var size = full._size, centre = size.l + size.w / 2;
+        var room = 2 * Math.min(centre, full.width - centre);
+        canvas.font = axis.title.font.size + "px " + axis.title.font.family;
+        var lines = ctxExport.wrap(original.replace(/<br>/g, " "), function (line) {
+          return canvas.measureText(line).width <= room;
+        });
+        var text = canvas.measureText(original).width <= room ? original : lines.join("<br>");
+        if (text !== axis.title.text) Plotly.relayout(div, { "xaxis.title.text": text });
+      }
+      div.on("plotly_afterplot", function () { window.requestAnimationFrame(fit); });
+      fit();
+    });
+  });
+
   /* Linked brushing: ctxBrush holds the logic; this block paints the samples a lasso or a tap
      names, in both traces, and keeps the live line in step. */
   document.querySelectorAll("form.brush").forEach(function (form) {
     guard("brush", function () { brushing(form); });
   });
 
+  /* A figure's PDF and SVG buttons: the figure files while its controls are at their
+     defaults; once one is moved, the view as set, drawn by ctxExport. Each control's wiring
+     calls the switch this returns with whether the view is moved (D-033). Moved, a button
+     links no file, so no middle click, new tab or "Save link as" reaches the default file
+     under a label that names the view. */
+  function exporting(fig, cfg) {
+    var links = Array.prototype.slice.call(fig.querySelectorAll("a[data-export]"));
+    var moved = false;
+    if (!cfg.export || !window.jspdf || !links.length) return function () {};
+    var reference = links.map(function (a) {
+      return [a.textContent, a.getAttribute("title"), a.getAttribute("href")];
+    });
+    links.forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        if (!moved) return;
+        e.preventDefault();
+        var ext = a.getAttribute("data-export");
+        ctxExport.draw(fig, cfg, ext).then(function (blob) {
+          ctxExport.save(blob, cfg.export.file + "_view." + ext);
+        }, function (err) { if (window.console) console.error("ctx page: export", err); });
+      });
+      a.addEventListener("keydown", function (e) {
+        if (moved && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); a.click(); }
+      });
+    });
+    return function (on) {
+      moved = on;
+      links.forEach(function (a, i) {
+        a.textContent = on ? a.getAttribute("data-view") : reference[i][0];
+        a.setAttribute("title", on ? a.getAttribute("data-view-title") : reference[i][1]);
+        if (on) {
+          a.removeAttribute("href"); a.setAttribute("role", "button"); a.setAttribute("tabindex", "0");
+        } else {
+          a.setAttribute("href", reference[i][2]); a.removeAttribute("role"); a.removeAttribute("tabindex");
+        }
+      });
+    };
+  }
+
   function brushing(form) {
     var fig = form.closest(".fig");
     var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
     var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
-    var div = fig.querySelector(".js-plotly-plot");
+    /* The scatter beside the reading guide; the parallel sets under both, across the card. */
+    var div = fig.querySelector(".fig-plot .js-plotly-plot");
+    var sets = fig.querySelector(".fig-below .js-plotly-plot") || div;
     var summary = fig.querySelector(".brush-summary");
+    var mark = exporting(fig, cfg);
     var painted = ctxBrush.start(rows.length);
     /* A painted sample shows its paint at full strength: the lasso's own dimming of the
        samples it missed, and its outline, go once the paint is laid. */
@@ -153,8 +282,9 @@
       Plotly.restyle(div, { "marker.color": [ctxBrush.markers(painted, cfg)],
                             selectedpoints: [null] }, [cfg.scatter]);
       Plotly.relayout(div, { selections: [] });
-      Plotly.restyle(div, { "line.color": [ctxBrush.codes(painted)] }, [cfg.parcats]);
+      Plotly.restyle(sets, { "line.color": [ctxBrush.codes(painted)] }, [cfg.parcats]);
       summary.textContent = ctxBrush.summary(painted, rows, cfg);
+      mark(ctxBrush.moved(painted));
     }
     function paint(event) {
       var picked = ctxBrush.indices(event);
@@ -164,6 +294,7 @@
     }
     div.on("plotly_selected", paint);
     div.on("plotly_click", paint);
+    if (sets !== div) sets.on("plotly_click", paint);
     form.querySelector("[data-clear]").addEventListener("click", function () {
       painted = ctxBrush.clear(painted);
       draw();
@@ -179,6 +310,7 @@
     var summary = fig.querySelector(".filter-summary");
     var selects = Array.prototype.slice.call(form.querySelectorAll("select[data-column]"));
     var axis = cfg.horizontal ? "yaxis" : "xaxis", along = cfg.horizontal ? "x" : "y";
+    var mark = exporting(fig, cfg);
     var traces = cfg.traces.map(function (_, i) { return i; });
     function update() {
       var chosen = {};
@@ -198,6 +330,7 @@
       Plotly.relayout(div, layout);
       summary.textContent = ctxFilter.summary(view, cfg, summary.getAttribute("data-template"),
                                               summary.getAttribute("data-none"));
+      mark(ctxFilter.moved(chosen));
     }
     form.addEventListener("change", update);
     form.addEventListener("submit", function (e) { e.preventDefault(); });
@@ -214,6 +347,7 @@
     var summary = fig.querySelector(".calls-summary");
     var fc = form.elements.fc, unit = form.elements.fc_unit;
     var basis = form.elements.basis, cutoff = form.elements.cutoff;
+    var mark = exporting(fig, cfg);
     function height(p) { return -Math.log10(Math.max(p, cfg.p_floor)); }
     /* The cutoff lines span the whole plot, thinned points included, as drawn on load. */
     var span = div.data[cfg.cutoff_lines[0]].y, across = div.data[cfg.cutoff_lines[2]].x;
@@ -267,6 +401,7 @@
         li.textContent = fill(cfg.reading[Number(li.getAttribute("data-reading"))], values);
       });
       if (summary) summary.textContent = fill(cfg.summary, values);
+      mark(ctxCalls.moved(cfg, t, column, alpha));
     }
     unit.addEventListener("change", function () {
       fc.value = ctxCalls.switchUnit(state, fc.value, unit.value);

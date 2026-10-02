@@ -3,8 +3,11 @@
 On the page, a lasso on the scatter or a tap on a category of the parallel sets paints those
 samples in the picked colour, in both views at once, and a live line counts what is painted
 (``templates/_brush.js.j2``, whose logic ``tests/test_page_script.py`` runs under node). The
-PDF and SVG draw the parallel sets as vector bands (``FlowData``); the scatter is its own
-figure. ``static()`` and ``interactive()`` read the same ``LinkedData``.
+scatter sits beside the reading guide and the parallel sets under both, across the figure
+card: two plotly figures, ``interactive()`` and ``below()`` (Rytis 2026-10-01). The figure
+files draw the parallel sets as vector bands (``FlowData``); painted, the page draws both
+views into its own PDF and SVG. ``static()``, ``interactive()`` and ``below()`` read the same
+``LinkedData``.
 """
 
 from collections.abc import Mapping
@@ -15,20 +18,28 @@ import polars as pl
 
 from ctx.viz.axes import axis_title
 from ctx.viz.flow import FlowData, Node
+from ctx.viz.metrics import text_width
 from ctx.viz.scatter import FLOAT_HOVER
 from ctx.viz.style import (
     DATA_COLOURS,
     MAX_CATEGORIES,
+    PAGE_PX_PER_PT,
     PLOTLY_HEIGHT_PX,
+    PLOTLY_MARGIN_PX,
     PLOTLY_MARKER_PX,
+    PLOTLY_PARCATS,
     POINT_ALPHA,
+    SIZES,
     THEMES,
     Theme,
+    figure_inches,
+    on_page,
     plotly_steps,
     plotly_templates,
 )
 
-# The scatter over the top of the plot, the parallel sets under it, as shares of its height.
+# A page's PDF and SVG of a painted view draw the scatter over the parallel sets, as shares
+# of the plot's height.
 SCATTER_DOMAIN, PARCATS_DOMAIN = (0.58, 1.0), (0.0, 0.42)
 
 
@@ -132,16 +143,25 @@ class LinkedData:
         """The parallel sets, drawn as vector bands; see ``flow()``."""
         return self.flow().static(theme)
 
+    def inches(self) -> tuple[float, float]:
+        """The size of a page's own PDF and SVG of a painted view: both views and a caption."""
+        return figure_inches(self.width, "linked")
+
     def controls(self) -> dict[str, Any]:
-        """What the page script needs: the traces, the paint colours and the live line."""
+        """What the page script needs: the traces, the paint colours and the live line.
+
+        The scatter is trace ``scatter`` of the figure beside the reading guide, the parallel
+        sets trace ``parcats`` of the one under it.
+        """
         return {
-            "kind": "brush", "scatter": 0, "parcats": 1, "reference": THEMES["white"].reference,
+            "kind": "brush", "scatter": 0, "parcats": 0, "reference": THEMES["white"].reference,
             "colours": list(DATA_COLOURS), "names": list(self.names), "summary": self.summary,
             "empty": self.empty, "detail": self.detail,
+            "above": list(SCATTER_DOMAIN), "below": list(PARCATS_DOMAIN),
         }  # fmt: skip
 
     def interactive(self) -> Any:
-        """The scatter over the parallel sets; the page script paints both.
+        """The scatter; the page script paints it and the parallel sets of ``below()``.
 
         Returns:
             A plotly Figure with the light template; the page switches themes.
@@ -162,18 +182,84 @@ class LinkedData:
             customdata=self.frame.select(self.hover).rows() if self.hover else None,
             marker={"color": [reference] * n, "size": PLOTLY_MARKER_PX, "opacity": POINT_ALPHA},
         ))  # fmt: skip
-        palette = [reference, *DATA_COLOURS]
-        fig.add_trace(go.Parcats(
-            domain={"y": list(PARCATS_DOMAIN)}, arrangement="freeform", hoveron="color",
-            dimensions=[{"label": label, "values": self.frame[c].cast(pl.String).to_list()}
-                        for c, label in zip(self.dimensions, self.dimension_labels, strict=True)],
-            line={"color": [0] * n, "cmin": -0.5, "cmax": len(palette) - 0.5,
-                  "colorscale": plotly_steps(palette), "shape": "hspline"},
-        ))  # fmt: skip
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["linked"],
             dragmode="lasso",
             xaxis={"title": {"text": x_title}},
-            yaxis={"title": {"text": y_title}, "domain": list(SCATTER_DOMAIN)},
+            yaxis={"title": {"text": y_title}},
         )  # fmt: skip
         return fig
+
+    def below(self) -> Any:
+        """The parallel sets, one sample a line, grey until painted; drawn across the card.
+
+        Returns:
+            A plotly Figure with the light template; the page switches themes.
+        """
+        import plotly.graph_objects as go  # noqa: PLC0415 - heavy; imported after the profile
+
+        palette = [THEMES["white"].reference, *DATA_COLOURS]
+        fig = go.Figure(go.Parcats(
+            arrangement="freeform", hoveron="color",
+            dimensions=[{"label": label, "values": self.frame[c].cast(pl.String).to_list()}
+                        for c, label in zip(self.dimensions, self.dimension_labels, strict=True)],
+            line={"color": [0] * self.frame.height, "cmin": -0.5, "cmax": len(palette) - 0.5,
+                  "colorscale": plotly_steps(palette), "shape": "hspline"},
+        ))  # fmt: skip
+
+        margin = self.sides(on_page(SIZES["tick"]), PLOTLY_MARGIN_PX)
+        fig.update_layout(template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["parcats"],
+                          margin=margin, meta={"least_width": self._least(margin)})  # fmt: skip
+        return fig
+
+    def _widest(self, column: str, size: float) -> float:
+        """The widest level of a dimension, set at ``size``."""
+        return max(text_width(str(v), size) for v in self.frame[column].unique())
+
+    def sides(self, size: float, margin: Mapping[str, float]) -> dict[str, float]:
+        """Left and right margins that hold the outer dimensions' levels, set at ``size``.
+
+        plotly sets the first dimension's levels left of its bars and the last's right of
+        them, outside the plot, where a margin too narrow cut them off.
+        """
+        return {"l": self._widest(self.dimensions[0], size) + margin["l"],
+                "r": self._widest(self.dimensions[-1], size) + margin["r"]}  # fmt: skip
+
+    def _least(self, margin: Mapping[str, float]) -> list[list[float]]:
+        """The narrowest plot that keeps its titles and levels a gap apart, at any zoom.
+
+        The gap, ``PLOTLY_PARCATS`` gap_px, lies between neighbouring dimension titles and
+        between each level and the bar before it. plotly spaces the bars evenly, so every step
+        takes the widest one needs. Each title is centred on its bar, and a middle dimension's
+        levels end left of its bar (the last one's start right of it, in the margin). At 375 px
+        a phone squeezed four titles into 191 px and they ran into each other; the page draws
+        the parallel sets no narrower than this and scrolls them sideways. Text, the gap and
+        the margins grow with a page's zoom, plotly's bars, insets and label offsets do not:
+        opened alone at twice the type, the demo's sets need 1,392 px, not twice 786 (Rytis
+        2026-10-02, the width capped), where Chromium measured 32.2 px from the nearest level to
+        the bar before it (2026-10-02).
+
+        Returns:
+            [scaled, fixed] px pairs, one per title step and per middle dimension's levels;
+            at zoom s the plot needs the largest s * scaled + fixed.
+        """
+        title, tick, keep = on_page(SIZES["axis_label"]), on_page(SIZES["tick"]), PLOTLY_PARCATS
+        titles = [text_width(label, title) for label in self.dimension_labels]
+        needs = [
+            ((left + right) / 2, 0.0) for left, right in zip(titles[:-1], titles[1:], strict=True)
+        ]
+        needs += [(self._widest(c, tick), keep["label_px"] + keep["bar_px"])
+                  for c in self.dimensions[1:-1]]  # fmt: skip
+        steps, sides = len(titles) - 1, margin["l"] + margin["r"]
+        bars = 2 * keep["inset_px"] + keep["bar_px"]
+        return [[sides + steps * (text + keep["gap_px"]), bars + steps * plotly]
+                for text, plotly in needs]  # fmt: skip
+
+    def export_layers(self) -> dict[str, Any]:
+        """The parallel sets' outer margins at the figure files' sizes, in pt.
+
+        A painted view's PDF and SVG draw the scatter's layout; without these, levels longer
+        than its margin ran off the page (review, 2026-10-01).
+        """
+        pt = {side: px / PAGE_PX_PER_PT for side, px in PLOTLY_MARGIN_PX.items()}
+        return {"sides": self.sides(SIZES["tick"], pt)}

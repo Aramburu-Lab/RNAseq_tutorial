@@ -5,7 +5,7 @@ Sizes, fonts, line widths, ticks and points are those of the Candida Ribo-seq fi
 CONVENTIONS.md (Figures).
 """
 
-from collections.abc import Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -57,12 +57,22 @@ PX_PER_PT = 96 / 72
 # A plot on the page draws its text, points and marks 25 % larger than the figure file does
 # (Rytis 2026-09-30); the PDF and SVG keep the journal sizes above.
 PAGE_SCALE = 1.25
+# Page px per figure pt of a mark: a point drawn at d pt in the PDF is d times this on the page,
+# and a page's own PDF of a changed view divides by it again.
+PAGE_PX_PER_PT = PX_PER_PT * PAGE_SCALE
 # Plotly marker diameter in pixels: MARKER_SIZE on screen, at the page's scale.
-PLOTLY_MARKER_PX = MARKER_SIZE * PX_PER_PT * PAGE_SCALE
+PLOTLY_MARKER_PX = MARKER_SIZE * PAGE_PX_PER_PT
+# "Open alone" draws a figure at twice its page size, a uniform zoom of its layout height,
+# every font, marker and line (Rytis 2026-10-01); zoom() applies it. Its width is twice the
+# page's or its box's, whichever is less, so nothing scrolls sideways (Rytis 2026-10-02).
+ALONE_SCALE = 2.0
 # Panel letters: bold capitals at the top left, nudged up by dy_pt (no figure has panels yet).
 PANEL_LABEL = {"size": SIZES["panel"], "weight": "bold", "dx_pt": 0.0, "dy_pt": 2.0}
 WIDTHS_MM = {"single": 85.0, "double": 170.0}
-ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1, "contour": 1.1}
+# "linked": a page's own PDF and SVG of a painted linked view, the scatter over the parallel
+# sets and a caption; the figure files draw the parallel sets alone, as "flow".
+ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1, "contour": 1.1,
+          "linked": 1.8}  # fmt: skip
 # Point shapes for a second category, in level order: (matplotlib, plotly).
 MARKERS = (
     ("o", "circle"),
@@ -83,6 +93,10 @@ PLOTLY_HEAT_ROW_PX, PLOTLY_HEAT_BASE_PX = 18, 220
 # label_share: the most of a flow's height its labels and gaps may take; the rest is bars.
 FLOW = {"node": 0.02, "label_room": 0.3, "pad": 0.01, "label_share": 0.6}
 PLOTLY_FLOW = {"node_px": 16, "pad_px": 18}
+# plotly's own parallel sets, measured in Chromium (2026-10-01): each dimension a 16 px bar, the
+# outer bars 40 px inside the plot, a category label 5 px from its bar. "gap" is the least
+# space this project keeps between two dimension titles, or a label and the bar before it.
+PLOTLY_PARCATS = {"bar_px": 16, "inset_px": 40, "label_px": 5, "gap_px": 16}
 # A density's outer highest-density region is dashed, its inner one solid.
 DENSITY_DASH: dict[str, tuple[Literal["-", "--"], Literal["solid", "dash"]]] = {
     "inner": ("-", "solid"), "outer": ("--", "dash"),
@@ -97,6 +111,9 @@ AVERAGE_CHAR_EM = 0.55
 # The caption's inset from each side, as a share of the figure's width: annotate.place_caption
 # draws it at x = 0.02 (tests/test_caption_fit.py holds the two equal).
 CAPTION_INSET = 0.02
+# Its inset from the bottom, as a share of the figure's height; a page's own PDF and SVG of a
+# changed view draw their caption at the same insets.
+CAPTION_BOTTOM = 0.01
 # Above this many features a box plot takes the double column: at 9 pt the p and r labels of
 # 5 features overlap in 85 mm and those of 4 do not (measured 2026-09-29).
 SINGLE_COLUMN_MAX_FEATURES = 4
@@ -200,15 +217,45 @@ LAYOUT = {
     "topbar": "60px", "topbar-blur": "8px", "dot": "11px",
     # A glossary icon's target, WCAG 2.2's minimum target size (2.5.8), and its tooltip's width.
     "hit": "24px", "tip": "352px",
+    # A figure card's padding, and the gap between its plot and its reading guide.
+    "fig-pad": "24px", "fig-gap": "16px",
 }  # fmt: skip
+
+
+def _px(token: str) -> float:
+    """A LAYOUT length in px, as a number."""
+    return float(LAYOUT[token].removesuffix("px"))
+
+
+# The width a module page gives a plot at its full layout: beside the reading guide, or across
+# the figure card under it (a linked view's parallel sets), inside the card's padding and its
+# border of one rule. "Open alone" draws a figure at ALONE_SCALE times this width where the
+# window leaves room for it, so the zoom is the same across as up and down.
+_CARD_PX = _px("content") - 2 * (_px("fig-pad") + _px("rule"))
+PAGE_PLOT_PX = {"across": _CARD_PX, "beside": _CARD_PX - _px("reading") - _px("fig-gap")}
+# The widest a page draws a plot: across the card, opened alone in a window wide enough.
+LARGEST_PLOT_PX = max(PAGE_PLOT_PX.values()) * ALONE_SCALE
+# A page draws a line through the points it needs and no more: none of the line's own points
+# lies further than this from the line drawn, in px, at the largest size a page draws the plot
+# (Rytis 2026-10-01: the M5 dispersion trend carried 12,796 points on Step-1). The figure files
+# draw every point.
+LINE_TOLERANCE_PX = 0.25
+# The narrowest plot a page draws: a 375 px phone, less its gutters and a card's narrow padding
+# (--space-3 each side) and border. A long axis title wraps to it, so no page clips one.
+PHONE_PLOT_PX = 375 - 2 * _px("gutter") - 2 * (SPACE_PX[2] + _px("rule"))
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640
+# "linked": the scatter beside the reading guide; "parcats": its parallel sets under both.
 PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow": 460,
-                    "contour": 460, "linked": 820}  # fmt: skip
+                    "contour": 460, "linked": 460, "parcats": 420}  # fmt: skip
 # Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed
 PLOTLY_TICK_PX, PLOTLY_TITLE_STANDOFF_PX = 4, 8
+# A legend key's length: plotly's own default and least, named so that a figure opened alone
+# draws it twice as long (zoom()). plotly draws a legend's marker at most 16 px across, so a
+# key of the page's 10 px points reaches 16 px alone, not 20.
+PLOTLY_LEGEND_KEY_PX = 30
 TRANSPARENT = "rgba(0,0,0,0)"
 # Dash of a threshold line, in both renderers.
 THRESHOLD_DASH: tuple[Literal["--"], Literal["dash"]] = ("--", "dash")
@@ -222,6 +269,17 @@ DASHES: tuple[tuple[MplDash, str], ...] = (
     ("solid", "solid"), ("dashed", "dash"), ("dotted", "dot"), ("dashdot", "dashdot"),
 )  # fmt: skip
 MAX_DISTINCT = len(LINE_COLOURS) * len(DASHES)
+# Each dash as matplotlib draws it, on and off lengths in pt per pt of line width (its own
+# defaults). apply_matplotlib sets them, and a page's own PDF and SVG of a changed view draw
+# plotly's named dashes with them, where plotly drew "dash" 9 on 9 off and "dot" 3 on 3 off.
+DASH_PATTERNS: dict[MplDash, tuple[float, ...]] = {
+    "dashed": (3.7, 1.6), "dotted": (1.0, 1.65), "dashdot": (6.4, 1.6, 1.0, 1.6),
+}  # fmt: skip
+
+
+def plotly_dashes() -> dict[str, tuple[float, ...]]:
+    """Each plotly dash name to its pattern in pt per pt of line width (``DASH_PATTERNS``)."""
+    return {plotly: DASH_PATTERNS[mpl] for mpl, plotly in DASHES if mpl in DASH_PATTERNS}
 
 
 def distinct_styles(levels: Sequence[str]) -> dict[str, tuple[str, tuple[MplDash, str]]]:
@@ -347,6 +405,9 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
             "grid.linewidth": LINE_WIDTHS["axes"],
             "patch.linewidth": LINE_WIDTHS["box"],
             "lines.markeredgewidth": LINE_WIDTHS["marker_edge"],
+            "lines.dashed_pattern": list(DASH_PATTERNS["dashed"]),
+            "lines.dotted_pattern": list(DASH_PATTERNS["dotted"]),
+            "lines.dashdot_pattern": list(DASH_PATTERNS["dashdot"]),
             "text.color": theme.ink,
             "axes.labelcolor": theme.ink,
             "axes.edgecolor": theme.ink,
@@ -364,17 +425,60 @@ def apply_matplotlib(theme: Theme, fonts: tuple[str, ...] = FONT_CHAIN) -> None:
     )
 
 
-def _plotly_axis(theme: Theme) -> dict[str, Any]:
+def _plotly_axis(theme: Theme, size: Callable[[float], float], tick: float,
+                 standoff: float) -> dict[str, Any]:  # fmt: skip
     """Axes as the static figures draw them: ink lines and ticks, no grid, room for titles."""
-    small = {"size": on_page(SIZES["tick"]), "color": theme.ink}
+    small = {"size": size(SIZES["tick"]), "color": theme.ink}
     return {
         "showgrid": False, "showline": True, "linecolor": theme.ink,
-        "linewidth": LINE_WIDTHS["axes"], "ticks": "outside", "ticklen": PLOTLY_TICK_PX,
+        "linewidth": LINE_WIDTHS["axes"], "ticks": "outside", "ticklen": tick,
         "tickcolor": theme.ink, "tickwidth": LINE_WIDTHS["axes"], "tickfont": small,
         "zeroline": False, "automargin": True,
-        "title": {"font": {"size": on_page(SIZES["axis_label"]), "color": theme.ink},
-                  "standoff": PLOTLY_TITLE_STANDOFF_PX},
+        "title": {"font": {"size": size(SIZES["axis_label"]), "color": theme.ink},
+                  "standoff": standoff},
     }  # fmt: skip
+
+
+def _plotly_template(theme: Theme, size: Callable[[float], float], tick: float,
+                     standoff: float, margin: Mapping[str, float]) -> dict[str, Any]:  # fmt: skip
+    """One plotly template, built on ``plotly_white``, its text sizes from ``size(pt)``."""
+    import plotly.io as pio  # noqa: PLC0415 - heavy; imported after the runtime profile
+
+    template: dict[str, Any] = pio.templates["plotly_white"].to_plotly_json()
+    small = {"size": size(SIZES["tick"]), "color": theme.ink}
+    template["layout"].update(
+        {
+            "font": {
+                "family": ", ".join([*FONT_CHAIN, "sans-serif"]),
+                "size": size(SIZES["base"]),
+                "color": theme.ink,
+            },
+            "colorway": list(DATA_COLOURS),
+            "paper_bgcolor": TRANSPARENT,
+            "plot_bgcolor": TRANSPARENT,
+            "margin": dict(margin),
+            "legend": {"orientation": "h", "x": 0, "xanchor": "left", "y": 1.02,
+                       "yanchor": "bottom", "font": small, "bgcolor": TRANSPARENT,
+                       "bordercolor": theme.ink, "itemwidth": PLOTLY_LEGEND_KEY_PX,
+                       "title": {"text": ""}},
+            "hoverlabel": {"bgcolor": theme.background, "bordercolor": theme.grid,
+                           "font": {**small, "family": ", ".join(FONT_CHAIN)},
+                           "align": "left"},
+            "modebar": {"bgcolor": TRANSPARENT, "color": theme.reference,
+                        "activecolor": theme.ink},
+            "annotationdefaults": {"font": small, "arrowcolor": theme.ink},
+            "shapedefaults": {"line": {"color": theme.reference}},
+            "xaxis": _plotly_axis(theme, size, tick, standoff),
+            "yaxis": _plotly_axis(theme, size, tick, standoff),
+        }
+    )  # fmt: skip
+    # A parallel-sets view titles its dimensions as axes and labels its categories as ticks;
+    # plotly's own default drew the categories at 1/1.2 of the base size.
+    template["data"]["parcats"] = [{
+        "labelfont": {"size": size(SIZES["axis_label"]), "color": theme.ink},
+        "tickfont": small,
+    }]  # fmt: skip
+    return template
 
 
 def plotly_templates() -> dict[str, Any]:
@@ -383,39 +487,73 @@ def plotly_templates() -> dict[str, Any]:
     Backgrounds are transparent, so a figure takes the page's colour in either theme; the
     page's toggle swaps these templates with ``Plotly.relayout``.
     """
-    import plotly.io as pio  # noqa: PLC0415 - heavy; imported after the runtime profile
+    page = (on_page, PLOTLY_TICK_PX, PLOTLY_TITLE_STANDOFF_PX, PLOTLY_MARGIN_PX)
+    return {name: _plotly_template(theme, *page) for name, theme in THEMES.items()}
 
-    templates = {}
-    for name, theme in THEMES.items():
-        template = pio.templates["plotly_white"].to_plotly_json()
-        small = {"size": on_page(SIZES["tick"]), "color": theme.ink}
-        template["layout"].update(
-            {
-                "font": {
-                    "family": ", ".join([*FONT_CHAIN, "sans-serif"]),
-                    "size": on_page(SIZES["base"]),
-                    "color": theme.ink,
-                },
-                "colorway": list(DATA_COLOURS),
-                "paper_bgcolor": TRANSPARENT,
-                "plot_bgcolor": TRANSPARENT,
-                "margin": dict(PLOTLY_MARGIN_PX),
-                "legend": {"orientation": "h", "x": 0, "xanchor": "left", "y": 1.02,
-                           "yanchor": "bottom", "font": small, "bgcolor": TRANSPARENT,
-                           "title": {"text": ""}},
-                "hoverlabel": {"bgcolor": theme.background, "bordercolor": theme.grid,
-                               "font": {**small, "family": ", ".join(FONT_CHAIN)},
-                               "align": "left"},
-                "modebar": {"bgcolor": TRANSPARENT, "color": theme.reference,
-                            "activecolor": theme.ink},
-                "annotationdefaults": {"font": small, "arrowcolor": theme.ink},
-                "shapedefaults": {"line": {"color": theme.reference}},
-                "xaxis": _plotly_axis(theme),
-                "yaxis": _plotly_axis(theme),
-            }
-        )  # fmt: skip
-        templates[name] = template
-    return templates
+
+def journal_template() -> dict[str, Any]:
+    """The white template at the figure files' own sizes, one plotly unit to the point.
+
+    A page's PDF and SVG of a changed view (D-033) draw with it: 9 pt ticks and legend, 10 pt
+    axis titles, 3 pt ticks and 1 pt lines, as the matplotlib files do; margins are the page's,
+    in pt.
+    """
+    margin = {side: px / PAGE_PX_PER_PT for side, px in PLOTLY_MARGIN_PX.items()}
+    return _plotly_template(THEMES["white"], lambda pt: pt, TICK_PT["major"],
+                            PLOTLY_TITLE_STANDOFF_PX / PAGE_PX_PER_PT, margin)  # fmt: skip
+
+
+# Plotly attributes that are lengths on the screen wherever they sit, and those that are only
+# under some parents: a "size" is a length under a marker or a font, not under contours or
+# bins; a "width" under a line or the layout, not a bar's width in data units.
+LENGTHS = frozenset({
+    "linewidth", "tickwidth", "gridwidth", "zerolinewidth", "minorgridwidth", "borderwidth",
+    "outlinewidth", "arrowwidth", "spikethickness", "ticklen", "standoff", "thickness",
+    "itemwidth", "tracegroupgap", "xgap", "ygap", "pad", "xshift", "yshift",
+})  # fmt: skip
+SIDES = frozenset({"l", "r", "t", "b"})
+# A heatmap's narrow layout (layout.meta.narrow): the width below which the page swaps it in,
+# and the height it sets. Opened alone in a window narrower than twice the page's plot, they
+# held the page's numbers and the band map's row labels started up to 198 px left of the plot.
+NARROW_LENGTHS = frozenset({("narrow", "below"), ("relayout", "height")})
+
+
+def _is_length(parent: str, key: str) -> bool:
+    """Whether ``parent.key`` of a plotly figure or template is a length on the screen."""
+    if (parent, key) in NARROW_LENGTHS:
+        return True
+    if key == "size":
+        return parent == "marker" or parent.endswith("font")
+    if key in ("width", "height"):
+        return parent == "layout" or (key == "width" and parent == "line")
+    return key in LENGTHS or (key in SIDES and parent in ("margin", "pad"))
+
+
+def zoom(node: Any, factor: float, parent: str = "") -> Any:
+    """A copy of a plotly figure or template with every length on the screen times ``factor``.
+
+    Layout width and height, margins, fonts, markers, line widths, tick lengths and node sizes;
+    data, positions and shares stay. ``ALONE_SCALE`` is the zoom of a figure opened alone.
+    """
+    if isinstance(node, dict):
+        return {k: _times(v, factor) if _is_length(parent, k) else zoom(v, factor, k)
+                for k, v in node.items()}  # fmt: skip
+    if isinstance(node, list | tuple):
+        return [zoom(v, factor, parent) for v in node]
+    return node
+
+
+def _times(value: Any, factor: float) -> Any:
+    """A length or a list of lengths times ``factor``; anything else unchanged."""
+    if isinstance(value, bool) or value is None:
+        return value
+    if isinstance(value, int | float):
+        return value * factor
+    if isinstance(value, list | tuple):
+        return [_times(v, factor) for v in value]
+    if hasattr(value, "dtype") and value.dtype.kind in "iuf":
+        return value * factor
+    return value
 
 
 def css_variables(theme: Theme) -> str:

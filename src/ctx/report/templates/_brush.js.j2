@@ -15,6 +15,8 @@ var ctxBrush = {
     return out;
   },
   clear: function (painted) { return painted.map(function () { return -1; }); },
+  /* Whether any sample is painted: the view the PDF and SVG buttons then draw (D-033). */
+  moved: function (painted) { return painted.some(function (k) { return k >= 0; }); },
   markers: function (painted, cfg) {
     return painted.map(function (k) { return k < 0 ? cfg.reference : cfg.colours[k]; });
   },

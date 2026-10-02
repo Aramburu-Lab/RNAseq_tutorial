@@ -62,6 +62,18 @@ open = "Open alone"
 back = "Back to the module page"
 data = "Data (CSV)"
 columns = "Column meanings"
+# Shown above a plot wider than its box: one kept at its least legible width, as the parallel
+# sets on a phone, or opened alone at twice its type in a window too narrow for it.
+scroll = "Wider than this window: scroll the figure sideways to see all of it."
+
+# The PDF and SVG buttons of a figure with page controls: at the defaults they link the figure
+# files; once a control is moved, they draw the view as set (D-033).
+[export]
+view = "{kind} of this view"
+reference = "The figure file, drawn at the default settings"
+view_title = "Drawn now from the figure as set, at the figure file's width and type"
+# Closes the caption of a file drawn from the page (D-051 plan, question 1, Rytis 2026-10-01).
+note = "Drawn in the browser from the view as set on the page, at the figure files' width."
 
 # Linked brushing: paint samples in one view, see them in the other.
 [brush]
