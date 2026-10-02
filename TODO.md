@@ -450,7 +450,7 @@ Each item starts when the one before it is merged, because they change the same 
 12. [ ] The external-data research, then M9 with GS.9: planned and brought to Rytis before building.
 13. [ ] When 1 to 12 and the side items are merged (Rytis, 2026-10-01): go through this file again, every unchecked item of every phase, and implement each with a long-term, root-cause solution, never a workaround. Items that need Rytis (a decision, a cluster run, an account, a release, CI billing) are brought to him with the recommended answer first; the rest are planned, built, reviewed and merged in phase order.
 
-Alongside: the heatmap fix; M3.6, then M3.7 (the page at 1280 and 375 px), M3.9 (a cold run on the 8 teaching runs) and kit v5; the monocyte download and count (P4.4).
+Alongside: the heatmap fix; M3.6, then M3.7 (the page at 1280 and 375 px), M3.9 (a cold run on the 8 teaching runs) and kit v5; the monocyte count (P4.4: downloaded and checked 2026-10-02, counting as job 47520582).
 
 ## ✅ Phased checklist
 
@@ -3188,6 +3188,9 @@ fi
 Run 2026-10-01: the MAC download took 9,999 s, so the limit became 24 h (23.3 h computed, the 1-day floor). The reason changed at once from ReqNodeNotAvail to None, start estimated 16:00. `scontrol show res` listed 61 one-hour `reboot_b-cn*` node reservations starting between 2026-10-01 11:55 and 10-08 04:18; a 7-day window overlaps far more of them than a 1-day one, which is consistent with the change but not shown to cause it; the course's `fetchngs.sbatch` and `rnaseq.sbatch` ask for 1 day from the same date.
 
 2. Check the download (counted md5 line), write the rnaseq sheet, submit the P4.1 count (guarded):
+
+Run 2026-10-02: the download (job 47505302, started at the 24 h limit) ended with all 102 accessions in the samplesheet. Steps 3 to 5 as recorded: publish mode link; 204 FASTQs and 204 md5 files; 204 OK, 0 not OK; 204 files, 580,591,689,686 bytes, ENA's figure; 204 files with 2 links; 103 sheet lines; 102 rows, 102 runs, 94 samples, 102 paired, none asked and missing, none unasked; params diff input and outdir, `publish_dir_mode: copy` added; the same config and batch script as breast_mac; 19 TB free; breast_mac's work/ 389G. `du -sh` gave 946G for the FASTQ folder against 541 GiB of bytes: allocation on the file system, not data, since every md5 matches. The count is job 47520582 (1-day limit), started 2026-10-02 08:56.
+
 
 ```
 # Kebnekaise login node, once squeue shows no nf_fetchngs job. Paste back every line marked PASTE.
