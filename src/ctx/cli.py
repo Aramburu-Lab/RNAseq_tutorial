@@ -13,6 +13,7 @@ from typing import Annotated, Any
 import typer
 
 from ctx import __version__, runtime
+from ctx.process import DEFAULT_SETTINGS, Aligner, Strandedness
 from ctx.qc import Fastp
 from ctx.report import text
 from ctx.report.builder import ParameterCard
@@ -222,6 +223,57 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, QcError, RegistryError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
+def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    genome: Annotated[Path, typer.Option(help=HELP["--genome"])],
+    aligner: Annotated[Aligner, typer.Option(help=HELP["--aligner"])] = Aligner.STAR,
+    strandedness: Annotated[
+        Strandedness, typer.Option(help=HELP["--strandedness"])
+    ] = Strandedness.AUTO,
+    multimap_max: Annotated[int | None, typer.Option(help=HELP["--multimap-max"])] = None,
+    settings: Annotated[str, typer.Option(help=HELP["--settings"])] = DEFAULT_SETTINGS,
+    featured_sample: Annotated[str | None, typer.Option(help=HELP["--featured-sample"])] = None,
+    reads_per_run: Annotated[int | None, typer.Option(help=HELP["--reads-per-run"])] = None,
+    compare_dataset: Annotated[str | None, typer.Option(help=HELP["--compare-dataset"])] = None,
+    fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
+    registry: Annotated[Path | None, typer.Option(help=HELP["--registry"])] = None,
+    fastp_q: Annotated[int, typer.Option(help=HELP["--fastp-q"])] = Fastp.q,
+    fastp_u: Annotated[int, typer.Option(help=HELP["--fastp-u"])] = Fastp.u,
+    fastp_l: Annotated[int, typer.Option(help=HELP["--fastp-l"])] = Fastp.l,
+    cut_tail: Annotated[
+        bool, typer.Option("--cut-tail/--no-cut-tail", help=HELP["--cut-tail"])
+    ] = Fastp.cut_tail,
+    cut_window: Annotated[int, typer.Option(help=HELP["--cut-window"])] = Fastp.window,
+    cut_mean: Annotated[int, typer.Option(help=HELP["--cut-mean"])] = Fastp.mean,
+) -> None:
+    """Trim, align and count every sample's reads, and test the settings that move counts (M3)."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.process import ProcessError  # noqa: PLC0415 - same reason
+    from ctx.process import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+    from ctx.qc import QcError  # noqa: PLC0415 - same reason
+    from ctx.qc.registry import RegistryError  # noqa: PLC0415 - same reason
+    from ctx.tools import ToolError  # noqa: PLC0415 - same reason
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = runtime.retypable(sys.argv[1:])
+    fastp = Fastp(fastp_q, fastp_u, fastp_l, cut_tail, cut_window, cut_mean)
+    options = module.Options(
+        dataset_file, genome, aligner, strandedness, multimap_max, _columns(settings),
+        featured_sample, reads_per_run, compare_dataset, fetchngs_dir, registry, fastp,
+    )  # fmt: skip
+    try:
+        written = module.run(ctx.obj["settings"], cards, command, dataset, options)
+    except (DatasetError, QcError, ProcessError, RegistryError, ToolError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

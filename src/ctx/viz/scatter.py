@@ -12,7 +12,7 @@ from typing import Any
 import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
-from ctx.viz.axes import axis_title
+from ctx.viz.axes import axis_title, screen_title
 from ctx.viz.style import (
     BUBBLE_KEYS,
     BUBBLE_PT,
@@ -207,6 +207,7 @@ class ScatterData:
         calls: How the page calls points again under the reader's cutoffs, or None.
         size: Non-negative numeric column that sets each point's area, or None.
         size_label: What the size shows, for its legend keys.
+        labels: Words for a ``hover`` column, where its name is terse.
     """
 
     frame: pl.DataFrame
@@ -230,6 +231,7 @@ class ScatterData:
     calls: Calls | None = None
     size: str | None = None
     size_label: str = ""
+    labels: Mapping[str, str] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -535,7 +537,7 @@ class ScatterData:
             f"{x_title}: %{{x{self._hover_format(self.x)}}}",
             f"{y_title}: %{{y{self._hover_format(self.y)}}}",
             *(
-                f"{c}: %{{customdata[{i}]{self._hover_format(c)}}}"
+                f"{(self.labels or {}).get(c, c)}: %{{customdata[{i}]{self._hover_format(c)}}}"
                 for i, c in enumerate(self.hover)
             ),
         ]
@@ -577,7 +579,9 @@ class ScatterData:
             template=plotly_templates()["white"],
             height=PLOTLY_HEIGHT_PX["scatter"],
             showlegend=len(fig.data) > 1,
-            xaxis={"title": {"text": x_title}, "type": "log" if self.log_x else "linear"},
-            yaxis={"title": {"text": y_title}, "type": "log" if self.log_y else "linear"},
+            xaxis={"title": {"text": screen_title(x_title)},
+                   "type": "log" if self.log_x else "linear"},
+            yaxis={"title": {"text": screen_title(y_title)},
+                   "type": "log" if self.log_y else "linear"},
         )  # fmt: skip
         return fig

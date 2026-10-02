@@ -1,71 +1,59 @@
 #!/usr/bin/env python3
 # /// codebase-meta
-# exempt: preview builder; draws the M3 page on made-up data until ctx process is built
+# exempt: preview builder; draws the M3 page on made-up data where no reads or genome exist
 # ///
 """The course preview of M3 Trim, align, count (``ctx process``), drawn on made-up data.
 
-``ctx process`` is not built yet (TODO.md, M3). This page carries the figures its plan names:
-the aligner's outcome per sample and per setting of one featured sample, reads assigned at each
-featureCounts ``-s``, and plain against ``-M`` gene counts as a scatter and a Bland-Altman plot.
-Every number comes from a seeded generator shaped like STAR's Log.final.out and featureCounts'
-summaries; the statistics on those numbers are computed. Samples, groups and the plain gene
-counts are the dataset's gather outputs, so this page agrees with the other preview pages. The
-words are ``content/process.toml``, which the real module will reuse. ``build_preview.py``
-calls ``page``.
+``ctx process`` needs reads and a genome, which the preview's made-up dataset does not have. This
+page draws what the real page draws, through the real page's own builders and words
+(``ctx.process.page``, ``content/process.toml``): the aligner's outcome per sample and for one
+featured sample under each setting, reads assigned at each featureCounts ``-s``, and plain
+against ``-M`` gene counts as a scatter and a Bland-Altman plot. Every count comes from a
+seeded generator shaped like STAR's Log.final.out and featureCounts' summaries; the statistics
+on those counts are computed. Samples, groups and the plain gene counts are the dataset's gather
+outputs, so this page agrees with the other preview pages. ``build_preview.py`` calls ``page``.
+Every caption starts "Made-up data.", and the build refuses a figure file that does not say so,
+since a figure is downloaded and shown apart from the page (D-050).
 """
 
 from __future__ import annotations
 
+import re
 import time
-from collections import Counter
 from datetime import date
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 import polars as pl
-from scipy import stats
+import typer
 
 from ctx import runtime
+from ctx.cli import app, parameter_cards
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
-from ctx.qc import Fastp
+from ctx.process import CATEGORIES, Aligner, figures
+from ctx.process import page as pages
+from ctx.process import tables as tab
 from ctx.qc import registry as reg
+from ctx.qc.checkpoint import gene_types
 from ctx.report import text
-from ctx.report.builder import (
-    FigureBlock,
-    FigureText,
-    Group,
-    KeyNumber,
-    ModulePage,
-    ParameterCard,
-    Reproduction,
-    write,
-)
-from ctx.viz.bar import BarData
-from ctx.viz.scatter import Line, ScatterData
-from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, ROLES, category_colours
+from ctx.report.builder import FIELDS, ModulePage, Reproduction, write
 
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
 SHOWN = ("ui", "preview.dataset")
 
 PAGE = MODULE = "process"
 SEED = 3
-# The planned default (--aligner star); its outcome classes are STAR's Log.final.out rows.
-ALIGNER = "STAR"
-OUTCOMES = ("unique", "multi", "too_many", "mismatches", "too_short", "other")
-# Six outcomes fit the seven data colours without the one a projector washes out.
-OUTCOME_COLOURS = dict(zip(OUTCOMES, [c for c in DATA_COLOURS if c not in PROJECTOR_UNSAFE],
-                           strict=False))  # fmt: skip
+# The planned default (--aligner star); its outcomes are STAR's Log.final.out rows.
+ALIGNER = Aligner.STAR
+GENOME = "chr22"
+# GRCh38 chr22's length in bases (D-037, measured on the real chr22 FASTA).
+GENOME_LENGTH = 50_818_468
 STRAND = ("s0", "s1", "s2")
-# The M3 plan's statistics (section 11): percentile bootstrap, 1000 resamples, seed 42.
-CI, RESAMPLES, BOOT_SEED = 0.95, 1000, 42
-Z = 1.96  # limits of agreement: bias plus or minus Z standard deviations (Bland-Altman)
-EMPIRICAL = (2.5, 97.5)
-STRAND_METRIC = "salmon_strand_bias"  # nf-core/rnaseq's thresholds, until M3 adds its own
-# The planned fastp options take their defaults from M2's Fastp, as the real CLI will.
-FASTP = {"--fastp-q": "q", "--fastp-u": "u", "--fastp-l": "l", "--cut-tail": "cut_tail",
-         "--cut-window": "window", "--cut-mean": "mean"}  # fmt: skip
+# The annotation build_preview writes beside the gather outputs; without it no gene has a type.
+ANNOTATION = Path("resources") / "gencode" / "mini.gtf"
+# What every preview figure file must carry, in its caption.
+MADE_UP = re.compile(r"Made-up", re.I)
 
 
 def made_up_runs(
@@ -94,11 +82,32 @@ def made_up_runs(
               "s2": genic * (1 - forward)}  # fmt: skip
     return pl.DataFrame({
         "sample": sheet["sample"],
-        "group": sheet.select(pl.concat_str("cell_type", "condition", "batch", separator=", "))
-        .to_series(),
         "input_reads": np.round(assigned / strand["s2"]).astype(np.int64),
-        "unique": unique, **shares, **strand, "forward_share": forward,
+        "unique": unique, **shares, **strand,
     })  # fmt: skip
+
+
+def outcome_reads(shares: dict[str, float], reads: int) -> dict[str, int]:
+    """Reads per STAR outcome from percent shares, unique taking the rounding so they add up."""
+    rest = {k: round(shares[k] / 100 * reads) for k in CATEGORIES[ALIGNER][1:]}
+    return {"unique": reads - sum(rest.values()), **rest, "input": reads}
+
+
+def settings_shares(run: dict[str, float]) -> dict[str, dict[str, float]]:
+    """Made-up outcome shares of one sample as run, on half the genome, untrimmed, and at limit 1.
+
+    Limit 1 is derived as the real page derives it: multimapped reads become too many loci.
+    """
+    main = {o: float(run[o]) for o in CATEGORIES[ALIGNER]}
+    # About half the reads come from genes on the removed half; a few align to paralogues.
+    cut = main | {"unique": main["unique"] * 0.52, "multi": main["multi"] * 0.6,
+                  "mismatches": main["mismatches"] + 0.4, "other": main["other"] + 0.5}  # fmt: skip
+    cut["too_short"] = 100.0 - sum(v for k, v in cut.items() if k != "too_short")
+    # Adapter tails that fastp would cut leave reads too short to align, or mismatched.
+    untrimmed = main | {"unique": main["unique"] - 1.4, "mismatches": main["mismatches"] + 0.3,
+                        "too_short": main["too_short"] + 1.1}  # fmt: skip
+    limit = main | {"multi": 0.0, "too_many": main["too_many"] + main["multi"]}
+    return {"main": main, "limit_1": limit, "cut": cut, "untrimmed": untrimmed}
 
 
 def with_multimappers(rng: np.random.Generator, plain: np.ndarray) -> np.ndarray:
@@ -112,203 +121,104 @@ def with_multimappers(rng: np.random.Generator, plain: np.ndarray) -> np.ndarray
     return np.asarray(plain + extra)
 
 
-def agreement(a: np.ndarray, b: np.ndarray) -> dict[str, Any]:
-    """Correlation and Bland-Altman agreement of two counts, over genes either one counts."""
-    kept = (a + b) > 0
-    a, b = a[kept], b[kept]
-    la, lb = np.log2(a + 1), np.log2(b + 1)
-    d = lb - la
-    n, bias, sd = a.size, float(d.mean()), float(d.std(ddof=1))
-    half = float(stats.t.ppf((1 + CI) / 2, n - 1)) * sd / np.sqrt(n)
-    pearson = stats.pearsonr(la, lb)
-    r_low, r_high = pearson.confidence_interval(confidence_level=CI)
-    d_low, d_high = np.percentile(d, EMPIRICAL)
-    return {
-        "n_genes": n, "n_identical": int((a == b).sum()),
-        "spearman": float(stats.spearmanr(a, b).statistic), "spearman_low": None,
-        "spearman_high": None, "pearson": float(pearson.statistic), "pearson_low": float(r_low),
-        "pearson_high": float(r_high), "bias": bias, "bias_low": bias - half,
-        "bias_high": bias + half, "sd": sd, "loa_low": bias - Z * sd, "loa_high": bias + Z * sd,
-        "d_low": float(d_low), "d_high": float(d_high), "fold": 2**bias,
-    }  # fmt: skip
+def strand_table(runs: pl.DataFrame, outcomes: dict[str, dict[str, int]]) -> pl.DataFrame:
+    """The strandedness table's columns the page reads, from the made-up shares."""
+    metric = reg.load(reg.resolve(None)).metrics["gene_strand_bias"]
+    rows = []
+    for r in runs.iter_rows(named=True):
+        n, unique = r["input_reads"], outcomes[r["sample"]]["unique"]
+        assigned = {s: round(r[s] * n) for s in STRAND}
+        share = assigned["s1"] / (assigned["s1"] + assigned["s2"])
+        rows.append({"sample": r["sample"],
+                     **{f"assigned_{s}": float(v) for s, v in assigned.items()},
+                     **{f"no_feature_{s}": float(unique - v) for s, v in assigned.items()},
+                     **{f"ambiguous_{s}": 0.0 for s in STRAND}, "forward_share": share,
+                     "call": metric.strandedness(share), "compare_bias": None,
+                     "compare_call": None})  # fmt: skip
+    return pl.DataFrame(rows).with_columns(used=pl.col("call"))
 
 
-def concordance(plain: np.ndarray, multi: np.ndarray, samples: list[str]) -> pl.DataFrame:
-    """The gene sums over samples, with Spearman's bootstrap interval; then each sample."""
-    a, b = plain.sum(axis=1), multi.sum(axis=1)
-    kept = (a + b) > 0
-    boot = stats.bootstrap((a[kept], b[kept]), lambda x, y: stats.spearmanr(x, y).statistic,
-                           paired=True, vectorized=False, n_resamples=RESAMPLES,
-                           confidence_level=CI, method="percentile",
-                           rng=np.random.default_rng(BOOT_SEED))  # fmt: skip
-    ci = boot.confidence_interval
-    rows = [{"unit": "all", **agreement(a, b), "spearman_low": ci.low, "spearman_high": ci.high}]
-    rows += [{"unit": s, **agreement(plain[:, i], multi[:, i])} for i, s in enumerate(samples)]
-    return pl.DataFrame(rows).with_columns(comparison=pl.lit("plain_vs_M"))
+def gene_table(root: Path, dataset: str, counts: pl.DataFrame) -> pl.DataFrame:
+    """gene_id, gene_name, gene_type: the made-up annotation's types where it was written."""
+    genes = newest(root / "outputs" / "01_gather", dataset, "genes")
+    names = pl.read_parquet(genes)
+    if (root / ANNOTATION).is_file():
+        types = gene_types(root / ANNOTATION).select("gene_id", "gene_type")
+        names = names.join(types, on="gene_id", how="left")
+    else:
+        names = names.with_columns(gene_type=pl.lit(None, pl.String))
+    return counts.select("gene_id").join(names.select("gene_id", "gene_name", "gene_type"),
+                                         on="gene_id", how="left")  # fmt: skip
 
 
-def _columns(key: str, frame: pl.DataFrame) -> dict[str, tuple[str, str]]:
-    """(unit, meaning) of every column, from a content table with ``units`` and ``columns``."""
-    entry = text.raw(PAGE, key)
-    return {c: (entry["units"].get(c, "none"), entry["columns"][c]) for c in frame.columns}
-
-
-def _text(key: str, **values: Any) -> FigureText:
-    """Title, lead and reading guide of ``figures.<key>``, the lead filled from values."""
-    return FigureText(title=text.word(PAGE, f"figures.{key}.title"),
-                      lead=text.fill(PAGE, f"figures.{key}.lead", **values),
-                      reading=text.words(PAGE, f"figures.{key}.reading"))  # fmt: skip
-
-
-def _bars(key: str, frame: pl.DataFrame, caption: str, **layout: Any) -> BarData:
-    """Bars of ``figures.<key>``: category first column, value ``percent``, series second."""
-    category, series = frame.columns[:2]
-    return BarData(
-        frame=frame, columns=_columns(f"figures.{key}", frame), category=category,
-        value="percent", category_label=text.word(PAGE, f"figures.{key}.category"),
-        value_label=text.word(PAGE, f"figures.{key}.value"), series=series, caption=caption,
-        **layout,
-    )  # fmt: skip
-
-
-def mapping_figures(writer: Writer, runs: pl.DataFrame) -> list[FigureBlock]:
-    """The outcome bars of every sample, then of the featured sample under each setting."""
-    names = {o: text.word(PAGE, f"outcomes.{o}") for o in OUTCOMES}
-    long = runs.unpivot(OUTCOMES, index=["sample", "group", "input_reads"],
-                        variable_name="outcome", value_name="percent").with_columns(
-        reads=(pl.col("percent") / 100 * pl.col("input_reads")).round().cast(pl.Int64))  # fmt: skip
-    long = long.select("sample", "outcome", "percent", "reads", "input_reads", "group")
-    reads = int(runs["input_reads"].median())  # type: ignore[arg-type]
-    low = runs.sort("unique").row(0, named=True)
-    caption = text.fill(PAGE, "figures.mapping.caption", aligner=ALIGNER, n=runs.height,
-                        reads=reads)  # fmt: skip
-    bars = _bars("mapping", long, caption, colours=OUTCOME_COLOURS, names=names, stacked=True,
-                 hover=("reads", "input_reads", "group"), width="double")  # fmt: skip
-    lead = {"median": float(runs["unique"].median()), "low": low["unique"],  # type: ignore[arg-type]
-            "low_sample": low["sample"]}  # fmt: skip
-    blocks = [writer.figure(bars, "mapping", _text("mapping", **lead))]
+def frames(root: Path, dataset: str, sheet: pl.DataFrame, counts: pl.DataFrame) -> pages.Frames:
+    """The made-up run as the real page's frames: outcomes, settings, strand, one comparison."""
+    samples = sheet["sample"].to_list()
+    plain = counts.select(samples).to_numpy().astype(np.int64)
+    rng = np.random.default_rng(SEED)
+    runs = made_up_runs(rng, sheet, plain.sum(axis=0))
+    multi = with_multimappers(rng, plain)
+    outcomes = {r["sample"]: outcome_reads(r, r["input_reads"]) for r in runs.iter_rows(named=True)}
     featured = runs.row(0, named=True)
-    shares = settings_shares(featured)
-    sample = featured["sample"]
-    frame = pl.DataFrame([
-        {"setting": text.fill(PAGE, f"settings.{s}", sample=sample), "outcome": o,
-         "percent": p, "reads": round(p / 100 * featured["input_reads"])}
-        for s, row in shares.items() for o, p in row.items()
-    ])  # fmt: skip
-    caption = text.fill(PAGE, "figures.settings.caption", sample=sample,
-                        reads=featured["input_reads"])  # fmt: skip
-    bars = _bars("settings", frame, caption, colours=OUTCOME_COLOURS, names=names, stacked=True,
-                 horizontal=True, hover=("reads",), width="double")  # fmt: skip
-    lead = {"sample": sample, "main": shares["main"]["unique"], "cut": shares["cut"]["unique"]}
-    blocks.append(writer.figure(bars, "settings", _text("settings", **lead)))
-    return blocks
+    settings = {k: outcome_reads(v, featured["input_reads"])
+                for k, v in settings_shares(featured).items()}  # fmt: skip
+    genes = gene_table(root, dataset, counts)
+    long = pl.DataFrame({
+        "comparison": "multimap", "sample": np.repeat(samples, plain.shape[0]),
+        "gene_id": np.tile(counts["gene_id"].to_numpy(), len(samples)),
+        "a": plain.T.ravel().astype(float), "b": multi.T.ravel().astype(float),
+    })  # fmt: skip
+    alignment = alignment_rows(rng, outcomes)
+    called = counts.select("gene_id", *samples)
+    return pages.Frames(
+        alignment=alignment, outcomes=outcomes, settings=settings,
+        strand=strand_table(runs, outcomes), counting=pl.DataFrame(),
+        gene_counts=genes.join(called, on="gene_id"), comparison=long,
+        agreements=tab.agreements(long, genes), reference=reference_row(genes.height),
+        incomplete=None, context=None,
+    )  # fmt: skip
 
 
-def settings_shares(run: dict[str, Any]) -> dict[str, dict[str, float]]:
-    """Made-up outcome shares of one sample as run, on half the genome, untrimmed, and at limit 1.
+def alignment_rows(rng: np.random.Generator, outcomes: dict[str, dict[str, int]]
+                   ) -> pl.DataFrame:  # fmt: skip
+    """The alignment table's columns the page prints, made up as STAR would report them.
 
-    Limit 1 is derived as the plan derives it: multimapped reads become too many loci.
+    Splices per 100 uniquely mapped reads, their annotated share and non-canonical count;
+    flagstat's records, a multimapper once per alignment, beside primary mapped reads.
     """
-    main = {o: float(run[o]) for o in OUTCOMES}
-    # About half the reads come from genes on the removed half; a few align to paralogues.
-    cut = main | {"unique": main["unique"] * 0.52, "multi": main["multi"] * 0.6,
-                  "mismatches": main["mismatches"] + 0.4, "other": main["other"] + 0.5}  # fmt: skip
-    cut["too_short"] = 100.0 - sum(v for k, v in cut.items() if k != "too_short")
-    # Adapter tails that fastp would cut leave reads too short to align, or mismatched.
-    untrimmed = main | {"unique": main["unique"] - 1.4, "mismatches": main["mismatches"] + 0.3,
-                        "too_short": main["too_short"] + 1.1}  # fmt: skip
-    limit = main | {"multi": 0.0, "too_many": main["too_many"] + main["multi"]}
-    return {"main": main, "cut": cut, "untrimmed": untrimmed, "limit": limit}
+    rows = []
+    for sample, r in outcomes.items():
+        unique, multi, total = r["unique"], r["multi"], r["input"]
+        splices = round(unique * rng.uniform(0.18, 0.30))
+        records = total + round(multi * rng.uniform(1.5, 3.0))  # secondary alignments
+        rows.append({
+            "sample": sample, "input_reads": total, "unique_pct": 100 * unique / total,
+            "splices_per_100_unique": 100 * splices / unique,
+            "splices_annotated_share": rng.uniform(0.97, 0.995),
+            "splices_noncanonical": round(splices * rng.uniform(0.001, 0.004)),
+            "records": records, "mapped_records_pct": 100 * (records - total + unique + multi)
+            / records, "primary_mapped_pct": 100 * (unique + multi) / total,
+        })  # fmt: skip
+    return pl.DataFrame(rows)
 
 
-def strand_figure(writer: Writer, runs: pl.DataFrame) -> tuple[FigureBlock, str, int]:
-    """Reads assigned at each ``-s`` per sample; also the majority call and how many share it."""
-    metric = reg.load(reg.resolve(None)).metrics[STRAND_METRIC]
-    calls = runs.with_columns(call=pl.col("forward_share").map_elements(
-        metric.strandedness, return_dtype=pl.String))  # fmt: skip
-    frame = calls.unpivot(STRAND, index=["sample", "input_reads", "forward_share", "call"],
-                          variable_name="setting", value_name="share").with_columns(
-        percent=pl.col("share") * 100,
-        reads=(pl.col("share") * pl.col("input_reads")).round().cast(pl.Int64),
-    ).select("sample", "setting", "percent", "reads", "forward_share", "call")  # fmt: skip
-    call, n_call = Counter(calls["call"]).most_common(1)[0]
-    share = runs["forward_share"]
-    caption = text.fill(PAGE, "figures.strandedness.caption", n=runs.height,
-                        share=float(share.median()),  # type: ignore[arg-type]
-                        stranded=metric.stranded, unstranded=metric.unstranded)  # fmt: skip
-    bars = _bars("strandedness", frame, caption, colours=category_colours(list(STRAND)),
-                 names=text.raw(PAGE, "figures.strandedness.names"),
-                 hover=("reads", "forward_share", "call"), width="double")  # fmt: skip
-    lead = _text("strandedness", low=float(share.min()), high=float(share.max()),  # type: ignore[arg-type]
-                 n_call=n_call, n=runs.height, call=call)  # fmt: skip
-    return writer.figure(bars, "strandedness", lead), call, n_call
+def reference_row(genes: int) -> pl.DataFrame:
+    """The reference table's row the page prints: chr22 by name, the made-up dataset's genes."""
+    return pl.DataFrame([{
+        "reference": text.word(PAGE, "references.main"), "contigs": GENOME,
+        "length_nt": GENOME_LENGTH, "genes_subset": genes, "genes_genome": genes,
+        "atg_share": None,
+    }])  # fmt: skip
 
 
-def counter_figures(writer: Writer, genes: pl.Series, plain: np.ndarray, multi: np.ndarray,
-                    table: pl.DataFrame) -> list[FigureBlock]:  # fmt: skip
-    """Plain against ``-M`` gene sums as a scatter, then as a Bland-Altman agreement plot."""
-    a, b = plain.sum(axis=1), multi.sum(axis=1)
-    frame = pl.DataFrame({"gene_id": genes, "plain": a, "multi": b}).filter(
-        pl.col("plain") + pl.col("multi") > 0).with_columns(
-        log2_plain=(pl.col("plain") + 1).log(2), log2_multi=(pl.col("multi") + 1).log(2),
-        keep=pl.col("plain") != pl.col("multi"))  # fmt: skip
-    frame = frame.with_columns(agreement=pl.when("keep").then(pl.lit("differs"))
-                               .otherwise(pl.lit("same")))  # fmt: skip
-    colours = {"same": None, "differs": ROLES["comparison"]}
-    names = {k: text.word(PAGE, f"figures.counters.{k}") for k in colours}
-    every, per_sample = table.row(0, named=True), table.filter(pl.col("unit") != "all")["spearman"]
-    values = {**every, "n": every["n_genes"], "samples": plain.shape[1], "ci": round(CI * 100),
-              "rho": every["spearman"], "rho_low": every["spearman_low"],
-              "rho_high": every["spearman_high"], "rho_med": per_sample.median(),
-              "rho_min": per_sample.min(), "rho_max": per_sample.max(), "r": every["pearson"],
-              "r_low": every["pearson_low"], "r_high": every["pearson_high"],
-              "n_same": every["n_identical"],
-              "n_diff": every["n_genes"] - every["n_identical"]}  # fmt: skip
-    span = (float(frame["log2_plain"].min()), float(frame["log2_multi"].max()))  # type: ignore[arg-type]
-    scatter = ScatterData(
-        frame=frame, columns=_columns("figures.counters", frame), x="log2_plain",
-        y="log2_multi", x_label=text.word(PAGE, "figures.counters.x"),
-        y_label=text.word(PAGE, "figures.counters.y"), colour="agreement", colours=colours,
-        caption=text.fill(PAGE, "figures.counters.caption", **values),
-        hover=("gene_id", "plain", "multi"), keep="keep", names=names,
-        lines=(Line(text.word(PAGE, "figures.counters.identity"), span, span),),
-    )  # fmt: skip
-    blocks = [writer.figure(scatter, "counters_multimap", _text("counters", **values))]
-    blocks.append(writer.figure(*agreement_plot(frame, values, colours, names)))
-    return blocks
+def check_made_up(files: list[Path]) -> None:
+    """Refuse a preview figure whose SVG does not say its data are made up.
 
-
-def agreement_plot(frame: pl.DataFrame, values: dict[str, Any], colours: dict[str, str | None],
-                   names: dict[str, str]) -> tuple[ScatterData, str, FigureText]:  # fmt: skip
-    """The Bland-Altman plot of the counter scatter's genes, with its stem and words."""
-    ba = frame.select("gene_id", mean_log2=(pl.col("log2_plain") + pl.col("log2_multi")) / 2,
-                      diff_log2=pl.col("log2_multi") - pl.col("log2_plain"),
-                      agreement="agreement", keep="keep")  # fmt: skip
-    span = (float(ba["mean_log2"].min()), float(ba["mean_log2"].max()))  # type: ignore[arg-type]
-    bias, limits = (text.word(PAGE, f"figures.agreement.{k}") for k in ("bias", "limits"))
-    outside = ~ba["diff_log2"].is_between(values["loa_low"], values["loa_high"])
-    data = ScatterData(
-        frame=ba, columns=_columns("figures.agreement", ba), x="mean_log2", y="diff_log2",
-        x_label=text.word(PAGE, "figures.agreement.x"),
-        y_label=text.word(PAGE, "figures.agreement.y"), colour="agreement", colours=colours,
-        caption=text.fill(PAGE, "figures.agreement.caption", **values), hover=("gene_id",),
-        keep="keep", names=names,
-        lines=(Line(bias, span, (values["bias"],) * 2),
-               *(Line(limits, span, (values[k],) * 2, dash=True) for k in ("loa_low", "loa_high"))),
-    )  # fmt: skip
-    return data, "agreement_multimap", _text("agreement", **values, n_out=int(outside.sum()))
-
-
-def cards() -> tuple[ParameterCard, ...]:
-    """The options ``ctx process`` will take, in the plan's order, fastp's defaults from M2."""
-    fastp = Fastp()
-    shown = {True: "on", False: "off"}
-    return tuple(
-        ParameterCard(flag, card["meaning"],
-                      card.get("default") or shown.get(v := getattr(fastp, FASTP[flag]), str(v)),
-                      card["effect"])
-        for flag, card in text.raw(PAGE, "planned").items()
-    )  # fmt: skip
+    Raises:
+        RuntimeError: Naming each figure that does not.
+    """
+    if bare := [f.name for f in files if f.suffix == ".svg" and not MADE_UP.search(f.read_text())]:
+        raise RuntimeError(f"preview figures without the made-up mark: {bare}")
 
 
 def page(root: Path, dataset: str, day: date) -> Path:
@@ -327,45 +237,42 @@ def page(root: Path, dataset: str, day: date) -> Path:
     inputs = [newest(gathered, dataset, what) for what in ("samplesheet", "counts")]
     sheet = pl.read_parquet(inputs[0]).unique("sample", keep="first", maintain_order=True)
     counts = pl.read_parquet(inputs[1])
-    samples = sheet["sample"].to_list()
-    plain = counts.select(samples).to_numpy().astype(np.int64)
-    rng = np.random.default_rng(SEED)
-    runs = made_up_runs(rng, sheet, plain.sum(axis=0))
-    multi = with_multimappers(rng, plain)
+    found = frames(root, dataset, sheet, counts)
     releases = {"input:samplesheet": inputs[0].name, "input:counts": inputs[1].name,
                 "made_up": f"numpy default_rng({SEED})"}  # fmt: skip
     writer = Writer(root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}", dataset, day,
                     releases)  # fmt: skip
-    table = concordance(plain, multi, samples)
-    writer.table(table, "concordance", _columns("tables.concordance", table))
-    strand, call, n_call = strand_figure(writer, runs)
-    counters = counter_figures(writer, counts["gene_id"], plain, multi, table)
-    every = table.row(0, named=True)
-    results = (
-        text.word("ui", "preview.note"),
-        Group(text.word(PAGE, "groups.align"), tuple(mapping_figures(writer, runs))),
-        Group(text.word(PAGE, "groups.strand"), (strand,)),
-        Group(text.word(PAGE, "groups.counters"), tuple(counters)),
+    writer.table(
+        found.agreements.concordance,
+        "concordance",
+        pages.described("tables.concordance", found.agreements.concordance.columns),
     )
-    keys = (
-        KeyNumber(text.word(PAGE, "keys.samples"), f"{runs.height:,}"),
-        KeyNumber(text.word(PAGE, "keys.unique"),
-                  f"{float(runs['unique'].median()):.1f} %"),  # type: ignore[arg-type]
-        KeyNumber(text.word(PAGE, "keys.strand"), call,
-                  text.fill(PAGE, "keys.strand_detail", n_call=n_call, n=runs.height)),
-        KeyNumber(text.word(PAGE, "keys.differ"), f"{every['n_genes'] - every['n_identical']:,}",
-                  text.fill(PAGE, "keys.differ_detail", n=every["n_genes"])),
-    )  # fmt: skip
+    # chr22 alone of a whole annotation: a partial reference, whatever the made-up genes say.
+    shown = pages.Shown(ALIGNER, sheet["sample"][0], pages.groups_of(sheet, sheet["sample"]),
+                        GENOME, reg.load(reg.resolve(None)).metrics["gene_strand_bias"],
+                        found.gene_counts.height, partial=True,
+                        prefix=f"{text.word(PAGE, 'preview.caption')} ")  # fmt: skip
+    body = pages.results(writer, found, shown, [text.word(PAGE, "preview.note")])
+    check_made_up(writer.files)
+    low, high = (figures.stat(found.alignment["unique_pct"], h) for h in ("min", "max"))
+    filled = pages.prose(shown, {
+        "samples": sheet.height, "runs": sheet.height, "genome": text.word(PAGE, "preview.genome"),
+        "length": f"{GENOME_LENGTH:,}", "release": text.word(PAGE, "preview.release"),
+        "low": f"{low:.1f}", "high": f"{high:.1f}",
+    })  # fmt: skip
+    group = typer.main.get_command(app)
     usage, budget = runtime.measure(started), runtime.budget(MODULE)
     command = f"ctx process --dataset {dataset} --dataset-file {dataset}.toml --genome genome.fa.gz"
     built = ModulePage(
-        title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)), **text.skeleton(PAGE),
-        parameters=cards(), results=results, key_numbers=keys,
+        title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)),
+        **(text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}),
+        parameters=parameter_cards(group, group.commands[MODULE]),  # type: ignore[attr-defined]
+        results=body, key_numbers=pages.key_numbers(found),
         reproduce=Reproduction(
             command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,
             # page() starts no child process; the build's own ctx children are not this page's.
-            peak_rss_children=0, profile=text.word(PAGE, "profile"),
-            budget=text.fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
+            peak_rss_children=0, profile=text.word(PAGE, "preview.profile"),
+            budget=text.fill(PAGE, "preview.budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
             versions=runtime.versions(), inputs=tuple(p.name for p in inputs),
         ),
     )  # fmt: skip

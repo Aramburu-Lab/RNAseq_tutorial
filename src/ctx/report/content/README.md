@@ -9,6 +9,7 @@ code only names a key and fills in the numbers. Rebuild a page by running its co
 | What a command-line option means, and what moving it changes | `cards.toml` | `[options."--name"]`; `[effects.<command>]` overrides the effect on one command |
 | The M0 Setup page | `setup.toml` | `purpose`, `input`, `method`, `interpretation`, `pitfalls`, `[[terms]]`, `[[questions]]`, then one table per results block |
 | The M1 Gather page | `gather.toml` | the same skeleton, then the checks, curation, counts and the two figures |
+| The M3 Trim, align, count page | `process.toml` | the same skeleton, then the notes, groups, key numbers, outcomes, settings, comparisons, each figure's words and each table's columns; `[preview]` holds what the course preview alone says |
 
 Not here yet: the M5 and M6 pages, the hub and the figure captions. Their code is frozen
 until the Step-1 record, and their text moves after it (TODO.md, P2S.4).

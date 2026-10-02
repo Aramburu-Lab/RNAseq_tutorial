@@ -24,6 +24,8 @@ from ctx.viz.style import (
 )
 
 TEST_NAME = "Mann-Whitney U, two-sided"
+# Holds a space no title line may break at; textwrap breaks only at ASCII whitespace.
+UNBROKEN = "\u00a0"
 PERMANOVA_NAME = "PERMANOVA on Euclidean distances"
 
 
@@ -112,6 +114,9 @@ def wrap_to_width(text: str, points: float, size: float) -> str:
 def fit_title(text: str, height: float) -> str:
     """Wrap a vertical axis title to the length its axis has: a share of the figure height.
 
+    A parenthesised span, such as the unit ``(log2(count + 1))``, is never broken: split at
+    its spaces it left ``1))`` alone on a line. A span longer than a line takes its own.
+
     Args:
         text: The title, with its unit.
         height: Figure height in inches.
@@ -120,7 +125,14 @@ def fit_title(text: str, height: float) -> str:
         The title, broken into lines that fit.
     """
     chars = int(height * 72 * AXIS_TITLE_SHARE / (SIZES["axis_label"] * AVERAGE_CHAR_EM))
-    return wrap(text, max(chars, 8))
+    depth, kept = 0, []
+    for char in text:
+        depth += (char == "(") - (char == ")")
+        # A space inside parentheses is held by a stand-in no line breaks at, then restored.
+        kept.append(UNBROKEN if char == " " and depth > 0 else char)
+    lines = textwrap.wrap("".join(kept), max(chars, 8), break_on_hyphens=False,
+                          break_long_words=False)  # fmt: skip
+    return "\n".join(lines).replace(UNBROKEN, " ")
 
 
 def place_caption(

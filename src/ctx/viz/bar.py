@@ -15,7 +15,7 @@ import numpy as np
 import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
-from ctx.viz.axes import axis_title
+from ctx.viz.axes import axis_title, screen_title
 from ctx.viz.style import (
     BAR_LABEL_ROTATION,
     BAR_MARGIN_MM,
@@ -80,6 +80,10 @@ class BarData:
         median: Name of a line at the median bar length, empty for none. The page moves it
             to the median of the bars the filters show; the PDF and SVG show every bar.
         filters: Columns of ``frame`` the page offers as filters, one select each.
+        labels: Words for a column on hover and on its filter, where its name is terse.
+        summary_median: Whether the filter's live line prints the median bar length; off where
+            that median is no number a reader asks for: bars stacked to 100 %, or several
+            settings of one category pooled.
     """
 
     frame: pl.DataFrame
@@ -100,6 +104,8 @@ class BarData:
     lines: tuple[tuple[float, str], ...] = ()
     median: str = ""
     filters: tuple[str, ...] = ()
+    labels: Mapping[str, str] | None = None
+    summary_median: bool = True
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -151,6 +157,10 @@ class BarData:
         """Legend text of a series level."""
         return (self.names or {}).get(level, str(level))
 
+    def _label(self, column: str) -> str:
+        """A column's words on hover and on its filter: ``labels``' own, else its name."""
+        return (self.labels or {}).get(column, column)
+
     def _references(self) -> list[tuple[float, str]]:
         """``hline``, then ``lines``."""
         return [*([self.hline] if self.hline else []), *self.lines]
@@ -196,6 +206,8 @@ class BarData:
             "traces": [str(level) for level in self.colours if level in present],
             "labels": [str(c) for c in self.frame[self.category]], "hover": list(self.hover),
             "filters": {c: sorted({str(v) for v in self.frame[c]}) for c in self.filters},
+            "filter_labels": {c: self._label(c) for c in self.filters},
+            "summary_median": self.summary_median,
             "median_shape": len(self._references()) if self.median else None,
             "max_tick_labels": MAX_TICK_LABELS, "unit": unit, "total": total,
             "start": {"shown": f"{total:,}", "total": f"{total:,}", "median": median},
@@ -277,7 +289,7 @@ class BarData:
         value = f"%{{{'x' if self.horizontal else 'y'}{digits}}}"
         hover = [f"{self.category_label}: %{{{'y' if self.horizontal else 'x'}}}"]
         hover += [f"{self._value_title()}: {value}"]
-        hover += [f"{c}: %{{customdata[{i}]}}" for i, c in enumerate(self.hover)]
+        hover += [f"{self._label(c)}: %{{customdata[{i}]}}" for i, c in enumerate(self.hover)]
         fig = go.Figure()
         for level in self.colours:
             rows = self.frame.filter(pl.col(self.series) == level)
@@ -291,7 +303,8 @@ class BarData:
                     marker={"color": self.colours[level] or light.reference,
                             "line": {"width": LINE_WIDTHS["marker_edge"]}},
                     customdata=rows.select(self.hover).rows(),
-                    hovertemplate="<br>".join([f"{self.series}: {self._name(level)}", *hover])
+                    hovertemplate="<br>".join([f"{self._label(self.series)}: {self._name(level)}",
+                                               *hover])
                     + "<extra></extra>",
                 )
             )  # fmt: skip
@@ -307,7 +320,7 @@ class BarData:
                          "showticklabels": len(categories) <= MAX_TICK_LABELS}  # fmt: skip
         if self.horizontal:
             category_axis["autorange"] = "reversed"
-        value_axis = {"title": {"text": self._value_title()}}
+        value_axis = {"title": {"text": screen_title(self._value_title())}}
         rows_px = PLOTLY_BAR_BASE_PX + PLOTLY_BAR_ROW_PX * len(categories)
         fig.update_layout(
             template=plotly_templates()["white"],

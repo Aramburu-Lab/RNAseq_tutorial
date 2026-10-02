@@ -427,16 +427,20 @@ def _prepare(block: FigureBlock, index: int, number: int, level: int) -> dict[st
 def _defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
     """What the controls show before the reader moves them: the default rule, no paint, or all.
 
-    A filter's live line is ``ui.toml`` [filter] summary, filled here with the numbers of every
-    bar and passed unfilled for the page script to fill again (``ctxFilter.summary``).
+    A filter's live line is ``ui.toml`` [filter] summary, or summary_count where the figure
+    prints no median, filled here with the numbers of every bar and passed unfilled for the
+    page script to fill again (``ctxFilter.summary``). Each select is labelled in words.
     """
     if controls["kind"] == "brush":
         return {"colours": list(zip(controls["colours"], controls["names"], strict=True)),
                 "empty": controls["empty"]}  # fmt: skip
     if controls["kind"] == "filter":
-        return {"filters": list(controls["filters"].items()),
-                "summary": text.fill("ui", "filter.summary", **controls["start"]),
-                "template": text.raw("ui", "filter.summary"),
+        line = "filter.summary" if controls.get("summary_median", True) else "filter.summary_count"
+        labels = controls.get("filter_labels", {})
+        return {"filters": [(c, levels, labels.get(c, c))
+                            for c, levels in controls["filters"].items()],
+                "summary": text.fill("ui", line, **controls["start"]),
+                "template": text.raw("ui", line),
                 "none": text.word("ui", "filter.none")}  # fmt: skip
     return {
         "fc": f"{controls['lfc_min']:g}",

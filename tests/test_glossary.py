@@ -206,6 +206,22 @@ def test_every_page_file_marks_only_terms_that_exist():
     assert errors == []
 
 
+def test_the_m3_page_marks_each_term_where_a_section_first_names_it():
+    """D-048 on process.toml: in every section the first mention of a glossary term carries
+    its mark. "read" and "counts", the subject of nearly every sentence, are left bare, as on
+    every other module's page; any other bare first mention is a warning this test refuses.
+
+    Mutation caught: Interpretation's [[Salmon]] written bare again (the M3 review found it,
+    with Method's Spearman and the Results captions' featureCounts, unstranded and reference).
+    """
+    _, warnings = glossary_lint.page_marks()
+    process = [w for w in warnings if w.startswith("process: ")]
+    bare = ("is read, unmarked", "is raw_counts, unmarked")
+    # The two bare words are found, so the lint read the page file at all.
+    assert process
+    assert [w for w in process if not w.endswith(bare)] == []
+
+
 def test_lookup_by_id_term_or_alias_in_any_case(capsys):
     """One entry answers to its id, its term and each alias, in any case; explain prints it.
 

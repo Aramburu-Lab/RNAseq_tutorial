@@ -32,7 +32,8 @@ CTX = str(Path(sys.executable).parent / "ctx")
 DATASET = "desynth"
 # Course order; each is a MODULES token with no command yet (D-044).
 PREVIEWS = ("process", "quant", "proteo", "ncrna", "genecard", "clinical")
-# The first result of every preview page: text.word("ui", "preview.note").
+# The first result of every preview page: text.word("ui", "preview.note"); M3, built but
+# short of reads and a genome here, says why in content/process.toml's preview.note.
 NOTE = ("ui", "preview.note")
 # The course's batch names (D-043) in place of the test data's short and long.
 BATCH = {"short": "Reads ≤ 76 nt (min 35 nt)", "long": "Reads > 76 nt (max 500 nt)"}

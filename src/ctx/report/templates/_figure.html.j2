@@ -27,7 +27,7 @@
 {% if f.kind == "filter" %}
 {# Class "calls" for the panel's look only; the page script tells the two kinds apart. #}
 <form class="calls filter" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="{{ ui.filter.label }}">
-{% for column, levels in f.defaults.filters %}<label>{{ column }}<select data-column="{{ column }}"><option value="" selected>{{ ui.filter.all }}</option>{% for level in levels %}<option value="{{ level }}">{{ level }}</option>{% endfor %}</select></label>{% endfor %}
+{% for column, levels, label in f.defaults.filters %}<label>{{ label }}<select data-column="{{ column }}"><option value="" selected>{{ ui.filter.all }}</option>{% for level in levels %}<option value="{{ level }}">{{ level }}</option>{% endfor %}</select></label>{% endfor %}
 </form>
 <noscript><p class="note">{{ ui.filter.noscript }}</p></noscript>
 <p class="calls-summary filter-summary" aria-live="polite" data-template="{{ f.defaults.template }}" data-none="{{ f.defaults.none }}">{{ f.defaults.summary }}</p>

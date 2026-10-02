@@ -127,7 +127,8 @@ def qc_run(tmp_path_factory):
     return root, _page(root, "02_qc", "desynth_overview")
 
 
-COMMANDS = ["setup", "gather", "qc", "de", "function", "report"]
+# process_run is conftest.py's: a rerun of the session's one ctx process run.
+COMMANDS = ["setup", "gather", "qc", "process", "de", "function", "report"]
 
 
 def test_every_subcommand_has_a_card_test():
@@ -492,3 +493,31 @@ def test_report_decides_sanity(pipeline):
     assert rules == {"S1": "PASS", "S2": "PASS", "S3": "FAIL"}
     hub = next(out.glob("*_desynth_hub_v1.html")).read_text()
     assert hub.count('class="verdict"') == 4  # S1, both S2 conditions, S3
+
+
+def test_process_trims_with_m2_s_fastp_defaults():
+    """ctx process and ctx qc share one fastp setting (M3 plan, section 5): each fastp option
+    of process defaults to qc's, and both to ``Fastp()``'s field.
+
+    Mutation caught: process's --fastp-l default changed alone (30 against qc's 15)."""
+    from ctx.qc import Fastp  # noqa: PLC0415
+
+    group = typer.main.get_command(app)
+    fields = {"--fastp-q": "q", "--fastp-u": "u", "--fastp-l": "l", "--cut-tail": "cut_tail",
+              "--cut-window": "window", "--cut-mean": "mean"}  # fmt: skip
+    defaults = {name: {p.opts[0]: p.default for p in group.commands[name].params}
+                for name in ("process", "qc")}  # fmt: skip
+    for flag, field in fields.items():
+        assert defaults["process"][flag] == defaults["qc"][flag] == getattr(Fastp(), field), flag
+
+
+def test_no_card_sends_a_reader_to_another_page_s_figure():
+    """M2's fastp grid is on the qc page alone: no other command's card mentions a grid.
+
+    Mutation caught: the process page's --fastp-q card left on M2's text ("see the grid")."""
+    group = typer.main.get_command(app)
+    for name, command in group.commands.items():
+        if name == "qc":
+            continue
+        for card in parameter_cards(group, command):
+            assert "grid" not in f"{card.meaning} {card.effect}".lower(), (name, card.name)
