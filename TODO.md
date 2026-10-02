@@ -450,7 +450,7 @@ Each item starts when the one before it is merged, because they change the same 
 12. [ ] The external-data research, then M9 with GS.9: planned and brought to Rytis before building.
 13. [ ] When 1 to 12 and the side items are merged (Rytis, 2026-10-01): go through this file again, every unchecked item of every phase, and implement each with a long-term, root-cause solution, never a workaround. Items that need Rytis (a decision, a cluster run, an account, a release, CI billing) are brought to him with the recommended answer first; the rest are planned, built, reviewed and merged in phase order.
 
-Alongside: the heatmap fix; M3.6, then M3.7 (the page at 1280 and 375 px), M3.9 (a cold run on the 8 teaching runs) and kit v5; the monocyte count (P4.4: downloaded and checked 2026-10-02, counting as job 47520582).
+Alongside: the heatmap fix; M3.6, then M3.7 (the page at 1280 and 375 px), M3.9 (a cold run on the 8 teaching runs) and kit v5; the monocyte count (P4.4: counted and checked on the Mac 2026-10-02).
 
 ## ✅ Phased checklist
 
@@ -621,6 +621,7 @@ Rytis asked for a bubble chart of raw against useful reads with a hover that say
 - [ ] **P2Q.8 M2's read stage on the full cohort** (D-050, Rytis 2026-10-01): fastp and the read metrics over all 210 Step-1 runs on Kebnekaise, so the read-level QC page shows the full cohort; the 8-run subset's page is the optional laptop exercise. Planned with M3.13, which reads the same FASTQs there.
 - [ ] **P2Q.9 Background bands on every QC tab that has one** (D-052, Rytis 2026-10-01): apply the approved proposal to `conf/qc_metrics.toml`; `strip()` draws plot_bands and plot_line; the registry checks band order against direction and refuses unknown keys; the FastQC status tabs draw per-position curves (sequence content grey over positions 1 to 13); rrna_fraction's action keep until P2Q.10; checkpoint `_show` never prints "100 is below 100"; `ctx gather` copies and reads nf-core's raw-read FastQC zips through MultiQC (COPIED_FILES and every recorded rsync); the zips are on the Mac (Rytis, 2026-10-01: 210 found by `find -L` on Kebnekaise, 275 MB by its `du`; 210 copied by rsync into `~/ctx_tier1/data/raw/tier1_rnaseq/fastqc/raw/`, 143,332,040 bytes, all 210 pass a zip CRC check); the full-cohort flags counted and recorded. After the qc-page-fixes merge, which changes the same figure code.
 - [ ] **P2Q.10** Correct the definitions of top_gene_share (leave out Mt_rRNA genes and the 18S-antisense lncRNAs ENSG00000280614 and ENSG00000281383) and rrna_fraction (18S and 28S reads), then propose their bands (D-052).
+- [ ] **P4.5** Head-job memory from measured runs (open for Rytis, 2026-10-02): the nf-core/rnaseq head peaked at 6.16, 6.61 and 7.49 GiB of its 8 GiB on breast_mac (22 paired), breast_tissue (103 single-end) and breast_mono (94 paired); proposed: 12G in `scripts/bash/rnaseq.sbatch` and `--mem=12G` on every recorded `sbatch` that reuses the lab's `run_rnaseq.sbatch`, about 1.6 times the largest peak, as the time limits were set.
 
 ### Phase 2D — Reuse: any dataset, any figure (after the Step-1 record; Rytis 2026-09-29, D-020)
 
@@ -3264,6 +3265,9 @@ tail -n 30 "$B"/slurm-nf_rnaseq_breast_mono-*.out                     # PASTE
 ```
 
 3. Post-run checks of the rnaseq count (guarded on the matrix):
+
+Run 2026-10-02: job 47520582 completed in 1 h 50 min 13 s, the batch step at 7,851,832 KiB peak (7.49 GiB of the 8 GiB asked, 94 %; breast_mac peaked at 6.16 GiB, breast_tissue at 6.61). Step 6: 94 sample columns, 78,470 genes, 0 lines differing from Step-1, rnaseq v3.27.0-ga1fcddd, salmon 2.7.0, Nextflow 26.04.4, libType IU on all 94, 398 folders and 2,818 files with no link, results 74G, work/ 1.5T. Step 4 on the Mac (`~/ctx_breast/data/raw/breast_mono_rnaseq`): 94 sample columns, 188 Trim Galore reports, 380 files, 0 symlinks, 49 MB; 679 trace tasks, all COMPLETED (8 CAT_FASTQ, 94 TRIMGALORE, 188 SALMON_QUANT); `ctx.gather.rnaseq.read` accepts it (78,470 genes x 94 samples; 2,190,432 fractional values rounded), so work/ is Rytis's to remove.
+
 
 ```
 # Kebnekaise login node, once squeue shows no nf_rnaseq_breast_mono job. Paste back every line marked PASTE.
