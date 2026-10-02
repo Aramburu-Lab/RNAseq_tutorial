@@ -2,6 +2,9 @@
 
 import os
 import platform
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -79,3 +82,81 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     if kind == "skip":
         pytest.skip(why)
     pytest.fail(why, pytrace=False)
+
+
+CTX = Path(sys.executable).parent / "ctx"
+
+
+def ctx_run(*args: str, cwd: Path, env: dict[str, str] | None = None
+            ) -> subprocess.CompletedProcess[str]:  # fmt: skip
+    """``ctx`` in a subprocess, SLURM_ and CTX_ variables cleared unless ``env`` sets them."""
+    clean = {k: v for k, v in os.environ.items() if not k.startswith(("SLURM_", "CTX_"))}
+    return subprocess.run([str(CTX), *args], cwd=cwd, env={**clean, **(env or {})},
+                          capture_output=True, text=True, check=False)  # fmt: skip
+
+
+# The session run's cap: no fixture run holds more reads, so every read is kept and the
+# planted truths hold, while the cap's note and its realised counts are on the page.
+CAP = "1000"
+# The Salmon twin's off-contig counts for se_e: Salmon puts 0.4 of its reads on the slice, below
+# the share assigned here, as on a real partial reference (D-039).
+SE_E_ELSEWHERE = 500
+
+
+@pytest.fixture(scope="session")
+def process_root(tmp_path_factory):
+    """`ctx process --aligner hisat2` on the chr22_se fixture, every setting and a Salmon twin.
+
+    One run for the whole session: tests/test_process_run.py reads it, and test_cli reruns a
+    copy of it (``process_run``), so the alignment is paid for once (M3.14).
+    """
+    from process_root import (  # noqa: PLC0415
+        COMPARE,
+        DATASET,
+        SLICE,
+        dataset_file,
+        plant,
+        plant_compare,
+    )
+
+    root = tmp_path_factory.mktemp("process")
+    plant(root)
+    plant_compare(root, off={"se_e": SE_E_ELSEWHERE})
+    spec = dataset_file(root, root)
+    args = ("--root", str(root), "process", "--dataset", DATASET, "--dataset-file", str(spec),
+            "--genome", str(SLICE), "--aligner", "hisat2", "--settings", "cut,untrimmed",
+            "--compare-dataset", COMPARE, "--reads-per-run", CAP)  # fmt: skip
+    done = ctx_run(*args, cwd=root)
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, spec, done
+
+
+@pytest.fixture(scope="session")
+def process_run(process_rerun):
+    """(root, overview html) of ``process_rerun``: test_cli's card test reads its page."""
+    root, html, _ = process_rerun
+    return root, html
+
+
+@pytest.fixture(scope="session")
+def process_rerun(process_root, tmp_path_factory):
+    """A copy of ``process_root`` rerun at the defaults but the aligner and the cap: (root, html).
+
+    Its dataset file now declares itself a subset (D-050). The tool folders' modification
+    times before the rerun ride along as the third value, so a test can see what was reused.
+    """
+    from process_root import DATASET, PARENT, SLICE, dataset_file  # noqa: PLC0415
+
+    source, _, _ = process_root
+    root = tmp_path_factory.mktemp("process_again") / "root"
+    shutil.copytree(source, root)
+    tools = root / "outputs" / "03_process" / "tools"
+    before = {str(p.relative_to(tools)): p.stat().st_mtime_ns for p in tools.rglob("*")
+              if p.is_file()}  # fmt: skip
+    copied = dataset_file(root, root, subset_of=PARENT)
+    done = ctx_run("--root", str(root), "process", "--dataset", DATASET, "--dataset-file",
+                   str(copied), "--genome", str(SLICE), "--aligner", "hisat2",
+                   "--reads-per-run", CAP, cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    (page,) = (root / "outputs" / "03_process").glob(f"*_process_{DATASET}_overview_v1.html")
+    return root, page.read_text(), before

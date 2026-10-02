@@ -30,6 +30,19 @@ class Strandedness(StrEnum):
     REVERSE = "reverse"
 
 
+# The featured sample's extra alignments a reader can ask for (--settings); under HISAT2 an
+# unspliced alignment is added (D-036: STAR has no switch that turns splicing off).
+SETTINGS = ("cut", "untrimmed")
+DEFAULT_SETTINGS = "cut"
+# --multimap-max: STAR's --outFilterMultimapNmax must stay within --winAnchorMultimapNmax,
+# whose default is 50 (STAR manual 2.7.11b, 4.1).
+MULTIMAP_RANGE = (1, 50)
+# Each aligner's outcomes for a read, the order the mapping figure stacks them in.
+CATEGORIES = {
+    Aligner.STAR: ("unique", "multi", "too_many", "mismatches", "too_short", "other"),
+    Aligner.HISAT2: ("unique", "multi", "unmapped"),
+}
+
 # The one map of a strand to STAR's ReadsPerGene column and featureCounts' -s: column 2
 # counts either strand, column 3 reads whose read 1 lies on the gene's strand, column 4 reads
 # whose read 2 does (STAR manual 2.7.11b, section 8); -s 0, 1, 2 likewise (Subread Users Guide,

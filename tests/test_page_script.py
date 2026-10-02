@@ -8,6 +8,7 @@ and cutoff line with the Python definition over a grid of every basis, cutoff an
 import dataclasses
 import json
 import math
+import re
 import shutil
 import subprocess
 from collections import Counter
@@ -368,3 +369,25 @@ def test_filter_draws_what_bardata_defines(kind, horizontal):
     assert out["views"][0]["summary"] == _defaults(cfg)["summary"]
     assert any(not p["view"]["bars"] for p in out["views"])
     assert len({p["summary"] for p in out["views"]}) > len(choices) // 2
+
+
+def test_a_filter_line_without_a_median_and_its_selects_in_words():
+    """Bars stacked to 100 %: the live line counts the bars shown and prints no median, before
+    and after a choice, and each select is labelled in words, its column kept for the script.
+
+    Mutations caught: ``_defaults`` ignoring summary_median (a median of 100 % printed); the
+    select labelled by its column name ("cell_type")."""
+    data = dataclasses.replace(filtered_bars("groups"), summary_median=False,
+                               labels={"cell_type": "Cell type"})  # fmt: skip
+    cfg = data.controls()
+    shown = _defaults(cfg)
+    assert shown["summary"] == f"{cfg['total']:,} of {cfg['total']:,} bars shown."
+    assert "median" not in shown["template"]
+    assert ("cell_type", cfg["filters"]["cell_type"], "Cell type") in shown["filters"]
+    assert ("condition", cfg["filters"]["condition"], "condition") in shown["filters"]
+    choices = [{"cell_type": "", "condition": ""}, {"cell_type": "NDN", "condition": ""}]
+    payload = {"rows": data.page_table().to_dicts(), "cfg": cfg, "choices": choices,
+               "template": shown["template"], "none": shown["none"], "numbers": []}  # fmt: skip
+    out = _node(payload, PICK, FILTER)
+    assert out["views"][0]["summary"] == shown["summary"]
+    assert re.fullmatch(r"\d+ of \d+ bars shown\.", out["views"][1]["summary"])

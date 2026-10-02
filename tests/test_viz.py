@@ -880,3 +880,35 @@ def test_hdr_levels_hold_their_mass_and_no_more_cells():
     data = demo_density()
     inner = (data.table()["region"] == "inner").sum() / data.table()["region"].is_not_null().sum()
     assert 0.5 <= inner <= 0.75
+
+
+@pytest.mark.parametrize("title", ["Difference d (log2(count + 1))",
+                                   "Count with -O, split (--fraction) (log2(count + 1))",
+                                   "Called strand (log2(count + 1))"])  # fmt: skip
+def test_a_vertical_title_never_breaks_inside_its_unit(title):
+    """At every scatter height a wrapped y title keeps "(log2(count + 1))" on one line; split at
+    its spaces it had left "1))" or "+ 1))" alone (M3's agreement plots).
+
+    Mutation caught: ``fit_title`` wrapping at every space again."""
+    from ctx.viz.annotate import fit_title  # noqa: PLC0415
+    from ctx.viz.style import figure_inches  # noqa: PLC0415
+
+    for width in ("single", "double"):
+        _, height = figure_inches(width, "scatter")
+        for scale in (0.6, 1.0):
+            lines = fit_title(title, height * scale).split("\n")
+            assert "(log2(count + 1))" in "\n".join(lines), lines
+            assert " ".join(lines) == title
+
+
+def test_a_long_interactive_title_puts_its_unit_on_a_line_of_its_own():
+    """Plotly never wraps a title: past 26 characters the page breaks before the unit, so a
+    375 px phone shows it whole (M3.7); a short title and one without a unit stay as they are.
+
+    Mutation caught: ``screen_title`` returning the title unchanged (M3's x titles ran 5 to 24
+    px past the figure at 375 px)."""
+    from ctx.viz.axes import screen_title  # noqa: PLC0415
+
+    assert screen_title("Mean of both (log2(count + 1))") == "Mean of both<br>(log2(count + 1))"
+    assert screen_title("Reads (%)") == "Reads (%)"
+    assert screen_title("A label of thirty characters") == "A label of thirty characters"
