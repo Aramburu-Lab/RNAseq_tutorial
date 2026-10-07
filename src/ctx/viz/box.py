@@ -11,7 +11,7 @@ from typing import Any
 import polars as pl
 
 from ctx.viz.annotate import Caption, compare_groups, fit_title, place_caption
-from ctx.viz.axes import axis_title
+from ctx.viz.axes import axis_title, hover_field, hover_rows, hover_value, page_y_title
 from ctx.viz.style import (
     FIGURE_WIDTH,
     HEADROOM,
@@ -158,7 +158,7 @@ def static(data: BoxData, theme: Theme) -> Any:
 
     apply_matplotlib(theme)
     features = data.frame["feature"].unique(maintain_order=True).to_list()
-    width, height = figure_inches(FIGURE_WIDTH, "box")
+    width, height = _inches()
     # Figure, not pyplot: a GUI backend rounds the canvas to whole pixels (84.84 mm, not 85).
     fig = Figure(figsize=(width, height))
     ax = fig.subplots()
@@ -199,6 +199,11 @@ def static(data: BoxData, theme: Theme) -> Any:
     return fig
 
 
+def _inches() -> tuple[float, float]:
+    """The figure files' size, whose height also sets where the page breaks its y title."""
+    return figure_inches(FIGURE_WIDTH, "box")
+
+
 def _values(frame: pl.DataFrame, feature: str, group: str) -> list[float]:
     """One feature's measured values in one group; a missing value is not drawn."""
     rows = frame.filter((pl.col("feature") == feature) & (pl.col("group") == group))
@@ -217,6 +222,7 @@ def interactive(data: BoxData) -> Any:
     import plotly.graph_objects as go  # noqa: PLC0415 - heavy; imported after the runtime profile
 
     stats = {t.feature: t for t in data.caption.tests}
+    schema, title = data.frame.schema, axis_title(data.value_label, data.unit)
     fig = go.Figure()
     for role, group in zip(("reference", "comparison"), data.groups, strict=True):
         rows = data.frame.filter(pl.col("group") == group)
@@ -228,9 +234,11 @@ def interactive(data: BoxData) -> Any:
             ]
             for f in rows["feature"]
         ]
-        custom = [[*h, *e] for h, e in zip(rows.select(data.hover).rows(), extra, strict=True)]
+        custom = [[*h, *map(hover_value, e)]
+                  for h, e in zip(hover_rows(rows, data.hover), extra, strict=True)]  # fmt: skip
         k = len(data.hover)
-        hover_lines = [f"{c}: %{{customdata[{i}]}}" for i, c in enumerate(data.hover)]
+        hover_lines = [f"{c}: {hover_field(f'customdata[{i}]', schema[c])}"
+                       for i, c in enumerate(data.hover)]  # fmt: skip
         fig.add_trace(
             go.Box(
                 x=rows["feature"].to_list(),
@@ -246,8 +254,8 @@ def interactive(data: BoxData) -> Any:
                         f"{data.feature_label}: %{{x}}",
                         f"group: {group}",
                         *hover_lines,
-                        f"{axis_title(data.value_label, data.unit)}: %{{y:.3~g}}",
-                        f"n: %{{customdata[{k}]}}",
+                        f"{title}: {hover_field('y', schema['value'])}",
+                        f"n: {hover_field(f'customdata[{k}]', pl.Int64())}",
                         f"p_adj: %{{customdata[{k + 1}]:.2g}}",
                         f"r: %{{customdata[{k + 2}]:.2f}}",
                     ]
@@ -274,7 +282,7 @@ def interactive(data: BoxData) -> Any:
         boxmode="group",
         xaxis_title=data.feature_label,
         # Room above the tallest box for the p and r labels, as the static figure leaves.
-        yaxis={"title": {"text": axis_title(data.value_label, data.unit)},
+        yaxis={"title": {"text": page_y_title(title, _inches()[1])},
                "range": [low - 0.05 * span, high + HEADROOM * span]},
         annotations=labels,
     )  # fmt: skip

@@ -10,9 +10,11 @@ code only names a key and fills in the numbers. Rebuild a page by running its co
 | The M0 Setup page | `setup.toml` | `purpose`, `input`, `method`, `interpretation`, `pitfalls`, `[[terms]]`, `[[questions]]`, then one table per results block |
 | The M1 Gather page | `gather.toml` | the same skeleton, then the checks, curation, counts and the two figures |
 | The M3 Trim, align, count page | `process.toml` | the same skeleton, then the notes, groups, key numbers, outcomes, settings, comparisons, each figure's words and each table's columns; `[preview]` holds what the course preview alone says |
+| The M5 Differential expression page, the sentences moved so far | `de.toml` | the volcano's adjustment sentence, and what a thinned page calls the points it may leave out |
+| The M6 Function page, the sentences moved so far | `function.toml` | the ORA lead, caption and passing line; the GSEA highlight line; the background lesson's words in each direction, and its self-checks |
 
-Not here yet: the M5 and M6 pages, the hub and the figure captions. Their code is frozen
-until the Step-1 record, and their text moves after it (TODO.md, P2S.4).
+Not here yet: the rest of the M5 and M6 pages, the hub and the other figure captions. Their
+text moves with P2S.4 (TODO.md).
 
 ## Rules the tests hold
 

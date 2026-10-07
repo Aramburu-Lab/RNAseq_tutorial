@@ -1,0 +1,18 @@
+# The M5 Differential expression page (ctx de): the sentences moved here so far. The rest of
+# its text is still in src/ctx/de/page.py and src/ctx/de/run.py and moves with P2S.4
+# (TODO.md). Placeholders in {braces} are filled by the code; keep their names.
+
+# The figure files draw every tested gene; a page that thins them ends its caption with
+# ui.toml's thinned sentence.
+[figures.volcano]
+tested = "The four adjustments count over the same {tested:,} tested genes."
+
+# What a page that thins a figure's points calls the ones it may leave out (ui.toml, thinned).
+[figures.ma]
+thinned = "genes not called"
+
+[figures.dispersion]
+thinned = "genes"
+
+[figures.lfc]
+thinned = "genes called in neither contrast"

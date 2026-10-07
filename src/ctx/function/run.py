@@ -16,7 +16,7 @@ import numpy as np
 import polars as pl
 
 from ctx import runtime
-from ctx.dataset import Dataset, DatasetError, load
+from ctx.dataset import Contrast, Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
 from ctx.de.stats import ALPHA
 from ctx.function import lite
@@ -24,6 +24,7 @@ from ctx.function.page import (
     CALLS,
     CONCEPT,
     MISTAKES,
+    PAGE,
     PRACTICE,
     QUESTION,
     TERMS,
@@ -34,6 +35,7 @@ from ctx.function.page import (
     running_text,
     think,
     trap_text,
+    union_direction,
 )
 from ctx.io.naming import MODULES, stem
 from ctx.report.builder import (
@@ -48,6 +50,7 @@ from ctx.report.builder import (
     SelfCheck,
     write,
 )
+from ctx.report.text import fill
 from ctx.viz.bar import BarData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import ROLES, category_colours
@@ -85,13 +88,16 @@ def _ranking(results: pl.DataFrame) -> tuple[list[str], np.ndarray]:
     )
 
 
-def _symbols(results: pl.DataFrame, call: str | None = None) -> list[str]:
-    """Symbols of the tested genes, or of the genes with one call."""
+def _tested(results: pl.DataFrame, call: str | None = None) -> pl.DataFrame:
+    """The tested genes, or those of them with one call."""
     tested = set(lite.background(results["gene_id"].to_list(), results["padj"].to_list()))
     rows = results.filter(pl.col("gene_id").is_in(list(tested)))
-    if call:
-        rows = rows.filter(pl.col("call") == call)
-    return sorted({s for s in rows["gene_name"].drop_nulls() if s})
+    return rows.filter(pl.col("call") == call) if call else rows
+
+
+def _symbols(results: pl.DataFrame, call: str | None = None) -> list[str]:
+    """Symbols of the tested genes, or of the genes with one call; two genes may share one."""
+    return sorted({s for s in _tested(results, call)["gene_name"].drop_nulls() if s})
 
 
 def _gsea(results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]) -> list[lite.Enriched]:
@@ -152,12 +158,16 @@ def _gsea_bars(name: str, frame: pl.DataFrame) -> BarData:
     )
 
 
-def _ora_bars(name: str, frame: pl.DataFrame, background: int) -> BarData:
-    """-log10 FDR of the top ORA sets per direction."""
+def _ora_bars(name: str, frame: pl.DataFrame, background: int) -> BarData | None:
+    """-log10 FDR of every set that passes, a block per direction; None when none passes.
+
+    A set that fails has no bar: drawn among the top seven per direction, 5 of Step-1's down
+    bars sat at FDR 1, a length of 1.6e-13.
+    """
     top = (
-        frame.sort("fdr", "gene_set")
-        .group_by("direction", maintain_order=True)
-        .head(TOP_SETS // 2)
+        frame.filter(pl.col("fdr") < ALPHA)
+        # The direction holding the smallest FDR first, each direction's sets by FDR.
+        .sort(pl.col("fdr").min().over("direction"), "direction", "fdr", "gene_set")
         .with_columns(
             neg_log10_fdr=-pl.col("fdr").log10(),
             label=pl.col("gene_set")
@@ -167,6 +177,8 @@ def _ora_bars(name: str, frame: pl.DataFrame, background: int) -> BarData:
         )
         .unique(["label", "direction"], maintain_order=True)
     )
+    if top.is_empty():
+        return None
     columns = {
         **ORA_COLUMNS,
         "neg_log10_fdr": ("-log10 FDR", "Minus log10 of the FDR."),
@@ -181,9 +193,8 @@ def _ora_bars(name: str, frame: pl.DataFrame, background: int) -> BarData:
         value_label="Significance",
         series="direction",
         colours={"up": ROLES["comparison"], "down": ROLES["reference"]},
-        caption=(
-            f"{name}: hypergeometric ORA of the up and the down calls ({CALLS}), BH per "
-            f"direction, against {background:,} tested genes; the dashed line is FDR = {ALPHA}."
+        caption=fill(
+            PAGE, "figures.ora.caption", name=name, calls=CALLS, background=background, alpha=ALPHA
         ),
         horizontal=True,
         hline=(-float(np.log10(ALPHA)), f"FDR {ALPHA}"),
@@ -226,9 +237,10 @@ def _featured_bars(featured: str, per_contrast: Mapping[str, pl.DataFrame]) -> B
 def _running(name: str, result: lite.Enriched) -> ScatterData:
     """The running enrichment score, with the set's genes as ticks along the ranking."""
     ranks = tuple(float(i) for i in range(len(result.running)))
+    # A rank is a whole number: as a float, the hover printed 12,345 as 1.23e+4.
     frame = pl.DataFrame(
         {
-            "rank": [float(p) for p in result.positions],
+            "rank": pl.Series([int(p) for p in result.positions], dtype=pl.Int64),
             "running": [result.running[p] for p in result.positions],
             "mark": ["set member"] * result.size,
         }
@@ -263,7 +275,11 @@ def _running(name: str, result: lite.Enriched) -> ScatterData:
 def _trap(
     name: str, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]
 ) -> tuple[BarData, int, int]:
-    """The same up calls tested against the tested genes and against the gene-set union."""
+    """The same up calls tested against the tested genes and against the gene-set union.
+
+    The caption counts the calls and their symbols apart: on Step-1 ndn_gcsf 1,683 up calls
+    carry 1,681 symbols, as CMAHP and RRN3P3 each name two called genes.
+    """
     tested = _symbols(results)
     union = sorted({g for genes in sets.values() for g in genes} | set(tested))
     hits = _symbols(results, "up")
@@ -290,15 +306,26 @@ def _trap(
         value_label="Significance",
         series="background",
         colours=category_colours(["tested genes", "gene-set union"]),
-        caption=(
-            f"{name}: the same {len(hits)} up calls, hypergeometric p against {len(tested):,} "
-            f"tested genes and against {len(union):,} genes, every gene in the sets plus the "
-            "tested ones (gseapy's default when no background is given)."
+        caption=fill(
+            PAGE,
+            "figures.background.caption",
+            name=name,
+            calls=_tested(results, "up").height,
+            hits=len(hits),
+            tested=len(tested),
+            union=len(union),
         ),
         horizontal=True,
         width="double",
     )
     return data, len(tested), len(union)
+
+
+def _moved(trap: BarData) -> tuple[int, int, int]:
+    """The plotted sets that look more, and less, significant against the union; and all."""
+    wide = trap.frame.pivot(on="background", index="gene_set", values="neg_log10_p")
+    union, tested = wide["gene-set union"], wide["tested genes"]
+    return int((union > tested).sum()), int((union < tested).sum()), wide.height
 
 
 @dataclass(frozen=True)
@@ -312,6 +339,27 @@ class _Enrichment:
     gmt: Path
 
 
+def _featured(writer: Writer, contrast: Contrast, e: _Enrichment) -> Group:
+    """The featured contrast's ORA and GSEA bars; a sentence where no ORA set passes."""
+    name = contrast.name
+    background = _symbols(e.results[name])
+    ora = _ora(e.results[name], e.sets, background)
+    passing = dict(ora.filter(pl.col("fdr") < ALPHA)["direction"].value_counts().rows())
+    bars = _ora_bars(name, ora, len(background))
+    gsea = e.gsea[name]
+    ranked = _gsea_bars(name, gsea)
+    drawn = (int((ranked.frame["fdr"] < ALPHA).sum()), ranked.frame.height)
+    items = (
+        writer.figure(bars, f"ora_{name}", ora_text(contrast, len(background),
+                                                    passing.get("up", 0), passing.get("down", 0)))
+        if bars else fill(PAGE, "figures.ora.none", alpha=ALPHA),
+        writer.figure(ranked, f"gsea_{name}",
+                      gsea_text(contrast, int((gsea["fdr"] < ALPHA).sum()), gsea.height, drawn)),
+    )  # fmt: skip
+    # Tabs hold figures only: with no ORA figure its sentence stands above the GSEA bars.
+    return Group(f"Featured contrast: {name}", items, tabs=bars is not None)
+
+
 def _page(
     writer: Writer, spec: Dataset, e: _Enrichment
 ) -> tuple[list[Result], tuple[KeyNumber, ...], tuple[SelfCheck, ...]]:
@@ -320,24 +368,8 @@ def _page(
     fn = spec.function
     featured = spec.de.featured
     contrasts = {c.name: c for c in spec.contrasts}
-    background = _symbols(e.results[featured])
-    ora = _ora(e.results[featured], e.sets, background)
-    passing = ora.filter(pl.col("fdr") < ALPHA)["gene_set"].n_unique()
     gsea = e.gsea[featured]
-    first = Group(
-        f"Featured contrast: {featured}",
-        (
-            writer.figure(
-                _ora_bars(featured, ora, len(background)), f"ora_{featured}",
-                ora_text(contrasts[featured], len(background), passing),
-            ),
-            writer.figure(
-                _gsea_bars(featured, gsea), f"gsea_{featured}",
-                gsea_text(contrasts[featured], int((gsea["fdr"] < ALPHA).sum()), gsea.height),
-            ),
-        ),
-        tabs=True,
-    )  # fmt: skip
+    first = _featured(writer, contrasts[featured], e)
     one_set: list[FigureBlock | str] = []
     tested = [n for n, table in e.gsea.items() if fn.featured_set in set(table["gene_set"])]
     if tested:
@@ -359,15 +391,15 @@ def _page(
     else:
         one_set.append(f"No running score: {gene_set} was not tested in {contrast}.")
     trap, n_tested, n_union = _trap(featured, e.results[featured], e.sets)
-    wide = trap.frame.pivot(on="background", index="gene_set", values="neg_log10_p")
-    more = int((wide["gene-set union"] > wide["tested genes"]).sum())
+    more, less, shown_sets = _moved(trap)
     page_results: list[Result] = [
         ResultTable("Gene sets", ("File", "Sets", "Licence"), ((e.gmt.name, f"{len(e.sets):,}",
                                                                fn.licence),), numeric=(1,)),
         first,
         Group(f"One gene set: {fn.featured_set}", tuple(one_set)),
         Group("Method: the background", (writer.figure(
-            trap, f"background_{featured}", trap_text(n_tested, n_union, more, wide.height)),)),
+            trap, f"background_{featured}",
+            trap_text(n_tested, n_union, (more, less), shown_sets)),)),
     ]  # fmt: skip
     keys: tuple[KeyNumber, ...] = (
         KeyNumber("Gene sets", f"{len(e.sets):,}", e.gmt.name),
@@ -379,7 +411,8 @@ def _page(
     if shown:
         keys += (KeyNumber(f"NES, {_short(fn.featured_set)}", f"{shown.nes:.2f}",
                            f"FDR {fdr_words(shown.fdr)}, {featured}"),)  # fmt: skip
-    return page_results, keys, think(n_tested, n_union)
+    direction = None if n_union == n_tested else union_direction(more, less)
+    return page_results, keys, think(direction)
 
 
 def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named option or context

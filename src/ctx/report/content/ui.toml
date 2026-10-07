@@ -66,6 +66,16 @@ columns = "Column meanings"
 # sets on a phone, or opened alone at twice its type in a window too narrow for it.
 scroll = "Wider than this window: scroll the figure sideways to see all of it."
 
+# Ends the page caption of a scatter that draws fewer points than its figure files
+# (ScatterData.caption_text): every point always drawn, then every nth unit of the rest, in
+# order of the y axis. {rest} names the rest in the figure's own words, else callable (live
+# calls) or other. units: a gene's raw and shrunk estimates, say, drawn or left out together.
+[thinned]
+rows = "This page draws {drawn:,} of the {units:,} {rest}, every {nth} in order of {order}; the CSV holds all {total:,}."
+units = "This page draws all points of {drawn:,} of the {units:,} {rest}, every {nth} in order of {order}; the CSV holds all {total:,} points."
+callable = "points no setting can call"
+other = "other points"
+
 # The PDF and SVG buttons of a figure with page controls: at the defaults they link the figure
 # files; once a control is moved, they draw the view as set (D-033).
 [export]

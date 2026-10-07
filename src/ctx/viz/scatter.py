@@ -8,13 +8,15 @@ import base64
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
+from functools import cached_property
+from typing import Any, NamedTuple
 
 import numpy as np
 import polars as pl
 
+from ctx.report import text
 from ctx.viz.annotate import fit_title, place_caption
-from ctx.viz.axes import axis_title, screen_title
+from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title, screen_title
 from ctx.viz.style import (
     ALONE_SCALE,
     BUBBLE_KEYS,
@@ -41,11 +43,11 @@ from ctx.viz.style import (
 
 # Points not in ``keep`` above this many are thinned on the HTML page; the CSV keeps all.
 THIN_MAX = 2000
+# Numbers the rows while thinning, where no ``unit`` column groups them.
+ROW = "_thin_row"
 MAX_LABELS = 10
 # Offset of a point label from its point, in points.
 LABEL_OFFSET = 3.0
-# Hover number formats: significant digits for measurements, thousands for counts.
-FLOAT_HOVER, INT_HOVER = ":.3~g", ":,d"
 # Cutoffs the page offers as presets; the loosest bounds what may be thinned.
 CUTOFF_PRESETS = (0.1, 0.05, 0.01, 0.001)
 # The strictest cutoff the page accepts; a smaller typed value is raised to it.
@@ -98,6 +100,22 @@ def _line_style(line: Line, theme: Theme) -> dict[str, Any]:
     if line.dash:
         return {"color": theme.reference, "linestyle": THRESHOLD_DASH[0]}
     return {"color": theme.ink}
+
+
+class Thinning(NamedTuple):
+    """The page's one selection of the points it draws, which its views and exports share.
+
+    Attributes:
+        page: One flag per row of the frame: drawn on the page.
+        units: Units not kept: values of ``unit``, or rows where there is none.
+        drawn: Of those, the units the page draws.
+        stride: The page draws every ``stride``-th of them in order of y; 1 draws all.
+    """
+
+    page: pl.Series
+    units: int
+    drawn: int
+    stride: int
 
 
 @dataclass(frozen=True)
@@ -247,6 +265,11 @@ class ScatterData:
         size: Non-negative numeric column that sets each point's area, or None.
         size_label: What the size shows, for its legend keys.
         labels: Words for a ``hover`` column, where its name is terse.
+        unit: Column naming what a row is a point of, such as the gene of a raw and a shrunk
+            estimate: the page draws or leaves out a unit's rows together. None: each row.
+        thinned: The caption's words for the units the page may thin, such as "genes not
+            called"; empty takes the page text's own: points no setting can call, with
+            ``calls``, else other points. Needed with ``unit``.
     """
 
     frame: pl.DataFrame
@@ -271,6 +294,8 @@ class ScatterData:
     size: str | None = None
     size_label: str = ""
     labels: Mapping[str, str] | None = None
+    unit: str | None = None
+    thinned: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -282,6 +307,7 @@ class ScatterData:
             self.label,
             self.keep,
             self.size,
+            self.unit,
             *self.hover,
         ]
         if self.calls:
@@ -304,6 +330,18 @@ class ScatterData:
             raise ValueError(f"{self.size}: sizes must be non-negative")
         if self.symbol and self.frame[self.symbol].n_unique() > len(MARKERS):
             raise ValueError(f"{self.symbol}: more levels than the {len(MARKERS)} marker shapes")
+        self._check_unit()
+
+    def _check_unit(self) -> None:
+        """Refuse a unit the caption cannot name, or one a thinned page would split."""
+        if self.unit is None:
+            return
+        if not self.thinned:
+            raise ValueError(f"unit {self.unit}: name the units in thinned")
+        if self.keep:
+            split = self.frame.group_by(self.unit).agg(pl.col(self.keep).n_unique() > 1)
+            if n := int(split[self.keep].sum()):
+                raise ValueError(f"{self.unit}: {n} units with rows kept and rows not kept")
 
     def table(self) -> pl.DataFrame:
         """Every point, drawn or thinned."""
@@ -379,31 +417,48 @@ class ScatterData:
             Line(CUTOFF_NAME, horizontal[0], horizontal[1], dash=True),
         )
 
-    def _thinned(self) -> tuple[pl.DataFrame, int]:
-        """The points not kept, in order of y, and the page's stride through them; 1 draws all."""
+    @cached_property
+    def thinning(self) -> Thinning:
+        """Every point kept, then every k-th unit of the rest in order of its first row's y.
+
+        k is the stride that leaves about ``THIN_MAX`` of the points not kept, counted as rows,
+        so a unit of two points halves the units drawn and the page keeps its size. A unit's
+        rows are drawn or left out together: thinned row by row, the MA plot showed one of the
+        two estimates of 1,645 of Step-1's 9,093 genes not called. Ties keep the table's
+        order, so the same table draws the same page.
+        """
+        rows = self.frame.with_row_index(ROW)
         if self.keep is None:
-            return self.frame.clear(), 1
-        other = self.frame.filter(~pl.col(self.keep)).sort(self.y)
-        return other, 1 if other.height <= THIN_MAX else math.ceil(other.height / THIN_MAX)
+            return Thinning(pl.Series([True] * rows.height), 0, 0, 1)
+        kept, unit = pl.col(self.keep).fill_null(False), self.unit or ROW
+        other = rows.filter(~kept)
+        order = other.unique(unit, keep="first", maintain_order=True)
+        units = order.sort(self.y, maintain_order=True)[unit]
+        stride = 1 if other.height <= THIN_MAX else math.ceil(other.height / THIN_MAX)
+        chosen = units.gather_every(stride)
+        page = rows.select(kept | pl.col(unit).is_in(chosen.implode())).to_series()
+        return Thinning(page, units.len(), chosen.len(), stride)
 
     def on_page(self) -> pl.DataFrame:
-        """The points the HTML page draws: every kept point, the rest thinned by a stride."""
-        other, stride = self._thinned()
-        if stride == 1 or self.keep is None:
-            return self.frame
-        return pl.concat([self.frame.filter(pl.col(self.keep)), other.gather_every(stride)])
+        """The points the HTML page draws, in the table's order: ``thinning``'s selection."""
+        return self.frame.filter(self.thinning.page)
 
     def caption_text(self) -> str:
-        """The caption, plus the thinning rule when the page draws fewer points than the CSV."""
-        other, stride = self._thinned()
-        if stride == 1:
+        """The caption, then the page's thinning sentence when it draws fewer points than the CSV.
+
+        The figure files draw every point, so their caption is ``caption`` alone.
+        """
+        t = self.thinning
+        if t.stride == 1:
             return self.caption
-        drawn = self.on_page().height - (self.frame.height - other.height)
-        return (
-            f"{self.caption} This page draws {drawn:,} of the {other.height:,} points no "
-            f"setting can call, every {_ordinal(stride)} in order of {self.y_label}; the CSV "
-            f"holds all {self.frame.height:,}."
-        )
+        rest = self.thinned or text.word("ui", "thinned.callable" if self.calls
+                                         else "thinned.other")  # fmt: skip
+        sentence = text.fill(
+            "ui", "thinned.units" if self.unit else "thinned.rows", drawn=t.drawn,
+            units=t.units, rest=rest, nth=_ordinal(t.stride), order=self.y_label,
+            total=self.frame.height,
+        )  # fmt: skip
+        return f"{self.caption} {sentence}"
 
     def export_layers(self) -> dict[str, Any]:
         """What the figure files draw and the page's plot lacks, for its PDF and SVG of a view.
@@ -413,8 +468,7 @@ class ScatterData:
         offset in pt and the alignment ``static()`` placed it at. A moved view's file then
         draws every point and label the reference file does (review, 2026-10-01).
         """
-        other, stride = self._thinned()
-        omitted = other.with_row_index("_i").filter(pl.col("_i") % stride != 0)
+        omitted = self.frame.filter(~self.thinning.page)
         thinned = {}
         for index, rows in enumerate(self._trace_rows(omitted, self.colour)):
             if rows.height:
@@ -474,11 +528,6 @@ class ScatterData:
         if isinstance(diameters, list):
             return [d * PAGE_PX_PER_PT for d in diameters]
         return PLOTLY_MARKER_PX
-
-    def _hover_format(self, column: str) -> str:
-        """Plotly number format for a column: none for text, digits for numbers."""
-        dtype = self.frame.schema[column]
-        return FLOAT_HOVER if dtype.is_float() else INT_HOVER if dtype.is_integer() else ""
 
     def inches(self) -> tuple[float, float]:
         """The figure files' size, which a page's own PDF and SVG of a changed view take too."""
@@ -571,13 +620,13 @@ class ScatterData:
         ]
         frame = ax.get_window_extent(renderer)
         centre = ax.get_window_extent(renderer).x0 + ax.get_window_extent(renderer).width / 2
-        for text, x, y in rows.select(self.label, self.x, self.y).head(MAX_LABELS).rows():
+        for name, x, y in rows.select(self.label, self.x, self.y).head(MAX_LABELS).rows():
             # Labels face the middle of the axes, so a point near an edge keeps its label on
             # the page.
             right = ax.transData.transform((x, y))[0] > centre
             dx = -LABEL_OFFSET if right else LABEL_OFFSET
             note = ax.annotate(
-                text, (x, y), xytext=(dx, LABEL_OFFSET), textcoords="offset points",
+                name, (x, y), xytext=(dx, LABEL_OFFSET), textcoords="offset points",
                 ha="right" if right else "left", fontsize=SIZES["annotation"], color=theme.ink,
                 arrowprops={"arrowstyle": "-", "color": theme.ink,
                             "linewidth": LINE_WIDTHS["line"], "shrinkA": 0, "shrinkB": 0},
@@ -631,11 +680,12 @@ class ScatterData:
             self._axis_title(self.x_label, self.x),
             self._axis_title(self.y_label, self.y),
         )
+        schema = self.frame.schema
         hover = [
-            f"{x_title}: %{{x{self._hover_format(self.x)}}}",
-            f"{y_title}: %{{y{self._hover_format(self.y)}}}",
+            f"{x_title}: {hover_field('x', schema[self.x])}",
+            f"{y_title}: {hover_field('y', schema[self.y])}",
             *(
-                f"{(self.labels or {}).get(c, c)}: %{{customdata[{i}]{self._hover_format(c)}}}"
+                f"{(self.labels or {}).get(c, c)}: {hover_field(f'customdata[{i}]', schema[c])}"
                 for i, c in enumerate(self.hover)
             ),
         ]
@@ -653,7 +703,7 @@ class ScatterData:
                     marker={"color": self.colours[level] or light.reference,
                             "symbol": MARKERS[j][1], "size": self._px(rows),
                             "opacity": POINT_ALPHA},
-                    customdata=rows.select(self.hover).rows(), hovertemplate=template,
+                    customdata=hover_rows(rows, self.hover), hovertemplate=template,
                 )
             )  # fmt: skip
         # No text labels here: plotly cannot keep them apart; hover names every point.
@@ -680,7 +730,7 @@ class ScatterData:
             showlegend=len(fig.data) > 1,
             xaxis={"title": {"text": screen_title(x_title)},
                    "type": "log" if self.log_x else "linear"},
-            yaxis={"title": {"text": screen_title(y_title)},
+            yaxis={"title": {"text": page_y_title(y_title, self.inches()[1])},
                    "type": "log" if self.log_y else "linear"},
         )  # fmt: skip
         return fig

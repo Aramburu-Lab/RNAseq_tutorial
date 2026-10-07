@@ -1,10 +1,15 @@
-"""M6 page copy: the words around the enrichment figures, filled from the run's own results."""
+"""M6 page copy: the words around the enrichment figures, filled from the run's own results.
+
+The sentences moved so far are in ``content/function.toml``; the rest move with P2S.4.
+"""
 
 from ctx.dataset import Contrast
 from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.function import lite
 from ctx.report.builder import FigureText, SelfCheck
+from ctx.report.text import fill, word
 
+PAGE = "function"
 QUESTION = "Which pathways move together, beyond single genes?"
 CONCEPT = (
     "Over-representation analysis (ORA) asks whether a pathway holds more of the called genes "
@@ -25,11 +30,6 @@ TERMS = (
 PRACTICE = (
     "Use the tested genes as the background, rank by a signed statistic, and read each NES "
     "with its FDR. A pathway can move with no single gene called."
-)
-UNION_CHECK = SelfCheck(
-    "Why does the gene-set union background make the same hits look more significant?",
-    "It adds genes that could never have been called, such as ones not expressed in the cells, "
-    "so the expected overlap shrinks and ordinary overlaps look rare.",
 )
 THINK = (
     SelfCheck(
@@ -53,24 +53,33 @@ def fdr_words(fdr: float) -> str:
     return "0 (no null score as extreme)" if fdr == 0 else f"{fdr:.2g}"
 
 
-def ora_text(contrast: Contrast, background: int, passing: int) -> FigureText:
-    """Title, lead and reading guide of the ORA bars."""
+def ora_text(contrast: Contrast, background: int, up: int, down: int) -> FigureText:
+    """Title, lead and reading guide of the ORA bars, which draw only the sets that pass.
+
+    ``up`` and ``down`` count the sets passing on each direction's calls; the lead states
+    both, so a direction with no bar says it has none.
+    """
     return FigureText(
         title=f"Over-representation: {contrast.tested} over {contrast.reference}",
-        lead=f"{passing} gene sets pass FDR < {ALPHA} on the up or the down calls.",
+        lead=fill(PAGE, "figures.ora.lead", up=up, down=down, alpha=ALPHA),
         reading=(
             "Each bar is one gene set; its length is -log10 of its FDR, so a longer bar is "
             "stronger evidence of over-representation.",
             f"Colour says which calls were counted: up or down in {contrast.tested} ({CALLS}).",
-            f"A bar past the dashed line has FDR below {ALPHA}: more calls in the set than the "
-            f"{background:,} tested genes predict.",
+            fill(PAGE, "figures.ora.passing", alpha=ALPHA, background=background),
         ),
         tab="ORA",
     )
 
 
-def gsea_text(contrast: Contrast, passing: int, tested: int) -> FigureText:
-    """Title, lead and reading guide of the GSEA bars."""
+def gsea_text(contrast: Contrast, passing: int, tested: int, drawn: tuple[int, int]) -> FigureText:
+    """Title, lead and reading guide of the GSEA bars.
+
+    ``drawn`` is (bars that pass, bars): the last line names what the highlight separates
+    among the bars drawn. On Step-1 all 15 drawn passed, and "the others" pointed at none.
+    """
+    shown, bars = drawn
+    which = "all" if shown == bars else "no" if shown == 0 else "some"
     return FigureText(
         title=f"Gene set enrichment: {contrast.tested} over {contrast.reference}",
         lead=f"{passing} of {tested} tested gene sets pass FDR < {ALPHA}.",
@@ -79,7 +88,7 @@ def gsea_text(contrast: Contrast, passing: int, tested: int) -> FigureText:
             "NES.",
             f"Right of 0, the set's genes gather among genes higher in {contrast.tested}; left "
             f"of 0, among genes higher in {contrast.reference}.",
-            f"Highlighted bars pass FDR < {ALPHA}; the others are shown for context.",
+            fill(PAGE, f"figures.gsea.{which}", alpha=ALPHA),
         ),
         tab="GSEA",
     )
@@ -116,30 +125,47 @@ def running_text(contrast: Contrast, result: lite.Enriched, ranked: int) -> Figu
     )
 
 
-def think(tested: int, union: int) -> tuple[SelfCheck, ...]:
-    """The self-checks; the background question only where the two backgrounds differ."""
-    return (UNION_CHECK, *THINK) if union > tested else THINK
+def union_direction(more: int, less: int) -> str:
+    """Which way the gene-set union moved most plotted sets: "more" or "less" significant.
+
+    Against the union a set's share of the background grows by its own untested members and
+    shrinks by the others', so the direction is measured, never assumed: on Step-1 ndn_gcsf
+    6 of 7 plotted sets looked less significant. "mixed" when as many moved each way.
+    """
+    return "more" if more > less else "less" if less > more else "mixed"
 
 
-def trap_text(tested: int, union: int, more: int, shown: int) -> FigureText:
+def think(direction: str | None) -> tuple[SelfCheck, ...]:
+    """The self-checks, with the background question where the two backgrounds differ.
+
+    ``direction`` is ``union_direction``'s, and None where both hold the same genes.
+    """
+    if direction is None:
+        return THINK
+    key = f"questions.union_{direction}"
+    return (SelfCheck(word(PAGE, f"{key}.prompt"), word(PAGE, f"{key}.answer")), *THINK)
+
+
+def trap_text(tested: int, union: int, moved: tuple[int, int], shown: int) -> FigureText:
     """Title, lead and reading guide of the background lesson, from the bars drawn.
 
-    ``more`` counts the plotted sets that look more significant against the union.
+    ``moved`` counts the plotted sets that look more and less significant against the union;
+    the second reading line explains the direction most of them took.
     """
+    more, less = moved
     lead = (
-        "Here both backgrounds hold the same genes, so the bars match."
+        word(PAGE, "figures.background.lead_same")
         if union == tested
-        else f"Against {union:,} genes instead of {tested:,}, {more} of {shown} sets look more "
-        "significant."
-    )
+        else fill(PAGE, "figures.background.lead_moved", union=union, tested=tested, more=more,
+                  less=less, shown=shown)
+    )  # fmt: skip
     return FigureText(
         title="The background decides the p-value",
         lead=lead,
         reading=(
             "Each gene set appears twice: tested against the genes DESeq2 tested, and against "
             "every gene in any set plus the tested ones, gseapy's default.",
-            "A longer bar looks more significant; genes that could never be called make the "
-            "same overlap look rarer.",
+            word(PAGE, f"figures.background.{union_direction(more, less)}"),
             "Use the tested genes: only they could have been called.",
         ),
     )

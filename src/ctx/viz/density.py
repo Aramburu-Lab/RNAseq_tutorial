@@ -15,7 +15,7 @@ import numpy as np
 import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
-from ctx.viz.axes import axis_title
+from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title
 from ctx.viz.contour import (
     DENSITY_BINS,
     DENSITY_MARGIN,
@@ -25,7 +25,7 @@ from ctx.viz.contour import (
     density_grid,
     hdr_levels,
 )
-from ctx.viz.scatter import FLOAT_HOVER, log_ticks
+from ctx.viz.scatter import log_ticks
 from ctx.viz.style import (
     DENSITY_DASH,
     FIGURE_WIDTH,
@@ -204,6 +204,10 @@ class DensityData:
         return (axis_title(self.x_label, self.columns[self.x][0]),
                 axis_title(self.y_label, self.columns[self.y][0]))  # fmt: skip
 
+    def _inches(self) -> tuple[float, float]:
+        """The figure files' size, whose height also sets where the page breaks its y title."""
+        return figure_inches(self.width, "contour")
+
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
 
@@ -217,7 +221,7 @@ class DensityData:
         from matplotlib.figure import Figure  # noqa: PLC0415 - heavy
 
         apply_matplotlib(theme)
-        width, height = figure_inches(self.width, "contour")
+        width, height = self._inches()
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
         xs, ys = self.centres()
@@ -285,9 +289,12 @@ class DensityData:
                     name=f"{group} {self.region_labels[key == 'outer']}", hoverinfo="skip",
                 ))  # fmt: skip
         x_title, y_title = self._titles()
+        schema = self.frame.schema
         template = "<br>".join([
-            f"{x_title}: %{{x{FLOAT_HOVER}}}", f"{y_title}: %{{y{FLOAT_HOVER}}}",
-            *(f"{c}: %{{customdata[{i}]}}" for i, c in enumerate(self.hover)),
+            f"{x_title}: {hover_field('x', schema[self.x])}",
+            f"{y_title}: {hover_field('y', schema[self.y])}",
+            *(f"{c}: {hover_field(f'customdata[{i}]', schema[c])}"
+              for i, c in enumerate(self.hover)),
         ])  # fmt: skip
         points = self.frame.filter(self._drawn())
         for group, colour in self.colours.items():
@@ -297,7 +304,7 @@ class DensityData:
                 fig.add_trace(go.Scatter(
                     x=rows[self.x].to_list(), y=rows[self.y].to_list(), mode="markers",
                     name=str(group),
-                    customdata=rows.select(self.hover).rows() if self.hover else None,
+                    customdata=hover_rows(rows, self.hover) if self.hover else None,
                     hovertemplate=template + "<extra></extra>",
                     marker={"color": colour, "size": PLOTLY_MARKER_PX, "opacity": POINT_ALPHA,
                             "symbol": [MARKERS[int(f)][1] for f in flags]},
@@ -305,6 +312,7 @@ class DensityData:
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["contour"],
             xaxis={"title": {"text": x_title}, "type": "log" if self.log_x else "linear"},
-            yaxis={"title": {"text": y_title}, "type": "log" if self.log_y else "linear"},
+            yaxis={"title": {"text": page_y_title(y_title, self._inches()[1])},
+                   "type": "log" if self.log_y else "linear"},
         )  # fmt: skip
         return fig

@@ -1,0 +1,42 @@
+# The M6 Function page (ctx function): the sentences moved here so far. The rest of its text
+# is still in src/ctx/function/page.py and src/ctx/function/run.py and moves with P2S.4
+# (TODO.md). Placeholders in {braces} are filled by the code; keep their names.
+
+# Over-representation draws only the sets that pass, so a direction with none has no bar; the
+# lead counts both directions, 0 included.
+[figures.ora]
+lead = "{up} gene sets pass FDR < {alpha} on the up calls, {down} on the down calls."
+caption = "{name}: hypergeometric ORA of the up and down calls ({calls}), BH per direction. Background: the {background:,} gene symbols of the tested genes. Drawn: the sets past the dashed line, FDR = {alpha}."
+passing = "Every bar passes the dashed line, FDR = {alpha}: the set holds more calls than its share of the {background:,} tested gene symbols predicts."
+# Shown in place of the figure when no set passes in either direction.
+none = "No gene set passes FDR < {alpha} on the up or the down calls, so no bar is drawn."
+
+# The last reading line of the GSEA bars, by how many of the bars drawn pass.
+[figures.gsea]
+some = "Highlighted bars pass FDR < {alpha}; the others are shown for context."
+all = "Every bar drawn passes FDR < {alpha}, so every bar is highlighted."
+no = "No bar drawn passes FDR < {alpha}, so none is highlighted."
+
+# The background lesson. Against the gene-set union a set's share of the background grows
+# by its own untested members and shrinks by everyone else's; which wins differs by set, so
+# the words follow the plotted sets: more (most look more significant), less, or mixed.
+[figures.background]
+caption = "{name}: the same {calls:,} up calls, {hits:,} gene symbols, tested by hypergeometric p against two backgrounds. One is the tested genes' {tested:,} symbols; the other, {union:,}, adds every symbol in the sets, gseapy's default when given none."
+lead_same = "Here both backgrounds hold the same genes, so the bars match."
+lead_moved = "Against {union:,} gene symbols instead of {tested:,}, {more} of {shown} sets look more significant and {less} less."
+more = "A longer bar looks more significant. Here most sets grow proportionally less than the background, which gains genes that could never be called, so they look stronger."
+less = "A longer bar looks more significant. Here most sets grow proportionally more than the background, by their own members that could never be called, so they look weaker."
+mixed = "A longer bar looks more significant. A set that grows proportionally more than the background, by its own untested members, looks weaker; one that grows less looks stronger."
+
+# The self-check on the background, in the direction the plotted sets moved.
+[questions.union_more]
+prompt = "Why does the gene-set union background make the same hits look more significant?"
+answer = "It adds genes that could never have been called, such as ones not expressed in the cells, so the expected overlap shrinks and ordinary overlaps look rare."
+
+[questions.union_less]
+prompt = "Why does the gene-set union background make most of these sets look less significant?"
+answer = "The union adds each set's own untested members, such as genes not expressed in the cells. A set that grows proportionally more than the background expects more calls."
+
+[questions.union_mixed]
+prompt = "Why does the gene-set union background make some sets look more significant and others less?"
+answer = "It adds untested genes to the background and to each set. A set that grows proportionally more expects more calls and looks weaker; one that grows less looks stronger."
