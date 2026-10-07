@@ -5,10 +5,15 @@ ran off the figure and the track swatches were missing from the legend. The revi
 row was as tall as the longest label, hover boxes ran off a phone, swatches were 6 px. The fix
 wrapped every label at a phone's width on every screen; since the qc-page-fixes merge
 (2026-10-07, work order item 2) a desktop keeps the static's labels and a phone swaps in the
-wrapped ones (``layout.meta.narrow``), so the phone assertions read the narrow layout."""
+wrapped ones (``layout.meta.narrow``), so the phone assertions read the narrow layout. Package
+D of item 2 (2026-10-07): every column the static labels is labelled, the plot scrolling where
+it is too narrow; the desktop's rows take the files' cell aspect; a phone's layout is sized as
+the page script and plotly draw it; the files' column title is wrapped by measure. The
+browser's half is tests/test_heatmap_browser.py."""
 
 import dataclasses
 import itertools
+import math
 import re
 from pathlib import Path
 
@@ -19,7 +24,7 @@ from matplotlib.colors import to_rgba
 from synth import demo_band_map, demo_heatmap
 
 from ctx.viz.heatmap import GAP, HeatmapData, Swatch, Track
-from ctx.viz.metrics import text_width, wrap_to
+from ctx.viz.metrics import text_width
 from ctx.viz.style import (
     BAND_COLOURS,
     BAR_LABEL_ROTATION,
@@ -31,11 +36,9 @@ from ctx.viz.style import (
     NARROW_PX,
     PHONE_PLOT_PX,
     PHONE_PX,
-    PLOTLY_HEAT_BASE_PX,
     PLOTLY_HEAT_ROW_PX,
     PLOTLY_HOVER_PX,
     PLOTLY_LEGEND_LINE_PX,
-    PLOTLY_LEGEND_PAD_PX,
     PLOTLY_LEGEND_SWATCH_PX,
     PLOTLY_LEGEND_SYMBOL_PX,
     PLOTLY_MARGIN_PX,
@@ -199,18 +202,24 @@ def test_a_long_label_raises_its_own_row_alone():
 
 @pytest.mark.parametrize("case", list(FIXTURES))
 def test_columns_ordered_as_the_static(case):
+    """D12 (work order item 2, 2026-10-07): every column the static labels has its tick, where
+    plotly thinned a categorical axis's labels to every other column of M7's 21 at 1,440 px.
+    Columns sit at their positions on a numeric axis, so a column named like a number cannot
+    sit at its value, and the row axis can hold the files' aspect against it (plotly holds an
+    aspect only between axes of one type). A plot too narrow for the labels scrolls instead
+    (``meta.least_width``, tests/test_heatmap_browser.py)."""
     data = FIXTURES[case]()
-    xaxis = data.interactive().layout.xaxis
-    # As categories: a column named like a number would otherwise sit at its value.
-    assert (xaxis.type, xaxis.categoryorder) == ("category", "array")
-    assert list(xaxis.categoryarray) == data.columns_in_order()
+    fig = data.interactive()
+    xaxis, cells = fig.layout.xaxis, fig.data[0]
+    n = len(data.columns_in_order())
+    assert list(cells.x) == list(range(n))
+    assert list(xaxis.range) == [-0.5, n - 0.5]
     shown = _static(data)["columns"]
     assert xaxis.showticklabels == bool(shown)
     assert not shown or shown == data.columns_in_order()
+    assert xaxis.tickmode == "array"
+    assert (list(xaxis.ticktext), list(xaxis.tickvals)) == (shown, list(range(len(shown))))
     assert xaxis.tickangle == -BAR_LABEL_ROTATION
-    # plotly thins column labels to the width it draws at. Every column forced on overlapped
-    # on a phone and on M4's 33 columns at 1280 px (93 and 32 pairs, measured 2026-10-01).
-    assert xaxis.tickmode in (None, "auto")
 
 
 def test_statistic_is_an_axis_inside_the_figure():
@@ -254,7 +263,8 @@ def test_cells_draw_the_static_grid(case):
     fig = data.interactive()
     cells, *tracks = [t for t in fig.data if t.type == "heatmap"]
     above = len(labels) - len(data.rows_in_order())
-    assert list(cells.x) == data.columns_in_order()
+    assert list(cells.x) == list(range(len(data.columns_in_order())))
+    assert list(fig.layout.xaxis.ticktext) == data.columns_in_order()
     drawn = np.array([[np.nan if v is None else v for v in row] for row in cells.z], float)
     np.testing.assert_array_equal(drawn, grid[above:])
     white, black = data._rgba(THEMES["white"]), data._rgba(THEMES["black"])
@@ -336,13 +346,19 @@ def test_legend_flows_entry_by_entry():
 def test_a_long_legend_entry_wraps_on_a_phone_only():
     """A track level as long as a tissue's full name: a desktop's legend prints it on one line,
     as the static does, and a phone's wraps it to the plot beside its swatch, its height
-    growing by the lines. Mutation: the phone's legend left unwrapped, wider than its plot."""
-    data = demo_heatmap()
+    growing by the lines. Mutation: the phone's legend left unwrapped, wider than its plot.
+    On a map whose labels make its plot wider than a phone's, M7's, the plot scrolls with its
+    legend unwrapped, so the map here is a band map's 4 runs."""
+
+    def with_level(level: str) -> HeatmapData:
+        data = _band_map(LONG)
+        cells = data.columns_in_order()
+        track = Track("tissue", {c: level if i % 2 else "blood" for i, c in enumerate(cells)},
+                      {"blood": "#56B4E9", level: "#E69F00"})  # fmt: skip
+        return dataclasses.replace(data, tracks=(track,))
+
     long = "bone marrow aspirate from the posterior iliac crest of the donor"
-    cells = data.columns_in_order()
-    track = Track("tissue", {c: long if i % 2 else "blood" for i, c in enumerate(cells)},
-                  {"blood": "#56B4E9", long: "#E69F00"})  # fmt: skip
-    data = dataclasses.replace(data, tracks=(track,))
+    data = with_level(long)
     fig = data.interactive()
     assert [t.name for t in _legend(fig)] == _static(data)["legend"]
     assert f"tissue: {long}" in [t.name for t in _legend(fig)]
@@ -353,46 +369,161 @@ def test_a_long_legend_entry_wraps_on_a_phone_only():
     assert [_plain(name) for name in names] == _static(data)["legend"]
     added = sum(_lines(name) - 1 for name in names)
     assert added > 0
-    assert phone.layout.height - fig.layout.height == pytest.approx(added * PLOTLY_LEGEND_LINE_PX)
+    short = _narrowed(with_level("marrow").interactive())
+    assert phone.layout.height - short.layout.height == pytest.approx(added * PLOTLY_LEGEND_LINE_PX)
 
 
-def _height(data: HeatmapData, fig, title_lines: int) -> float:
-    """A page heatmap's height as its parts add up: the legend's lines as a phone stacks
-    them, the column labels and title below, then the rows, capped as the static caps them."""
-    legend = sum(_lines(t.name) for t in _legend(fig))
-    top = max(PLOTLY_MARGIN_PX["t"], legend * PLOTLY_LEGEND_LINE_PX + PLOTLY_LEGEND_PAD_PX)
-    labels = max(text_width(c, on_page(SIZES["tick"])) for c in data.columns_in_order())
-    title = title_lines * on_page(SIZES["axis_label"]) * LINE_SPACING
-    edges = fig.data[0].y
+# plotly.js's own numbers, stated apart from ctx.viz.style: the padding autoMargin adds to a
+# pushed margin (12 px, or the least margin, 8 here), a titled axis's cap shift (CAP_SHIFT),
+# the 3 px legend/draw.js adds to an entry's line, and the legend's 5 px gap above and below.
+PLOTLY_PAD, CAP_SHIFT, ENTRY_EXTRA, LEGEND_GAP = 8, 0.7, 3, 5
+
+
+def _phone_height(data: HeatmapData, phone) -> float:
+    """A phone's figure height as its parts add up, plotly's margins as plotly draws them.
+
+    The legend's lines as a phone stacks them, padded; the rows at the label pitch, capped as
+    the static caps them; the column labels' depth, turned about half their size above their
+    anchor; the axis title's cap shift and standoff, padded; or a right-aligned title's margin.
+    """
+    tick, title = on_page(SIZES["tick"]), on_page(SIZES["axis_label"])
+    lines = sum(_lines(t.name) for t in _legend(phone))
+    legend = lines * (on_page(SIZES["legend"]) * LINE_SPACING + ENTRY_EXTRA) + 2 * LEGEND_GAP
+    top = max(PLOTLY_MARGIN_PX["t"], math.ceil(legend + PLOTLY_PAD))
+    edges = phone.data[0].y
     rows = edges[-1] - edges[0]
     if len(data.rows_in_order()) > HEAT["max_rows_drawn"]:
         rows = HEAT["max_rows_drawn"]
-    expected = PLOTLY_HEAT_BASE_PX + top + (labels if fig.layout.xaxis.showticklabels else 0)
-    return expected + title + (edges[0] + rows) * PLOTLY_HEAT_ROW_PX
+    if data.column_title:
+        bottom = phone.layout.margin.b
+    else:
+        longest = max(text_width(c, tick) for c in data.columns_in_order())
+        depth = 0.5 + 4 + (CAP_SHIFT - 0.5) * tick + longest if phone.layout.xaxis.showticklabels \
+            else 0  # fmt: skip
+        text = phone.layout.xaxis.title.text
+        caption = title * (CAP_SHIFT + (_lines(text) - 1) * LINE_SPACING) + 8
+        bottom = math.ceil(PLOTLY_PAD + depth + caption)
+    return top + (edges[0] + rows) * PLOTLY_HEAT_ROW_PX + bottom
 
 
 @pytest.mark.parametrize("case", [*FIXTURES, "long_labels"])
-def test_height_is_the_sum_of_its_parts(case):
-    # Order of operations in ``_height``, on a desktop's layout and on a phone's. A column
-    # label is measured: at the average glyph it fell 38 px short of 19-character run names
-    # in capitals (2026-10-01). A phone's layout makes room for the axis title wrapped to half
-    # its plot, where the page script wraps it, and exists only where some text wraps.
+def test_a_phones_height_is_the_sum_of_its_parts(case):
+    """Order of operations in ``_page_height`` on a phone's layout, plotly's own margins
+    included: the legend's padding, the labels' depth under the axis, the title's cap shift.
+    A column label is measured: at the average glyph it fell 38 px short of 19-character run
+    names in capitals (2026-10-01). A phone's layout shows wherever a desktop's would not fit
+    a phone's plot; the M7-like maps' 24 column labels keep their plots wider than any
+    phone's, so it never does."""
     data = _band_map(LONG) if case == "long_labels" else FIXTURES[case]()
     fig = data.interactive()
-    title = _lines(fig.layout.xaxis.title.text)
-    assert fig.layout.height == pytest.approx(_height(data, fig, title))
-    assert sum(_lines(t.name) for t in _legend(fig)) >= len(_legend(fig))
-    assert (fig.layout.meta is not None) == (case == "long_labels")
-    if fig.layout.meta is not None:
-        lines = wrap_to(data.column_label, PHONE_PLOT_PX / 2, on_page(SIZES["axis_label"]))
-        phone = _narrowed(fig)
-        assert phone.layout.height == pytest.approx(_height(data, phone, len(lines)))
-        assert phone.layout.height > fig.layout.height
+    assert ("narrow" in fig.layout.meta) == (case in ("band_map", "long_labels"))
+    if "narrow" not in fig.layout.meta:
+        ((least, _),) = fig.layout.meta["least_width"]
+        assert least > PHONE_PLOT_PX
+        return
+    phone = _narrowed(fig)
+    assert phone.layout.height == pytest.approx(_phone_height(data, phone))
+    assert phone.layout.yaxis.scaleanchor is None  # a phone's rows hold their labels
+
+
+def test_the_desktop_holds_the_files_cell_aspect():
+    """D13 (audit, 2026-10-07): M12's 4 x 4 map drew its page cells 2.28 times flatter than its
+    files, its rows at a fixed pitch while matplotlib gives the files' cells what the margin
+    leaves. The desktop's row axis now holds a band at the files' cell aspect, measured here
+    off the drawn axes, against a column's width, at every width (plotly's scaleanchor, its
+    length shrinking toward the legend); where that would put two labels on each other, a
+    band is a label's box high instead. Mutation: the rows at the fixed pitch."""
+    from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415
+    from test_heatmap_browser import _confounding  # noqa: PLC0415
+
+    for data, floored in ((_confounding(), False), (demo_heatmap(), True)):
+        fig = data.static(THEMES["white"])
+        renderer = FigureCanvasAgg(fig).get_renderer()
+        fig.draw(renderer)
+        box = fig.axes[0].get_window_extent(renderer)
+        rows, columns = data._grid()[0].shape
+        aspect = (box.height / rows) / (box.width / columns)
+        yaxis = data.interactive().layout.yaxis
+        assert (yaxis.scaleanchor, yaxis.constrain, yaxis.constraintoward) == (
+            "x", "domain", "top")  # fmt: skip
+        if floored:
+            assert yaxis.scaleratio > aspect
+        else:
+            assert yaxis.scaleratio == pytest.approx(aspect, rel=1e-3)
+
+
+def test_the_column_title_wraps_where_the_files_set_it():
+    """D14: the files' column title wraps to the figure's width less its widest row label,
+    each measured as matplotlib sets it; a line ends only where its next word would cross
+    that room. At an average glyph, the Step-1 teaching band map's title (8 runs, FastQC's
+    verdict rows) broke before "names it" with room to spare (2026-10-07). Mutation: the
+    average glyph restored."""
+    from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415
+
+    from ctx.qc import figures  # noqa: PLC0415
+    from ctx.qc.registry import load  # noqa: PLC0415
+
+    registry = load(ROOT / "conf" / "qc_metrics.toml")
+    statuses = [m for m in registry.metrics.values() if m.kind == "status"]
+    runs = [f"ERR74252{i:02d}" for i in range(8)]
+    values = pl.DataFrame({"run_accession": runs, **{m.column: ["pass"] * 8 for m in statuses}})
+    teaching = figures.band_map(values, registry, "run_accession")
+    assert teaching is not None
+    long = "Overrepresented sequences in the reads of every sample (status; pass good, fail bad)"
+    cases = (teaching, _band_map([long, "Q30 bases"]))
+    for data in cases:
+        fig = data.static(THEMES["white"])
+        renderer = FigureCanvasAgg(fig).get_renderer()
+        fig.draw(renderer)
+        ax = fig.axes[0]
+        prop = ax.xaxis.label.get_fontproperties()
+
+        def set_width(text: str, fig=fig, prop=prop, renderer=renderer) -> float:
+            width, _, _ = renderer.get_text_width_height_descent(text, prop, ismath=False)
+            return width * 72 / fig.dpi
+
+        labels = max(t.get_window_extent(renderer).width for t in ax.get_yticklabels()
+                     if t.get_text()) * 72 / fig.dpi  # fmt: skip
+        room = fig.get_figwidth() * 72 - labels
+        lines = ax.get_xlabel().split("\n")
+        assert " ".join(lines) == (data.column_title or data.column_label)
+        assert all(set_width(line) <= room for line in lines)
+        for line, after in itertools.pairwise(lines):
+            assert set_width(f"{line} {after.split()[0]}") > room
+    assert len(cases[1].static(THEMES["white"]).axes[0].get_xlabel().split("\n")) > 1
+
+
+def test_the_page_layouts_numbers_are_plotlys_and_the_fonts():
+    """The numbers the page layout takes from plotly.js and the face it sets, read from them:
+    autoMargin's pad, 12 px or the least margin; the title's CAP_SHIFT; the legend's item gap;
+    a line's box, the vendored face's ascender and descender over its em. Mutation: the box
+    taken at LINE_SPACING, 1.3 em."""
+    import io  # noqa: PLC0415
+
+    import plotly  # noqa: PLC0415
+    from fontTools.ttLib import TTFont  # noqa: PLC0415
+
+    from ctx.report.export import FONTS, vendored  # noqa: PLC0415
+    from ctx.viz.style import (  # noqa: PLC0415
+        PLOTLY_CAP_SHIFT,
+        PLOTLY_LABEL_BOX_EM,
+        PLOTLY_LEGEND_GAP_PX,
+        PLOTLY_PUSH_PAD_PX,
+    )
+
+    bundle = (Path(plotly.__file__).parent / "package_data" / "plotly.min.js").read_text()
+    assert re.search(r"Math\.min\(12,(\w)\.l,\1\.r,\1\.t,\1\.b\)", bundle)
+    assert PLOTLY_PUSH_PAD_PX == min(12, *PLOTLY_MARGIN_PX.values()) == 8
+    assert float(re.search(r"CAP_SHIFT:([\d.]+)", bundle).group(1)) == PLOTLY_CAP_SHIFT
+    assert int(re.search(r"titlePad:2,itemGap:(\d+)", bundle).group(1)) == PLOTLY_LEGEND_GAP_PX
+    font = TTFont(io.BytesIO(vendored(FONTS["normal"])))
+    box = (font["hhea"].ascent - font["hhea"].descent) / font["head"].unitsPerEm
+    assert box == pytest.approx(PLOTLY_LABEL_BOX_EM)
 
 
 def test_row_pitch_holds_a_label_line():
-    # The static's pitch per point of label, at the label's page size: 18 px held a 20 px
-    # label on every other row only.
+    # A phone's rows: the static's pitch per point of label, at the label's page size. 18 px
+    # held a 20 px label on every other row only.
     per_point = HEAT["row_mm"] / MM_PER_INCH * 72 / SIZES["tick"]
     assert pytest.approx(per_point * on_page(SIZES["tick"])) == PLOTLY_HEAT_ROW_PX
     assert on_page(SIZES["tick"]) * LINE_SPACING <= PLOTLY_HEAT_ROW_PX
