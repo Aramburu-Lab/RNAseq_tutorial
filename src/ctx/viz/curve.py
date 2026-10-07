@@ -12,8 +12,8 @@ from typing import Any
 import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
-from ctx.viz.axes import axis_title
-from ctx.viz.scatter import FLOAT_HOVER, Line
+from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title
+from ctx.viz.scatter import Line
 from ctx.viz.strip import Span, shade, span_handles, span_traces
 from ctx.viz.style import (
     DASHES,
@@ -121,12 +121,16 @@ class CurveData:
 
     def _extra(self, rows: pl.DataFrame) -> list[tuple[Any, ...]]:
         """The hover columns of each point; empty tuples when there are none."""
-        return rows.select(self.hover).rows() if self.hover else [()] * rows.height
+        return hover_rows(rows, self.hover) if self.hover else [()] * rows.height
 
     def _titles(self) -> tuple[str, str]:
         """The two axis titles with their units, as both renderers print them."""
         return (axis_title(self.x_label, self.columns[self.x][0]),
                 axis_title(self.y_label, self.columns[self.y][0]))  # fmt: skip
+
+    def _inches(self) -> tuple[float, float]:
+        """The figure files' size, whose height also sets where the page breaks its y title."""
+        return figure_inches(self.width, "scatter")
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
@@ -142,7 +146,7 @@ class CurveData:
         from matplotlib.lines import Line2D  # noqa: PLC0415 - heavy
 
         apply_matplotlib(theme)
-        width, height = figure_inches(self.width, "scatter")
+        width, height = self._inches()
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
         styles = self._styles()
@@ -181,10 +185,12 @@ class CurveData:
         x_range = (float(x_values.min()), float(x_values.max()))  # type: ignore[arg-type]
         fig = go.Figure(span_traces(self.spans, x_range, self.frame[self.y]))
         x_title, y_title = self._titles()
+        schema = self.frame.schema
         template = "<br>".join([
-            f"{self.series}: %{{customdata[0]}}", f"{x_title}: %{{x}}",
-            f"{y_title}: %{{y{FLOAT_HOVER}}}",
-            *(f"{c}: %{{customdata[{i + 1}]}}" for i, c in enumerate(self.hover)),
+            f"{self.series}: %{{customdata[0]}}", f"{x_title}: {hover_field('x', schema[self.x])}",
+            f"{y_title}: {hover_field('y', schema[self.y])}",
+            *(f"{c}: {hover_field(f'customdata[{i + 1}]', schema[c])}"
+              for i, c in enumerate(self.hover)),
         ]) + "<extra></extra>"  # fmt: skip
         shown: set[str] = set()
         styles = self._styles()
@@ -206,6 +212,7 @@ class CurveData:
             ))  # fmt: skip
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["scatter"],
-            xaxis={"title": {"text": x_title}}, yaxis={"title": {"text": y_title}},
+            xaxis={"title": {"text": x_title}},
+            yaxis={"title": {"text": page_y_title(y_title, self._inches()[1])}},
         )  # fmt: skip
         return fig

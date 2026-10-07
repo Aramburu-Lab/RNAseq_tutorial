@@ -13,8 +13,8 @@ from typing import Any
 import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
-from ctx.viz.axes import axis_title
-from ctx.viz.scatter import FLOAT_HOVER, log_ticks
+from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title
+from ctx.viz.scatter import log_ticks
 from ctx.viz.style import (
     BAND_ALPHA,
     BAND_COLOURS,
@@ -202,6 +202,10 @@ class StripData:
         """The value axis title with its unit, as both renderers print it."""
         return axis_title(self.value_label, self.columns[self.value][0])
 
+    def _inches(self) -> tuple[float, float]:
+        """The figure files' size, whose height also sets where the page breaks its y title."""
+        return figure_inches(self.width, "strip")
+
     def _flags(self) -> list[bool]:
         """Whether each point is flagged; none are without a ``flagged`` column."""
         return self.frame[self.flagged].to_list() if self.flagged else [False] * self.frame.height
@@ -219,7 +223,7 @@ class StripData:
         from matplotlib.figure import Figure  # noqa: PLC0415 - heavy
 
         apply_matplotlib(theme)
-        width, height = figure_inches(self.width, "strip")
+        width, height = self._inches()
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
         x, flags = self.positions(), self._flags()
@@ -303,25 +307,33 @@ class StripData:
             fig.add_trace(trace)
         x, flags = self.positions(), self._flags()
         rows = self.frame.with_columns(_x=pl.Series(x), _flag=pl.Series(flags, dtype=pl.Boolean))
-        title = self._value_title()
+        title, schema = self._value_title(), self.frame.schema
         template = "<br>".join([
-            f"{self.category_label}: %{{customdata[0]}}", f"{title}: %{{y{FLOAT_HOVER}}}",
-            *(f"{c}: %{{customdata[{i + 1}]}}" for i, c in enumerate(self.hover)),
+            f"{self.category_label}: %{{customdata[0]}}",
+            f"{title}: {hover_field('y', schema[self.value])}",
+            *(f"{c}: {hover_field(f'customdata[{i + 1}]', schema[c])}"
+              for i, c in enumerate(self.hover)),
         ]) + "<extra></extra>"  # fmt: skip
         for level, colour in self.colours.items():
             part = rows.filter(pl.col(self.colour) == level)
             fig.add_trace(go.Scatter(
                 x=part["_x"].to_list(), y=part[self.value].to_list(), mode="markers",
                 name=str(level), hovertemplate=template,
-                customdata=part.select(self.category, *self.hover).rows(),
+                customdata=hover_rows(part, [self.category, *self.hover]),
                 marker={"color": colour, "size": PLOTLY_MARKER_PX, "opacity": POINT_ALPHA,
                         "symbol": [MARKERS[int(f)][1] for f in part["_flag"]]},
             ))  # fmt: skip
+        # The slots are categories on a linear axis, for the spread; plotly hides a linear
+        # axis's tick label that would overflow before it is turned, and hid the last stratum
+        # of Step-1's strips at 1,280 px, ending 12 px inside the plot once shown. "allow" is
+        # plotly's own default on a category axis.
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["strip"],
             xaxis={"title": {"text": self.category_label}, "tickvals": list(range(len(slots))),
-                   "ticktext": slots, "range": [-0.5, len(slots) - 0.5]},
-            yaxis={"title": {"text": title}, "type": "log" if self.log else "linear"},
+                   "ticktext": slots, "range": [-0.5, len(slots) - 0.5],
+                   "ticklabeloverflow": "allow"},
+            yaxis={"title": {"text": page_y_title(title, self._inches()[1])},
+                   "type": "log" if self.log else "linear"},
         )  # fmt: skip
         return fig
 

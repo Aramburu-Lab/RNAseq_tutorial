@@ -58,6 +58,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.report.text import fill, word
 from ctx.viz.annotate import Permanova, permanova
 from ctx.viz.bar import BarData
 from ctx.viz.box import box_data
@@ -66,6 +67,8 @@ from ctx.viz.scatter import CUTOFF_PRESETS, Calls, Line, ScatterData
 from ctx.viz.style import ROLES, category_colours
 
 MODULE = "de"
+# The content file holding the page's sentences moved so far (P2S.4 moves the rest).
+PAGE = "de"
 P_BINS = 20
 FLAT_FROM = 0.5
 MAX_VOLCANO_LABELS = 10
@@ -264,9 +267,8 @@ def _volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
     floored = int((frame["pvalue"] < P_FLOOR).sum())
     caption = (
         f"{c.name}: DESeq2 Wald test of {c.tested} over {c.reference}, design {c.design}; "
-        f"n = {_sizes(result)}. The four adjustments count over the same {frame.height:,} "
-        f"tested genes, all drawn. Default call: BH-adjusted p below {ALPHA} and log2 FC at "
-        f"or beyond ±{LFC_MIN:g}."
+        f"n = {_sizes(result)}. {fill(PAGE, 'figures.volcano.tested', tested=frame.height)} "
+        f"Default call: BH-adjusted p below {ALPHA} and log2 FC at or beyond ±{LFC_MIN:g}."
         + (f" {untested:,} genes with no adjusted p (Cook's outliers or independent "
            "filtering) are not drawn." if untested else "")
         + (f" {floored} p-values below {P_FLOOR:g} are drawn at it." if floored else "")
@@ -297,7 +299,11 @@ def _volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
 
 
 def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
-    """Mean against fold change, raw and shrunk as two series; raw alone without shrinkage."""
+    """Mean against fold change, raw and shrunk as two series; raw alone without shrinkage.
+
+    A page that thins the genes not called draws both estimates of a gene or neither, so the
+    pull of shrinkage stays visible gene by gene; genes in order of their raw estimate.
+    """
     base = result.results.join(genes, on="gene_id", how="left").filter(pl.col("baseMean") > 0)
     shrunk = base["log2FoldChange_shrunk"].is_not_null().any()
     estimates = (("log2FoldChange", "raw"), ("log2FoldChange_shrunk", "shrunk"))[: 1 + shrunk]
@@ -348,6 +354,8 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
         log_x=True,
         width="double",
         keep="keep",
+        unit="gene_id",
+        thinned=word(PAGE, "figures.ma.thinned"),
     )
 
 
@@ -391,7 +399,10 @@ def p_histogram(result: Fit) -> tuple[BarData, float, int]:
 
 
 def _dispersion(result: Fit) -> ScatterData:
-    """Gene-wise and final dispersions against mean expression, with the fitted trend."""
+    """Gene-wise and final dispersions against mean expression, with the fitted trend.
+
+    A page that thins them draws both of a gene's estimates or neither, as the MA plot does.
+    """
     d = result.dispersions.filter(pl.col("baseMean") > 0).drop_nans()
     frame = (
         pl.concat(
@@ -439,6 +450,8 @@ def _dispersion(result: Fit) -> ScatterData:
         log_y=True,
         width="double",
         keep="keep",
+        unit="gene_id",
+        thinned=word(PAGE, "figures.dispersion.thinned"),
     )
 
 
@@ -542,6 +555,7 @@ def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, floa
         lines=(Line("x = y", ends, ends),),
         width="double",
         keep="keep",
+        thinned=word(PAGE, "figures.lfc.thinned"),
     )
     return data, rho
 

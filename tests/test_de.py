@@ -4,8 +4,10 @@ Fits share module-scoped fixtures; each takes about 3 s at 1,000 genes (P1.5 spi
 """
 
 import ast
+import base64
 import dataclasses
 import math
+import shutil
 from pathlib import Path
 
 import numpy as np
@@ -18,8 +20,10 @@ from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
 from ctx.de.page import ma_text
-from ctx.de.run import _fit_metrics, _ma
+from ctx.de.run import _fit_metrics, _ma, _volcano
 from ctx.de.stats import ALPHA, LFC_MIN, classify
+from ctx.report import text
+from ctx.viz import scatter
 
 ROOT = Path(__file__).resolve().parents[1]
 BASIC = Contrast("basic", "condition", "control", "case", (6, 6))
@@ -114,6 +118,80 @@ def test_ma_draws_the_estimates_the_fit_has(basic):
     assert set(_ma(plain, genes).frame["estimate"]) == {"raw"}
     assert "--no-lfc-shrink" in _ma(plain, genes).caption
     assert "--no-lfc-shrink" in ma_text(BASIC, shrunk=False).lead
+
+
+# A page thins at this many units here, so a 1,000-gene fit thins as Step-1's 12,796 genes do.
+THIN_AT = 100
+
+
+def _genes(synthetic) -> pl.DataFrame:
+    return synthetic.counts.select("gene_id", gene_name=pl.col("gene_id"))
+
+
+def test_a_thinned_volcano_page_says_what_it_draws(basic, monkeypatch, tmp_path):
+    """Item 2, D7: Step-1's volcano caption called its 12,796 tested genes "all drawn", then
+    said the page drew 1,842 of the 5,526 no setting can call, from English written in
+    scatter.py. The files' caption claims nothing about drawing; the page's ends with ui.toml's
+    sentence, numbers from the thinning. Mutations: ", all drawn" restored in _volcano's
+    caption; the sentence written in scatter.py again, so an edited ui.toml misses the page."""
+    synthetic, result = basic
+    monkeypatch.setattr(scatter, "THIN_MAX", THIN_AT)
+    data = _volcano(result, _genes(synthetic))
+    other = data.frame.filter(~pl.col("keep")).height
+    stride = math.ceil(other / THIN_AT)
+    assert stride > 1, "the case must thin"
+    sentence = text.fill(
+        "ui", "thinned.rows", drawn=math.ceil(other / stride), units=other,
+        rest=text.word("ui", "thinned.callable"), nth=scatter._ordinal(stride),
+        order="-log10 raw p", total=data.frame.height,
+    )  # fmt: skip
+    assert data.caption_text() == f"{data.caption} {sentence}"
+    assert "all drawn" not in data.caption_text()
+    copy = tmp_path / "content"
+    shutil.copytree(Path(text.__file__).parent / "content", copy)
+    ui = (copy / "ui.toml").read_text()
+    (copy / "ui.toml").write_text(ui.replace("This page draws {drawn:,}", "Shown: {drawn:,}"))
+    monkeypatch.setenv(text.CONTENT_ENV, str(copy))
+    text.load.cache_clear()
+    try:
+        assert f"{data.caption} Shown: " in data.caption_text()
+    finally:
+        text.load.cache_clear()
+
+
+def test_a_thinned_ma_page_draws_both_estimates_of_a_gene_or_neither(basic, monkeypatch):
+    """Item 2, D8: thinned row by row, Step-1's MA page drew one of the two estimates of 1,645 of
+    its 9,093 genes not called. A gene's raw and shrunk points are now drawn together or not at
+    all, the page keeps its budget of points, and the page's points plus those its own PDF and
+    SVG add are the CSV's, trace by trace. Mutations: each row its own unit again (the row
+    stride); the budget counted in genes, which grew Step-1's M5 page by 818,839 bytes."""
+    synthetic, result = basic
+    monkeypatch.setattr(scatter, "THIN_MAX", THIN_AT)
+    data = _ma(result, _genes(synthetic))
+    other = data.frame.filter(~pl.col("keep")).group_by("gene_id").len()
+    assert set(other["len"]) == {2}, "every gene not called has both estimates"
+    page = data.on_page().filter(~pl.col("keep")).group_by("gene_id").len()
+    assert set(page["len"]) == {2}, "a gene drawn is drawn whole"
+    stride = math.ceil(2 * other.height / THIN_AT)
+    assert stride > 1 and page.height == math.ceil(other.height / stride)
+    assert 2 * page.height <= THIN_AT + 2, "at most one unit over the budget"
+    sentence = text.fill(
+        "ui", "thinned.units", drawn=page.height, units=other.height,
+        rest=text.word("de", "figures.ma.thinned"), nth=scatter._ordinal(stride),
+        order="log2 fold change", total=data.frame.height,
+    )  # fmt: skip
+    assert data.caption_text() == f"{data.caption} {sentence}"
+    thinned = data.export_layers()["thinned"]
+    for index, level in enumerate(data.colours):
+        added = np.frombuffer(base64.b64decode(thinned.get(str(index), "")), "<f4")
+        shipped = _pairs(data.on_page(), level) + [tuple(p) for p in added.reshape(-1, 2).tolist()]
+        assert sorted(shipped) == sorted(_pairs(data.table(), level)), level
+
+
+def _pairs(rows: pl.DataFrame, level: str) -> list[tuple[float, float]]:
+    """An MA trace's points as float32 (x, y), as the export ships them."""
+    xy = rows.filter(pl.col("estimate") == level).select("baseMean", "lfc").to_numpy()
+    return [tuple(p) for p in xy.astype("<f4").tolist()]
 
 
 def test_significant_counts_any_fold_change(basic):

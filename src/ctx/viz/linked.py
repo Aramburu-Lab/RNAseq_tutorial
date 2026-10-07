@@ -16,10 +16,9 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.axes import axis_title
+from ctx.viz.axes import axis_title, hover_field, hover_rows
 from ctx.viz.flow import FlowData, Node
 from ctx.viz.metrics import text_width
-from ctx.viz.scatter import FLOAT_HOVER
 from ctx.viz.style import (
     DATA_COLOURS,
     MAX_CATEGORIES,
@@ -172,14 +171,17 @@ class LinkedData:
         n = self.frame.height
         x_title = axis_title(self.x_label, self.columns[self.x][0])
         y_title = axis_title(self.y_label, self.columns[self.y][0])
+        schema = self.frame.schema
         template = "<br>".join([
-            f"{x_title}: %{{x{FLOAT_HOVER}}}", f"{y_title}: %{{y{FLOAT_HOVER}}}",
-            *(f"{c}: %{{customdata[{i}]}}" for i, c in enumerate(self.hover)),
+            f"{x_title}: {hover_field('x', schema[self.x])}",
+            f"{y_title}: {hover_field('y', schema[self.y])}",
+            *(f"{c}: {hover_field(f'customdata[{i}]', schema[c])}"
+              for i, c in enumerate(self.hover)),
         ]) + "<extra></extra>"  # fmt: skip
         fig = go.Figure(go.Scatter(
             x=self.frame[self.x].to_list(), y=self.frame[self.y].to_list(), mode="markers",
             showlegend=False, hovertemplate=template,
-            customdata=self.frame.select(self.hover).rows() if self.hover else None,
+            customdata=hover_rows(self.frame, self.hover) if self.hover else None,
             marker={"color": [reference] * n, "size": PLOTLY_MARKER_PX, "opacity": POINT_ALPHA},
         ))  # fmt: skip
         fig.update_layout(

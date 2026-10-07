@@ -7,6 +7,7 @@ darwin-arm64 with CI unset, and fail everywhere else (R6.2).
 
 import gzip
 import html as markup
+import json
 import os
 import re
 import shutil
@@ -521,17 +522,35 @@ def test_the_settings_keep_their_labels_however_many_samples(tmp_path):
         assert f">{text.word('process', f'settings.{key}')}<" in svg["featured_settings"], key
 
 
-def test_no_axis_title_line_is_longer_than_a_phone_holds(process_root):
-    """Every axis title on the page, line by line, within ``axes.SCREEN_TITLE_CHARS``: plotly
+def _y_label(svg: Path) -> list[str]:
+    """The y-axis label of a figure file, line by line: its texts at the axis-title size, turned
+    a quarter, in the order they are drawn."""
+    import xml.etree.ElementTree as ET  # noqa: PLC0415, N817
+
+    from ctx.viz.style import SIZES  # noqa: PLC0415
+
+    size, texts = f"font-size: {SIZES['axis_label']:g}px", "{http://www.w3.org/2000/svg}text"
+    return ["".join(t.itertext()) for t in ET.parse(svg).getroot().iter(texts)
+            if "rotate(-90" in t.get("transform", "") and size in t.get("style", "")]  # fmt: skip
+
+
+def test_axis_titles_hold_a_phone_and_y_titles_are_the_files(process_root):
+    """Every x-axis title on the page, line by line, within ``axes.SCREEN_TITLE_CHARS``: plotly
     never wraps one, and at 375 px a longer line ran past the figure (M3.7, measured in
-    headless Chromium); the overlap scatter's y title was clipped at 1,280 px too.
+    headless Chromium). Every y title is the figure file's y label, line by line (item 2, D10):
+    the page's own PDF and SVG of a view copy it, and a y title broken by the phone rule
+    carried that break into them.
 
     Mutations caught: ``screen_title`` disabled (lines of 29 to 38 characters); the overlap
-    comparison named "Count with every overlapped gene (-O)" again."""
+    comparison named "Count with every overlapped gene (-O)" again; ``screen_title`` applied
+    to a y title."""
     from ctx.viz.axes import SCREEN_TITLE_CHARS  # noqa: PLC0415
 
     root, _, _ = process_root
-    titles = re.findall(r'"[xy]axis":\{[^{}]*?"title":\{"text":"(.*?)"', page(root))
-    assert len(titles) == 2 * len(FIGURES)
-    lines = [line for t in titles for line in t.split("\\u003cbr\\u003e")]
-    assert max(len(line) for line in lines) <= SCREEN_TITLE_CHARS, lines
+    for what in FIGURES:
+        (html,) = out(root).glob(f"*_{DATASET}_{what}_v1.html")
+        (svg,) = out(root).glob(f"*_{DATASET}_{what}_v1_white.svg")
+        titles = {axis: json.loads(f'"{found}"').split("<br>") for axis, found in re.findall(
+            r'"([xy])axis":\{[^{}]*?"title":\{"text":"(.*?)"', html.read_text())}  # fmt: skip
+        assert max(len(line) for line in titles["x"]) <= SCREEN_TITLE_CHARS, (what, titles)
+        assert titles["y"] == _y_label(svg), what

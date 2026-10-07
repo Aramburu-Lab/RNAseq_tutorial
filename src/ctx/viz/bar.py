@@ -15,7 +15,7 @@ import numpy as np
 import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
-from ctx.viz.axes import axis_title, screen_title
+from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title, screen_title
 from ctx.viz.style import (
     BAR_LABEL_ROTATION,
     BAR_MARGIN_MM,
@@ -296,13 +296,12 @@ class BarData:
         """
         import plotly.graph_objects as go  # noqa: PLC0415 - heavy; imported after the profile
 
-        light = THEMES["white"]
-        # A count prints whole, a measurement to three significant digits.
-        digits = ":,d" if self.frame.schema[self.value].is_integer() else ":.3~g"
-        value = f"%{{{'x' if self.horizontal else 'y'}{digits}}}"
+        light, schema = THEMES["white"], self.frame.schema
+        value = hover_field("x" if self.horizontal else "y", schema[self.value])
         hover = [f"{self.category_label}: %{{{'y' if self.horizontal else 'x'}}}"]
         hover += [f"{self._value_title()}: {value}"]
-        hover += [f"{self._label(c)}: %{{customdata[{i}]}}" for i, c in enumerate(self.hover)]
+        hover += [f"{self._label(c)}: {hover_field(f'customdata[{i}]', schema[c])}"
+                  for i, c in enumerate(self.hover)]  # fmt: skip
         fig = go.Figure()
         for level in self.colours:
             rows = self.frame.filter(pl.col(self.series) == level)
@@ -315,7 +314,7 @@ class BarData:
                     x=x, y=y, name=self._name(level), orientation="h" if self.horizontal else "v",
                     marker={"color": self.colours[level] or light.reference,
                             "line": {"width": LINE_WIDTHS["marker_edge"]}},
-                    customdata=rows.select(self.hover).rows(),
+                    customdata=hover_rows(rows, self.hover),
                     hovertemplate="<br>".join([f"{self._label(self.series)}: {self._name(level)}",
                                                *hover])
                     + "<extra></extra>",
@@ -333,7 +332,10 @@ class BarData:
                          "showticklabels": len(categories) <= MAX_TICK_LABELS}  # fmt: skip
         if self.horizontal:
             category_axis["autorange"] = "reversed"
-        value_axis = {"title": {"text": screen_title(self._value_title())}}
+        # The page script rewraps an x title for the screen; the export copies a y title.
+        value_title = (screen_title(self._value_title()) if self.horizontal
+                       else page_y_title(self._value_title(), self.inches()[1]))  # fmt: skip
+        value_axis = {"title": {"text": value_title}}
         rows_px = PLOTLY_BAR_BASE_PX + PLOTLY_BAR_ROW_PX * len(categories)
         fig.update_layout(
             template=plotly_templates()["white"],
