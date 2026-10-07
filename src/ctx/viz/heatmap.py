@@ -16,6 +16,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
+from ctx.viz import metrics
 from ctx.viz.annotate import place_caption
 from ctx.viz.axes import axis_title
 from ctx.viz.metrics import text_width, wrap_to
@@ -301,7 +302,7 @@ class HeatmapData:
         lines = [line for label in self._shown() for line in label.split("\n")]
         labels = max((text_width(line, SIZES["tick"]) for line in lines), default=0.0)
         title = self.column_title or self.column_label
-        return "\n".join(wrap_to(title, width * 72 - labels, SIZES["axis_label"]))
+        return "\n".join(wrap_to(metrics.words(title), width * 72 - labels, SIZES["axis_label"]))
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme; cells are vector quads.
@@ -498,9 +499,10 @@ class HeatmapData:
         right = math.ceil(self._right_px())
         if self.column_title:
             room = width - PLOTLY_MARGIN_PX["l"] - right
-            return _fit(self.column_title, room, SIZES["axis_label"])
+            return _fit(metrics.words(self.column_title), room, SIZES["axis_label"])
         left = math.ceil(self._left_px(words.ticks))
-        return _fit(self.column_label, width - abs(left - right), SIZES["axis_label"])
+        return _fit(metrics.words(self.column_label), width - abs(left - right),
+                    SIZES["axis_label"])  # fmt: skip
 
     def _wide(self, words: "_Words") -> "_Wide":
         """The static's layout on the page, laid out at the width a module page draws a plot at.
@@ -859,13 +861,15 @@ def _hover_lines(lines: list[str]) -> str:
     return "<br>".join(_fit(line, PLOTLY_HOVER_PX) for line in lines)
 
 
-def _fit(text: str, width_px: float, size: float = SIZES["tick"]) -> str:
+def _fit(text: str | list[str], width_px: float, size: float = SIZES["tick"]) -> str:
     """Text wrapped at spaces to lines of at most ``width_px`` on the page, in plotly's ``<br>``.
 
     Measured as ``ctx.viz.metrics`` measures every wrapped text. A word longer than a line
-    stays whole: split, it would read as two words.
+    stays whole: split, it would read as two words. A list is the text's words already, as
+    ``metrics.words`` holds a parenthesised unit whole.
     """
-    return "<br>".join(wrap_to(text, width_px, on_page(size))) or text
+    lines = wrap_to(text, width_px, on_page(size))
+    return "<br>".join(lines) if lines else (text if isinstance(text, str) else "")
 
 
 def _lines(text: str) -> int:

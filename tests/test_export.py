@@ -35,10 +35,10 @@ from ctx.report.builder import (
     SelfCheck,
     render,
 )
+from ctx.viz.metrics import text_width
 from ctx.viz.save import figure_block
 from ctx.viz.style import (
     ALONE_SCALE,
-    AVERAGE_CHAR_EM,
     PAGE_PLOT_PX,
     PHONE_PLOT_PX,
     SIZES,
@@ -251,13 +251,12 @@ def test_linked_view_puts_the_sets_across_the_card_and_the_scatter_beside_the_gu
     caption = html.index("<figcaption>")
     assert plot < html.index('id="ctx-figure-0"') < reading < below < caption
     assert below < html.index('id="ctx-below-0"') < caption
-    # plotly sets the first dimension's levels left of the plot and the last's right of it.
-    data, tick = demo_linked(), on_page(SIZES["tick"]) * AVERAGE_CHAR_EM
+    # plotly sets the first dimension's levels left of the plot and the last's right of it,
+    # each as wide as the one measure of text width sets it.
+    data, tick = demo_linked(), on_page(SIZES["tick"])
     ends = (data.dimensions[0], data.dimensions[-1])
-    first, last = (max(map(len, data.frame[c].unique())) for c in ends)
-    assert (
-        block.below.layout.margin.l >= first * tick and block.below.layout.margin.r >= last * tick
-    )
+    first, last = (max(text_width(str(v), tick) for v in data.frame[c].unique()) for c in ends)
+    assert block.below.layout.margin.l >= first and block.below.layout.margin.r >= last
 
 
 def test_vendored_files_are_their_manifests():
