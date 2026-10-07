@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-041 — M3's settings run on the featured sample only, and its defaults are the measured ones: `--settings cut`, every read
+
+**Date:** 2026-10-07 · **Status:** decided (M3.9; drafted in the M3 plan, docs/plans/2026-09-30_m3_plan.md, section 15)
+
+**Context.** `ctx process` aligns every sample once and the featured sample again under each setting, so each setting adds an alignment; the plan left `--settings` and `--reads-per-run` provisional until a cold run on the real teaching subset showed what Track A's budget, 15 minutes and 6 GB on 4 cores, allows (R2).
+
+**Options.** More settings by default (`cut,untrimmed`) or none; a per-run read cap below the subset's own, or every read.
+
+**Decision.** Settings run on the featured sample only; the multimapper limit of 1 is derived from the run's own log, never aligned again; a cap, when given, is `seqkit sample -p` with seed 42, a run within 5 SD of the cap cut to its first reads (M3.4); STAR has no unspliced switch (measured, D-036). The defaults stay `--settings cut` and `--reads-per-run` unset, every read: the subset is already 1,000,000 raw reads per run, and the cold run fits the budget with them.
+
+**Evidence.** A cold `ctx --root ~/ctx_tier1 process --dataset tier1_teach --aligner hisat2 --compare-dataset tier1` on the 8 runs, 2026-10-07, at a load average of 50 to 60 on 14 cores from other work: 750.55 s by `/usr/bin/time -l`, 744.8 s on the page; the page's process 369,868,800 B, its largest child 1,229,881,344 B, the two together 1,599,750,144 B, and Track B's bound, the process plus four times its largest child, 5,289,394,176 B; the page 7,414,597 B. fastp passed 989,688 to 998,616 of each run's 1,000,000 reads and HISAT2 took in exactly those (I1). Under that load the run still met the wall budget, so it meets it on a quiet machine. `tests/test_budget.py::test_track_a_on_the_teaching_subset` (`-m budget`) repeats the cold run on the data where they are present; its own first run, the same day at a load average of 126 falling to 34, passed in 565.2 s, the process 539,164,672 B, its largest child 1,241,104,384 B, the bound 5,503,582,208 B, the page 7,414,737 B. The process peaked 169,295,872 B higher than in the first run, for a reason not established, so peak memory varies between cold runs, and the bound's margin under 6 GB is 496,417,792 B.
+
+**Consequence.** A setting added by default must first be measured inside the budget; the budget test fails if a default aligns more than the wall allows.
+
+---
+
 ## D-052 — QC background bands: 11 sourced, 4 course conventions, 6 reference lines or call regions, 6 left to the stratum check
 
 **Date:** 2026-10-01 · **Status:** decided, to be built (P2Q.9)
@@ -71,7 +87,7 @@ it were reversed.
 - Read level: the full cohort on every page with the subset kept as an optional laptop exercise; the full cohort only, the subset retired, so no reader can rerun alignment on a laptop; or the pages on the subset, as designed.
 - Made-up pages: out of every kit from v5, or kept in development kits and out of the release kit.
 
-**Decision.** Rytis, 2026-10-01: the first of each. Every page a reader gets for M2's read stage and M3 shows all 210 Step-1 runs, aligned to the full GENCODE 50 genome on Kebnekaise. The 8-run subset stays as the laptop exercise, under Track A's budget, and its pages say it is the optional exercise. Development kits keep the made-up previews, marked Made-up; the release kit is built with no made-up root.
+**Decision.** Rytis, 2026-10-01: the first read-level option, and made-up pages out only at the release, the second made-up option. Until 2026-10-07 this line read "the first of each", which named the made-up option he declined; his answer was "Only at the release". Every page a reader gets for M2's read stage and M3 shows all 210 Step-1 runs, aligned to the full GENCODE 50 genome on Kebnekaise. The 8-run subset stays as the laptop exercise, under Track A's budget, and its pages say it is the optional exercise. Development kits keep the made-up previews, marked Made-up; the release kit is built with no made-up root.
 
 **Evidence.** None: a teaching choice by the course's author. Its cost is stated, not measured: 210 full-genome alignments on the cluster, with RAM, wall time and disk still to be measured on M3.11's 8-run pilot.
 

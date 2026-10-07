@@ -171,3 +171,46 @@ def test_track_b_at_tier1_size(tmp_path):
         fit(synthetic.counts, synthetic.samples, contrast, spec.order, threads=n)
         seconds = time.perf_counter() - started
         print(f"ndn_pdac_naive at {N_GENES:,} genes, n_cpus {n}: {seconds:.1f} s")
+
+
+# Track A's real data, where the course was built: the 8-run teaching subset of Step-1, its
+# chr22 genome, and Step-1's gather and qc outputs, which --compare-dataset reads.
+TEACH_ROOT = Path(os.environ.get("CTX_TEACH_ROOT", Path.home() / "ctx_tier1"))
+GENOME = "data/raw/reference/GRCh38.primary_assembly.chr22.fa.gz"
+TEACH_INPUTS = ("outputs/01_gather", "outputs/02_qc", "resources", "data/raw/tier1_teach", GENOME)
+
+
+@pytest.mark.budget
+def test_track_a_on_the_teaching_subset(tmp_path):
+    """A cold `ctx process` on the real 8 runs keeps Track A's 15 minutes and 6 GB (M3.9).
+
+    The root is fresh, so every index is built: the inputs are linked in, the outputs written
+    here. Memory is bounded as Track B's is, the command plus four times its largest child,
+    though ctx.tools runs one tool at a time. Two cold runs 2026-10-07: 744.8 and 565.2 s,
+    bound 5,289,394,176 and 5,503,582,208 B.
+    Mutation caught: a default that aligns more (--settings cut,untrimmed) past the wall."""
+    missing = [p for p in TEACH_INPUTS if not (TEACH_ROOT / p).exists()]
+    if missing:
+        pytest.skip(f"Track A's data are not on this machine: {missing}")
+    for part in ("outputs/01_gather", "outputs/02_qc", "resources"):
+        (tmp_path / part).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / part).symlink_to(TEACH_ROOT / part)
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("SLURM_", "CTX_"))}
+    repo = Path(__file__).resolve().parents[1]
+    done = subprocess.run(
+        [str(CTX), "--root", str(tmp_path), "process", "--dataset", "tier1_teach",
+         "--dataset-file", str(repo / "conf" / "datasets" / "tier1_teach.toml"),
+         "--genome", str(TEACH_ROOT / TEACH_INPUTS[-1]), "--aligner", "hisat2",
+         "--compare-dataset", "tier1", "--fetchngs-dir", str(TEACH_ROOT / TEACH_INPUTS[-2])],
+        cwd=tmp_path, env=env, capture_output=True, text=True, check=False,
+    )  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    (page,) = (tmp_path / "outputs" / "03_process").glob("*_tier1_teach_overview_v1.html")
+    wall, self_rss, children = _measured(page.read_text())
+    threads = min(4, os.cpu_count() or 1)
+    bound = self_rss + threads * children
+    print(f"\nprocess: wall {wall:.1f} s, self {self_rss:,} B, largest child {children:,} B, "
+          f"bound {bound:,} B ({threads} threads), page {page.stat().st_size:,} B")  # fmt: skip
+    assert wall < BUDGETS["A"].minutes * 60
+    assert bound < BUDGETS["A"].ram_gb * 10**9
+    assert page.stat().st_size < 15 * 10**6

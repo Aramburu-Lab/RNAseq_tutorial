@@ -15,6 +15,27 @@ file's SHA-256; ``--zip`` packs one folder.
 Usage:
     pixi run python scripts/python/build_kit.py --out ~/ctx_kit/2026-09-30_course_kit_v2 \
         --real step1=~/ctx_tier1 --made-up preview=~/ctx_preview/synthetic --zip
+
+Every page is rebuilt from one commit first, so the pages and ``MANIFEST.json`` name the same
+commit. The steps for the Step-1 root, kept here since a session's scratch copy was lost twice
+(kits v5 and v6); ``build_preview.py`` refuses an existing root, so move the last one aside:
+    R=~/ctx_tier1; C=conf/datasets; T=$R/data/raw/tier1_teach
+    pixi run ctx --root $R setup
+    pixi run ctx --root $R gather --dataset tier1 --fetchngs-dir $R/data/raw/tier1_meta \
+        --dataset-file $C/tier1.toml --rnaseq-dir $R/data/raw/tier1_rnaseq
+    pixi run ctx --root $R gather --dataset tier1_teach --fetchngs-dir $T \
+        --dataset-file $C/tier1_teach.toml
+    pixi run ctx --root $R qc --dataset tier1 --dataset-file $C/tier1.toml \
+        --rnaseq-dir $R/data/raw/tier1_rnaseq
+    pixi run ctx --root $R qc --dataset tier1_teach --dataset-file $C/tier1_teach.toml --reads \
+        --fetchngs-dir $T
+    pixi run ctx --root $R process --dataset tier1_teach --dataset-file $C/tier1_teach.toml \
+        --genome $R/data/raw/reference/GRCh38.primary_assembly.chr22.fa.gz --aligner hisat2 \
+        --compare-dataset tier1 --fetchngs-dir $T
+    pixi run ctx --root $R de --dataset tier1 --dataset-file $C/tier1.toml
+    pixi run ctx --root $R function --dataset tier1 --dataset-file $C/tier1.toml
+    pixi run ctx --root $R report --dataset tier1 --dataset-file $C/tier1.toml
+    pixi run python scripts/python/build_preview.py --root ~/ctx_preview/synthetic
 """
 
 from __future__ import annotations
