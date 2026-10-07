@@ -6,7 +6,6 @@ since matplotlib has no Sankey of this kind; ``interactive()`` uses plotly's. Bo
 same ``FlowData``, which refuses a node whose reads in and out differ: every read has a fate.
 """
 
-import textwrap
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -14,8 +13,8 @@ from typing import Any
 import polars as pl
 
 from ctx.viz.annotate import place_caption
+from ctx.viz.metrics import words, wrap_to
 from ctx.viz.style import (
-    AVERAGE_CHAR_EM,
     FLOW,
     LINE_SPACING,
     LINE_WIDTHS,
@@ -209,15 +208,15 @@ class FlowData:
         """Each node's label and reads, wrapped to the room before the next stage's bars.
 
         Long level names ("Reads \u2264 76 nt (min 35 nt)") ran into the next stage on one line.
+        Measured as the files set them, a parenthesised span held whole as a title holds its
+        unit: split at its spaces, Step-1's batch level ended a line at "(min" (2026-10-07).
         """
         held = self.held()
         starts = sorted({x for x, _, _ in placed.values()})
-        room = {x: (nxt if nxt else 1.0) - x - FLOW["node"] - 2 * FLOW["pad"]
-                for x, nxt in zip(starts, [*starts[1:], None], strict=True)}  # fmt: skip
-        chars = {x: max(1, int(r * axes_inches * 72 / (SIZES["annotation"] * AVERAGE_CHAR_EM)))
-                 for x, r in room.items()}  # fmt: skip
-        return {n.id: textwrap.fill(f"{n.label} {held[n.id]:,.0f}", chars[placed[n.id][0]],
-                                    break_long_words=False)
+        room = {x: (end - x - FLOW["node"] - 2 * FLOW["pad"]) * axes_inches * 72
+                for x, end in zip(starts, [*starts[1:], 1.0], strict=True)}  # fmt: skip
+        return {n.id: "\n".join(wrap_to(words(f"{n.label} {held[n.id]:,.0f}"),
+                                        room[placed[n.id][0]], SIZES["annotation"]))
                 for n in self.nodes}  # fmt: skip
 
     def _draw_nodes(self, ax: Any, placed: Mapping[str, tuple[float, float, float]],

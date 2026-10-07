@@ -51,7 +51,6 @@ from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figur
 from ctx.viz.scatter import THIN_MAX, Calls, Line, ScatterData, bubble_pt
 from ctx.viz.strip import StripData
 from ctx.viz.style import (
-    AVERAGE_CHAR_EM,
     AXIS_TITLE_SHARE,
     CIVIDIS,
     DATA_COLOURS,
@@ -570,7 +569,9 @@ def test_no_text_overlap(case):
 
 def test_write_refuses_clipped_text(tmp_path):
     data = demo_bar(counts())
-    long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 30)
+    # Wrapped by measured width, 30 repeats took 36 lines, which tight_layout still fitted by
+    # squeezing the axes to 9 % of the width; 60 take 71, wider than the page.
+    long = dataclasses.replace(data, value_label="A value axis title far too long to fit " * 60)
     # matplotlib says so first: tight_layout gives up on a title it cannot fit, even at 170 mm.
     with (pytest.raises(ValueError, match="off the page"),
           pytest.warns(UserWarning, match="Tight layout not applied")):  # fmt: skip
@@ -852,8 +853,9 @@ def test_fit_title_wraps_to_axis_length():
     from ctx.viz.annotate import fit_title  # noqa: PLC0415
 
     height = WIDTHS_MM["single"] * 1.1 / 25.4
-    # Longer than the axis holds at the axis-title size, whatever that size is.
-    fits = int(height * 72 * AXIS_TITLE_SHARE / (SIZES["axis_label"] * AVERAGE_CHAR_EM))
+    # Longer than the axis holds at the axis-title size, whatever that size is: an x is half
+    # an em wide in Arial and Liberation Sans.
+    fits = math.ceil(height * 72 * AXIS_TITLE_SHARE / (SIZES["axis_label"] / 2))
     title = "mono_hsct_early " + "x" * fits + " (log2 FC)"
     wrapped = fit_title(title, height)
     assert wrapped.replace("\n", " ") == title
@@ -952,7 +954,9 @@ def test_hdr_levels_hold_their_mass_and_no_more_cells():
                                    "Called strand (log2(count + 1))"])  # fmt: skip
 def test_a_vertical_title_never_breaks_inside_its_unit(title):
     """At every scatter height a wrapped y title keeps "(log2(count + 1))" on one line; split at
-    its spaces it had left "1))" or "+ 1))" alone (M3's agreement plots).
+    its spaces it had left "1))" or "+ 1))" alone (M3's agreement plots). At 0.3 of the height
+    the unit, 73.6 pt, is wider than a line, 43.7 pt; at 0.6 and 1.0 it fits one, where a
+    measured wrap at every space also kept it whole.
 
     Mutation caught: ``fit_title`` wrapping at every space again."""
     from ctx.viz.annotate import fit_title  # noqa: PLC0415
@@ -960,7 +964,7 @@ def test_a_vertical_title_never_breaks_inside_its_unit(title):
 
     for width in ("single", "double"):
         _, height = figure_inches(width, "scatter")
-        for scale in (0.6, 1.0):
+        for scale in (0.3, 0.6, 1.0):
             lines = fit_title(title, height * scale).split("\n")
             assert "(log2(count + 1))" in "\n".join(lines), lines
             assert " ".join(lines) == title

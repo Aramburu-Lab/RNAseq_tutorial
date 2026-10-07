@@ -14,9 +14,8 @@ import polars as pl
 from scipy.stats import false_discovery_control, mannwhitneyu
 
 from ctx.report.marks import plain
-from ctx.viz.metrics import wrap_to
+from ctx.viz.metrics import words, wrap_to
 from ctx.viz.style import (
-    AVERAGE_CHAR_EM,
     AXIS_TITLE_SHARE,
     CAPTION_BOTTOM,
     CAPTION_INSET,
@@ -26,8 +25,6 @@ from ctx.viz.style import (
 )
 
 TEST_NAME = "Mann-Whitney U, two-sided"
-# Holds a space no title line may break at; textwrap breaks only at ASCII whitespace.
-UNBROKEN = "\u00a0"
 PERMANOVA_NAME = "PERMANOVA on Euclidean distances"
 
 
@@ -87,8 +84,11 @@ def wrap(text: str, width: int = 0) -> str:
 def fit_title(text: str, height: float) -> str:
     """Wrap a vertical axis title to the length its axis has: a share of the figure height.
 
-    A parenthesised span, such as the unit ``(log2(count + 1))``, is never broken: split at
-    its spaces it left ``1))`` alone on a line. A span longer than a line takes its own.
+    Measured as the files set it, so a line ends only where its next word would cross that
+    length: an average glyph width broke M3's "Difference d (log2(count + 1))", 130.2 pt
+    against 145.8 pt, after "d". A parenthesised span, such as that unit, is never broken:
+    split at its spaces it left ``1))`` alone on a line. A span longer than a line takes its
+    own. The page's titles break at the same places (``ctxExport.words``).
 
     Args:
         text: The title, with its unit.
@@ -97,15 +97,8 @@ def fit_title(text: str, height: float) -> str:
     Returns:
         The title, broken into lines that fit.
     """
-    chars = int(height * 72 * AXIS_TITLE_SHARE / (SIZES["axis_label"] * AVERAGE_CHAR_EM))
-    depth, kept = 0, []
-    for char in text:
-        depth += (char == "(") - (char == ")")
-        # A space inside parentheses is held by a stand-in no line breaks at, then restored.
-        kept.append(UNBROKEN if char == " " and depth > 0 else char)
-    lines = textwrap.wrap("".join(kept), max(chars, 8), break_on_hyphens=False,
-                          break_long_words=False)  # fmt: skip
-    return "\n".join(lines).replace(UNBROKEN, " ")
+    room = height * 72 * AXIS_TITLE_SHARE
+    return "\n".join(wrap_to(words(text), room, SIZES["axis_label"]))
 
 
 def place_caption(
