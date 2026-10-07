@@ -256,16 +256,30 @@ PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow"
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed
 PLOTLY_TICK_PX, PLOTLY_TITLE_STANDOFF_PX = 4, 8
+# What plotly.js adds to every length an axis or a legend pushes a margin out by: 12 px, or the
+# smallest margin where one is smaller (plots.autoMargin). A pushed margin replaces the
+# template's; it never adds to it.
+PLOTLY_PUSH_PAD_PX = min(12, *PLOTLY_MARGIN_PX.values())
+# plotly.js's alignment constant CAP_SHIFT, in em: an axis title with a standoff takes this much
+# of its size past its labels (axes.drawTitle), and an upright column label starts this much
+# less half an em under its axis.
+PLOTLY_CAP_SHIFT = 0.7
+# A text line's box across, in em: Liberation Sans's ascender and descender, 1854 and 434 of its
+# 2048 units, as Arial's. Chromium drew a 20 px label 22.0 to 22.2 px tall (2026-10-07): an
+# upright column label takes this much width and a row label this much height.
+PLOTLY_LABEL_BOX_EM = (1854 + 434) / 2048
 # A legend key's length: plotly's own default and least, named so that a figure opened alone
 # draws it twice as long (zoom()). plotly draws a legend's marker at most 16 px across, so a
 # key of the page's 10 px points reaches 16 px alone, not 20.
 PLOTLY_LEGEND_KEY_PX = 30
 # A legend entry's line on the page: plotly.js adds 3 px to each entry's text line
 # (legend/draw.js, Math.max(h, 16) + 3; 29 px at a 20 px font, measured 2026-10-01), draws
-# its symbol in 40 px before the text (the key and an item gap of 5 each side), and pads the
-# legend by that gap above and below.
+# its symbol in 40 px before the text (the key and an item gap of 5 each side), ends each
+# entry with a gap, and pads the legend by a gap above and below.
 PLOTLY_LEGEND_LINE_PX = on_page(SIZES["legend"]) * LINE_SPACING + 3
-PLOTLY_LEGEND_SYMBOL_PX, PLOTLY_LEGEND_PAD_PX = PLOTLY_LEGEND_KEY_PX + 2 * 5, 10
+PLOTLY_LEGEND_GAP_PX = 5
+PLOTLY_LEGEND_SYMBOL_PX = PLOTLY_LEGEND_KEY_PX + 2 * PLOTLY_LEGEND_GAP_PX
+PLOTLY_LEGEND_PAD_PX = 2 * PLOTLY_LEGEND_GAP_PX
 # A legend swatch on the page is the static's patch height at the legend's page size:
 # plotly's default 6 px square beside a 20 px label hid the palest levels (2026-10-01).
 PLOTLY_LEGEND_SWATCH_PX = LEGEND["handleheight"] * on_page(SIZES["legend"])
@@ -273,13 +287,10 @@ PLOTLY_LEGEND_SWATCH_PX = LEGEND["handleheight"] * on_page(SIZES["legend"])
 # arrow (fx/constants.js HOVERTEXTPAD, HOVERARROWSIZE); a wider box ran off the plot
 # (2026-10-01).
 PLOTLY_HOVER_PX = PHONE_PLOT_PX - 2 * (3 + 6)
-# A heatmap row on the page holds its label as HEAT's row_mm holds a 9 pt one in the file:
-# the same pitch per point of label, at the label's page size. 18 px held a 20 px label
-# only on every other row, and plotly dropped the rest (2026-10-01).
+# A heatmap row of a phone's layout holds a line of its wrapped label as HEAT's row_mm holds a
+# 9 pt one in the file: the same pitch per point of label, at the label's page size. The
+# static's layout on the page takes the files' cell aspect instead (ctx.viz.heatmap, D13).
 PLOTLY_HEAT_ROW_PX = HEAT["row_mm"] / MM_PER_INCH * 72 / SIZES["tick"] * on_page(SIZES["tick"])
-# Below a heatmap's column labels and title: the bottom margin, the title's standoff and the
-# tick labels' pad. Above it the legend takes the top margin, or the margin the legend.
-PLOTLY_HEAT_BASE_PX = PLOTLY_MARGIN_PX["b"] + PLOTLY_TITLE_STANDOFF_PX + PLOTLY_TICK_PX
 TRANSPARENT = "rgba(0,0,0,0)"
 # Dash of a threshold line, in both renderers.
 THRESHOLD_DASH: tuple[Literal["--"], Literal["dash"]] = ("--", "dash")

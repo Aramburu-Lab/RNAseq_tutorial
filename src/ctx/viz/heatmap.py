@@ -8,38 +8,44 @@ beside each row. ``static()`` and ``interactive()`` read the same ``HeatmapData`
 """
 
 import itertools
+import math
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
 import polars as pl
 
-from ctx.viz.annotate import place_caption, wrap
+from ctx.viz.annotate import place_caption
 from ctx.viz.axes import axis_title
 from ctx.viz.metrics import text_width, wrap_to
 from ctx.viz.style import (
-    AVERAGE_CHAR_EM,
     BAR_LABEL_ROTATION,
     HEAT,
     HEAT_ALPHAS,
     LINE_SPACING,
     LINE_WIDTHS,
     MM_PER_INCH,
+    PAGE_PLOT_PX,
     PHONE_PLOT_PX,
-    PLOTLY_HEAT_BASE_PX,
+    PHONE_PX,
+    PLOTLY_CAP_SHIFT,
     PLOTLY_HEAT_ROW_PX,
     PLOTLY_HOVER_PX,
+    PLOTLY_LABEL_BOX_EM,
+    PLOTLY_LEGEND_GAP_PX,
     PLOTLY_LEGEND_LINE_PX,
     PLOTLY_LEGEND_PAD_PX,
     PLOTLY_LEGEND_SWATCH_PX,
     PLOTLY_LEGEND_SYMBOL_PX,
     PLOTLY_MARGIN_PX,
     PLOTLY_NO_LEVEL,
+    PLOTLY_PUSH_PAD_PX,
     PLOTLY_TICK_PX,
     PLOTLY_TITLE_STANDOFF_PX,
     ROLES,
     SIZES,
+    THEMES,
     WIDTHS_MM,
     Theme,
     apply_matplotlib,
@@ -249,6 +255,16 @@ class HeatmapData:
         """The label a row's axis prints; a line break where it wraps."""
         return (self.row_display or {}).get(row, row)
 
+    def _shown(self) -> list[str]:
+        """The row axis's labels top down as the static prints them, a line break where one wraps.
+
+        The tracks, the blank row, then every row while there are ``HEAT["label_rows"]`` or
+        fewer.
+        """
+        labels, rows = self._grid()[1], len(self.rows_in_order())
+        shown = labels if rows <= HEAT["label_rows"] else labels[: len(labels) - rows]
+        return [self._display(label) for label in shown]
+
     def _row_lines(self) -> int:
         """Lines in the tallest row label: each row is drawn that many lines high."""
         return max((self._display(r).count("\n") + 1 for r in self.rows_in_order()), default=1)
@@ -278,13 +294,14 @@ class HeatmapData:
     def _column_title(self, width: float) -> str:
         """The column axis's title, wrapped to the width the cells leave beside the row labels.
 
-        A long title centred under cells pushed right by long row labels ran off the page.
+        A long title centred under cells pushed right by long row labels ran off the page. The
+        labels and the title are measured as the files set them: estimated at an average
+        glyph, the Step-1 teaching band map's title broke a word early (2026-10-07).
         """
-        lines = [line for r in self.rows_in_order() for line in self._display(r).split("\n")]
-        labels_pt = max(map(len, lines), default=0) * SIZES["tick"] * AVERAGE_CHAR_EM
-        room = width * 72 - labels_pt
-        return wrap(self.column_title or self.column_label,
-                    max(int(room / (SIZES["axis_label"] * AVERAGE_CHAR_EM)), 12))  # fmt: skip
+        lines = [line for label in self._shown() for line in label.split("\n")]
+        labels = max((text_width(line, SIZES["tick"]) for line in lines), default=0.0)
+        title = self.column_title or self.column_label
+        return "\n".join(wrap_to(title, width * 72 - labels, SIZES["axis_label"]))
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme; cells are vector quads.
@@ -327,8 +344,7 @@ class HeatmapData:
         cell.
         """
         rows, cols = self.rows_in_order(), self.columns_in_order()
-        labels = [self._display(label) for label in labels]
-        shown = labels if len(rows) <= HEAT["label_rows"] else labels[: len(labels) - len(rows)]
+        shown = self._shown()
         ax.set_yticks(np.arange(len(shown)) + 0.5, shown)
         ax.tick_params(axis="both", length=0)
         if len(cols) <= HEAT["label_columns"]:
@@ -344,17 +360,31 @@ class HeatmapData:
             right.set_ylabel(self.row_stats_label)
             right.spines["right"].set_visible(False)
 
+    def cell_aspect(self) -> float:
+        """A cell's height over its width as the static draws it, read off its laid-out axes.
+
+        The static's height adds a fixed margin to its rows and matplotlib gives the cells what
+        the legend, labels and caption leave, so the aspect is the layout's outcome, not a
+        constant; the page takes it from here (D13). At a fixed pitch, kit v6's M12 page drew
+        its cells 0.34 high per unit of width at 1,440 px, where its files draw 0.44
+        (2026-10-07).
+        """
+        fig = self.static(THEMES["white"])
+        box = fig.axes[0].get_position()
+        width, height = fig.get_size_inches()
+        rows, columns = self._grid()[0].shape
+        return float((box.height * height / rows) / (box.width * width / columns))
+
     def interactive(self) -> Any:
         """Render the plotly figure in the static's layout: tracks, the gap row, then the rows.
 
         Every row of ``_grid`` is a band of a numeric axis with one tick, so a track stands one
-        row above the cells as in the static and no label is dropped. A band is as many
-        pitches tall as its own label has lines, so one long label raises its own row alone.
-        The row statistic is a second axis at right, which automargin keeps inside the figure.
-        Rows, legend and column title read as the static's; narrower than they need, the page
-        swaps in ``layout.meta.narrow`` (``_narrow``), each wrapped to a phone's plot. Hover
-        lines fit a phone's plot at every width; plotly thins the column labels to the width
-        the plot is drawn at.
+        row above the cells as in the static and no label is dropped; every column the static
+        labels is labelled. The bands take the static's cell aspect at a module page's width
+        (``_wide``), so the cells read as in the files. The row statistic is a second axis at
+        right, which automargin keeps inside the figure. Narrower than its labels need, the
+        plot scrolls sideways under the page's hint (``meta.least_width``); a phone draws the
+        labels wrapped to its plot, each row as tall as its label (``_narrow``).
 
         Returns:
             A plotly Figure with the light template; the page switches themes.
@@ -363,7 +393,10 @@ class HeatmapData:
 
         rows, cols = self.rows_in_order(), self.columns_in_order()
         words = self._words(phone=False)
-        edges = self._edges(words)
+        wide = self._wide(words)
+        words = replace(words, title=self._title(words, wide.below if self.column_title
+                                                 else wide.width))  # fmt: skip
+        edges = wide.edges
         first = len(edges) - 1 - len(rows)
         fig = go.Figure(self._cell_trace(go, rows, cols, edges[first:]))
         for at, track in enumerate(self.tracks):
@@ -375,73 +408,153 @@ class HeatmapData:
                 x=[None], y=[None], mode="markers", name=name, legendgroup=str(i),
                 marker={"symbol": "square", "color": colour, "size": PLOTLY_LEGEND_SWATCH_PX},
             ))  # fmt: skip
-        bare = {"showline": False, "ticks": "", "ticklabelstandoff": PLOTLY_TICK_PX,
-                "zeroline": False, "showgrid": False, "automargin": True}  # fmt: skip
         fig.update_layout(
-            template=plotly_templates()["white"], height=self._page_height(edges, words),
+            template=plotly_templates()["white"], height=self._wide_height(wide, words),
             showlegend=True,
             # At the div's top left, not the plot's, which a phone's labels push right; never
             # scrolled, as plotly scrolls a legend past half the figure's height.
             legend={"xref": "container", "yref": "container", "x": 0, "y": 1,
                     "yanchor": "top", "maxheight": 1, "traceorder": "grouped",
                     "tracegroupgap": 0},
-            xaxis={**bare, "type": "category", "categoryorder": "array", "categoryarray": cols,
-                   "title": {"text": "" if self.column_title else words.title},
-                   "tickangle": -BAR_LABEL_ROTATION,
-                   "showticklabels": len(cols) <= HEAT["label_columns"]},
-            yaxis={**bare, "tickmode": "array", **self._yaxis(edges, words)},
+            **self._axes(edges, words, wide),
         )  # fmt: skip
         if self._shows_stats():
             # plotly draws no axis that no trace is on, so an empty one holds it.
             fig.add_trace(go.Scatter(x=[None], y=[None], yaxis="y2", showlegend=False,
                                      hoverinfo="skip"))  # fmt: skip
             fig.update_layout(yaxis2={
-                **bare, "matches": "y", "overlaying": "y", "side": "right", "tickmode": "array",
+                **_BARE, "matches": "y", "overlaying": "y", "side": "right", "tickmode": "array",
                 "tickvals": _centres(edges)[first:], "ticktext": [self._stat(r) for r in rows],
                 "title": {"text": self.row_stats_label},
             })  # fmt: skip
         if self.column_title:
             fig.add_annotation(self._title_note(words.title))
             fig.update_layout(margin_b=self._bottom(words.title))
-        if (narrow := self._narrow(words)) is not None:
-            fig.update_layout(meta={"narrow": narrow})
+        fig.update_layout(meta=self._meta(wide))
         return fig
 
-    def _words(self, phone: bool) -> "_Words":
-        """The static's row labels, legend entries and column title, or a phone's.
+    def _axes(self, edges: list[float], words: "_Words", wide: "_Wide") -> dict[str, Any]:
+        """The column and row axes of the static's layout.
 
-        On a phone each wraps to the room it has there, a row label to half the plot.
+        Columns sit at their positions on a numeric axis, each named by its tick, as the rows
+        do: plotly thins a categorical axis's labels to the width it draws at, and M7's page
+        labelled every other column of 21; and plotly holds an aspect only between two axes of
+        one type. Where ``wide.held``, the row axis holds the bands at ``wide.ratio`` of a
+        column's width, its length shrinking toward the legend where the plot is narrower
+        than ``wide.width``, and the column axis's toward the row labels where it is wider.
         """
-        labels, rows = self._grid()[1], len(self.rows_in_order())
-        shown = labels if rows <= HEAT["label_rows"] else labels[: len(labels) - rows]
+        cols = self.columns_in_order()
+        labelled = self._labelled_columns() > 0
+        held = {"scaleanchor": "x", "scaleratio": wide.ratio, "constrain": "domain",
+                "constraintoward": "top"} if wide.held else {}  # fmt: skip
+        return {
+            "xaxis": {**_BARE, "range": [-0.5, len(cols) - 0.5], "tickmode": "array",
+                      "tickvals": list(range(len(cols))) if labelled else [],
+                      "ticktext": cols if labelled else [],
+                      "title": {"text": "" if self.column_title else words.title},
+                      "tickangle": -BAR_LABEL_ROTATION, "showticklabels": labelled,
+                      "constrain": "domain", "constraintoward": "left"},
+            "yaxis": {**_BARE, "tickmode": "array", **self._yaxis(edges, words), **held},
+        }  # fmt: skip
+
+    def _meta(self, wide: "_Wide") -> dict[str, Any]:
+        """The least width the page draws the plot at, and a phone's layout where it can show.
+
+        The least is what a phone's labels need, the narrowest layout's; plotly's own padding
+        doubles to 12 px, not 16, opened alone, so twice it holds the labels there too.
+        """
+        phone = self._words(phone=True)
+        least = self._needs(phone)
+        meta: dict[str, Any] = {"least_width": [[least, 0]]}
+        if wide.below > least:
+            meta["narrow"] = self._narrow(phone, wide, least)
+        return meta
+
+    def _words(self, phone: bool) -> "_Words":
+        """The static's row labels and legend entries, or a phone's; the title is ``_title``'s.
+
+        On a phone each wraps to the room it has there, a row label to half the plot, an entry
+        to the plot beside its swatch.
+        """
         ticks = {i: "<br>".join(_fit(line, PHONE_PLOT_PX / 2) if phone else line
-                                for line in self._display(label).split("\n"))
-                 for i, label in enumerate(shown) if label}  # fmt: skip
+                                for line in label.split("\n"))
+                 for i, label in enumerate(self._shown()) if label}  # fmt: skip
         legend = [s.level for s in self.swatches]
         legend += [f"{t.name}: {level}" for t in self.tracks for level in t.colours]
         if phone:
             room = PHONE_PLOT_PX - PLOTLY_LEGEND_SYMBOL_PX
             legend = [_fit(name, room, SIZES["legend"]) for name in legend]
-        return _Words(ticks, legend, self._title(ticks, legend, phone))
+        return _Words(ticks, legend, "")
 
-    def _title(self, ticks: Mapping[int, str], legend: list[str], phone: bool) -> str:
-        """The column title as a layout prints it.
+    def _title(self, words: "_Words", width: float) -> str:
+        """The column title as a layout prints it at its narrowest, ``width`` px.
 
-        ``column_title`` is right-aligned under the column labels, wrapped to the plot at the
-        narrowest width its layout is drawn at. ``column_label`` is the axis title, which the
-        page script wraps to the room under the plot; a phone's layout makes room for it
-        wrapped to half the plot. Centred under a phone's cells, a wider one ran off the plot.
+        ``column_title`` is right-aligned under the column labels, from the figure's left
+        margin to the plot's right edge. ``column_label`` is the axis title, centred under the
+        plot, which the page script wraps to twice the room from the plot's centre to the
+        nearer edge of the figure: a phone's layout was sized for it wrapped to half the plot,
+        while the script wrapped it wider (2026-10-07).
         """
-        if not self.column_title:
-            if not phone:
-                return self.column_label
-            return _fit(self.column_label, PHONE_PLOT_PX / 2, SIZES["axis_label"])
-        width = PHONE_PLOT_PX if phone else self._below(ticks, legend)
-        room = width - PLOTLY_MARGIN_PX["l"] - PLOTLY_MARGIN_PX["r"] - self._right_px()
-        return _fit(self.column_title, room, SIZES["axis_label"])
+        right = math.ceil(self._right_px())
+        if self.column_title:
+            room = width - PLOTLY_MARGIN_PX["l"] - right
+            return _fit(self.column_title, room, SIZES["axis_label"])
+        left = math.ceil(self._left_px(words.ticks))
+        return _fit(self.column_label, width - abs(left - right), SIZES["axis_label"])
+
+    def _wide(self, words: "_Words") -> "_Wide":
+        """The static's layout on the page, laid out at the width a module page draws a plot at.
+
+        A row's band is the static's cell height for the page's cell width there, every band
+        that tall as in the static, and no band less than keeps two labels apart: the page's
+        labels are larger beside its plot than the files' beside theirs, and the files' aspect,
+        0.945, would put M7's 22.2 px labels in rows of 21.2 px at its 687 px. Past
+        ``HEAT["label_rows"]`` the rows are unlabelled and keep the files' aspect; a track's
+        band alone grows to its label. The page draws the layout from ``below`` up, where its
+        labels fit and the plot is wider than a phone's screen. plotly holds the aspect at
+        every such width where each band still keeps its label at the narrowest (``held``).
+        Elsewhere, as on the band maps whose two-line labels would have pushed every desktop
+        narrower than 686 px onto a phone's layout, the bands keep their heights; there the
+        legend and title can take more lines, and a band that holds a label grows by what that
+        takes from it, so it keeps the label at the narrowest width too.
+        """
+        n = len(self.columns_in_order())
+        sides = self._sides(words.ticks)
+        needs = self._needs(words)
+        width = max(PAGE_PLOT_PX["beside"], needs)
+        column = (width - sides) / n
+        floors = self._floors(words.ticks)
+        rows = len(self.rows_in_order())
+        band = max(self.cell_aspect() * column, *floors[len(floors) - rows :])
+        heights = [max(band, floor) for floor in floors]
+        below = max(needs, PHONE_PX)
+        scale = (below - sides) / n / column
+        held = all(h * scale >= floor for h, floor in zip(heights, floors, strict=True))
+        if not held:
+            squeeze = self._chrome(words, below, below) - self._chrome(words, width, below)
+            grow = max([1.0, *(f / h + squeeze / sum(heights)
+                               for h, f in zip(heights, floors, strict=True) if f)])  # fmt: skip
+            band, heights = band * grow, [h * grow for h in heights]
+        edges = [0.0, *itertools.accumulate(h / band for h in heights)]
+        return _Wide(width, band, band / column, below, held, edges)
+
+    def _chrome(self, words: "_Words", width: float, below: float) -> float:
+        """The figure's height outside its bands in px, at a plot ``width`` px wide.
+
+        The legend as plotly flows it over the cells there, then the column labels and the
+        title: an axis title as the page script wraps it there, a ``column_title`` as wrapped
+        for the narrowest plot, ``below``.
+        """
+        title = self._title(words, below if self.column_title else width)
+        legend = self._legend_px(words.legend, width - self._sides(words.ticks))
+        return self._top(legend) + math.ceil(self._bottom(title))
+
+    def _wide_height(self, wide: "_Wide", words: "_Words") -> float:
+        """The figure's height in px at ``wide.width``: its legend, bands, labels and title."""
+        return self._chrome(words, wide.width, wide.below) + wide.edges[-1] * wide.band
 
     def _edges(self, words: "_Words") -> list[float]:
-        """Band edges top down, in row pitches: each band as many pitches as its label's lines."""
+        """A phone's band edges top down, in row pitches: each as many as its label's lines."""
         heights = [_lines(words.ticks.get(i, "")) for i in range(len(self._grid()[1]))]
         return [0.0, *itertools.accumulate(map(float, heights))]
 
@@ -451,63 +564,100 @@ class HeatmapData:
         return {"range": [edges[-1], edges[0]], "tickvals": [centres[i] for i in words.ticks],
                 "ticktext": list(words.ticks.values())}  # fmt: skip
 
-    def _narrow(self, wide: "_Words") -> dict[str, Any] | None:
-        """The layout the page script swaps in while the plot is narrower than ``below`` px.
+    def _narrow(self, words: "_Words", wide: "_Wide", least: float) -> dict[str, Any]:
+        """A phone's layout, which the page script swaps in narrower than ``wide.below`` px.
 
         At 375 px the band map's two-line labels started up to 132 px left of the plot and lost
         their unit (2026-10-01); wrapped for a phone on every screen, a desktop's rows were as
-        tall as a phone's labels (work order item 2, 2026-10-01). Narrower than the static's
-        labels need, each wraps to a phone's plot and each row grows to its label's lines: new
-        band edges for the heatmap traces, names for the legend's (``restyle``), ticks, title
-        and height (``relayout``). None where nothing wraps.
+        tall as a phone's labels (work order item 2, 2026-10-01). Each label wraps to a phone's
+        plot and each row grows to its label's lines, free of the static's aspect: new band
+        edges for the heatmap traces, names for the legend's (``restyle``), ticks, title, the
+        aspect's anchor and the height (``relayout``).
         """
-        words = self._words(phone=True)
-        if words == wide:
-            return None
+        words = replace(words, title=self._title(words, max(PHONE_PLOT_PX, least)))
         edges = self._edges(words)
         first = len(edges) - 1 - len(self.rows_in_order())
         relayout = {f"yaxis.{key}": value for key, value in self._yaxis(edges, words).items()}
+        if wide.held:
+            relayout["yaxis.scaleanchor"] = None
         if self._shows_stats():
             relayout["yaxis2.tickvals"] = _centres(edges)[first:]
         if self.column_title:
             relayout |= {"annotations[0].text": words.title, "margin.b": self._bottom(words.title)}
+        else:
+            relayout["xaxis.title.text"] = words.title
         relayout["height"] = self._page_height(edges, words)
         heat = list(range(len(self.tracks) + 1))
         y = [edges[first:], *(edges[at : at + 2] for at in range(len(self.tracks)))]
         keys = list(range(len(heat), len(heat) + len(words.legend)))
-        return {"below": self._below(wide.ticks, wide.legend), "relayout": relayout,
+        return {"below": wide.below, "relayout": relayout,
                 "restyle": [[{"y": y}, heat], [{"name": words.legend}, keys]]}  # fmt: skip
 
-    def _below(self, ticks: Mapping[int, str], legend: list[str]) -> float:
-        """The narrowest plot the static's labels fit, in px.
+    def _labelled_columns(self) -> int:
+        """How many columns the static labels: all of them, up to ``HEAT["label_columns"]``."""
+        n = len(self.columns_in_order())
+        return n if n <= HEAT["label_columns"] else 0
 
-        The widest row label beside a line's width for each labelled column, upright, and the
-        statistic's axis; or the widest legend entry beside its swatch.
+    def _needs(self, words: "_Words") -> int:
+        """The narrowest plot that prints ``words`` whole, in px.
+
+        The row labels' margin, a label's box across for each labelled column, upright, and the
+        statistic's margin; or the widest legend entry beside its swatch. A column under its
+        label's box overlapped its neighbour's.
         """
-        tick = on_page(SIZES["tick"])
-        widest = max((text_width(line, tick) for t in ticks.values() for line in t.split("<br>")),
-                     default=0.0)  # fmt: skip
-        columns = min(len(self.columns_in_order()), HEAT["label_columns"])
-        plot = (PLOTLY_MARGIN_PX["l"] + widest + PLOTLY_TICK_PX + columns * tick * LINE_SPACING
-                + self._right_px() + PLOTLY_MARGIN_PX["r"])  # fmt: skip
+        columns = self._labelled_columns() * PLOTLY_LABEL_BOX_EM * on_page(SIZES["tick"])
         size = on_page(SIZES["legend"])
-        entries = max((text_width(name, size) for name in legend), default=0.0)
-        return max(plot, entries + PLOTLY_LEGEND_SYMBOL_PX)
+        entries = max((text_width(line, size) for name in words.legend
+                       for line in name.split("<br>")), default=0.0)  # fmt: skip
+        return math.ceil(max(self._sides(words.ticks) + columns, entries + PLOTLY_LEGEND_SYMBOL_PX))
+
+    def _floors(self, ticks: Mapping[int, str]) -> list[float]:
+        """Each band's least height in px: what keeps its label off a neighbour's.
+
+        For a labelled band with a labelled neighbour, the box of the tallest label's lines, as
+        the static gives every row the tallest label's; none for any other band.
+        """
+        lines = max((_lines(t) for t in ticks.values()), default=1)
+        box = ((lines - 1) * LINE_SPACING + PLOTLY_LABEL_BOX_EM) * on_page(SIZES["tick"])
+        return [box if i in ticks and (i - 1 in ticks or i + 1 in ticks) else 0.0
+                for i in range(len(self._grid()[1]))]  # fmt: skip
 
     def _shows_stats(self) -> bool:
         """Whether the page prints the row statistic, as the static does, on a right axis."""
         return self.row_stats is not None and len(self.rows_in_order()) <= HEAT["label_rows"]
 
-    def _right_px(self) -> float:
-        """What the statistic's axis takes at right, in px; nothing where none is printed.
+    def _left_px(self, ticks: Mapping[int, str]) -> float:
+        """The left margin plotly draws, in px; the template's where no row is labelled.
 
-        Its widest label, the label's and the title's standoffs, and the title's line.
+        With row labels: its padding, half the axis line, the labels' standoff and the widest
+        label line (plotly.js autoMargin).
+        """
+        tick = on_page(SIZES["tick"])
+        widest = max((text_width(line, tick) for t in ticks.values()
+                      for line in t.split("<br>")), default=0.0)  # fmt: skip
+        if not widest:
+            return PLOTLY_MARGIN_PX["l"]
+        labels = LINE_WIDTHS["axes"] / 2 + PLOTLY_TICK_PX + widest
+        return max(PLOTLY_MARGIN_PX["l"], PLOTLY_PUSH_PAD_PX + labels)
+
+    def _right_px(self) -> float:
+        """The right margin plotly draws, in px; the template's where no statistic is printed.
+
+        With the statistic's axis: its padding, half the axis line, the labels' standoff, the
+        widest statistic, then the title's cap height and standoff (plotly.js autoMargin and
+        axes.drawTitle). Counted as a whole line of title on top of the template's margin, it
+        came to 93.8 px on M7's page where plotly drew 82 (2026-10-07).
         """
         if not self._shows_stats():
-            return 0.0
+            return PLOTLY_MARGIN_PX["r"]
         tick, title = on_page(SIZES["tick"]), on_page(SIZES["axis_label"])
         widest = max((text_width(self._stat(r), tick) for r in self.rows_in_order()), default=0.0)
-        return widest + PLOTLY_TICK_PX + PLOTLY_TITLE_STANDOFF_PX + title * LINE_SPACING
+        labels = LINE_WIDTHS["axes"] / 2 + PLOTLY_TICK_PX + widest
+        return PLOTLY_PUSH_PAD_PX + labels + PLOTLY_CAP_SHIFT * title + PLOTLY_TITLE_STANDOFF_PX
+
+    def _sides(self, ticks: Mapping[int, str]) -> int:
+        """The left and right margins together, as plotly rounds each, in whole px."""
+        return math.ceil(self._left_px(ticks)) + math.ceil(self._right_px())
 
     def _title_drop(self) -> float:
         """How far under the cells a right-aligned title starts, in px.
@@ -523,37 +673,78 @@ class HeatmapData:
         """``column_title`` as an annotation right-aligned under the column labels.
 
         Centred under cells that long row labels push to the right, it ran off the plot and was
-        clipped (Rytis 2026-10-01).
+        clipped (Rytis 2026-10-01). Placed on the axes' domains, it follows the cells where
+        plotly shortens the row axis to hold their aspect.
         """
-        return {"text": text, "xref": "paper", "x": 1, "xanchor": "right", "yref": "paper",
-                "y": 0, "yanchor": "top", "yshift": -self._title_drop(), "align": "right",
-                "showarrow": False, "font": {"size": on_page(SIZES["axis_label"])}}  # fmt: skip
+        return {"text": text, "xref": "x domain", "x": 1, "xanchor": "right",
+                "yref": "y domain", "y": 0, "yanchor": "top", "yshift": -self._title_drop(),
+                "align": "right", "showarrow": False,
+                "font": {"size": on_page(SIZES["axis_label"])}}  # fmt: skip
+
+    def _labels_depth(self) -> float:
+        """How far the upright column labels reach under the cells, in px; 0 when unlabelled.
+
+        plotly.js turns each about a point half its size above its anchor, which sits its cap
+        shift under the axis line past the labels' standoff (axes.makeLabelFns).
+        """
+        longest = self._column_label_length(on_page(SIZES["tick"]))
+        if not longest:
+            return 0.0
+        offset = (PLOTLY_CAP_SHIFT - 0.5) * on_page(SIZES["tick"])
+        return LINE_WIDTHS["axes"] / 2 + PLOTLY_TICK_PX + offset + longest
 
     def _bottom(self, title: str) -> float:
-        """The page plot's height under its cells: column labels, the column title, margins.
+        """The page plot's height under its cells, in px: column labels, title and margins.
 
-        An axis title takes plotly's own room under the labels, which automargin grows to;
-        a right-aligned title sits ``_title_drop`` under the cells, in a bottom margin set to
-        hold it.
+        A right-aligned ``column_title`` sits ``_title_drop`` under the cells, in a bottom
+        margin set to hold it. An axis title takes the margin plotly draws: its padding, the
+        labels' depth, the title's cap height and its standoff (plotly.js autoMargin).
         """
-        title_px = _lines(title) * on_page(SIZES["axis_label"]) * LINE_SPACING
+        size = on_page(SIZES["axis_label"])
         if self.column_title:
+            title_px = _lines(title) * size * LINE_SPACING
             return PLOTLY_MARGIN_PX["b"] + self._title_drop() + title_px
-        return PLOTLY_HEAT_BASE_PX + self._column_label_length(on_page(SIZES["tick"])) + title_px
+        caption = size * (PLOTLY_CAP_SHIFT + (_lines(title) - 1) * LINE_SPACING)
+        pushed = PLOTLY_PUSH_PAD_PX + self._labels_depth() + caption + PLOTLY_TITLE_STANDOFF_PX
+        return max(PLOTLY_MARGIN_PX["b"], pushed)
+
+    def _top(self, legend: float) -> int:
+        """The top margin plotly draws over a legend ``legend`` px tall, in whole px."""
+        return max(PLOTLY_MARGIN_PX["t"], math.ceil(legend + PLOTLY_PUSH_PAD_PX))
+
+    def _legend_px(self, names: list[str], room: float) -> float:
+        """The legend's height as plotly lays it out in a plot ``room`` px wide.
+
+        Entries flow left to right, each its swatch, its text and a gap, onto a new line where
+        the next would cross ``room``; each line is as tall as its tallest entry
+        (legend/draw.js, grouped and horizontal).
+        """
+        size = on_page(SIZES["legend"])
+        heights, used, tallest = [], 0.0, 0.0
+        for name in names:
+            lines = name.split("<br>")
+            entry = (PLOTLY_LEGEND_SYMBOL_PX + max(text_width(line, size) for line in lines)
+                     + PLOTLY_LEGEND_GAP_PX)  # fmt: skip
+            if used and used + entry > room:
+                heights.append(tallest)
+                used, tallest = 0.0, 0.0
+            used += entry
+            tallest = max(tallest, PLOTLY_LEGEND_LINE_PX + (len(lines) - 1) * size * LINE_SPACING)
+        return sum([*heights, tallest]) + PLOTLY_LEGEND_PAD_PX
 
     def _page_height(self, edges: list[float], words: "_Words") -> float:
-        """The page figure's height in px: the static's rows at the page pitch, then the rest.
+        """A phone's figure height in px: its rows at the label pitch, then the rest.
 
         As ``_inches`` does, the rows drawn are capped and the column labels measured. The
         legend has a line per entry, the most a phone stacks (M7's nine on nine lines at
-        375 px, 2026-10-01); a wider page gives the rows what it leaves.
+        375 px, 2026-10-01); a wider plot gives the rows what it leaves.
         """
         rows = len(self.rows_in_order())
         above = edges[len(edges) - 1 - rows]  # the tracks and the blank row
         cells = edges[-1] - above if rows <= HEAT["max_rows_drawn"] else HEAT["max_rows_drawn"]
         lines = sum(_lines(name) for name in words.legend)
-        top = max(PLOTLY_MARGIN_PX["t"], lines * PLOTLY_LEGEND_LINE_PX + PLOTLY_LEGEND_PAD_PX)
-        return top + (above + cells) * PLOTLY_HEAT_ROW_PX + self._bottom(words.title)
+        top = self._top(lines * PLOTLY_LEGEND_LINE_PX + PLOTLY_LEGEND_PAD_PX)
+        return top + (above + cells) * PLOTLY_HEAT_ROW_PX + math.ceil(self._bottom(words.title))
 
     def _cell_trace(self, go: Any, rows: list[str], cols: list[str], edges: list[float]) -> Any:
         """The cells as one heatmap trace between the row ``edges``; hover names each cell."""
@@ -566,7 +757,7 @@ class HeatmapData:
             z.append([None if level is None else index[level] for level, _ in found])
             text.append([self._hover(r, c, *cell) for c, cell in zip(cols, found, strict=True)])
         return go.Heatmap(
-            z=z, x=cols, y=edges, text=text, showscale=False, xgap=0, ygap=0,
+            z=z, x=list(range(len(cols))), y=edges, text=text, showscale=False, xgap=0, ygap=0,
             hoverongaps=False, zmin=-0.5, zmax=len(self.swatches) - 0.5,
             colorscale=plotly_steps([_page_colour(s) for s in self.swatches]),
             hovertemplate="%{text}<extra></extra>",
@@ -578,7 +769,8 @@ class HeatmapData:
         hover = [_hover_lines([_named(track.name, track.values[c]), _named(self.column_label, c)])
                  for c in cols]  # fmt: skip
         return go.Heatmap(
-            z=[[codes[track.values[c]] for c in cols]], x=cols, y=edges, text=[hover],
+            z=[[codes[track.values[c]] for c in cols]], x=list(range(len(cols))), y=edges,
+            text=[hover],
             showscale=False, colorscale=plotly_steps(list(track.colours.values())),
             zmin=-0.5, zmax=len(codes) - 0.5, hovertemplate="%{text}<extra></extra>",
         )  # fmt: skip
@@ -606,6 +798,12 @@ class HeatmapData:
         return "" if value is None else f"{value:{self.row_stats_format}}"
 
 
+# An axis drawn bare: no line, ticks or grid; labels clear of the cells; margins grown to hold
+# them.
+_BARE = {"showline": False, "ticks": "", "ticklabelstandoff": PLOTLY_TICK_PX, "zeroline": False,
+         "showgrid": False, "automargin": True}  # fmt: skip
+
+
 @dataclass(frozen=True)
 class _Words:
     """What one page layout prints, each text with ``<br>`` where it breaks.
@@ -616,6 +814,28 @@ class _Words:
     ticks: Mapping[int, str]
     legend: list[str]
     title: str
+
+
+@dataclass(frozen=True)
+class _Wide:
+    """The static's layout on the page (``HeatmapData._wide``).
+
+    Attributes:
+        width: The plot's width it is laid out for, in px: a module page's, or the least its
+            labels need where that is more.
+        band: A row's height there, in px: the unit of ``edges``.
+        ratio: A row's height over a column's width there.
+        below: The narrowest plot it is drawn in, in px.
+        held: Whether plotly holds ``ratio`` at every width it is drawn at.
+        edges: The bands' edges top down, in rows.
+    """
+
+    width: float
+    band: float
+    ratio: float
+    below: int
+    held: bool
+    edges: list[float]
 
 
 def _page_colour(swatch: Swatch) -> str:
