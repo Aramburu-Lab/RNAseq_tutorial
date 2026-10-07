@@ -11,6 +11,9 @@ measure at 170 mm, and the breaks matched at 170 and 85 mm; without the kerning 
 ran up to 4.33 pt wide and broke 5 captions a word early at 85 mm. A page's PDF embeds these
 fonts as Ctx Sans, its subset renamed; Chromium drew the band map's run names and the parallel
 sets' titles within 0.5 px of the advances (2026-10-01).
+
+A vertical axis title and a flow's labels wrap with it too, from ``words``, which holds a
+parenthesised span such as a unit whole, as the page's ``ctxExport.words`` does.
 """
 
 import io
@@ -69,14 +72,34 @@ def text_width(text: str, size: float, bold: bool = False) -> float:
     return size * total / per_em
 
 
-def wrap_to(text: str, room: float, size: float) -> list[str]:
+def words(text: str) -> list[str]:
+    """``text``'s words, a parenthesised span held as one, as ``ctxExport.words`` splits a title.
+
+    A unit split at its spaces, ``(log2(count + 1))``, left ``1))`` alone on a line (M3.6), and
+    a flow's level ``Reads > 76 nt (max 500 nt)`` ended a line at ``(max`` (2026-10-07).
+    """
+    held: list[str] = []
+    word, depth = "", 0
+    for char in text:
+        if char.isspace() and depth <= 0:
+            held.append(word)
+            word = ""
+        else:
+            depth += (char == "(") - (char == ")")
+            word += char
+    return [w for w in (*held, word) if w]
+
+
+def wrap_to(text: str | list[str], room: float, size: float) -> list[str]:
     """Words greedily onto lines no wider than ``room`` at ``size``; a word is never split.
 
     A line ends only where its next word would cross ``room``; a word wider than ``room``
-    takes a line of its own. Any run of white space is one space.
+    takes a line of its own. A text is split at its white space, any run of it one space;
+    a list is its words already, as ``words`` holds a unit, and as ``ctxExport.wrap`` takes
+    either.
     """
     lines: list[str] = []
-    for word in text.split():
+    for word in text.split() if isinstance(text, str) else text:
         trial = f"{lines[-1]} {word}" if lines else word
         if lines and text_width(trial, size) <= room:
             lines[-1] = trial
