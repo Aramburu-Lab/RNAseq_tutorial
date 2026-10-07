@@ -236,13 +236,14 @@ def read_figures(writer: Writer, seen: Reads, sheet: pl.DataFrame, registry: reg
                          n=seen.curves["run_accession"].n_unique()))  # fmt: skip
     grid = figures.grid_figure(seen.grid, options.fastp, seen.grid_run)
     if grid is None:
-        items.append(text.fill(PAGE, "notes.flat_grid", run=seen.grid_run,
-                               pct=float(seen.grid["passed_pct"][0])))  # fmt: skip
+        items.append(figures.flat_grid(seen.grid, seen.grid_run))
     else:
-        kept, fastp, bands = seen.grid["passed_pct"], options.fastp, len(grid.edges()) - 1
-        items.append(_figure(writer, grid, "fastp_grid", "grid", run=seen.grid_run, q=fastp.q,
-                             l=fastp.l, low=kept.min(), high=kept.max(), bands=bands,
-                             isoline=figures.GRID_ISOLINE))  # fmt: skip
+        counts, fastp = figures.grid_counts(seen.grid), options.fastp
+        floor = (text.fill(PAGE, "figures.grid.reading_floor", **counts),) if counts["none"] else ()
+        items.append(_figure(writer, grid, "fastp_grid", "grid", *floor,
+                             lead="lead_floor" if counts["none"] else "lead", run=seen.grid_run,
+                             q=fastp.q, l=fastp.l, bands=len(grid.edges()) - 1,
+                             isoline=figures.GRID_ISOLINE, **counts))  # fmt: skip
     run_bands = figures.band_map(seen.values, registry, "run_accession")
     if run_bands is not None:
         items.append(_band_map(writer, run_bands, "run_band_map", "run_accession"))
@@ -290,7 +291,7 @@ def _colour_line(column: str | None) -> str:
     return text.fill(PAGE, "colour.by", column=column)
 
 
-def _figure(writer: Writer, data: Any, what: str, key: str, *extra: str,
+def _figure(writer: Writer, data: Any, what: str, key: str, *extra: str, lead: str = "lead",
             **values: Any) -> FigureBlock:  # fmt: skip
     """A page figure whose title, lead and reading guide are ``figures.<key>`` in the content.
 
@@ -300,6 +301,7 @@ def _figure(writer: Writer, data: Any, what: str, key: str, *extra: str,
         what: The figure's file description.
         key: Its table under ``figures`` in ``content/qc.toml``.
         extra: Lines added to the reading guide after the content's own.
+        lead: The lead's key in that table, where a figure has more than one.
         values: The placeholders of the lead and the reading guide.
 
     Returns:
@@ -307,7 +309,7 @@ def _figure(writer: Writer, data: Any, what: str, key: str, *extra: str,
     """
     return writer.figure(data, what, FigureText(
         title=text.word(PAGE, f"figures.{key}.title"),
-        lead=text.fill(PAGE, f"figures.{key}.lead", **values),
+        lead=text.fill(PAGE, f"figures.{key}.{lead}", **values),
         reading=(*_lines(f"figures.{key}.reading", **values), *extra)))  # fmt: skip
 
 
@@ -333,11 +335,13 @@ def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured 
         linked = figures.linked_pca(measured.scores, measured.share, sheet, status, dims)
         glance.append(_figure(writer, linked, "linked_pca", "linked"))
         colour = figures.colour_column(sheet, options.peers)
-        scatter = figures.density(stage.values, sheet, stage.flags, colour)
+        scatter = figures.density(stage.values, sheet, stage.flags, colour, registry)
         if scatter is not None:
+            drawn = scatter.frame
+            elsewhere = (drawn["flagged_by"] != "") & ~drawn["flagged"]
             identity.append(_figure(writer, scatter, "size_genes", "density", _colour_line(colour),
-                                    flagged=int(scatter.frame["flagged"].sum()),
-                                    n=scatter.frame.height, minimum=DENSITY_MIN_POINTS,
+                                    flagged=int(drawn["flagged"].sum()), other=int(elsewhere.sum()),
+                                    n=drawn.height, minimum=DENSITY_MIN_POINTS,
                                     **figures.HDR))  # fmt: skip
         if measured.sexes is not None:
             sexes = figures.sex_scatter(measured.sexes)

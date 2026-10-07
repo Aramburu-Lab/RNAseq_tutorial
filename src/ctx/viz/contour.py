@@ -1,9 +1,11 @@
 """Contours of a continuous value over two continuous axes: computed surfaces and densities.
 
 ``SurfaceData`` fills a value computed on a grid (a two-knob map, a power map) in eight
-cividis bands, with labelled isolines and the current setting marked. The density helpers,
-``density_grid`` and ``hdr_levels``, compute once the smoothed histogram and the 50 % and 90 %
-highest-density levels that ``ctx.viz.density`` draws in both renderers.
+cividis bands, with labelled isolines and the current setting marked. Cells at an optional
+floor, such as settings that keep no read, are drawn in the reference grey and the bands span
+the cells above it: spanning a fastp grid's 0 % put its 30 other cells in the top two bands.
+The density helpers, ``density_grid`` and ``hdr_levels``, compute once the smoothed histogram
+and the 50 % and 90 % highest-density levels that ``ctx.viz.density`` draws in both renderers.
 """
 
 from collections.abc import Mapping, Sequence
@@ -23,8 +25,10 @@ from ctx.viz.style import (
     LINE_WIDTHS,
     MARKER_SIZE,
     PLOTLY_HEIGHT_PX,
+    PLOTLY_LEGEND_SWATCH_PX,
     PLOTLY_MARKER_PX,
     SIZES,
+    THEMES,
     Theme,
     apply_matplotlib,
     figure_inches,
@@ -69,6 +73,11 @@ def hdr_levels(density: np.ndarray, masses: Sequence[float] = HDR_MASSES) -> lis
     return [float(ordered[min(int(np.searchsorted(held, m)), ordered.size - 1)]) for m in masses]
 
 
+def above_floor(values: np.ndarray, floor: float | None) -> np.ndarray:
+    """Whether each value lies above the floor and so takes a band: every value without one."""
+    return np.ones(values.size, dtype=bool) if floor is None else values > floor
+
+
 def box_labels(labels: Sequence[Any], theme: Theme) -> None:
     """Sit each isoline label on a box of the grid grey, readable on any cividis band."""
     for label in labels:
@@ -103,6 +112,9 @@ class SurfaceData:
         isoline_format: Format spec of their labels.
         mark: The current setting, or None.
         width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
+        floor: A value at or below which a cell takes no band and is drawn in the reference
+            grey, e.g. a setting that keeps no read; None puts every cell in the bands.
+        floor_label: The floor's legend key.
     """
 
     frame: pl.DataFrame
@@ -118,17 +130,32 @@ class SurfaceData:
     isoline_format: str = ".3g"
     mark: Mark | None = None
     width: str = FIGURE_WIDTH
+    floor: float | None = None
+    floor_label: str = ""
 
     def __post_init__(self) -> None:
-        """Refuse anything but a full grid of finite values that vary."""
+        """Refuse anything but a full grid of finite values that vary above the floor."""
         if missing := [c for c in (self.x, self.y, self.z) if c not in self.frame.columns]:
             raise ValueError(f"missing columns {missing}")
         nx, ny = self.frame[self.x].n_unique(), self.frame[self.y].n_unique()
         if self.frame.height != nx * ny or self.frame.select(self.x, self.y).is_duplicated().any():
             raise ValueError(f"not a full grid: {self.frame.height} rows for {nx} x {ny}")
         z = self.frame[self.z].cast(pl.Float64)
-        if z.is_null().any() or not z.is_finite().all() or z.min() == z.max():
-            raise ValueError(f"{self.z} must be finite everywhere and vary")
+        if z.is_null().any() or not z.is_finite().all():
+            raise ValueError(f"{self.z} must be finite everywhere")
+        banded = self._values()[self.above()]
+        if not banded.size or banded.min() == banded.max():
+            raise ValueError(f"{self.z} must vary above the floor")
+        if self.floor is not None and not self.floor_label:
+            raise ValueError("a floor needs its legend key")
+
+    def _values(self) -> np.ndarray:
+        """The z column, one value per row of ``frame``."""
+        return self.frame[self.z].cast(pl.Float64).to_numpy()
+
+    def above(self) -> np.ndarray:
+        """Whether each row of ``frame`` lies above the floor and so takes a band."""
+        return above_floor(self._values(), self.floor)
 
     def grid(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """The x values, the y values, and z with rows along y."""
@@ -138,22 +165,24 @@ class SurfaceData:
         return xs, ys, frame[self.z].to_numpy().astype(float).reshape(len(ys), len(xs))
 
     def edges(self) -> np.ndarray:
-        """The value at each band edge: eight equal bands from the lowest to the highest."""
-        z = self.frame[self.z].cast(pl.Float64)
-        return np.linspace(float(z.min()), float(z.max()), len(CIVIDIS) + 1)  # type: ignore[arg-type]
+        """The value at each band edge: eight equal bands over the cells above the floor."""
+        z = self._values()[self.above()]
+        return np.linspace(float(z.min()), float(z.max()), len(CIVIDIS) + 1)
 
     def table(self) -> pl.DataFrame:
-        """Every grid point, with the band it is filled in (0 lowest)."""
+        """Every grid point, with the band it is filled in (0 lowest); none on the floor."""
         edges = self.edges()
-        band = np.clip(np.searchsorted(edges, self.frame[self.z].to_numpy(), "right") - 1,
-                       0, len(CIVIDIS) - 1)  # fmt: skip
-        return self.frame.with_columns(band=pl.Series(band, dtype=pl.Int32))
+        band = np.clip(np.searchsorted(edges, self._values(), "right") - 1, 0, len(CIVIDIS) - 1)
+        return self.frame.with_columns(band=pl.when(pl.Series(self.above()))
+                                       .then(pl.Series(band, dtype=pl.Int32)))  # fmt: skip
 
     def table_columns(self) -> Mapping[str, tuple[str, str]]:
         """(unit, meaning) for every column of ``table()``."""
         edges = ", ".join(f"{e:.4g}" for e in self.edges())
-        return {**self.columns,
-                "band": ("none", f"Colour band, 0 lowest, between the edges {edges}.")}  # fmt: skip
+        meaning = f"Colour band, 0 lowest, between the edges {edges}"
+        if self.floor is not None:
+            meaning += f"; empty at or below the floor, {self.floor:g}, drawn grey"
+        return {**self.columns, "band": ("none", f"{meaning}.")}
 
     def page_table(self) -> pl.DataFrame:
         """Every grid point: the page draws the whole surface."""
@@ -170,6 +199,16 @@ class SurfaceData:
             for label, c in ((self.x_label, self.x), (self.y_label, self.y), (self.z_label, self.z))  # type: ignore[return-value]
         )
 
+    def _levels(self) -> list[float]:
+        """The band edges matplotlib fills between.
+
+        matplotlib closes a band at its top edge, and at its bottom only where that edge is the
+        grid's minimum, which a floor lies below; the lowest edge moves one float down, so the
+        lowest cell above the floor is filled in band 0, as ``table()`` puts it, not as floor.
+        """
+        edges = self.edges()
+        return [float(np.nextafter(edges[0], -np.inf)), *(float(e) for e in edges[1:])]
+
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme: filled bands, isolines, colour bar.
 
@@ -181,6 +220,7 @@ class SurfaceData:
         """
         from matplotlib.figure import Figure  # noqa: PLC0415 - heavy
         from matplotlib.lines import Line2D  # noqa: PLC0415 - heavy
+        from matplotlib.patches import Patch  # noqa: PLC0415 - heavy
         from matplotlib.ticker import FuncFormatter  # noqa: PLC0415 - heavy
 
         apply_matplotlib(theme)
@@ -188,18 +228,24 @@ class SurfaceData:
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
         xs, ys, z = self.grid()
-        filled = ax.contourf(xs, ys, z, levels=self.edges(), colors=list(CIVIDIS))
+        levels = self._levels()
+        filled = ax.contourf(xs, ys, z, levels=levels, colors=list(CIVIDIS))
+        if not self.above().all():
+            ax.contourf(xs, ys, z, levels=[float(z.min()), levels[0]], colors=[theme.reference])
         if self.isolines:
             lines = ax.contour(xs, ys, z, levels=sorted(self.isolines), colors=theme.ink,
                                linewidths=LINE_WIDTHS["line"])  # fmt: skip
             box_labels(ax.clabel(lines, fmt=lambda v: f"{v:{self.isoline_format}}",
                                  fontsize=SIZES["annotation"]), theme)  # fmt: skip
-        handles = []
+        handles: list[Any] = []
         if self.mark:
             ax.plot([self.mark.x], [self.mark.y], marker="o", color=theme.ink, linestyle="",
                     markersize=MARKER_SIZE)  # fmt: skip
             handles.append(Line2D([], [], marker="o", linestyle="", color=theme.ink,
                                   label=self.mark.label))  # fmt: skip
+        if not self.above().all():
+            handles.append(Patch(facecolor=theme.reference, linewidth=LINE_WIDTHS["band_edge"],
+                                 label=self.floor_label))  # fmt: skip
         x_title, y_title, z_title = self._titles()
         ax.set_xlabel(x_title)
         ax.set_ylabel(fit_title(y_title, height))
@@ -211,10 +257,10 @@ class SurfaceData:
         return fig
 
     def interactive(self) -> Any:
-        """Render the plotly figure: the same bands and isolines, hover on every grid point.
+        """Render the plotly figure: the same bands, floor and isolines, hover on every point.
 
         Isolines are black in both themes: they sit on the cividis fill, which the theme does
-        not change.
+        not change. The floor keeps the reference grey, one grey for both themes.
 
         Returns:
             A plotly Figure with the light template; the page switches themes.
@@ -224,15 +270,27 @@ class SurfaceData:
         xs, ys, z = self.grid()
         edges = self.edges()
         x_title, y_title, z_title = self._titles()
+        # plotly colours the bands by floor((zmax - zmin) / size) + 1 levels. The difference of
+        # two rounded edges can exceed the band width by an ulp, which dropped a level and
+        # shifted bands 3 to 6 up a colour on the fastp grid; a width divided by eight is exact.
+        size = (edges[-1] - edges[0]) / (len(edges) - 1)
         fig = go.Figure(go.Contour(
             x=xs, y=ys, z=z, zmin=edges[0], zmax=edges[-1], autocontour=False,
-            contours={"start": edges[0], "end": edges[-1], "size": edges[1] - edges[0],
-                      "coloring": "fill"},
+            contours={"start": edges[0], "end": edges[-1], "size": size, "coloring": "fill"},
             colorscale=plotly_steps(list(CIVIDIS)), line={"width": LINE_WIDTHS["band_edge"]},
             colorbar={"title": {"text": z_title}},
             hovertemplate=f"{x_title}: %{{x}}<br>{y_title}: %{{y}}<br>{z_title}: %{{z:.4g}}"
             "<extra></extra>",
         ))  # fmt: skip
+        reference = THEMES["white"].reference
+        if not self.above().all():
+            # A constraint contour shades the side its operation rules out: ">" keeps the
+            # values above the lowest edge and shades the floor's side in grey.
+            fig.add_trace(go.Contour(
+                x=xs, y=ys, z=z, showscale=False, hoverinfo="skip", showlegend=False,
+                contours={"type": "constraint", "operation": ">", "value": edges[0]},
+                fillcolor=reference, line={"width": LINE_WIDTHS["band_edge"]},
+            ))  # fmt: skip
         for value in self.isolines:
             fig.add_trace(go.Contour(
                 x=xs, y=ys, z=z, autocontour=False, showscale=False, hoverinfo="skip",
@@ -246,6 +304,11 @@ class SurfaceData:
             fig.add_trace(go.Scatter(
                 x=[self.mark.x], y=[self.mark.y], mode="markers", name=self.mark.label,
                 marker={"color": INK_COLOUR, "size": PLOTLY_MARKER_PX},
+            ))  # fmt: skip
+        if not self.above().all():
+            fig.add_trace(go.Scatter(
+                x=[None], y=[None], mode="markers", name=self.floor_label,
+                marker={"symbol": "square", "color": reference, "size": PLOTLY_LEGEND_SWATCH_PX},
             ))  # fmt: skip
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["contour"],
