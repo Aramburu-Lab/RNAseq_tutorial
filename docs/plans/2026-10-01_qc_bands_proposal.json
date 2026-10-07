@@ -1,0 +1,723 @@
+[
+ {
+  "id": "total_sequences",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "consortium_standard",
+  "registry_add": {},
+  "registry_replace": {
+   "plot_source": "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"Each replicate should have 30 million aligned reads, although older projects aimed for 20 million reads.\" ENCODE's audit, ENCODE-DCC/encoded src/encoded/audit/analysis.py at commit 4638915d (2022-11-15), check_file_read_depth with upper_threshold=30000000 and middle_threshold=20000000: 20 to 30 million aligned reads is 'low read depth' at level WARNING, 1 to 20 million 'insufficient read depth' at level NOT_COMPLIANT. Aligned reads are unique reads plus multi-mappers at fewer than 20 loci. Read 2026-10-01. This metric counts sequenced reads, more than aligned ones, so a run above a line may still fall short of it."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "strip() in src/ctx/qc/figures.py draws plot_bands when the metric has no good and usable (today it draws only Metric.spans())",
+   "teach-tab caption: the course cut every run to 1,000,000 reads"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "fastqc-total_sequences",
+   "unit": "run",
+   "good": 0,
+   "usable": 0,
+   "bad": 8,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Judging would add 8 flags on the teach runs, all from subsampling. M has no column."
+ },
+ {
+  "id": "read_length",
+  "applies": false,
+  "mode": "shade",
+  "band_source_type": "consortium_standard",
+  "registry_add": {
+   "plot_line": 50.0,
+   "plot_source": "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline, Uniform Processing Pipeline Restrictions (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"The read length should be a minimum of 50 base pairs.\" ENCODE's audit marks a shorter read 'insufficient read length' at level NOT_COMPLIANT (ENCODE-DCC/encoded src/encoded/audit/experiment.py, check_file_read_length_rna(f, 50, ...), last commit d9f41ec2, 2023-01-19). A floor for ENCODE's pipeline, not a quality scale. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "new registry field plot_line, one reference value sourced by plot_source, drawn by strip() (today plot_bands refuses one value)"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "fastqc-avg_sequence_length",
+   "unit": "run",
+   "above_line": 8,
+   "below_line": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Full cohort has no column; Trim Galore JSON gives 210 above, 0 below."
+ },
+ {
+  "id": "percent_gc",
+  "applies": false,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {
+   "plot_line": 49.8,
+   "plot_source": "Course convention, derived: the mean of MultiQC 1.35's theoretical GC curve 'FastQC theoretical GC content curve: Human Transcriptome (UCSC hg38)' (github.com/MultiQC/MultiQC/blob/v1.35/multiqc/modules/fastqc/fastqc_theoretical_gc/fastqc_theoretical_gc_hg38_txome.txt), computed 2026-10-01 as 49.81. The curve draws reads in proportion to transcript length and isoform number, not expression: a reference for the annotation, not the value an expressed library should have."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "new registry field plot_line, one reference value sourced by plot_source, drawn by strip() (today plot_bands refuses one value)"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "fastqc-percent_gc",
+   "unit": "run",
+   "above_line": 1,
+   "below_line": 7,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "The MAD flag on ERR7425270 at 50 % stays."
+ },
+ {
+  "id": "fastp_surviving",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {
+   "plot_bands": [
+    95.0,
+    90.0
+   ],
+   "plot_source": "Course convention, at fastp's default filters only. fastp 1.1.0 --help, the installed binary: -q 'Default 15 means phred quality >=Q15 is qualified.', -u 'Default 40 means 40%', -n 'Default is 5', -l 'default is 15'. At those settings a read is dropped only when more than 40 % of its bases fall below Q15, it carries more than 5 N, or it is shorter than 15 nt. The worst of the 8 teaching runs loses 1.03 %; 95 % is about five times that loss, 90 % about ten. Not sourced. Read 2026-10-01."
+  },
+  "registry_replace": {
+   "rationale": "At fastp's default filters a run losing 1 read in 20 is degraded; the band rests on 8 teaching runs and holds at default settings only. The -q and -l grid the page lets you move is never shaded, since there a band would grade the settings, not the run."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "strip() in src/ctx/qc/figures.py draws plot_bands when the metric has no good and usable (today it draws only Metric.spans())",
+   "draw the band on the default-settings strip only, never on the fastp grid"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "fastp-pct_surviving_reads",
+   "unit": "run",
+   "good": 8,
+   "usable": 0,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": ""
+ },
+ {
+  "id": "fastqc_per_base_quality",
+  "applies": true,
+  "mode": "judge",
+  "band_source_type": "tool_code",
+  "registry_add": {},
+  "registry_replace": {
+   "plot_source": "FastQC 0.12.1 Graphs/QualityBoxPlot.java (github.com/s-andrews/FastQC/blob/v0.12.1/uk/ac/babraham/FastQC/Graphs/QualityBoxPlot.java): 'g.fillRect(xOffset+(baseWidth*i), getY(28), baseWidth, getY(20)-getY(28));'. Good from Phred 28, reasonable from 20, poor below. Read 2026-10-01."
+  },
+  "registry_remove": [],
+  "needs_code": [],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "per_base_sequence_quality",
+   "unit": "run",
+   "good": 8,
+   "usable": 0,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "No band change: the verdict stays FastQC's status, 28/20 stay plot_bands. Optional: plot_source cites the source line instead of the javap reading."
+ },
+ {
+  "id": "fastqc_adapter",
+  "applies": true,
+  "mode": "judge",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "plot_bands": [
+    5.0,
+    10.0
+   ],
+   "plot_source": "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'adapter warn 5', 'adapter error 10', the percentage of reads observed to contain an adapter k-mer at any point. Shades the cumulative adapter curve; the verdict stays FastQC's status. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "registry.py _band_problems: plot_bands order checked against direction, or the pair's own order where direction is none (today a lower-is-better pair is refused)",
+   "a per-position cumulative adapter curve figure, like quality_figure"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "adapter_content",
+   "unit": "run",
+   "good": 5,
+   "usable": 1,
+   "bad": 2,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Already judges; ERR7425288 and ERR7425289 already flagged."
+ },
+ {
+  "id": "fastqc_n_content",
+  "applies": true,
+  "mode": "judge",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "plot_bands": [
+    5.0,
+    20.0
+   ],
+   "plot_source": "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'n_content warn 5', 'n_content error 20'. FastQC Help, Per Base N Content: 'This module raises a warning if any position shows an N content of >5%'. Shades the N share by position; the verdict stays FastQC's status. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "registry.py _band_problems: plot_bands order checked against direction, or the pair's own order where direction is none (today a lower-is-better pair is refused)",
+   "a per-position N curve figure"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "per_base_n_content",
+   "unit": "run",
+   "good": 8,
+   "usable": 0,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": ""
+ },
+ {
+  "id": "fastqc_sequence_content",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "plot_bands": [
+    10.0,
+    20.0
+   ],
+   "plot_expected_bias_positions": 13,
+   "plot_source": "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'sequence warn 10', 'sequence error 20', the largest A/T or G/C difference at any position. FastQC Help, Per Base Sequence Content: 'Nearly all RNA-Seq libraries will fail this module because of this bias'. Positions 1 to 13 greyed as priming bias: Hansen, Brenner, Dudoit 2010, Nucleic Acids Res 38:e131, doi:10.1093/nar/gkq224: 'a strong distinctive pattern in the nucleotide frequencies of the first 13 positions'. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "registry.py _band_problems: plot_bands order checked against direction, or the pair's own order where direction is none (today a lower-is-better pair is refused)",
+   "new field plot_expected_bias_positions",
+   "a per-position base-difference curve figure"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "per_base_sequence_content",
+   "unit": "run",
+   "good": 0,
+   "usable": 0,
+   "bad": 8,
+   "missing": 0,
+   "from_position_14": {
+    "good": 7,
+    "usable": 1,
+    "bad": 0
+   }
+  },
+  "flags_changed": 0,
+  "note": "Action stays keep. Action flag would add 8."
+ },
+ {
+  "id": "fastqc_gc_distribution",
+  "applies": true,
+  "mode": "judge",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "plot_bands": [
+    15.0,
+    30.0
+   ],
+   "plot_source": "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'gc_sequence warn 15', 'gc_sequence error 30', the percentage of reads deviating from a normal fitted at the mode. Shades a per-run deviation strip; the verdict stays FastQC's status. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "registry.py _band_problems: plot_bands order checked against direction, or the pair's own order where direction is none (today a lower-is-better pair is refused)",
+   "a per-run deviation strip, and the GC histogram over MultiQC 1.35's hg38_txome curve"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "per_sequence_gc_content",
+   "unit": "run",
+   "good": 4,
+   "usable": 3,
+   "bad": 1,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Already judges; ERR7425271 already flagged."
+ },
+ {
+  "id": "fastqc_overrepresented",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "plot_bands": [
+    0.1,
+    1.0
+   ],
+   "plot_source": "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'overrepresented warn 0.1', 'overrepresented error 1', the percentage of reads that are one sequence. Shades the top sequence's share. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "registry.py _band_problems: plot_bands order checked against direction, or the pair's own order where direction is none (today a lower-is-better pair is refused)",
+   "a bar of the top sequence's share per run"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_teach_read_metrics_v1.csv",
+   "column": "overrepresented_sequences",
+   "unit": "run",
+   "good": 6,
+   "usable": 2,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Action stays keep."
+ },
+ {
+  "id": "tg_pct_with_adapter",
+  "applies": false,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {
+   "plot_line": 33.3,
+   "plot_source": "Course convention, derived: the sum over overlap lengths L of 4^-L, 33.3 % at 75 to 101 nt, from the per-length expectation Trim Galore 2.3.0 prints, src/report.rs line 638 (github.com/FelixKrueger/TrimGalore/blob/v2.3.0/src/report.rs): 'let expect = stats.total_reads as f64 / 4f64.powi(length as i32);'. Trim Galore prints no total. The share expected to match by chance at stringency 1 with no adapter present, if bases were even. Computed 2026-10-01."
+  },
+  "registry_replace": {
+   "rationale": "Trim Galore counts a read with a single adapter base (stringency 1), and about a third of reads match that way by chance with no adapter present, so no adapter cut-off applies to this share. A run far above its batch has short inserts."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "new registry field plot_line, one reference value sourced by plot_source, drawn by strip() (today plot_bands refuses one value)"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "trim_galore-tg_pct_with_adapter",
+   "unit": "sample",
+   "below_line": 2,
+   "above_line": 208,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "bands stays dataset_only. See decision 5 for FastQC on all 210 samples or a >=12 bp adapter metric."
+ },
+ {
+  "id": "tg_pct_passing",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {
+   "plot_bands": [
+    99.9,
+    99.0
+   ],
+   "plot_source": "Course convention: Trim Galore 2.3.0's length guide (trimgalore.com/guide/length/) shows an example report with '1000000 sequences processed in total' and 'Sequences removed because they became shorter than the length cutoff of 20 bp: 552 (0.1%)'. Up to that loss is good, up to ten times it usable. An example, not a cut-off. Read 2026-10-01."
+  },
+  "registry_replace": {
+   "meaning": "The share of reads Trim Galore wrote; with nf-core/rnaseq 3.27.0's arguments every read removed was shorter than 20 nt after trimming.",
+   "rationale": "Trim Galore's own example loses 0.1 % of reads as too short; the band shades from there. Depth is judged by tg_total_reads and library_size, not here."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "strip() in src/ctx/qc/figures.py draws plot_bands when the metric has no good and usable (today it draws only Metric.spans())"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "trim_galore-tg_pct_passing",
+   "unit": "sample",
+   "good": 210,
+   "usable": 0,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "21 MAD flags stay; they follow the poly-G batch."
+ },
+ {
+  "id": "tg_pct_quality_trimmed",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {
+   "plot_bands": [
+    2.3,
+    20.0
+   ],
+   "plot_source": "Course convention. Good to 2.3 %: Trim Galore 0.6.2 trimmed 2.3 % of bases from SEQC UHRR and HBRR, 100 bp paired-end, quality and adapter trimming together (Liao and Shi 2020, NAR Genom Bioinform 2(3):lqaa068, doi:10.1093/nargab/lqaa068, Supplementary Table S1); a description of reference RNA, not a cut-off. Usable to 20 %: the share of bases the course's q30_rate line lets fall below Q30, an analogy only. Read 2026-10-01."
+  },
+  "registry_replace": {
+   "rationale": "No source gives a cut-off on this share; the good line is what Trim Galore removed in all from a benchmark library, the usable line the course's own. A run trimmed far more than its batch had poorer late cycles."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "strip() in src/ctx/qc/figures.py draws plot_bands when the metric has no good and usable (today it draws only Metric.spans())",
+   "registry.py _band_problems: plot_bands order checked against direction, or the pair's own order where direction is none (today a lower-is-better pair is refused)"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "trim_galore-tg_pct_quality_trimmed",
+   "unit": "sample",
+   "good": 210,
+   "usable": 0,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "1 MAD flag, ERX6994392, stays."
+ },
+ {
+  "id": "gene_strand_bias",
+  "applies": false,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {},
+  "registry_replace": {
+   "rationale": "nf-core/rnaseq 3.27.0 applies these thresholds to Salmon's strand share and to RSeQC infer_experiment on the genome alignment, which leaves out a read on genes of both strands. featureCounts at -s 1 and at -s 2 assigns such a read both times, so for a stranded library this share sits nearer 0.5 than RSeQC's. Applying the same cut-offs here is this course's choice.",
+   "source": "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), which docs/usage.md applies to Salmon and to RSeQC infer_experiment; transferred to featureCounts gene-assigned reads"
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "strip() for kind strandedness shades the call regions from stranded and unstranded"
+  ],
+  "step1": {
+   "note": "not measurable: no outputs/03_process, Step-1 ran skip_alignment true",
+   "missing": 210
+  },
+  "flags_changed": null,
+  "note": "source_type stays course_convention (D-039)."
+ },
+ {
+  "id": "salmon_percent_mapped",
+  "applies": true,
+  "mode": "judge",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "good": 30.0,
+   "usable": 10.0
+  },
+  "registry_replace": {
+   "source": "Salmon 2.7.0 crates/salmon-core/src/diagnostics.rs input_diagnostics() (github.com/COMBINE-lab/salmon/blob/v2.7.0/crates/salmon-core/src/diagnostics.rs): 'The thresholds are judgement calls, not statistics: a healthy bulk RNA-seq run against a matching transcriptome typically maps 70-90%. Below 30% something is usually wrong; below 10% it is almost certainly the wrong reference.' Below 30 % writes low_mapping_rate, below 10 % very_low_mapping_rate, both at severity warning. Read 2026-10-01.",
+   "source_type": "tool_code",
+   "rationale": "Salmon's own lines, from the release that quantified Step-1; they catch a wrong reference or a failed library. Lenient for sorted blood cells on a decoy-aware index, whose cell-type medians lose 15 to 26 % of reads to the genome decoys, so the dataset check beside them finds the low mappers. Conesa et al. 2016 expect a transcriptome rate slightly below the genome's 70 to 90 % and give no number."
+  },
+  "registry_remove": [
+   "bands"
+  ],
+  "needs_code": [
+   "check: samples whose meta_info.json diagnostics hold low_mapping_rate or very_low_mapping_rate equal the samples outside good (210 of 210 agree today)"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "salmon-percent_mapped",
+   "unit": "sample",
+   "good": 209,
+   "usable": 1,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Usable: ERX6994414 at 29.29. The 4 MAD flags stay. Teach file has no Salmon column."
+ },
+ {
+  "id": "salmon_strand_bias",
+  "applies": false,
+  "mode": "shade",
+  "band_source_type": "pipeline_default",
+  "registry_add": {
+   "plot_unstranded_tolerance": 0.01,
+   "plot_source": "Salmon 2.7.0 crates/salmon-core/src/libtype.rs LibFormatSummary::diagnostics() (github.com/COMBINE-lab/salmon/blob/v2.7.0/crates/salmon-core/src/libtype.rs): under an unstranded library, |strand_mapping_bias - 0.5| > 0.01 writes strand_bias_unstranded, 'detected a *potential* strand bias > 1% in an unstranded protocol', a warning. Drawn for runs quantified as U only. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "strip() for kind strandedness shades the call regions from stranded and unstranded",
+   "new field plot_unstranded_tolerance, drawn as a strip around 0.5 for U runs"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "salmon-strand_mapping_bias",
+   "unit": "sample",
+   "unstranded": 210,
+   "forward": 0,
+   "reverse": 0,
+   "undetermined": 0,
+   "inside_strip": 209,
+   "outside_strip": 1,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Salmon's strip judging would add 1 flag row, ERX6994473, and 0 new samples."
+ },
+ {
+  "id": "salmon_compatible_ratio",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "plot_line": 95.0,
+   "plot_source": "Salmon 2.7.0 crates/salmon-core/src/libtype.rs LibFormatSummary::diagnostics() (github.com/COMBINE-lab/salmon/blob/v2.7.0/crates/salmon-core/src/libtype.rs): when 1.0 - compatible_fragment_ratio > 0.05 it warns, high_incompatible_fraction, 'greater than 5% of the fragments disagreed with the expected library type'. A warning, so a line, not a fail. Read 2026-10-01."
+  },
+  "registry_replace": {
+   "unit": "%",
+   "rationale": "Salmon warns when more than 5 % of fragments disagree with the library type. A single-end run quantified as unstranded accepts either strand, so it reads 100 by construction; the line separates runs only in a stranded or paired cohort."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "new registry field plot_line, one reference value sourced by plot_source, drawn by strip() (today plot_bands refuses one value)",
+   "the metrics _README.md data dictionary calls this column a fraction; fix it where the README is written"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "salmon-compatible_fragment_ratio",
+   "unit": "sample",
+   "at_or_above_line": 210,
+   "below_line": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": ""
+ },
+ {
+  "id": "library_size",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "consortium_standard",
+  "registry_add": {
+   "plot_bands": [
+    30000000.0,
+    20000000.0
+   ],
+   "plot_source": "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"Each replicate should have 30 million aligned reads, although older projects aimed for 20 million reads.\" ENCODE's audit, ENCODE-DCC/encoded src/encoded/audit/analysis.py at commit 4638915d (2022-11-15), check_file_read_depth with upper_threshold=30000000 and middle_threshold=20000000: 20 to 30 million aligned reads is 'low read depth' at level WARNING, 1 to 20 million 'insufficient read depth' at level NOT_COMPLIANT. Aligned reads are unique reads plus multi-mappers at fewer than 20 loci. Read 2026-10-01. This column equals Salmon's transcriptome-mapped reads, fewer than genome-aligned reads: a library above a line meets it, one below may still meet it."
+  },
+  "registry_replace": {
+   "rationale": "DESeq2's size factors correct depth; a library far below the rest is noisier, not wrong. The column equals Salmon's transcriptome-mapped reads, fewer than the genome-aligned reads ENCODE counts, so ENCODE's lines are drawn, not judged."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "strip() in src/ctx/qc/figures.py draws plot_bands when the metric has no good and usable (today it draws only Metric.spans())"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "library_size",
+   "unit": "sample",
+   "good": 29,
+   "usable": 81,
+   "bad": 100,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Judging would add 95 flag rows and move 45 samples from pass to flag."
+ },
+ {
+  "id": "genes_detected",
+  "applies": true,
+  "mode": "none",
+  "band_source_type": null,
+  "registry_add": {},
+  "registry_replace": {
+   "rationale": "Depends on depth, on the annotation, on the detection rule and on the cell type's RNA content, which is low in neutrophils (TODO.md, M2). No short-read bulk source gives a number; ENCODE's 8,000 and 4,000 are for long-read RNA-seq."
+  },
+  "registry_remove": [],
+  "needs_code": [],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "genes_detected",
+   "unit": "sample",
+   "median": 22418,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": ""
+ },
+ {
+  "id": "top_gene_share",
+  "applies": true,
+  "mode": "none",
+  "band_source_type": null,
+  "registry_add": {},
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "leave Mt_rRNA genes and the 18S-antisense lncRNAs ENSG00000280614 and ENSG00000281383 out of the top-gene search, then update 'computed'"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "top_gene_share",
+   "unit": "sample",
+   "median": 0.053446,
+   "missing": 0,
+   "top_gene_is_ENSG00000280614": 102
+  },
+  "flags_changed": 0,
+  "note": "After the fix: median 3.22 %, max 17.9 % DEFA1B in BM_1."
+ },
+ {
+  "id": "mt_fraction",
+  "applies": true,
+  "mode": "none",
+  "band_source_type": null,
+  "registry_add": {},
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "mt_fraction",
+   "unit": "sample",
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "No line: the only number, 5 %, is a single-cell per-cell filter. At 5 %: 190 good, 20 bad; judging adds 15 rows, 5 monocytes pass to flag."
+ },
+ {
+  "id": "mt_rrna_fraction",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "tool_code",
+  "registry_add": {
+   "plot_line": 0.1,
+   "plot_source": "RNA-SeQC 2.4.2 python/rnaseqc/report.py (github.com/getzlab/rnaseqc/blob/v2.4.2/python/rnaseqc/report.py) draws \"'rRNA Rate': 0.1\" as a dashed line and marks samples above it ('gt'). Its src/GTF.cpp counts as rRNA every transcript_type matching 'rRNA', 'const boost::regex ribosomalPattern(\"rRNA\")': on GENCODE that is Mt_rRNA, rRNA and rRNA_pseudogene, this column plus rrna_fraction. RNA-SeQC divides by genome-mapped reads and this column by Salmon-mapped reads, so a value here reads at or above RNA-SeQC's. Read 2026-10-01."
+  },
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "new registry field plot_line, one reference value sourced by plot_source, drawn by strip() (today plot_bands refuses one value)"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "mt_rrna_fraction",
+   "unit": "sample",
+   "below_line": 204,
+   "above_line": 6,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "All 6 above are already MAD-flagged; judging at good = usable = 0.1 would also add 0."
+ },
+ {
+  "id": "rrna_fraction",
+  "applies": true,
+  "mode": "none",
+  "band_source_type": null,
+  "registry_add": {},
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "count 18S and 28S reads: through the two 18S-antisense lncRNAs in unstranded libraries, or an rRNA reference"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "rrna_fraction",
+   "unit": "sample",
+   "max": 6.8e-05,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Decision 9: action keep until fixed removes 11 flag rows and unflags 4 samples."
+ },
+ {
+  "id": "globin_fraction",
+  "applies": true,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {
+   "plot_bands": [
+    0.001,
+    0.01
+   ],
+   "plot_source": "Course convention, placed on Step-1 measured 2026-10-01: every peripheral-blood sample is at or below 0.062 % globin and the six above 0.09 % are bone marrow, where erythroid precursors are expected. Good to 0.1 %, usable to 1 %. Scale only, not a source: whole blood carries a mean 81 % globin reads undepleted and 17 % after globin depletion (Shin et al. 2014, PLoS One 9(3):e91041, doi:10.1371/journal.pone.0091041)."
+  },
+  "registry_replace": {
+   "rationale": "Sorted leukocytes carry almost no globin: peripheral-blood samples sit at or below 0.062 %, bone-marrow ones reach 0.119 %. Usable to 1 %, one-seventeenth of a globin-depleted whole-blood library. The dataset check still flags small differences between peers."
+  },
+  "registry_remove": [],
+  "needs_code": [
+   "strip() in src/ctx/qc/figures.py draws plot_bands when the metric has no good and usable (today it draws only Metric.spans())",
+   "registry.py _band_problems: plot_bands order checked against direction, or the pair's own order where direction is none (today a lower-is-better pair is refused)"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "globin_fraction",
+   "unit": "sample",
+   "good": 207,
+   "usable": 3,
+   "bad": 0,
+   "missing": 0
+  },
+  "flags_changed": 0,
+  "note": "Usable: ERX6994368, ERX6994432, ERX6994441, all BM_4. 53 MAD flags stay; 50 sit at or below 0.1 %."
+ },
+ {
+  "id": "replicate_spearman",
+  "applies": true,
+  "mode": "none",
+  "band_source_type": null,
+  "registry_add": {},
+  "registry_replace": {
+   "rationale": "ENCODE's standard (encodeproject.org/data-standards/rna-seq/long-rnas/, June 2017, read 2026-10-01) asks for a Spearman correlation above 0.9 between isogenic and above 0.8 between anisogenic replicates, computed pairwise on RSEM FPKM over genes with mean log2 FPKM above 0. This column is a median over peers on counts over every gene read, so the number does not transfer; 39 of 210 Step-1 samples also share a donor with a peer."
+  },
+  "registry_remove": [],
+  "needs_code": [],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "replicate_spearman",
+   "unit": "sample",
+   "missing": 1
+  },
+  "flags_changed": 0,
+  "note": "At 0.8 on this column: 67 good, 142 bad, 1 missing; judging adds 133 rows, 58 samples pass to flag."
+ },
+ {
+  "id": "pca_distance",
+  "applies": true,
+  "mode": "none",
+  "band_source_type": null,
+  "registry_add": {},
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "pca_distance",
+   "unit": "sample",
+   "missing": 1
+  },
+  "flags_changed": 0,
+  "note": "A quality signal with no absolute scale."
+ },
+ {
+  "id": "sex_check",
+  "applies": false,
+  "mode": "shade",
+  "band_source_type": "course_convention",
+  "registry_add": {},
+  "registry_replace": {},
+  "registry_remove": [],
+  "needs_code": [
+   "shade the XIST against chrY scatter's two half-planes of rule R8, labelled 'expression says M' and 'expression says F'; caption notes ERX6994414 and ERX6994457, both HSCT"
+  ],
+  "step1": {
+   "file": "2026-09-30_qc_tier1_metrics_v1.csv",
+   "column": "sex_agrees",
+   "unit": "sample",
+   "agrees": 208,
+   "not_recorded": 2,
+   "disagrees": 0
+  },
+  "flags_changed": 0,
+  "note": ""
+ }
+]
