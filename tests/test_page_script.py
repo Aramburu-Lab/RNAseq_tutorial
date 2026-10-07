@@ -3,9 +3,12 @@
 The volcano page calls genes again in the browser for any cutoff the reader picks. That rule
 is JavaScript (templates/_calls.js.j2); this test runs the same file and compares its counts
 and cutoff line with the Python definition over a grid of every basis, cutoff and threshold.
+The bar filter, its lead's numbers and the hover rule are held to their Python definitions the
+same way.
 """
 
 import dataclasses
+import itertools
 import json
 import math
 import re
@@ -13,6 +16,7 @@ import shutil
 import subprocess
 from collections import Counter
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import polars as pl
@@ -25,7 +29,10 @@ from ctx.de.deseq import fit
 from ctx.de.run import _volcano
 from ctx.de.stats import ADJUSTMENTS, adjust, classify, p_line
 from ctx.report import text
+from ctx.report.builder import FigureText
 from ctx.report.figures import defaults as _defaults
+from ctx.report.figures import finite
+from ctx.viz.axes import hover_rows, hover_value
 from ctx.viz.bar import significant
 from ctx.viz.save import figure_block
 from ctx.viz.scatter import CUTOFF_PRESETS, MIN_CUTOFF, _js_number
@@ -76,11 +83,17 @@ def _python(rows: pl.DataFrame, basis: str, alpha: float, t: float) -> dict[str,
     }
 
 
-def _node(payload: dict, harness: str | None = None, script: Path = SCRIPT) -> dict:
-    """Run a template's logic under node on one payload; returns what the harness prints."""
+def _node(payload: dict, harness: str | None = None, script: Path | tuple[Path, ...] = SCRIPT
+          ) -> dict:  # fmt: skip
+    """Run templates' logic under node on one payload; returns what the harness prints.
+
+    Several templates run in the order given, as the page includes them.
+    """
     node = shutil.which("node")
     assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
-    rule = script.read_text().replace("{% raw %}", "").replace("{% endraw %}", "")
+    scripts = script if isinstance(script, tuple) else (script,)
+    rule = "".join(s.read_text() for s in scripts).replace("{% raw %}", "").replace(
+        "{% endraw %}", "")  # fmt: skip
     harness = (
         harness
         or """
@@ -301,7 +314,9 @@ def test_brush_paints_both_views_and_counts_as_python_does():
     assert "; " in out[-2]["summary"]
 
 
-FILTER = ROOT / "src" / "ctx" / "report" / "templates" / "_filter.js.j2"
+HOVER = ROOT / "src" / "ctx" / "report" / "templates" / "_hover.js.j2"
+# The filter as the page includes it: the hover rule first.
+FILTER = (HOVER, ROOT / "src" / "ctx" / "report" / "templates" / "_filter.js.j2")
 PICK = """
 const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
 const cfg = input.cfg;
@@ -331,7 +346,7 @@ def _filter_oracle(data, chosen: dict[str, str]) -> dict:
         "median": float(np.median(lengths)),
         "traces": [p[data.category].cast(pl.String).to_list() for p in parts],
         "values": [p[data.value].to_list() for p in parts],
-        "hover": [p.select(data.hover).rows() for p in parts],
+        "hover": [hover_rows(p, data.hover) for p in parts],
     }
 
 
@@ -392,6 +407,186 @@ def test_a_filter_line_without_a_median_and_its_selects_in_words():
     out = _node(payload, PICK, FILTER)
     assert out["views"][0]["summary"] == shown["summary"]
     assert re.fullmatch(r"\d+ of \d+ bars shown\.", out["views"][1]["summary"])
+
+
+HOVERS = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify({
+  values: input.values.map(ctxHover.value), nan: ctxHover.value(NaN),
+  views: input.choices.map((chosen) => ctxFilter.view(input.rows, input.cfg, chosen).customdata),
+  aggregate: ctxFilter.aggregate(input.rows, input.rows.map((_, i) => i), input.aggregates),
+  none: ctxFilter.aggregate(input.rows, [0], input.aggregates),
+}));
+"""
+
+
+def test_a_missing_hover_value_prints_nothing_as_python_writes_it():
+    """Package C: under a number format plotly prints a missing value as 0, so Python writes it
+    as "" (``axes.hover_value``). The page builds customdata again from its rows, where a
+    missing number is null, whenever a filter or a live call moves; it follows the same rule.
+    A lead's numbers pass a missing value by, in both languages, and with none left give no
+    number. Mutation: the page's customdata of raw values (null printed as 0 again)."""
+    from ctx.viz import aggregates  # noqa: PLC0415
+
+    data = filtered_bars()
+    fdr = [None if i % 4 == 0 else i / 100 for i in range(data.frame.height)]
+    data = dataclasses.replace(
+        data, frame=data.frame.with_columns(fdr=pl.Series(fdr, dtype=pl.Float64)),
+        hover=("cell_type", "fdr"),
+        columns={**data.columns, "fdr": ("none", "An FDR.")})  # fmt: skip
+    values = [None, 0, 0.0, -1.5, 12, "", "LDN"]
+    choices = [{"cell_type": "", "condition": ""}, {"cell_type": "LDN", "condition": ""}]
+    rows = [finite(r) for r in data.page_table().to_dicts()]
+    specs = (aggregates.Aggregate("m", "median", "fdr"),
+             aggregates.Aggregate("low", "min", "fdr", row=("bar", "bar")))  # fmt: skip
+    out = _node({"values": values, "rows": rows, "cfg": data.controls(), "choices": choices,
+                 "aggregates": [dataclasses.asdict(s) for s in specs]}, HOVERS, FILTER)  # fmt: skip
+    assert out["values"] == [hover_value(v) for v in values] and out["nan"] == hover_value(math.nan)
+    for chosen, page in zip(choices, out["views"], strict=True):
+        assert page == [[list(r) for r in h] for h in _filter_oracle(data, chosen)["hover"]]
+    assert any("" in r for trace in out["views"][0] for r in trace)
+    assert out["aggregate"] == aggregates.fill(rows, specs) == {"m": "0.200", "low": "0.0100",
+                                                                "bar": "r01"}  # fmt: skip
+    assert out["none"] is None and aggregates.fill(rows[:1], specs) is None
+
+
+def _depth(median: int, n: int, seed: int):
+    """M1's depth bars and lead over ``n`` runs (odd) whose median is ``median`` reads.
+
+    Monocyte runs are steady state only, so one filter level shows no run.
+    """
+    from ctx.gather import harmonise  # noqa: PLC0415
+
+    rng = np.random.default_rng(seed)
+    half = n // 2
+    reads = [*rng.integers(median // 5, median, half), median,
+             *rng.integers(median + 1, 3 * median, half)]  # fmt: skip
+    types = [("NDN", "LDN", "Monocyte")[i % 3] for i in rng.permutation(n)]
+    sheet = pl.DataFrame({
+        "run_accession": [f"XRR{i:04d}" for i in range(n)], "read_count": reads,
+        "batch": ["short" if i % 2 else "long" for i in range(n)],
+        "read_length": [76.0 if i % 2 else 101.0 for i in range(n)], "cell_type": types,
+        "condition": ["steady_state" if t == "Monocyte" or i % 2 else "gcsf"
+                      for i, t in enumerate(types)],
+    })  # fmt: skip
+    bands, _ = harmonise._depth_standard()
+    data = harmonise._library_sizes(
+        sheet, SimpleNamespace(batch_bins={"short": (76,), "long": (101,)}), bands
+    )
+    return data, harmonise.library_lead(bands[0])
+
+
+def _samples() -> pl.DataFrame:
+    """Ten samples over three cell types and two conditions, for M3's bars; Mono is b only,
+    so one filter level shows no sample."""
+    return pl.DataFrame({"sample": [f"S{i}" for i in range(10)],
+                         "cell_type": ["NDN", "NDN", "LDN", "LDN", "LDN", "Mono", "Mono", "NDN",
+                                       "LDN", "Mono"],
+                         "condition": ["a", "b", "a", "b", "a", "b", "b", "b", "a",
+                                       "b"]})  # fmt: skip
+
+
+def _mapping():
+    """M3's mapping bars and lead: S3 and S6 tie at the lowest uniquely mapped share, so a tie
+    keeps the first row."""
+    from ctx.process import Aligner, blocks, figures  # noqa: PLC0415
+    from ctx.process import tables as tab  # noqa: PLC0415
+
+    unique = [900, 850, 700, 310, 820, 760, 310, 905, 640, 500]
+    reads = {f"S{i}": {"unique": u, "multi": 40 + i, "unmapped": 60 - i, "input": u + 100}
+             for i, u in enumerate(unique)}  # fmt: skip
+    reads["S6"] = dict(reads["S3"])
+    frame = tab.outcomes_long(reads, Aligner.HISAT2).join(
+        _samples(), left_on="label", right_on="sample", maintain_order="left")  # fmt: skip
+    data = figures.outcome_bars(frame, Aligner.HISAT2, "mapping", ("cell_type", "condition"),
+                                "Made up; no test.")  # fmt: skip
+    return data, blocks.mapping_lead()
+
+
+def _strand():
+    """M3's strand bars and lead: shares below 0.1, near 0.5 and near 1, and the calls tied
+    two to two within LDN."""
+    from ctx.process import blocks, figures  # noqa: PLC0415
+
+    shares = [0.0213, 0.0456, 0.4921, 0.0312, 0.5034, 0.9611, 0.0278, 0.4877, 0.0453, 0.0391]
+    calls = ["reverse" if s < 0.1 else "forward" if s > 0.9 else "unstranded" for s in shares]
+    rows = [{"sample": f"S{i}", "setting": s, "reads": 1000 + 10 * i, "percent": 50.0 + i,
+             "no_feature": 100, "ambiguous": 10, "forward_share": share, "call": call}
+            for i, (share, call) in enumerate(zip(shares, calls, strict=True))
+            for s in ("s0", "s1", "s2")]  # fmt: skip
+    frame = pl.DataFrame(rows).join(_samples(), on="sample", maintain_order="left")
+    data = figures.strand_bars(frame, ("cell_type", "condition"), "Made up; no test.")
+    return data, blocks.strand_lead()
+
+
+# The made-up M1 page printed its median as "0.5 million" in the lead and "0.494 million
+# reads" in the live line (kit v6); Step-1's is 26.1 million (work order item 2, D1 and D2).
+LEADS = {"depth_made_up": lambda: _depth(494_123, 33, 3),
+         "depth_step1": lambda: _depth(26_123_456, 41, 5), "mapping": _mapping,
+         "strand": _strand}  # fmt: skip
+LEAD = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const cfg = input.cfg, lead = cfg.lead;
+console.log(JSON.stringify(input.choices.map((chosen) => {
+  const view = ctxFilter.view(input.rows, cfg, chosen);
+  const values = view.bars ? ctxFilter.aggregate(input.rows, view.shown, lead.aggregates) : null;
+  return {
+    lead: values === null ? null
+      : ctxFilter.fill(lead.template, Object.assign({}, lead.fixed, values)),
+    summary: ctxFilter.summary(view, cfg, input.template, input.none, ctxFilter.moved(chosen)),
+  };
+})));
+"""
+
+
+def _python_lead(lead, rows: list[dict], chosen: dict[str, str]) -> str | None:
+    """The oracle: ``ctx.viz.aggregates`` over the rows the choice keeps, or None for none."""
+    from ctx.viz import aggregates  # noqa: PLC0415
+
+    shown = [r for r in rows if all(not v or str(r[c]) == v for c, v in chosen.items())]
+    values = aggregates.fill(shown, lead.aggregates) if shown else None
+    return None if values is None else lead.template.format_map({**lead.fixed, **values})
+
+
+@pytest.mark.parametrize("name", list(LEADS))
+def test_a_lead_follows_every_filter_level_as_python_fills_it(name):
+    """D1: the M1 depth bars' and M3's mapping and strand bars' leads, refilled by the page at
+    every level of every filter, equal ``ctx.viz.aggregates`` over the same rows, a level with
+    no bar or no number to take giving none; at "All" the lead is the one the page prints and
+    the live line is the default's, and once a filter is set the live line says what the
+    caption counts. D2: at "All" the made-up M1 page's median prints 0.494 and Step-1's 26.1.
+    Mutations caught: the median taken over every row; the depth printed as ".1f" (0.5)."""
+    data, lead = LEADS[name]()
+    block = figure_block(data, "x", FigureText(title="Demo", reading=("Read.",), follows=lead))
+    rows, cfg = [finite(r) for r in block.rows], dict(block.controls)
+    levels = itertools.product(*(["", *v] for v in cfg["filters"].values()))
+    choices = [dict(zip(cfg["filters"], combo, strict=True)) for combo in levels]
+    words = _defaults(cfg)
+    out = _node({"rows": rows, "cfg": cfg, "choices": choices, "template": words["template"],
+                 "none": words["none"]}, LEAD, FILTER)  # fmt: skip
+    for chosen, page in zip(choices, out, strict=True):
+        assert page["lead"] == _python_lead(lead, rows, chosen), chosen
+        if page["lead"] is not None:
+            assert page["summary"].endswith(" " + lead.note) == any(chosen.values()), chosen
+    assert out[0]["lead"] == block.text.lead and out[0]["summary"] == words["summary"]
+    assert any(p["lead"] is None for p in out)
+    assert len({p["lead"] for p in out}) > len(choices) // 3
+    depth = {"depth_made_up": "0.494 million", "depth_step1": "26.1 million"}.get(name)
+    assert depth is None or f"The median run has {depth} reads." in block.text.lead
+
+
+def test_a_lead_names_its_first_row_on_a_tie_and_holds_three_digits():
+    """The planted ties and shares the leads above are compared on: S3 and S6 tie lowest, and
+    S3, first, is named; a forward share of 0.0213 prints 0.0213, not 0.021 held to three
+    decimals nor 0.0210; LDN's calls tie two to two and the first seen is named."""
+    data, lead = _mapping()
+    rows = [finite(r) for r in data.page_table().to_dicts()]
+    assert lead.text(rows) == "Median uniquely mapped: 87.9 % of input reads; lowest 75.6 % in S3."
+    data, lead = _strand()
+    rows = [finite(r) for r in data.page_table().to_dicts()]
+    assert lead.text(rows) == "Forward share 0.0213 to 0.961: 6 of 10 samples are called reverse."
+    ldn = [r for r in rows if r["cell_type"] == "LDN"]
+    assert lead.text(ldn) == "Forward share 0.0312 to 0.503: 2 of 4 samples are called unstranded."
 
 
 EXPORT = ROOT / "src" / "ctx" / "report" / "templates" / "_export.js.j2"
@@ -505,8 +700,10 @@ def _plain(figure) -> dict:
 
 def test_export_draws_marks_at_the_figure_files_sizes_from_any_zoom():
     """Every point MARKER_SIZE pt, every line its LINE_WIDTHS pt, from the module page and
-    from a page opened alone at twice the size; the journal template and the files' width; a
-    linked view's parallel sets under the scatter. Mutation: the page's zoom not divided out."""
+    from a page opened alone at twice the size, each plot's zoom read off its layout's
+    meta.zoom, which the page script sets to 1 below the floor; the journal template and the
+    files' width; a linked view's parallel sets under the scatter. Mutation: the page's zoom
+    not divided out."""
     from ctx.viz.style import LINE_WIDTHS, MARKER_SIZE, zoom  # noqa: PLC0415
 
     volcano = figure_block(demo_volcano(design_counts(condition_lfc=1.0)), "x")
@@ -515,8 +712,9 @@ def test_export_draws_marks_at_the_figure_files_sizes_from_any_zoom():
     for scale in (1.0, 2.0):
         for block in (volcano, linked):
             parts = [zoom(_plain(f), scale) for f in (block.figure, block.below) if f is not None]
-            cfg = {**block.controls, "export": {**block.controls["export"], "zoom": scale}}
-            cases.append([parts, cfg])
+            for part in parts if scale != 1 else ():
+                part["layout"]["meta"] = {**(part["layout"].get("meta") or {}), "zoom": scale}
+            cases.append([parts, block.controls])
     out = _figure(cases)
     for (_, cfg), drawn in zip(cases, out, strict=True):
         layout, ex = drawn["layout"], cfg["export"]
@@ -638,7 +836,7 @@ def test_a_view_is_moved_only_away_from_the_defaults():
     any paint, filter, threshold, basis or cutoff is not. Mutation: the cutoff left out of
     ctxCalls.moved, so a stricter cutoff still linked the default file."""
     cfg = figure_block(demo_volcano(design_counts(condition_lfc=1.0)), "x").controls
-    scripts = [SCRIPT, BRUSH, FILTER]
+    scripts = [SCRIPT, BRUSH, *FILTER]
     rule = "\n".join(p.read_text().replace("{% raw %}", "").replace("{% endraw %}", "")
                      for p in scripts)  # fmt: skip
     node = shutil.which("node")

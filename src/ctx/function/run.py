@@ -139,6 +139,8 @@ def _gsea_bars(name: str, frame: pl.DataFrame) -> BarData:
         "label": ("none", "Set name, shortened."),
         "significance": ("none", f"FDR below {ALPHA} or not."),
     }
+    # The sets drawn, which fall short of TOP_SETS where fewer were tested.
+    key = "figures.gsea.caption_one" if top.height == 1 else "figures.gsea.caption"
     return BarData(
         frame=top,
         columns=columns,
@@ -148,9 +150,8 @@ def _gsea_bars(name: str, frame: pl.DataFrame) -> BarData:
         value_label="NES",
         series="significance",
         colours={f"FDR < {ALPHA}": ROLES["comparison"], "not significant": None},
-        caption=(
-            f"{name}: preranked GSEA on the Wald statistic, {lite.PERMUTATIONS} gene-set "
-            f"permutations, seed {lite.SEED}; the {TOP_SETS} sets with the smallest FDR."
+        caption=fill(
+            PAGE, key, name=name, permutations=lite.PERMUTATIONS, seed=lite.SEED, shown=top.height
         ),
         horizontal=True,
         hover=("fdr", "size"),

@@ -21,8 +21,9 @@ SLICE = ROOT / "tests" / "fixtures" / "chr22" / "slice.fa"
 GTF = ROOT / "tests" / "fixtures" / "chr22" / "slice.gtf"
 SAMPLES = ("se_a", "se_b", "se_c", "se_d", "se_e")
 DATASET, COMPARE = "chrse", "chrse_full"
-# The parent a subset's dataset file names (D-042); its page says it is the laptop exercise.
-PARENT = "chrse_cohort"
+# The parent a subset's dataset file names (D-042); its page says it is the laptop exercise,
+# naming the parent by the label of its own dataset file, beside the subset's.
+PARENT, PARENT_LABEL = "chrse_cohort", "Fixture cohort"
 DAY = date(2026, 10, 1)
 # A gene on another contig, kept in the compare counts so the expected share is below 1.
 OFF_CONTIG = ("ENSG00000000001.1", "elsewhere")
@@ -39,11 +40,13 @@ def annotation(root: Path) -> Path:
     return gtf
 
 
-def dataset_file(root: Path, folder: Path, slug: str = DATASET, *, subset_of: str = "") -> Path:
+def dataset_file(root: Path, folder: Path, slug: str = DATASET, *, subset_of: str = "",
+                 label: str = "") -> Path:  # fmt: skip
     """A dataset file whose annotation_gtf is the root's GTF, with its real size and SHA-256."""
     gtf = annotation(root)
     digest = hashlib.sha256(gtf.read_bytes()).hexdigest()
     head = f'[dataset]\nslug = "{slug}"\n' + (f'subset_of = "{subset_of}"\n' if subset_of else "")
+    head += f'label = "{label}"\n' if label else ""
     spec = folder / f"{slug}.toml"
     spec.write_text(
         head + '\n[guard]\nids = []\npatterns = []\n\n[[resources]]\nname = "annotation_gtf"\n'

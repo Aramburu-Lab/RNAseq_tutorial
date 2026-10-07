@@ -8,7 +8,6 @@ from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
-import numpy as np
 import polars as pl
 
 from ctx import runtime
@@ -31,6 +30,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.viz.aggregates import Aggregate, Lead
 from ctx.viz.bar import BarData
 from ctx.viz.save import figure_block, write_figure
 from ctx.viz.style import category_colours
@@ -39,8 +39,6 @@ MODULE = "gather"
 PAGE = MODULE
 # FASTQ statuses (ctx.gather.fetchngs.STATUSES) of a file that is in fastq/.
 ON_DISK = ("verified", "mismatch", "no_md5")
-# Below this, "0.0 million reads" would hide the depth: print the reads themselves.
-DEPTH_IN_MILLIONS = 100_000
 # The registry metric whose plot_bands hold ENCODE's depth standard, in aligned reads.
 DEPTH_STANDARD = "total_sequences"
 # The depth figure's filters, columns of the curated sheet (Rytis, 2026-09-30).
@@ -229,15 +227,26 @@ def _composition_text(data: BarData) -> FigureText:
     )
 
 
+def library_lead(good_reads: float) -> Lead:
+    """The depth figure's lead: the runs shown, their median depth and how many fall short.
+
+    The median is the bars' own, in million reads through ``significant``, as the live line
+    prints it: the made-up page said "0.5 million" in the lead and "0.494 million reads" in
+    the live line (work order item 2, D2). A run falls short below ENCODE's aligned reads,
+    counted on the reads ENA reports.
+    """
+    return Lead(
+        template=text.raw(PAGE, "figures.library.lead"),
+        aggregates=(Aggregate("depth", "median", "million_reads"),
+                    Aggregate("below", "below", "read_count", value=good_reads),
+                    Aggregate("runs", "count")),
+        fixed={"good": f"{good_reads / 1e6:g}"},
+        note=text.word(PAGE, "figures.library.note"),
+    )  # fmt: skip
+
+
 def _library_text(data: BarData, good_reads: float) -> FigureText:
-    """Title, lead and reading guide of the library sizes, from the depths drawn."""
-    reads = data.frame["read_count"]
-    median = float(np.median(reads.to_numpy()))
-    depth = (
-        text.fill(PAGE, "figures.library.depth_millions", millions=median / 1e6)
-        if median >= DEPTH_IN_MILLIONS
-        else f"{median:,.0f}"
-    )
+    """Title, lead and reading guide of the library sizes; the lead follows the filters."""
     word = functools.partial(text.word, PAGE)
     order = word("figures.library.sorted")
     if data.frame["batch"].n_unique() > 1:
@@ -248,12 +257,9 @@ def _library_text(data: BarData, good_reads: float) -> FigureText:
                           lengths=", ".join(f"{v:g}" for v in lengths[b]))
                 for b in data.colours if b in lengths]  # fmt: skip
         order = text.fill(PAGE, "figures.library.batched", lengths="; ".join(each))
-    below = int((reads < good_reads).sum())
-    lead = text.fill(PAGE, "figures.library.lead", depth=depth, runs=f"{reads.len():,}",
-                     below=f"{below:,}", good=f"{good_reads / 1e6:g}")  # fmt: skip
     return FigureText(
         title=word("figures.library.title"),
-        lead=lead,
+        follows=library_lead(good_reads),
         reading=(word("figures.library.bars"), order, word("figures.library.lines")),
     )
 

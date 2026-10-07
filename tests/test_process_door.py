@@ -25,6 +25,7 @@ from process_root import (
 from test_process_align import FAKES, fake_star
 
 from ctx import runtime, tools
+from ctx.dataset import load
 from ctx.process import Aligner, ProcessError, align, run
 
 PAIRED = ROOT / "tests" / "fixtures" / "chr22"
@@ -234,6 +235,24 @@ def test_a_missing_registry_and_dataset_file_join_the_other_problems(tmp_path):
     for part in ("No QC registry", "none.toml is not a file", "nothere.fa is not a file",
                  "unknown ['bogus']"):  # fmt: skip
         assert part.lower() in said.lower(), part
+
+
+def test_a_subset_whose_parent_has_no_dataset_file_is_a_problem(tmp_path):
+    """A dataset file declaring subset_of a dataset whose file is not beside it: a problem
+    naming the file, before anything is aligned, since the page names the parent by its label
+    from that file. With the file there, its label is the parent's name.
+
+    Mutation caught: the parent left unread at the door (the run stopped after every
+    alignment, when the page named the parent)."""
+    root = tmp_path / "root"
+    root.mkdir()
+    plant(root)
+    spec = dataset_file(root, tmp_path, subset_of="whole")
+    said = problems(root, options(tmp_path, dataset_file=spec))
+    assert "subset_of 'whole'" in said and str(tmp_path / "whole.toml") in said
+    dataset_file(root, tmp_path, "whole", label="The whole cohort")
+    parent = load(spec).parent()
+    assert parent is not None and parent.name == "The whole cohort"
 
 
 def test_a_registry_without_a_metric_the_command_reads_is_a_problem(tmp_path):

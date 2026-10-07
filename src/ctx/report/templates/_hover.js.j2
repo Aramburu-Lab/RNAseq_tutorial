@@ -1,0 +1,15 @@
+{% raw %}
+/* A hover value as ctx.viz.axes.hover_value writes it into a figure's customdata, for the
+   customdata the page script builds again from its rows when a filter or a live call moves:
+   under a number format plotly.js prints a missing value (null) as 0, and "" as nothing.
+   tests/test_page_script.py runs it under node against the Python rule. */
+var ctxHover = {
+  value: function (v) {
+    return v === null || v === undefined || (typeof v === "number" && isNaN(v)) ? "" : v;
+  },
+  /* One row's hover values, in customdata order. */
+  row: function (r, columns) {
+    return columns.map(function (c) { return ctxHover.value(r[c]); });
+  }
+};
+{% endraw %}

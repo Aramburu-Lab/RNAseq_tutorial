@@ -1,8 +1,9 @@
 {% raw %}
 /* The page's bar filter, apart from the page so tests/test_page_script.py runs it under node
-   against ctx.viz.bar.BarData. A row is shown when its value in every filter column equals
-   the level chosen there, "" standing for all; the median is BarData.lengths()'s rule over the
-   rows shown: each category's total when stacked, else each bar. */
+   against ctx.viz.bar.BarData and ctx.viz.aggregates. A row is shown when its value in every
+   filter column equals the level chosen there, "" standing for all; the median is
+   BarData.lengths()'s rule over the rows shown: each category's total when stacked, else each
+   bar; the lead's numbers are its named aggregates over the rows shown. */
 var ctxFilter = {
   /* Whether any filter is set: the view the PDF and SVG buttons then draw (D-033). */
   moved: function (chosen) {
@@ -43,8 +44,55 @@ var ctxFilter = {
       minimumFractionDigits: decimals, maximumFractionDigits: decimals
     });
   },
+  /* The lead's numbers over the rows shown, as ctx.viz.aggregates.fill gives them, or null
+     where a median, minimum, maximum or mode has no row. A row counts when its every "where"
+     column holds the value, as text; a tie keeps the first row in row order. */
+  aggregate: function (rows, shown, aggregates) {
+    var out = {};
+    for (var a = 0; a < aggregates.length; a++) {
+      var spec = aggregates[a];
+      var picked = shown.filter(function (i) {
+        return Object.keys(spec.where).every(function (c) {
+          return String(rows[i][c]) === spec.where[c];
+        });
+      });
+      if (spec.kind === "count") { out[spec.name] = picked.length.toLocaleString("en-US"); continue; }
+      var held = picked.filter(function (i) {
+        return rows[i][spec.column] !== null && rows[i][spec.column] !== undefined;
+      });
+      var values = held.map(function (i) { return rows[i][spec.column]; });
+      if (spec.kind === "below") {
+        out[spec.name] = values.filter(function (v) { return v < spec.value; }).length
+          .toLocaleString("en-US");
+        continue;
+      }
+      if (!held.length) return null;
+      if (spec.kind === "median") {
+        out[spec.name] = ctxFilter.number(ctxFilter.median(values));
+      } else if (spec.kind === "mode") {
+        var counts = {}, order = [];
+        values.forEach(function (v) {
+          var w = String(v);
+          if (!Object.prototype.hasOwnProperty.call(counts, w)) { counts[w] = 0; order.push(w); }
+          counts[w] += 1;
+        });
+        var top = Math.max.apply(null, order.map(function (w) { return counts[w]; }));
+        out[spec.name] = order.filter(function (w) { return counts[w] === top; })[0];
+        out[spec.count] = top.toLocaleString("en-US");
+      } else {
+        var best = 0;
+        values.forEach(function (v, k) {
+          if (spec.kind === "min" ? v < values[best] : v > values[best]) best = k;
+        });
+        out[spec.name] = ctxFilter.number(values[best]);
+        if (spec.row) out[spec.row[0]] = String(rows[held[best]][spec.row[1]]);
+      }
+    }
+    return out;
+  },
   /* What the plot draws for a choice: per trace, in trace order, the bars' positions, lengths
-     and hover values; the categories in row order; the median and the number of bars. */
+     and hover values; the rows shown, the categories in row order; the median and the number
+     of bars. */
   view: function (rows, cfg, chosen) {
     var shown = ctxFilter.match(rows, chosen), categories = [], seen = {};
     shown.forEach(function (i) {
@@ -60,9 +108,10 @@ var ctxFilter = {
     return {
       x: cfg.horizontal ? along : at, y: cfg.horizontal ? at : along,
       customdata: parts.map(function (p) {
-        return p.map(function (i) { return cfg.hover.map(function (h) { return rows[i][h]; }); });
+        return p.map(function (i) { return ctxHover.row(rows[i], cfg.hover); });
       }),
-      categories: categories, bars: lengths.length, median: ctxFilter.median(lengths)
+      shown: shown, categories: categories, bars: lengths.length,
+      median: ctxFilter.median(lengths)
     };
   },
   fill: function (text, values) {
@@ -70,14 +119,16 @@ var ctxFilter = {
       return Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : all;
     });
   },
-  /* The live line; with no bar shown, the none line. */
-  summary: function (view, cfg, template, none) {
+  /* The live line; with no bar shown, the none line. While a filter is set it adds the lead's
+     note, which says what the caption, kept at every bar, counts. */
+  summary: function (view, cfg, template, none, moved) {
     if (!view.bars) return none;
     var median = ctxFilter.number(view.median) + (cfg.unit ? " " + cfg.unit : "");
-    return ctxFilter.fill(template, {
+    var line = ctxFilter.fill(template, {
       shown: view.bars.toLocaleString("en-US"), total: cfg.total.toLocaleString("en-US"),
       median: median
     });
+    return moved && cfg.lead && cfg.lead.note ? line + " " + cfg.lead.note : line;
   }
 };
 {% endraw %}

@@ -235,9 +235,9 @@ def settings(
 
     Returns:
         The size in pt, the caption, the stem and the caption's type and insets; ``marker``
-        turns a mark's page px back into pt, and ``zoom`` is the page's own zoom; the labels'
-        type, ink and leader width; ``note``, the sentence that closes the file's caption and
-        says it is the page's drawing.
+        turns a mark's page px back into pt, at the zoom a plot is drawn at, which its layout's
+        ``meta.zoom`` gives; the labels' type, ink and leader width; ``note``, the sentence
+        that closes the file's caption and says it is the page's drawing.
     """
     width, height = inches
     return {
@@ -245,13 +245,6 @@ def settings(
         "note": text.word("ui", "export.note"),
         "file": stem, "size": SIZES["caption"], "spacing": LINE_SPACING, "inset": CAPTION_INSET,
         "bottom": CAPTION_BOTTOM, "ink": THEMES["white"].ink, "marker": 1 / PAGE_PX_PER_PT,
-        "family": ", ".join([*(f"'{f}'" for f in FONT_CHAIN), "sans-serif"]), "zoom": 1.0,
+        "family": ", ".join([*(f"'{f}'" for f in FONT_CHAIN), "sans-serif"]),
         "label_size": SIZES["annotation"], "leader": LINE_WIDTHS["line"], **(layers or {}),
     }  # fmt: skip
-
-
-def zoomed(controls: Mapping[str, Any], zoom: float) -> dict[str, Any]:
-    """Controls whose export knows the page draws its marks at ``zoom`` times their size."""
-    if "export" not in controls:
-        return dict(controls)
-    return {**controls, "export": {**controls["export"], "zoom": zoom}}

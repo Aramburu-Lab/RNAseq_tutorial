@@ -11,6 +11,7 @@ from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
 from ctx.report import export, glossary
 from ctx.report.builder import FigureBlock, FigurePage, FigureText, write
+from ctx.report.figures import finite
 from ctx.report.marks import MARK
 from ctx.viz.bar import BarData
 from ctx.viz.linked import LinkedData
@@ -137,13 +138,20 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
 
     A figure with page controls carries them (a scatter's live calls, a linked view's brush,
     a bar's filters); a scatter with live calling also takes, unless ``text`` brings its own,
-    the "How to read" lines at the default setting.
+    the "How to read" lines at the default setting. A lead that follows its rows
+    (``text.follows``) is filled here over the rows the page embeds, the rows its filter
+    refills it from, and a figure with filters carries it for the page script.
 
     Raises:
         ValueError: If the figure's title or plotly text holds a glossary mark, or a scatter
             with live calls brings its own reading.
     """
     controls = data.controls() if isinstance(data, ScatterData | LinkedData | BarData) else None
+    if text.follows is not None:
+        rows = [finite(r) for r in data.page_table().to_dicts()]
+        if controls is not None and controls["kind"] == "filter":
+            controls = {**controls, "lead": text.follows.controls(rows)}
+        text = replace(text, lead=text.follows.text(rows), follows=None)
     if isinstance(data, ScatterData) and data.calls:
         # The page script refills these lines by position from the figure's own templates;
         # lines from elsewhere would be overwritten, or leave a template with no line.
