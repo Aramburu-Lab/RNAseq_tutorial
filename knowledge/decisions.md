@@ -220,6 +220,8 @@ R4's first two conditions hold: HSCT neutrophils carry the interferon-alpha sign
 
 **Consequence.** The frozen paths are free: P2S.4 and P2P.3 can move M5, M6 and the hub to content files and the prose rules, and `annotate.py`'s legend layout can be fixed. The hub counts 11 modules (D-044).
 
+**Rebuilt 2026-10-07 (kit v6, from 345e98f).** Of the frozen paths only `src/ctx/viz/annotate.py` differs from the record commit, its caption wrapping (7febcfd); the rebuilt Step-1 pages reproduce all 92 recorded metrics exactly, the 72 of `ctx de` and the 20 GSEA rows of `ctx function`, compared value by value.
+
 ---
 
 ## D-045 — Report prose: nine fixed labels, word budgets and a lint (draft v3.11)
