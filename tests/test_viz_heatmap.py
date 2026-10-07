@@ -2,8 +2,12 @@
 track floated far above the cells, every other row went unlabelled, the right-hand statistic
 ran off the figure and the track swatches were missing from the legend. The review of that fix
 (2026-10-01) added: the "nothing to show" grey stayed the white theme's on a dark page, every
-row was as tall as the longest label, hover boxes ran off a phone, swatches were 6 px."""
+row was as tall as the longest label, hover boxes ran off a phone, swatches were 6 px. The fix
+wrapped every label at a phone's width on every screen; since the qc-page-fixes merge
+(2026-10-07, work order item 2) a desktop keeps the static's labels and a phone swaps in the
+wrapped ones (``layout.meta.narrow``), so the phone assertions read the narrow layout."""
 
+import dataclasses
 import itertools
 import re
 from pathlib import Path
@@ -14,9 +18,9 @@ import pytest
 from matplotlib.colors import to_rgba
 from synth import demo_band_map, demo_heatmap
 
-from ctx.viz.heatmap import GAP, HeatmapData, Swatch
+from ctx.viz.heatmap import GAP, HeatmapData, Swatch, Track
+from ctx.viz.metrics import text_width, wrap_to
 from ctx.viz.style import (
-    AVERAGE_CHAR_EM,
     BAND_COLOURS,
     BAR_LABEL_ROTATION,
     CHROME,
@@ -25,6 +29,7 @@ from ctx.viz.style import (
     LINE_SPACING,
     MM_PER_INCH,
     NARROW_PX,
+    PHONE_PLOT_PX,
     PHONE_PX,
     PLOTLY_HEAT_BASE_PX,
     PLOTLY_HEAT_ROW_PX,
@@ -34,7 +39,6 @@ from ctx.viz.style import (
     PLOTLY_LEGEND_SWATCH_PX,
     PLOTLY_LEGEND_SYMBOL_PX,
     PLOTLY_MARGIN_PX,
-    PLOTLY_NARROW_PX,
     SIZES,
     THEMES,
     apply_matplotlib,
@@ -118,9 +122,23 @@ def _steps(colorscale) -> list[str]:
 
 
 def _fits(text: str, width: float, size: float) -> bool:
-    """Every line of a plotly text fits ``width`` px at ``size`` pt, or is one word."""
-    chars = int(width / (on_page(size) * AVERAGE_CHAR_EM))
-    return all(len(line) <= chars or " " not in line for line in text.split("<br>"))
+    """Every line of a plotly text fits ``width`` px at ``size`` pt, as ctx.viz.metrics
+    measures it, or is one word."""
+    return all(text_width(line, on_page(size)) <= width or " " not in line
+               for line in text.split("<br>"))  # fmt: skip
+
+
+def _narrowed(fig):
+    """The figure as the page script draws it narrower than ``meta.narrow.below``: its trace
+    updates, then its layout's, as plotly's restyle and relayout apply them."""
+    import plotly.graph_objects as go  # noqa: PLC0415
+
+    narrow = fig.layout.meta["narrow"]
+    out = go.Figure(fig)
+    for update, traces in narrow["restyle"]:
+        out.plotly_restyle(update, traces)
+    out.plotly_relayout(narrow["relayout"])
+    return out
 
 
 def _same_colour(page: tuple[float, ...], white: tuple, black: tuple) -> None:
@@ -164,14 +182,19 @@ def test_rows_labelled_as_the_static_labels(case):
 
 def test_a_long_label_raises_its_own_row_alone():
     # Every row had been as tall as the longest label: 3 pitches each on the QC band maps,
-    # 1078 px for 9 rows at 1280 px (2026-10-01).
+    # 1078 px for 9 rows at 1280 px (2026-10-01). On a phone's layout the long label wraps
+    # and raises its row alone; on a desktop no label wraps and every row is one pitch.
     data = _band_map(["Q30 bases", "Per-base sequence content", "N bases"])
     fig = data.interactive()
-    lines = [_lines(t) for t in fig.layout.yaxis.ticktext]
-    assert lines == [1, 3, 1]
-    assert np.diff(fig.data[0].y).tolist() == lines
-    short = _band_map(["Q30 bases", "GC", "N bases"]).interactive()
-    assert fig.layout.height - short.layout.height == pytest.approx(2 * PLOTLY_HEAT_ROW_PX)
+    assert [_lines(t) for t in fig.layout.yaxis.ticktext] == [1, 1, 1]
+    assert np.diff(fig.data[0].y).tolist() == [1, 1, 1]
+    phone = _narrowed(fig)
+    lines = [_lines(t) for t in phone.layout.yaxis.ticktext]
+    # Measured, the long label takes 2 lines of half a phone's plot; at the average glyph, 3.
+    assert lines == [1, 2, 1]
+    assert np.diff(phone.data[0].y).tolist() == lines
+    short = _narrowed(_band_map(["Q30 bases", "GC", "N bases"]).interactive())
+    assert phone.layout.height - short.layout.height == pytest.approx(PLOTLY_HEAT_ROW_PX)
 
 
 @pytest.mark.parametrize("case", list(FIXTURES))
@@ -285,7 +308,7 @@ def test_hover_lines_fit_a_phone(case):
     assert texts
     assert all(_fits(t, PLOTLY_HOVER_PX, SIZES["tick"]) for t in texts)
     assert not [t for t in texts if ".:" in t]
-    assert PLOTLY_HOVER_PX < PLOTLY_NARROW_PX
+    assert PLOTLY_HOVER_PX < PHONE_PLOT_PX
 
 
 @pytest.mark.parametrize("case", ["tracks_and_stats", "band_map"])
@@ -310,25 +333,61 @@ def test_legend_flows_entry_by_entry():
     assert (fig.layout.legend.traceorder, fig.layout.legend.tracegroupgap) == ("grouped", 0)
 
 
-@pytest.mark.parametrize("case", [*FIXTURES, "long_labels"])
-def test_height_is_the_sum_of_its_parts(case):
-    # Order of operations: the legend's lines as a phone stacks them, the column labels and
-    # title below, then the rows; the rows drawn are capped as the static caps them.
-    data = _band_map(LONG) if case == "long_labels" else FIXTURES[case]()
+def test_a_long_legend_entry_wraps_on_a_phone_only():
+    """A track level as long as a tissue's full name: a desktop's legend prints it on one line,
+    as the static does, and a phone's wraps it to the plot beside its swatch, its height
+    growing by the lines. Mutation: the phone's legend left unwrapped, wider than its plot."""
+    data = demo_heatmap()
+    long = "bone marrow aspirate from the posterior iliac crest of the donor"
+    cells = data.columns_in_order()
+    track = Track("tissue", {c: long if i % 2 else "blood" for i, c in enumerate(cells)},
+                  {"blood": "#56B4E9", long: "#E69F00"})  # fmt: skip
+    data = dataclasses.replace(data, tracks=(track,))
     fig = data.interactive()
+    assert [t.name for t in _legend(fig)] == _static(data)["legend"]
+    assert f"tissue: {long}" in [t.name for t in _legend(fig)]
+    phone = _narrowed(fig)
+    width = PHONE_PLOT_PX - PLOTLY_LEGEND_SYMBOL_PX
+    names = [t.name for t in _legend(phone)]
+    assert all(_fits(name, width, SIZES["legend"]) for name in names)
+    assert [_plain(name) for name in names] == _static(data)["legend"]
+    added = sum(_lines(name) - 1 for name in names)
+    assert added > 0
+    assert phone.layout.height - fig.layout.height == pytest.approx(added * PLOTLY_LEGEND_LINE_PX)
+
+
+def _height(data: HeatmapData, fig, title_lines: int) -> float:
+    """A page heatmap's height as its parts add up: the legend's lines as a phone stacks
+    them, the column labels and title below, then the rows, capped as the static caps them."""
     legend = sum(_lines(t.name) for t in _legend(fig))
     top = max(PLOTLY_MARGIN_PX["t"], legend * PLOTLY_LEGEND_LINE_PX + PLOTLY_LEGEND_PAD_PX)
-    cols = data.columns_in_order()
-    labels = max(map(len, cols)) * on_page(SIZES["tick"]) * AVERAGE_CHAR_EM
-    title = _lines(fig.layout.xaxis.title.text) * on_page(SIZES["axis_label"]) * LINE_SPACING
+    labels = max(text_width(c, on_page(SIZES["tick"])) for c in data.columns_in_order())
+    title = title_lines * on_page(SIZES["axis_label"]) * LINE_SPACING
     edges = fig.data[0].y
     rows = edges[-1] - edges[0]
     if len(data.rows_in_order()) > HEAT["max_rows_drawn"]:
         rows = HEAT["max_rows_drawn"]
     expected = PLOTLY_HEAT_BASE_PX + top + (labels if fig.layout.xaxis.showticklabels else 0)
-    expected += title + (edges[0] + rows) * PLOTLY_HEAT_ROW_PX
-    assert fig.layout.height == pytest.approx(expected)
-    assert legend >= len(_legend(fig))
+    return expected + title + (edges[0] + rows) * PLOTLY_HEAT_ROW_PX
+
+
+@pytest.mark.parametrize("case", [*FIXTURES, "long_labels"])
+def test_height_is_the_sum_of_its_parts(case):
+    # Order of operations in ``_height``, on a desktop's layout and on a phone's. A column
+    # label is measured: at the average glyph it fell 38 px short of 19-character run names
+    # in capitals (2026-10-01). A phone's layout makes room for the axis title wrapped to half
+    # its plot, where the page script wraps it, and exists only where some text wraps.
+    data = _band_map(LONG) if case == "long_labels" else FIXTURES[case]()
+    fig = data.interactive()
+    title = _lines(fig.layout.xaxis.title.text)
+    assert fig.layout.height == pytest.approx(_height(data, fig, title))
+    assert sum(_lines(t.name) for t in _legend(fig)) >= len(_legend(fig))
+    assert (fig.layout.meta is not None) == (case == "long_labels")
+    if fig.layout.meta is not None:
+        lines = wrap_to(data.column_label, PHONE_PLOT_PX / 2, on_page(SIZES["axis_label"]))
+        phone = _narrowed(fig)
+        assert phone.layout.height == pytest.approx(_height(data, phone, len(lines)))
+        assert phone.layout.height > fig.layout.height
 
 
 def test_row_pitch_holds_a_label_line():
@@ -339,14 +398,29 @@ def test_row_pitch_holds_a_label_line():
     assert on_page(SIZES["tick"]) * LINE_SPACING <= PLOTLY_HEAT_ROW_PX
 
 
-def test_text_wraps_to_a_phone():
+def test_a_desktop_keeps_the_static_labels_and_a_phone_wraps_them():
+    """Work order item 2 (Rytis 2026-10-01): the heatmap fix wrapped every label at a phone's
+    width on every screen, as plotly cannot change a text by width. A desktop now keeps the
+    static's row labels, legend and axis title; narrower than they need, the page swaps in a
+    phone's (``meta.narrow``): every line fits half a phone's plot, measured. Mutations: the
+    narrow labels at a desktop's width; the desktop's labels wrapped for a phone; the legend
+    left unwrapped on a phone."""
     data = _band_map(LONG)
     fig = data.interactive()
-    assert all(_fits(t, PLOTLY_NARROW_PX / 2, SIZES["tick"]) for t in fig.layout.yaxis.ticktext)
-    assert _fits(fig.layout.xaxis.title.text, PLOTLY_NARROW_PX / 2, SIZES["axis_label"])
-    assert "<br>" in fig.layout.xaxis.title.text
-    width = PLOTLY_NARROW_PX - PLOTLY_LEGEND_SYMBOL_PX
-    assert all(_fits(t.name, width, SIZES["legend"]) for t in _legend(fig))
+    static = _static(data)
+    assert list(fig.layout.yaxis.ticktext) == static["left"]
+    assert [t.name for t in _legend(fig)] == static["legend"]
+    assert fig.layout.xaxis.title.text == data.column_label
+    below = fig.layout.meta["narrow"]["below"]
+    widest = max(text_width(t, on_page(SIZES["tick"])) for t in static["left"])
+    # The static's labels and a line's width per upright column label, inside a desktop's plot.
+    assert widest + len(data.columns_in_order()) * on_page(SIZES["tick"]) < below < 686
+    phone = _narrowed(fig)
+    assert all(_fits(t, PHONE_PLOT_PX / 2, SIZES["tick"]) for t in phone.layout.yaxis.ticktext)
+    assert [_plain(t) for t in phone.layout.yaxis.ticktext] == static["left"]
+    assert any("<br>" in t for t in phone.layout.yaxis.ticktext)
+    width = PHONE_PLOT_PX - PLOTLY_LEGEND_SYMBOL_PX
+    assert all(_fits(t.name, width, SIZES["legend"]) for t in _legend(phone))
     legend = fig.layout.legend
     # From the div's top left: at the plot's, a phone's labels pushed it off the right edge.
     assert (legend.xref, legend.yref, legend.x, legend.y, legend.yanchor) == (
@@ -355,7 +429,7 @@ def test_text_wraps_to_a_phone():
 
 
 def test_phone_plot_is_what_the_stylesheet_leaves():
-    # PLOTLY_NARROW_PX was a second copy of the phone's padding: the stylesheet's could change
+    # PHONE_PLOT_PX was a second copy of the phone's padding: the stylesheet's could change
     # and the labels still wrap to the old width (a 293 px plot against 317, 2026-10-01).
     css = (ROOT / "src" / "ctx" / "report" / "templates" / "_page.css.j2").read_text()
     narrow = css.split("@media (max-width:{{ layout.narrow }}px){", 1)[1].split("\n}\n", 1)[0]
@@ -371,7 +445,7 @@ def test_phone_plot_is_what_the_stylesheet_leaves():
     padding = px(rules[".fig"], r"padding:var\(--[\w-]+\) var\((--[\w-]+)\)")
     border = px(card, r"border:var\((--[\w-]+)\) solid")
     assert PHONE_PX <= NARROW_PX  # the narrow rules are the phone's
-    assert PHONE_PX - 2 * (gutter + padding + border) == PLOTLY_NARROW_PX == 317
+    assert PHONE_PX - 2 * (gutter + padding + border) == PHONE_PLOT_PX == 317
 
 
 def _sizes(node):

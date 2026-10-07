@@ -1,16 +1,15 @@
 """Write every file of one figure (D16): PDF and SVG per theme, one HTML page, data and README."""
 
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Protocol
 
-import numpy as np
 import polars as pl
 
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
-from ctx.report import glossary
+from ctx.report import export, glossary
 from ctx.report.builder import FigureBlock, FigurePage, FigureText, write
 from ctx.report.marks import MARK
 from ctx.viz.bar import BarData
@@ -111,20 +110,6 @@ def _refuse_marks(where: str, texts: Iterable[str]) -> None:
         raise ValueError(f"{where}: a glossary mark outside the caption: {found!r}")
 
 
-def _strings(node: Any) -> Iterator[str]:
-    """Every string in a plotly figure's JSON: titles, labels, hover templates and text."""
-    if isinstance(node, str):
-        yield node
-    elif isinstance(node, dict):
-        for value in node.values():
-            yield from _strings(value)
-    elif isinstance(node, list | tuple):
-        for value in node:
-            yield from _strings(value)
-    elif isinstance(node, np.ndarray) and node.dtype.kind in "OUS":
-        yield from _strings(node.tolist())
-
-
 def layout_problems(fig: Any) -> list[str]:
     """Texts that leave the page or overlap another text, measured on the drawn figure."""
     from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
@@ -166,10 +151,19 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
             raise ValueError("a figure with live calls takes its reading from calls.reading")
         text = replace(text, reading=data.reading())
     figure = data.interactive()
-    _refuse_marks(figure_stem, [text.title, *_strings(figure.to_plotly_json())])
+    below = data.below() if isinstance(data, LinkedData) else None
+    drawn = [figure, *([below] if below is not None else [])]
+    texts = (t for f in drawn for t in export.strings(f.to_dict()))
+    _refuse_marks(figure_stem, [text.title, *texts])
+    if controls is not None and isinstance(data, ScatterData | LinkedData | BarData):
+        # A moved control makes the PDF and SVG buttons draw the view as set (D-033), with
+        # the figure files' caption and what they draw that the page's plot lacks.
+        layers = data.export_layers()
+        controls = {**controls, "export": export.settings(data.inches(), data.caption,
+                                                          figure_stem, layers)}  # fmt: skip
     return FigureBlock(
-        figure, data.caption_text(), data.page_table().to_dicts(),
-        f"{figure_stem}.csv", text=text, stem=figure_stem, controls=controls,
+        figure, data.caption_text(), data.page_table().to_dicts(), f"{figure_stem}.csv",
+        text=text, stem=figure_stem, controls=controls, below=below,
     )  # fmt: skip
 
 

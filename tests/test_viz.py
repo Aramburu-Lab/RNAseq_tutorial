@@ -48,7 +48,7 @@ from ctx.viz.flow import FlowData
 from ctx.viz.heatmap import HeatmapData
 from ctx.viz.linked import LinkedData
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
-from ctx.viz.scatter import THIN_MAX, Calls, ScatterData, bubble_pt
+from ctx.viz.scatter import THIN_MAX, Calls, Line, ScatterData, bubble_pt
 from ctx.viz.strip import StripData
 from ctx.viz.style import (
     AVERAGE_CHAR_EM,
@@ -59,6 +59,8 @@ from ctx.viz.style import (
     INK_COLOUR,
     LINE_WIDTHS,
     MAX_CATEGORIES,
+    PAGE_PLOT_PX,
+    PLOTLY_HEIGHT_PX,
     PROJECTOR_UNSAFE,
     ROLES,
     SIZES,
@@ -588,6 +590,68 @@ def _marker_traces(fig):
     return [t for t in fig.data if t.mode == "markers"]
 
 
+def test_ordinals_read_as_written():
+    """Mutation: the suffix taken from the last digit alone, so 11 reads "11st"."""
+    from ctx.viz.scatter import _ordinal  # noqa: PLC0415
+
+    cases = {1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 11: "11th", 12: "12th", 13: "13th",
+             21: "21st", 22: "22nd", 23: "23rd", 101: "101st", 111: "111th"}  # fmt: skip
+    assert {n: _ordinal(n) for n in cases} == cases
+
+
+def _trend(n: int = 12_796) -> ScatterData:
+    """A dispersion plot of n genes with DESeq2's parametric trend through every one of them, as
+    M5 draws Step-1's featured contrast (12,796 genes)."""
+    rng = np.random.default_rng(7)
+    mean = np.sort(10 ** rng.uniform(-0.5, 5.0, n))
+    fitted = 0.04 + 1.8 / mean
+    frame = pl.DataFrame({"mean": mean, "dispersion": fitted * rng.lognormal(0.0, 0.6, n),
+                          "estimate": ["gene-wise"] * n, "keep": [False] * n})  # fmt: skip
+    return ScatterData(
+        frame=frame, columns={"mean": ("reads", "Mean."), "dispersion": ("none", "Dispersion."),
+                              "estimate": ("none", "Estimate."), "keep": ("none", "Never.")},
+        x="mean", y="dispersion", x_label="Mean expression", y_label="Dispersion",
+        colour="estimate", colours=category_colours(["gene-wise"]), caption="Made up.",
+        lines=(Line("fitted trend", tuple(mean), tuple(fitted)),), log_x=True, log_y=True,
+        width="double", keep="keep",
+    )  # fmt: skip
+
+
+def _farthest(full: np.ndarray, kept: np.ndarray) -> float:
+    """The farthest any point of ``full`` lies from the polyline through ``kept``, both (n, 2)."""
+    a, b = kept[:-1], kept[1:]
+    d = b - a
+    rel = full[:, None, :] - a[None, :, :]
+    t = np.clip((rel * d).sum(-1) / np.maximum((d * d).sum(-1), 1e-12), 0.0, 1.0)
+    return float(np.sqrt(((rel - t[..., None] * d) ** 2).sum(-1)).min(axis=1).max())
+
+
+def test_a_long_line_is_drawn_with_the_points_it_needs():
+    """Rytis, 2026-10-01: M5's dispersion trend carried all 12,796 points onto the page. The page
+    draws it through a few dozen, none of the 12,796 further than a quarter of a px from it at
+    the largest size a page draws the plot (twice the widest page plot, opened alone); the
+    figure files still draw every point, and a two-point line is left as it is. Mutations: the
+    line drawn whole; the tolerance taken in axis units, not px; the figure files thinned too."""
+    data = _trend()
+    (trace,) = [t for t in data.interactive().data if t.mode == "lines"]
+    line = data.lines[0]
+    assert 2 < len(trace.x) < len(line.x) / 100
+    assert (trace.x[0], trace.x[-1]) == (line.x[0], line.x[-1])
+    # The line's own extent over the whole layout: more px per decade than the plot gives it,
+    # whose axes span the points too, inside margins; so a bound on what a reader sees.
+    size = np.array([max(PAGE_PLOT_PX.values()) * 2, PLOTLY_HEIGHT_PX["scatter"] * 2])
+    full = np.log10(np.column_stack([line.x, line.y]))
+    kept = np.log10(np.column_stack([trace.x, trace.y]))
+    low, span = full.min(0), np.ptp(full, 0)
+    assert _farthest((full - low) / span * size, (kept - low) / span * size) <= 0.25
+    (drawn,) = [ln for ln in data.static(THEMES["white"]).axes[0].get_lines()
+                if len(ln.get_xdata()) > 2]  # fmt: skip
+    assert len(drawn.get_xdata()) == len(line.x)
+    short = dataclasses.replace(data, lines=(Line("x = y", (1.0, 1e4), (1.0, 1e4)),))
+    (two,) = [t for t in short.interactive().data if t.mode == "lines"]
+    assert (two.x, two.y) == ((1.0, 1e4), (1.0, 1e4))
+
+
 def test_points_drawn_equal_csv_rows():
     data = demo_volcano(counts(n_genes=6000))
     other = data.frame.filter(~pl.col("keep")).height
@@ -596,7 +660,8 @@ def test_points_drawn_equal_csv_rows():
     drawn = sum(len(t.x) for t in _marker_traces(data.interactive()))
     stride = math.ceil(other / THIN_MAX)
     assert drawn == data.table().height - other + math.ceil(other / stride)
-    assert f"every {stride}th" in data.caption_text()
+    # The caption read "every 3th" (review, 2026-10-01).
+    assert stride == 3 and "every 3rd in order of" in data.caption_text()
     called = set(data.frame.filter(pl.col("keep"))["gene_id"])
     on_page = set(data.on_page()["gene_id"])
     assert called <= on_page

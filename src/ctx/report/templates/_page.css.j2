@@ -109,18 +109,29 @@ html:not(.js) .tabs{display:none}
 .js .fig[hidden]{display:none}
 
 /* Figure card */
-.fig{margin:var(--space-5) 0 var(--space-6);padding:var(--space-5);background:var(--surface);border:var(--rule) solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.fig{margin:var(--space-5) 0 var(--space-6);padding:var(--fig-pad);background:var(--surface);border:var(--rule) solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 .fig-num{margin:0;font-size:var(--fs-xs);font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--link)}
 .fig-title{margin:var(--space-1) 0 0;font-size:var(--fs-md)}
 .fig-lead{margin:var(--space-1) 0 0;color:var(--text)}
-.fig-body{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-4);margin-top:var(--space-4)}
-.fig-plot{min-width:0}
+.fig-body{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--fig-gap);margin-top:var(--space-4)}
+/* A plot kept from shrinking below its least legible width, on a phone or opened alone at
+   twice its type, scrolls inside the card, and the page script shows the hint above it. */
+.fig-plot{min-width:0;overflow-x:auto}
+/* A second plot under the plot and its reading guide, across the card: a linked view's parallel sets. */
+.fig-below{min-width:0;margin-top:var(--fig-gap);overflow-x:auto}
+.scroll-hint{position:sticky;left:0;margin:0 0 var(--space-2);font-size:var(--fs-sm);color:var(--muted)}
+/* Opened alone, a figure's type, marks and lines are twice the page's (style.ALONE_SCALE) and
+   its plot twice as wide where the window has room (figures.figure_html): the page takes the
+   window's width and the reading guide goes under the plot. */
+.page.alone{max-width:none}
 .reading{align-self:start;margin:0;padding:var(--space-3) var(--space-4);background:var(--surface-2);border:var(--rule) solid var(--line);border-left:var(--rule-accent) solid var(--link);border-radius:var(--radius-sm);font-size:var(--fs-sm)}
 .reading-title{margin:0 0 var(--space-2);font-size:var(--fs-xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--link)}
 .reading ul{margin:0;padding-left:var(--space-4)}
 .reading li{margin:var(--space-1) 0;color:var(--text)}
 .fig figcaption{margin-top:var(--space-3);font-size:var(--fs-xs);line-height:1.55;color:var(--muted)}
 .fig-files{display:flex;flex-wrap:wrap;gap:var(--space-1) var(--space-4);margin:var(--space-2) 0 0;font-size:var(--fs-xs);color:var(--muted)}
+/* A moved view's PDF and SVG draw in the page and link no file. */
+.fig-files a[role=button]{cursor:pointer}
 .only-black{display:none}
 :root[data-theme="black"] .only-black{display:inline}
 :root[data-theme="black"] .only-white{display:none}
@@ -236,7 +247,7 @@ section,.group,.fig,.entry{scroll-margin-top:calc(2 * var(--topbar) + var(--spac
 @media (min-width:{{ layout.rail_from }}px){
 .page.has-rail{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);column-gap:var(--gap);max-width:calc(var(--rail) + var(--gap) + var(--content) + 2 * var(--gutter-wide))}
 .toc{position:sticky;top:var(--topbar);align-self:start;max-height:calc(100vh - var(--topbar));overflow-y:auto;padding-top:var(--space-8)}
-.fig-body.has-reading{grid-template-columns:minmax(0,1fr) minmax(0,var(--reading))}
+.page:not(.alone) .fig-body.has-reading{grid-template-columns:minmax(0,1fr) minmax(0,var(--reading))}
 }
 @media (max-width:{{ layout.narrow }}px){
 .page{padding-left:var(--gutter);padding-right:var(--gutter)}

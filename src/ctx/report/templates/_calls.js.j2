@@ -28,6 +28,11 @@ var ctxCalls = {
     state.exact = t; state.unit = unit; state.shown = ctxCalls.display(t, unit);
     return state.shown;
   },
+  /* Whether the rule in force differs from the default one: a threshold, a basis or a cutoff
+     moved. A unit switch alone shows the same rule in other words, so it is no move. */
+  moved: function (cfg, t, basis, alpha) {
+    return Math.abs(t - cfg.lfc_min) > 1e-12 || basis !== cfg.gate || alpha !== cfg.alpha;
+  },
   /* The cutoff actually applied: the default for an empty box, else clamped to the range the
      box states, so the box and the rule never disagree. */
   cutoff: function (value, cfg) {

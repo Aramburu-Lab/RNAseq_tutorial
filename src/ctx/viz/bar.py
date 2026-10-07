@@ -214,6 +214,21 @@ class BarData:
             "start": {"shown": f"{total:,}", "total": f"{total:,}", "median": median},
         }  # fmt: skip
 
+    def inches(self) -> tuple[float, float]:
+        """The figure's size, which a page's own PDF and SVG of a filtered view take too.
+
+        Horizontal bars grow by a row per category.
+        """
+        width, height = figure_inches(self.width, "bar")
+        if self.horizontal:
+            rows = (len(self._categories()) * BAR_ROW_MM + BAR_MARGIN_MM) / MM_PER_INCH
+            height = max(height, rows)
+        return width, height
+
+    def export_layers(self) -> dict[str, Any]:
+        """Nothing: the page draws every bar and line the figure files draw."""
+        return {}
+
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
 
@@ -230,10 +245,7 @@ class BarData:
 
         apply_matplotlib(theme)
         categories = self._categories()
-        width, height = figure_inches(self.width, "bar")
-        if self.horizontal:
-            rows = (len(categories) * BAR_ROW_MM + BAR_MARGIN_MM) / MM_PER_INCH
-            height = max(height, rows)
+        width, height = self.inches()
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
         positions = np.arange(len(categories), dtype=float)

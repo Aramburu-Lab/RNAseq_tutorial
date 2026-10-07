@@ -51,7 +51,7 @@ from ctx.report.builder import (
 from ctx.viz.annotate import TEST_NAME
 from ctx.viz.box import BoxData, box_data, interactive
 from ctx.viz.save import write_figure
-from ctx.viz.style import plotly_templates
+from ctx.viz.style import ALONE_SCALE, plotly_templates, zoom
 
 ROOT = Path(__file__).resolve().parents[1]
 HOSTILE = "</script><b>x"
@@ -100,10 +100,15 @@ def _labels(data) -> list[str]:
 
 
 def _plotly_script(html: str) -> str:
-    """The figure's drawing script, with each line break read as the space it stands for."""
-    (script,) = [
+    """The figure's drawing scripts, with each line break read as the space it stands for.
+
+    A linked view draws two plots, the scatter and the parallel sets under it.
+    """
+    scripts = [
         s for s in re.findall(r"<script[^>]*>(.*?)</script>", html, re.S) if "Plotly.newPlot" in s
     ]
+    assert scripts
+    script = " ".join(scripts)
     decoded = re.sub(r"\\u([0-9a-fA-F]{4})", lambda m: chr(int(m.group(1), 16)), script)
     return decoded.replace("<br>", " ")
 
@@ -164,7 +169,9 @@ def test_html_offline(figure):
     assert not re.search(r"url\(\s*['\"]?(https?:)?//", outside, re.IGNORECASE)
     assert len(html.encode()) <= MAX_BYTES
     (templates,) = re.findall(r'id="ctx-templates">(.*?)</script>', html, re.S)
-    assert json.loads(templates) == json.loads(json.dumps(plotly_templates(), default=str))
+    # A figure opened alone switches themes at its own zoom (style.ALONE_SCALE).
+    alone = {name: zoom(t, ALONE_SCALE) for name, t in plotly_templates().items()}
+    assert json.loads(templates) == json.loads(json.dumps(alone, default=str))
     assert html.index("prefers-color-scheme") < html.index("</head>")
 
 
@@ -295,10 +302,22 @@ def test_building_blocks_refuse_bad_input():
 
 
 def test_templates_use_tokens_only():
-    # Colours and lengths come from ctx.viz.style; a literal in a template drifts from it.
-    literal = re.compile(r"#[0-9A-Fa-f]{6}\b|rgba?\(|\b\d+(?:\.\d+)?px\b")
+    """Colours, lengths and type sizes come from ctx.viz.style; a literal in a template drifts
+    from it. Mutations: "font-size:12pt" in the stylesheet; a 9 concatenated before "px" as
+    an export caption's size; both passed a scan of px literals alone (review, 2026-10-01)."""
+    literal = re.compile(
+        r"#[0-9A-Fa-f]{6}\b|rgba?\(|\b\d+(?:\.\d+)?(?:px|pt)\b"
+        r"|\b\d+(?:\.\d+)?\s*\+\s*[\"'](?:px|pt)|\bsize\s*:\s*\d"
+    )
+    # A stylesheet size is a token, relative to the text around it (inline code), or the
+    # title's fluid size between two tokens.
+    font_size = re.compile(r"font-size\s*:\s*([^;}\"]+)")
+    relative = {".88em", ".95em", "clamp(var(--fs-xl),4vw,var(--fs-display))"}
     for template in (ROOT / "src" / "ctx" / "report" / "templates").glob("*.j2"):
-        found = literal.findall(template.read_text())
+        text = template.read_text()
+        found = literal.findall(text)
+        found += [v for v in (m.strip() for m in font_size.findall(text))
+                  if v and not v.startswith("var(") and v not in relative]  # fmt: skip
         assert not found, (template.name, found[:5])
 
 

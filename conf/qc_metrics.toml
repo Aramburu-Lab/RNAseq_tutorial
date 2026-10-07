@@ -352,7 +352,7 @@ source_type = "course_convention"
 
 [metrics.tg_total_reads]
 stage = "trim"
-title = "Reads written by Trim Galore"
+title = "Processed reads"
 meaning = "How many reads Trim Galore processed."
 computed = "Trim Galore total_reads"
 unit = "reads"

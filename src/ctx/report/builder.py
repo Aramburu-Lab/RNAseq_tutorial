@@ -7,8 +7,6 @@ page and the glossary page. A page that marks a glossary term links the glossary
 embeds the tooltips of the terms it marks, and writing it writes the glossary too (D-048).
 """
 
-import json
-import math
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -18,15 +16,17 @@ from typing import Any
 from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
-from ctx.io.naming import figure_files
-from ctx.report import glossary, marks, text
+from ctx.report import export, glossary, marks, text
+from ctx.report.figures import json_for_script, prepare
 from ctx.viz.style import (
+    ALONE_SCALE,
     NARROW_PX,
     RAIL_FROM_PX,
     THEMES,
     css_layout,
     css_variables,
     plotly_templates,
+    zoom,
 )
 
 MAX_BYTES = 15 * 10**6
@@ -47,14 +47,6 @@ MAX_TABLE_COLUMNS = 8  # CONVENTIONS.md, HTML reports
 MAX_KEY_NUMBERS = 4
 # The packages a reader asks about first; the full list sits behind a disclosure.
 KEY_PACKAGES = ("python", "ctx", "polars", "numpy", "scipy", "pydeseq2", "plotly", "matplotlib")
-PLOTLY_CONFIG = {
-    "displaylogo": False,
-    "responsive": True,
-    # No toolbar: over a phone-width plot it covers the legend, and drag-to-zoom and
-    # double-click-to-reset work without it. A PNG export would carry no statistics anyway:
-    # the caption sits beside the plot, not in it.
-    "displayModeBar": False,
-}
 HEX = re.compile(r"#[0-9A-Fa-f]{6}")
 TITLE = re.compile(r"(?:M(?P<n>\d+)[a-z]? )?(?P<headline>[^:]+?)(?:: (?P<dataset>.+))?")
 
@@ -111,7 +103,10 @@ class FigureBlock:
         text: Title, lead and reading guide.
         stem: The figure's file stem, which names its PDF, SVG and README; empty for none.
         controls: Settings for the page script, with a ``kind``: "calls" for live calling,
-            "brush" for linked brushing, "filter" for bars filtered by column; or None.
+            "brush" for linked brushing, "filter" for bars filtered by column; or None. Its
+            ``export`` entry draws the PDF and SVG of a changed view (``ctx.report.export``).
+        below: A second plotly figure, drawn under the plot and its reading guide across the
+            card: a linked view's parallel sets; or None.
     """
 
     figure: Any
@@ -121,6 +116,7 @@ class FigureBlock:
     text: FigureText = FigureText()
     stem: str = ""
     controls: Mapping[str, Any] | None = None
+    below: Any = None
 
 
 @dataclass(frozen=True)
@@ -361,96 +357,6 @@ def plotly_js() -> str:
     return library.replace("\ufffd", "\\uFFFD")
 
 
-def _json_for_script(value: Any) -> Markup:
-    """JSON safe inside a ``<script>`` element: every ``<`` is escaped as a unicode escape.
-
-    ``allow_nan=False``: a browser's JSON.parse rejects NaN and Infinity, which Python writes
-    by default; rows go through ``_finite`` first.
-    """
-    return Markup(json.dumps(value, default=str, allow_nan=False).replace("<", "\\u003c"))
-
-
-def _finite(row: Mapping[str, Any]) -> dict[str, Any]:
-    """A row with every NaN or infinite number as null, which is what they mean on a page."""
-    return {k: None if isinstance(v, float) and not math.isfinite(v) else v for k, v in row.items()}
-
-
-def _figure_html(block: FigureBlock, index: int) -> Markup:
-    """The plotly div and its drawing script, without plotly.js itself."""
-    html = block.figure.to_html(
-        include_plotlyjs=False, full_html=False, div_id=f"ctx-figure-{index}", config=PLOTLY_CONFIG
-    )
-    return Markup(html)
-
-
-def _files(block: FigureBlock) -> list[tuple[str, str, str]]:
-    """(label, theme or "", file name) of every file a reader may open beside the figure."""
-    data = text.word("ui", "figures.data")
-    if not block.stem:
-        return [(data, "", block.data_file)]
-    names = figure_files(block.stem)
-    rendered = [
-        (ext.upper(), theme, name)
-        for name in names
-        for theme in THEMES
-        for ext in ("pdf", "svg")
-        if name == f"{block.stem}_{theme}.{ext}"
-    ]
-    return [
-        (data, "", block.data_file),
-        (text.word("ui", "figures.columns"), "", f"{block.stem}_README.md"),
-        *rendered,
-    ]
-
-
-def _prepare(block: FigureBlock, index: int, number: int, level: int) -> dict[str, Any]:
-    """Everything the figure macro prints for one figure."""
-    return {
-        "html": _figure_html(block, index),
-        "caption": block.caption,
-        "rows": _json_for_script([_finite(r) for r in block.rows]),
-        "data_file": block.data_file,
-        "index": index,
-        "number": number,
-        "level": level,
-        "text": block.text,
-        "title": block.text.title,
-        "tab": block.text.tab or block.text.title or text.fill("ui", "figure_n", n=number),
-        "page": f"{block.stem}.html" if block.stem else "",
-        "files": _files(block),
-        "controls": _json_for_script(block.controls) if block.controls else None,
-        "kind": block.controls["kind"] if block.controls else None,
-        "defaults": _defaults(block.controls) if block.controls else None,
-    }
-
-
-def _defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
-    """What the controls show before the reader moves them: the default rule, no paint, or all.
-
-    A filter's live line is ``ui.toml`` [filter] summary, or summary_count where the figure
-    prints no median, filled here with the numbers of every bar and passed unfilled for the
-    page script to fill again (``ctxFilter.summary``). Each select is labelled in words.
-    """
-    if controls["kind"] == "brush":
-        return {"colours": list(zip(controls["colours"], controls["names"], strict=True)),
-                "empty": controls["empty"]}  # fmt: skip
-    if controls["kind"] == "filter":
-        line = "filter.summary" if controls.get("summary_median", True) else "filter.summary_count"
-        labels = controls.get("filter_labels", {})
-        return {"filters": [(c, levels, labels.get(c, c))
-                            for c, levels in controls["filters"].items()],
-                "summary": text.fill("ui", line, **controls["start"]),
-                "template": text.raw("ui", line),
-                "none": text.word("ui", "filter.none")}  # fmt: skip
-    return {
-        "fc": f"{controls['lfc_min']:g}",
-        "bases": list(controls["bases"].items()),
-        "alpha": f"{controls['alpha']:g}",
-        "presets": sorted({*controls["presets"], f"{controls['min_cutoff']:g}"}, key=float),
-        "summary": controls["default_summary"],
-    }
-
-
 def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:
     """Results ready for the template, the contents entries of the groups, and any figure.
 
@@ -465,7 +371,7 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
         nonlocal counter
         if isinstance(item, FigureBlock):
             counter += 1
-            return "figure", _prepare(item, counter - 1, counter, level)
+            return "figure", prepare(item, counter - 1, counter, level)
         return ("table", item) if isinstance(item, ResultTable) else ("text", item)
 
     for item in items:
@@ -521,12 +427,12 @@ def render(page: Page, glossary_href: str = "") -> str:
             "layout": Markup(css_layout()),
         },
         "layout": {"rail_from": RAIL_FROM_PX, "narrow": NARROW_PX},
-        "templates": _json_for_script(plotly_templates()),
+        "templates": json_for_script(plotly_templates()),
         "plotly_js": Markup(plotly_js()),
         "terms": glossary.Terms(),
         "glossary_href": glossary_href,
         # Only the entries this page marks: a page carries its own tooltips, and no more.
-        "tooltips": _json_for_script(glossary.tooltips(used, glossary_href)) if used else "",
+        "tooltips": json_for_script(glossary.tooltips(used, glossary_href)) if used else "",
     }
     if isinstance(page, GlossaryPage):
         names = {e.id: e.term for _, entries in page.groups for e in entries}
@@ -539,16 +445,23 @@ def render(page: Page, glossary_href: str = "") -> str:
         context |= {"plotly_js": "", "course": text.load("course")}
         return _ENV.get_template("course.html.j2").render(**context)
     if isinstance(page, FigurePage):
-        context["figure"] = _prepare(page.figure, 0, 1, 3)
+        # Opened alone, at ALONE_SCALE, the theme toggle swaps templates at that scale too.
+        alone = {name: zoom(t, ALONE_SCALE) for name, t in plotly_templates().items()}
+        figure = prepare(page.figure, 0, 1, 3, ALONE_SCALE)
+        context |= {"figure": figure, "templates": json_for_script(alone),
+                    "export": export.assets([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
     results, outline, draws = _walk(page.results)
     if not draws:
         context["plotly_js"] = ""
     versions = page.reproduce.versions
+    items = [i for k, it in results for i in (it["items"] if k == "group" else [(k, it)])]
+    prepared = [it for k, it in items if k == "figure"]
     context |= {
         "results": results,
         "outline": outline,
         "key_versions": [(n, versions[n]) for n in KEY_PACKAGES if n in versions],
+        "export": export.assets(prepared),
     }
     return _ENV.get_template("module.html.j2").render(**context)
 

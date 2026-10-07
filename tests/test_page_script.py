@@ -17,7 +17,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 import pytest
-from synth import demo_linked, design_counts, filtered_counts
+from synth import demo_linked, demo_volcano, design_counts, filtered_counts
 from test_viz import filtered_bars
 
 from ctx.dataset import Contrast
@@ -25,10 +25,11 @@ from ctx.de.deseq import fit
 from ctx.de.run import _volcano
 from ctx.de.stats import ADJUSTMENTS, adjust, classify, p_line
 from ctx.report import text
-from ctx.report.builder import _defaults
+from ctx.report.figures import defaults as _defaults
 from ctx.viz.bar import significant
 from ctx.viz.save import figure_block
 from ctx.viz.scatter import CUTOFF_PRESETS, MIN_CUTOFF, _js_number
+from ctx.viz.style import THEMES
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_calls.js.j2"
@@ -391,3 +392,292 @@ def test_a_filter_line_without_a_median_and_its_selects_in_words():
     out = _node(payload, PICK, FILTER)
     assert out["views"][0]["summary"] == shown["summary"]
     assert re.fullmatch(r"\d+ of \d+ bars shown\.", out["views"][1]["summary"])
+
+
+EXPORT = ROOT / "src" / "ctx" / "report" / "templates" / "_export.js.j2"
+WRAP = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify(input.cases.map(([text, ex]) =>
+  ctxExport.wrap(text, ctxExport.fits(ex, input.metrics)))));
+"""
+# Step-1's PCA caption, one of the course's 99 (2026-10-07): at 85 mm the advances without
+# their kerning end its third line a word early.
+KERNED = (
+    "PERMANOVA on Euclidean distances for condition: R\u00b2 = 0.40, pseudo-F = 8.28, "
+    "p = 0.001 (999 permutations; n = 55 samples in 5 groups). Blind VST, the 500 most variable "
+    "genes after the transform; PC1 33%, PC2 9% of their variance; n = 55 samples."
+)
+
+
+def _caption_lines(figure) -> list[str]:
+    """The caption a figure file draws, line by line: the text place_caption sets at the
+    insets."""
+    from ctx.viz.style import CAPTION_BOTTOM, CAPTION_INSET  # noqa: PLC0415
+
+    (caption,) = [t for t in figure.texts if t.get_position() == (CAPTION_INSET, CAPTION_BOTTOM)]
+    return caption.get_text().split("\n")
+
+
+def test_export_wraps_its_caption_as_the_figure_files_do():
+    """The view's caption breaks where the figure files' caption breaks: the page measures a
+    line with the numbers ctx.viz.metrics measures the files' captions with (the export's
+    "metrics"), greedy, never splitting a word, a hyphenated one included. Checked against the
+    caption each demo figure's own static() draws, and against wrap_to at both widths on a
+    caption whose breaks the kerning moves and on edge cases. Mutations: the character-count
+    wrap the first export used; a line closed one word early; the kerning left out of the
+    page's measure; a split at a hyphen."""
+    from ctx.report import export  # noqa: PLC0415
+    from ctx.viz.metrics import wrap_to  # noqa: PLC0415
+    from ctx.viz.style import CAPTION_INSET, SIZES, WIDTHS_MM  # noqa: PLC0415
+
+    demos = [demo_volcano(design_counts(condition_lfc=1.0)), demo_linked(), filtered_bars()]
+    cases, expected = [], []
+    for data in demos:
+        ex = figure_block(data, "x").controls["export"]
+        cases.append([ex["caption"], ex])
+        expected.append(_caption_lines(data.static(THEMES["white"])))
+    texts = [KERNED, "a  b\tc " + "x" * 12 + " d", "", "one-word-wide-as-two two"]
+    for column, words in [(c, t) for c in sorted(WIDTHS_MM) for t in texts[:1]] + [
+            ("tiny", t) for t in texts[1:]]:  # fmt: skip
+        width_pt = 30 / (1 - 2 * CAPTION_INSET) if column == "tiny" else (
+            WIDTHS_MM[column] / 25.4 * 72)  # fmt: skip
+        cases.append([words, {"width_pt": width_pt, "inset": CAPTION_INSET,
+                              "size": SIZES["caption"]}])  # fmt: skip
+        expected.append(wrap_to(words, width_pt * (1 - 2 * CAPTION_INSET), SIZES["caption"]))
+    extra = frozenset("".join(words for words, _ in cases)) - export.package_characters()
+    metrics = json.loads(str(export.page_assets(extra)["config"]))["metrics"]
+    out = _node({"cases": cases, "metrics": metrics}, WRAP, EXPORT)
+    assert out == expected
+    # The cases hold what they test: the linked view's caption takes two lines, the kerned
+    # caption breaks otherwise at 85 mm than at 170 mm, and the edge cases.
+    assert [len(lines) for lines in expected[:3]] == [1, 2, 1]
+    assert expected[3] != expected[4] and expected[5] == ["a b c", "x" * 12, "d"]
+    assert expected[6] == [] and expected[7] == ["one-word-wide-as-two", "two"]
+
+
+CAPTION = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify(input.cases.map(([ex, view]) =>
+  ctxExport.captionLines(ex, view, (line) => line.length <= 1000))));
+"""
+
+
+def test_export_caption_is_caption_live_line_and_note_each_closed():
+    """The file's caption is the figure files' caption, the live line and the note, in that
+    order, each a sentence: the linked view's live line ends with no stop, and the note ran
+    on from it ("vermillion: type_a 3 Drawn in the browser"). Mutations: the note left out;
+    the stop never added."""
+    ex = {"caption": "No test.", "note": "Drawn in the browser."}
+    cases = [[ex, "3 painted vermillion: type_a 3"], [ex, "Up: 4 genes."], [ex, ""],
+             [{**ex, "caption": "A caption without a stop"}, "  "]]  # fmt: skip
+    out = [lines[0] for lines in _node({"cases": cases}, CAPTION, EXPORT)]
+    assert out == [
+        "No test. 3 painted vermillion: type_a 3. Drawn in the browser.",
+        "No test. Up: 4 genes. Drawn in the browser.",
+        "No test. Drawn in the browser.",
+        "A caption without a stop. Drawn in the browser.",
+    ]
+
+
+FIGURE = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify(input.cases.map(([parts, cfg]) =>
+  ctxExport.figure(parts, cfg, {journal: true}, 200, input.dashes))));
+"""
+
+
+def _figure(cases: list) -> list:
+    """ctxExport.figure() under node on each (parts, controls), with the page's dash patterns."""
+    from ctx.viz.style import plotly_dashes  # noqa: PLC0415
+
+    return _node({"cases": cases, "dashes": plotly_dashes()}, FIGURE, EXPORT)
+
+
+def _plain(figure) -> dict:
+    """A plotly figure as the page holds it: arrays as lists."""
+    return json.loads(
+        json.dumps(
+            figure.to_plotly_json(),
+            default=lambda o: o.tolist() if hasattr(o, "tolist") else str(o),
+        )
+    )
+
+
+def test_export_draws_marks_at_the_figure_files_sizes_from_any_zoom():
+    """Every point MARKER_SIZE pt, every line its LINE_WIDTHS pt, from the module page and
+    from a page opened alone at twice the size; the journal template and the files' width; a
+    linked view's parallel sets under the scatter. Mutation: the page's zoom not divided out."""
+    from ctx.viz.style import LINE_WIDTHS, MARKER_SIZE, zoom  # noqa: PLC0415
+
+    volcano = figure_block(demo_volcano(design_counts(condition_lfc=1.0)), "x")
+    linked = figure_block(demo_linked(), "y")
+    cases = []
+    for scale in (1.0, 2.0):
+        for block in (volcano, linked):
+            parts = [zoom(_plain(f), scale) for f in (block.figure, block.below) if f is not None]
+            cfg = {**block.controls, "export": {**block.controls["export"], "zoom": scale}}
+            cases.append([parts, cfg])
+    out = _figure(cases)
+    for (_, cfg), drawn in zip(cases, out, strict=True):
+        layout, ex = drawn["layout"], cfg["export"]
+        assert layout["template"] == {"journal": True}
+        assert layout.get("margin") == ({"l": ex["sides"]["l"], "r": ex["sides"]["r"]}
+                                        if "sides" in ex else None)  # fmt: skip
+        assert (layout["width"], layout["height"]) == (ex["width_pt"], 200)
+        sizes = {t["marker"]["size"] for t in drawn["data"] if t.get("mode") == "markers"}
+        assert sizes and all(s == pytest.approx(MARKER_SIZE) for s in sizes), sizes
+        widths = {t["line"]["width"] for t in drawn["data"] if t.get("mode") == "lines"}
+        assert all(w == pytest.approx(LINE_WIDTHS["line"]) for w in widths), widths
+    linked_out = out[1]
+    assert [t["type"] for t in linked_out["data"]] == ["scatter", "parcats"]
+    assert linked_out["data"][1]["domain"]["y"] == linked.controls["below"]
+    assert linked_out["layout"]["yaxis"]["domain"] == linked.controls["above"]
+
+
+def test_export_draws_the_x_title_as_built():
+    """A title the page wrapped for a phone, whose titles guard keeps the title on one line in
+    layout.meta.xtitle, is drawn whole, as the figure files set it; with none kept the title
+    stands; meta never reaches the file. The volcano's title is built with its unit on a line
+    of its own (axes.screen_title, M3.6), which the guard reads as one line. Mutation: the
+    restore removed, which broke the 170 mm files' title where a phone's plot broke it
+    (review, 2026-10-02)."""
+    data = demo_volcano(design_counts(condition_lfc=1.0))
+    block = figure_block(data, "x")
+    wrapped = _plain(block.figure)
+    built = wrapped["layout"]["xaxis"]["title"]["text"]
+    files = data.static(THEMES["white"]).axes[0].get_xlabel()
+    assert built == "Fold change<br>(log2 fold change)" and files == built.replace("<br>", " ")
+    wrapped["layout"]["xaxis"]["title"]["text"] = files.replace(" ", "<br>", 1)
+    kept = {**wrapped, "layout": {**wrapped["layout"], "meta": {"xtitle": files}}}
+    out = _figure([[[kept], block.controls], [[wrapped], block.controls]])
+    assert [o["layout"]["xaxis"]["title"]["text"] for o in out] == [
+        files, files.replace(" ", "<br>", 1)]  # fmt: skip
+    assert all("meta" not in o["layout"] for o in out)
+
+
+TITLE = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify(input.cases.map(([text, width]) =>
+  ctxExport.wrap(ctxExport.words(text), (line) => line.length <= width))));
+"""
+
+
+def test_a_wrapped_axis_title_keeps_its_unit_whole():
+    """The page's titles guard wraps an x title from its words with each parenthesised span
+    held whole, as the files hold a unit (annotate.fit_title) and the page breaks before it
+    (axes.screen_title, M3.6): split at its spaces, "(log2(count + 1))" left "1))" alone on a
+    line. A span wider than a line takes its own. Mutation: words() splitting at every space."""
+    cases = [["Mean of both (log2(count + 1))", 16], ["Fold change (log2 fold change)", 22],
+             ["PC1, 42% of variance (VST units)", 12], ["Reads (%)", 4], ["", 5]]  # fmt: skip
+    out = _node({"cases": cases}, TITLE, EXPORT)
+    assert out == [
+        ["Mean of both", "(log2(count + 1))"],
+        ["Fold change", "(log2 fold change)"],
+        ["PC1, 42% of", "variance", "(VST units)"],
+        ["Reads", "(%)"],
+        [],
+    ]
+
+
+COMPOSE = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const svg = ctxExport.compose(input.plot, input.lines, input.ex);
+console.log(JSON.stringify({svg, pdf: ctxExport.forPdf(svg, "CtxSans"),
+                            height: ctxExport.captionHeight(input.lines.length, input.ex)}));
+"""
+
+
+def test_export_svg_is_sized_in_points_with_its_caption_inside():
+    """The file is the figure files' size in pt, one user unit to the point; the caption's
+    lines sit inside its insets, escaped; the PDF's copy sets every text in the face it
+    embeds; plotly's hard-coded band edges go. Mutations: the size left in plotly's px, the
+    caption's last line below the page."""
+    from xml.etree import ElementTree  # noqa: PLC0415
+
+    ex = figure_block(demo_volcano(design_counts(condition_lfc=1.0)), "x").controls["export"]
+    plot = ('<svg xmlns="http://www.w3.org/2000/svg" class="main-svg" width="481" '
+            'height="230" style="" viewBox="0 0 481 230">'
+            "<text style=\"font-family: Arial, 'Liberation Sans', sans-serif; font-size: 9px\">"
+            '1</text><path class="path" fill="rgb(1, 2, 3)" stroke="lightgray" '
+            'stroke-width="0.2"/></svg>')  # fmt: skip
+    lines = ["Up in case: 3 < 4 & so on.", "A second line."]
+    out = _node({"plot": plot, "lines": lines, "ex": ex}, COMPOSE, EXPORT)
+    root = ElementTree.fromstring(out["svg"])
+    w, h = ex["width_pt"], ex["height_pt"]
+    assert (root.get("width"), root.get("height")) == (f"{w}pt", f"{h}pt")
+    assert root.get("viewBox") == f"0 0 {w} {h}"
+    texts = [t for t in root.iter("{http://www.w3.org/2000/svg}text")][1:]
+    assert [t.text for t in texts] == lines
+    baselines = [float(t.get("y")) for t in texts]
+    assert baselines[-1] <= h * (1 - ex["bottom"]) + 1e-9
+    assert baselines[1] - baselines[0] == pytest.approx(ex["size"] * ex["spacing"])
+    assert float(texts[0].get("x")) == pytest.approx(ex["inset"] * w)
+    assert out["height"] == pytest.approx(2 * ex["size"] * ex["spacing"] + ex["bottom"] * h)
+    assert "lightgray" not in out["svg"] and 'stroke="none"' in out["svg"]
+    assert set(re.findall(r"font-family:\s*([^;\"]+)", out["pdf"])) == {"CtxSans"}
+
+
+MOVED = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const cfg = input.cfg;
+console.log(JSON.stringify({
+  brush: [ctxBrush.moved(ctxBrush.start(3)), ctxBrush.moved([-1, 2, -1]),
+          ctxBrush.moved(ctxBrush.clear([0, 1, 2]))],
+  filter: [ctxFilter.moved({a: "", b: ""}), ctxFilter.moved({a: "", b: "x"}), ctxFilter.moved({})],
+  calls: [ctxCalls.moved(cfg, cfg.lfc_min, cfg.gate, cfg.alpha),
+          ctxCalls.moved(cfg, Math.log2(Math.pow(2, cfg.lfc_min)), cfg.gate, cfg.alpha),
+          ctxCalls.moved(cfg, 2, cfg.gate, cfg.alpha),
+          ctxCalls.moved(cfg, cfg.lfc_min, "padj_holm", cfg.alpha),
+          ctxCalls.moved(cfg, cfg.lfc_min, cfg.gate, 0.01)],
+}));
+"""
+
+
+def test_a_view_is_moved_only_away_from_the_defaults():
+    """Nothing painted, every filter on all and the default rule are the figure files' view;
+    any paint, filter, threshold, basis or cutoff is not. Mutation: the cutoff left out of
+    ctxCalls.moved, so a stricter cutoff still linked the default file."""
+    cfg = figure_block(demo_volcano(design_counts(condition_lfc=1.0)), "x").controls
+    scripts = [SCRIPT, BRUSH, FILTER]
+    rule = "\n".join(p.read_text().replace("{% raw %}", "").replace("{% endraw %}", "")
+                     for p in scripts)  # fmt: skip
+    node = shutil.which("node")
+    done = subprocess.run([node, "-e", rule + MOVED], input=json.dumps({"cfg": cfg}),
+                          capture_output=True, text=True, check=True)  # fmt: skip
+    out = json.loads(done.stdout)
+    assert out == {"brush": [False, True, False], "filter": [False, True, False],
+                   "calls": [False, False, True, True, True]}  # fmt: skip
+
+
+def test_export_draws_what_the_figure_files_draw_and_the_page_lacks(monkeypatch):
+    """A thinned volcano's left-out points back in their trace; its labels as annotations at
+    the offsets static() placed them, with a solid leader; plotly's named dashes as the
+    figure files' lengths; legend keys opaque beside points at the page's opacity.
+    Mutations: the thinned points dropped; the labels dropped; "dash" left as plotly's own
+    9 on 9 off; the legend key left at the points' opacity."""
+    from ctx.viz import scatter  # noqa: PLC0415
+    from ctx.viz.style import DASH_PATTERNS, POINT_ALPHA, SIZES  # noqa: PLC0415
+
+    monkeypatch.setattr(scatter, "THIN_MAX", 300)
+    data = demo_volcano(design_counts(condition_lfc=1.0))
+    block = figure_block(data, "x")
+    (drawn,) = _figure([[[_plain(block.figure)], block.controls]])
+    traces, cfg = drawn["data"], block.controls
+    points = [t for t in traces if t.get("mode") == "markers" and t["x"] != [None]]
+    assert sum(len(t["x"]) for t in points) == data.frame.height
+    (ns,) = [t for t in points if t["name"] == "ns"]
+    assert len(ns["x"]) == data.frame.filter(pl.col("call") == "ns").height
+    keys = [t for t in traces if t.get("x") == [None]]
+    assert [k["name"] for k in keys] == [t["name"] for t in points]
+    assert all(k["marker"]["opacity"] == 1 and k["legendgroup"] == t["legendgroup"]
+               and t["showlegend"] is False and t["marker"]["opacity"] == POINT_ALPHA
+               for k, t in zip(keys, points, strict=True))  # fmt: skip
+    dashed = {t["line"]["dash"] for t in traces if t.get("mode") == "lines"}
+    assert dashed == {",".join(f"{v}px" for v in DASH_PATTERNS["dashed"])}
+    labels = drawn["layout"]["annotations"]
+    placed = cfg["export"]["labels"]
+    assert [(a["text"], a["x"], a["y"], a["ax"], -a["ay"], a["xanchor"]) for a in labels] == [
+        (p["text"], p["x"], p["y"], p["dx"], p["dy"], p["anchor"]) for p in placed]  # fmt: skip
+    assert placed, "the static file labels some genes"
+    assert {a["font"]["size"] for a in labels} == {SIZES["annotation"]}
+    assert {a["axref"] for a in labels} == {"pixel"} and {a["arrowhead"] for a in labels} == {0}

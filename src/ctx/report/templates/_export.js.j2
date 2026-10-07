@@ -1,0 +1,270 @@
+{% raw %}
+/* A figure's own PDF and SVG of a changed view (D-033, amended 2026-10-01): once the reader
+   has moved its page controls from their defaults, the PDF and SVG buttons draw the view as
+   set, at the size, type and white theme of the figure's own files; the PDF embeds Ctx Sans,
+   the page's subset of Liberation Sans, Arial's metric twin. Everything but draw(), pdf() and
+   save() runs under node in tests/test_page_script.py. The page script borrows wrap() and
+   words() for its axis titles. */
+var ctxExport = {
+  /* Words greedily onto lines while fits(line) holds; a word is never split, as
+     ctx.viz.metrics.wrap_to wraps a figure file's caption. Takes a text, or its words. */
+  wrap: function (text, fits) {
+    var lines = [];
+    var words = Array.isArray(text) ? text : String(text).split(/\s+/).filter(Boolean);
+    words.forEach(function (word) {
+      var trial = lines.length ? lines[lines.length - 1] + " " + word : word;
+      if (lines.length && fits(trial)) lines[lines.length - 1] = trial;
+      else lines.push(word);
+    });
+    return lines;
+  },
+  /* A title's words, a parenthesised span held as one, as ctx.viz.annotate.fit_title and
+     ctx.viz.axes.screen_title hold a unit: split at its spaces, "(log2(count + 1))" left
+     "1))" alone on a line (M3.6). */
+  words: function (text) {
+    var out = [], word = "", depth = 0;
+    Array.from(String(text)).forEach(function (c) {
+      if (/\s/.test(c) && depth <= 0) {
+        if (word) out.push(word);
+        word = "";
+        return;
+      }
+      depth += (c === "(") - (c === ")");
+      word += c;
+    });
+    if (word) out.push(word);
+    return out;
+  },
+  /* A copy of plotly data or layout as plain values: a typed array becomes an array. */
+  plain: function (value) {
+    if (Array.isArray(value) || ArrayBuffer.isView(value)) {
+      return Array.prototype.map.call(value, ctxExport.plain);
+    }
+    if (value && typeof value === "object") {
+      var out = {};
+      Object.keys(value).forEach(function (k) { out[k] = ctxExport.plain(value[k]); });
+      return out;
+    }
+    return value;
+  },
+  /* A length, or a list of lengths, times factor. */
+  scale: function (value, factor) {
+    if (typeof value === "number") return value * factor;
+    if (Array.isArray(value)) return value.map(function (v) { return v * factor; });
+    return value;
+  },
+  /* Little-endian float32 x, y pairs in base64 (ScatterData.export_layers) as two arrays. */
+  points: function (encoded) {
+    var bytes = Uint8Array.from(atob(encoded), function (c) { return c.charCodeAt(0); });
+    var view = new DataView(bytes.buffer), x = [], y = [];
+    for (var at = 0; at + 8 <= bytes.length; at += 8) {
+      x.push(view.getFloat32(at, true)); y.push(view.getFloat32(at + 4, true));
+    }
+    return { x: x, y: y };
+  },
+  /* A plotly dash name as the figure files draw it: matplotlib's on and off lengths in pt per
+     pt of line width (style.DASH_PATTERNS); any other dash unchanged. */
+  dash: function (value, width, dashes) {
+    var pattern = dashes && dashes[value];
+    if (!pattern) return value;
+    return pattern.map(function (v) { return v * (width || 1) + "px"; }).join(",");
+  },
+  /* A line's width back in pt, and its dash drawn as the figure files draw it. */
+  line: function (line, lines, dashes) {
+    if (!line) return;
+    line.width = ctxExport.scale(line.width, lines);
+    if (typeof line.dash === "string") line.dash = ctxExport.dash(line.dash, line.width, dashes);
+  },
+  /* A label as the figure files place it: on its point, offset in pt, a leader line to it. */
+  label: function (l, ex, layout) {
+    function at(value, axis) { return (layout[axis] || {}).type === "log" ? Math.log10(value) : value; }
+    return {
+      x: at(l.x, "xaxis"), y: at(l.y, "yaxis"), xref: "x", yref: "y", text: ctxExport.escape(l.text),
+      showarrow: true, arrowhead: 0, arrowwidth: ex.leader, arrowcolor: ex.ink, standoff: 0,
+      ax: l.dx, ay: -l.dy, axref: "pixel", ayref: "pixel", xanchor: l.anchor, yanchor: "bottom",
+      font: { size: ex.label_size, color: ex.ink }
+    };
+  },
+  /* The figure to draw: every trace of the page's plots as they stand, marks back at the
+     figure files' sizes (export.marker turns a mark's page px into pt, export.zoom undoes the
+     page's own zoom), the journal template, export.width_pt wide and height tall. What the
+     figure files draw and the page's plot lacks comes back from export: the points the page
+     thinned, the labels it leaves out, the parallel sets' outer margins. A second plot, a
+     linked view's parallel sets, goes under the first at cfg.above and cfg.below. Legend keys
+     are opaque, as the figure files draw them, whatever their points' opacity. An x-axis title
+     the page wrapped for a narrow screen is drawn as built (layout.meta.xtitle). */
+  figure: function (parts, cfg, template, height, dashes) {
+    var ex = cfg.export, marks = ex.marker / ex.zoom, lines = 1 / ex.zoom, data = [];
+    var layout = ctxExport.plain(parts[0].layout);
+    var built = layout.meta && layout.meta.xtitle;
+    if (typeof built === "string" && layout.xaxis && layout.xaxis.title) {
+      layout.xaxis.title.text = built;
+    }
+    parts.forEach(function (part, i) {
+      part.data.forEach(function (trace, k) {
+        var t = ctxExport.plain(trace), more = i === 0 && (ex.thinned || {})[k];
+        if (more) {
+          var xy = ctxExport.points(more);
+          t.x = (t.x || []).concat(xy.x); t.y = (t.y || []).concat(xy.y);
+        }
+        if (t.marker) {
+          t.marker.size = ctxExport.scale(t.marker.size, marks);
+          if (t.marker.line) t.marker.line.width = ctxExport.scale(t.marker.line.width, lines);
+        }
+        ctxExport.line(t.line, lines, dashes);
+        if (i > 0) t.domain = { x: [0, 1], y: cfg.below };
+        data.push(t);
+        var faint = t.marker && typeof t.marker.opacity === "number" && t.marker.opacity < 1;
+        if (faint && t.showlegend !== false && !Array.isArray(t.marker.color)) {
+          var group = t.legendgroup || "key-" + data.length;
+          t.showlegend = false; t.legendgroup = group;
+          data.push({ type: t.type || "scatter", mode: "markers", x: [null], y: [null], name: t.name,
+                      legendgroup: group, hoverinfo: "skip",
+                      marker: Object.assign({}, t.marker, { opacity: 1 }) });
+        }
+      });
+    });
+    if (parts.length > 1) layout.yaxis = Object.assign(layout.yaxis || {}, { domain: cfg.above });
+    (layout.shapes || []).forEach(function (s) { ctxExport.line(s.line, lines, dashes); });
+    ["template", "width", "height", "autosize", "margin", "selections", "dragmode", "meta"]
+      .forEach(function (k) { delete layout[k]; });
+    if (ex.sides) layout.margin = { l: ex.sides.l, r: ex.sides.r };
+    if (ex.labels && ex.labels.length) {
+      layout.annotations = (layout.annotations || []).concat(ex.labels.map(function (l) {
+        return ctxExport.label(l, ex, layout);
+      }));
+    }
+    layout.template = template;
+    layout.width = ex.width_pt;
+    layout.height = height;
+    return { data: data, layout: layout };
+  },
+  /* The caption under the drawing: the figure's caption, the live line naming what the
+     reader set, and the note that the file is the page's drawing of that view, each closed
+     by a stop; the linked view's live line has none on the page. */
+  captionLines: function (ex, view, fits) {
+    var parts = [ex.caption, view, ex.note].map(function (part) {
+      part = String(part || "").trim();
+      return !part || /[.!?]$/.test(part) ? part : part + ".";
+    });
+    return ctxExport.wrap(parts.filter(Boolean).join(" "), fits);
+  },
+  /* The caption block's height in pt: its lines at the caption size and line spacing, and the
+     inset under it that the figure files keep. */
+  captionHeight: function (n, ex) {
+    return n * ex.size * ex.spacing + ex.bottom * ex.height_pt;
+  },
+  escape: function (s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  },
+  /* The SVG file: plotly's drawing, sized in pt as the figure files are, one user unit to the
+     point, and the caption under it in ink, a text element per line. */
+  compose: function (plot, lines, ex) {
+    /* plotly edges each parallel-sets band in lightgray and each of its colour segments in
+       black, both at 0.2, a colour and a width no style token names; the figure files draw
+       bands with no edge (LINE_WIDTHS band_edge). */
+    plot = plot.replace(/ stroke="(?:lightgray|black)" stroke-width="0\.2"/g, ' stroke="none"');
+    /* plotly draws an annotation's leader as dashes 0, 0, then its own length on and off: a
+       solid line written as a dash pattern no figure file has. */
+    plot = plot.replace(/ stroke-dasharray: 0(?:px)?, 0(?:px)?, ([\d.]+)(?:px)?, \1(?:px)?;/g, "");
+    var open = plot.match(/<svg[^>]*>/)[0], w = ex.width_pt, h = ex.height_pt;
+    var root = open
+      .replace(/ width="[^"]*"/, ' width="' + w + 'pt"')
+      .replace(/ height="[^"]*"/, ' height="' + h + 'pt"')
+      .replace(/ viewBox="[^"]*"/, ' viewBox="0 0 ' + w + " " + h + '"');
+    var pitch = ex.size * ex.spacing, top = h - ctxExport.captionHeight(lines.length, ex);
+    var style = "font-family: " + ex.family + "; font-size: " + ex.size + "px; fill: " + ex.ink;
+    var text = lines.map(function (line, i) {
+      var baseline = top + i * pitch + ex.size;
+      return '<text x="' + ex.inset * w + '" y="' + baseline + '" style="' + style + '">' +
+        ctxExport.escape(line) + "</text>";
+    }).join("");
+    var end = plot.lastIndexOf("</svg>");
+    return root + plot.slice(open.length, end) + '<g class="caption">' + text + "</g></svg>";
+  },
+  /* The SVG as the PDF reads it: every text set in the embedded face, which svg2pdf would
+     otherwise swap for its own Helvetica when the first name of the chain is not loaded. */
+  forPdf: function (svg, face) {
+    return svg.replace(/font-family:\s*[^;"]+/g, "font-family: " + face);
+  },
+  /* A line's width at size, as ctx.viz.metrics.text_width measures it from the same numbers
+     (metrics.table): the advances, then the kerning of each pair, in the unit of size. */
+  width: function (text, size, metrics) {
+    var chars = Array.from(String(text)), total = 0, kerned = 0;
+    chars.forEach(function (c) {
+      var advance = metrics.advances[c];
+      total += advance === undefined ? metrics.missing : advance;
+    });
+    for (var i = 0; i + 1 < chars.length; i++) kerned += metrics.kern[chars[i] + chars[i + 1]] || 0;
+    return size * (total + kerned) / metrics.per_em;
+  },
+  /* Whether a caption line fits the width the figure files wrap captions to, measured as they
+     measure it (ctx.viz.annotate.place_caption), so the view's caption breaks where theirs does. */
+  fits: function (ex, metrics) {
+    var room = ex.width_pt * (1 - 2 * ex.inset);
+    return function (line) { return ctxExport.width(line, ex.size, metrics) <= room; };
+  },
+  /* Browser only: the PDF or SVG of a figure's view as it stands, as a Blob. */
+  draw: function (fig, cfg, ext) {
+    var setup = JSON.parse(document.getElementById("ctx-export").textContent);
+    var plots = [fig.querySelector(".fig-plot .js-plotly-plot"),
+                 fig.querySelector(".fig-below .js-plotly-plot")].filter(Boolean);
+    var live = fig.querySelector("[aria-live]"), ex = cfg.export;
+    var lines = ctxExport.captionLines(ex, live ? live.textContent : "",
+                                       ctxExport.fits(ex, setup.metrics));
+    var height = ex.height_pt - ctxExport.captionHeight(lines.length, ex);
+    var spec = ctxExport.figure(plots.map(function (d) { return { data: d.data, layout: d.layout }; }),
+                                cfg, setup.template, height, setup.dashes);
+    return Plotly.toImage(spec, { format: "svg", width: ex.width_pt, height: height })
+      .then(function (url) {
+        var svg = ctxExport.compose(decodeURIComponent(url.slice(url.indexOf(",") + 1)), lines, ex);
+        if (ext === "svg") return new Blob([svg], { type: "image/svg+xml" });
+        return ctxExport.pdf(svg, ex, setup);
+      });
+  },
+  /* Browser only: the composed SVG drawn into a PDF of its own size by svg2pdf, with Ctx Sans
+     regular and bold embedded, and only the fonts the drawing sets. */
+  pdf: function (svg, ex, setup) {
+    var w = ex.width_pt, h = ex.height_pt;
+    var doc = new window.jspdf.jsPDF({ unit: "pt", format: [w, h], compress: true,
+                                       orientation: w > h ? "landscape" : "portrait",
+                                       putOnlyUsedFonts: true });
+    Object.keys(setup.fonts).forEach(function (style) {
+      var file = setup.names[style] + ".ttf";
+      doc.addFileToVFS(file, setup.fonts[style]);
+      doc.addFont(file, setup.face, style);
+      /* jsPDF names an embedded font by its family; each style takes its PostScript name. */
+      doc.internal.getFont(setup.face, style).fontName = setup.names[style];
+    });
+    doc.setFont(setup.face, "normal");
+    /* jsPDF writes a fill or stroke colour at two decimals, 1/255 off the style colours; a
+       channel passed as a string it writes as given, here at four, as the SVG keeps them. */
+    ["setFillColor", "setDrawColor"].forEach(function (name) {
+      var set = doc[name];
+      doc[name] = function (r, g, b, k) {
+        if (typeof r !== "number" || typeof g !== "number" || typeof b !== "number" ||
+            k !== undefined) return set.apply(doc, arguments);
+        return set.call(doc, (r / 255).toFixed(4), (g / 255).toFixed(4), (b / 255).toFixed(4));
+      };
+    });
+    var holder = document.createElement("div");
+    holder.setAttribute("aria-hidden", "true");
+    holder.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none";
+    var el = new DOMParser().parseFromString(ctxExport.forPdf(svg, setup.face), "image/svg+xml")
+      .documentElement;
+    holder.appendChild(el);
+    document.body.appendChild(holder);
+    return doc.svg(el, { x: 0, y: 0, width: w, height: h }).then(function () {
+      holder.remove();
+      return doc.output("blob");
+    }, function (err) { holder.remove(); throw err; });
+  },
+  /* Browser only: hand the reader a file. */
+  save: function (blob, name) {
+    var a = document.createElement("a"), url = URL.createObjectURL(blob);
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+  }
+};
+{% endraw %}

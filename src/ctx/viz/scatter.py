@@ -4,28 +4,32 @@ One contract draws PCA, volcano, MA, dispersion, LFC-against-LFC and the GSEA ru
 ``static()`` and ``interactive()`` read the same ``ScatterData``.
 """
 
+import base64
 import math
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
+import numpy as np
 import polars as pl
 
 from ctx.viz.annotate import fit_title, place_caption
 from ctx.viz.axes import axis_title, screen_title
 from ctx.viz.style import (
+    ALONE_SCALE,
     BUBBLE_KEYS,
     BUBBLE_PT,
     FIGURE_WIDTH,
+    LARGEST_PLOT_PX,
+    LINE_TOLERANCE_PX,
     LINE_WIDTHS,
     MARKER_SIZE,
     MARKERS,
     MAX_CATEGORIES,
-    PAGE_SCALE,
+    PAGE_PX_PER_PT,
     PLOTLY_HEIGHT_PX,
     PLOTLY_MARKER_PX,
     POINT_ALPHA,
-    PX_PER_PT,
     SIZES,
     THEMES,
     THRESHOLD_DASH,
@@ -59,6 +63,34 @@ class Line:
     x: tuple[float, ...]
     y: tuple[float, ...]
     dash: bool = False
+
+
+def needed_points(x: np.ndarray, y: np.ndarray, size: tuple[float, float],
+                  tolerance: float = LINE_TOLERANCE_PX) -> np.ndarray:  # fmt: skip
+    """Indices of the points a line drawn ``size`` px wide and high needs (Ramer-Douglas-Peucker).
+
+    No point of the line lies further than ``tolerance`` px from the line through the points
+    kept. ``x`` and ``y`` are as the axes place them (log10 on a log axis); each is stretched
+    over the whole of ``size``, which a plot's axes, spanning its points as well, never exceed.
+    """
+    spans = [np.ptp(v) or 1.0 for v in (x, y)]
+    u, v = ((w - w.min()) / span * px for w, span, px in zip((x, y), spans, size, strict=True))
+    keep = np.zeros(len(u), dtype=bool)
+    keep[:1] = keep[-1:] = True
+    stack = [(0, len(u) - 1)]
+    while stack:
+        a, b = stack.pop()
+        if b - a <= 1:
+            continue
+        du, dv = u[b] - u[a], v[b] - v[a]
+        pu, pv = u[a + 1 : b] - u[a], v[a + 1 : b] - v[a]
+        along = np.clip((pu * du + pv * dv) / ((du * du + dv * dv) or 1.0), 0.0, 1.0)
+        off = np.hypot(pu - along * du, pv - along * dv)
+        far = int(np.argmax(off))
+        if off[far] > tolerance:
+            keep[a + 1 + far] = True
+            stack += [(a, a + 1 + far), (a + 1 + far, b)]
+    return np.flatnonzero(keep)
 
 
 def _line_style(line: Line, theme: Theme) -> dict[str, Any]:
@@ -156,6 +188,12 @@ def log_ticks(axis: Any, values: pl.Series) -> None:
     positive = values.filter(values > 0)
     decades = math.log10(float(positive.max()) / float(positive.min()))  # type: ignore[arg-type]
     plain_log_ticks(axis, subs=LOG_SUBS if decades < LOG_SUBS_BELOW else None)
+
+
+def _ordinal(n: int) -> str:
+    """1st, 2nd, 3rd, 4th, 11th, 12th, 13th, 21st: the caption read "every 3th"."""
+    suffix = "th" if n % 100 in (11, 12, 13) else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
 
 
 def _js_number(value: float) -> str:
@@ -259,6 +297,9 @@ class ScatterData:
         if self.calls and self.symbol:
             # The page script finds one trace per colour level; shapes would split them.
             raise ValueError("live calls cannot be combined with a symbol column")
+        if self.calls and self.size:
+            # The page script moves points between traces by position, never their sizes.
+            raise ValueError("live calls cannot be combined with a size column")
         if self.size and not (self.frame[self.size].fill_null(0) >= 0).all():
             raise ValueError(f"{self.size}: sizes must be non-negative")
         if self.symbol and self.frame[self.symbol].n_unique() > len(MARKERS):
@@ -338,28 +379,66 @@ class ScatterData:
             Line(CUTOFF_NAME, horizontal[0], horizontal[1], dash=True),
         )
 
+    def _thinned(self) -> tuple[pl.DataFrame, int]:
+        """The points not kept, in order of y, and the page's stride through them; 1 draws all."""
+        if self.keep is None:
+            return self.frame.clear(), 1
+        other = self.frame.filter(~pl.col(self.keep)).sort(self.y)
+        return other, 1 if other.height <= THIN_MAX else math.ceil(other.height / THIN_MAX)
+
     def on_page(self) -> pl.DataFrame:
         """The points the HTML page draws: every kept point, the rest thinned by a stride."""
-        if self.keep is None:
+        other, stride = self._thinned()
+        if stride == 1 or self.keep is None:
             return self.frame
-        other = self.frame.filter(~pl.col(self.keep)).sort(self.y)
-        if other.height <= THIN_MAX:
-            return self.frame
-        stride = math.ceil(other.height / THIN_MAX)
         return pl.concat([self.frame.filter(pl.col(self.keep)), other.gather_every(stride)])
 
     def caption_text(self) -> str:
         """The caption, plus the thinning rule when the page draws fewer points than the CSV."""
-        drawn = self.on_page().height
-        if drawn == self.frame.height or self.keep is None:
+        other, stride = self._thinned()
+        if stride == 1:
             return self.caption
-        other = self.frame.filter(~pl.col(self.keep)).height
-        stride = math.ceil(other / THIN_MAX)
+        drawn = self.on_page().height - (self.frame.height - other.height)
         return (
-            f"{self.caption} This page draws {drawn - (self.frame.height - other):,} of the "
-            f"{other:,} points no setting can call, every {stride}th in order of "
-            f"{self.y_label}; the CSV holds all {self.frame.height:,}."
+            f"{self.caption} This page draws {drawn:,} of the {other.height:,} points no "
+            f"setting can call, every {_ordinal(stride)} in order of {self.y_label}; the CSV "
+            f"holds all {self.frame.height:,}."
         )
+
+    def export_layers(self) -> dict[str, Any]:
+        """What the figure files draw and the page's plot lacks, for its PDF and SVG of a view.
+
+        ``thinned``: each trace's points the page leaves out, as little-endian float32 x, y
+        pairs in base64, by trace index; ``labels``: each label the figure files print, at the
+        offset in pt and the alignment ``static()`` placed it at. A moved view's file then
+        draws every point and label the reference file does (review, 2026-10-01).
+        """
+        other, stride = self._thinned()
+        omitted = other.with_row_index("_i").filter(pl.col("_i") % stride != 0)
+        thinned = {}
+        for index, rows in enumerate(self._trace_rows(omitted, self.colour)):
+            if rows.height:
+                xy = np.column_stack([rows[self.x].to_numpy(), rows[self.y].to_numpy()])
+                thinned[str(index)] = base64.b64encode(xy.astype("<f4").tobytes()).decode()
+        return {"thinned": thinned, "labels": self.placed_labels()}
+
+    def placed_labels(self) -> list[dict[str, Any]]:
+        """Each label as the white figure file prints it: its point, text, offset and alignment.
+
+        Offsets are in pt from the point, where ``_place_labels`` left the label clear of every
+        other text; a label it could not place is not here, as it is not in the file.
+        """
+        if not self.label:
+            return []
+        from matplotlib.text import Annotation  # noqa: PLC0415 - heavy; imported after profile
+
+        fig = self.static(THEMES["white"])
+        return [
+            {"x": float(n.xy[0]), "y": float(n.xy[1]), "text": n.get_text(),
+             "dx": float(n.xyann[0]), "dy": float(n.xyann[1]),
+             "anchor": n.get_horizontalalignment()}
+            for ax in fig.axes for n in ax.texts if isinstance(n, Annotation)
+        ]  # fmt: skip
 
     def _levels(self, column: str | None) -> list[Any]:
         """Levels of a column in first-appearance order, or [None] for no column."""
@@ -393,13 +472,17 @@ class ScatterData:
         """Plotly marker diameters in px: the static diameters, on screen."""
         diameters = self._diameters(rows)
         if isinstance(diameters, list):
-            return [d * PX_PER_PT * PAGE_SCALE for d in diameters]
+            return [d * PAGE_PX_PER_PT for d in diameters]
         return PLOTLY_MARKER_PX
 
     def _hover_format(self, column: str) -> str:
         """Plotly number format for a column: none for text, digits for numbers."""
         dtype = self.frame.schema[column]
         return FLOAT_HOVER if dtype.is_float() else INT_HOVER if dtype.is_integer() else ""
+
+    def inches(self) -> tuple[float, float]:
+        """The figure files' size, which a page's own PDF and SVG of a changed view take too."""
+        return figure_inches(self.width, "scatter")
 
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
@@ -416,7 +499,7 @@ class ScatterData:
         from matplotlib.lines import Line2D  # noqa: PLC0415 - heavy
 
         apply_matplotlib(theme)
-        width, height = figure_inches(self.width, "scatter")
+        width, height = self.inches()
         fig = Figure(figsize=(width, height))
         ax = fig.subplots()
         colours = {level: colour or theme.reference for level, colour in self.colours.items()}
@@ -520,6 +603,20 @@ class ScatterData:
                 out.append(rows.filter(pl.col(self.symbol) == shape) if self.symbol else rows)
         return out
 
+    def _page_line(self, line: Line) -> tuple[list[float], list[float]]:
+        """A line as the page draws it: the points it needs at the largest size a page draws it.
+
+        The figure files draw every point. A line with a gap or a point a log axis cannot place
+        is drawn whole.
+        """
+        x, y = np.asarray(line.x, dtype=float), np.asarray(line.y, dtype=float)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            u, v = (np.log10(w) if log else w for w, log in ((x, self.log_x), (y, self.log_y)))
+        if not x.size or not (np.isfinite(u).all() and np.isfinite(v).all()):
+            return list(line.x), list(line.y)
+        kept = needed_points(u, v, (LARGEST_PLOT_PX, PLOTLY_HEIGHT_PX["scatter"] * ALONE_SCALE))
+        return x[kept].tolist(), y[kept].tolist()
+
     def interactive(self) -> Any:
         """Render the plotly figure; hover shows x, y and every ``hover`` column.
 
@@ -566,9 +663,10 @@ class ScatterData:
             # and light ink vanishes on the dark page. A cutoff nothing reaches stays as an
             # empty trace, so the page script finds every cutoff at a fixed index.
             drawn = not math.isnan(line.y[0])
+            x, y = self._page_line(line)
             fig.add_trace(
                 go.Scatter(
-                    x=list(line.x), y=list(line.y) if drawn else [None, None], mode="lines",
+                    x=x, y=y if drawn else [None, None], mode="lines",
                     name=line.name, visible=drawn,
                     line={"color": light.reference, "width": LINE_WIDTHS["line"],
                           "dash": THRESHOLD_DASH[1] if line.dash else "solid"},

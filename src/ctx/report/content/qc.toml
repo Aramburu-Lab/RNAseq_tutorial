@@ -326,10 +326,25 @@ unit.run_accession = "run"
 reading = [
     "Each column is one {unit}, each row one metric; a cell is that {unit}'s value on that metric.",
     "Colour is the absolute band from the metric's registry source: green good, orange usable, red bad; grey, no value.",
+    "Each row names the metric's unit and its band cut-offs, as the registry gives them.",
 ]
 none = "no band"
-metric = "Registry metric."
+metric = "Registry metric, with its unit and its band cut-offs."
 band = "The metric's band for the sample or run."
+# A row: the metric, then its unit and cut-offs, built from conf/qc_metrics.toml; the axes
+# print the two lines one under the other, the table and hover on one line.
+row = ["{title}", "({unit}; {bands})"]
+row_label = "Metric"
+# The cut-offs by the metric's direction; "_usable" where good and usable differ.
+cuts.higher = "good from {good}"
+cuts.higher_usable = "good from {good}, usable from {usable}"
+cuts.lower = "good to {good}"
+cuts.lower_usable = "good to {good}, usable to {usable}"
+# A FastQC module's verdicts, each with the band it maps to.
+verdict = "{verdict} {band}"
+x = "Each column one {unit}: {n}, in name order; hover names it"
+hover.sample = "Sample"
+hover.run_accession = "Run"
 value = "Not used by this map."
 caption = "The absolute band of each of {n} samples or runs on each of {m} metrics with a band from a source; grey: no value. The strips judge every metric against its stratum as well. No test."
 
@@ -369,8 +384,10 @@ title = "Samples on the PCA, beside their labels and QC status"
 lead = "Paint samples in one view to find them in the other."
 reading = [
     "Top: each point is one sample on PC1 and PC2 of the blind VST.",
-    "Bottom: each column is a label or the QC status; a band's width is the samples sharing the levels it joins.",
-    "Points and bands are grey until painted. In the PDF and SVG, bands into QC are green for pass, red for flag, orange for exclude.",
+    "Bottom, across the card: each column is a label or the QC status; a band's width is the samples sharing the levels it joins.",
+    "Points and bands are grey until painted.",
+    "Unpainted, PDF and SVG give the figure files: the bands alone, those into QC green for pass, red for flag, orange for exclude.",
+    "Painted, they become PDF of this view and SVG of this view: both views as painted, one over the other at the figure files' width, the live line and a note closing the caption.",
 ]
 pc1 = "PC1 score of the blind VST."
 pc2 = "PC2 score of the blind VST."
@@ -378,7 +395,7 @@ qc_status = "The worst QC status among the sample's runs."
 x = "PC1, {share:.0%} of variance"
 y = "PC2, {share:.0%} of variance"
 qc = "QC"
-caption = "[[PC1]] and PC2 of the blind [[VST]] of {n} samples, beside their labels and QC status. The PDF and SVG draw the bands alone, those into QC coloured by status. No test."
+caption = "[[PC1]] and PC2 of the blind [[VST]] of {n} samples, beside their labels and QC status. Unpainted, the PDF and SVG draw the bands alone, coloured by QC status; painted, both views as shown. No test."
 names = ["orange", "sky blue", "bluish green", "yellow", "blue", "vermillion", "reddish purple"]
 summary = "{n} painted {colour}: {detail}"
 empty = "Nothing painted yet."
