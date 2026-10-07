@@ -39,6 +39,19 @@ _NAME = re.compile(
 )
 
 
+def description(name: str) -> str | None:
+    """The description of an output's name: its dataset's slug, then what the file holds.
+
+    Args:
+        name: A bare file name, without directories.
+
+    Returns:
+        The description, or None for a name outside the output naming rule.
+    """
+    match = _NAME.fullmatch(name)
+    return match["desc"] if match else None
+
+
 def check(name: str) -> bool:
     """Say whether a file name follows the output naming rule.
 

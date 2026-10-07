@@ -246,3 +246,51 @@ def test_the_windows_checker_reads_its_kit_and_is_plain_ascii(tmp_path):
     script = text.decode()
     assert "ConvertFrom-Json" in script and "MANIFEST.json" in script
     assert not re.search(r"[0-9a-fA-F]{64}|course_kit|\b10[56][56]\b", script)
+
+
+def two_datasets(root: Path) -> Path:
+    """A root holding a dataset and a second one whose slug starts with the first's."""
+    a_root(root, "Study", "study")
+    return a_root(root, "Study subset", "study_sub")
+
+
+def shipped_files(kit: Path) -> set[str]:
+    return {p.relative_to(kit).as_posix() for p in kit.rglob("*") if p.is_file()}
+
+
+def test_a_left_out_dataset_ships_nothing_and_a_longer_slug_ships_whole(tmp_path):
+    """--leave-out drops one dataset's outputs and home links, never a longer slug's (D-050).
+
+    Mutation caught: ownership by prefix alone, with which leaving out "study" drops "study_sub".
+    """
+    real = two_datasets(tmp_path / "real")
+    kit, done = build(tmp_path / "a", "--leave-out", "study_sub", real=real)
+    assert done.returncode == 0, done.stderr
+    files = shipped_files(kit)
+    assert f"step/outputs/01_gather/{NEW}_gather_study_overview_v1.html" in files
+    assert not [f for f in files if "study_sub" in f]
+    assert "study_sub" not in (kit / course.INDEX).read_text()
+    assert json.loads((kit / "MANIFEST.json").read_text())["left_out"] == ["study_sub"]
+    kit, done = build(tmp_path / "b", "--leave-out", "study", real=real)
+    assert done.returncode == 0, done.stderr
+    files = shipped_files(kit)
+    assert f"step/outputs/01_gather/{NEW}_gather_study_sub_overview_v1.html" in files
+    assert f"step/outputs/09_report/{NEW}_report_study_sub_hub_v1.html" in files
+    assert f"step/outputs/01_gather/{NEW}_gather_study_overview_v1.html" not in files
+
+
+def test_a_shipped_page_linking_a_left_out_dataset_writes_nothing(tmp_path):
+    """Mutation caught: what the shipped pages link left unchecked, which carries it back in."""
+    real = two_datasets(tmp_path / "real")
+    page(real / "outputs" / "02_qc" / f"{NEW}_qc_study_overview_v1.html", "M2 Read QC: Study",
+         f"../01_gather/{NEW}_gather_study_sub_overview_v1.html")  # fmt: skip
+    kit, done = build(tmp_path, "--leave-out", "study_sub", real=real)
+    assert done.returncode != 0 and "its dataset is left out" in done.stderr
+    assert nothing_written(kit)
+
+
+def test_leaving_out_a_dataset_no_root_holds_writes_nothing(tmp_path):
+    """Mutation caught: an unknown slug accepted, so a typo builds a kit that leaves nothing out."""
+    kit, done = build(tmp_path, "--leave-out", "stdy")
+    assert done.returncode != 0 and "no root holds that dataset" in done.stderr
+    assert nothing_written(kit)

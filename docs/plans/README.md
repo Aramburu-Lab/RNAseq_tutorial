@@ -13,6 +13,21 @@ knowledge/decisions.md record what was decided; these hold the detail the record
 | [2026-10-01_figure_controls_plan_approved.md](2026-10-01_figure_controls_plan_approved.md) | 2026-10-01, all 12 recommended answers | D-051, TODO.md P2S.6 and the work order |
 | [2026-10-01_figure_controls_critique.md](2026-10-01_figure_controls_critique.md) | the critique that plan was written from | the same |
 
+## Proposals awaiting Rytis
+
+Plans written for Rytis's priority of 2026-10-07 (real data for M4, M10, M8, M9 and M7, and a
+custom-data guide). Each moves to the table above, renamed `_approved`, when he answers it.
+
+| File | Written | Record |
+|---|---|---|
+| [2026-10-07_real_data_decisions.md](2026-10-07_real_data_decisions.md) | 2026-10-07, every open decision of the six plans and the downloads they need | TODO.md Priority |
+| [2026-10-07_m4_real_data_plan_proposal.md](2026-10-07_m4_real_data_plan_proposal.md) | 2026-10-07, 7 decisions open | TODO.md Priority 1 |
+| [2026-10-07_m8_real_data_plan_proposal.md](2026-10-07_m8_real_data_plan_proposal.md) | 2026-10-07, 7 decisions open | TODO.md Priority 3 |
+| [2026-10-07_custom_data_guide_plan_proposal.md](2026-10-07_custom_data_guide_plan_proposal.md) | 2026-10-07, 7 decisions open, 4 block the build | TODO.md Priority 6 |
+| [2026-10-07_m10_real_data_plan_proposal.md](2026-10-07_m10_real_data_plan_proposal.md) | 2026-10-07, 3 decisions open | TODO.md Priority 2 |
+| [2026-10-07_m7_real_data_plan_proposal.md](2026-10-07_m7_real_data_plan_proposal.md) | 2026-10-07, 6 decisions open | TODO.md Priority 5 |
+| [2026-10-07_m9_real_data_plan_proposal.md](2026-10-07_m9_real_data_plan_proposal.md) | 2026-10-07, 3 decisions open | TODO.md Priority 4 |
+
 ## How these were recovered
 
 They were first kept in the session's scratch folder under `/private/tmp`, which macOS's

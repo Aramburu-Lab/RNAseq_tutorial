@@ -14,7 +14,11 @@ file's SHA-256; ``--zip`` packs one folder.
 
 Usage:
     pixi run python scripts/python/build_kit.py --out ~/ctx_kit/2026-09-30_course_kit_v2 \
-        --real step1=~/ctx_tier1 --made-up preview=~/ctx_preview/synthetic --zip
+        --real step1=~/ctx_tier1 --made-up preview=~/ctx_preview/synthetic \
+        --leave-out tier1_teach --zip
+
+``--leave-out`` keeps a dataset's outputs out of the kit: the teaching subset is the optional
+laptop exercise, built in the Step-1 root and never shipped (D-050, Rytis 2026-10-07).
 
 Every page is rebuilt from one commit first, so the pages and ``MANIFEST.json`` name the same
 commit. The steps for the Step-1 root, kept here since a session's scratch copy was lost twice
@@ -53,6 +57,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_kit  # noqa: E402 - the kit's own checker, beside this file
 
+from ctx.io import naming  # noqa: E402
 from ctx.report import text  # noqa: E402
 from ctx.report.course import label, newest, write_home  # noqa: E402
 
@@ -81,6 +86,23 @@ def current(outputs: Path) -> set[Path]:
     return set(best.values())
 
 
+def slugs_in(root: Path) -> set[str]:
+    """The datasets a root holds: one per gather page, since every dataset enters through M1."""
+    pages = newest((root / "outputs" / "01_gather").resolve(), "overview")
+    return {(naming.description(p.name) or "").removesuffix("_overview") for p in pages}
+
+
+def belongs(name: str, slug: str, slugs: set[str]) -> bool:
+    """Whether a dated output is the dataset ``slug``'s.
+
+    The owner is the longest known slug its description starts with, so leaving out
+    ``tier1`` keeps ``tier1_teach``'s files, whose descriptions start with ``tier1_`` too.
+    """
+    desc = naming.description(name) or ""
+    owners = [s for s in slugs | {slug} if desc == s or desc.startswith(f"{s}_")]
+    return max(owners, key=len, default=None) == slug
+
+
 def reached(pages: set[Path], inside: Path) -> tuple[set[Path], list[str]]:
     """Every file the pages link to, followed through linked pages, and every link problem.
 
@@ -102,12 +124,21 @@ def reached(pages: set[Path], inside: Path) -> tuple[set[Path], list[str]]:
     return seen, check_kit.link_problems(inside, html)
 
 
-def select(root: Path) -> tuple[list[Path], list[str]]:
-    """A root's files for the kit, and every reason one of them cannot ship."""
+def select(
+    root: Path, left_out: tuple[str, ...] = (), slugs: frozenset[str] = frozenset()
+) -> tuple[list[Path], list[str]]:
+    """A root's files for the kit, less the left-out datasets', and every reason one cannot ship.
+
+    A shipped page that links to a left-out dataset's file is a problem: following the link
+    would put the dataset back into the kit.
+    """
     # Resolved, so a symlinked outputs/ holds the same paths the links resolve to.
     outputs = (root / "outputs").resolve()
-    chosen = current(outputs)
+    out = {p for p in current(outputs) if any(belongs(p.name, s, set(slugs)) for s in left_out)}
+    chosen = current(outputs) - out
     found, problems = reached({p for p in chosen if p.suffix == ".html"}, outputs)
+    problems += [f"{p}: a shipped page links to it, but its dataset is left out"
+                 for p in sorted(found & out)]  # fmt: skip
     for p in sorted(chosen | found):
         if p.name.lower().endswith(REFUSED):
             problems.append(f"{p}: reads or alignments never ship")
@@ -131,7 +162,9 @@ def _commit() -> str:
     return git("rev-parse", "--short", "HEAD") + ("-dirty" if changed else "")
 
 
-def manifest(kit: Path, roots: list[tuple[str, bool]], commit: str) -> Path:
+def manifest(
+    kit: Path, roots: list[tuple[str, bool]], commit: str, left_out: tuple[str, ...] = ()
+) -> Path:
     """``MANIFEST.json``: every other file of the kit with its size and SHA-256."""
     out = kit / "MANIFEST.json"
     files = [
@@ -143,6 +176,7 @@ def manifest(kit: Path, roots: list[tuple[str, bool]], commit: str) -> Path:
         "built": date.today().isoformat(),
         "commit": commit,
         "roots": [{"folder": f, "real": real} for f, real in roots],
+        "left_out": sorted(left_out),
         "files": len(files),
         "bytes": sum(f["bytes"] for f in files),
         "entries": files,
@@ -191,11 +225,20 @@ def _roots(args: argparse.Namespace) -> list[tuple[str, Path, bool]]:
     return roots
 
 
-def build(out: Path, roots: list[tuple[str, Path, bool]]) -> list[Path]:
-    """Copy each root's files and write the home page; return what was copied."""
+def build(
+    out: Path, roots: list[tuple[str, Path, bool]], left_out: tuple[str, ...] = ()
+) -> list[Path]:
+    """Copy each root's files, less the left-out datasets', and write the home page.
+
+    Returns:
+        What was copied.
+    """
+    slugs = frozenset().union(*(slugs_in(root) for _, root, _ in roots))
+    if unknown := sorted(set(left_out) - slugs):
+        sys.exit(f"--leave-out {', '.join(unknown)}: no root holds that dataset; nothing written")
     chosen, problems = {}, []
     for folder, root, _ in roots:
-        chosen[folder], found = select(root)
+        chosen[folder], found = select(root, left_out, slugs)
         problems += found
     if problems:
         sys.exit("kit refused, nothing written:\n" + "\n".join(problems))
@@ -221,6 +264,8 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True, help="the kit folder; must not exist")
     parser.add_argument("--real", action="append", default=[], metavar="FOLDER=ROOT")
     parser.add_argument("--made-up", action="append", default=[], metavar="FOLDER=ROOT")
+    parser.add_argument("--leave-out", action="append", default=[], metavar="DATASET",
+                        help="a dataset slug whose outputs stay out of the kit")  # fmt: skip
     parser.add_argument("--zip", action="store_true", help="also write <out>.zip")
     args = parser.parse_args()
     out = args.out.expanduser()
@@ -228,7 +273,8 @@ def main() -> None:
     if taken := [p for p in (out, partial, out.with_suffix(".zip")) if p.exists()]:
         sys.exit(f"{', '.join(map(str, taken))} exists; a kit is never written over")
     roots = _roots(args)
-    shipped = build(partial, roots)
+    left_out = tuple(args.leave_out)
+    shipped = build(partial, roots, left_out)
     names = [p.relative_to(partial).as_posix() for p in partial.rglob("*") if p.is_file()]
     pages = sorted(partial.rglob("*.html"))
     if problems := check_kit.link_problems(partial, pages) + check_kit.windows_problems(
@@ -237,9 +283,11 @@ def main() -> None:
         sys.exit(f"kit checks fail; left in {partial} for inspection:\n" + "\n".join(problems))
     commit, folders = _commit(), [(f, real) for f, _, real in roots]
     readme(partial, folders, shipped, commit)
-    record = json.loads(manifest(partial, folders, commit).read_text())
+    record = json.loads(manifest(partial, folders, commit, left_out).read_text())
     partial.rename(out)
     print(f"{out}: {record['files']:,} files, {record['bytes'] / 1e6:,.1f} MB, commit {commit}")
+    if left_out:
+        print(f"left out: {', '.join(sorted(left_out))}")
     if args.zip:
         packed = pack(out)
         print(f"{packed}: {packed.stat().st_size / 1e6:,.1f} MB")

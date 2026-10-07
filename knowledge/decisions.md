@@ -27,6 +27,24 @@ it were reversed.
 
 ---
 
+## D-053 — Step 0 of the controls plan, packages B to E: thinning keeps units whole, one hover rule, page y titles take the files' lines, heatmaps take the files' aspect, every width measured
+
+**Date:** 2026-10-07 · **Status:** decided (merged 12248b6, c1d638e, 82e7832, b9254be; package A follows)
+
+**Context.** The figure-control audit (D-051; `docs/plans/2026-10-01_figure_controls_plan_approved.md`, Step 0) and the page-fix merge left defects to fix at the root before any new control. A read-only plan split them into five packages over disjoint files; B, C, D and E were built in worktrees and merged one at a time, each followed by a full preflight (1,028, 1,082, 1,098 and 1,119 passed, 10 skipped).
+
+**Decision.**
+- **QC (B, dddbeec).** "Size against genes" marks only samples flagged on its two plotted metrics and the lead names the rest: on Step-1, 5 of 210 marked, where 107 were, and 102 flagged on other metrics. A surface's optional floor takes no band and is drawn in the reference grey with its own key; the eight bands span the cells above it, so tier1_teach's 30 kept cells span bands 0 to 7, where they sat in 6 and 7. Plotly's band width is (max - min) / 8: an edge difference one ulp wide made plotly count seven levels and paint four bands one colour high. The registry no longer claims a page control for fastp's settings.
+- **Thinning and hovers (C, b9d4a3a).** A thinned scatter keeps or drops whole units, a gene's raw and shrunk estimates together (MA plot on ndn_gcsf: 0 genes split, where 1,645 were); the stride counts rows, so the point budget holds. One hover rule (`axes.hover_format`, `hover_value`) serves every contract, and a missing value prints as nothing, since plotly prints it as 0 under a number format. M6 draws only passing over-representation sets, and its reading lines follow the bars drawn and the background's measured direction: the union lowers the significance of 6 of the 7 plotted sets. Page y titles take the files' lines (`axes.page_y_title` over `annotate.fit_title`); `screen_title` is for x titles only. The strip's x axis lets its last label overflow.
+- **Heatmaps (D, 801555a).** Every column the files label is labelled, on a numeric axis, and a window narrower than `meta.least_width` scrolls under the hint: M4's made-up heatmap scrolls at every module width and M7's 105 px at 1,280 px, a cost stated to Rytis before he asked for the merge. Page cells take the files' aspect at 686 px, rows no shorter than a label's box; phone layouts follow plotly.js's own margin, title and legend rules, which a test reads from the bundle.
+- **Measured text (E, d8a7987).** Vertical axis titles, flow labels and the heatmap's column title wrap by `ctx.viz.metrics` over `words`, the Python twin of `ctxExport.words`, and a bracketed unit never splits: 18 of 116 built vertical titles drop to one line and none gains one.
+
+**Evidence.** Each package's planted mutations, every one caught (B 6, C 18, D 7, E 6), and its measurements before and after, in its commit. C's rebuild of Step-1 reproduces all 92 recorded metrics (D-046).
+
+**Consequence.** Two numbers the audit gave were wrong, and the builders measured them again: M12's map was 1.29 times flatter than its files at 1,440 px, not 2.28, and the fastp grid's run has 76-nt reads, not 101. `AXIS_TITLE_SHARE` gives some axes more room than they have (TODO.md P2S.8, open for Rytis).
+
+---
+
 ## D-041 — M3's settings run on the featured sample only, and its defaults are the measured ones: `--settings cut`, every read
 
 **Date:** 2026-10-07 · **Status:** decided (M3.9; drafted in the M3 plan, docs/plans/2026-09-30_m3_plan.md, section 15)
@@ -90,6 +108,8 @@ it were reversed.
 **Decision.** Rytis, 2026-10-01: the first read-level option, and made-up pages out only at the release, the second made-up option. Until 2026-10-07 this line read "the first of each", which named the made-up option he declined; his answer was "Only at the release". Every page a reader gets for M2's read stage and M3 shows all 210 Step-1 runs, aligned to the full GENCODE 50 genome on Kebnekaise. The 8-run subset stays as the laptop exercise, under Track A's budget, and its pages say it is the optional exercise. Development kits keep the made-up previews, marked Made-up; the release kit is built with no made-up root.
 
 **Evidence.** None: a teaching choice by the course's author. Its cost is stated, not measured: 210 full-genome alignments on the cluster, with RAM, wall time and disk still to be measured on M3.11's 8-run pilot.
+
+**Amended 2026-10-07 (Rytis): the subset's pages leave the kit.** Asked what "Remove Step-1 teaching subset" covers, Rytis chose "Out of the kit": the kit and its home page carry none of the subset's pages, and M3 shows only its made-up page until M3.13's 210 runs. The subset stays in the repository as the laptop exercise, with its dataset file, the M3.9 budget test and its data on the Mac. `build_kit.py --leave-out tier1_teach` does it, and a shipped page that links to a left-out file stops the build (TODO.md K.7).
 
 **Consequence.** M3.6 is unchanged, because `ctx process` and its page run on any dataset. M3.9 still measures the laptop exercise. M3.11 becomes the pilot of M3.13, the full-cohort M3; P2Q.8 runs M2's read stage on the full cohort; K.6 builds the release kit with no made-up root. Students still download only the subset, never the full FASTQs.
 
