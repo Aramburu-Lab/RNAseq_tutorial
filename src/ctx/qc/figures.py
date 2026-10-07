@@ -2,6 +2,7 @@
 
 from collections.abc import Sequence
 from dataclasses import replace
+from typing import Any
 
 import numpy as np
 import polars as pl
@@ -12,7 +13,7 @@ from ctx.qc import Fastp
 from ctx.qc.registry import STATUS_BANDS as FASTQC_BANDS
 from ctx.qc.registry import Metric, Registry
 from ctx.report import text
-from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES, Mark, SurfaceData
+from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES, Mark, SurfaceData, above_floor
 from ctx.viz.curve import CurveData
 from ctx.viz.density import DensityData
 from ctx.viz.flow import FlowData, Node
@@ -117,6 +118,9 @@ def colour_column(sheet: pl.DataFrame, candidates: Sequence[str]) -> str | None:
 
 # The isoline a grid map draws: the settings that still keep this share of the reads.
 GRID_ISOLINE = 90.0
+# A grid cell keeping this share keeps no read, as -l past the reads' length does
+# (``reads.GRID_L``); it is drawn as the floor, and the bands span the cells above it.
+GRID_FLOOR = 0.0
 
 
 def quality_figure(curves: pl.DataFrame, sheet: pl.DataFrame, metric: Metric,
@@ -154,9 +158,20 @@ def quality_figure(curves: pl.DataFrame, sheet: pl.DataFrame, metric: Metric,
     )  # fmt: skip
 
 
+def grid_counts(grid: pl.DataFrame) -> dict[str, Any]:
+    """The grid's cells, those that keep reads and those on the floor, and what they keep."""
+    kept = grid["passed_pct"].filter(above_floor(grid["passed_pct"].to_numpy(), GRID_FLOOR))
+    return {"cells": grid.height, "kept": kept.len(), "none": grid.height - kept.len(),
+            "low": kept.min(), "high": kept.max()}  # fmt: skip
+
+
 def grid_figure(grid: pl.DataFrame, fastp: Fastp, run: str) -> SurfaceData | None:
-    """Reads fastp keeps across -q and -l on one run; None when every cell keeps the same."""
-    if grid["passed_pct"].n_unique() == 1:
+    """Reads fastp keeps across -q and -l on one run, settings that keep none as the floor.
+
+    None when the cells that keep reads all keep the same share: there is no band to draw.
+    """
+    counts = grid_counts(grid)
+    if counts["low"] is None or counts["low"] == counts["high"]:
         return None
     units = text.raw(PAGE, "figures.grid.units")
     surface = SurfaceData(
@@ -168,11 +183,24 @@ def grid_figure(grid: pl.DataFrame, fastp: Fastp, run: str) -> SurfaceData | Non
         isolines=(GRID_ISOLINE,), isoline_format=".0f",
         mark=Mark(float(fastp.q), float(fastp.l), text.fill(PAGE, "figures.grid.mark", q=fastp.q,
                                                               l=fastp.l)),
+        floor=GRID_FLOOR, floor_label=text.word(PAGE, "figures.grid.floor"),
     )  # fmt: skip
     # The band count is the one the surface draws, so the caption cannot name another.
+    key = "figures.grid.caption_floor" if counts["none"] else "figures.grid.caption"
     return replace(surface, caption=text.fill(
-        PAGE, "figures.grid.caption", run=run, u=fastp.u, nq=grid["q"].n_unique(),
-        nl=grid["l"].n_unique(), isoline=GRID_ISOLINE, bands=len(surface.edges()) - 1))  # fmt: skip
+        PAGE, key, run=run, u=fastp.u, nq=grid["q"].n_unique(), nl=grid["l"].n_unique(),
+        isoline=GRID_ISOLINE, bands=len(surface.edges()) - 1, **counts))  # fmt: skip
+
+
+def flat_grid(grid: pl.DataFrame, run: str) -> str:
+    """The note in place of a grid with nothing to map.
+
+    Every cell keeps the same share, or every cell above the floor does and the rest none.
+    """
+    counts = grid_counts(grid)
+    if not counts["none"] or not counts["kept"]:
+        return text.fill(PAGE, "notes.flat_grid", run=run, pct=float(grid["passed_pct"][0]))
+    return text.fill(PAGE, "notes.flat_floor", run=run, pct=float(counts["low"]), **counts)
 
 
 def stratum_labels(strata: Sequence[str]) -> pl.Expr:
@@ -295,19 +323,37 @@ def band_map(values: pl.DataFrame, registry: Registry, key: str) -> HeatmapData 
     )  # fmt: skip
 
 
+# The value columns library size against genes detected plots, across and up.
+SIZE_GENES = ("library_size", "genes_detected")
+
+
+def flagged_by(flags: pl.DataFrame) -> pl.DataFrame:
+    """Each flagged sample and every metric that flagged it, in the flags' order, joined by ", "."""
+    return flags.group_by("sample", maintain_order=True).agg(
+        flagged_by=pl.col("metric").unique(maintain_order=True).str.join(", "))  # fmt: skip
+
+
 def density(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
-            colour: str | None) -> DensityData | None:  # fmt: skip
-    """Library size against genes detected, a density per group of 30 or more samples."""
-    if not {"library_size", "genes_detected"} <= set(values.columns):
+            colour: str | None, registry: Registry) -> DensityData | None:  # fmt: skip
+    """Library size against genes detected, a density per group of 30 or more samples.
+
+    The triangles are the samples flagged on a plotted metric: marking any flag pointed the
+    lead at the dashed line while 102 of Step-1's 107 flagged samples were flagged on neither
+    axis (2026-10-07). Every flag stays in ``flagged_by``, which the hover and the CSV show.
+    """
+    if not set(SIZE_GENES) <= set(values.columns):
         return None
+    plotted = [m.id for m in registry.metrics.values() if m.column in SIZE_GENES]
     samples = sheet.unique("sample", keep="first").select("sample", *([colour] if colour else []))
-    frame = values.select("sample", "library_size", "genes_detected").join(samples, on="sample")
+    frame = values.select("sample", *SIZE_GENES).join(samples, on="sample")
     frame = frame.filter(pl.col("library_size") > 0)
     group = colour or "group"
     if colour is None:
         frame = frame.with_columns(group=pl.lit(text.word(PAGE, "figures.fates.all")))
-    flagged = pl.col("sample").is_in(flags["sample"].implode())
-    frame = frame.with_columns(pl.col(group).cast(pl.String), flagged=flagged)
+    on_axes = flags.filter(pl.col("metric").is_in(plotted))["sample"].implode()
+    frame = frame.join(flagged_by(flags), on="sample", how="left").with_columns(
+        pl.col(group).cast(pl.String), flagged=pl.col("sample").is_in(on_axes),
+        flagged_by=pl.col("flagged_by").fill_null(""))  # fmt: skip
     levels = [str(v) for v in frame[group].unique(maintain_order=True)]
     data = DensityData(
         frame=frame, x="library_size", y="genes_detected", group=group,
@@ -316,10 +362,11 @@ def density(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
                  "library_size": ("reads", text.word(PAGE, "figures.density.library_size")),
                  "genes_detected": ("genes", text.word(PAGE, "figures.density.genes_detected")),
                  group: ("none", text.fill(PAGE, "figures.fates.colour", column=group)),
-                 "flagged": ("none", text.word(PAGE, "figures.density.flagged"))},
+                 "flagged": ("none", text.word(PAGE, "figures.density.flagged")),
+                 "flagged_by": ("none", text.word(PAGE, "figures.density.flagged_by"))},
         colours=category_colours(levels), caption="", highlight="flagged",
-        highlight_label=text.word(PAGE, "figures.strip.flagged_label"),
-        hover=("sample", "flagged"), log_x=True, width="double",
+        highlight_label=text.word(PAGE, "figures.density.flagged_label"),
+        hover=("sample", "flagged_by"), log_x=True, width="double",
     )  # fmt: skip
     n = ", ".join(f"{g} {d.n}" for g, d in data.densities.items()) or text.word(
         PAGE, "figures.density.none")  # fmt: skip

@@ -75,6 +75,7 @@ not_fetched = "Composition shares not measured: the annotation is not at {path};
 no_counts = "Counts not judged: gather wrote no counts for this dataset (it needs --rnaseq-dir). The reads and the pipeline's reports are judged alone."
 skipped = "{n} runs left unread, their FASTQ not verified or not downloaded (the skipped table lists why): {runs}."
 flat_grid = "The fastp grid on {run} is flat: every setting keeps {pct:.1f} % of its reads, so there is nothing to map."
+flat_floor = "The fastp grid on {run} is flat: {kept} settings each keep {pct:.1f} % of its reads, and the other {none} keep none. There is nothing to map."
 
 [tests]
 fisher = "Fisher's exact test, two-sided"
@@ -267,16 +268,21 @@ columns.group = "Every run, where no sheet column has few enough levels to colou
 [figures.grid]
 title = "Reads fastp keeps, by its quality and length settings"
 lead = "On {run}, fastp keeps between {low:.1f} and {high:.1f} % of the reads across the grid."
+# Where some settings keep no read: grey, apart from the bands, which span the rest.
+lead_floor = "On {run}, fastp keeps between {low:.1f} and {high:.1f} % of the reads at {kept} of the {cells} settings; the other {none} keep none."
 x = "fastp -q"
 y = "fastp -l"
 z = "Reads kept"
 mark = "the setting used (-q {q}, -l {l})"
-caption = "Reads fastp keeps from {run} at each -q and -l on a {nq} by {nl} grid, other settings as used (-u {u}). {bands} equal colour bands; the line marks {isoline:.0f} % kept. No test."
+floor = "keeps no read"
+caption = "Reads fastp keeps from {run} on a {nq} by {nl} grid of -q and -l, other settings as used (-u {u}). {bands} equal colour bands; the line marks {isoline:.0f} % kept. No test."
+caption_floor = "Reads fastp keeps from {run} on a {nq} by {nl} grid of -q and -l, other settings as used (-u {u}). Grey: {none} settings keep none; {bands} equal bands span the rest; the line marks {isoline:.0f} % kept. No test."
 reading = [
     "Across, fastp -q; up, fastp -l. The colour at each point is the percentage of reads fastp keeps there.",
-    "Dark blue keeps the fewest reads, yellow the most, in {bands} equal bands; the labelled line joins settings keeping {isoline:.0f} %.",
+    "In the {bands} equal bands, dark blue keeps the fewest reads and yellow the most; the labelled line joins settings keeping {isoline:.0f} %.",
     "The dot marks the setting used: -q {q}, -l {l}.",
 ]
+reading_floor = "Grey: the {none} settings that keep no read. The bands span only the {kept} that keep some."
 units = { q = "Phred", l = "nt", passed_reads = "reads", passed_pct = "%" }
 columns.q = "fastp -q: a base below this Phred quality is unqualified."
 columns.l = "fastp -l: a read shorter than this is dropped."
@@ -350,16 +356,18 @@ caption = "The absolute band of each of {n} samples or runs on each of {m} metri
 
 [figures.density]
 title = "Library size against genes detected"
-lead = "{flagged} of {n} samples are flagged; look for those outside their group's dashed line."
+lead = "{flagged} of {n} samples are flagged on library size or genes detected, drawn as triangles; {other} more are flagged only on other metrics."
 reading = [
     "Solid line: the smallest region holding {inner} of a group's samples; dashed: {outer}. A group under {minimum} samples is drawn as points.",
-    "Triangles: flagged samples, drawn over the contours.",
+    "Triangles: samples flagged on library size or genes detected, drawn over the contours; the hover names every metric that flagged them.",
 ]
 x = "Library size"
 y = "Genes detected"
 library_size = "Reads counted on genes."
 genes_detected = "Genes with at least one read."
-flagged = "Whether any metric flagged the sample."
+flagged = "Whether library size or genes detected flagged the sample: a triangle."
+flagged_by = "Every registry metric that flagged the sample, comma-separated; empty for none."
+flagged_label = "flagged on either axis"
 none = "none, every group has fewer"
 caption = "Solid: {inner}, dashed: {outer} highest-density regions, per group of at least {minimum} samples ({n}); smaller groups are drawn as points. {bandwidth}. No test."
 

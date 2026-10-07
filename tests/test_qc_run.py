@@ -1,6 +1,9 @@
 """`ctx qc` end to end on synthetic gather outputs with planted problems."""
 
+import html
+import json
 import os
+import re
 import subprocess
 import sys
 from datetime import date
@@ -109,6 +112,30 @@ def test_confounding_covers_the_unpaired_contrasts_with_bh(ran):
     assert "a_case" in " ".join(tables["confounding"]["contrasts"].to_list())
 
 
+def test_size_against_genes_marks_the_samples_flagged_on_its_axes(ran):
+    """The triangles are the samples flagged on library size or genes detected; the lead
+    counts them and the samples flagged only on other metrics, such as the planted swap.
+
+    Mutation caught: marking a sample flagged on any metric (the swap and the MT-rRNA sample
+    drawn as triangles)."""
+    root, planted, tables, page = ran
+    out = root / "outputs" / "02_qc"
+    drawn = pl.read_csv(next(out.glob("*_desynth_size_genes_v1.csv")))
+    flags = tables["flags"]
+    axes = flags.filter(pl.col("metric").is_in(["library_size", "genes_detected"]))
+    on_axes = set(axes["sample"])
+    elsewhere = set(flags["sample"]) - on_axes
+    assert planted["shallow"] in on_axes and {planted["swapped"], planted["mito"]} <= elsewhere
+    assert set(drawn.filter(pl.col("flagged"))["sample"]) == on_axes
+    by = dict(drawn.select("sample", pl.col("flagged_by").fill_null("")).rows())
+    assert {s for s, metrics in by.items() if metrics} == set(flags["sample"])
+    assert "sex_check" in by[planted["swapped"]].split(", ")
+    lead = (f"{len(on_axes)} of {drawn.height} samples are flagged on library size or genes "
+            f"detected, drawn as triangles; {len(elsewhere)} more are flagged only on other "
+            "metrics.")  # fmt: skip
+    assert lead in page
+
+
 def test_page_and_outputs(ran):
     root, _, tables, page = ran
     assert lint(root / "outputs" / "02_qc")[1] == []
@@ -185,13 +212,28 @@ def test_reports_add_fates_figures_and_the_multiqc_report(with_reports):
 
 SE = ROOT / "tests" / "fixtures" / "chr22_se"
 SE_SAMPLES = ("se_a", "se_b", "se_c", "se_d", "se_e")
+# The grid's run, whose reads get graded qualities; Phred 12 as FASTQ writes it.
+GRID_SAMPLE, PHRED_12 = "se_d", b"-"
+
+
+def graded(fastq: bytes) -> bytes:
+    """Read k with its first k mod 60 qualities at Phred 12.
+
+    Every read of a fixture run has one quality string, so each fastp grid cell kept all of
+    its reads or none and nothing lay between to map; graded, -q above 12 rejects a share that
+    grows with -q.
+    """
+    lines = fastq.splitlines(keepends=True)
+    for i in range(3, len(lines), 4):
+        k = i // 4 % 60
+        lines[i] = PHRED_12 * k + lines[i][k:]
+    return b"".join(lines)
 
 
 @pytest.fixture(scope="module")
 def with_reads(tmp_path_factory):
     """The chr22_se reads as a fetchngs outdir, gather outputs naming them, ctx qc --reads."""
     import gzip  # noqa: PLC0415
-    import shutil  # noqa: PLC0415
 
     from synth import Synthetic  # noqa: PLC0415
 
@@ -199,11 +241,9 @@ def with_reads(tmp_path_factory):
     fastq = root / "data" / "raw" / "desynth" / "fastq"
     fastq.mkdir(parents=True)
     for name in SE_SAMPLES:
-        with (
-            (SE / f"{name}.fq").open("rb") as src,
-            gzip.open(fastq / f"{name}.fastq.gz", "wb") as dst,
-        ):
-            shutil.copyfileobj(src, dst)
+        reads = (SE / f"{name}.fq").read_bytes()
+        with gzip.open(fastq / f"{name}.fastq.gz", "wb") as dst:
+            dst.write(graded(reads) if name == GRID_SAMPLE else reads)
     synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
     names = dict(zip(synthetic.samples["sample"], SE_SAMPLES, strict=True))
     samples = synthetic.samples.with_columns(pl.col("sample").replace_strict(names))
@@ -216,7 +256,7 @@ def with_reads(tmp_path_factory):
     sheet.write_parquet(sheet_path)
     runs = dict(sheet.select("sample", "run_accession").rows())
     done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(SPEC),
-               "--reads", "--grid-run", runs["se_d"], cwd=root)  # fmt: skip
+               "--reads", "--grid-run", runs[GRID_SAMPLE], cwd=root)  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
     return root / "outputs" / "02_qc", runs
 
@@ -245,6 +285,65 @@ def test_reads_add_curves_the_grid_and_their_own_multiqc_report(with_reads):
     assert lint(out)[1] == []
     page = next(out.glob("*_overview_v1.html")).read_text()
     assert "The reads themselves" in page and "built-in method" not in page
+
+
+def test_the_grid_draws_settings_that_keep_none_as_its_floor(with_reads):
+    """The fixture's reads are 101 nt, so -l 102 keeps none: those cells take no band, the
+    others span all eight, and the lead counts both."""
+    out, _ = with_reads
+    cells = pl.read_csv(next(out.glob("*_desynth_fastp_grid_v1.csv")))
+    none = cells.filter(pl.col("passed_pct") == 0)
+    assert sorted(none["l"].unique()) == [102] and none.height == 6
+    assert cells.filter(pl.col("band").is_null()).equals(none)
+    kept = cells.filter(pl.col("passed_pct") > 0)
+    assert (kept["band"].min(), kept["band"].max()) == (0, 7)
+    page = html.unescape(next(out.glob("*_overview_v1.html")).read_text())
+    assert (f"fastp keeps between {kept['passed_pct'].min():.1f} and "
+            f"{kept['passed_pct'].max():.1f} % of the reads at 30 of the 36 settings; the other 6 "
+            "keep none.") in page  # fmt: skip
+
+
+# Every sentence a registry text says about a page or to its reader, with the figure it is
+# about and the page controls that figure must carry for the sentence to hold. A registry
+# text speaks of the page in no other sentence: D5 found fastp's settings called ones "the
+# page lets you move" (2026-10-07), and the page had no such control.
+PAGE_CLAIMS = {"the page maps one run's -q by -l, without a control": ("fastp_grid", [])}
+ABOUT_THE_PAGE = re.compile(r"\b(?:pages?|you|your)\b", re.IGNORECASE)
+
+
+def _figures(page: str) -> dict[str, list[str]]:
+    """Each figure on a module page, by its file description: the kinds of its controls."""
+    found = {}
+    for block in page.split('<figure class="fig"')[1:]:
+        (name,) = set(re.findall(r"_desynth_(\w+?)_v1_white\.pdf", block))
+        controls = re.findall(r'id="ctx-controls-\d+">(.*?)</script>', block, re.S)
+        found[name] = [json.loads(c)["kind"] for c in controls]
+    return found
+
+
+def test_no_registry_text_claims_a_control_the_page_lacks(with_reads):
+    """Every registry sentence about the page names a figure the page draws, with the controls
+    it has; the page here is M2 with --reads, the one that prints the fastp rationale.
+
+    Mutation caught: the old rationale, "which the page lets you move", restored."""
+    from ctx.qc import registry  # noqa: PLC0415
+
+    out, _ = with_reads
+    page = html.unescape(next(out.glob("*_overview_v1.html")).read_text())
+    figures = _figures(page)
+    assert figures["linked_pca"] == ["brush"], "the reader of controls must see a real one"
+    loaded = registry.load(ROOT / "conf" / "qc_metrics.toml")
+    claims = [(m.id, sentence.rstrip(".;")) for m in loaded.metrics.values()
+              for field in (m.title, m.meaning, m.computed, m.rationale, m.source, m.plot_source,
+                            *m.causes)
+              for sentence in re.split(r"(?<=[.;])\s+", field)
+              if ABOUT_THE_PAGE.search(sentence)]  # fmt: skip
+    assert ("fastp_surviving", "the page maps one run's -q by -l, without a control") in claims
+    for metric, claim in claims:
+        assert claim in PAGE_CLAIMS, f"{metric} speaks of the page unchecked: {claim!r}"
+        figure, controls = PAGE_CLAIMS[claim]
+        assert figures[figure] == controls, (metric, figure)
+        assert claim in page, "the claim must be printed on the page it speaks of"
 
 
 FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs" / "download"
