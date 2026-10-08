@@ -55,8 +55,8 @@ def _lint(release=False, **fields):
 
 
 def test_the_packaged_glossary_passes_its_lint():
-    """182 entries, proteomic ruler (M7) the latest, and no error; the draft's 8 unverified entries carry
-    sources now (L.5).
+    """182 entries, proteomic ruler (M7) the latest, and no error; the draft's 8 unverified
+    entries carry sources now (L.5).
 
     Mutation: 'robust' written back into mad.short fails it (a banned word).
     """
