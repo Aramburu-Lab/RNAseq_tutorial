@@ -385,6 +385,67 @@ var ctxSurv = {
     var cuts = rule === "median" ? [ctxSurv.percentile(values, 50)]
       : [ctxSurv.percentile(values, 100 / 3), ctxSurv.percentile(values, 200 / 3)];
     return values.map(function (v) { return cuts.filter(function (c) { return v >= c; }).length; });
+  },
+  /* panel.decode after inflation: the high bytes of every value, then the low bytes, as
+     int16 genes by patients, gene after gene. */
+  planes: function (bytes, genes, patients) {
+    var half = genes * patients, out = new Int16Array(half);
+    for (var i = 0; i < half; i++) out[i] = (bytes[i] << 8 | bytes[half + i]) << 16 >> 16;
+    return out;
+  },
+  /* Python's format(x, ".Ng"): N significant digits, exponent below -4 or at N and above. */
+  general: function (x, digits) {
+    if (x === null || !isFinite(x)) return null;
+    if (x === 0) return "0";
+    var exponent = Math.floor(Math.log10(Math.abs(Number(x.toPrecision(digits)))));
+    if (exponent < -4 || exponent >= digits) {
+      var parts = x.toExponential(digits - 1).split("e"), mantissa = parts[0];
+      if (mantissa.indexOf(".") >= 0) mantissa = mantissa.replace(/0+$/, "").replace(/\.$/, "");
+      var e = Number(parts[1]);
+      return mantissa + "e" + (e < 0 ? "-" : "+") + ("0" + Math.abs(e)).slice(-2);
+    }
+    var fixed = x.toFixed(Math.max(0, digits - 1 - exponent));
+    return fixed.indexOf(".") >= 0 ? fixed.replace(/0+$/, "").replace(/\.$/, "") : fixed;
+  },
+  /* page.scored: a gene list's score on one endpoint's patients, and what the page draws of it.
+     panel holds the int16 values; genes are panel rows; signs +1 or -1 per gene. */
+  analyse: function (cfg, panel, genes, signs, endpoint, rule) {
+    var S = ctxSurv, data = cfg.endpoints[endpoint], n = cfg.patients, keep = [];
+    for (var i = 0; i < n; i++) if (data.event[i] !== null && data.days[i] !== null) keep.push(i);
+    var months = keep.map(function (i) { return data.days[i] / cfg.days_per_month; });
+    var event = keep.map(function (i) { return data.event[i]; });
+    var rows = genes.map(function (g) { return keep.map(function (i) { return panel[g * n + i]; }); });
+    var value = S.score(rows, signs), labels = S.split(value, rule), k = cfg.names[rule].length;
+    var groups = cfg.names[rule].map(function (name, g) {
+      var t = [], e = [];
+      labels.forEach(function (l, j) { if (l === g) { t.push(months[j]); e.push(event[j]); } });
+      var curve = S.kaplanMeier(t, e, cfg.z), mid = S.median(curve);
+      return { name: name, patients: t.length, events: e.reduce(function (a, b) { return a + b; }, 0),
+               curve: curve, median: mid, rmst: S.rmst(curve, cfg.horizon) };
+    });
+    var strata = cfg.strata ? keep.map(function (i) { return cfg.strata[i]; }) : null;
+    function model(x, t, e, s) {
+      var fit = S.cox(t, e, x, s), w = S.wald(fit, 0, cfg.z);
+      if (!w) return { patients: t.length, events: e.reduce(function (a, b) { return a + b; }, 0), refused: true };
+      var zph = S.zph(t, e, x, fit.beta, s);
+      var risk = x.map(function (r) { return r.reduce(function (a, v, q) { return a + v * fit.beta[q]; }, 0); });
+      return { patients: t.length, events: e.reduce(function (a, b) { return a + b; }, 0), hr: w.hr,
+               low: w.low, high: w.high, p: w.p, ph_p: zph.p[0], c_index: S.concordance(t, e, risk) };
+    }
+    var alone = model(value.map(function (v) { return [v]; }), months, event, strata);
+    var full = [], tm = [], em = [], sm = [];
+    keep.forEach(function (i, j) {
+      var extra = cfg.covariates.map(function (c) { return c[i]; });
+      if (extra.some(function (v) { return v === null; })) return;
+      full.push([value[j]].concat(extra)); tm.push(months[j]); em.push(event[j]);
+      if (strata) sm.push(strata[j]);
+    });
+    var adjusted = model(full, tm, em, strata ? sm : null);
+    var scan = S.scan(months, event, value, cfg.scan.low, cfg.scan.high, cfg.scan.permutations,
+                      cfg.scan.seed);
+    return { months: months, event: event, score: value, labels: labels, groups: groups, k: k,
+             logrank: S.logrank(months, event, labels, k), alone: alone, adjusted: adjusted,
+             scan: scan, rmst: groups[k - 1].rmst - groups[0].rmst };
   }
 };
 {% endraw %}

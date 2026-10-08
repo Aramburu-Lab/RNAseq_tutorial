@@ -75,7 +75,12 @@ FIGURE_WIDTH = "double"
 # "linked": a page's own PDF and SVG of a painted linked view, the scatter over the parallel
 # sets and a caption; the figure files draw the parallel sets alone, as "flow".
 ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1, "contour": 1.1,
-          "linked": 1.8}  # fmt: skip
+          "linked": 1.8, "km": 1.3}  # fmt: skip
+# A Kaplan-Meier figure: the share of its height the number-at-risk rows take, one row per
+# group at most three; a censor tick's height in pt, a vertical stroke on the curve; and the
+# most at-risk columns, which still read beside a reading guide at 1,280 px (TCGA-BRCA's 12
+# columns, every 24 months to 264, ran into each other there, 2026-10-08).
+KM = {"risk_share": 0.24, "censor_pt": 5.0, "risk_columns": 7}
 # Point shapes for a second category, in level order: (matplotlib, plotly).
 MARKERS = (
     ("o", "circle"),
@@ -249,7 +254,7 @@ PHONE_PLOT_PX = PHONE_PX - 2 * (_px("gutter") + SPACE_PX[2] + _px("rule"))
 RAIL_FROM_PX, NARROW_PX = 1100, 640
 # "linked": the scatter beside the reading guide; "parcats": its parallel sets under both.
 PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow": 460,
-                    "contour": 460, "linked": 460, "parcats": 420}  # fmt: skip
+                    "contour": 460, "linked": 460, "parcats": 420, "km": 540}  # fmt: skip
 # Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed

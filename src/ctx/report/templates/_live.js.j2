@@ -1,0 +1,225 @@
+{% raw %}
+/* M10's survival panel (GS.7): score a gene list on the page. ctxSurv.analyse computes, as
+   ctx.clinical.page.scored does at build; this block reads the form, inflates the panel's
+   expression, redraws the Kaplan-Meier figure and the scan that follows it, and fills the
+   live lines from clinical.toml's templates. The PDF and SVG buttons of both figures export
+   the view as set once it differs from the build list's (D-033). */
+var ctxLive = {
+  /* A template's {name} and {name:spec} filled from values; a spec of the page's own kinds. */
+  fill: function (template, values) {
+    return template.replace(/\{(\w+)(?::([^}]*))?\}/g, function (all, key, spec) {
+      if (!Object.prototype.hasOwnProperty.call(values, key)) return all;
+      var v = values[key];
+      if (typeof v !== "number" || !spec) return String(v);
+      var m = /^(,?)\.(\d+)([fg])$/.exec(spec);
+      if (spec === ",") return v.toLocaleString("en-US");
+      if (!m) return String(v);
+      var out = m[3] === "f" ? v.toFixed(Number(m[2])) : ctxSurv.general(v, Number(m[2]));
+      return m[1] ? Number(out).toLocaleString("en-US", { minimumFractionDigits: Number(m[2]) }) : out;
+    });
+  },
+  /* The words the summary prints, formatted as page.values formats them at build. */
+  values: function (cfg, found, state, none) {
+    var g = ctxSurv.general, two = function (v) { return v === undefined || v === null ? none : v.toFixed(2); };
+    return {
+      endpoint: state.endpoint, genes: state.genes.length, source: state.source,
+      n: found.months.length, events: found.event.reduce(function (a, b) { return a + b; }, 0),
+      split: cfg.split_words[state.split], chi2: found.logrank.chi2.toFixed(2),
+      df: found.logrank.df, p: g(found.logrank.p, 2),
+      horizon: String(cfg.horizon), rmst: found.rmst.toFixed(1),
+      hr: found.alone.refused ? none : two(found.alone.hr),
+      hr_adj: found.adjusted.refused ? none : two(found.adjusted.hr),
+      corrected: g(found.scan.corrected, 2),
+      min_p: g(ctxSurv.chi2Sf(Math.max.apply(null, found.scan.statistic), 1), 2),
+      best: found.scan.best, perms: cfg.scan.permutations,
+      floor: g(1 / (cfg.scan.permutations + 1), 2)
+    };
+  },
+  /* figures.risk_step: whole years between at-risk counts, at most columns of them. */
+  riskStep: function (last, columns) {
+    return 12 * Math.max(1, Math.ceil(last / (columns - 1) / 12));
+  },
+  /* KmData.band: the band as a closed polygon of steps, upper out and lower back. */
+  band: function (x, upper, lower) {
+    var keep = [], ox = [], oy = [], bx = [], by = [];
+    x.forEach(function (_, i) { if (!isNaN(upper[i]) && !isNaN(lower[i])) keep.push(i); });
+    keep.forEach(function (i, k) {
+      var end = k + 1 < keep.length ? x[keep[k + 1]] : x[i];
+      ox.push(x[i], end); oy.push(upper[i], upper[i]);
+      bx.push(end, x[i]); by.push(lower[i], lower[i]);
+    });
+    return { x: ox.concat(bx.reverse()), y: oy.concat(by.reverse()) };
+  },
+  /* The KM figure's traces: per slot a band, a line and its censor ticks, then one at-risk row
+     per slot; a median split leaves the middle slot empty and hidden. */
+  draw: function (div, cfg, found, rule) {
+    var slots = rule === "median" ? [0, 2] : [0, 1, 2], update = { x: [], y: [], name: [], visible: [],
+      customdata: [], text: [] }, traces = [];
+    var last = 0;
+    found.groups.forEach(function (g) { last = Math.max(last, g.curve.time[g.curve.time.length - 1] || 0); });
+    var ticks = [];
+    var step = ctxLive.riskStep(last, cfg.risk_columns);
+    for (var t = 0; t <= last; t += step) ticks.push(t);
+    [0, 1, 2].forEach(function (slot) {
+      var at = slots.indexOf(slot), g = at >= 0 ? found.groups[at] : null;
+      var x = [0], y = [1], lo = [1], hi = [1], risk = [];
+      if (g) {
+        x = x.concat(g.curve.time); y = y.concat(g.curve.survival);
+        lo = lo.concat(g.curve.lower); hi = hi.concat(g.curve.upper);
+        risk = ticks.map(function (tick) {
+          for (var i = 0; i < g.curve.time.length; i++) if (g.curve.time[i] >= tick) return g.curve.at_risk[i];
+          return 0;
+        });
+      }
+      var band = ctxLive.band(x, hi, lo), name = g ? g.name : "";
+      var cx = [], cy = [];
+      if (g) g.curve.censored.forEach(function (c, i) { if (c > 0) { cx.push(g.curve.time[i]); cy.push(g.curve.survival[i]); } });
+      var custom = x.map(function (_, i) { return [lo[i], hi[i], i === 0 ? (g ? g.curve.at_risk[0] : 0) : g.curve.at_risk[i - 1]]; });
+      [[band.x, band.y, null, null], [x, y, custom, null], [cx, cy, null, null]].forEach(function (d, k) {
+        traces.push(3 * slot + k);
+        update.x.push(d[0]); update.y.push(d[1]); update.name.push(name); update.visible.push(!!g);
+        update.customdata.push(d[2]); update.text.push(null);
+      });
+    });
+    [0, 1, 2].forEach(function (slot) {
+      var at = slots.indexOf(slot), g = at >= 0 ? found.groups[at] : null;
+      traces.push(9 + slot);
+      update.x.push(g ? ticks : []); update.y.push(g ? ticks.map(function () { return g.name; }) : []);
+      update.name.push(g ? g.name : ""); update.visible.push(!!g); update.customdata.push(null);
+      update.text.push(g ? ticks.map(function (tick) {
+        for (var i = 0; i < g.curve.time.length; i++) if (g.curve.time[i] >= tick) return g.curve.at_risk[i].toLocaleString("en-US");
+        return "0";
+      }) : []);
+    });
+    Plotly.restyle(div, update, traces);
+    Plotly.relayout(div, { "yaxis2.categoryarray": found.groups.map(function (g) { return g.name; }).reverse(),
+                           "yaxis2.range": [-0.5, found.groups.length - 0.5], "xaxis2.tickvals": ticks });
+  },
+  /* The scan's line, its hover and the corrected line's height. */
+  drawScan: function (div, found) {
+    var s = found.scan, neg = s.statistic.map(function (c) { return -Math.log10(ctxSurv.chi2Sf(c, 1)); });
+    var needed = -Math.log10(ctxSurv.chi2Sf(ctxSurv.percentile(s.maxima, 95), 1));
+    var custom = s.statistic.map(function (c, i) { return ["", ctxSurv.chi2Sf(c, 1), s.thresholds[i]]; });
+    Plotly.restyle(div, { x: [s.cuts], y: [neg], customdata: [custom] }, [0]);
+    Plotly.restyle(div, { y: [[needed, needed]] }, [2]);
+  },
+  inflate: function (block) {
+    var bytes = Uint8Array.from(atob(block), function (c) { return c.charCodeAt(0); });
+    var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+    return new Response(stream).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+  },
+  survival: function (form, exporting) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var words = cfg.words, div = fig.querySelector(".fig-plot .js-plotly-plot");
+    var summary = fig.querySelector(".survival-summary"), notes = fig.querySelector(".survival-notes");
+    var mark = exporting(fig, cfg), scanMark = function () {}, scanDiv = null, scanLead = null;
+    var lead = fig.querySelector(".fig-lead");
+    document.querySelectorAll("script[id^='ctx-controls-']").forEach(function (s) {
+      var c = JSON.parse(s.textContent);
+      if (c.kind !== "follow" || c.part !== "scan") return;
+      var other = s.closest(".fig");
+      scanDiv = other.querySelector(".js-plotly-plot");
+      scanLead = other.querySelector(".fig-lead");
+      scanMark = exporting(other, c);
+    });
+    cfg.split_words = {};
+    cfg.defaults.splits.forEach(function (pair) { cfg.split_words[pair[0]] = pair[1]; });
+    var index = ctxSelect.index(cfg.numbers, cfg.symbols);
+    var build = { genes: cfg.build, signs: cfg.build.map(function () { return 1; }),
+                  source: cfg.source, text: form.elements.genes.value };
+    var state = { genes: build.genes, signs: build.signs, source: build.source,
+                  endpoint: cfg.endpoint, split: cfg.split }, history = [], tries = 0, panel = null;
+    var buttons = form.querySelectorAll("button, select, textarea");
+    function busy(on) { buttons.forEach(function (b) { b.disabled = on; }); }
+    function moved() {
+      return state.genes !== build.genes || state.endpoint !== cfg.endpoint || state.split !== cfg.split;
+    }
+    function apply(extra) {
+      var found = ctxSurv.analyse(cfg, panel, state.genes, state.signs, state.endpoint, state.split);
+      ctxLive.draw(div, cfg, found, state.split);
+      if (scanDiv) ctxLive.drawScan(scanDiv, found);
+      var shown = ctxLive.values(cfg, found, state, cfg.none);
+      summary.textContent = ctxLive.fill(words.summary, shown);
+      if (lead) lead.textContent = ctxLive.fill(cfg.leads.km, shown);
+      if (scanLead) {
+        scanLead.textContent = ctxLive.fill(found.scan.beaten ? cfg.leads.scan : cfg.leads.scan_floor, shown);
+      }
+      var lines = [extra || ""];
+      if (found.alone.refused || found.adjusted.refused) lines.push(words.refused);
+      if (state.genes !== build.genes) lines.push(ctxLive.fill(words.cross, { tries: tries }));
+      lines.push(ctxLive.fill(words.notice, { genes: build.genes.length, source: build.source }));
+      notes.textContent = lines.filter(Boolean).join(" ");
+      mark(moved()); scanMark(moved());
+      form.querySelector("[data-undo]").disabled = !history.length;
+    }
+    function score(text, source) {
+      var parsed = ctxSelect.parse(text, index);
+      var rows = parsed.found.map(function (n) { return index.row[n]; });
+      var said = ctxLive.fill(words.scored, { genes: rows.length, found: rows.length,
+        missing: parsed.missing.length, ambiguous: parsed.ambiguous.length });
+      if (!rows.length) { notes.textContent = words.empty + " " + said; return; }
+      history.push(state); tries++;
+      state = { genes: rows, signs: rows.map(function () { return 1; }), source: source,
+                endpoint: state.endpoint, split: state.split };
+      apply(said + " " + words.unsigned);
+    }
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (panel) score(form.elements.genes.value, words.pasted);
+    });
+    form.elements.endpoint.addEventListener("change", function () {
+      if (!panel) return;
+      history.push(state); state = Object.assign({}, state, { endpoint: form.elements.endpoint.value }); apply();
+    });
+    form.elements.split.addEventListener("change", function () {
+      if (!panel) return;
+      history.push(state); state = Object.assign({}, state, { split: form.elements.split.value }); apply();
+    });
+    form.querySelector("[data-undo]").addEventListener("click", function () {
+      if (!history.length || !panel) return;
+      state = history.pop();
+      form.elements.endpoint.value = state.endpoint; form.elements.split.value = state.split;
+      apply();
+    });
+    form.querySelector("[data-reset]").addEventListener("click", function () {
+      if (!panel) return;
+      history.push(state);
+      state = { genes: build.genes, signs: build.signs, source: build.source,
+                endpoint: cfg.endpoint, split: cfg.split };
+      form.elements.endpoint.value = cfg.endpoint; form.elements.split.value = cfg.split;
+      form.elements.genes.value = build.text;
+      apply();
+    });
+    if (!window.DecompressionStream) { busy(true); notes.textContent = words.no_stream; return; }
+    busy(true);
+    notes.textContent = words.loading;
+    ctxLive.inflate(cfg.block).then(function (bytes) {
+      panel = ctxSurv.planes(bytes, cfg.genes, cfg.patients);
+      busy(false);
+      form.querySelector("[data-undo]").disabled = true;
+      /* A link from another page carries its list in the fragment (ctxSelect, D-049). */
+      if (ctxSelect.carries(location.hash)) {
+        var sel = ctxSelect.decode(location.hash);
+        var rows = [], signs = [];
+        sel.genes.forEach(function (gene) {
+          var at = index.row[Math.abs(gene)];
+          if (at !== undefined) { rows.push(at); signs.push(gene < 0 ? -1 : 1); }
+        });
+        if (rows.length) {
+          tries++;
+          state = { genes: rows, signs: signs, source: sel.src, endpoint: state.endpoint, split: state.split };
+          apply(ctxLive.fill(words.scored, { genes: rows.length, found: rows.length,
+            missing: sel.genes.length - rows.length, ambiguous: 0 }));
+          return;
+        }
+      }
+      notes.textContent = ctxLive.fill(words.notice, { genes: build.genes.length, source: build.source }) +
+        " " + ctxLive.fill(words.panel, { genes: cfg.genes, patients: cfg.patients });
+    }, function (err) {
+      notes.textContent = words.no_stream;
+      if (window.console) console.error("ctx page: survival", err);
+    });
+  }
+};
+{% endraw %}
