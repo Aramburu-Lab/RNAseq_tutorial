@@ -58,7 +58,7 @@ Assumed unless you object: gather is the only GDC reader; no exclusion beyond th
 | 2 | GTEx v10 through its API | GENCODE v39 against our 50; genes newer than v39 get no GTEx panel | V11 as files only: 2.4 GB of TPM and a 20.3 GB exon table, no API |
 | 3 | Every GTEx sample in the page, packed, so the donor control recomputes in the page | 87 cards fit under 15 MB | summaries: 254 cards, the control becomes three fixed options |
 
-**Answered 2026-10-08 (Rytis):** 1 yes, our own figures; 2 the alternative, GTEx V11 as files only; 3 the alternative, summaries per tissue and sex, so 254 cards fit and the donor control becomes fixed options. With no V11 API, GTEx leaves the live per-gene calls: its files are a download to approve (2.4 GB of TPM by the planner's HEAD; the 20.3 GB exon table only if the exon panel stays), and notebook 09's live fetch keeps HPA alone.
+**Answered 2026-10-08 (Rytis):** 1 yes, our own figures; 2 the alternative, GTEx V11 as files only; 3 the alternative, summaries per tissue and sex, and the donor control becomes fixed options. Corrected 2026-10-08: "254 cards fit" was the planner's arithmetic on raw summaries; the built page measures 0.25 to 0.31 MB a card, so about 35 fit under 15 MB. With no V11 API, GTEx leaves the live per-gene calls: its files are a download to approve (2.4 GB of TPM by the planner's HEAD; the 20.3 GB exon table only if the exon panel stays), and notebook 09's live fetch keeps HPA alone.
 
 Assumed: MANE exons from the GTF, single-cell as text, interactions linked, notebook 09 ships precomputed cards and fetches one gene live when online.
 
