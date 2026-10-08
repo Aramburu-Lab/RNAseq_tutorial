@@ -445,6 +445,8 @@ Rytis, 2026-10-07: fill these modules with real data, in this order, and give th
 
 The 2026-10-01 work order's items 3 to 10 follow these unless Rytis reorders them.
 
+Rytis, 2026-10-08: copy all of M4's Salmon files (9.76 GB, Q1) and download GTEx V11's TPM and exon tables, then work through the list. Decisions he has not answered take their recommended answers (`docs/plans/2026-10-07_real_data_decisions.md`); M7's and M8's downloads wait for his approval. Fetched: GTEx V11 release 2025-08-22 into `~/ctx_tier1/data/raw/gtex_v11/`, MD5-checked, with the sample and subject annotations the tissue and sex summaries need.
+
 ## ▶️ Work order (Rytis, 2026-10-01)
 
 Each item starts when the one before it is merged, because they change the same page script and QC files; the side column runs alongside. Ticked here as each merges.
