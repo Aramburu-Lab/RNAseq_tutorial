@@ -139,6 +139,8 @@ def test_guard_patterns_cover_study():
     fields = "run_accession,experiment_accession,sample_accession,secondary_sample_accession"
     for path in sorted((ROOT / DATASETS).glob("*.toml")):
         declared = tomllib.loads(path.read_text())
+        if "ena_study" not in declared["dataset"]:
+            continue  # a GDC project: its barcodes are guarded by pattern, with no ENA report
         patterns = guard_patterns(ROOT)[1:]
         url = (
             "https://www.ebi.ac.uk/ena/portal/api/filereport?result=read_run&format=tsv"

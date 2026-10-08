@@ -14,12 +14,17 @@ from ctx.report.builder import FigureBlock, FigurePage, FigureText, write
 from ctx.report.figures import finite
 from ctx.report.marks import MARK
 from ctx.viz.bar import BarData
+from ctx.viz.contour import SurfaceData
+from ctx.viz.curve import CurveData
+from ctx.viz.km import KmData
 from ctx.viz.linked import LinkedData
 from ctx.viz.scatter import ScatterData
 from ctx.viz.style import THEMES, Theme
 
 # A figure with no title, lead or reading guide.
 NO_TEXT = FigureText()
+# The contracts that can carry page controls and draw their changed view (D-033, D-051).
+CONTROLLED = (ScatterData, LinkedData, BarData, CurveData, SurfaceData, KmData)
 
 
 class Figure(Protocol):
@@ -146,7 +151,7 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
         ValueError: If the figure's title or plotly text holds a glossary mark, or a scatter
             with live calls brings its own reading.
     """
-    controls = data.controls() if isinstance(data, ScatterData | LinkedData | BarData) else None
+    controls = data.controls() if isinstance(data, CONTROLLED) else None
     if text.follows is not None:
         rows = [finite(r) for r in data.page_table().to_dicts()]
         if controls is not None and controls["kind"] == "filter":
@@ -163,7 +168,7 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
     drawn = [figure, *([below] if below is not None else [])]
     texts = (t for f in drawn for t in export.strings(f.to_dict()))
     _refuse_marks(figure_stem, [text.title, *texts])
-    if controls is not None and isinstance(data, ScatterData | LinkedData | BarData):
+    if controls is not None and isinstance(data, CONTROLLED):
         # A moved control makes the PDF and SVG buttons draw the view as set (D-033), with
         # the figure files' caption and what they draw that the page's plot lacks.
         layers = data.export_layers()

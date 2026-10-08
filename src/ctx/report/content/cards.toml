@@ -33,6 +33,38 @@ effect = "Off: shrunk columns empty, MA plot raw; p-values and calls unchanged."
 meaning = "An nf-core/rnaseq outdir, Salmon only. Unset: none is read."
 effect = "Set: gather checks release and samples, then writes rounded length-scaled counts."
 
+[options."--gdc-dir"]
+meaning = "A GDC project folder of STAR counts, clinical records and annotations."
+effect = "Set: gather checks it and takes one file per patient."
+
+[options."--endpoint"]
+meaning = "Survival endpoint from TCGA-CDR: OS, DSS, DFI or PFI. Unset: dataset file's."
+effect = "Changes which events count; OS needs the longest follow-up."
+
+[options."--split"]
+meaning = "How a gene score groups patients: median or tertiles."
+effect = "Tertiles compare extremes; a scanned cut-off needs the corrected p."
+
+[options."--horizon"]
+meaning = "Months up to which [[RMST|restricted mean survival]] is compared."
+effect = "A later horizon uses more follow-up but fewer patients at risk."
+
+[options."--covariates"]
+meaning = "Comma-separated patient columns the adjusted Cox model adds: age, stage."
+effect = "Adding stage removes the prognosis a score shares with stage."
+
+[options."--cox-strata"]
+meaning = "Comma-separated patient columns given their own Cox baseline hazard."
+effect = "Handles a variable that breaks proportional hazards, without estimating it."
+
+[options."--genes-from"]
+meaning = "A gene list file: symbols or Ensembl IDs, as Save list writes."
+effect = "Scores this list in the static files; unset, the dataset file's list."
+
+[options."--min-log2cpm"]
+meaning = "Expression filter: a gene's median log2 [[CPM]] over the patients, at least."
+effect = "Higher keeps fewer, better-measured genes; each dropped gene is counted."
+
 [options."--registry"]
 meaning = "The QC registry of metrics, bands and sources. Unset: CTX_QC_REGISTRY, else conf/qc_metrics.toml."
 effect = "Samples are judged against its bands; the page names the file used."
@@ -153,3 +185,7 @@ effect = "The value no keeps Salmon's estimates, which shift with isoform use."
 
 [effects.function]
 "--dataset-file" = "Selects the gene sets tested, the featured set and its running score."
+
+[effects.clinical]
+"--dataset-file" = "Selects the build list, default endpoint and the published numbers shown."
+"--dataset" = "Selects gather's GDC tables and renames every output."

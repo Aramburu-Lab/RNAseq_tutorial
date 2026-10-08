@@ -397,6 +397,15 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
     return out, outline, counter > 0
 
 
+def _live(prepared: Iterable[Mapping[str, Any]]) -> bool:
+    """Whether a page scores gene lists live.
+
+    Such a page carries the selection and survival scripts (``_select``, ``_surv`` and
+    ``_live``); other pages leave them out.
+    """
+    return any(f.get("kind") in ("survival", "follow") for f in prepared)
+
+
 def _heading(page: Page) -> dict[str, str]:
     """Kicker, headline and dataset, parsed from the page title."""
     if isinstance(page, FigurePage):
@@ -463,7 +472,7 @@ def render(page: Page, glossary_href: str = "") -> str:
         figure = prepare(page.figure, 0, 1, 3, ALONE_SCALE)
         context |= {"figure": figure, "templates": json_for_script(alone),
                     "page_templates": context["templates"],
-                    "export": export.assets([figure])}  # fmt: skip
+                    "export": export.assets([figure]), "live": _live([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
     results, outline, draws = _walk(page.results)
     if not draws:
@@ -476,6 +485,7 @@ def render(page: Page, glossary_href: str = "") -> str:
         "outline": outline,
         "key_versions": [(n, versions[n]) for n in KEY_PACKAGES if n in versions],
         "export": export.assets(prepared),
+        "live": _live(prepared),
     }
     return _ENV.get_template("module.html.j2").render(**context)
 

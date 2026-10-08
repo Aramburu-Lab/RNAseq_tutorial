@@ -233,6 +233,10 @@ def defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
     prints no median, filled here with the numbers of every bar and passed unfilled for the
     page script to fill again (``ctxFilter.summary``). Each select is labelled in words.
     """
+    if controls["kind"] in ("survival", "follow"):
+        # The survival panel's own defaults, built by ctx.clinical.page.live; a figure that
+        # follows the panel has none.
+        return dict(controls.get("defaults", {}))
     if controls["kind"] == "brush":
         return {"colours": list(zip(controls["colours"], controls["names"], strict=True)),
                 "empty": controls["empty"]}  # fmt: skip

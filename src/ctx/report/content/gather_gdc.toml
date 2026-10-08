@@ -1,0 +1,166 @@
+# The M1 Gather page of a GDC project (ctx gather --gdc-dir). Placeholders in {braces} are
+# filled by the code; keep their names.
+
+title = "M1 Gather: {dataset}"
+budget = "Track B: under {minutes} min and {ram_gb} GB"
+inputs = "the GDC folder's metadata, manifest, status, retrieval log, counts, cases, annotations and TCGA-CDR"
+purpose = "Check a [[GDC]] download against its own records and checksums, and choose one tumour and one normal file per patient for every later module."
+input = "One [[GDC]] project folder as the fetch writes it. It holds the files' metadata, manifest, release status and retrieval log, the [[STAR]] [[gene counts]], the clinical records, the annotations and the TCGA-CDR workbook."
+method = """Each counts file is checked against the [[md5]] GDC lists, the release it came from, and the [[gene model]] its first line names. Every file must hold the same genes in one order.
+
+A patient can have several tumour files, one per [[aliquot]]. FFPE files leave first, then libraries of another [[strandedness|protocol]], then redacted files. Of the rest, the first aliquot ID is taken per patient and sample type."""
+interpretation = """From here on every module takes files through the sample sheet's `chosen` column, so one patient is one tumour. A dropped file stays in the sheet with its reason.
+
+FFPE tissue degrades RNA: its reads fall outside genes far more often, as the no-feature row shows. A stranded library counts reads on one strand only, so mixing protocols mixes two scales. Notifications such as neoadjuvant therapy exclude no one; the clinical page reports them."""
+pitfalls = [
+    "Two files of one patient: counting both doubles that patient's weight in every test.",
+    "Choosing by barcode order alone: an FFPE or stranded aliquot can sort first.",
+    "Excluding on a notification: only a redaction removes a file.",
+]
+
+[[terms]]
+term = "Aliquot"
+meaning = "The portion of a sample one library was made from; one counts file each."
+
+[[terms]]
+term = "FFPE"
+meaning = "Formalin-fixed, paraffin-embedded tissue: its RNA is degraded and cross-linked."
+
+[[terms]]
+term = "Redaction"
+meaning = "A GDC annotation that withdraws an entity from analysis: a consent withdrawn or an identity in doubt."
+
+[[questions]]
+prompt = "Why is the strand of each file measured rather than read from the project's description?"
+answer = "A project mixes protocols: some aliquots were sequenced again with a stranded kit. The counts themselves show it."
+
+[[questions]]
+prompt = "Why are the `_PAR_Y` rows checked before the version is stripped from gene IDs?"
+answer = "A `_PAR_Y` row shares its unversioned ID with the X copy. Once both are zero, dropping them keeps every ID unique."
+
+[[questions]]
+prompt = "Why does a neoadjuvant notification not remove the patient?"
+answer = "It is a notification, not a redaction. The tumour was sampled after treatment, so the clinical page states it and leaves the choice to the analysis."
+
+[keys]
+files = "Counts files"
+cases = "Patients"
+tumours = "Tumours taken"
+tumours_detail = "one per patient"
+release = "GDC release"
+
+[checks]
+title = "Download checks"
+columns = ["Check", "Result"]
+release = "Release"
+release_value = "{release}, in the status file and every retrieval row"
+query = "Query"
+query_value = "project {project}, workflow {workflow}, open access"
+manifest = "Manifest"
+manifest_value = "{files:,} files, each with the md5 and size the metadata lists"
+md5 = "md5"
+md5_value = "{files:,} of {files:,} files match, read in {seconds:.1f} s"
+model = "Gene model"
+model_value = "{model} in all {files:,} files, one gene order, {rows:,} rows with {n} N_ rows"
+genes = "Genes"
+genes_value = "{par_y} _PAR_Y rows hold no count in any file and leave; {genes:,} unversioned IDs, each once"
+stored = "Matrix"
+stored_value = "{genes:,} genes by {files:,} files, int32, {bytes:,} bytes in memory"
+strand = "Strand"
+strand_value = "{call}: {n:,} files, first-strand share {lo:.4f} to {hi:.4f}"
+library = "Library size"
+library_value = "Sum of {column} over genes, N_ rows left out: median {median:,.0f}, {low:,} to {high:,}"
+no_feature = "Reads outside genes"
+no_feature_value = "N_noFeature over counted plus no-feature reads: median {ffpe:.1f} % in {n} FFPE files, {kept:.1f} % in the files taken"
+site = "Primary site"
+site_value = "{site} kept; {n} files of other sites left out"
+clinical = "Clinical records"
+clinical_value = "{cases:,} GDC cases; {with_counts:,} of {all:,} patients with counts have one"
+cdr_value = "; {rows:,} TCGA-CDR rows of type {type}"
+
+[flow]
+title = "One file per patient and sample type, in the rule's order"
+step = "Step"
+tumour = "Tumour"
+normal = "Normal"
+other = "Other"
+steps = ["Files", "Patients", "FFPE dropped", "Other protocol dropped", "Redacted", "Patients kept", "Patients lost", "Decided by the first aliquot ID"]
+pairs = "Patients with a tumour and a normal file taken: {kept:,} of the {both:,} with files of both."
+
+[annotations]
+title = "GDC annotations of the patients' biospecimens"
+columns = ["Classification", "Category", "Annotations", "Patients", "Files hit", "Action"]
+none = "No annotation"
+
+# Column dictionaries: [unit, meaning] per column.
+[columns.samplesheet]
+sample = ["none", "Aliquot submitter ID: one counts file each."]
+file_id = ["none", "GDC file UUID; the file sits in a folder of this name."]
+file_name = ["none", "File name GDC gives the counts file."]
+md5sum = ["none", "MD5 GDC lists, matched against the file on disk."]
+file_size = ["bytes", "Size GDC lists."]
+case = ["none", "Patient submitter ID."]
+case_id = ["none", "Patient UUID in GDC."]
+sample_id = ["none", "Sample submitter ID: the vial the aliquot came from."]
+sample_type = ["none", "GDC sample type, e.g. Primary Tumor or Solid Tissue Normal."]
+condition = ["none", "tumour, normal or other, from the dataset file's [gdc] sample types."]
+preservation = ["none", "GDC preservation method: OCT, FFPE or Unknown."]
+vial = ["none", "Vial letter of a TCGA barcode; empty for another identifier."]
+portion = ["none", "Portion number of a TCGA barcode; empty for another identifier."]
+plate = ["none", "Plate of a TCGA barcode, the batch the aliquot was processed in."]
+site = ["none", "Tissue source site of a TCGA barcode: the collecting institution."]
+batch = ["none", "The plate, as the batch later modules test."]
+library_size = ["reads", "Sum of the protocol's count column over genes; N_ rows left out."]
+stranded_first = ["reads", "Sum of STAR's first-read-strand column over genes."]
+stranded_second = ["reads", "Sum of STAR's second-read-strand column over genes."]
+first_strand_share = ["fraction", "stranded_first / (stranded_first + stranded_second)."]
+strand_call = ["none", "Library type from the share by the QC registry's gdc_strand_share, in exact arithmetic."]
+n_unmapped = ["reads", "STAR's N_unmapped row of the protocol's column."]
+n_multimapping = ["reads", "STAR's N_multimapping row of the protocol's column."]
+n_nofeature = ["reads", "STAR's N_noFeature row of the protocol's column: reads in no gene."]
+n_ambiguous = ["reads", "STAR's N_ambiguous row of the protocol's column: reads on several genes."]
+redacted = ["none", "True when a GDC redaction hits this file."]
+chosen = ["none", "True for the one file taken per patient and sample type; select with ctx.gather.gdc.chosen."]
+drop_reason = ["none", "ffpe, protocol, redacted or not_first, in the rule's order; empty when chosen."]
+
+[columns.genes]
+gene_id = ["none", "Ensembl gene ID without its version; unique once the _PAR_Y rows leave."]
+gene_id_version = ["none", "Ensembl gene ID as the counts file gives it."]
+gene_name = ["none", "Gene symbol from the counts file."]
+gene_type = ["none", "GENCODE gene type from the counts file."]
+
+[columns.annotations]
+case = ["none", "Patient submitter ID."]
+classification = ["none", "GDC classification: Notification, Redaction, Observation and others."]
+category = ["none", "GDC category, e.g. Neoadjuvant therapy or Prior malignancy."]
+entity_type = ["none", "What the annotation is about: case, sample, portion, analyte or aliquot."]
+entity = ["none", "Submitter ID of that entity."]
+files = ["files", "Counts files of this folder the annotation hits."]
+samples = ["none", "Those files' aliquots, separated by semicolons."]
+action = ["none", "drops its files for a redaction that hits one; logged otherwise."]
+
+[columns.cases]
+case = ["none", "Patient submitter ID."]
+case_id = ["none", "Patient UUID in GDC."]
+primary_site = ["none", "GDC primary site."]
+disease_type = ["none", "GDC disease type."]
+sex_at_birth = ["none", "GDC demographic.sex_at_birth."]
+age_at_index = ["years", "GDC demographic.age_at_index."]
+vital_status = ["none", "GDC demographic.vital_status."]
+primary_diagnosis = ["none", "primary_diagnosis of the diagnosis GDC marks as the primary disease."]
+ajcc_pathologic_stage = ["none", "ajcc_pathologic_stage of that diagnosis; empty where GDC gives none."]
+
+[columns.treatments]
+case = ["none", "Patient submitter ID."]
+treatment_type = ["none", "GDC treatment_type."]
+treatment_or_therapy = ["none", "GDC treatment_or_therapy: yes, no, unknown or not reported."]
+
+[columns.molecular_tests]
+case = ["none", "Patient submitter ID."]
+gene_symbol = ["none", "Gene tested, e.g. ESR1 for the oestrogen receptor."]
+method = ["none", "GDC molecular_analysis_method, e.g. IHC or FISH."]
+result = ["none", "GDC test_result, e.g. Positive, Negative or Equivocal."]
+
+[columns]
+count = "STAR {protocol} count of aliquot {sample}; N_ and _PAR_Y rows left out."
+cdr = "TCGA-CDR column {column}, verbatim as the workbook shows it; parsed by ctx clinical."

@@ -32,6 +32,19 @@
 <noscript><p class="note">{{ ui.filter.noscript }}</p></noscript>
 <p class="calls-summary filter-summary" aria-live="polite" data-template="{{ f.defaults.template }}" data-none="{{ f.defaults.none }}">{{ f.defaults.summary }}</p>
 {% endif %}
+{% if f.kind == "survival" %}
+<form class="survival" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.survival.label }}">
+<label>{{ ui.survival.endpoint }}<select name="endpoint">{% for value, label in f.defaults.endpoints %}<option value="{{ value }}"{% if value == f.defaults.endpoint %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label>{{ ui.survival.split }}<select name="split">{% for value, label in f.defaults.splits %}<option value="{{ value }}"{% if value == f.defaults.split %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label class="genes">{{ ui.survival.genes }}<textarea name="genes" rows="3" spellcheck="false" autocomplete="off" aria-describedby="ctx-genes-hint-{{ f.index }}">{{ f.defaults.genes }}</textarea><span class="hint" id="ctx-genes-hint-{{ f.index }}">{{ ui.survival.genes_hint }}</span></label>
+<button type="submit">{{ ui.survival.score }}</button>
+<button type="button" data-undo disabled>{{ ui.survival.undo }}</button>
+<button type="button" data-reset>{{ ui.survival.reset }}</button>
+</form>
+<noscript><p class="note">{{ ui.survival.noscript }}</p></noscript>
+<p class="survival-summary" aria-live="polite">{{ f.defaults.summary }}</p>
+<p class="survival-notes" aria-live="polite">{{ f.defaults.notice }} {{ f.defaults.panel }}</p>
+{% endif %}
 <div class="fig-body{% if f.text.reading %} has-reading{% endif %}">
 <div class="fig-plot"><p class="scroll-hint" hidden>{{ ui.figures.scroll }}</p>{{ f.html }}</div>
 {% if f.text.reading %}

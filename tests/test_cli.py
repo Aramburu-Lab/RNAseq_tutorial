@@ -127,8 +127,19 @@ def qc_run(tmp_path_factory):
     return root, _page(root, "02_qc", "desynth_overview")
 
 
+@pytest.fixture(scope="module")
+def clinical_run(tmp_path_factory):
+    from clinical_root import make  # noqa: PLC0415 - the made-up GDC root of the M10 tests
+
+    root, spec = make(tmp_path_factory.mktemp("clinical_cli"))
+    done = _ctx("--root", str(root), "clinical", "--dataset", "fake_brca", "--dataset-file",
+                str(spec), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "12_clinical", "fake_brca_overview")
+
+
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
-COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report"]
+COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical"]
 
 
 def test_every_subcommand_has_a_card_test():

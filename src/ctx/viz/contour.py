@@ -115,6 +115,9 @@ class SurfaceData:
         floor: A value at or below which a cell takes no band and is drawn in the reference
             grey, e.g. a setting that keeps no read; None puts every cell in the bands.
         floor_label: The floor's legend key.
+        live: Settings of the page control that moves the mark, with its ``kind``; None for a
+            surface the page does not change. Set, the PDF and SVG buttons export the view as
+            set (D-033).
     """
 
     frame: pl.DataFrame
@@ -132,6 +135,7 @@ class SurfaceData:
     width: str = FIGURE_WIDTH
     floor: float | None = None
     floor_label: str = ""
+    live: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         """Refuse anything but a full grid of finite values that vary above the floor."""
@@ -191,6 +195,18 @@ class SurfaceData:
     def caption_text(self) -> str:
         """The caption, unwrapped."""
         return self.caption
+
+    def controls(self) -> dict[str, Any] | None:
+        """The page control that moves the mark, or None."""
+        return dict(self.live) if self.live is not None else None
+
+    def inches(self) -> tuple[float, float]:
+        """The figure files' size, which a page's own PDF and SVG of a changed view take."""
+        return figure_inches(self.width, "contour")
+
+    def export_layers(self) -> dict[str, Any]:
+        """Nothing: the page draws every band, isoline and mark the files draw."""
+        return {}
 
     def _titles(self) -> tuple[str, str, str]:
         """Axis and colour bar titles with their units."""

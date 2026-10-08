@@ -4,6 +4,9 @@
 {% include "_filter.js.j2" %}
 {% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
+{% if live %}{% include "_select.js.j2" %}
+{% include "_surv.js.j2" %}
+{% include "_live.js.j2" %}{% endif %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
    is logged and never stops the others; every feature degrades to a readable page without
@@ -204,7 +207,10 @@
       var original = null;
       function fit() {
         var full = div._fullLayout, axis = full && full.xaxis;
-        if (!axis || !axis.title || !axis.title.text || div.offsetParent === null) return;
+        /* A plot that names no x title, as a Kaplan-Meier figure's upper plot names none, keeps
+           plotly's placeholder in its full layout alone. */
+        var given = div.layout.xaxis && div.layout.xaxis.title;
+        if (!axis || !axis.title || !axis.title.text || !given || div.offsetParent === null) return;
         if (original === null) {
           original = String(div.layout.xaxis.title.text || "").replace(/<br>/g, " ");
           div.layout.meta = Object.assign({}, div.layout.meta, { xtitle: original });
@@ -226,6 +232,11 @@
      names, in both traces, and keeps the live line in step. */
   document.querySelectorAll("form.brush").forEach(function (form) {
     guard("brush", function () { brushing(form); });
+  });
+
+  /* M10's survival panel: ctxLive scores a gene list and redraws its figures (GS.7). */
+  document.querySelectorAll("form.survival").forEach(function (form) {
+    guard("survival", function () { ctxLive.survival(form, exporting); });
   });
 
   function at(o, key) {

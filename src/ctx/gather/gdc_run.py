@@ -1,0 +1,319 @@
+"""M1c for a GDC project: check the folder, choose one file per case, write the tables and page.
+
+Everything is read and checked before the first file is written (``ctx.gather.gdc``); the
+outputs follow ``harmonise.run``'s pattern under ``outputs/01_gather/``.
+"""
+
+import functools
+import hashlib
+import time
+from collections import Counter
+from collections.abc import Mapping
+from dataclasses import dataclass
+from datetime import date
+from pathlib import Path
+
+import polars as pl
+
+from ctx import runtime
+from ctx.dataset import Dataset, DatasetError, GdcSpec, load
+from ctx.gather import gdc
+from ctx.io.naming import MODULES, stem
+from ctx.io.readme_companion import write_table
+from ctx.qc import registry
+from ctx.report import text
+from ctx.report.builder import (
+    KeyNumber,
+    ModulePage,
+    ParameterCard,
+    Reproduction,
+    ResultTable,
+    write,
+)
+
+MODULE = "gather"
+PAGE = "gather_gdc"
+# (unit, meaning) of every sheet column, from the page file.
+SHEET = "columns.samplesheet"
+
+
+@dataclass(frozen=True)
+class Read:
+    """Everything gather read from one folder, checked, before anything is written."""
+
+    folder: gdc.Folder
+    counts: gdc.Counts
+    sheet: pl.DataFrame
+    annotations: pl.DataFrame
+    cases: pl.DataFrame
+    treatments: pl.DataFrame
+    tests: pl.DataFrame
+    cdr: pl.DataFrame | None
+    md5_seconds: float
+
+
+def columns(key: str) -> dict[str, tuple[str, str]]:
+    """(unit, meaning) per column of one table, from the page file."""
+    return {name: (unit, meaning) for name, (unit, meaning) in text.raw(PAGE, key).items()}
+
+
+def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,
+                spec: GdcSpec, metric: registry.Metric) -> pl.DataFrame:  # fmt: skip
+    """One row per counts file: identity, barcode parts, strand, library size and the choice."""
+    stats = gdc.strand(counts.stats, metric)
+    hit = notes.filter(pl.col("action") == "drops its files")["samples"]
+    redacted = {s for joined in hit for s in joined.split(";")}
+    parts = pl.DataFrame(
+        [gdc.barcode(s, c) for s, c in folder.files.select("sample", "case").rows()],
+        schema=dict.fromkeys(("vial", "portion", "plate", "site"), pl.String),
+    )
+    condition = (pl.when(pl.col("sample_type") == spec.tumour).then(pl.lit("tumour"))
+                 .when(pl.col("sample_type") == spec.normal).then(pl.lit("normal"))
+                 .otherwise(pl.lit("other")))  # fmt: skip
+    frame = folder.files.hstack(parts).join(stats, on="sample", maintain_order="left")
+    frame = frame.with_columns(condition=condition, batch=pl.col("plate"),
+                               redacted=pl.col("sample").is_in(sorted(redacted)))  # fmt: skip
+    frame = gdc.choose(frame, spec.protocol)
+    return frame.select(*columns(SHEET))
+
+
+def read_all(path: Path, spec: Dataset) -> Read:
+    """Read and check the whole folder; nothing is written.
+
+    Raises:
+        gdc.GdcError: On any failed check.
+        registry.RegistryError: If the QC registry lacks the strand metric.
+    """
+    assert spec.gdc is not None  # noqa: S101 - run() refuses a dataset file without [gdc]
+    metric = registry.load(registry.resolve(None)).metrics.get(gdc.STRAND_METRIC)
+    if metric is None:
+        raise registry.RegistryError(f"the QC registry has no [metrics.{gdc.STRAND_METRIC}]")
+    folder = gdc.read_folder(path, spec.gdc)
+    started = time.perf_counter()
+    gdc.verify(folder)
+    md5_seconds = time.perf_counter() - started
+    cdr = None
+    if spec.gdc.cdr_file and spec.gdc.cdr_type:
+        cdr = gdc.cdr(path / spec.gdc.cdr_file, spec.gdc.cdr_type)
+    counts = gdc.read_counts(folder, spec.gdc)
+    notes = gdc.annotations(path / gdc.ANNOTATIONS, folder.files)
+    sheet = build_sheet(folder, counts, notes, spec.gdc, metric)
+    cases, treatments, tests = gdc.clinical(path / gdc.CASES)
+    return Read(folder, counts, sheet, notes, cases, treatments, tests, cdr, md5_seconds)
+
+
+def _flow(sheet: pl.DataFrame) -> ResultTable:
+    """Files, cases and each drop of the rule, per sample type, in the rule's order."""
+    word = functools.partial(text.word, PAGE)
+    kinds = [k for k in ("tumour", "normal", "other") if k in set(sheet["condition"])]
+    cells: dict[str, list[str]] = {k: [] for k in kinds}
+    for kind in kinds:
+        part = sheet.filter(pl.col("condition") == kind)
+        kept = gdc.chosen(part)["case"].n_unique()
+        reasons = Counter(part["drop_reason"])
+        candidates = part.filter(pl.col("drop_reason").is_in(["", "not_first"]))
+        ties = candidates.group_by("case").len().filter(pl.col("len") > 1).height
+        cells[kind] = [f"{part.height:,}", f"{part['case'].n_unique():,}",
+                       *(f"{reasons.get(r, 0):,}" for r in ("ffpe", "protocol", "redacted")),
+                       f"{kept:,}", f"{part['case'].n_unique() - kept:,}", f"{ties:,}"]  # fmt: skip
+    steps = text.words(PAGE, "flow.steps")
+    rows = tuple((step, *(cells[k][i] for k in kinds)) for i, step in enumerate(steps))
+    heads = (word("flow.step"), *(word(f"flow.{k}") for k in kinds))
+    return ResultTable(word("flow.title"), heads, rows, numeric=tuple(range(1, len(heads))))
+
+
+def _shares(sheet: pl.DataFrame) -> str:
+    """Files per strand call with the range of their shares."""
+    by = sheet.group_by("strand_call").agg(
+        pl.len(),
+        pl.col("first_strand_share").min().alias("lo"),
+        pl.col("first_strand_share").max().alias("hi"),
+    )
+    return "; ".join(text.fill(PAGE, "checks.strand_value", call=c, n=n, lo=lo, hi=hi)
+                     for c, n, lo, hi in by.sort("strand_call").rows())  # fmt: skip
+
+
+def _no_feature(sheet: pl.DataFrame) -> str | None:
+    """Median N_noFeature share of FFPE files against the files kept, where there are FFPE."""
+    share = pl.col("n_nofeature") / (pl.col("n_nofeature") + pl.col("library_size")) * 100
+    ffpe = sheet.filter(pl.col("preservation") == gdc.FFPE)
+    if ffpe.is_empty():
+        return None
+    kept = gdc.chosen(sheet)
+    return text.fill(PAGE, "checks.no_feature_value", ffpe=ffpe.select(share.median()).item(),
+                     n=ffpe.height, kept=kept.select(share.median()).item())  # fmt: skip
+
+
+def _checks(found: Read, spec: GdcSpec) -> ResultTable:
+    """What the folder holds, checked, one row per check."""
+    fill, word = functools.partial(text.fill, PAGE), functools.partial(text.word, PAGE)
+    files, genes = found.sheet.height, found.counts.genes.height
+    sizes = found.sheet["library_size"]
+    rows = [
+        (word("checks.release"), fill("checks.release_value", release=spec.release)),
+        (word("checks.query"), fill("checks.query_value", project=spec.project,
+                                    workflow=spec.workflow)),
+        (word("checks.manifest"), fill("checks.manifest_value", files=files)),
+        (word("checks.md5"), fill("checks.md5_value", files=files, seconds=found.md5_seconds)),
+        (word("checks.model"), fill("checks.model_value", model=spec.gene_model, files=files,
+                                    rows=found.counts.rows, n=len(gdc.N_ROWS))),
+        (word("checks.genes"), fill("checks.genes_value", par_y=found.counts.par_y, genes=genes)),
+        (word("checks.stored"), fill("checks.stored_value", genes=genes, files=files,
+                                     bytes=found.counts.matrix.nbytes)),
+        (word("checks.strand"), _shares(found.sheet)),
+        (word("checks.library"), fill("checks.library_value", column=spec.protocol,
+                                      median=sizes.median(), low=sizes.min(), high=sizes.max())),
+    ]  # fmt: skip
+    if (no_feature := _no_feature(found.sheet)) is not None:
+        rows.append((word("checks.no_feature"), no_feature))
+    if spec.primary_site:
+        rows.append((word("checks.site"), fill("checks.site_value", site=spec.primary_site,
+                                               n=found.folder.dropped_site)))  # fmt: skip
+    clinical = fill("checks.clinical_value", cases=found.cases.height,
+                    with_counts=found.sheet["case"].unique().is_in(found.cases["case"]).sum(),
+                    all=found.sheet["case"].n_unique())  # fmt: skip
+    if found.cdr is not None:
+        clinical += fill("checks.cdr_value", rows=found.cdr.height, type=spec.cdr_type)
+    rows.append((word("checks.clinical"), clinical))
+    return ResultTable(word("checks.title"), text.words(PAGE, "checks.columns"), tuple(rows))
+
+
+def _pairs(sheet: pl.DataFrame) -> str:
+    """Cases with a chosen tumour and a chosen normal, of those with files of both."""
+
+    def cases(frame: pl.DataFrame, kind: str) -> set[str]:
+        """The cases with a file of one condition in a frame."""
+        return set(frame.filter(pl.col("condition") == kind)["case"])
+
+    kept = cases(gdc.chosen(sheet), "tumour") & cases(gdc.chosen(sheet), "normal")
+    both = cases(sheet, "tumour") & cases(sheet, "normal")
+    return text.fill(PAGE, "flow.pairs", kept=len(kept), both=len(both))
+
+
+def _annotations(notes: pl.DataFrame) -> ResultTable:
+    """Annotations of the cases' biospecimens by category: how many, on how many, the action."""
+    by = (notes.group_by("classification", "category", "action")
+          .agg(pl.len().alias("n"), pl.col("case").n_unique().alias("cases"),
+               pl.col("files").sum().alias("files"))
+          .sort("classification", "category", "action"))  # fmt: skip
+    rows = tuple((c, k, f"{n:,}", f"{cases:,}", f"{f:,}", a) for c, k, a, n, cases, f in by.rows())
+    word = functools.partial(text.word, PAGE)
+    empty = ((word("annotations.none"), *("",) * 5),)
+    return ResultTable(word("annotations.title"), text.words(PAGE, "annotations.columns"),
+                       rows or empty, numeric=(2, 3, 4))  # fmt: skip
+
+
+def _keys(found: Read, spec: GdcSpec) -> tuple[KeyNumber, ...]:
+    """Files, cases, tumours taken, release."""
+    word = functools.partial(text.word, PAGE)
+    tumours = gdc.chosen(found.sheet, spec.tumour).height
+    return (
+        KeyNumber(word("keys.files"), f"{found.sheet.height:,}"),
+        KeyNumber(word("keys.cases"), f"{found.sheet['case'].n_unique():,}"),
+        KeyNumber(word("keys.tumours"), f"{tumours:,}", word("keys.tumours_detail")),
+        KeyNumber(word("keys.release"), spec.release.split(" - ")[0]),
+    )
+
+
+def _matrix(found: Read) -> pl.DataFrame:
+    """Genes by files, int32, gene_id then one column per aliquot in sheet order."""
+    names = found.folder.files["sample"].to_list()
+    assert names == found.sheet["sample"].to_list()  # noqa: S101 - both in aliquot order
+    data = {"gene_id": found.counts.genes["gene_id"]}
+    data |= {name: pl.Series(name, found.counts.matrix[:, j], dtype=pl.Int32)
+             for j, name in enumerate(names)}  # fmt: skip
+    return pl.DataFrame(data)
+
+
+def _write(found: Read, out: Path, dataset: str, day: date, spec: GdcSpec,
+           releases: Mapping[str, str]) -> list[Path]:  # fmt: skip
+    """Every table, each with its README."""
+    matrix = _matrix(found)
+    per_file = {s: ("reads", text.fill(PAGE, "columns.count", protocol=spec.protocol, sample=s))
+                for s in matrix.columns[1:]}  # fmt: skip
+    tables = [
+        ("samplesheet", found.sheet, columns(SHEET)),
+        ("counts", matrix, {"gene_id": columns("columns.genes")["gene_id"], **per_file}),
+        ("genes", found.counts.genes, columns("columns.genes")),
+        ("annotations", found.annotations, columns("columns.annotations")),
+        ("cases", found.cases, columns("columns.cases")),
+        ("treatments", found.treatments, columns("columns.treatments")),
+        ("molecular_tests", found.tests, columns("columns.molecular_tests")),
+    ]
+    if found.cdr is not None:
+        tables.append(("cdr", found.cdr, {c: ("none", text.fill(PAGE, "columns.cdr", column=c))
+                                          for c in found.cdr.columns}))  # fmt: skip
+    files: list[Path] = []
+    for name, frame, described in tables:
+        files += write_table(frame, out, stem(MODULE, f"{dataset}_{name}", 1, day=day),
+                             columns=described, data_releases=releases)  # fmt: skip
+    return files
+
+
+def _releases(path: Path, spec: Dataset) -> dict[str, str]:
+    """The releases and files every table derives from, with the SHA-256 of each record read."""
+    assert spec.gdc is not None  # noqa: S101 - run() checked
+    named = [gdc.METADATA, gdc.MANIFEST, gdc.STATUS, gdc.CASES, gdc.ANNOTATIONS]
+    named += [spec.gdc.cdr_file] if spec.gdc.cdr_file else []
+    return {
+        "GDC": spec.gdc.release, "GDC folder": str(path), "project": spec.gdc.project,
+        "workflow": spec.gdc.workflow, "gene model": spec.gdc.gene_model,
+        "dataset file": str(spec.path),
+        f"sha256:{spec.path.name}": hashlib.sha256(spec.path.read_bytes()).hexdigest(),
+        **{f"sha256:{n}": hashlib.sha256((path / n).read_bytes()).hexdigest() for n in named},
+    }  # fmt: skip
+
+
+def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named option or context
+    settings: runtime.Settings,
+    cards: tuple[ParameterCard, ...],
+    command: str,
+    dataset: str,
+    *,
+    gdc_dir: Path,
+    dataset_file: Path,
+) -> list[Path]:
+    """Check a GDC folder, choose one file per case and sample type, write the tables and page.
+
+    Args:
+        settings: The resolved runtime.
+        cards: Parameter cards for every option of this command.
+        command: The command line, as the reader should retype it.
+        dataset: Slug naming the dataset in output names.
+        gdc_dir: The GDC project folder as the fetch wrote it.
+        dataset_file: The dataset file, with a ``[gdc]`` table.
+
+    Returns:
+        The page, then the tables.
+
+    Raises:
+        DatasetError: If the dataset file has no ``[gdc]`` or names another slug.
+        gdc.GdcError: On any failed check of the folder; nothing is written.
+    """
+    day = date.today()
+    page_stem = stem(MODULE, f"{dataset}_overview", 1, day=day)
+    spec = load(dataset_file)
+    if spec.slug != dataset:
+        raise DatasetError(f"{dataset_file} is for {spec.slug!r}, not --dataset {dataset!r}")
+    if spec.gdc is None:
+        raise DatasetError(f"{dataset_file}: no [gdc] table; not a GDC dataset")
+    source = gdc_dir.resolve()
+    found = read_all(source, spec)
+    out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
+    files = _write(found, out, dataset, day, spec.gdc, _releases(source, spec))
+    word = functools.partial(text.word, PAGE)
+    results = (_checks(found, spec.gdc), _flow(found.sheet), _pairs(found.sheet),
+               _annotations(found.annotations))  # fmt: skip
+    usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
+    page = ModulePage(
+        title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE),
+        parameters=cards, results=results, key_numbers=_keys(found, spec.gdc),
+        reproduce=Reproduction(
+            command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,
+            peak_rss_children=usage.peak_rss_children,
+            profile=f"{settings.profile}, {settings.threads} threads",
+            budget=text.fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
+            versions=runtime.versions(), inputs=(word("inputs"),),
+        ),
+    )  # fmt: skip
+    return [write(page, out / f"{page_stem}.html"), *files]

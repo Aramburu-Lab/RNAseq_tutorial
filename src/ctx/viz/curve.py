@@ -54,6 +54,9 @@ class CurveData:
         width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
         distinct: One unique colour and dash per ``colour`` level, drawn opaque and thick, so
             each line stays traceable; ``colours`` is then unused (``style.distinct_styles``).
+        live: Settings of the page control that redraws these lines, with its ``kind``; None
+            for curves the page does not redraw. Set, the PDF and SVG buttons export the view
+            as set (D-033).
     """
 
     frame: pl.DataFrame
@@ -71,6 +74,7 @@ class CurveData:
     thresholds: tuple[Line, ...] = ()
     width: str = FIGURE_WIDTH
     distinct: bool = False
+    live: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -104,6 +108,18 @@ class CurveData:
     def caption_text(self) -> str:
         """The caption, unwrapped."""
         return self.caption
+
+    def controls(self) -> dict[str, Any] | None:
+        """The page control that redraws these lines, or None."""
+        return dict(self.live) if self.live is not None else None
+
+    def inches(self) -> tuple[float, float]:
+        """The figure files' size, which a page's own PDF and SVG of a changed view take."""
+        return self._inches()
+
+    def export_layers(self) -> dict[str, Any]:
+        """Nothing: the page draws every line the figure files draw."""
+        return {}
 
     def _styles(self) -> dict[str, tuple[str, tuple[MplDash, str], float, float]]:
         """(colour, (matplotlib dash, plotly dash), width, opacity) per ``colour`` level."""
