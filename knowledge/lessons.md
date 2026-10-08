@@ -78,3 +78,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Read a contour's fills back from the page: a band width one ulp wide made plotly count seven levels and paint four bands one colour high while every Python-side check passed (package B, 2026-10-07).
 - Under a number format plotly prints a missing value as 0: write it as an empty string, in Python and in the page script alike (package C, 2026-10-07).
 - A measurement that replaces an estimate exposes what the estimate's slack hid: measured title widths showed `AXIS_TITLE_SHARE` larger than some axes (package E, 2026-10-07).
+- A transcript with no gene stays in tximport's scaling totals and leaves only after scaling, and a sum check against quant.sf allows its 3-decimal rounding, half a thousandth per transcript (M4, 2026-10-08).

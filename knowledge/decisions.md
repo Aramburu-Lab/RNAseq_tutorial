@@ -27,6 +27,16 @@ it were reversed.
 
 ---
 
+## D-054 — M4 quantifies by ctx's own tximport port and reads the cluster's Salmon files from their own folder
+
+**Date:** 2026-10-08 · **Status:** decided (M4 part 1, d2286ae; plan `docs/plans/2026-10-07_m4_real_data_plan_proposal.md`, recommended answers)
+
+**Decision.** Gene summaries come from `ctx.quant.tximport`, a streamed port of R tximport, not pytximport (GPL-3.0, pandas). Copy Q1 lives in `data/raw/tier1_salmon`, read through `--salmon-dir`, so gather's input stays unchanged; `--rnaseq-dir` is required. The sample correlation heatmap draws its lower triangle, since the whole 210 by 210 figure page was 18,579,509 B. A batch test needs at least 3 samples per batch within a cell type. F6, the fold change from estimated against length-scaled counts, is descriptive: `concordance.agreement` refuses signed values.
+
+**Evidence.** The port equals R tximport 1.30.0, run in nf-core's cached image, within 3.5e-15 relative on the chr22_se fixture and a planted 4-sample set; the planted set catches all six order mutations, chr22_se three. A transcript with no gene stays in the scaling totals and is dropped after, as nf-core does; dropping it first was off by up to 2.9 %. Length-scaled sums equal Salmon's `num_mapped` within 1.8e-8 on Step-1, the tolerance quant.sf's 3-decimal rounding allows.
+
+---
+
 ## D-053 — Step 0 of the controls plan, packages B to E: thinning keeps units whole, one hover rule, page y titles take the files' lines, heatmaps take the files' aspect, every width measured
 
 **Date:** 2026-10-07 · **Status:** decided (merged 12248b6, c1d638e, 82e7832, b9254be; package A follows)
