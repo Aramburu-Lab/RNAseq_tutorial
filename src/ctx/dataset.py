@@ -33,13 +33,19 @@ class DatasetError(ValueError):
 
 @dataclass(frozen=True)
 class Resource:
-    """A file ``ctx setup`` fetches: its mirrors, size, checksum and place under the root."""
+    """A file ``ctx setup`` fetches: its mirrors, size, checksum and place under the root.
+
+    ``tls_ciphers`` is an OpenSSL cipher string added to Python's default TLS 1.2 list for
+    this resource alone, for a server that offers no cipher the default list holds;
+    certificate and host checks are unchanged.
+    """
 
     name: str
     urls: tuple[str, ...]
     bytes: int
     sha256: str
     dest: str
+    tls_ciphers: str = ""
 
 
 @dataclass(frozen=True)
@@ -362,7 +368,11 @@ def _resources(raw: list[Any], problems: list[str]) -> tuple[Resource, ...]:
             name, urls, size, digest, dest = fields
             if Path(dest).is_absolute() or ".." in Path(dest).parts:
                 problems.append(f"{where}.dest: {dest!r} must stay under the root")
-            out.append(Resource(name, tuple(urls), size, digest, dest))
+            ciphers = entry.get("tls_ciphers", "")
+            if not isinstance(ciphers, str):
+                problems.append(f"{where}.tls_ciphers: expected str, found {ciphers!r}")
+                ciphers = ""
+            out.append(Resource(name, tuple(urls), size, digest, dest, ciphers))
     return tuple(out)
 
 

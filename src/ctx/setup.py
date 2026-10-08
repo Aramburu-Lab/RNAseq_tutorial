@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import platform
+import ssl
 import urllib.request
 from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime
@@ -198,9 +199,29 @@ def _md5(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _download(url: str, part: Path, opener: Callable[..., Any]) -> None:
-    """Stream one URL to ``part``."""
-    with opener(url, timeout=120) as response, part.open("wb") as out:
+def tls_context(ciphers: str) -> ssl.SSLContext:
+    """Python's default verifying context with ``ciphers`` added to its TLS 1.2 list.
+
+    The default list holds only forward-secret key exchange; a server offering only RSA key
+    exchange (miRTarBase's, 2026-10-08) fails the handshake on it. Appending, not replacing,
+    keeps every default cipher preferred, and verification is the default context's.
+
+    Args:
+        ciphers: An OpenSSL cipher string, as the resource's ``tls_ciphers`` declares it.
+
+    Returns:
+        The context to open that resource's URLs with.
+    """
+    context = ssl.create_default_context()
+    default = [c["name"] for c in context.get_ciphers() if c["protocol"] != "TLSv1.3"]
+    context.set_ciphers(":".join([*default, ciphers]))
+    return context
+
+
+def _download(url: str, part: Path, opener: Callable[..., Any], ciphers: str = "") -> None:
+    """Stream one URL to ``part``, with the resource's own TLS ciphers if it declares any."""
+    extra = {"context": tls_context(ciphers)} if ciphers else {}
+    with opener(url, timeout=120, **extra) as response, part.open("wb") as out:
         while block := response.read(CHUNK):
             out.write(block)
 
@@ -271,7 +292,7 @@ def _fetch_one(resource: Resource, dest: Path, opener: Callable[..., Any]) -> di
             if url.startswith(pdc.SCHEME):
                 print(text.fill(PAGE, "resources.dua", name=resource.name, url=pdc.DUA_URL))
                 signed = pdc.resolve(url, opener)
-            _download(signed.url if signed else url, part, opener)
+            _download(signed.url if signed else url, part, opener, resource.tls_ciphers)
             size, digest = part.stat().st_size, _sha256(part)
             if signed and _md5(part) != signed.md5:
                 failures.append(f"{url}: MD5 {_md5(part)}, PDC lists {signed.md5}")
