@@ -150,9 +150,22 @@ def genecard_run(tmp_path_factory):
     return root, _page(root, "11_genecard", f"{SLUG}_overview")
 
 
+@pytest.fixture(scope="module")
+def ncrna_run(tmp_path_factory):
+    from datetime import date  # noqa: PLC0415
+
+    from ncrna_root import DATASET, make  # noqa: PLC0415 - the made-up root of the M8 tests
+
+    root, spec = make(tmp_path_factory.mktemp("ncrna_cli"), date.today())
+    done = _ctx("--root", str(root), "ncrna", "--dataset", DATASET, "--dataset-file", str(spec),
+                cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "08_ncrna", f"{DATASET}_overview")
+
+
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
 COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical",
-            "genecard"]  # fmt: skip
+            "genecard", "ncrna"]  # fmt: skip
 
 
 def test_every_subcommand_has_a_card_test():

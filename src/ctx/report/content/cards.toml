@@ -173,6 +173,10 @@ effect = "Set or present: gene and transcript figures, and ctx's gene counts."
 meaning = "How ctx's [[tx2gene|tximport]] port makes gene counts from transcript estimates."
 effect = "The value no keeps Salmon's estimates, which shift with isoform use."
 
+[options."--biotypes"]
+meaning = "Comma-separated biotype groups M8 tests, each with its own BH."
+effect = "Each added group is one more stratum, adjusted on its own."
+
 [effects.setup]
 "--dataset-file" = "Set: fetches each resource, keeping it only if size and SHA-256 match."
 
@@ -214,3 +218,7 @@ effect = "The value no keeps Salmon's estimates, which shift with isoform use."
 "--dataset-file" = "Supplies contrasts, box genes, the GTF and the GTEx files."
 "--dataset" = "Selects gather's genes and the M5 results the cards read."
 "--genes-from" = "Cards for an M5 table's genes or a saved list."
+
+[effects.ncrna]
+"--dataset-file" = "Selects the featured contrast, the pair count and M8's own rules."
+"--min-count" = "Moves the filter line; M5's tested genes stay as fitted."

@@ -120,6 +120,12 @@ summary_count = "{shown} of {total} bars shown."
 none = "No bar matches these filters."
 noscript = "This shows every bar; turn on JavaScript to filter them."
 
+# M8's pair select: one lncRNA and its neighbour, drawn and correlated on the page.
+[pairs]
+label = "Choose a pair"
+pair = "lncRNA and neighbour"
+noscript = "This shows the first pair; turn on JavaScript to choose another."
+
 # M10's survival panel: score a gene list on the page (GS.7). Its sentences are clinical.toml's.
 [survival]
 label = "Score a gene list"

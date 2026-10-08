@@ -54,9 +54,11 @@ BAND_COLUMNS = {
 
 
 def gene_types(gtf: Path) -> pl.DataFrame:
-    """The gene records of a GENCODE GTF, gzipped or not: gene_id, gene_name, gene_type, chrom.
+    """The gene records of a GENCODE GTF, gzipped or not.
 
-    Streams the file, so the 1.6 GB of text in GENCODE 50 never sits in memory.
+    Columns gene_id, gene_name, gene_type, chrom, then start and end (1-based, inclusive, as
+    the GTF writes them) and strand, which M8's neighbours read. Streams the file, so the
+    1.6 GB of text in GENCODE 50 never sits in memory.
     """
     opener = gzip.open if gtf.suffix == ".gz" else open
     rows = []
@@ -68,10 +70,14 @@ def gene_types(gtf: Path) -> pl.DataFrame:
             if len(fields) == 9 and fields[2] == "gene":  # noqa: PLR2004 - GTF's 9 columns
                 found = dict(ATTRIBUTE.findall(fields[8]))
                 rows.append((found.get("gene_id"), found.get("gene_name"),
-                             found.get("gene_type"), fields[0]))  # fmt: skip
-    return pl.DataFrame(
-        rows, schema=["gene_id", "gene_name", "gene_type", "chrom"], orient="row"
-    ).unique("gene_id", keep="first", maintain_order=True)
+                             found.get("gene_type"), fields[0], int(fields[3]), int(fields[4]),
+                             fields[6]))  # fmt: skip
+    schema = {"gene_id": pl.String, "gene_name": pl.String, "gene_type": pl.String,
+              "chrom": pl.String, "start": pl.Int64, "end": pl.Int64,
+              "strand": pl.String}  # fmt: skip
+    return pl.DataFrame(rows, schema=schema, orient="row").unique(
+        "gene_id", keep="first", maintain_order=True
+    )
 
 
 def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFrame:

@@ -97,6 +97,32 @@ def adjust(p: np.ndarray, method: str) -> np.ndarray:
     raise ValueError(f"unknown adjustment {method!r}; one of {list(ADJUSTMENTS)}")
 
 
+def adjust_within(p: np.ndarray, strata: np.ndarray, method: str) -> np.ndarray:
+    """Adjust raw p-values within each stratum on its own, as ``adjust`` over that stratum alone.
+
+    M8 adjusts within each biotype: pooled, the many well-measured protein-coding genes set the
+    bar the few lncRNAs are judged by, and the false discovery rate holds only over both.
+
+    Args:
+        p: Raw p-values, 1-D, each in [0, 1]; no NaN.
+        strata: One label per p-value.
+        method: A key of ``ADJUSTMENTS``.
+
+    Returns:
+        Adjusted p-values, in the input order.
+
+    Raises:
+        ValueError: If ``strata`` is not one label per p-value, or as ``adjust`` raises.
+    """
+    if strata.shape != p.shape:
+        raise ValueError(f"{strata.shape[0]} strata for {p.shape[0]} p-values")
+    adjusted = np.empty(p.size)
+    for level in np.unique(strata):
+        within = strata == level
+        adjusted[within] = adjust(p[within], method)
+    return adjusted
+
+
 def p_line(basis: str, alpha: float, n_tested: int, n_passing: int) -> float | None:
     """The raw p the cutoff sits at: the volcano's horizontal line, for any basis.
 

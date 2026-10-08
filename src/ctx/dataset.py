@@ -15,7 +15,7 @@ from typing import Any
 REQUIRED_COLUMNS = ("donor", "cell_type", "condition")
 TABLES = {
     "dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect",
-    "contrasts", "de", "function", "sanity", "gdc", "clinical",
+    "contrasts", "de", "function", "sanity", "gdc", "clinical", "ncrna",
 }  # fmt: skip
 # The count column a GDC STAR - Counts file holds per library protocol (ctx.gather.gdc).
 PROTOCOLS = ("unstranded", "stranded_first", "stranded_second")
@@ -187,6 +187,24 @@ class ClinicalSpec:
 
 
 @dataclass(frozen=True)
+class NcrnaSpec:
+    """What M8 builds: the contrast it stratifies, the pairs its select offers, its own rules.
+
+    Attributes:
+        featured: The contrast whose M5 results and samples M8 reads.
+        pairs: How many lncRNA and neighbour pairs the page's select offers.
+        sanity: M8's pre-registered rules, a ``[sanity]``-shaped table with its
+            ``registered_on`` time; apart from ``[sanity]``, whose record is fixed
+            (tests/test_sanity_record.py), which finds its registration by any line starting
+            ``registered = ``, so this one is named otherwise.
+    """
+
+    featured: str
+    pairs: int
+    sanity: Mapping[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class Dataset:
     """A parsed dataset file."""
 
@@ -206,6 +224,7 @@ class Dataset:
     sanity: Mapping[str, Any] = field(default_factory=dict)
     gdc: GdcSpec | None = None
     clinical: ClinicalSpec | None = None
+    ncrna: NcrnaSpec | None = None
 
     @property
     def name(self) -> str:
@@ -415,6 +434,22 @@ def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | Non
     return ClinicalSpec(tuple(genes), endpoint, published)
 
 
+def _ncrna(raw: Mapping[str, Any], names: set[str], problems: list[str]) -> NcrnaSpec | None:
+    """Parse [ncrna]."""
+    featured = _need(raw, "featured", str, "ncrna", problems)
+    pairs = _need(raw, "pairs", int, "ncrna", problems)
+    if featured is not None and featured not in names:
+        problems.append(f"ncrna.featured: {featured!r} is not a declared contrast")
+    if pairs is not None and pairs < 1:
+        problems.append(f"ncrna.pairs: {pairs}, at least 1")
+    sanity = raw.get("sanity", {})
+    if sanity and not isinstance(sanity.get("registered_on"), str):
+        problems.append("ncrna.sanity.registered_on: the time the rules were registered")
+    if featured is None or pairs is None:
+        return None
+    return NcrnaSpec(featured, pairs, sanity)
+
+
 def load(path: Path) -> Dataset:
     """Read and check a dataset file.
 
@@ -455,6 +490,7 @@ def load(path: Path) -> Dataset:
     function = _function(raw["function"], names, resources, problems) if "function" in raw else None
     gdc = _gdc(raw["gdc"], problems) if "gdc" in raw else None
     clinical = _clinical(raw["clinical"], problems) if "clinical" in raw else None
+    ncrna = _ncrna(raw["ncrna"], names, problems) if "ncrna" in raw else None
     if "clinical" in raw and "gdc" not in raw:
         problems.append("[clinical] needs [gdc]: M10 reads a GDC project's gather outputs")
     if problems:
@@ -476,4 +512,5 @@ def load(path: Path) -> Dataset:
         sanity=raw.get("sanity", {}),
         gdc=gdc,
         clinical=clinical,
+        ncrna=ncrna,
     )
