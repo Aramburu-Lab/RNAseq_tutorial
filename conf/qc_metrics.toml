@@ -413,6 +413,29 @@ read_length_tied = false
 source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), applied to gene-assigned reads"
 source_type = "course_convention"
 
+# The GDC counts files' own strand columns (ctx.gather.gdc): STAR's GeneCounts per read strand.
+# In the four TCGA projects on this Mac, 52 of 3,008 files share 0.0444 to 0.1243, the rest
+# 0.4948 to 0.5332, so no file falls between classes (measured 2026-10-07).
+[metrics.gdc_strand_share]
+stage = "counts"
+title = "Strand of a GDC counts file"
+meaning = "The share of a file's gene counts on the first read strand: near 0 or 1 for a stranded library, near 0.5 for an unstranded one."
+computed = "STAR GeneCounts stranded_first / (stranded_first + stranded_second), summed over genes, N_ rows left out"
+unit = "fraction"
+table = "gdc_samplesheet"
+column = "first_strand_share"
+kind = "strandedness"
+direction = "none"
+stranded = 0.8
+unstranded = 0.1
+rationale = "nf-core sets these thresholds on Salmon's fragments over transcripts; STAR counts each read once per strand setting, a read on overlapping genes of both strands left out. Applying the same cut-offs to GDC's columns is this course's choice."
+causes = ["a stranded library in an unstranded project", "an unstranded library in a stranded project"]
+action = "exclude"
+matters_for_de = true
+read_length_tied = false
+source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), applied to GDC STAR - Counts strand columns"
+source_type = "course_convention"
+
 # ---- Quantification (Salmon 2.7.0) -------------------------------------------------------
 
 [metrics.salmon_percent_mapped]

@@ -33,6 +33,10 @@ effect = "Off: shrunk columns empty, MA plot raw; p-values and calls unchanged."
 meaning = "An nf-core/rnaseq outdir, Salmon only. Unset: none is read."
 effect = "Set: gather checks release and samples, then writes rounded length-scaled counts."
 
+[options."--gdc-dir"]
+meaning = "A GDC project folder of STAR counts, clinical records and annotations."
+effect = "Set: gather checks it and takes one file per patient."
+
 [options."--registry"]
 meaning = "The QC registry of metrics, bands and sources. Unset: CTX_QC_REGISTRY, else conf/qc_metrics.toml."
 effect = "Samples are judged against its bands; the page names the file used."

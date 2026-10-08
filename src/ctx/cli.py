@@ -158,23 +158,33 @@ def gather(
     fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
     dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
+    gdc_dir: Annotated[Path | None, typer.Option(help=HELP["--gdc-dir"])] = None,
 ) -> None:
-    """Check one nf-core/fetchngs outdir and write the harmonised sample sheet (M1c)."""
+    """Check one nf-core/fetchngs outdir or GDC folder and write the sample sheet (M1c)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
-    from ctx.gather import harmonise  # noqa: PLC0415 - heavy; imported after the runtime profile
+    from ctx.gather import gdc_run, harmonise  # noqa: PLC0415 - heavy; after the runtime profile
     from ctx.gather.curation import CurationError  # noqa: PLC0415 - same reason
     from ctx.gather.fetchngs import FetchngsError  # noqa: PLC0415 - same module, same reason
+    from ctx.gather.gdc import GdcError  # noqa: PLC0415 - same reason
     from ctx.gather.rnaseq import RnaseqError  # noqa: PLC0415 - same reason
     from ctx.qc.registry import RegistryError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
     try:
-        written = harmonise.run(
-            ctx.obj["settings"], cards, command, dataset, fetchngs_dir=fetchngs_dir,
-            dataset_file=dataset_file, rnaseq_dir=rnaseq_dir,
-        )  # fmt: skip
-    except (FetchngsError, DatasetError, CurationError, RnaseqError, RegistryError) as error:
+        if gdc_dir is not None:
+            if fetchngs_dir or rnaseq_dir or dataset_file is None:
+                raise DatasetError("--gdc-dir takes --dataset-file, and neither --fetchngs-dir "
+                                   "nor --rnaseq-dir")  # fmt: skip
+            written = gdc_run.run(ctx.obj["settings"], cards, command, dataset, gdc_dir=gdc_dir,
+                                  dataset_file=dataset_file)  # fmt: skip
+        else:
+            written = harmonise.run(
+                ctx.obj["settings"], cards, command, dataset, fetchngs_dir=fetchngs_dir,
+                dataset_file=dataset_file, rnaseq_dir=rnaseq_dir,
+            )  # fmt: skip
+    except (FetchngsError, DatasetError, CurationError, RnaseqError, RegistryError,
+            GdcError) as error:  # fmt: skip
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

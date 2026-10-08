@@ -1,0 +1,58 @@
+# TCGA breast invasive carcinoma, the M10 cohort (TODO.md Priority 2; the plan
+# docs/plans/2026-10-07_m10_real_data_plan_proposal.md, approved 2026-10-08). The one committed
+# place for this cohort's identifiers: tests/test_repo.py fails if a [guard] id or pattern
+# appears in src/, tests/ or scripts/. Raw files sit under data/raw/tcga_brca as the GDC fetch
+# wrote them; `ctx gather --gdc-dir` reads them and nothing else does (ctx.gather.gdc).
+
+[dataset]
+slug = "tcga_brca"
+label = "TCGA breast"
+source = "The Cancer Genome Atlas, project TCGA-BRCA, through the NCI Genomic Data Commons; clinical endpoints from TCGA-CDR, Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052"
+
+# The folder's own record: gdc_status.json and every row of _retrieval_log.tsv name this
+# release, and the file query asked for this project, workflow and open access.
+[gdc]
+project = "TCGA-BRCA"
+release = "Data Release 46.0 - August 10, 2026"
+workflow = "STAR - Counts"
+gene_model = "GENCODE v36"
+# 52 of 3,008 TCGA files in the four fetched projects are stranded (first-strand share 0.0444
+# to 0.1243, the rest 0.4948 to 0.5332, measured 2026-10-07); the cohort's protocol is
+# unstranded, so the others are dropped and counts come from the unstranded column.
+protocol = "unstranded"
+tumour = "Primary Tumor"
+normal = "Solid Tissue Normal"
+cdr_file = "TCGA-CDR-SupplementalTableS1.xlsx"
+cdr_type = "BRCA"
+
+# Case barcodes (TCGA-3C-AAAU) start with a digit or a letter, which COHORT_ID's TCGA-[A-Z]+
+# alone does not cover.
+[guard]
+ids = ["TCGA-BRCA"]
+patterns = ['\bTCGA-[A-Z0-9]{2}-[A-Z0-9]{4}\b']
+
+# The build list (plan section 3, proposed and approved): the static figures and the page's
+# default selection. PFI is TCGA-CDR's recommended endpoint for breast (Liu 2018, Table 3).
+[clinical]
+genes = ["ESR1", "PGR", "ERBB2", "MKI67"]
+endpoint = "PFI"
+
+# Liu et al. 2018, read through PubMed Central (PMC6066282) for the plan, 2026-10-07. Table 3
+# counts event flags among the BRCA rows; Figure 2A to D compares ER-positive with ER-negative.
+[clinical.published.table3]
+source = "Liu et al. 2018 Cell, Table 3, BRCA: events and censored per endpoint"
+OS = [151, 946]
+PFI = [145, 952]
+DFI = [84, 869]
+DSS = [83, 995]
+
+[clinical.published.er_logrank]
+source = "Liu et al. 2018 Cell, Figure 2A-D: log-rank p, ER-positive against ER-negative"
+OS = 0.097
+PFI = 0.005
+DFI = 0.001
+DSS = 0.009
+
+[clinical.published.follow_up]
+source = "Liu et al. 2018 Cell, Table 2, BRCA: median follow-up, the median observed OS time"
+months = 27.7

@@ -27,7 +27,7 @@ files = ["src"]
 # These ship no type information; everything else stays strict.
 [[tool.mypy.overrides]]
 module = ["seaborn", "seaborn.*", "plotly", "plotly.*", "scipy", "scipy.*", "threadpoolctl",
-          "pandas", "pandas.*", "pydeseq2.*", "formulaic", "joblib.*"]
+          "pandas", "pandas.*", "pydeseq2.*", "formulaic", "joblib.*", "openpyxl", "openpyxl.*"]
 ignore_missing_imports = true
 
 [tool.interrogate]
@@ -39,5 +39,6 @@ markers = [
     "network: needs the network; deselected by default, run with -m network",
     "budget: real-size run against the Track A or B budget; minutes; run with -m budget",
     "needs_star: needs a STAR that maps; a failing probe skips only on darwin-arm64 with CI unset, and fails everywhere else (R6.2, D-036)",
+    "realdata: reads the GDC folders on this Mac (CTX_GDC_HOME, else ~); run with -m realdata",
 ]
-addopts = "-m 'not network and not budget'"
+addopts = "-m 'not network and not budget and not realdata'"

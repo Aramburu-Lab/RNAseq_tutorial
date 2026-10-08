@@ -15,8 +15,12 @@ from typing import Any
 REQUIRED_COLUMNS = ("donor", "cell_type", "condition")
 TABLES = {
     "dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect",
-    "contrasts", "de", "function", "sanity",
+    "contrasts", "de", "function", "sanity", "gdc", "clinical",
 }  # fmt: skip
+# The count column a GDC STAR - Counts file holds per library protocol (ctx.gather.gdc).
+PROTOCOLS = ("unstranded", "stranded_first", "stranded_second")
+# TCGA-CDR's four endpoints (Liu et al. 2018), each an event flag and a time in days.
+ENDPOINTS = ("OS", "DSS", "DFI", "PFI")
 
 
 class DatasetError(ValueError):
@@ -137,6 +141,52 @@ class FunctionSpec:
 
 
 @dataclass(frozen=True)
+class GdcSpec:
+    """A GDC project folder: what ``ctx.gather.gdc`` checks it against and how it chooses.
+
+    Attributes:
+        project: The GDC project ID the metadata's files must belong to.
+        release: The GDC data release, as ``gdc_status.json`` names it.
+        workflow: The expression workflow the files come from, e.g. ``STAR - Counts``.
+        gene_model: The annotation each counts file's first line names, e.g. ``GENCODE v36``.
+        protocol: The library protocol kept, one of ``PROTOCOLS``; files of another are dropped,
+            and counts come from this column.
+        tumour: The GDC sample type of the tumours; one is chosen per case.
+        normal: The GDC sample type of the normal tissue; one is chosen per case.
+        primary_site: The case primary site to keep, where the folder's metadata carries it;
+            None keeps every file of the project.
+        cdr_file: The TCGA-CDR workbook in the folder, or None for a project without one.
+        cdr_type: The CDR's ``type`` of this project's patients.
+    """
+
+    project: str
+    release: str
+    workflow: str
+    gene_model: str
+    protocol: str
+    tumour: str
+    normal: str
+    primary_site: str | None = None
+    cdr_file: str | None = None
+    cdr_type: str | None = None
+
+
+@dataclass(frozen=True)
+class ClinicalSpec:
+    """What M10 builds for a GDC dataset: the build list, the endpoint and published numbers.
+
+    Attributes:
+        genes: The build list, gene symbols the static figures and the default selection hold.
+        endpoint: The default endpoint, one of ``ENDPOINTS``, as TCGA-CDR Table 3 recommends.
+        published: Numbers a page prints beside its own, each table with its ``source``.
+    """
+
+    genes: tuple[str, ...]
+    endpoint: str
+    published: Mapping[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class Dataset:
     """A parsed dataset file."""
 
@@ -154,6 +204,8 @@ class Dataset:
     de: DeSpec | None = None
     function: FunctionSpec | None = None
     sanity: Mapping[str, Any] = field(default_factory=dict)
+    gdc: GdcSpec | None = None
+    clinical: ClinicalSpec | None = None
 
     @property
     def name(self) -> str:
@@ -328,6 +380,41 @@ def _function(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource
     return FunctionSpec(gene_sets, licence, featured, running=(running[0], running[1]))
 
 
+def _gdc(raw: Mapping[str, Any], problems: list[str]) -> GdcSpec | None:
+    """Parse [gdc]."""
+    keys = ("project", "release", "workflow", "gene_model", "protocol", "tumour", "normal")
+    fields = [_need(raw, k, str, "gdc", problems) for k in keys]
+    optional = {k: raw.get(k) for k in ("primary_site", "cdr_file", "cdr_type")}
+    problems += [f"gdc.{k}: expected str, found {v!r}" for k, v in optional.items()
+                 if v is not None and not isinstance(v, str)]  # fmt: skip
+    if fields[4] is not None and fields[4] not in PROTOCOLS:
+        problems.append(f"gdc.protocol: {fields[4]!r}, not one of {PROTOCOLS}")
+    if (optional["cdr_file"] is None) != (optional["cdr_type"] is None):
+        problems.append("gdc.cdr_file and gdc.cdr_type are given together or not at all")
+    if None in fields:
+        return None
+    project, release, workflow, model, protocol, tumour, normal = (str(f) for f in fields)
+    return GdcSpec(project, release, workflow, model, protocol, tumour, normal,
+                   primary_site=optional["primary_site"], cdr_file=optional["cdr_file"],
+                   cdr_type=optional["cdr_type"])  # fmt: skip
+
+
+def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | None:
+    """Parse [clinical]."""
+    genes = _need(raw, "genes", list, "clinical", problems)
+    endpoint = _need(raw, "endpoint", str, "clinical", problems)
+    if endpoint is not None and endpoint not in ENDPOINTS:
+        problems.append(f"clinical.endpoint: {endpoint!r}, not one of {ENDPOINTS}")
+    published = raw.get("published", {})
+    problems += [f"clinical.published.{k}: no source" for k, v in published.items()
+                 if not isinstance(v, dict) or not isinstance(v.get("source"), str)]  # fmt: skip
+    if genes is None or endpoint is None:
+        return None
+    if not genes or not all(isinstance(g, str) for g in genes):
+        problems.append("clinical.genes: a non-empty list of gene symbols")
+    return ClinicalSpec(tuple(genes), endpoint, published)
+
+
 def load(path: Path) -> Dataset:
     """Read and check a dataset file.
 
@@ -366,6 +453,10 @@ def load(path: Path) -> Dataset:
     names = {c.name for c in contrasts}
     de = _de(raw["de"], names, problems) if "de" in raw else None
     function = _function(raw["function"], names, resources, problems) if "function" in raw else None
+    gdc = _gdc(raw["gdc"], problems) if "gdc" in raw else None
+    clinical = _clinical(raw["clinical"], problems) if "clinical" in raw else None
+    if "clinical" in raw and "gdc" not in raw:
+        problems.append("[clinical] needs [gdc]: M10 reads a GDC project's gather outputs")
     if problems:
         raise DatasetError(f"{path}:\n  " + "\n  ".join(problems))
     return Dataset(
@@ -383,4 +474,6 @@ def load(path: Path) -> Dataset:
         de=de,
         function=function,
         sanity=raw.get("sanity", {}),
+        gdc=gdc,
+        clinical=clinical,
     )

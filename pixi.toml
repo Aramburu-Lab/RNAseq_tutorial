@@ -161,6 +161,9 @@ formulaic = "==1.2.2"
 pandas = "==3.0.6"
 # ctx.report.glossary reads Rytis's glossary.yaml (Phase 2L, D-048); the version the lock already held.
 pyyaml = "==6.0.3"
+# The one Excel reader, for M10's TCGA-CDR workbook and M7's supplements; it also writes the
+# test fixtures (real-data decisions, M7 6, 2026-10-08). MIT; conda-forge noarch.
+openpyxl = "==3.1.5"
 
 [feature.ctx.pypi-dependencies]
 cancer-transcriptomics-teaching = { path = ".", editable = true }
