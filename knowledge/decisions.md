@@ -27,6 +27,16 @@ it were reversed.
 
 ---
 
+## D-058 — M8's TCGA half: miRNA through the GDC reader, M5 on a GDC sheet by one mapping, targets apart, a NOT MEASURED verdict
+
+**Date:** 2026-10-08 · **Status:** decided (M8 TCGA merged, e202a43; plan recommended answers)
+
+**Decision.** The GDC reader reads miRNA and isoform files (`ctx.gather.gdc_mirna`): mature miRNAs summed from isoform rows per hairpin, the per-hairpin sum checked against the miRNA file; cross-mapped totals are recorded but not compared, since a miRNA file flags a whole hairpin and an isoform file single reads. A GDC sheet maps `donor` to the case and `run_accession` to the aliquot order, so M5 fits it through its one path. A non-target has no TargetScan site at all; validated and predicted targets are never merged. A rule whose input is absent is NOT MEASURED with its reason, never PASS or FAIL. M5 pages embed rows as columns plus value lists, since the volcano's live calls read every row below p 0.1.
+
+**Evidence.** The miRNA DE counts equal the plan's on all four cohorts; KIRC's miR-210-3p and ISCU, miR-200c-3p and miR-141-3p, and BRCA's miR-21-5p and miR-145-5p go the published directions; the 92 recorded Step-1 metrics reproduce; 30 planted mutations caught.
+
+---
+
 ## D-057 — M7: one log2 CPM and a public Spearman; rules apart from the Step-1 record; the CPTAC agreement accepted for the reader, and said
 
 **Date:** 2026-10-08 · **Status:** decided (M7 merged, 849a8f7; plan `docs/plans/2026-10-07_m7_real_data_plan_proposal.md`, recommended answers; Excel by openpyxl as M10)
