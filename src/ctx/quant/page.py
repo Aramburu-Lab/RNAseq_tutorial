@@ -12,6 +12,7 @@ import polars as pl
 
 from ctx import runtime, tools
 from ctx.de.run import Writer
+from ctx.quant import NUM_READS_DECIMALS
 from ctx.quant import blocks as blk
 from ctx.quant import tables as tab
 from ctx.quant.figures import UNITS
@@ -138,7 +139,12 @@ def q1_groups(ctx: Context, found: blk.Shown) -> list[Group]:
     columns = {c: ("reads", text.fill(PAGE, "columns.sample_counts", sample=c,
                                       mode=str(ctx.options.counts_from)))
                for c in port.samples}  # fmt: skip
-    writer.table(counts, "gene_counts", described(counts.select("gene_id", "gene_name")) | columns)
+    writer.table(
+        counts,
+        "gene_counts",
+        described(counts.select("gene_id", "gene_name")) | columns,
+        csv_decimals=NUM_READS_DECIMALS,
+    )
     return out
 
 

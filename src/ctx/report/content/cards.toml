@@ -215,6 +215,11 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 [effects.report]
 "--dataset-file" = "Set: the hub also shows the verdict of each sanity rule."
 
+[effects.run]
+"--salmon-dir" = "Carried to quant, which needs --rnaseq-dir beside it."
+"--mirna-dir" = "Carried to gather; needs --gdc-dir and --isoform-dir."
+"--isoform-dir" = "Carried to gather; needs --gdc-dir and --mirna-dir."
+
 [effects.qc]
 "--fetchngs-dir" = "With --reads: FASTQ paths resolve against it; nothing else there is read."
 "--rnaseq-dir" = "Set: adds read fates and judges trimming and mapping. Unset: counts only."

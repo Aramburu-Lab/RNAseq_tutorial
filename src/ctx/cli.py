@@ -526,13 +526,17 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
     gdc_dir: Annotated[Path | None, typer.Option(help=HELP["--gdc-dir"])] = None,
+    salmon_dir: Annotated[Path | None, typer.Option(help=HELP["--salmon-dir"])] = None,
+    mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
+    isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
     check: Annotated[bool, typer.Option("--check/--no-check", help=HELP["--check"])] = False,
 ) -> None:
     """Run every module the dataset file declares, in course order, each as its own command."""
     from ctx import pipeline  # noqa: PLC0415 - imported after the runtime profile
 
     settings = ctx.obj["settings"]
-    options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dir)
+    options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dir,
+                               salmon_dir, mirna_dir, isoform_dir)  # fmt: skip
     problems, planned = pipeline.check(settings.root, options)
     for problem in problems:
         typer.echo(f"- {problem.text}", err=True)

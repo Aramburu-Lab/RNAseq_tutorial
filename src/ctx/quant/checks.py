@@ -16,12 +16,12 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
-from ctx.quant import CountsFrom, QuantError, outdir
+from ctx.quant import NUM_READS_DECIMALS, CountsFrom, QuantError, outdir
 from ctx.quant.tximport import GeneTables
 
-# quant.sf prints NumReads to three decimals, so the estimated counts tximport scales to can
-# miss num_mapped by half a thousandth per transcript in the index, and no more.
-ROUNDING = 0.0005
+# Rounded NumReads let the estimated counts tximport scales to miss num_mapped by half the
+# last printed decimal per transcript in the index, and no more.
+ROUNDING = 0.5 * 10**-NUM_READS_DECIMALS
 # R writes its tables with 15 significant digits.
 TABLE_TOLERANCE = 1e-9
 SHOWN = 5

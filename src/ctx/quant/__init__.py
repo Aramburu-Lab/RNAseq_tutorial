@@ -6,6 +6,9 @@ Dependency-free, so the command line reads its choices without importing the ana
 
 from enum import StrEnum
 
+# quant.sf prints NumReads to three decimals: a count of reads carries no finer precision.
+NUM_READS_DECIMALS = 3
+
 
 class QuantError(ValueError):
     """An input `ctx quant` cannot use, or a check its outputs failed; the message says which."""

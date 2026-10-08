@@ -102,6 +102,9 @@ urls = ["https://awi.cuhk.edu.cn/miRTarBase/downloads/files/10.0/miRTarBase_SE_W
 bytes = 3348778
 sha256 = "77a862a5f2f98f52c7a130649803b05e1468f9759b3c0bf8d03a99f75d992e46"
 dest = "data/raw/mirna_targets/miRTarBase_SE_WR.csv"
+# Its server speaks TLS 1.2 with RSA key exchange only (AES128-GCM-SHA256, AES256-GCM-SHA384;
+# every ECDHE and DHE suite refused, 2026-10-08), which Python's default list omits.
+tls_ciphers = "AES256-GCM-SHA384:AES128-GCM-SHA256"
 
 # M5 on this project (M8 plan, section 4): every patient with a tumour and a normal file
 # taken by ctx.gather.gdc.chosen, paired. n is the pairs the gather rule keeps

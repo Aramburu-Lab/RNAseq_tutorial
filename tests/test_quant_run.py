@@ -13,7 +13,7 @@ from quant_root import DATASET, SALMON, quant_root
 
 from ctx import runtime
 from ctx.io.naming import lint
-from ctx.quant import CountsFrom, QuantError, checks, outdir, tables, tximport
+from ctx.quant import NUM_READS_DECIMALS, CountsFrom, QuantError, checks, outdir, tables, tximport
 from ctx.quant.run import Options, resolve
 
 SE = ("se_a", "se_b", "se_c", "se_d", "se_e")
@@ -64,6 +64,29 @@ def test_gene_counts_follow_the_option(built):
     r = pl.read_csv(SALMON / "salmon.merged.gene_counts_length_scaled.tsv", separator="\t")
     assert ours["gene_id"].to_list() == r["gene_id"].to_list()
     np.testing.assert_allclose(ours.select(SE).to_numpy(), r.select(SE).to_numpy(), rtol=1e-12)
+
+
+def test_gene_counts_csv_at_the_precision_of_num_reads(built):
+    """The CSV holds the counts to quant.sf's three decimals; the parquet keeps every digit.
+
+    Mutations: the CSV written with full float repr (``csv_decimals`` dropped at the page,
+    or the round skipped in ``write_table``): numbers with more than three decimals; the
+    ``.0`` kept: zeros written ``0.0``; the parquet rounded too: none of its values carries
+    a fourth decimal.
+    """
+    root, *_ = built
+    full = newest(root, "gene_counts")
+    path = next((root / "outputs" / "04_quant").glob("*_gene_counts_v1.csv"))
+    shown = pl.read_csv(path, schema_overrides=dict.fromkeys(SE, pl.String))
+    digits = shown.unpivot(on=SE)["value"].str.extract(r"\.(\d+)").str.len_chars()
+    assert digits.max() <= NUM_READS_DECIMALS
+    assert "0" in shown[SE[0]].to_list() and "0.0" not in shown[SE[0]].to_list()
+    read = pl.read_csv(path)
+    assert read["gene_id"].to_list() == full["gene_id"].to_list()
+    rounded = full.select(SE).to_numpy().round(NUM_READS_DECIMALS)
+    assert np.array_equal(read.select(SE).to_numpy(), rounded)
+    assert (full.select(SE).to_numpy() != rounded).any()
+    assert "rounded to 3 decimals" in path.with_name(path.stem + "_README.md").read_text()
 
 
 def test_fold_change_thinning_keeps_the_far_genes(tmp_path):
