@@ -24,7 +24,14 @@ from ctx.dataset import load
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 from ctx.report import builder, course, guide, prose, text
-from ctx.report.builder import Code, Group, ModulePage, ParameterCard, Reproduction
+from ctx.report.builder import (
+    Code,
+    Group,
+    ModulePage,
+    ParameterCard,
+    Reproduction,
+    ResultTable,
+)
 
 
 @pytest.fixture
@@ -103,9 +110,64 @@ def test_usage_lines_are_the_scripts(page_blocks):
 
 
 def _titles() -> dict[str, str]:
-    return {"fetch_laptop": "part1.laptop", "setup": "part1.setup",
-            "fetch_cluster": "part1.cluster", "count_laptop": "part2.laptop",
+    return {"fetch_laptop": "part1.laptop", "fetch_laptop_download": "part1.laptop_download",
+            "setup": "part1.setup", "fetch_cluster": "part1.cluster",
+            "fetch_cluster_size": "part1.cluster_size",
+            "fetch_cluster_download": "part1.cluster_download", "count_laptop": "part2.laptop",
             "count_cluster": "part2.cluster"}  # fmt: skip
+
+
+LAUNCH = re.compile(
+    r"(?:^|\s)(?:CTX_SITE=laptop |SKIP_DOWNLOAD=1 |DRY_RUN=1 )*"
+    r"(?:bash|sbatch -A \S+ \S+) \S*fetchngs\.sbatch",
+    re.M,
+)
+
+
+def test_no_block_downloads_before_the_size_is_read(page_blocks):
+    """Each route's metadata run and its download are in separate Copy blocks, the size read
+    between them, so pasting one block never downloads unseen. Catches the laptop's two launches
+    in one block (U.10 pasted it and downloaded at once), and the Kebnekaise grep and download
+    in one."""
+    for c in codes(page_blocks[1]).values():
+        launches = [m.group(0) for m in LAUNCH.finditer(c.text)]
+        downloads = [x for x in launches if "SKIP_DOWNLOAD" not in x and "DRY_RUN" not in x]
+        assert not (downloads and len(launches) > len(downloads)), c.title
+        assert not (downloads and "bytes of FASTQ at ENA" in c.text), c.title
+    titles = list(codes(page_blocks[1]))
+    order = [text.word("guide", k) for k in ("part1.laptop", "part1.laptop_download",
+                                             "part1.cluster", "part1.cluster_size",
+                                             "part1.cluster_download")]  # fmt: skip
+    assert [t for t in titles if t in order] == order
+
+
+def test_laptop_gtf_is_where_setup_finds_it(page_blocks):
+    """Part 2's laptop block saves the GTF at the dataset's annotation_gtf dest under its ctx
+    root, so ctx setup finds it in place, and the page lists every file setup downloads with its
+    size. Catches the GTF fetched twice (U.10: 124,650,284 bytes again) and a download the page
+    does not name."""
+    spec, blocks = page_blocks
+    lines = codes(blocks)[text.word("guide", "part2.laptop")].text.splitlines()
+    (refs,) = [line.split("=", 1)[1].strip('"') for line in lines if line.startswith("REFS=")]
+    count = lines[-1]
+    gtf = re.search(r'"\$REFS/(\S+\.gtf\.gz)"', count).group(1)
+    root = f"$HOME/ctx_{spec.slug}"
+    assert f"{refs}/{gtf}" == f"{root}/{spec.resource('annotation_gtf').dest}"
+    assert f" --root ~/ctx_{spec.slug} " in codes(blocks)[text.word("guide", "part3.laptop")].text
+    (table,) = [i for g in blocks for i in g.items if isinstance(i, ResultTable)]
+    assert [(r[0], r[1]) for r in table.rows] == [(r.name, f"{r.bytes:,}") for r in spec.resources]
+    found = {r[0]: r[3] for r in table.rows}
+    assert found["annotation_gtf"] == text.word("guide", "part3.found")
+    assert found["msigdb_hallmark"] == text.word("guide", "part3.fetched")
+
+
+def test_laptop_needs_from_one_place(page_blocks):
+    """Part 2 states Docker's memory floor and the run folder's size from guide.NEEDS, the
+    measured values. Catches a value typed into the page text instead."""
+    note = next(i for g in page_blocks[1] for i in g.items if isinstance(i, str)
+                and str(guide.NEEDS["index_gib"]) in i)  # fmt: skip
+    assert note == text.fill("guide", "part2.needs", **guide.NEEDS)
+    assert text.placeholders(text.raw("guide", "part2.needs")) == set(guide.NEEDS)
 
 
 def test_reference_is_the_datasets(page_blocks):
@@ -113,7 +175,8 @@ def test_reference_is_the_datasets(page_blocks):
     Catches the Usage moved to another release alone."""
     spec, _ = page_blocks
     (base,) = [line[2:] for line in guide.USAGE["count_laptop"][1] if line.startswith("B=")]
-    (gtf,) = re.findall(r'"\$B/(gencode[^"]+)"', guide.USAGE["count_laptop"][1][2])
+    (curl,) = [line for line in guide.USAGE["count_laptop"][1] if line.startswith("curl ")]
+    (gtf,) = re.findall(r'"\$B/(gencode[^"]+)"', curl)
     assert spec.resource("annotation_gtf").urls == (f"{base}/{gtf}",)
 
 
@@ -134,6 +197,7 @@ def test_laptop_blocks_run_in_page_order(site, tmp_path):
     assert spec.accessions == tuple(_ids("download"))
     shown = codes(guide.blocks(spec, spec_path))
     part1 = shown[text.word("guide", "part1.laptop")].text
+    part1 += shown[text.word("guide", "part1.laptop_download")].text
     part2 = shown[text.word("guide", "part2.laptop")].text
     clone = shlex.quote(env["CTX_REPO"])
     # Between the parts, the harness keeps what Part 1's last launch recorded.

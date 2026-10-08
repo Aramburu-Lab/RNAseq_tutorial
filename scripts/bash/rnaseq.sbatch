@@ -25,8 +25,10 @@
 #   DRY_RUN=1 bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
 #   sbatch -A <compute project> "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
 #   # keep nfcore_rnaseq/work until ctx gather on the laptop has read the copied results
-#   # on a laptop, Docker running: the same references, then
-#   cd "$RUN" && CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
+#   # on a laptop, Docker running: the references where ctx setup finds the GTF, then the count
+#   REFS="$HOME/ctx_<run name, no spaces>/resources/gencode"
+#   mkdir -p "$REFS" && cd "$REFS"
+#   cd "$RUN" && CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" "$REFS/GRCh38.primary_assembly.genome.fa.gz" "$REFS/gencode.v50.primary_assembly.annotation.gtf.gz" true
 set -euo pipefail
 
 RUN="${1:?usage: rnaseq.sbatch <run folder> <genome FASTA> <GTF> <true|false, a GENCODE GTF>}"
@@ -81,6 +83,7 @@ MARKER="$RUN/nfcore_fetchngs/results.complete"
 SHEET="$RUN/nfcore_fetchngs/results/samplesheet/samplesheet.csv"
 [[ -s "$SHEET" ]] || die "no samplesheet at $SHEET"
 # Asked of the site before anything is written: on a laptop, what Docker has.
+executor=$(site_executor) || die "the site's executor is unknown; see the line above"
 limits=$(site_rnaseq_config) || die "the site's limits are unknown; see the line above"
 LAUNCH="$RUN/nfcore_rnaseq"
 mkdir -p "$LAUNCH"
@@ -95,12 +98,12 @@ gtf: $GTF
 gencode: $GENCODE
 pseudo_aligner: salmon
 skip_alignment: true
-save_reference: true
+save_reference: $SITE_SAVE_REFERENCE
 publish_dir_mode: copy
 EOF
-# The site's queueSize and limits. Then the Trim Galore JSON reports, the only ones MultiQC 1.35
+# The site's executor and limits. Then the Trim Galore JSON reports, the only ones MultiQC 1.35
 # reads for Trim Galore 2.x, which ctx qc needs (D-025).
-printf 'executor {\n    queueSize = %s\n}\n%s\n' "$SITE_QUEUE_SIZE" "$limits" > "$LAUNCH/site.config"
+printf '%s\n%s\n' "$executor" "$limits" > "$LAUNCH/site.config"
 cat >> "$LAUNCH/site.config" <<'EOF'
 process {
     withName: '.*:FASTQ_FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE' {

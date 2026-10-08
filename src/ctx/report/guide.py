@@ -26,6 +26,7 @@ from ctx.report.builder import (
     ModulePage,
     ParameterCard,
     Reproduction,
+    ResultTable,
     write,
 )
 
@@ -43,6 +44,10 @@ USAGE = {
         'mkdir -p "$RUN" && cd "$RUN"',
         "printf '%s\\n' <accession> <accession> > ids.txt",
         'CTX_SITE=laptop SKIP_DOWNLOAD=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt',  # noqa: E501
+    )),
+    # Apart from the metadata run, so a pasted block never downloads before the size is read.
+    "fetch_laptop_download": ("fetchngs.sbatch", (
+        "# its last line is the size at ENA: read it, then download",
         'CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt',
     )),
     "setup": ("kebnekaise_env.sh", (
@@ -61,15 +66,20 @@ USAGE = {
         "printf '%s\\n' <accession> <accession> > ids.txt",
         'DRY_RUN=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt',
         'SKIP_DOWNLOAD=1 sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt',  # noqa: E501
+    )),
+    "fetch_cluster_size": ("fetchngs.sbatch", (
         "# once that job has ended: the size of the download, read before it is submitted",
         "grep 'bytes of FASTQ at ENA' slurm-ctx_fetchngs-<job id>.out",
+    )),
+    "fetch_cluster_download": ("fetchngs.sbatch", (
         'sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt',
     )),
     "count_laptop": ("rnaseq.sbatch", (
-        'mkdir -p "$RUN/refs" && cd "$RUN/refs"',
+        'REFS="$HOME/ctx_<run name, no spaces>/resources/gencode"',
+        'mkdir -p "$REFS" && cd "$REFS"',
         "B=https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50",
         'curl -fL --remote-name-all "$B/MD5SUMS" "$B/GRCh38.primary_assembly.genome.fa.gz" "$B/gencode.v50.primary_assembly.annotation.gtf.gz"',  # noqa: E501
-        'cd "$RUN" && CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true',  # noqa: E501
+        'cd "$RUN" && CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" "$REFS/GRCh38.primary_assembly.genome.fa.gz" "$REFS/gencode.v50.primary_assembly.annotation.gtf.gz" true',  # noqa: E501
     )),
     "count_cluster": ("rnaseq.sbatch", (
         'mkdir -p "$RUN/refs" && cd "$RUN/refs"',
@@ -87,6 +97,13 @@ CLUSTER_RUN = "<run folder on Kebnekaise>"
 META, RNASEQ = "nfcore_fetchngs_meta/results", "nfcore_rnaseq/results"
 # A study of one's own, as the template's [dataset] slug names it.
 MINE = "mine"
+# The resource Part 2's laptop block saves where ctx setup finds it.
+GTF_RESOURCE = "annotation_gtf"
+# Measured, the one place the page's sizes come from. The Salmon index's peak resident memory,
+# the largest of Step-1's and the breast studies' four cluster builds (GENCODE 50, genome as
+# decoys; docs/plans/2026-10-07_custom_data_guide_plan_proposal.md). The laptop run folder of
+# U.10 (2026-10-08) before the index finished, with the references saved into results/.
+NEEDS = {"index_gib": 16.8, "folder_gb": 61, "work_gb": 37, "results_gb": 22}
 
 
 def filled(line: str, spec: Dataset) -> str:
@@ -120,7 +137,7 @@ def shown(path: Path) -> str:
     path = path.resolve()
     if path.is_relative_to(REPO):
         return shlex.quote(path.relative_to(REPO).as_posix())
-    return runtime.retypable([str(path)]).removeprefix("ctx ")
+    return runtime.retyped([str(path)])
 
 
 def course_lines(spec: Dataset, dataset_file: str, meta: str, counts: str) -> tuple[str, ...]:
@@ -170,7 +187,7 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
 
     given = shown(dataset_file)
     raw = f"~/ctx_{spec.slug}/data/raw/{spec.slug}"
-    part3: list[Code | str] = [
+    part3: list[Code | ResultTable | str] = [
         code("part3.laptop", course_lines(spec, given, f'"$RUN/{META}"', f'"$RUN/{RNASEQ}"')),
         code("part3.copy", copy_lines(spec.slug)),
         code("part3.cluster", course_lines(spec, given, f"{raw}_meta", f"{raw}_rnaseq")),
@@ -180,10 +197,14 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
     ]
     if caution := spec.info.get("caution"):
         part3.insert(0, str(caution))
-    parts: tuple[tuple[Code | str, ...], ...] = (
-        (code("part1.laptop", usage("fetch_laptop")), code("part1.setup", usage("setup")),
-         code("part1.cluster", usage("fetch_cluster"))),
-        (code("part2.laptop", usage("count_laptop")),
+    part3.insert(0, downloads(spec))
+    parts: tuple[tuple[Code | ResultTable | str, ...], ...] = (
+        (code("part1.laptop", usage("fetch_laptop")),
+         code("part1.laptop_download", usage("fetch_laptop_download")),
+         code("part1.setup", usage("setup")), code("part1.cluster", usage("fetch_cluster")),
+         code("part1.cluster_size", usage("fetch_cluster_size")),
+         code("part1.cluster_download", usage("fetch_cluster_download"))),
+        (text.fill(PAGE, "part2.needs", **NEEDS), code("part2.laptop", usage("count_laptop")),
          code("part2.cluster", usage("count_cluster"))),
         tuple(part3),
     )  # fmt: skip
@@ -193,10 +214,26 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
     )
 
 
+def downloads(spec: Dataset) -> ResultTable:
+    """Every file ``ctx setup`` fetches for the dataset, with its size and where it comes from.
+
+    The GTF is found in place, never fetched again, on the laptop route: Part 2 saved it where
+    the dataset file's ``annotation_gtf`` names it.
+    """
+    word = functools.partial(text.word, PAGE)
+    rows = tuple(
+        (r.name, f"{r.bytes:,}", r.urls[0].split("/")[2],
+         word("part3.found") if r.name == GTF_RESOURCE else word("part3.fetched"))
+        for r in spec.resources
+    )  # fmt: skip
+    return ResultTable(word("part3.downloads"), text.words(PAGE, "part3.columns"), rows,
+                       numeric=(1,))  # fmt: skip
+
+
 def _keys(spec: Dataset) -> tuple[KeyNumber, ...]:
     """Accessions, the two pinned releases and the reference release the Usage downloads."""
     word = functools.partial(text.word, PAGE)
-    (release,) = re.findall(r"release_(\d+)", USAGE["count_laptop"][1][1])
+    (release,) = set(re.findall(r"release_(\d+)", "\n".join(USAGE["count_laptop"][1])))
     return (
         KeyNumber(word("keys.runs"), f"{len(spec.accessions):,}"),
         KeyNumber(word("keys.fetchngs"), FETCHNGS_VERSION),

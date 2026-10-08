@@ -11,11 +11,12 @@ case "$(uname -m)" in
 arm64 | aarch64) SITE_FETCHNGS_PROFILE=docker,arm SITE_RNASEQ_PROFILE=docker,arm64 ;;
 *) SITE_FETCHNGS_PROFILE=docker SITE_RNASEQ_PROFILE=docker ;;
 esac
-# Nextflow's own default for local tasks: one per core.
-SITE_QUEUE_SIZE=$(getconf _NPROCESSORS_ONLN)
 # sra-tools' fasterq-dump asks for 36 GB by default and failed on a 24 GB Mac.
 SITE_FETCHNGS_ARGS=(--max_cpus 4 --max_memory 8.GB)
 SITE_HOME_ALLOWED=1
+# ctx reads none of the published references, and -resume reuses them from work/: saved, they
+# were copied into results/ beside work/'s copy (U.10, 2026-10-08).
+SITE_SAVE_REFERENCE=false
 
 site_activate() {
     if [[ ! -x "$CTX_REPO/.pixi/envs/fetch/bin/nextflow" ]]; then
@@ -25,9 +26,8 @@ site_activate() {
     export PATH="$CTX_REPO/.pixi/envs/fetch/bin:$PATH" NXF_ANSI_LOG=false
 }
 
-# A task may ask for no more than Docker has: nf-core/rnaseq's largest ask more than a laptop
-# holds, and Nextflow refuses a task that asks for more than the machine.
-site_rnaseq_config() {
+# Docker's CPUs and memory, from one docker info, as "<cpus> <MB>": every task runs inside them.
+_site_docker() {
     local found cpus bytes
     if ! found=$(docker info --format '{{.NCPU}} {{.MemTotal}}' 2>/dev/null) || [[ -z "$found" ]]; then
         echo "docker info failed: start Docker first" >&2
@@ -38,5 +38,24 @@ site_rnaseq_config() {
         echo "docker info gave $found, not CPUs and bytes" >&2
         return 1
     }
-    printf 'process {\n    resourceLimits = [cpus: %s, memory: %s.MB]\n}\n' "$cpus" "$((bytes / 1048576))"
+    echo "$cpus $((bytes / 1048576))"
+}
+
+# The local executor sized to Docker, not to the host: sized to the host (14 CPUs, 24 GB), it ran
+# two tasks each allowed all of Docker's 11.67 GiB side by side, and Docker killed one (exit 137,
+# GTF2BED beside SALMON_INDEX, U.10).
+site_executor() {
+    local cpus mb
+    read -r cpus mb <<<"$(_site_docker)" || return 1
+    [[ -n "$mb" ]] || return 1
+    printf 'executor {\n    queueSize = %s\n    cpus = %s\n    memory = %s.MB\n}\n' "$cpus" "$cpus" "$mb"
+}
+
+# A task may ask for no more than Docker has: nf-core/rnaseq's largest ask more than a laptop
+# holds, and Nextflow refuses a task that asks for more than the executor.
+site_rnaseq_config() {
+    local cpus mb
+    read -r cpus mb <<<"$(_site_docker)" || return 1
+    [[ -n "$mb" ]] || return 1
+    printf 'process {\n    resourceLimits = [cpus: %s, memory: %s.MB]\n}\n' "$cpus" "$mb"
 }

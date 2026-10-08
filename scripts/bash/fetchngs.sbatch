@@ -35,6 +35,7 @@
 #   mkdir -p "$RUN" && cd "$RUN"
 #   printf '%s\n' <accession> <accession> > ids.txt
 #   CTX_SITE=laptop SKIP_DOWNLOAD=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
+#   # its last line is the size at ENA: read it, then download
 #   CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 set -euo pipefail
 
@@ -73,6 +74,8 @@ case "$here/" in
     die "the run folder $RUN is in your home folder (25 GB); use a folder under CTX_STORE" ;;
 esac
 [[ -s "$IDS" ]] || die "no accession list, or an empty one: $IDS"
+# Asked of the site before anything is written: on a laptop, what Docker has.
+executor=$(site_executor) || die "the site's executor is unknown; see the line above"
 # A metadata-only run keeps its own outdir: one params file per outdir is what ctx gather reads.
 LAUNCH="$RUN/nfcore_fetchngs"
 if [[ "$SKIP_DOWNLOAD" == 1 ]]; then LAUNCH="$RUN/nfcore_fetchngs_meta"; fi
@@ -120,9 +123,7 @@ mv "$LAUNCH/ids.csv.part" "$LAUNCH/ids.csv"
 
 # D-035: wget retries a refused connection, with a growing pause, MAX_FORKS downloads at once.
 cat > "$LAUNCH/nextflow.config" <<CONF
-executor {
-    queueSize = $SITE_QUEUE_SIZE
-}
+$executor
 process {
     withName: 'SRA_FASTQ_FTP' {
         ext.args      = '-t 5 -nv -c -T 60 --retry-connrefused --waitretry 60'
