@@ -148,10 +148,10 @@ def rank_correlation(x: Vector, y: Vector, axis: int = -1) -> Vector:
     Vectorised, so the bootstrap ranks all its resamples at once; a row of tied values has no
     rank correlation and gives NaN.
     """
-    return _correlation(stats.rankdata(x, axis=axis), stats.rankdata(y, axis=axis), axis)
+    return correlation(stats.rankdata(x, axis=axis), stats.rankdata(y, axis=axis), axis)
 
 
-def _correlation(x: Vector, y: Vector, axis: int = -1) -> Vector:
+def correlation(x: Vector, y: Vector, axis: int = -1) -> Vector:
     """Pearson's r along an axis, the one formula behind both estimates and every resample.
 
     Exactly 1 on identical input, where ``spearmanr`` and ``pearsonr`` of a vector with itself
@@ -216,7 +216,7 @@ def _pearson(x: Vector, y: Vector) -> tuple[float | None, float | None, float | 
     """Pearson's r and its Fisher z interval, tanh(atanh(r) ± z / sqrt(n - 3))."""
     if x.size < 2 or _constant(x) or _constant(y):  # noqa: PLR2004 - a correlation needs two
         return None, None, None
-    r = float(_correlation(x, y))
+    r = float(correlation(x, y))
     if x.size < MIN_CI:
         return r, None, None
     if abs(r) == 1:
