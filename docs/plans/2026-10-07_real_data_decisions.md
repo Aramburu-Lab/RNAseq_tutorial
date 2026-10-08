@@ -58,6 +58,8 @@ Assumed unless you object: gather is the only GDC reader; no exclusion beyond th
 | 2 | GTEx v10 through its API | GENCODE v39 against our 50; genes newer than v39 get no GTEx panel | V11 as files only: 2.4 GB of TPM and a 20.3 GB exon table, no API |
 | 3 | Every GTEx sample in the page, packed, so the donor control recomputes in the page | 87 cards fit under 15 MB | summaries: 254 cards, the control becomes three fixed options |
 
+**Answered 2026-10-08 (Rytis):** 1 yes, our own figures; 2 the alternative, GTEx V11 as files only; 3 the alternative, summaries per tissue and sex, so 254 cards fit and the donor control becomes fixed options. With no V11 API, GTEx leaves the live per-gene calls: its files are a download to approve (2.4 GB of TPM by the planner's HEAD; the 20.3 GB exon table only if the exon panel stays), and notebook 09's live fetch keeps HPA alone.
+
 Assumed: MANE exons from the GTF, single-cell as text, interactions linked, notebook 09 ships precomputed cards and fetches one gene live when online.
 
 ### M7 RNA versus protein
@@ -106,7 +108,7 @@ None is fetched until you approve it.
 
 ## Cluster commands
 
-Only M4's Q0 is ready now; it reads, writes nothing, and its output decides Q1's size. It is in
+M4's Q0 ran 2026-10-08 (Rytis): per sample, 210 `quant.sf` 6,269,453,842 B, `quant.genes.sf` 824,625,867 B, `ambig_info.tsv` 659,688,305 B, `flenDist.txt` 2,537,640 B, `cmd_info.json` 47,670 B; merged tables without the two `.rds` files 2,000,172,794 B (transcript lengths 656,854,830, TPM 421,216,020, counts 373,079,965). Q1 "all of it" is about 9.76 GB, 8.59 GB without `quant.genes.sf`, which the merged gene tables repeat. Salmon 2.7.0, libType U, confirmed. It is in
 the M4 plan, section 1. The guide's Kebnekaise rehearsal comes after its tooling is built.
 
 ## Order
