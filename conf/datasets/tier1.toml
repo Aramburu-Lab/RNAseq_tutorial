@@ -214,6 +214,20 @@ n = [7, 6]
 filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min 35 nt)"], condition = ["steady_state"] }
 split = { seed = 42, strata = "sex" }
 
+# M7's RNA side of neutrophils against monocytes (docs/plans/2026-10-07_m7_real_data_plan_proposal.md,
+# decision 5, approved 2026-10-08): steady-state blood, the 9 individuals with both cell types,
+# measured 2026-10-08 from gather's sheet; each individual sits in one read-length batch (7 at
+# 76 nt or less, 2 over), so ~donor absorbs the batch.
+[[contrasts]]
+name = "ndn_vs_mono_steady"
+variable = "cell_type"
+reference = "Monocyte"
+tested = "NDN"
+n = [9, 9]
+design = "~donor + group"
+paired = true
+filters = { tissue = ["PB"], condition = ["steady_state"] }
+
 [de]
 featured = "ndn_gcsf"
 box_contrast = "ndn_hsct_early"
