@@ -1,5 +1,6 @@
-"""M10 at real size (plan M10.9): gather and clinical on TCGA-BRCA from this Mac's folder, against
-the Track B budget, under 10 min and 4 GB each (CONVENTIONS.md, Stack), and the 15 MB page cap.
+"""M10 at real size (plan M10.9): gather and clinical on the breast cohort from this Mac's
+folder, against the Track B budget, under 10 min and 4 GB each (CONVENTIONS.md, Stack), and the
+15 MB page cap.
 Opt-in: -m "realdata and budget"; minutes."""
 
 import importlib.util

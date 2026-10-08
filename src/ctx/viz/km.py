@@ -91,7 +91,7 @@ class KmData:
         """Every step, rounded to what a reader reads.
 
         The plot carries the full values and the CSV every digit: unrounded, the rows of
-        TCGA-BRCA's four ER figures took 604,978 bytes of its page, rounded 466,356.
+        the breast cohort's four ER figures took 604,978 bytes of its page, rounded 466,356.
         """
         fractions = pl.col("survival", "lower", "upper").round(PAGE_DIGITS["fraction"])
         return self.frame.with_columns(pl.col("time").round(PAGE_DIGITS["time"]), fractions)

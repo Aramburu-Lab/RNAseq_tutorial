@@ -6,7 +6,7 @@ notifications from gather's annotation log. Every missing value is null with a r
 ``<column>_missing`` column, so "stage missing 24: 13 Stage X, 6 discrepancy, 5 not available"
 is counted, not guessed. A CDR redaction removes the patient; a notification removes no one
 (CONVENTIONS.md, Data and scope). Months are days over ``DAYS_PER_MONTH`` (the CDR's
-TCGA-CDR_Notes, row 23, gives days).
+notes sheet, row 23, gives days).
 """
 
 import re

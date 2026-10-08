@@ -13,7 +13,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-# The block's share of the 15,000,000-byte page cap. On TCGA-BRCA (2026-10-08) the page was
+# The block's share of the 15,000,000-byte page cap. On the breast cohort (2026-10-08) the page was
 # 14,509,635 bytes at this budget, 8,822,282 of them outside the panel's settings: plotly.js
 # 4,815,817, the export's libraries 526,581 and fonts 219,314, the figures and their rows the
 # rest. At 6,500,000 it was 15,593,683 and refused; the GS plan's 6,729,268 for the block

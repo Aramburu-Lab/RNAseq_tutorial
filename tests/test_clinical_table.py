@@ -1,6 +1,6 @@
 """ctx.clinical.harmonise on a made-up GDC folder with a made-up CDR; and, opt-in with -m
-realdata, TCGA-BRCA against Liu et al. 2018 and the plan's numbers, typed here apart from the
-code (lessons.md: a test that reads the constant it checks passes at any value of it)."""
+realdata, the breast cohort against Liu et al. 2018 and the plan's numbers, typed here apart
+from the code (lessons.md: a test that reads the constant it checks passes at any value of it)."""
 
 import importlib.util
 import os

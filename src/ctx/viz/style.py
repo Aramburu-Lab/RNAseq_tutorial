@@ -78,7 +78,7 @@ ASPECT = {"box": 1.1, "scatter": 1.1, "bar": 1.0, "strip": 1.1, "flow": 1.1, "co
           "linked": 1.8, "km": 1.3}  # fmt: skip
 # A Kaplan-Meier figure: the share of its height the number-at-risk rows take, one row per
 # group at most three; a censor tick's height in pt, a vertical stroke on the curve; and the
-# most at-risk columns, which still read beside a reading guide at 1,280 px (TCGA-BRCA's 12
+# most at-risk columns, which still read beside a reading guide at 1,280 px (the breast cohort's 12
 # columns, every 24 months to 264, ran into each other there, 2026-10-08).
 KM = {"risk_share": 0.24, "censor_pt": 5.0, "risk_columns": 7}
 # Point shapes for a second category, in level order: (matplotlib, plotly).
