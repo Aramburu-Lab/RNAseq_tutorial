@@ -13,6 +13,7 @@ from typing import Annotated, Any
 import typer
 
 from ctx import __version__, runtime
+from ctx.genecard.hpa import RELEASE as HPA_RELEASE
 from ctx.process import DEFAULT_SETTINGS, Aligner, Strandedness
 from ctx.qc import Fastp
 from ctx.quant import CountsFrom
@@ -401,6 +402,40 @@ def clinical(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI opti
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, ClinicalError, GeneListError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
+def genecard(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    genes: Annotated[str, typer.Option(help=HELP["--genes"])] = "",
+    genes_from: Annotated[Path | None, typer.Option(help=HELP["--genes-from"])] = None,
+    contrast: Annotated[str | None, typer.Option(help=HELP["--contrast"])] = None,
+    hpa_release: Annotated[str, typer.Option(help=HELP["--hpa-release"])] = HPA_RELEASE,
+    offline: Annotated[bool, typer.Option("--offline/--online", help=HELP["--offline"])] = False,
+    refresh: Annotated[
+        bool, typer.Option("--refresh/--no-refresh", help=HELP["--refresh"])
+    ] = False,
+) -> None:
+    """Gene cards: this dataset's results beside GTEx, HPA and Ensembl data (M9)."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.genecard import GenecardError  # noqa: PLC0415 - same reason
+    from ctx.genecard import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+    from ctx.report.genes import GeneListError  # noqa: PLC0415 - same reason
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = runtime.retypable(sys.argv[1:])
+    options = module.Options(dataset_file, _columns(genes), genes_from, contrast, hpa_release,
+                             offline, refresh)  # fmt: skip
+    try:
+        written = module.run(ctx.obj["settings"], cards, command, dataset, options)
+    except (DatasetError, GenecardError, GeneListError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

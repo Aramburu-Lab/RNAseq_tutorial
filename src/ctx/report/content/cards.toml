@@ -61,6 +61,26 @@ effect = "Handles a variable that breaks proportional hazards, without estimatin
 meaning = "A gene list file: symbols or Ensembl IDs, as Save list writes."
 effect = "Scores this list in the static files; unset, the dataset file's list."
 
+[options."--genes"]
+meaning = "Comma-separated gene symbols or Ensembl IDs, one card each."
+effect = "Replaces the default list; an ambiguous or unknown name stops the run."
+
+[options."--contrast"]
+meaning = "M5 contrast whose top up and down calls join the default list."
+effect = "Changes which top calls get cards; unset, the featured contrast."
+
+[options."--hpa-release"]
+meaning = "Human Protein Atlas major release every HPA request names."
+effect = "Another release can change values, antibodies and categories."
+
+[options."--offline"]
+meaning = "Read only `resources/cache/`; make no request."
+effect = "On: an uncached response leaves its panel unavailable, named."
+
+[options."--refresh"]
+meaning = "Move each gene's cached responses aside, then fetch them again."
+effect = "On: newer provider data replace the cache; old copies kept dated."
+
 [options."--min-log2cpm"]
 meaning = "Expression filter: a gene's median log2 [[CPM]] over the patients, at least."
 effect = "Higher keeps fewer, better-measured genes; each dropped gene is counted."
@@ -189,3 +209,8 @@ effect = "The value no keeps Salmon's estimates, which shift with isoform use."
 [effects.clinical]
 "--dataset-file" = "Selects the build list, default endpoint and the published numbers shown."
 "--dataset" = "Selects gather's GDC tables and renames every output."
+
+[effects.genecard]
+"--dataset-file" = "Supplies contrasts, box genes, the GTF and the GTEx files."
+"--dataset" = "Selects gather's genes and the M5 results the cards read."
+"--genes-from" = "Cards for an M5 table's genes or a saved list."

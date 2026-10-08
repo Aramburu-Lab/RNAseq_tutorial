@@ -138,8 +138,21 @@ def clinical_run(tmp_path_factory):
     return root, _page(root, "12_clinical", "fake_brca_overview")
 
 
+@pytest.fixture(scope="module")
+def genecard_run(tmp_path_factory):
+    from genecard_root import SLUG, make  # noqa: PLC0415 - the made-up root of the M9 tests
+
+    root = tmp_path_factory.mktemp("genecard_cli")
+    spec = make(root)
+    done = _ctx("--root", str(root), "genecard", "--dataset", SLUG, "--dataset-file", str(spec),
+                "--genes", "NPTX2", "--offline", cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "11_genecard", f"{SLUG}_overview")
+
+
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
-COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical"]
+COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical",
+            "genecard"]  # fmt: skip
 
 
 def test_every_subcommand_has_a_card_test():

@@ -204,7 +204,10 @@ def fetch(
 
     Each mirror is tried in order: download to ``<dest>.part``, check, then rename, so a
     file at ``dest`` is always a checked one. A file already there with the right hash is
-    not fetched again. Every fetched or confirmed file is recorded in
+    not fetched again: one placed there by hand, as GTEx V11's 24 GB were, is registered with
+    its hash measured on arrival and ``found`` true, never downloaded. The destination is
+    checked against the root by its path, not its link target, so an input folder linked into
+    a scratch root counts as inside it. Every fetched or confirmed file is recorded in
     ``resources/manifest.json``.
 
     Args:
@@ -222,17 +225,28 @@ def fetch(
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
     entries = []
     for resource in resources:
-        dest = (root / resource.dest).resolve()
-        if not dest.is_relative_to(root.resolve()):
+        base = Path(os.path.normpath(root.absolute()))
+        dest = Path(os.path.normpath(base / resource.dest))
+        if not dest.is_relative_to(base):
             raise FetchError(f"{resource.name}: {resource.dest} is outside {root}")
         entry = manifest.get(resource.dest)
-        if not (dest.is_file() and _sha256(dest) == resource.sha256 and entry):
+        present = dest.is_file() and _sha256(dest) == resource.sha256
+        if present and not entry:
+            entry = _found(resource, dest)
+        elif not (present and entry):
             entry = _fetch_one(resource, dest, opener)
         manifest[resource.dest] = entry
         entries.append(entry)
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     return entries
+
+
+def _found(resource: Resource, dest: Path) -> dict[str, Any]:
+    """The manifest entry of a file already in place with its declared size and hash."""
+    return {"name": resource.name, "url": resource.urls[0], "bytes": dest.stat().st_size,
+            "sha256": resource.sha256, "found": True,
+            "retrieved": datetime.now(UTC).isoformat(timespec="seconds")}  # fmt: skip
 
 
 def _fetch_one(resource: Resource, dest: Path, opener: Callable[..., Any]) -> dict[str, Any]:
