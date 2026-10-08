@@ -186,8 +186,23 @@ def shown_path(path: str | Path) -> str:
     return "~" if rest == "." else f"~/{rest}"
 
 
-def retypable(argv: Sequence[str]) -> str:
-    """The command as a reader should retype it, home paths shown as ``~/``.
+def launcher(prefix: str | None = None) -> list[str]:
+    """How a reader starts ``ctx`` again: through the pixi environment this one runs in.
+
+    A plain shell has no ``ctx`` on its PATH unless the environment is activated, so a command
+    shown bare failed when pasted (U.10). Outside a pixi environment, as from a wheel, bare.
+
+    Args:
+        prefix: The environment's folder; unset, this interpreter's ``sys.prefix``.
+    """
+    env = Path(prefix or sys.prefix)
+    if env.parent.name == "envs" and env.parent.parent.name == ".pixi":
+        return ["pixi", "run", "-e", env.name, "ctx"]
+    return ["ctx"]
+
+
+def retyped(argv: Sequence[str]) -> str:
+    """Arguments as a reader should retype them, home paths shown as ``~/``.
 
     The part after ``~/`` is quoted on its own, so the shell still expands the tilde.
     """
@@ -196,7 +211,12 @@ def retypable(argv: Sequence[str]) -> str:
         shown = shown_path(arg) if os.path.isabs(arg) else arg
         tail = shown[2:] if shown.startswith("~/") else None
         parts.append(f"~/{shlex.quote(tail)}" if tail else shlex.quote(shown))
-    return " ".join(["ctx", *parts])
+    return " ".join(parts)
+
+
+def retypable(argv: Sequence[str]) -> str:
+    """The command as a reader should retype it: ``launcher()``, then ``retyped`` arguments."""
+    return " ".join([*launcher(), retyped(argv)])
 
 
 def versions() -> dict[str, str]:

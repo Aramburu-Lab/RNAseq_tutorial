@@ -9,7 +9,6 @@ filled from the curated runs.
 """
 
 import re
-import shlex
 import subprocess
 import sys
 from collections.abc import Sequence
@@ -20,6 +19,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Contrast, Dataset, DatasetError, load
+from ctx.gather.rnaseq import MATRIX_FILE
 
 # Course order, which a new module joins in its place; report reads every page, so it is last.
 # Not naming.MODULES, whose numbers name output folders, not the order a dataset is run in.
@@ -205,7 +205,12 @@ def _inputs(root: Path, spec: Dataset, options: Options) -> list[Problem]:
     for flag, folder in given:
         if folder is not None and not folder.is_dir():
             problems.append(Problem(f"{flag} {folder} is not a folder"))
-    fetch = f"ctx --root {shlex.quote(str(root))} setup --dataset-file {options.dataset_file}"
+    counts = options.rnaseq_dir
+    if counts is not None and counts.is_dir() and not (matrix := counts / MATRIX_FILE).is_file():
+        problems.append(Problem(f"--rnaseq-dir holds no count matrix, {matrix}: nf-core/rnaseq "
+                                "has not finished there, or the copy left it out"))  # fmt: skip
+    fetch = runtime.retypable(["--root", str(root), "setup", "--dataset-file",
+                               str(options.dataset_file)])  # fmt: skip
     problems += [Problem(f"resource {r.name} is not fetched to {root / r.dest}; run {fetch}")
                  for r in spec.resources if not (root / r.dest).is_file()]  # fmt: skip
     if spec.sdrf is None and spec.gdc is None:

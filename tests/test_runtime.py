@@ -185,7 +185,7 @@ def test_loky_child_peak_attributed():
 
 
 def test_home_paths_shown_as_tilde():
-    from ctx.runtime import retypable, shown_path  # noqa: PLC0415
+    from ctx.runtime import launcher, retypable, shown_path  # noqa: PLC0415
 
     home = Path.home()
     assert shown_path(home / "ctx_tier1") == "~/ctx_tier1"
@@ -194,5 +194,14 @@ def test_home_paths_shown_as_tilde():
     assert shown_path(f"{home}2/x") == f"{home}2/x"
     command = retypable(["--root", str(home / "a b"), "de", "--x", "/opt/c d"])
     # The tilde stays outside the quotes, so a shell still expands it.
-    assert command == "ctx --root ~/'a b' de --x '/opt/c d'"
+    assert command == " ".join([*launcher(), "--root ~/'a b' de --x '/opt/c d'"])
     assert str(home) not in command
+
+
+def test_launcher_names_the_pixi_environment():
+    """A command shown on a page starts with the pixi environment that ran it, else bare ctx.
+    Catches the bare `ctx` a plain shell cannot find (U.10), and another environment named."""
+    from ctx.runtime import launcher  # noqa: PLC0415
+
+    assert launcher("/home/a/repo/.pixi/envs/laptop") == ["pixi", "run", "-e", "laptop", "ctx"]
+    assert launcher("/opt/venv") == ["ctx"]

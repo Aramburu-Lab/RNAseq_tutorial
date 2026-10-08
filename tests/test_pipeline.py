@@ -20,6 +20,7 @@ from ctx import pipeline
 from ctx.cli import app
 from ctx.dataset import load
 from ctx.gather.fetchngs import read
+from ctx.runtime import launcher
 
 ROOT = Path(__file__).resolve().parents[1]
 # Commands that are not modules a dataset runs: the machine, the read-level Track A, and these.
@@ -193,8 +194,10 @@ def test_run_matches_the_module_commands(tmp_path, runs):
     done = ctx_run("--root", str(one), "run", "--dataset", "mine", "--dataset-file",
                    str(spec_path), "--fetchngs-dir", str(FIXTURE), cwd=one)  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
-    printed = re.findall(r"^ctx run: \d+ of 3: (ctx .+)$", done.stdout, re.M)
-    assert [c.split()[3] for c in printed] == ["gather", "qc", "report"]
+    printed = re.findall(r"^ctx run: \d+ of 3: (.+)$", done.stdout, re.M)
+    # Through the environment that ran it, so a plain shell can paste it (runtime.launcher).
+    assert all(c.startswith(" ".join(launcher()) + " --root ") for c in printed), printed
+    assert [c.split("--root ")[1].split()[1] for c in printed] == ["gather", "qc", "report"]
     # Each module as its own page tells a reader to run it, typed here, not taken from ctx run.
     named = ("--dataset", "mine", "--dataset-file", str(spec_path))
     for module, args in (("gather", (*named, "--fetchngs-dir", str(FIXTURE))), ("qc", named),
@@ -209,3 +212,18 @@ def test_run_matches_the_module_commands(tmp_path, runs):
              for p in pages]  # fmt: skip
     # gather's and qc's pages; report writes a hub, whose page shows no command.
     assert shown == printed[:2]
+
+
+def test_check_finds_no_matrix_and_fixes_paste(tmp_path, runs):
+    """An rnaseq outdir without its count matrix is a problem before setup, and the setup line
+    a fix gives runs from a plain shell, through the environment. Catches the check that listed
+    only the two resources while Part 2 had died (U.10), and a bare `ctx` fix line."""
+    spec_path = _spec(tmp_path, runs)
+    spec_path.write_text(spec_path.read_text() + "\n" + pipeline._resource(pipeline.GENE_SETS))
+    rnaseq = tmp_path / "rnaseq"
+    (rnaseq / "salmon").mkdir(parents=True)
+    options = pipeline.Options("mine", spec_path, FIXTURE, rnaseq)
+    texts = [p.text for p in pipeline.check(tmp_path / "root", options)[0]]
+    assert any(t.startswith("--rnaseq-dir holds no count matrix") for t in texts), texts
+    (fetch,) = [t for t in texts if t.startswith("resource ")]
+    assert f"; run {' '.join(launcher())} --root " in fetch, fetch
