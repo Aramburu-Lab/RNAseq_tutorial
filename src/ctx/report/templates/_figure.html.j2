@@ -4,7 +4,7 @@
 <p class="fig-num">{{ ui.figure_n.format(n=f.number) }}</p>
 {% if f.title %}<h{{ f.level }} class="fig-title">{{ f.title }}</h{{ f.level }}>{% endif %}
 {% endif %}
-{% if f.text.lead %}<p class="fig-lead">{{ f.text.lead | code }}</p>{% endif %}
+{% if f.lead %}<p class="fig-lead">{{ f.lead }}</p>{% endif %}
 {% if f.kind == "brush" %}
 <form class="brush" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="{{ ui.brush.label }}">
 <fieldset><legend>{{ ui.brush.colour }}</legend>{% for hex, name in f.defaults.colours %}<label class="paint"><input type="radio" name="colour" value="{{ loop.index0 }}"{% if loop.first %} checked{% endif %}><span class="sw" style="--sw: {{ hex }}"></span>{{ name }}</label>{% endfor %}</fieldset>

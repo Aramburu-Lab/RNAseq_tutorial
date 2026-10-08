@@ -5,7 +5,6 @@ starts with ``Shown.prefix``, empty on the real page and "Made-up data." on the 
 preview figure says so in every file it writes.
 """
 
-from collections import Counter
 from collections.abc import Sequence
 from dataclasses import replace
 from typing import TYPE_CHECKING, Any
@@ -17,6 +16,7 @@ from ctx.process import Aligner, figures
 from ctx.process import tables as tab
 from ctx.report import text
 from ctx.report.builder import FigureBlock, FigureText, ResultTable
+from ctx.viz.aggregates import Aggregate, Lead
 
 if TYPE_CHECKING:
     from ctx.process.page import Frames, Shown
@@ -40,6 +40,18 @@ def bands(shown: "Shown") -> str:
     return text.word(PAGE, f"figures.mapping.bands.{'partial' if shown.partial else 'whole'}")
 
 
+def mapping_lead() -> Lead:
+    """F1's lead over the samples its filter shows: the median uniquely mapped and the lowest.
+
+    Each from a bar's uniquely mapped segment, as a share of its input reads.
+    """
+    unique = {"outcome": "unique"}
+    return Lead(text.raw(PAGE, "figures.mapping.lead"),
+                (Aggregate("median", "median", "percent", unique),
+                 Aggregate("low", "min", "percent", unique, row=("low_sample", "label"))),
+                note=text.word(PAGE, "figures.mapping.note"))  # fmt: skip
+
+
 def mapping_figure(writer: Writer, found: "Frames", shown: "Shown") -> FigureBlock:
     """F1: every sample as run, one stacked bar each, filtered by the sheet's groups."""
     frame = tab.outcomes_long(found.outcomes, shown.aligner).join(
@@ -50,12 +62,7 @@ def mapping_figure(writer: Writer, found: "Frames", shown: "Shown") -> FigureBlo
         reads=figures.reads(figures.stat(found.alignment["input_reads"], "median")),
     )  # fmt: skip
     data = figures.outcome_bars(frame, shown.aligner, "mapping", shown.usable, caption)
-    low = found.alignment.sort("unique_pct").row(0, named=True)
-    lead = text.fill(PAGE, "figures.mapping.lead", low_sample=low["sample"],
-                     median=figures.number(figures.stat(found.alignment["unique_pct"], "median"),
-                                           ".1f"),
-                     low=figures.number(low["unique_pct"], ".1f"))  # fmt: skip
-    return writer.figure(data, "mapping", _text("mapping", lead))
+    return writer.figure(data, "mapping", replace(_text("mapping", ""), follows=mapping_lead()))
 
 
 def settings_figure(writer: Writer, found: "Frames", shown: "Shown") -> FigureBlock:
@@ -76,27 +83,40 @@ def settings_figure(writer: Writer, found: "Frames", shown: "Shown") -> FigureBl
     return writer.figure(data, "featured_settings", _text("settings", lead))
 
 
+def strand_lead() -> Lead:
+    """F2's lead over the samples shown: their forward shares' range and the commonest call.
+
+    Each sample is read once, from its -s 0 bar.
+    """
+    once = {"setting": "s0"}
+    return Lead(text.raw(PAGE, "figures.strandedness.lead"),
+                (Aggregate("low", "min", "forward_share", once),
+                 Aggregate("high", "max", "forward_share", once),
+                 Aggregate("call", "mode", "call", once, count="n_call"),
+                 Aggregate("n", "count", where=once)),
+                note=text.word(PAGE, "figures.strandedness.note"))  # fmt: skip
+
+
 def strand_figure(writer: Writer, found: "Frames", shown: "Shown") -> FigureBlock:
-    """F2: what featureCounts assigns at each -s, per sample, with the forward share and call."""
+    """F2: what featureCounts assigns at each -s, per sample, with the forward share and call.
+
+    Each bar carries its sample's forward share whole: the lead takes its range to three
+    significant digits, and a share held to three decimals printed 0.021 as 0.0210.
+    """
     strand, inputs = found.strand, dict(found.alignment.select("sample", "input_reads").rows())
     rows = [{"sample": r["sample"], "setting": s, "reads": int(r[f"assigned_{s}"]),
              "percent": 100 * r[f"assigned_{s}"] / inputs[r["sample"]],
              "no_feature": int(r[f"no_feature_{s}"]), "ambiguous": int(r[f"ambiguous_{s}"]),
-             "forward_share": round(r["forward_share"], 3), "call": r["call"]}
+             "forward_share": r["forward_share"], "call": r["call"]}
             for r in strand.iter_rows(named=True) for s in ("s0", "s1", "s2")]  # fmt: skip
     frame = pl.DataFrame(rows).join(shown.groups, on="sample")
     metric = shown.strand_metric
-    share = strand["forward_share"]
     caption = shown.prefix + text.fill(
         PAGE, "figures.strandedness.caption", n=strand.height,
-        share=f"{figures.stat(share, 'median'):.3f}", stranded=metric.stranded,
-        unstranded=metric.unstranded)  # fmt: skip
+        share=f"{figures.stat(strand['forward_share'], 'median'):.3f}",
+        stranded=metric.stranded, unstranded=metric.unstranded)  # fmt: skip
     data = figures.strand_bars(frame, shown.usable, caption)
-    call, n_call = Counter(strand["call"]).most_common(1)[0]
-    lead = text.fill(PAGE, "figures.strandedness.lead", low=f"{figures.stat(share, 'min'):.3f}",
-                     high=f"{figures.stat(share, 'max'):.3f}", n_call=n_call, n=strand.height,
-                     call=call)  # fmt: skip
-    words = _text("strandedness", lead)
+    words = replace(_text("strandedness", ""), follows=strand_lead())
     if shown.aligner is Aligner.STAR:
         star = text.word(PAGE, "figures.strandedness.reading_star")
         words = replace(words, reading=(*words.reading, star))

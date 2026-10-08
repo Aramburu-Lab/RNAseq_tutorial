@@ -11,8 +11,11 @@ passing = "Every bar passes the dashed line, FDR = {alpha}: the set holds more c
 # Shown in place of the figure when no set passes in either direction.
 none = "No gene set passes FDR < {alpha} on the up or the down calls, so no bar is drawn."
 
-# The last reading line of the GSEA bars, by how many of the bars drawn pass.
+# The last reading line of the GSEA bars, by how many of the bars drawn pass; the caption
+# counts the sets drawn, fewer than the fifteen where fewer were tested.
 [figures.gsea]
+caption = "{name}: preranked GSEA on the Wald statistic, {permutations} gene-set permutations, seed {seed}; the {shown} sets with the smallest FDR."
+caption_one = "{name}: preranked GSEA on the Wald statistic, {permutations} gene-set permutations, seed {seed}; the one set tested."
 some = "Highlighted bars pass FDR < {alpha}; the others are shown for context."
 all = "Every bar drawn passes FDR < {alpha}, so every bar is highlighted."
 no = "No bar drawn passes FDR < {alpha}, so none is highlighted."

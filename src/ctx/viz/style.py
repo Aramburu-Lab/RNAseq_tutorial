@@ -108,8 +108,6 @@ LABEL_BOX_PAD = 0.15
 # A strip plot spreads a category's points over this share of its slot either side of the
 # centre, and draws its median ± k MAD bar over a little more.
 STRIP = {"jitter": 0.3, "range": 0.4}
-# Average glyph width in em, used to wrap axis titles and labels to the room they have.
-AVERAGE_CHAR_EM = 0.55
 # The caption's inset from each side, as a share of the figure's width; annotate.place_caption
 # draws at it and wraps inside it.
 CAPTION_INSET = 0.02

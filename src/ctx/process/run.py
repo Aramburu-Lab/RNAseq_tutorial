@@ -205,11 +205,16 @@ def _sheet(root: Path, dataset: str, options: Options) -> tuple[Sheet | None, li
 
 
 def _spec(options: Options, dataset: str) -> tuple[Dataset | None, list[str]]:
-    """The dataset file, read and checked, or why not; a file with another slug is a problem."""
+    """The dataset file, read and checked, or why not; a file with another slug is a problem.
+
+    A subset's parent file is read here too: the page names the parent by its label, and a
+    missing one would otherwise stop the run after every alignment.
+    """
     if not options.dataset_file.is_file():
         return None, [f"--dataset-file {options.dataset_file} is not a file"]
     try:
         spec = load(options.dataset_file)
+        spec.parent()
     except DatasetError as error:
         return None, [str(error)]
     if spec.slug != dataset:

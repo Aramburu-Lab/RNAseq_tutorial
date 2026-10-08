@@ -11,7 +11,7 @@ import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
@@ -28,6 +28,9 @@ from ctx.viz.style import (
     plotly_templates,
     zoom,
 )
+
+if TYPE_CHECKING:
+    from ctx.viz.aggregates import Lead
 
 MAX_BYTES = 15 * 10**6
 # The report skeleton, in the order CONVENTIONS.md fixes; ids are the section anchors, and
@@ -82,6 +85,9 @@ class FigureText:
         reading: "How to read this": what a mark is and the rule that colours it.
         tab: Tab label inside a tabbed group; the title when empty.
         back: File name of the module page, linked from the standalone figure page.
+        follows: A lead whose numbers are named aggregates over the rows the figure draws, in
+            place of ``lead``: ``ctx.viz.save.figure_block`` fills it, and a figure with
+            filters refills them over the rows the reader keeps.
     """
 
     title: str = ""
@@ -89,6 +95,12 @@ class FigureText:
     reading: tuple[str, ...] = ()
     tab: str = ""
     back: str = ""
+    follows: "Lead | None" = None
+
+    def __post_init__(self) -> None:
+        """Refuse a lead given twice, as text and as numbers to fill."""
+        if self.lead and self.follows is not None:
+            raise ValueError("a lead is text or follows its rows, not both")
 
 
 @dataclass(frozen=True)
@@ -445,10 +457,12 @@ def render(page: Page, glossary_href: str = "") -> str:
         context |= {"plotly_js": "", "course": text.load("course")}
         return _ENV.get_template("course.html.j2").render(**context)
     if isinstance(page, FigurePage):
-        # Opened alone, at ALONE_SCALE, the theme toggle swaps templates at that scale too.
+        # Opened alone, at ALONE_SCALE, the theme toggle swaps templates at that scale too, and
+        # at the page's own where the figure is drawn at the page's size (figures.page_layout).
         alone = {name: zoom(t, ALONE_SCALE) for name, t in plotly_templates().items()}
         figure = prepare(page.figure, 0, 1, 3, ALONE_SCALE)
         context |= {"figure": figure, "templates": json_for_script(alone),
+                    "page_templates": context["templates"],
                     "export": export.assets([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
     results, outline, draws = _walk(page.results)

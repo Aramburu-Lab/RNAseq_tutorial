@@ -49,6 +49,8 @@
 </main>
 </div>
 <script type="application/json" id="ctx-templates">{{ templates }}</script>
+{% if page_templates %}<script type="application/json" id="ctx-templates-page">{{ page_templates }}</script>
+{% endif %}
 {% if tooltips %}<script type="application/json" id="ctx-glossary">{{ tooltips }}</script>
 {% endif %}
 <script>

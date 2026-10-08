@@ -197,7 +197,10 @@ filter_labels = { cell_type = "Cell type", condition = "Condition", call = "Stra
 
 [figures.mapping]
 title = "Where each sample's reads align"
+# The page refills the numbers over the samples a filter shows (ctx.viz.aggregates), and the
+# live line then says the note.
 lead = "Median uniquely mapped: {median} % of input reads; lowest {low} % in {low_sample}."
+note = "The caption counts every sample."
 reading = [
     "Each bar is one sample as run; its segments add up to its input reads.",
     "Unique and several loci are aligned reads; every other outcome is a reason a read stayed unaligned.",
@@ -234,7 +237,9 @@ columns.percent = "Reads with this outcome as a share of the bar's input reads."
 
 [figures.strandedness]
 title = "Reads assigned to genes at each strandedness setting"
+# Refilled over the samples a filter shows, as the mapping lead is.
 lead = "Forward share {low} to {high}: {n_call} of {n} samples are called {call}."
+note = "The caption counts every sample."
 reading = [
     "Each group of three bars is one sample: reads featureCounts assigned to genes at -s 0, -s 1 and -s 2.",
     "In a reverse-stranded library -s 1 is short and -s 2 nearly matches -s 0; in an unstranded one -s 1 and -s 2 each hold about half.",
@@ -254,7 +259,7 @@ columns.reads = "Reads assigned to a gene at this setting."
 columns.percent = "Assigned reads as a share of the sample's input reads."
 columns.no_feature = "Reads on no gene at this setting."
 columns.ambiguous = "Reads on more than one gene at this setting, so left out."
-columns.forward_share = "Reads at -s 1 over reads at -s 1 plus -s 2, to three decimals; the strandedness table holds it whole."
+columns.forward_share = "Reads at -s 1 over reads at -s 1 plus -s 2, the sample's own, on each of its bars."
 columns.call = "The strand the forward share gives, by the registry's gene_strand_bias bands."
 
 [figures.counters]

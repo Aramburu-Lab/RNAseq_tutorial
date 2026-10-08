@@ -102,6 +102,25 @@ def test_no_cohort_identifiers():
     assert not hits, "cohort identifiers belong in conf/datasets/*.toml only"
 
 
+# A name for a mean glyph width, in any case, its words joined or by an underscore: the
+# estimate that wrapped titles and labels until one measure of text width replaced it (D-024).
+GLYPH_ESTIMATE = re.compile(r"\w*(?:average|avg|mean)_?(?:char|glyph)\w*", re.I)
+
+
+def test_no_source_names_a_glyph_width_estimate():
+    """Every text width is measured by ``ctx.viz.metrics``; the average glyph it replaced ended
+    a caption, a title and a label a word early in turn (D14, D-024). No source of the package
+    or the tests names one again, the vendored libraries apart. Mutation caught: the constant
+    restored in ``ctx.viz.style`` and used in ``tests/test_export.py``."""
+    sources = [p for folder in ("src", "tests") for p in (ROOT / folder).rglob("*")
+               if p.suffix in {".py", ".j2", ".mjs", ".toml", ".yaml"}
+               and "vendor" not in p.relative_to(ROOT).parts]  # fmt: skip
+    assert len(sources) > 100
+    named = [f"{p.relative_to(ROOT)}: {m.group()}" for p in sources
+             for m in GLYPH_ESTIMATE.finditer(p.read_text())]  # fmt: skip
+    assert named == []
+
+
 def test_guard_reads_dataset_files(tmp_path):
     (tmp_path / DATASETS).mkdir(parents=True)
     (tmp_path / DATASETS / "x.toml").write_text(

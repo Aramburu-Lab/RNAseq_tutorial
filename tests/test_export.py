@@ -35,10 +35,10 @@ from ctx.report.builder import (
     SelfCheck,
     render,
 )
+from ctx.viz.metrics import text_width
 from ctx.viz.save import figure_block
 from ctx.viz.style import (
     ALONE_SCALE,
-    AVERAGE_CHAR_EM,
     PAGE_PLOT_PX,
     PHONE_PLOT_PX,
     SIZES,
@@ -148,16 +148,39 @@ def test_zoom_scales_the_lengths_on_screen_and_nothing_else():
     assert figure["layout"]["height"] == 400, "zoom changed its input"
 
 
+def _set(node, path: str, value) -> None:
+    """Set one plotly attribute path, ``annotations[0].font.size``, in a figure's JSON."""
+    keys = [int(k) if k.isdigit() else k for k in re.findall(r"[^.\[\]]+", path)]
+    for key in keys[:-1]:
+        node = node[key]
+    node[keys[-1]] = value
+
+
+def _paged(data: list, layout: dict, tier: dict) -> tuple[list, dict]:
+    """The figure opened alone with its page tier applied, as the page script applies it."""
+    data, layout = json.loads(json.dumps(data)), json.loads(json.dumps(layout))
+    for path, value in tier["relayout"].items():
+        _set(layout, path, value)
+    for update, traces in tier["restyle"]:
+        for path, values in update.items():
+            for i, value in zip(traces, values, strict=True):
+                _set(data[i], path, value)
+    return data, layout
+
+
 @pytest.mark.parametrize("name", list(DEMOS))
 def test_alone_is_the_page_figure_at_twice_its_size(name):
     """Every font, marker, line, margin and the height twice the page's; the width twice the
     page's at full layout, or the box's where that is less (Rytis 2026-10-02), and never under
-    twice a phone's plot or the least width the figure names at twice its type; data and
-    positions the same; the theme toggle's templates at the same scale. Mutations:
-    ALONE_SCALE not applied to the templates; the width left to the window alone; the width
-    fixed at twice the page's, wider than a laptop's card; a marker size left out of the
-    lengths; ALONE_SCALE 1.5 (which passed every test that took it as its own oracle, review
-    2026-10-01)."""
+    the least width the figure names at twice its type; data and positions the same; the theme
+    toggle's templates at the same scale. Below twice a phone's plot it carries the module
+    page's own figure (Rytis 2026-10-07): its page tier, applied, gives the page's JSON back,
+    with the box's width as the module page sets it and the page's templates beside the
+    alone's. Mutations: ALONE_SCALE not applied to the templates; the width left to the window
+    alone; the width fixed at twice the page's, wider than a laptop's card; a marker size left
+    out of the lengths; ALONE_SCALE 1.5 (which passed every test that took it as its own
+    oracle, review 2026-10-01); a length left out of the page tier (a figure taken back to the
+    page's size kept a 2x line width)."""
     assert ALONE_SCALE == TWICE
     block = _block(name)
     alone = render(FigurePage("Demo", block))
@@ -172,12 +195,24 @@ def test_alone_is_the_page_figure_at_twice_its_size(name):
         assert "width" not in page_json["layout"] and "width" not in layout
         cap = f"min(100%, {TWICE * PAGE_PLOT_PX[part]:.0f}px)"
         needs = (page_json["layout"].get("meta") or {}).get("least_width") or []
-        least = max([TWICE * PHONE_PLOT_PX, *(TWICE * scaled + fixed for scaled, fixed in needs)])
-        assert width == f"max({cap}, {least:.0f}px)"
+        least = max((TWICE * scaled + fixed for scaled, fixed in needs), default=0)
+        assert width == (f"max({cap}, {least:.0f}px)" if least else cap)
         _compare(page_json["data"], data, TWICE, "data")
         _compare(page_json["layout"], layout, TWICE, "layout")
+        tier = layout["meta"]["page"]
+        assert layout["meta"]["zoom"] == TWICE and tier["below"] == TWICE * PHONE_PLOT_PX
+        least = max((scaled + fixed for scaled, fixed in needs), default=0)
+        assert tier["width"] == (f"max(100%, {least:.0f}px)" if least else "100%")
+        assert tier.get("narrow") == (page_json["layout"].get("meta") or {}).get("narrow")
+        back_data, back_layout = _paged(data, layout, tier)
+        assert back_data == page_json["data"]
+        skip = ("template", "meta")
+        assert {k: v for k, v in back_layout.items() if k not in skip} == {
+            k: v for k, v in page_json["layout"].items() if k not in skip}  # fmt: skip
     (templates,) = re.findall(r'id="ctx-templates">(.*?)</script>', alone, re.S)
     _compare(json.loads(json.dumps(plotly_templates())), json.loads(templates), TWICE)
+    (own,) = re.findall(r'id="ctx-templates-page">(.*?)</script>', alone, re.S)
+    assert json.loads(own) == json.loads(json.dumps(plotly_templates()))
 
 
 def test_the_page_widths_are_the_stylesheets():
@@ -216,13 +251,12 @@ def test_linked_view_puts_the_sets_across_the_card_and_the_scatter_beside_the_gu
     caption = html.index("<figcaption>")
     assert plot < html.index('id="ctx-figure-0"') < reading < below < caption
     assert below < html.index('id="ctx-below-0"') < caption
-    # plotly sets the first dimension's levels left of the plot and the last's right of it.
-    data, tick = demo_linked(), on_page(SIZES["tick"]) * AVERAGE_CHAR_EM
+    # plotly sets the first dimension's levels left of the plot and the last's right of it,
+    # each as wide as the one measure of text width sets it.
+    data, tick = demo_linked(), on_page(SIZES["tick"])
     ends = (data.dimensions[0], data.dimensions[-1])
-    first, last = (max(map(len, data.frame[c].unique())) for c in ends)
-    assert (
-        block.below.layout.margin.l >= first * tick and block.below.layout.margin.r >= last * tick
-    )
+    first, last = (max(text_width(str(v), tick) for v in data.frame[c].unique()) for c in ends)
+    assert block.below.layout.margin.l >= first and block.below.layout.margin.r >= last
 
 
 def test_vendored_files_are_their_manifests():
@@ -525,6 +559,7 @@ def test_export_settings_are_the_figure_files_size(name):
     if name != "linked":
         size = data.static(THEMES["white"]).get_size_inches() * 72
         assert (settings["width_pt"], settings["height_pt"]) == pytest.approx(tuple(size))
-    assert settings["zoom"] == 1 and settings["file"] == "2026-10-01_qc_demo_v1"
+    # The zoom a plot is drawn at is its own, layout.meta.zoom, which changes with its box.
+    assert "zoom" not in settings and settings["file"] == "2026-10-01_qc_demo_v1"
     assert "[[" not in settings["caption"]
     assert settings["note"] == text.word("ui", "export.note") and settings["note"]

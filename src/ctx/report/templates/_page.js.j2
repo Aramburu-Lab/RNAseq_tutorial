@@ -1,3 +1,4 @@
+{% include "_hover.js.j2" %}
 {% include "_calls.js.j2" %}
 {% include "_brush.js.j2" %}
 {% include "_filter.js.j2" %}
@@ -14,11 +15,20 @@
   }
   var root = document.documentElement;
   var templates = JSON.parse(document.getElementById("ctx-templates").textContent);
+  /* Opened alone, the page's own templates, for a plot drawn at the page's size (fit). */
+  var paged = document.getElementById("ctx-templates-page");
+  var pageTemplates = paged ? JSON.parse(paged.textContent) : templates;
   var toggle = document.getElementById("ctx-theme-toggle");
   function plots(scope) { return (scope || document).querySelectorAll(".js-plotly-plot"); }
+  /* A plot's template in a theme: at the zoom it is drawn at, which its layout.meta.zoom
+     gives opened alone, 1 where it is drawn at the page's size. */
+  function template(div, theme) {
+    var meta = div.layout && div.layout.meta;
+    return (meta && meta.zoom === 1 ? pageTemplates : templates)[theme];
+  }
   function retheme(theme) {
     if (!window.Plotly) return;
-    plots().forEach(function (d) { Plotly.relayout(d, { template: templates[theme] }); });
+    plots().forEach(function (d) { Plotly.relayout(d, { template: template(d, theme) }); });
   }
 
   guard("theme", function () {
@@ -130,7 +140,8 @@
   });
 
   /* Filters: ctxFilter picks the rows; this block redraws every series from them, fits the
-     category axis to the bars shown, moves the median line and refills the live line. */
+     category axis to the bars shown, moves the median line and refills the lead's numbers and
+     the live line. */
   document.querySelectorAll("form.filter").forEach(function (form) {
     guard("filter", function () { filtering(form); });
   });
@@ -157,52 +168,27 @@
     });
   });
 
-  /* A plot that names a narrow layout (layout.meta.narrow: a heatmap's row labels, legend
-     entries and title wrapped for a phone, each row as tall as its wrapped label, and the
-     height they need) takes it while it is narrower than narrow.below px, and its own again
-     when wider. narrow.relayout holds layout keys, plotly's paths among them; narrow.restyle
-     pairs of a trace update and the traces it sets: the rows' band edges, the legend's names.
-     A desktop keeps the figure's own layout, the static's (work order item 2, 2026-10-01). */
-  guard("narrow", function () {
+  /* Every plot follows its box, through one ResizeObserver on its div and its box (work order
+     item 2, 2026-10-07): plotly redraws only on a window's resize, and a scrollbar that appears
+     after the first draw narrows every box with none (QC band maps laid out 582 px wide in a
+     567 px div). A plot drawn at another width than its div's is redrawn; and the observer
+     swaps the layouts a plot names:
+     - layout.meta.narrow, a phone's (a heatmap's row labels, legend entries and title wrapped,
+       each row as tall as its wrapped label, and the height they need), while the div is
+       narrower than narrow.below px; a desktop keeps the figure's own, the static's (work order
+       item 2, 2026-10-01).
+     - layout.meta.page, opened alone, the module page's own (figures.page_layout), with its
+       templates and its box's width, while the box is narrower than page.below, twice a
+       phone's plot: there a figure opened alone is drawn as the page draws it (Rytis
+       2026-10-07), with page.narrow, the page's phone layout, as on the module page.
+     A swap's relayout holds layout keys, plotly's paths among them; its restyle, pairs of a
+     trace update and the traces it sets. Where a layout holds its cells' aspect
+     (yaxis.scaleanchor), plotly shrank the cells with the width under a fixed height, and M12's
+     map stood 49 px blank under its plot at 1,280 px: the figure takes the height its width
+     gives the cells instead. */
+  guard("fit", function () {
     if (!window.Plotly) return;
-    function at(o, key) {
-      return key.split(/[.[\]]+/).filter(Boolean).reduce(function (o, p) { return o && o[p]; }, o);
-    }
-    plots().forEach(function (div) {
-      var narrow = div.layout.meta && div.layout.meta.narrow;
-      if (!narrow) return;
-      var wide = {}, state = null, styles = narrow.restyle || [];
-      Object.keys(narrow.relayout).forEach(function (k) {
-        wide[k] = ctxExport.plain(at(div.layout, k));
-      });
-      var wideStyles = styles.map(function (pair) {
-        var update = {};
-        Object.keys(pair[0]).forEach(function (k) {
-          update[k] = pair[1].map(function (i) { return ctxExport.plain(at(div.data[i], k)); });
-        });
-        return [update, pair[1]];
-      });
-      function apply() {
-        var width = div.clientWidth, on = width < narrow.below;
-        if (!width || on === state) return;
-        state = on;
-        var update = on ? narrow.relayout : wide;
-        (on ? styles : wideStyles).forEach(function (pair) { Plotly.restyle(div, pair[0], pair[1]); });
-        /* The div and plotly's wrapper keep the height they were written with; both take the
-           plot's new one. */
-        if ("height" in update) {
-          [div, div.parentElement].forEach(function (e) {
-            if (e.style.height) e.style.height = update.height + "px";
-          });
-        }
-        /* plotly pins the width it drew at when a relayout sets the height, and then never
-           redraws the plot at its box's width again: autosize, and no width, keep it free. */
-        Plotly.relayout(div, Object.assign({ autosize: true, width: null }, update));
-      }
-      if (window.ResizeObserver) new ResizeObserver(apply).observe(div);
-      window.addEventListener("resize", apply);
-      apply();
-    });
+    plots().forEach(function (div) { guard("fit", function () { fitting(div); }); });
   });
 
   /* An x-axis title wider than the room under its plot wraps there, from its own words, a unit
@@ -241,6 +227,140 @@
   document.querySelectorAll("form.brush").forEach(function (form) {
     guard("brush", function () { brushing(form); });
   });
+
+  function at(o, key) {
+    return key.split(/[.[\]]+/).filter(Boolean).reduce(function (o, p) { return o && o[p]; }, o);
+  }
+
+  function fitting(div) {
+    var meta = div.layout.meta || {}, narrow = meta.narrow, page = meta.page;
+    var wrapper = div.parentElement, holder = div.closest(".fig-plot, .fig-below") || wrapper;
+    var built = wrapper.style.width, ratio = null;
+    /* A layout that holds its cells' aspect through plotly (yaxis.scaleanchor) has it held by
+       its height here instead: with an axis shortened to the anchor, plotly's automargin
+       stops counting the column labels and the statistic axis drawn inside the plot, and a
+       height that followed its margins redrew between two layouts without end. */
+    if (div.layout.yaxis && div.layout.yaxis.scaleanchor) {
+      ratio = div.layout.yaxis.scaleratio || 1;
+      Plotly.relayout(div, { "yaxis.scaleanchor": null });
+    }
+    function layout(relayout, restyle, small) {
+      return { relayout: relayout, restyle: restyle || [], small: !!small };
+    }
+    var own = layout({}, []);
+    var phone = narrow ? layout(narrow.relayout, narrow.restyle) : null;
+    var small = page ? layout(Object.assign({ "meta.zoom": 1 }, page.relayout), page.restyle, true)
+      : null;
+    var smallPhone = page && page.narrow ? layout(
+      Object.assign({ "meta.zoom": 1 }, page.relayout, page.narrow.relayout),
+      page.restyle.concat(page.narrow.restyle || []), true) : null;
+    /* What any swap sets, as the figure was built, to set back. */
+    var wide = {};
+    [own, phone, small, smallPhone].filter(Boolean).forEach(function (s) {
+      Object.keys(s.relayout).forEach(function (k) { wide[k] = ctxExport.plain(at(div.layout, k)); });
+      s.unstyle = s.restyle.map(function (pair) {
+        var update = {};
+        Object.keys(pair[0]).forEach(function (k) {
+          update[k] = pair[1].map(function (i) { return ctxExport.plain(at(div.data[i], k)); });
+        });
+        return [update, pair[1]];
+      });
+    });
+    var state = own, resizedAt = null, heightSet = null, swapping = false;
+    /* The layout for the box as it is. Below the floor the box takes the module page's
+       width first, and a phone's layout follows the plot's width there. */
+    function pick() {
+      var box = holder.clientWidth;
+      if (!box) return null;
+      var below = !!page && box < page.below, css = below ? page.width : built;
+      if (wrapper.style.width !== css) wrapper.style.width = css;
+      var width = div.getBoundingClientRect().width;
+      if (below) return smallPhone && width < page.narrow.below ? smallPhone : small;
+      return phone && width < narrow.below ? phone : own;
+    }
+    /* The div and plotly's wrapper keep the height they were written with; both take the
+       plot's new one. */
+    function heights(h) {
+      [div, wrapper].forEach(function (e) { if (e.style.height) e.style.height = h + "px"; });
+    }
+    /* plotly draws, and says so, inside each restyle and relayout here: the plot's state is
+       the new one before the first, and the draws it says it made wait for the last. */
+    function swap(next) {
+      var last = state, update = {};
+      state = next; resizedAt = null; heightSet = null; swapping = true;
+      try {
+        Object.keys(last.relayout).forEach(function (k) { update[k] = wide[k]; });
+        Object.assign(update, next.relayout);
+        if (next.small !== last.small) {
+          var theme = root.getAttribute("data-theme");
+          update.template = (next.small ? pageTemplates : templates)[theme];
+        }
+        last.unstyle.forEach(function (pair) { Plotly.restyle(div, pair[0], pair[1]); });
+        next.restyle.forEach(function (pair) { Plotly.restyle(div, pair[0], pair[1]); });
+        /* A plot whose margins outgrow its height stops plotly ("Something went wrong with axis
+           scaling"): a taller figure takes its height before its new type, a shorter one
+           after, as a heatmap opened alone narrowed to the page's size did. */
+        var height = update.height, grows = height !== undefined && height > div._fullLayout.height;
+        delete update.height;
+        if (grows) setHeight(height);
+        /* plotly pins the width it drew at when a relayout sets the height, and then never
+           redraws the plot at its box's width again: autosize, and no width, keep it free. */
+        Plotly.relayout(div, Object.assign({ autosize: true, width: null }, update));
+        if (height !== undefined && !grows) setHeight(height);
+        /* plotly.js sets a legend key's offset only when it first draws the key, from the key's
+           width then: drawn at the page's size, a figure opened alone kept its keys 15 px into
+           their names until its legend was drawn anew. */
+        if (next.small !== last.small && div._fullLayout.showlegend) {
+          var shown = div.layout.showlegend;
+          Plotly.relayout(div, { showlegend: false });
+          Plotly.relayout(div, { showlegend: shown === undefined ? null : shown });
+        }
+      } finally {
+        swapping = false;
+      }
+    }
+    function setHeight(height) {
+      heights(height);
+      Plotly.relayout(div, { height: height, autosize: true, width: null });
+    }
+    /* The height that holds the cells' aspect at the width drawn, in the layouts that hold it
+       (the figure's own and the page's; a phone's rows keep their heights): the margins as
+       drawn, which no anchor shortens, and the rows' span at the ratio of a column's px. */
+    function held() {
+      var x = div.layout.xaxis, y = div.layout.yaxis, full = div._fullLayout;
+      if (ratio === null || (state !== own && state !== small) || !full) return null;
+      var size = full._size;
+      return size.t + size.b + ratio * size.w * Math.abs(y.range[1] - y.range[0]) /
+        Math.abs(x.range[1] - x.range[0]);
+    }
+    function apply() {
+      if (swapping) return;
+      var next = pick(), full = div._fullLayout;
+      if (!next || !full) return;
+      if (next !== state) swap(next);
+      full = div._fullLayout;
+      var width = div.getBoundingClientRect().width;
+      /* Once per width, so a width plotly cannot draw at never loops. */
+      if (Math.abs(full.width - width) > 0.5 && resizedAt !== width) {
+        resizedAt = width;
+        Plotly.Plots.resize(div);
+        return;
+      }
+      var height = held();
+      if (height !== null && Math.abs(height - full.height) > 1 && heightSet !== height) {
+        heightSet = height;
+        setHeight(height);
+      }
+    }
+    if (window.ResizeObserver) {
+      var watch = new ResizeObserver(apply);
+      watch.observe(div);
+      watch.observe(holder);
+    }
+    window.addEventListener("resize", apply);
+    div.on("plotly_afterplot", apply);
+    apply();
+  }
 
   /* A figure's PDF and SVG buttons: the figure files while its controls are at their
      defaults; once one is moved, the view as set, drawn by ctxExport. Each control's wiring
@@ -323,14 +443,26 @@
     var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
     var div = fig.querySelector(".js-plotly-plot");
     var summary = fig.querySelector(".filter-summary");
+    var lead = fig.querySelector(".fig-lead");
     var selects = Array.prototype.slice.call(form.querySelectorAll("select[data-column]"));
     var axis = cfg.horizontal ? "yaxis" : "xaxis", along = cfg.horizontal ? "x" : "y";
     var mark = exporting(fig, cfg);
     var traces = cfg.traces.map(function (_, i) { return i; });
+    /* The lead's numbers sit in spans named for their placeholders; only they change, so its
+       words and marks stay as built. With nothing to take a number over, the lead hides. */
+    function refill(view) {
+      if (!cfg.lead || !lead) return;
+      var values = view.bars ? ctxFilter.aggregate(rows, view.shown, cfg.lead.aggregates) : null;
+      lead.hidden = values === null;
+      if (values === null) return;
+      lead.querySelectorAll("[data-fill]").forEach(function (span) {
+        span.textContent = values[span.getAttribute("data-fill")];
+      });
+    }
     function update() {
       var chosen = {};
       selects.forEach(function (s) { chosen[s.getAttribute("data-column")] = s.value; });
-      var view = ctxFilter.view(rows, cfg, chosen), layout = {};
+      var view = ctxFilter.view(rows, cfg, chosen), layout = {}, moved = ctxFilter.moved(chosen);
       Plotly.restyle(div, { x: view.x, y: view.y, customdata: view.customdata }, traces);
       layout[axis + ".categoryarray"] = view.categories;
       layout[axis + ".showticklabels"] = view.categories.length <= cfg.max_tick_labels;
@@ -343,9 +475,10 @@
         }
       }
       Plotly.relayout(div, layout);
+      refill(view);
       summary.textContent = ctxFilter.summary(view, cfg, summary.getAttribute("data-template"),
-                                              summary.getAttribute("data-none"));
-      mark(ctxFilter.moved(chosen));
+                                              summary.getAttribute("data-none"), moved);
+      mark(moved);
     }
     form.addEventListener("change", update);
     form.addEventListener("submit", function (e) { e.preventDefault(); });
@@ -391,9 +524,7 @@
         traces.push(cfg.traces[cfg.levels[k]]);
         restyled.x.push(parts[k].map(function (r) { return r[cfg.lfc]; }));
         restyled.y.push(parts[k].map(function (r) { return height(r[cfg.p]); }));
-        restyled.customdata.push(parts[k].map(function (r) {
-          return cfg.hover.map(function (h) { return r[h]; });
-        }));
+        restyled.customdata.push(parts[k].map(function (r) { return ctxHover.row(r, cfg.hover); }));
       });
       var yline = found.line === null ? null : height(found.line), lines = cfg.cutoff_lines;
       Plotly.restyle(div, restyled, traces);

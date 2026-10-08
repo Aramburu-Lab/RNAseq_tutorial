@@ -300,8 +300,8 @@ def groups_of(sheet: pl.DataFrame, samples: Sequence[str]) -> pl.DataFrame:
 def notes(ctx: Context, found: Frames) -> list[Result]:
     """What the page says before any result: a subset's page, the cap, the runs left unread."""
     said: list[Result] = []
-    if parent := ctx.inputs.spec.info.get("subset_of"):
-        said.append(text.fill(PAGE, "notes.subset", parent=parent))
+    if (parent := ctx.inputs.spec.parent()) is not None:
+        said.append(text.fill(PAGE, "notes.subset", parent=parent.name))
     if (cap := ctx.options.reads_per_run) is not None and found.runs is not None:
         said.append(capped(cap, found.runs, ctx.aligned.main.paired))
     if ctx.inputs.skipped.height:

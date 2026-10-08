@@ -113,8 +113,11 @@ value = "Runs"
 
 [figures.library]
 title = "Sequencing depth per run"
-lead = "The median run has {depth} reads. {below} of {runs} runs have fewer than {good} million, ENCODE's standard for aligned reads."
-depth_millions = "{millions:.1f} million"
+# The page refills depth, below and runs over the runs a filter shows (ctx.viz.aggregates);
+# the depth to three significant digits, as the live line prints its median.
+lead = "The median run has {depth} million reads. {below} of {runs} runs have fewer than {good} million, ENCODE's standard for aligned reads."
+# Said in the live line while a filter is set: the caption keeps every run.
+note = "The caption counts every run."
 # The reading guide: the bars, their order and colour, the lines.
 bars = "Each bar is one run: the reads ENA reports for it, a read pair counted once, in millions."
 batched = "Runs are grouped by read-length batch and sorted by depth: {lengths}."

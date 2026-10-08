@@ -145,7 +145,7 @@ def process_rerun(process_root, tmp_path_factory):
     Its dataset file now declares itself a subset (D-050). The tool folders' modification
     times before the rerun ride along as the third value, so a test can see what was reused.
     """
-    from process_root import DATASET, PARENT, SLICE, dataset_file  # noqa: PLC0415
+    from process_root import DATASET, PARENT, PARENT_LABEL, SLICE, dataset_file  # noqa: PLC0415
 
     source, _, _ = process_root
     root = tmp_path_factory.mktemp("process_again") / "root"
@@ -153,6 +153,7 @@ def process_rerun(process_root, tmp_path_factory):
     tools = root / "outputs" / "03_process" / "tools"
     before = {str(p.relative_to(tools)): p.stat().st_mtime_ns for p in tools.rglob("*")
               if p.is_file()}  # fmt: skip
+    dataset_file(root, root, PARENT, label=PARENT_LABEL)
     copied = dataset_file(root, root, subset_of=PARENT)
     done = ctx_run("--root", str(root), "process", "--dataset", DATASET, "--dataset-file",
                    str(copied), "--genome", str(SLICE), "--aligner", "hisat2",

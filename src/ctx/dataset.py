@@ -167,6 +167,27 @@ class Dataset:
         """The resource with this name."""
         return next(r for r in self.resources if r.name == name)
 
+    def parent(self) -> "Dataset | None":
+        """The dataset this one is a subset of (``[dataset] subset_of``), or None for a whole one.
+
+        Its file sits beside this one, named by its slug, as ``conf/datasets`` holds both; a
+        page names it by its own ``name``, its label: M3's subset note named the slug, "tier1",
+        where the parent's label is "Step-1" (kit v6, 2026-10-07).
+
+        Raises:
+            DatasetError: If that file is missing, unusable or names another slug.
+        """
+        slug = self.info.get("subset_of")
+        if not slug:
+            return None
+        path = self.path.with_name(f"{slug}.toml")
+        if not path.is_file():
+            raise DatasetError(f"{self.path.name}: subset_of {slug!r}, but no {path} beside it")
+        found = load(path)
+        if found.slug != slug:
+            raise DatasetError(f"{path}: slug {found.slug!r}, not the subset_of {slug!r}")
+        return found
+
 
 def _need(table: Mapping[str, Any], key: str, kind: type, where: str, problems: list[str]) -> Any:
     """Read one required key of a given type, recording a problem instead of raising."""

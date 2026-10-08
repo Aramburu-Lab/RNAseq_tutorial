@@ -1,10 +1,11 @@
 """A vertical axis title and a flow's labels end a line only where the next word would cross.
 
-An average glyph width (``style.AVERAGE_CHAR_EM``) wrapped both (D14): M3's "Difference d
-(log2(count + 1))", set 130.2 pt wide against the 145.8 pt its axis gives a title, broke after
-"d", and a flow label broke Step-1's batch level "Reads ≤ 76 nt (min 35 nt)" at "(min". Each
-line is measured here as matplotlib sets it in the PDF, never with ``ctx.viz.metrics``, the
-measure under test, and a parenthesised span is found by its own pattern, not by ``words``.
+An average glyph width, a constant in ``ctx.viz.style`` until item 2 removed it, wrapped both
+(D14): M3's "Difference d (log2(count + 1))", set 130.2 pt wide against the 145.8 pt its axis
+gives a title, broke after "d", and a flow label broke Step-1's batch level "Reads ≤ 76 nt
+(min 35 nt)" at "(min". Each line is measured here as matplotlib sets it in the PDF, never with
+``ctx.viz.metrics``, the measure under test, and a parenthesised span is found by its own
+pattern, not by ``words``. The heatmap's two titles wrap from ``words`` too.
 """
 
 import dataclasses
@@ -18,11 +19,14 @@ from test_caption_fit import _set_width
 from test_page_script import EXPORT, _node
 
 from ctx.viz.annotate import fit_title
+from ctx.viz.heatmap import HeatmapData, Swatch
 from ctx.viz.metrics import table, words, wrap_to
 from ctx.viz.style import (
     AXIS_TITLE_SHARE,
+    BAND_COLOURS,
     FIGURE_WIDTH,
     FLOW,
+    PHONE_PLOT_PX,
     SIZES,
     THEMES,
     apply_matplotlib,
@@ -192,3 +196,45 @@ def test_a_flow_label_line_ends_only_where_its_next_word_would_cross_the_next_st
     levels = {" ".join(lines).rsplit(" ", 1)[0] for lines, _, _ in labels}
     assert set(BATCHES.values()) <= levels
     assert sum(len(lines) > 1 for lines, _, _ in labels) >= len(BATCHES)
+
+
+# A title whose unit wrapping at every space splits, in the files' room beside the rows below
+# and in a phone's plot.
+UNIT_TITLE = (
+    "Each column one sample, named as nf-core/rnaseq names it (reads assigned, good from 10,000)"
+)
+
+
+def _heatmap(column_title: str) -> HeatmapData:
+    """A band map whose long row labels leave its column title little room in the files."""
+    metrics = ["Reads written by Trim Galore after quality and adapter trimming",
+               "Per-base sequence content across every read position"]  # fmt: skip
+    runs = [f"R{i:02d}" for i in range(6)]
+    frame = pl.DataFrame([(r, m, "good") for r in runs for m in metrics], orient="row",
+                         schema=["run", "metric", "band"]).with_columns(
+        value=pl.lit(None, pl.Float64))  # fmt: skip
+    return HeatmapData(
+        frame=frame, row="metric", column="run", value="value", level="band",
+        columns={"run": ("none", "Run."), "metric": ("none", "Metric."),
+                 "band": ("none", "Band."), "value": ("none", "Not used.")},
+        row_label="Registry metric", column_label=UNIT_TITLE, column_title=column_title,
+        swatches=(Swatch("good", BAND_COLOURS["good"]), Swatch("no band", None)),
+        caption="Made up.", row_order=tuple(metrics), column_order=tuple(runs),
+    )  # fmt: skip
+
+
+@pytest.mark.parametrize("titled", [False, True])
+def test_a_heatmaps_titles_keep_their_unit_whole(titled):
+    """Package D wrapped a heatmap's column title in its files, and its titles on the page,
+    with plain ``wrap_to``, which splits a parenthesised unit at its spaces where package E's
+    titles keep it whole. The files' title at the room the row labels leave, and the page's at
+    a phone's plot, as an axis title or a column title, each break only between the words
+    ``words`` holds. Mutations caught: plain ``wrap_to`` in ``_column_title``, and in
+    ``_title``."""
+    data = _heatmap(UNIT_TITLE if titled else "")
+    files = data._column_title(figure_inches(FIGURE_WIDTH, "bar")[0]).split("\n")
+    page = data._title(data._words(phone=True), PHONE_PLOT_PX).split("<br>")
+    for lines in (files, page):
+        assert len(lines) > 1 and " ".join(lines) == UNIT_TITLE, lines
+        assert any(SPAN.fullmatch(words(line)[-1]) for line in lines), lines
+        assert all(line.count("(") == line.count(")") for line in lines), lines

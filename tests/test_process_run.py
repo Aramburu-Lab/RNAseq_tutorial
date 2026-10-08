@@ -240,12 +240,18 @@ def test_a_moved_rerun_reuses_every_tool_folder(process_rerun, process_root):
 
 def test_a_subsets_page_says_it_is_the_laptop_exercise(process_rerun, process_root):
     """The rerun's dataset file declares subset_of: its page says first that it is the optional
-    laptop exercise on that parent's runs (D-050); the full run's page does not.
+    laptop exercise on that parent's runs (D-050), naming the parent by its label, from the
+    parent's own dataset file; the full run's page does not.
 
-    Mutation caught: the note left out of ``page.notes`` (no subset page says what it is)."""
+    Mutations caught: the note left out of ``page.notes`` (no subset page says what it is); the
+    parent named by its slug (kit v6: "a subset of tier1's runs", where its label is
+    "Step-1")."""
+    from process_root import PARENT, PARENT_LABEL  # noqa: PLC0415
+
     _, html, _ = process_rerun
-    note = "This page is the optional laptop exercise, on a subset of chrse_cohort"
-    assert note in html and html.index(note) < html.index("The reference each alignment used")
+    shown, note = visible(html), text.fill("process", "notes.subset", parent=PARENT_LABEL)
+    assert note in shown and shown.index(note) < shown.index("The reference each alignment used")
+    assert f"subset of {PARENT}" not in shown
     assert "optional laptop exercise" not in page(process_root[0])
 
 
@@ -289,6 +295,24 @@ def test_captions_come_from_content_and_state_no_test(process_root):
         assert prose.words(caption) + made_up <= prose.CAPTION_WORDS, (key, prose.words(caption))
     metric = REGISTRY.metrics["gene_strand_bias"]
     assert f"stranded {metric.stranded}, unstranded {metric.unstranded}." in found[2]
+
+
+def test_agreement_captions_give_the_empirical_percentiles_of_d(process_root):
+    """D6 (D-040): each agreement caption gives its comparison's empirical 2.5th and 97.5th
+    percentiles of d to three decimals, beside the limits of agreement, from the concordance
+    table. The caption test above holds a caption to its own template, which a template
+    without the clause matches too. Mutation caught: the clause deleted from
+    content/process.toml."""
+    root, _, _ = process_root
+    found = captions(page(root))
+    agreement = [c for key, c in zip(CAPTION_KEYS, found, strict=True) if key == "agreement"]
+    every = table(root, "concordance").filter(pl.col("unit") == "all")
+    undefined = text.word("process", "undefined")
+    assert len(agreement) == every.height == 4
+    for caption, row in zip(agreement, every.iter_rows(named=True), strict=True):
+        low, high = (undefined if row[c] is None else f"{row[c]:.3f}"
+                     for c in ("d_p2_5", "d_p97_5"))  # fmt: skip
+        assert f"95 % of d {low} to {high}" in caption, (row["comparison"], caption)
 
 
 def test_the_key_number_counts_the_genes_multimappers_change(process_root):
@@ -357,7 +381,8 @@ def test_the_cap_and_the_reads_each_run_kept_are_reported(process_root):
 
 def test_hover_and_filters_name_every_column_in_words(process_root):
     """No hover line and no filter names a column by its identifier; the strand figure's
-    forward share is printed to three decimals, not seventeen digits.
+    forward share is printed to three significant digits, not seventeen: its bars carry the
+    share whole, for the lead's range, and hover formats it.
 
     The bar filters' live lines print no median: on bars stacked to 100 % it is always 100 %,
     and on the strand bars it pools three settings (P2S.6 (d)).
@@ -380,8 +405,7 @@ def test_hover_and_filters_name_every_column_in_words(process_root):
     assert "Forward share: " in html and "Plain count: " in html
     labels = re.findall(r'<label>([^<]*)<select data-column="([^"]+)"', html)
     assert ("Strand call", "call") in labels and all(word != column for word, column in labels)
-    shares = pl.read_csv(next(out(root).glob(f"*_{DATASET}_strand_assigned_v1.csv")))
-    assert (shares["forward_share"] == shares["forward_share"].round(3)).all()
+    assert "Forward share: %{customdata[3]:.3~g}" in html
 
 
 def test_a_partial_reference_is_said_to_be_one_and_a_whole_one_is_not(process_root):

@@ -2,18 +2,21 @@
 
 ``prepare`` gives the figure macro (``templates/_figure.html.j2``) everything it prints for a
 ``FigureBlock``; ``builder`` renders the pages around it. Opened alone, a figure is drawn at
-``style.ALONE_SCALE`` (Rytis 2026-10-01), no wider than its box (Rytis 2026-10-02).
+``style.ALONE_SCALE`` (Rytis 2026-10-01), no wider than its box (Rytis 2026-10-02), and at the
+module page's size where its box is narrower than that scale of a phone's plot (Rytis
+2026-10-07).
 """
 
 import json
 import math
+import string
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
-from markupsafe import Markup
+from markupsafe import Markup, escape
 
 from ctx.io.naming import figure_files
-from ctx.report import export, text
+from ctx.report import export, marks, text
 from ctx.viz.style import PAGE_PLOT_PX, PHONE_PLOT_PX, THEMES, zoom
 
 if TYPE_CHECKING:
@@ -43,35 +46,108 @@ def finite(row: Mapping[str, Any]) -> dict[str, Any]:
     return {k: None if isinstance(v, float) and not math.isfinite(v) else v for k, v in row.items()}
 
 
+def _width(scale: float, part: str, needs: list[list[float]]) -> str:
+    """The CSS width of a plot's box at ``scale``: its card's, capped opened alone.
+
+    Opened alone, ``scale`` times the width a module page gives a plot there (``part``) or the
+    box's, whichever is less (Rytis 2026-10-02); never narrower than a ``layout.meta.least_width``
+    of [scaled, fixed] px pairs names, the largest ``scale`` * scaled + fixed: the parallel
+    sets' titles ran into each other at 375 px. Narrower, the box scrolls under the hint.
+    """
+    width = "100%" if scale == 1 else f"min(100%, {PAGE_PLOT_PX[part] * scale:.0f}px)"
+    least = max((scale * a + b for a, b in needs), default=0.0)
+    return f"max({width}, {least:.0f}px)" if least else width
+
+
+def _plain(node: Any) -> Any:
+    """A plotly figure's JSON as the page receives it: arrays as lists, NaN as null."""
+    from plotly.utils import PlotlyJSONEncoder  # noqa: PLC0415 - heavy
+
+    return json.loads(json.dumps(node, cls=PlotlyJSONEncoder))
+
+
+def _differ(page: Any, zoomed: Any, path: str, out: dict[str, Any]) -> None:
+    """Every value ``zoom`` changed, at its plotly attribute path, as the page holds it.
+
+    A list of objects (annotations, shapes) is walked item by item, ``annotations[0].font``; any
+    other list is one value, as a marker's sizes are.
+    """
+    if isinstance(page, dict) and isinstance(zoomed, dict):
+        for key, value in page.items():
+            _differ(value, zoomed.get(key), f"{path}.{key}" if path else key, out)
+    elif (isinstance(page, list) and isinstance(zoomed, list) and len(page) == len(zoomed)
+          and page and all(isinstance(v, dict) for v in page)):  # fmt: skip
+        for i, (a, b) in enumerate(zip(page, zoomed, strict=True)):
+            _differ(a, b, f"{path}[{i}]", out)
+    elif page != zoomed:
+        out[path] = page
+
+
+def page_layout(page: Mapping[str, Any], zoomed: Mapping[str, Any], scale: float, part: str
+                ) -> dict[str, Any]:  # fmt: skip
+    """What turns a figure opened alone back into the module page's, below the floor.
+
+    Rytis, 2026-10-07: below the phone width a figure opened alone is drawn as the page draws
+    it. Wherever its box is narrower than ``scale`` times a phone's plot, where the doubled
+    figure was held to that width and scrolled, the page script swaps this in through the
+    narrow mechanism (``_page.js.j2``, fit): every value ``zoom`` changed, taken back from the
+    page's own JSON, so no second list of lengths exists; the box's width as the module page
+    sets it; and a heatmap's own narrow layout at the page's size. The template and ``meta``
+    are not in it: the script swaps the page's templates in, and ``meta.zoom`` tells the export
+    the page's zoom.
+
+    Args:
+        page: The figure's JSON at the module page's size.
+        zoomed: The same at ``scale``.
+        scale: The zoom opened alone.
+        part: Where the plot sits, as ``PAGE_PLOT_PX`` names it.
+
+    Returns:
+        ``below``, the floor in px; ``width``, the box's CSS width; ``relayout``, attribute
+        path to the page's value; ``restyle``, [values by path, traces] pairs, one per set of
+        traces that share their paths; and ``narrow``, the page's own, where it has one.
+    """
+    page, zoomed = _plain(page), _plain(zoomed)
+    skip = ("template", "meta")
+    relayout: dict[str, Any] = {}
+    _differ({k: v for k, v in page["layout"].items() if k not in skip}, zoomed["layout"], "",
+            relayout)  # fmt: skip
+    traces: dict[tuple[str, ...], list[tuple[int, dict[str, Any]]]] = {}
+    for i, (a, b) in enumerate(zip(page["data"], zoomed["data"], strict=True)):
+        changed: dict[str, Any] = {}
+        _differ(a, b, "", changed)
+        if changed:
+            traces.setdefault(tuple(changed), []).append((i, changed))
+    restyle = [[{k: [c[k] for _, c in group] for k in keys}, [i for i, _ in group]]
+               for keys, group in traces.items()]  # fmt: skip
+    meta = page["layout"].get("meta") or {}
+    out = {"below": PHONE_PLOT_PX * scale, "width": _width(1.0, part, meta.get("least_width", [])),
+           "relayout": relayout, "restyle": restyle}  # fmt: skip
+    return out | ({"narrow": meta["narrow"]} if "narrow" in meta else {})
+
+
 def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "beside") -> Markup:
     """The plotly div and its drawing script, without plotly.js itself.
 
     At a ``scale`` other than 1, opened alone, every length of the figure is ``scale`` times its
-    page size, and its width ``scale`` times the width the page gives a plot there (``part``)
-    or the width of its box, whichever is less (Rytis 2026-10-02): plotly redraws it at its
-    box's width as the window changes. It is never narrower than ``scale`` times a phone's
-    plot, the narrowest a page lays a figure out for, nor than a ``layout.meta.least_width``
-    of [scaled, fixed] px pairs names: the largest ``scale`` * scaled + fixed. Narrower than
-    that, its box scrolls sideways under the hint.
+    page size, in a box ``_width`` caps, and plotly redraws it at its box's width as the window
+    changes. Its layout's ``meta.zoom`` is ``scale``, and ``meta.page`` the page's own layout,
+    which the page script swaps in where the box is narrower than ``scale`` times a phone's
+    plot (``page_layout``, Rytis 2026-10-07).
     """
     import plotly.io as pio  # noqa: PLC0415 - heavy; imported after the runtime profile
 
     figure = figure.to_plotly_json()
-    width, least = "100%", 0.0
+    needs = (figure["layout"].get("meta") or {}).get("least_width") or []
     if scale != 1:
-        figure = zoom(figure, scale)
-        width = f"min(100%, {PAGE_PLOT_PX[part] * scale:.0f}px)"
-        # At twice the type a phone's plot held none of the band map's row labels (2026-10-02).
-        least = PHONE_PLOT_PX * scale
-    # The parallel sets' titles ran into each other at 375 px; they name their least width.
-    needs = (figure["layout"].get("meta") or {}).get("least_width")
-    if needs:
-        least = max(least, *(scale * a + b for a, b in needs))
-    if least:
-        width = f"max({width}, {least:.0f}px)"
+        zoomed = zoom(figure, scale)
+        meta = zoomed["layout"].get("meta") or {}
+        zoomed["layout"]["meta"] = {**meta, "zoom": scale,
+                                    "page": page_layout(figure, zoomed, scale, part)}  # fmt: skip
+        figure = zoomed
     html = pio.to_html(
         figure, include_plotlyjs=False, full_html=False, div_id=div_id, config=PLOTLY_CONFIG,
-        default_width=width,
+        default_width=_width(scale, part, needs),
     )  # fmt: skip
     return Markup(html)
 
@@ -96,11 +172,29 @@ def files(block: "FigureBlock") -> list[tuple[str, str, str]]:
     ]
 
 
+def lead_html(lead: Mapping[str, Any]) -> Markup:
+    """A lead that follows its filter, each recomputed number in a span the page refills.
+
+    The span is named for its placeholder (``data-fill``); the words around it print as any
+    lead does, a backticked span as code and a glossary mark as its display text.
+    """
+    values = {**lead["fixed"], **lead["start"]}
+    out = []
+    for literal, name, _, _ in string.Formatter().parse(lead["template"]):
+        out.append(marks.html(literal))
+        if name is None:
+            continue
+        shown = escape(values[name])
+        out.append(Markup(f'<span data-fill="{name}">{shown}</span>')
+                   if name in lead["start"] else shown)  # fmt: skip
+    return Markup("").join(out)
+
+
 def prepare(
     block: "FigureBlock", index: int, number: int, level: int, scale: float = 1.0
 ) -> dict[str, Any]:
     """Everything the figure macro prints for one figure; opened alone, at ``scale``."""
-    controls = export.zoomed(block.controls, scale) if block.controls else None
+    controls = dict(block.controls) if block.controls else None
     exporting = bool(controls and controls.get("export"))
     # Every character the view's PDF can set, which the page's embedded fonts must keep.
     drawn = [block.figure, *([block.below] if block.below is not None else [])]
@@ -108,9 +202,11 @@ def prepare(
     below = block.below
     if below is not None:
         below = figure_html(below, f"ctx-below-{index}", scale, "across")
+    following = controls.get("lead") if controls else None
     return {
         "html": figure_html(block.figure, f"ctx-figure-{index}", scale),
         "below": below,
+        "lead": lead_html(following) if following else marks.html(block.text.lead),
         "caption": block.caption,
         "rows": json_for_script([finite(r) for r in block.rows]),
         "data_file": block.data_file,

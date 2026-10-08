@@ -40,8 +40,10 @@ from ctx.report.builder import (
     SelfCheck,
     write,
 )
+from ctx.report.figures import finite
 from ctx.report.text import word as text_word
 from ctx.viz import scatter
+from ctx.viz.aggregates import Aggregate, Lead
 from ctx.viz.save import figure_block, write_figure
 from ctx.viz.style import (
     ASPECT,
@@ -88,6 +90,9 @@ RUNS = ("RAP1_UNINDUCED_REP1", "RAP1_UNINDUCED_REP2", "RAP1_IAA_30M_REP1", "WT_R
 # the module page from a phone to a laptop.
 BANDS_ALONE_WINDOWS = (375, 1280, 2560, 375)
 BANDS_PAGE_WINDOWS = (375, 1440)
+# Rytis, 2026-10-07: below the phone width, Open alone draws a figure as the page does, and 2x
+# from the floor up. A phone, then windows whose box falls either side of the 634 px floor.
+FLOOR_WINDOWS = (375, 700, 768)
 
 LABELS = """Array.from(document.querySelectorAll(%s)).map(function (a) {
   return [a.textContent, a.getAttribute("href")]; })"""
@@ -190,12 +195,56 @@ TEXTS = """(function () {
 })()"""
 FILTER = """(function () {
   var fig = document.querySelector("#figure-3"), select = fig.querySelector("select[data-column]");
-  var links = %(links)s, before = links();
+  var links = %(links)s, before = links(), lead = fig.querySelector(".fig-lead");
+  var was = lead.textContent;
   select.value = "LDN"; select.dispatchEvent(new Event("change", {bubbles: true}));
   var div = fig.querySelector(".js-plotly-plot");
   return {before: before, after: links(), summary: fig.querySelector(".filter-summary").textContent,
-          shown: div.layout.xaxis.categoryarray};
+          shown: div.layout.xaxis.categoryarray, lead: [was, lead.textContent],
+          spans: lead.querySelectorAll("[data-fill]").length};
 })()"""
+# Every plot's drawn and div width, then again once a 15 px margin narrows every card with no
+# window resize, as a scrollbar appearing after the first draw does: polled until each plot is
+# drawn at its div's width, or 3 s.
+NARROWED = """new Promise(function (done) {
+  function widths() {
+    return Array.from(document.querySelectorAll(".js-plotly-plot")).map(function (d) {
+      return {drawn: d.querySelector("svg.main-svg").getBoundingClientRect().width,
+              div: d.getBoundingClientRect().width};
+    });
+  }
+  var before = widths(), start = Date.now();
+  document.querySelectorAll(".fig").forEach(function (f) { f.style.marginRight = "15px"; });
+  (function poll() {
+    var after = widths();
+    var fits = after.every(function (p) { return Math.abs(p.drawn - p.div) <= 1; });
+    if ((fits && Date.now() - start > 300) || Date.now() - start > 3000) {
+      done({before: before, after: after});
+    } else setTimeout(poll, 100);
+  })();
+})"""
+# Every value of every plot's customdata that is null, which plotly prints as 0 under a number
+# format, and every one that is "", which it prints as nothing.
+HOVERED = """(function () {
+  var nulls = 0, blanks = 0;
+  document.querySelectorAll(".js-plotly-plot").forEach(function (d) {
+    d.data.forEach(function (t) {
+      (t.customdata || []).forEach(function (row) {
+        (Array.isArray(row) ? row : [row]).forEach(function (v) {
+          if (v === null) nulls += 1; else if (v === "") blanks += 1;
+        });
+      });
+    });
+  });
+  return {nulls: nulls, blanks: blanks};
+})()"""
+# The demo bars' lead, whose numbers follow the filter as M1's and M3's do (D1).
+BARS_LEAD = Lead(
+    "{runs} runs shown; median {median} million reads, {short} below thirty.",
+    (Aggregate("runs", "count"), Aggregate("median", "median", "reads"),
+     Aggregate("short", "below", "reads", value=30.0)),
+    note="The caption counts every run.",
+)  # fmt: skip
 RESET = """new Promise(function (done) {
   var fig = document.querySelector("%(figure)s");
   %(undo)s
@@ -235,12 +284,18 @@ FIT = """(function () {
       var holder = d.closest(".fig-plot, .fig-below");
       var text = d.querySelector(".xtick text, .ytick text, .dimlabel");
       var all = function (s) { return Array.from(d.querySelectorAll(s)).map(box); };
+      var keys = Array.from(d.querySelectorAll(".legend .traces")).map(function (t) {
+        var marks = Array.from(t.querySelectorAll(".legendpoints path, .legendlines path"));
+        return [Math.max.apply(null, marks.map(function (m) { return box(m)[2]; })),
+                box(t.querySelector(".legendtext"))[0]];
+      });
       return {drawn: d.querySelector("svg.main-svg").getBoundingClientRect().width,
               div: d.getBoundingClientRect().width,
               box: holder.clientWidth, hint: !holder.querySelector(".scroll-hint").hidden,
               text: text && parseFloat(getComputedStyle(text).fontSize),
               svg: box(d.querySelector("svg.main-svg")), yticks: all(".ytick text"),
-              titles: all(".dimlabel"), levels: all(".catlabel"), bars: all(".catrect")};
+              titles: all(".dimlabel"), levels: all(".catlabel"), bars: all(".catrect"),
+              keys: keys};
     })};
 })()""".replace("%s", BOX, 1)
 # FIT once plotly has drawn every plot at its div's width, or after 5 s: plotly redraws a plot
@@ -254,6 +309,17 @@ SETTLED = """new Promise(function (done) {
     if (settled || Date.now() - start > 5000) done(fit); else setTimeout(poll, 100);
   })();
 })""".replace("%s", FIT, 1)
+
+
+# SETTLED, then the theme toggled and the page measured again.
+TOGGLED = (
+    SETTLED
+    + """.then(function (first) {
+  document.getElementById("ctx-theme-toggle").click();
+  return new Promise(function (done) { setTimeout(function () {
+    done({first: first, toggled: %s}); }, 500); });
+})""".replace("%s", FIT, 1)
+)
 
 
 def _links(figure: str) -> str:
@@ -301,6 +367,8 @@ def _write(out: Path, page: str, demos: dict) -> tuple[Path, dict]:
     for name, data in demos.items():
         figure_stem = stem("qc", f"{name}_demo", 1, day=date(2026, 10, 1))
         text = FigureText(title=name) if name == "volcano" else FigureText(name, reading=READING)
+        if name == "bars":
+            text = FigureText(name, reading=READING, follows=BARS_LEAD)
         write_figure(data, out, figure_stem, title=name, data_releases={}, text=text)
         blocks.append(figure_block(data, figure_stem, text))
     overview = stem("qc", f"{page}_overview", 1, day=date(2026, 10, 1))
@@ -325,7 +393,17 @@ def built(tmp_path_factory):
     blocks = {**blocks, "thin": thinned["volcano"]}
     pages["long"], _ = _write(out / "long", "long", {"linked": _long_levels()})
     pages["bands"], _ = _write(out / "bands", "bands", {"bandmap": _band_map()})
+    pages["untested"], _ = _write(out / "untested", "untested", {"volcano": _untested()})
     return out, page, {**demos, "thin": thin}, blocks, pages
+
+
+def _untested():
+    """The demo volcano with every seventh hover value missing: a gene with no identifier."""
+    data = demo_volcano(counts(), width="double")
+    hover = data.frame.with_row_index().select(
+        pl.exclude("index", "gene_id"),
+        gene_id=pl.when(pl.col("index") % 7 > 0).then(pl.col("gene_id")))  # fmt: skip
+    return dataclasses.replace(data, frame=hover.select(data.frame.columns))
 
 
 @pytest.fixture(scope="module")
@@ -393,6 +471,7 @@ def ran(built, tmp_path_factory):
                                 ("bands_reflow", pages["bands"], BANDS_PAGE_WINDOWS)):  # fmt: skip
         steps = [{"width": width, "height": 812, "act": SETTLED} for width in widths]
         tasks.append({**steps[0], "name": name, "url": where.as_uri(), "resize": steps[1:]})
+    tasks += _fit_tasks(page, pages, standalone["volcano"], bands_alone.as_uri())
     results = _browse(tasks, downloads)
     for result in results.values():
         result["paths"] = {ext: downloads / f["guid"] for ext, f in result["files"].items()}
@@ -402,6 +481,22 @@ def ran(built, tmp_path_factory):
         results["defaults"]["paths"][f"bars_{ext}"] = _decoded(encoded, downloads, f"b.{ext}")
     results["bold"]["paths"]["pdf"] = _decoded(results["bold"]["acted"], downloads, "bold.pdf")
     return results, blocks
+
+
+def _fit_tasks(page: Path, pages: dict, volcano: str, bands: str) -> list[dict]:
+    """Every card narrowed with no window resize, on the demo and band map pages; the volcano
+    and the band map opened alone either side of the floor; the volcano whose hover misses
+    values, drawn by its live calls."""
+    tasks = [{"name": f"narrowed_{name}", "url": where.as_uri(), "width": 1280, "act": NARROWED}
+             for name, where in (("demo", page), ("bands", pages["bands"]))]  # fmt: skip
+    tasks += [{"name": f"floor_{kind}_{width}", "url": where, "width": width, "height": 812,
+               "act": TOGGLED}
+              for kind, where in (("volcano", volcano), ("bandmap", bands))
+              for width in FLOOR_WINDOWS]  # fmt: skip
+    one = "#figure-1"
+    tasks.append({"name": "alone_volcano_phone", "url": volcano, "width": 375, "height": 812,
+                  "figure": one, "act": CALLS % {"links": _links(one), "figure": one}})  # fmt: skip
+    return [*tasks, {"name": "untested", "url": pages["untested"].as_uri(), "act": HOVERED}]
 
 
 def _browse(tasks: list[dict], downloads: Path) -> dict[str, dict]:
@@ -680,6 +775,69 @@ def test_filtered_view_draws_the_bars_shown(ran):
     assert len(bars) == len(names)
 
 
+def test_a_filter_refills_its_lead_as_python_fills_it(ran, built):
+    """D1: choosing LDN refills the lead's numbers, in their spans, with ``ctx.viz.aggregates``
+    over the LDN rows, its words kept; the live line adds that the caption counts every run,
+    which the export appends to the caption. Mutation: the refill removed from the page script
+    (the lead kept every bar's numbers)."""
+    acted = ran[0]["bars"]["acted"]
+    rows = [finite(r) for r in built[3]["bars"].rows]
+    every, ldn = BARS_LEAD.text(rows), BARS_LEAD.text([r for r in rows if r["cell_type"] == "LDN"])
+    assert every != ldn and acted["lead"] == [every, ldn] and acted["spans"] == 3
+    assert acted["summary"].endswith(" " + BARS_LEAD.note)
+    text = " ".join(PdfReader(ran[0]["bars"]["paths"]["pdf"]).pages[0].extract_text().split())
+    assert BARS_LEAD.note in text
+
+
+def test_a_narrowed_card_redraws_every_plot_at_its_width(ran):
+    """D11: a scrollbar that appears after the first draw narrows every card with no window
+    resize, and plotly redraws only on one: QC band maps were laid out 582 px wide in a 567 px
+    div. Every card narrowed 15 px, every plot of the demo page and the band map page is drawn
+    at its div's width within 1 px. Mutation: the page script's ResizeObserver removed (each
+    plot kept the width it was drawn at, 15 px wider than its div)."""
+    for name in ("demo", "bands"):
+        acted = ran[0][f"narrowed_{name}"]["acted"]
+        pairs = zip(acted["before"], acted["after"], strict=True)
+        narrowed = [b["div"] - a["div"] for b, a in pairs]
+        assert any(n == pytest.approx(15, abs=1) for n in narrowed), (name, narrowed)
+        assert all(abs(p["drawn"] - p["div"]) <= 1 for p in acted["after"]), (name, acted)
+
+
+@pytest.mark.parametrize("kind", ["volcano", "bandmap"])
+def test_alone_below_the_floor_is_drawn_as_the_page_draws_it(ran, kind):
+    """D17, Rytis 2026-10-07: opened alone where the box is narrower than twice a phone's plot
+    (a 375 px phone, a 700 px window), the volcano and the band map are drawn at their box's
+    width with the module page's 20 px ticks and no scroll hint; from the floor up (a 768 px
+    window) at twice the type, as wide as their box. The page never scrolls, every legend key
+    ends before its name, and the theme toggle keeps the type each is drawn at. Mutations: the
+    floor kept below the phone width (634 px in a 317 px box, ticks at 40 px, under the hint);
+    the legend not drawn anew at the page's size (each key stood 15 px into its name); the
+    toggle swapping in the templates at twice the size there."""
+    page = ran[0]["fit_page"]["acted"]["plots"][0]["text"]
+    floor, regimes = TWICE * PHONE_PLOT_PX, []
+    for width in FLOOR_WINDOWS:
+        acted = ran[0][f"floor_{kind}_{width}"]["acted"]
+        for fit in (acted["first"], acted["toggled"]):
+            (plot,) = fit["plots"]
+            below = plot["box"] < floor
+            assert plot["text"] == pytest.approx(page if below else TWICE * page), width
+            assert plot["drawn"] == pytest.approx(plot["box"], abs=0.5), width
+            assert not plot["hint"] and fit["scroll"] <= fit["page"], width
+            assert plot["keys"] and all(key < name for key, name in plot["keys"]), plot["keys"]
+        regimes.append(below)
+    assert regimes == [True, True, False]
+    assert page == pytest.approx(20)
+
+
+def test_live_calls_print_a_missing_value_as_nothing(ran):
+    """Package C's hover rule on the page: a volcano over filtered genes, whose untested genes
+    have no adjusted p, draws its live calls on load from its rows, and no customdata value is
+    null, which plotly prints as 0 under a number format. Mutation: the live calls' customdata
+    of raw values."""
+    acted = ran[0]["untested"]["acted"]
+    assert acted["nulls"] == 0 and acted["blanks"] > 0
+
+
 def test_no_request_and_no_error(ran):
     """Offline: the page asks for nothing but itself and the files it saves, and logs no error.
     Mutations: a fetch of an https URL planted in the page script; an exception thrown in the
@@ -723,10 +881,12 @@ def test_alone_draws_the_page_figure_at_twice_its_size(ran):
         PLOTLY_MARKER_PX)  # fmt: skip
 
 
-@pytest.mark.parametrize("name", ["linked", "alone_paint", "volcano"])
+@pytest.mark.parametrize("name", ["linked", "alone_paint", "volcano", "alone_volcano_phone"])
 def test_exported_marks_are_the_figure_files_size(ran, name):
-    """A point is MARKER_SIZE pt across in the export, from the module page and from the page
-    opened alone at twice the size. Mutation: the page's zoom not divided back out."""
+    """A point is MARKER_SIZE pt across in the export, from the module page, from the page
+    opened alone at twice the size, and opened alone on a phone, where it is drawn at the
+    page's size. Mutations: the page's zoom not divided back out; the zoom left at 2 where a
+    figure opened alone is drawn at the page's size."""
     root = _svg(ran[0][name]["paths"]["svg"])
     radii = {float(re.match(r"M([\d.]+),0A", p.get("d")).group(1)) for p in root.iter(f"{SVG}path")
              if p.get("class", "").startswith("point")}  # fmt: skip
@@ -796,14 +956,15 @@ def test_band_map_title_and_labels_stay_clear(ran, name):
     assert _inside(title, plot["svg"])
 
 
-def test_alone_on_a_phone_scrolls_at_twice_a_phone_plot(ran):
-    """Opened alone in a 375 px window, twice the type cannot fit a phone's 317 px plot: the
-    band map is drawn twice that wide and scrolls inside its card under the hint, every row
-    label inside it. Mutation: no floor under the capped width, which drew it 317 px wide with
-    all 11 row labels starting up to 103 px left of the plot and its title off the page."""
+def test_alone_on_a_phone_fits_the_screen_at_the_pages_size(ran):
+    """Opened alone in a 375 px window, the band map is drawn at its box's width with no hint,
+    at the page's size, its phone layout in: Rytis 2026-10-07, below the phone width Open alone
+    fits the screen at the page's size; every row label stays inside the plot
+    (``test_band_map_title_and_labels_stay_clear``). Mutation: the floor kept, which drew it
+    634 px wide in its 317 px box under the hint."""
     (plot,) = ran[0]["bands_alone_375"]["acted"]
-    assert plot["width"] == pytest.approx(TWICE * PHONE_PLOT_PX, abs=0.5)
-    assert plot["width"] > plot["box"][2] - plot["box"][0] and plot["hint"]
+    assert plot["width"] == pytest.approx(plot["box"][2] - plot["box"][0], abs=0.5)
+    assert plot["width"] < TWICE * PHONE_PLOT_PX and not plot["hint"]
 
 
 @pytest.mark.parametrize(("name", "windows"), [("bands_alone_reflow", BANDS_ALONE_WINDOWS),
@@ -811,27 +972,27 @@ def test_alone_on_a_phone_scrolls_at_twice_a_phone_plot(ran):
 def test_band_map_reflows_as_the_window_changes(ran, name, windows):
     """Rytis, 2026-10-02: the plot reflows on resize. The band map, whose page script swaps its
     narrow layout in and out, opened alone at 375 px and resized to 1,280, 2,560 and 375 px, is
-    drawn at each step at twice the page's width or its box's, whichever is less, never under
-    twice a phone's plot, which the steps reach in turn; on the module page, opened at 375 px
-    and widened to 1,440, at its box's width; every row label stays inside the plot. Mutations:
-    the narrow layout's relayout sent without autosize and a null width, so plotly pinned the
-    width it drew at: alone, 634 px in a 1,167 px box at 1,280 with 7 of 11 row labels up to
-    219 px left of the plot, and on the module page 317 px in a 686 px box at 1,440 (review,
-    2026-10-02); autosize sent without the null width, which the height's own edit pins
-    again."""
+    drawn at each step at twice the page's width or its box's, whichever is less, and below
+    twice a phone's plot at its box's at the page's size (Rytis 2026-10-07), which the steps
+    reach in turn; on the module page, opened at 375 px and widened to 1,440, at its box's
+    width; every row label stays inside the plot. Mutations: the narrow layout's relayout sent
+    without autosize and a null width, so plotly pinned the width it drew at: alone, 634 px in
+    a 1,167 px box at 1,280 with 7 of 11 row labels up to 219 px left of the plot, and on the
+    module page 317 px in a 686 px box at 1,440 (review, 2026-10-02); autosize sent without the
+    null width, which the height's own edit pins again."""
     result = ran[0][name]
     plots = [step["plots"][0] for step in (result["acted"], *result["resized"])]
     assert len(plots) == len(windows)
     floor, cap = TWICE * PHONE_PLOT_PX, TWICE * PAGE_PLOT_PX["beside"]
     alone = name == "bands_alone_reflow"
     for plot in plots:
-        expected = max(floor, min(plot["box"], cap)) if alone else plot["box"]
+        expected = min(plot["box"], cap) if alone else plot["box"]
         assert plot["drawn"] == pytest.approx(expected, abs=0.5), (windows, plot["box"])
         assert plot["yticks"] and all(_inside(t, plot["svg"]) for t in plot["yticks"])
     if alone:
-        regimes = ["floor" if p["box"] < floor else "cap" if p["box"] > cap else "box"
+        regimes = ["page" if p["box"] < floor else "cap" if p["box"] > cap else "box"
                    for p in plots]  # fmt: skip
-        assert regimes == ["floor", "box", "cap", "floor"]
+        assert regimes == ["page", "box", "cap", "page"]
 
 
 def _words(text: str) -> set[str]:

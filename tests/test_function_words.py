@@ -101,6 +101,20 @@ def test_the_gsea_highlight_line_names_the_bars_drawn(tmp_path, passing, which):
     assert gsea.text.reading[-1] == text.fill("function", f"figures.gsea.{which}", alpha=ALPHA)
 
 
+@pytest.mark.parametrize(("tested", "shown"), [(20, 15), (9, 9), (1, 1)])
+def test_the_gsea_caption_counts_the_sets_drawn(tested, shown):
+    """Package C: the caption said "the 15 sets with the smallest FDR" whatever was drawn. It
+    counts the bars: 15 of 20 tested, all 9 of 9, and the one of 1. Mutation: the caption
+    filled with TOP_SETS again."""
+    data = m6._gsea_bars(FEATURED, _gsea(tested // 2, tested - tested // 2))
+    assert data.frame.height == shown
+    want = text.fill("function", "figures.gsea.caption_one" if shown == 1
+                     else "figures.gsea.caption", name=FEATURED, permutations=1000, seed=42,
+                     shown=shown)  # fmt: skip
+    assert data.caption == want
+    assert ("the one set tested." if shown == 1 else f"the {shown} sets with") in data.caption
+
+
 def test_the_background_words_follow_a_union_that_lowers_significance(planted):
     """Against the gene-set union, 6 of Step-1's 7 plotted sets looked less significant, while
     the reading line and the self-check said the union makes overlaps look rarer. Planted here:

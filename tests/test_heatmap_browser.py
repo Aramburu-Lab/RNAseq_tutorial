@@ -48,13 +48,14 @@ PLOTS = """new Promise(function (done) { setTimeout(function () {
   done(Array.from(document.querySelectorAll(".js-plotly-plot")).filter(function (d) {
     return d.data.some(function (t) { return t.type === "heatmap"; });
   }).map(function (d) {
-    var full = d._fullLayout, x = full.xaxis, holder = d.closest(".fig-plot");
+    var full = d._fullLayout, x = full.xaxis, y = full.yaxis, holder = d.closest(".fig-plot");
     var texts = function (s) {
       return Array.from(d.querySelectorAll(s)).filter(function (t) { return t.textContent; })
         .map(function (t) { return {text: t.textContent, box: box(t),
                                     lines: t.querySelectorAll("tspan.line").length || 1}; });
     };
     return {width: full.width, size: full._size, x: [x._offset, x._length],
+            y: [y._offset, y._length],
             cells: box(d.querySelector("g.hm image")), columns: d.data[0].x.length,
             rows: d.data[0].z.length, edges: Array.from(d.data[0].y),
             svg: box(d.querySelector("svg.main-svg")), xticks: texts(".xtick text"),
@@ -177,8 +178,17 @@ def ran(built, tmp_path_factory):
               "act": PLOTS} for w in (*DESKTOPS, PHONE)]  # fmt: skip
     tasks += [{"name": f"{name}_alone_{w}", "url": path.as_uri(), "width": w, "height": 900,
                "act": PLOTS}
-              for name, path in alone.items() for w in (*DESKTOPS, 2560)]  # fmt: skip
+              for name, path in alone.items() for w in (PHONE, *DESKTOPS, 2560)]  # fmt: skip
     return _browse(tasks, tmp_path_factory.mktemp("downloads"))
+
+
+def test_no_page_logs_an_error(ran):
+    """Every map on the module page and opened alone, from a phone to 2,560 px, draws with no
+    console error. Mutation: a swap to the page's size setting the height before the page's
+    type (M12's map opened alone at 375 px: plotly's "Something went wrong with axis
+    scaling", its margins at twice the type in the page's height)."""
+    assert len(ran) == len(MAPS) * 4 + 3
+    assert {name: r["errors"] for name, r in ran.items() if r["errors"]} == {}
 
 
 def _plot(ran: dict, name: str, where: str, width: int) -> dict:
@@ -251,15 +261,22 @@ def test_cells_are_drawn_as_the_files_draw_them(ran, built, name, where, width):
 
 
 @pytest.mark.parametrize("name", ["confounding", "correlation"])
-def test_at_a_module_pages_width_the_figure_has_no_room_to_spare(ran, name):
+@pytest.mark.parametrize(("where", "width"), [("page", 1280), ("page", 1440), ("alone", 1280),
+                                              ("alone", 1440)])  # fmt: skip
+def test_the_figure_has_no_room_to_spare_at_any_desktop_width(ran, name, where, width):
     """The height is the cells at the files' aspect, the labels, legend and title as plotly sets
-    them at a module page's 686 px: under the lowest text the figure ends within its own bottom
-    margin and plotly's padding, 16 px. Mutation: the legend budgeted one entry a line, as a
-    phone stacks it (the 4 x 4 map's figure ended 89 px under its title)."""
-    plot = _plot(ran, name, "page", 1440)
+    them: under the lowest text the figure ends within its own bottom margin and plotly's
+    padding, 16 px on the module page and twice that opened alone, and the cells fill the plot.
+    Where the plot is narrower than a module page's 686 px, plotly kept the cells' aspect by
+    shrinking them under a fixed height: M12's map stood 49 px blank under its plot at 1,280 px
+    and 90 px opened alone there (package D). Mutations: the legend budgeted one entry a line,
+    as a phone stacks it (the 4 x 4 map's figure ended 89 px under its title at 1,440 px); the
+    height left fixed at narrower widths."""
+    plot = _plot(ran, name, where, width)
     texts = [*plot["xticks"], *plot["xtitle"], *plot["annotations"]]
     lowest = max(t["box"][3] for t in texts)
-    assert 0 <= plot["svg"][3] - lowest <= 16
+    assert 0 <= plot["svg"][3] - lowest <= 16 * (TWICE if where == "alone" else 1)
+    assert plot["size"]["h"] - plot["y"][1] <= 1 and plot["size"]["w"] - plot["x"][1] <= 1
 
 
 def test_rows_hold_their_labels_where_the_files_aspect_would_not(ran, built):

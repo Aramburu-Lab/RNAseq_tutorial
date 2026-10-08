@@ -86,21 +86,26 @@ var ctxExport = {
     };
   },
   /* The figure to draw: every trace of the page's plots as they stand, marks back at the
-     figure files' sizes (export.marker turns a mark's page px into pt, export.zoom undoes the
-     page's own zoom), the journal template, export.width_pt wide and height tall. What the
-     figure files draw and the page's plot lacks comes back from export: the points the page
-     thinned, the labels it leaves out, the parallel sets' outer margins. A second plot, a
-     linked view's parallel sets, goes under the first at cfg.above and cfg.below. Legend keys
-     are opaque, as the figure files draw them, whatever their points' opacity. An x-axis title
-     the page wrapped for a narrow screen is drawn as built (layout.meta.xtitle). */
+     figure files' sizes (export.marker turns a mark's page px into pt, and each plot's
+     layout.meta.zoom, the zoom it is drawn at, is undone: 2 opened alone, 1 on the module page
+     and opened alone below the floor), the journal template, export.width_pt wide and height
+     tall. What the figure files draw and the page's plot lacks comes back from export: the
+     points the page thinned, the labels it leaves out, the parallel sets' outer margins. A
+     second plot, a linked view's parallel sets, goes under the first at cfg.above and
+     cfg.below. Legend keys are opaque, as the figure files draw them, whatever their points'
+     opacity. An x-axis title the page wrapped for a narrow screen is drawn as built
+     (layout.meta.xtitle). */
   figure: function (parts, cfg, template, height, dashes) {
-    var ex = cfg.export, marks = ex.marker / ex.zoom, lines = 1 / ex.zoom, data = [];
+    var ex = cfg.export, data = [];
+    function zoomOf(part) { return (part.layout.meta && part.layout.meta.zoom) || 1; }
+    var lines = 1 / zoomOf(parts[0]);
     var layout = ctxExport.plain(parts[0].layout);
     var built = layout.meta && layout.meta.xtitle;
     if (typeof built === "string" && layout.xaxis && layout.xaxis.title) {
       layout.xaxis.title.text = built;
     }
     parts.forEach(function (part, i) {
+      var zoom = zoomOf(part), marks = ex.marker / zoom, widths = 1 / zoom;
       part.data.forEach(function (trace, k) {
         var t = ctxExport.plain(trace), more = i === 0 && (ex.thinned || {})[k];
         if (more) {
@@ -109,9 +114,9 @@ var ctxExport = {
         }
         if (t.marker) {
           t.marker.size = ctxExport.scale(t.marker.size, marks);
-          if (t.marker.line) t.marker.line.width = ctxExport.scale(t.marker.line.width, lines);
+          if (t.marker.line) t.marker.line.width = ctxExport.scale(t.marker.line.width, widths);
         }
-        ctxExport.line(t.line, lines, dashes);
+        ctxExport.line(t.line, widths, dashes);
         if (i > 0) t.domain = { x: [0, 1], y: cfg.below };
         data.push(t);
         var faint = t.marker && typeof t.marker.opacity === "number" && t.marker.opacity < 1;
