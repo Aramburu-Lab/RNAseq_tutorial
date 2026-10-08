@@ -7,6 +7,7 @@ page and the glossary page. A page that marks a glossary term links the glossary
 embeds the tooltips of the terms it marks, and writing it writes the glossary too (D-048).
 """
 
+import hashlib
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -152,11 +153,31 @@ class ResultTable:
 
 
 @dataclass(frozen=True)
+class Code:
+    """Text to run, shown exactly as given, with its SHA-256 and a Copy button.
+
+    Attributes:
+        title: What the block does, or the file it is.
+        text: The lines, as a file holds them or a reader types them; never reflowed.
+        source: The file the text is, named beside its hash; empty for typed commands.
+    """
+
+    title: str
+    text: str
+    source: str = ""
+
+    @property
+    def sha256(self) -> str:
+        """The SHA-256 of the text's UTF-8 bytes, as ``sha256sum`` prints it for the file."""
+        return hashlib.sha256(self.text.encode()).hexdigest()
+
+
+@dataclass(frozen=True)
 class Group:
     """Results that answer one question, under one heading; tabs for alternative views."""
 
     title: str
-    items: tuple["FigureBlock | ResultTable | str", ...]
+    items: tuple["FigureBlock | ResultTable | Code | str", ...]
     lead: str = ""
     tabs: bool = False
 
@@ -260,6 +281,7 @@ class CoursePage:
     hubs: tuple[CourseLink, ...]
     key_numbers: tuple[KeyNumber, ...] = ()
     glossary: str = ""
+    guide: str = ""
 
 
 @dataclass(frozen=True)
@@ -270,7 +292,7 @@ class GlossaryPage:
     groups: tuple[tuple[str, tuple[glossary.Entry, ...]], ...]
 
 
-Result = Group | FigureBlock | ResultTable | str
+Result = Group | FigureBlock | ResultTable | Code | str
 
 
 @dataclass(frozen=True)
@@ -289,6 +311,7 @@ class ModulePage:
     key_numbers: tuple[KeyNumber, ...] = ()
     terms: tuple[tuple[str, str], ...] = ()
     input: str = ""
+    kicker: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a page with an empty section; the skeleton is the teaching contract.
@@ -377,13 +400,17 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
     out: list[tuple[str, Any]] = []
     outline: list[tuple[str, str]] = []
     counter = 0
+    codes = 0
 
-    def one(item: FigureBlock | ResultTable | str, level: int) -> tuple[str, Any]:
-        """One item, prepared."""
-        nonlocal counter
+    def one(item: FigureBlock | ResultTable | Code | str, level: int) -> tuple[str, Any]:
+        """One item, prepared; each code block gets its own id, which its Copy button names."""
+        nonlocal counter, codes
         if isinstance(item, FigureBlock):
             counter += 1
             return "figure", prepare(item, counter - 1, counter, level)
+        if isinstance(item, Code):
+            codes += 1
+            return "code", {"id": f"ctx-code-{codes}", "code": item}
         return ("table", item) if isinstance(item, ResultTable) else ("text", item)
 
     for item in items:
@@ -415,6 +442,8 @@ def _heading(page: Page) -> dict[str, str]:
     assert match is not None  # noqa: S101 - the pattern accepts any title
     if isinstance(page, HubPage | CoursePage | GlossaryPage):
         kicker = SUITE
+    elif page.kicker:
+        kicker = page.kicker
     else:
         numbered = match["n"] is not None
         kicker = (

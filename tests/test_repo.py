@@ -348,8 +348,8 @@ def test_publish_override_single_source():
     assert f"""cat >> "$P/rnaseq_kebnekaise.config" <<'EOF'\n{publish}EOF""" in todo
     assert '-c "$P/rnaseq_kebnekaise.config"' in todo
     script = (ROOT / "scripts" / "bash" / "rnaseq.sbatch").read_text()
-    assert f"""cat >> "$LAUNCH/kebnekaise.config" <<'EOF'\n{publish}EOF""" in script
-    assert '-c "$LAUNCH/kebnekaise.config"' in script
+    assert f"""cat >> "$LAUNCH/site.config" <<'EOF'\n{publish}EOF""" in script
+    assert '-c "$LAUNCH/site.config"' in script
 
 
 DOWNLOAD_KEYS = ("ext.args", "time", "maxRetries", "errorStrategy")

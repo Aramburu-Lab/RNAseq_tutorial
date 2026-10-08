@@ -146,9 +146,52 @@ def proteo_run(tmp_path_factory):
     return root, _page(root, "07_proteo", "fake_cells_overview")
 
 
+@pytest.fixture(scope="module")
+def genecard_run(tmp_path_factory):
+    from genecard_root import SLUG, make  # noqa: PLC0415 - the made-up root of the M9 tests
+
+    root = tmp_path_factory.mktemp("genecard_cli")
+    spec = make(root)
+    done = _ctx("--root", str(root), "genecard", "--dataset", SLUG, "--dataset-file", str(spec),
+                "--genes", "NPTX2", "--offline", cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "11_genecard", f"{SLUG}_overview")
+
+
+@pytest.fixture(scope="module")
+def ncrna_run(tmp_path_factory):
+    from datetime import date  # noqa: PLC0415
+
+    from ncrna_root import DATASET, make  # noqa: PLC0415 - the made-up root of the M8 tests
+
+    root, spec = make(tmp_path_factory.mktemp("ncrna_cli"), date.today())
+    done = _ctx("--root", str(root), "ncrna", "--dataset", DATASET, "--dataset-file", str(spec),
+                cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "08_ncrna", f"{DATASET}_overview")
+
+
+@pytest.fixture(scope="module")
+def guide_run(tmp_path_factory):
+    root = tmp_path_factory.mktemp("guide_cli")
+    done = _ctx("--root", str(root), "guide", cwd=root)
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "09_report", "report_guide")
+
+
+@pytest.fixture(scope="module")
+def run_run(guide_run):
+    """`ctx run` writes no page of its own: its cards are on the guide, which teaches it."""
+    return guide_run
+
+
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
 COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical",
-            "proteo"]  # fmt: skip
+            "proteo", "genecard", "ncrna", "run", "guide"]  # fmt: skip
+# Commands whose page shows another command's cards beside their own (cli.guide).
+SHARED_CARDS = {"run": ("run", "guide"), "guide": ("run", "guide")}
+# Commands that run modules or write a page of the report folder, not a module of their own.
+NOT_MODULES = {"run", "guide"}
 
 
 def test_every_subcommand_has_a_card_test():
@@ -162,7 +205,7 @@ def test_parameter_cards_match_cli(request, command):
     group = typer.main.get_command(app)
     options = {
         p.opts[0]: p
-        for cmd in (group, group.commands[command])
+        for cmd in (group, *(group.commands[c] for c in SHARED_CARDS.get(command, (command,))))
         for p in cmd.params
         if p.opts[0] not in {"--help", "--version"}
     }
@@ -193,7 +236,7 @@ def test_parameter_cards_match_cli(request, command):
 
 def test_subcommands_in_modules():
     tokens = {token for token, _ in MODULES}
-    names = list(typer.main.get_command(app).commands)
+    names = [n for n in typer.main.get_command(app).commands if n not in NOT_MODULES]
     assert names
     assert all(name.replace("-", "_") in tokens for name in names)
 

@@ -28,8 +28,9 @@ from ctx.viz.annotate import Caption, compare_groups
 PAGE = "quant"
 # Samples each read-length batch needs within a cell type before the two are compared.
 MIN_PER_BATCH = 3
-# Points a scatter draws, at random, seeded; its statistics read every gene.
-DRAWN = 2_500
+# A fold change differing by this much (log2) is always drawn on the page: the genes F6's lead
+# counts, two-fold or more.
+FAR = 1.0
 
 
 @dataclass(frozen=True)
@@ -160,16 +161,16 @@ def units_figure(writer: Writer, port: GeneTables, fates: pl.DataFrame,
     j = port.samples.index(sample)
     whole = pl.DataFrame({"gene_id": port.genes, "tpm": port.tpm[:, j],
                           "counts": port.counts[:, j], "length": port.lengths[:, j]})  # fmt: skip
-    whole = whole.filter(pl.col("counts") > 0).with_columns(
+    whole = whole.filter(pl.col("counts") >= tab.MIN_READS).with_columns(
         gene_name=pl.col("gene_id").replace(names))  # fmt: skip
     whole, classes = fig.length_classes(whole)
     per_tpm = dict(whole.group_by("length_class").agg((pl.col("counts") / pl.col("tpm"))
                                                        .median()).iter_rows())  # fmt: skip
-    drawn = whole.sample(min(DRAWN, whole.height), seed=tab.SEED).sort("gene_id")
-    data = fig.units_scatter(drawn.select("gene_id", "gene_name", "tpm", "counts", "length",
-                                          "length_class"), classes,
-                             text.fill(PAGE, "figures.units.caption", sample=sample,
-                                       n=drawn.height, total=whole.height))  # fmt: skip
+    drawn = whole.select("gene_id", "gene_name", "tpm", "counts", "length", "length_class",
+                         keep=pl.lit(value=False))  # fmt: skip
+    data = fig.units_scatter(drawn, classes, text.fill(PAGE, "figures.units.caption",
+                                                       sample=sample, total=whole.height,
+                                                       min_reads=tab.MIN_READS))  # fmt: skip
     ratio = per_tpm.get(classes["long"], float("nan")) / per_tpm.get(classes["short"], float("nan"))
     lead = text.fill(PAGE, "figures.units.lead", sample=sample, ratio=ratio)
     return writer.figure(data, "units", figure_text("units", lead)), whole
@@ -197,11 +198,11 @@ def estimates_figure(writer: Writer, port: GeneTables, used: pl.DataFrame, genes
         genes.select("gene_id", "gene_name", "gene_type"), on="gene_id", how="left")  # fmt: skip
     frame = fig.type_names(frame)
     rho = float(rank_correlation(frame["estimated"].to_numpy(), frame["length_scaled"].to_numpy()))
-    far = int((frame["difference"].abs() >= 1).sum())
-    drawn = frame.sample(min(DRAWN, frame.height), seed=tab.SEED).sort("gene_id")
-    data = fig.estimates_scatter(drawn, text.fill(
+    frame = frame.with_columns(keep=pl.col("difference").abs() >= FAR)
+    far = int(frame["keep"].sum())
+    data = fig.estimates_scatter(frame, text.fill(
         PAGE, "figures.estimates.caption", contrast=name, n_ref=int((~tested).sum()),
-        n_test=int(tested.sum()), genes=frame.height, rho=rho, drawn=drawn.height))  # fmt: skip
+        n_test=int(tested.sum()), genes=frame.height, rho=rho))  # fmt: skip
     lead = text.fill(PAGE, "figures.estimates.lead", far=far, genes=frame.height, rho=rho)
     return writer.figure(data, "estimates", figure_text("estimates", lead)), frame
 
@@ -217,7 +218,10 @@ def isoforms_figure(writer: Writer, folder: Any, samples: Sequence[str], genes: 
                     .collect())  # fmt: skip
     per_gene = fig.type_names(tab.isoforms(expressed_tx, outdir.tx2gene(folder), genes))
     names = [text.word(PAGE, f"gene_types.{t}") for t in tab.GENE_TYPES]
-    compared = per_gene.filter(pl.col("gene_type").is_in(names)).with_columns(feature=pl.lit(
+    typed = per_gene.filter(pl.col("gene_type").is_in(names))
+    # Genes with no isoform expressed share 0 %: on Step-1 that is 12,904 of 18,253 coding
+    # genes and the median of both types, so the share is read where a gene is expressed.
+    compared = typed.filter(pl.col("expressed") > 0).with_columns(feature=pl.lit(
         text.word(PAGE, "figures.isoforms.feature")), share_pct=100 * pl.col("share"))  # fmt: skip
     if compared["gene_type"].n_unique() < 2:  # noqa: PLR2004 - two types compared
         return None
@@ -231,8 +235,12 @@ def isoforms_figure(writer: Writer, folder: Any, samples: Sequence[str], genes: 
             .agg(share=pl.col("share_pct").median(), n_genes=pl.len())
             .sort(pl.col("annotated_bin").replace_strict(order), "gene_type"))  # fmt: skip
     medians = dict(compared.group_by("gene_type").agg(pl.col("share_pct").median()).iter_rows())
+    sizes = dict(typed.group_by("gene_type").len().iter_rows())
+    shown = dict(compared.group_by("gene_type").len().iter_rows())
     data = fig.isoform_bars(bars, caption("isoforms", found, n=compared.height,
-                                          tpm=tab.MIN_TPM))  # fmt: skip
+                                          total=typed.height, tpm=tab.MIN_TPM))  # fmt: skip
     lead = text.fill(PAGE, "figures.isoforms.lead", coding=medians[names[0]],
-                     lncrna=medians[names[1]])  # fmt: skip
+                     lncrna=medians[names[1]], coding_n=shown[names[0]],
+                     coding_total=sizes[names[0]], lncrna_n=shown[names[1]],
+                     lncrna_total=sizes[names[1]])  # fmt: skip
     return writer.figure(data, "isoforms", figure_text("isoforms", lead, tpm=tab.MIN_TPM)), per_gene

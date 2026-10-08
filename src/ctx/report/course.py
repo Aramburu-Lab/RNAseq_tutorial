@@ -96,10 +96,18 @@ def page(kit: Path, roots: Sequence[tuple[Path, bool]]) -> CoursePage:
         for key, n, total in counts
     )  # fmt: skip
     # The newest glossary any root holds; each root's pages link their own copy (D-048).
-    books = [p for root, _ in roots for p in newest(root / "outputs" / report, "glossary")]
-    newest_book = max(books, key=_dated, default=None)
-    book = Path(os.path.relpath(newest_book, kit)).as_posix() if newest_book else ""
-    return CoursePage(text.word("course", "title"), tuple(rows), tuple(hubs), keys, book)
+    book, guide = (_newest_across(kit, roots, report, what) for what in ("glossary", "guide"))
+    return CoursePage(text.word("course", "title"), tuple(rows), tuple(hubs), keys, book, guide)
+
+
+def _newest_across(kit: Path, roots: Sequence[tuple[Path, bool]], folder: str, what: str) -> str:
+    """The newest page of one kind any root holds, linked from the kit's top, or empty.
+
+    The glossary (D-048) and the custom-data guide: each root's pages link their own copy.
+    """
+    pages = [p for root, _ in roots for p in newest(root / "outputs" / folder, what)]
+    found = max(pages, key=_dated, default=None)
+    return Path(os.path.relpath(found, kit)).as_posix() if found else ""
 
 
 def _dated(page: Path) -> tuple[str, int]:

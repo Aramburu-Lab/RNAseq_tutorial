@@ -78,6 +78,11 @@ class Track:
     colours: Mapping[str, str]
 
 
+def _suffix(n: int) -> str:
+    """The ordinal suffix of n: 1st, 2nd, 3rd, 4th, 11th."""
+    return "th" if n % 100 in (11, 12, 13) else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+
+
 def cluster_order(matrix: np.ndarray, labels: Sequence[str]) -> tuple[str, ...]:
     """Row labels in the leaf order of average-linkage clustering on 1 − Pearson.
 
@@ -145,6 +150,10 @@ class HeatmapData:
             what a column is, how many there are and in what order.
         row_display: Row to the label its axis prints, with a line break where it wraps, as
             a band map's metric over its unit and cut-offs; the row itself where absent.
+        thin: Rows and columns name the same units (a sample against a sample): above
+            ``HEAT["max_page_cells"]`` cells, the page draws every k-th unit in drawn order,
+            its row and its column whole, with the cells between them. The files draw every
+            cell; the CSV holds every cell.
     """
 
     frame: pl.DataFrame
@@ -166,6 +175,7 @@ class HeatmapData:
     width: str = "double"
     column_title: str = ""
     row_display: Mapping[str, str] | None = None
+    thin: bool = False
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -217,12 +227,46 @@ class HeatmapData:
         return {**self.columns, **extra}
 
     def page_table(self) -> pl.DataFrame:
-        """Every cell: the page draws them all."""
-        return self.table()
+        """The cells the page draws: every cell, or the thinned units' cells."""
+        stride = self.stride()
+        return self.table() if stride == 1 else self._paged(stride).table()
 
     def caption_text(self) -> str:
-        """The caption, unwrapped."""
-        return self.caption
+        """The caption, then the page's thinning sentence when it draws fewer units.
+
+        The figure files draw every cell, so their caption is ``caption`` alone.
+        """
+        stride = self.stride()
+        if stride == 1:
+            return self.caption
+        from ctx.report import text  # noqa: PLC0415 - report imports viz
+
+        units = self.rows_in_order()
+        sentence = text.fill("ui", "thinned.heatmap", drawn=len(units[::stride]),
+                             units=len(units), nth=f"{stride}{_suffix(stride)}",
+                             total=self.frame.height)  # fmt: skip
+        return f"{self.caption} {sentence}"
+
+    def stride(self) -> int:
+        """Every how many units the page draws: 1 draws all; only a ``thin`` heatmap thins.
+
+        The stride counts cells, the frame's rows: the smallest k whose units' cells fit
+        ``HEAT["max_page_cells"]``.
+        """
+        if not self.thin or self.frame.height <= HEAT["max_page_cells"]:
+            return 1
+        stride = 2
+        while self._paged(stride).frame.height > HEAT["max_page_cells"]:
+            stride += 1
+        return stride
+
+    def _paged(self, stride: int) -> "HeatmapData":
+        """The contract of every ``stride``-th unit in drawn order, its rows and columns whole."""
+        kept = self.rows_in_order()[::stride]
+        frame = self.frame.filter(pl.col(self.row).cast(pl.String).is_in(kept)
+                                  & pl.col(self.column).cast(pl.String).is_in(kept))  # fmt: skip
+        order = tuple(kept)
+        return replace(self, frame=frame, row_order=order, column_order=order, thin=False)
 
     def _grid(self) -> tuple[np.ndarray, list[str]]:
         """Swatch index per cell, tracks on top, the gap, then the rows; NaN draws nothing.
@@ -392,6 +436,8 @@ class HeatmapData:
         """
         import plotly.graph_objects as go  # noqa: PLC0415 - heavy; imported after the profile
 
+        if (stride := self.stride()) > 1:
+            return self._paged(stride).interactive()
         rows, cols = self.rows_in_order(), self.columns_in_order()
         words = self._words(phone=False)
         wide = self._wide(words)

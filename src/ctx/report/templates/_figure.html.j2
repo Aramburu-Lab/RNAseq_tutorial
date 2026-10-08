@@ -32,6 +32,13 @@
 <noscript><p class="note">{{ ui.filter.noscript }}</p></noscript>
 <p class="calls-summary filter-summary" aria-live="polite" data-template="{{ f.defaults.template }}" data-none="{{ f.defaults.none }}">{{ f.defaults.summary }}</p>
 {% endif %}
+{% if f.kind == "pairs" %}
+<form class="calls pairs" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.pairs.label }}">
+<label>{{ ui.pairs.pair }}<select name="pair">{% for value, label in f.defaults.options %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+</form>
+<noscript><p class="note">{{ ui.pairs.noscript }}</p></noscript>
+<p class="calls-summary pairs-summary" aria-live="polite">{{ f.defaults.summary }}</p>
+{% endif %}
 {% if f.kind == "survival" %}
 <form class="survival" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.survival.label }}">
 <label>{{ ui.survival.endpoint }}<select name="endpoint">{% for value, label in f.defaults.endpoints %}<option value="{{ value }}"{% if value == f.defaults.endpoint %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>

@@ -4,7 +4,7 @@
 title = "M7 RNA versus protein: {dataset}"
 budget = "Track {track}: under {minutes} min and {ram_gb} GB."
 purpose = "Measure how far protein follows RNA, per gene across samples or as fold changes in one contrast. Name the genes whose protein departs from their RNA."
-input = "Gather's counts, or M5's results for the contrast. A protein table from the dataset file's resources: [[TMT]] log2 ratios to a pooled reference, or copy numbers by the [[proteomic ruler]]."
+input = "Gather's counts or M5's results, and a protein table: [[TMT]] log2 ratios or [[proteomic ruler]] copy numbers. `ctx setup` accepts the CPTAC data use agreement on the reader's behalf when it fetches a PDC file: `https://cptac-data-portal.georgetown.edu/cptac/s?id=73217`."
 method = """[[mass spectrometry proteomics|Mass spectrometry]] measures peptides, assembled into [[protein groups]]. Each group becomes one gene; groups naming several genes leave, and a gene measured twice keeps its best-quantified row.
 
 A protein not quantified in a sample is [[missingness|missing]], never zero. Only proteins quantified in enough samples are tested, decided in exact fractions.

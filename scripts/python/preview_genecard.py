@@ -7,7 +7,7 @@ r"""The M9 Gene cards preview page, on made-up data (scripts/python/build_previe
 Every value comes from one seeded numpy Generator: a made-up gene in the dataset's samples,
 across made-up GTEx tissues, HPA immune cell types and exons. Only sample names, cell types,
 conditions and batches come from the made-up dataset's gather sheet, so the preview pages show
-the same samples. The text is ``content/genecard.toml``, which the built module will read too.
+the same samples. The text is ``content/genecard_preview.toml``; tau is ``ctx genecard``'s own.
 
 Usage:
     pixi run python scripts/python/build_preview.py --root <dir> --only genecard
@@ -26,6 +26,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.de.run import Writer
+from ctx.genecard.summary import tau
 from ctx.io.naming import MODULES, stem
 from ctx.report import text
 from ctx.report.builder import (
@@ -49,7 +50,7 @@ from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, category_colours
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
 SHOWN = ("ui", "preview.dataset")
 
-MODULE = PAGE = "genecard"
+MODULE, PAGE = "genecard", "genecard_preview"
 SEED = 9
 # Not an HGNC symbol: no real gene is drawn with made-up values.
 GENE = "MADEUP1"
@@ -159,18 +160,12 @@ def tissues(writer: Writer, rng: np.random.Generator) -> FigureBlock:
     return writer.figure(strip, "normal_tissues", words)
 
 
-def tau(values: np.ndarray) -> float:
-    """Tissue specificity index of Yanai et al. 2005 on log2(x + 1): 0 even, 1 one type only."""
-    x = np.log2(values + 1.0)
-    return float(np.sum(1.0 - x / x.max()) / (x.size - 1))
-
-
 def immune(writer: Writer, rng: np.random.Generator) -> tuple[FigureBlock, float]:
     """Made-up HPA immune cell nTPM, one pooled bar per cell type, with our tau; no test."""
     names, lineages, base = zip(*IMMUNE, strict=True)
     ntpm = np.round(np.array(base) * np.exp(rng.normal(0.0, IMMUNE_SD, len(base))), 1)
     frame = pl.DataFrame({"cell_type": names, "lineage": lineages, "ntpm": ntpm})
-    specificity, top = tau(ntpm), int(np.argmax(ntpm))
+    specificity, top = float(tau(ntpm) or 0.0), int(np.argmax(ntpm))
     caption = text.fill(PAGE, "figures.immune.caption", cells=len(names), tau=specificity)
     bars = BarData(frame=frame, columns=_columns("immune"), category="cell_type", value="ntpm",
                    category_label=text.word(PAGE, "figures.immune.x"),

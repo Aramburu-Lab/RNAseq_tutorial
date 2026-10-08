@@ -81,3 +81,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A transcript with no gene stays in tximport's scaling totals and leaves only after scaling, and a sum check against quant.sf allows its 3-decimal rounding, half a thousandth per transcript (M4, 2026-10-08).
 
 - A test subprocess run with a stripped environment imports main's tree, not the worktree's, so a worktree's suite can fail on main's uncommitted edits (M10, 2026-10-08).
+- A page budget computed from raw values is not the page's size: as Plotly figures a 22 KB gene card took 250 to 310 KB, and the plan's 254 cards became about 35 (M9, 2026-10-08). Measure a built page before a decision rests on its capacity.
+- `max(0.05, nan)` returns 0.05 and `max(nan, 0.05)` returns nan: check every value is finite before taking a maximum (M9, 2026-10-08).

@@ -67,6 +67,38 @@ bytes = 778106
 sha256 = "1ee846c446a87c1b6cc2b097dc415bed1c2f6b539312d2611f946038c5f7e9f8"
 dest = "resources/msigdb/c5.go.cc.v2026.1.Hs.symbols.gmt"
 
+# GTEx V11 (release 2025-08-22, GENCODE 47) for M9's gene cards, Rytis 2026-10-08: files, not
+# the API, which has no V11. Fetched by data/raw/gtex_v11/_fetch_gtex_v11.sh, each checked
+# against the bucket's MD5 (log: retrieved 2026-10-08T10:36:13Z); size and SHA-256 measured on
+# that copy the same day. ctx setup registers a file already in place without downloading it.
+[[resources]]
+name = "gtex_gene_tpm"
+urls = ["https://storage.googleapis.com/adult-gtex/bulk-gex/v11/rna-seq/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_tpm.gct.gz"]
+bytes = 2637294603
+sha256 = "7025f4281da8733367f949ea6fb58ca4c6c4afdfcb5a35910be490f607d8c775"
+dest = "data/raw/gtex_v11/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_tpm.gct.gz"
+
+[[resources]]
+name = "gtex_exon_reads"
+urls = ["https://storage.googleapis.com/adult-gtex/bulk-gex/v11/rna-seq/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_exon_reads.parquet"]
+bytes = 21849125411
+sha256 = "86eb6097394dc59fcf18fe337d11d145a0a98c956565d88ddfb6315412e2503a"
+dest = "data/raw/gtex_v11/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_exon_reads.parquet"
+
+[[resources]]
+name = "gtex_samples"
+urls = ["https://storage.googleapis.com/adult-gtex/annotations/v11/metadata-files/GTEx_Analysis_v11_Annotations_SampleAttributesDS.txt"]
+bytes = 38497961
+sha256 = "98c246b3855edf62cb050982a7ca50f3069d010624baea47ef84a9465900ca4b"
+dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SampleAttributesDS.txt"
+
+[[resources]]
+name = "gtex_subjects"
+urls = ["https://storage.googleapis.com/adult-gtex/annotations/v11/metadata-files/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"]
+bytes = 20292
+sha256 = "2313caeaaf3718ac8aead8c6b9eab92b3f613509cfe1a6f7b6286310a7200e73"
+dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"
+
 # Patterns are checked against the ENA read_run report of the study by
 # tests/test_repo.py::test_guard_patterns_cover_study (runs ERR7425257-466, experiments
 # ERX6994339-548, samples SAMEA11307688-897, secondary samples ERS8952829-53038, 2026-09-27)
@@ -435,3 +467,23 @@ id = "P3"
 text = "The missingness figure comes before every test on the page."
 source = "TODO.md, Verification: M7 sanity, missingness plotted before any test"
 conditions = [{ metric = "page.missingness_first", op = "==", value = 1 }]
+
+# M8 Non-coding RNA (plan docs/plans/2026-10-07_m8_real_data_plan_proposal.md). Its rules sit
+# here, not in [sanity], whose Step-1 record is fixed; the time key is not named `registered`,
+# which tests/test_sanity_record.py reads as a registration of [sanity].
+[ncrna]
+featured = "ndn_gcsf"
+# Pairs the lncRNA neighbour select offers, smallest residual q first.
+pairs = 50
+
+[ncrna.sanity]
+# Registered before the first ctx ncrna run on Step-1, but NOT blind: while planning
+# (2026-10-07) the miRNA-gene share was measured on these counts, maximum 0.0142 % over 210
+# runs. The threshold is the course convention the plan names, not tuned to that value.
+registered_on = "2026-10-08 14:20"
+
+[[ncrna.sanity.rules]]
+id = "N1"
+text = "miRNA genes hold under 0.1 % of counted reads in every poly-A library."
+source = "course convention: poly-A capture and size selection leave mature miRNAs out (CONVENTIONS.md, Statistics rules); seen while planning, Step-1 maximum 0.0142 %"
+conditions = [{ metric = "mirna.max_percent", op = "<", value = 0.1 }]

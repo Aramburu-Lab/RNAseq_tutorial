@@ -27,6 +27,16 @@ it were reversed.
 
 ---
 
+## D-056 — M9 draws GTEx V11 from its release files as our own figures, summaries by tissue and sex; setup registers a file already in place
+
+**Date:** 2026-10-08 · **Status:** decided (Rytis 2026-10-08 for the three GTEx answers; M9.0 to M9.7 merged)
+
+**Decision.** GTEx is drawn as our own figures with the Portal's dated acknowledgement and a line that newer GTEx data may exist; CONVENTIONS' UNVERIFIED clause is amended. The data are V11's release files of 2025-08-22, registered by `ctx setup` with SHA-256, read as summaries per tissue and sex (n, median, IQR, tau); the 21.8 GB exon table, one row group, is read 128 sample columns at a time. `ctx setup` registers a declared file found in place with its hash instead of downloading it. The tissue panel is bars, not a strip: 68 rotated tissue names fell off a fixed-height strip. tau is undefined when no value reaches 1, HPA's detection limit. `--genes` takes a comma-separated list.
+
+**Evidence.** NPTX2 against the plan's expected values: HPA immunoassay 2.49 µg/L, Corticotrophs 335.9 nCPM, pituitary 200.0 nTPM, our tau 0.6710; GTEx V11 highest median Pituitary 219.98 TPM (n 313), lowest EBV lymphocytes 0.0534; MANE exons from the GTF equal Ensembl REST 116's for NPTX2 and ACTB. The plan's 254 cards was arithmetic on raw summaries; the 57-card page measured 22,646,440 B.
+
+---
+
 ## D-055 — One GDC reader; one tumour per case by FFPE, protocol, redaction, first aliquot; survival in numpy with R as oracle
 
 **Date:** 2026-10-08 · **Status:** decided (M10, merged; plan `docs/plans/2026-10-07_m10_real_data_plan_proposal.md`, recommended answers)

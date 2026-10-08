@@ -9,6 +9,7 @@ code only names a key and fills in the numbers. Rebuild a page by running its co
 | What a command-line option means, and what moving it changes | `cards.toml` | `[options."--name"]`; `[effects.<command>]` overrides the effect on one command |
 | The M0 Setup page | `setup.toml` | `purpose`, `input`, `method`, `interpretation`, `pitfalls`, `[[terms]]`, `[[questions]]`, then one table per results block |
 | The M1 Gather page | `gather.toml` | the same skeleton, then the checks, curation, counts and the two figures |
+| The custom-data guide (`ctx guide`) | `guide.toml` | the same skeleton, then the key numbers, each part's heading, lead and block titles; the commands are not here: they come from the launchers' Usage blocks and the CLI |
 | The M1 Gather page of a GDC project (`--gdc-dir`) | `gather_gdc.toml` | the same skeleton, then the checks, the one-file-per-patient flow, the annotations and each table's columns |
 | The M3 Trim, align, count page | `process.toml` | the same skeleton, then the notes, groups, key numbers, outcomes, settings, comparisons, each figure's words and each table's columns; `[preview]` holds what the course preview alone says |
 | The M5 Differential expression page, the sentences moved so far | `de.toml` | the volcano's adjustment sentence, and what a thinned page calls the points it may leave out |

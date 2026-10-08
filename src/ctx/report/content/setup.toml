@@ -78,3 +78,4 @@ below = "below {minimum}: marks need size, or a second cue such as shape"
 title = "Resources, recorded in {manifest}"
 columns = ["Resource", "Bytes", "Checksum", "Source", "Retrieved"]
 checksum = "sha256 {sha256}"
+dua = "{name}: ctx setup accepts the CPTAC data use agreement on your behalf to fetch it from PDC: {url}"

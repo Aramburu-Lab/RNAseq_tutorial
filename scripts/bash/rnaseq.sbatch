@@ -2,7 +2,7 @@
 #SBATCH -J ctx_rnaseq
 #SBATCH -n 1
 #SBATCH -c 1
-#SBATCH --mem=8G
+#SBATCH --mem=12G
 #SBATCH -t 1-00:00:00
 #SBATCH -o slurm-%x-%j.out
 # /// codebase-meta
@@ -11,18 +11,22 @@
 # One day: Step-1's download of 210 runs took 1 h 39 min and its count, the Salmon index included,
 # 1 h 52 min (2026-09-30). A 7-day head job waited on ReqNodeNotAvail until its limit was lowered to
 # 1 day, which cleared it at once (2026-10-01).
+# 12 GB: the head job peaked at 6.16, 6.61 and 7.49 GiB of its 8 on three breast studies (P4.5).
 # Gene counts with nf-core/rnaseq, Salmon only, from the FASTQs fetchngs.sbatch downloaded. It
-# starts only once fetchngs.sbatch has written nfcore_fetchngs/results.complete in the run folder.
+# starts only once fetchngs.sbatch has written nfcore_fetchngs/results.complete in the run folder,
+# and only with references equal to the publisher's MD5SUMS where one sits beside them. Another
+# genome: its FASTA and GTF in place of GENCODE's, and false for a GTF not from GENCODE.
 #
 # Usage:
 #   mkdir -p "$RUN/refs" && cd "$RUN/refs"
-#   wget -nv <genome FASTA URL> <GTF URL>
-#   md5sum <genome FASTA> <GTF>
-#   # each sum equal to the publisher's MD5 list, or download that file again
+#   B=https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50
+#   curl -fL --remote-name-all "$B/MD5SUMS" "$B/GRCh38.primary_assembly.genome.fa.gz" "$B/gencode.v50.primary_assembly.annotation.gtf.gz"
 #   cd "$RUN"
-#   DRY_RUN=1 bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/<genome FASTA> refs/<GTF> <true for a GENCODE GTF, else false>
-#   sbatch -A <compute project> "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/<genome FASTA> refs/<GTF> <true or false>
+#   DRY_RUN=1 bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
+#   sbatch -A <compute project> "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
 #   # keep nfcore_rnaseq/work until ctx gather on the laptop has read the copied results
+#   # on a laptop, Docker running: the same references, then
+#   cd "$RUN" && CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
 set -euo pipefail
 
 RUN="${1:?usage: rnaseq.sbatch <run folder> <genome FASTA> <GTF> <true|false, a GENCODE GTF>}"
@@ -35,9 +39,13 @@ die() {
     printf 'rnaseq.sbatch: %s\n' "$*" >&2
     exit 1
 }
-# From CTX_REPO, never from $0: sbatch runs a copy of this file from its spool folder.
-ENV_FILE="${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/kebnekaise_env.sh"
-[[ -f "$ENV_FILE" ]] || die "no $ENV_FILE; is CTX_REPO your clone of the course repository?"
+# From CTX_REPO, never from $0: sbatch runs a copy of this file from its spool folder. The site
+# file says what this computer changes; read before the dry run, which prints its profile.
+CTX_SITE="${CTX_SITE:-kebnekaise}"
+[[ "$CTX_SITE" =~ ^[a-z0-9_]+$ ]] || die "CTX_SITE is a site name such as kebnekaise or laptop, not $CTX_SITE"
+SITE_FILE="${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/site_$CTX_SITE.sh"
+[[ -f "$SITE_FILE" ]] || die "no $SITE_FILE; is CTX_REPO your clone of the course repository, and CTX_SITE a site it has?"
+source "$SITE_FILE"
 [[ "$DRY_RUN" == [01] ]] || die "DRY_RUN takes 0 or 1"
 # No default: nf-core/rnaseq builds the Salmon index differently for a GENCODE GTF, so the
 # student states which kind of GTF this is.
@@ -62,7 +70,8 @@ while [[ ! -d "$here" ]]; do here=$(dirname -- "$here"); done
 here=$(CDPATH='' cd -- "$here" && pwd -P) || die "cannot enter the folder that holds $RUN"
 home=$(CDPATH='' cd -- "${HOME:-/nonexistent}" 2>/dev/null && pwd -P) || home=${HOME:-/nonexistent}
 case "$here/" in
-"$home"/*) die "the run folder $RUN is in your home folder (25 GB); use a folder under CTX_STORE" ;;
+"$home"/*) [[ "${SITE_HOME_ALLOWED:-0}" == 1 ]] ||
+    die "the run folder $RUN is in your home folder (25 GB); use a folder under CTX_STORE" ;;
 esac
 [[ -s "$FASTA" ]] || die "no genome FASTA, or an empty one: $FASTA"
 [[ -s "$GTF" ]] || die "no GTF, or an empty one: $GTF"
@@ -71,6 +80,8 @@ MARKER="$RUN/nfcore_fetchngs/results.complete"
 [[ -f "$MARKER" ]] || die "no $MARKER: fetchngs.sbatch has not finished this download"
 SHEET="$RUN/nfcore_fetchngs/results/samplesheet/samplesheet.csv"
 [[ -s "$SHEET" ]] || die "no samplesheet at $SHEET"
+# Asked of the site before anything is written: on a laptop, what Docker has.
+limits=$(site_rnaseq_config) || die "the site's limits are unknown; see the line above"
 LAUNCH="$RUN/nfcore_rnaseq"
 mkdir -p "$LAUNCH"
 
@@ -87,14 +98,10 @@ skip_alignment: true
 save_reference: true
 publish_dir_mode: copy
 EOF
-# queueSize 50: HPC2N refused 100 jobs at once. Then the Trim Galore JSON reports, the only ones
-# MultiQC 1.35 reads for Trim Galore 2.x, which ctx qc needs (D-025).
-cat > "$LAUNCH/kebnekaise.config" <<'EOF'
-executor {
-    queueSize = 50
-}
-EOF
-cat >> "$LAUNCH/kebnekaise.config" <<'EOF'
+# The site's queueSize and limits. Then the Trim Galore JSON reports, the only ones MultiQC 1.35
+# reads for Trim Galore 2.x, which ctx qc needs (D-025).
+printf 'executor {\n    queueSize = %s\n}\n%s\n' "$SITE_QUEUE_SIZE" "$limits" > "$LAUNCH/site.config"
+cat >> "$LAUNCH/site.config" <<'EOF'
 process {
     withName: '.*:FASTQ_FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE' {
         publishDir = [
@@ -118,12 +125,26 @@ process {
     }
 }
 EOF
-cmd=(nextflow run nf-core/rnaseq -r 3.27.0 -profile singularity -params-file "$LAUNCH/params.yml" -c "$LAUNCH/kebnekaise.config" -resume)
+cmd=(nextflow run nf-core/rnaseq -r 3.27.0 -profile "$SITE_RNASEQ_PROFILE" -params-file "$LAUNCH/params.yml" -c "$LAUNCH/site.config" -resume)
 printf 'the job runs, in %s:\n%s\n' "$LAUNCH" "${cmd[*]}"
 if [[ "$DRY_RUN" == 1 ]]; then exit 0; fi
 
-# Sourced first, so the cut below runs on the environment's Python, not the system's.
-source "$ENV_FILE" || die "the fetch environment did not activate; see the line above"
+# Activated first, so the checks below run on the environment's Python and md5sum.
+site_activate || die "the fetch environment did not activate; see the line above"
+# The publisher's MD5SUMS beside a reference, where there is one, compared hash to hash: macOS's
+# md5sum -c passes an empty list, so a list that names neither file would pass it.
+for ref in "$FASTA" "$GTF"; do
+    sums="${ref%/*}/MD5SUMS"
+    if [[ ! -f "$sums" ]]; then
+        echo "${ref##*/}: no MD5SUMS beside it, so not checked against its publisher"
+        continue
+    fi
+    want=$(awk -v n="${ref##*/}" '$2 == n || $2 == "*" n {print $1}' "$sums")
+    [[ "$want" =~ ^[0-9a-f]{32}$ ]] || die "$sums has no single line for ${ref##*/}; download both again"
+    got=$(md5sum <"$ref" | awk '{print $1}')
+    [[ "$got" == "$want" ]] || die "${ref##*/}: MD5 $got, not the $want in $sums; download it again"
+    echo "${ref##*/}: MD5 equal to $sums"
+done
 python3 - "$SHEET" "$LAUNCH/samplesheet.csv" <<'CUT'
 import csv
 import sys

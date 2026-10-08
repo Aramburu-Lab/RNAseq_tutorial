@@ -237,6 +237,8 @@ def defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
         # The survival panel's own defaults, built by ctx.clinical.page.live; a figure that
         # follows the panel has none.
         return dict(controls.get("defaults", {}))
+    if controls["kind"] == "pairs":
+        return {"options": list(enumerate(controls["options"])), "summary": controls["summary"]}
     if controls["kind"] == "brush":
         return {"colours": list(zip(controls["colours"], controls["names"], strict=True)),
                 "empty": controls["empty"]}  # fmt: skip

@@ -55,6 +55,10 @@ budget = "Budget"
 inputs = "Inputs"
 versions = "All {n} package versions"
 
+# A block of commands or a script on a page (builder.Code): the hash of exactly the text shown.
+[code]
+sha256 = "SHA-256 of this text:"
+
 [figures]
 reading = "How to read this"
 reading_label = "How to read this figure"
@@ -73,6 +77,7 @@ scroll = "Wider than this window: scroll the figure sideways to see all of it."
 [thinned]
 rows = "This page draws {drawn:,} of the {units:,} {rest}, every {nth} in order of {order}; the CSV holds all {total:,}."
 units = "This page draws all points of {drawn:,} of the {units:,} {rest}, every {nth} in order of {order}; the CSV holds all {total:,} points."
+heatmap = "This page draws {drawn:,} of the {units:,} rows and their columns, every {nth} in the drawn order; the files and the CSV hold all {total:,} cells."
 callable = "points no setting can call"
 other = "other points"
 
@@ -118,6 +123,12 @@ summary = "{shown} of {total} bars shown; median {median}."
 summary_count = "{shown} of {total} bars shown."
 none = "No bar matches these filters."
 noscript = "This shows every bar; turn on JavaScript to filter them."
+
+# M8's pair select: one lncRNA and its neighbour, drawn and correlated on the page.
+[pairs]
+label = "Choose a pair"
+pair = "lncRNA and neighbour"
+noscript = "This shows the first pair; turn on JavaScript to choose another."
 
 # M10's survival panel: score a gene list on the page (GS.7). Its sentences are clinical.toml's.
 [survival]

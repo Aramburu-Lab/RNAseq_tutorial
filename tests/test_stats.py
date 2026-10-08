@@ -10,7 +10,7 @@ from synth import design_counts, filtered_counts
 
 from ctx.dataset import Contrast
 from ctx.de.deseq import fit
-from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, classify, p_line
+from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, adjust_within, classify, p_line
 
 BASIC = Contrast("basic", "condition", "control", "case", (6, 6))
 # statsmodels names for the same four methods: the oracle, installed but not a ctx dependency.
@@ -88,6 +88,27 @@ def test_adjust_monotone_in_p(method):
     adjusted = adjust(p, method)
     assert np.all(np.diff(adjusted) >= 0)
     assert np.all(adjusted >= p) and np.all(adjusted <= 1)
+
+
+def test_adjust_within_each_stratum_alone_in_input_order():
+    """BH within each stratum equals statsmodels on that stratum alone, written back in place.
+
+    The strata interleave and differ in size, so the values differ from BH over all of them.
+    Catches: pooled BH (the a-genes' 0.03 become 0.05), each stratum's values written in
+    stratum order rather than to their own rows, or one stratum's count used for all.
+    """
+    p = np.array([0.01, 0.5, 0.02, 0.6, 0.03])
+    strata = np.array(["a", "b", "a", "b", "a"])
+    got = adjust_within(p, strata, "padj")
+    want = np.empty(5)
+    for level in ("a", "b"):
+        within = strata == level
+        want[within] = statsmodels_adjust(p[within], "padj")
+    assert np.allclose(got, want, rtol=0, atol=1e-12)
+    assert np.allclose(got[strata == "a"], 0.03) and np.allclose(got[strata == "b"], 0.6)
+    assert not np.allclose(got, adjust(p, "padj"))
+    with pytest.raises(ValueError, match="strata for"):
+        adjust_within(p, strata[:4], "padj")
 
 
 def test_adjust_refuses_bad_input():

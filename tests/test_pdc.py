@@ -41,11 +41,14 @@ def resource() -> Resource:
                     "resources/freeze.tar.gz")  # fmt: skip
 
 
-def test_resolved_fetched_and_recorded_by_its_pdc_url(tmp_path):
+def test_resolved_fetched_and_recorded_by_its_pdc_url(tmp_path, capsys):
     """Mutations caught: the pdc:// URL handed to urlopen unresolved; the signed URL recorded in
-    the manifest, where it expires; the study ID left out of the query."""
+    the manifest, where it expires; the study ID left out of the query; the agreement accepted
+    without saying so first (Rytis, 2026-10-08)."""
     open_, seen = opener()
     (entry,) = fetch(tmp_path, [resource()], opener=open_)
+    said = capsys.readouterr().out
+    assert "accepts the CPTAC data use agreement" in said and pdc.DUA_URL in said
     assert (tmp_path / "resources" / "freeze.tar.gz").read_bytes() == BODY
     assert entry["url"] == URL and 'pdc_study_id: "PDCFAKE"' in seen[0]
     assert seen[1] == "https://signed.example/once"

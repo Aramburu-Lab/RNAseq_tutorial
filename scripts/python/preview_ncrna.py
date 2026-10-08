@@ -29,6 +29,7 @@ from ctx.de.filters import MIN_COUNT, TOLERANCE, expressed, min_sample_size
 from ctx.de.run import Writer, newest
 from ctx.de.stats import ALPHA, LFC_MIN, classify
 from ctx.io.naming import MODULES, stem
+from ctx.ncrna import biotypes
 from ctx.report import text
 from ctx.report.builder import (
     FigureBlock,
@@ -43,7 +44,7 @@ from ctx.report.builder import (
 from ctx.viz.bar import BarData
 from ctx.viz.curve import CurveData
 from ctx.viz.scatter import Line, ScatterData
-from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, ROLES
+from ctx.viz.style import DATA_COLOURS, ROLES
 
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
 SHOWN = ("ui", "preview.dataset")
@@ -55,10 +56,10 @@ LNCRNA, CODING, MT_RRNA = "lncRNA", "protein_coding", "Mt_rRNA"
 # read shares sit near a poly-A library's, about nine in ten on protein-coding genes, and the
 # filter keeps most protein-coding genes and a minority of lncRNAs.
 GENES = {"protein_coding": (2000, 2.5, 3.0), "lncRNA": (1500, -1.0, 2.5),
-         "pseudogene": (800, -1.0, 2.5), "Mt_rRNA": (2, 10.0, 0.5), "small RNA": (300, 0.0, 2.5),
+         "pseudogene": (800, -1.0, 2.5), "Mt_rRNA": (2, 10.0, 0.5), "small_RNA": (300, 0.0, 2.5),
          "other": (200, -1.0, 2.5)}  # fmt: skip
-# Yellow is left out: at 1.32:1 on white it does not survive a projector.
-COLOURS = dict(zip(GENES, [c for c in DATA_COLOURS if c not in PROJECTOR_UNSAFE], strict=True))
+# The built module's groups and colours (ctx.ncrna.biotypes), in the same order.
+COLOURS = biotypes.COLOURS
 # log2 SDs: per-sample noise, cell-type offset, mitochondrial rRNA per sample, and the spread of
 # every gene's true change between conditions; NB dispersion.
 NOISE_SD, CELL_SD, MT_SD, CHANGE_SD, DISPERSION = 0.3, 0.4, 0.8, 0.25, 0.05
@@ -75,7 +76,7 @@ PAIR, PAIR_MU, PAIR_LFC, PAIR_CELL, PAIR_SD = (LNCRNA, CODING), (5.0, 6.0), 1.0,
 # One meaning per column, for every figure's CSV README.
 COLUMNS = {
     "gene_id": ("none", "Made-up gene."),
-    "biotype": ("none", "GENCODE biotype; small RNA and pseudogene pool several types."),
+    "biotype": ("none", "GENCODE biotype; small_RNA and pseudogene pool several types."),
     "sample": ("none", "Sample, from the gather sample sheet."),
     "cell_type": ("none", "Cell type, from the sample sheet."),
     "condition": ("none", "Condition, from the sample sheet."),
@@ -113,8 +114,8 @@ def _log_cpm(counts: Any) -> Any:
 
 
 def tested_biotypes() -> tuple[str, ...]:
-    """The biotypes the page tests: the planned ``--biotypes`` default, one definition."""
-    return tuple(text.word(PAGE, "planned.--biotypes.default").split(","))
+    """The biotypes the page tests: the built module's ``--biotypes`` default."""
+    return biotypes.TESTED
 
 
 def _text(key: str, **values: Any) -> FigureText:
@@ -125,8 +126,8 @@ def _text(key: str, **values: Any) -> FigureText:
 
 
 def _caption(key: str, **values: Any) -> str:
-    """The caption of ``figures.<key>``, filled."""
-    return text.fill(PAGE, f"figures.{key}.caption", **values)
+    """The preview's own caption of a figure, which names its made-up data, filled."""
+    return text.fill(PAGE, f"preview.captions.{key}", **values)
 
 
 def made_up(sheet: pl.DataFrame, tested: str, rng: np.random.Generator) -> tuple[pl.DataFrame, Any]:
@@ -186,8 +187,8 @@ def composition(
         caption=_caption("composition", n_samples=sheet.height, n_genes=genes.height),
         stacked=True, hover=("cell_type", "condition"), width="double",
     )  # fmt: skip
-    words = _text("composition", lncrna=float(np.median(lncrna)), mt_low=float(mt.min()),
-                  mt_high=float(mt.max()))  # fmt: skip
+    words = _text("composition", lncrna=f"{np.median(lncrna):.1f}", mt_low=f"{mt.min():.1f}",
+                  mt_high=f"{mt.max():.1f}")  # fmt: skip
     return writer.figure(data, "biotype_shares", words)
 
 
@@ -248,7 +249,9 @@ def expression_filter(writer: Writer, genes: pl.DataFrame, counts: Any,
                          dash=True),),
         width="double",  # landscape like the biotype shares above it (Rytis, 2026-10-01)
     )  # fmt: skip
-    words = _text("filter", protein_coding=kept[CODING], lncrna=kept[LNCRNA], k=k)
+    words = _text(
+        "filter", protein_coding=kept[CODING], lncrna=kept[LNCRNA], k=k, min_count=MIN_COUNT
+    )
     return writer.figure(data, "filter_by_biotype", words), keep
 
 
@@ -309,17 +312,30 @@ def neighbour(writer: Writer, sheet: pl.DataFrame, genes: pl.DataFrame, logs: An
     rho, p = spearmanr(frame["lncrna"], frame["neighbour"])
     rho_within, p_within = spearmanr(frame["lncrna_residual"], frame["neighbour_residual"])
     names = {"lncrna": text.word(PAGE, "preview.lncrna"),
-             "neighbour": text.word(PAGE, "preview.neighbour")}  # fmt: skip
+             "neighbour": text.word(PAGE, "preview.neighbour"),
+             "kind": text.fill(PAGE, "kinds.near", kb=1)}  # fmt: skip
     data = ScatterData(
         frame=frame, columns=_columns(frame), x="lncrna", y="neighbour",
-        x_label=text.fill(PAGE, "figures.neighbour.x", **names),
-        y_label=text.fill(PAGE, "figures.neighbour.y", **names), colour="condition",
+        x_label=text.word(PAGE, "figures.neighbour.x"),
+        y_label=text.word(PAGE, "figures.neighbour.y"), colour="condition",
         colours={con.reference: ROLES["reference"], con.tested: ROLES["comparison"]},
-        symbol="cell_type", hover=("sample",),
+        hover=("sample", "cell_type"),
         caption=_caption("neighbour", n_samples=frame.height, rho=rho, p=p,
                          rho_within=rho_within, p_within=p_within),
     )  # fmt: skip
-    words = _text("neighbour", **names, rho=rho, rho_within=rho_within)
+    # One made-up pair and no select: the built page's third reading line names the select.
+    words = FigureText(
+        title=text.word(PAGE, "figures.neighbour.title"),
+        lead=text.fill(
+            PAGE,
+            "figures.neighbour.lead",
+            **names,
+            rho=f"{rho:.2f}",
+            rho_within=f"{rho_within:.2f}",
+            q_within=f"{p_within:.2g}",
+        ),
+        reading=tuple(text.raw(PAGE, "figures.neighbour.reading")[:2]),
+    )
     return writer.figure(data, "lncrna_neighbour", words)
 
 
@@ -345,10 +361,10 @@ def target_shift(writer: Writer, results: pl.DataFrame, con: Contrast) -> Figure
         colour="target_class", hover=("gene_id",),
         colours={classes["validated"]: ROLES["comparison"], classes["predicted"]: DATA_COLOURS[0],
                  classes["non"]: ROLES["reference"]},
-        caption=_caption("targets", n_validated=lfc["validated"].size,
-                         n_predicted=lfc["predicted"].size, n_non=lfc["non"].size,
-                         d_validated=tests["validated"].statistic, p_validated=padj["validated"],
-                         d_predicted=tests["predicted"].statistic, p_predicted=padj["predicted"]),
+        caption=text.fill(PAGE, "figures.targets.caption", n_validated=lfc["validated"].size,
+                          n_predicted=lfc["predicted"].size, n_non=lfc["non"].size,
+                          d_validated=tests["validated"].statistic, p_validated=padj["validated"],
+                          d_predicted=tests["predicted"].statistic, p_predicted=padj["predicted"]),
     )  # fmt: skip
     words = _text("targets", mirna=text.word(PAGE, "preview.mirna"),
                   **{f"shift_{k}": v for k, v in shift.items()})  # fmt: skip
@@ -356,13 +372,19 @@ def target_shift(writer: Writer, results: pl.DataFrame, con: Contrast) -> Figure
 
 
 def cards() -> tuple[ParameterCard, ...]:
-    """The options ``ctx ncrna`` will have, their text from ``planned`` in the content file."""
-    planned = text.raw(PAGE, "planned")
-    return tuple(
+    """The options ``ctx ncrna`` has (cards.toml), then those its TCGA half will add."""
+    built = {"--biotypes": ",".join(biotypes.TESTED), "--min-count": str(MIN_COUNT)}
+    effects = text.raw("cards", "effects.ncrna")
+    have = tuple(
+        ParameterCard(flag, text.word("cards", f"options.{flag}.meaning"), default,
+                      effects.get(flag) or text.word("cards", f"options.{flag}.effect"))
+        for flag, default in built.items()
+    )  # fmt: skip
+    return have + tuple(
         ParameterCard(flag, text.word(PAGE, f"planned.{flag}.meaning"),
-                      text.fill(PAGE, f"planned.{flag}.default", min_count=MIN_COUNT),
+                      text.word(PAGE, f"planned.{flag}.default"),
                       text.word(PAGE, f"planned.{flag}.effect"))
-        for flag in planned
+        for flag in text.raw(PAGE, "planned")
     )  # fmt: skip
 
 

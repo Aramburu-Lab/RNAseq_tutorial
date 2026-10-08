@@ -61,6 +61,26 @@ effect = "Handles a variable that breaks proportional hazards, without estimatin
 meaning = "A gene list file: symbols or Ensembl IDs, as Save list writes."
 effect = "Scores this list in the static files; unset, the dataset file's list."
 
+[options."--genes"]
+meaning = "Comma-separated gene symbols or Ensembl IDs, one card each."
+effect = "Replaces the default list; an ambiguous or unknown name stops the run."
+
+[options."--contrast"]
+meaning = "M5 contrast whose top up and down calls join the default list."
+effect = "Changes which top calls get cards; unset, the featured contrast."
+
+[options."--hpa-release"]
+meaning = "Human Protein Atlas major release every HPA request names."
+effect = "Another release can change values, antibodies and categories."
+
+[options."--offline"]
+meaning = "Read only `resources/cache/`; make no request."
+effect = "On: an uncached response leaves its panel unavailable, named."
+
+[options."--refresh"]
+meaning = "Move each gene's cached responses aside, then fetch them again."
+effect = "On: newer provider data replace the cache; old copies kept dated."
+
 [options."--min-log2cpm"]
 meaning = "Expression filter: a gene's median log2 [[CPM]] over the patients, at least."
 effect = "Higher keeps fewer, better-measured genes; each dropped gene is counted."
@@ -169,6 +189,14 @@ effect = "Higher calls fewer protein changes; compressed ratios drop out first."
 meaning = "Gene class drawn in the class figures, or all."
 effect = "One class shows whether its proteins escape RNA control."
 
+[options."--biotypes"]
+meaning = "Comma-separated biotype groups M8 tests, each with its own BH."
+effect = "Each added group is one more stratum, adjusted on its own."
+
+[options."--check"]
+meaning = "List each problem a run meets, with lines to add; run nothing."
+effect = "On: nothing runs or is written; problems give a failing exit status."
+
 [effects.setup]
 "--dataset-file" = "Set: fetches each resource, keeping it only if size and SHA-256 match."
 
@@ -202,6 +230,22 @@ effect = "One class shows whether its proteins escape RNA control."
 [effects.function]
 "--dataset-file" = "Selects the gene sets tested, the featured set and its running score."
 
+# The guide's page documents `ctx run`, so its cards carry run's effects.
+[effects.guide]
+"--dataset-file" = "Writes that study's commands; unset, the worked example's."
+"--dataset" = "Names every output of every module run, and the study's ctx root."
+"--rnaseq-dir" = "Set: gather reads its counts, so quant, de and function can run."
+"--gdc-dir" = "Set: gather reads a GDC project; clinical runs where declared."
+
 [effects.clinical]
 "--dataset-file" = "Selects the build list, default endpoint and the published numbers shown."
 "--dataset" = "Selects gather's GDC tables and renames every output."
+
+[effects.genecard]
+"--dataset-file" = "Supplies contrasts, box genes, the GTF and the GTEx files."
+"--dataset" = "Selects gather's genes and the M5 results the cards read."
+"--genes-from" = "Cards for an M5 table's genes or a saved list."
+
+[effects.ncrna]
+"--dataset-file" = "Selects the featured contrast, the pair count and M8's own rules."
+"--min-count" = "Moves the filter line; M5's tested genes stay as fitted."

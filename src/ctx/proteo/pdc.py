@@ -4,7 +4,7 @@ PDC serves a file through a signed URL that expires, so a dataset file cannot ho
 itself. ``resolve`` asks PDC's GraphQL API for a fresh one, with PDC's MD5 and size, when setup
 fetches the file; setup then checks the MD5 against PDC's and the SHA-256 against the dataset
 file's (M7 plan, P7.5). The query accepts the CPTAC data use agreement, as the PDC portal's
-download does: the dataset file names the agreement beside the resource.
+download does, for whoever runs ``ctx setup`` (Rytis, 2026-10-08); setup says so first.
 """
 
 import json
@@ -18,6 +18,8 @@ GRAPHQL = "https://pdc.cancer.gov/graphql"
 CATEGORY = "Publication Supplementary Material"
 QUERY = ('{ filesPerStudy(pdc_study_id: "%s", data_category: "%s", acceptDUA: true) '
          "{ file_name md5sum file_size signedUrl { url } } }")  # fmt: skip
+# The agreement the query accepts; ctx setup names it before fetching (Rytis, 2026-10-08).
+DUA_URL = "https://cptac-data-portal.georgetown.edu/cptac/s?id=73217"
 TIMEOUT = 120
 
 
