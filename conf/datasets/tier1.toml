@@ -343,3 +343,23 @@ conditions = [
     { metric = "gsea.ndn_pdac_adjusted.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
     { metric = "gsea.ndn_pdac_within.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
 ]
+
+# M8 Non-coding RNA (plan docs/plans/2026-10-07_m8_real_data_plan_proposal.md). Its rules sit
+# here, not in [sanity], whose Step-1 record is fixed; the time key is not named `registered`,
+# which tests/test_sanity_record.py reads as a registration of [sanity].
+[ncrna]
+featured = "ndn_gcsf"
+# Pairs the lncRNA neighbour select offers, smallest residual q first.
+pairs = 50
+
+[ncrna.sanity]
+# Registered before the first ctx ncrna run on Step-1, but NOT blind: while planning
+# (2026-10-07) the miRNA-gene share was measured on these counts, maximum 0.0142 % over 210
+# runs. The threshold is the course convention the plan names, not tuned to that value.
+registered_on = "2026-10-08 14:20"
+
+[[ncrna.sanity.rules]]
+id = "N1"
+text = "miRNA genes hold under 0.1 % of counted reads in every poly-A library."
+source = "course convention: poly-A capture and size selection leave mature miRNAs out (CONVENTIONS.md, Statistics rules); seen while planning, Step-1 maximum 0.0142 %"
+conditions = [{ metric = "mirna.max_percent", op = "<", value = 0.1 }]

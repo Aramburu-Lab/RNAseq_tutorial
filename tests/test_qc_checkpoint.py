@@ -46,7 +46,24 @@ def test_gene_types_read_gzip_and_plain_alike(tmp_path):
     plain = checkpoint.gene_types(write_gtf(tmp_path / "a.gtf", GENES))
     zipped = checkpoint.gene_types(write_gtf(tmp_path / "a.gtf.gz", GENES))
     assert plain.equals(zipped)
-    assert plain.rows() == GENES
+    assert plain.select("gene_id", "gene_name", "gene_type", "chrom").rows() == GENES
+
+
+def test_gene_types_coordinates_come_from_the_gene_line(tmp_path):
+    """Start, end and strand of the gene record, typed; the exon line after it is ignored.
+
+    Catches: start and end swapped, the strand dropped or read from another column, or the
+    exon's coordinates kept over the gene's (the exon line comes second, with its own span).
+    """
+    gene = 'gene_id "G"; gene_type "lncRNA"; gene_name "LNC";'
+    path = tmp_path / "c.gtf"
+    path.write_text(f"chr1\tHAVANA\tgene\t1000\t2000\t.\t-\t.\t{gene}\n"
+                    f"chr1\tHAVANA\texon\t1500\t1600\t.\t+\t.\t{gene}\n")  # fmt: skip
+    found = checkpoint.gene_types(path)
+    assert found.row(0, named=True) == {"gene_id": "G", "gene_name": "LNC", "gene_type": "lncRNA",
+                                        "chrom": "chr1", "start": 1000, "end": 2000,
+                                        "strand": "-"}  # fmt: skip
+    assert found.schema["start"] == pl.Int64
 
 
 def test_count_metrics_by_hand():
