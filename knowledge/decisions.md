@@ -27,6 +27,14 @@ it were reversed.
 
 ---
 
+## D-057 — M7: one log2 CPM and a public Spearman; rules apart from the Step-1 record; the CPTAC agreement accepted for the reader, and said
+
+**Date:** 2026-10-08 · **Status:** decided (M7 merged, 849a8f7; plan `docs/plans/2026-10-07_m7_real_data_plan_proposal.md`, recommended answers; Excel by openpyxl as M10)
+
+**Decision.** `ctx.de.filters` holds the one `log2cpm`, shared by M5, M7 and M10; `ctx.concordance.spearman` is public. M7's rules live in `[proteo.sanity]` with `registered_at`, since `test_sanity_record` reads any `registered = ` line in tier1.toml as the Step-1 registration. The Krug 2020 band rule stays unregistered: the supplement gives per-gene r only as a histogram (Figure S2G), so K0 records our median beside Mertins 2016's 0.39 without gating. `ctx setup` accepts the CPTAC data use agreement for whoever runs it (Rytis 2026-10-08), and says so before fetching and on the M7 page. The Step-1 granule rule P2 failed as registered (one-sided p 0.087, r 0.049) and stands failed. The freeze's 22 plex labels are its 15 tumour plexes plus 7 joined labels of tumours run in two or three plexes.
+
+---
+
 ## D-056 — M9 draws GTEx V11 from its release files as our own figures, summaries by tissue and sex; setup registers a file already in place
 
 **Date:** 2026-10-08 · **Status:** decided (Rytis 2026-10-08 for the three GTEx answers; M9.0 to M9.7 merged)
