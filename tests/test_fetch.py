@@ -81,6 +81,20 @@ def test_idempotent(server, tmp_path):
     assert len(hits) == before
 
 
+def test_file_in_place_registered_through_a_linked_folder(server, tmp_path):
+    # Mutations: a file already in place but unrecorded downloaded again (GTEx V11's 24 GB);
+    # a destination judged by its link target, refusing an input folder linked into a root.
+    base, hits = server
+    elsewhere = tmp_path / "elsewhere"
+    elsewhere.mkdir()
+    (elsewhere / "good.gmt").write_bytes(BODY)
+    (tmp_path / "root" / "data").mkdir(parents=True)
+    (tmp_path / "root" / "data" / "raw").symlink_to(elsewhere)
+    (entry,) = fetch(tmp_path / "root", [resource(base, "good.txt", dest="data/raw/good.gmt")])
+    assert hits == []
+    assert entry["found"] is True and entry["sha256"] == hashlib.sha256(BODY).hexdigest()
+
+
 def test_dest_outside_root_refused(server, tmp_path):
     base, hits = server
     with pytest.raises(FetchError, match="outside"):
