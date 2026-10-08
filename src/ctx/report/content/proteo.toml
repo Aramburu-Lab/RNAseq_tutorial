@@ -3,8 +3,8 @@
 
 title = "M7 RNA versus protein: {dataset}"
 budget = "Track {track}: under {minutes} min and {ram_gb} GB."
-purpose = "Measure how far protein follows RNA: per gene across samples, or as fold changes in one contrast, and name the genes whose protein departs from their RNA."
-input = "Gather's counts or M5's results for the contrast, and a protein table from the dataset file's resources: [[TMT]] log2 ratios to a pooled reference, or copy numbers by the [[proteomic ruler]]."
+purpose = "Measure how far protein follows RNA, per gene across samples or as fold changes in one contrast. Name the genes whose protein departs from their RNA."
+input = "Gather's counts, or M5's results for the contrast. A protein table from the dataset file's resources: [[TMT]] log2 ratios to a pooled reference, or copy numbers by the [[proteomic ruler]]."
 method = """[[mass spectrometry proteomics|Mass spectrometry]] measures peptides, assembled into [[protein groups]]. Each group becomes one gene; groups naming several genes leave, and a gene measured twice keeps its best-quantified row.
 
 A protein not quantified in a sample is [[missingness|missing]], never zero. Only proteins quantified in enough samples are tested, decided in exact fractions.
@@ -127,7 +127,7 @@ lead = "Spearman ρ = {rho:.2f}, Pearson r = {r:.2f} over {n:,} samples with bot
 reading = [
     "Each dot is one sample; colour marks the {track} call of the source annotation.",
 ]
-caption = "{gene}: log2(CPM + 1) against log2 ratio to the reference over {n} samples; Spearman ρ = {rho:.2f}, BH-adjusted p = {padj}."
+caption = "{gene}: RNA as log2 CPM against protein as log2 ratio to the reference, over {n} samples; Spearman ρ = {rho:.2f}, BH-adjusted p = {padj}."
 x = "RNA"
 y = "Protein"
 
@@ -138,7 +138,7 @@ reading = [
     "Each dot is one gene measured at both levels; colour marks granule proteins.",
     "Dashed lines split the quadrants; the solid diagonal is equal change.",
 ]
-caption = "Cross-study. RNA: M5's log2 FC, n = {n_rna}. Protein: Welch t on log2 copies, n = {n_protein}, BH. Spearman ρ = {rho:.2f}, 95 % CI {low:.2f} to {high:.2f}."
+caption = "Cross-study: RNA as M5's log2 FC over n = {n_rna}; protein by Welch t on log2 copies over n = {n_protein}, BH. Spearman ρ = {rho:.2f}, {ci} % CI {low:.2f} to {high:.2f}."
 x = "RNA log2 fold change"
 y = "Protein log2 fold change"
 identity = "equal change"

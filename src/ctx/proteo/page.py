@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
-from ctx import runtime
+from ctx import concordance, runtime
 from ctx.dataset import Dataset
 from ctx.de.run import Writer
 from ctx.de.sanity import VERDICT_COLUMNS
@@ -144,7 +144,8 @@ def _cross(writer: Writer, ctx: Context) -> list[Result]:
     values = {"rho": rho, "low": low, "high": high, "n_genes": tested.height, "n_same": same,
               "tested": contrast.tested, "reference": contrast.reference,
               "n_rna": " and ".join(map(str, contrast.expected_n)),
-              "n_protein": f"{m.extra['n_tested']} and {m.extra['n_reference']}"}  # fmt: skip
+              "n_protein": f"{m.extra['n_tested']} and {m.extra['n_reference']}",
+              "ci": round(100 * concordance.LEVEL)}  # fmt: skip
     blocks: list[FigureBlock] = [figures.fold(writer, tested, values)]
     assert ctx.spec.proteo is not None  # noqa: S101 - run() checks
     named = [c for c in ctx.spec.proteo.classes if f"shift.{c}" in m.extra]
