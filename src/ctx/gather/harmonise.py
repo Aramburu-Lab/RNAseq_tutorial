@@ -12,8 +12,8 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
-from ctx.gather import rnaseq
-from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate, normalise
+from ctx.gather import rnaseq, trace
+from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate, normalise, read_table
 from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
@@ -362,7 +362,8 @@ def _curation_facts(frame: pl.DataFrame, spec: Dataset) -> ResultTable:
     repeats = frame.filter(pl.col("replicate") > 1).height
     joined = (
         text.fill(PAGE, "curation.joined", file=spec.path.name, runs=frame.height,
-                  column=spec.sdrf.join[0])
+                  column=spec.sdrf.join[0],
+                  table=spec.sdrf.file or text.word(PAGE, "curation.sdrf"))
         + (text.fill(PAGE, "curation.agrees", checked=checked) if checked else "")
         + word("curation.mapped")
     )  # fmt: skip
@@ -446,31 +447,49 @@ def subset_rows(sdrf_text: str, key: str, runs: set[str]) -> tuple[str, int, int
     return buffer.getvalue(), len(kept), len(body)
 
 
-def _curate(
-    settings: runtime.Settings, spec: Dataset, checked: Outdir, out: Path, releases: dict[str, str]
+def curated_runs(
+    root: Path, spec: Dataset, checked: Outdir, releases: dict[str, str]
 ) -> pl.DataFrame:
-    """Curate the runs with the dataset's SDRF, adding what was read to ``releases``.
+    """The runs curated with the dataset's SDRF or own table; what was read goes into ``releases``.
+
+    The one curation of a gather and of ``ctx run --check``, which writes nothing.
 
     Raises:
-        DatasetError: If the SDRF has not been fetched under the root.
-        CurationError: After writing the problem table.
+        DatasetError: If the SDRF has not been fetched under the root, or the own table is
+            not beside the dataset file.
+        CurationError: With every problem curation found.
     """
-    assert spec.sdrf is not None  # noqa: S101 - run() refuses a dataset file without [sdrf]
-    sdrf = settings.root / spec.resource(spec.sdrf.resource).dest
+    assert spec.sdrf is not None  # noqa: S101 - callers refuse a dataset file without [sdrf]
+    own = spec.table()
+    sdrf = own or root / spec.resource(spec.sdrf.resource).dest
     if not sdrf.is_file():
-        raise DatasetError(f"{sdrf} is missing; run ctx setup --dataset-file {spec.path}")
+        fix = f"run ctx setup --dataset-file {spec.path}"
+        if own:
+            fix = f"write it beside {spec.path.name}, from the sheet gather writes without one"
+        raise DatasetError(f"{sdrf} is missing; {fix}")
+    sdrf_text, digest = read_table(sdrf) if own else (sdrf.read_text(), "")
     releases |= {
         "dataset file": str(spec.path),
         f"sha256:{spec.path.name}": hashlib.sha256(spec.path.read_bytes()).hexdigest(),
-        f"sha256:{sdrf.name}": hashlib.sha256(sdrf.read_bytes()).hexdigest(),
+        f"sha256:{sdrf.name}": digest or hashlib.sha256(sdrf.read_bytes()).hexdigest(),
     }
-    sdrf_text = sdrf.read_text()
     if parent := spec.info.get("subset_of"):
         key, column = spec.sdrf.join
         sdrf_text, kept, total = subset_rows(sdrf_text, key, set(checked.runs[column]))
         releases["sdrf rows"] = f"{kept} of {total}, the runs of this subset of {parent}"
+    return curate(checked.runs, sdrf_text, spec)
+
+
+def _curate(
+    settings: runtime.Settings, spec: Dataset, checked: Outdir, out: Path, releases: dict[str, str]
+) -> pl.DataFrame:
+    """``curated_runs``, writing the problem table when curation fails.
+
+    Raises:
+        CurationError: After writing the problem table.
+    """
     try:
-        return curate(checked.runs, sdrf_text, spec)
+        return curated_runs(settings.root, spec, checked, releases)
     except CurationError as error:
         _write_problems(error, out, spec.slug, releases)
         raise
@@ -524,8 +543,11 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     # Read before anything is written, so a bad outdir leaves no sheet behind.
     counts = rnaseq.read(rnaseq_dir.resolve(), set(frame["sample"])) if rnaseq_dir else None
     standard = _depth_standard() if spec else None
+    cost = trace.table((("nf-core/fetchngs", source), ("nf-core/rnaseq", rnaseq_dir)))
     files = write_table(frame, out, sheet_stem, columns=columns(spec), data_releases=releases)
     results: list[Result] = [_facts(checked, frame, curated is not None)]
+    if cost:
+        results.append(cost)
     if counts is not None:
         counts_releases = {**releases, "rnaseq outdir": str(rnaseq_dir), **counts.provenance}
         for name, table, described in _counts_tables(counts):

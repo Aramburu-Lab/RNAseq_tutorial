@@ -55,6 +55,10 @@ budget = "Budget"
 inputs = "Inputs"
 versions = "All {n} package versions"
 
+# A block of commands or a script on a page (builder.Code): the hash of exactly the text shown.
+[code]
+sha256 = "SHA-256 of this text:"
+
 [figures]
 reading = "How to read this"
 reading_label = "How to read this figure"

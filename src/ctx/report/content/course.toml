@@ -18,6 +18,7 @@ real = "Real"
 made_up = "Made-up"
 none = "No page in this kit yet."
 glossary = "Glossary: every term the pages explain, with its sources where it gives them."
+guide = "Your own data: download a study, count it, and build these pages for it."
 # M0 describes the computer that built the pages, not a dataset, so its title names none.
 machine = "The computer that built the kit"
 
@@ -58,7 +59,7 @@ On Windows without Python, `powershell -NoProfile -ExecutionPolicy Bypass -File 
 
 ## Rerunning a module
 
-This kit only reads. Rerunning a module needs the course codebase and its environment; the codebase's own README gives the commands.
+This kit only reads. Rerunning a module needs the course codebase and its environment. The guide, Your own data on `START.html`, gives every command from a study's accessions to a kit of its own.
 
 Built on {built} from codebase commit `{commit}`.
 """

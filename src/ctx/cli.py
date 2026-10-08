@@ -168,6 +168,7 @@ def gather(
     from ctx.gather.fetchngs import FetchngsError  # noqa: PLC0415 - same module, same reason
     from ctx.gather.gdc import GdcError  # noqa: PLC0415 - same reason
     from ctx.gather.rnaseq import RnaseqError  # noqa: PLC0415 - same reason
+    from ctx.gather.trace import TraceError  # noqa: PLC0415 - same reason
     from ctx.qc.registry import RegistryError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
@@ -185,7 +186,7 @@ def gather(
                 dataset_file=dataset_file, rnaseq_dir=rnaseq_dir,
             )  # fmt: skip
     except (FetchngsError, DatasetError, CurationError, RnaseqError, RegistryError,
-            GdcError) as error:  # fmt: skip
+            GdcError, TraceError) as error:  # fmt: skip
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:
@@ -420,3 +421,55 @@ def report(
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     for path in hub.run(ctx.obj["settings"], cards, dataset, dataset_file):
         typer.echo(path)
+
+
+@app.command()
+@profiled
+def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
+    rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
+    gdc_dir: Annotated[Path | None, typer.Option(help=HELP["--gdc-dir"])] = None,
+    check: Annotated[bool, typer.Option("--check/--no-check", help=HELP["--check"])] = False,
+) -> None:
+    """Run every module the dataset file declares, in course order, each as its own command."""
+    from ctx import pipeline  # noqa: PLC0415 - imported after the runtime profile
+
+    settings = ctx.obj["settings"]
+    options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dir)
+    problems, planned = pipeline.check(settings.root, options)
+    for problem in problems:
+        typer.echo(f"- {problem.text}", err=True)
+        if problem.lines:
+            typer.echo(f"  add these lines to the dataset file:\n{problem.lines}", err=True)
+    stops = [p for p in problems if p.blocks]
+    typer.echo(f"{len(problems)} problems, {len(stops)} of them stopping the run; ctx run runs: "
+               f"{', '.join(planned) or 'nothing'}")  # fmt: skip
+    if check or stops:
+        raise typer.Exit(1 if (problems if check else stops) else 0)
+    profile = ctx.find_root().obj.get("profile")
+    raise typer.Exit(pipeline.execute(settings.root, profile, pipeline.planned(options)))
+
+
+@app.command()
+@profiled
+def guide(
+    ctx: typer.Context,
+    dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
+) -> None:
+    """Write the custom-data guide: download, count and run a study, from its dataset file."""
+    from ctx.dataset import DatasetError, load  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.report import guide as module  # noqa: PLC0415 - same reason
+
+    group = ctx.find_root().command
+    # The page teaches `ctx run`, so its cards are run's options and guide's own.
+    shared = parameter_cards(group, group.commands["run"], ctx.command)  # type: ignore[attr-defined]
+    cards = tuple({card.name: card for card in shared}.values())
+    try:
+        spec = load(dataset_file or module.DEFAULT)
+    except (DatasetError, OSError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    typer.echo(module.run(ctx.obj["settings"], cards, runtime.retypable(sys.argv[1:]), spec))

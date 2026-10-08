@@ -1,0 +1,88 @@
+# A dataset file for your own study. Copy it beside your own table, give both your study's name,
+# and edit each line marked EDIT; `ctx run --check` then lists what is still missing, with the
+# lines to add. ctx reads it through ctx.dataset, which names every problem at once.
+#
+# Each run needs a donor, a cell type and a condition, from one of three routes; keep one [sdrf]:
+#   1. Your own table (below): a CSV or TSV beside this file, one row per run. Start it from
+#      the sample sheet `ctx gather` writes without --dataset-file: keep run_accession and add
+#      donor, cell_type and condition. The join below names that column twice: the table's
+#      header, then the sheet's column.
+#   2. The study's SDRF, from its ArrayExpress or BioStudies page: a [[resources]] entry named
+#      "sdrf" with its URL, size and SHA-256, and [sdrf] resource = "sdrf" in place of file,
+#      as conf/datasets/tier1.toml does. `ctx setup --dataset-file` fetches it.
+#   3. Some runs of a study that already has a dataset file: that file's tables with
+#      [dataset] subset_of = "<its slug>", as conf/datasets/tier1_teach.toml does.
+
+[dataset]
+# EDIT: lowercase letters, digits and underscores; it names every output file.
+slug = "mine"
+# EDIT: the name the pages show.
+label = "My study"
+# EDIT: the runs or the study to download, as `ctx guide --dataset-file` writes them into the
+# accession list (ERR, SRR, DRR, their experiments and studies, or GSE and GSM).
+accessions = []
+
+# The study's own accessions, which tests/test_repo.py keeps out of the code; empty for a study
+# that stays outside the repository.
+[guard]
+ids = []
+patterns = []
+
+# Gene sets for `ctx function` and the annotation `ctx qc` and `ctx quant` read gene types from:
+# Step-1's, which tests/test_dataset_template.py holds equal to conf/datasets/tier1.toml's.
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# EDIT: your table's file name, beside this file.
+[sdrf]
+file = "mine.csv"
+join = ["run_accession", "run_accession"]
+
+[columns.donor]
+source = "donor"
+meaning = "Individual the sample came from."
+
+[columns.cell_type]
+source = "cell_type"
+meaning = "Cell type or tissue sampled."
+
+[columns.condition]
+source = "condition"
+meaning = "Donor state, treatment or disease."
+
+# ctx run --check prints each block below, filled from your sheet, once the tables above curate:
+# one contrast per comparison, then what `ctx de` and `ctx function` feature. Paste them here.
+#
+# --- [[contrasts]]
+# [[contrasts]]
+# name = "{name}"
+# variable = "{variable}"
+# reference = "{reference}"
+# tested = "{tested}"
+# n = [{reference_n}, {tested_n}]
+#
+# --- [de]
+# [de]
+# featured = "{contrast}"
+#
+# --- [function]
+# [function]
+# gene_sets = "msigdb_hallmark"
+# licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+# featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+# running = ["{contrast}", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]

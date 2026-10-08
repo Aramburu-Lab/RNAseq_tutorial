@@ -153,6 +153,10 @@ effect = "Set or present: gene and transcript figures, and ctx's gene counts."
 meaning = "How ctx's [[tx2gene|tximport]] port makes gene counts from transcript estimates."
 effect = "The value no keeps Salmon's estimates, which shift with isoform use."
 
+[options."--check"]
+meaning = "List each problem a run meets, with lines to add; run nothing."
+effect = "On: nothing runs or is written; problems give a failing exit status."
+
 [effects.setup]
 "--dataset-file" = "Set: fetches each resource, keeping it only if size and SHA-256 match."
 
@@ -185,6 +189,13 @@ effect = "The value no keeps Salmon's estimates, which shift with isoform use."
 
 [effects.function]
 "--dataset-file" = "Selects the gene sets tested, the featured set and its running score."
+
+# The guide's page documents `ctx run`, so its cards carry run's effects.
+[effects.guide]
+"--dataset-file" = "Writes that study's commands; unset, the worked example's."
+"--dataset" = "Names every output of every module run, and the study's ctx root."
+"--rnaseq-dir" = "Set: gather reads its counts, so quant, de and function can run."
+"--gdc-dir" = "Set: gather reads a GDC project; clinical runs where declared."
 
 [effects.clinical]
 "--dataset-file" = "Selects the build list, default endpoint and the published numbers shown."

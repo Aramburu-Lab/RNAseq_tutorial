@@ -7,7 +7,9 @@ so one run lists them all.
 """
 
 import csv
+import hashlib
 import io
+from pathlib import Path
 
 import polars as pl
 
@@ -31,6 +33,28 @@ class CurationError(ValueError):
         self.problems = problems
         lines = [f"{check}: {key}: {detail}" for check, key, detail in problems]
         super().__init__(f"{len(problems)} curation problems:\n  " + "\n  ".join(lines))
+
+
+def read_table(path: Path) -> tuple[str, str]:
+    """A student's own table as curation reads an SDRF: tab-separated text, and its SHA-256.
+
+    A spreadsheet's export is taken as saved: the byte-order mark and Windows line ends are
+    removed, and a ``.csv`` is read with commas, quotes honoured, every other ending with tabs.
+
+    Args:
+        path: The table, as ``Dataset.table`` resolves it.
+
+    Returns:
+        The table as tab-separated text, and the SHA-256 of the file's bytes as saved.
+    """
+    data = path.read_bytes()
+    body = data.decode("utf-8").removeprefix(chr(0xFEFF))
+    # newline="" keeps a CR inside a quoted cell for csv, which strips the rest itself.
+    rows = list(csv.reader(io.StringIO(body, newline=""),
+                           delimiter="," if path.suffix == ".csv" else "\t"))  # fmt: skip
+    buffer = io.StringIO()
+    csv.writer(buffer, delimiter="\t", lineterminator="\n").writerows(rows)
+    return buffer.getvalue(), hashlib.sha256(data).hexdigest()
 
 
 def normalise(value: str) -> str:

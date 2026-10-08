@@ -138,8 +138,27 @@ def clinical_run(tmp_path_factory):
     return root, _page(root, "12_clinical", "fake_brca_overview")
 
 
+@pytest.fixture(scope="module")
+def guide_run(tmp_path_factory):
+    root = tmp_path_factory.mktemp("guide_cli")
+    done = _ctx("--root", str(root), "guide", cwd=root)
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, _page(root, "09_report", "report_guide")
+
+
+@pytest.fixture(scope="module")
+def run_run(guide_run):
+    """`ctx run` writes no page of its own: its cards are on the guide, which teaches it."""
+    return guide_run
+
+
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
-COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical"]
+COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical",
+            "run", "guide"]  # fmt: skip
+# Commands whose page shows another command's cards beside their own (cli.guide).
+SHARED_CARDS = {"run": ("run", "guide"), "guide": ("run", "guide")}
+# Commands that run modules or write a page of the report folder, not a module of their own.
+NOT_MODULES = {"run", "guide"}
 
 
 def test_every_subcommand_has_a_card_test():
@@ -153,7 +172,7 @@ def test_parameter_cards_match_cli(request, command):
     group = typer.main.get_command(app)
     options = {
         p.opts[0]: p
-        for cmd in (group, group.commands[command])
+        for cmd in (group, *(group.commands[c] for c in SHARED_CARDS.get(command, (command,))))
         for p in cmd.params
         if p.opts[0] not in {"--help", "--version"}
     }
@@ -184,7 +203,7 @@ def test_parameter_cards_match_cli(request, command):
 
 def test_subcommands_in_modules():
     tokens = {token for token, _ in MODULES}
-    names = list(typer.main.get_command(app).commands)
+    names = [n for n in typer.main.get_command(app).commands if n not in NOT_MODULES]
     assert names
     assert all(name.replace("-", "_") in tokens for name in names)
 

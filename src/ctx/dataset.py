@@ -19,6 +19,8 @@ TABLES = {
 }  # fmt: skip
 # The count column a GDC STAR - Counts file holds per library protocol (ctx.gather.gdc).
 PROTOCOLS = ("unstranded", "stranded_first", "stranded_second")
+# An own table's endings: comma-separated, or tab-separated as an SDRF is (ctx.gather.curation).
+TABLE_SUFFIXES = (".csv", ".tsv", ".txt")
 # TCGA-CDR's four endpoints (Liu et al. 2018), each an event flag and a time in days.
 ENDPOINTS = ("OS", "DSS", "DFI", "PFI")
 
@@ -55,11 +57,16 @@ class Column:
 
 @dataclass(frozen=True)
 class Sdrf:
-    """How SDRF rows meet the fetchngs runs: the join pair and the cross-checked pairs."""
+    """How SDRF rows meet the fetchngs runs: the join pair and the cross-checked pairs.
+
+    The table is a fetched ``[[resources]]`` entry, or ``file``: the student's own table, CSV
+    or TSV, named relative to the dataset file, for a study with no SDRF.
+    """
 
     resource: str
     join: tuple[str, str]
     cross_check: tuple[tuple[str, str], ...]
+    file: str = ""
 
 
 @dataclass(frozen=True)
@@ -215,6 +222,15 @@ class Dataset:
         """
         return str(self.info.get("label", self.slug))
 
+    @property
+    def accessions(self) -> tuple[str, ...]:
+        """``[dataset] accessions``: what fetchngs downloads, in the file's order."""
+        return tuple(self.info.get("accessions", ()))
+
+    def table(self) -> Path | None:
+        """The own table of ``[sdrf] file``, beside the dataset file, never the working folder."""
+        return self.path.parent / self.sdrf.file if self.sdrf and self.sdrf.file else None
+
     def resource(self, name: str) -> Resource:
         """The resource with this name."""
         return next(r for r in self.resources if r.name == name)
@@ -287,15 +303,21 @@ def _columns(raw: Mapping[str, Any], problems: list[str]) -> tuple[Column, ...]:
 
 
 def _sdrf(raw: Mapping[str, Any], resources: tuple[Resource, ...], problems: list[str]) -> Sdrf:
-    """Parse [sdrf]."""
-    resource = _need(raw, "resource", str, "sdrf", problems)
+    """Parse [sdrf]: a fetched resource, or the student's own table beside the dataset file."""
+    if ("resource" in raw) == ("file" in raw):
+        problems.append("sdrf: give resource (a fetched SDRF) or file (your own table), not both")
+    key = "file" if "file" in raw else "resource"
+    named = _need(raw, key, str, "sdrf", problems)
     join = _need(raw, "join", list, "sdrf", problems) or ["", ""]
     pairs = raw.get("cross_check", [])
-    if resource is not None and resource not in {r.name for r in resources}:
-        problems.append(f"sdrf.resource: no [[resources]] entry named {resource!r}")
+    if key == "resource" and named is not None and named not in {r.name for r in resources}:
+        problems.append(f"sdrf.resource: no [[resources]] entry named {named!r}")
+    if key == "file" and named is not None and not named.endswith(TABLE_SUFFIXES):
+        problems.append(f"sdrf.file: {named!r} is read by its ending, one of {TABLE_SUFFIXES}")
     if len(join) != 2 or any(len(p) != 2 for p in pairs):  # noqa: PLR2004 - pairs
         problems.append("sdrf.join and each sdrf.cross_check entry must be [sdrf header, column]")
-    return Sdrf(resource or "", (join[0], join[-1]), tuple((a, b) for a, b in pairs))
+    resource, file = (named or "", "") if key == "resource" else ("", named or "")
+    return Sdrf(resource, (join[0], join[-1]), tuple((a, b) for a, b in pairs), file)
 
 
 def _values(raw: Mapping[str, Any]) -> dict[str, tuple[str, ...]]:
@@ -433,6 +455,10 @@ def load(path: Path) -> Dataset:
     slug = _need(info, "slug", str, "dataset", problems)
     if "label" in info:
         _need(info, "label", str, "dataset", problems)
+    # The runs `ctx guide` writes into the fetchngs list (Part 1), in the file's order.
+    accessions = info.get("accessions", [])
+    if not isinstance(accessions, list) or not all(isinstance(a, str) for a in accessions):
+        problems.append(f"dataset.accessions: expected a list of accessions, found {accessions!r}")
     resources = _resources(raw.get("resources", []), problems)
     columns = _columns(raw.get("columns", {}), problems)
     sdrf = _sdrf(raw["sdrf"], resources, problems) if "sdrf" in raw else None

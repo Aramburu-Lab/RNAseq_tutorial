@@ -294,3 +294,23 @@ def test_leaving_out_a_dataset_no_root_holds_writes_nothing(tmp_path):
     kit, done = build(tmp_path, "--leave-out", "stdy")
     assert done.returncode != 0 and "no root holds that dataset" in done.stderr
     assert nothing_written(kit)
+
+
+def test_a_kit_folder_builds_a_kit(tmp_path):
+    """U.7: a dataset folder of a kit is a root the builder takes again, with the guide's page,
+    so a student's kit rebuilds from the kit alone. Catches that folder refused, and the guide
+    left behind on the way."""
+    real = a_root(tmp_path / "real", "Study", "study")
+    page(real / "outputs" / "09_report" / f"{NEW}_report_guide_v1.html", "Your own data: Study")
+    kit, done = build(tmp_path, real=real)
+    assert done.returncode == 0, done.stderr
+    again = tmp_path / "again"
+    done = subprocess.run([sys.executable, str(SCRIPT), "--out", str(again),
+                           f"--real=step={kit / 'step'}"], capture_output=True, text=True,
+                          check=False)  # fmt: skip
+    assert done.returncode == 0, done.stderr
+    pages = {p.relative_to(kit / "step") for p in (kit / "step").rglob("*.html")}
+    assert pages == {p.relative_to(again / "step") for p in (again / "step").rglob("*.html")}
+    assert course.page(again, [(again / "step", True)]).guide == (
+        f"step/outputs/09_report/{NEW}_report_guide_v1.html"
+    )
