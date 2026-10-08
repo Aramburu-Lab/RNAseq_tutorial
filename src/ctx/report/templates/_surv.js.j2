@@ -1,0 +1,390 @@
+{% raw %}
+/* The page twin of ctx.clinical.survival, score and cutpoint: one definition in two languages,
+   tests/test_survival.py runs both on the same cohorts. Each function names its Python twin
+   where the name differs. No DOM here, so node runs all of it. */
+var ctxSurv = {
+  /* harmonise.DAYS_PER_MONTH */
+  DAYS_PER_MONTH: 365.25 / 12,
+  EPS: 1e-9,
+  ITERATIONS: 20,
+  HALVINGS: 30,
+  TOLERANCE: Math.sqrt(2.220446049250313e-16),
+  SCALE: 1000,
+  /* numpy's linear percentile of unsorted values, its lerp included, so cuts agree exactly. */
+  percentile: function (values, q) {
+    var a = Float64Array.from(values).sort(), n = a.length;
+    var at = (n - 1) * (q / 100), lo = Math.floor(at), hi = Math.min(lo + 1, n - 1);
+    var t = at - lo, diff = a[hi] - a[lo];
+    return t >= 0.5 ? a[hi] - diff * (1 - t) : a[lo] + diff * t;
+  },
+  /* Normal tail and chi-squared tails for 1 and 2 df, from erfc (W. J. Cody's rational
+     approximations through the continued fraction for large x). */
+  erfc: function (x) {
+    var z = Math.abs(x), t = 1 / (1 + 0.5 * z);
+    var r = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + t * (0.09678418 +
+      t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 + t * (1.48851587 +
+      t * (-0.82215223 + t * 0.17087277)))))))));
+    return x >= 0 ? r : 2 - r;
+  },
+  normSf: function (z) { return 0.5 * ctxSurv.erfc(z / Math.SQRT2); },
+  chi2Sf: function (x, df) {
+    if (!(x > 0)) return 1;
+    if (df === 1) return ctxSurv.erfc(Math.sqrt(x / 2));
+    if (df === 2) return Math.exp(-x / 2);
+    throw new Error("chi2Sf takes 1 or 2 degrees of freedom");
+  },
+  /* kaplan_meier: R's conf.type "log-log"; z is the normal quantile of the interval. */
+  kaplanMeier: function (time, event, z) {
+    var order = time.map(function (t, i) { return i; }).sort(function (a, b) { return time[a] - time[b]; });
+    var out = { time: [], at_risk: [], events: [], censored: [], survival: [], lower: [], upper: [] };
+    var n = time.length, i = 0, s = 1, g = 0;
+    while (i < n) {
+      var t = time[order[i]], d = 0, c = 0, risk = n - i;
+      while (i < n && time[order[i]] === t) { if (event[order[i]] === 1) d++; else c++; i++; }
+      s *= 1 - d / risk;
+      g += d / (risk * (risk - d));
+      var se = Math.sqrt(g), ls = Math.log(s), lo, hi;
+      if (s === 1) { lo = 1; hi = 1; } else if (s === 0) { lo = NaN; hi = NaN; } else {
+        hi = Math.exp(-Math.exp(Math.log(-ls) + z * se / ls));
+        lo = Math.exp(-Math.exp(Math.log(-ls) - z * se / ls));
+      }
+      out.time.push(t); out.at_risk.push(risk); out.events.push(d); out.censored.push(c);
+      out.survival.push(s); out.lower.push(lo); out.upper.push(hi);
+    }
+    return out;
+  },
+  quantile: function (times, survival, p) {
+    var target = 1 - p, x = [], y = [];
+    survival.forEach(function (v, i) {
+      if (isNaN(v)) return;
+      if (y.length && y[y.length - 1] === v) return;
+      x.push(times[i]); y.push(v);
+    });
+    for (var i = 0; i < y.length; i++) {
+      if (y[i] <= target + ctxSurv.TOLERANCE) {
+        if (i === y.length - 1 || Math.abs(y[i] - target) > ctxSurv.TOLERANCE) return x[i];
+        return (x[i] + x[i + 1]) / 2;
+      }
+    }
+    return NaN;
+  },
+  median: function (curve) {
+    return [ctxSurv.quantile(curve.time, curve.survival, 0.5),
+            ctxSurv.quantile(curve.time, curve.lower, 0.5),
+            ctxSurv.quantile(curve.time, curve.upper, 0.5)];
+  },
+  followUp: function (time, event, z) {
+    return ctxSurv.median(ctxSurv.kaplanMeier(time, event.map(function (e) { return 1 - e; }), z))[0];
+  },
+  rmst: function (curve, horizon) {
+    var area = 0, last = 0, s = 1;
+    for (var i = 0; i < curve.time.length && curve.time[i] < horizon; i++) {
+      area += s * (Math.max(curve.time[i], 0) - last);
+      last = Math.max(curve.time[i], 0); s = curve.survival[i];
+    }
+    return area + s * (horizon - last);
+  },
+  /* logrank: k groups labelled 0..k-1; chi-squared on the first k - 1 with the ties factor. */
+  logrank: function (time, event, group, k) {
+    var times = Array.from(new Set(time.filter(function (t, i) { return event[i] === 1; })))
+      .sort(function (a, b) { return a - b; });
+    var om = new Array(k).fill(0), cov = [];
+    for (var a = 0; a < k; a++) cov.push(new Array(k).fill(0));
+    times.forEach(function (t) {
+      var nAt = new Array(k).fill(0), dAt = new Array(k).fill(0);
+      time.forEach(function (u, i) {
+        if (u >= t) nAt[group[i]]++;
+        if (u === t && event[i] === 1) dAt[group[i]]++;
+      });
+      var n = 0, d = 0;
+      for (var j = 0; j < k; j++) { n += nAt[j]; d += dAt[j]; }
+      var ties = n > 1 ? (n - d) / Math.max(n - 1, 1) : 0;
+      for (j = 0; j < k; j++) {
+        om[j] += dAt[j] - d * nAt[j] / n;
+        for (var m = 0; m < k; m++) {
+          cov[j][m] += d * ties * ((j === m ? nAt[j] / n : 0) - (nAt[j] / n) * (nAt[m] / n));
+        }
+      }
+    });
+    var size = k - 1, sub = cov.slice(0, size).map(function (r) { return r.slice(0, size); });
+    var u = om.slice(0, size), x = ctxSurv.solve(sub, u), chi = 0;
+    for (var j2 = 0; j2 < size; j2++) chi += u[j2] * x[j2];
+    return { chi2: chi, df: size, p: ctxSurv.chi2Sf(chi, size) };
+  },
+  /* Gaussian elimination with partial pivoting; matrices are arrays of rows. */
+  solve: function (a, b) {
+    var n = b.length, m = a.map(function (r, i) { return r.concat([b[i]]); });
+    for (var c = 0; c < n; c++) {
+      var p = c;
+      for (var r = c + 1; r < n; r++) if (Math.abs(m[r][c]) > Math.abs(m[p][c])) p = r;
+      var tmp = m[c]; m[c] = m[p]; m[p] = tmp;
+      for (r = c + 1; r < n; r++) {
+        var f = m[r][c] / m[c][c];
+        for (var k = c; k <= n; k++) m[r][k] -= f * m[c][k];
+      }
+    }
+    var x = new Array(n).fill(0);
+    for (var i = n - 1; i >= 0; i--) {
+      var s = m[i][n];
+      for (var j = i + 1; j < n; j++) s -= m[i][j] * x[j];
+      x[i] = s / m[i][i];
+    }
+    return x;
+  },
+  inverse: function (a) {
+    return a.map(function (_, j) {
+      return ctxSurv.solve(a, a.map(function (_, i) { return i === j ? 1 : 0; }));
+    }).reduce(function (rows, col, j) {
+      col.forEach(function (v, i) { rows[i][j] = v; });
+      return rows;
+    }, a.map(function (r) { return new Array(r.length).fill(0); }));
+  },
+  /* risk_sets: patients sorted by stratum then time; each event time's risk set and events. */
+  riskSets: function (time, event, strata) {
+    var n = time.length, s = strata || new Array(n).fill(0);
+    var order = time.map(function (t, i) { return i; }).sort(function (a, b) {
+      return s[a] < s[b] ? -1 : s[a] > s[b] ? 1 : time[a] - time[b];
+    });
+    var sets = [];
+    for (var i = 0; i < n; i++) {
+      var p = order[i];
+      if (event[p] !== 1) continue;
+      var last = sets[sets.length - 1];
+      if (last && s[last.deaths[0]] === s[p] && time[last.deaths[0]] === time[p]) { last.deaths.push(p); continue; }
+      var start = i;
+      while (start > 0 && s[order[start - 1]] === s[p] && time[order[start - 1]] === time[p]) start--;
+      var end = i;
+      while (end < n && s[order[end]] === s[p]) end++;
+      sets.push({ deaths: [p], members: order.slice(start, end) });
+    }
+    return sets;
+  },
+  /* efron_terms: per event time, score and information at a linear predictor. */
+  efronTerms: function (sets, x, eta) {
+    var p = x[0].length, loglik = 0, terms = [];
+    sets.forEach(function (set) {
+      var s0 = 0, s1 = new Array(p).fill(0), s2 = [], d0 = 0, d1 = new Array(p).fill(0), d2 = [];
+      for (var a = 0; a < p; a++) { s2.push(new Array(p).fill(0)); d2.push(new Array(p).fill(0)); }
+      function add(i, into0, into1, into2) {
+        var w = Math.exp(eta[i]);
+        for (var a = 0; a < p; a++) {
+          into1[a] += w * x[i][a];
+          for (var b = 0; b < p; b++) into2[a][b] += w * x[i][a] * x[i][b];
+        }
+        return into0 + w;
+      }
+      set.members.forEach(function (i) { s0 = add(i, s0, s1, s2); });
+      var score = new Array(p).fill(0), info = [];
+      for (a = 0; a < p; a++) info.push(new Array(p).fill(0));
+      set.deaths.forEach(function (i) {
+        d0 = add(i, d0, d1, d2);
+        loglik += eta[i];
+        for (var a = 0; a < p; a++) score[a] += x[i][a];
+      });
+      var d = set.deaths.length;
+      for (var l = 0; l < d; l++) {
+        var f = l / d, a0 = s0 - f * d0, mean = [];
+        for (a = 0; a < p; a++) mean.push((s1[a] - f * d1[a]) / a0);
+        loglik -= Math.log(a0);
+        for (a = 0; a < p; a++) {
+          score[a] -= mean[a];
+          for (var b = 0; b < p; b++) info[a][b] += (s2[a][b] - f * d2[a][b]) / a0 - mean[a] * mean[b];
+        }
+      }
+      terms.push({ score: score, info: info });
+    });
+    return { loglik: loglik, terms: terms };
+  },
+  efron: function (sets, x, eta) {
+    var p = x[0].length, got = ctxSurv.efronTerms(sets, x, eta);
+    var score = new Array(p).fill(0), info = [];
+    for (var a = 0; a < p; a++) info.push(new Array(p).fill(0));
+    got.terms.forEach(function (t) {
+      for (var a = 0; a < p; a++) {
+        score[a] += t.score[a];
+        for (var b = 0; b < p; b++) info[a][b] += t.info[a][b];
+      }
+    });
+    return { loglik: got.loglik, score: score, info: info };
+  },
+  /* cox: Newton from 0 with step halving, R's convergence and its infinite-coefficient flag. */
+  cox: function (time, event, x, strata) {
+    var p = x[0].length, sets = ctxSurv.riskSets(time, event, strata);
+    function eta(beta) { return x.map(function (r) { return r.reduce(function (s, v, a) { return s + v * beta[a]; }, 0); }); }
+    var beta = new Array(p).fill(0), now = ctxSurv.efron(sets, x, eta(beta)), start = now.loglik, steps = 0;
+    for (var it = 0; it < ctxSurv.ITERATIONS; it++) {
+      var step = ctxSurv.solve(now.info, now.score);
+      var trial = beta.map(function (b, a) { return b + step[a]; });
+      var next = ctxSurv.efron(sets, x, eta(trial));
+      for (var h = 0; h < ctxSurv.HALVINGS && next.loglik < now.loglik; h++) {
+        trial = trial.map(function (t, a) { return (beta[a] + t) / 2; });
+        next = ctxSurv.efron(sets, x, eta(trial));
+      }
+      var settled = Math.abs(1 - now.loglik / next.loglik) <= ctxSurv.EPS;
+      steps++;
+      beta = trial; now = next;
+      if (settled) break;
+    }
+    var cov = ctxSurv.inverse(now.info);
+    var infinite = beta.map(function (b, q) {
+      var s = 0;
+      for (var a = 0; a < p; a++) s += now.score[a] * cov[a][q];
+      s = Math.abs(s);
+      return s > ctxSurv.EPS && s > Math.sqrt(ctxSurv.EPS) * Math.abs(b);
+    });
+    return { beta: beta, cov: cov, loglik: [start, now.loglik], iterations: steps, infinite: infinite,
+             refused: infinite.some(Boolean) };
+  },
+  /* wald: one coefficient's HR, interval and p; null where the fit is refused. */
+  wald: function (fit, column, z) {
+    if (fit.refused) return null;
+    var b = fit.beta[column], se = Math.sqrt(fit.cov[column][column]);
+    return { hr: Math.exp(b), low: Math.exp(b - z * se), high: Math.exp(b + z * se),
+             p: 2 * ctxSurv.normSf(Math.abs(b / se)), se: se };
+  },
+  /* average ranks of all times, as scipy.stats.rankdata and R's rank */
+  ranks: function (values) {
+    var order = values.map(function (v, i) { return i; }).sort(function (a, b) { return values[a] - values[b]; });
+    var out = new Array(values.length), i = 0;
+    while (i < order.length) {
+      var j = i;
+      while (j + 1 < order.length && values[order[j + 1]] === values[order[i]]) j++;
+      for (var k = i; k <= j; k++) out[order[k]] = (i + j) / 2 + 1;
+      i = j + 1;
+    }
+    return out;
+  },
+  /* cox_zph: R's cox.zph(transform = "rank"); per covariate chi-squared and p, then global. */
+  zph: function (time, event, x, beta, strata) {
+    var p = x[0].length, r = ctxSurv.ranks(time), sum = 0, count = 0;
+    event.forEach(function (e, i) { if (e === 1) { sum += r[i]; count++; } });
+    var mean = sum / count, sets = ctxSurv.riskSets(time, event, strata);
+    var eta = x.map(function (row) { return row.reduce(function (s, v, a) { return s + v * beta[a]; }, 0); });
+    var got = ctxSurv.efronTerms(sets, x, eta), size = 2 * p, u = new Array(size).fill(0), full = [];
+    for (var a = 0; a < size; a++) full.push(new Array(size).fill(0));
+    got.terms.forEach(function (term, j) {
+      var g = r[sets[j].deaths[0]] - mean;
+      for (var a = 0; a < p; a++) {
+        u[p + a] += g * term.score[a];
+        for (var b = 0; b < p; b++) {
+          full[a][b] += term.info[a][b];
+          full[a][p + b] += g * term.info[a][b];
+          full[p + a][b] += g * term.info[a][b];
+          full[p + a][p + b] += g * g * term.info[a][b];
+        }
+      }
+    });
+    function test(keep) {
+      var sub = keep.map(function (i) { return u[i]; });
+      var m = keep.map(function (i) { return keep.map(function (j) { return full[i][j]; }); });
+      var x2 = ctxSurv.solve(m, sub);
+      return sub.reduce(function (s, v, i) { return s + v * x2[i]; }, 0);
+    }
+    var base = []; for (a = 0; a < p; a++) base.push(a);
+    var tests = base.map(function (k) { return test(base.concat([p + k])); });
+    var all = []; for (a = 0; a < size; a++) all.push(a);
+    var total = test(all);
+    return { chi2: tests, p: tests.map(function (t) { return ctxSurv.chi2Sf(t, 1); }), global: total };
+  },
+  concordance: function (time, event, risk) {
+    var agree = 0, pairs = 0;
+    for (var i = 0; i < time.length; i++) {
+      if (event[i] !== 1) continue;
+      for (var j = 0; j < time.length; j++) {
+        if (i === j) continue;
+        if (time[i] < time[j] || (time[i] === time[j] && event[j] === 0)) {
+          pairs++;
+          agree += risk[i] > risk[j] ? 1 : risk[i] === risk[j] ? 0.5 : 0;
+        }
+      }
+    }
+    return agree / pairs;
+  },
+  /* mulberry32, as survival.Mulberry draws it */
+  mulberry32: function (seed) {
+    var a = seed | 0;
+    return function () {
+      a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  },
+  shuffle: function (values, draw) {
+    var out = values.slice();
+    for (var i = out.length - 1; i > 0; i--) {
+      var j = Math.floor(draw() * (i + 1)), t = out[i];
+      out[i] = out[j]; out[j] = t;
+    }
+    return out;
+  },
+  /* survival.Splits: two-group log-rank over many splits, the outcome's work done once. */
+  splits: function (time, event) {
+    var order = time.map(function (t, i) { return i; }).sort(function (a, b) { return time[a] - time[b] || a - b; });
+    var t = order.map(function (i) { return time[i]; }), e = order.map(function (i) { return event[i]; });
+    var times = [], at = [], deaths = [];
+    for (var i = 0; i < t.length; i++) {
+      if (e[i] !== 1) continue;
+      if (times.length && times[times.length - 1] === t[i]) { deaths[deaths.length - 1].push(i); continue; }
+      var start = i;
+      while (start > 0 && t[start - 1] === t[i]) start--;
+      times.push(t[i]); at.push(start); deaths.push([i]);
+    }
+    return function (high) {
+      var g = order.map(function (i) { return high[i] ? 1 : 0; }), tail = new Array(g.length + 1).fill(0);
+      for (var k = g.length - 1; k >= 0; k--) tail[k] = tail[k + 1] + g[k];
+      var excess = 0, variance = 0;
+      times.forEach(function (_, j) {
+        var risk = t.length - at[j], d = deaths[j].length, share = tail[at[j]] / risk;
+        var dh = deaths[j].reduce(function (s, i) { return s + g[i]; }, 0);
+        var ties = (risk - d) / Math.max(risk - 1, 1);
+        excess += dh - d * share;
+        variance += d * share * (1 - share) * ties;
+      });
+      return variance > 0 ? excess * excess / variance : 0;
+    };
+  },
+  /* cutpoint.scan */
+  scan: function (time, event, values, low, high, permutations, seed) {
+    var cuts = [], thresholds = [], stat = ctxSurv.splits(time, event);
+    for (var q = low; q <= high; q++) { cuts.push(q); thresholds.push(ctxSurv.percentile(values, q)); }
+    function each(shown) {
+      return thresholds.map(function (c) { return stat(shown.map(function (v) { return v >= c; })); });
+    }
+    var observed = each(values), best = Math.max.apply(null, observed);
+    var draw = ctxSurv.mulberry32(seed), beaten = 0, maxima = [];
+    for (var k = 0; k < permutations; k++) {
+      var m = Math.max.apply(null, each(ctxSurv.shuffle(values, draw)));
+      maxima.push(m);
+      if (m >= best) beaten++;
+    }
+    return { cuts: cuts, thresholds: thresholds, statistic: observed, beaten: beaten, maxima: maxima,
+             corrected: (1 + beaten) / (permutations + 1),
+             best: cuts[observed.indexOf(best)] };
+  },
+  /* score.zscores and score.score over the stored int16 values of the selected genes. */
+  score: function (rows, signs) {
+    var n = rows[0].length, total = new Float64Array(n);
+    rows.forEach(function (row, g) {
+      var mean = 0, sd = 0, i;
+      for (i = 0; i < n; i++) mean += row[i] / ctxSurv.SCALE;
+      mean /= n;
+      for (i = 0; i < n; i++) { var d = row[i] / ctxSurv.SCALE - mean; sd += d * d; }
+      sd = Math.sqrt(sd / n);
+      for (i = 0; i < n; i++) total[i] += signs[g] * (row[i] / ctxSurv.SCALE - mean) / sd;
+    });
+    var m = 0, s = 0, k;
+    for (k = 0; k < n; k++) { total[k] /= rows.length; m += total[k]; }
+    m /= n;
+    for (k = 0; k < n; k++) s += (total[k] - m) * (total[k] - m);
+    s = Math.sqrt(s / n);
+    return Array.from(total, function (v) { return (v - m) / s; });
+  },
+  /* score.split: 0 low, 1 high at the median; 0, 1, 2 by tertiles. */
+  split: function (values, rule) {
+    var cuts = rule === "median" ? [ctxSurv.percentile(values, 50)]
+      : [ctxSurv.percentile(values, 100 / 3), ctxSurv.percentile(values, 200 / 3)];
+    return values.map(function (v) { return cuts.filter(function (c) { return v >= c; }).length; });
+  }
+};
+{% endraw %}
