@@ -18,7 +18,7 @@ from scipy.spatial.distance import squareform
 from ctx.quant import tables as tab
 from ctx.report import text
 from ctx.viz.annotate import Caption
-from ctx.viz.bar import BarData
+from ctx.viz.bar import MAX_TICK_LABELS, BarData
 from ctx.viz.curve import CurveData
 from ctx.viz.heatmap import HeatmapData, Swatch, Track
 from ctx.viz.scatter import Line, ScatterData
@@ -61,7 +61,8 @@ def fate_bars(frame: pl.DataFrame, groups: Sequence[str], caption: str) -> BarDa
         frame=frame, columns=columns(frame), category="sample", value="percent",
         category_label=text.word(PAGE, "figures.fates.category"),
         value_label=text.word(PAGE, "figures.fates.value"), series="fate",
-        colours={f: FATE_COLOURS[f] for f in tab.FATES}, caption=caption, horizontal=True,
+        colours={f: FATE_COLOURS[f] for f in tab.FATES}, caption=caption,
+        horizontal=frame["sample"].n_unique() <= MAX_TICK_LABELS,
         stacked=True, hover=("reads", "processed"), names=names, filters=tuple(groups),
         labels=labels, summary_median=False,
     )  # fmt: skip
@@ -107,13 +108,20 @@ def leaf_order(rho: np.ndarray, samples: Sequence[str]) -> tuple[str, ...]:
 
 def correlation_heatmap(rho: np.ndarray, sheet: pl.DataFrame,
                         caption: str) -> HeatmapData:  # fmt: skip
-    """F3: the samples' Spearman rho, clustered, with cell type and batch strips on top."""
+    """F3: the samples' Spearman rho, clustered, with cell type and batch strips on top.
+
+    Only the lower triangle in drawn order is kept: rho is symmetric, and the full 210 by 210
+    matrix drew an 18,579,509-byte figure page against the 15 MB cap (Step-1, 2026-10-08).
+    """
     samples = sheet["sample"].to_list()
     order = leaf_order(rho, samples)
     levels, swatches = rho_levels(rho)
+    position = {s: i for i, s in enumerate(order)}
     frame = pl.DataFrame({"sample_row": [s for s in samples for _ in samples],
                           "sample_column": samples * len(samples),
-                          "rho": rho.ravel().round(4), "level": levels})  # fmt: skip
+                          "rho": rho.ravel().round(4), "level": levels}).filter(
+        pl.col("sample_row").replace_strict(position, return_dtype=pl.Int64)
+        > pl.col("sample_column").replace_strict(position, return_dtype=pl.Int64))  # fmt: skip
     tracks = []
     for column in ("cell_type", "batch"):
         values = dict(zip(samples, sheet[column].cast(pl.String), strict=True))
@@ -196,5 +204,13 @@ def isoform_bars(frame: pl.DataFrame, caption: str) -> BarData:
 
 
 def test_caption(found: Caption) -> dict[str, Any]:
-    """The placeholders a caption fills from ``ctx.viz.annotate``'s tests."""
-    return {"tests": found.text(), "n_tests": len(found.tests)}
+    """The placeholders a caption fills from ``ctx.viz.annotate``'s tests, one item per test.
+
+    Each item names its feature, n per group, BH-adjusted p and rank-biserial r; the groups'
+    names are said once, as ``reference`` and ``tested``, since a batch name runs long.
+    """
+    items = "; ".join(text.fill(PAGE, "tests_item", feature=t.feature, n_ref=t.n_reference,
+                                n_test=t.n_comparison, p=t.p_adj, r=t.r)
+                      for t in found.tests)  # fmt: skip
+    return {"tests": items, "n_tests": len(found.tests), "reference": found.groups[0],
+            "tested": found.groups[1]}  # fmt: skip

@@ -3,6 +3,8 @@
 title = "M4 Quantification: {dataset}"
 budget = "Track A: under {minutes} min and {ram_gb} GB"
 no_value = "not recorded"
+# One test in a caption: n per group, BH-adjusted p, rank-biserial r (above 0: tested higher).
+tests_item = "{feature} n {n_ref} and {n_test}, p {p:.2g}, r {r:.2f}"
 purpose = "Read what [[Salmon]] did with every sample's fragments, and how its transcript estimates become the gene counts differential expression reads."
 input = "The nf-core/rnaseq outdir of {n} samples: Salmon's logs per sample and the length-scaled gene matrix, from nf-core/rnaseq {release} with Salmon {salmon}. Transcript figures read each sample's `quant.sf` from the per-sample copy."
 method = """[[Salmon]] maps each fragment to the [[transcript|transcripts]] it fits, or to a [[decoy]] where genome sequence outside the transcriptome fits better. It splits fragments that fit several transcripts by their estimated abundance.
@@ -169,7 +171,7 @@ reading = [
     "Each bar is one sample's fragments, stacked by fate as a percentage of those Salmon processed.",
     "Decoy fragments came from genome sequence outside the transcriptome; no-hit fragments matched nothing.",
 ]
-caption = "Salmon's fragment fates for {n} samples. Mapping rate, tested batch over reference within each cell type: {tests}"
+caption = "Fragment fates of {n} samples. Mapping rate, {tested} over {reference} within each cell type, [[mann_whitney|Mann-Whitney]] U, BH over {n_tests}: {tests}."
 caption_untested = "Salmon's fragment fates for {n} samples; no cell type holds enough samples of two read-length batches to test the mapping rate."
 category = "Sample"
 value = "Fragments processed"
@@ -198,7 +200,7 @@ reading = [
     "Each line is one sample, thinned to fewer reads; its height counts genes with at least {min_reads} estimated reads.",
     "The dashed line is the depth every sample reaches; a line still rising at its right end would detect more with more reads.",
 ]
-caption = "Genes with {min_reads} or more reads as {n} samples are thinned binomially. Genes at {depth} reads, tested batch over reference within each cell type: {tests}"
+caption = "Genes with {min_reads} or more reads in {n} samples thinned binomially. At {depth} reads, {tested} over {reference} within each cell type, Mann-Whitney U, BH over {n_tests}: {tests}."
 caption_untested = "Genes with {min_reads} or more reads as {n} samples are thinned binomially to {depth} reads and below; no cell type holds enough samples of two batches to test."
 x = "Reads kept"
 y = "Genes detected"
@@ -237,7 +239,7 @@ reading = [
     "Each bar is the median share of a gene's isoforms at {tpm:g} TPM or more in half the samples, by isoforms annotated.",
     "Colour marks the gene type; hover a bar for its genes.",
 ]
-caption = "{n:,} genes with two isoforms or more; an isoform is expressed at {tpm:g} TPM in half the samples. Share expressed, lncRNA over protein-coding: {tests}"
+caption = "{n:,} genes with two isoforms or more; an isoform is expressed at {tpm:g} TPM in half the samples. Share expressed, {tested} over {reference}, Mann-Whitney U: {tests}."
 x = "Isoforms annotated"
 y = "Isoforms expressed"
 feature = "Share expressed"
