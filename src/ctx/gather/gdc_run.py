@@ -131,9 +131,13 @@ def columns(key: str) -> dict[str, tuple[str, str]]:
     return {name: (unit, meaning) for name, (unit, meaning) in text.raw(PAGE, key).items()}
 
 
-def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,
-                spec: GdcSpec, metric: registry.Metric) -> pl.DataFrame:  # fmt: skip
-    """One row per counts file: identity, barcode parts, strand, library size and the choice."""
+def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,  # noqa: PLR0913 - each a part of the sheet
+                spec: GdcSpec, metric: registry.Metric,
+                libraries: pl.DataFrame | None = None) -> pl.DataFrame:  # fmt: skip
+    """One row per counts file: identity, barcode parts, strand, library size and the choice.
+
+    ``libraries`` is ``gdc.library_selection``'s record; without one the column stays empty.
+    """
     stats = gdc.strand(counts.stats, metric)
     hit = notes.filter(pl.col("action") == "drops its files")["samples"]
     redacted = {s for joined in hit for s in joined.split(";")}
@@ -149,6 +153,10 @@ def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,
                                run_accession=gdc.run_accession(),
                                redacted=pl.col("sample").is_in(sorted(redacted)))  # fmt: skip
     frame = gdc.choose(frame, spec.protocol)
+    if libraries is None:
+        frame = frame.with_columns(library_selection=pl.lit(None, dtype=pl.String))
+    else:
+        frame = frame.join(libraries, on="sample", how="left", maintain_order="left")
     return frame.select(*columns(SHEET))
 
 
@@ -172,7 +180,9 @@ def read_all(path: Path, spec: Dataset) -> Read:
         cdr = gdc.cdr(path / spec.gdc.cdr_file, spec.gdc.cdr_type)
     counts = gdc.read_counts(folder, spec.gdc)
     notes = gdc.annotations(path / gdc.ANNOTATIONS, folder.files)
-    sheet = build_sheet(folder, counts, notes, spec.gdc, metric)
+    sheet = build_sheet(
+        folder, counts, notes, spec.gdc, metric, gdc.library_selection(path, spec.gdc)
+    )
     cases, treatments, tests = gdc.clinical(path / gdc.CASES)
     return Read(folder, counts, sheet, notes, cases, treatments, tests, cdr, md5_seconds)
 

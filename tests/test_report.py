@@ -147,7 +147,8 @@ def test_round_trip(figure):
         assert rows["p_adj"].unique().to_list() == pytest.approx([t.p_adj])
         assert rows["r"].unique().to_list() == pytest.approx([t.r])
     (embedded,) = re.findall(r'id="ctx-data-0">(.*?)</script>', html, re.S)
-    rows = pl.DataFrame(json.loads(embedded, parse_constant=_refuse))  # as a browser parses it
+    table = json.loads(embedded, parse_constant=_refuse)  # as a browser parses it
+    rows = pl.DataFrame(table["data"], schema=table["columns"], orient="row")
     # The page embeds every drawn point, with the columns it calls and names points by.
     columns = list(data.page_table().columns)
     assert rows.columns == columns

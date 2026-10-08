@@ -147,6 +147,8 @@ class Calls:
         summary: The one-line result with ``{placeholders}``.
         line_rule: How the horizontal line reads, with ``{placeholders}``.
         no_line_rule: The same when no point was tested, so no line is drawn.
+        unit: What one point is, plural, as the lines name it: genes, or mature miRNAs on M8's
+            miRNA volcano; the figure's caller states it with the rows it hands over.
         levels: The colour column's level for up, down and not called.
     """
 
@@ -166,6 +168,7 @@ class Calls:
     summary: str
     line_rule: str
     no_line_rule: str
+    unit: str
     levels: tuple[str, str, str] = ("up", "down", "ns")
 
     def page_columns(self, hover: tuple[str, ...]) -> list[str]:
@@ -185,7 +188,7 @@ class Calls:
             "pct_up": f"{100 * (2**t - 1):.1f}", "pct_down": f"{100 * (1 - 2**-t):.1f}",
             "basis": next(iter(self.adjusted.values())), "cutoff": _js_number(self.alpha),
             "y_line": "" if line is None else f"{line:.2f}", "n_up": f"{n_up:,}",
-            "n_down": f"{n_down:,}",
+            "n_down": f"{n_down:,}", "unit": self.unit,
         }  # fmt: skip
         rule = self.no_line_rule if line is None else self.line_rule
         return values | {"line_rule": rule.format_map(values)}
@@ -384,7 +387,7 @@ class ScatterData:
             "max_cutoff": c.max_cutoff, "min_cutoff": MIN_CUTOFF, "n_tested": c.n_tested,
             "p_floor": c.p_floor,
             "reading": list(c.reading), "summary": c.summary, "line_rule": c.line_rule,
-            "no_line_rule": c.no_line_rule,
+            "no_line_rule": c.no_line_rule, "unit": c.unit,
             "levels": dict(zip(("up", "down", "ns"), c.levels, strict=True)),
             "traces": {level: i for i, level in enumerate(self.colours)},
             "hover": list(self.hover), "cutoff_lines": [first_line + i for i in range(3)],

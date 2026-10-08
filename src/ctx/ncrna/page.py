@@ -232,21 +232,28 @@ def lncrna(writer: Writer, ctx: Context) -> Result:
     return Group(word("groups.lncrna"), (block, table))
 
 
-def sanity(writer: Writer, ctx: Context, metrics: dict[str, float]) -> Result | None:
-    """M8's own rules decided on this run's metrics; the verdicts as a table and a group."""
+def sanity(writer: Writer, ctx: Context, metrics: dict[str, float],
+           reasons: dict[str, str]) -> Result | None:  # fmt: skip
+    """M8's own rules decided on this run's metrics; the verdicts as a table and a group.
+
+    A condition whose metric this run could not measure is NOT MEASURED, its reason printed
+    where its value would be.
+    """
     spec = ctx.inputs.spec.ncrna
     if spec is None or not spec.sanity:
         return None
-    rows = decide(metrics, parse(spec.sanity))
+    rows = decide(metrics, parse(spec.sanity), reasons)
     frame = pl.DataFrame(rows, schema={"rule": pl.String, "text": pl.String,
                                        "condition": pl.String, "left": pl.Float64,
                                        "right": pl.Float64, "verdict": pl.String,
-                                       "source": pl.String, "rule_verdict": pl.String})  # fmt: skip
+                                       "source": pl.String, "rule_verdict": pl.String,
+                                       "reason": pl.String})  # fmt: skip
     from ctx.de.sanity import VERDICT_COLUMNS  # noqa: PLC0415 - the one data dictionary
 
     writer.table(frame.select(list(VERDICT_COLUMNS)), "sanity", VERDICT_COLUMNS)
     cells = tuple((r["rule"], r["text"], r["condition"],
-                   "" if r["left"] is None else f"{r['left']:.4g}", r["verdict"], r["source"])
+                   r["reason"] if r["left"] is None else f"{r['left']:.4g}", r["verdict"],
+                   r["source"])
                   for r in rows)  # fmt: skip
     table = ResultTable("", text.words(PAGE, "sanity.columns"), cells, numeric=(3,))
     return Group(
@@ -282,8 +289,9 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     gdc = ctx.inputs.tcga is not None
     lead = text.word("ui", "gdc.acknowledgement") if gdc else word("notes.tcga")
     results: list[Result] = [lead, *shown, tested, lncrna(writer, ctx)]
+    reasons: dict[str, str] = {}
     if gdc:
-        found, measured = mirna_page.build(writer, ctx)
+        found, measured, reasons = mirna_page.build(writer, ctx)
         results += found
         metrics |= measured
     metric_rows = [(k, float(v), detail) for k, (v, detail) in metrics.items()]
@@ -291,11 +299,8 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
                                                    "detail": pl.String}, orient="row"),
                  "metrics", METRIC_COLUMNS)  # fmt: skip
     record = {k: float(v) for k, (v, _) in metrics.items()}
-    if (verdicts := sanity(writer, ctx, record)) is not None:
+    if (verdicts := sanity(writer, ctx, record, reasons)) is not None:
         results.append(verdicts)
-        assert ctx.inputs.spec.ncrna is not None  # noqa: S101 - sanity() returned a group
-        if (absent := mirna_page.missing(record, ctx.inputs.spec.ncrna.sanity)) is not None:
-            results.append(absent)
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(PAGE)
     skeleton = text.skeleton(PAGE)
     if gdc:

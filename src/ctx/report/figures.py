@@ -10,7 +10,7 @@ module page's size where its box is narrower than that scale of a phone's plot (
 import json
 import math
 import string
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import TYPE_CHECKING, Any
 
 from markupsafe import Markup, escape
@@ -44,6 +44,18 @@ def json_for_script(value: Any) -> Markup:
 def finite(row: Mapping[str, Any]) -> dict[str, Any]:
     """A row with every NaN or infinite number as null, which is what they mean on a page."""
     return {k: None if isinstance(v, float) and not math.isfinite(v) else v for k, v in row.items()}
+
+
+def columnar(rows: Sequence[Mapping[str, Any]]) -> dict[str, list[Any]]:
+    """A figure's page rows as column names once and one list of values per row.
+
+    Rows as objects repeat every column name on every row: on M5's breast-cohort volcano the
+    names were 39 % of its 4,985,574 bytes and put the page over its cap. ``ctxRows`` in the
+    page script turns this back into one object per row, so every reader of the rows is
+    unchanged.
+    """
+    columns = list(rows[0]) if rows else []
+    return {"columns": columns, "data": [list(finite(r).values()) for r in rows]}
 
 
 def _width(scale: float, part: str, needs: list[list[float]]) -> str:
@@ -208,7 +220,7 @@ def prepare(
         "below": below,
         "lead": lead_html(following) if following else marks.html(block.text.lead),
         "caption": block.caption,
-        "rows": json_for_script([finite(r) for r in block.rows]),
+        "rows": json_for_script(columnar(block.rows)),
         "data_file": block.data_file,
         "index": index,
         "number": number,

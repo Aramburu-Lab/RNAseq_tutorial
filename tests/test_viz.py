@@ -739,7 +739,7 @@ def _live_volcano(padj: list | None = None) -> ScatterData:
         p_floor=1e-300, p_line=p_line("padj", 0.05, tested.height, passing),
         reading=("{n_up} up in {tested}; {line_rule}",),
         summary="{n_up} up, {n_down} down", line_rule="line at {y_line}",
-        no_line_rule="no line",
+        no_line_rule="no line", unit="genes",
     )  # fmt: skip
     return ScatterData(
         frame=frame, columns={c: ("none", c) for c in frame.columns}, x="lfc", y="y",

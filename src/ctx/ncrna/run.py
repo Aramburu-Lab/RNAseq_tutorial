@@ -50,6 +50,7 @@ class Tcga:
     Attributes:
         contrast: The miRNA contrast, ``[ncrna.mirna]``.
         sheet: Gather's miRNA sheet, through ``gdc.chosen``.
+        files: Gather's whole STAR sheet, every file: F5 reads both libraries of a sample.
         mature: Mature counts, ``mimat`` then one column per miRNA aliquot.
         hairpins: Hairpin counts, ``hairpin`` then one column per miRNA aliquot.
         loci: Each hairpin's span over the isoform rows.
@@ -60,6 +61,7 @@ class Tcga:
 
     contrast: Contrast
     sheet: pl.DataFrame
+    files: pl.DataFrame
     mature: pl.DataFrame
     hairpins: pl.DataFrame
     loci: pl.DataFrame
@@ -176,7 +178,7 @@ def _tcga(root: Path, dataset: str, spec: Dataset, counts: pl.DataFrame,
     gathered = root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
     paths = {what: _newest(gathered, dataset, what, problems) for what in
              ("mirna_samplesheet", "mirna_mature_counts", "mirna_hairpin_counts",
-              "mirna_hairpins", "genes")}  # fmt: skip
+              "mirna_hairpins", "genes", "samplesheet")}  # fmt: skip
     files, missing = targets.located(root, spec)
     problems += missing
     assert spec.ncrna is not None  # noqa: S101 - resolve() refuses a file without [ncrna]
@@ -191,7 +193,7 @@ def _tcga(root: Path, dataset: str, spec: Dataset, counts: pl.DataFrame,
         raise NcrnaError(f"{differ.height:,} genes' types differ between the counts and the "
                          f"annotation, e.g. {differ['gene_id'][:3].to_list()}: another "
                          "release")  # fmt: skip
-    return Tcga(spec.ncrna.mirna, gdc.chosen(read["mirna_samplesheet"]),
+    return Tcga(spec.ncrna.mirna, gdc.chosen(read["mirna_samplesheet"]), read["samplesheet"],
                 read["mirna_mature_counts"], read["mirna_hairpin_counts"],
                 read["mirna_hairpins"], counts, types, targets.read(files))  # fmt: skip
 

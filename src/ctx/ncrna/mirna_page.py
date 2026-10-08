@@ -14,7 +14,7 @@ import polars as pl
 from ctx.de.deseq import RESULT_COLUMNS
 from ctx.de.run import Writer, volcano
 from ctx.de.stats import ALPHA
-from ctx.ncrna import mirna, targets
+from ctx.ncrna import libraries_page, mirna, targets
 from ctx.ncrna.figures import columns as figure_columns
 from ctx.report import text
 from ctx.report.builder import FigureText, Group, Result, ResultTable
@@ -107,7 +107,8 @@ def fitted(writer: Writer, ctx: "Context", tcga: "Tcga") -> tuple[Result, pl.Dat
                        lead=fill("figures.mirna_volcano.lead", n_tested=tested.height,
                                  up=int((tested["call"] == "up").sum()),
                                  down=int((tested["call"] == "down").sum())))  # fmt: skip
-    block = writer.figure(volcano(result, named), "mirna_volcano", shown)
+    unit = word("figures.mirna_volcano.unit")
+    block = writer.figure(volcano(result, named, unit), "mirna_volcano", shown)
     assert ctx.inputs.spec.ncrna is not None  # noqa: S101 - resolve() refuses a file without it
     metrics: Metrics = {
         "mirna.tested": (float(tested.height), f"mature miRNAs with an adjusted p in {c.name}"),
@@ -316,8 +317,8 @@ def agreement(writer: Writer, tcga: "Tcga", both: mirna.Layers) -> tuple[str, Me
     return note, {"agreement.median_rho": (rho, detail)}
 
 
-def build(writer: Writer, ctx: "Context") -> tuple[list[Result], Metrics]:
-    """Every TCGA group, in page order, and the metrics they measured."""
+def build(writer: Writer, ctx: "Context") -> tuple[list[Result], Metrics, dict[str, str]]:
+    """Every TCGA group, in page order, the metrics they measured, and why any is absent."""
     tcga = ctx.inputs.tcga
     assert tcga is not None  # noqa: S101 - page.build calls this for a GDC dataset alone
     fit_group, fit, metrics = fitted(writer, ctx, tcga)
@@ -325,12 +326,6 @@ def build(writer: Writer, ctx: "Context") -> tuple[list[Result], Metrics]:
     shift_group, found = shift(writer, ctx, tcga, fit)
     pair_group, paired = pairs(writer, ctx, tcga, both)
     note, agreed = agreement(writer, tcga, both)
-    return [fit_group, note, shift_group, pair_group], metrics | found | paired | agreed
-
-
-def missing(record: Mapping[str, float], raw: Mapping[str, Any]) -> str | None:
-    """A note naming every metric a rule reads that this run did not measure, or None."""
-    wanted = {c.get(k) for r in raw.get("rules", []) for c in r.get("conditions", [])
-              for k in ("metric", "other")} - {None}  # fmt: skip
-    absent = sorted(m for m in wanted if m not in record or not np.isfinite(record[m]))
-    return fill("tcga.missing", metrics=", ".join(absent)) if absent else None
+    library, typed, reasons = libraries_page.group(writer, tcga, ctx.inputs.genes)
+    shown = [fit_group, note, shift_group, pair_group, *([library] if library else [])]
+    return shown, metrics | found | paired | agreed | typed, reasons

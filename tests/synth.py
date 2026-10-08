@@ -199,6 +199,7 @@ def demo_volcano(synthetic: Synthetic, width: str = "double", labels: int = 6): 
         reading=("Each dot is one of {n_tested} genes.", "Up in {tested}: {line_rule}."),
         summary="Up in {tested}: {n_up}. Down: {n_down}.",
         line_rule="above -log10 p = {y_line}", no_line_rule="none passes {basis} < {cutoff}",
+        unit="genes",
     )  # fmt: skip
     return ScatterData(
         frame=frame, columns=columns, x="lfc", y="neg_log10_p", x_label="Fold change",

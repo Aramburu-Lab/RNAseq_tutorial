@@ -124,6 +124,7 @@ n_ambiguous = ["reads", "STAR's N_ambiguous row of the protocol's column: reads 
 redacted = ["none", "True when a GDC redaction hits this file."]
 chosen = ["none", "True for the one file taken per patient and sample type; select with ctx.gather.gdc.chosen."]
 drop_reason = ["none", "ffpe, protocol, redacted or not_first, in the rule's order; empty when chosen."]
+library_selection = ["none", "GDC read groups' library selection of the aliquot, e.g. rRNA Depletion; empty without the read-group record."]
 
 [columns.genes]
 gene_id = ["none", "Ensembl gene ID without its version; unique once the _PAR_Y rows leave."]

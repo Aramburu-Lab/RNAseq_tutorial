@@ -68,6 +68,7 @@ lncrna = "lncRNA neighbours"
 mirna = "Mature miRNAs from the small-RNA libraries"
 targets = "miRNA targets"
 pairs = "miRNAs against their targets across tumours"
+libraries = "Two libraries of one tumour"
 sanity = "Sanity rules"
 
 [keys]
@@ -177,7 +178,7 @@ input = "From `ctx gather` on a GDC project: the STAR counts and the mature coun
 method = """Mature miRNA counts come from the small-RNA libraries alone, summed over every hairpin of a mature miRNA. M5's paired fit tests them, tumour against normal.
 
 A target is validated in miRTarBase's strong evidence or predicted by TargetScan, never both at once. Each class's mRNA fold changes are compared with non-targets'. A miRNA and its target are correlated across tumours, normals apart."""
-missing = "A rule whose value is empty read a metric this run could not measure: {metrics}."
+no_read_groups = "this project's GDC folder holds no read-group record, so no file's library selection is known"
 agreement = "Per sample, the STAR counts of {hairpins:,} miRNA genes rank their hairpins unlike the small-RNA library: median Spearman rho {rho:.3f} over {n:,} samples."
 
 [figures.mirna_volcano]
@@ -186,6 +187,7 @@ lead = "Of {n_tested:,} mature miRNAs tested, {up:,} rise and {down:,} fall."
 table_title = "Featured miRNAs"
 columns = ["miRNA", "MIMAT", "Mean count", "log2 FC", "BH-adjusted p", "Call"]
 untested = "not tested"
+unit = "mature miRNAs"
 
 [figures.shift]
 title = "Fold changes of {mirna} targets against non-targets"
@@ -221,6 +223,21 @@ summary = "{mirna} and {gene}, {source}: q {q_tumour} across tumours, rho {rho_n
 table_title = "Pairs by miRNA and source: share with BH q below {alpha:g} across tumours"
 columns = ["miRNA", "Source", "Pairs", "Median rho, tumours", "Called, tumours", "Median rho, normals"]
 none = "none"
+
+[figures.libraries]
+title = "One tumour, two libraries: replication-dependent histone mRNA"
+lead = "In {higher} of {n} tumours the rRNA-depleted library holds the larger histone share: median {rrna:.3f} % against {other_median:.3f} %."
+reading = [
+    "Each point is one tumour sequenced twice: its {other} library across, its rRNA-depleted library up.",
+    "Points above the dashed line hold more histone mRNA after rRNA depletion, which keeps transcripts without a poly-A tail.",
+    "This figure compares the two files of one sample, so it reads files the one-per-patient rule leaves out.",
+]
+caption = "{n} tumours with an rRNA-depleted and a {other} library, from GDC read groups. Shares of counted reads on [[replication-dependent histone mRNA|histone genes]]; Wilcoxon signed-rank: rRNA-depleted higher in {higher} of {n}, p = {p:.2g}."
+x = "Histone mRNA, {other} library"
+y = "Histone mRNA, rRNA-depleted library"
+equal = "equal shares"
+table_title = "Shares of counted reads, rRNA-depleted against {other}, the same tumours"
+columns = ["Class", "rRNA-depleted, median %", "Other, median %", "rRNA-depleted higher", "Wilcoxon p"]
 
 [preview]
 command = "ctx ncrna --dataset {dataset} --dataset-file conf/datasets/{dataset}.toml"

@@ -64,11 +64,11 @@ def test_record_is_the_hub_verdicts_and_the_metrics_union(script, root, tmp_path
     (union,) = out.glob("*_de_desynth_metrics_v1.csv")
     assert verdicts.read_bytes() == hub_csv(root).read_bytes()
     # The record tests decide again from the metrics CSV alone: S2 passes only because the
-    # M6 gsea.* rows are in it, and S3 fails because no module writes its metric.
+    # M6 gsea.* rows are in it, and S3 is NOT MEASURED because no module writes its metric.
     record = script.record_from_csv(union.read_text())
     decided = decide(record, parse(load(DE_SPEC).sanity))
     assert [(r["rule"], r["verdict"]) for r in decided] == [
-        ("S1", "PASS"), ("S2", "PASS"), ("S2", "PASS"), ("S3", "FAIL"),
+        ("S1", "PASS"), ("S2", "PASS"), ("S2", "PASS"), ("S3", "NOT MEASURED"),
     ]  # fmt: skip
     assert script.verdict_rows(verdicts.read_text()) == [
         (r["rule"], r["condition"], r["verdict"], r["rule_verdict"]) for r in decided
@@ -86,7 +86,7 @@ def test_refuses_a_second_record(script, root, tmp_path):
 
 def test_refuses_an_edited_hub_verdict(script, root, tmp_path):
     csv_path = hub_csv(root)
-    csv_path.write_text(csv_path.read_text().replace("FAIL", "PASS"))
+    csv_path.write_text(csv_path.read_text().replace("NOT MEASURED", "PASS"))
     out = tmp_path / "deliverables"
     with pytest.raises(ValueError, match="no record written"):
         script.write(root, "desynth", DE_SPEC, out)

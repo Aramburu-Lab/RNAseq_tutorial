@@ -30,6 +30,7 @@ from ctx.de.page import (
     QUESTION,
     RAW_WORDS,
     TERMS,
+    UNIT,
     VOLCANO_READING,
     VOLCANO_SUMMARY,
     box_text,
@@ -225,7 +226,7 @@ def _pca_figure(
     return data, metrics, text
 
 
-def volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
+def volcano(result: Fit, genes: pl.DataFrame, unit: str = UNIT) -> ScatterData:
     """Volcano of one contrast: the default call drawn, and every cutoff callable live.
 
     Every gene some setting of the page could call is drawn; the rest, above the loosest
@@ -278,7 +279,7 @@ def volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
         lfc="log2FoldChange", p="pvalue", adjusted=BASES, raw_words=RAW_WORDS, tested=c.tested,
         reference=c.reference, alpha=ALPHA, lfc_min=LFC_MIN, max_cutoff=max(CUTOFF_PRESETS),
         n_tested=frame.height, p_floor=P_FLOOR, p_line=line, reading=VOLCANO_READING,
-        summary=VOLCANO_SUMMARY, line_rule=LINE_RULE, no_line_rule=NO_LINE_RULE,
+        summary=VOLCANO_SUMMARY, line_rule=LINE_RULE, no_line_rule=NO_LINE_RULE, unit=unit,
     )  # fmt: skip
     return ScatterData(
         frame=frame,
@@ -856,6 +857,11 @@ def _keys(sheet: pl.DataFrame, fits: Mapping[str, Fit], featured: str) -> tuple[
     )
 
 
+def _acknowledged(spec: Dataset) -> tuple[str, ...]:
+    """The GDC acknowledgement for a page drawn from GDC data (TODO.md, M10), else nothing."""
+    return (word("ui", "gdc.acknowledgement"),) if spec.gdc is not None else ()
+
+
 def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long sequence
     settings: runtime.Settings,
     cards: tuple[ParameterCard, ...],
@@ -932,7 +938,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,
-        results=(_contrasts_table(fits), *groups),
+        results=(*_acknowledged(spec), _contrasts_table(fits), *groups),
         practice=PRACTICE,
         think=think(spec, fits),
         mistakes=MISTAKES,

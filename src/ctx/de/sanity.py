@@ -2,8 +2,9 @@
 
 The rules live in the dataset file's ``[sanity]`` table and are committed before any real
 count exists; ``decide`` is pure, so a verdict can be recomputed from the record alone. A
-metric that is missing or not a number fails a gating rule: an absent measurement is not a
-pass (D-005 records the spike rule that let one through).
+metric that is missing or not a number is NOT MEASURED, with the reason the run gives: an absent
+measurement is never a pass (D-005 records the spike rule that let one through), and it is not
+a FAIL either, which would say the data contradicted the rule.
 """
 
 import math
@@ -25,8 +26,9 @@ VERDICT_COLUMNS = {
     "condition": ("none", "The condition, as metric op right-hand side."),
     "left": ("varies", "The metric's recorded value; empty when missing."),
     "right": ("varies", "The threshold, or the multiple of another metric; empty when missing."),
-    "verdict": ("none", "PASS or FAIL; RECORDED for a rule that does not gate."),
-    "rule_verdict": ("none", "FAIL if any condition of the rule fails."),
+    "verdict": ("none", "PASS, FAIL or NOT MEASURED; RECORDED for a rule that does not gate."),
+    "rule_verdict": ("none", "FAIL if any condition fails, else NOT MEASURED if any is."),
+    "reason": ("none", "Why a condition is NOT MEASURED, as the run states it; else empty."),
     "source": ("none", "Where the rule comes from: the paper figure or the plan line."),
 }
 
@@ -118,25 +120,43 @@ def _value(record: Mapping[str, float], name: str) -> float | None:
     return None if value is None or math.isnan(value) else float(value)
 
 
-def decide(record: Mapping[str, float], rules: tuple[Rule, ...]) -> list[dict[str, Any]]:
-    """One verdict row per condition; the rule fails if any of its conditions fails.
+NOT_MEASURED = "NOT MEASURED"
+# The reason a condition gets when the run names none for its absent metric.
+NO_VALUE = "no value recorded"
+
+
+def _verdict(holds: bool | None, gate: bool) -> str:
+    """PASS, FAIL or NOT MEASURED (``holds`` None) for a gating rule; RECORDED otherwise."""
+    if not gate:
+        return "RECORDED"
+    return NOT_MEASURED if holds is None else ("PASS" if holds else "FAIL")
+
+
+def decide(record: Mapping[str, float], rules: tuple[Rule, ...],
+           reasons: Mapping[str, str] | None = None) -> list[dict[str, Any]]:  # fmt: skip
+    """One verdict row per condition, and the rule's: FAIL, else NOT MEASURED, else PASS.
+
+    A rule fails if any condition fails, else is NOT MEASURED if any condition's metric is
+    absent, else passes.
 
     Args:
         record: Metric name to value, from the M5 and M6 metrics tables.
         rules: The pre-registered rules.
+        reasons: Why a metric is absent, by metric name, as the run states it.
 
     Returns:
         Rows with the columns of ``VERDICT_COLUMNS``.
     """
-    rows = []
+    rows, reasons = [], reasons or {}
     for rule in rules:
         found = []
         for c in rule.conditions:
             left = _value(record, c.metric)
             other = _value(record, c.other) if c.other else None
             right = c.value if c.other is None else (None if other is None else c.times * other)
-            holds = left is not None and right is not None and OPS[c.op](left, right)
-            verdict = ("PASS" if holds else "FAIL") if rule.gate else "RECORDED"
+            absent = [m for m, v in ((c.metric, left), (c.other, right)) if m and v is None]
+            holds = None if absent else OPS[c.op](left, right)  # type: ignore[arg-type]
+            why = "; ".join(dict.fromkeys(reasons.get(m, NO_VALUE) for m in absent))
             found.append(
                 {
                     "rule": rule.id,
@@ -144,11 +164,12 @@ def decide(record: Mapping[str, float], rules: tuple[Rule, ...]) -> list[dict[st
                     "condition": c.text(),
                     "left": left,
                     "right": right,
-                    "verdict": verdict,
+                    "verdict": _verdict(holds, rule.gate),
                     "source": rule.source,
+                    "reason": why,
                 }
             )
-        failed = any(r["verdict"] == "FAIL" for r in found)
-        overall = ("FAIL" if failed else "PASS") if rule.gate else "RECORDED"
+        verdicts = {r["verdict"] for r in found}
+        overall = next((v for v in ("RECORDED", "FAIL", NOT_MEASURED) if v in verdicts), "PASS")
         rows += [{**r, "rule_verdict": overall} for r in found]
     return rows

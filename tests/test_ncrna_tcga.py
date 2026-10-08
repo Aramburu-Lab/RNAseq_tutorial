@@ -165,18 +165,19 @@ def table(out: Path, what: str) -> pl.DataFrame:
 def test_the_tcga_page_end_to_end(built):
     """The page, its miRNA, target and pair tables and the rules. Catches: the planted miRNA
     not called up, the planted target's anticorrelation lost, a page without the GDC
-    acknowledgement, a rule on an unmeasured metric shown with no note, and a page over the
-    15 MB cap."""
+    acknowledgement, a rule on an unmeasured metric called FAIL or shown without its reason, the
+    miRNA volcano's live line naming genes, and a page over the 15 MB cap."""
     out, written = built
     page = Path(written[0])
     assert page.stat().st_size < 15 * 10**6
     html = page.read_text()
     assert "distributed by the NCI Genomic Data Commons" in html
-    assert "could not measure: library.histone_pairs" in html
+    assert "holds no read-group record" in html
     fit = table(out, "mirna_results").filter(pl.col("gene_name") == "hsa-miR-1-3p")
     assert fit["call"][0] == "up"
     verdicts = dict(table(out, "sanity").select("rule", "rule_verdict").unique().rows())
-    assert verdicts == {"up": "PASS", "pair": "PASS", "absent": "PASS", "unmeasured": "FAIL"}
+    assert verdicts == {"up": "PASS", "pair": "PASS", "absent": "PASS",
+                        "unmeasured": "NOT MEASURED"}  # fmt: skip
     pairs = table(out, "mirna_target_pairs")
     assert set(pairs["source"]) <= {targets.VALIDATED, targets.PREDICTED}
     planted = pairs.filter(pl.col("gene_name") == "G00010").row(0, named=True)
@@ -185,8 +186,11 @@ def test_the_tcga_page_end_to_end(built):
     assert shifts.height == 2 * (len(targets.PRESETS) + 1)
     blocks = re.findall(r'<script type="application/json" id="ctx-controls-\d+">(.*?)</script>',
                         html, flags=re.S)  # fmt: skip
-    kinds = [c["kind"] for c in map(json.loads, blocks)]
-    assert kinds.count("pairs") == 2
+    controls = list(map(json.loads, blocks))
+    assert [c["kind"] for c in controls].count("pairs") == 2
+    (calls,) = [c for c in controls if c["kind"] == "calls"]
+    assert calls["unit"] == "mature miRNAs" and "mature miRNAs" in calls["default_summary"]
+    assert "genes" not in calls["default_summary"]
 
 
 def test_the_contrast_takes_each_patients_chosen_tumour_alone(built):
@@ -218,3 +222,75 @@ def test_m5_takes_a_gdc_sheet_through_chosen(root, tmp_path):
     assert done.returncode == 0, done.stderr[-3000:]
     row = contrasts.row(0, named=True)
     assert (row["n_reference"], row["n_tested"], row["dropped_runs"]) == (12, 12, "")
+    # Mutation caught: the M5 page of GDC data without the GDC acknowledgement.
+    (page,) = out.glob("*_de_fakegdc_overview_v1.html")
+    assert "distributed by the NCI Genomic Data Commons" in page.read_text()
+
+
+def test_f5_compares_both_libraries_of_a_tumour_and_leaves_out_ffpe():
+    """Two tumours sequenced both ways, one of them with an FFPE third library. Catches: F5
+    reading only the chosen files (no pair is left), an FFPE library compared, and the histone
+    share taken over a gene the HGNC cluster names do not cover (H2AZ1 is replication-
+    independent)."""
+    from ctx.ncrna import libraries  # noqa: PLC0415
+
+    files = pl.DataFrame({
+        "sample": ["a1", "a2", "b1", "b2", "b3"],
+        "sample_id": ["A", "A", "B", "B", "B"],
+        "condition": ["tumour"] * 5,
+        "drop_reason": ["", "not_first", "", "not_first", "ffpe"],
+        "library_selection": ["Poly-T", "rRNA Depletion", "Poly-T", "rRNA Depletion",
+                              "rRNA Depletion"],
+    })  # fmt: skip
+    genes = pl.DataFrame({"gene_id": ["g1", "g2", "g3"], "gene_name": ["H2BC1", "H2AZ1", "ACTB"],
+                          "biotype": ["protein_coding"] * 3})  # fmt: skip
+    counts = pl.DataFrame({"gene_id": ["g1", "g2", "g3"], "a1": [1, 50, 99], "a2": [10, 0, 90],
+                           "b1": [2, 0, 98], "b2": [20, 0, 80], "b3": [0, 0, 100]})  # fmt: skip
+    paired = libraries.pairs(files, counts, genes)
+    assert sorted(paired["sample"]) == ["a1", "a2", "b1", "b2"]
+    found = libraries.compare(paired)["histone"]
+    assert (found["pairs"], found["higher"]) == (2, 2)
+    assert found["other"] == pytest.approx(np.median([1 / 150 * 100, 2.0]))
+
+
+def test_read_groups_give_each_aliquot_its_library_selection(tmp_path):
+    """Catches: a read-group record of another project or with no log row read, and an aliquot
+    with two selections kept as one of them."""
+    from gdc_fixture import PROJECT, RELEASE  # noqa: PLC0415
+
+    from ctx.gather import gdc  # noqa: PLC0415
+
+    folder = tmp_path / "gdc"
+    folder.mkdir()
+
+    def hit(aliquot: str, *selections: str) -> dict:
+        """One aligned-reads file hit with its read groups."""
+        tree = {
+            "samples": [{"portions": [{"analytes": [{"aliquots": [{"submitter_id": aliquot}]}]}]}]
+        }
+        groups = [{"library_selection": s} for s in selections]
+        return {"cases": [tree], "analysis": {"metadata": {"read_groups": groups}}}
+
+    hits = [
+        hit("X-1", "Poly-T"),
+        hit("X-2", "rRNA Depletion"),
+        hit("X-3", "Poly-T", "rRNA Depletion"),
+    ]
+    (folder / gdc.READ_GROUPS).write_text(json.dumps({"data": {"hits": hits}}))
+    query = {"filters": {"op": "in", "content": {"field": "cases.project.project_id",
+                                                 "value": [PROJECT]}}}  # fmt: skip
+    (folder / f"{gdc.READ_GROUPS}{gdc.QUERY}").write_text(json.dumps(query))
+    head = "retrieved_utc\tgdc_release\tfile\tsource\n"
+    (folder / gdc.RETRIEVAL).write_text(f"{head}2099\t{RELEASE}\t{gdc.READ_GROUPS}\tmade up\n")
+    from gdc_fixture import spec_file  # noqa: PLC0415
+
+    gdc_spec = load(spec_file(tmp_path / "x.toml")).gdc
+    assert gdc_spec is not None
+    found = gdc.library_selection(folder, gdc_spec)
+    assert found is not None
+    assert dict(found.rows()) == {"X-1": "Poly-T", "X-2": "rRNA Depletion",
+                                  "X-3": "Poly-T;rRNA Depletion"}  # fmt: skip
+    (folder / gdc.RETRIEVAL).write_text("retrieved_utc\tgdc_release\tfile\tsource\n")
+    with pytest.raises(gdc.GdcError, match="no row for"):
+        gdc.library_selection(folder, gdc_spec)
+    assert gdc.library_selection(tmp_path, gdc_spec) is None

@@ -32,6 +32,8 @@ RETRIEVAL = "_retrieval_log.tsv"
 CASES = "gdc_cases_clinical.json"
 ANNOTATIONS = "gdc_annotations.json"
 QUERY = ".query.json"
+# GDC's read groups of the project's RNA-Seq aligned reads: each library's selection (M8 F5).
+READ_GROUPS = "gdc_read_groups.json"
 # Our name for each GDC metadata column. ``sample`` is the aliquot: one counts file each.
 FIELDS = {
     "file_id": "file_id", "file_name": "file_name", "md5sum": "md5sum", "file_size": "file_size",
@@ -408,6 +410,50 @@ def choose(sheet: pl.DataFrame, protocol: str | None) -> pl.DataFrame:
         .then("drop_reason")
         .otherwise(pl.lit("not_first")),
     )
+
+
+def _aliquots(hit: Mapping[str, Any]) -> Iterator[str]:
+    """Every aliquot submitter ID under a file hit's cases, samples, portions and analytes."""
+    for case in hit.get("cases") or []:
+        for sample in case.get("samples") or []:
+            for portion in sample.get("portions") or []:
+                for analyte in portion.get("analytes") or []:
+                    yield from (a["submitter_id"] for a in analyte.get("aliquots") or [])
+
+
+def library_selection(path: Path, spec: GdcSpec) -> pl.DataFrame | None:
+    """Each aliquot's library selection, from GDC's read groups of its aligned reads.
+
+    The record is one files-endpoint query of the project's RNA-Seq aligned reads, saved as
+    ``READ_GROUPS`` with its query and a retrieval row, as the fetch saves every record. A
+    folder without it gives None: the library type is then not measured, never guessed. An
+    aliquot whose read groups name two selections keeps both, joined by ``;``.
+
+    Returns:
+        sample (the aliquot) and library_selection, one row per aliquot, or None.
+
+    Raises:
+        GdcError: If the record is of another project or release, or lacks its log row.
+    """
+    if not (path / READ_GROUPS).is_file():
+        return None
+    problems = []
+    if _queried(path, READ_GROUPS, "project_id") != {spec.project}:
+        problems.append(f"{READ_GROUPS}{QUERY}: project_id is not {spec.project!r} alone")
+    logged = {r["file"]: r["gdc_release"] for r in _table(path / RETRIEVAL)}
+    if logged.get(READ_GROUPS) != spec.release:
+        problems.append(f"{RETRIEVAL}: no row for {READ_GROUPS} from {spec.release!r}")
+    if problems:
+        raise GdcError(f"{path}:\n  " + "\n  ".join(problems))
+    found: dict[str, set[str]] = {}
+    for hit in json.loads(_text(path / READ_GROUPS))["data"]["hits"]:
+        groups = (hit.get("analysis") or {}).get("metadata", {}).get("read_groups") or []
+        chosen = {str(g["library_selection"]) for g in groups if g.get("library_selection")}
+        for aliquot in _aliquots(hit):
+            found.setdefault(aliquot, set()).update(chosen)
+    rows = [(a, ";".join(sorted(s))) for a, s in sorted(found.items()) if s]
+    return pl.DataFrame(rows, schema={"sample": pl.String, "library_selection": pl.String},
+                        orient="row")  # fmt: skip
 
 
 def run_accession() -> pl.Expr:

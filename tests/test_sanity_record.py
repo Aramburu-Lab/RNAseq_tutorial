@@ -48,10 +48,21 @@ def test_times_other_metric():
 
 
 @pytest.mark.parametrize("record", [{}, {"m": math.nan}, {"m": 1.0}])
-def test_missing_metric_fails(record):
-    # An absent or NaN measurement is not a pass, on either side of the comparison.
+def test_missing_metric_is_not_measured_never_a_pass(record):
+    # An absent or NaN measurement is not a pass, on either side of the comparison, and not a
+    # FAIL either: NOT MEASURED, with the reason the run gives or "no value recorded".
+    # Mutation caught: an absent side compared as if measured (PASS or FAIL), or the run's
+    # reason dropped.
     condition = {"metric": "m", "op": ">", "other": "n"}
-    assert verdict(record, condition) == "FAIL"
+    assert verdict(record, condition) == "NOT MEASURED"
+    rows = decide(record, rules(condition), {"n": "its input is not on disk"})
+    assert rows[0]["reason"].endswith("its input is not on disk")
+
+
+def test_a_failing_condition_outranks_an_unmeasured_one():
+    both = ({"metric": "a", "op": ">", "value": 0}, {"metric": "b", "op": "<", "value": 0.05})
+    assert verdict({"a": -1.0}, *both) == "FAIL"
+    assert verdict({"a": 1.0}, *both) == "NOT MEASURED"
 
 
 def test_all_conditions_must_hold():
@@ -198,4 +209,4 @@ def test_record_complete():
     assert {r.id for r in parse(load(SPEC).sanity)} == {r["rule"] for r in recorded}
     for r in recorded:
         assert r["condition"] and r["verdict"] and r["source"], r
-        assert r["left"] or r["verdict"] in {"FAIL", "RECORDED"}, r
+        assert r["left"] or r["verdict"] in {"NOT MEASURED", "RECORDED"}, r
