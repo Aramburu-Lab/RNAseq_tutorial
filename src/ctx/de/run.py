@@ -706,11 +706,18 @@ class Writer:
         """The stem of one output of this run."""
         return stem(self.out.name.split("_", 1)[1], f"{self.dataset}_{what}", 1, day=self.day)
 
-    def table(self, frame: pl.DataFrame, what: str, columns: Mapping[str, tuple[str, str]]) -> None:
-        """Write one table with its README."""
+    def table(
+        self,
+        frame: pl.DataFrame,
+        what: str,
+        columns: Mapping[str, tuple[str, str]],
+        csv_decimals: int | None = None,
+    ) -> None:
+        """Write one table with its README; ``csv_decimals`` as ``write_table`` takes it."""
         self.files += write_table(
-            frame, self.out, self.stem(what), columns=columns, data_releases=self.releases
-        )
+            frame, self.out, self.stem(what), columns=columns, data_releases=self.releases,
+            csv_decimals=csv_decimals,
+        )  # fmt: skip
 
     def figure(self, data: Figure, what: str, text: FigureText) -> FigureBlock:
         """Write one figure, its page linked back to the module page; return its page block."""

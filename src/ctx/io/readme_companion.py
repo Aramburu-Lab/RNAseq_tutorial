@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import polars as pl
+import polars.selectors as cs
 
 from ctx import __version__
 from ctx.io.naming import check
@@ -20,7 +21,7 @@ from ctx.runtime import source, versions
 FORMATS = ("parquet", "csv")
 
 
-def write_table(
+def write_table(  # noqa: PLR0913 - keyword-only after the third, each a separate choice
     frame: pl.DataFrame,
     directory: Path,
     table_stem: str,
@@ -28,6 +29,7 @@ def write_table(
     columns: Mapping[str, tuple[str, str]],
     data_releases: Mapping[str, str],
     formats: Sequence[str] = FORMATS,
+    csv_decimals: int | None = None,
 ) -> list[Path]:
     """Validate, write the data files, hash them, then write the README last.
 
@@ -40,6 +42,9 @@ def write_table(
         data_releases: External resource to release identifier (GENCODE, GDC, ...); pass an
             empty mapping, deliberately, when the table uses none.
         formats: Any of ``"parquet"`` and ``"csv"``, written in this order.
+        csv_decimals: The decimals the source carries; the CSV rounds every float column to
+            them and writes a whole number without ``.0``, the parquet keeps full precision.
+            Digits past the source's precision are arithmetic, not measurement.
 
     Returns:
         The data files, then the README.
@@ -51,13 +56,23 @@ def write_table(
         path = directory / f"{table_stem}.{fmt}"
         if fmt == "parquet":
             frame.write_parquet(path)
-        else:
+        elif csv_decimals is None:
             frame.write_csv(path)
+        else:
+            frame.with_columns(_shown(csv_decimals)).write_csv(path)
         written.append(path)
     digests = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in written}
     readme = directory / f"{table_stem}_README.md"
-    readme.write_text(_readme(frame, table_stem, columns, data_releases, digests))
+    readme.write_text(_readme(frame, table_stem, columns, data_releases, digests, csv_decimals))
     return [*written, readme]
+
+
+def _shown(decimals: int) -> pl.Expr:
+    """Every float column as the CSV writes it: rounded, and ``0`` rather than ``0.0``.
+
+    A count matrix is mostly zeros, so the ``.0`` alone is a third of its bytes.
+    """
+    return cs.float().round(decimals).cast(pl.String).str.strip_suffix(".0")
 
 
 def validate(
@@ -105,6 +120,7 @@ def _readme(
     columns: Mapping[str, tuple[str, str]],
     data_releases: Mapping[str, str],
     digests: Mapping[Path, str],
+    csv_decimals: int | None = None,
 ) -> str:
     """Render the companion README."""
     created = datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
@@ -123,6 +139,14 @@ def _readme(
         f"| Rows | {frame.height} |",
         f"| Columns | {frame.width} |",
         f"| Estimated in-memory size (bytes) | {frame.estimated_size()} |",
+        *(
+            [
+                f"| CSV floats | rounded to {csv_decimals} decimals, whole numbers without .0; "
+                "the parquet keeps every digit |"
+            ]
+            if csv_decimals is not None
+            else []
+        ),
         "",
         "## Files",
         "",
