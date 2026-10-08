@@ -2,7 +2,8 @@
 
 The score's order (GS plan, M10), mirrored by ``ctxSurv`` in the page:
 
-1. log2(CPM + 1) from the protocol's counts; library size is gather's, the ``N_`` rows left out.
+1. log2(CPM + 1) from the protocol's counts, by ``ctx.de.filters.log2cpm``; library size is
+   gather's, the ``N_`` rows left out.
 2. Stored as int16 of the value times ``SCALE``: the build and the page read the same values.
 3. Genes kept with median log2 CPM of at least ``--min-log2cpm`` and a non-zero variance.
 4. z per gene over the analysed patients, from the stored values.
@@ -21,12 +22,6 @@ SCALE = 1000
 INT16 = np.iinfo(np.int16)
 SPLITS = ("median", "tertiles")
 TERTILES = (100 / 3, 200 / 3)
-
-
-def log2cpm(counts: np.ndarray, library: np.ndarray) -> np.ndarray:
-    """log2(CPM + 1) of a genes-by-patients count matrix, each patient over its library size."""
-    return np.asarray(np.log2(np.asarray(counts, float) / np.asarray(library, float)[None, :]
-                              * 1e6 + 1))  # fmt: skip
 
 
 def stored(values: np.ndarray) -> np.ndarray:

@@ -15,6 +15,22 @@ MIN_PROP = 0.7
 TOLERANCE = 1e-14
 
 
+def cpm(counts: np.ndarray, library: np.ndarray | None = None) -> np.ndarray:
+    """Counts per million, genes by samples, each sample over its library size.
+
+    The one definition, shared by the M5 filter, M7 and M10. Library sizes default to the
+    column sums; M10 passes gather's, which leave out the ``N_`` rows the matrix lacks anyway.
+    """
+    counts = np.asarray(counts, dtype=np.float64)
+    size = counts.sum(axis=0) if library is None else np.asarray(library, dtype=np.float64)
+    return np.asarray(counts / size[None, :] * 1e6)
+
+
+def log2cpm(counts: np.ndarray, library: np.ndarray | None = None) -> np.ndarray:
+    """log2(CPM + 1): the display and correlation scale of RNA in M7 and M10."""
+    return np.asarray(np.log2(cpm(counts, library) + 1))
+
+
 def min_sample_size(group_sizes: list[int]) -> float:
     """How many samples must pass the CPM cutoff: the smallest group, eased above ``LARGE_N``."""
     smallest = float(min(n for n in group_sizes if n > 0))
@@ -38,7 +54,6 @@ def expressed(counts: np.ndarray, group_sizes: list[int], min_count: int = MIN_C
     """
     library = counts.sum(axis=0)
     cutoff = min_count / np.median(library) * 1e6
-    cpm = counts / library * 1e6
-    enough = (cpm >= cutoff).sum(axis=1) >= min_sample_size(group_sizes) - TOLERANCE
+    enough = (cpm(counts) >= cutoff).sum(axis=1) >= min_sample_size(group_sizes) - TOLERANCE
     total = counts.sum(axis=1) >= MIN_TOTAL_COUNT - TOLERANCE
     return np.asarray(enough & total, dtype=bool)
