@@ -66,6 +66,35 @@ def test_gene_counts_follow_the_option(built):
     np.testing.assert_allclose(ours.select(SE).to_numpy(), r.select(SE).to_numpy(), rtol=1e-12)
 
 
+def test_fold_change_thinning_keeps_the_far_genes(tmp_path):
+    """The genes F6's lead counts, two-fold or more apart, are always drawn on the page.
+
+    Gene g0 keeps its reads in the tested group while its length falls to a quarter, as an
+    isoform switch does: its estimated fold change is 0 and its length-scaled one about 2.
+    Mutation: ``keep`` set false for every gene: g0 would be thinned with the rest.
+    """
+    from datetime import date  # noqa: PLC0415
+
+    from ctx.de.run import Writer  # noqa: PLC0415
+    from ctx.quant import blocks  # noqa: PLC0415
+
+    genes, samples = [f"g{i:02d}" for i in range(50)], ("r1", "r2", "r3", "t1", "t2", "t3")
+    counts = np.full((50, 6), 100.0)
+    lengths = np.full((50, 6), 1000.0)
+    lengths[0, 3:] = 250.0
+    rate = counts / lengths
+    port = tximport.GeneTables(tuple(genes), samples, counts, 1e6 * rate / rate.sum(axis=0),
+                               lengths, np.ones(50, dtype=bool))  # fmt: skip
+    used = pl.DataFrame({"sample": list(samples), "group": ["reference"] * 3 + ["tested"] * 3})
+    annotation = pl.DataFrame({"gene_id": genes, "gene_name": genes,
+                               "gene_type": ["protein_coding"] * 50})  # fmt: skip
+    writer = Writer(tmp_path / "04_quant", "planted", date(2026, 10, 8), {})
+    _, frame = blocks.estimates_figure(writer, port, used, annotation, "planted")
+    far = frame.filter(pl.col("difference").abs() >= 1)
+    assert far["gene_id"].to_list() == ["g00"]
+    assert frame.filter("keep")["gene_id"].to_list() == ["g00"]
+
+
 def test_planted_truth(built):
     """Salmon's library calls and gene totals are what chr22_se planted.
 

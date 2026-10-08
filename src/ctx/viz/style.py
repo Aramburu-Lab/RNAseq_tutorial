@@ -93,8 +93,11 @@ MARKERS = (
 # pitch that holds a 9 pt label (as BAR_ROW_MM); room for axes, tracks, legend and caption;
 # and the most rows or columns that are labelled, above which hover and the CSV name them.
 HEAT_ALPHAS = (0.33, 0.67, 1.0)
+# max_page_cells: the most cells a thinned heatmap's page draws (HeatmapData.thin). Step-1's
+# sample correlation carried 370 bytes a cell on the page (8,123,574 in its two scripts for
+# 21,945 cells), so 6,000 cells are about 2.2 MB.
 HEAT = {"row_mm": 4.5, "margin_mm": 70.0, "label_rows": 60, "label_columns": 40,
-        "max_rows_drawn": 60}  # fmt: skip
+        "max_rows_drawn": 60, "max_page_cells": 6_000}  # fmt: skip
 # A flow diagram: node width and the share of the width kept for the last stage's labels,
 # both as fractions of the axes; the gap between nodes is one label's pitch.
 # label_share: the most of a flow's height its labels and gaps may take; the rest is bars.

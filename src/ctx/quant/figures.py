@@ -1,5 +1,7 @@
 """M4's figure contracts, built from ``ctx.quant.tables``' frames; every word from content.
 
+Above the point budget the page thins F4 and F6 by ``ScatterData.keep`` and F3 by
+``HeatmapData.thin``, units whole (D-053); the files and CSVs keep every point and cell.
 F1 Salmon's fragment fates per sample, F2 genes detected against depth, F3 Spearman between
 samples, F4 reads against TPM, F6 the featured contrast's fold change from estimated and from
 length-scaled counts, F7 isoforms expressed against annotated. F1 and F7 filter by sheet
@@ -8,6 +10,7 @@ scatter takes none (M4.14 in the M4 plan). F5 and F8 need runs that do not exist
 """
 
 from collections.abc import Mapping, Sequence
+from sys import float_info
 from typing import Any
 
 import numpy as np
@@ -44,7 +47,7 @@ UNITS = {
     "decoys": "sequences", "length_scaled_sum": "reads", "relative_difference": "fraction",
     "n_reference": "samples", "n_tested": "samples", "u": "dimensionless", "p": "probability",
     "p_bh": "probability", "r": "dimensionless", "annotated": "transcripts",
-    "expressed": "transcripts",
+    "expressed": "transcripts", "keep": "none",
 }  # fmt: skip
 
 
@@ -132,7 +135,7 @@ def correlation_heatmap(rho: np.ndarray, sheet: pl.DataFrame,
     return HeatmapData(
         frame=frame, columns=columns(frame), row="sample_row", column="sample_column",
         value="rho", level="level", row_label=axis, column_label=axis, swatches=swatches,
-        caption=caption, row_order=order, column_order=order, tracks=tuple(tracks),
+        caption=caption, row_order=order, column_order=order, tracks=tuple(tracks), thin=True,
     )  # fmt: skip
 
 
@@ -156,7 +159,8 @@ def units_scatter(frame: pl.DataFrame, names: Mapping[str, str], caption: str) -
         frame=frame, columns=columns(frame), x="tpm", y="counts",
         x_label=text.word(PAGE, "figures.units.x"), y_label=text.word(PAGE, "figures.units.y"),
         colour="length_class", colours=colours, hover=("gene_name", "length"), log_x=True,
-        log_y=True, caption=caption,
+        log_y=True, caption=caption, keep="keep",
+        thinned=text.word(PAGE, "figures.units.thinned"),
     )  # fmt: skip
 
 
@@ -186,7 +190,7 @@ def estimates_scatter(frame: pl.DataFrame, caption: str) -> ScatterData:
         colours=type_colours(), hover=("gene_name", "difference"),
         lines=(Line(text.word(PAGE, "figures.estimates.identity"), (low, high), (low, high),
                     dash=True),),
-        caption=caption,
+        caption=caption, keep="keep", thinned=text.word(PAGE, "figures.estimates.thinned"),
     )  # fmt: skip
 
 
@@ -203,6 +207,11 @@ def isoform_bars(frame: pl.DataFrame, caption: str) -> BarData:
     )  # fmt: skip
 
 
+def p_text(p: float) -> str:
+    """A p-value to two significant digits; one that underflows to zero, as a bound."""
+    return f"{p:.2g}" if p > 0 else text.fill(PAGE, "p_below", smallest=float_info.min)
+
+
 def test_caption(found: Caption) -> dict[str, Any]:
     """The placeholders a caption fills from ``ctx.viz.annotate``'s tests, one item per test.
 
@@ -210,7 +219,7 @@ def test_caption(found: Caption) -> dict[str, Any]:
     names are said once, as ``reference`` and ``tested``, since a batch name runs long.
     """
     items = "; ".join(text.fill(PAGE, "tests_item", feature=t.feature, n_ref=t.n_reference,
-                                n_test=t.n_comparison, p=t.p_adj, r=t.r)
+                                n_test=t.n_comparison, p=p_text(t.p_adj), r=t.r)
                       for t in found.tests)  # fmt: skip
     return {"tests": items, "n_tests": len(found.tests), "reference": found.groups[0],
             "tested": found.groups[1]}  # fmt: skip
