@@ -27,6 +27,16 @@ it were reversed.
 
 ---
 
+## D-055 — One GDC reader; one tumour per case by FFPE, protocol, redaction, first aliquot; survival in numpy with R as oracle
+
+**Date:** 2026-10-08 · **Status:** decided (M10, merged; plan `docs/plans/2026-10-07_m10_real_data_plan_proposal.md`, recommended answers)
+
+**Decision.** `ctx.gather.gdc` is the only code that opens a GDC folder, and `chosen()` the one door to its samples: FFPE out, then other library protocols, then redactions, then the first aliquot. Sex is GDC's `sex_at_birth`, Data Release 46.0 having no `gender`; the CDR's days become months by 365.25/12. Survival is numpy, checked against R survival 3.7.0 and statsmodels 0.15.0; lifelines waits for notebook 10, so CONVENTIONS' lifelines boundary is to be amended. The CDR's columns are embedded verbatim under its CC BY-NC-ND 4.0 notice. The live panel carries 2,332 genes in 5.6 MB; 6.5 MB took the page to 15,593,683 B. Excel files are read with openpyxl 3.1.5, shared with M7. The Cox strata option is `--cox-strata`, since `--strata` is QC's. Four figures carry no control under D-051: the ER curves (the endpoint is a tab), the ER box (one comparison), the power map (computed) and the confounding map (descriptive).
+
+**Evidence.** On TCGA-BRCA: 1,231 files md5-checked; 1,095 tumour cases, 1,093 kept, 113 of 113 pairs; patients 1,095, 1,093, 1,092, 1,088; Liu Table 3's counts equal. `cox.zph` weights each event time's score by g of that time: weighting each patient by their own time gave chi-square 2.52 against R's 0.12. 63 planted mutations caught.
+
+---
+
 ## D-054 — M4 quantifies by ctx's own tximport port and reads the cluster's Salmon files from their own folder
 
 **Date:** 2026-10-08 · **Status:** decided (M4 part 1, d2286ae; plan `docs/plans/2026-10-07_m4_real_data_plan_proposal.md`, recommended answers)
