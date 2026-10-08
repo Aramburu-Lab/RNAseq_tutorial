@@ -6,7 +6,6 @@ genes, and it reports what it dropped: rows with no symbol, groups naming severa
 peptides), and every extra row of a gene measured twice (isoforms).
 """
 
-import io
 import re
 import tarfile
 from dataclasses import dataclass
@@ -153,11 +152,6 @@ def read_gct(archive: Path, member: str) -> tuple[Layer, pl.DataFrame]:
     ).with_columns(pl.Series("sample", samples))
     genes = tuple(cells[i][symbol_at].strip() for i in kept)
     return Layer(genes, tuple(samples), values[kept], report), annotation
-
-
-def read_annotation(archive: Path, member: str) -> pl.DataFrame:
-    """The freeze's sample annotation, every column as text."""
-    return pl.read_csv(io.BytesIO(_member(archive, member)), infer_schema=False)
 
 
 def read_copies(path: Path, tested: str, reference: str) -> tuple[Layer, int, int]:

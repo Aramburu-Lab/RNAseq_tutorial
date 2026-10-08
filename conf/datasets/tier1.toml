@@ -386,6 +386,7 @@ conditions = [
 # ndn_vs_mono_steady against Rieckmann's copy numbers, steady-state neutrophils over classical
 # monocytes, 4 donors each. Monocyte is matched to MO.classical (plan decision 5).
 [proteo]
+label = "Rieckmann et al. 2017, protein copy numbers"
 design = "cross_dataset"
 protein = "rieckmann_table6"
 contrast = "ndn_vs_mono_steady"

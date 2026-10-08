@@ -409,6 +409,34 @@ def clinical(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI opti
 
 @app.command()
 @profiled
+def proteo(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    method: Annotated[str, typer.Option(help=HELP["--method"])] = "spearman",
+    min_quantified: Annotated[float, typer.Option(help=HELP["--min-quantified"])] = 0.7,
+    lfc_min: Annotated[float, typer.Option(help=HELP["--lfc-min"])] = 1.0,
+    gene_class: Annotated[str, typer.Option(help=HELP["--gene-class"])] = "all",
+) -> None:
+    """Compare RNA with protein per gene, or as fold changes across studies (M7)."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.proteo import ProteoError  # noqa: PLC0415 - same reason
+    from ctx.proteo import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = runtime.retypable(sys.argv[1:])
+    options = module.Options(dataset_file, method, min_quantified, lfc_min, gene_class)
+    try:
+        written = module.run(ctx.obj["settings"], cards, command, dataset, options)
+    except (DatasetError, ProteoError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
 def report(
     ctx: typer.Context,
     dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],

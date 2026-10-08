@@ -61,13 +61,13 @@ ids = ["PDC000120", "phs000892"]
 patterns = ['\b\d{2}BR\d{3}\b', '\bX\d{2}BR\d{3}\b']
 
 # What M7 reads from the freeze: the protein ratios (log2 to the pooled reference, NAs left in
-# place), the annotation with plex, PAM50 and ERBB2 amplification. Member names as the tarball
-# lists them; the freeze writes case 11BR047 as X11BR047.
+# place) and their GCT column annotations: plex, PAM50, ERBB2 amplification. Member name as the
+# tarball lists it; the freeze writes case 11BR047 as X11BR047.
 [proteo]
+label = "Krug et al. 2020, the PDC data freeze"
 design = "across_samples"
 protein = "cptac_freeze"
 member = "prosp-brca-v5.4-public-proteome-ratio-norm-NArm.gct"
-annotation = "prosp-brca-v5.4-public-sample-annotation.csv"
 sample_prefix = "X"
 plex = "TMT.Plex"
 tracks = ["PAM50"]

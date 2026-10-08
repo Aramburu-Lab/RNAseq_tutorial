@@ -203,8 +203,8 @@ class ProteoSpec:
     Attributes:
         design: One of ``PROTEO_DESIGNS``.
         protein: The ``[[resources]]`` entry holding the protein table.
+        label: How a page names the protein source; the resource name where empty.
         member: The table's file inside that resource, when the resource is an archive.
-        annotation: The sample annotation's file inside the archive (across samples).
         sample_prefix: Text before a case ID in the protein table's sample names.
         plex: The annotation column naming each sample's TMT plex.
         tracks: Annotation columns drawn beside the paired heatmap.
@@ -220,8 +220,8 @@ class ProteoSpec:
 
     design: str
     protein: str
+    label: str = ""
     member: str | None = None
-    annotation: str | None = None
     sample_prefix: str = ""
     plex: str | None = None
     tracks: tuple[str, ...] = ()
@@ -475,7 +475,7 @@ def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, 
         problems.append(f"proteo.design: {design!r}, not one of {PROTEO_DESIGNS}")
     if protein is not None and protein not in known:
         problems.append(f"proteo.protein: no [[resources]] entry named {protein!r}")
-    keys = {"across_samples": ("member", "annotation", "plex"),
+    keys = {"across_samples": ("member", "plex"),
             "cross_dataset": ("contrast", "tested", "reference")}  # fmt: skip
     needed = keys.get(design or "", ())
     problems += [f"proteo.{k}: the {design} design needs it" for k in needed if not raw.get(k)]
@@ -493,7 +493,7 @@ def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, 
     if design is None or protein is None:
         return None
     return ProteoSpec(
-        design, protein, member=raw.get("member"), annotation=raw.get("annotation"),
+        design, protein, label=raw.get("label", ""), member=raw.get("member"),
         sample_prefix=raw.get("sample_prefix", ""), plex=raw.get("plex"),
         tracks=tuple(raw.get("tracks", [])), amplified=raw.get("amplified"),
         genes=tuple(raw.get("genes", [])), contrast=raw.get("contrast"),

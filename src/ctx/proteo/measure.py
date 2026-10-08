@@ -173,6 +173,12 @@ def welch(values: np.ndarray, tested: np.ndarray) -> tuple[np.ndarray, np.ndarra
     return np.asarray(lfc, dtype=np.float64), np.asarray(result.pvalue, dtype=np.float64)
 
 
+def median(values: pl.Series) -> float:
+    """The median of a column's present values, NaN when none is present."""
+    present = values.drop_nulls().drop_nans() if values.dtype.is_float() else values.drop_nulls()
+    return float(np.median(present.to_numpy())) if present.len() else float("nan")
+
+
 def tertiles(abundance: np.ndarray) -> np.ndarray:
     """Each value's abundance tertile, 1 low to 3 high, by numpy's linear percentiles."""
     cuts = np.percentile(abundance, [100 / 3, 200 / 3])
