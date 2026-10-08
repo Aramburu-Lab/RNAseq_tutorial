@@ -101,6 +101,7 @@ def sanity(
             "verdict": pl.String,
             "source": pl.String,
             "rule_verdict": pl.String,
+            "reason": pl.String,
         },
     )
     table_stem = stem(MODULE, f"{dataset}_sanity", 1, day=date.today())

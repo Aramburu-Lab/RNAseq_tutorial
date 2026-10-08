@@ -26,7 +26,7 @@ from test_viz import filtered_bars
 
 from ctx.dataset import Contrast
 from ctx.de.deseq import fit
-from ctx.de.run import _volcano
+from ctx.de.run import volcano
 from ctx.de.stats import ADJUSTMENTS, adjust, classify, p_line
 from ctx.report import text
 from ctx.report.builder import FigureText
@@ -197,7 +197,7 @@ def test_static_line_is_the_line_the_page_draws_on_load():
     result = fit(counts, synthetic.samples,
                  Contrast("c", "condition", "control", "case", (6, 6)), {}, threads=1)  # fmt: skip
     assert result.results["padj"].null_count() > 0
-    data = _volcano(result, counts.select("gene_id", gene_name=pl.col("gene_id")))
+    data = volcano(result, counts.select("gene_id", gene_name=pl.col("gene_id")))
     block = figure_block(data, "x")
     rows = [{k: None if isinstance(v, float) and not math.isfinite(v) else v
              for k, v in r.items()} for r in block.rows]  # fmt: skip

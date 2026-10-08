@@ -75,18 +75,20 @@ SHORT = {"Benjamini-Hochberg": "BH", "Benjamini-Yekutieli": "BY"}
 BASES = {column: f"{SHORT.get(m, m)}-adjusted p" for column, m in ADJUSTMENTS.items()}
 RAW_WORDS = "raw p (no correction)"
 VOLCANO_READING = (
-    "Each dot is one of {n_tested} genes tested in both groups; right of 0 is higher in "
+    "Each dot is one of {n_tested} {unit} tested in both groups; right of 0 is higher in "
     "{tested}, left is higher in {reference}.",
     "Up in {tested}: log2 FC at least {fc} ({fold_up} times as high, +{pct_up} %) and {line_rule}.",
     "Down in {tested}: log2 FC at most -{fc} ({fold_down} times as high, -{pct_down} %) under "
     "the same p-value rule. Grey dots miss at least one of the two conditions.",
 )
 VOLCANO_SUMMARY = (
-    "Up in {tested}: {n_up} genes. Down: {n_down} genes. Rule: log2 FC at or beyond \u00b1{fc} and "
-    "{basis} below {cutoff}."
+    "Up in {tested}: {n_up} {unit}. Down: {n_down} {unit}. Rule: log2 FC at or beyond "
+    "\u00b1{fc} and {basis} below {cutoff}."
 )
 LINE_RULE = "above the dashed line at -log10 p = {y_line}, where {basis} falls below {cutoff}"
-NO_LINE_RULE = "{basis} below {cutoff}; no gene was tested, so no line is drawn"
+NO_LINE_RULE = "{basis} below {cutoff}; no {unit} were tested, so no line is drawn"
+# What one point of M5's volcano is.
+UNIT = "genes"
 
 
 def _terms(design: str) -> set[str]:

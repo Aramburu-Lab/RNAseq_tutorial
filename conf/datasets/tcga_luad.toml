@@ -15,9 +15,101 @@ gene_model = "GENCODE v36"
 protocol = "unstranded"
 tumour = "Primary Tumor"
 normal = "Solid Tissue Normal"
+# The miRNA and isoform files, read by ctx gather --mirna-dir --isoform-dir (M8).
+mirna_workflow = "BCGSC miRNA Profiling"
 cdr_file = "TCGA-CDR-SupplementalTableS1.xlsx"
 cdr_type = "LUAD"
 
 [guard]
 ids = ["TCGA-LUAD"]
 patterns = ['\bTCGA-[A-Z0-9]{2}-[A-Z0-9]{4}\b']
+
+# M8's resources (plan docs/plans/2026-10-07_m8_real_data_plan_proposal.md, decisions 2, 3
+# and 7; downloads approved and fetched by Rytis 2026-10-08, each folder's _manifest_*.tsv
+# recording the bytes and SHA-256 measured on arrival). ctx setup registers each file already
+# in place by its hash. The STAR counts' own annotation: GDC's GENCODE v36, md5
+# c03931958d4572148650d62eb6dec41a as GDC's reference-files page lists it.
+[[resources]]
+name = "annotation_gtf"
+urls = ["https://api.gdc.cancer.gov/data/be002a2c-3b27-43f3-9e0f-fd47db92a6b5"]
+bytes = 44507458
+sha256 = "81359865bab048361cbeaf91c9441aac4c700b63978e6691d579d78bf2322d30"
+dest = "data/raw/gdc_gencode_v36/gencode.v36.annotation.gtf.gz"
+
+# TargetScan 8.0 (McGeary et al. 2019 Science, doi:10.1126/science.aav1741); no terms are
+# published on its home or download page, so the kit ships derived rows and links these.
+[[resources]]
+name = "targetscan_predictions"
+urls = ["https://www.targetscan.org/vert_80/vert_80_data_download/Predicted_Targets_Context_Scores.default_predictions.txt.zip"]
+bytes = 17673917
+sha256 = "73411a01b2745d7098c3e4d36d5887b231ce765e7282013d15df78d736711aee"
+dest = "data/raw/mirna_targets/Predicted_Targets_Context_Scores.default_predictions.txt.zip"
+
+[[resources]]
+name = "targetscan_families"
+urls = ["https://www.targetscan.org/vert_80/vert_80_data_download/miR_Family_Info.txt.zip"]
+bytes = 162636
+sha256 = "d91827b9c9524f2b970d85f61050ecfa9b8cb7ca395c5f7952b9c21cb3dc3b7a"
+dest = "data/raw/mirna_targets/miR_Family_Info.txt.zip"
+
+[[resources]]
+name = "targetscan_genes"
+urls = ["https://www.targetscan.org/vert_80/vert_80_data_download/Gene_info.txt.zip"]
+bytes = 622317
+sha256 = "482e1b2786d9a4f7b2dfd1364ac1c5132f1015d546dc963e0db405c65ca3fa08"
+dest = "data/raw/mirna_targets/Gene_info.txt.zip"
+
+# miRTarBase 10.0 strong evidence: reporter assay or Western blot (Cui et al. 2025 NAR,
+# doi:10.1093/nar/gkae1072). Its LICENSE calls it provided at no cost in the public domain.
+[[resources]]
+name = "mirtarbase_strong"
+urls = ["https://awi.cuhk.edu.cn/miRTarBase/downloads/files/10.0/miRTarBase_SE_WR.csv"]
+bytes = 3348778
+sha256 = "77a862a5f2f98f52c7a130649803b05e1468f9759b3c0bf8d03a99f75d992e46"
+dest = "data/raw/mirna_targets/miRTarBase_SE_WR.csv"
+
+# M5 on this project (M8 plan, section 4): every patient with a tumour and a normal file
+# taken by ctx.gather.gdc.chosen, paired. n is the pairs the gather rule keeps
+# (tests/test_gdc.py, the four-project test).
+[[contrasts]]
+name = "tumour_normal"
+variable = "condition"
+reference = "normal"
+tested = "tumour"
+design = "~donor + group"
+paired = true
+n = [58, 58]
+
+[de]
+featured = "tumour_normal"
+
+# M8 (plan docs/plans/2026-10-07_m8_real_data_plan_proposal.md): M5's tumour_normal results by
+# biotype, and the mature miRNAs of the miRNA libraries, paired the same way. n is the
+# patients with a tumour and a normal miRNA library taken (ctx gather --mirna-dir, measured
+# 2026-10-08). The featured miRNAs' targets are tested and paired with them.
+[ncrna]
+featured = "tumour_normal"
+pairs = 50
+mirnas = ["hsa-miR-210-3p"]
+
+[ncrna.mirna]
+name = "mirna_tumour_normal"
+variable = "condition"
+reference = "normal"
+tested = "tumour"
+design = "~donor + group"
+paired = true
+n = [46, 46]
+
+[ncrna.sanity]
+# Registered before the first ctx ncrna run on this project, but NOT blind: every number in
+# a source below was measured while planning (2026-10-07, the plan's section 2) on these
+# files. Directions come from the papers; thresholds are M5's ALPHA 0.05 and LFC_MIN 1
+# (ctx.de.stats), not tuned to those values.
+registered_on = "2026-10-08 15:37"
+
+[[ncrna.sanity.rules]]
+id = "M8.absent"
+text = "Mature miRNAs are absent from mRNA-seq: per sample, miRNA-gene counts of the STAR files rank hairpins unlike the miRNA libraries."
+source = "size selection leaves mature miRNAs out of long-RNA libraries (CONVENTIONS.md, Statistics rules); the 0.3 is a course convention for a weak correlation; seen while planning, KIRC median rho 0.045 over 200 samples"
+conditions = [{ metric = "agreement.median_rho", op = "<", value = 0.3 }]

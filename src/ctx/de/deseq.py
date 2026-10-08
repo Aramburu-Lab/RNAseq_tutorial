@@ -139,7 +139,9 @@ def select_samples(
     variable, levels = contrast.variable, (contrast.reference, contrast.tested)
     if contrast.split is None:
         subset = subset.filter(pl.col(variable).is_in(list(levels)))
-    first = rank_replicates(subset, REPLICATE_KEYS, dict(order)) == 1
+    # A GDC sheet has no cell type: its one file per patient and sample type is already chosen.
+    keys = tuple(k for k in REPLICATE_KEYS if k in subset.columns)
+    first = rank_replicates(subset, keys, dict(order)) == 1
     dropped = subset.filter(~first)["run_accession"].to_list()
     used = subset.filter(first)
     if contrast.split is not None:

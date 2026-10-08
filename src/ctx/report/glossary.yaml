@@ -655,6 +655,62 @@
     matched samples supports, but does not prove, regulation.
   see_also: [mirna, utr]
 
+- id: context_score
+  term: context++ score
+  aliases: [context++, weighted context++ score, cumulative weighted context++ score]
+  category: function
+  short: TargetScan's predicted repression at a target site; more negative is stronger, summed over a gene's sites.
+  long: >-
+    The score models the log fold change a site confers from its type, the sequence around it
+    and its place in the 3' UTR. The weighted score scales it by how often that UTR isoform is
+    used, and TargetScan sums a gene's sites into one cumulative score.
+  source: McGeary et al. 2019 Science 366:eaav1741 (TargetScan 8.0's context++ model)
+  see_also: [mirna_target, utr]
+
+- id: cerna
+  term: competing endogenous RNA
+  aliases: [ceRNA, ceRNAs, miRNA sponge]
+  category: genome
+  short: An RNA proposed to draw a miRNA away from its other targets by sharing its binding sites.
+  long: >-
+    The hypothesis holds that transcripts sharing miRNA sites regulate each other through the
+    miRNA pool. It is contested: most transcripts have too few copies to change the free miRNA,
+    and correlated expression also arises from shared regulation without any sponging.
+  see_also: [mirna, mirna_target, lncrna]
+
+- id: cross_mapped_read
+  term: cross-mapped read
+  aliases: [cross-mapped, cross-mapped reads]
+  category: quantification
+  short: A small-RNA read that aligns equally well to two or more miRNAs, so its origin is uncertain.
+  long: >-
+    GDC's miRNA files flag a whole hairpin as cross-mapped when any of its reads also aligns to
+    another miRNA. The isoform files flag each read sequence instead. The two flags therefore
+    give different read totals for the same library.
+  see_also: [mirna, multimapped]
+
+- id: rpm_mirna
+  term: RPM of miRNA-mapped reads
+  aliases: [reads per million miRNA-mapped reads, reads_per_million_miRNA_mapped]
+  category: quantification
+  short: A miRNA's reads per million reads that map to any miRNA in the same library.
+  long: >-
+    GDC's miRNA files report it as reads_per_million_miRNA_mapped. The denominator leaves out
+    reads of other small RNAs, so a library rich in them is not penalised. It corrects for
+    depth only; it is not a between-sample normalisation like DESeq2's size factors.
+  see_also: [mirna, small_rna_seq]
+
+- id: histone_mrna
+  term: replication-dependent histone mRNA
+  aliases: [histone mRNA, histone mRNAs, replication-dependent histone mRNAs]
+  category: genome
+  short: mRNA of the S-phase histone genes; it ends in a stem loop, not a poly(A) tail.
+  long: >-
+    These transcripts are processed at a stem loop instead of being polyadenylated, so poly(A)
+    selection loses most of them while rRNA depletion keeps them. Their share of a library's
+    reads therefore reflects the library type as much as cell division.
+  see_also: [poly_a_selection, rrna_depletion]
+
 - id: circrna
   term: circular RNA
   aliases: [circRNA, circRNAs, back-splice]

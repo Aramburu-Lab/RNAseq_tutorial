@@ -37,6 +37,14 @@ effect = "Set: gather checks release and samples, then writes rounded length-sca
 meaning = "A GDC project folder of STAR counts, clinical records and annotations."
 effect = "Set: gather checks it and takes one file per patient."
 
+[options."--mirna-dir"]
+meaning = "A GDC folder of the project's miRNA files. Unset: none is read."
+effect = "Set with --isoform-dir: gather checks both and writes miRNA tables."
+
+[options."--isoform-dir"]
+meaning = "A GDC folder of the same aliquots' isoform files. Unset: none read."
+effect = "Set with --mirna-dir: mature miRNA counts come from its rows."
+
 [options."--endpoint"]
 meaning = "Survival endpoint from TCGA-CDR: OS, DSS, DFI or PFI. Unset: dataset file's."
 effect = "Changes which events count; OS needs the longest follow-up."

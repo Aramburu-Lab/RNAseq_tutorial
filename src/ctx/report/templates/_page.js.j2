@@ -419,10 +419,21 @@
     };
   }
 
+  /* A figure's rows, embedded as column names once and a list of values per row
+     (ctx.report.figures.columnar), as one object per row again. */
+  function ctxRows(form) {
+    var t = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    return t.data.map(function (values) {
+      var row = {};
+      t.columns.forEach(function (c, i) { row[c] = values[i]; });
+      return row;
+    });
+  }
+
   function brushing(form) {
     var fig = form.closest(".fig");
     var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
-    var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    var rows = ctxRows(form);
     /* The scatter beside the reading guide; the parallel sets under both, across the card. */
     var div = fig.querySelector(".fig-plot .js-plotly-plot");
     var sets = fig.querySelector(".fig-below .js-plotly-plot") || div;
@@ -495,7 +506,7 @@
   function filtering(form) {
     var fig = form.closest(".fig");
     var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
-    var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    var rows = ctxRows(form);
     var div = fig.querySelector(".js-plotly-plot");
     var summary = fig.querySelector(".filter-summary");
     var lead = fig.querySelector(".fig-lead");
@@ -544,7 +555,7 @@
   function liveCalls(form) {
     var fig = form.closest(".fig");
     var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
-    var rows = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    var rows = ctxRows(form);
     var div = fig.querySelector(".js-plotly-plot");
     var reading = fig.querySelectorAll("[data-reading]");
     var summary = fig.querySelector(".calls-summary");
@@ -595,7 +606,7 @@
         pct_up: fmt(100 * (Math.pow(2, t) - 1), 1), pct_down: fmt(100 * (1 - Math.pow(2, -t)), 1),
         basis: cfg.bases[column], cutoff: String(alpha),
         y_line: yline === null ? "" : fmt(yline, 2),
-        n_up: count(parts.up.length), n_down: count(parts.down.length)
+        n_up: count(parts.up.length), n_down: count(parts.down.length), unit: cfg.unit
       };
       values.line_rule = fill(yline === null ? cfg.no_line_rule : cfg.line_rule, values);
       reading.forEach(function (li) {

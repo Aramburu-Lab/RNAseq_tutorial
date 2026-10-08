@@ -553,7 +553,7 @@ def test_report_decides_sanity(pipeline):
     out = root / "outputs" / "09_report"
     verdicts = pl.read_parquet(next(out.glob("*_desynth_sanity_v1.parquet")))
     rules = dict(verdicts.select("rule", "rule_verdict").unique().rows())
-    assert rules == {"S1": "PASS", "S2": "PASS", "S3": "FAIL"}
+    assert rules == {"S1": "PASS", "S2": "PASS", "S3": "NOT MEASURED"}
     hub = next(out.glob("*_desynth_hub_v1.html")).read_text()
     assert hub.count('class="verdict"') == 4  # S1, both S2 conditions, S3
 

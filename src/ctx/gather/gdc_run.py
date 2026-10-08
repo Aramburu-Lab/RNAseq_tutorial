@@ -17,7 +17,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, GdcSpec, load
-from ctx.gather import gdc
+from ctx.gather import gdc, gdc_mirna
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
 from ctx.qc import registry
@@ -52,14 +52,92 @@ class Read:
     md5_seconds: float
 
 
+@dataclass(frozen=True)
+class MirnaRead:
+    """Both miRNA kinds of the project, checked, and their sheet; nothing written yet."""
+
+    matrices: gdc_mirna.Matrices
+    sheet: pl.DataFrame
+    md5_seconds: float
+
+
+def read_mirna(mirna_dir: Path, isoform_dir: Path, spec: GdcSpec, star: Read) -> MirnaRead:
+    """Read and check both miRNA folders, choose one library per patient, join the STAR files.
+
+    Raises:
+        gdc.GdcError: On any failed check; nothing is written.
+    """
+    if spec.mirna_workflow is None:
+        raise gdc.GdcError("--mirna-dir needs [gdc] mirna_workflow in the dataset file")
+    folders = {
+        kind: gdc_mirna.read_kind(path.resolve(), spec, kind)
+        for kind, path in ((gdc_mirna.MIRNA, mirna_dir), (gdc_mirna.ISOFORM, isoform_dir))
+    }
+    started = time.perf_counter()
+    for folder in folders.values():
+        gdc.verify(folder)
+    seconds = time.perf_counter() - started
+    found = gdc_mirna.read_matrices(folders[gdc_mirna.MIRNA], folders[gdc_mirna.ISOFORM])
+    notes = gdc.annotations(star.folder.path / gdc.ANNOTATIONS, found.files)
+    sheet = gdc_mirna.sheet(found, notes, star.sheet, spec)
+    return MirnaRead(found, sheet.select(*columns("columns.mirna_samplesheet")), seconds)
+
+
+def _mirna_tables(found: MirnaRead) -> list[tuple[str, pl.DataFrame, dict[str, tuple[str, str]]]]:
+    """The miRNA sheet, both count matrices and the hairpins' loci, each with its columns."""
+    m, names = found.matrices, found.sheet["sample"].to_list()
+    meaning = text.raw(PAGE, "columns.mirna_counts")
+    per_file = {s: ("reads", meaning["count"].format(sample=s)) for s in names}
+    tables = []
+    for what, key, ids, matrix in (("mirna_mature_counts", "mimat", m.mature, m.mature_counts),
+                                   ("mirna_hairpin_counts", "hairpin", m.hairpins,
+                                    m.hairpin_counts)):  # fmt: skip
+        data = {key: list(ids)} | {s: pl.Series(s, matrix[:, j], dtype=pl.Int32)
+                                   for j, s in enumerate(names)}  # fmt: skip
+        tables.append((what, pl.DataFrame(data), {key: tuple(meaning[key]), **per_file}))
+    return [("mirna_samplesheet", found.sheet, columns("columns.mirna_samplesheet")), *tables,
+            ("mirna_hairpins", m.loci, columns("columns.mirna_hairpins"))]  # fmt: skip
+
+
+def _mirna_checks(found: MirnaRead, spec: GdcSpec) -> ResultTable:
+    """What the two miRNA folders hold, checked, one row per check."""
+    fill = functools.partial(text.fill, PAGE)
+    s, m = found.sheet, found.matrices
+    share = {r: (pl.col(f"{r}_reads") / pl.col("mirna_reads") * 100).median()
+             for r in gdc_mirna.REGIONS}  # fmt: skip
+    medians = s.select(**share, cross=(pl.col("cross_mapped_reads") / pl.col("mirna_reads")
+                                       * 100).median()).row(0, named=True)  # fmt: skip
+    taken = gdc.chosen(s)
+    types = ", ".join(t for _, _, t in gdc_mirna.KINDS.values())
+    values = (
+        fill("mirna.query_value", project=spec.project, workflow=spec.mirna_workflow, types=types),
+        fill("mirna.files_value", files=s.height, seconds=found.md5_seconds),
+        fill("mirna.hairpins_value", hairpins=len(m.hairpins),
+             detected=int((m.hairpin_counts.sum(axis=1) > 0).sum())),
+        fill("mirna.mature_value", mature=len(m.mature), isoforms=s["mature_isoforms"].median()),
+        fill("mirna.sum_value", files=s.height, reads=int(s["mirna_reads"].sum())),
+        fill("mirna.regions_value", **{r: medians[r] for r in gdc_mirna.REGIONS}),
+        fill("mirna.cross_value", pct=medians["cross"]),
+        fill("mirna.taken_value", tumours=gdc.chosen(s, spec.tumour).height,
+             normals=gdc.chosen(s, spec.normal).height, taken=taken.height,
+             joined=taken["rna_sample"].is_not_null().sum()),
+    )  # fmt: skip
+    rows = tuple(zip(text.words(PAGE, "mirna.rows"), values, strict=True))
+    return ResultTable(text.word(PAGE, "mirna.title"), text.words(PAGE, "checks.columns"), rows)
+
+
 def columns(key: str) -> dict[str, tuple[str, str]]:
     """(unit, meaning) per column of one table, from the page file."""
     return {name: (unit, meaning) for name, (unit, meaning) in text.raw(PAGE, key).items()}
 
 
-def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,
-                spec: GdcSpec, metric: registry.Metric) -> pl.DataFrame:  # fmt: skip
-    """One row per counts file: identity, barcode parts, strand, library size and the choice."""
+def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,  # noqa: PLR0913 - each a part of the sheet
+                spec: GdcSpec, metric: registry.Metric,
+                libraries: pl.DataFrame | None = None) -> pl.DataFrame:  # fmt: skip
+    """One row per counts file: identity, barcode parts, strand, library size and the choice.
+
+    ``libraries`` is ``gdc.library_selection``'s record; without one the column stays empty.
+    """
     stats = gdc.strand(counts.stats, metric)
     hit = notes.filter(pl.col("action") == "drops its files")["samples"]
     redacted = {s for joined in hit for s in joined.split(";")}
@@ -71,9 +149,14 @@ def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,
                  .when(pl.col("sample_type") == spec.normal).then(pl.lit("normal"))
                  .otherwise(pl.lit("other")))  # fmt: skip
     frame = folder.files.hstack(parts).join(stats, on="sample", maintain_order="left")
-    frame = frame.with_columns(condition=condition, batch=pl.col("plate"),
+    frame = frame.with_columns(condition=condition, batch=pl.col("plate"), donor=pl.col("case"),
+                               run_accession=gdc.run_accession(),
                                redacted=pl.col("sample").is_in(sorted(redacted)))  # fmt: skip
     frame = gdc.choose(frame, spec.protocol)
+    if libraries is None:
+        frame = frame.with_columns(library_selection=pl.lit(None, dtype=pl.String))
+    else:
+        frame = frame.join(libraries, on="sample", how="left", maintain_order="left")
     return frame.select(*columns(SHEET))
 
 
@@ -97,7 +180,9 @@ def read_all(path: Path, spec: Dataset) -> Read:
         cdr = gdc.cdr(path / spec.gdc.cdr_file, spec.gdc.cdr_type)
     counts = gdc.read_counts(folder, spec.gdc)
     notes = gdc.annotations(path / gdc.ANNOTATIONS, folder.files)
-    sheet = build_sheet(folder, counts, notes, spec.gdc, metric)
+    sheet = build_sheet(
+        folder, counts, notes, spec.gdc, metric, gdc.library_selection(path, spec.gdc)
+    )
     cases, treatments, tests = gdc.clinical(path / gdc.CASES)
     return Read(folder, counts, sheet, notes, cases, treatments, tests, cdr, md5_seconds)
 
@@ -225,9 +310,11 @@ def _matrix(found: Read) -> pl.DataFrame:
     return pl.DataFrame(data)
 
 
-def _write(found: Read, out: Path, dataset: str, day: date, spec: GdcSpec,
-           releases: Mapping[str, str]) -> list[Path]:  # fmt: skip
-    """Every table, each with its README."""
+def _write(  # noqa: PLR0913 - each a part of the write
+    found: Read, out: Path, dataset: str, day: date, spec: GdcSpec,
+    releases: Mapping[str, str], *, mirna: MirnaRead | None = None,
+) -> list[Path]:  # fmt: skip
+    """Every table, each with its README; the miRNA tables too where both folders were read."""
     matrix = _matrix(found)
     per_file = {s: ("reads", text.fill(PAGE, "columns.count", protocol=spec.protocol, sample=s))
                 for s in matrix.columns[1:]}  # fmt: skip
@@ -243,6 +330,7 @@ def _write(found: Read, out: Path, dataset: str, day: date, spec: GdcSpec,
     if found.cdr is not None:
         tables.append(("cdr", found.cdr, {c: ("none", text.fill(PAGE, "columns.cdr", column=c))
                                           for c in found.cdr.columns}))  # fmt: skip
+    tables += _mirna_tables(mirna) if mirna is not None else []
     files: list[Path] = []
     for name, frame, described in tables:
         files += write_table(frame, out, stem(MODULE, f"{dataset}_{name}", 1, day=day),
@@ -264,6 +352,18 @@ def _releases(path: Path, spec: Dataset) -> dict[str, str]:
     }  # fmt: skip
 
 
+def _mirna_releases(found: MirnaRead) -> dict[str, str]:
+    """The miRNA folders and the SHA-256 of each one's metadata, manifest and status."""
+    out = {}
+    for kind, path in ((gdc_mirna.MIRNA, found.matrices.paths[0]),
+                       (gdc_mirna.ISOFORM, found.matrices.paths[1])):  # fmt: skip
+        metadata, manifest, _ = gdc_mirna.KINDS[kind]
+        out[f"GDC {kind} folder"] = str(path)
+        out |= {f"sha256:{kind}/{n}": hashlib.sha256((path / n).read_bytes()).hexdigest()
+                for n in (metadata, manifest, gdc.STATUS)}  # fmt: skip
+    return out
+
+
 def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named option or context
     settings: runtime.Settings,
     cards: tuple[ParameterCard, ...],
@@ -272,6 +372,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     *,
     gdc_dir: Path,
     dataset_file: Path,
+    mirna_dir: Path | None = None,
+    isoform_dir: Path | None = None,
 ) -> list[Path]:
     """Check a GDC folder, choose one file per case and sample type, write the tables and page.
 
@@ -282,6 +384,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         dataset: Slug naming the dataset in output names.
         gdc_dir: The GDC project folder as the fetch wrote it.
         dataset_file: The dataset file, with a ``[gdc]`` table.
+        mirna_dir: The project's miRNA folder as the fetch wrote it; given with isoform_dir.
+        isoform_dir: The project's isoform folder, the same aliquots' files.
 
     Returns:
         The page, then the tables.
@@ -298,12 +402,23 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     if spec.gdc is None:
         raise DatasetError(f"{dataset_file}: no [gdc] table; not a GDC dataset")
     source = gdc_dir.resolve()
+    if (mirna_dir is None) != (isoform_dir is None):
+        raise DatasetError("--mirna-dir and --isoform-dir are given together or not at all")
     found = read_all(source, spec)
+    mirna = None
+    if mirna_dir is not None and isoform_dir is not None:
+        mirna = read_mirna(mirna_dir, isoform_dir, spec.gdc, found)
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
-    files = _write(found, out, dataset, day, spec.gdc, _releases(source, spec))
+    releases = _releases(source, spec)
+    if mirna is not None:
+        releases |= _mirna_releases(mirna)
+    files = _write(found, out, dataset, day, spec.gdc, releases, mirna=mirna)
     word = functools.partial(text.word, PAGE)
-    results = (_checks(found, spec.gdc), _flow(found.sheet), _pairs(found.sheet),
-               _annotations(found.annotations))  # fmt: skip
+    results: tuple[ResultTable | str, ...] = (_checks(found, spec.gdc), _flow(found.sheet),
+                                              _pairs(found.sheet),
+                                              _annotations(found.annotations))  # fmt: skip
+    if mirna is not None:
+        results = (*results, _mirna_checks(mirna, spec.gdc))
     usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
     page = ModulePage(
         title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE),

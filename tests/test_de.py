@@ -20,7 +20,7 @@ from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
 from ctx.de.page import ma_text
-from ctx.de.run import _fit_metrics, _ma, _volcano
+from ctx.de.run import _fit_metrics, _ma, volcano
 from ctx.de.stats import ALPHA, LFC_MIN, classify
 from ctx.report import text
 from ctx.viz import scatter
@@ -132,11 +132,11 @@ def test_a_thinned_volcano_page_says_what_it_draws(basic, monkeypatch, tmp_path)
     """Item 2, D7: Step-1's volcano caption called its 12,796 tested genes "all drawn", then
     said the page drew 1,842 of the 5,526 no setting can call, from English written in
     scatter.py. The files' caption claims nothing about drawing; the page's ends with ui.toml's
-    sentence, numbers from the thinning. Mutations: ", all drawn" restored in _volcano's
+    sentence, numbers from the thinning. Mutations: ", all drawn" restored in volcano's
     caption; the sentence written in scatter.py again, so an edited ui.toml misses the page."""
     synthetic, result = basic
     monkeypatch.setattr(scatter, "THIN_MAX", THIN_AT)
-    data = _volcano(result, _genes(synthetic))
+    data = volcano(result, _genes(synthetic))
     other = data.frame.filter(~pl.col("keep")).height
     stride = math.ceil(other / THIN_AT)
     assert stride > 1, "the case must thin"

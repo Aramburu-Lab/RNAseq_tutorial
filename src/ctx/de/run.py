@@ -30,6 +30,7 @@ from ctx.de.page import (
     QUESTION,
     RAW_WORDS,
     TERMS,
+    UNIT,
     VOLCANO_READING,
     VOLCANO_SUMMARY,
     box_text,
@@ -43,6 +44,7 @@ from ctx.de.page import (
     volcano_text,
 )
 from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, P_FLOOR, classify, p_line
+from ctx.gather import gdc
 from ctx.gather.curation import rank_replicates
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
@@ -224,7 +226,7 @@ def _pca_figure(
     return data, metrics, text
 
 
-def _volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
+def volcano(result: Fit, genes: pl.DataFrame, unit: str = UNIT) -> ScatterData:
     """Volcano of one contrast: the default call drawn, and every cutoff callable live.
 
     Every gene some setting of the page could call is drawn; the rest, above the loosest
@@ -277,7 +279,7 @@ def _volcano(result: Fit, genes: pl.DataFrame) -> ScatterData:
         lfc="log2FoldChange", p="pvalue", adjusted=BASES, raw_words=RAW_WORDS, tested=c.tested,
         reference=c.reference, alpha=ALPHA, lfc_min=LFC_MIN, max_cutoff=max(CUTOFF_PRESETS),
         n_tested=frame.height, p_floor=P_FLOOR, p_line=line, reading=VOLCANO_READING,
-        summary=VOLCANO_SUMMARY, line_rule=LINE_RULE, no_line_rule=NO_LINE_RULE,
+        summary=VOLCANO_SUMMARY, line_rule=LINE_RULE, no_line_rule=NO_LINE_RULE, unit=unit,
     )  # fmt: skip
     return ScatterData(
         frame=frame,
@@ -793,7 +795,7 @@ def _figures(
     c, name = featured.contrast, featured.contrast.name
     groups.append(Group(
         f"Featured contrast: {name}",
-        (writer.figure(_volcano(featured, genes), f"volcano_{name}", volcano_text(c)),
+        (writer.figure(volcano(featured, genes), f"volcano_{name}", volcano_text(c)),
          writer.figure(_ma(featured, genes), f"ma_{name}",
                        ma_text(c, featured.results["log2FoldChange_shrunk"].is_not_null().any()))),
         lead="Which genes changed, and by how much?", tabs=True,
@@ -855,6 +857,11 @@ def _keys(sheet: pl.DataFrame, fits: Mapping[str, Fit], featured: str) -> tuple[
     )
 
 
+def _acknowledged(spec: Dataset) -> tuple[str, ...]:
+    """The GDC acknowledgement for a page drawn from GDC data (TODO.md, M10), else nothing."""
+    return (word("ui", "gdc.acknowledgement"),) if spec.gdc is not None else ()
+
+
 def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long sequence
     settings: runtime.Settings,
     cards: tuple[ParameterCard, ...],
@@ -889,6 +896,8 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     gathered = settings.root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
     inputs = {what: newest(gathered, dataset, what) for what in ("samplesheet", "counts", "genes")}
     sheet, counts, genes = (pl.read_parquet(inputs[w]) for w in ("samplesheet", "counts", "genes"))
+    # A GDC sheet lists every file; its approved choice of one per patient is the one door.
+    sheet = gdc.chosen(sheet) if "chosen" in sheet.columns else sheet
     releases = {
         "dataset file": str(spec.path),
         f"sha256:{spec.path.name}": _sha256(spec.path),
@@ -912,7 +921,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     rows = [_contrast_row(f, sheet.columns) for f in fits.values()]
     writer.table(pl.DataFrame(rows), "contrasts", CONTRAST_COLUMNS)
     for name, result in fits.items():
-        frame = result.results.join(genes, on="gene_id", how="left")
+        frame = result.results.join(genes.select("gene_id", "gene_name"), on="gene_id", how="left")
         writer.table(frame, f"{name}_results", {**RESULT_COLUMNS, "gene_name": GENE_NAME})
     groups, metrics = _figures(writer, spec, fits, (sheet, counts, genes), settings.threads)
     sexes, found = sex_check(sheet, counts, genes)
@@ -929,7 +938,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
         question=QUESTION,
         concept=CONCEPT,
         parameters=cards,
-        results=(_contrasts_table(fits), *groups),
+        results=(*_acknowledged(spec), _contrasts_table(fits), *groups),
         practice=PRACTICE,
         think=think(spec, fits),
         mistakes=MISTAKES,
