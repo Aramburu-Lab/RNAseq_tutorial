@@ -25,6 +25,8 @@ RUN="${1:?usage: subsample.sbatch <run folder>}"
 READS="${READS:-1000000}"
 SEED="${SEED:-42}"
 CTX_STORE="${CTX_STORE:?export CTX_STORE=<your folder on the storage project>}"
+# Kebnekaise only: Apptainer, and a run folder never in home.
+SITE_HOME_ALLOWED=0
 
 die() {
     printf 'subsample.sbatch: %s\n' "$*" >&2
@@ -40,7 +42,8 @@ while [[ ! -d "$here" ]]; do here=$(dirname -- "$here"); done
 here=$(CDPATH='' cd -- "$here" && pwd -P) || die "cannot enter the folder that holds $RUN"
 home=$(CDPATH='' cd -- "${HOME:-/nonexistent}" 2>/dev/null && pwd -P) || home=${HOME:-/nonexistent}
 case "$here/" in
-"$home"/*) die "the run folder $RUN is in your home folder (25 GB); use a folder under CTX_STORE" ;;
+"$home"/*) [[ "${SITE_HOME_ALLOWED:-0}" == 1 ]] ||
+    die "the run folder $RUN is in your home folder (25 GB); use a folder under CTX_STORE" ;;
 esac
 [[ "$CTX_STORE" == /* ]] || CTX_STORE="$PWD/$CTX_STORE"
 R="$RUN/nfcore_fetchngs/results"

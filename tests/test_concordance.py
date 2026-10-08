@@ -267,3 +267,19 @@ def test_bad_input_is_refused():
         concordance.agreement([1, 2], [1, 2, 3])
     with pytest.raises(ValueError, match="non-negative"):
         concordance.agreement([1, -2], [1, 2])
+
+
+def test_public_spearman_takes_signed_values():
+    """M7 compares fold changes, which are signed; the estimate is spearmanr's on them.
+
+    Mutations caught: the agreement's non-negative check moved into ``spearman`` (refuses a
+    fold change); the interval drawn without the seed (a second call differs)."""
+    rng = np.random.default_rng(3)
+    x = rng.normal(0, 2, 60)
+    y = 0.5 * x + rng.normal(0, 1, 60)
+    rho, low, high, dropped = concordance.spearman(x, y)
+    assert rho == pytest.approx(stats.spearmanr(x, y).statistic, abs=1e-12)
+    assert low is not None and high is not None and low < rho < high and dropped == 0
+    assert concordance.spearman(x, y) == (rho, low, high, dropped)
+    with pytest.raises(ValueError, match="finite"):
+        concordance.spearman([1.0, math.nan, 2.0, 3.0], [1.0, 2.0, 3.0, 4.0])

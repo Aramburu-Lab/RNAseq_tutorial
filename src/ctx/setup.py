@@ -23,6 +23,7 @@ from ctx import runtime
 from ctx.dataset import Resource, load
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
+from ctx.proteo import pdc
 from ctx.report import text
 from ctx.report.builder import (
     FIELDS,
@@ -188,6 +189,15 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _md5(path: Path) -> str:
+    """MD5 of a file, read in chunks: the checksum PDC publishes."""
+    digest = hashlib.md5()  # noqa: S324 - compared with the publisher's MD5, not for security
+    with path.open("rb") as handle:
+        while block := handle.read(CHUNK):
+            digest.update(block)
+    return digest.hexdigest()
+
+
 def _download(url: str, part: Path, opener: Callable[..., Any]) -> None:
     """Stream one URL to ``part``."""
     with opener(url, timeout=120) as response, part.open("wb") as out:
@@ -256,8 +266,16 @@ def _fetch_one(resource: Resource, dest: Path, opener: Callable[..., Any]) -> di
     failures = []
     for url in resource.urls:
         try:
-            _download(url, part, opener)
+            # A PDC URL names a file whose signed URL expires: resolved now, MD5 checked first.
+            signed = None
+            if url.startswith(pdc.SCHEME):
+                print(text.fill(PAGE, "resources.dua", name=resource.name, url=pdc.DUA_URL))
+                signed = pdc.resolve(url, opener)
+            _download(signed.url if signed else url, part, opener)
             size, digest = part.stat().st_size, _sha256(part)
+            if signed and _md5(part) != signed.md5:
+                failures.append(f"{url}: MD5 {_md5(part)}, PDC lists {signed.md5}")
+                continue
             if (size, digest) == (resource.bytes, resource.sha256):
                 part.replace(dest)
                 return {

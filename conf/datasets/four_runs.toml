@@ -1,0 +1,93 @@
+# The custom-data guide's worked example (ctx guide, U.8): Step-1's four smallest runs by ENA
+# fastq_bytes, 1,268,992,130 bytes in all (G.0), curated from their own table, four_runs.csv, as
+# a study without an SDRF is. The table's values are Step-1's curated sheet's (ctx gather on
+# tier1 with tier1.toml, 2026-10-08), so both curations agree run by run. Every run is 101 nt,
+# single-end, peripheral blood.
+
+[dataset]
+slug = "four_runs"
+# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+label = "Four Step-1 runs"
+ena_study = "PRJEB49000"
+ena_secondary_study = "ERP133445"
+arrayexpress = "E-MTAB-11190"
+source = "Montaldo et al. 2022 Nat Immunol, doi:10.1038/s41590-022-01311-1, PMC7615267"
+accessions = ["ERR7425276", "ERR7425397", "ERR7425403", "ERR7425436"]
+# Shown on the guide: what two runs a group cannot separate.
+caution = "Both neutrophils come from PDAC patients and the monocytes from a G-CSF donor and an IPMN patient, so lineage and condition are confounded: the contrast shows the pipeline working, not a finding."
+
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+# The annotation Step-1's cluster run used (GENCODE 50), which the guide's Part 2 downloads.
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# Step-1's study, so Step-1's guard (tier1.toml).
+[guard]
+ids = ["PRJEB49000", "ERP133445", "E-MTAB-11190"]
+patterns = [
+    '\bERR7425\d{3}\b',
+    '\bERX699\d{4}\b',
+    '\bSAMEA11307[6-8]\d{2}\b',
+    '\bERS895\d{4}\b',
+    '\bUPN\d+\b',
+]
+
+[sdrf]
+file = "four_runs.csv"
+join = ["run_accession", "run_accession"]
+
+[columns.donor]
+source = "donor"
+meaning = "Individual the sample came from (Step-1's SDRF Characteristics[individual])."
+
+[columns.cell_type]
+source = "cell_type"
+meaning = "Sorted cell population: low-density (LDN) or normal-density (NDN) neutrophils, or monocytes."
+
+[columns.condition]
+source = "condition"
+meaning = "Donor state: G-CSF mobilised donor, PDAC or IPMN patient."
+
+[columns.lineage]
+source = "lineage"
+meaning = "neutrophil for LDN and NDN, monocyte for monocytes: the contrast's two groups."
+
+[expect]
+runs = 4
+
+[expect.counts.read_length]
+"101" = 4
+
+[expect.counts.lineage]
+neutrophil = 2
+monocyte = 2
+
+[[contrasts]]
+name = "neutrophil_monocyte"
+variable = "lineage"
+reference = "monocyte"
+tested = "neutrophil"
+n = [2, 2]
+
+[de]
+featured = "neutrophil_monocyte"
+
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+running = ["neutrophil_monocyte", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]

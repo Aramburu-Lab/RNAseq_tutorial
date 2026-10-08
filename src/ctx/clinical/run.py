@@ -15,6 +15,7 @@ import polars as pl
 from ctx import runtime
 from ctx.clinical import ClinicalError, harmonise, page, panel, score
 from ctx.dataset import ENDPOINTS, Dataset, DatasetError, load
+from ctx.de.filters import log2cpm
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES
 from ctx.report import genes, text
@@ -73,7 +74,7 @@ def expression(tables: dict[str, pl.DataFrame], patients: pl.DataFrame, min_log2
     sizes = dict(tables["samplesheet"].select("sample", "library_size").rows())
     samples = patients["sample"].to_list()
     matrix = tables["counts"].select(samples).to_numpy()
-    values = score.stored(score.log2cpm(matrix, np.array([sizes[s] for s in samples])))
+    values = score.stored(log2cpm(matrix, np.array([sizes[s] for s in samples])))
     kept, flat = score.expressed(values, min_log2cpm)
     dropped = (int((~kept & ~flat).sum()), int(flat.sum()))
     return tables["genes"].filter(pl.Series(kept)), values[kept], dropped

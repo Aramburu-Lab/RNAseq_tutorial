@@ -75,7 +75,9 @@ not_curated = "Not curated: without --dataset-file, donor, cell type, condition,
 title = "Curation"
 join = "Join"
 # The join sentence is these three parts; the middle one only when the SDRF is cross-checked.
-joined = "Curation from {file}: each of {runs} runs joined to one SDRF row on {column}, in both directions"
+joined = "Curation from {file}: each of {runs} runs joined to one row of {table} on {column}, in both directions"
+# The table a dataset with a [[resources]] SDRF joins; an own table is named by its file.
+sdrf = "the SDRF"
 agrees = "; {checked} agrees for every run"
 mapped = "; every value is in the dataset file's value maps."
 read_length = "Read length"
@@ -98,6 +100,15 @@ stored_value = "{kind}, {bytes:,} bytes in memory"
 
 [samples]
 group = "Samples"
+
+# What each pipeline run cost, from its Nextflow traces (ctx.gather.trace).
+[trace]
+group = "Cost of the pipeline runs"
+title = "Peak memory and time per process"
+columns = ["Pipeline", "Process", "Tasks", "Samples", "Peak memory", "Real time"]
+note = "From the Nextflow traces: {total:,} task rows, of which {cached:,} repeat a task an earlier launch ran and are left out. Peak memory is the largest task's resident memory; real time adds every task's, so tasks that ran at once count in full."
+mib = "{mib:,.0f} MiB"
+minutes = "{minutes:,.1f} min"
 
 [figures.composition]
 title = "Samples by cell type and condition"

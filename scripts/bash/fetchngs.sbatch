@@ -13,7 +13,8 @@
 # 1 day, which cleared it at once (2026-10-01).
 # One accession list through nf-core/fetchngs into a fresh outdir, laid out as ctx gather reads
 # it. The account is never written here: sbatch -A names the compute project. Run the Usage
-# lines on a login node with CTX_REPO and CTX_STORE exported (kebnekaise_env.sh).
+# lines on a login node with CTX_REPO and CTX_STORE exported (kebnekaise_env.sh), or on a laptop
+# with CTX_SITE=laptop (site_laptop.sh).
 #
 # Usage:
 #   RUN="$CTX_STORE/<run name, no spaces>"
@@ -28,6 +29,13 @@
 #   # after that mv, the same sbatch line resumes the rest
 #   DRY_RUN=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 #   sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
+#   # on a laptop, Docker running: the same script run by bash, each run printing its size
+#   export CTX_REPO=<your clone of the course repository> RUN="$HOME/ctx_runs/<run name, no spaces>"
+#   pixi install --manifest-path "$CTX_REPO/pixi.toml" -e fetch --frozen
+#   mkdir -p "$RUN" && cd "$RUN"
+#   printf '%s\n' <accession> <accession> > ids.txt
+#   CTX_SITE=laptop SKIP_DOWNLOAD=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
+#   CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 set -euo pipefail
 
 RUN="${1:?usage: fetchngs.sbatch <run folder> <accession list>}"
@@ -40,9 +48,13 @@ die() {
     printf 'fetchngs.sbatch: %s\n' "$*" >&2
     exit 1
 }
-# From CTX_REPO, never from $0: sbatch runs a copy of this file from its spool folder.
-ENV_FILE="${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/kebnekaise_env.sh"
-[[ -f "$ENV_FILE" ]] || die "no $ENV_FILE; is CTX_REPO your clone of the course repository?"
+# From CTX_REPO, never from $0: sbatch runs a copy of this file from its spool folder. The site
+# file says what this computer changes; read before the dry run, which prints its profile.
+CTX_SITE="${CTX_SITE:-kebnekaise}"
+[[ "$CTX_SITE" =~ ^[a-z0-9_]+$ ]] || die "CTX_SITE is a site name such as kebnekaise or laptop, not $CTX_SITE"
+SITE_FILE="${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/site_$CTX_SITE.sh"
+[[ -f "$SITE_FILE" ]] || die "no $SITE_FILE; is CTX_REPO your clone of the course repository, and CTX_SITE a site it has?"
+source "$SITE_FILE"
 [[ "$SKIP_DOWNLOAD" == [01] && "$DRY_RUN" == [01] ]] || die "SKIP_DOWNLOAD and DRY_RUN take 0 or 1"
 [[ "$MAX_FORKS" =~ ^[1-9][0-9]*$ ]] || die "MAX_FORKS is a whole number, not $MAX_FORKS"
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
@@ -57,7 +69,8 @@ while [[ ! -d "$here" ]]; do here=$(dirname -- "$here"); done
 here=$(CDPATH='' cd -- "$here" && pwd -P) || die "cannot enter the folder that holds $RUN"
 home=$(CDPATH='' cd -- "${HOME:-/nonexistent}" 2>/dev/null && pwd -P) || home=${HOME:-/nonexistent}
 case "$here/" in
-"$home"/*) die "the run folder $RUN is in your home folder (25 GB); use a folder under CTX_STORE" ;;
+"$home"/*) [[ "${SITE_HOME_ALLOWED:-0}" == 1 ]] ||
+    die "the run folder $RUN is in your home folder (25 GB); use a folder under CTX_STORE" ;;
 esac
 [[ -s "$IDS" ]] || die "no accession list, or an empty one: $IDS"
 # A metadata-only run keeps its own outdir: one params file per outdir is what ctx gather reads.
@@ -108,7 +121,7 @@ mv "$LAUNCH/ids.csv.part" "$LAUNCH/ids.csv"
 # D-035: wget retries a refused connection, with a growing pause, MAX_FORKS downloads at once.
 cat > "$LAUNCH/nextflow.config" <<CONF
 executor {
-    queueSize = 50
+    queueSize = $SITE_QUEUE_SIZE
 }
 process {
     withName: 'SRA_FASTQ_FTP' {
@@ -122,14 +135,15 @@ process {
 CONF
 # The input list sits inside the outdir, where ctx gather looks for it. -resume finds nothing on
 # a first launch; after results/ is moved aside it reuses every finished download.
-cmd=(nextflow run nf-core/fetchngs -r 1.12.0 -profile singularity --input "$OUT/ids.csv" --outdir "$OUT"
-    --nf_core_pipeline rnaseq --monochrome_logs true --publish_dir_mode link -resume)
+cmd=(nextflow run nf-core/fetchngs -r 1.12.0 -profile "$SITE_FETCHNGS_PROFILE" --input "$OUT/ids.csv"
+    --outdir "$OUT" --nf_core_pipeline rnaseq --monochrome_logs true --publish_dir_mode link -resume
+    ${SITE_FETCHNGS_ARGS[@]+"${SITE_FETCHNGS_ARGS[@]}"})
 if [[ "$SKIP_DOWNLOAD" == 1 ]]; then cmd+=(--skip_fastq_download); fi
 printf '%s accessions in %s; the job runs, in %s:\n%s\n' \
     "$(awk 'END{print NR}' "$LAUNCH/ids.csv")" "$LAUNCH/ids.csv" "$LAUNCH" "${cmd[*]}"
 if [[ "$DRY_RUN" == 1 ]]; then exit 0; fi
 
-source "$ENV_FILE" || die "the fetch environment did not activate; see the line above"
+site_activate || die "the fetch environment did not activate; see the line above"
 rm -f "$LAUNCH/results.complete"
 mkdir -p "$OUT"
 cp "$LAUNCH/ids.csv" "$OUT/ids.csv"

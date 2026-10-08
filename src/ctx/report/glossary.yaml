@@ -1807,15 +1807,37 @@
 
 - id: tmt
   term: TMT labelling
-  aliases: [TMT, tandem mass tag, isobaric labelling, label-free quantification, LFQ]
+  aliases: [TMT, tandem mass tag, isobaric labelling, TMT plex]
   category: proteomics
   short: Chemical tags that let several samples be measured together; values are ratios within a batch.
   long: >-
     Each TMT batch reports abundance relative to a pooled reference, so comparisons across
     batches need the reference. Ratio compression makes large differences look smaller than
-    they are. Label-free quantification measures samples separately with more missing
-    values.
-  see_also: [ratio_compression, mass_spectrometry, batch_effect]
+    they are.
+  see_also: [ratio_compression, mass_spectrometry, batch_effect, label_free]
+
+- id: label_free
+  term: label-free quantification
+  aliases: [LFQ, label free, intensity-based quantification]
+  category: proteomics
+  short: Each sample is measured in its own run, and protein abundance comes from peptide signal.
+  long: >-
+    No tags and no pooled reference: samples are compared through their peptide intensities,
+    so more proteins go missing in some samples than under TMT. Copy numbers by the proteomic
+    ruler start from such intensities.
+  see_also: [tmt, proteomic_ruler, missing_values]
+
+- id: proteomic_ruler
+  term: proteomic ruler
+  aliases: [copy numbers, protein copy number, histone ruler]
+  category: proteomics
+  short: Protein copies per cell, scaled from mass spectrometry signal by the histone content of DNA.
+  long: >-
+    Histone signal is proportional to DNA, and a diploid cell holds a fixed mass of DNA.
+    Each protein's share of signal then becomes copies per cell (Wisniewski et al. 2014). Copy
+    numbers compare across cell types without a reference channel.
+  source: Wisniewski et al. 2014 Mol Cell Proteomics, doi:10.1074/mcp.M113.037309
+  see_also: [label_free, mass_spectrometry]
 
 - id: protein_group
   term: protein group
