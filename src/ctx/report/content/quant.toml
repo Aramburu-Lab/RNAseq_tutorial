@@ -4,7 +4,9 @@ title = "M4 Quantification: {dataset}"
 budget = "Track A: under {minutes} min and {ram_gb} GB"
 no_value = "not recorded"
 # One test in a caption: n per group, BH-adjusted p, rank-biserial r (above 0: tested higher).
-tests_item = "{feature} n {n_ref} and {n_test}, p {p:.2g}, r {r:.2f}"
+tests_item = "{feature} n {n_ref:,} and {n_test:,}, p {p}, r {r:.2f}"
+# A p-value that underflows to zero in double precision.
+p_below = "below {smallest:.1e}"
 purpose = "Read what [[Salmon]] did with every sample's fragments, and how its transcript estimates become the gene counts differential expression reads."
 input = "The nf-core/rnaseq outdir of {n} samples: Salmon's logs per sample and the length-scaled gene matrix, from nf-core/rnaseq {release} with Salmon {salmon}. Transcript figures read each sample's `quant.sf` from the per-sample copy."
 method = """[[Salmon]] maps each fragment to the [[transcript|transcripts]] it fits, or to a [[decoy]] where genome sequence outside the transcriptome fits better. It splits fragments that fit several transcripts by their estimated abundance.
@@ -161,6 +163,7 @@ expressed = "Of those, transcripts at the TPM threshold in at least half the sam
 share = "Expressed transcripts as a share of annotated ones."
 annotated_bin = "Annotated transcripts of the gene, binned."
 n_genes = "Genes in this bin and type."
+keep = "Whether the page always draws the point; the rest are thinned above the point budget."
 sample_counts = "Gene counts of {sample}, tximport countsFromAbundance {mode}."
 
 [figures.fates]
@@ -213,7 +216,8 @@ reading = [
     "Each point is one gene: its TPM across, its estimated reads up, both on log scales.",
     "Colour marks effective length; at equal TPM, a longer gene sits higher.",
 ]
-caption = "Sample {sample}, the median by mapped fragments: {n:,} genes drawn at random from {total:,} with a read. Descriptive, no test: reads are TPM times effective length times one constant."
+caption = "Sample {sample}, the median by mapped fragments: {total:,} genes with {min_reads} or more reads. Descriptive, no test: reads are TPM times effective length times one constant."
+thinned = "genes"
 x = "Abundance"
 y = "Estimated reads"
 short = "Under {short:,} nt"
@@ -227,19 +231,20 @@ reading = [
     "Each point is one gene: its fold change from length-scaled counts across, from estimated counts up.",
     "Points off the dashed line change isoform use between the groups.",
 ]
-caption = "Contrast {contrast}, {n_ref} reference and {n_test} tested samples; {genes:,} genes past M5's expression filter, {drawn:,} drawn at random. Descriptive: Spearman rho {rho:.3f} over every gene."
+caption = "Contrast {contrast}, {n_ref} reference and {n_test} tested samples; {genes:,} genes past M5's expression filter. Descriptive: Spearman rho {rho:.3f} over every gene."
+thinned = "genes within two-fold"
 x = "Fold change, length-scaled"
 y = "Fold change, estimated"
 identity = "Equal fold changes"
 
 [figures.isoforms]
 title = "Isoforms expressed against isoforms annotated"
-lead = "The median protein-coding gene expresses {coding:.1f} % of its isoforms; the median lncRNA gene {lncrna:.1f} %."
+lead = "{coding_n:,} of {coding_total:,} protein-coding genes express an isoform, a median {coding:.1f} % of theirs; {lncrna_n:,} of {lncrna_total:,} lncRNA genes, {lncrna:.1f} %."
 reading = [
-    "Each bar is the median share of a gene's isoforms at {tpm:g} TPM or more in half the samples, by isoforms annotated.",
+    "Each bar is the median share of a gene's isoforms at {tpm:g} TPM or more in half the samples, over genes that express one.",
     "Colour marks the gene type; hover a bar for its genes.",
 ]
-caption = "{n:,} genes with two isoforms or more; an isoform is expressed at {tpm:g} TPM in half the samples. Share expressed, {tested} over {reference}, Mann-Whitney U: {tests}."
+caption = "{n:,} of {total:,} genes with two isoforms or more express one, at {tpm:g} TPM in half the samples. Share expressed, {tested} over {reference}, Mann-Whitney U: {tests}."
 x = "Isoforms annotated"
 y = "Isoforms expressed"
 feature = "Share expressed"

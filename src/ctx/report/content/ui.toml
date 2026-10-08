@@ -73,6 +73,7 @@ scroll = "Wider than this window: scroll the figure sideways to see all of it."
 [thinned]
 rows = "This page draws {drawn:,} of the {units:,} {rest}, every {nth} in order of {order}; the CSV holds all {total:,}."
 units = "This page draws all points of {drawn:,} of the {units:,} {rest}, every {nth} in order of {order}; the CSV holds all {total:,} points."
+heatmap = "This page draws {drawn:,} of the {units:,} rows and their columns, every {nth} in the drawn order; the files and the CSV hold all {total:,} cells."
 callable = "points no setting can call"
 other = "other points"
 

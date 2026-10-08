@@ -214,3 +214,42 @@ def test_track_a_on_the_teaching_subset(tmp_path):
     assert wall < BUDGETS["A"].minutes * 60
     assert bound < BUDGETS["A"].ram_gb * 10**9
     assert page.stat().st_size < 15 * 10**6
+
+
+# M4's real data: Step-1's gather sheet, its nf-core outdir and copy Q1, linked in.
+QUANT_INPUTS = ("outputs/01_gather", "resources", "data/raw/tier1_rnaseq",
+                "data/raw/tier1_salmon")  # fmt: skip
+
+
+@pytest.mark.budget
+def test_quant_on_step1_keeps_track_b(tmp_path):
+    """`ctx quant` on all 210 Step-1 runs with copy Q1 keeps Track B's 10 minutes and 4 GB.
+
+    quant is a Track A module; Track B is the plan's stricter check of its cohort path (M4
+    plan, decision 5). Memory is bounded as Track B's is above, the command plus its largest
+    child, MultiQC. Mutation caught: the correlation heatmap left unthinned (``thin=False``)
+    makes the page 16,113,974 B, over the cap, and the run fails.
+    """
+    missing = [p for p in QUANT_INPUTS if not (TEACH_ROOT / p).exists()]
+    if missing:
+        pytest.skip(f"Step-1's Salmon outputs are not on this machine: {missing}")
+    for part in QUANT_INPUTS:
+        (tmp_path / part).parent.mkdir(parents=True, exist_ok=True)
+        (tmp_path / part).symlink_to(TEACH_ROOT / part)
+    env = {k: v for k, v in os.environ.items() if not k.startswith(("SLURM_", "CTX_"))}
+    repo = Path(__file__).resolve().parents[1]
+    done = subprocess.run(
+        [str(CTX), "--root", str(tmp_path), "quant", "--dataset", "tier1",
+         "--dataset-file", str(repo / "conf" / "datasets" / "tier1.toml"),
+         "--rnaseq-dir", str(tmp_path / QUANT_INPUTS[2])],
+        cwd=tmp_path, env=env, capture_output=True, text=True, check=False,
+    )  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    (page,) = (tmp_path / "outputs" / "04_quant").glob("*_tier1_overview_v1.html")
+    wall, self_rss, children = _measured(page.read_text())
+    bound = self_rss + children
+    print(f"\nquant: wall {wall:.1f} s, self {self_rss:,} B, largest child {children:,} B, "
+          f"bound {bound:,} B, page {page.stat().st_size:,} B")  # fmt: skip
+    assert wall < BUDGETS["B"].minutes * 60
+    assert bound < BUDGETS["B"].ram_gb * 10**9
+    assert page.stat().st_size < 15 * 10**6
