@@ -65,6 +65,8 @@ def test_across_missing_never_zero_and_one_row_per_gene(across_root):
     assert g10["n_quantified"] == TUMOURS // 2 and not g10["tested"]
     g9 = genes.filter(pl.col("gene") == "G9").row(0, named=True)
     assert g9["rho"] > 0.95
+    metrics = pl.read_parquet(output(across_root, "metrics_v1.parquet"))
+    assert metrics["metric"].n_unique() == metrics.height
 
 
 def test_cross_untested_below_the_share(cross_root):

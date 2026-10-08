@@ -213,7 +213,8 @@ def correlation_metrics(measured: Measured, spec: ProteoSpec, method: str) -> No
     measured.metrics.append(("pergene.spearman.median", measure.median(tested["rho"]),
                              f"{tested['rho'].drop_nulls().len()} genes"))  # fmt: skip
     published = spec.published.get("mertins", {})
-    for gene in [k for k in published if k.isupper()] + list(spec.genes):
+    # ERBB2 is both a published gene and a worked one: one metric per gene.
+    for gene in dict.fromkeys([*(k for k in published if k.isupper()), *spec.genes]):
         row = measured.genes.filter((pl.col("gene") == gene) & pl.col("tested"))
         value = float(row["r"][0]) if row.height and row["r"][0] is not None else np.nan
         measured.metrics.append((f"gene.{gene}.pearson", value, "per-gene Pearson r"))
