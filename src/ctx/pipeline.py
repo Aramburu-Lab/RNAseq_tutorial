@@ -24,7 +24,7 @@ from ctx.dataset import Contrast, Dataset, DatasetError, load
 # Course order, which a new module joins in its place; report reads every page, so it is last.
 # Not naming.MODULES, whose numbers name output folders, not the order a dataset is run in.
 # genecard is not here: it calls HPA and Ensembl, and one command runs nothing that fetches.
-ORDER = ("gather", "qc", "quant", "de", "function", "ncrna", "clinical", "report")
+ORDER = ("gather", "qc", "quant", "de", "function", "proteo", "ncrna", "clinical", "report")
 TEMPLATE = Path(__file__).resolve().parents[2] / "conf" / "dataset_template.toml"
 # The curated columns a suggested contrast compares, in the order tried.
 VARIABLES = ("condition", "cell_type")
@@ -64,7 +64,8 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
 
     gather and report always run; qc on a fetchngs route; quant with an rnaseq outdir and an
     ``annotation_gtf``; de with contrasts, ``[de]`` and counts; function with ``[function]``
-    too; ncrna with ``[ncrna]`` and de's tables; clinical with ``[clinical]``.
+    too; proteo with ``[proteo]`` and counts, and de's tables when it compares fold changes;
+    ncrna with ``[ncrna]`` and de's tables; clinical with ``[clinical]``.
     """
     base = ("--dataset", options.dataset, "--dataset-file", str(options.dataset_file))
     rnaseq = ("--rnaseq-dir", str(options.rnaseq_dir)) if options.rnaseq_dir else ()
@@ -72,12 +73,16 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
     gdc = options.gdc_dir is not None
     counts = gdc or options.rnaseq_dir is not None
     has_gtf = any(r.name == "annotation_gtf" for r in spec.resources)
+    # Across studies M7 reads M5's fold changes; across samples, gather's counts alone.
+    fold_changes = bool(spec.contrasts and spec.de)
+    proteo = spec.proteo and counts and (spec.proteo.design == "across_samples" or fold_changes)
     planned: dict[str, tuple[str, ...] | None] = {
         "gather": base + (("--gdc-dir", str(options.gdc_dir)) if gdc else fetchngs + rnaseq),
         "qc": None if gdc else base + rnaseq,
         "quant": base + rnaseq if rnaseq and has_gtf else None,
         "de": base if spec.contrasts and spec.de and counts else None,
         "function": base if spec.function and spec.contrasts and spec.de and counts else None,
+        "proteo": base if proteo else None,
         "ncrna": base if spec.ncrna and spec.contrasts and spec.de and counts else None,
         "clinical": base if spec.clinical else None,
         "report": base,

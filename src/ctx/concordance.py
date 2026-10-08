@@ -107,7 +107,8 @@ def agreement(
     kept = (x + y) > 0
     x, y = x[kept], y[kept]
     d = np.log2(y + 1) - np.log2(x + 1)
-    return Agreement(int(x.size), int((x == y).sum()), *_spearman(x, y, seed, resamples),
+    rho = spearman(x, y, seed=seed, resamples=resamples)
+    return Agreement(int(x.size), int((x == y).sum()), *rho,
                      *_pearson(np.log2(x + 1), np.log2(y + 1)), *_bland_altman(d))  # fmt: skip
 
 
@@ -147,10 +148,10 @@ def rank_correlation(x: Vector, y: Vector, axis: int = -1) -> Vector:
     Vectorised, so the bootstrap ranks all its resamples at once; a row of tied values has no
     rank correlation and gives NaN.
     """
-    return _correlation(stats.rankdata(x, axis=axis), stats.rankdata(y, axis=axis), axis)
+    return correlation(stats.rankdata(x, axis=axis), stats.rankdata(y, axis=axis), axis)
 
 
-def _correlation(x: Vector, y: Vector, axis: int = -1) -> Vector:
+def correlation(x: Vector, y: Vector, axis: int = -1) -> Vector:
     """Pearson's r along an axis, the one formula behind both estimates and every resample.
 
     Exactly 1 on identical input, where ``spearmanr`` and ``pearsonr`` of a vector with itself
@@ -171,10 +172,23 @@ def _constant(values: Vector) -> bool:
     return bool(values.size == 0 or (values == values[0]).all())
 
 
-def _spearman(
-    x: Vector, y: Vector, seed: int, resamples: int
+def spearman(
+    a: ArrayLike, b: ArrayLike, *, seed: int = SEED, resamples: int = RESAMPLES
 ) -> tuple[float | None, float | None, float | None, int]:
-    """Spearman's rho, its percentile bootstrap interval over genes, and resamples dropped."""
+    """Spearman's rho, its percentile bootstrap interval over genes, and resamples dropped.
+
+    Signed values are allowed, so M7 compares fold changes with it; ``agreement()`` calls it on
+    counts. None where undefined: below two pairs or on a constant vector, and no interval below
+    ``MIN_CI`` pairs or when every resample is tied.
+
+    Raises:
+        ValueError: If the vectors differ in shape or hold a non-finite value.
+    """
+    x, y = np.asarray(a, dtype=np.float64), np.asarray(b, dtype=np.float64)
+    if x.ndim != 1 or x.shape != y.shape:
+        raise ValueError(f"two vectors of one length needed, not {x.shape} and {y.shape}")
+    if not (np.isfinite(x).all() and np.isfinite(y).all()):
+        raise ValueError("values must be finite")
     if x.size < 2 or _constant(x) or _constant(y):  # noqa: PLR2004 - a correlation needs two
         return None, None, None, 0
     rho = float(rank_correlation(x, y))
@@ -202,7 +216,7 @@ def _pearson(x: Vector, y: Vector) -> tuple[float | None, float | None, float | 
     """Pearson's r and its Fisher z interval, tanh(atanh(r) ± z / sqrt(n - 3))."""
     if x.size < 2 or _constant(x) or _constant(y):  # noqa: PLR2004 - a correlation needs two
         return None, None, None
-    r = float(_correlation(x, y))
+    r = float(correlation(x, y))
     if x.size < MIN_CI:
         return r, None, None
     if abs(r) == 1:

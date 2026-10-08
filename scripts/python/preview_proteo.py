@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # /// codebase-meta
-# exempt: preview builder; the M7 RNA versus protein page on made-up data until ctx proteo exists
+# exempt: preview builder; the M7 RNA versus protein page on made-up data, for the course preview
 # ///
 r"""Course preview of M7 RNA versus protein (``ctx proteo``), on made-up data.
 
-The module is not built yet. ``page()`` draws what its page will show from a seeded
+``ctx proteo`` draws the real page; here ``page()`` draws what its page will show from a seeded
 generator: protein groups quantified per sample by TMT plex, per-gene RNA-protein Spearman
 rho by gene class, RNA against protein fold change in one contrast, and paired z-scores of
 the top genes. Samples, cell types and conditions come from the gather sample sheet, so the
-preview pages agree on who the samples are. Every sentence is in ``content/proteo.toml``,
-which the real module will read.
+preview pages agree on who the samples are. Every sentence is in ``content/proteo_preview.toml``,
+apart from ctx proteo's own ``content/proteo.toml``.
 
 The contrast is the sheet's second condition against its first, within its first cell type,
 both in sheet order: the preview holds no cohort value.
@@ -53,7 +53,7 @@ from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
 SHOWN = ("ui", "preview.dataset")
 
-MODULE = PAGE = "proteo"
+MODULE, PAGE = "proteo", "proteo_preview"
 SEED = 7
 N_GENES = 3000
 # A TMT 11-plex: ten sample channels beside one pooled reference channel.

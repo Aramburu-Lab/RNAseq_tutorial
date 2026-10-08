@@ -15,7 +15,7 @@ from typing import Any
 REQUIRED_COLUMNS = ("donor", "cell_type", "condition")
 TABLES = {
     "dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect",
-    "contrasts", "de", "function", "sanity", "gdc", "clinical", "ncrna",
+    "contrasts", "de", "function", "sanity", "gdc", "clinical", "proteo", "ncrna",
 }  # fmt: skip
 # The count column a GDC STAR - Counts file holds per library protocol (ctx.gather.gdc).
 PROTOCOLS = ("unstranded", "stranded_first", "stranded_second")
@@ -23,6 +23,8 @@ PROTOCOLS = ("unstranded", "stranded_first", "stranded_second")
 TABLE_SUFFIXES = (".csv", ".tsv", ".txt")
 # TCGA-CDR's four endpoints (Liu et al. 2018), each an event flag and a time in days.
 ENDPOINTS = ("OS", "DSS", "DFI", "PFI")
+# M7's two designs: one cohort measured at both layers, or RNA and protein from two studies.
+PROTEO_DESIGNS = ("across_samples", "cross_dataset")
 
 
 class DatasetError(ValueError):
@@ -194,6 +196,54 @@ class ClinicalSpec:
 
 
 @dataclass(frozen=True)
+class GeneClass:
+    """A gene class M7 compares: the union of named sets from one GMT resource."""
+
+    resource: str
+    sets: tuple[str, ...]
+
+
+@dataclass(frozen=True)
+class ProteoSpec:
+    """What M7 reads for a dataset: the protein table, how its samples meet RNA, the classes.
+
+    Attributes:
+        design: One of ``PROTEO_DESIGNS``.
+        protein: The ``[[resources]]`` entry holding the protein table.
+        label: How a page names the protein source; the resource name where empty.
+        member: The table's file inside that resource, when the resource is an archive.
+        sample_prefix: Text before a case ID in the protein table's sample names.
+        plex: The annotation column naming each sample's TMT plex.
+        tracks: Annotation columns drawn beside the paired heatmap.
+        amplified: The annotation column marking the worked example's amplification.
+        genes: The worked example's genes.
+        contrast: The M5 contrast whose fold changes meet the protein's (cross dataset).
+        tested: A regular expression naming the protein table's tested-group columns.
+        reference: The same for the reference group.
+        classes: Gene classes by name.
+        published: Numbers a page prints beside its own, each table with its ``source``.
+        sanity: The ``[proteo.sanity]`` table: ``registered_at`` and ``[[rules]]``; not
+            ``registered``, the key whose commits mark the Step-1 [sanity] registration.
+    """
+
+    design: str
+    protein: str
+    label: str = ""
+    member: str | None = None
+    sample_prefix: str = ""
+    plex: str | None = None
+    tracks: tuple[str, ...] = ()
+    amplified: str | None = None
+    genes: tuple[str, ...] = ()
+    contrast: str | None = None
+    tested: str | None = None
+    reference: str | None = None
+    classes: Mapping[str, GeneClass] = field(default_factory=dict)
+    published: Mapping[str, Any] = field(default_factory=dict)
+    sanity: Mapping[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class NcrnaSpec:
     """What M8 builds: the contrast it stratifies, the pairs its select offers, its own rules.
 
@@ -231,6 +281,7 @@ class Dataset:
     sanity: Mapping[str, Any] = field(default_factory=dict)
     gdc: GdcSpec | None = None
     clinical: ClinicalSpec | None = None
+    proteo: ProteoSpec | None = None
     ncrna: NcrnaSpec | None = None
 
     @property
@@ -456,6 +507,43 @@ def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | Non
     return ClinicalSpec(tuple(genes), endpoint, published)
 
 
+def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, ...],
+            problems: list[str]) -> ProteoSpec | None:  # fmt: skip
+    """Parse [proteo]: each design's own keys, its resources and its contrast checked."""
+    design = _need(raw, "design", str, "proteo", problems)
+    protein = _need(raw, "protein", str, "proteo", problems)
+    known = {r.name for r in resources}
+    if design is not None and design not in PROTEO_DESIGNS:
+        problems.append(f"proteo.design: {design!r}, not one of {PROTEO_DESIGNS}")
+    if protein is not None and protein not in known:
+        problems.append(f"proteo.protein: no [[resources]] entry named {protein!r}")
+    keys = {"across_samples": ("member", "plex"),
+            "cross_dataset": ("contrast", "tested", "reference")}  # fmt: skip
+    needed = keys.get(design or "", ())
+    problems += [f"proteo.{k}: the {design} design needs it" for k in needed if not raw.get(k)]
+    if raw.get("contrast") and raw["contrast"] not in names:
+        problems.append(f"proteo.contrast: {raw['contrast']!r} is not a declared contrast")
+    classes = {}
+    for name, entry in raw.get("classes", {}).items():
+        if entry.get("resource") not in known or not entry.get("sets"):
+            problems.append(f"proteo.classes.{name}: needs a known resource and a list of sets")
+            continue
+        classes[name] = GeneClass(entry["resource"], tuple(entry["sets"]))
+    published = raw.get("published", {})
+    problems += [f"proteo.published.{k}: no source" for k, v in published.items()
+                 if not isinstance(v, dict) or not isinstance(v.get("source"), str)]  # fmt: skip
+    if design is None or protein is None:
+        return None
+    return ProteoSpec(
+        design, protein, label=raw.get("label", ""), member=raw.get("member"),
+        sample_prefix=raw.get("sample_prefix", ""), plex=raw.get("plex"),
+        tracks=tuple(raw.get("tracks", [])), amplified=raw.get("amplified"),
+        genes=tuple(raw.get("genes", [])), contrast=raw.get("contrast"),
+        tested=raw.get("tested"), reference=raw.get("reference"), classes=classes,
+        published=published, sanity=raw.get("sanity", {}),
+    )  # fmt: skip
+
+
 def _ncrna(raw: Mapping[str, Any], names: set[str], problems: list[str]) -> NcrnaSpec | None:
     """Parse [ncrna]."""
     featured = _need(raw, "featured", str, "ncrna", problems)
@@ -516,6 +604,7 @@ def load(path: Path) -> Dataset:
     function = _function(raw["function"], names, resources, problems) if "function" in raw else None
     gdc = _gdc(raw["gdc"], problems) if "gdc" in raw else None
     clinical = _clinical(raw["clinical"], problems) if "clinical" in raw else None
+    proteo = _proteo(raw["proteo"], names, resources, problems) if "proteo" in raw else None
     ncrna = _ncrna(raw["ncrna"], names, problems) if "ncrna" in raw else None
     if "clinical" in raw and "gdc" not in raw:
         problems.append("[clinical] needs [gdc]: M10 reads a GDC project's gather outputs")
@@ -538,5 +627,6 @@ def load(path: Path) -> Dataset:
         sanity=raw.get("sanity", {}),
         gdc=gdc,
         clinical=clinical,
+        proteo=proteo,
         ncrna=ncrna,
     )

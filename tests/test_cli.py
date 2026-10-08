@@ -139,6 +139,14 @@ def clinical_run(tmp_path_factory):
 
 
 @pytest.fixture(scope="module")
+def proteo_run(tmp_path_factory):
+    from proteo_root import cross  # noqa: PLC0415 - the made-up cross-dataset root of the M7 tests
+
+    root = cross(tmp_path_factory.mktemp("proteo_cli"))
+    return root, _page(root, "07_proteo", "fake_cells_overview")
+
+
+@pytest.fixture(scope="module")
 def genecard_run(tmp_path_factory):
     from genecard_root import SLUG, make  # noqa: PLC0415 - the made-up root of the M9 tests
 
@@ -179,7 +187,7 @@ def run_run(guide_run):
 
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
 COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical",
-            "genecard", "ncrna", "run", "guide"]  # fmt: skip
+            "proteo", "genecard", "ncrna", "run", "guide"]  # fmt: skip
 # Commands whose page shows another command's cards beside their own (cli.guide).
 SHARED_CARDS = {"run": ("run", "guide"), "guide": ("run", "guide")}
 # Commands that run modules or write a page of the report folder, not a module of their own.

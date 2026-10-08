@@ -173,6 +173,22 @@ effect = "Set or present: gene and transcript figures, and ctx's gene counts."
 meaning = "How ctx's [[tx2gene|tximport]] port makes gene counts from transcript estimates."
 effect = "The value no keeps Salmon's estimates, which shift with isoform use."
 
+[options."--method"]
+meaning = "Per-gene correlation of RNA with protein: spearman or pearson."
+effect = "Pearson weighs extreme samples; Spearman uses ranks and resists outliers."
+
+[options."--min-quantified"]
+meaning = "Share of samples in which a protein needs a value."
+effect = "Higher tests fewer proteins, each measured in more samples."
+
+[options."--lfc-min"]
+meaning = "Absolute log2 fold change a protein needs to count as changed."
+effect = "Higher calls fewer protein changes; compressed ratios drop out first."
+
+[options."--gene-class"]
+meaning = "Gene class drawn in the class figures, or all."
+effect = "One class shows whether its proteins escape RNA control."
+
 [options."--biotypes"]
 meaning = "Comma-separated biotype groups M8 tests, each with its own BH."
 effect = "Each added group is one more stratum, adjusted on its own."

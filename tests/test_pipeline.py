@@ -77,6 +77,21 @@ def test_steps_in_course_order(tmp_path, runs):
     both = replace(gdc, ncrna=object())  # type: ignore[arg-type]
     planned = pipeline.steps(both, pipeline.Options("mine", spec_path, gdc_dir=tmp_path))
     assert [m for m, _ in planned] == ["gather", "de", "function", "ncrna", "clinical", "report"]
+    # M7 reads gather's counts and, across studies, M5's results: after de, before ncrna.
+    across = replace(both, proteo=replace_proteo("across_samples"))
+    planned = pipeline.steps(across, pipeline.Options("mine", spec_path, gdc_dir=tmp_path))
+    assert [m for m, _ in planned] == ["gather", "de", "function", "proteo", "ncrna", "clinical",
+                                       "report"]  # fmt: skip
+    no_de = replace(across, de=None, proteo=replace_proteo("cross_dataset"))
+    gdc_options = pipeline.Options("mine", spec_path, gdc_dir=tmp_path)
+    assert "proteo" not in dict(pipeline.steps(no_de, gdc_options))
+
+
+def replace_proteo(design):
+    """A stand-in [proteo]: steps reads only its design."""
+    from ctx.dataset import ProteoSpec  # noqa: PLC0415
+
+    return ProteoSpec(design, "protein")
 
 
 def replace_resource():
