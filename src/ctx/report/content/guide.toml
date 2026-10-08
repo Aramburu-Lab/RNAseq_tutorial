@@ -1,0 +1,75 @@
+# The custom-data guide (ctx guide, ctx.report.guide). Placeholders in {braces} are filled by the
+# code; keep their names. Every command on the page comes from a script's Usage block, the CLI
+# or ctx's own constants, never from this file.
+
+title = "Your own data: {dataset}"
+kicker = "Guide"
+budget = "Track B: under {minutes} min and {ram_gb} GB"
+purpose = "Take a study from its accessions to course pages of its own: download the reads, count them, then run every module the dataset file declares."
+input = "A dataset file: its slug, the accessions to download, and how each run gets its donor, cell type and condition. The worked example is `conf/datasets/four_runs.toml` with its own table."
+method = """The download runs [[nf-core/fetchngs]] on the metadata alone first, so the size is read before any [[FASTQ]] is fetched. The count runs nf-core/rnaseq, [[Salmon]] only, against references checked with the publisher's [[md5|MD5SUMS]].
+
+One launcher per pipeline serves both computers: `CTX_SITE=laptop` runs every task here under Docker, and the default runs each as a Slurm job on Kebnekaise. The last part copies the outdirs into a ctx root and runs the modules in course order."""
+interpretation = """Run `ctx run --check` until it lists nothing; each problem comes with the lines that fix it, filled from your own runs. A contrast's n is counted after its filters and replicate ranking, as `ctx de` counts it.
+
+Each module page keeps its own Reproduce block and peak memory, so a slow or failing step is found on its own page. The gather page lists what each pipeline run cost, process by process."""
+# "Term: rest" in a mistake prints Term in bold.
+pitfalls = [
+    "Downloading before reading the size: the metadata run prints the bytes at ENA; a laptop holds few runs.",
+    "Cleaning nf-core/rnaseq's work folder early: keep it until `ctx gather` has read the copied results.",
+    "Trusting a group of two: with two runs a side, any difference in condition or batch reads as the contrast.",
+]
+
+[[terms]]
+term = "Outdir"
+meaning = "The results folder a pipeline writes; ctx reads it and never writes into it."
+
+[[terms]]
+term = "Site"
+meaning = "The computer a launcher runs on: `laptop`, or `kebnekaise` by default; a file in `scripts/bash/` each."
+
+[[terms]]
+term = "Own table"
+meaning = "A CSV or TSV beside the dataset file, one row per run, for a study without an SDRF."
+
+[[questions]]
+prompt = "Why does the guide download the metadata alone first?"
+answer = "The metadata run prints how many bytes of FASTQ the study holds at ENA, so the download is chosen with its size in view."
+
+[[questions]]
+prompt = "Why does `ctx run` start each module as its own command?"
+answer = "Each page then records its own command, wall time and peak memory, exactly as a module run by hand would."
+
+[[questions]]
+prompt = "Why can the worked example not support a biological claim?"
+answer = "Its two groups differ in condition as well as cell type, and two runs a side estimate no spread worth trusting."
+
+[keys]
+runs = "Accessions to download"
+fetchngs = "nf-core/fetchngs"
+rnaseq = "nf-core/rnaseq"
+genome = "References"
+genome_value = "GENCODE release {release}"
+
+[part1]
+group = "Part {n}: download the reads"
+lead = "The metadata run prints the bytes at ENA; read them, then download."
+laptop = "On a laptop with Docker running"
+setup = "On Kebnekaise, once per login: Nextflow from the fetch environment"
+cluster = "On Kebnekaise: the metadata job, the size, then the download"
+
+[part2]
+group = "Part {n}: count with nf-core/rnaseq"
+lead = "The references are checked against the publisher's MD5SUMS before nf-core/rnaseq starts."
+laptop = "On a laptop: the references, then the count"
+cluster = "On Kebnekaise: the references, then the count job"
+
+[part3]
+group = "Part {n}: into the course"
+lead = "Every module the dataset file declares runs in course order; `--check` first lists what is missing."
+copy = "From Kebnekaise to the laptop: the metadata, and the files ctx reads"
+laptop = "On the laptop, after the laptop route"
+cluster = "On the laptop, after the copy from Kebnekaise"
+mine = "A study of your own: its sheet before curation, and a dataset file to edit"
+kit = "Your pages as a kit, opened from its START.html"
+site = "Another Slurm site: copy scripts/bash/site_kebnekaise.sh to site_<name>.sh, change its profile, queue size, home rule and activation, and set CTX_SITE=<name> before each launcher."

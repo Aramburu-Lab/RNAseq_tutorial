@@ -25,7 +25,8 @@ from ctx.tools import locate
 
 ROOT = Path(__file__).resolve().parents[1]
 BASH = ROOT / "scripts" / "bash"
-SCRIPTS = ("kebnekaise_env.sh", "fetchngs.sbatch", "rnaseq.sbatch", "subsample.sbatch")
+SCRIPTS = ("kebnekaise_env.sh", "fetchngs.sbatch", "rnaseq.sbatch", "subsample.sbatch",
+           "site_kebnekaise.sh", "site_laptop.sh")  # fmt: skip
 JOBS = tuple(name for name in SCRIPTS if name.endswith(".sbatch"))
 FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs"
 SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
@@ -219,11 +220,12 @@ def test_shell_rules(name):
         assert exits == [GUARD], "exit closes a login shell"
 
 
-# What each head job asks Slurm for: one task, its cores, 8 GB (the head job's 4 GB heap under
-# it) and a walltime its pipeline fits in.
+# What each head job asks Slurm for: one task, its cores, its memory (the head job's 4 GB heap
+# under it) and a walltime its pipeline fits in. rnaseq's 12 GB is Rytis's P4.5 answer: its head
+# peaked at 6.16, 6.61 and 7.49 GiB of 8 on three breast studies.
 RESOURCES = {
     "fetchngs.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
-    "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
+    "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "12G", "-t": "1-00:00:00"},
     "subsample.sbatch": {"-n": "1", "-c": "2", "--mem": "8G", "-t": "0-04:00:00"},
 }
 
