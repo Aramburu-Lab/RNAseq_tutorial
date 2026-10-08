@@ -1,0 +1,140 @@
+# CPTAC prospective breast (Krug et al. 2020 Cell, doi:10.1016/j.cell.2020.10.036), the M7 tumour
+# cohort (docs/plans/2026-10-07_m7_real_data_plan_proposal.md, approved 2026-10-08). The one
+# committed place for this cohort's identifiers: tests/test_repo.py fails if a [guard] id or
+# pattern appears in src/, tests/ or scripts/. RNA is GDC's open STAR - Counts through
+# `ctx gather --gdc-dir`; protein and the sample annotation are the paper's PDC data freeze.
+
+[dataset]
+slug = "cptac_brca"
+label = "CPTAC breast"
+source = "CPTAC prospective breast cancer, Krug et al. 2020 Cell, doi:10.1016/j.cell.2020.10.036; protein from the Proteomic Data Commons study PDC000120, RNA from the NCI Genomic Data Commons project CPTAC-2"
+
+# The PDC data freeze, v5.4-public: Table S1A and S2 of Krug 2020 as GCT files (its README). PDC
+# serves it through a signed URL that expires, so the URL names the study and file and setup
+# resolves it (ctx.proteo.pdc). md5 1f108a42725a0b107e6f34e3d4d60c43 from PDC's metadata;
+# size and SHA-256 measured on the download of 2026-10-08 (_manifest_cptac_brca.tsv). The CPTAC
+# data use agreement asks for acknowledgement and is silent on redistribution: the kit ships
+# derived tables only (plan decision 3).
+[[resources]]
+name = "cptac_freeze"
+urls = ["pdc://PDC000120/S060_Breast_Cancer_data_freeze_GCTfiles_v5.4-public.tar.gz"]
+bytes = 34878978
+sha256 = "c27a0226cba4f14c96b905f86c30007b62dd2a67a176e608c96f642566862903"
+dest = "resources/datasets/cptac_brca/S060_Breast_Cancer_data_freeze_GCTfiles_v5.4-public.tar.gz"
+
+[[resources]]
+name = "msigdb_go_cc"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/c5.go.cc.v2026.1.Hs.symbols.gmt",
+]
+bytes = 778106
+sha256 = "1ee846c446a87c1b6cc2b097dc415bed1c2f6b539312d2611f946038c5f7e9f8"
+dest = "resources/msigdb/c5.go.cc.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "msigdb_reactome"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/c2.cp.reactome.v2026.1.Hs.symbols.gmt",
+]
+bytes = 898680
+sha256 = "5d61f289a2400cddfbb3a3353829fd2284a360bbe50f2093b566c4b7bea93341"
+dest = "resources/msigdb/c2.cp.reactome.v2026.1.Hs.symbols.gmt"
+
+# CPTAC-2 holds breast, colon and ovary, so the primary-site filter keeps breast. All 133 open
+# counts files are reverse stranded by the QC registry's strand rule (first-strand share 0.0460
+# to 0.0828, measured 2026-10-08 with ctx.gather.gdc's reader on the fetched files), so the
+# counts come from stranded_second. No TCGA-CDR: CPTAC is not in it.
+[gdc]
+project = "CPTAC-2"
+release = "Data Release 46.0 - August 10, 2026"
+workflow = "STAR - Counts"
+gene_model = "GENCODE v36"
+protocol = "stranded_second"
+tumour = "Primary Tumor"
+normal = "Solid Tissue Normal"
+primary_site = "Breast"
+
+# Case IDs (11BR047) and the freeze's sample names (X11BR047). Aliquot IDs (CPT followed by
+# digits) are not guarded: tests/test_gdc.py builds a made-up one for the reader's CPTAC path.
+[guard]
+ids = ["PDC000120", "phs000892"]
+patterns = ['\b\d{2}BR\d{3}\b', '\bX\d{2}BR\d{3}\b']
+
+# What M7 reads from the freeze: the protein ratios (log2 to the pooled reference, NAs left in
+# place), the annotation with plex, PAM50 and ERBB2 amplification. Member names as the tarball
+# lists them; the freeze writes case 11BR047 as X11BR047.
+[proteo]
+design = "across_samples"
+protein = "cptac_freeze"
+member = "prosp-brca-v5.4-public-proteome-ratio-norm-NArm.gct"
+annotation = "prosp-brca-v5.4-public-sample-annotation.csv"
+sample_prefix = "X"
+plex = "TMT.Plex"
+tracks = ["PAM50"]
+amplified = "ERBB2.Gene.Amplified"
+genes = ["ERBB2", "GRB7", "STARD3"]
+
+# Complex subunits and metabolic enzymes as the plan counted them from MSigDB 2026.1: GO:CC
+# cytosolic ribosome 121, spliceosomal complex 219, RNA polymerase complex 117, proteasome 66;
+# Reactome amino acid metabolism 358, fatty acid metabolism 175. A gene in both classes (the
+# Reactome amino acid set holds ribosomal proteins, under selenoamino acid metabolism) is left
+# out of both comparisons and counted.
+[proteo.classes.complex]
+resource = "msigdb_go_cc"
+sets = ["GOCC_CYTOSOLIC_RIBOSOME", "GOCC_SPLICEOSOMAL_COMPLEX", "GOCC_RNA_POLYMERASE_COMPLEX", "GOCC_PROTEASOME_COMPLEX"]
+
+[proteo.classes.metabolic]
+resource = "msigdb_reactome"
+sets = ["REACTOME_METABOLISM_OF_AMINO_ACIDS_AND_DERIVATIVES", "REACTOME_FATTY_ACID_METABOLISM"]
+
+# Mertins et al. 2016 Nature, 77 TCGA tumours, iTRAQ: per-gene Pearson r. A different cohort and
+# label chemistry, so printed beside ours and used as a rule's threshold only through the 0.5 floor.
+[proteo.published.mertins]
+source = "Mertins et al. 2016 Nature, doi:10.1038/nature18003: 77 TCGA breast tumours, iTRAQ 4-plex"
+median_pearson = 0.39
+ESR1 = 0.74
+PGR = 0.74
+ERBB2 = 0.84
+GATA3 = 0.83
+significant_pairs = [6135, 9302]
+
+# Krug 2020's supplement (fetched by hand 2026-10-08, md5 e47986e42e3a64abfbd2ae72bd39cd4a) gives
+# the per-gene mRNA-protein correlations only as a histogram, Figure S2G (PDF page 3, legend page
+# 4): Pearson, all genes and those at FDR < 0.01, with no median, mean or count printed. A value
+# read off the bars would be an estimate, so the rule "our median within a band of Krug's" stays
+# UNREGISTERED; K0 records our median beside Mertins' and gates nothing.
+[proteo.sanity]
+registered_at = "2026-10-08 14:56"
+
+[[proteo.sanity.rules]]
+id = "K0"
+text = "Recorded, not gating: the median per-gene Pearson r, beside Mertins 2016's 0.39; Krug 2020 prints no median."
+source = "Mertins et al. 2016 Nature; Krug et al. 2020 Cell Figure S2G, a histogram with no median printed"
+gate = false
+conditions = [{ metric = "pergene.pearson.median", op = ">", value = 0 }]
+
+[[proteo.sanity.rules]]
+id = "K1"
+text = "ESR1, PGR, ERBB2 and GATA3 each have per-gene Pearson r above 0.5 across tumours."
+source = "Mertins et al. 2016 Nature: 0.74, 0.74, 0.84, 0.83 in 77 TCGA tumours"
+conditions = [
+    { metric = "gene.ESR1.pearson", op = ">", value = 0.5 },
+    { metric = "gene.PGR.pearson", op = ">", value = 0.5 },
+    { metric = "gene.ERBB2.pearson", op = ">", value = 0.5 },
+    { metric = "gene.GATA3.pearson", op = ">", value = 0.5 },
+]
+
+[[proteo.sanity.rules]]
+id = "K2"
+text = "Complex subunits have lower per-gene Spearman rho than metabolic enzymes: one-sided Mann-Whitney."
+source = "Mertins et al. 2016 Nature: metabolism enriched among positive correlations; ribosome, RNA polymerase and splicing among negative"
+conditions = [
+    { metric = "class.complex_below_metabolic.p", op = "<", value = 0.05 },
+    { metric = "class.complex.median", op = "<", other = "class.metabolic.median" },
+]
+
+[[proteo.sanity.rules]]
+id = "K3"
+text = "The two missingness figures come before every test on the page."
+source = "TODO.md, Verification: M7 sanity, missingness plotted before any test"
+conditions = [{ metric = "page.missingness_first", op = "==", value = 1 }]

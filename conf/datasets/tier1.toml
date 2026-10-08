@@ -43,6 +43,30 @@ bytes = 124650284
 sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
 dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
 
+# M7's protein side (D11): Rieckmann et al. 2017 Nat Immunol, doi:10.1038/ni.3693, PRIDE
+# PXD004352; Supplementary Table 6, protein copy numbers by the proteomic ruler. Size and
+# SHA-256 from the download of 2026-10-08 (~/ctx_breast/data/raw/papers/_manifest_papers.tsv,
+# md5 870112d79b5ca182d10dbcebb5d0169a); reuse terms UNVERIFIED, so the kit never ships it.
+[[resources]]
+name = "rieckmann_table6"
+urls = [
+    "https://media.springernature.com/original/springer-static/esm/art%3A10.1038%2Fni.3693/MediaObjects/41590_2017_BFni3693_MOESM13_ESM.xlsx",
+]
+bytes = 11193232
+sha256 = "f09c2c03590761fca8b58eb9c3d0a40210b8319e4732f505867ae6238684b184"
+dest = "resources/datasets/tier1/41590_2017_BFni3693_MOESM13_ESM.xlsx"
+
+# MSigDB 2026.1 GO cellular component, for M7's granule class; size and SHA-256 from the
+# download of 2026-10-08 (~/ctx_breast/data/raw/cptac_brca/_manifest_cptac_brca.tsv).
+[[resources]]
+name = "msigdb_go_cc"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/c5.go.cc.v2026.1.Hs.symbols.gmt",
+]
+bytes = 778106
+sha256 = "1ee846c446a87c1b6cc2b097dc415bed1c2f6b539312d2611f946038c5f7e9f8"
+dest = "resources/msigdb/c5.go.cc.v2026.1.Hs.symbols.gmt"
+
 # Patterns are checked against the ENA read_run report of the study by
 # tests/test_repo.py::test_guard_patterns_cover_study (runs ERR7425257-466, experiments
 # ERX6994339-548, samples SAMEA11307688-897, secondary samples ERS8952829-53038, 2026-09-27)
@@ -357,3 +381,56 @@ conditions = [
     { metric = "gsea.ndn_pdac_adjusted.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
     { metric = "gsea.ndn_pdac_within.HALLMARK_INTERFERON_ALPHA_RESPONSE.nes", op = ">", value = 0 },
 ]
+
+# M7, cross-dataset (D11; the M7 plan, approved 2026-10-08): RNA fold changes from M5's
+# ndn_vs_mono_steady against Rieckmann's copy numbers, steady-state neutrophils over classical
+# monocytes, 4 donors each. Monocyte is matched to MO.classical (plan decision 5).
+[proteo]
+design = "cross_dataset"
+protein = "rieckmann_table6"
+contrast = "ndn_vs_mono_steady"
+tested = '^CopyNumber_Neutrophil_\d{2}_steady-state$'
+reference = '^CopyNumber_MO\.classical_\d{2}_steady-state$'
+
+# Neutrophil granules (Cowland and Borregaard 2016): azurophil, specific and tertiary.
+[proteo.classes.granule]
+resource = "msigdb_go_cc"
+sets = ["GOCC_AZUROPHIL_GRANULE", "GOCC_SPECIFIC_GRANULE", "GOCC_TERTIARY_GRANULE"]
+
+# Rieckmann 2017 Supplementary Figure 6b (Supplementary Text and Figures PDF, page 10): Pearson r
+# of RPKM against iBAQ across genes within each of 8 matched cell types, read off the axis at
+# about 0.43 to 0.62, steady-state types near 0.44. Absolute levels within one cell type, not
+# fold changes, and no neutrophil RNA: printed for context, never a rule.
+[proteo.published.rieckmann_fig6b]
+source = "Rieckmann et al. 2017 Nat Immunol, Supplementary Figure 6b, read from the plot"
+low = 0.43
+high = 0.62
+
+# Registered before any protein value was read (M7 plan, P7.1). ctx proteo decides these on its
+# own metrics with ctx.de.sanity; they are apart from [sanity], whose record is closed (D-046).
+[proteo.sanity]
+registered_at = "2026-10-08 14:56"
+
+[[proteo.sanity.rules]]
+id = "P1"
+text = "Neutrophil-over-monocyte fold changes agree in rank at RNA and protein: rho above 0, its whole 95 % interval too."
+source = "M7 plan, sanity rules; Spearman of M5's raw log2 FC against the copy-number log2 FC, bootstrap over genes"
+conditions = [
+    { metric = "fold.spearman", op = ">", value = 0 },
+    { metric = "fold.spearman.low", op = ">", value = 0 },
+]
+
+[[proteo.sanity.rules]]
+id = "P2"
+text = "Granule proteins sit higher at protein than at RNA, against the other genes: one-sided Mann-Whitney on protein minus RNA log2 FC."
+source = "Rorvig et al. 2013 J Leukoc Biol; Cowland and Borregaard 2016 Immunol Rev: granule proteins are made early in granulopoiesis"
+conditions = [
+    { metric = "class.granule.p", op = "<", value = 0.05 },
+    { metric = "class.granule.rank_biserial", op = ">", value = 0 },
+]
+
+[[proteo.sanity.rules]]
+id = "P3"
+text = "The missingness figure comes before every test on the page."
+source = "TODO.md, Verification: M7 sanity, missingness plotted before any test"
+conditions = [{ metric = "page.missingness_first", op = "==", value = 1 }]
