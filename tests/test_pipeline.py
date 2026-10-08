@@ -227,3 +227,61 @@ def test_check_finds_no_matrix_and_fixes_paste(tmp_path, runs):
     assert any(t.startswith("--rnaseq-dir holds no count matrix") for t in texts), texts
     (fetch,) = [t for t in texts if t.startswith("resource ")]
     assert f"; run {' '.join(launcher())} --root " in fetch, fetch
+
+
+def test_folders_carried_to_the_modules_that_take_them(tmp_path, runs):
+    """--salmon-dir reaches quant and --mirna-dir with --isoform-dir reach gather on the GDC
+    route, each parsed by that module's own command line. Catches quant planned without
+    --salmon-dir, gather without the miRNA folders, and a flag the module does not take."""
+    spec_path = _spec(tmp_path, runs)
+    spec = replace(load(spec_path), resources=(*load(spec_path).resources, replace_resource()))
+    salmon, mirna, isoform = tmp_path / "salmon", tmp_path / "mirna", tmp_path / "isoform"
+    reads = pipeline.Options("mine", spec_path, FIXTURE, tmp_path / "rnaseq", salmon_dir=salmon)
+    gdc = pipeline.Options("mine", spec_path, gdc_dir=tmp_path, mirna_dir=mirna,
+                           isoform_dir=isoform)  # fmt: skip
+    quant = dict(pipeline.steps(spec, reads))["quant"]
+    gather = dict(pipeline.steps(spec, gdc))["gather"]
+    assert quant[quant.index("--salmon-dir") + 1] == str(salmon)
+    assert gather[gather.index("--mirna-dir") + 1] == str(mirna)
+    assert gather[gather.index("--isoform-dir") + 1] == str(isoform)
+    commands = typer.main.get_command(app).commands  # type: ignore[attr-defined]
+    for module, args in (*pipeline.steps(spec, reads), *pipeline.steps(spec, gdc)):
+        parsed = commands[module].make_context(module, list(args)).params
+        for flag, value in zip(args[::2], args[1::2], strict=True):
+            assert str(parsed[flag.lstrip("-").replace("-", "_")]) == value, (module, flag)
+
+
+def test_check_refuses_folders_no_module_reads(tmp_path, runs):
+    """--check lists, together, a miRNA folder without its isoform folder or --gdc-dir, a salmon
+    folder without --rnaseq-dir, and a folder that is not there, each stopping the run. Catches
+    ``_pairing`` returning nothing, and a missing folder among the three left unchecked."""
+    spec_path = _spec(tmp_path, runs)
+    mirna = tmp_path / "mirna"
+    options = pipeline.Options("mine", spec_path, FIXTURE, mirna_dir=mirna,
+                               salmon_dir=tmp_path)  # fmt: skip
+    problems, _ = pipeline.check(tmp_path / "root", options)
+    texts = {p.text for p in problems if p.blocks}
+    assert {f"--mirna-dir {mirna} is not a folder",
+            "--mirna-dir and --isoform-dir go together: gather reads both",
+            "--mirna-dir and --isoform-dir take --gdc-dir",
+            "--salmon-dir takes --rnaseq-dir: quant reads both"} <= texts, texts  # fmt: skip
+    # With --rnaseq-dir but no annotation_gtf, quant is not planned and nothing reads it.
+    no_gtf = replace(options, rnaseq_dir=tmp_path, mirna_dir=None)
+    texts = {p.text for p in pipeline.check(tmp_path / "root", no_gtf)[0]}
+    assert any(t.startswith("--salmon-dir is read by quant alone") for t in texts), texts
+
+
+def test_run_check_takes_the_folders(tmp_path, runs):
+    """`ctx run --check` takes --salmon-dir, --mirna-dir and --isoform-dir and hands them to the
+    check. Catches the command dropping one of them before ``pipeline.Options``."""
+    spec_path = _spec(tmp_path, runs)
+    root = tmp_path / "root"
+    root.mkdir()
+    done = ctx_run("--root", str(root), "run", "--dataset", "mine", "--dataset-file",
+                   str(spec_path), "--fetchngs-dir", str(FIXTURE), "--salmon-dir", str(tmp_path),
+                   "--mirna-dir", str(tmp_path / "m"), "--isoform-dir", str(tmp_path / "i"),
+                   "--check", cwd=root)  # fmt: skip
+    assert done.returncode == 1
+    for text in ("--salmon-dir takes --rnaseq-dir", f"--mirna-dir {tmp_path / 'm'} is not",
+                 f"--isoform-dir {tmp_path / 'i'} is not"):  # fmt: skip
+        assert text in done.stderr, done.stderr
