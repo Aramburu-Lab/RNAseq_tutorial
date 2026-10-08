@@ -52,8 +52,8 @@ def test_gene_types_read_gzip_and_plain_alike(tmp_path):
 def test_gene_types_coordinates_come_from_the_gene_line(tmp_path):
     """Start, end and strand of the gene record, typed; the exon line after it is ignored.
 
-    Catches: start and end swapped, the strand dropped or read from another column, or the
-    exon's coordinates kept over the gene's (the exon line comes second, with its own span).
+    Catches: start and end swapped, the strand read from another column, or the columns left
+    as text. The exon line, with its own span and strand, stays out.
     """
     gene = 'gene_id "G"; gene_type "lncRNA"; gene_name "LNC";'
     path = tmp_path / "c.gtf"

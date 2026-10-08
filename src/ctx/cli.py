@@ -376,6 +376,32 @@ def function(
 
 @app.command()
 @profiled
+def ncrna(
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    biotypes: Annotated[str, typer.Option(help=HELP["--biotypes"])] = "protein_coding,lncRNA",
+    min_count: Annotated[int, typer.Option(help=HELP["--min-count"])] = 10,
+) -> None:
+    """Non-coding genes by biotype, and each lncRNA beside its nearest gene; the M8 page."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.ncrna import NcrnaError  # noqa: PLC0415 - same reason
+    from ctx.ncrna import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = runtime.retypable(sys.argv[1:])
+    options = module.Options(dataset_file, _columns(biotypes), min_count)
+    try:
+        written = module.run(ctx.obj["settings"], cards, command, dataset, options)
+    except (DatasetError, NcrnaError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
 def clinical(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     ctx: typer.Context,
     dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],

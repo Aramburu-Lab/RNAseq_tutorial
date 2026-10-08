@@ -1,0 +1,41 @@
+{% raw %}
+/* The page twin of ctx.ncrna.neighbours: Spearman's rho, on values and on residuals within
+   each stratum, for the pair a reader picks (M8). tests/test_ncrna.py runs both on the same
+   cases under node. */
+var ctxPairs = {
+  /* Ranks from 1, ties at their mean rank: scipy's rankdata "average". */
+  rank: function (values) {
+    var order = values.map(function (v, i) { return i; });
+    order.sort(function (a, b) { return values[a] - values[b] || a - b; });
+    var ranks = new Array(values.length), i = 0;
+    while (i < order.length) {
+      var j = i;
+      while (j + 1 < order.length && values[order[j + 1]] === values[order[i]]) j++;
+      for (var k = i; k <= j; k++) ranks[order[k]] = (i + j) / 2 + 1;
+      i = j + 1;
+    }
+    return ranks;
+  },
+  /* Pearson's r of the ranks; null where a side holds one value throughout. */
+  spearman: function (a, b) {
+    var ra = ctxPairs.rank(a), rb = ctxPairs.rank(b), n = a.length;
+    var ma = ra.reduce(function (s, v) { return s + v; }, 0) / n;
+    var mb = rb.reduce(function (s, v) { return s + v; }, 0) / n;
+    var sab = 0, saa = 0, sbb = 0;
+    for (var i = 0; i < n; i++) {
+      var da = ra[i] - ma, db = rb[i] - mb;
+      sab += da * db; saa += da * da; sbb += db * db;
+    }
+    return saa > 0 && sbb > 0 ? sab / Math.sqrt(saa * sbb) : null;
+  },
+  /* Each value minus the mean of its stratum. */
+  residuals: function (values, strata) {
+    var sum = {}, count = {};
+    values.forEach(function (v, i) {
+      sum[strata[i]] = (sum[strata[i]] || 0) + v;
+      count[strata[i]] = (count[strata[i]] || 0) + 1;
+    });
+    return values.map(function (v, i) { return v - sum[strata[i]] / count[strata[i]]; });
+  }
+};
+{% endraw %}

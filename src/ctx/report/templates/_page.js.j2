@@ -2,6 +2,7 @@
 {% include "_calls.js.j2" %}
 {% include "_brush.js.j2" %}
 {% include "_filter.js.j2" %}
+{% include "_pairs.js.j2" %}
 {% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% if live %}{% include "_select.js.j2" %}
@@ -137,8 +138,8 @@
   /* Live calling: ctxCalls holds the rule; this block reads the controls, redraws the points
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
-  /* The filter form borrows the calls panel's look (class "calls"), not its script. */
-  document.querySelectorAll("form.calls:not(.filter)").forEach(function (form) {
+  /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
+  document.querySelectorAll("form.calls:not(.filter):not(.pairs)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -232,6 +233,12 @@
      names, in both traces, and keeps the live line in step. */
   document.querySelectorAll("form.brush").forEach(function (form) {
     guard("brush", function () { brushing(form); });
+  });
+
+  /* M8's pair select: ctxPairs recomputes both rho for the pair chosen; this block redraws its
+     points and refills the lead's numbers and the live line. */
+  document.querySelectorAll("form.pairs").forEach(function (form) {
+    guard("pairs", function () { pairing(form); });
   });
 
   /* M10's survival panel: ctxLive scores a gene list and redraws its figures (GS.7). */
@@ -446,6 +453,43 @@
       draw();
     });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
+  }
+
+  /* The chosen pair's values replace every trace's points, sample by sample (cfg.members
+     names each trace's samples in order); rho on values and on residuals comes from ctxPairs,
+     q from the pair's row, which BH set over every pair. */
+  function pairing(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var div = fig.querySelector(".js-plotly-plot");
+    var lead = fig.querySelector(".fig-lead"), summary = fig.querySelector(".pairs-summary");
+    var mark = exporting(fig, cfg);
+    function rho(value) { return value === null ? cfg.none : value.toFixed(2); }
+    function fill(text, values) {
+      return text.replace(/\{(\w+)\}/g, function (all, key) {
+        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : all;
+      });
+    }
+    function update() {
+      var i = Number(form.elements.pair.value), pair = cfg.pairs[i];
+      var x = ctxPairs.residuals(pair.x, cfg.strata), y = ctxPairs.residuals(pair.y, cfg.strata);
+      var values = Object.assign({}, pair.words, {
+        rho: rho(ctxPairs.spearman(pair.x, pair.y)), rho_within: rho(ctxPairs.spearman(x, y))
+      });
+      Plotly.restyle(div, {
+        x: cfg.members.map(function (m) { return m.map(function (j) { return pair.x[j]; }); }),
+        y: cfg.members.map(function (m) { return m.map(function (j) { return pair.y[j]; }); })
+      }, cfg.members.map(function (m, k) { return k; }));
+      if (lead) lead.querySelectorAll("[data-fill]").forEach(function (span) {
+        span.textContent = values[span.getAttribute("data-fill")];
+      });
+      summary.textContent = fill(cfg.summary_template, values);
+      mark(i !== 0);
+    }
+    form.addEventListener("change", update);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the select without an event. */
+    update();
   }
 
   function filtering(form) {

@@ -270,6 +270,8 @@ class ScatterData:
         thinned: The caption's words for the units the page may thin, such as "genes not
             called"; empty takes the page text's own: points no setting can call, with
             ``calls``, else other points. Needed with ``unit``.
+        live: Settings of another page control that redraws the points, with its ``kind``,
+            such as M8's pair select; None for none. Not with ``calls``, which is one itself.
     """
 
     frame: pl.DataFrame
@@ -296,6 +298,7 @@ class ScatterData:
     labels: Mapping[str, str] | None = None
     unit: str | None = None
     thinned: str = ""
+    live: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -318,19 +321,27 @@ class ScatterData:
             raise ValueError(f"{len(self.colours)} colour levels; at most {MAX_CATEGORIES}")
         if stray := set(self.frame[self.colour].unique()) - set(self.colours):
             raise ValueError(f"{self.colour}: levels {sorted(stray)} have no colour")
-        if self.calls and set(self.calls.levels) != set(self.colours):
-            raise ValueError(f"call levels {self.calls.levels} are not the colour levels")
-        if self.calls and self.symbol:
-            # The page script finds one trace per colour level; shapes would split them.
-            raise ValueError("live calls cannot be combined with a symbol column")
-        if self.calls and self.size:
-            # The page script moves points between traces by position, never their sizes.
-            raise ValueError("live calls cannot be combined with a size column")
         if self.size and not (self.frame[self.size].fill_null(0) >= 0).all():
             raise ValueError(f"{self.size}: sizes must be non-negative")
         if self.symbol and self.frame[self.symbol].n_unique() > len(MARKERS):
             raise ValueError(f"{self.symbol}: more levels than the {len(MARKERS)} marker shapes")
+        self._check_controls()
         self._check_unit()
+
+    def _check_controls(self) -> None:
+        """Refuse page controls the page script could only apply wrongly."""
+        if self.calls and self.live:
+            raise ValueError("live calls are the figure's one control; live takes another")
+        if (self.calls or self.live) and self.symbol:
+            # The page script finds one trace per colour level; shapes would split them.
+            raise ValueError("a page control cannot be combined with a symbol column")
+        if self.calls is None:
+            return
+        if set(self.calls.levels) != set(self.colours):
+            raise ValueError(f"call levels {self.calls.levels} are not the colour levels")
+        if self.size:
+            # The page script moves points between traces by position, never their sizes.
+            raise ValueError("live calls cannot be combined with a size column")
 
     def _check_unit(self) -> None:
         """Refuse a unit the caption cannot name, or one a thinned page would split."""
@@ -361,9 +372,9 @@ class ScatterData:
         return rows.select(self.calls.page_columns(self.hover)) if self.calls else rows
 
     def controls(self) -> dict[str, Any] | None:
-        """The live-calling settings the page script reads, or None without ``calls``."""
+        """The live-calling settings the page script reads, else ``live``'s, else None."""
         if self.calls is None:
-            return None
+            return dict(self.live) if self.live is not None else None
         c = self.calls
         first_line = len(self.colours) + len(self.lines)
         return {

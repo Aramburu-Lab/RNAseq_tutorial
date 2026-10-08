@@ -73,7 +73,8 @@ def gene_types(gtf: Path) -> pl.DataFrame:
                              found.get("gene_type"), fields[0], int(fields[3]), int(fields[4]),
                              fields[6]))  # fmt: skip
     schema = {"gene_id": pl.String, "gene_name": pl.String, "gene_type": pl.String,
-              "chrom": pl.String, "start": pl.Int64, "end": pl.Int64, "strand": pl.String}  # fmt: skip
+              "chrom": pl.String, "start": pl.Int64, "end": pl.Int64,
+              "strand": pl.String}  # fmt: skip
     return pl.DataFrame(rows, schema=schema, orient="row").unique(
         "gene_id", keep="first", maintain_order=True
     )
