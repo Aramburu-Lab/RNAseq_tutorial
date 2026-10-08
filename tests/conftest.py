@@ -161,3 +161,24 @@ def process_rerun(process_root, tmp_path_factory):
     assert done.returncode == 0, done.stderr[-3000:]
     (page,) = (root / "outputs" / "03_process").glob(f"*_process_{DATASET}_overview_v1.html")
     return root, page.read_text(), before
+
+
+@pytest.fixture(scope="session")
+def quant_built(tmp_path_factory):
+    """`ctx quant` on the quant fixture, once per session: (root, dataset file, files written)."""
+    from quant_root import DATASET, RNASEQ, SALMON, quant_root  # noqa: PLC0415
+
+    root = tmp_path_factory.mktemp("quant")
+    spec = quant_root(root)
+    done = ctx_run("--root", str(root), "quant", "--dataset", DATASET, "--dataset-file",
+                   str(spec), "--rnaseq-dir", str(RNASEQ), "--salmon-dir", str(SALMON),
+                   cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, spec, [Path(p) for p in done.stdout.split()]
+
+
+@pytest.fixture(scope="session")
+def quant_run(quant_built):
+    """(root, overview html) of ``quant_built``: test_cli's card test reads its page."""
+    root, _, written = quant_built
+    return root, written[0].read_text()

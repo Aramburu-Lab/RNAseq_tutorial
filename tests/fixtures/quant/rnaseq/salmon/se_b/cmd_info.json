@@ -1,0 +1,13 @@
+{
+  "salmon_version": "2.7.0",
+  "index": "index",
+  "libType": "A",
+  "output": "se_b",
+  "mates1": [],
+  "mates2": [],
+  "unmatedReads": [
+    "se_b.fq"
+  ],
+  "threads": 1,
+  "sketch": false
+}

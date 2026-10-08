@@ -113,6 +113,14 @@ effect = "Fewer reads run faster; gene counts grow noisier."
 meaning = "A dataset slug whose Salmon counts and qc metrics cover these samples."
 effect = "Adds each sample's expected share of reads and Salmon's strand call."
 
+[options."--salmon-dir"]
+meaning = "Salmon's per-sample folders with quant.sf. Unset: data/raw/<dataset>_salmon, if present."
+effect = "Set or present: gene and transcript figures, and ctx's gene counts."
+
+[options."--counts-from-abundance"]
+meaning = "How ctx's [[tx2gene|tximport]] port makes gene counts from transcript estimates."
+effect = "The value no keeps Salmon's estimates, which shift with isoform use."
+
 [effects.setup]
 "--dataset-file" = "Set: fetches each resource, keeping it only if size and SHA-256 match."
 
@@ -135,6 +143,10 @@ effect = "Adds each sample's expected share of reads and Salmon's strand call."
 "--registry" = "Its strand thresholds and start-codon bands decide the calls."
 "--fastp-q" = "Higher: more unqualified bases, so fewer reads reach the aligner."
 "--fastp-l" = "Higher drops short reads, which more often align to several loci."
+
+[effects.quant]
+"--rnaseq-dir" = "Its gene matrix and Salmon logs are read; nothing is written there."
+"--dataset-file" = "Its `annotation_gtf` gives gene types; its featured contrast, the fold changes."
 
 [effects.de]
 "--dataset-file" = "Selects contrasts, designs, expected n, featured contrast, lessons and PCA subsets."

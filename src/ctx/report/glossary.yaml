@@ -765,6 +765,17 @@
     biases. Decoy-aware indexes need much memory to build; hosted indexes avoid that.
   see_also: [pseudoalignment, effective_length, strandedness_inference]
 
+- id: decoy
+  term: decoy
+  aliases: [decoys, decoy sequence, decoy-aware index]
+  category: quantification
+  short: Genome sequence added to a Salmon index so fragments from outside the transcriptome map there.
+  long: >-
+    Without decoys, a fragment from an intron or an unannotated region can map to a similar
+    transcript and inflate its estimate. Salmon counts a fragment that aligns better to a decoy
+    as a decoy fragment and leaves it out of every transcript.
+  see_also: [salmon, index_alignment, mapping_rate]
+
 - id: index_alignment
   term: index (alignment)
   aliases: [genome index, transcriptome index, STAR index, Salmon index]
@@ -995,9 +1006,9 @@
   category: quantification
   short: Table mapping each transcript to its gene, used to sum transcript estimates into gene counts.
   long: >-
-    Built from the GTF. pytximport sums Salmon estimates per gene and can rescale them by
+    Built from the GTF. tximport sums Salmon estimates per gene and can rescale them by
     length (lengthScaledTPM) so gene counts reflect changes in abundance rather than in
-    isoform length.
+    isoform length. ctx quant runs its own port, checked against R's tables.
   see_also: [transcript, salmon]
 
 - id: vst
