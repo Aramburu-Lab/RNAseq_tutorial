@@ -138,8 +138,17 @@ def clinical_run(tmp_path_factory):
     return root, _page(root, "12_clinical", "fake_brca_overview")
 
 
+@pytest.fixture(scope="module")
+def proteo_run(tmp_path_factory):
+    from proteo_root import cross  # noqa: PLC0415 - the made-up cross-dataset root of the M7 tests
+
+    root = cross(tmp_path_factory.mktemp("proteo_cli"))
+    return root, _page(root, "07_proteo", "fake_cells_overview")
+
+
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
-COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical"]
+COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report", "clinical",
+            "proteo"]  # fmt: skip
 
 
 def test_every_subcommand_has_a_card_test():

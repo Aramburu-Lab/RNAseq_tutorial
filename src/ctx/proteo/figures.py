@@ -22,8 +22,9 @@ PAGE = "proteo"
 # Category colours, the projector-unsafe yellow left out; at most seven levels (CONVENTIONS.md).
 COLOURS = tuple(c for c in DATA_COLOURS if c not in PROJECTOR_UNSAFE)
 # One colour per gene class on every figure, by role: Other is the reference population.
-CLASS_COLOURS = {"granule": ROLES["comparison"], "complex": "#E69F00", "metabolic": "#009E73",
-                 measure.OTHER: ROLES["reference"]}  # fmt: skip
+# Complex and metabolic take the palette's orange and green, which no role holds.
+CLASS_COLOURS = {"granule": ROLES["comparison"], "complex": DATA_COLOURS[0],
+                 "metabolic": DATA_COLOURS[2], measure.OTHER: ROLES["reference"]}  # fmt: skip
 
 
 def columns(*names: str) -> dict[str, tuple[str, str]]:
@@ -52,7 +53,7 @@ def short(names: tuple[str, ...]) -> list[str]:
     """Sample names without the words every one of them shares at either end.
 
     ``CopyNumber_Neutrophil_01_steady-state`` becomes ``Neutrophil_01``: whole underscore-
-    separated words only, so ``X11BR047`` and ``X18BR010`` keep their shared ``X``.
+    separated words only, so ``XA01`` and ``XA02`` keep their shared ``X``.
     """
     parts = [n.split("_") for n in names]
     head = len(os.path.commonprefix(parts))

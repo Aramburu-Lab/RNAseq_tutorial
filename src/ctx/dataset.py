@@ -215,7 +215,8 @@ class ProteoSpec:
         reference: The same for the reference group.
         classes: Gene classes by name.
         published: Numbers a page prints beside its own, each table with its ``source``.
-        sanity: The ``[proteo.sanity]`` table: ``registered`` and ``[[rules]]``.
+        sanity: The ``[proteo.sanity]`` table: ``registered_at`` and ``[[rules]]``; not
+            ``registered``, the key whose commits mark the Step-1 [sanity] registration.
     """
 
     design: str

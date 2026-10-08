@@ -55,14 +55,14 @@ def _lint(release=False, **fields):
 
 
 def test_the_packaged_glossary_passes_its_lint():
-    """180 entries, decoy (M4) the latest, and no error; the draft's 8 unverified entries carry
+    """182 entries, proteomic ruler (M7) the latest, and no error; the draft's 8 unverified entries carry
     sources now (L.5).
 
     Mutation: 'robust' written back into mad.short fails it (a banned word).
     """
     errors, warnings = glossary_lint.lint()
     assert errors == []
-    assert len(glossary.load()) == len(RAW) == 180
+    assert len(glossary.load()) == len(RAW) == 182
     assert not [w for w in warnings if "confirm: true" in w]
 
 
@@ -362,7 +362,7 @@ def test_the_glossary_page(tmp_path):
     assert len(html.encode()) < MAX_BYTES
     ids = re.findall(r'<article class="entry" id="([^"]+)"', html)
     assert ids == [e.id for _, entries in glossary.grouped() for e in entries]
-    assert len(ids) == 180
+    assert len(ids) == 182
     assert len(re.findall(r'<section class="glossary-group"', html)) == 14
     gc = re.search(r'<article class="entry" id="gc_content" data-search="([^"]*)">(.*?)</article>',
                    html, re.S)  # fmt: skip

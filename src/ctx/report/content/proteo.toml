@@ -56,8 +56,8 @@ prompt = "Why is a protein missing from one [[TMT]] plex not a zero in those sam
 answer = "No peptide of it was identified in that run; it may be present below detection. A zero would claim absence and pull its mean and fold change down."
 
 [[questions]]
-prompt = "Granule proteins sit above the diagonal of neutrophil over monocyte fold changes. What does that say about timing?"
-answer = "Granule proteins are made in the bone marrow and stored; mature neutrophils keep the protein after the mRNA has gone."
+prompt = "A gene sits far above the diagonal of neutrophil over monocyte fold changes. Which timing of synthesis explains it?"
+answer = "Granule proteins are made in the bone marrow and stored; mature neutrophils keep the protein after the mRNA has gone. Check the class figure before generalising."
 
 [abundance]
 across_samples = "log2(CPM + 1), mean over samples"
@@ -70,7 +70,6 @@ tested_detail = "Quantified in at least {pct} % of samples"
 rho = "Median per-gene ρ"
 fold = "Fold-change ρ"
 fold_detail = "Bootstrap 95 % CI {low:.2f} to {high:.2f}"
-samples = "Samples in both layers"
 
 [groups]
 missing = "Missingness first"
