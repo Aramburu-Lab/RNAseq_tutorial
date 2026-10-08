@@ -6,7 +6,8 @@
 
 Every number is drawn from one seeded generator over the made-up dataset's own samples, read
 from its gather sheet, so the preview pages name the same samples. The text is
-``content/quant.toml``, which the real module will read. Called by ``build_preview.py``.
+``content/quant_preview.toml``; the sample correlation's bins are ``ctx quant``'s own.
+Called by ``build_preview.py``.
 """
 
 from __future__ import annotations
@@ -26,6 +27,7 @@ from scipy.stats import mannwhitneyu, spearmanr
 from ctx import runtime
 from ctx.de.run import Writer
 from ctx.io.naming import MODULES
+from ctx.quant.figures import rho_levels
 from ctx.report import text
 from ctx.report.builder import (
     FigureBlock,
@@ -39,15 +41,15 @@ from ctx.report.builder import (
 )
 from ctx.viz.bar import BarData
 from ctx.viz.curve import CurveData
-from ctx.viz.heatmap import HeatmapData, Swatch, Track
+from ctx.viz.heatmap import HeatmapData, Track
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.strip import StripData
-from ctx.viz.style import CIVIDIS, DATA_COLOURS, category_colours
+from ctx.viz.style import DATA_COLOURS, category_colours
 
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
 SHOWN = ("ui", "preview.dataset")
 
-MODULE = PAGE = "quant"
+MODULE, PAGE = "quant", "quant_preview"
 SEED = 4
 # A gene is detected at this many reads; the figures only, the real module has no such option.
 MIN_READS = 10
@@ -63,7 +65,6 @@ GENES = 3_000  # genes behind the correlation matrix
 # (sheet column, share of genes it shifts, SD of the log2 shift) for samples not in its
 # first level: cell type dominates, as it does in immune-cell data.
 EFFECTS = (("cell_type", 0.25, 1.6), ("batch", 0.08, 0.7), ("condition", 0.04, 1.0))
-BINS = 6  # rho bins of equal width over the off-diagonal range, so colour follows the value
 UNIVERSE, DRAWN = 20_000, 2_500  # genes in one sample, and those the units figure draws
 LENGTH = (1_800.0, 0.7, 150.0, 12_000.0)  # effective length nt: median, log SD, floor, ceiling
 SHORT_NT, LONG_NT = 1_000, 4_000
@@ -239,23 +240,6 @@ def permutation(rho: np.ndarray, labels: np.ndarray, rng: np.random.Generator) -
     same = labels[upper[0]] == labels[upper[1]]
     medians = {"within": float(np.median(values[same])), "between": float(np.median(values[~same]))}
     return observed, (1 + int((null >= observed).sum())) / (1 + PERMUTATIONS), medians
-
-
-def rho_levels(rho: np.ndarray) -> tuple[list[str | None], tuple[Swatch, ...]]:
-    """Each cell's rho bin, in cividis from low to high; no bin on the diagonal."""
-    off = rho[np.triu_indices(rho.shape[0], 1)]
-    edges = np.unique(np.round(np.linspace(off.min(), off.max(), BINS + 1)[1:-1], 3))
-    key = "figures.correlation.bins"
-    pairs = zip(edges[:-1], edges[1:], strict=True)
-    names = [text.fill(PAGE, f"{key}.below", edge=edges[0]),
-             *(text.fill(PAGE, f"{key}.between", low=a, high=b) for a, b in pairs),
-             text.fill(PAGE, f"{key}.above", edge=edges[-1])]  # fmt: skip
-    stops = np.linspace(0, len(CIVIDIS) - 1, len(names)).round().astype(int)
-    swatches = tuple(Swatch(name, CIVIDIS[i]) for name, i in zip(names, stops, strict=True))
-    n = rho.shape[0]
-    levels = [None if i == j else names[int(np.searchsorted(edges, rho[i, j], side="right"))]
-              for i in range(n) for j in range(n)]  # fmt: skip
-    return levels, swatches
 
 
 def correlation_figure(writer: Writer, design: Design, metrics: pl.DataFrame,

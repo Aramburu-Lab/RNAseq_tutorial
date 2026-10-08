@@ -93,8 +93,8 @@ class GeneTables:
         """One table as gene_id (and gene_name, where ``names`` is given), then each sample."""
         frame = pl.DataFrame(values, schema=list(self.samples), orient="row")
         if names is not None:
-            frame = frame.insert_column(0, pl.Series("gene_name", [names.get(g, g)
-                                                                   for g in self.genes]))  # fmt: skip
+            named = [names.get(g, g) for g in self.genes]
+            frame = frame.insert_column(0, pl.Series("gene_name", named))
         return frame.insert_column(0, pl.Series("gene_id", self.genes))
 
 
@@ -126,7 +126,7 @@ def _rowsum(index: NDArray[np.int64], values: Matrix, n_rows: int) -> Matrix:
 
 
 def _fill(lengths: Matrix, mean_length: Matrix) -> Matrix:
-    """tximport's replaceMissingLength: a gene's missing lengths, filled in place of NaN.
+    """Fill a gene's missing lengths as tximport's replaceMissingLength does.
 
     Args:
         lengths: Genes by samples, NaN where a gene had no TPM.
@@ -159,7 +159,7 @@ def summarize(quants: Iterable[tuple[str, pl.DataFrame]], tx2gene: pl.DataFrame)
     samples: list[str] = []
     names: pl.Series | None = None
     sums = _Sums([], [], [], np.zeros(0))
-    index, rows, extra = np.zeros(0, dtype=np.int64), [], set()
+    index, rows, extra = np.zeros(0, dtype=np.int64), list[str](), set[str]()
     for sample, quant in quants:
         if names is None:
             names = quant[NAME]
@@ -179,7 +179,14 @@ def summarize(quants: Iterable[tuple[str, pl.DataFrame]], tx2gene: pl.DataFrame)
     with np.errstate(invalid="ignore", divide="ignore"):
         lengths = weighted / tpm
     per_transcript = sums.length_total / len(samples)
-    mean_length = _rowsum(index, per_transcript, len(rows)) / np.bincount(index,
-                                                                          minlength=len(rows))
-    return GeneTables(tuple(rows), tuple(samples), np.column_stack(sums.counts), tpm,
-                      _fill(lengths, mean_length), np.array([r not in extra for r in rows]))
+    mean_length = _rowsum(index, per_transcript, len(rows)) / np.bincount(
+        index, minlength=len(rows)
+    )
+    return GeneTables(
+        tuple(rows),
+        tuple(samples),
+        np.column_stack(sums.counts),
+        tpm,
+        _fill(lengths, mean_length),
+        np.array([r not in extra for r in rows]),
+    )

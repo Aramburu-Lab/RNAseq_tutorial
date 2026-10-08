@@ -62,8 +62,9 @@ def merged(folder: Path, what: str, keys: Sequence[str], samples: Sequence[str])
     """One merged table, its keys as text and the samples' columns as Float64, in that order."""
     path = folder / MERGED.format(what)
     schema = {**dict.fromkeys(keys, pl.String), **dict.fromkeys(samples, pl.Float64)}
-    return pl.scan_csv(path, separator="\t", schema_overrides=schema).select(*keys,
-                                                                          *samples).collect()
+    return (
+        pl.scan_csv(path, separator="\t", schema_overrides=schema).select(*keys, *samples).collect()
+    )
 
 
 def column_sums(folder: Path, what: str, samples: Sequence[str]) -> dict[str, float]:

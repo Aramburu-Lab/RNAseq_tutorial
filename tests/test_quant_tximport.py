@@ -38,13 +38,19 @@ RELATIVE = 1e-12
 def tables(name: str) -> tuple[tximport.GeneTables, Path, tuple[str, ...], str]:
     """ctx's gene tables of one set, and where R's are."""
     folder, samples, prefix = SETS[name]
-    return tximport.summarize(outdir.quants(folder, samples), outdir.tx2gene(folder)), folder, \
-        samples, prefix
+    return (
+        tximport.summarize(outdir.quants(folder, samples), outdir.tx2gene(folder)),
+        folder,
+        samples,
+        prefix,
+    )
 
 
 @pytest.mark.parametrize("name", list(SETS))
-@pytest.mark.parametrize("table", ["gene_counts", "gene_tpm", "gene_lengths",
-                                   "gene_counts_length_scaled", "gene_counts_scaled"])
+@pytest.mark.parametrize(
+    "table",
+    ["gene_counts", "gene_tpm", "gene_lengths", "gene_counts_length_scaled", "gene_counts_scaled"],
+)
 def test_tximport_matches_r(name, table):
     ours, folder, samples, prefix = tables(name)
     values = {

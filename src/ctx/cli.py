@@ -15,6 +15,7 @@ import typer
 from ctx import __version__, runtime
 from ctx.process import DEFAULT_SETTINGS, Aligner, Strandedness
 from ctx.qc import Fastp
+from ctx.quant import CountsFrom
 from ctx.report import text
 from ctx.report.builder import ParameterCard
 from ctx.report.marks import plain
@@ -274,6 +275,35 @@ def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI optio
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, QcError, ProcessError, RegistryError, ToolError) as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+
+
+@app.command()
+@profiled
+def quant(
+    ctx: typer.Context,
+    dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
+    dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    rnaseq_dir: Annotated[Path, typer.Option(help=HELP["--rnaseq-dir"])],
+    salmon_dir: Annotated[Path | None, typer.Option(help=HELP["--salmon-dir"])] = None,
+    counts_from_abundance: Annotated[
+        CountsFrom, typer.Option(help=HELP["--counts-from-abundance"])
+    ] = CountsFrom.LENGTH_SCALED_TPM,
+) -> None:
+    """Read what Salmon did with every sample, and how transcripts became gene counts (M4)."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
+    from ctx.quant import QuantError  # noqa: PLC0415 - same reason
+    from ctx.quant import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+
+    cards = parameter_cards(ctx.find_root().command, ctx.command)
+    command = runtime.retypable(sys.argv[1:])
+    options = module.Options(dataset_file, rnaseq_dir, salmon_dir, counts_from_abundance)
+    try:
+        written = module.run(ctx.obj["settings"], cards, command, dataset, options)
+    except (DatasetError, QuantError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

@@ -128,7 +128,7 @@ def qc_run(tmp_path_factory):
 
 
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
-COMMANDS = ["setup", "gather", "qc", "process", "de", "function", "report"]
+COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "report"]
 
 
 def test_every_subcommand_has_a_card_test():

@@ -1,4 +1,4 @@
-"""M4: what Salmon did with each sample's reads, and how transcripts become gene counts (`ctx quant`).
+"""M4 (`ctx quant`): what Salmon did with each sample's reads, and how genes get counts.
 
 Dependency-free, so the command line reads its choices without importing the analysis stack
 (D-034's rule for `ctx qc`).
