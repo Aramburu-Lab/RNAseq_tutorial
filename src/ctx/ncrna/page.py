@@ -17,9 +17,10 @@ from ctx.de.run import Writer
 from ctx.de.sanity import decide, parse
 from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.io.naming import stem
-from ctx.ncrna import biotypes, figures
+from ctx.ncrna import biotypes, figures, mirna_page
 from ctx.report import text
 from ctx.report.builder import (
+    FIELDS,
     FigureText,
     Group,
     KeyNumber,
@@ -78,7 +79,8 @@ def contrast_words(ctx: Context) -> dict[str, Any]:
     """The contrast's names and group sizes, which several captions print."""
     c, used = ctx.inputs.contrast, ctx.inputs.used
     n_test = int((used["group"] == "tested").sum())
-    cell = ", ".join(used["cell_type"].unique(maintain_order=True).to_list())
+    cell = (", ".join(used["cell_type"].unique(maintain_order=True).to_list())
+            if "cell_type" in used.columns else ctx.inputs.spec.name)  # fmt: skip
     return {"reference": c.reference, "tested": c.tested, "cell_type": cell,
             "n_ref": used.height - n_test, "n_test": n_test, "contrast": c.name}  # fmt: skip
 
@@ -105,8 +107,10 @@ def library(writer: Writer, ctx: Context) -> tuple[list[Result], dict[str, tuple
                 note=word("figures.composition.note"))  # fmt: skip
     shares = writer.figure(bars, "biotype_shares", replace(figure_text_fixed("composition"),
                                                            follows=lead))  # fmt: skip
-    poly_a = wide.filter(pl.col("library_selection").is_in(biotypes.POLY_A))
+    selected = "library_selection" in wide.columns
+    poly_a = wide.filter(pl.col("library_selection").is_in(biotypes.POLY_A)) if selected else wide
     top = float(poly_a["mirna_percent"].to_numpy().max()) if poly_a.height else float("nan")
+    which = "poly-A" if selected else "every library, its selection not on the sheet"
     columns = contrast_columns(ctx)
     used = ctx.inputs.used
     sizes = [int((used["group"] == "reference").sum()), int((used["group"] == "tested").sum())]
@@ -127,8 +131,8 @@ def library(writer: Writer, ctx: Context) -> tuple[list[Result], dict[str, tuple
         min_count=ctx.min_count))  # fmt: skip
     name = inp.contrast.name
     metrics = {
-        "mirna.max_percent": (top, "largest miRNA-gene share of counted reads, poly-A, %"),
-        "mirna.poly_a_samples": (float(poly_a.height), "samples whose library_selection is poly-A"),
+        "mirna.max_percent": (top, f"largest miRNA-gene share of counted reads, {which}, %"),
+        "mirna.poly_a_samples": (float(poly_a.height), f"samples read: {which}"),
         "filter.kept": (float(values["kept"].sum()), f"genes the filter keeps at "
                         f"{ctx.min_count} reads, samples of {name}"),
         "m5.tested": (float(inp.results["padj"].is_not_null().sum()), f"genes M5 tested in {name}"),
@@ -192,7 +196,8 @@ def lncrna(writer: Writer, ctx: Context) -> Result:
     sub = inp.matrix[:, cols].astype(float)
     logcpm = np.log2(sub / sub.sum(axis=0) * 1e6 + 1)
     used = inp.used.sort(pl.col("group") != "reference", maintain_order=True)
-    strata = (used["cell_type"] + "|" + used["condition"]).to_numpy()
+    facets = [c for c in ("cell_type", "condition") if c in used.columns]
+    strata = used.select(pl.concat_str(facets, separator="|"))[:, 0].to_numpy()
     pairs = figures.pair_table(inp.genes, inp.results, logcpm, strata)
     writer.table(pairs, "pairs", figures.columns(pairs))
     assert inp.spec.ncrna is not None  # noqa: S101 - resolve() refuses a file without [ncrna]
@@ -200,7 +205,7 @@ def lncrna(writer: Writer, ctx: Context) -> Result:
     row = {g: i for i, g in enumerate(inp.genes["gene_id"].to_list())}
     a = logcpm[[row[g] for g in shown["lncrna_id"]]]
     b = logcpm[[row[g] for g in shown["neighbour_id"]]]
-    frame = used.select("sample", "cell_type", "condition").with_columns(
+    frame = used.select("sample", *facets).with_columns(
         lncrna=pl.Series(a[0]), neighbour=pl.Series(b[0])
     )
     colours = {inp.contrast.reference: ROLES["reference"], inp.contrast.tested: ROLES["comparison"]}
@@ -212,7 +217,7 @@ def lncrna(writer: Writer, ctx: Context) -> Result:
     data = ScatterData(
         frame=frame, columns=figures.columns(frame), x="lncrna", y="neighbour",
         x_label=word("figures.neighbour.x"), y_label=word("figures.neighbour.y"),
-        colour="condition", colours=colours, caption=caption, hover=("sample", "cell_type"),
+        colour="condition", colours=colours, caption=caption, hover=("sample", *facets[:-1]),
         live=live,
     )  # fmt: skip
     reading = tuple(line.format(pairs=shown.height)
@@ -274,16 +279,29 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write every table and figure, then the page; the page first in the returned list."""
     shown, metrics = library(writer, ctx)
     tested, frame = de(writer, ctx)
-    results: list[Result] = [word("notes.tcga"), *shown, tested, lncrna(writer, ctx)]
-    metric_rows = [(k, v, detail) for k, (v, detail) in metrics.items()]
-    writer.table(pl.DataFrame(metric_rows, schema=list(METRIC_COLUMNS), orient="row"),
+    gdc = ctx.inputs.tcga is not None
+    lead = text.word("ui", "gdc.acknowledgement") if gdc else word("notes.tcga")
+    results: list[Result] = [lead, *shown, tested, lncrna(writer, ctx)]
+    if gdc:
+        found, measured = mirna_page.build(writer, ctx)
+        results += found
+        metrics |= measured
+    metric_rows = [(k, float(v), detail) for k, (v, detail) in metrics.items()]
+    writer.table(pl.DataFrame(metric_rows, schema={"metric": pl.String, "value": pl.Float64,
+                                                   "detail": pl.String}, orient="row"),
                  "metrics", METRIC_COLUMNS)  # fmt: skip
-    record = {k: v for k, (v, _) in metrics.items()}
+    record = {k: float(v) for k, (v, _) in metrics.items()}
     if (verdicts := sanity(writer, ctx, record)) is not None:
         results.append(verdicts)
+        assert ctx.inputs.spec.ncrna is not None  # noqa: S101 - sanity() returned a group
+        if (absent := mirna_page.missing(record, ctx.inputs.spec.ncrna.sanity)) is not None:
+            results.append(absent)
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(PAGE)
+    skeleton = text.skeleton(PAGE)
+    if gdc:
+        skeleton |= {"input": word("tcga.input"), FIELDS["method"]: word("tcga.method")}
     built = ModulePage(
-        title=fill("title", dataset=ctx.inputs.spec.name), **text.skeleton(PAGE),
+        title=fill("title", dataset=ctx.inputs.spec.name), **skeleton,
         parameters=ctx.cards, results=tuple(results),
         key_numbers=keys(ctx, frame, record["mirna.max_percent"]),
         reproduce=Reproduction(

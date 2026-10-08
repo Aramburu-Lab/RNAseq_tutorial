@@ -238,7 +238,12 @@ def defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
         # follows the panel has none.
         return dict(controls.get("defaults", {}))
     if controls["kind"] == "pairs":
-        return {"options": list(enumerate(controls["options"])), "summary": controls["summary"]}
+        # The select's label: the figure's own where it gives one, M8's F8 naming miRNA pairs.
+        return {
+            "options": list(enumerate(controls["options"])),
+            "summary": controls["summary"],
+            "label": controls.get("label"),
+        }
     if controls["kind"] == "brush":
         return {"colours": list(zip(controls["colours"], controls["names"], strict=True)),
                 "empty": controls["empty"]}  # fmt: skip

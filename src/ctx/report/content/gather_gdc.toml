@@ -110,6 +110,8 @@ portion = ["none", "Portion number of a TCGA barcode; empty for another identifi
 plate = ["none", "Plate of a TCGA barcode, the batch the aliquot was processed in."]
 site = ["none", "Tissue source site of a TCGA barcode: the collecting institution."]
 batch = ["none", "The plate, as the batch later modules test."]
+donor = ["none", "The patient, as M5's paired designs name the individual."]
+run_accession = ["none", "GDC and the file's place in aliquot order, which M5 ranks replicates by."]
 library_size = ["reads", "Sum of the protocol's count column over genes; N_ rows left out."]
 stranded_first = ["reads", "Sum of STAR's first-read-strand column over genes."]
 stranded_second = ["reads", "Sum of STAR's second-read-strand column over genes."]
@@ -164,3 +166,56 @@ result = ["none", "GDC test_result, e.g. Positive, Negative or Equivocal."]
 [columns]
 count = "STAR {protocol} count of aliquot {sample}; N_ and _PAR_Y rows left out."
 cdr = "TCGA-CDR column {column}, verbatim as the workbook shows it; parsed by ctx clinical."
+
+# The miRNA half (ctx gather --mirna-dir --isoform-dir; ctx.gather.gdc_mirna).
+[mirna]
+title = "miRNA and isoform files"
+query_value = "project {project}, workflow {workflow}, data types {types}"
+files_value = "{files:,} aliquots in both folders, each file with the md5 and size its manifest lists, read in {seconds:.1f} s"
+hairpins_value = "{hairpins:,} miRBase hairpins in every miRNA file, one order; {detected:,} with a read in some file"
+mature_value = "{mature:,} MIMAT accessions named by mature isoform rows; a median {isoforms:,.0f} mature isoform rows per file"
+sum_value = "In all {files:,} aliquots the isoform rows of each hairpin sum to the miRNA file's count: {reads:,} reads"
+regions_value = "Median shares of a file's reads: mature {mature:.2f} %, precursor {precursor:.3f} %, stemloop {stemloop:.3f} %, unannotated {unannotated:.3f} %"
+cross_value = "Cross-mapped isoform rows hold a median {pct:.2f} % of a file's reads"
+taken_value = "{tumours:,} tumour and {normals:,} normal files taken by the rule; {joined:,} of {taken:,} share a sample barcode with a STAR file taken"
+rows = ["Query", "Files", "Hairpins", "Mature miRNAs", "Hairpin sums", "Regions", "Cross-mapped", "Taken"]
+
+[columns.mirna_samplesheet]
+sample = ["none", "Aliquot submitter ID of the miRNA library: one miRNA and one isoform file each."]
+file_id = ["none", "GDC file UUID of the miRNA file."]
+file_name = ["none", "File name GDC gives the miRNA file."]
+md5sum = ["none", "MD5 GDC lists for the miRNA file, matched on disk."]
+file_size = ["bytes", "Size GDC lists for the miRNA file."]
+case = ["none", "Patient submitter ID."]
+case_id = ["none", "Patient UUID in GDC."]
+sample_id = ["none", "Sample submitter ID, the barcode the STAR file of the same sample shares."]
+sample_type = ["none", "GDC sample type."]
+preservation = ["none", "GDC preservation method: OCT, FFPE or Unknown."]
+isoform_file_id = ["none", "GDC file UUID of the isoform file of the same aliquot."]
+mature_reads = ["reads", "Reads of isoform rows in a mature region."]
+precursor_reads = ["reads", "Reads of isoform rows in the precursor outside the matures."]
+stemloop_reads = ["reads", "Reads of isoform rows in the stem loop."]
+unannotated_reads = ["reads", "Reads of isoform rows outside any annotated region."]
+cross_mapped_reads = ["reads", "Reads of isoform rows flagged cross-mapped: the read maps to several miRNAs."]
+mature_isoforms = ["rows", "Mature isoform rows in the file."]
+mirna_reads = ["reads", "miRNA-mapped reads: the sum of the miRNA file's hairpin counts."]
+condition = ["none", "tumour, normal or other, from the dataset file's [gdc] sample types."]
+donor = ["none", "The patient, as M5's paired designs name the individual."]
+run_accession = ["none", "GDC and the file's place in aliquot order, which M5 ranks replicates by."]
+redacted = ["none", "True when a GDC redaction of the STAR folder's annotations hits this aliquot."]
+chosen = ["none", "True for the one miRNA library taken per patient and sample type; select with ctx.gather.gdc.chosen."]
+drop_reason = ["none", "ffpe, redacted or not_first, in the rule's order; empty when chosen."]
+rna_sample = ["none", "The STAR aliquot taken for the same sample barcode; empty where none was."]
+
+[columns.mirna_hairpins]
+miRNA_ID = ["none", "miRBase 21 hairpin ID, as the miRNA files name it."]
+chrom = ["none", "Chromosome of the hairpin's isoform rows, hg38; empty where no file holds one."]
+start = ["nt", "Smallest start of its isoform rows over every file, 1-based."]
+end = ["nt", "Largest end of its isoform rows over every file, inclusive."]
+strand = ["none", "Strand of its isoform rows."]
+mimats = ["none", "MIMAT accessions its mature rows name, separated by semicolons."]
+
+[columns.mirna_counts]
+mimat = ["none", "miRBase mature accession."]
+hairpin = ["none", "miRBase 21 hairpin ID."]
+count = "Reads of aliquot {sample}."

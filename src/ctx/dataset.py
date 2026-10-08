@@ -157,6 +157,9 @@ class GdcSpec:
             None keeps every file of the project.
         cdr_file: The TCGA-CDR workbook in the folder, or None for a project without one.
         cdr_type: The CDR's ``type`` of this project's patients.
+        mirna_workflow: The workflow of the project's miRNA and isoform files, e.g. ``BCGSC
+            miRNA Profiling``, which ``ctx gather --mirna-dir`` checks; None for a project
+            gathered without them.
     """
 
     project: str
@@ -169,6 +172,7 @@ class GdcSpec:
     primary_site: str | None = None
     cdr_file: str | None = None
     cdr_type: str | None = None
+    mirna_workflow: str | None = None
 
 
 @dataclass(frozen=True)
@@ -197,11 +201,16 @@ class NcrnaSpec:
             ``registered_on`` time; apart from ``[sanity]``, whose record is fixed
             (tests/test_sanity_record.py), which finds its registration by any line starting
             ``registered = ``, so this one is named otherwise.
+        mirna: The miRNA contrast of a GDC dataset (``[ncrna.mirna]``), fitted on the mature
+            miRNA counts gather wrote; None for a dataset without small-RNA libraries.
+        mirnas: The mature miRNAs, by miRBase name, whose targets the page tests and pairs.
     """
 
     featured: str
     pairs: int
     sanity: Mapping[str, Any] = field(default_factory=dict)
+    mirna: Contrast | None = None
+    mirnas: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -403,7 +412,7 @@ def _gdc(raw: Mapping[str, Any], problems: list[str]) -> GdcSpec | None:
     """Parse [gdc]."""
     keys = ("project", "release", "workflow", "gene_model", "protocol", "tumour", "normal")
     fields = [_need(raw, k, str, "gdc", problems) for k in keys]
-    optional = {k: raw.get(k) for k in ("primary_site", "cdr_file", "cdr_type")}
+    optional = {k: raw.get(k) for k in ("primary_site", "cdr_file", "cdr_type", "mirna_workflow")}
     problems += [f"gdc.{k}: expected str, found {v!r}" for k, v in optional.items()
                  if v is not None and not isinstance(v, str)]  # fmt: skip
     if fields[4] is not None and fields[4] not in PROTOCOLS:
@@ -415,7 +424,8 @@ def _gdc(raw: Mapping[str, Any], problems: list[str]) -> GdcSpec | None:
     project, release, workflow, model, protocol, tumour, normal = (str(f) for f in fields)
     return GdcSpec(project, release, workflow, model, protocol, tumour, normal,
                    primary_site=optional["primary_site"], cdr_file=optional["cdr_file"],
-                   cdr_type=optional["cdr_type"])  # fmt: skip
+                   cdr_type=optional["cdr_type"],
+                   mirna_workflow=optional["mirna_workflow"])  # fmt: skip
 
 
 def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | None:
@@ -445,9 +455,19 @@ def _ncrna(raw: Mapping[str, Any], names: set[str], problems: list[str]) -> Ncrn
     sanity = raw.get("sanity", {})
     if sanity and not isinstance(sanity.get("registered_on"), str):
         problems.append("ncrna.sanity.registered_on: the time the rules were registered")
+    mirna = None
+    if "mirna" in raw:
+        parsed = _contrasts([raw["mirna"]], problems)
+        mirna = parsed[0] if parsed else None
+    mirnas = raw.get("mirnas", [])
+    if not isinstance(mirnas, list) or not all(isinstance(m, str) for m in mirnas):
+        problems.append("ncrna.mirnas: a list of mature miRNA names")
+        mirnas = []
+    if mirnas and mirna is None:
+        problems.append("ncrna.mirnas: needs [ncrna.mirna], the contrast they come from")
     if featured is None or pairs is None:
         return None
-    return NcrnaSpec(featured, pairs, sanity)
+    return NcrnaSpec(featured, pairs, sanity, mirna, tuple(mirnas))
 
 
 def load(path: Path) -> Dataset:

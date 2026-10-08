@@ -24,6 +24,8 @@ from ctx.viz.style import ALONE_SCALE, LARGEST_PLOT_PX, PLOTLY_HEIGHT_PX
 
 PAGE = "ncrna"
 NOT_CALLED = "ns"
+# The sheet columns F1 carries where the sheet has them, Step-1's all three.
+FACETS = ("cell_type", "condition", "library_selection")
 # One meaning per column, for every table's and figure's README.
 COLUMNS = {
     "sample": ("none", "Sample, from the gather sample sheet."),
@@ -97,20 +99,23 @@ def composition(sheet: pl.DataFrame, genes: pl.DataFrame, matrix: np.ndarray,
     """
     groups = biotypes.shares(matrix, genes["biotype"].to_numpy(), biotypes.GROUPS)
     (mirna,) = biotypes.shares(matrix, genes["gene_type"].to_numpy(), (biotypes.MIRNA,))
-    wide = sheet.select("sample", "cell_type", "condition", "library_selection").with_columns(
+    # A GDC sheet has neither cell type nor library selection: its bars split by condition.
+    facets = [c for c in FACETS if c in sheet.columns]
+    shown = tuple(c for c in facets if c != "library_selection")
+    wide = sheet.select("sample", *facets).with_columns(
         *(pl.Series(f"{g}_percent", groups[i]) for i, g in enumerate(biotypes.GROUPS)),
         mirna_percent=pl.Series(mirna),
     )
     frame = (wide.unpivot([f"{g}_percent" for g in biotypes.GROUPS],
-                          index=["sample", "cell_type", "condition"], variable_name="biotype",
+                          index=["sample", *shown], variable_name="biotype",
                           value_name="percent")
              .with_columns(pl.col("biotype").str.strip_suffix("_percent"))
-             .sort("cell_type", "condition", "sample", maintain_order=True))  # fmt: skip
+             .sort(*shown, "sample", maintain_order=True))  # fmt: skip
     data = BarData(
         frame=frame, columns=columns(frame), category="sample", value="percent",
         category_label=word("figures.composition.x"), value_label=word("figures.composition.y"),
         series="biotype", colours=biotypes.COLOURS, caption=caption, stacked=True,
-        hover=("cell_type", "condition"), filters=("cell_type", "condition"),
+        hover=shown, filters=shown,
         summary_median=False,
     )  # fmt: skip
     return data, wide

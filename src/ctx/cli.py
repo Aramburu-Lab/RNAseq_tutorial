@@ -154,13 +154,15 @@ def setup(
 
 @app.command()
 @profiled
-def gather(
+def gather(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     ctx: typer.Context,
     dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
     fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
     dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
     gdc_dir: Annotated[Path | None, typer.Option(help=HELP["--gdc-dir"])] = None,
+    mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
+    isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
 ) -> None:
     """Check one nf-core/fetchngs outdir or GDC folder and write the sample sheet (M1c)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -179,7 +181,10 @@ def gather(
                 raise DatasetError("--gdc-dir takes --dataset-file, and neither --fetchngs-dir "
                                    "nor --rnaseq-dir")  # fmt: skip
             written = gdc_run.run(ctx.obj["settings"], cards, command, dataset, gdc_dir=gdc_dir,
-                                  dataset_file=dataset_file)  # fmt: skip
+                                  dataset_file=dataset_file, mirna_dir=mirna_dir,
+                                  isoform_dir=isoform_dir)  # fmt: skip
+        elif mirna_dir or isoform_dir:
+            raise DatasetError("--mirna-dir and --isoform-dir take --gdc-dir")
         else:
             written = harmonise.run(
                 ctx.obj["settings"], cards, command, dataset, fetchngs_dir=fetchngs_dir,

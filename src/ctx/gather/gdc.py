@@ -145,15 +145,19 @@ def _queried(folder: Path, name: str, field: str) -> set[str]:
     return {v for f, values in _filters(query) if f.endswith(field) for v in values}
 
 
-def _metadata(folder: Path, spec: GdcSpec) -> tuple[pl.DataFrame, int]:
-    """The counts files' metadata by our names, kept to the declared primary site."""
-    rows = _table(folder / METADATA)
+def _metadata(folder: Path, spec: GdcSpec, name: str = METADATA) -> tuple[pl.DataFrame, int]:
+    """A fetch's file metadata by our names, kept to the declared primary site.
+
+    ``name`` is the metadata file: the STAR counts' by default, a miRNA kind's for
+    ``ctx.gather.gdc_mirna``.
+    """
+    rows = _table(folder / name)
     header = list(rows[0]) if rows else []
-    problems = [f"{METADATA}: no column {c}" for c in FIELDS.values() if c not in header]
-    problems += [f"{METADATA}: column {c} is for a second entity" for c in header
+    problems = [f"{name}: no column {c}" for c in FIELDS.values() if c not in header]
+    problems += [f"{name}: column {c} is for a second entity" for c in header
                  if SECOND.search(c)]  # fmt: skip
     if spec.primary_site and PRIMARY_SITE not in header:
-        problems.append(f"{METADATA}: no {PRIMARY_SITE}, which a primary_site filter needs")
+        problems.append(f"{name}: no {PRIMARY_SITE}, which a primary_site filter needs")
     if problems:
         raise GdcError("\n".join(problems))
     kept = [r for r in rows if not spec.primary_site or r[PRIMARY_SITE] == spec.primary_site]
@@ -163,20 +167,20 @@ def _metadata(folder: Path, spec: GdcSpec) -> tuple[pl.DataFrame, int]:
     for column in ("file_id", "sample"):
         if frame[column].n_unique() != frame.height:
             twice = frame.filter(pl.col(column).is_duplicated())[column].unique().sort()
-            raise GdcError(f"{METADATA}: {column} listed twice: {twice.to_list()[:5]}")
+            raise GdcError(f"{name}: {column} listed twice: {twice.to_list()[:5]}")
     return frame, len(rows) - len(kept)
 
 
-def _manifest(folder: Path, files: pl.DataFrame) -> list[str]:
+def _manifest(folder: Path, files: pl.DataFrame, name: str = MANIFEST) -> list[str]:
     """The manifest lists the same files with the same md5 and size."""
-    listed = {r["id"]: r for r in _table(folder / MANIFEST)}
+    listed = {r["id"]: r for r in _table(folder / name)}
     problems = []
     for file_id, md5, size in files.select("file_id", "md5sum", "file_size").rows():
         row = listed.get(file_id)
         if row is None:
-            problems.append(f"{MANIFEST}: no row for {file_id}")
+            problems.append(f"{name}: no row for {file_id}")
         elif row["md5"] != md5 or int(row["size"]) != size:
-            problems.append(f"{MANIFEST}: {file_id} differs from {METADATA} in md5 or size")
+            problems.append(f"{name}: {file_id} differs from the file metadata in md5 or size")
     return problems
 
 
@@ -379,17 +383,19 @@ def annotations(path: Path, files: pl.DataFrame) -> pl.DataFrame:
     return pl.DataFrame(rows, schema=schema, orient="row").sort("case", "category", "entity")
 
 
-def choose(sheet: pl.DataFrame, protocol: str) -> pl.DataFrame:
+def choose(sheet: pl.DataFrame, protocol: str | None) -> pl.DataFrame:
     """One file per case and sample type, by the approved rule (decision 1, 2026-10-08).
 
     In this order: drop FFPE, drop libraries of another protocol, drop redacted files, then
     take the first aliquot ID of what is left. Every file gets ``chosen`` and the reason it is
     not, ``drop_reason``; the tie-break runs last, so an FFPE or stranded aliquot that sorts
-    first cannot take a case.
+    first cannot take a case. A protocol of None skips its step: a miRNA file has no strand
+    call (``ctx.gather.gdc_mirna``).
     """
+    other = pl.lit(value=False) if protocol is None else pl.col("strand_call") != CALLS[protocol]
     reason = (
         pl.when(pl.col("preservation") == FFPE).then(pl.lit("ffpe"))
-        .when(pl.col("strand_call") != CALLS[protocol]).then(pl.lit("protocol"))
+        .when(other).then(pl.lit("protocol"))
         .when(pl.col("redacted")).then(pl.lit("redacted"))
         .otherwise(pl.lit(""))
     )  # fmt: skip
@@ -402,6 +408,15 @@ def choose(sheet: pl.DataFrame, protocol: str) -> pl.DataFrame:
         .then("drop_reason")
         .otherwise(pl.lit("not_first")),
     )
+
+
+def run_accession() -> pl.Expr:
+    """A sortable accession per file of a sheet in aliquot order, as ``rank_replicates`` reads.
+
+    ``GDC`` and the file's position, six digits: ranking by it keeps the first aliquot ID,
+    the tie-break ``choose`` applies, where a TCGA aliquot's own digits name its centre.
+    """
+    return pl.format("GDC{}", pl.int_range(1, pl.len() + 1).cast(pl.String).str.zfill(6))
 
 
 def chosen(sheet: pl.DataFrame, sample_type: str | None = None) -> pl.DataFrame:

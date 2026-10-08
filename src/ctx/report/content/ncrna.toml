@@ -42,7 +42,7 @@ prompt = "Why adjust p-values within each biotype rather than over all genes at 
 answer = "Pooled [[BH]] holds the false discovery rate over all calls together. The lncRNAs, with less power, can carry a larger share of false calls than that rate. Per biotype, each rate holds on its own."
 
 [[questions]]
-prompt = "A lncRNA correlates with many targets of one [[miRNA]]. Does this support the ceRNA hypothesis?"
+prompt = "A lncRNA correlates with many targets of one [[miRNA]]. Does this support the [[ceRNA]] hypothesis?"
 answer = "Not by itself. A shared response to the condition correlates genes without any sponging. The hypothesis is also contested: most transcripts have too few copies to titrate a miRNA."
 
 # Parameter cards of the options the TCGA half will add; the built ones are in cards.toml.
@@ -65,7 +65,9 @@ effect = "One type alone avoids comparing RNAs one library cannot capture."
 library = "What the library counts"
 de = "Differential expression by biotype"
 lncrna = "lncRNA neighbours"
+mirna = "Mature miRNAs from the small-RNA libraries"
 targets = "miRNA targets"
+pairs = "miRNAs against their targets across tumours"
 sanity = "Sanity rules"
 
 [keys]
@@ -155,6 +157,8 @@ none = "none"
 lead = "Rules registered {registered} in the dataset file, before this module first ran on it."
 columns = ["Rule", "What it checks", "Condition", "Value", "Verdict", "Source"]
 
+# The preview's target figure (scripts/python/preview_ncrna.py); the built page draws
+# [figures.shift].
 [figures.targets]
 title = "Fold changes of {mirna} targets against non-targets"
 lead = "Median log2 fold change minus that of non-targets: {shift_validated:+.2f} for validated targets, {shift_predicted:+.2f} for predicted-only ones."
@@ -166,6 +170,57 @@ caption = "Made-up data: {n_validated} validated, {n_predicted} predicted-only t
 x = "log2 fold change, {tested} over {reference}"
 y = "Share of genes"
 classes = ["validated", "predicted only", "non-target"]
+
+# The TCGA half: a GDC dataset's page replaces Input and Method with these.
+[tcga]
+input = "From `ctx gather` on a GDC project: the STAR counts and the mature counts of the small-RNA libraries; M5's tumour-normal results; the counts' GENCODE release; the target files of `ctx setup`."
+method = """Mature miRNA counts come from the small-RNA libraries alone, summed over every hairpin of a mature miRNA. M5's paired fit tests them, tumour against normal.
+
+A target is validated in miRTarBase's strong evidence or predicted by TargetScan, never both at once. Each class's mRNA fold changes are compared with non-targets'. A miRNA and its target are correlated across tumours, normals apart."""
+missing = "A rule whose value is empty read a metric this run could not measure: {metrics}."
+agreement = "Per sample, the STAR counts of {hairpins:,} miRNA genes rank their hairpins unlike the small-RNA library: median Spearman rho {rho:.3f} over {n:,} samples."
+
+[figures.mirna_volcano]
+title = "Mature miRNAs, {tested} against {reference}"
+lead = "Of {n_tested:,} mature miRNAs tested, {up:,} rise and {down:,} fall."
+table_title = "Featured miRNAs"
+columns = ["miRNA", "MIMAT", "Mean count", "log2 FC", "BH-adjusted p", "Call"]
+untested = "not tested"
+
+[figures.shift]
+title = "Fold changes of {mirna} targets against non-targets"
+lead = "Median log2 fold change minus that of non-targets: {shift_validated} for validated targets, {shift_predicted} for predicted-only ones."
+reading = [
+    "Each line is one target class: the share of its genes at or below each fold change.",
+    "A line left of the non-targets' line marks lower fold changes, as repression by a rising miRNA predicts.",
+    "Predicted-only targets reach the default context++ cutoff of {preset:g}; non-targets hold no predicted site.",
+]
+caption = "{n_validated:,} validated, {n_predicted:,} predicted-only, at a [[context++ score]] of at most {preset:g}, and {n_non:,} non-target genes M5 tested. KS test against non-targets, BH over {n_tests} tests: validated D = {d_validated}, q = {q_validated}; predicted-only D = {d_predicted}, q = {q_predicted}."
+x = "log2 fold change, {tested} over {reference}"
+y = "Share of genes"
+table_title = "Target classes against non-targets, every featured miRNA and cutoff"
+columns = ["miRNA", "Targets", "context++ at most", "Genes", "Median shift", "KS D", "KS q", "Mann-Whitney q"]
+any = "any"
+enrich_title = "Targets among the genes called against the miRNA's change"
+enrich_columns = ["miRNA", "Targets", "Called genes", "Set", "Hits", "Expected", "p", "BH q"]
+
+[figures.mirna_pairs]
+title = "miRNAs against their targets, across tumours"
+lead = "{mirna} and {gene}, {source}: rho {rho} across tumours, {rho_normal} across normals."
+reading = [
+    "Each point is one tumour: the miRNA across, its target up, both from one sample.",
+    "The select offers the {pairs} pairs with the smallest q across tumours.",
+    "Repression predicts a negative rho; a shared response to hypoxia or growth can give either sign.",
+]
+caption = "{n_tumour} tumours and {n_normal} normals with a small-RNA and an mRNA library of one sample. [[Spearman]] rho of log2 [[RPM of miRNA-mapped reads]] against log2 CPM, each condition apart; BH over {n_pairs:,} pairs within each."
+x = "miRNA, log2 RPM of miRNA-mapped reads"
+y = "Target, log2 CPM"
+option = "{mirna} and {gene}, {source}"
+label = "miRNA and target"
+summary = "{mirna} and {gene}, {source}: q {q_tumour} across tumours, rho {rho_normal} across normals."
+table_title = "Pairs by miRNA and source: share with BH q below {alpha:g} across tumours"
+columns = ["miRNA", "Source", "Pairs", "Median rho, tumours", "Called, tumours", "Median rho, normals"]
+none = "none"
 
 [preview]
 command = "ctx ncrna --dataset {dataset} --dataset-file conf/datasets/{dataset}.toml"

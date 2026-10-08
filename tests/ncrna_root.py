@@ -77,9 +77,9 @@ def write_gtf(path: Path, ids: list[str], names: list[str]) -> None:
     path.write_text("".join(lines))
 
 
-def counts() -> tuple[pl.DataFrame, Synthetic]:
+def counts(groups: tuple[tuple, ...] = GROUPS) -> tuple[pl.DataFrame, Synthetic]:
     """design_counts with the planted lncRNA following its neighbour and near-silent miRNAs."""
-    synthetic = design_counts(GROUPS, n_genes=N_GENES, seed=11)
+    synthetic = design_counts(groups, n_genes=N_GENES, seed=11)
     frame = synthetic.counts
     lead = frame.filter(pl.col("gene_id") == PLANTED[1])
     rng = np.random.default_rng(3)
@@ -93,10 +93,11 @@ def counts() -> tuple[pl.DataFrame, Synthetic]:
     ), synthetic  # fmt: skip
 
 
-def results(frame: pl.DataFrame, sheet: pl.DataFrame, names: list[str]) -> pl.DataFrame:
+def results(frame: pl.DataFrame, sheet: pl.DataFrame, names: list[str],
+            tested: str = "case") -> pl.DataFrame:  # fmt: skip
     """M5's columns for the genes M5's filter keeps: Welch t on log2 CPM, BH over them."""
     samples = sheet["sample"].to_list()
-    case = (sheet["condition"] == "case").to_numpy()
+    case = (sheet["condition"] == tested).to_numpy()
     matrix = frame.select(samples).to_numpy().astype(float)
     keep = expressed(matrix, [int((~case).sum()), int(case.sum())], MIN_COUNT)
     logs = np.log2(matrix / matrix.sum(axis=0) * 1e6 + 1)[keep]
