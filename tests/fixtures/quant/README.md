@@ -10,8 +10,8 @@ tximport 1.30.0 in `community.wave.seqera.io/library/bioconductor-tximeta_jq:b3a
   the yeast genome, not this one. `salmon/` holds what copy Q1 holds per sample: `quant.sf`,
   `cmd_info.json`, `lib_format_counts.json`, `aux_info/meta_info.json`,
   `aux_info/ambig_info.tsv` and `libParams/flenDist.txt`, and the merged tables.
-- `planted/` holds four made-up `quant.sf` files, their `tx2gene.tsv` and R's gene tables
-  (`r.gene_*.tsv`): effective lengths differ by sample, G1 is zero in s3, G2 is zero
-  everywhere and T9 is in no gene.
+- `planted/` holds four made-up `quant.sf` files, their `salmon.merged.tx2gene.tsv`
+  and R's gene tables (`r.gene_*.tsv`): effective lengths differ by sample, G1 is zero
+  in s3, G2 is zero everywhere and T9 is in no gene.
 
 A rebuild repeats every count; `meta_info.json` records run times, so its bytes differ.

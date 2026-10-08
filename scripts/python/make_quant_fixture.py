@@ -58,7 +58,8 @@ args <- commandArgs(trailingOnly = TRUE)
 dir <- args[1]; samples <- strsplit(args[2], ",")[[1]]; prefix <- args[3]
 files <- setNames(file.path(dir, samples, "quant.sf"), samples)
 txi <- tximport(files, type = "salmon", txOut = TRUE)
-info <- read.csv(file.path(dir, "tx2gene.tsv"), sep = "\t", header = TRUE, check.names = FALSE)
+info <- read.csv(file.path(dir, "salmon.merged.tx2gene.tsv"), sep = "\t", header = TRUE,
+                 check.names = FALSE)
 tx <- data.frame(tx = info[[1]], gene_id = info[[2]], gene_name = info[[3]])
 extra <- setdiff(rownames(txi$counts), tx$tx)
 tx <- rbind(tx, data.frame(tx = extra, gene_id = extra, gene_name = extra))
@@ -90,7 +91,7 @@ def require_empty(out: Path) -> None:
 
 
 def tx2gene(path: Path) -> None:
-    """nf-core's tx2gene.tsv for the chr22 fixture: transcript_id, gene_id, gene_name."""
+    """nf-core's salmon.merged.tx2gene.tsv for the chr22 fixture: transcript, gene, name."""
     rows = ["transcript_id\tgene_id\tgene_name"]
     for line in (CHR22 / "transcripts.fa").read_text().splitlines():
         if line.startswith(">"):
@@ -141,7 +142,7 @@ def planted(folder: Path) -> None:
     folder.mkdir()
     lines = ["transcript_id\tgene_id\tgene_name", *(f"{t}\t{g}\t{g}" for t, g in
                                                    PLANTED_GENES.items())]  # fmt: skip
-    (folder / "tx2gene.tsv").write_text("\n".join(lines) + "\n")
+    (folder / "salmon.merged.tx2gene.tsv").write_text("\n".join(lines) + "\n")
     names = list(PLANTED_LENGTHS)
     for sample, reads in PLANTED_READS.items():
         effective = [PLANTED_LENGTHS[t] - PLANTED_FRAGMENT[sample] for t in names]
@@ -167,7 +168,7 @@ def write(out: Path, work: Path) -> None:
     salmon_dir = out / "rnaseq" / "salmon"
     salmon_dir.mkdir(parents=True)
     shutil.copytree(PIPELINE_INFO, out / "rnaseq" / "pipeline_info")
-    tx2gene(salmon_dir / "tx2gene.tsv")
+    tx2gene(salmon_dir / "salmon.merged.tx2gene.tsv")
     salmon(work, salmon_dir)
     version = r_tximport(salmon_dir, SAMPLES, "salmon.merged")
     planted(out / "planted")
@@ -190,9 +191,9 @@ tximport {version} in `{image}` wrote the merged tables with nf-core/rnaseq's co
   the yeast genome, not this one. `salmon/` holds what copy Q1 holds per sample: `quant.sf`,
   `cmd_info.json`, `lib_format_counts.json`, `aux_info/meta_info.json`,
   `aux_info/ambig_info.tsv` and `libParams/flenDist.txt`, and the merged tables.
-- `planted/` holds four made-up `quant.sf` files, their `tx2gene.tsv` and R's gene tables
-  (`r.gene_*.tsv`): effective lengths differ by sample, G1 is zero in s3, G2 is zero
-  everywhere and T9 is in no gene.
+- `planted/` holds four made-up `quant.sf` files, their `salmon.merged.tx2gene.tsv`
+  and R's gene tables (`r.gene_*.tsv`): effective lengths differ by sample, G1 is zero
+  in s3, G2 is zero everywhere and T9 is in no gene.
 
 A rebuild repeats every count; `meta_info.json` records run times, so its bytes differ.
 """

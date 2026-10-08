@@ -4,8 +4,9 @@ Two folders. The rnaseq outdir ``ctx gather`` reads holds the length-scaled gene
 each sample's ``aux_info/meta_info.json`` and ``lib_format_counts.json``; those two are logs,
 read only through MultiQC (``ctx.qc.multiqc_io``). The per-sample copy Q1 holds the salmon
 folder's layout: each sample's ``quant.sf``, the merged ``salmon.merged.*.tsv`` tables and
-``tx2gene.tsv``, written by nf-core's ``tximport.r`` (transcript tables keyed by ``tx`` and
-``gene_id``, gene tables by ``gene_id`` and ``gene_name``). Nothing here writes into either.
+``salmon.merged.tx2gene.tsv``, written by nf-core's ``tximport.r`` (transcript tables keyed by
+``tx`` and ``gene_id``, gene tables by ``gene_id`` and ``gene_name``). Nothing here writes into
+either.
 """
 
 from collections.abc import Iterator, Sequence
@@ -18,7 +19,8 @@ from ctx.quant import QuantError
 from ctx.quant.tximport import QUANT_COLUMNS
 
 MERGED = "salmon.merged.{}.tsv"
-TX2GENE = "tx2gene.tsv"
+# nf-core 3.27.0 writes it beside the merged tables, under their pattern (Step-1, 2026-10-08).
+TX2GENE = MERGED.format("tx2gene")
 TX2GENE_COLUMNS = ("transcript_id", "gene_id", "gene_name")
 GENE_KEYS, TRANSCRIPT_KEYS = ("gene_id", "gene_name"), ("tx", "gene_id")
 # The merged tables M4 reads from Q1, and their key columns.
