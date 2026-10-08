@@ -54,15 +54,19 @@ genome_value = "GENCODE release {release}"
 [part1]
 group = "Part {n}: download the reads"
 lead = "The metadata run prints the bytes at ENA; read them, then download."
-laptop = "On a laptop with Docker running"
+laptop = "On a laptop with Docker running: the metadata run, which prints the size"
+laptop_download = "On the laptop, once the size is read: the download"
 setup = "On Kebnekaise, once per login: Nextflow from the fetch environment"
-cluster = "On Kebnekaise: the metadata job, the size, then the download"
+cluster = "On Kebnekaise: the metadata job"
+cluster_size = "On Kebnekaise, once that job has ended: the size"
+cluster_download = "On Kebnekaise, once the size is read: the download"
 
 [part2]
 group = "Part {n}: count with nf-core/rnaseq"
 lead = "The references are checked against the publisher's MD5SUMS before nf-core/rnaseq starts."
 laptop = "On a laptop: the references, then the count"
 cluster = "On Kebnekaise: the references, then the count job"
+needs = "On a laptop, give Docker more memory than the Salmon index's peak, {index_gib} GiB measured on Kebnekaise, plus what runs beside it. The run folder reached {folder_gb} GB before the index finished, {work_gb} GB in work/ and {results_gb} GB in results/, references then saved; the laptop site no longer saves them."
 
 [part3]
 group = "Part {n}: into the course"
@@ -70,6 +74,10 @@ lead = "Every module the dataset file declares runs in course order; `--check` f
 copy = "From Kebnekaise to the laptop: the metadata, and the files ctx reads"
 laptop = "On the laptop, after the laptop route"
 cluster = "On the laptop, after the copy from Kebnekaise"
+downloads = "What ctx setup downloads"
+columns = ["Resource", "Bytes", "From", "On the laptop route"]
+found = "found in place, where the count saved it"
+fetched = "downloaded"
 mine = "A study of your own: its sheet before curation, and a dataset file to edit"
 kit = "Your pages as a kit, opened from its START.html"
 site = "Another Slurm site: copy scripts/bash/site_kebnekaise.sh to site_<name>.sh, change its profile, queue size, home rule and activation, and set CTX_SITE=<name> before each launcher."

@@ -28,7 +28,9 @@ accessions = []
 ids = []
 patterns = []
 
-# Gene sets for `ctx function` and the annotation `ctx qc` and `ctx quant` read gene types from:
+# Gene sets for `ctx function` and the annotation `ctx qc` and `ctx quant` read gene types from.
+# The guide's laptop route saves the GTF at this dest in Part 2, where ctx setup finds it in place
+# and downloads nothing:
 # Step-1's, which tests/test_dataset_template.py holds equal to conf/datasets/tier1.toml's.
 [[resources]]
 name = "msigdb_hallmark"

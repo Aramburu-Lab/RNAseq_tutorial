@@ -7,7 +7,6 @@ mutation it catches.
 
 import hashlib
 import re
-import subprocess
 
 import pytest
 from test_cluster_scripts import (
@@ -44,6 +43,8 @@ echo "$@" >> "$STUB_LOG/docker.calls"
 if [ -n "${STUB_DOCKER_DOWN:-}" ]; then echo "Cannot connect to the Docker daemon" >&2; exit 1; fi
 echo "6 12884901888"
 """
+# The executor block both launchers write on a laptop, from the docker stub's 6 CPUs and 12 GiB.
+DOCKER_EXECUTOR = "executor {\n    queueSize = 6\n    cpus = 6\n    memory = 12288.MB\n}\n"
 NAME = re.compile(r"\b(SITE_[A-Z_]+)=|^(site_\w+)\(\)", re.M)
 USED = re.compile(r"\$\{?(SITE_[A-Z_]+)|\b(site_[a-z_]+)\b")
 ARCHES = [("arm64", "docker,arm", "docker,arm64"), ("aarch64", "docker,arm", "docker,arm64"),
@@ -59,7 +60,7 @@ def test_sites_define_what_the_launchers_use():
     from one site, which fails under set -u on that site alone, and a launcher reading a name no
     site sets."""
     kebnekaise, laptop = (_defined(n) for n in SITES)
-    assert kebnekaise == laptop and len(kebnekaise) == 7, (kebnekaise, laptop)
+    assert kebnekaise == laptop and len(kebnekaise) == 8, (kebnekaise, laptop)
     code = "\n".join(s for n in LAUNCHERS for s in (BASH / n).read_text().splitlines()
                      if not s.lstrip().startswith("#"))  # fmt: skip
     used = {a or b for a, b in USED.findall(code)}
@@ -98,17 +99,17 @@ def test_laptop_fetchngs(site, arch, fetchngs, rnaseq):
     assert _after(argv, "--max_cpus") == "4" and _after(argv, "--max_memory") == "8.GB"
     assert nf_env["NXF_SYNTAX_PARSER"] == "v1" and "NXF_EXECUTOR" not in nf_env
     assert not (tmp_path / "log" / "pixi.args").exists()
-    cores = subprocess.run(["getconf", "_NPROCESSORS_ONLN"], capture_output=True, text=True,
-                           check=True).stdout.strip()  # fmt: skip
     config = (run / "nfcore_fetchngs" / "nextflow.config").read_text()
-    assert re.search(rf"^\s*queueSize = {cores}$", config, re.M), config
+    assert config.startswith(DOCKER_EXECUTOR), config
     assert (run / "nfcore_fetchngs" / "results.complete").is_file()
 
 
 @pytest.mark.parametrize(("arch", "fetchngs", "rnaseq"), ARCHES)
 def test_laptop_rnaseq(site, arch, fetchngs, rnaseq):
     """Counting on a laptop. Catches the profiles swapped, the Slurm executor or the Kebnekaise
-    queue on a laptop, and tasks let ask for more than Docker has (Nextflow refuses them)."""
+    queue on a laptop, tasks let ask for more than Docker has (Nextflow refuses them), the
+    executor sized to the host (two tasks each allowed all of Docker's memory ran together and
+    one was killed, U.10), and the references copied into results/ on a laptop."""
     del fetchngs
     tmp_path, env, _ = _laptop(site, arch)
     done, _, launch = _rnaseq((tmp_path, env))
@@ -117,8 +118,10 @@ def test_laptop_rnaseq(site, arch, fetchngs, rnaseq):
     assert argv[:4] == ["run", "nf-core/rnaseq", "-r", RNASEQ_VERSION]
     assert _after(argv, "-profile") == rnaseq and "NXF_EXECUTOR" not in nf_env
     config = (launch / "site.config").read_text()
+    assert config.startswith(DOCKER_EXECUTOR), config
     assert "resourceLimits = [cpus: 6, memory: 12288.MB]" in config, config
-    assert "queueSize = 50" not in config
+    params = (launch / "params.yml").read_text()
+    assert "save_reference: false\n" in params, params
 
 
 def test_laptop_rnaseq_without_docker(site):
