@@ -218,6 +218,17 @@ def module_page(root: Path, number_module: str, what: str) -> str:
     return page.read_text()
 
 
+@pytest.fixture(scope="session")
+def wheel_site(tmp_path_factory):
+    """The wheel built and unzipped once; every test that runs ctx from it only reads it.
+
+    test_io builds its own, inside an unrelated git repository, which is what it tests.
+    """
+    from test_packaging import build_wheel  # noqa: PLC0415
+
+    return build_wheel(tmp_path_factory.mktemp("wheel"))
+
+
 def _ran(root: Path, *args: str) -> None:
     done = ctx_run("--root", str(root), *args, cwd=root)
     assert done.returncode == 0, (args[0], done.stderr[-3000:])
@@ -240,15 +251,20 @@ def gather_run(tmp_path_factory):
 
 
 @pytest.fixture(scope="session")
-def pipeline(tmp_path_factory):
+def pipeline(tmp_path_factory, wheel_site):
     """de, function and report on one root, from gather outputs written by gather's writer:
-    (root, the gather files' bytes before, the three runs)."""
+    (root, the gather files' bytes before, the ctx package de imported).
+
+    de runs from the wheel, so its one fit also proves the wheel runs it; it was fitted twice,
+    80 s of CI run 37898263890's 1,778 s for the second (M3.14).
+    """
     from synth import (  # noqa: PLC0415
         DE_GROUPS,
         design_counts,
         write_gather_outputs,
         write_gene_sets,
     )
+    from test_packaging import run_from_wheel  # noqa: PLC0415
 
     from ctx.dataset import load  # noqa: PLC0415
 
@@ -256,13 +272,16 @@ def pipeline(tmp_path_factory):
     write_gather_outputs(root, "desynth", design_counts(DE_GROUPS, batch_lfc=2.0), date.today())
     write_gene_sets(root / load(DE_SPEC).resource("sets").dest)
     gathered = {p.name: p.read_bytes() for p in (root / "outputs" / "01_gather").iterdir()}
-    runs = {}
-    for command in ("de", "function", "report"):
-        done = ctx_run("--root", str(root), command, "--dataset", "desynth", "--dataset-file",
-                       str(DE_SPEC), cwd=root)  # fmt: skip
-        assert done.returncode == 0, (command, done.stderr[-3000:])
-        runs[command] = done
-    return root, gathered, runs
+    args = ["--root", str(root), "de", "--dataset", "desynth", "--dataset-file", str(DE_SPEC)]
+    imported = run_from_wheel(wheel_site, f"""
+        import ctx
+        from ctx.cli import app
+        print(ctx.__file__)
+        app({args!r}, standalone_mode=False)
+        """, cwd=root).splitlines()[0]  # fmt: skip
+    for command in ("function", "report"):
+        _ran(root, command, "--dataset", "desynth", "--dataset-file", str(DE_SPEC))
+    return root, gathered, Path(imported)
 
 
 @pytest.fixture(scope="session")

@@ -12,9 +12,9 @@ from pathlib import Path
 import polars as pl
 import pytest
 import typer
-from conftest import DE_SPEC, setup_page, threads_unlike_default
 from conftest import FETCHNGS_DOWNLOAD as FIXTURE
-from test_packaging import build_wheel, run_from_wheel
+from conftest import setup_page, threads_unlike_default
+from test_packaging import run_from_wheel
 
 from ctx.cli import app, parameter_cards
 from ctx.io.naming import MODULES, lint
@@ -156,8 +156,8 @@ def test_setup_end_to_end(setup_run):
     assert 0 < rss < BUDGETS["B"].ram_gb * 10**9
 
 
-def test_setup_runs_from_wheel(tmp_path):
-    site = build_wheel(tmp_path)
+def test_setup_runs_from_wheel(tmp_path, wheel_site):
+    site = wheel_site
     run_from_wheel(
         site,
         f"""
@@ -229,8 +229,8 @@ def test_failure_writes_no_sheet(tmp_path):
     assert not (root / "outputs").exists()
 
 
-def test_gather_runs_from_wheel(tmp_path):
-    site = build_wheel(tmp_path)
+def test_gather_runs_from_wheel(tmp_path, wheel_site):
+    site = wheel_site
     run_from_wheel(
         site,
         f"""
@@ -378,23 +378,15 @@ def test_lfc_shrink_reaches_the_fit(monkeypatch):
         assert seen["lfc_shrink"] is expected, flag
 
 
-def test_de_runs_from_wheel(pipeline, tmp_path):
-    root, _, _ = pipeline
-    fresh = tmp_path / "root"
-    shutil.copytree(root / "outputs" / "01_gather", fresh / "outputs" / "01_gather")
-    site = build_wheel(tmp_path)
-    run_from_wheel(
-        site,
-        f"""
-        import ctx
-        from ctx.cli import app
-        assert ctx.__file__.startswith({str(site)!r}), ctx.__file__
-        app(["--root", {str(fresh)!r}, "de", "--dataset", "desynth",
-             "--dataset-file", {str(DE_SPEC)!r}], standalone_mode=False)
-        """,
-        cwd=tmp_path,
-    )
-    assert list((fresh / "outputs" / "05_de").glob("*_desynth_overview_v1.html"))
+def test_de_runs_from_wheel(pipeline, wheel_site):
+    """The pipeline's de ran from the wheel, so its page and README are the wheel's.
+
+    Mutation caught: the pipeline's de run from the checkout (ctx imported from src/)."""
+    root, _, imported = pipeline
+    assert imported.is_relative_to(wheel_site), imported
+    out = root / "outputs" / "05_de"
+    assert list(out.glob("*_desynth_overview_v1.html"))
+    assert "installed wheel" in next(out.glob("*_desynth_metrics_v1_README.md")).read_text()
 
 
 def test_report_decides_sanity(pipeline):

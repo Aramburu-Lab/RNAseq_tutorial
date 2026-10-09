@@ -43,8 +43,8 @@ def run_from_wheel(site: Path, code: str, cwd: Path) -> str:
     ).stdout
 
 
-def test_wheel_runs_outside_repo(tmp_path):
-    site = build_wheel(tmp_path)
+def test_wheel_runs_outside_repo(tmp_path, wheel_site):
+    site = wheel_site
     (entry_points,) = site.glob("*.dist-info/entry_points.txt")
     assert "ctx = ctx.cli:app" in entry_points.read_text()
 
@@ -64,8 +64,8 @@ def test_wheel_runs_outside_repo(tmp_path):
     assert out[1] == declared
 
 
-def test_wheel_renders_a_page(tmp_path):
-    site = build_wheel(tmp_path)
+def test_wheel_renders_a_page(tmp_path, wheel_site):
+    site = wheel_site
     out = run_from_wheel(
         site,
         """
@@ -83,9 +83,9 @@ def test_wheel_renders_a_page(tmp_path):
     assert int(out[2]) > 1_000_000
 
 
-def test_wheel_ships_every_content_file(tmp_path):
+def test_wheel_ships_every_content_file(wheel_site):
     """Pages read their text from the package, so every content file must be in the wheel."""
-    site = build_wheel(tmp_path)
+    site = wheel_site
     content = ROOT / "src" / "ctx" / "report" / "content"
     shipped = {p.name for p in (site / "ctx" / "report" / "content").iterdir()}
     assert {p.name for p in content.iterdir()} <= shipped
