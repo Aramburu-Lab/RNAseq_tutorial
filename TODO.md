@@ -447,6 +447,19 @@ The 2026-10-01 work order's items 3 to 10 follow these unless Rytis reorders the
 
 Rytis, 2026-10-08: copy all of M4's Salmon files (9.76 GB, Q1) and download GTEx V11's TPM and exon tables, then work through the list. Decisions he has not answered take their recommended answers (`docs/plans/2026-10-07_real_data_decisions.md`); M7's and M8's downloads wait for his approval. Fetched: GTEx V11 release 2025-08-22 into `~/ctx_tier1/data/raw/gtex_v11/`, MD5-checked, with the sample and subject annotations the tissue and sex summaries need.
 
+## ▶️ Work-order item 13 answers (Rytis, 2026-10-09: all recommended answers of `docs/plans/2026-10-09_todo_triage.md`)
+
+1. [ ] One cluster block for M3.11 with M4's Q2, written by an agent; M3.13 and P2Q.8 planned from what it measures.
+2. [ ] The G.5/U.11 Kebnekaise rehearsal after package G's CONVENTIONS line.
+3. [ ] P2S.8: each contract's title room from its own drawn axis height (wave 2).
+4. [ ] TCGA mRNA sanity rules (rows 739, 740) registered now, labelled not blind (wave 2).
+5. [ ] CPTAC-2 breast miRNA and isoform files downloaded (104 tumour files each, 5,251,801 and 47,005,217 B).
+6. [ ] SCAN-B, TOIL/GTEx, CPTAC ccRCC, LUAD and LSCC, and the GTEx V11 junction file: an agent measures sizes and reads licences first.
+7. [x] HPA's own tau: closed; v25's files carry none, and the page labels tau as ours (D-056).
+8. [ ] Cassetta breast: an agent writes the dataset files with the paper's comparisons and registers their sanity rules before `ctx de`; Step-2 and the D28 treatment dataset after the v1.0 pilot.
+9. [ ] GHCR: dispatch the containers workflow at 0.1.0 once package F adds the `figures` target.
+10. [ ] The kit as a GitHub release asset once kit v8 is built; Zenodo held until the Step-1 redistribution terms are settled.
+
 ## ▶️ Work order (Rytis, 2026-10-01)
 
 Each item starts when the one before it is merged, because they change the same page script and QC files; the side column runs alongside. Ticked here as each merges.
