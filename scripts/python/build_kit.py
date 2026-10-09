@@ -20,6 +20,11 @@ Usage:
 ``--leave-out`` keeps a dataset's outputs out of the kit: the teaching subset is the optional
 laptop exercise, built in the Step-1 root and never shipped (D-050, Rytis 2026-10-07).
 
+``--release`` builds the kit students get (K.6, D-050): it refuses a ``--made-up`` root, and a
+page carrying the preview's made-up note inside a ``--real`` root, before anything is written;
+it then counts the home page's Made-up links, which must be 0, and states the release in
+README.md and MANIFEST.json. A development kit keeps the previews, marked Made-up.
+
 Every page is rebuilt from one commit first, so the pages and ``MANIFEST.json`` name the same
 commit. The steps for the Step-1 root, kept here since a session's scratch copy was lost twice
 (kits v5 and v6); ``build_preview.py`` refuses an existing root, so move the last one aside:
@@ -74,6 +79,8 @@ DATED = re.compile(r"\d{4}-\d{2}-\d{2}_")
 FOLDER = re.compile(r"[a-z0-9_]+")
 # Code a kit is built from; a change here, even an untracked file, marks the commit dirty.
 CODE = ("src", "scripts", "conf", "pixi.toml", "pixi.lock", "pyproject.toml")
+# How the home page marks a made-up link (course.html.j2's pill), counted in a release kit.
+MADE_UP_LINK = '<span class="pill" data-kind="made-up">'
 
 
 def current(outputs: Path) -> set[Path]:
@@ -163,8 +170,33 @@ def _commit() -> str:
     return git("rev-parse", "--short", "HEAD") + ("-dirty" if changed else "")
 
 
+def made_up_pages(files: list[Path]) -> list[str]:
+    """Every page that says it is drawn on made-up data: it carries the preview's note."""
+    note = text.word("ui", "preview.note")
+    pages = [p for p in files if p.suffix == ".html"]
+    return [f"{p}: a made-up page; a release kit holds none" for p in pages
+            if note in p.read_text(encoding="utf-8", errors="replace")]  # fmt: skip
+
+
+def release_problems(roots: list[tuple[str, Path, bool]], chosen: dict[str, list[Path]]
+                     ) -> list[str]:  # fmt: skip
+    """Why these roots cannot make a release kit: a made-up root, or a made-up page."""
+    problems = [f"--made-up {folder}={root}: a release kit holds no made-up root"
+                for folder, root, real in roots if not real]  # fmt: skip
+    return problems + made_up_pages([p for files in chosen.values() for p in files])
+
+
+def made_up_links(kit: Path) -> int:
+    """Made-up links on the kit's home page."""
+    return (kit / "START.html").read_text(encoding="utf-8").count(MADE_UP_LINK)
+
+
 def manifest(
-    kit: Path, roots: list[tuple[str, bool]], commit: str, left_out: tuple[str, ...] = ()
+    kit: Path,
+    roots: list[tuple[str, bool]],
+    commit: str,
+    left_out: tuple[str, ...] = (),
+    release: bool = False,
 ) -> Path:
     """``MANIFEST.json``: every other file of the kit with its size and SHA-256."""
     out = kit / "MANIFEST.json"
@@ -178,6 +210,8 @@ def manifest(
         "commit": commit,
         "roots": [{"folder": f, "real": real} for f, real in roots],
         "left_out": sorted(left_out),
+        "release": release,
+        "made_up_links": made_up_links(kit),
         "files": len(files),
         "bytes": sum(f["bytes"] for f in files),
         "entries": files,
@@ -186,7 +220,8 @@ def manifest(
     return out
 
 
-def readme(kit: Path, roots: list[tuple[str, bool]], shipped: list[Path], commit: str) -> Path:
+def readme(kit: Path, roots: list[tuple[str, bool]], shipped: list[Path], commit: str,
+           release: bool = False) -> Path:  # fmt: skip
     """The kit's README.md, its text from ``content/course.toml``."""
     lines = []
     for folder, real in roots:
@@ -200,6 +235,8 @@ def readme(kit: Path, roots: list[tuple[str, bool]], shipped: list[Path], commit
     body = text.fill("course", "readme.text", files=f"{len(shipped):,}", size=size,
                      datasets="\n".join(lines), built=date.today().isoformat(),
                      commit=commit)  # fmt: skip
+    if release:
+        body += "\n" + text.word("course", "readme.release") + "\n"
     out = kit / "README.md"
     out.write_text(body, encoding="utf-8")
     return out
@@ -227,9 +264,14 @@ def _roots(args: argparse.Namespace) -> list[tuple[str, Path, bool]]:
 
 
 def build(
-    out: Path, roots: list[tuple[str, Path, bool]], left_out: tuple[str, ...] = ()
+    out: Path,
+    roots: list[tuple[str, Path, bool]],
+    left_out: tuple[str, ...] = (),
+    release: bool = False,
 ) -> list[Path]:
     """Copy each root's files, less the left-out datasets', and write the home page.
+
+    A release build refuses every made-up root and page first, and writes nothing then.
 
     Returns:
         What was copied.
@@ -241,6 +283,8 @@ def build(
     for folder, root, _ in roots:
         chosen[folder], found = select(root, left_out, slugs)
         problems += found
+    if release:
+        problems += release_problems(roots, chosen)
     if problems:
         sys.exit("kit refused, nothing written:\n" + "\n".join(problems))
     out.mkdir(parents=True)
@@ -268,6 +312,8 @@ def main() -> None:
     parser.add_argument("--leave-out", action="append", default=[], metavar="DATASET",
                         help="a dataset slug whose outputs stay out of the kit")  # fmt: skip
     parser.add_argument("--zip", action="store_true", help="also write <out>.zip")
+    parser.add_argument("--release", action="store_true",
+                        help="the students' kit: no made-up root or page")  # fmt: skip
     args = parser.parse_args()
     out = args.out.expanduser()
     partial = out.with_name(out.name + ".partial")
@@ -275,20 +321,23 @@ def main() -> None:
         sys.exit(f"{', '.join(map(str, taken))} exists; a kit is never written over")
     roots = _roots(args)
     left_out = tuple(args.leave_out)
-    shipped = build(partial, roots, left_out)
+    shipped = build(partial, roots, left_out, args.release)
     names = [p.relative_to(partial).as_posix() for p in partial.rglob("*") if p.is_file()]
     pages = sorted(partial.rglob("*.html"))
-    if problems := check_kit.link_problems(partial, pages) + check_kit.windows_problems(
-        names, out.name
-    ):
+    problems = check_kit.link_problems(partial, pages) + check_kit.windows_problems(names, out.name)
+    if args.release and (links := made_up_links(partial)):
+        problems.append(f"START.html: {links} Made-up links; a release kit has 0")
+    if problems:
         sys.exit(f"kit checks fail; left in {partial} for inspection:\n" + "\n".join(problems))
     commit, folders = _commit(), [(f, real) for f, _, real in roots]
-    readme(partial, folders, shipped, commit)
-    record = json.loads(manifest(partial, folders, commit, left_out).read_text())
+    readme(partial, folders, shipped, commit, args.release)
+    record = json.loads(manifest(partial, folders, commit, left_out, args.release).read_text())
     partial.rename(out)
     print(f"{out}: {record['files']:,} files, {record['bytes'] / 1e6:,.1f} MB, commit {commit}")
     if left_out:
         print(f"left out: {', '.join(sorted(left_out))}")
+    if args.release:
+        print(f"release kit: {record['made_up_links']} Made-up links on START.html")
     if args.zip:
         packed = pack(out)
         print(f"{packed}: {packed.stat().st_size / 1e6:,.1f} MB")

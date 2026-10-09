@@ -171,7 +171,7 @@ def test_the_tcga_page_end_to_end(built):
     page = Path(written[0])
     assert page.stat().st_size < 15 * 10**6
     html = page.read_text()
-    assert "distributed by the NCI Genomic Data Commons" in html
+    assert "were retrieved from the NCI Genomic Data Commons" in html
     assert "holds no read-group record" in html
     fit = table(out, "mirna_results").filter(pl.col("gene_name") == "hsa-miR-1-3p")
     assert fit["call"][0] == "up"
@@ -224,33 +224,69 @@ def test_m5_takes_a_gdc_sheet_through_chosen(root, tmp_path):
     assert (row["n_reference"], row["n_tested"], row["dropped_runs"]) == (12, 12, "")
     # Mutation caught: the M5 page of GDC data without the GDC acknowledgement.
     (page,) = out.glob("*_de_fakegdc_overview_v1.html")
-    assert "distributed by the NCI Genomic Data Commons" in page.read_text()
+    assert "were retrieved from the NCI Genomic Data Commons" in page.read_text()
 
 
-def test_f5_compares_both_libraries_of_a_tumour_and_leaves_out_ffpe():
-    """Two tumours sequenced both ways, one of them with an FFPE third library. Catches: F5
-    reading only the chosen files (no pair is left), an FFPE library compared, and the histone
-    share taken over a gene the HGNC cluster names do not cover (H2AZ1 is replication-
-    independent)."""
+TUMOUR = "Primary Tumor"
+
+
+def f5_files(**changes: list) -> pl.DataFrame:
+    """Gather's sheet as the rule marks it: two tumours sequenced both ways, each rRNA-depleted
+    twin dropped as another protocol; B also has an FFPE library and A a redacted one, which the
+    rule records as protocol, as the reasons' order puts it first."""
+    rows = {
+        "sample": ["a1", "a2", "a3", "b1", "b2", "b3", "n1", "n2"],
+        "sample_id": ["A", "A", "A", "B", "B", "B", "N", "N"],
+        "sample_type": [TUMOUR] * 6 + ["Solid Tissue Normal"] * 2,
+        "condition": ["tumour"] * 6 + ["normal"] * 2,
+        "drop_reason": ["", "protocol", "protocol", "", "protocol", "ffpe", "", "protocol"],
+        "preservation": ["OCT", "OCT", "OCT", "OCT", "OCT", "FFPE", "OCT", "OCT"],
+        "redacted": [False, False, True, False, False, False, False, False],
+        "library_selection": ["Poly-T", "rRNA Depletion", "rRNA Depletion", "Poly-T",
+                              "rRNA Depletion", "rRNA Depletion", "Poly-T", "rRNA Depletion"],
+    }  # fmt: skip
+    return pl.DataFrame(rows | changes)
+
+
+F5_GENES = pl.DataFrame({"gene_id": ["g1", "g2", "g3"], "gene_name": ["H2BC1", "H2AZ1", "ACTB"],
+                         "biotype": ["protein_coding"] * 3})  # fmt: skip
+F5_COUNTS = pl.DataFrame({"gene_id": ["g1", "g2", "g3"], "a1": [1, 50, 99], "a2": [10, 0, 90],
+                          "a3": [90, 0, 10], "b1": [2, 0, 98], "b2": [20, 0, 80],
+                          "b3": [0, 0, 100], "n1": [5, 5, 5], "n2": [9, 1, 5]})  # fmt: skip
+
+
+def test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file():
+    """Each rRNA-depleted twin is dropped as another protocol, as gather drops it on every TCGA
+    project (LUSC: 9 tumours). Mutations caught: F5 reading only the chosen and tie-break files
+    (no pair, as kit v8 found), an FFPE library compared, a redacted file compared because the
+    rule recorded protocol first, a normal compared, and the histone share taken over H2AZ1,
+    which is replication-independent."""
     from ctx.ncrna import libraries  # noqa: PLC0415
 
-    files = pl.DataFrame({
-        "sample": ["a1", "a2", "b1", "b2", "b3"],
-        "sample_id": ["A", "A", "B", "B", "B"],
-        "condition": ["tumour"] * 5,
-        "drop_reason": ["", "not_first", "", "not_first", "ffpe"],
-        "library_selection": ["Poly-T", "rRNA Depletion", "Poly-T", "rRNA Depletion",
-                              "rRNA Depletion"],
-    })  # fmt: skip
-    genes = pl.DataFrame({"gene_id": ["g1", "g2", "g3"], "gene_name": ["H2BC1", "H2AZ1", "ACTB"],
-                          "biotype": ["protein_coding"] * 3})  # fmt: skip
-    counts = pl.DataFrame({"gene_id": ["g1", "g2", "g3"], "a1": [1, 50, 99], "a2": [10, 0, 90],
-                           "b1": [2, 0, 98], "b2": [20, 0, 80], "b3": [0, 0, 100]})  # fmt: skip
-    paired = libraries.pairs(files, counts, genes)
+    paired = libraries.pairs(f5_files(), F5_COUNTS, F5_GENES, TUMOUR)
     assert sorted(paired["sample"]) == ["a1", "a2", "b1", "b2"]
     found = libraries.compare(paired)["histone"]
     assert (found["pairs"], found["higher"]) == (2, 2)
     assert found["other"] == pytest.approx(np.median([1 / 150 * 100, 2.0]))
+
+
+def test_f5_without_a_pair_is_not_measured_with_its_reason():
+    """No rRNA-depleted twin, as in BRCA, KIRC and LUAD: the pairs are an empty table and the
+    histone rule's metrics are absent with the reason, never a crash (kit v8: IndexError at
+    libraries.pairs on all four projects). Mutation caught: the empty selection indexed."""
+    from types import SimpleNamespace  # noqa: PLC0415
+
+    from ctx.ncrna import libraries, libraries_page  # noqa: PLC0415
+
+    files = f5_files(library_selection=["Poly-T"] * 8)
+    paired = libraries.pairs(files, F5_COUNTS, F5_GENES, TUMOUR)
+    assert paired.is_empty() and paired.columns == ["sample_id", "sample", "library_selection",
+                                                    *libraries.CLASSES]  # fmt: skip
+    tcga = SimpleNamespace(files=files, counts=F5_COUNTS)
+    shown, metrics, reasons = libraries_page.group(None, tcga, F5_GENES, TUMOUR)  # type: ignore[arg-type]
+    assert shown is None and metrics == {}
+    assert set(reasons) == set(libraries_page.RULE_METRICS)
+    assert all("no tumour" in why for why in reasons.values())
 
 
 def test_read_groups_give_each_aliquot_its_library_selection(tmp_path):

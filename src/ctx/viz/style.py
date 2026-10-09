@@ -107,6 +107,8 @@ PLOTLY_FLOW = {"node_px": 16, "pad_px": 18}
 # outer bars 40 px inside the plot, a category label 5 px from its bar. "gap" is the least
 # space this project keeps between two dimension titles, or a label and the bar before it.
 PLOTLY_PARCATS = {"bar_px": 16, "inset_px": 40, "label_px": 5, "gap_px": 16}
+# The least space kept between the labels of two neighbouring boxes' features, page px.
+BOX_GAP_PX = 8
 # A density's outer highest-density region is dashed, its inner one solid.
 DENSITY_DASH: dict[str, tuple[Literal["-", "--"], Literal["solid", "dash"]]] = {
     "inner": ("-", "solid"), "outer": ("--", "dash"),

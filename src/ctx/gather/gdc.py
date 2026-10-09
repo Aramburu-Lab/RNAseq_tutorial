@@ -23,6 +23,7 @@ import polars as pl
 
 from ctx.dataset import GdcSpec
 from ctx.qc.registry import Metric
+from ctx.report import text
 
 # The fetch's own file names, as the lab's GDC fetch script writes them.
 METADATA = "gdc_files_star_counts.tsv"
@@ -57,6 +58,8 @@ STRAND_METRIC = "gdc_strand_share"
 FFPE = "FFPE"
 # Why a file is not the one taken for its case and sample type, in the order the rule applies.
 DROPS = ("ffpe", "protocol", "redacted", "not_first")
+# The drop reasons ``comparable`` passes: none, the tie-break, and another protocol.
+COMPARABLE = ("", "not_first", "protocol")
 # Annotation entities that are biospecimens; the rest annotate other data types' files.
 BIOSPECIMEN = ("case", "sample", "portion", "analyte", "aliquot")
 REDACTION = "Redaction"
@@ -109,6 +112,16 @@ class Counts:
     stats: pl.DataFrame
     par_y: int
     rows: int
+
+
+def acknowledgement(spec: GdcSpec) -> tuple[str, ...]:
+    """What a page drawn from a GDC project prints about its source, first on the page.
+
+    The project's own attribution sentence where the dataset file names one, then the project
+    accession and release with the GDC's citation (ui.toml [gdc], each from its source page).
+    """
+    own = (text.word("ui", f"gdc.attribution.{spec.attribution}"),) if spec.attribution else ()
+    return (*own, text.fill("ui", "gdc.commons", project=spec.project, release=spec.release))
 
 
 def _text(path: Path) -> str:
@@ -463,6 +476,22 @@ def run_accession() -> pl.Expr:
     the tie-break ``choose`` applies, where a TCGA aliquot's own digits name its centre.
     """
     return pl.format("GDC{}", pl.int_range(1, pl.len() + 1).cast(pl.String).str.zfill(6))
+
+
+def comparable(sheet: pl.DataFrame, sample_type: str) -> pl.DataFrame:
+    """The second door: the files a comparison of library types within one sample may read.
+
+    ``chosen`` takes one file per case; a tumour sequenced twice, once rRNA-depleted, has its
+    second library dropped as another protocol, which is exactly what F5 compares
+    (``ctx.ncrna.libraries``). So this door passes the chosen files, the tie-break's other
+    aliquots and the files of another protocol, and never an FFPE or a redacted file. FFPE is
+    the rule's first reason, so no FFPE file carries another; a redacted file of another
+    protocol is recorded as protocol, so redaction is read from its own column.
+    """
+    return sheet.filter(
+        pl.col("sample_type") == sample_type, pl.col("drop_reason").is_in(list(COMPARABLE)),
+        ~pl.col("redacted"),
+    )  # fmt: skip
 
 
 def chosen(sheet: pl.DataFrame, sample_type: str | None = None) -> pl.DataFrame:

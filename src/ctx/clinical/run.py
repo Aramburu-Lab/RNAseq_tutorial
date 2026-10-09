@@ -135,7 +135,8 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     tables = gathered(settings.root, dataset)
     clinical = harmonise.build(tables["samplesheet"], tables["cdr"], tables["cases"],
                                tables["molecular_tests"], tables["treatments"],
-                               tables["annotations"], tumour=spec.gdc.tumour)  # fmt: skip
+                               tables["annotations"], tumour=spec.gdc.tumour,
+                               therapy=spec.clinical.therapy)  # fmt: skip
     gene_table, values, dropped = expression(tables, clinical.patients, options.min_log2cpm)
     lookup = genes.table(gene_table["gene_id"].to_list(), gene_table["gene_name"].to_list())
     chosen, source = build_list(spec, options.genes_from, lookup)

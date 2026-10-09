@@ -1,7 +1,7 @@
 """The clinical table: one row per patient, from gather's GDC tables (plan section 1.2).
 
-The patient's tumour comes through ``gdc.chosen()``; endpoints, age, stage, histology and
-menopause from the TCGA-CDR; receptor status, sex and treatment from GDC's own records; the
+The patient's tumour comes through ``gdc.chosen()``; endpoints, age, stage, grade, histology
+and menopause from the TCGA-CDR; receptor status, sex and treatment from GDC's own records; the
 notifications from gather's annotation log. Every missing value is null with a reason in a
 ``<column>_missing`` column, so "stage missing 24: 13 Stage X, 6 discrepancy, 5 not available"
 is counted, not guessed. A CDR redaction removes the patient; a notification removes no one
@@ -31,11 +31,12 @@ MISSING = {
 }  # fmt: skip
 STAGE = re.compile(r"Stage (IV|I{1,3})[A-C]?")
 ROMAN = {"I": 1, "II": 2, "III": 3, "IV": 4}
+# Histological grade G1 to G4; GX, grade not assessable, is a reason, never a grade.
+GRADE = re.compile(r"G([1-4])")
 MENOPAUSE = {"Pre": "pre", "Peri": "peri", "Post": "post", "Indeterminate": "indeterminate"}
 RECEPTORS = {"er": "ESR1", "pr": "PGR"}
 CALLED = ("Positive", "Negative")
 EQUIVOCAL = "Equivocal"
-HORMONE = "Hormone Therapy"
 # The notifications a patient's row flags, by GDC category.
 NOTIFICATIONS = {
     "neoadjuvant": "Neoadjuvant therapy",
@@ -45,7 +46,8 @@ NOTIFICATIONS = {
 }  # fmt: skip
 REDACTED = "Redacted"
 CDR_COLUMNS = ("bcr_patient_barcode", "age_at_initial_pathologic_diagnosis",
-               "ajcc_pathologic_tumor_stage", "histological_type", "menopause_status",
+               "ajcc_pathologic_tumor_stage", "histological_type", "histological_grade",
+               "menopause_status",
                "Redaction", *ENDPOINTS, *(f"{e}.time" for e in ENDPOINTS))  # fmt: skip
 
 
@@ -77,6 +79,14 @@ def stage(raw: str) -> tuple[int | None, str | None]:
         return None, reason
     found = STAGE.fullmatch(raw.strip())
     return (ROMAN[found[1]], None) if found else (None, f"unread: {raw}")
+
+
+def grade(raw: str) -> tuple[int | None, str | None]:
+    """Histological grade G1 to G4 as 1 to 4; GX and the missing tokens are no grade."""
+    if (reason := missing(raw)) is not None:
+        return None, reason
+    found = GRADE.fullmatch(raw.strip())
+    return (int(found[1]), None) if found else (None, raw.strip())
 
 
 def whole(raw: str) -> tuple[int | None, str | None]:
@@ -165,10 +175,11 @@ def _cdr_row(row: Mapping[str, str]) -> dict[str, Any]:
     group, stage_reason = stage(row["ajcc_pathologic_tumor_stage"])
     histology = row["histological_type"]
     meno, meno_reason = menopause(row["menopause_status"])
+    graded, grade_reason = grade(row["histological_grade"])
     out = {
         "age": age, "age_missing": age_reason, "stage": group,
         "stage_label": None if stage_reason else row["ajcc_pathologic_tumor_stage"],
-        "stage_missing": stage_reason,
+        "stage_missing": stage_reason, "grade": graded, "grade_missing": grade_reason,
         "histology": None if missing(histology) else histology,
         "histology_missing": missing(histology), "menopause": meno,
         "menopause_missing": meno_reason,
@@ -189,7 +200,7 @@ def flags(cdr: pl.DataFrame) -> dict[str, tuple[int, int]]:
 
 def build(  # noqa: PLR0913 - gather's six tables, each read once
     sheet: pl.DataFrame, cdr: pl.DataFrame, cases: pl.DataFrame, tests: pl.DataFrame,
-    treatments: pl.DataFrame, annotations: pl.DataFrame, *, tumour: str,
+    treatments: pl.DataFrame, annotations: pl.DataFrame, *, tumour: str, therapy: str,
 ) -> Clinical:  # fmt: skip
     """The patient table from gather's GDC tables.
 
@@ -201,6 +212,7 @@ def build(  # noqa: PLR0913 - gather's six tables, each read once
         treatments: Gather's treatments.
         annotations: Gather's annotation log.
         tumour: The dataset file's tumour sample type.
+        therapy: The GDC treatment type the ``therapy`` column records, e.g. Hormone Therapy.
 
     Returns:
         The table, the flow to it and the CDR's flags per endpoint.
@@ -218,13 +230,13 @@ def build(  # noqa: PLR0913 - gather's six tables, each read once
     redacted = sorted(c for c, r in by_cdr.items() if r["Redaction"] == REDACTED)
     kept = in_cdr.filter(~pl.col("case").is_in(redacted))
     receptors, sex = _tests(tests), dict(cases.select("case", "sex_at_birth").rows())
-    therapy = (pl.col("treatment_type") == HORMONE) & (pl.col("treatment_or_therapy") == "yes")
-    hormone = set(treatments.filter(therapy)["case"])
+    given = (pl.col("treatment_type") == therapy) & (pl.col("treatment_or_therapy") == "yes")
+    treated = set(treatments.filter(given)["case"])
     noted = {k: set(annotations.filter(pl.col("category") == v)["case"])
              for k, v in NOTIFICATIONS.items()}  # fmt: skip
     rows = []
     for case, sample, plate, site in kept.select("case", "sample", "plate", "site").rows():
-        given = sex.get(case) or ""
+        recorded = sex.get(case) or ""
         status = receptors.get(
             case,
             {
@@ -235,13 +247,16 @@ def build(  # noqa: PLR0913 - gather's six tables, each read once
         )
         rows.append({
             "patient": case, "sample": sample, "plate": plate, "site": site,
-            "sex": None if missing(given) else given, "sex_missing": missing(given),
+            "sex": None if missing(recorded) else recorded, "sex_missing": missing(recorded),
             **_cdr_row(by_cdr[case]), **status,
-            "hormone_therapy": "yes" if case in hormone else None,
-            "hormone_therapy_missing": None if case in hormone else "not recorded",
+            "therapy": "yes" if case in treated else None,
+            "therapy_missing": None if case in treated else "not recorded",
             **{k: case in v for k, v in noted.items()},
         })  # fmt: skip
-    patients = pl.DataFrame(rows, infer_schema_length=None).sort("patient")
+    # A column no row fills is typed Null, which compares with nothing: text, or whole numbers.
+    patients = (pl.DataFrame(rows, infer_schema_length=None).sort("patient")
+                .with_columns(pl.col(pl.Null).cast(pl.String))
+                .with_columns(pl.col("age", "stage", "grade").cast(pl.Int64)))  # fmt: skip
     tumours = sheet.filter(pl.col("sample_type") == tumour)["case"].n_unique()
     flow = (("tumour", tumours), ("rule", taken.height), ("cdr", in_cdr.height),
             ("redactions", kept.height))  # fmt: skip

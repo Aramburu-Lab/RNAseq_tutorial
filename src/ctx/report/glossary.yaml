@@ -1599,6 +1599,17 @@
     exists.
   see_also: [kaplan_meier, hazard_ratio]
 
+- id: cumulative_incidence
+  term: cumulative incidence
+  aliases: [competing risks, Aalen-Johansen]
+  category: survival
+  short: Share of patients who have had one kind of event by a given time, other kinds competing.
+  long: >-
+    Where a death from another cause ends the chance of a death from the cancer, each cause has
+    its own cumulative incidence, estimated by Aalen-Johansen. One minus Kaplan-Meier with the
+    other deaths censored overstates the cause, since it treats those patients as still at risk.
+  see_also: [kaplan_meier, censoring]
+
 - id: hazard_ratio
   term: hazard ratio (Cox model)
   aliases: [HR, Cox regression, Cox proportional hazards, Cox model]

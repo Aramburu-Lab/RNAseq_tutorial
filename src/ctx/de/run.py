@@ -565,9 +565,19 @@ def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, floa
 def _box(
     result: Fit, counts: pl.DataFrame, genes: pl.DataFrame, symbols: tuple[str, ...]
 ) -> tuple[Figure | None, list[str]]:
-    """Normalised expression of named genes in one contrast, MWU in the caption, padj on hover."""
-    named = genes.filter(pl.col("gene_name").is_in(list(symbols))).unique("gene_name", keep="first")
-    missing = [s for s in symbols if s not in set(named["gene_name"])]
+    """Normalised expression of named genes in one contrast, MWU in the caption, padj on hover.
+
+    The boxes stand in the dataset file's order, each symbol's first gene in the table's order:
+    polars' ``unique`` without ``maintain_order`` returned the genes in another order each run.
+    """
+    once = genes.select("gene_name", "gene_id").unique(
+        "gene_name", keep="first", maintain_order=True
+    )
+    first = dict(once.rows())
+    missing = [s for s in symbols if s not in first]
+    named = pl.DataFrame({"gene_id": [first[s] for s in symbols if s in first],
+                          "gene_name": [s for s in symbols if s in first]},
+                         schema={"gene_id": pl.String, "gene_name": pl.String})  # fmt: skip
     if named.is_empty():
         return None, missing
     c = result.contrast
@@ -866,7 +876,7 @@ def _keys(sheet: pl.DataFrame, fits: Mapping[str, Fit], featured: str) -> tuple[
 
 def _acknowledged(spec: Dataset) -> tuple[str, ...]:
     """The GDC acknowledgement for a page drawn from GDC data (TODO.md, M10), else nothing."""
-    return (word("ui", "gdc.acknowledgement"),) if spec.gdc is not None else ()
+    return gdc.acknowledgement(spec.gdc) if spec.gdc is not None else ()
 
 
 def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long sequence

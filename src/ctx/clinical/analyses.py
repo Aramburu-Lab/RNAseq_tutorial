@@ -10,10 +10,11 @@ from typing import Any
 
 import numpy as np
 import polars as pl
-from scipy.stats import chi2_contingency, kruskal, mannwhitneyu, norm, spearmanr
+from scipy.stats import chi2_contingency, mannwhitneyu, norm, spearmanr
 from scipy.stats import false_discovery_control as bh
 
-from ctx.clinical import harmonise, survival
+from ctx.clinical import ClinicalError, harmonise, survival
+from ctx.proteo import measure
 
 # Fewest patients a level needs to enter a Kruskal-Wallis test or a Cramér's V table.
 MIN_GROUP = 10
@@ -21,6 +22,12 @@ MIN_GROUP = 10
 AGE_EDGES = (50, 60, 70)
 ALPHA = 0.05
 TARGET_POWER = 80.0
+# Dunn's pairs as measure.class_test gives them: (level a, level b, z, p, BH-adjusted p).
+Pairs = tuple[tuple[str, str, float, float, float], ...]
+# The tests each patient-table variable takes, in this order (dataset.CLINICAL_VARIABLES).
+TESTS = {"er": ("mann_whitney",), "stage": ("kruskal", "spearman"),
+         "grade": ("kruskal", "spearman"), "histology": ("kruskal",), "menopause": ("kruskal",),
+         "age": ("spearman",), "sex": ("kruskal",)}  # fmt: skip
 
 
 @dataclass(frozen=True)
@@ -152,52 +159,70 @@ def screen(out: Outcome, z: np.ndarray, extra: np.ndarray, complete: np.ndarray,
     return table
 
 
-def _test(values: np.ndarray, labels: np.ndarray, kind: str) -> tuple[int, float, float]:
-    """(n, effect, p) of one test of expression against a variable.
+def _test(values: np.ndarray, labels: np.ndarray, kind: str) -> tuple[int, float, float, Pairs]:
+    """(n, effect, p, Dunn's pairs) of one test of expression against a variable.
 
     ``mann_whitney``: labels positive and negative, effect AUC of positive over negative.
-    ``kruskal``: levels with at least ``MIN_GROUP`` patients, effect epsilon squared.
-    ``spearman``: a numeric variable, effect rho.
+    ``kruskal``: levels with at least ``MIN_GROUP`` patients, effect epsilon squared, through
+    ``measure.class_test``, the one definition of Kruskal-Wallis with Dunn's pairs.
+    ``spearman``: a numeric variable, effect rho. Only ``kruskal`` has pairs.
     """
     if kind == "spearman":
         keep = ~np.isnan(labels.astype(float))
         rho, p = spearmanr(values[keep], labels[keep].astype(float))
-        return int(keep.sum()), float(rho), float(p)
+        return int(keep.sum()), float(rho), float(p), ()
     if kind == "mann_whitney":
         a, b = values[labels == "positive"], values[labels == "negative"]
         u, p = mannwhitneyu(a, b, alternative="two-sided")
-        return len(a) + len(b), float(u / (len(a) * len(b))), float(p)
+        return len(a) + len(b), float(u / (len(a) * len(b))), float(p), ()
     present = np.array([v is not None for v in labels])
     levels = [lv for lv in np.unique(labels[present]) if (labels == lv).sum() >= MIN_GROUP]
-    parts = [values[labels == lv] for lv in levels]
-    h, p = kruskal(*parts)
-    n = sum(len(x) for x in parts)
-    return n, float(h / (n - 1)), float(p)
+    if len(levels) < 2:  # noqa: PLR2004 - a test needs two levels
+        raise ClinicalError(f"{len(levels)} level with {MIN_GROUP} patients or more: no test")
+    found = measure.class_test({str(lv): values[labels == lv] for lv in levels})
+    return sum(found.n.values()), found.epsilon2, found.p, found.pairs
 
 
-def expression_tests(patients: pl.DataFrame, values: Mapping[str, np.ndarray]) -> pl.DataFrame:
-    """Each build gene against ER, stage, histology, menopause and age; q over all of them.
+def plans(variables: Sequence[str]) -> list[tuple[str, str]]:
+    """(variable, test) of each declared variable, in ``TESTS``' order per variable."""
+    return [(v, kind) for v in variables for kind in TESTS[v]]
+
+
+def expression_tests(patients: pl.DataFrame, values: Mapping[str, np.ndarray],
+                     planned: Sequence[tuple[str, str]]
+                     ) -> tuple[pl.DataFrame, pl.DataFrame]:  # fmt: skip
+    """Each build gene against each planned variable; q over all of them; Dunn's pairs.
 
     Args:
         patients: The patient table.
         values: log2 CPM per build gene symbol, over the patients in table order.
+        planned: (variable, test) pairs, from ``plans``.
 
     Returns:
-        gene, variable, test, n, effect, p, q.
+        gene, variable, test, n, effect, p, q; and Dunn's pairs of each Kruskal-Wallis row:
+        gene, variable, level_a, level_b, z, p, and p_adj by Benjamini-Hochberg over that
+        test's pairs, as ``measure.class_test`` adjusts them.
     """
-    plans = (("er", "mann_whitney"), ("stage", "kruskal"), ("stage", "spearman"),
-             ("histology", "kruskal"), ("menopause", "kruskal"), ("age", "spearman"))  # fmt: skip
-    rows = []
+    rows, pairs = [], []
     for gene, v in values.items():
-        for variable, kind in plans:
-            labels = patients[variable].to_numpy()
+        for variable, kind in planned:
+            # A list keeps a missing value None and a whole number whole: numpy makes an
+            # integer column with nulls float, so stage 1 would print as level "1.0".
+            labels = np.array(patients[variable].to_list(), dtype=object)
             if kind == "spearman":
                 labels = np.array([np.nan if x is None else x for x in labels], float)
-            n, effect, p = _test(np.asarray(v, float), labels, kind)
+            n, effect, p, found = _test(np.asarray(v, float), labels, kind)
             rows.append({"gene": gene, "variable": variable, "test": kind, "n": n,
                          "effect": effect, "p": p})  # fmt: skip
+            pairs += [{"gene": gene, "variable": variable, "level_a": a, "level_b": b, "z": z,
+                       "p": pp, "p_adj": q} for a, b, z, pp, q in found]  # fmt: skip
     table = pl.DataFrame(rows)
-    return table.with_columns(q=pl.Series(bh(table["p"].to_numpy())))
+    schema = {"gene": pl.String, "variable": pl.String, "level_a": pl.String,
+              "level_b": pl.String, "z": pl.Float64, "p": pl.Float64,
+              "p_adj": pl.Float64}  # fmt: skip
+    return table.with_columns(q=pl.Series(bh(table["p"].to_numpy()))), pl.DataFrame(
+        pairs, schema=schema
+    )
 
 
 def cramers_v(sheet: pl.DataFrame, a: str, b: str) -> tuple[float | None, int]:

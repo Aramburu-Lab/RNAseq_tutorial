@@ -91,7 +91,7 @@ def word(key: str) -> str:
 
 def composition(sheet: pl.DataFrame, genes: pl.DataFrame, matrix: np.ndarray,
                 caption: str) -> tuple[BarData, pl.DataFrame]:  # fmt: skip
-    """F1: each sample's counted reads by biotype, filterable by cell type and condition.
+    """F1: each sample's counted reads by biotype, filterable by biotype, cell type and condition.
 
     Returns:
         The figure's data, and one row per sample with every group's share and the miRNA
@@ -115,7 +115,7 @@ def composition(sheet: pl.DataFrame, genes: pl.DataFrame, matrix: np.ndarray,
         frame=frame, columns=columns(frame), category="sample", value="percent",
         category_label=word("figures.composition.x"), value_label=word("figures.composition.y"),
         series="biotype", colours=biotypes.COLOURS, caption=caption, stacked=True,
-        hover=shown, filters=shown,
+        hover=shown, filters=(*shown, "biotype"),
         summary_median=False,
     )  # fmt: skip
     return data, wide

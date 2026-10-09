@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from ctx.report import course
+from ctx.report import course, text
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "python" / "build_kit.py"
@@ -316,3 +316,51 @@ def test_a_kit_folder_builds_a_kit(tmp_path):
     assert course.page(again, [(again / "step", True)]).guide == (
         f"step/outputs/09_report/{NEW}_report_guide_v1.html"
     )
+
+
+def release(tmp: Path, real: Path, *extra: str) -> tuple[Path, subprocess.CompletedProcess]:
+    """A --release build of one real root, with any other arguments."""
+    out = tmp / "kit"
+    done = subprocess.run([sys.executable, str(SCRIPT), "--out", str(out), "--release",
+                           f"--real=step={real}", *extra], capture_output=True, text=True,
+                          check=False)  # fmt: skip
+    return out, done
+
+
+def test_a_release_kit_refuses_a_made_up_root_and_writes_nothing(tmp_path):
+    """K.6: --release with --made-up stops before writing. Mutation caught: the release check
+    dropped from build(), which ships the preview root marked Made-up."""
+    real, made = a_root(tmp_path / "real", "Study", "study"), a_root(tmp_path / "made", "M", "m")
+    kit, done = release(tmp_path, real, f"--made-up=preview={made}")
+    assert done.returncode != 0 and "a release kit holds no made-up root" in done.stderr
+    assert nothing_written(kit)
+
+
+def test_a_release_kit_refuses_a_made_up_page_in_a_real_root(tmp_path):
+    """K.6: a preview page put in a real root is found by the preview's own note. Mutation
+    caught: made_up_pages returning nothing, so the page ships labelled real."""
+    real = a_root(tmp_path / "real", "Study", "study")
+    note = text.word("ui", "preview.note")
+    page(real / "outputs" / "12_clinical" / f"{NEW}_clinical_study_overview_v1.html",
+         "M10 Clinical and survival: Made-up study", extra=f"<p>{note}</p>")  # fmt: skip
+    kit, done = release(tmp_path, real)
+    assert done.returncode != 0 and "a made-up page; a release kit holds none" in done.stderr
+    assert nothing_written(kit)
+
+
+def test_a_release_kit_counts_zero_made_up_links_and_says_so(tmp_path):
+    """K.6: the release's MANIFEST.json and README.md state it, with 0 Made-up links counted;
+    a development kit counts its own. Mutation caught: made_up_links returning 0 whatever the
+    page holds, which a development kit with a preview root shows."""
+    real = a_root(tmp_path / "real", "Study", "study")
+    kit, done = release(tmp_path, real)
+    assert done.returncode == 0, done.stderr
+    record = json.loads((kit / "MANIFEST.json").read_text())
+    assert (record["release"], record["made_up_links"]) == (True, 0)
+    assert text.word("course", "readme.release") in (kit / "README.md").read_text()
+    assert "release kit: 0 Made-up links" in done.stdout
+    dev, done = build(tmp_path / "dev")
+    assert done.returncode == 0, done.stderr
+    record = json.loads((dev / "MANIFEST.json").read_text())
+    assert record["release"] is False and record["made_up_links"] > 0
+    assert text.word("course", "readme.release") not in (dev / "README.md").read_text()

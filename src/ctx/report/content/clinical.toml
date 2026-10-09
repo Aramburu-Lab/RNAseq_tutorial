@@ -132,10 +132,6 @@ columns.median = "Median (months)"
 columns.ci = "{level:.0f} % CI (months)"
 columns.rmst = "RMST (months)"
 
-[risk]
-title = "Patients at risk, by months since diagnosis"
-group = "Group"
-
 [cox]
 title = "Cox model of {endpoint}: hazard ratio per SD of {gene}"
 alone = "{gene} alone"
@@ -149,12 +145,8 @@ lead = "Median {endpoint}: {median_low} below the median, {median_high} at or ab
 reading = [
     "Each line is one group's Kaplan-Meier estimate: the share of its patients still free of the event.",
     "A step down is one or more events; a short vertical tick is a censored patient.",
-    "Colour: expression of {gene} below, or at or above, the cohort median.",
+    "Colour: expression of {gene} below, or at or above, the cohort median. The rows below count the patients still followed.",
 ]
-x = "Time since diagnosis"
-y = "Free of {endpoint}"
-step = "step"
-censored = "censored"
 caption = "{source}: {n} patients, {events} {endpoint} events, split at the median of {gene}. Log-rank chi-squared {chi2:.2f}, p = {p}. [[RMST]] difference, high minus low, at {horizon} months: {rmst:.1f} months."
 
 [figures.scan]
@@ -165,25 +157,16 @@ reading = [
     "The line is the log-rank p of a split at each percentile of {gene}, as -log10 p: higher means smaller p.",
     "Lower dashed line: p = {alpha} for one cut-off. Upper dashed line: the height the scan's smallest p needs for a corrected p of {alpha}.",
 ]
-line = "each cut-off"
-x = "Cut-off, percentile of {gene}"
-y = "Log-rank p"
-uncorrected = "uncorrected p = {alpha}"
-corrected = "corrected p = {alpha}"
 caption = "{source}: {n} patients, {events} events. Maximally selected [[log-rank test|log-rank]] statistic over {cuts} cut-offs; corrected p from {perms} [[permutations]] of expression. The pre-specified median split gives p = {median_p}."
 
 [figures.power]
 title = "Power of a Cox model by number of events and hazard ratio per SD"
-lead = "This cohort's {events} events give {power:.0f} % power at its adjusted hazard ratio of {hr:.2f}."
+lead = "This cohort's {events} events detect a hazard ratio of {hr:.2f} per SD with {target:.0f} % power."
 reading = [
     "Colour: power of a two-sided Wald test at alpha = {alpha}, for a covariate scaled to one SD.",
-    "The labelled line is {target:.0f} % power; the point marks this cohort's events and adjusted hazard ratio.",
+    "The labelled line is {target:.0f} % power; the point marks this cohort's events and the hazard ratio they detect.",
 ]
-x = "Events"
-y = "Hazard ratio per SD"
-z = "Power"
-mark = "this cohort"
-caption = "Computed from Hsieh and Lavori's formula for a per-SD [[HR|hazard ratio]], two-sided alpha = {alpha}; no data drawn. Point: {source}, {events} events, adjusted HR {hr:.2f}."
+caption = "Computed from Hsieh and Lavori's formula for a per-SD [[HR|hazard ratio]], two-sided alpha = {alpha}; no data drawn. Point: {source}, {events} events, the HR they detect, {hr:.2f}."
 
 [figures.confounding]
 title = "Cramér's V between the variables of the sample sheet"
@@ -211,23 +194,6 @@ days = ["days", "Time from diagnosis to the event or to censoring."]
 months = ["months", "Days divided by the mean days per month."]
 event = ["none", "1 for an event, 0 for censored."]
 
-[columns.km_estimates]
-group = ["none", "Split at the cohort median of expression."]
-months = ["months", "A time at which a patient had the event or was censored."]
-at_risk = ["patients", "Patients still followed just before this time."]
-events = ["patients", "Events at this time."]
-censored = ["patients", "Patients censored at this time."]
-survival = ["fraction", "Kaplan-Meier estimate just after this time."]
-lower = ["fraction", "Lower bound of the pointwise confidence interval, log-log Greenwood."]
-upper = ["fraction", "Upper bound of the pointwise confidence interval, log-log Greenwood."]
-
-[columns.km]
-group = ["none", "Split at the cohort median of expression."]
-months = ["months", "Time since diagnosis of this vertex of the drawn line."]
-survival = ["fraction", "Height of the vertex: the Kaplan-Meier estimate, or a censor tick's end."]
-at_risk = ["patients", "Patients still followed just before this time."]
-mark = ["none", "step for the estimate, censored for a censor tick."]
-
 [columns.cox]
 model = ["none", "Covariates in the model."]
 patients = ["patients", "Patients in the fit."]
@@ -236,21 +202,8 @@ hr = ["ratio", "Hazard ratio per SD of expression."]
 low = ["ratio", "Lower bound of the Wald confidence interval of the hazard ratio."]
 high = ["ratio", "Upper bound of the Wald confidence interval of the hazard ratio."]
 p = ["dimensionless", "Two-sided Wald p of the expression term."]
-ph_p = ["dimensionless", "Grambsch-Therneau test of proportional hazards for the expression term, rank time."]
-c_index = ["dimensionless", "Harrell's C of the model's linear predictor."]
-
-[columns.scan]
-line = ["none", "The one line drawn."]
-percentile = ["percentile", "Cut-off as a percentile of expression; at or above it is high."]
-cutoff = ["log2 CPM", "Cut-off as expression."]
-chi2 = ["dimensionless", "Log-rank chi-squared, one degree of freedom."]
-p = ["dimensionless", "Log-rank p of this cut-off alone, uncorrected."]
-neglog10p = ["-log10", "-log10 of p."]
-
-[columns.power]
-events = ["events", "Events in the cohort."]
-hr = ["ratio", "Hazard ratio per SD of a covariate."]
-power = ["%", "Power of the two-sided Wald test."]
+ph_p = ["dimensionless", "R's cox.zph rank-time test of proportional hazards for the expression term."]
+c_index = ["dimensionless", "Harrell's C of the model's linear predictor, as R's concordance."]
 
 [columns.confounding]
 row_variable = ["none", "Sample-sheet column of the row."]
@@ -286,12 +239,15 @@ notified = "GDC notifications, kept and flagged: {neoadjuvant} neoadjuvant thera
 [patients.variables]
 age = "Age"
 stage = "Stage"
+stage_group = "Stage group"
+grade = "Grade"
 histology = "Histology"
 menopause = "Menopause"
+sex = "Sex"
 er = "ER status"
 pr = "PR status"
 her2 = "HER2 status"
-hormone_therapy = "Hormone therapy"
+therapy = "Treatment of the cohort's type"
 age_group = "Age group"
 plate = "Plate"
 site = "Tissue source site"
@@ -313,6 +269,14 @@ columns = ["Gene", "Variable", "Test", "Patients", "Effect", "p", "q"]
 tests.mann_whitney = "Mann-Whitney, AUC"
 tests.kruskal = "Kruskal-Wallis, epsilon squared"
 tests.spearman = "Spearman, rho"
+dunn_title = "Dunn's pairs after each Kruskal-Wallis test; p adjusted by Benjamini-Hochberg over that test's pairs"
+dunn_columns = ["Gene", "Variable", "Levels", "z", "p", "Adjusted p"]
+dunn_pair = "{a} against {b}"
+
+# The box's stage groups (ctx.clinical.figures.STAGE_GROUPS).
+[box]
+early = "Stage I-II"
+late = "Stage III-IV"
 
 [splits]
 median = "at the median"
@@ -348,11 +312,15 @@ columns = ["Gene", "HR alone", "q alone", "HR adjusted", "95 % CI adjusted", "q 
 [confounding]
 title = "Confounding between patient variables"
 
+[competing]
+title = "Competing risks"
+
 [treatment]
-title = "Treatment recorded, by ER status"
-table_title = "Hormone therapy recorded in GDC, by ER status; descriptive"
-columns = ["ER status", "Patients", "Hormone therapy recorded", "Not recorded"]
-unknown = "ER not called"
+title = "Treatment recorded, by {variable}"
+table_title = "{therapy} recorded in GDC, by {variable}; descriptive"
+columns = ["Patients", "Recorded", "Not recorded"]
+unknown.er = "ER not called"
+unknown.stage_group = "Stage not known"
 note = "Treatment followed the tumour's features, so these counts show who was treated, not what treatment did; an unrecorded therapy is missing, never no."
 
 # The live panel's words, filled by the page script from the numbers it computes and by the
@@ -386,14 +354,24 @@ reading = [
 caption = "{n:,} patients, {events:,} {endpoint} events, ER by GDC's IHC records. [[Log-rank test|Log-rank]] chi-squared {chi2:.2f}, p = {p}; Liu et al. report p = {liu}. Cox HR, ER-negative against positive, {hr}."
 
 [figures.expression]
+feature = "Gene"
+value = "Expression"
+
+[figures.expression.er]
 title = "Build genes by ER status"
 lead = "{gene} separates ER-positive from ER-negative tumours with an AUC of {auc:.3f}."
 reading = [
     "Each point is one patient's tumour: log2 CPM of the gene, by ER status from IHC.",
     "The box spans the middle half of the patients; the line inside is the median.",
 ]
-feature = "Gene"
-value = "Expression"
+
+[figures.expression.stage_group]
+title = "Build genes by stage group"
+lead = "{gene} separates stage III-IV from stage I-II tumours with an AUC of {auc:.3f}."
+reading = [
+    "Each point is one patient's tumour: log2 CPM of the gene, by AJCC pathologic stage from the CDR.",
+    "The box spans the middle half of the patients; the line inside is the median.",
+]
 
 [figures.km_score]
 title = "{endpoint} by a score of {genes} genes, split {split}"
@@ -419,6 +397,19 @@ y = "Log-rank p"
 uncorrected = "uncorrected p = {alpha}"
 corrected = "corrected p = {alpha}"
 caption = "{n:,} patients, {events:,} {endpoint} events. Maximally selected [[log-rank test|log-rank]] statistic over {cuts} cuts; corrected p {corrected} from {perms} [[permutations]] of the score, mulberry32 seed {seed}. The median split gives p = {p}."
+
+[figures.competing]
+title = "Death from the cancer and from other causes, as competing risks"
+lead = "At {horizon} months, {cif:.1f} % of patients have died of the cancer; 1 - Kaplan-Meier of DSS gives {naive:.1f} %."
+reading = [
+    "Each line is the share of patients who have had that death by each time, out of every patient followed.",
+    "A patient who dies of another cause can no longer die of the cancer, so 1 - Kaplan-Meier, which treats that death as censored, runs above the cancer's line.",
+]
+y = "Cumulative incidence"
+lines.cancer = "Death from the cancer"
+lines.other = "Death from other causes"
+lines.naive = "1 - Kaplan-Meier of DSS"
+caption = "{n:,} patients with OS and DSS: {cancer:,} deaths from the cancer (DSS) and {other:,} from other causes; {unknown:,} deaths of unknown cause left out. [[cumulative incidence|Cumulative incidence]] by Aalen-Johansen, as R's survival; descriptive, no test."
 
 [figures.power_map]
 title = "Power of a Cox model by events and hazard ratio per SD"
@@ -460,6 +451,8 @@ age_missing = ["none", "Why age is empty: the CDR's own token."]
 stage = ["stage", "AJCC pathologic stage group, I to IV as 1 to 4, from the CDR."]
 stage_label = ["none", "The CDR's stage as written."]
 stage_missing = ["none", "Why stage is empty: Stage X or the CDR's own token."]
+grade = ["grade", "Histological grade G1 to G4 as 1 to 4, from the CDR."]
+grade_missing = ["none", "Why grade is empty: GX or the CDR's own token."]
 histology = ["none", "TCGA-CDR histological_type."]
 histology_missing = ["none", "Why histology is empty."]
 menopause = ["none", "pre, peri, post or indeterminate, from the CDR's menopause_status."]
@@ -486,8 +479,8 @@ pr = ["none", "PR by IHC, as ER."]
 pr_missing = ["none", "Why PR is empty."]
 her2 = ["none", "HER2 by IHC, and by FISH where IHC is equivocal or absent."]
 her2_missing = ["none", "Why HER2 is empty."]
-hormone_therapy = ["none", "yes where GDC records a hormone therapy given; never no."]
-hormone_therapy_missing = ["none", "not recorded where GDC records none."]
+therapy = ["none", "yes where GDC records the dataset file's clinical.therapy given; never no."]
+therapy_missing = ["none", "not recorded where GDC records none."]
 neoadjuvant = ["none", "A GDC neoadjuvant therapy notification."]
 prior_malignancy = ["none", "A GDC prior malignancy notification."]
 prior_treatment = ["none", "A GDC unacceptable prior treatment notification."]
@@ -502,16 +495,31 @@ survival = ["fraction", "Kaplan-Meier estimate just after this time."]
 lower = ["fraction", "Lower bound of the 95 % log-log Greenwood interval; empty where the estimate is 0."]
 upper = ["fraction", "Upper bound of the same interval."]
 
-[columns.box]
+[columns.box.er]
 feature = ["none", "Gene symbol."]
 group = ["none", "ER status by IHC."]
 sample = ["none", "Patient submitter ID."]
 value = ["log2 CPM", "log2(CPM + 1) of the gene, as stored, to 0.001."]
 
+[columns.box.stage_group]
+feature = ["none", "Gene symbol."]
+group = ["none", "AJCC pathologic stage I to II, or III to IV, from the CDR."]
+sample = ["none", "Patient submitter ID."]
+value = ["log2 CPM", "log2(CPM + 1) of the gene, as stored, to 0.001."]
+
+[columns.dunn]
+gene = ["none", "Gene symbol of the build list."]
+variable = ["none", "Patient-table column of the Kruskal-Wallis test."]
+level_a = ["none", "First level of the pair."]
+level_b = ["none", "Second level of the pair."]
+z = ["dimensionless", "Dunn's z, tie-corrected: mean rank of level_a minus level_b over its SE."]
+p = ["dimensionless", "Two-sided normal p of z."]
+p_adj = ["dimensionless", "Benjamini-Hochberg over the pairs of this gene and variable."]
+
 [columns.tests]
 gene = ["none", "Gene symbol of the build list."]
 variable = ["none", "Patient-table column tested."]
-test = ["none", "mann_whitney (ER), kruskal (levels with ten patients or more) or spearman."]
+test = ["none", "mann_whitney (ER), kruskal (levels with ten patients or more, Dunn's pairs in dunn_pairs) or spearman."]
 n = ["patients", "Patients with a value."]
 effect = ["dimensionless", "AUC for Mann-Whitney, epsilon squared for Kruskal-Wallis, rho for Spearman."]
 p = ["dimensionless", "Two-sided p."]
@@ -544,6 +552,11 @@ chi2 = ["dimensionless", "Log-rank chi-squared, one degree of freedom."]
 p = ["dimensionless", "Log-rank p of this cut alone, uncorrected."]
 cutoff = ["SD", "The cut as a score value."]
 neglog10p = ["-log10", "-log10 of p."]
+
+[columns.competing]
+line = ["none", "The curve: a cause's cumulative incidence, or 1 - Kaplan-Meier of DSS."]
+time = ["months", "Vertex time of the step line, OS time since diagnosis."]
+incidence = ["fraction", "Share of patients with that death by this time."]
 
 [columns.power_map]
 events = ["events", "Events in a cohort."]

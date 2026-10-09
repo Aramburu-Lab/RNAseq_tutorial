@@ -16,6 +16,7 @@ from ctx import runtime
 from ctx.de.run import Writer
 from ctx.de.sanity import decide, parse
 from ctx.de.stats import ALPHA, LFC_MIN
+from ctx.gather import gdc as gdc_reader
 from ctx.io.naming import stem
 from ctx.ncrna import biotypes, figures, mirna_page
 from ctx.report import text
@@ -287,8 +288,9 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     shown, metrics = library(writer, ctx)
     tested, frame = de(writer, ctx)
     gdc = ctx.inputs.tcga is not None
-    lead = text.word("ui", "gdc.acknowledgement") if gdc else word("notes.tcga")
-    results: list[Result] = [lead, *shown, tested, lncrna(writer, ctx)]
+    spec = ctx.inputs.spec.gdc
+    lead = gdc_reader.acknowledgement(spec) if gdc and spec else (word("notes.tcga"),)
+    results: list[Result] = [*lead, *shown, tested, lncrna(writer, ctx)]
     reasons: dict[str, str] = {}
     if gdc:
         found, measured, reasons = mirna_page.build(writer, ctx)

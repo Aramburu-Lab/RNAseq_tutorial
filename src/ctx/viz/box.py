@@ -12,12 +12,15 @@ import polars as pl
 
 from ctx.viz.annotate import Caption, compare_groups, fit_title, place_caption
 from ctx.viz.axes import axis_title, hover_field, hover_rows, hover_value, page_y_title
+from ctx.viz.metrics import text_width
 from ctx.viz.style import (
+    BOX_GAP_PX,
     FIGURE_WIDTH,
     HEADROOM,
     LINE_WIDTHS,
     MARKER_SIZE,
     PLOTLY_HEIGHT_PX,
+    PLOTLY_MARGIN_PX,
     PLOTLY_MARKER_PX,
     POINT_ALPHA,
     ROLES,
@@ -25,6 +28,7 @@ from ctx.viz.style import (
     Theme,
     apply_matplotlib,
     figure_inches,
+    on_page,
     plotly_templates,
 )
 
@@ -285,5 +289,32 @@ def interactive(data: BoxData) -> Any:
         yaxis={"title": {"text": page_y_title(title, _inches()[1])},
                "range": [low - 0.05 * span, high + HEADROOM * span]},
         annotations=labels,
+        meta={"least_width": least_width(data, (low - 0.05 * span, high + HEADROOM * span))},
     )  # fmt: skip
     return fig
+
+
+def least_width(data: BoxData, y_range: tuple[float, float]) -> list[list[float]]:
+    """The narrowest plot that keeps each feature's tick label and p and r label apart.
+
+    plotly gives every feature an equal slot, so each takes the widest label any needs plus
+    ``BOX_GAP_PX``; the left margin holds the y tick labels and the axis title. At 375 px a
+    phone squeezed four TCGA kidney genes into 63 px slots: NDUFA4L2, 101 px at the page's
+    tick size, ran over VEGFA, and the p labels over each other (2026-10-09). The page draws
+    the box no narrower than this and scrolls it sideways (``report.figures``).
+
+    Returns:
+        One [scaled, fixed] px pair: at zoom s the plot needs s * scaled + fixed.
+    """
+    tick, note = on_page(SIZES["tick"]), on_page(SIZES["annotation"])
+    features = data.frame["feature"].unique(maintain_order=True).to_list()
+    widest = max(
+        max(
+            text_width(f, tick),
+            *(text_width(line, note) for line in data.caption.label(f).split("\n")),
+        )
+        for f in features
+    )
+    y_ticks = max(text_width(f"{v:.0f}", tick) for v in y_range)
+    scaled = len(features) * (widest + BOX_GAP_PX) + y_ticks + on_page(SIZES["axis_label"])
+    return [[scaled, float(PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"])]]

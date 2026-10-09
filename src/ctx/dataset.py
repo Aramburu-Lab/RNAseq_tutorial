@@ -25,6 +25,13 @@ TABLE_SUFFIXES = (".csv", ".tsv", ".txt")
 ENDPOINTS = ("OS", "DSS", "DFI", "PFI")
 # M7's two designs: one cohort measured at both layers, or RNA and protein from two studies.
 PROTEO_DESIGNS = ("across_samples", "cross_dataset")
+# The patient-table variables M10 tests expression against and maps for confounding, with the
+# tests each takes (ctx.clinical.analyses); a dataset file lists those its patients carry.
+CLINICAL_VARIABLES = ("er", "stage", "grade", "histology", "menopause", "age", "sex")
+# The two-level variables M10's box can split patients by (ctx.clinical.figures.box).
+CLINICAL_BOXES = ("er", "stage_group")
+# Projects whose own attribution policy the course quotes: the key under ui.toml [gdc.attribution].
+ATTRIBUTIONS = ("tcga",)
 
 
 class DatasetError(ValueError):
@@ -175,6 +182,8 @@ class GdcSpec:
         mirna_workflow: The workflow of the project's miRNA and isoform files, e.g. ``BCGSC
             miRNA Profiling``, which ``ctx gather --mirna-dir`` checks; None for a project
             gathered without them.
+        attribution: The project's own attribution policy, a key of ``ATTRIBUTIONS``, which
+            pages quote beside the GDC's citation; None where none was read from its source.
     """
 
     project: str
@@ -188,6 +197,7 @@ class GdcSpec:
     cdr_file: str | None = None
     cdr_type: str | None = None
     mirna_workflow: str | None = None
+    attribution: str | None = None
 
 
 @dataclass(frozen=True)
@@ -198,11 +208,18 @@ class ClinicalSpec:
         genes: The build list, gene symbols the static figures and the default selection hold.
         endpoint: The default endpoint, one of ``ENDPOINTS``, as TCGA-CDR Table 3 recommends.
         published: Numbers a page prints beside its own, each table with its ``source``.
+        variables: Patient-table variables the page tests and maps, from
+            ``CLINICAL_VARIABLES``, those the cohort's records carry; "er" adds the ER check.
+        box: The two-level variable of the expression box, from ``CLINICAL_BOXES``.
+        therapy: The GDC treatment type the treatment table counts, e.g. ``Hormone Therapy``.
     """
 
     genes: tuple[str, ...]
     endpoint: str
     published: Mapping[str, Any] = field(default_factory=dict)
+    variables: tuple[str, ...] = ("stage", "age")
+    box: str = "stage_group"
+    therapy: str = "Chemotherapy"
 
 
 @dataclass(frozen=True)
@@ -495,20 +512,26 @@ def _gdc(raw: Mapping[str, Any], problems: list[str]) -> GdcSpec | None:
     """Parse [gdc]."""
     keys = ("project", "release", "workflow", "gene_model", "protocol", "tumour", "normal")
     fields = [_need(raw, k, str, "gdc", problems) for k in keys]
-    optional = {k: raw.get(k) for k in ("primary_site", "cdr_file", "cdr_type", "mirna_workflow")}
+    optional = {
+        k: raw.get(k)
+        for k in ("primary_site", "cdr_file", "cdr_type", "mirna_workflow", "attribution")
+    }
     problems += [f"gdc.{k}: expected str, found {v!r}" for k, v in optional.items()
                  if v is not None and not isinstance(v, str)]  # fmt: skip
     if fields[4] is not None and fields[4] not in PROTOCOLS:
         problems.append(f"gdc.protocol: {fields[4]!r}, not one of {PROTOCOLS}")
     if (optional["cdr_file"] is None) != (optional["cdr_type"] is None):
         problems.append("gdc.cdr_file and gdc.cdr_type are given together or not at all")
+    if optional["attribution"] not in (None, *ATTRIBUTIONS):
+        problems.append(f"gdc.attribution: {optional['attribution']!r}, not one of {ATTRIBUTIONS}")
     if None in fields:
         return None
     project, release, workflow, model, protocol, tumour, normal = (str(f) for f in fields)
     return GdcSpec(project, release, workflow, model, protocol, tumour, normal,
                    primary_site=optional["primary_site"], cdr_file=optional["cdr_file"],
                    cdr_type=optional["cdr_type"],
-                   mirna_workflow=optional["mirna_workflow"])  # fmt: skip
+                   mirna_workflow=optional["mirna_workflow"],
+                   attribution=optional["attribution"])  # fmt: skip
 
 
 def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | None:
@@ -520,11 +543,20 @@ def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | Non
     published = raw.get("published", {})
     problems += [f"clinical.published.{k}: no source" for k, v in published.items()
                  if not isinstance(v, dict) or not isinstance(v.get("source"), str)]  # fmt: skip
-    if genes is None or endpoint is None:
+    variables = _need(raw, "variables", list, "clinical", problems)
+    box = _need(raw, "box", str, "clinical", problems)
+    therapy = _need(raw, "therapy", str, "clinical", problems)
+    if variables is not None and (bad := [v for v in variables if v not in CLINICAL_VARIABLES]):
+        problems.append(f"clinical.variables: {bad}, not in {CLINICAL_VARIABLES}")
+    if box is not None and box not in CLINICAL_BOXES:
+        problems.append(f"clinical.box: {box!r}, not one of {CLINICAL_BOXES}")
+    if box == "er" and variables is not None and "er" not in variables:
+        problems.append("clinical.box: 'er' needs 'er' in clinical.variables")
+    if None in (genes, endpoint, variables, box, therapy):
         return None
     if not genes or not all(isinstance(g, str) for g in genes):
         problems.append("clinical.genes: a non-empty list of gene symbols")
-    return ClinicalSpec(tuple(genes), endpoint, published)
+    return ClinicalSpec(tuple(genes), endpoint, published, tuple(variables), box, therapy)
 
 
 def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, ...],

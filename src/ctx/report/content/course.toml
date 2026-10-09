@@ -29,6 +29,7 @@ value = "{n} of {total}"
 
 # The kit's README.md; build_kit.py fills the placeholders from the kit it has just written.
 [readme]
+release = "This is a release kit: every page in it comes from public data, and it holds no made-up page."
 text = """# Cancer Transcriptomics course kit
 
 Double-click `START.html`. The course home page opens in your browser, on macOS, Windows and Linux alike. Every report of the course is one click from there.
