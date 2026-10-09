@@ -14,8 +14,24 @@ meaning = "Dataset short name: lowercase words joined by underscores, in every o
 effect = "Renames every output and selects which earlier outputs this command reads."
 
 [options."--fetchngs-dir"]
-meaning = "The nf-core/fetchngs outdir holding the FASTQ files. Unset: <root>/data/raw/<dataset>."
+meaning = "The nf-core/fetchngs or ctx reads outdir. Unset: <root>/data/raw/<dataset>."
 effect = "Reads another download; nothing is ever written into it."
+
+[options."--run-folder"]
+meaning = "Run folder where ctx reads writes the two outdirs fetchngs.sbatch would."
+effect = "Moves both outdirs; rnaseq.sbatch and ctx gather read them there."
+
+[options."--fastq-dir"]
+meaning = "Folder of your gzipped FASTQ files, subfolders included; never moved or copied."
+effect = "Lays out other files; each stays where it is, linked."
+
+[options."--table"]
+meaning = "Your sample table, CSV or TSV, one row per sample."
+effect = "Names other samples; a file matching no row is refused."
+
+[options."--sample-column"]
+meaning = "Table column naming each sample; every FASTQ name starts with one."
+effect = "Matches files to another column; nf-core/rnaseq names samples by it."
 
 [options."--dataset-file"]
 meaning = "The dataset file, conf/datasets/<slug>.toml: resources, curation, contrasts, gene sets, sanity rules."

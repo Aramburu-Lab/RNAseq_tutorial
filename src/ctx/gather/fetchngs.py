@@ -1,6 +1,8 @@
 """Read one nf-core/fetchngs outdir, in the layout of the pinned release as its code writes it.
 
-See D-006 for the layout facts and their sources. Nothing here writes into the outdir.
+See D-006 for the layout facts and their sources. Nothing here writes into the outdir. A
+student's own FASTQ files arrive in the same layout, written by ``ctx reads``
+(``ctx.gather.own_fastq``), and pass the same checks; only the versions file differs.
 """
 
 import hashlib
@@ -10,6 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import polars as pl
+
+from ctx.gather import own_fastq
 
 # The one definition. An upgrade is one deliberate change: this, a new fixture, and the
 # versions file, which 1.13.0 renames.
@@ -45,9 +49,26 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _own_layout(outdir: Path) -> dict[str, str]:
+    """``ctx reads``'s versions file: its layout version, which must be the one written now."""
+    path = outdir / "pipeline_info" / own_fastq.VERSIONS_FILE
+    found = re.search(r"ctx reads: layout (\S+)", path.read_text())
+    if found is None or found.group(1) != own_fastq.LAYOUT:
+        seen = found.group(1) if found else "unreadable"
+        raise FetchngsError(f"ctx reads layout {seen} in {outdir}; gather reads layout "
+                            f"{own_fastq.LAYOUT} only: rerun ctx reads, new folder")  # fmt: skip
+    return {"ctx reads": found.group(1),
+            f"sha256:pipeline_info/{own_fastq.VERSIONS_FILE}": _sha256(path)}  # fmt: skip
+
+
 def _version(outdir: Path) -> dict[str, str]:
-    """Refuse any release but the pinned one; the versions file names it with its commit."""
+    """Refuse any release but the pinned one; the versions file names it with its commit.
+
+    A folder ``ctx reads`` wrote holds its own versions file instead, and no fetchngs one.
+    """
     path = outdir / "pipeline_info" / VERSIONS_FILE
+    if not path.is_file() and (outdir / "pipeline_info" / own_fastq.VERSIONS_FILE).is_file():
+        return _own_layout(outdir)
     if not path.is_file():
         raise FetchngsError(f"{path} is missing: not a fetchngs {FETCHNGS_VERSION} outdir")
     text = path.read_text()
@@ -134,7 +155,10 @@ def _file_status(outdir: Path, name: str) -> str:
     if not md5.is_file():
         return "no_md5"  # the sra-tools path writes none
     expected = md5.read_text().split()[0]
-    return "verified" if hashlib.md5(path.read_bytes()).hexdigest() == expected else "mismatch"
+    # In chunks: a student's own FASTQ is read through its link, and may be gigabytes.
+    with path.open("rb") as handle:
+        found = hashlib.file_digest(handle, "md5").hexdigest()
+    return "verified" if found == expected else "mismatch"
 
 
 def _files(outdir: Path, sheet: pl.DataFrame, downloaded: bool) -> pl.DataFrame:
@@ -162,12 +186,14 @@ def _files(outdir: Path, sheet: pl.DataFrame, downloaded: bool) -> pl.DataFrame:
 
 def _runs(sheet: pl.DataFrame, files: pl.DataFrame) -> pl.DataFrame:
     """One row per run with its replicate structure and ENA file count."""
-    number = pl.col("run_accession").str.extract(r"(\d+)$").cast(pl.Int64)
+    number = pl.col("run_accession").str.extract(r"(\d+)$").cast(pl.Int64).alias("_number")
+    # Then by name: a run named without a trailing number (ctx reads) has none to rank by.
+    index = pl.int_range(1, pl.len() + 1).over("sample", order_by=[number, "run_accession"])
     return (
         sheet.drop("fastq_1", "fastq_2")
         .hstack(files)
         .with_columns(
-            number.rank("ordinal").over("sample").cast(pl.Int32).alias("run_index"),
+            index.cast(pl.Int32).alias("run_index"),
             pl.len().over("sample").cast(pl.Int32).alias("n_runs"),
             (pl.col("library_layout") == "SINGLE").alias("single_end"),
             pl.col("fastq_ftp")

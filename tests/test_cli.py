@@ -39,13 +39,15 @@ COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "repo
             "proteo", "genecard", "ncrna", "run", "guide"]  # fmt: skip
 # Commands whose page shows another command's cards beside their own (cli.guide).
 SHARED_CARDS = {"run": ("run", "guide"), "guide": ("run", "guide")}
-# Commands that run modules or write a page of the report folder, not a module of their own.
-NOT_MODULES = {"run", "guide"}
+# Commands that run modules or write a page of the report folder, not a module of their own;
+# reads writes no page at all, and its cards are tested in test_own_fastq.py.
+NOT_MODULES = {"run", "guide", "reads"}
+PAGELESS = {"reads"}
 
 
 def test_every_subcommand_has_a_card_test():
     # A new subcommand without a case below fails here, not silently.
-    assert set(typer.main.get_command(app).commands) == set(COMMANDS)
+    assert set(typer.main.get_command(app).commands) == set(COMMANDS) | PAGELESS
 
 
 @pytest.mark.parametrize("command", COMMANDS)

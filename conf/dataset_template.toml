@@ -7,6 +7,9 @@
 #      the sample sheet `ctx gather` writes without --dataset-file: keep run_accession and add
 #      donor, cell_type and condition. The join below names that column twice: the table's
 #      header, then the sheet's column.
+#      With your own FASTQ files (`ctx reads`, the guide's Part 1b), the table is the one
+#      `ctx reads --table` took, one row per sample, joined by sample: join = ["sample",
+#      "sample"], its --sample-column then the sheet's column. Each lane of a sample is a run.
 #   2. The study's SDRF, from its ArrayExpress or BioStudies page: a [[resources]] entry named
 #      "sdrf" with its URL, size and SHA-256, and [sdrf] resource = "sdrf" in place of file,
 #      as conf/datasets/tier1.toml does. `ctx setup --dataset-file` fetches it.

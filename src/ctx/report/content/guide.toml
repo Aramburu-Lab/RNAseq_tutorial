@@ -61,6 +61,15 @@ cluster = "On Kebnekaise: the metadata job"
 cluster_size = "On Kebnekaise, once that job has ended: the size"
 cluster_download = "On Kebnekaise, once the size is read: the download"
 
+# Part 1b: a student's own FASTQ files in place of Part 1's download (ctx reads).
+[part1b]
+group = "Part {n}b: your own FASTQ files instead"
+lead = "Files already on the laptop or on Kebnekaise replace the download: ctx reads lays them out as fetchngs.sbatch would, so the count and the course parts run unchanged."
+names = "Each file name starts with a sample's name from the table's sample column, then `_` or its ending. Mates end in `_1` and `_2`, or `_R1` and `_R2`, before Illumina's `_001`; the lanes of one sample are its runs."
+links = "The files stay where they are: the outdir links each one, and the samplesheet names it by its full path. Every problem is listed at once, and nothing is written until none is left."
+laptop = "On a laptop: your files, laid out in the run folder the count reads"
+cluster = "On Kebnekaise, after the download part's once-per-login block: your files on the storage project"
+
 [part2]
 group = "Part {n}: count with nf-core/rnaseq"
 lead = "The references are checked against the publisher's MD5SUMS before nf-core/rnaseq starts."

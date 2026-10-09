@@ -64,6 +64,7 @@ columns = ["Check", "Result"]
 none = "none"
 source = "Source"
 source_value = "nf-core/fetchngs {fetchngs} (commit {commit}), Nextflow {nextflow}"
+source_own = "Own FASTQ files, laid out by ctx reads, layout {layout}"
 by_status = "FASTQ files by status"
 multi_run = "Experiments with more than one run"
 wide = "Runs with more than two ENA files"
