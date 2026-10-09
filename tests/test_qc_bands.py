@@ -215,8 +215,8 @@ def test_read_length_is_judged_within_its_group_only():
     lengths = {"l1": 100, "l2": 101, "l3": 102, "l4": 101, "l5": 100,
                "s1": 75, "s2": 76, "s3": 77, "s4": 76, "s5": 75, "s6": 76, "odd": 60}  # fmt: skip
     names = list(lengths)
-    values = pl.DataFrame({"sample": names,
-                           "fastqc-avg_sequence_length": [float(v) for v in lengths.values()]})  # fmt: skip
+    column = REG.metrics["read_length"].column
+    values = pl.DataFrame({"sample": names, column: [float(v) for v in lengths.values()]})
     batch = ["long" if n.startswith("l") else "short" for n in names]
     samples = pl.DataFrame({"sample": names, "cell_type": ["x"] * len(names), "batch": batch})
     samples = checkpoint.length_groups(samples, declared=True)
