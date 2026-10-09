@@ -191,3 +191,35 @@ def test_fastqc_plots_take_read_1_and_the_largest_adapter(tmp_path):
     assert plots.curves["fastqc_gc_distribution"]["y"].to_list() == [1.0, 2.0]
     assert plots.theoretical is not None and plots.theoretical["y"].to_list() == [0.5, 3.0]
     assert plots.overrepresented.rows() == [("R1", 0.2)]
+
+
+def test_read_length_groups_come_from_the_data():
+    """The declared batch where the dataset file declares one, else the run's own length.
+
+    Mutation caught: groups from a fixed list of Step-1's lengths (50 and 150 nt unknown)."""
+    sheet = pl.DataFrame({"sample": ["a", "b", "c"], "batch": ["short", "short", "long"],
+                          "read_length": [50.0, 52.0, 150.0]})  # fmt: skip
+    own = checkpoint.length_groups(sheet, declared=False)[checkpoint.LENGTH_GROUP].to_list()
+    assert own == ["50 nt", "52 nt", "150 nt"]
+    declared = checkpoint.length_groups(sheet, declared=True)[checkpoint.LENGTH_GROUP]
+    assert declared.to_list() == ["short", "short", "long"]
+    alone = checkpoint.length_groups(sheet.drop("batch", "read_length"), declared=True)
+    assert alone[checkpoint.LENGTH_GROUP].to_list() == ["all"] * 3
+
+
+def test_read_length_is_judged_within_its_group_only():
+    """Two batches mixed by design: across them the MAD rule flags the whole long batch;
+    within them it flags only the run unlike its own batch (Rytis 2026-10-09).
+
+    Mutation caught: read_length judged across the --strata (the five long runs flagged)."""
+    lengths = {"l1": 100, "l2": 101, "l3": 102, "l4": 101, "l5": 100,
+               "s1": 75, "s2": 76, "s3": 77, "s4": 76, "s5": 75, "s6": 76, "odd": 60}  # fmt: skip
+    names = list(lengths)
+    values = pl.DataFrame({"sample": names,
+                           "fastqc-avg_sequence_length": [float(v) for v in lengths.values()]})  # fmt: skip
+    batch = ["long" if n.startswith("l") else "short" for n in names]
+    samples = pl.DataFrame({"sample": names, "cell_type": ["x"] * len(names), "batch": batch})
+    samples = checkpoint.length_groups(samples, declared=True)
+    _, flags = checkpoint.judge(values, samples, REG, ["cell_type"])
+    assert flags.filter(pl.col("metric") == "read_length")["sample"].to_list() == ["odd"]
+    assert REG.metrics["read_length"].judged_within == checkpoint.LENGTH_GROUP

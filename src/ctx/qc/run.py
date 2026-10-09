@@ -221,7 +221,9 @@ def judge(values: pl.DataFrame, sheet: pl.DataFrame, found: Reads | None,
     if found is None:
         return Stage(values, bands, flags, notes)
     by_run = found.values.drop("sample").rename({"run_accession": "sample"})
-    runs = sheet.select(pl.col("run_accession").alias("sample"), *options.strata)
+    runs = sheet.select(
+        pl.col("run_accession").alias("sample"), *options.strata, checkpoint.LENGTH_GROUP
+    )
     run_bands, run_flags = checkpoint.judge(by_run, runs, registry, options.strata)
     return Stage(values, pl.concat([bands, run_bands], how="diagonal_relaxed"), flags, notes,
                  found.values, run_flags)  # fmt: skip
@@ -356,7 +358,7 @@ def pipeline_groups(
         groups.append(Group(text.word(PAGE, "groups.fastqc"), tuple(items)))
     if seen is not None:
         groups.append(read_figures(writer, seen, sheet, registry, options))
-        run_units = sheet.select("run_accession", *options.strata)
+        run_units = sheet.select("run_accession", *options.strata, checkpoint.LENGTH_GROUP)
         run_strips = strips(writer, stage, run_units, registry, options, "run_accession")
         if run_strips:
             groups.append(Group(text.word(PAGE, "groups.run_metrics"), tuple(run_strips),
@@ -383,7 +385,7 @@ def run(
     registry = load_registry(options)
     inputs = gathered_tables(settings.root, dataset)
     gathered = {w: pl.read_parquet(p) for w, p in inputs.items()}
-    sheet = gathered["samplesheet"]
+    sheet = checkpoint.length_groups(gathered["samplesheet"], bool(spec.batch_bins))
     if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
         raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
     measured, notes = counts_stage(settings, spec, gathered, options)

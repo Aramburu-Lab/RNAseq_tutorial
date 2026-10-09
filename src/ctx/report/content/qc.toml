@@ -378,6 +378,8 @@ tolerance = "Salmon's unstranded strip, {low} to {high}"
 source = "Source of the shading: {source}"
 # Every unit at one value: a cut the course made, not a measurement (teaching runs, D-052).
 equal = "All {n} hold {value} {unit}: a value set upstream, such as a cut to a fixed read count, so the bands grade that cut, not the runs."
+# A metric judged within read-length groups, where the cohort holds more than one.
+mixed_lengths = "The cohort mixes {n} read-length groups by design ({groups}), so each slot is one group and a run is judged only against its own."
 # What the strip shades, by figures.shading_kind.
 shading.judged = "Shaded: the absolute bands, cited beside the figure."
 shading.display = "Shaded, display only: bands cited beside the figure; they judge nothing."

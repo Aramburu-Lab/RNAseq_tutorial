@@ -69,7 +69,10 @@ module = "fastqc"
 scale = "linear"
 direction = "none"
 bands = "dataset_only"
-rationale = "Set by the sequencing run, not by the sample; a length unlike the rest of its batch is a different run."
+rationale = "Set by the sequencing run, not by the sample; a length unlike the rest of its batch is a different run. Judged within each read-length group, the batch the dataset file declares or else the run's own length, never across a cohort that mixes lengths by design."
+# Rytis 2026-10-09 (TODO.md item 13 answers, item 14): across Step-1's 101, 76 and 75 nt the
+# MAD rule flagged 39 runs for their length alone.
+judged_within = "read_length_group"
 causes = ["a different sequencing run", "trimmed before upload"]
 action = "flag"
 matters_for_de = false
