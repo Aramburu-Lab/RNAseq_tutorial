@@ -166,7 +166,7 @@ reading = [
     "Colour: power of a two-sided Wald test at alpha = {alpha}, for a covariate scaled to one SD.",
     "The labelled line is {target:.0f} % power; the point marks this cohort's events and the hazard ratio they detect.",
 ]
-caption = "Computed from Hsieh and Lavori's formula for a per-SD [[HR|hazard ratio]], two-sided alpha = {alpha}; no data drawn. Point: {source}, {events} events, the HR they detect, {hr:.2f}."
+caption = "Computed from Hsieh and Lavori's formula for a per-SD [[HR|hazard ratio]], two-sided alpha = {alpha}; computed, no test. Point: {source}, {events} events, the HR they detect, {hr:.2f}."
 
 [figures.confounding]
 title = "Cramér's V between the variables of the sample sheet"
@@ -422,7 +422,7 @@ mark = "this endpoint"
 x = "Events"
 y = "Hazard ratio per SD"
 z = "Power"
-caption = "Hsieh and Lavori's formula for a per-SD [[HR|hazard ratio]], two-sided alpha = {alpha}; no data drawn and no observed hazard ratio used. Point: {events:,} {endpoint} events, at {target:.0f} % power."
+caption = "Hsieh and Lavori's formula for a per-SD [[HR|hazard ratio]], two-sided alpha = {alpha}; computed, no test, no observed hazard ratio used. Point: {events:,} {endpoint} events, at {target:.0f} % power."
 
 [figures.confounding_map]
 title = "Cramér's V between patient variables"

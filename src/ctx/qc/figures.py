@@ -8,20 +8,19 @@ import numpy as np
 import polars as pl
 from scipy.stats import median_abs_deviation
 
-from ctx.de.run import SEX_X, SEX_Y
 from ctx.qc import Fastp
+from ctx.qc.identity import SEX_X, SEX_Y
 from ctx.qc.registry import STATUS_BANDS as FASTQC_BANDS
 from ctx.qc.registry import Metric, Registry
 from ctx.report import text
 from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES, Mark, SurfaceData, above_floor
-from ctx.viz.curve import CurveData
 from ctx.viz.density import DensityData
 from ctx.viz.flow import FlowData, Node
 from ctx.viz.heatmap import HeatmapData, Swatch
 from ctx.viz.linked import LinkedData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.strip import Range, Span, StripData
-from ctx.viz.style import BAND_COLOURS, MAX_CATEGORIES, MAX_DISTINCT, ROLES, category_colours
+from ctx.viz.style import BAND_COLOURS, MAX_CATEGORIES, ROLES, category_colours
 
 PAGE = "qc"
 # The composition shares a bubble's area adds up, where the counts had gene types.
@@ -123,41 +122,6 @@ GRID_ISOLINE = 90.0
 GRID_FLOOR = 0.0
 
 
-def quality_figure(curves: pl.DataFrame, sheet: pl.DataFrame, metric: Metric,
-                   colour: str | None) -> CurveData:  # fmt: skip
-    """Mean quality along read 1 of every run, over the bands FastQC's own plot shades."""
-    runs = sheet.select("run_accession", "sample", *([colour] if colour else []))
-    frame = curves.join(runs, on="run_accession", how="left")
-    if colour is None:
-        colour = "group"
-        frame = frame.with_columns(group=pl.lit(text.word(PAGE, "figures.fates.all")))
-    frame = frame.with_columns(pl.col(colour).cast(pl.String))
-    good, usable = metric.plot_bands or (None, None)
-    spans = () if good is None else (
-        Span("good", text.word(PAGE, "figures.quality.good"), good, None),
-        Span("usable", text.word(PAGE, "figures.quality.usable"), usable, good),
-        Span("bad", text.word(PAGE, "figures.quality.bad"), None, usable),
-    )  # fmt: skip
-    units = text.raw(PAGE, "figures.quality.units")
-    columns = {c: (units.get(c, "none"), text.fill(PAGE, "figures.fates.colour", column=c)
-                   if c == colour else text.word(PAGE, f"figures.quality.columns.{c}"))
-               for c in frame.columns}  # fmt: skip
-    levels = [str(v) for v in frame[colour].unique(maintain_order=True)]
-    # Each run its own colour and dash while they fit (Rytis 2026-09-30); the group moves to
-    # the hover. Beyond that, lines share their group's colour.
-    distinct = frame["run_accession"].n_unique() <= MAX_DISTINCT
-    hover = ("sample", colour) if distinct and colour != "group" else ("sample",)
-    return CurveData(
-        frame=frame, columns=columns, series="run_accession", x="position", y="quality",
-        x_label=text.word(PAGE, "figures.quality.x"), y_label=text.word(PAGE, "figures.quality.y"),
-        colour="run_accession" if distinct else colour, colours=category_colours(levels),
-        distinct=distinct, hover=hover, spans=spans,
-        caption=text.fill(PAGE, "figures.quality.caption", n=frame["run_accession"].n_unique(),
-                          source=metric.plot_source or metric.source),
-        width="double",
-    )  # fmt: skip
-
-
 def grid_counts(grid: pl.DataFrame) -> dict[str, Any]:
     """The grid's cells, those that keep reads and those on the floor, and what they keep."""
     kept = grid["passed_pct"].filter(above_floor(grid["passed_pct"].to_numpy(), GRID_FLOOR))
@@ -239,8 +203,7 @@ def strip(
     own = bands.filter((pl.col("metric") == metric.id) & pl.col("median").is_not_null())
     rows = own.select("stratum", "median", "low", "high").rows()
     ranges = tuple(Range(*row) for row in rows if row[0] in present)
-    word = {b: text.word(PAGE, f"figures.strip.{b}") for b in ("good", "usable", "bad")}
-    spans = tuple(Span(b, word[b], low, high) for b, low, high in metric.spans())
+    spans, references = strip_shading(metric)
     log = metric.scale == "log10" and bool((frame["value"] > 0).all())
     return StripData(
         frame=frame.with_columns(group=pl.lit(text.word(PAGE, "figures.strip.all"))),
@@ -254,12 +217,48 @@ def strip(
         value_label=metric.title, colour="group",
         colours={text.word(PAGE, "figures.strip.all"): ROLES["reference"]},
         caption=text.fill(PAGE, "figures.strip.caption", computed=metric.computed,
-                          bands=text.fill(PAGE, "figures.strip.spans", source=metric.source)
-                          if spans else text.word(PAGE, "figures.strip.no_spans")),
+                          bands=text.word(PAGE, f"figures.strip.shading.{shading_kind(metric)}")),
         flagged="flagged", flag_label=text.word(PAGE, "figures.strip.flagged_label"),
         hover=(key, "reason"), spans=spans, ranges=ranges,
-        range_label=text.word(PAGE, "figures.strip.range"), log=log,
+        range_label=text.word(PAGE, "figures.strip.range"), log=log, references=references,
     )  # fmt: skip
+
+
+def shading_kind(metric: Metric) -> str:
+    """What a metric's figures shade, as the caption names it.
+
+    judged: the bands ``band()`` reads; display: ``plot_bands``, which judge nothing; line: a
+    reference line alone; calls: a strand call's regions; none: nothing.
+    """
+    if metric.kind == "strandedness":
+        return "calls"
+    if metric.banded:
+        return "judged"
+    if metric.plot_bands is not None:
+        return "display"
+    return "line" if metric.plot_line is not None else "none"
+
+
+def strip_shading(metric: Metric) -> tuple[tuple[Span, ...], tuple[tuple[str, float], ...]]:
+    """The spans and reference lines a metric's strip draws, all read from the registry.
+
+    The judged bands where it has them, else its display ``plot_bands``; a strandedness
+    metric's call regions and Salmon's unstranded strip; ``plot_line`` as a dashed line.
+    """
+    references = ((text.fill(PAGE, "figures.strip.line", value=cut(metric.plot_line)),
+                   metric.plot_line),) if metric.plot_line is not None else ()  # fmt: skip
+    if metric.kind == "strandedness":
+        calls = text.word(PAGE, "figures.strip.calls")
+        spans = [Span("good", calls, low, high, ROLES["reference"])
+                 for _, low, high in metric.call_regions()]  # fmt: skip
+        if (tolerance := metric.plot_unstranded_tolerance) is not None:
+            low, high = 0.5 - tolerance, 0.5 + tolerance
+            label = text.fill(PAGE, "figures.strip.tolerance", low=cut(low), high=cut(high))
+            spans.append(Span("good", label, low, high, ROLES["reference"]))
+        return tuple(spans), references
+    word = {b: text.word(PAGE, f"figures.strip.{b}") for b in ("good", "usable", "bad")}
+    ranges = metric.spans() if metric.banded else metric.plot_spans()
+    return tuple(Span(b, word[b], low, high) for b, low, high in ranges), references
 
 
 def band_label(metric: Metric) -> tuple[str, ...]:
@@ -276,13 +275,13 @@ def band_label(metric: Metric) -> tuple[str, ...]:
         # source gives one: no value is usable, the rest is bad.
         side = "higher" if metric.direction == "higher" else "lower"
         key = side + ("" if metric.good == metric.usable else "_usable")
-        bands = text.fill(PAGE, f"figures.band_map.cuts.{key}", good=_cut(metric.good),
-                          usable=_cut(metric.usable))  # fmt: skip
+        bands = text.fill(PAGE, f"figures.band_map.cuts.{key}", good=cut(metric.good),
+                          usable=cut(metric.usable))  # fmt: skip
     return tuple(line.format(title=metric.title, unit=metric.unit, bands=bands)
                  for line in text.words(PAGE, "figures.band_map.row"))  # fmt: skip
 
 
-def _cut(value: float | None) -> str:
+def cut(value: float | None) -> str:
     """A band cut-off as a reader reads it: thousands grouped, no exponent, no trailing zero."""
     return f"{value:,.10g}"
 
@@ -375,6 +374,59 @@ def density(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
                                            minimum=DENSITY_MIN_POINTS, **HDR))  # fmt: skip
 
 
+# The composition shares the scatter plots, across and up (P2Q.3).
+COMPOSITION = ("mt_fraction", "rrna_fraction")
+
+
+def composition(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
+                colour: str | None, registry: Registry) -> ScatterData | None:  # fmt: skip
+    """Mitochondrial against nuclear rRNA share per sample, in %; None without gene types.
+
+    A triangle is a sample flagged on either share; the hover names every metric that
+    flagged it, as on the library-size density.
+    """
+    if not set(COMPOSITION) <= set(values.columns):
+        return None
+    plotted = [m.id for m in registry.metrics.values() if m.column in COMPOSITION]
+    samples = sheet.unique("sample", keep="first").select("sample", *([colour] if colour else []))
+    group = colour or "group"
+    percent = values.select("sample", *(pl.col(c) * 100 for c in COMPOSITION))
+    frame = percent.join(samples, on="sample")
+    if colour is None:
+        frame = frame.with_columns(group=pl.lit(text.word(PAGE, "figures.fates.all")))
+    on_axes = flags.filter(pl.col("metric").is_in(plotted))["sample"].implode()
+    shape = {True: text.word(PAGE, "figures.composition.flagged"),
+             False: text.word(PAGE, "figures.composition.not_flagged")}  # fmt: skip
+    frame = frame.join(flagged_by(flags), on="sample", how="left").with_columns(
+        pl.col(group).cast(pl.String), flagged_by=pl.col("flagged_by").fill_null(""),
+        flag=pl.col("sample").is_in(on_axes).replace_strict(shape,
+                                                            return_dtype=pl.String))  # fmt: skip
+    levels = [str(v) for v in frame[group].unique(maintain_order=True)]
+    words = "figures.composition"
+    return ScatterData(
+        frame=frame, x=COMPOSITION[1], y=COMPOSITION[0],
+        columns={"sample": ("none", text.word(PAGE, "columns.sample")),
+                 **{c: ("%", text.word(PAGE, f"{words}.{c}")) for c in COMPOSITION},
+                 group: ("none", text.fill(PAGE, "figures.fates.colour", column=group)),
+                 "flagged_by": ("none", text.word(PAGE, "figures.density.flagged_by")),
+                 "flag": ("none", text.word(PAGE, f"{words}.flag"))},
+        x_label=text.word(PAGE, f"{words}.x"), y_label=text.word(PAGE, f"{words}.y"),
+        colour=group, colours=category_colours(levels), symbol="flag",
+        caption=text.fill(PAGE, f"{words}.caption", n=frame.height),
+        hover=("sample", "flagged_by"), width="double",
+    )  # fmt: skip
+
+
+def cross_sex(sexes: pl.DataFrame, n: int = 2) -> list[str]:
+    """The samples whose expression carries the most of the other sex's marker, strongest first.
+
+    The weaker of XIST and the chrY mean, in log2 CPM: high only where both are expressed, as in
+    a transplanted sample carrying cells of donor and recipient.
+    """
+    weaker = pl.min_horizontal("xist_log2cpm", "chry_log2cpm")
+    return sexes.sort(weaker, descending=True)["sample"].head(n).to_list()
+
+
 def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
     """XIST against the chrY genes, coloured by the recorded sex, disagreements named."""
     unknown = text.word(PAGE, "figures.sex.unknown")
@@ -398,7 +450,7 @@ def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
         y_label=text.word(PAGE, "figures.sex.y"), colour="recorded",
         colours=category_colours(levels), label="label",
         caption=text.fill(PAGE, "figures.sex.caption", n=frame.height, xist=SEX_X,
-                          genes=", ".join(SEX_Y)),  # fmt: skip
+                          genes=", ".join(SEX_Y), cross=", ".join(cross_sex(sexes))),  # fmt: skip
         lines=(Line(text.word(PAGE, "figures.sex.boundary"), (0.0, top), (0.0, top)),),
         hover=("sample", "expected", "expression_sex"),
     )  # fmt: skip

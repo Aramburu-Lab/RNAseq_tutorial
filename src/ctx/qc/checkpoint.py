@@ -24,9 +24,9 @@ from scipy.stats import fisher_exact, median_abs_deviation, rankdata
 
 from ctx.dataset import Contrast
 from ctx.de.deseq import pca, select_samples
-from ctx.de.run import sex_check
 from ctx.de.stats import adjust
 from ctx.qc import QcError
+from ctx.qc.identity import sex_check
 from ctx.qc.registry import Metric, Registry
 from ctx.report import text
 from ctx.viz.annotate import TEST_NAME, compare_groups
@@ -37,6 +37,11 @@ MT_RRNA = ("Mt_rRNA",)
 # GENCODE 50 types the 5S and 5.8S genes rRNA and their copies rRNA_pseudogene; it has no
 # 45S gene, so 18S and 28S reads land on no gene at all (said on the page).
 RRNA = ("rRNA", "rRNA_pseudogene")
+# The two lncRNAs GENCODE 50 annotates antisense to 18S rRNA sequence, 923 nt each on the minus
+# strand of chr21 at 8,254,592 and 8,393,419 (read from the GTF, 2026-10-09). In an unstranded
+# library 18S reads land on them, which made ENSG00000280614 Step-1's top gene in 102 of 210
+# samples (P2Q.10). Unversioned, so a release that bumps the version still matches.
+RRNA_18S_ANTISENSE = ("ENSG00000280614", "ENSG00000281383")
 GLOBIN = ("HBA1", "HBA2", "HBB")
 ATTRIBUTE = re.compile(r'(gene_id|gene_name|gene_type) "([^"]*)"')
 # ponytail: sex_check is the registry's one category metric; a per-metric flag value in the
@@ -80,12 +85,34 @@ def gene_types(gtf: Path) -> pl.DataFrame:
     )
 
 
+def _antisense_18s() -> pl.Expr:
+    """Whether a row's ``gene_id``, version dropped, is one of the 18S-antisense lncRNAs."""
+    return pl.col("gene_id").str.replace(r"\.\d+$", "").is_in(RRNA_18S_ANTISENSE)
+
+
+def top_gene(matrix: np.ndarray, rrna: np.ndarray) -> np.ndarray:
+    """Each sample's largest gene count among the genes that are not rRNA (P2Q.10).
+
+    Args:
+        matrix: Genes by samples.
+        rrna: One boolean per gene: Mt_rRNA, or an 18S-antisense lncRNA. A dominant gene of
+            these is rRNA content, which ``rrna_fraction`` and ``mt_rrna_fraction`` report.
+
+    Returns:
+        The count, per sample; 0 where only rRNA genes have reads.
+    """
+    kept = matrix[~rrna]
+    return kept.max(axis=0) if kept.shape[0] else np.zeros(matrix.shape[1])
+
+
 def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFrame:
     """Library size, genes detected, top-gene share and the four composition shares per sample.
 
     The shares are of disjoint gene classes: mitochondrial rRNA (Mt_rRNA), the other chrM
-    genes, nuclear rRNA and its pseudogenes, and the three globin genes. Without gene types
-    the shares are left out.
+    genes, nuclear rRNA (its genes, pseudogenes and the two 18S-antisense lncRNAs, which hold
+    18S reads in an unstranded library), and the three globin genes. The top gene is searched
+    among the others. Without gene types the shares are left out, and the top gene is
+    searched outside the 18S-antisense lncRNAs alone.
 
     Raises:
         QcError: If a gene of the counts is not in the annotation; the counts then came from
@@ -95,7 +122,7 @@ def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFr
         matrix = counts.drop("gene_id").to_numpy().astype(float)
         size = matrix.sum(axis=0)
         with np.errstate(divide="ignore", invalid="ignore"):
-            top = matrix.max(axis=0) / size
+            top = top_gene(matrix, counts.select(_antisense_18s()).to_series().to_numpy()) / size
         return pl.DataFrame(
             {
                 "sample": counts.columns[1:],
@@ -115,15 +142,17 @@ def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFr
     classes = {
         "mt_fraction": (pl.col("chrom") == MT_CHROM) & ~pl.col("gene_type").is_in(MT_RRNA),
         "mt_rrna_fraction": pl.col("gene_type").is_in(MT_RRNA),
-        "rrna_fraction": pl.col("gene_type").is_in(RRNA) & (pl.col("chrom") != MT_CHROM),
+        "rrna_fraction": (pl.col("gene_type").is_in(RRNA) & (pl.col("chrom") != MT_CHROM))
+        | _antisense_18s(),
         "globin_fraction": pl.col("gene_name").is_in(GLOBIN),
     }
+    rrna_like = typed.select(pl.col("gene_type").is_in(MT_RRNA) | _antisense_18s()).to_series()
     with np.errstate(divide="ignore", invalid="ignore"):
         shares = {
             name: matrix[typed.select(mask).to_series().to_numpy()].sum(axis=0) / size
             for name, mask in classes.items()
         }
-        top = matrix.max(axis=0) / size
+        top = top_gene(matrix, rrna_like.to_numpy()) / size
     return pl.DataFrame({
         "sample": names, "library_size": size, "genes_detected": (matrix >= 1).sum(axis=0),
         "top_gene_share": top, **shares,
@@ -225,9 +254,30 @@ def sample_metrics(
     return Measured(frame, sexes, found.scores, found.share)
 
 
-def _show(value: float) -> str:
-    """A value as a reason prints it: counts with thousands separators, others to 3 digits."""
-    return f"{value:,.0f}" if abs(value) >= 1000 else f"{value:.3g}"  # noqa: PLR2004
+def _show(value: float, digits: int = 3) -> str:
+    """A value as a reason prints it: counts with thousands separators, others to ``digits``.
+
+    A count gains one decimal for each digit past 3.
+    """
+    if abs(value) >= 1000:  # noqa: PLR2004
+        return f"{value:,.{digits - 3}f}"
+    return f"{value:.{digits}g}"
+
+
+# The most significant digits a reason prints; float64 holds 15 to 17.
+MAX_DIGITS = 15
+
+
+def shown_apart(value: float, bound: float) -> tuple[str, str]:
+    """A value and the bound it fails, each to the fewest digits, from 3, that tell them apart.
+
+    At 3 digits alone, 21 of Step-1's tg_pct_passing reasons read "100 is below 100" (D-052).
+    """
+    for digits in range(3, MAX_DIGITS + 1):
+        pair = _show(value, digits), _show(bound, digits)
+        if pair[0] != pair[1]:
+            return pair
+    return pair
 
 
 def mad_band(values: np.ndarray, metric: Metric, k: float, scaled: bool) -> tuple[float, ...]:
@@ -269,9 +319,9 @@ def _numeric(
     for sample, v in present.select("sample", metric.column).rows():
         side = "low" if v < low else "high" if v > high else None
         if side and metric.direction in ("none", {"low": "higher", "high": "lower"}[side]):
-            bound = low if side == "low" else high
+            shown, bound = shown_apart(v, low if side == "low" else high)
             flags.append((sample, text.fill(PAGE, f"reasons.{side}", title=metric.title,
-                          value=_show(v), bound=_show(bound), k=f"{registry.mad_multiplier:g}",
+                          value=shown, bound=bound, k=f"{registry.mad_multiplier:g}",
                           n=len(values), stratum=label)))  # fmt: skip
     return band, flags
 

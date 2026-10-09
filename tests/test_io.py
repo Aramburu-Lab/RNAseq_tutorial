@@ -142,8 +142,12 @@ def _sha(repo: Path) -> str:
 
 
 def _unrelated_repo(path: Path) -> str:
+    """A one-commit repository whose identity is its own: a CI runner has no global one, and
+    `git commit` there exits 128 (run 37807649888)."""
     path.mkdir(parents=True)
-    for args in (["init", "-q"], ["commit", "-q", "--allow-empty", "-m", "unrelated"]):
+    own = (["config", "user.name", "t"], ["config", "user.email", "t@t"],
+           ["config", "commit.gpgsign", "false"])  # fmt: skip
+    for args in (["init", "-q"], *own, ["commit", "-q", "--allow-empty", "-m", "unrelated"]):
         subprocess.run(["git", "-C", str(path), *args], check=True, capture_output=True)
     return _sha(path)
 

@@ -39,6 +39,13 @@ REQUIRED = (
     "stage", "title", "meaning", "computed", "unit", "table", "column", "direction", "causes",
     "action", "matters_for_de", "read_length_tied", "source", "source_type",
 )  # fmt: skip
+# Keys a metric may carry besides REQUIRED. Any other is refused: a misspelt key loaded
+# silently and drew nothing (the proposal's plot_line, before any code read it; D-052).
+OPTIONAL = (
+    "module", "kind", "scale", "good", "usable", "bands", "rationale", "stranded", "unstranded",
+    "plot_bands", "plot_line", "plot_source", "plot_expected_bias_positions",
+    "plot_unstranded_tolerance",
+)  # fmt: skip
 
 
 class RegistryError(ValueError):
@@ -74,6 +81,9 @@ class Metric:
     unstranded: float | None = None
     plot_bands: tuple[float, float] | None = None
     plot_source: str = ""
+    plot_line: float | None = None
+    plot_expected_bias_positions: int | None = None
+    plot_unstranded_tolerance: float | None = None
 
     @property
     def banded(self) -> bool:
@@ -112,6 +122,30 @@ class Metric:
             ranges = [("good", None, good), ("usable", good, usable), ("bad", usable, None)]
         return [r for r in ranges if r[1] is None or r[2] is None or r[1] < r[2]]
 
+    def plot_spans(self) -> list[tuple[str, float | None, float | None]]:
+        """The bands a figure shades: ``plot_bands`` where the registry has them, else ``spans()``.
+
+        A pair's side is read from the pair: good above usable shades the high side good.
+        Shading never judges; ``band()`` reads ``good`` and ``usable`` alone.
+        """
+        if self.plot_bands is None:
+            return self.spans()
+        good, usable = self.plot_bands
+        if good > usable:
+            return [("good", good, None), ("usable", usable, good), ("bad", None, usable)]
+        return [("good", None, good), ("usable", good, usable), ("bad", usable, None)]
+
+    def call_regions(self) -> list[tuple[str, float, float]]:
+        """A strandedness metric's call regions on the forward share, (call, low, high).
+
+        Reverse at or below 1 - stranded, forward at or above stranded, unstranded where the
+        two shares differ by less than ``unstranded``; ``strandedness()`` decides the edges.
+        """
+        assert self.stranded is not None and self.unstranded is not None  # noqa: S101 - load() checked
+        half = self.unstranded / 2
+        return [("reverse", 0.0, 1 - self.stranded), ("unstranded", 0.5 - half, 0.5 + half),
+                ("forward", self.stranded, 1.0)]  # fmt: skip
+
     def strandedness(self, bias: float | Fraction) -> str:
         """The library type a forward-strand share shows, by nf-core/rnaseq's thresholds.
 
@@ -146,6 +180,7 @@ class Registry:
     source: str
     rationale: str
     metrics: Mapping[str, Metric]
+    theoretical_gc: str = ""
 
     def stage(self, stage: str) -> list[Metric]:
         """The metrics of one stage, in file order."""
@@ -155,6 +190,8 @@ class Registry:
 def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]:
     """One [metrics.<id>] table, or every problem it has."""
     problems = [f"[metrics.{key}] needs {f}" for f in REQUIRED if f not in raw]
+    known = (*REQUIRED, *OPTIONAL)
+    problems += [f"[metrics.{key}] unknown key {f!r}" for f in raw if f not in known]
     kind, scale = raw.get("kind", "numeric"), raw.get("scale", "linear")
     checks = {"stage": STAGES, "direction": DIRECTIONS, "action": ACTIONS}
     problems += [f"[metrics.{key}] {f} = {raw[f]!r}, not one of {v}"
@@ -177,7 +214,9 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
         source_type=raw["source_type"], stranded=raw.get("stranded"),
         unstranded=raw.get("unstranded"),
         plot_bands=tuple(raw["plot_bands"]) if "plot_bands" in raw else None,
-        plot_source=raw.get("plot_source", ""),
+        plot_source=raw.get("plot_source", ""), plot_line=raw.get("plot_line"),
+        plot_expected_bias_positions=raw.get("plot_expected_bias_positions"),
+        plot_unstranded_tolerance=raw.get("plot_unstranded_tolerance"),
     ), []  # fmt: skip
 
 
@@ -197,13 +236,42 @@ def _band_problems(key: str, raw: Mapping[str, Any], kind: str) -> list[str]:
         order = {"higher": 1, "lower": -1}.get(raw.get("direction", ""), 0)
         if banded and {"good", "usable"} <= set(raw) and order * (raw["good"] - raw["usable"]) < 0:
             problems.append(f"[metrics.{key}] good must lie on the good side of usable")
-    bands = raw.get("plot_bands")
-    if bands is not None and ("plot_source" not in raw or [*sorted(bands, reverse=True)] != bands
-                              or len(set(bands)) != len(PLOT_BANDS)):  # fmt: skip
-        problems.append(f"[metrics.{key}] plot_bands needs [good, usable], good above usable, "
-                        "and a plot_source")  # fmt: skip
+    problems += _plot_problems(key, raw, kind)
     if kind == "strandedness" and not {"stranded", "unstranded"} <= set(raw):
         problems.append(f"[metrics.{key}] strandedness needs stranded and unstranded")
+    return problems
+
+
+def _plot_problems(key: str, raw: Mapping[str, Any], kind: str) -> list[str]:
+    """What is wrong with the shading a metric's figures draw: plot_bands, plot_line and the rest.
+
+    A pair's order must agree with ``direction``: good above usable where higher is better,
+    below it where lower is; with direction none the pair's own order says which side is good.
+    """
+    problems = []
+    plotted = [f for f in OPTIONAL if f.startswith("plot_") and f != "plot_source" and f in raw]
+    if plotted and not raw.get("plot_source"):
+        problems.append(f"[metrics.{key}] {', '.join(plotted)} needs a plot_source")
+    bands = raw.get("plot_bands")
+    if bands is not None:
+        side = {"higher": 1, "lower": -1}.get(raw.get("direction", ""), 0)
+        if len(bands) != len(PLOT_BANDS) or len(set(bands)) != len(PLOT_BANDS):
+            problems.append(f"[metrics.{key}] plot_bands needs two different values, "
+                            "[good, usable]")  # fmt: skip
+        elif side * (bands[0] - bands[1]) < 0:
+            problems.append(f"[metrics.{key}] plot_bands {bands}: good must lie on the "
+                            f"{raw['direction']} side of usable")  # fmt: skip
+    if "plot_line" in raw and not isinstance(raw["plot_line"], int | float):
+        problems.append(f"[metrics.{key}] plot_line must be one number")
+    positions = raw.get("plot_expected_bias_positions")
+    if positions is not None and (kind != "status" or not isinstance(positions, int)
+                                  or positions < 1):  # fmt: skip
+        problems.append(f"[metrics.{key}] plot_expected_bias_positions needs a status metric "
+                        "and a whole number of positions from 1")  # fmt: skip
+    tolerance = raw.get("plot_unstranded_tolerance")
+    if tolerance is not None and (kind != "strandedness" or not 0 < tolerance < 0.5):  # noqa: PLR2004
+        problems.append(f"[metrics.{key}] plot_unstranded_tolerance needs a strandedness metric "
+                        "and a value between 0 and 0.5")  # fmt: skip
     return problems
 
 
@@ -246,7 +314,7 @@ def load(path: Path) -> Registry:
         raise RegistryError(f"{path}:\n  " + "\n  ".join(problems))
     return Registry(path, float(head["mad_multiplier"]), bool(head["mad_scaled"]),
                     int(head["min_samples"]), head["source"], head["rationale"],
-                    metrics)  # fmt: skip
+                    metrics, head.get("fastqc_theoretical_gc", ""))  # fmt: skip
 
 
 def cond_rules(metric: Metric) -> dict[str, list[dict[str, float]]]:
@@ -288,4 +356,6 @@ def multiqc_config(registry: Registry, comment: str) -> dict[str, Any]:
         ],
         "table_cond_formatting_rules": {m.column: cond_rules(m) for m in banded},
         "section_comments": {module: " ".join(lines) for module, lines in sections.items()},
+        **({"fastqc_config": {"fastqc_theoretical_gc": registry.theoretical_gc}}
+           if registry.theoretical_gc else {}),
     }  # fmt: skip

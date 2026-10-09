@@ -1,0 +1,189 @@
+# GSE100925 breast tissue (P4.0, TODO.md "Phase 4"; counted by nf-core/rnaseq 3.27.0, job
+# 47504033): 103 single-end runs, one per GEO sample. GEO's series names Cassetta et al. 2019 as
+# its publication (Series_pubmed_id 30930117), where it is "cohort 3", whole-tumour RNA-seq from
+# Duke University (Methods). Curated from its own table, breast_tissue.tsv: GEO's per-sample
+# records (brief SOFT of GSE100925's samples, retrieved 2026-10-09, SHA-256
+# 08d5f86020c35c9c41d32fec9d265a95544d584b0a15feceb32da29d1bcf628d), values verbatim,
+# one row per ENA run (read_run report, 2026-10-09), joined on the run and cross-checked on the
+# GSM and title; `library_run` is the title before '_'. Paper: 50 bp single-end (Methods); ENA's
+# counts give 100 nt for 23 runs (below). Tallied from those records: tissue Breast tumor 51,
+# Adjacent normal 38, Normal Breast 7, Prophylactic Mastectomy 3, Prophylactic Mammoplasty 2, no
+# clinical information 2 (lessons.md: GEO's title says tumours only). 50 records carry the
+# paper's FPKMs (47 tumours, 2 mammoplasties, 1 mastectomy); the other 53 say "not included in
+# current publication". The series design says 103 samples from 63 patients, but no record names
+# its patient, so tumour and adjacent normal cannot be paired and each sample counts as its own
+# individual. Read length by ENA's counts: 50 nt (80 runs), 100 nt (23, all in RNA150213LC).
+#
+# The paper's own comparisons on these data do not map onto the records: it ranks the 47 tumours
+# by a CSF1-response signature (K-means) and by PAM50 subtype, both computed from expression, and
+# compares a TAM-signature score across them (Fig. 3A and 3B). It compares no tissue against
+# another. The contrasts below are the course's, tumour against adjacent normal, labelled so.
+
+[dataset]
+slug = "breast_tissue"
+# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+label = "Breast tumour and adjacent tissue"
+ena_study = "PRJNA393443"
+ena_secondary_study = "SRP111343"
+geo = "GSE100925"
+source = "Cassetta et al. 2019 Cancer Cell 35:588, doi:10.1016/j.ccell.2019.02.009, PMID 30930117, PMC6472943 (cohort 3)"
+
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# ENA's read_run report of PRJNA393443 (2026-10-09): runs SRR5811633-735, experiments
+# SRX2990193-295, samples SAMN07333265-367, SRS2342115-217; GSMs GSM2696500-602; titles
+# RNA140128LC_<n> and RNA150213LC_<well>.
+[guard]
+ids = ["PRJNA393443", "SRP111343", "GSE100925"]
+patterns = [
+    '\bSRR581(?:16|17)\d{2}\b',
+    '\bSRX299(?:01|02)\d{2}\b',
+    '\bSAMN07333[23]\d{2}\b',
+    '\bSRS2342[12]\d{2}\b',
+    '\bGSM269(?:65|66)\d{2}\b',
+    '\bRNA1(?:40128|50213)LC\w*',
+]
+
+[sdrf]
+file = "breast_tissue.tsv"
+join = ["run_accession", "run_accession"]
+cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
+
+[columns.donor]
+source = "donor"
+meaning = "The sample's GEO title; no record names its patient (63 patients for 103 samples)."
+
+[columns.cell_type]
+source = "cell type"
+meaning = "Whole tissue; GEO fills its cell-type field for tumours only."
+values = { "Whole human breast tumor" = "tissue", "--" = "tissue" }
+
+[columns.condition]
+source = "tissue"
+meaning = "Tissue as GEO records it: tumour, adjacent normal, normal breast, prophylactic surgery, or unknown."
+values = { "Breast tumor" = "tumour", "Adjacent normal" = "adjacent_normal", "Normal Breast" = "normal_breast", "Prophylactic Mastectomy" = "prophylactic_mastectomy", "Prophylactic Mammoplasty" = "prophylactic_mammoplasty", "No clinical information available" = "unknown" }
+
+[columns.library_run]
+source = "library_run"
+meaning = "The title's prefix, RNA140128LC or RNA150213LC: two library runs, by the dates they carry."
+
+[columns.in_paper]
+source = "description"
+meaning = "yes where GEO holds the paper's FPKMs for the sample, no where it says the sample was not in the publication."
+values = { "" = "yes", "No fpkms submitted for this sample because it was not included in current publication" = "no" }
+
+[columns.histology]
+source = "histology"
+meaning = "Tumour histology as GEO records it; -- for non-tumour samples."
+
+[columns.her2_status]
+source = "her2 status"
+meaning = "HER2 immunohistochemistry score as GEO records it, free text; -- for non-tumour samples."
+
+[derived.batch]
+bins = { "Reads 50 nt" = [50], "Reads 100 nt" = [100] }
+
+[expect]
+runs = 103
+
+[expect.counts.read_length]
+"50" = 80
+"100" = 23
+
+[expect.counts.condition]
+tumour = 51
+adjacent_normal = 38
+normal_breast = 7
+prophylactic_mastectomy = 3
+prophylactic_mammoplasty = 2
+unknown = 2
+
+[expect.counts.library_run]
+RNA140128LC = 54
+RNA150213LC = 49
+
+[expect.counts.in_paper]
+yes = 50
+no = 53
+
+# The course's comparison, not the paper's (header). Library run and read length are partly
+# confounded with tissue: 39 of 51 tumours sit in RNA140128LC at 50 nt, 27 of 38 adjacent normals
+# in RNA150213LC, 16 of them at 100 nt. Unpaired, since no record names a patient.
+
+[[contrasts]]
+name = "tumour_adjacent_naive"
+variable = "condition"
+reference = "adjacent_normal"
+tested = "tumour"
+n = [38, 51]
+
+[[contrasts]]
+name = "tumour_adjacent"
+variable = "condition"
+reference = "adjacent_normal"
+tested = "tumour"
+n = [38, 51]
+design = "~library_run + batch + group"
+
+[de]
+featured = "tumour_adjacent"
+scatters = [["tumour_adjacent_naive", "tumour_adjacent"]]
+
+[de.lessons]
+"Batch" = ["tumour_adjacent_naive", "tumour_adjacent"]
+
+[[de.pca]]
+name = "tissue"
+filters = { condition = ["tumour", "adjacent_normal"] }
+factors = ["condition", "library_run", "batch"]
+
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_ADIPOGENESIS"
+running = ["tumour_adjacent", "HALLMARK_ADIPOGENESIS"]
+
+# Registered before any ctx de run on this dataset (TODO.md, work-order item 13 answers, item 8).
+# The counts were on this Mac before the rules; no expression value, fit or enrichment was read
+# for them. A failing rule is reported, never retuned. Rytis reviews these before ctx de.
+# No finding the paper published on these data maps onto a metric ctx de computes (header), so
+# the gating rules are the course's health checks and the recorded one the course's own claim.
+
+[sanity]
+# The commit that last changed this line is this dataset's registration.
+registered = "2026-10-09 09:56"
+
+[[sanity.rules]]
+id = "TIS1"
+text = "Tumour and adjacent normal separate on the PCA."
+source = "course health check; not a finding of Cassetta 2019, which compares no tissues on these data"
+conditions = [{ metric = "permanova.tissue.condition.p", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "TIS2"
+text = "The p-value histogram of the adjusted contrast peaks at 0 over a flat floor."
+source = "course health check, as Step-1's R2"
+conditions = [{ metric = "phist.tumour_adjacent.low", op = ">=", other = "phist.tumour_adjacent.flat", times = 2 }]
+
+[[sanity.rules]]
+id = "TIS3"
+text = "Recorded, not gating: adipogenesis genes lower in tumour than in adjacent normal tissue."
+source = "TODO.md, Phase 4 breast row: adipocyte genes higher in adjacent normal in 54 TCGA pairs, per a conference abstract, to be confirmed on our own run before it is taught"
+gate = false
+conditions = [{ metric = "gsea.tumour_adjacent.HALLMARK_ADIPOGENESIS.nes", op = "<", value = 0 }]
