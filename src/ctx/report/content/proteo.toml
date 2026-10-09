@@ -27,6 +27,8 @@ collapse = "Protein table: {rows:,} rows; {no_symbol:,} without a gene symbol an
 zeros = "{zeros:,} cells written as 0 in the source were read as missing."
 rna_twice = "RNA: {twice:,} gene symbols shared by two or more gene IDs were left out."
 classes_note = "Gene classes from {sources}; {twice:,} genes in more than one class were left out of the class comparisons."
+paired = "{n:,} of {n_columns:,} protein samples have a chosen tumour in gather's sheet. {by_sample_id:,} of them are named by their GDC sample ID, not their case, and are paired by it."
+f4_missing = "RNA and protein calls for {contrast} are not compared: M5's results for it are absent. Run `ctx de` on a sheet with the contrast's column."
 unregistered = "The Krug 2020 band rule is not registered: its supplement prints the per-gene correlations only as a histogram, Figure S2G, with no median."
 sanity_title = "Sanity rules, registered before any protein value was read"
 sanity_columns = ["Rule", "What it checks", "Measured", "Verdict"]
@@ -76,6 +78,8 @@ missing = "Missingness first"
 correlation = "Does protein follow RNA"
 fold = "Do fold changes agree"
 worked = "Worked example: the ERBB2 amplicon"
+paired = "RNA and protein, tumour by tumour"
+contrast = "RNA and protein calls on the same tumours"
 
 [classes]
 other = "Other"
@@ -134,14 +138,46 @@ y = "Protein"
 title = "RNA against protein fold change: {tested} over {reference}"
 lead = "Spearman ρ = {rho:.2f} across {n_genes:,} genes, bootstrap 95 % CI {low:.2f} to {high:.2f}; {n_same:,} change in the same direction at both levels."
 reading = [
-    "Each dot is one gene measured at both levels; colour marks granule proteins.",
-    "Dashed lines split the quadrants; the solid diagonal is equal change.",
+    "Solid line: the smallest region holding {inner} of a class's genes; dashed: {outer}. A class under {minimum} genes is drawn as points.",
+    "Triangles mark the genes of the declared class, drawn over the contours; hover names each.",
 ]
-caption = "Cross-study: RNA as M5's log2 FC over n = {n_rna}; protein by Welch t on log2 copies over n = {n_protein}, BH. Spearman ρ = {rho:.2f}, {ci} % CI {low:.2f} to {high:.2f}."
+caption = "Cross-study; RNA: M5's log2 FC, n = {n_rna}; protein: Welch t on log2 copies, n = {n_protein}, BH. Spearman ρ = {rho:.2f}, {ci} % CI {low:.2f} to {high:.2f}; regions {inner} and {outer}, {bandwidth}."
 x = "RNA log2 fold change"
 y = "Protein log2 fold change"
-identity = "equal change"
-zero = "no change"
+
+[figures.contrast]
+title = "RNA against protein fold change on the same tumours: {tested} over {reference}"
+lead = "RNA calls {rna_up:,} genes up and {rna_down:,} down; protein calls {protein_up:,} up and {protein_down:,} down. {both:,} genes are called at both layers, {opposite:,} of them in opposite directions."
+reading = [
+    "Each contour holds most genes of one group: called at both layers, at RNA only, at protein only, or at neither.",
+    "Solid line: the smallest region holding {inner} of a group's genes; dashed: {outer}. A group under {minimum} genes is drawn as points.",
+    "A call at either layer needs BH-adjusted p < {alpha} and an absolute log2 fold change of at least {lfc}.",
+]
+caption = "{tested} over {reference}; RNA: M5's DESeq2, {n_rna}; protein: Welch t, {n_protein}; BH each. Spearman ρ = {rho:.2f} over {n_genes:,} genes, {ci} % CI {low:.2f} to {high:.2f}; regions {inner} and {outer}, {bandwidth}."
+x = "RNA log2 fold change"
+y = "Protein log2 fold change"
+
+[figures.contrast.kinds]
+both = "called at both layers"
+rna = "RNA only"
+protein = "protein only"
+neither = "neither"
+
+[figures.paired]
+title = "RNA and protein of the same genes, tumour by tumour"
+lead = "{n_genes:,} genes over {n_samples:,} tumours: each gene's RNA row sits above its protein row."
+reading = [
+    "Each row is z-scored over its tumours; a gene whose two rows share a pattern has protein following RNA.",
+    "The strips above the columns give each tumour's {tracks}; a pattern that follows the plex strip is a batch effect.",
+    "A blank cell is a protein not quantified in that tumour, never a zero.",
+]
+caption = "The named genes, then the highest and the lowest per-gene Spearman ρ, printed at right; {missing:,} protein cells missing. Descriptive, no further test."
+row = "Gene and layer"
+column = "Tumour"
+column_title = "{n_samples:,} tumours, sorted by {tracks}"
+rna_row = "{gene} RNA"
+protein_row = "{gene} protein"
+rho = "Spearman ρ"
 
 [figures.shift]
 title = "Protein minus RNA fold change, by gene class"
@@ -185,4 +221,10 @@ protein_p = ["dimensionless", "Welch t-test p on log2 copies."]
 protein_padj = ["dimensionless", "Benjamini-Hochberg adjusted protein_p over the tested proteins."]
 difference = ["log2 fold change", "protein_lfc minus rna_lfc."]
 protein_call = ["none", "up, down or ns by protein_padj < 0.05 and abs(protein_lfc) at least --lfc-min."]
-keep = ["none", "Always drawn on the page: a granule protein."]
+keep = ["none", "Always drawn on the page: a gene of the declared class."]
+rna_call = ["none", "up, down or ns by M5's padj < 0.05 and abs(rna_lfc) at least --lfc-min."]
+called = ["none", "True when called at both layers: drawn as a point over the contours."]
+kind = ["none", "Where the gene was called: at both layers, RNA only, protein only, or neither."]
+row = ["none", "The gene and the layer of the heatmap row."]
+z = ["z-score", "The row's value centred on its mean and scaled by its standard deviation over the tumours."]
+level = ["none", "The z-score's colour step."]

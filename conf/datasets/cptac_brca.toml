@@ -60,6 +60,27 @@ primary_site = "Breast"
 ids = ["PDC000120", "phs000892"]
 patterns = ['\b\d{2}BR\d{3}\b', '\bX\d{2}BR\d{3}\b']
 
+# F4 (M7 plan, section 2): M5's DESeq2 on the tumours of two subtype contrasts, against the
+# protein of the same tumours. pam50 and er_status are the freeze's PAM50 and
+# ER.Updated.Clinical.Status (positive ER+, negative ER-), to reach gather's sheet through a
+# declared annotation join that is not built yet (it needs ctx.gather and ctx.dataset); until
+# then ctx de cannot fit these and the M7 page says so. n: chosen tumours with both a freeze
+# column and a counts file, paired by ctx.proteo.run.pair_samples (121, two of them by GDC
+# sample ID), measured 2026-10-09 on the scratch join; the third LumA case lacks RNA.
+[[contrasts]]
+name = "basal_vs_luma"
+variable = "pam50"
+reference = "LumA"
+tested = "Basal"
+n = [56, 29]
+
+[[contrasts]]
+name = "erneg_vs_erpos"
+variable = "er_status"
+reference = "ER+"
+tested = "ER-"
+n = [80, 39]
+
 # What M7 reads from the freeze: the protein ratios (log2 to the pooled reference, NAs left in
 # place) and their GCT column annotations: plex, PAM50, ERBB2 amplification. Member name as the
 # tarball lists it; the freeze writes case 11BR047 as X11BR047.

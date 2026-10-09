@@ -69,6 +69,26 @@ def test_across_missing_never_zero_and_one_row_per_gene(across_root):
     assert metrics["metric"].n_unique() == metrics.height
 
 
+def test_across_f4_f5_and_the_sample_id_column(across_root):
+    """F4 compares M5's calls with protein on the same tumours; F5 pairs each gene's rows.
+
+    Mutations caught: the column named by GDC sample ID left out (29 of 30 paired); F4 not
+    drawn when M5's results exist; G11's planted protein shift not called (both is 0); G10,
+    untested at protein, counted as an RNA-only call; F5 a gene's protein row dropped."""
+    html = output(across_root, "overview_v1.html").read_text()
+    assert f"{TUMOURS} of {TUMOURS} protein samples" in html and "1 of them are named" in html
+    metrics = dict(pl.read_parquet(output(across_root, "metrics_v1.parquet"))
+                   .select("metric", "value").rows())  # fmt: skip
+    assert (metrics["f4.basal_vs_luma.both"], metrics["f4.basal_vs_luma.rna"]) == (1.0, 1.0)
+    assert metrics["f4.basal_vs_luma.protein_up"] == 1.0
+    f4 = pl.read_csv(output(across_root, "contrast_basal_vs_luma_v1.csv"), comment_prefix="#")
+    assert "G10" not in f4["gene"].to_list() and f4.filter(pl.col("called"))["gene"][0] == "G11"
+    paired = pl.read_csv(output(across_root, "paired_zscores_v1.csv"), comment_prefix="#")
+    rows = paired["row"].unique().to_list()
+    assert len(rows) % 2 == 0 and {r.rsplit(" ", 1)[1] for r in rows} == {"RNA", "protein"}
+    assert paired["sample"].n_unique() == TUMOURS
+
+
 def test_cross_untested_below_the_share(cross_root):
     """Catches the 70 % filter skipped: G30 has 5 of 8 values."""
     genes = pl.read_parquet(output(cross_root, "genes_v1.parquet"))
