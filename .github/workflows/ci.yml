@@ -75,6 +75,32 @@ jobs:
         if: ${{ !cancelled() }}
         run: pixi run labdocs render --check
 
+      # Ubuntu 24.04 lets a program make unprivileged user namespaces only when an AppArmor
+      # profile grants it, and the runner's Chromium has none, so it aborted "No usable sandbox!"
+      # and 72 page tests errored (run 37807649888). The profile below grants that one binary
+      # what Chromium's own document prescribes (docs/security/apparmor-userns-restrictions.md),
+      # so it keeps its sandbox; --no-sandbox, or the sysctl that lifts the rule for every
+      # program, would test a weaker browser than a reader runs. The last line fails here, not
+      # 72 tests later, if the profile does not take.
+      - name: Let the runner's Chromium build its sandbox
+        if: ${{ !cancelled() }}
+        run: |
+          chrome="$(readlink -f "$(command -v chromium)")"
+          sudo tee /etc/apparmor.d/ctx-chromium > /dev/null <<EOF
+          abi <abi/4.0>,
+          include <tunables/global>
+          profile ctx-chromium "$chrome" flags=(unconfined) {
+            userns,
+          }
+          EOF
+          sudo apparmor_parser -r /etc/apparmor.d/ctx-chromium
+          echo "CTX_CHROMIUM=$chrome" >> "$GITHUB_ENV"
+          "$chrome" --headless=new --disable-gpu --dump-dom about:blank > /dev/null
+
+      # -rpfEsxX lists every test by outcome, so a test that must run (M3.10's fake-STAR
+      # refusal) is seen to pass, not merely absent from the failures.
       - name: pytest
         if: ${{ !cancelled() }}
+        env:
+          PYTEST_ADDOPTS: "-rpfEsxX --durations=60"
         run: pixi run test

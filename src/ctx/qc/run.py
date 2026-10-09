@@ -19,13 +19,21 @@ from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
-from ctx.qc import Fastp, QcError, checkpoint, fates, figures, multiqc_io, reads
+from ctx.qc import Fastp, QcError, checkpoint, fastqc, fates, multiqc_io, reads
 from ctx.qc import registry as reg
+from ctx.qc.blocks import (
+    Reads,
+    Stage,
+    fastqc_figures,
+    fate_figures,
+    lines,
+    overview_groups,
+    read_figures,
+    strips,
+)
 from ctx.report import text
 from ctx.report.builder import (
     FIELDS,
-    FigureBlock,
-    FigureText,
     Group,
     KeyNumber,
     ModulePage,
@@ -35,8 +43,6 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
-from ctx.viz.contour import DENSITY_MIN_POINTS
-from ctx.viz.style import MAX_CATEGORIES, MAX_DISTINCT
 
 MODULE = "qc"
 PAGE = MODULE
@@ -44,6 +50,8 @@ GTF_RESOURCE = "annotation_gtf"
 # The page lists this many confounding tests, smallest adjusted p first; the CSV holds all.
 SHOWN_TESTS = 10
 ALPHA = 0.05
+# M3's tables M2 judges on the align stage (M3.12): `ctx process` writes one row per sample.
+ALIGN_TABLES = ("alignment", "strandedness")
 
 
 @dataclass(frozen=True)
@@ -74,29 +82,6 @@ class Options:
     fetchngs_dir: Path | None = None
     fastp: Fastp = field(default_factory=Fastp)
     grid_run: str | None = None
-
-
-@dataclass(frozen=True)
-class Stage:
-    """One stage's judgement: its values, bands and flags, all keyed by sample."""
-
-    values: pl.DataFrame
-    bands: pl.DataFrame
-    flags: pl.DataFrame
-    notes: tuple[str, ...] = ()
-    run_values: pl.DataFrame | None = None
-    run_flags: pl.DataFrame | None = None
-
-
-@dataclass(frozen=True)
-class Reads:
-    """What the reads showed: values per run, the runs left unread, the curves and the grid."""
-
-    values: pl.DataFrame
-    skipped: pl.DataFrame
-    curves: pl.DataFrame
-    grid: pl.DataFrame
-    grid_run: str
 
 
 def load_registry(options: Options) -> reg.Registry:
@@ -142,16 +127,52 @@ def gathered_tables(root: Path, dataset: str) -> dict[str, Path]:
     return inputs
 
 
-def rnaseq_stage(writer: Writer, rnaseq_dir: Path, samples: list[str],
-                 registry: reg.Registry) -> tuple[pl.DataFrame, pl.DataFrame]:  # fmt: skip
-    """Trim Galore's and Salmon's reports through MultiQC: values per sample, and the fates.
+def align_tables(root: Path, dataset: str) -> dict[str, Path]:
+    """The newest `ctx process` tables of the dataset that the align stage reads, if any."""
+    folder = root / "outputs" / f"{dict(MODULES)['process']:02d}_process"
+    found = {}
+    for what in ALIGN_TABLES:
+        try:
+            found[what] = newest(folder, dataset, what)
+        except DatasetError:
+            continue
+    return found
+
+
+def align_stage(tables: Mapping[str, Path], registry: reg.Registry) -> pl.DataFrame | None:
+    """M3's per-sample alignment values, by the registry's align-stage columns (M3.12).
+
+    Each table gives the columns of the registry's align metrics it holds; None without any.
+    """
+    frame = None
+    for what, path in tables.items():
+        wanted = [m.column for m in registry.stage("align") if m.table == what]
+        table = pl.read_parquet(path)
+        if missing := [c for c in wanted if c not in table.columns]:
+            raise QcError(f"{path.name} has no {missing}, which the registry's align stage reads")
+        part = table.select("sample", *[pl.col(c).cast(pl.Float64) for c in wanted])
+        frame = part if frame is None else frame.join(part, on="sample", how="full",
+                                                      coalesce=True)  # fmt: skip
+    return frame
+
+
+def rnaseq_stage(
+    writer: Writer, rnaseq_dir: Path, samples: list[str], registry: reg.Registry
+) -> tuple[pl.DataFrame, pl.DataFrame, fastqc.Plots | None]:
+    """The pipeline's reports through MultiQC: values per sample, the fates, FastQC's plots.
 
     The MultiQC config the registry implies is written first, beside the tables, so
-    MultiQC's own report colours its table by the same bands.
+    MultiQC's own report colours its table by the same bands. FastQC's plots are None where
+    the outdir's copy holds no raw-read FastQC reports.
     """
     mqc = fates.run_multiqc(rnaseq_dir, writer.out / "multiqc", multiqc_config(writer, registry),
                             samples)  # fmt: skip
-    return fates.values(mqc, samples, registry), fates.fates(mqc, samples)
+    plots = None
+    if fates.has_raw_fastqc(rnaseq_dir):
+        names = {name: s for name, (s, _) in fates.ranks(samples).items()}
+        first = [n for n, (_, r) in fates.ranks(samples).items() if r < fates.FIRST_UNUSED_RANK]
+        plots = fastqc.read(mqc, names, first, "sample")
+    return fates.values(mqc, samples, registry), fates.fates(mqc, samples), plots
 
 
 def multiqc_config(writer: Writer, registry: reg.Registry) -> Path:
@@ -186,8 +207,10 @@ def reads_stage(writer: Writer, settings: runtime.Settings, dataset: str, sheet:
     grid = reads.fastp_grid(paths, logs / "grid", writer.out / "multiqc" / "grid",
                             grid=(reads.GRID_Q, reads.GRID_L), fastp=options.fastp,
                             threads=settings.threads)  # fmt: skip
+    names = {reads.stem(p): r for r, p in files.select("run_accession", "path").rows()}
+    first = [reads.stem(p) for p in files.filter(pl.col("mate") == 1)["path"]]
     return Reads(reads.run_values(mqc, files, registry), skipped,
-                 reads.quality_curves(mqc, files), grid, grid_run)  # fmt: skip
+                 fastqc.read(mqc, names, first, "run_accession"), grid, grid_run)  # fmt: skip
 
 
 def judge(values: pl.DataFrame, sheet: pl.DataFrame, found: Reads | None,
@@ -213,149 +236,14 @@ def confounding(stage: Stage, sheet: pl.DataFrame, spec: Dataset,
     """
     values, flags = stage.values, stage.flags
     if stage.run_values is not None and stage.run_flags is not None:
-        values = values.join(by_first_run(stage.run_values.drop("sample"), sheet,
-                                          "run_accession"), on="sample", how="left")  # fmt: skip
+        # A metric measured on the sample, from the pipeline's FastQC, keeps that value.
+        own = stage.run_values.drop("sample", *(c for c in values.columns if c != "sample"),
+                                    strict=False)  # fmt: skip
+        values = values.join(by_first_run(own, sheet, "run_accession"), on="sample",
+                             how="left")  # fmt: skip
         flags = pl.concat([flags, by_first_run(stage.run_flags, sheet, "sample")
                            .select(flags.columns)])  # fmt: skip
     return checkpoint.confounding(values, flags, sheet, spec.contrasts, spec.order, registry)
-
-
-def read_figures(writer: Writer, seen: Reads, sheet: pl.DataFrame, registry: reg.Registry,
-                 options: Options) -> Group:  # fmt: skip
-    """The quality curves and the fastp grid, with the runs left unread said first."""
-    items: list[FigureBlock | str] = []
-    if seen.skipped.height:
-        items.append(text.fill(PAGE, "notes.skipped", n=seen.skipped.height,
-                               runs=", ".join(seen.skipped["run_accession"].head(10))))  # fmt: skip
-    metric = registry.metrics["fastqc_per_base_quality"]
-    curves = figures.quality_figure(seen.curves, sheet, metric,
-                                    figures.colour_column(sheet, options.peers))  # fmt: skip
-    styles = (text.word(PAGE, "figures.quality.styles_distinct") if curves.distinct else
-              text.fill(PAGE, "figures.quality.styles_shared", most=MAX_DISTINCT))  # fmt: skip
-    items.append(_figure(writer, curves, "base_quality", "quality", styles,
-                         n=seen.curves["run_accession"].n_unique()))  # fmt: skip
-    grid = figures.grid_figure(seen.grid, options.fastp, seen.grid_run)
-    if grid is None:
-        items.append(figures.flat_grid(seen.grid, seen.grid_run))
-    else:
-        counts, fastp = figures.grid_counts(seen.grid), options.fastp
-        floor = (text.fill(PAGE, "figures.grid.reading_floor", **counts),) if counts["none"] else ()
-        items.append(_figure(writer, grid, "fastp_grid", "grid", *floor,
-                             lead="lead_floor" if counts["none"] else "lead", run=seen.grid_run,
-                             q=fastp.q, l=fastp.l, bands=len(grid.edges()) - 1,
-                             isoline=figures.GRID_ISOLINE, **counts))  # fmt: skip
-    run_bands = figures.band_map(seen.values, registry, "run_accession")
-    if run_bands is not None:
-        items.append(_band_map(writer, run_bands, "run_band_map", "run_accession"))
-    return Group(text.word(PAGE, "groups.reads"), tuple(items))
-
-
-def strips(writer: Writer, stage: Stage, units: pl.DataFrame, registry: reg.Registry,
-           options: Options, key: str) -> list[FigureBlock]:  # fmt: skip
-    """A strip per numeric metric the values hold, one tab each, in registry order."""
-    values = stage.values if key == "sample" else stage.run_values
-    flags = stage.flags if key == "sample" else stage.run_flags
-    if values is None or flags is None:
-        return []
-    blocks = []
-    for metric in registry.metrics.values():
-        if metric.kind != "numeric" or metric.column not in values.columns:
-            continue
-        data = figures.strip(metric, values, (stage.bands, flags), units, options.strata, key)
-        if data is None:
-            continue
-        lead = text.fill(PAGE, "figures.strip.lead", flagged=int(data.frame["flagged"].sum()),
-                         n=data.frame.height, k=f"{registry.mad_multiplier:g}")  # fmt: skip
-        reading = (metric.meaning, metric.rationale) if metric.rationale else (metric.meaning,)
-        text_around = FigureText(title=metric.title, tab=metric.title, lead=lead, reading=reading)
-        blocks.append(writer.figure(data, f"strip_{metric.id}", text_around))
-    return blocks
-
-
-def _lines(key: str, **values: Any) -> tuple[str, ...]:
-    """The list of text at a key, each line's placeholders filled from ``values``.
-
-    Raises:
-        TextError: If a line needs a value the code did not give.
-    """
-    lines = text.words(PAGE, key)
-    if missing := {n for line in lines for n in text.placeholders(line)} - values.keys():
-        raise text.TextError(f"content/{PAGE}.toml {key!r} needs {sorted(missing)}")
-    return tuple(line.format_map(values) for line in lines)
-
-
-def _colour_line(column: str | None) -> str:
-    """The reading-guide line naming the sheet column that colours a figure's marks."""
-    if column is None:
-        return text.fill(PAGE, "colour.none", most=MAX_CATEGORIES)
-    return text.fill(PAGE, "colour.by", column=column)
-
-
-def _figure(writer: Writer, data: Any, what: str, key: str, *extra: str, lead: str = "lead",
-            **values: Any) -> FigureBlock:  # fmt: skip
-    """A page figure whose title, lead and reading guide are ``figures.<key>`` in the content.
-
-    Args:
-        writer: The step's writer.
-        data: The figure's data contract.
-        what: The figure's file description.
-        key: Its table under ``figures`` in ``content/qc.toml``.
-        extra: Lines added to the reading guide after the content's own.
-        lead: The lead's key in that table, where a figure has more than one.
-        values: The placeholders of the lead and the reading guide.
-
-    Returns:
-        The figure, written.
-    """
-    return writer.figure(data, what, FigureText(
-        title=text.word(PAGE, f"figures.{key}.title"),
-        lead=text.fill(PAGE, f"figures.{key}.{lead}", **values),
-        reading=(*_lines(f"figures.{key}.reading", **values), *extra)))  # fmt: skip
-
-
-def _band_map(writer: Writer, data: Any, what: str, key: str) -> FigureBlock:
-    """The band map, its lead counting the bad and usable values, one column per sample or run."""
-    bands = data.frame["band"]
-    return _figure(writer, data, what, "band_map", cells=bands.len(),
-                   bad=int((bands == "bad").sum()), usable=int((bands == "usable").sum()),
-                   unit=text.word(PAGE, f"figures.band_map.unit.{key}"))  # fmt: skip
-
-
-def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured | None,
-                    context: tuple[pl.DataFrame, pl.DataFrame], registry: reg.Registry,
-                    options: Options) -> list[Group]:  # fmt: skip
-    """The groups every run draws: the glance, every metric, composition and identity."""
-    sheet, status = context
-    groups, glance, identity = [], [], []
-    bands = figures.band_map(stage.values, registry, "sample")
-    if bands is not None:
-        glance.append(_band_map(writer, bands, "band_map", "sample"))
-    if measured is not None:
-        dims = (*dict.fromkeys([*options.strata, *options.peers, "batch"]),)
-        linked = figures.linked_pca(measured.scores, measured.share, sheet, status, dims)
-        glance.append(_figure(writer, linked, "linked_pca", "linked"))
-        colour = figures.colour_column(sheet, options.peers)
-        scatter = figures.density(stage.values, sheet, stage.flags, colour, registry)
-        if scatter is not None:
-            drawn = scatter.frame
-            elsewhere = (drawn["flagged_by"] != "") & ~drawn["flagged"]
-            identity.append(_figure(writer, scatter, "size_genes", "density", _colour_line(colour),
-                                    flagged=int(drawn["flagged"].sum()), other=int(elsewhere.sum()),
-                                    n=drawn.height, minimum=DENSITY_MIN_POINTS,
-                                    **figures.HDR))  # fmt: skip
-        if measured.sexes is not None:
-            sexes = figures.sex_scatter(measured.sexes)
-            disagree = sexes.frame.filter(pl.col("agrees").not_()).height
-            identity.append(_figure(writer, sexes, "sex_check", "sex", n=sexes.frame.height,
-                                    disagree=disagree))  # fmt: skip
-    units = sheet.unique("sample", keep="first").select("sample", *options.strata)
-    metrics = strips(writer, stage, units, registry, options, "sample")
-    for title, items, tabs in (("glance", glance, False), ("metrics", metrics, True),
-                               ("identity", identity, False)):  # fmt: skip
-        if items:
-            groups.append(Group(text.word(PAGE, f"groups.{title}"), tuple(items),
-                                tabs=tabs and len(items) > 1))  # fmt: skip
-    return groups
 
 
 def by_first_run(run_frame: pl.DataFrame, sheet: pl.DataFrame, key: str) -> pl.DataFrame:
@@ -367,22 +255,6 @@ def by_first_run(run_frame: pl.DataFrame, sheet: pl.DataFrame, key: str) -> pl.D
         .join(first, on="run_accession", how="inner")
         .drop("run_accession")
     )
-
-
-def fate_figures(writer: Writer, fate: pl.DataFrame, values: pl.DataFrame, sheet: pl.DataFrame,
-                 registry: reg.Registry, options: Options) -> Group:  # fmt: skip
-    """The read-fates bubble chart and the Sankey, as one group of the page."""
-    colour = figures.colour_column(sheet, options.peers)
-    bubble = figures.fates_bubble(fate, values, sheet, colour, registry)
-    median = float(bubble.frame["useful_share"].median())  # type: ignore[arg-type]
-    total, useful = int(fate["total_reads"].sum()), int(fate["num_mapped"].sum())
-    blocks = (
-        _figure(writer, bubble, "read_fates", "fates", _colour_line(colour), median=median,
-                k=f"{registry.mad_multiplier:g}"),
-        _figure(writer, figures.fates_flow(fate), "read_flow", "flow", total=total, useful=useful,
-                share=useful / total if total else 0.0),
-    )  # fmt: skip
-    return Group(text.word(PAGE, "groups.fates"), blocks)
 
 
 def columns_of(frame: pl.DataFrame, registry: reg.Registry) -> dict[str, tuple[str, str]]:
@@ -460,9 +332,36 @@ def _sections(stage: Stage, registry: reg.Registry, tally: Mapping[str, int]) ->
                            registry=registry.path.name),
         "method": text.fill(PAGE, "method", k=f"{registry.mad_multiplier:g}"),
         "interpretation": text.fill(PAGE, "interpretation", alpha=ALPHA, **tally),
-        "pitfalls": _lines("pitfalls", minimum=registry.min_samples),
+        "pitfalls": lines("pitfalls", minimum=registry.min_samples),
     }  # fmt: skip
     return text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}
+
+
+def pipeline_groups(
+    writer: Writer, found: tuple[pl.DataFrame | None, fastqc.Plots | None, Reads | None],
+    stage: Stage, sheet: pl.DataFrame, registry: reg.Registry, options: Options,
+) -> list[Group]:  # fmt: skip
+    """The groups of the pipeline's reports and of the reads, where the run read them.
+
+    ``found`` is the fates, the pipeline's FastQC plots and what the reads showed, each None
+    where the run did not read it.
+    """
+    fate, plots, seen = found
+    groups = []
+    if fate is not None:
+        groups.append(fate_figures(writer, fate, stage.values, sheet, registry, options))
+    if plots is not None:
+        units = sheet.unique("sample", keep="first", maintain_order=True)
+        items = fastqc_figures(writer, plots, units, registry, options)
+        groups.append(Group(text.word(PAGE, "groups.fastqc"), tuple(items)))
+    if seen is not None:
+        groups.append(read_figures(writer, seen, sheet, registry, options))
+        run_units = sheet.select("run_accession", *options.strata)
+        run_strips = strips(writer, stage, run_units, registry, options, "run_accession")
+        if run_strips:
+            groups.append(Group(text.word(PAGE, "groups.run_metrics"), tuple(run_strips),
+                                tabs=len(run_strips) > 1))  # fmt: skip
+    return groups
 
 
 def run(
@@ -491,13 +390,18 @@ def run(
     samples = sheet.unique("sample", keep="first", maintain_order=True).select("sample")
     values = measured.values if measured else samples
     sexes = measured.sexes if measured else None
+    inputs |= align_tables(settings.root, dataset)
+    aligned = align_stage({w: inputs[w] for w in ALIGN_TABLES if w in inputs}, registry)
+    if aligned is not None:
+        values = values.join(aligned, on="sample", how="left")
     day = date.today()
     releases = {"registry": str(registry.path), **{f"input:{w}": p.name for w, p in inputs.items()}}
     writer = Writer(settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}", dataset,
                     day, releases)  # fmt: skip
-    fate = None
+    fate = plots = None
     if options.rnaseq_dir:
-        found, fate = rnaseq_stage(writer, options.rnaseq_dir, values["sample"].to_list(), registry)
+        found, fate, plots = rnaseq_stage(writer, options.rnaseq_dir, values["sample"].to_list(),
+                                          registry)  # fmt: skip
         values = values.join(found, on="sample", how="left")
     seen = (
         reads_stage(writer, settings, dataset, sheet, registry, options) if options.reads else None
@@ -515,15 +419,7 @@ def run(
     _write_tables(writer, stage.values, frames, registry)
     results: list[Result] = [*stage.notes, _status_table(status), _confounding_table(tests)]
     results += overview_groups(writer, stage, measured, (sheet, status), registry, options)
-    if fate is not None:
-        results.append(fate_figures(writer, fate, values, sheet, registry, options))
-    if seen is not None:
-        results.append(read_figures(writer, seen, sheet, registry, options))
-        run_units = sheet.select("run_accession", *options.strata)
-        run_strips = strips(writer, stage, run_units, registry, options, "run_accession")
-        if run_strips:
-            results.append(Group(text.word(PAGE, "groups.run_metrics"), tuple(run_strips),
-                                 tabs=len(run_strips) > 1))  # fmt: skip
+    results += pipeline_groups(writer, (fate, plots, seen), stage, sheet, registry, options)
     usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
     tally = _tally(status, tests)
     page = ModulePage(

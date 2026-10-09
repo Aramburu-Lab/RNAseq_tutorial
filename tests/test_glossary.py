@@ -223,6 +223,20 @@ def test_the_m3_page_marks_each_term_where_a_section_first_names_it():
     assert [w for w in process if not w.endswith(bare)] == []
 
 
+def test_an_alias_with_another_meaning_on_a_page_is_no_mention():
+    """L.6: setup's "OS" is the operating system, written as survival's alias; matched by case
+    already, it needs the page's exception. Elsewhere "OS" still names the survival endpoint.
+
+    Mutation caught: the exception's `continue` dropped (setup's 'OS' warned again)."""
+    _, warnings = glossary_lint.page_marks()
+    assert not [w for w in warnings if w.startswith("setup: ") and "'OS'" in w]
+    patterns = glossary_lint._names()
+    text = ["The memory the OS reports."]
+    assert list(glossary_lint._first_mentions(text, patterns)) == [
+        "'OS' is survival_endpoints, unmarked"]  # fmt: skip
+    assert list(glossary_lint._first_mentions(text, patterns, frozenset({"OS"}))) == []
+
+
 def test_lookup_by_id_term_or_alias_in_any_case(capsys):
     """One entry answers to its id, its term and each alias, in any case; explain prints it.
 

@@ -25,6 +25,10 @@ min_samples = 3
 source = "robust z-score, median ± 3 scaled MAD"
 source_type = "course_convention"
 rationale = "Many RNA-seq metrics have no universal cut-off; a sample far from its own dataset is a question worth asking. 3 scaled MADs is 3 SD for normal data, and it flags, never excludes."
+# MultiQC 1.35's theoretical GC curve that the GC distribution figure draws, the curve
+# percent_gc's plot_line is the mean of: "Human Transcriptome (UCSC hg38)". MultiQC writes it
+# as the row "Theoretical GC Content" of its per-sequence GC plot data.
+fastqc_theoretical_gc = "hg38_txome"
 
 # ---- M2a, reads before alignment (FastQC 0.12.1, fastp 1.1.0, seqkit 2.13.0) --------------
 
@@ -51,7 +55,7 @@ source_type = "course_convention"
 # HTML on 2026-09-30 (the space before "projects" is a non-breaking one there). The M1 depth
 # figure draws both values as reference lines through ctx.qc.registry.
 plot_bands = [30000000.0, 20000000.0]
-plot_source = "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"Each replicate should have 30 million aligned reads, although older projects aimed for 20 million reads.\" Read 2026-09-30."
+plot_source = "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"Each replicate should have 30 million aligned reads, although older projects aimed for 20 million reads.\" ENCODE's audit, ENCODE-DCC/encoded src/encoded/audit/analysis.py at commit 4638915d (2022-11-15), check_file_read_depth with upper_threshold=30000000 and middle_threshold=20000000: 20 to 30 million aligned reads is 'low read depth' at level WARNING, 1 to 20 million 'insufficient read depth' at level NOT_COMPLIANT. Aligned reads are unique reads plus multi-mappers at fewer than 20 loci. Read 2026-10-01. This metric counts sequenced reads, more than aligned ones, so a run above a line may still fall short of it."
 
 [metrics.read_length]
 stage = "reads"
@@ -72,6 +76,8 @@ matters_for_de = false
 read_length_tied = true
 source = "dataset only"
 source_type = "course_convention"
+plot_line = 50.0
+plot_source = "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline, Uniform Processing Pipeline Restrictions (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"The read length should be a minimum of 50 base pairs.\" ENCODE's audit marks a shorter read 'insufficient read length' at level NOT_COMPLIANT (ENCODE-DCC/encoded src/encoded/audit/experiment.py, check_file_read_length_rna(f, 50, ...), last commit d9f41ec2, 2023-01-19). A floor for ENCODE's pipeline, not a quality scale. Read 2026-10-01."
 
 [metrics.percent_gc]
 stage = "reads"
@@ -92,6 +98,8 @@ matters_for_de = true
 read_length_tied = false
 source = "dataset only"
 source_type = "course_convention"
+plot_line = 49.8
+plot_source = "Course convention, derived: the mean of MultiQC 1.35's theoretical GC curve 'FastQC theoretical GC content curve: Human Transcriptome (UCSC hg38)' (github.com/MultiQC/MultiQC/blob/v1.35/multiqc/modules/fastqc/fastqc_theoretical_gc/fastqc_theoretical_gc_hg38_txome.txt), computed 2026-10-01 as 49.81. The curve draws reads in proportion to transcript length and isoform number, not expression: a reference for the annotation, not the value an expressed library should have."
 
 [metrics.percent_duplicates]
 stage = "reads"
@@ -146,13 +154,18 @@ module = "fastp"
 scale = "linear"
 direction = "higher"
 bands = "dataset_only"
-rationale = "What fastp removes depends on its settings; the page maps one run's -q by -l, without a control. The dataset shows which runs lose more than the rest."
+# The approved proposal's last sentence read "The -q and -l grid the page lets you move": the
+# grid has no control (test_no_registry_text_claims_a_control_the_page_lacks), so the sentence
+# keeps the page's own claim and the proposal's meaning (test_qc_bands.DEVIATIONS).
+rationale = "At fastp's default filters a run losing 1 read in 20 is degraded; the band rests on 8 teaching runs and holds at default settings only; the page maps one run's -q by -l, without a control. That grid is never shaded, since there a band would grade the settings, not the run."
 causes = ["low quality", "short inserts", "many N bases"]
 action = "flag"
 matters_for_de = true
 read_length_tied = false
 source = "dataset only"
 source_type = "course_convention"
+plot_bands = [95.0, 90.0]
+plot_source = "Course convention, at fastp's default filters only. fastp 1.1.0 --help, the installed binary: -q 'Default 15 means phred quality >=Q15 is qualified.', -u 'Default 40 means 40%', -n 'Default is 5', -l 'default is 15'. At those settings a read is dropped only when more than 40 % of its bases fall below Q15, it carries more than 5 N, or it is shorter than 15 nt. The worst of the 8 teaching runs loses 1.03 %; 95 % is about five times that loss, 90 % about ten. Not sourced. Read 2026-10-01."
 
 [metrics.fastp_passed_reads]
 stage = "reads"
@@ -196,7 +209,7 @@ source_type = "tool_code"
 # read from the bytecode of FastQC 0.12.1's QualityBoxPlot class with javap on 2026-09-30
 # (constants 28.0 and 20.0 beside its GOOD, BAD and UGLY colours).
 plot_bands = [28.0, 20.0]
-plot_source = "FastQC 0.12.1 QualityBoxPlot: good from Phred 28, reasonable from 20, poor below"
+plot_source = "FastQC 0.12.1 Graphs/QualityBoxPlot.java (github.com/s-andrews/FastQC/blob/v0.12.1/uk/ac/babraham/FastQC/Graphs/QualityBoxPlot.java): 'g.fillRect(xOffset+(baseWidth*i), getY(28), baseWidth, getY(20)-getY(28));'. Good from Phred 28, reasonable from 20, poor below. Read 2026-10-01."
 
 [metrics.fastqc_adapter]
 stage = "reads"
@@ -215,6 +228,8 @@ matters_for_de = true
 read_length_tied = true
 source = "FastQC 0.12.1 limits.txt: adapter warn 5, error 10 (% of reads)"
 source_type = "tool_code"
+plot_bands = [5.0, 10.0]
+plot_source = "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'adapter warn 5', 'adapter error 10', the percentage of reads observed to contain an adapter k-mer at any point. Shades the cumulative adapter curve; the verdict stays FastQC's status. Read 2026-10-01."
 
 [metrics.fastqc_n_content]
 stage = "reads"
@@ -233,6 +248,8 @@ matters_for_de = true
 read_length_tied = false
 source = "FastQC 0.12.1 limits.txt: n_content warn 5, error 20 (% at any position)"
 source_type = "tool_code"
+plot_bands = [5.0, 20.0]
+plot_source = "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'n_content warn 5', 'n_content error 20'. FastQC Help, Per Base N Content: 'This module raises a warning if any position shows an N content of >5%'. Shades the N share by position; the verdict stays FastQC's status. Read 2026-10-01."
 
 [metrics.fastqc_sequence_content]
 stage = "reads"
@@ -251,6 +268,9 @@ matters_for_de = false
 read_length_tied = false
 source = "FastQC 0.12.1 limits.txt: sequence warn 10, error 20 (% A/T or G/C difference)"
 source_type = "tool_code"
+plot_bands = [10.0, 20.0]
+plot_expected_bias_positions = 13
+plot_source = "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'sequence warn 10', 'sequence error 20', the largest A/T or G/C difference at any position. FastQC Help, Per Base Sequence Content: 'Nearly all RNA-Seq libraries will fail this module because of this bias'. Positions 1 to 13 greyed as priming bias: Hansen, Brenner, Dudoit 2010, Nucleic Acids Res 38:e131, doi:10.1093/nar/gkq224: 'a strong distinctive pattern in the nucleotide frequencies of the first 13 positions'. Read 2026-10-01."
 
 [metrics.fastqc_gc_distribution]
 stage = "reads"
@@ -269,6 +289,8 @@ matters_for_de = true
 read_length_tied = false
 source = "FastQC 0.12.1 limits.txt: gc_sequence warn 15, error 30 (% deviation from normal)"
 source_type = "tool_code"
+plot_bands = [15.0, 30.0]
+plot_source = "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'gc_sequence warn 15', 'gc_sequence error 30', the percentage of reads deviating from a normal fitted at the mode. Shades a per-run deviation strip; the verdict stays FastQC's status. Read 2026-10-01."
 
 [metrics.fastqc_overrepresented]
 stage = "reads"
@@ -287,6 +309,8 @@ matters_for_de = false
 read_length_tied = false
 source = "FastQC 0.12.1 limits.txt: overrepresented warn 0.1, error 1 (% of reads)"
 source_type = "tool_code"
+plot_bands = [0.1, 1.0]
+plot_source = "FastQC 0.12.1 Configuration/limits.txt (github.com/s-andrews/FastQC/blob/v0.12.1/Configuration/limits.txt): 'overrepresented warn 0.1', 'overrepresented error 1', the percentage of reads that are one sequence. Shades the top sequence's share. Read 2026-10-01."
 
 # ---- Trimming on the cluster (Trim Galore 2.3.0, nf-core/rnaseq 3.27.0's default trimmer) --
 
@@ -302,18 +326,20 @@ module = "trim_galore"
 scale = "linear"
 direction = "lower"
 bands = "dataset_only"
-rationale = "Trim Galore counts a read with a single adapter base (stringency 1), so every run shows a share; a run far above its batch has short inserts."
+rationale = "Trim Galore counts a read with a single adapter base (stringency 1), and about a third of reads match that way by chance with no adapter present, so no adapter cut-off applies to this share. A run far above its batch has short inserts."
 causes = ["short inserts", "degraded RNA"]
 action = "flag"
 matters_for_de = true
 read_length_tied = true
 source = "dataset only"
 source_type = "course_convention"
+plot_line = 33.3
+plot_source = "Course convention, derived: the sum over overlap lengths L of 4^-L, 33.3 % at 75 to 101 nt, from the per-length expectation Trim Galore 2.3.0 prints, src/report.rs line 638 (github.com/FelixKrueger/TrimGalore/blob/v2.3.0/src/report.rs): 'let expect = stats.total_reads as f64 / 4f64.powi(length as i32);'. Trim Galore prints no total. The share expected to match by chance at stringency 1 with no adapter present, if bases were even. Computed 2026-10-01."
 
 [metrics.tg_pct_passing]
 stage = "trim"
 title = "Reads kept by Trim Galore"
-meaning = "The share of reads Trim Galore wrote; the rest were too short, too long or had too many N."
+meaning = "The share of reads Trim Galore wrote; with nf-core/rnaseq 3.27.0's arguments every read removed was shorter than 20 nt after trimming."
 computed = "Trim Galore reads_written / total_reads"
 unit = "%"
 table = "general_stats"
@@ -322,13 +348,15 @@ module = "trim_galore"
 scale = "linear"
 direction = "higher"
 bands = "dataset_only"
-rationale = "What is removed depends on the insert sizes a library has; the dataset shows which runs lose more than the rest."
+rationale = "Trim Galore's own example loses 0.1 % of reads as too short; the band shades from there. Depth is judged by tg_total_reads and library_size, not here."
 causes = ["short inserts", "degraded RNA"]
 action = "flag"
 matters_for_de = true
 read_length_tied = true
 source = "dataset only"
 source_type = "course_convention"
+plot_bands = [99.9, 99.0]
+plot_source = "Course convention: Trim Galore 2.3.0's length guide (trimgalore.com/guide/length/) shows an example report with '1000000 sequences processed in total' and 'Sequences removed because they became shorter than the length cutoff of 20 bp: 552 (0.1%)'. Up to that loss is good, up to ten times it usable. An example, not a cut-off. Read 2026-10-01."
 
 [metrics.tg_pct_quality_trimmed]
 stage = "trim"
@@ -342,13 +370,15 @@ module = "trim_galore"
 scale = "linear"
 direction = "lower"
 bands = "dataset_only"
-rationale = "No source gives a cut-off; a run trimmed far more than its batch had poorer late cycles."
+rationale = "No source gives a cut-off on this share; the good line is what Trim Galore removed in all from a benchmark library, the usable line the course's own. A run trimmed far more than its batch had poorer late cycles."
 causes = ["a degraded run", "late cycles of a long read"]
 action = "flag"
 matters_for_de = true
 read_length_tied = true
 source = "dataset only"
 source_type = "course_convention"
+plot_bands = [2.3, 20.0]
+plot_source = "Course convention. Good to 2.3 %: Trim Galore 0.6.2 trimmed 2.3 % of bases from SEQC UHRR and HBRR, 100 bp paired-end, quality and adapter trimming together (Liao and Shi 2020, NAR Genom Bioinform 2(3):lqaa068, doi:10.1093/nargab/lqaa068, Supplementary Table S1); a description of reference RNA, not a cut-off. Usable to 20 %: the share of bases the course's q30_rate line lets fall below Q30, an analogy only. Read 2026-10-01."
 
 [metrics.tg_total_reads]
 stage = "trim"
@@ -393,6 +423,84 @@ read_length_tied = false
 source = "measured on GENCODE 50 and GRCh38 chr22 (2026-10-01)"
 source_type = "course_convention"
 
+# M2 judges the next four from M3's alignment table, one row per sample, when `ctx process` has
+# run on the dataset (M3.12). M3 aligns to part of the genome, so no genome-wide band applies.
+[metrics.align_unique_pct]
+stage = "align"
+title = "Reads mapped once"
+meaning = "The share of a sample's input reads the aligner placed at one locus of the reference M3 used."
+computed = "uniquely mapped reads / reads given to the aligner, from MultiQC's STAR or HISAT2 table"
+unit = "%"
+table = "alignment"
+column = "unique_pct"
+scale = "linear"
+direction = "higher"
+bands = "dataset_only"
+rationale = "M3 aligns to part of the genome by default, so most reads belong elsewhere and a genome-wide rate does not apply; the dataset shows which sample maps less than its stratum."
+causes = ["contamination", "rRNA", "a different library protocol"]
+action = "flag"
+matters_for_de = false
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.align_multi_pct]
+stage = "align"
+title = "Reads mapped to several loci"
+meaning = "The share of a sample's input reads the aligner placed at more than one locus."
+computed = "reads mapped to several loci / reads given to the aligner, from MultiQC's STAR or HISAT2 table"
+unit = "%"
+table = "alignment"
+column = "multi_pct"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "Repeats and rRNA copies raise it, and how much depends on the reference; the dataset shows which sample stands apart."
+causes = ["rRNA", "repeat-rich RNA", "short reads"]
+action = "flag"
+matters_for_de = false
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.align_mismatch_rate]
+stage = "align"
+title = "Mismatch rate"
+meaning = "Mismatches per base of the uniquely mapped reads; STAR reports it, HISAT2 does not."
+computed = "STAR Log.final.out mismatch rate per base, through MultiQC"
+unit = "%"
+table = "alignment"
+column = "mismatch_rate"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "Sequencing error and variants set it; a sample above its stratum had poorer base calls or more adapter left on."
+causes = ["poor base calls", "adapter left on the reads"]
+action = "flag"
+matters_for_de = false
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.align_splices_per_100]
+stage = "align"
+title = "Splices per 100 reads"
+meaning = "Spliced alignments per 100 uniquely mapped reads; STAR reports them, HISAT2 does not."
+computed = "STAR splices / uniquely mapped reads × 100"
+unit = "splices per 100 reads"
+table = "alignment"
+column = "splices_per_100_unique"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "Mature mRNA carries splice junctions and pre-mRNA fewer; a sample unlike its stratum holds more unspliced RNA or more DNA."
+causes = ["pre-mRNA", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = false
+read_length_tied = true
+source = "dataset only"
+source_type = "course_convention"
+
 [metrics.gene_strand_bias]
 stage = "align"
 title = "Strand of the gene-assigned reads"
@@ -405,12 +513,12 @@ kind = "strandedness"
 direction = "none"
 stranded = 0.8
 unstranded = 0.1
-rationale = "nf-core sets these thresholds on Salmon's fragments over transcripts. Reads featureCounts assigns to genes are a different measurement: a read on two genes of opposite strands is ambiguous and left out. Applying the same cut-offs here is this course's choice."
+rationale = "nf-core/rnaseq 3.27.0 applies these thresholds to Salmon's strand share and to RSeQC infer_experiment on the genome alignment, which leaves out a read on genes of both strands. featureCounts at -s 1 and at -s 2 assigns such a read both times, so for a stranded library this share sits nearer 0.5 than RSeQC's. Applying the same cut-offs here is this course's choice."
 causes = ["a different library protocol", "genomic DNA contamination"]
 action = "flag"
 matters_for_de = true
 read_length_tied = false
-source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), applied to gene-assigned reads"
+source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), which docs/usage.md applies to Salmon and to RSeQC infer_experiment; transferred to featureCounts gene-assigned reads"
 source_type = "course_convention"
 
 # The GDC counts files' own strand columns (ctx.gather.gdc): STAR's GeneCounts per read strand.
@@ -449,14 +557,15 @@ column = "salmon-percent_mapped"
 module = "salmon"
 scale = "linear"
 direction = "higher"
-bands = "dataset_only"
-rationale = "Conesa et al. 2016's 70-90 % is for reads mapped to the genome; Salmon maps to transcripts, and a decoy-aware index sends intronic, genome-like reads to decoys, so no genome band applies."
+rationale = "Salmon's own lines, from the release that quantified Step-1; they catch a wrong reference or a failed library. Lenient for sorted blood cells on a decoy-aware index, whose cell-type medians lose 15 to 26 % of reads to the genome decoys, so the dataset check beside them finds the low mappers. Conesa et al. 2016 expect a transcriptome rate slightly below the genome's 70 to 90 % and give no number."
 causes = ["intronic reads from pre-mRNA", "contamination", "rRNA"]
 action = "flag"
 matters_for_de = true
 read_length_tied = false
-source = "dataset only"
-source_type = "course_convention"
+source = "Salmon 2.7.0 crates/salmon-core/src/diagnostics.rs input_diagnostics() (github.com/COMBINE-lab/salmon/blob/v2.7.0/crates/salmon-core/src/diagnostics.rs): 'The thresholds are judgement calls, not statistics: a healthy bulk RNA-seq run against a matching transcriptome typically maps 70-90%. Below 30% something is usually wrong; below 10% it is almost certainly the wrong reference.' Below 30 % writes low_mapping_rate, below 10 % very_low_mapping_rate, both at severity warning. Read 2026-10-01."
+source_type = "tool_code"
+good = 30.0
+usable = 10.0
 
 [metrics.salmon_strand_bias]
 stage = "quant"
@@ -477,26 +586,30 @@ matters_for_de = true
 read_length_tied = false
 source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config; the fixture's params file)"
 source_type = "pipeline_default"
+plot_unstranded_tolerance = 0.01
+plot_source = "Salmon 2.7.0 crates/salmon-core/src/libtype.rs LibFormatSummary::diagnostics() (github.com/COMBINE-lab/salmon/blob/v2.7.0/crates/salmon-core/src/libtype.rs): under an unstranded library, |strand_mapping_bias - 0.5| > 0.01 writes strand_bias_unstranded, 'detected a *potential* strand bias > 1% in an unstranded protocol', a warning. Drawn for runs quantified as U only. Read 2026-10-01."
 
 [metrics.salmon_compatible_ratio]
 stage = "quant"
 title = "Reads compatible with the library type"
 meaning = "The share of reads that fit the library type Salmon inferred."
 computed = "Salmon lib_format_counts.json compatible_fragment_ratio"
-unit = "fraction"
+unit = "%"
 table = "general_stats"
 column = "salmon-compatible_fragment_ratio"
 module = "salmon"
 scale = "linear"
 direction = "higher"
 bands = "dataset_only"
-rationale = "No source gives a cut-off; the dataset shows which runs stand apart."
+rationale = "Salmon warns when more than 5 % of fragments disagree with the library type. A single-end run quantified as unstranded accepts either strand, so it reads 100 by construction; the line separates runs only in a stranded or paired cohort."
 causes = ["a mix of library types", "genomic DNA contamination"]
 action = "flag"
 matters_for_de = true
 read_length_tied = false
 source = "dataset only"
 source_type = "course_convention"
+plot_line = 95.0
+plot_source = "Salmon 2.7.0 crates/salmon-core/src/libtype.rs LibFormatSummary::diagnostics() (github.com/COMBINE-lab/salmon/blob/v2.7.0/crates/salmon-core/src/libtype.rs): when 1.0 - compatible_fragment_ratio > 0.05 it warns, high_incompatible_fraction, 'greater than 5% of the fragments disagreed with the expected library type'. A warning, so a line, not a fail. Read 2026-10-01."
 
 # ---- Counts: computed by ctx from the gene matrix and the GENCODE 50 gene types --------------
 
@@ -511,13 +624,15 @@ column = "library_size"
 scale = "log10"
 direction = "higher"
 bands = "dataset_only"
-rationale = "DESeq2's size factors correct depth; a library far below the rest is noisier, not wrong. ENCODE's bulk RNA-seq standard (June 2017) asks for 30 million aligned reads per replicate, 20 million in older projects; reads counted on genes are fewer than reads aligned."
+rationale = "DESeq2's size factors correct depth; a library far below the rest is noisier, not wrong. The column equals Salmon's transcriptome-mapped reads, fewer than the genome-aligned reads ENCODE counts, so ENCODE's lines are drawn, not judged."
 causes = ["a failed library", "low input"]
 action = "flag"
 matters_for_de = true
 read_length_tied = false
 source = "dataset only"
 source_type = "course_convention"
+plot_bands = [30000000.0, 20000000.0]
+plot_source = "ENCODE, Bulk RNA-seq Data Standards and Processing Pipeline (encodeproject.org/data-standards/rna-seq/long-rnas/, updated June 2017): \"Each replicate should have 30 million aligned reads, although older projects aimed for 20 million reads.\" ENCODE's audit, ENCODE-DCC/encoded src/encoded/audit/analysis.py at commit 4638915d (2022-11-15), check_file_read_depth with upper_threshold=30000000 and middle_threshold=20000000: 20 to 30 million aligned reads is 'low read depth' at level WARNING, 1 to 20 million 'insufficient read depth' at level NOT_COMPLIANT. Aligned reads are unique reads plus multi-mappers at fewer than 20 loci. Read 2026-10-01. This column equals Salmon's transcriptome-mapped reads, fewer than genome-aligned reads: a library above a line meets it, one below may still meet it."
 
 [metrics.genes_detected]
 stage = "counts"
@@ -530,7 +645,7 @@ column = "genes_detected"
 scale = "linear"
 direction = "higher"
 bands = "dataset_only"
-rationale = "Depends on depth and on the cell type's RNA content, which is low in neutrophils (TODO.md, M2)."
+rationale = "Depends on depth, on the annotation, on the detection rule and on the cell type's RNA content, which is low in neutrophils (TODO.md, M2). No short-read bulk source gives a number; ENCODE's 8,000 and 4,000 are for long-read RNA-seq."
 causes = ["low depth", "degraded RNA", "a few transcripts taking most reads"]
 action = "flag"
 matters_for_de = true
@@ -541,8 +656,11 @@ source_type = "course_convention"
 [metrics.top_gene_share]
 stage = "counts"
 title = "Share of the top gene"
-meaning = "The share of all counted reads that fall on the single most-read gene."
-computed = "largest gene count / library size"
+meaning = "The share of all counted reads that fall on the single most-read gene that is not rRNA."
+# P2Q.10: Mt_rRNA and the 18S-antisense lncRNAs ENSG00000280614 and ENSG00000281383 are left
+# out of the search (ctx.qc.checkpoint.RRNA_18S_ANTISENSE). On Step-1 the median fell from
+# 5.34 % to 3.22 %; the largest, 17.88 %, is DEFA1B in ERX6994400, under both definitions.
+computed = "largest count among genes other than Mt_rRNA and the two 18S-antisense lncRNAs / library size"
 unit = "fraction"
 table = "counts"
 column = "top_gene_share"
@@ -594,19 +712,23 @@ matters_for_de = true
 read_length_tied = false
 source = "dataset only"
 source_type = "course_convention"
+plot_line = 0.1
+plot_source = "RNA-SeQC 2.4.2 python/rnaseqc/report.py (github.com/getzlab/rnaseqc/blob/v2.4.2/python/rnaseqc/report.py) draws \"'rRNA Rate': 0.1\" as a dashed line and marks samples above it ('gt'). Its src/GTF.cpp counts as rRNA every transcript_type matching 'rRNA', 'const boost::regex ribosomalPattern(\"rRNA\")': on GENCODE that is Mt_rRNA, rRNA and rRNA_pseudogene, this column plus rrna_fraction. RNA-SeQC divides by genome-mapped reads and this column by Salmon-mapped reads, so a value here reads at or above RNA-SeQC's. Read 2026-10-01."
 
 [metrics.rrna_fraction]
 stage = "counts"
 title = "Nuclear rRNA"
-meaning = "The share of reads on nuclear rRNA genes and pseudogenes. GENCODE 50 annotates the 5S and 5.8S genes, not the 45S precursor, so 18S and 28S reads are not counted here at all."
-computed = "counts on GENCODE gene_type rRNA or rRNA_pseudogene / library size"
+meaning = "The share of reads on nuclear rRNA: the 5S and 5.8S genes, their pseudogenes, and 18S through the two lncRNAs annotated antisense to it. GENCODE 50 has no 45S gene, so 28S reads land on no gene."
+# P2Q.10: the two 18S-antisense lncRNAs join the nuclear rRNA genes. On Step-1 (unstranded)
+# the median rose from 6.48e-6 to 0.041, the range 0.0018 to 0.167 (measured 2026-10-09).
+computed = "counts on nuclear rRNA and rRNA_pseudogene genes and the two 18S-antisense lncRNAs / library size"
 unit = "fraction"
 table = "counts"
 column = "rrna_fraction"
 scale = "linear"
 direction = "lower"
 bands = "dataset_only"
-rationale = "A lower bound on rRNA content, since most rRNA reads have no gene to land on; comparable between samples, not an absolute contamination figure."
+rationale = "The antisense lncRNAs hold 18S reads only in an unstranded library, where a read lands on either strand; in a stranded one this is a lower bound. 28S is never counted. No band until one is proposed on this definition (D-052)."
 causes = ["incomplete poly-A selection or rRNA depletion"]
 action = "flag"
 matters_for_de = true
@@ -625,13 +747,15 @@ column = "globin_fraction"
 scale = "linear"
 direction = "lower"
 bands = "dataset_only"
-rationale = "Blood-derived samples carry reticulocyte globin mRNA in varying amounts; the dataset shows which sample holds more."
+rationale = "Sorted leukocytes carry almost no globin: peripheral-blood samples sit at or below 0.062 %, bone-marrow ones reach 0.119 %. Usable to 1 %, one-seventeenth of a globin-depleted whole-blood library. The dataset check still flags small differences between peers."
 causes = ["red cell or reticulocyte carry-over"]
 action = "flag"
 matters_for_de = true
 read_length_tied = false
 source = "dataset only"
 source_type = "course_convention"
+plot_bands = [0.001, 0.01]
+plot_source = "Course convention, placed on Step-1 measured 2026-10-01: every peripheral-blood sample is at or below 0.062 % globin and the six above 0.09 % are bone marrow, where erythroid precursors are expected. Good to 0.1 %, usable to 1 %. Scale only, not a source: whole blood carries a mean 81 % globin reads undepleted and 17 % after globin depletion (Shin et al. 2014, PLoS One 9(3):e91041, doi:10.1371/journal.pone.0091041)."
 
 [metrics.replicate_spearman]
 stage = "counts"
@@ -644,7 +768,7 @@ column = "replicate_spearman"
 scale = "linear"
 direction = "higher"
 bands = "dataset_only"
-rationale = "ENCODE's replicate Spearman above 0.9 (isogenic) or 0.8 (anisogenic) is UNVERIFIED (TODO.md, M2), and these samples are different donors, not replicates of one."
+rationale = "ENCODE's standard (encodeproject.org/data-standards/rna-seq/long-rnas/, June 2017, read 2026-10-01) asks for a Spearman correlation above 0.9 between isogenic and above 0.8 between anisogenic replicates, computed pairwise on RSEM FPKM over genes with mean log2 FPKM above 0. This column is a median over peers on counts over every gene read, so the number does not transfer; 39 of 210 Step-1 samples also share a donor with a peer."
 causes = ["a mislabelled sample", "a failed library", "a different cell population"]
 action = "flag"
 matters_for_de = true
@@ -675,7 +799,7 @@ source_type = "course_convention"
 stage = "counts"
 title = "Recorded sex against expression"
 meaning = "Whether XIST and the chrY genes agree with the sex recorded for the donor."
-computed = "ctx.de.run.sex_check: XIST against RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY (rule R8)"
+computed = "ctx.qc.identity.sex_check: XIST against RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY (rule R8)"
 unit = "category"
 table = "counts"
 column = "sex_agrees"
@@ -685,6 +809,6 @@ causes = ["a mislabelled sample", "a sample swap", "an HSCT recipient carrying d
 action = "flag"
 matters_for_de = true
 read_length_tied = false
-source = "rule R8 of conf/datasets/tier1.toml; the sex genes of ctx.de.run"
+source = "rule R8 of conf/datasets/tier1.toml; the sex genes of ctx.qc.identity"
 source_type = "course_convention"
 rationale = "A disagreement is a question for the metadata, never a reason on its own to drop a sample; HSCT samples are compared with donor sex."

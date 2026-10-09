@@ -32,6 +32,8 @@ custom-data guide). Each moves to the table above, renamed `_approved`, when he 
 
 | File | Written | Record |
 |---|---|---|
+| [2026-10-09_dataset_survey.md](2026-10-09_dataset_survey.md) | 2026-10-09, sizes and terms of SCAN-B, TOIL, CPTAC ccRCC, LUAD, LSCC and the GTEx V11 junctions; nothing downloaded | TODO.md item-13 answer 6 |
+| [2026-10-09_m3_11_q2_cluster_blocks.md](2026-10-09_m3_11_q2_cluster_blocks.md) | 2026-10-09, the Kebnekaise blocks for M3.11 and M4's Q2 | TODO.md item-13 answer 1 |
 | [2026-10-09_todo_triage.md](2026-10-09_todo_triage.md) | 2026-10-09, all 123 open items: 28 done, 10 superseded, 52 to build, 20 for Rytis, 13 blocked | TODO.md items ticked with it |
 
 ## How these were recovered
