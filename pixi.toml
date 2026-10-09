@@ -99,6 +99,8 @@ platforms = ["linux-64-glibc-2-35", "osx-arm64"]
 
 [feature.dev.dependencies]
 pytest = ">=8"
+# Runs the suite on several cores toward the 5-minute budget (Rytis 2026-10-09; CI took 1,692 s serial).
+pytest-xdist = "==3.8.0"
 
 [feature.dev.pypi-dependencies]
 ruff = "==0.16.2"
