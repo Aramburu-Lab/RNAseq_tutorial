@@ -459,6 +459,7 @@ Rytis, 2026-10-08: copy all of M4's Salmon files (9.76 GB, Q1) and download GTEx
 8. [ ] Cassetta breast: an agent writes the dataset files with the paper's comparisons and registers their sanity rules before `ctx de`; Step-2 and the D28 treatment dataset after the v1.0 pilot.
 9. [ ] GHCR: dispatch the containers workflow at 0.1.0 once package F adds the `figures` target.
 11. [ ] Dataset survey answers (Rytis 2026-10-09, `docs/plans/2026-10-09_dataset_survey.md`): CPTAC ccRCC downloaded now (PDC000127 freeze, mapping and clinical; GDC STAR counts, 202 tumour and 75 normal files; about 1.19 GB), one tumour aliquot per case chosen by the GDC reader's door; M9 stays on GTEx V11 release 2025-08-22, its page saying a 2026-05-19 re-release without the LCM samples exists; M9's junction panel from GTEx V10's per-gene medians through the API, labelled V10. SCAN-B, TOIL, LUAD, LSCC later in their phases; the V11 junction file not on the laptop.
+12. [ ] Raw GDC count matrices stay out of the kit (Rytis 2026-10-09): the four TCGA counts tables were 94,046,616 to 204,776,548 B against the 64 MB cap. The kit carries each project's GDC manifest and the commands that rebuild them (the fetch, then `ctx gather --gdc-dir`), names what it leaves out in README.md and MANIFEST.json, and ships every derived table; Step-1's counts still ship.
 10. [ ] The kit as a GitHub release asset once kit v8 is built; Zenodo held until the Step-1 redistribution terms are settled.
 
 ## ▶️ Work order (Rytis, 2026-10-01)
