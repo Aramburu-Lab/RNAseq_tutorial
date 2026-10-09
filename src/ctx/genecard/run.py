@@ -1,9 +1,9 @@
 """``ctx genecard``: one page of gene cards for a dataset, its tables and figures.
 
-Genes come from ``cards``; GTEx V11 from the files ``ctx setup`` registered (``gtex``); HPA
-and Ensembl from the response cache (``cache``); MANE exons from the dataset file's GTF
-(``annotation``). A source that cannot be read leaves its panels unavailable, naming why,
-and the rest of the card stands. ``page`` draws the result.
+Genes come from ``cards``; GTEx V11 from the files ``ctx setup`` registered (``gtex``); HPA,
+Ensembl and GTEx V10's junctions (``junctions``) from the response cache (``cache``); MANE
+exons from the dataset file's GTF (``annotation``). A source that cannot be read leaves its
+panels unavailable, naming why, and the rest of the card stands. ``page`` draws the result.
 """
 
 import json
@@ -16,7 +16,7 @@ from typing import Any
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer
-from ctx.genecard import GenecardError, annotation, cards, gtex, hpa, page
+from ctx.genecard import GenecardError, annotation, cards, gtex, hpa, junctions, page
 from ctx.genecard.cache import Cache
 from ctx.io.naming import MODULES
 from ctx.report import genes
@@ -101,7 +101,72 @@ def _ensembl_release(cache: Cache) -> str:
     return ""
 
 
-def _remote(cache: Cache, release: str, chosen: list[cards.Card]) -> dict[str, str]:
+def _listed(root: Path, spec: Dataset, options: Options, table: genes.GeneTable,
+            renamer: cards.Renamer) -> list[tuple[int, str]]:  # fmt: skip
+    """The cards' genes and reasons; a name HPA could not be asked about says why.
+
+    Raises:
+        GenecardError: If a name is ambiguous or names no gene.
+    """
+    try:
+        named = None
+        if options.genes_from is not None:
+            named = cards.from_file(options.genes_from, table, renamer)
+        if options.genes:
+            named = (named or []) + cards.named("\n".join(options.genes), table, "--genes",
+                                                renamer)  # fmt: skip
+        return cards.card_list(spec, table, named, options.contrast, root, renamer)
+    except GenecardError as e:
+        if not renamer.why:
+            raise
+        why = "; ".join(f"{word}: {reason}" for word, reason in renamer.why.items())
+        raise GenecardError(f"{e}; {why}") from e
+
+
+def _lines(cache: Cache, release: str, card: cards.Card, lines: hpa.CellLines) -> str:
+    """Fill the card's cell-line values from HPA's search; return the retrieval, or ""."""
+    gene = genes.ensembl(card.number)
+    url = hpa.search_url(release, gene, ("g", "eg", lines.group))
+    answer = cache.get("hpa", release, gene, f"lines_{lines.group}", url)
+    if answer.body is None:
+        card.notes["lines"] = answer.error
+        return ""
+    card.lines = hpa.parse_lines(answer.body, gene, lines.group)
+    return answer.retrieved
+
+
+def _junctions(cache: Cache, chosen: list[cards.Card]) -> str:
+    """Fill each card's GTEx V10 junction medians from the API; return the newest retrieval."""
+    newest = ""
+    for card in chosen:
+        gene = genes.ensembl(card.number)
+        record = cache.get("gtex", junctions.DATASET, gene, f"reference_{junctions.GENCODE}",
+                           junctions.gene_url(gene))  # fmt: skip
+        if record.body is None:
+            card.notes["junctions"] = record.error
+            continue
+        gencode_id = junctions.versioned(record.body, gene)
+        if gencode_id is None:
+            card.notes["junctions"] = (
+                f"not in GENCODE {junctions.GENCODE}, GTEx {junctions.RELEASE}'s annotation"
+            )
+            continue
+        answer = cache.get("gtex", junctions.DATASET, gene, "junctions",
+                           junctions.junction_url(gencode_id))  # fmt: skip
+        if answer.body is None:
+            card.notes["junctions"] = answer.error
+            continue
+        newest = max(newest, record.retrieved, answer.retrieved)
+        table = junctions.parse(answer.body, gencode_id)
+        if table.is_empty():
+            card.notes["junctions"] = f"no junction of {gencode_id} in {junctions.DATASET}"
+            continue
+        card.junction_id, card.junctions = gencode_id, table
+    return newest
+
+
+def _remote(cache: Cache, release: str, chosen: list[cards.Card],
+            lines: hpa.CellLines | None) -> dict[str, str]:  # fmt: skip
     """Fill each card's HPA and Ensembl panels from the cache; return the newest retrieval."""
     newest: dict[str, str] = {}
     rest_note = _ensembl_release(cache)
@@ -114,7 +179,10 @@ def _remote(cache: Cache, release: str, chosen: list[cards.Card]) -> dict[str, s
         else:
             card.xml = hpa.parse_xml(answers["xml"].body, release)  # type: ignore[arg-type]
             card.facts = hpa.parse_json(answers["json"].body)  # type: ignore[arg-type]
-            newest["hpa"] = max(newest.get("hpa", ""), *(a.retrieved for a in answers.values()))
+            seen = [a.retrieved for a in answers.values()]
+            if lines is not None:
+                seen.append(_lines(cache, release, card, lines))
+            newest["hpa"] = max(newest.get("hpa", ""), *seen)
         if rest_note:
             card.notes["ensembl"] = rest_note
             continue
@@ -155,15 +223,16 @@ def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: 
     if not hpa.RELEASE_PATTERN.fullmatch(options.hpa_release):
         raise GenecardError(f"--hpa-release {options.hpa_release!r}: a major release, as v25")
     root = settings.root
+    lines = hpa.cell_lines(spec.info, spec.path.name)
+    cache = Cache(root, offline=options.offline, refresh=options.refresh)
+    if opener is not None:
+        cache.opener = opener
     frame, table = cards.gene_table(root, dataset)
-    named = None
-    if options.genes_from is not None:
-        named = cards.from_file(options.genes_from, table)
-    if options.genes:
-        named = (named or []) + cards.named("\n".join(options.genes), table, "--genes")
-    listed = cards.card_list(spec, table, named, options.contrast, root)
+    renamer = cards.Renamer(cache, options.hpa_release, table)
+    listed = _listed(root, spec, options, table, renamer)
     ids = frame["gene_id"].to_list()
-    chosen = [cards.Card(n, ids[table.row[n]], table.symbols[table.row[n]] or genes.ensembl(n), why)
+    chosen = [cards.Card(n, ids[table.row[n]], table.symbols[table.row[n]] or genes.ensembl(n), why,
+                         renamed=renamer.renamed.get(n, ""))
               for n, why in listed]  # fmt: skip
     evidence = cards.evidence(root, spec, [c.number for c in chosen])
     provenance = {"gtex": _gtex(root, spec, chosen)}
@@ -171,10 +240,8 @@ def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: 
     mane = annotation.gtf_mane(gtf, [c.number for c in chosen]) if isinstance(gtf, Path) else {}
     for card in chosen:
         card.gtf = mane.get(card.number)
-    cache = Cache(root, offline=options.offline, refresh=options.refresh)
-    if opener is not None:
-        cache.opener = opener
-    provenance["remote"] = _remote(cache, options.hpa_release, chosen)
+    provenance["remote"] = _remote(cache, options.hpa_release, chosen, lines)
+    provenance["remote"]["junctions"] = _junctions(cache, chosen)
     out = root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
     releases = {"GTEx": f"{gtex.RELEASE} ({gtex.RELEASE_DATE}), GENCODE {gtex.GENCODE}",
                 "HPA": options.hpa_release, "Ensembl": annotation.ENSEMBL_RELEASE,

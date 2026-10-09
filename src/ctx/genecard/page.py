@@ -14,9 +14,9 @@ import polars as pl
 from ctx import runtime
 from ctx.dataset import Dataset
 from ctx.de.run import Writer
-from ctx.genecard import annotation, figures, gtex, hpa
+from ctx.genecard import annotation, figures, gtex, hpa, junctions
 from ctx.genecard.cards import Card
-from ctx.genecard.summary import tau
+from ctx.genecard.summary import spread, tau
 from ctx.io.naming import stem
 from ctx.report import text
 from ctx.report.builder import (
@@ -136,8 +136,18 @@ def _amount(value: float) -> str:
     return f"{value:,.0f}" if value >= 100 else f"{value:.3g}"  # noqa: PLR2004 - 3 digits
 
 
-def _facts(card: Card, release: str) -> ResultTable:
-    """HPA's categories beside our tau, protein, location, blood and interactions."""
+def _lines(lines: hpa.Lines, named: hpa.CellLines) -> tuple[str, str, str]:
+    """The facts row of the dataset file's cell lines: each one's nTPM, then the group's."""
+    values = dict(lines.values)
+    shown = [fill("facts.line", line=n, ntpm=values[n]) if n in values
+             else fill("facts.line_absent", line=n) for n in named.lines]  # fmt: skip
+    group = spread([v for _, v in lines.values])
+    return (fill("facts.lines", group=lines.group), "; ".join(shown),
+            fill("facts.lines_note", n=group.n, median=group.median))  # fmt: skip
+
+
+def _facts(card: Card, release: str, named_lines: hpa.CellLines | None) -> ResultTable:
+    """HPA's categories beside our tau, protein, location, blood, interactions, cell lines."""
     assert card.xml is not None and card.facts is not None  # noqa: S101 - drawn only with data
     xml, facts = card.xml, card.facts
     named = text.raw(PAGE, "facts.categories")
@@ -163,6 +173,8 @@ def _facts(card: Card, release: str) -> ResultTable:
         rows.append((word(f"facts.{key}"), shown, ""))
     rows.append((word("facts.interactions"), _number(facts.interactions, "d"),
                  word("facts.interactions_note")))  # fmt: skip
+    if card.lines is not None and named_lines is not None:
+        rows.append(_lines(card.lines, named_lines))
     rows.append((word("facts.page"), hpa.page(release, f"ENSG{card.number:011d}"), ""))
     return ResultTable(fill("facts.title", symbol=card.symbol, release=release),
                        text.words(PAGE, "facts.columns"), tuple(rows))  # fmt: skip
@@ -172,6 +184,9 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Group:
     """One gene's card: own evidence, structure, then each reference panel or why it is absent."""
     release = ctx.options.hpa_release
     items: list[Any] = [_evidence(card, ctx.evidence), *_structure(card)]
+    if card.renamed:
+        items.insert(0, fill("gene.renamed", typed=card.renamed, release=release,
+                             gene=f"ENSG{card.number:011d}", symbol=card.symbol))  # fmt: skip
     if card.tissues is not None:
         strip, numbers = figures.tissues(card)
         items.append(writer.figure(strip, f"tissues_{_slug(card)}", _words("tissues", numbers)))
@@ -180,10 +195,14 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Group:
         lead = "lead" if pair is not None else "lead_none"
         items.append(writer.figure(heat, f"exons_{_slug(card)}",
                                    _words("exons", numbers, lead)))  # fmt: skip
+    if card.junctions is not None:
+        heat, numbers = figures.junctions(card)
+        items.append(writer.figure(heat, f"junctions_{_slug(card)}",
+                                   _words("junctions", numbers)))  # fmt: skip
     if card.xml is not None and card.facts is not None:
         bars, numbers = figures.immune(card, release)
         items.append(writer.figure(bars, f"immune_{_slug(card)}", _words("immune", numbers)))
-        items.append(_facts(card, release))
+        items.append(_facts(card, release, hpa.cell_lines(ctx.spec.info, ctx.spec.path.name)))
     items += [_unavailable(card, source) for source in card.notes]
     lead = fill("gene.lead", reason=_reason(card.reason), gene_id=card.gene_id,
                 gtex_id=card.gtex_id or word("none"))  # fmt: skip
@@ -210,12 +229,17 @@ def _tables(writer: Writer, ctx: Context) -> None:
     kinds = {
         "tissues": [_named(c.tissues, c) for c in ctx.chosen if c.tissues is not None],
         "exons": [_named(c.exons, c) for c in ctx.chosen if c.exons is not None],
+        "junctions": [_named(c.junctions.with_columns(gtex_id=pl.lit(c.junction_id)), c)
+                      for c in ctx.chosen if c.junctions is not None],
         "immune": [_named(pl.DataFrame(c.xml.immune, schema=["cell_type", "lineage", "ntpm"],
                                        orient="row"), c)
                    for c in ctx.chosen if c.xml is not None],
         "consensus": [_named(pl.DataFrame(c.xml.tissues, schema=["tissue", "ntpm"],
                                           orient="row"), c)
                       for c in ctx.chosen if c.xml is not None],
+        "lines": [_named(pl.DataFrame(c.lines.values, schema=["cell_line", "ntpm"], orient="row")
+                         .with_columns(group=pl.lit(c.lines.group)), c)
+                  for c in ctx.chosen if c.lines is not None],
     }  # fmt: skip
     for kind, frames in kinds.items():
         if frames:
@@ -230,9 +254,13 @@ def _sources(ctx: Context) -> Group:
     gtex_seen = ctx.provenance["gtex"].get("retrieved", "")[:10] or word("sources.never")
     remote = ctx.provenance["remote"]
     release = ctx.options.hpa_release
+    v10 = remote.get("junctions", "")[:10] or word("sources.never")
     rows = (
         (word("sources.gtex"), f"{gtex.RELEASE} ({gtex.RELEASE_DATE}), GENCODE {gtex.GENCODE}",
          gtex_seen, fill("sources.gtex_cite", date=gtex_seen)),
+        (word("sources.gtex_api"), fill("sources.gtex_api_release", release=junctions.RELEASE,
+                                        dataset=junctions.DATASET, gencode=junctions.GENCODE),
+         v10, fill("sources.gtex_cite", date=v10)),
         (word("sources.hpa"), release, remote.get("hpa", "")[:10] or word("sources.never"),
          fill("sources.hpa_cite", versioned=hpa.page(release, "<ENSG>"))),
         (word("sources.ensembl"), annotation.ENSEMBL_RELEASE,
@@ -241,7 +269,8 @@ def _sources(ctx: Context) -> Group:
          if not any(c.gtf for c in ctx.chosen) else "", word("sources.gencode_cite")),
     )  # fmt: skip
     table = ResultTable(word("sources.title"), text.words(PAGE, "sources.columns"), rows)
-    return Group(word("sources.title"), (table, word("sources.gtex_current")))
+    return Group(word("sources.title"), (table, word("sources.gtex_current"),
+                                         word("sources.gtex_rerelease")))  # fmt: skip
 
 
 def build(writer: Writer, ctx: Context) -> list[Path]:

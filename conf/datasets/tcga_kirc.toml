@@ -6,6 +6,9 @@
 slug = "tcga_kirc"
 label = "TCGA kidney clear cell"
 source = "The Cancer Genome Atlas, project TCGA-KIRC, through the NCI Genomic Data Commons"
+# M9's cell-line row: HPA's kidney cancer group (35 lines, read 2026-10-09) and three renal
+# carcinoma lines common in clear cell studies, as HPA spells them.
+hpa_cell_lines = { group = "cell_RNA_kidney_cancer", lines = ["786-O", "A-498", "Caki-2"] }
 
 [gdc]
 project = "TCGA-KIRC"
