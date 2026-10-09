@@ -7,7 +7,6 @@ outdir's layout (D-031). Every number comes back through MultiQC (`ctx.qc.multiq
 
 import json
 import os
-import re
 from collections.abc import Sequence
 from dataclasses import replace
 from pathlib import Path
@@ -31,8 +30,6 @@ READ_2 = 2
 # Step-1 read (101 nt), so the map always shows where the length floor bites.
 GRID_Q = (10, 15, 20, 25, 30, 35)
 GRID_L = (15, 25, 36, 50, 75, 102)
-# A cell of MultiQC's FastQC plot data: "(position, value)".
-POINT = re.compile(r"\(\s*([-0-9.eE]+)\s*,\s*([-0-9.eE]+)\s*\)")
 GRID_COLUMNS = ("fastp-filtering_result_passed_filter_reads", "fastp-pct_surviving_reads")
 
 
@@ -173,23 +170,6 @@ def run_values(mqc: multiqc_io.MultiqcRun, files: pl.DataFrame, registry: Regist
     for frame in frames:
         values = values.join(frame, on="run_accession", how="left")
     return values
-
-
-def quality_curves(mqc: multiqc_io.MultiqcRun, files: pl.DataFrame) -> pl.DataFrame:
-    """Mean base quality along each run's read-1 file, from MultiQC's FastQC plot data.
-
-    MultiQC writes one row per FASTQ, a cell per position as "(position, mean)"; its
-    positions are FastQC's bins, one base each at first, then wider.
-    """
-    table = pl.read_csv(mqc.data / "fastqc_per_base_sequence_quality_plot.txt", separator="\t",
-                        infer_schema=False)  # fmt: skip
-    multiqc_io.map_names(table["Sample"], {stem(p): stem(p) for p in files["path"]})
-    first = {stem(p): r for r, m, p in files.select("run_accession", "mate", "path").rows()
-             if m == 1}  # fmt: skip
-    rows = [(first[row[0]], float(x), float(y))
-            for row in table.rows() if row[0] in first
-            for cell in row[1:] if cell for x, y in POINT.findall(cell)]  # fmt: skip
-    return pl.DataFrame(rows, schema=["run_accession", "position", "quality"], orient="row")
 
 
 def fastp_grid(

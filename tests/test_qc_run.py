@@ -147,6 +147,49 @@ def test_page_and_outputs(ran):
     assert "mt_rrna_fraction" in tables["metrics"].columns
 
 
+def test_the_composition_scatter_plots_both_shares(ran):
+    """P2Q.3: MT % against nuclear rRNA %, the mito-planted sample far up.
+
+    Mutation caught: the composition figure left out of the identity group."""
+    root, planted, tables, page = ran
+    assert "Mitochondrial against nuclear rRNA share" in page
+    (drawn,) = (root / "outputs" / "02_qc").glob("*_qc_desynth_composition_v1.csv")
+    frame = pl.read_csv(drawn)
+    shares = dict(frame.select("sample", "mt_fraction").rows())
+    metrics = dict(tables["metrics"].select("sample", "mt_fraction").rows())
+    assert shares == pytest.approx({s: 100 * v for s, v in metrics.items()})
+
+
+def test_the_m3_alignment_table_is_judged_on_the_align_stage(tmp_path):
+    """M3.12: with `ctx process`'s tables beside gather's, M2 judges them with dataset bands.
+
+    Mutation caught: align_tables finding nothing (no unique_pct column, S003 unflagged)."""
+    root = tmp_path / "root"
+    root.mkdir()
+    plant(root)
+    sheet = pl.read_parquet(next((root / "outputs" / "01_gather").glob("*_samplesheet_v1.parquet")))
+    samples = sheet.unique("sample", keep="first", maintain_order=True)["sample"].to_list()
+    unique = [1.0 if s == "S003" else 50.0 + (i % 5) * 0.5 for i, s in enumerate(samples)]
+    process = root / "outputs" / "03_process"
+    process.mkdir(parents=True)
+    empty = pl.Series([None] * len(samples), dtype=pl.Float64)
+    table = pl.DataFrame({"sample": samples, "unique_pct": unique,
+                          "multi_pct": [2.0] * len(samples), "mismatch_rate": empty,
+                          "splices_per_100_unique": empty})  # fmt: skip
+    table.write_parquet(process / "2026-10-01_process_desynth_alignment_v1.parquet")
+    pl.DataFrame({"sample": samples, "forward_share": [0.5] * len(samples)}).write_parquet(
+        process / "2026-10-01_process_desynth_strandedness_v1.parquet")  # fmt: skip
+    done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(SPEC),
+               cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    out = root / "outputs" / "02_qc"
+    metrics = pl.read_csv(next(out.glob("*_metrics_v1.csv")))
+    assert {"unique_pct", "forward_share"} <= set(metrics.columns)
+    flags = pl.read_csv(next(out.glob("*_flags_v1.csv")))
+    assert ("S003", "align_unique_pct") in set(flags.select("sample", "metric").rows())
+    assert "Reads mapped once" in next(out.glob("*_overview_v1.html")).read_text()
+
+
 def test_without_an_annotation_the_shares_are_left_out_and_said(tmp_path):
     root = tmp_path / "root"
     root.mkdir()
@@ -276,8 +319,13 @@ def test_reads_are_judged_run_by_run(with_reads):
 
 
 def test_reads_add_curves_the_grid_and_their_own_multiqc_report(with_reads):
+    """FastQC's plots behind its verdicts are drawn too (P2Q.9), adapter, N, GC and the top
+    sequence, each with its CSV; per-base sequence content says why it has none.
+
+    Mutation caught: read_figures drawing the quality curves alone."""
     out, runs = with_reads
-    for what in ("base_quality", "fastp_grid"):
+    for what in ("base_quality", "fastqc_adapter", "fastqc_n_content", "gc_distribution",
+                 "overrepresented", "fastp_grid"):  # fmt: skip
         assert len(list(out.glob(f"*_desynth_{what}_v1*"))) == 7, what
     grid = pl.read_csv(next(out.glob("*_desynth_grid_v1.csv")))
     assert grid.height == 36 and grid["passed_pct"].n_unique() > 1
@@ -285,6 +333,7 @@ def test_reads_add_curves_the_grid_and_their_own_multiqc_report(with_reads):
     assert lint(out)[1] == []
     page = next(out.glob("*_overview_v1.html")).read_text()
     assert "The reads themselves" in page and "built-in method" not in page
+    assert "Per-base sequence content: FastQC's verdict is judged" in html.unescape(page)
 
 
 def test_the_grid_draws_settings_that_keep_none_as_its_floor(with_reads):

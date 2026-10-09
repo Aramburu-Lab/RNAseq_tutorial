@@ -16,7 +16,10 @@ from ctx.qc import QcError, multiqc_io
 from ctx.qc.registry import Registry
 
 MODULES = ("trim_galore", "salmon")
-TRIM = ("total_reads", "reads_written", "reads_too_short", "reads_too_long", "reads_too_many_n",
+# nf-core/rnaseq's FastQC on the raw reads, where the outdir's copy holds it (P2Q.9): MultiQC
+# then judges every sample's reads by FastQC's own verdicts, not the teaching runs' alone.
+RAW_FASTQC = Path("fastqc") / "raw"
+TRIM =("total_reads", "reads_written", "reads_too_short", "reads_too_long", "reads_too_many_n",
         "reads_discarded_untrimmed")  # fmt: skip
 SALMON = ("num_processed", "num_mapped", "num_decoy_fragments")
 # Read 1 of a pair (rank 0), then a single-end sample's own row (1); a pair's summed row (2)
@@ -29,8 +32,23 @@ def ranks(samples: Iterable[str]) -> dict[str, tuple[str, int]]:
     out: dict[str, tuple[str, int]] = {}
     for sample in samples:
         out |= {f"{sample}_trimmed_1": (sample, 0), sample: (sample, 1),
-                f"{sample}_trimmed": (sample, 2), f"{sample}_trimmed_2": (sample, 3)}  # fmt: skip
+                f"{sample}_trimmed": (sample, 2), f"{sample}_trimmed_2": (sample, 3),
+                **raw_ranks(sample)}  # fmt: skip
     return out
+
+
+def raw_ranks(sample: str) -> dict[str, tuple[str, int]]:
+    """The names nf-core's raw-read FastQC reports take in MultiQC, ranked as ``ranks`` ranks.
+
+    ``<sample>_raw`` for a single-end sample, ``<sample>_raw_1`` and ``_raw_2`` for a pair.
+    """
+    return {f"{sample}_raw_1": (sample, 0), f"{sample}_raw": (sample, 1),
+            f"{sample}_raw_2": (sample, 3)}  # fmt: skip
+
+
+def has_raw_fastqc(rnaseq_dir: Path) -> bool:
+    """Whether the outdir's copy holds nf-core's FastQC reports on the raw reads."""
+    return any((rnaseq_dir / RAW_FASTQC).glob("*_fastqc.zip"))
 
 
 def run_multiqc(
@@ -45,9 +63,12 @@ def run_multiqc(
     folders = [rnaseq_dir / "trimgalore", rnaseq_dir / "salmon"]
     if missing := [str(f) for f in folders if not f.is_dir()]:
         raise QcError(f"the rnaseq outdir has no {missing}; was it copied with step 7?")
-    run = multiqc_io.run(folders, dest, config=config, modules=MODULES)
+    raw = has_raw_fastqc(rnaseq_dir)
+    modules = (*MODULES, "fastqc") if raw else MODULES
+    run = multiqc_io.run([*folders, *[rnaseq_dir / RAW_FASTQC] * raw], dest, config=config,
+                         modules=modules)  # fmt: skip
     names = {name: sample for name, (sample, _) in ranks(samples).items()}
-    for module in MODULES:
+    for module in modules:
         found = multiqc_io.map_names(multiqc_io.table(run, module)["Sample"], names)
         if missing := sorted(set(samples) - set(found.values())):
             raise QcError(f"no {module} report for {missing}")
@@ -55,15 +76,26 @@ def run_multiqc(
 
 
 def values(run: multiqc_io.MultiqcRun, samples: list[str], registry: Registry) -> pl.DataFrame:
-    """One row per sample: every trim and quant registry metric, by its column."""
+    """One row per sample: every trim and quant registry metric, by its column.
+
+    Where MultiQC read the raw-read FastQC reports too, FastQC's metrics join them, its
+    general statistics and its module verdicts, read 1 of a pair standing for the sample.
+    """
+    raw = (run.data / "multiqc_fastqc.txt").is_file()
     metrics = [m for m in registry.metrics.values()
-               if m.stage in ("trim", "quant") and m.table == "general_stats"]  # fmt: skip
-    table = multiqc_io.table(run, "general_stats")
-    if missing := [m.column for m in metrics if m.column not in table.columns]:
-        raise QcError(f"MultiQC's general_stats table has no {missing}")
-    numbers = [m.column for m in metrics if m.kind in ("numeric", "strandedness")]
-    table = multiqc_io.numeric(table, numbers).select("Sample", *(m.column for m in metrics))
-    return multiqc_io.by_unit(table, ranks(samples), "sample", FIRST_UNUSED_RANK)
+               if (m.stage in ("trim", "quant") and m.table == "general_stats")
+               or (raw and m.module == "fastqc")]  # fmt: skip
+    frame = pl.DataFrame({"sample": samples})
+    for name in dict.fromkeys(m.table for m in metrics):
+        table = multiqc_io.table(run, name)
+        wanted = [m for m in metrics if m.table == name]
+        if missing := [m.column for m in wanted if m.column not in table.columns]:
+            raise QcError(f"MultiQC's {name} table has no {missing}")
+        numbers = [m.column for m in wanted if m.kind in ("numeric", "strandedness")]
+        table = multiqc_io.numeric(table, numbers).select("Sample", *(m.column for m in wanted))
+        part = multiqc_io.by_unit(table, ranks(samples), "sample", FIRST_UNUSED_RANK)
+        frame = frame.join(part, on="sample", how="left")
+    return frame
 
 
 def fates(run: multiqc_io.MultiqcRun, samples: list[str]) -> pl.DataFrame:

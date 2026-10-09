@@ -29,6 +29,7 @@ from ctx.viz.style import (
     POINT_ALPHA,
     STRIP,
     THEMES,
+    THRESHOLD_DASH,
     Theme,
     apply_matplotlib,
     figure_inches,
@@ -47,12 +48,22 @@ RANGE_COLUMNS = {
 
 @dataclass(frozen=True)
 class Span:
-    """An absolute band shaded across the whole axis; None runs to the axis's end."""
+    """A band shaded across the whole axis; None runs to the axis's end.
+
+    ``band`` names a quality band of ``BAND_COLOURS``; a region that grades nothing, such as a
+    strand call's, gives its own ``colour`` instead. Spans sharing a label share one legend entry.
+    """
 
     band: str
     label: str
     low: float | None
     high: float | None
+    colour: str | None = None
+
+    @property
+    def hexa(self) -> str:
+        """The colour it is shaded in."""
+        return self.colour or BAND_COLOURS[self.band]
 
 
 def shade(ax: Any, spans: Sequence[Span]) -> None:
@@ -62,16 +73,18 @@ def shade(ax: Any, spans: Sequence[Span]) -> None:
         low = bottom if span.low is None else max(span.low, bottom)
         high = top if span.high is None else min(span.high, top)
         if low < high:
-            ax.axhspan(low, high, color=BAND_COLOURS[span.band], alpha=BAND_ALPHA,
+            ax.axhspan(low, high, color=span.hexa, alpha=BAND_ALPHA,
                        linewidth=LINE_WIDTHS["band_edge"], zorder=0)  # fmt: skip
     ax.set_ylim(bottom, top)
 
 
 def span_handles(spans: Sequence[Span]) -> list[Any]:
-    """A legend patch per band, tinted as it is shaded."""
+    """A legend patch per label, tinted as it is shaded."""
     from matplotlib.patches import Patch  # noqa: PLC0415 - heavy
 
-    return [Patch(facecolor=BAND_COLOURS[s.band], alpha=BAND_ALPHA, label=s.label) for s in spans]
+    first = {s.label: s for s in reversed(spans)}
+    return [Patch(facecolor=first[label].hexa, alpha=BAND_ALPHA, label=label)
+            for label in dict.fromkeys(s.label for s in spans)]  # fmt: skip
 
 
 def span_traces(spans: Sequence[Span], x: tuple[float, float], values: pl.Series) -> list[Any]:
@@ -83,15 +96,17 @@ def span_traces(spans: Sequence[Span], x: tuple[float, float], values: pl.Series
 
     present = values.drop_nulls()
     bottom, top = float(present.min()), float(present.max())  # type: ignore[arg-type]
-    traces = []
+    traces, named = [], set()
     for span in spans:
         low = min(bottom, span.high or bottom) if span.low is None else span.low
         high = max(top, span.low or top) if span.high is None else span.high
         traces.append(go.Scatter(
             x=[x[0], x[1], x[1], x[0], x[0]], y=[low, low, high, high, low], fill="toself",
             mode="lines", line={"width": LINE_WIDTHS["band_edge"]}, name=span.label,
-            fillcolor=tint(BAND_COLOURS[span.band], BAND_ALPHA), hoverinfo="skip",
+            legendgroup=span.label, showlegend=span.label not in named,
+            fillcolor=tint(span.hexa, BAND_ALPHA), hoverinfo="skip",
         ))  # fmt: skip
+        named.add(span.label)
     return traces
 
 
@@ -127,6 +142,8 @@ class StripData:
         range_label: Legend text of the grey bar.
         log: Log-scaled value axis.
         width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
+        references: (label, value) of sourced reference lines, dashed across the axis; they
+            shade nothing and judge nothing.
     """
 
     frame: pl.DataFrame
@@ -146,6 +163,7 @@ class StripData:
     range_label: str = ""
     log: bool = False
     width: str = FIGURE_WIDTH
+    references: tuple[tuple[str, float], ...] = ()
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -156,7 +174,7 @@ class StripData:
             raise ValueError(f"{len(self.colours)} colour levels; at most {MAX_CATEGORIES}")
         if stray := set(self.frame[self.colour].unique()) - set(self.colours):
             raise ValueError(f"{self.colour}: levels {sorted(stray)} have no colour")
-        if bands := {s.band for s in self.spans} - set(BAND_COLOURS):
+        if bands := {s.band for s in self.spans if s.colour is None} - set(BAND_COLOURS):
             raise ValueError(f"spans name no band colour: {sorted(bands)}")
         if levels := {r.level for r in self.ranges} - set(self.levels()):
             raise ValueError(f"ranges for absent categories: {sorted(levels)}")
@@ -252,6 +270,10 @@ class StripData:
         """Absolute bands across the axis, then each category's bar and median, behind points."""
         from matplotlib.patches import Rectangle  # noqa: PLC0415 - heavy
 
+        # Before the range is read: a reference line far from the values still shows.
+        for _, value in self.references:
+            ax.axhline(value, color=theme.ink, linestyle=THRESHOLD_DASH[0],
+                       linewidth=LINE_WIDTHS["line"], zorder=1)  # fmt: skip
         bottom, top = ax.get_ylim()
         shade(ax, self.spans)
         slot = {level: i for i, level in enumerate(self.levels())}
@@ -288,6 +310,8 @@ class StripData:
         if self.ranges:
             handles.append(Patch(facecolor=theme.reference, alpha=BAND_ALPHA,
                                  label=self.range_label))  # fmt: skip
+        handles += [Line2D([], [], color=theme.ink, linestyle=THRESHOLD_DASH[0], label=label)
+                    for label, _ in self.references]  # fmt: skip
         return handles + span_handles(self.spans)
 
     def interactive(self) -> Any:
@@ -342,6 +366,10 @@ class StripData:
         import plotly.graph_objects as go  # noqa: PLC0415 - heavy
 
         traces = span_traces(self.spans, (-0.5, n - 0.5), self.frame[self.value])
+        traces += [go.Scatter(x=[-0.5, n - 0.5], y=[value, value], mode="lines", name=label,
+                              hoverinfo="skip", line={"color": light.ink,
+                              "width": LINE_WIDTHS["line"], "dash": THRESHOLD_DASH[1]})
+                   for label, value in self.references]  # fmt: skip
         slot = {level: i for i, level in enumerate(self.levels())}
         half = STRIP["range"]
         for k, r in enumerate(self.ranges):
