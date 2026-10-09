@@ -9,6 +9,7 @@ HPA and Ensembl panels are unavailable, which the degraded-card tests read.
 import gzip
 import hashlib
 import io
+import json
 import urllib.error
 from datetime import date
 from pathlib import Path
@@ -16,7 +17,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
-from ctx.genecard import annotation, hpa
+from ctx.genecard import annotation, hpa, junctions
 from ctx.io.naming import stem
 from ctx.io.readme_companion import write_table
 
@@ -28,6 +29,10 @@ OURS = {NPTX2: "ENSG00000106236.6", ACTB: "ENSG00000075624.19"}
 THEIRS = {NPTX2: "ENSG00000106236.4", ACTB: "ENSG00000075624.17"}
 # Two IDs under one symbol, as GENCODE gives 446 of Step-1's symbols; and three called genes.
 TWINS = ("ENSG00000900001.1", "ENSG00000900002.1")
+# GENCODE 50's name for HPA v25's NDUFA4L2, whose search lists COXFA4L2 as a synonym.
+RENAMED = ("ENSG00000185633.13", "COXFA4L2")
+# The dataset file's HPA cell-line group and lines, as tier1.toml names them.
+LINES = ("cell_RNA_leukemia", ("HL-60", "THP-1", "U-937"))
 # padj and |log2 FC| disagree on UPA and UPB, and UPA and UPC tie on padj.
 CALLED = {"ENSG00000900011.1": ("UPA", 1e-9, 3.0, "up"),
           "ENSG00000900012.1": ("UPB", 1e-8, 4.0, "up"),
@@ -114,8 +119,8 @@ def _resource(name: str, path: Path, root: Path) -> str:
 
 def _tables(root: Path, day: date) -> None:
     """Gather's genes table and the one contrast's M5 results."""
-    ids = [OURS[NPTX2], OURS[ACTB], *TWINS, *CALLED]
-    names = ["NPTX2", "ACTB", "TWIN", "TWIN", *(v[0] for v in CALLED.values())]
+    ids = [OURS[NPTX2], OURS[ACTB], *TWINS, *CALLED, RENAMED[0]]
+    names = ["NPTX2", "ACTB", "TWIN", "TWIN", *(v[0] for v in CALLED.values()), RENAMED[1]]
     genes = pl.DataFrame({"gene_id": ids, "gene_name": names})
     described = {"gene_id": ("none", "Ensembl ID."), "gene_name": ("none", "Symbol.")}
     write_table(genes, root / "outputs" / "01_gather", stem("gather", f"{SLUG}_genes", 1, day=day),
@@ -149,7 +154,8 @@ def make(root: Path, day: date | None = None) -> Path:
     _tables(root, day)
     spec = root / f"{SLUG}.toml"
     spec.write_text(
-        f'[dataset]\nslug = "{SLUG}"\n\n'
+        f'[dataset]\nslug = "{SLUG}"\nhpa_cell_lines = {{ group = "{LINES[0]}", lines = '
+        + json.dumps(list(LINES[1])) + " }\n\n"
         + _resource("annotation_gtf", gtf, root) + _resource("gtex_gene_tpm", tpm, root)
         + _resource("gtex_exon_reads", exons, root) + _resource("gtex_samples", attributes, root)
         + _resource("gtex_subjects", subjects, root)
@@ -166,7 +172,14 @@ def responses() -> dict[str, bytes]:
     files = {hpa.url("v25", gene, "xml"): "hpa_v25_ENSG00000106236.xml.gz",
              hpa.url("v25", gene, "json"): "hpa_v25_ENSG00000106236.json.gz",
              annotation.lookup_url(gene): "ensembl_116_ENSG00000106236_lookup.json.gz",
-             annotation.release_url(): "ensembl_116_info_data.json.gz"}  # fmt: skip
+             annotation.release_url(): "ensembl_116_info_data.json.gz",
+             hpa.search_url("v25", gene, ("g", "eg", LINES[0])):
+                 "hpa_v25_search_ENSG00000106236_cell_RNA_leukemia.json.gz",
+             hpa.search_url("v25", "NDUFA4L2", ("g", "gs", "eg")):
+                 "hpa_v25_search_name_NDUFA4L2.json.gz",
+             junctions.gene_url(gene): "gtex_v10_ENSG00000106236_reference_v39.json.gz",
+             junctions.junction_url("ENSG00000106236.4"):
+                 "gtex_v10_ENSG00000106236_junctions.json.gz"}  # fmt: skip
     return {u: gzip.decompress((FIXTURES / f).read_bytes()) for u, f in files.items()}
 
 

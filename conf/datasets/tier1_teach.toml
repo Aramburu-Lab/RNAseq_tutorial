@@ -15,6 +15,8 @@ ena_study = "PRJEB49000"
 ena_secondary_study = "ERP133445"
 arrayexpress = "E-MTAB-11190"
 source = "Montaldo et al. 2022 Nat Immunol, doi:10.1038/s41590-022-01311-1, PMC7615267"
+# M9's cell-line row, as tier1.toml names it (test_subsets_curate_as_their_parent).
+hpa_cell_lines = { group = "cell_RNA_leukemia", lines = ["HL-60", "THP-1", "U-937"] }
 
 # BioStudies publishes no checksum: size and SHA-256 are from the first download, 2026-09-27,
 # identical from both URLs.
