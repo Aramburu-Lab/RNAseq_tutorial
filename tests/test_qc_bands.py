@@ -33,7 +33,7 @@ def with_metric(tmp_path: Path, key: str, **fields: object) -> Path:
 # Fields the registry words otherwise than the proposal, each with the text it keeps instead.
 DEVIATIONS = {
     # The proposal claimed a control the page lacks: "the page lets you move" the fastp grid.
-    ("fastp_surviving", "rationale"): "The page maps one run's -q by -l, without a control.",
+    ("fastp_surviving", "rationale"): "the page maps one run's -q by -l, without a control.",
 }
 
 

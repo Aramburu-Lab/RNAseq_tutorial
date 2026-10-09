@@ -157,7 +157,7 @@ bands = "dataset_only"
 # The approved proposal's last sentence read "The -q and -l grid the page lets you move": the
 # grid has no control (test_no_registry_text_claims_a_control_the_page_lacks), so the sentence
 # keeps the page's own claim and the proposal's meaning (test_qc_bands.DEVIATIONS).
-rationale = "At fastp's default filters a run losing 1 read in 20 is degraded; the band rests on 8 teaching runs and holds at default settings only. The page maps one run's -q by -l, without a control. That grid is never shaded, since there a band would grade the settings, not the run."
+rationale = "At fastp's default filters a run losing 1 read in 20 is degraded; the band rests on 8 teaching runs and holds at default settings only; the page maps one run's -q by -l, without a control. That grid is never shaded, since there a band would grade the settings, not the run."
 causes = ["low quality", "short inserts", "many N bases"]
 action = "flag"
 matters_for_de = true

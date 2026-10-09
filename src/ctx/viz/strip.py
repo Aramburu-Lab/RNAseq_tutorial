@@ -103,7 +103,7 @@ def span_traces(spans: Sequence[Span], x: tuple[float, float], values: pl.Series
         traces.append(go.Scatter(
             x=[x[0], x[1], x[1], x[0], x[0]], y=[low, low, high, high, low], fill="toself",
             mode="lines", line={"width": LINE_WIDTHS["band_edge"]}, name=span.label,
-            legendgroup=span.label, showlegend=span.label not in named,
+            showlegend=span.label not in named,
             fillcolor=tint(span.hexa, BAND_ALPHA), hoverinfo="skip",
         ))  # fmt: skip
         named.add(span.label)
