@@ -154,11 +154,27 @@ def test_laptop_gtf_is_where_setup_finds_it(page_blocks):
     root = f"$HOME/ctx_{spec.slug}"
     assert f"{refs}/{gtf}" == f"{root}/{spec.resource('annotation_gtf').dest}"
     assert f" --root ~/ctx_{spec.slug} " in codes(blocks)[text.word("guide", "part3.laptop")].text
-    (table,) = [i for g in blocks for i in g.items if isinstance(i, ResultTable)]
+    title = text.word("guide", "part3.downloads")
+    tables = [i for g in blocks for i in g.items if isinstance(i, ResultTable)]
+    (table,) = [t for t in tables if t.title == title]
     assert [(r[0], r[1]) for r in table.rows] == [(r.name, f"{r.bytes:,}") for r in spec.resources]
     found = {r[0]: r[3] for r in table.rows}
     assert found["annotation_gtf"] == text.word("guide", "part3.found")
     assert found["msigdb_hallmark"] == text.word("guide", "part3.fetched")
+
+
+def test_accession_comes_before_the_download(page_blocks):
+    """M1a on the page: the accession levels and the class exercise lead, before any launcher,
+    one row per level from study to run. Catches the group moved after Part 1, a level dropped,
+    and a level's prefixes left out of an archive's column."""
+    first, *rest = page_blocks[1]
+    assert first.title == text.word("guide", "find.group") and rest
+    assert not any(isinstance(i, Code) for i in first.items)
+    (levels,) = [i for i in first.items if isinstance(i, ResultTable)]
+    assert [r[0] for r in levels.rows] == ["Study", "Sample", "Experiment", "Run"]
+    assert [r[1:4] for r in levels.rows][-1] == ("SRR", "ERR", "DRR")
+    assert all(all(cell for cell in row) for row in levels.rows)
+    assert text.word("guide", "find.exercise") in first.items
 
 
 def test_laptop_needs_from_one_place(page_blocks):
