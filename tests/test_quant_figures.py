@@ -5,9 +5,10 @@ Mutations each test was seen to fail on are named in its docstring (2026-10-08).
 
 import numpy as np
 import polars as pl
+import pytest
 
 from ctx.quant import figures as fig
-from ctx.viz.style import HEAT
+from ctx.viz.style import HEAT, SPENT_GREYS, contrast, strip_colours
 
 ROWS = HEAT["max_page_cells"]
 
@@ -55,3 +56,67 @@ def test_stride_counts_cells():
     assert data.stride() == 1
     assert data.caption_text() == "caption"
     assert heatmap(200).stride() == 2  # 100 samples, 4,950 cells; units squared would say 3
+
+
+def test_cells_are_square():
+    """A sample-by-sample heatmap draws square cells in the files and on the page, thinned too.
+
+    Mutations: the static's equal aspect dropped (``ax.set_aspect`` in ``static``): the 120
+    samples' cells stand taller than wide; ``_paged`` resetting ``thin``: the page's 60 drawn
+    samples fall back to 60 capped rows of 4.5 mm and stand taller than wide, as Step-1's
+    105 did, 2.9 times (2026-10-09); the track bands not lifted in ``_wide``: plotly holds
+    no aspect and the page draws cells wider than tall past 686 px.
+    """
+    data = heatmap(120)
+    paged = data._paged(data.stride())
+    assert abs(data.cell_aspect() - 1) < 0.01
+    assert abs(paged.cell_aspect() - 1) < 0.01
+    # 105 drawn, as Step-1's page: rows unlabelled, so plotly must hold the aspect itself.
+    page = heatmap(210)._paged(2).interactive().layout.yaxis
+    assert page.scaleanchor == "x"
+    assert abs(page.scaleratio - 1) < 0.01
+
+
+def test_track_names_keep_their_row():
+    """A square cell is shorter than a label, so a track's row keeps the 4.5 mm a label needs.
+
+    Mutation: every static row one unit tall (``_static_edges`` without the thin case): 120
+    columns give 1.4 mm rows and the two track names overprint.
+    """
+    data = heatmap(120)
+    edges = data._static_edges()
+    assert (edges[1] - edges[0]) * data._pitch_mm() >= HEAT["row_mm"]
+    assert edges[-1] - edges[3] == 120  # two tracks and the gap, then one unit per sample
+
+
+def test_seven_cell_types_take_seven_colours_and_the_batches_none_of_them():
+    """Step-1's 7 cell types each take a colour, and the batch strip repeats none of them.
+
+    Mutation: each strip coloured from the first data colour (``category_colours`` per strip,
+    as before 2026-10-09): the two batches take the first two cell types' colours.
+    """
+    n = 14
+    frame = pl.DataFrame({"sample": [f"s{i:02d}" for i in range(n)],
+                          "cell_type": [f"c{i % 7}" for i in range(n)],
+                          "batch": ["short", "long"] * (n // 2)})  # fmt: skip
+    rng = np.random.default_rng(2)
+    rho = np.clip(0.8 + rng.normal(0, 0.05, (n, n)), -1, 1)
+    rho = (rho + rho.T) / 2
+    np.fill_diagonal(rho, 1.0)
+    cells, batches = fig.correlation_heatmap(rho, frame, "caption").tracks
+    assert len(set(cells.colours.values())) == 7
+    assert not set(cells.colours.values()) & set(batches.colours.values())
+    assert len(set(batches.colours.values())) == 2
+
+
+def test_strip_colours_refuse_what_greys_cannot_tell_apart():
+    """A strip of three levels with no data colour left is refused, never given repeats.
+
+    Mutation: the spent-colours branch taking any strip (its length check dropped): three
+    levels zipped onto two greys, one level left without a colour.
+    """
+    spent = strip_colours([list("abcdefg"), ["x", "y"]])[1]
+    assert spent == dict(zip("xy", SPENT_GREYS, strict=True))
+    with pytest.raises(ValueError, match="3 strip levels; 0 data colours left"):
+        strip_colours([list("abcdefg"), ["x", "y", "z"]])
+    assert contrast(*SPENT_GREYS) >= 3  # the 3:1 graphics threshold, between the two levels

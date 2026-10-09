@@ -266,7 +266,9 @@ class HeatmapData:
         frame = self.frame.filter(pl.col(self.row).cast(pl.String).is_in(kept)
                                   & pl.col(self.column).cast(pl.String).is_in(kept))  # fmt: skip
         order = tuple(kept)
-        return replace(self, frame=frame, row_order=order, column_order=order, thin=False)
+        # Still ``thin``: its units are one kind on both axes, so its cells stay square; it
+        # fits the budget, so it is never thinned again.
+        return replace(self, frame=frame, row_order=order, column_order=order)
 
     def _grid(self) -> tuple[np.ndarray, list[str]]:
         """Swatch index per cell, tracks on top, the gap, then the rows; NaN draws nothing.
@@ -329,12 +331,34 @@ class HeatmapData:
         """Width by the column rule; height by the rows drawn and the longest column label.
 
         The rows drawn are capped; a column label runs upward and, unmeasured, squeezed the rows.
+        A ``thin`` heatmap's rows are as tall as its columns are wide at the full width, every
+        row drawn: capped at 60 rows of 4.5 mm, Step-1's 105 drawn samples stood 2.9 times as
+        tall as wide on the page (2026-10-09). The static then holds the cells square.
         """
-        drawn = min(len(self.rows_in_order()), HEAT["max_rows_drawn"]) + len(self.tracks) + GAP
+        if self.thin:
+            rows_mm = self._static_edges()[-1] * self._pitch_mm()
+        else:
+            drawn = min(len(self.rows_in_order()), HEAT["max_rows_drawn"]) + len(self.tracks) + GAP
+            rows_mm = drawn * HEAT["row_mm"] * self._row_lines()
         label_mm = self._column_label_length(SIZES["tick"]) / 72 * MM_PER_INCH
-        rows_mm = drawn * HEAT["row_mm"] * self._row_lines()
         return (WIDTHS_MM[self.width] / MM_PER_INCH,
                 (rows_mm + HEAT["margin_mm"] + label_mm) / MM_PER_INCH)  # fmt: skip
+
+    def _pitch_mm(self) -> float:
+        """A column's width in mm were the cells to take the figure's whole width."""
+        return WIDTHS_MM[self.width] / len(self.columns_in_order())
+
+    def _static_edges(self) -> np.ndarray:
+        """The static's row edges top down, a data row one unit tall.
+
+        A ``thin`` heatmap's square cells can be shorter than a label: its track and gap rows
+        stand ``HEAT["row_mm"]`` tall, so two track names never overlap; every other row is one.
+        """
+        top = len(self.tracks) + (GAP if self.tracks else 0)
+        heights = np.ones(top + len(self.rows_in_order()))
+        if self.thin:
+            heights[:top] = max(1.0, HEAT["row_mm"] / self._pitch_mm())
+        return np.concatenate([[0.0], np.cumsum(heights)])
 
     def _column_title(self, width: float) -> str:
         """The column axis's title, wrapped to the width the cells leave beside the row labels.
@@ -367,10 +391,14 @@ class HeatmapData:
         ax = fig.subplots()
         grid, labels = self._grid()
         colours = self._rgba(theme)
-        ax.pcolormesh(np.ma.masked_invalid(grid), cmap=ListedColormap(colours),
+        ax.pcolormesh(np.arange(grid.shape[1] + 1), self._static_edges(),
+                      np.ma.masked_invalid(grid), cmap=ListedColormap(colours),
                       norm=BoundaryNorm(np.arange(len(colours) + 1) - 0.5, len(colours)),
                       linewidth=LINE_WIDTHS["band_edge"])  # fmt: skip
         ax.invert_yaxis()
+        if self.thin:
+            # One kind of unit on both axes: a cell as tall as it is wide, the cells at the top.
+            ax.set_aspect("equal", anchor="N")
         self._label_axes(ax, labels)
         ax.set_xlabel(self._column_title(width))
         for spine in ax.spines.values():
@@ -390,7 +418,9 @@ class HeatmapData:
         """
         rows, cols = self.rows_in_order(), self.columns_in_order()
         shown = self._shown()
-        ax.set_yticks(np.arange(len(shown)) + 0.5, shown)
+        edges = self._static_edges()
+        centres = (edges[:-1] + edges[1:]) / 2
+        ax.set_yticks(centres[: len(shown)], shown)
         ax.tick_params(axis="both", length=0)
         if len(cols) <= HEAT["label_columns"]:
             ax.set_xticks(np.arange(len(cols)) + 0.5, cols, rotation=BAR_LABEL_ROTATION)
@@ -399,8 +429,7 @@ class HeatmapData:
         if self.row_stats is not None and len(rows) <= HEAT["label_rows"]:
             right = ax.secondary_yaxis("right")
             start = len(labels) - len(rows)
-            right.set_yticks(np.arange(len(rows)) + start + 0.5,
-                             [self._stat(r) for r in rows])  # fmt: skip
+            right.set_yticks(centres[start:], [self._stat(r) for r in rows])
             right.tick_params(axis="y", length=0)
             right.set_ylabel(self.row_stats_label)
             right.spines["right"].set_visible(False)
@@ -417,7 +446,7 @@ class HeatmapData:
         fig = self.static(THEMES["white"])
         box = fig.axes[0].get_position()
         width, height = fig.get_size_inches()
-        rows, columns = self._grid()[0].shape
+        rows, columns = self._static_edges()[-1], len(self.columns_in_order())
         return float((box.height * height / rows) / (box.width * width / columns))
 
     def interactive(self) -> Any:
@@ -574,9 +603,13 @@ class HeatmapData:
         floors = self._floors(words.ticks)
         rows = len(self.rows_in_order())
         band = max(self.cell_aspect() * column, *floors[len(floors) - rows :])
-        heights = [max(band, floor) for floor in floors]
         below = max(needs, PHONE_PX)
         scale = (below - sides) / n / column
+        # A thin heatmap's track names keep their floor down to the narrowest width, so plotly
+        # holds its square cells at every width: unheld, Step-1's 105 samples kept the bands of
+        # 686 px and drew cells wider than tall at 974 px (2026-10-09).
+        top = len(floors) - rows if self.thin else 0
+        heights = [max(band, floor / scale if i < top else floor) for i, floor in enumerate(floors)]
         held = all(h * scale >= floor for h, floor in zip(heights, floors, strict=True))
         if not held:
             squeeze = self._chrome(words, below, below) - self._chrome(words, width, below)
