@@ -28,6 +28,12 @@ custom-data guide). Each moves to the table above, renamed `_approved`, when he 
 | [2026-10-07_m7_real_data_plan_proposal.md](2026-10-07_m7_real_data_plan_proposal.md) | 2026-10-07, 6 decisions open | TODO.md Priority 5 |
 | [2026-10-07_m9_real_data_plan_proposal.md](2026-10-07_m9_real_data_plan_proposal.md) | 2026-10-07, 3 decisions open | TODO.md Priority 4 |
 
+## Work-order item 13
+
+| File | Written | Record |
+|---|---|---|
+| [2026-10-09_todo_triage.md](2026-10-09_todo_triage.md) | 2026-10-09, all 123 open items: 28 done, 10 superseded, 52 to build, 20 for Rytis, 13 blocked | TODO.md items ticked with it |
+
 ## How these were recovered
 
 They were first kept in the session's scratch folder under `/private/tmp`, which macOS's
