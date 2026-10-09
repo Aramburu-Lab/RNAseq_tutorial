@@ -16,7 +16,7 @@ from ctx import __version__, runtime
 from ctx.genecard.hpa import RELEASE as HPA_RELEASE
 from ctx.process import DEFAULT_SETTINGS, Aligner, Strandedness
 from ctx.qc import Fastp
-from ctx.quant import CountsFrom
+from ctx.quant import CountsFrom, SalmonOptions
 from ctx.report import text
 from ctx.report.builder import ParameterCard
 from ctx.report.marks import plain
@@ -300,27 +300,38 @@ def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI optio
 
 @app.command()
 @profiled
-def quant(
+def quant(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     ctx: typer.Context,
     dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
     dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
-    rnaseq_dir: Annotated[Path, typer.Option(help=HELP["--rnaseq-dir"])],
+    rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
     salmon_dir: Annotated[Path | None, typer.Option(help=HELP["--salmon-dir"])] = None,
     counts_from_abundance: Annotated[
         CountsFrom, typer.Option(help=HELP["--counts-from-abundance"])
     ] = CountsFrom.LENGTH_SCALED_TPM,
+    genome: Annotated[Path | None, typer.Option(help=HELP["--genome"])] = None,
+    libtype: Annotated[str, typer.Option(help=HELP["--libtype"])] = SalmonOptions.libtype,
+    gc_bias: Annotated[
+        bool, typer.Option("--gc-bias/--no-gc-bias", help=HELP["--gc-bias"])
+    ] = False,
+    seq_bias: Annotated[
+        bool, typer.Option("--seq-bias/--no-seq-bias", help=HELP["--seq-bias"])
+    ] = False,
+    decoys: Annotated[bool, typer.Option("--decoys/--no-decoys", help=HELP["--decoys"])] = True,
 ) -> None:
-    """Read what Salmon did with every sample, and how transcripts became gene counts (M4)."""
+    """Read or run Salmon on every sample, and see how transcripts become gene counts (M4)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
     from ctx.quant import QuantError  # noqa: PLC0415 - same reason
     from ctx.quant import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+    from ctx.tools import ToolError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
-    options = module.Options(dataset_file, rnaseq_dir, salmon_dir, counts_from_abundance)
+    options = module.Options(dataset_file, rnaseq_dir, salmon_dir, counts_from_abundance, genome,
+                             SalmonOptions(libtype, gc_bias, seq_bias, decoys))  # fmt: skip
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
-    except (DatasetError, QuantError) as error:
+    except (DatasetError, QuantError, ToolError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

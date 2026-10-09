@@ -40,7 +40,7 @@ GROUPS = ("cell_type", "condition", "batch")
 
 @dataclass(frozen=True)
 class Context:
-    """Everything one run hands the page."""
+    """Everything one run hands the page; ``made_up`` for the course preview's made-up data."""
 
     writer: Writer
     inputs: "Inputs"
@@ -49,6 +49,7 @@ class Context:
     cards: tuple[ParameterCard, ...]
     command: str
     settings: runtime.Settings
+    made_up: bool = False
 
 
 def shown(sheet: pl.DataFrame) -> blk.Shown:
@@ -90,7 +91,19 @@ def notes(ctx: Context) -> list[Result]:
     sums = ctx.measured.sums
     worst = tab.stat(sums["relative_difference"].abs(), "max")
     said: list[Result] = [text.fill(PAGE, "notes.sums", n=sums.height, worst=worst)]
-    if ctx.inputs.salmon_dir is None:
+    if ctx.made_up:
+        return [text.word(PAGE, "preview.note"), *said]
+    if (ref := ctx.measured.ref) is not None and ctx.measured.port is not None:
+        said.append(
+            text.fill(
+                PAGE,
+                "laptop.note",
+                contigs=len(ref.genome.contigs),
+                genes=len(ctx.measured.port.genes),
+                atg=100 * (ref.start_codons.share or 0.0),
+            )
+        )
+    elif ctx.inputs.salmon_dir is None:
         said.append(text.fill(PAGE, "notes.no_q1", dataset=ctx.inputs.spec.slug))
     else:
         said.append(text.fill(PAGE, "notes.q1", n=len(ctx.measured.port.samples)
@@ -108,14 +121,14 @@ def salmon_group(ctx: Context, found: blk.Shown) -> Group:
         items.append(blk.test_table(tests, "fate_tests"))
         writer.table(blk.tests_frame(tests), "fate_tests", described(blk.tests_frame(tests)))
     items.append(library_table(tab.library(measured.salmon)))
-    matrix = ctx.inputs.counts.matrix.select(found.sheet["sample"].to_list()).to_numpy()
+    matrix = ctx.measured.counts.matrix.select(found.sheet["sample"].to_list()).to_numpy()
     items.append(blk.correlation_figure(writer, matrix.astype(float), found))
     return Group(text.word(PAGE, "groups.salmon"), tuple(items))
 
 
 def q1_groups(ctx: Context, found: blk.Shown) -> list[Group]:
     """F2, F4, F6 and F7, from copy Q1 through the port; none without it."""
-    port, folder = ctx.measured.port, ctx.inputs.salmon_dir
+    port, folder = ctx.measured.port, ctx.measured.salmon_dir
     if port is None or folder is None:
         return []
     writer, genes = ctx.writer, ctx.inputs.genes
@@ -183,10 +196,27 @@ def write_tables(ctx: Context) -> None:
 
 def sections(ctx: Context) -> dict[str, Any]:
     """The fixed sections, Input filled from this run."""
-    provenance = ctx.inputs.counts.provenance
-    filled = {"input": text.fill(PAGE, "input", n=ctx.inputs.samples.height,
-                                 release=provenance.get("nf-core/rnaseq", ""),
-                                 salmon=provenance.get("salmon", ""))}  # fmt: skip
+    provenance, n = ctx.measured.counts.provenance, ctx.inputs.samples.height
+    if ctx.made_up:
+        filled = {"input": text.fill(PAGE, "preview.input", n=n)}
+    elif ctx.measured.ref is not None:
+        genome = ctx.options.genome.name if ctx.options.genome else ""
+        filled = {
+            "input": text.fill(
+                PAGE, "laptop.input", n=n, genome=genome, salmon=provenance.get("salmon", "")
+            ),
+            "method": text.fill(
+                PAGE,
+                "laptop.method",
+                decoys=text.word(
+                    PAGE, f"laptop.decoys_{'on' if ctx.options.salmon.decoys else 'off'}"
+                ),
+            ),
+        }
+    else:
+        filled = {"input": text.fill(PAGE, "input", n=n,
+                                     release=provenance.get("nf-core/rnaseq", ""),
+                                     salmon=provenance.get("salmon", ""))}  # fmt: skip
     return text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}
 
 
@@ -197,17 +227,20 @@ def build(ctx: Context) -> ModulePage:
     salmon = salmon_group(ctx, found)
     body: Sequence[Result] = (*notes(ctx), salmon, *q1_groups(ctx, found))
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(MODULE)
-    inputs = [ctx.inputs.sheet_path.name, ctx.inputs.gtf.name, ctx.inputs.rnaseq_dir.name]
-    inputs += [ctx.inputs.salmon_dir.name] if ctx.inputs.salmon_dir else []
+    inputs = [ctx.inputs.sheet_path.name, ctx.inputs.gtf.name]
+    inputs += [p.name for p in (ctx.inputs.rnaseq_dir, ctx.inputs.trim, ctx.options.genome,
+                                ctx.measured.salmon_dir) if p is not None]  # fmt: skip
     return ModulePage(
         title=text.fill(PAGE, "title", dataset=ctx.inputs.spec.name), **sections(ctx),
         parameters=ctx.cards, results=tuple(body), key_numbers=key_numbers(ctx),
         reproduce=Reproduction(
             command=ctx.command, wall_seconds=usage.wall_seconds,
             peak_rss_self=usage.peak_rss_self, peak_rss_children=usage.peak_rss_children,
-            profile=f"{ctx.settings.profile}, {ctx.settings.threads} threads",
-            budget=text.fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
-            versions={**runtime.versions(), **ctx.inputs.counts.provenance,
+            profile=text.word(PAGE, "preview.profile") if ctx.made_up
+            else f"{ctx.settings.profile}, {ctx.settings.threads} threads",
+            budget=text.fill(PAGE, "preview.budget" if ctx.made_up else "budget",
+                             minutes=budget.minutes, ram_gb=budget.ram_gb),
+            versions={**runtime.versions(), **ctx.measured.counts.provenance,
                       "multiqc": tools.TOOLS["multiqc"].version}, inputs=tuple(inputs),
         ),
     )  # fmt: skip

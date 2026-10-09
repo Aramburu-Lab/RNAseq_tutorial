@@ -177,6 +177,22 @@ effect = "Adds each sample's expected share of reads and Salmon's strand call."
 meaning = "Salmon's per-sample folders with quant.sf. Unset: data/raw/<dataset>_salmon, if present."
 effect = "Set or present: gene and transcript figures, and ctx's gene counts."
 
+[options."--libtype"]
+meaning = "Salmon's [[library type]]; `A` detects it in each sample."
+effect = "A fixed type skips detection; a wrong one misassigns reads."
+
+[options."--gc-bias"]
+meaning = "Salmon's fragment GC bias model; off in nf-core/rnaseq's runs."
+effect = "On: estimates move between isoforms that differ in GC content."
+
+[options."--seq-bias"]
+meaning = "Salmon's model of sequence bias at fragment ends; off in nf-core/rnaseq's runs."
+effect = "On: estimates move between isoforms by their end sequences."
+
+[options."--decoys"]
+meaning = "Index the genome's contigs as Salmon [[decoy|decoys]], as nf-core/rnaseq's index does."
+effect = "Off: reads from unannotated sequence can map to similar transcripts."
+
 [options."--counts-from-abundance"]
 meaning = "How ctx's [[tx2gene|tximport]] port makes gene counts from transcript estimates."
 effect = "The value no keeps Salmon's estimates, which shift with isoform use."
@@ -234,7 +250,8 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 "--fastp-l" = "Higher drops short reads, which more often align to several loci."
 
 [effects.quant]
-"--rnaseq-dir" = "Its gene matrix and Salmon logs are read; nothing is written there."
+"--rnaseq-dir" = "Its gene matrix and Salmon logs are read. Unset: give --genome."
+"--genome" = "Without --rnaseq-dir: Salmon runs here on M3's trimmed reads."
 "--dataset-file" = "Its `annotation_gtf` gives gene types; its featured contrast, the fold changes."
 
 [effects.de]

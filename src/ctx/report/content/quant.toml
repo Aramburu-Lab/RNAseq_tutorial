@@ -57,6 +57,25 @@ no_q1 = "The per-sample Salmon files are not here, so the gene and transcript fi
 q1 = "ctx's port of tximport summed every quant.sf of {n} samples and equals each gene table nf-core's R wrote; the gene and transcript figures read it."
 not_yet = "Not yet drawn: genes Salmon, STAR and featureCounts detect on the same reads, and the reads Salmon splits between genes. Both need cluster runs not made yet."
 
+# The laptop path (--genome): Salmon run here on M3's trimmed reads.
+[laptop]
+input = "M3's trimmed FASTQ files of {n} samples, the genome `{genome}` and the dataset file's annotation. Salmon {salmon} quantifies each sample here."
+method = """The transcripts are spliced from the genome at the annotation's exons. {decoys}
+
+tximport sums transcripts into genes: TPM by sum, length as the TPM-weighted mean of effective length. ctx's port of tximport equals R's on the course's test files. Length-scaled counts give DESeq2 counts free of isoform-length changes."""
+decoys_on = "The genome's sequence joins the index as decoys: Salmon maps each fragment to the transcripts it fits, or to a decoy where the genome fits better."
+decoys_off = "The index holds no decoys: Salmon maps each fragment to the transcripts it fits, and a fragment from unannotated sequence can land on a similar transcript."
+note = "The index holds the transcripts of {genes:,} genes on {contigs} contig(s); {atg:.1f} % of the annotation's start codons read ATG on this genome. A fragment from any other chromosome finds no transcript, so the mapping rate counts the reference, not the library."
+
+# The course preview (scripts/python/preview_quant.py): this page's code on made-up data.
+[preview]
+note = "Preview: every number on this page comes from made-up data, drawn to show how the page looks. Made-up quant.sf files went through ctx's tximport port as real ones do."
+# The start of every preview caption, so each figure file says it holds made-up data.
+caption = "Made-up data."
+input = "Made-up Salmon outputs for the {n} samples of the made-up dataset: a quant.sf per sample and the numbers of Salmon's logs."
+budget = "Preview build on made-up data; Salmon ran on no read. The real run's budget is Track A: under {minutes} min and {ram_gb} GB."
+profile = "preview build, one process"
+
 [groups]
 salmon = "Salmon: fragment fates, library type and agreement between samples"
 genes = "Genes: depth, units and length scaling"
