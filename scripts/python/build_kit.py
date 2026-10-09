@@ -67,8 +67,9 @@ CHECK_PS1 = REPO / "scripts" / "powershell" / "check_kit.ps1"
 # Reads, alignments and their indexes: a kit never carries them (Rytis 2026-09-30).
 REFUSED = (".fastq", ".fq", ".fastq.gz", ".fq.gz", ".bam", ".bai", ".sam", ".cram", ".crai",
            ".sra")  # fmt: skip
-# Above the largest output measured on 2026-09-30, Step-1's counts CSV at 39.5 MB.
-CAP_BYTES = 50_000_000
+# Above the largest output measured, Step-1's M4 counts CSV at 59,259,687 B written at Salmon's
+# 3 decimals (Rytis 2026-10-09, raised from 50 MB).
+CAP_BYTES = 64_000_000
 DATED = re.compile(r"\d{4}-\d{2}-\d{2}_")
 FOLDER = re.compile(r"[a-z0-9_]+")
 # Code a kit is built from; a change here, even an untracked file, marks the commit dirty.

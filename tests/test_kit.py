@@ -128,14 +128,16 @@ def test_newest_page_per_dataset(tmp_path):
     ("name", "content", "reason"),
     [
         (f"{NEW}_gather_study_r1_v1.fastq.gz", b"@r\nA\n+\nI\n", "reads or alignments never ship"),
-        (f"{NEW}_gather_study_big_v1.csv", None, "over the 50,000,000 cap"),
+        (f"{NEW}_gather_study_big_v1.csv", None, "over the 64,000,000 cap"),
     ],
 )
 def test_kit_refuses_reads_and_big_files_and_writes_nothing(tmp_path, name, content, reason):
     path = a_root(tmp_path / "real", "Study", "study") / "outputs" / "01_gather" / name
     if content is None:
-        with path.open("wb") as handle:  # sparse: 50 MB on paper, nothing on disk
-            handle.truncate(50_000_001)
+        with path.open(
+            "wb"
+        ) as handle:  # sparse: Rytis's 64 MB cap (2026-10-09) plus a byte, nothing on disk
+            handle.truncate(64_000_001)
     else:
         path.write_bytes(content)
     kit, done = build(tmp_path, real=tmp_path / "real")
