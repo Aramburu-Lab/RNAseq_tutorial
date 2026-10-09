@@ -194,7 +194,7 @@ reading = [
     "Decoy fragments came from genome sequence outside the transcriptome; no-hit fragments matched nothing.",
 ]
 caption = "Fragment fates of {n} samples. Mapping rate, {tested} over {reference} within each cell type, [[mann_whitney|Mann-Whitney]] U, BH over {n_tests}: {tests}."
-caption_untested = "Salmon's fragment fates for {n} samples; no cell type holds enough samples of two read-length batches to test the mapping rate."
+caption_untested = "Salmon's fragment fates for {n} samples. No test: no cell type holds enough samples of two read-length batches."
 category = "Sample"
 value = "Fragments processed"
 
@@ -223,7 +223,7 @@ reading = [
     "The dashed line is the depth every sample reaches; a line still rising at its right end would detect more with more reads.",
 ]
 caption = "Genes with {min_reads} or more reads in {n} samples thinned binomially. At {depth} reads, {tested} over {reference} within each cell type, Mann-Whitney U, BH over {n_tests}: {tests}."
-caption_untested = "Genes with {min_reads} or more reads as {n} samples are thinned binomially to {depth} reads and below; no cell type holds enough samples of two batches to test."
+caption_untested = "Genes with {min_reads} or more reads as {n} samples are thinned binomially to {depth} reads and below. No test: no cell type holds enough samples of two batches."
 x = "Reads kept"
 y = "Genes detected"
 depth_line = "Depth every sample reaches"
@@ -250,7 +250,7 @@ reading = [
     "Each point is one gene: its fold change from length-scaled counts across, from estimated counts up.",
     "Points off the dashed line change isoform use between the groups.",
 ]
-caption = "Contrast {contrast}, {n_ref} reference and {n_test} tested samples; {genes:,} genes past M5's expression filter. Descriptive: Spearman rho {rho:.3f} over every gene."
+caption = "Contrast {contrast}, {n_ref} reference and {n_test} tested samples; {genes:,} genes past M5's expression filter. Descriptive, no test: Spearman rho {rho:.3f} over every gene."
 thinned = "genes within two-fold"
 x = "Fold change, length-scaled"
 y = "Fold change, estimated"
