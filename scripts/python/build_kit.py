@@ -25,6 +25,14 @@ page carrying the preview's made-up note inside a ``--real`` root, before anythi
 it then counts the home page's Made-up links, which must be 0, and states the release in
 README.md and MANIFEST.json. A development kit keeps the previews, marked Made-up.
 
+A raw GDC count matrix never ships (Rytis 2026-10-09; kit v8's were 94 to 205 MB). The rule
+reads the data, not a list of names: a gather table of the counts kind whose README names a
+GDC folder is left out, with its README kept; the kit carries that folder's GDC manifest and
+fetch script, and ``LEFT_OUT.json``, README.md and MANIFEST.json name each file with its bytes
+and the commands that rebuild it, the gather command read from the table's own README. A page
+that links a left-out matrix keeps its link: the link check counts a declared file as present
+(``check_kit.declared``). Every derived table ships, and a count matrix not from GDC ships.
+
 Every page is rebuilt from one commit first, so the pages and ``MANIFEST.json`` name the same
 commit. The steps for the Step-1 root, kept here since a session's scratch copy was lost twice
 (kits v5 and v6); ``build_preview.py`` refuses an existing root, so move the last one aside:
@@ -58,6 +66,7 @@ import sys
 import zipfile
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_kit  # noqa: E402 - the kit's own checker, beside this file
@@ -65,6 +74,7 @@ import check_kit  # noqa: E402 - the kit's own checker, beside this file
 from ctx.io import naming  # noqa: E402
 from ctx.report import text  # noqa: E402
 from ctx.report.course import label, newest, write_home  # noqa: E402
+from ctx.runtime import shown_path  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
 # The same checks for a Windows reader without Python, reading the kit's own MANIFEST.json.
@@ -81,6 +91,14 @@ FOLDER = re.compile(r"[a-z0-9_]+")
 CODE = ("src", "scripts", "conf", "pixi.toml", "pixi.lock", "pyproject.toml")
 # How the home page marks a made-up link (course.html.j2's pill), counted in a release kit.
 MADE_UP_LINK = '<span class="pill" data-kind="made-up">'
+# A gather table of this kind, from a GDC folder, is a raw count matrix (counts, miRNA counts).
+MATRIX_KIND = "_counts"
+# The rows ctx's table READMEs carry (ctx.io.readme_companion): the folders read, the command.
+GDC_FOLDER_ROW = re.compile(r"^\| GDC (?:\w+ )?folder \| (.+?) \|$", re.MULTILINE)
+COMMAND_ROW = re.compile(r"^\| Command \| `(.+)` \|$", re.MULTILINE)
+FILE_ROW = re.compile(r"^\| `([^`]+)` \| (\d+) \| `([0-9a-f]{64})` \|$", re.MULTILINE)
+# How a GDC folder's own fetch script is run again, into the folder it fetched.
+FETCH = "OUT={folder} bash {script}"
 
 
 def current(outputs: Path) -> set[Path]:
@@ -132,13 +150,47 @@ def reached(pages: set[Path], inside: Path) -> tuple[set[Path], list[str]]:
     return seen, check_kit.link_problems(inside, html)
 
 
+def table_readme(path: Path) -> Path:
+    """The README ctx writes beside a table, shared by its CSV and Parquet copies."""
+    return path.with_name(path.name.split(".")[0] + "_README.md")
+
+
+def shown_command(command: str) -> str:
+    """A command as a README recorded it, with ``ctx`` for its entry point and ~ for home."""
+    words = command.split()
+    first = "ctx" if words[0].endswith(("__main__.py", "/ctx")) else words[0]
+    return " ".join([first, *(shown_path(w) if w.startswith("/") else w for w in words[1:])])
+
+
+def gdc_matrix(path: Path) -> dict[str, Any] | None:
+    """What a raw GDC count matrix's README records, or None for any other file.
+
+    A gather table of the counts kind whose README names a GDC folder; its bytes and SHA-256
+    from the README's own file table, the folders and the gather command from its rows.
+    """
+    note = table_readme(path)
+    kind = (naming.description(path.name) or "").endswith(MATRIX_KIND)
+    if path.parent.name != "01_gather" or not kind or path == note or not note.is_file():
+        return None
+    written = note.read_text(encoding="utf-8")
+    folders = [Path(f) for f in GDC_FOLDER_ROW.findall(written)]
+    if not folders:
+        return None
+    command = COMMAND_ROW.search(written)
+    sizes = {name: (int(n), sha) for name, n, sha in FILE_ROW.findall(written)}
+    return {"folders": folders, "command": shown_command(command[1]) if command else None,
+            "bytes": sizes.get(path.name, (path.stat().st_size, ""))[0],
+            "sha256": sizes.get(path.name, (0, ""))[1] or check_kit.sha256(path)}  # fmt: skip
+
+
 def select(
     root: Path, left_out: tuple[str, ...] = (), slugs: frozenset[str] = frozenset()
-) -> tuple[list[Path], list[str]]:
-    """A root's files for the kit, less the left-out datasets', and every reason one cannot ship.
+) -> tuple[list[Path], dict[Path, dict[str, Any]], list[str]]:
+    """A root's files for the kit, its raw GDC count matrices apart, and what stops a ship.
 
     A shipped page that links to a left-out dataset's file is a problem: following the link
-    would put the dataset back into the kit.
+    would put the dataset back into the kit. A matrix left out by rule needs its rebuild
+    command and its GDC folder's manifest and fetch script.
     """
     # Resolved, so a symlinked outputs/ holds the same paths the links resolve to.
     outputs = (root / "outputs").resolve()
@@ -147,12 +199,48 @@ def select(
     found, problems = reached({p for p in chosen if p.suffix == ".html"}, outputs)
     problems += [f"{p}: a shipped page links to it, but its dataset is left out"
                  for p in sorted(found & out)]  # fmt: skip
-    for p in sorted(chosen | found):
+    matrices = {p: m for p in chosen | found if (m := gdc_matrix(p)) is not None}
+    for p, m in sorted(matrices.items()):
+        problems += [f"{p}: left out as a GDC matrix, but its README records no command"
+                     ] if m["command"] is None else []  # fmt: skip
+        problems += [f"{p}: its GDC folder {f} holds no manifest or fetch script"
+                     for f in m["folders"] if not gdc_sources(f)]  # fmt: skip
+    kept = (chosen | found) - matrices.keys()
+    for p in sorted(kept):
         if p.name.lower().endswith(REFUSED):
             problems.append(f"{p}: reads or alignments never ship")
         elif p.stat().st_size > CAP_BYTES:
             problems.append(f"{p}: {p.stat().st_size:,} bytes, over the {CAP_BYTES:,} cap")
-    return sorted(chosen | found), problems
+    return sorted(kept), matrices, problems
+
+
+def gdc_sources(folder: Path) -> list[Path]:
+    """A GDC folder's manifests and fetch script, which the kit carries for a left-out matrix."""
+    found = sorted(folder.glob("gdc_manifest_*.txt"))
+    script = sorted(folder.glob("_fetch_*.sh"))
+    return [*found, *script] if found and script else []
+
+
+def carry_matrices(out: Path, folder: str, base: Path,
+                   matrices: dict[Path, dict[str, Any]]) -> list[dict[str, Any]]:  # fmt: skip
+    """Copy each left-out matrix's GDC manifest and fetch script; its LEFT_OUT.json entries."""
+    entries = []
+    for p, m in sorted(matrices.items()):
+        carried, fetches = [], []
+        for source in m["folders"]:
+            place = out / folder / "gdc" / source.name
+            place.mkdir(parents=True, exist_ok=True)
+            for f in gdc_sources(source):
+                carried.append(Path(shutil.copy2(f, place / f.name)).relative_to(out).as_posix())
+                if f.suffix == ".sh":
+                    fetches.append(FETCH.format(folder=shown_path(source),
+                                                script=carried[-1]))  # fmt: skip
+        entries.append({
+            "path": (Path(folder) / "outputs" / p.relative_to(base)).as_posix(),
+            "bytes": m["bytes"], "sha256": m["sha256"], "carried": carried,
+            "rebuild": [*fetches, m["command"]],
+        })  # fmt: skip
+    return entries
 
 
 def _commit() -> str:
@@ -186,6 +274,12 @@ def release_problems(roots: list[tuple[str, Path, bool]], chosen: dict[str, list
     return problems + made_up_pages([p for files in chosen.values() for p in files])
 
 
+def left_out_files(kit: Path) -> list[dict[str, Any]]:
+    """The kit's LEFT_OUT.json entries; none where nothing was left out by rule."""
+    record = kit / check_kit.LEFT_OUT
+    return json.loads(record.read_text(encoding="utf-8"))["files"] if record.is_file() else []
+
+
 def made_up_links(kit: Path) -> int:
     """Made-up links on the kit's home page."""
     return (kit / "START.html").read_text(encoding="utf-8").count(MADE_UP_LINK)
@@ -212,6 +306,7 @@ def manifest(
         "left_out": sorted(left_out),
         "release": release,
         "made_up_links": made_up_links(kit),
+        "left_out_files": left_out_files(kit),
         "files": len(files),
         "bytes": sum(f["bytes"] for f in files),
         "entries": files,
@@ -237,6 +332,12 @@ def readme(kit: Path, roots: list[tuple[str, bool]], shipped: list[Path], commit
                      commit=commit)  # fmt: skip
     if release:
         body += "\n" + text.word("course", "readme.release") + "\n"
+    if entries := left_out_files(kit):
+        listed = "\n".join(text.fill("course", "readme.left_out_file", path=e["path"],
+                                      bytes=f"{e['bytes']:,}",
+                                      commands="\n".join(f"    {c}" for c in e["rebuild"]))
+                           for e in entries)  # fmt: skip
+        body += "\n" + text.fill("course", "readme.left_out", files=listed) + "\n"
     out = kit / "README.md"
     out.write_text(body, encoding="utf-8")
     return out
@@ -279,9 +380,9 @@ def build(
     slugs = frozenset().union(*(slugs_in(root) for _, root, _ in roots))
     if unknown := sorted(set(left_out) - slugs):
         sys.exit(f"--leave-out {', '.join(unknown)}: no root holds that dataset; nothing written")
-    chosen, problems = {}, []
+    chosen, matrices, problems = {}, {}, []
     for folder, root, _ in roots:
-        chosen[folder], found = select(root, left_out, slugs)
+        chosen[folder], matrices[folder], found = select(root, left_out, slugs)
         problems += found
     if release:
         problems += release_problems(roots, chosen)
@@ -295,6 +396,12 @@ def build(
             dest = out / folder / "outputs" / p.relative_to(base)
             dest.parent.mkdir(parents=True, exist_ok=True)
             shipped.append(Path(shutil.copy2(p, dest)))
+    entries = [e for folder, root, _ in roots
+               for e in carry_matrices(out, folder, (root / "outputs").resolve(),
+                                       matrices[folder])]  # fmt: skip
+    if entries:
+        (out / check_kit.LEFT_OUT).write_text(json.dumps({"files": entries}, indent=1) + "\n",
+                                              encoding="utf-8")  # fmt: skip
     write_home(out, [(out / folder, real) for folder, _, real in roots])
     # Its load proves START.html is beside the kit; see course.html.j2.
     (out / "kit.js").write_text("window.ctxKit = true;\n", encoding="utf-8")
