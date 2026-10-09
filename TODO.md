@@ -449,11 +449,11 @@ Rytis, 2026-10-08: copy all of M4's Salmon files (9.76 GB, Q1) and download GTEx
 
 ## ▶️ Work-order item 13 answers (Rytis, 2026-10-09: all recommended answers of `docs/plans/2026-10-09_todo_triage.md`)
 
-1. [ ] One cluster block for M3.11 with M4's Q2, written by an agent; M3.13 and P2Q.8 planned from what it measures.
+1. [ ] One cluster block for M3.11 with M4's Q2, written by an agent (`docs/plans/2026-10-09_m3_11_q2_cluster_blocks.md`, 6 blocks; the STAR index's RAM and time are unmeasured, their limits marked as guesses); M3.13 and P2Q.8 planned from what it measures.
 2. [ ] The G.5/U.11 Kebnekaise rehearsal after package G's CONVENTIONS line.
 3. [ ] P2S.8: each contract's title room from its own drawn axis height (wave 2).
 4. [ ] TCGA mRNA sanity rules (rows 739, 740) registered now, labelled not blind (wave 2).
-5. [ ] CPTAC-2 breast miRNA and isoform files downloaded (104 tumour files each, 5,251,801 and 47,005,217 B).
+5. [x] CPTAC-2 breast miRNA and isoform files downloaded (104 tumour files each, 5,251,801 and 47,005,217 B), 2026-10-09: every md5 matched, metadata as `ctx_fetch_gdc.sh` writes it, into `~/ctx_breast/data/raw/cptac_brca_{mirna,isoform}`.
 6. [ ] SCAN-B, TOIL/GTEx, CPTAC ccRCC, LUAD and LSCC, and the GTEx V11 junction file: an agent measures sizes and reads licences first.
 7. [x] HPA's own tau: closed; v25's files carry none, and the page labels tau as ours (D-056).
 8. [ ] Cassetta breast: an agent writes the dataset files with the paper's comparisons and registers their sanity rules before `ctx de`; Step-2 and the D28 treatment dataset after the v1.0 pilot.
