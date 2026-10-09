@@ -1,0 +1,73 @@
+# The teacher guide (python -m ctx.report.teacher, ctx.report.teacher). Placeholders in {braces}
+# are filled by the code; keep their names. Every time on the page is read from a module page's
+# Reproduce block, never typed here.
+
+title = "Teacher guide: {dataset}"
+kicker = "Teacher guide"
+budget = "Track {track}: under {minutes} min and {ram_gb} GB"
+purpose = "Plan each lesson around what its command costs: the wall time and peak memory every module page recorded when it was built."
+input = "One or more ctx roots, or a kit's dataset folders: the newest overview page of each module and dataset, taken from its Reproduce block."
+method = """Each module page records its own command, wall time, peak memory of its process and of its largest child, and the profile it ran under. This page takes those values back from the newest page per module and dataset, and sets each beside its track's budget.
+
+A module with no page in any root given is listed as not measured; no time is estimated."""
+interpretation = """The times are compute times on the computer that built the pages, at the profile and threads shown. Class time is not measured: no lesson of the course has been timed in a classroom yet.
+
+Run a Track A module before class when its wall time leaves no room for discussion. A time over its budget is a defect to report, not a lesson plan."""
+# "Term: rest" in a mistake prints Term in bold.
+pitfalls = [
+    "Reading a laptop time as a cluster time: the profile and threads differ, so the time does too.",
+    "Planning from a made-up root alone: its sizes come from a simulation, not from a study.",
+    "Planning from an old page: the guide uses the newest page, so rebuild a module after changing it.",
+]
+
+[[terms]]
+term = "Wall time"
+meaning = "Seconds from the command's start to its end, as a clock on the wall counts them."
+
+[[terms]]
+term = "Peak memory"
+meaning = "The most resident memory the process held at once, from the operating system."
+
+[[terms]]
+term = "Largest child"
+meaning = "The peak of the biggest program the module started, such as fastp or Salmon."
+
+[[questions]]
+prompt = "Why does the guide take times from the pages instead of listing them?"
+answer = "A typed time goes stale the first time a module changes; a page records the run that built it."
+
+[[questions]]
+prompt = "Why are the process and its largest child shown apart?"
+answer = "A module's tools run as child processes; their memory adds to the module's own when both run at once."
+
+[[questions]]
+prompt = "Why can one module have several rows?"
+answer = "Each dataset has its own page of the module, and each was measured on its own run."
+
+# The command's two arguments, shown as parameter cards.
+[[cards]]
+name = "out"
+meaning = "The page to write, an .html file."
+default = "required"
+effect = "Another name writes another page; nothing else changes."
+
+[[cards]]
+name = "roots"
+meaning = "Folders holding outputs/: ctx roots, or a kit's dataset folders."
+default = "required"
+effect = "More roots add rows; a module no root holds reads not measured."
+
+[keys]
+pages = "Module pages read"
+modules = "Modules measured"
+value = "{n} of {total}"
+
+[times]
+group = "Compute time per module"
+lead = "Newest overview page per module and dataset, its Reproduce values read back as recorded."
+title = "Wall time and peak memory"
+columns = ["Module", "Dataset", "Wall time", "Peak memory", "Largest child", "Profile", "Budget", "Page"]
+seconds = "{seconds:,.1f} s"
+mib = "{mib:,.0f} MiB"
+none = "not measured"
+profile = "one process, no thread pool"

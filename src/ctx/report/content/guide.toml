@@ -81,3 +81,22 @@ fetched = "downloaded"
 mine = "A study of your own: its sheet before curation, and a dataset file to edit"
 kit = "Your pages as a kit, opened from its START.html"
 site = "Another Slurm site: copy scripts/bash/site_kebnekaise.sh to site_<name>.sh, change its profile, queue size, home rule and activation, and set CTX_SITE=<name> before each launcher."
+
+# Before Part 1: the accession a study is found by (M1a), and the class exercise (M1b). These
+# notes print as plain text, so a field or command is named without backticks.
+[find]
+group = "First: find the accession"
+lead = "A paper's data availability statement names a study. Each archive nests the same four levels, and fetchngs takes an accession at any of them."
+levels = "Accession levels"
+columns = ["Level", "SRA", "ENA", "DDBJ", "Holds"]
+rows = [
+    ["Study", "SRP, PRJNA", "ERP, PRJEB", "DRP, PRJDB", "every sample and run of a project"],
+    ["Sample", "SRS, SAMN", "ERS, SAMEA", "DRS, SAMD", "one biological source"],
+    ["Experiment", "SRX", "ERX", "DRX", "one library"],
+    ["Run", "SRR", "ERR", "DRR", "one sequencing run, one or two FASTQ files"],
+]
+archives = "GEO and ArrayExpress hold metadata and processed files. The reads sit in SRA, ENA and DDBJ, which mirror each other."
+routes = "Three routes lead to the runs: a GEO series through the SRA Run Selector's accession list, an ENA text search and its read files report, or an ArrayExpress page and its linked ENA study."
+arrayexpress = "fetchngs refuses an E-MTAB accession: give the study's ENA accession, ERP or PRJEB, instead. A run accession pulls every run of its experiment."
+budget = "Before downloading, read library_layout, library_strategy, library_selection, instrument_model, read_count and fastq_bytes in the metadata run's samplesheet/samplesheet.csv."
+exercise = "Class exercise: run the metadata block on a whole study, list its two to four runs with the smallest fastq_bytes, download those, then check them with ctx gather. The worked example's runs were picked this way."

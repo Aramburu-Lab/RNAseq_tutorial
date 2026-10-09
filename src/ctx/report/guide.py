@@ -174,7 +174,7 @@ def kit_lines(slug: str) -> tuple[str, ...]:
 
 
 def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
-    """The three parts, each a group of code blocks under its lead."""
+    """The accession, then the three parts, each a group of code blocks under its lead."""
     word = functools.partial(text.word, PAGE)
 
     def code(key: str, lines: tuple[str, ...]) -> Code:
@@ -208,10 +208,21 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
          code("part2.cluster", usage("count_cluster"))),
         tuple(part3),
     )  # fmt: skip
-    return tuple(
+    numbered = tuple(
         Group(text.fill(PAGE, f"part{n}.group", n=n), items, lead=word(f"part{n}.lead"))
         for n, items in enumerate(parts, start=1)
     )
+    return (find(), *numbered)
+
+
+def find() -> Group:
+    """Before Part 1: the accession levels, the routes to a study's runs, the class exercise."""
+    word = functools.partial(text.word, PAGE)
+    levels = ResultTable(word("find.levels"), text.words(PAGE, "find.columns"),
+                         tuple(tuple(row) for row in text.raw(PAGE, "find.rows")))  # fmt: skip
+    notes = tuple(word(f"find.{key}") for key in ("archives", "routes", "arrayexpress", "budget",
+                                                  "exercise"))  # fmt: skip
+    return Group(word("find.group"), (levels, *notes), lead=word("find.lead"))
 
 
 def downloads(spec: Dataset) -> ResultTable:

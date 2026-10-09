@@ -28,7 +28,18 @@ pixi run -e laptop ctx --root ~/ctx_four_runs guide
 writes the guide page, `outputs/09_report/<date>_report_guide_v1.html`: every command from a
 study's accessions, through nf-core/fetchngs and nf-core/rnaseq on a laptop or on Kebnekaise,
 to its own course pages and kit. `--dataset-file` writes it for your own dataset file, started
-from `conf/dataset_template.toml`. Every kit's `START.html` links the page.
+from `conf/dataset_template.toml`. Every kit's `START.html` links the page. The page starts
+with how to find a study's accession, and the class exercise of a metadata run and a small download.
+
+## Teacher guide
+
+```bash
+pixi run -e laptop python -m ctx.report.teacher ~/ctx_teacher/<date>_report_teacher_v1.html ~/ctx_tier1 ~/ctx_breast
+```
+
+writes the compute time and peak memory of every module, read back from the Reproduce block of
+each root's newest module pages; a module no root holds reads "not measured". Class time is not
+measured yet.
 
 ## Layout
 
