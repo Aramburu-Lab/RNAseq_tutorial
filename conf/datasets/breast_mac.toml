@@ -1,0 +1,206 @@
+# Cassetta et al. 2019 tissue macrophages (P4.0, TODO.md "Phase 4"): the 22 GEO samples of
+# GSE117970 whose extract protocol is the macrophage one, one paired 2 x 100 nt run each, counted
+# by nf-core/rnaseq 3.27.0 (job 47489148). Curated from its own table, breast_mac.tsv, because the
+# study has no SDRF: GEO's per-sample records (brief SOFT of GSE117970's samples, retrieved
+# 2026-10-09, SHA-256 eb80bb5b44fcdc8f34e675af88d09d9cc1f715b99ce0cadd9fb3d230db02bd00), values
+# verbatim, one row per ENA run (read_run report, 2026-10-09), joined to fetchngs on the run and
+# cross-checked on the GSM and title; `donor` is the title before ':'. Tallied from those records: breast 4 resident and 4 tumour-associated, endometrium
+# 5 resident and 9 tumour-associated; sequencing batch 4 (15) and 5 (7).
+# GEO's `cell type` reads "tumour associated macrophages" for all 22, the resident ones included;
+# only `condition` tells resident from tumour-associated (TODO.md P4 row 1).
+
+[dataset]
+slug = "breast_mac"
+# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+label = "Breast and endometrial macrophages"
+ena_study = "PRJNA483877"
+ena_secondary_study = "SRP155941"
+geo = "GSE117970"
+source = "Cassetta et al. 2019 Cancer Cell 35:588, doi:10.1016/j.ccell.2019.02.009, PMID 30930117, PMC6472943"
+
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+# The annotation the cluster count used (Step-1's rnaseq files, reused by path, P4.1).
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# The whole of PRJNA483877, macrophages and monocytes, as ENA's read_run report lists it
+# (2026-10-09: runs SRR7631576-658 and SRR8512442-482, experiments SRX4495339-413 and
+# SRX5316062-102, samples SAMN0975xxxx and SAMN108531xx, SRS36164xx-65xx and SRS43130xx),
+# GSMs GSM3316272-356 and GSM3585969-3586009, and GEO titles MAC<n>, MON<n> and mon<n>.
+# breast_mono.toml declares the same guard.
+[guard]
+ids = ["PRJNA483877", "SRP155941", "GSE117970"]
+patterns = [
+    '\bSRR7631[5-6]\d{2}\b',
+    '\bSRR85124[4-8]\d\b',
+    '\bSRX4495[34]\d{2}\b',
+    '\bSRX531(?:60|61)\d{2}\b',
+    '\bSAMN09750[3-4]\d{2}\b',
+    '\bSAMN0975[1-2][3-6]\d{2}\b',
+    '\bSAMN108531\d{2}\b',
+    '\bSRS36164\d{2}\b',
+    '\bSRS36165\d{2}\b',
+    '\bSRS43130\d{2}\b',
+    '\bGSM331[6]\d{3}\b',
+    '\bGSM358[5-6]\d{3}\b',
+    '\b(?:MAC|MON|mon)\d+\b',
+]
+
+[sdrf]
+file = "breast_mac.tsv"
+join = ["run_accession", "run_accession"]
+cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
+
+[columns.donor]
+source = "donor"
+meaning = "The sample's GEO title before the colon (MAC<n>); GEO gives no other individual ID."
+
+[columns.cell_type]
+source = "cell type"
+meaning = "Sorted CD45+ CD14+ CD163+ macrophages (GEO: tumour associated macrophages, for resident ones too)."
+values = { "tumour associated macrophages" = "macrophage" }
+
+[columns.tissue]
+source = "condition"
+meaning = "Organ the macrophages were sorted from, from GEO's condition."
+values = { "Breast cancer" = "breast", "Normal Breast" = "breast", "Endometrial cancer" = "endometrium", "Normal Endometrial" = "endometrium" }
+
+[columns.condition]
+source = "condition"
+meaning = "Tumour-associated (from cancer tissue) or resident (from normal or benign tissue), from GEO's condition."
+values = { "Breast cancer" = "tam", "Normal Breast" = "resident", "Endometrial cancer" = "tam", "Normal Endometrial" = "resident" }
+
+[columns.seq_batch]
+source = "sequencing batch"
+meaning = "Sequencing batch as GEO records it; the paper corrects monocytes for it, not macrophages."
+values = { "Batch 4" = "batch4", "Batch 5" = "batch5" }
+
+[columns.pathology]
+source = "pathology"
+meaning = "Pathology as GEO records it: Normal tissue, Benign, Invasive Breast cancer, or an endometrial cancer type."
+
+[expect]
+runs = 22
+
+[expect.counts.read_length]
+"100" = 22
+
+[expect.counts.condition]
+tam = 13
+resident = 9
+
+[expect.counts.tissue]
+breast = 8
+endometrium = 14
+
+# The paper's two macrophage comparisons (Results, "Gene Expression Profiles of TAMs"; limma-voom
+# with quality weights, no batch term, Methods "Statistical Analysis for RNA-seq Data"): Br-TAM
+# against Br-RM, 1,873 DEGs (1,301 up, 572 down), and En-TAM against En-RM, 831 (115 up, 716
+# down), FDR <= 0.05. One sample per individual; n read from gather's sheet, 2026-10-09.
+
+[[contrasts]]
+name = "breast_tam"
+variable = "condition"
+reference = "resident"
+tested = "tam"
+n = [4, 4]
+filters = { tissue = ["breast"] }
+
+[[contrasts]]
+name = "endometrium_tam"
+variable = "condition"
+reference = "resident"
+tested = "tam"
+n = [5, 9]
+filters = { tissue = ["endometrium"] }
+
+[de]
+featured = "breast_tam"
+# Named by the paper as Br-TAM genes (SIGLEC1 log2 FC 7.2, the top one; CCL8 the most
+# significant of the seven shared with conditioned-medium THP1; CD163 not different; TNF up by
+# qPCR, Fig. 4L):
+# drawn, not tested as a rule.
+box_contrast = "breast_tam"
+box_genes = ["SIGLEC1", "CCL8", "CD163", "TNF"]
+
+[[de.pca]]
+name = "mac"
+filters = {}
+factors = ["tissue", "condition", "seq_batch"]
+
+[[de.pca]]
+name = "breast"
+filters = { tissue = ["breast"] }
+factors = ["condition"]
+
+[[de.pca]]
+name = "tams"
+filters = { condition = ["tam"] }
+factors = ["tissue"]
+
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_TNFA_SIGNALING_VIA_NFKB"
+running = ["breast_tam", "HALLMARK_TNFA_SIGNALING_VIA_NFKB"]
+
+# Registered before any ctx de run on this dataset (TODO.md, work-order item 13 answers, item 8).
+# The counts were on this Mac before the rules (P4.1); no expression value, fit or enrichment was
+# read for them. A failing rule is reported, never retuned. Rytis reviews these before ctx de.
+# The paper's numbers come from limma-voom on HTSeq counts with |log FC| >= 1.5; the rules here
+# read only the direction or order of what it published, never its counts.
+
+[sanity]
+# The commit that last changed this line is this dataset's registration.
+registered = "2026-10-09 09:56"
+
+[[sanity.rules]]
+id = "MAC1"
+text = "Breast tumour-associated macrophages gain more genes than they lose against resident ones."
+source = "Cassetta 2019 Results: Br-TAM against Br-RM, 1,301 up and 572 down at FDR <= 0.05"
+conditions = [{ metric = "calls.breast_tam.up", op = ">", other = "calls.breast_tam.down" }]
+
+[[sanity.rules]]
+id = "MAC2"
+text = "Endometrial tumour-associated macrophages lose more genes than they gain against resident ones."
+source = "Cassetta 2019 Results: En-TAM against En-RM, 115 up and 716 down at FDR <= 0.05"
+conditions = [{ metric = "calls.endometrium_tam.down", op = ">", other = "calls.endometrium_tam.up" }]
+
+[[sanity.rules]]
+id = "MAC3"
+text = "Breast tumour-associated and resident macrophages separate on the PCA."
+source = "Cassetta 2019 Fig. 2A and 2B; 4 against 4 permuted freely cannot reach p below 2/70, about 0.03"
+conditions = [{ metric = "permanova.breast.condition.p", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "MAC4"
+text = "Breast and endometrial tumour-associated macrophages separate on the PCA."
+source = "Cassetta 2019 Fig. S2C: Br-TAM and En-TAM form two distinct groups"
+conditions = [{ metric = "permanova.tams.tissue.p", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "MAC5"
+text = "The p-value histogram of the breast contrast peaks at 0 over a flat floor."
+source = "course health check, as Step-1's R2; the paper reports 1,873 DEGs for this contrast"
+conditions = [{ metric = "phist.breast_tam.low", op = ">=", other = "phist.breast_tam.flat", times = 2 }]
+
+[[sanity.rules]]
+id = "MAC6"
+text = "Recorded, not gating: TNF-alpha signalling up in breast tumour-associated macrophages."
+source = "Cassetta 2019 Fig. 4L (TNF mRNA up in Br-TAM by qPCR) and Fig. 4D; one gene, so a set-level reading"
+gate = false
+conditions = [{ metric = "gsea.breast_tam.HALLMARK_TNFA_SIGNALING_VIA_NFKB.nes", op = ">", value = 0 }]

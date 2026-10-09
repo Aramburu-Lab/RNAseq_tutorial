@@ -1,0 +1,103 @@
+run_accession	gsm	title	donor	source_name	cell type	condition	sequencing batch	pathology	age	sex
+SRR7631576	GSM3316272	MON2: Normal	MON2	Blood	monocytes	Normal	Batch 1	N/A	-	F
+SRR7631577	GSM3316273	MON4: Normal	MON4	Blood	monocytes	Normal	Batch 1	N/A	-	F
+SRR7631578	GSM3316273	MON4: Normal	MON4	Blood	monocytes	Normal	Batch 1	N/A	-	F
+SRR7631579	GSM3316274	MON8: Normal	MON8	Blood	monocytes	Normal	Batch 1	N/A	-	F
+SRR7631580	GSM3316275	MON10: Normal	MON10	Blood	monocytes	Normal	Batch 1	N/A	-	F
+SRR7631581	GSM3316275	MON10: Normal	MON10	Blood	monocytes	Normal	Batch 1	N/A	-	F
+SRR7631582	GSM3316276	MON12: Breast cancer	MON12	Blood	monocytes	Breast cancer	Batch 1	Invasive Breast cancer	78	F
+SRR7631583	GSM3316277	MON14: Breast cancer	MON14	Blood	monocytes	Breast cancer	Batch 1	Invasive Breast cancer	74	F
+SRR7631584	GSM3316278	MON18: Breast cancer	MON18	Blood	monocytes	Breast cancer	Batch 1	Invasive Breast cancer	58	F
+SRR7631585	GSM3316279	MON20: Breast cancer	MON20	Blood	monocytes	Breast cancer	Batch 1	Invasive Breast cancer	42	F
+SRR7631586	GSM3316279	MON20: Breast cancer	MON20	Blood	monocytes	Breast cancer	Batch 1	Invasive Breast cancer	42	F
+SRR7631587	GSM3316280	MON22: Endometrial cancer	MON22	Blood	monocytes	Endometrial cancer	Batch 1	Carcinoma	60	F
+SRR7631588	GSM3316280	MON22: Endometrial cancer	MON22	Blood	monocytes	Endometrial cancer	Batch 1	Carcinoma	60	F
+SRR7631589	GSM3316281	MON24: Endometrial cancer	MON24	Blood	monocytes	Endometrial cancer	Batch 1	UPSC	71	F
+SRR7631590	GSM3316282	MON26: Endometrial cancer	MON26	Blood	monocytes	Endometrial cancer	Batch 1	UPSC	62	F
+SRR7631591	GSM3316283	MON28: Endometrial cancer	MON28	Blood	monocytes	Endometrial cancer	Batch 1	UPSC	71	F
+SRR7631592	GSM3316283	MON28: Endometrial cancer	MON28	Blood	monocytes	Endometrial cancer	Batch 1	UPSC	71	F
+SRR7631593	GSM3316284	MON30: Endometrial cancer	MON30	Blood	monocytes	Endometrial cancer	Batch 1	UPSC	70	F
+SRR7631594	GSM3316284	MON30: Endometrial cancer	MON30	Blood	monocytes	Endometrial cancer	Batch 1	UPSC	70	F
+SRR7631595	GSM3316285	MON57: Normal	MON57	Blood	monocytes	Normal	Batch 3	N/A	-	F
+SRR7631596	GSM3316286	MON59: Breast cancer	MON59	Blood	monocytes	Breast cancer	Batch 3	Invasive Breast cancer	69	F
+SRR7631597	GSM3316287	MON61: Breast cancer	MON61	Blood	monocytes	Breast cancer	Batch 3	Invasive Breast cancer	65	F
+SRR7631598	GSM3316288	MON63: Endometrial cancer	MON63	Blood	monocytes	Endometrial cancer	Batch 3	iEndometrioid	66	F
+SRR7631599	GSM3316289	MON65: Endometrial cancer	MON65	Blood	monocytes	Endometrial cancer	Batch 3	iEndometrioid	65	F
+SRR7631600	GSM3316290	MON66: Normal	MON66	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631601	GSM3316291	MON67: Normal	MON67	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631602	GSM3316292	MON68: Normal	MON68	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631603	GSM3316293	MON69: Normal	MON69	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631604	GSM3316294	MON70: Normal	MON70	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631605	GSM3316295	MON71: Normal	MON71	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631606	GSM3316296	MON72: Normal	MON72	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631607	GSM3316297	MON73: Normal	MON73	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631608	GSM3316298	MON74: Normal	MON74	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631609	GSM3316299	MON75: Normal	MON75	Blood	monocytes	Normal	Batch 4	N/A	-	F
+SRR7631610	GSM3316300	MON76: Breast cancer	MON76	Blood	monocytes	Breast cancer	Batch 4	Invasive Breast cancer	-	F
+SRR7631611	GSM3316301	MON78: Breast cancer	MON78	Blood	monocytes	Breast cancer	Batch 4	-	-	F
+SRR7631612	GSM3316302	MON79: Endometrial cancer	MON79	Blood	monocytes	Endometrial cancer	Batch 4	iEndometrioid	71	F
+SRR7631613	GSM3316303	MON80: Endometrial cancer	MON80	Blood	monocytes	Endometrial cancer	Batch 4	iEndometrioid	74	F
+SRR7631614	GSM3316304	MON81: Breast cancer	MON81	Blood	monocytes	Breast cancer	Batch 4	Invasive Breast cancer	50	F
+SRR7631615	GSM3316305	MON82: Breast cancer	MON82	Blood	monocytes	Breast cancer	Batch 4	Invasive Breast cancer	57	F
+SRR7631616	GSM3316306	MON83: Breast cancer	MON83	Blood	monocytes	Breast cancer	Batch 4	Invasive Breast cancer	62	F
+SRR7631617	GSM3316307	MON84: Breast cancer	MON84	Blood	monocytes	Breast cancer	Batch 4	Invasive Breast cancer	62	F
+SRR7631618	GSM3316308	MON85: Breast cancer	MON85	Blood	monocytes	Breast cancer	Batch 4	Invasive Breast cancer	57	F
+SRR7631619	GSM3316309	MON87: Breast cancer	MON87	Blood	monocytes	Breast cancer	Batch 4	Invasive Breast cancer	46	F
+SRR7631620	GSM3316310	MON103: Normal	MON103	Blood	monocytes	Normal	Batch 5	N/A	-	F
+SRR7631621	GSM3316311	MON104: Normal	MON104	Blood	monocytes	Normal	Batch 5	N/A	-	F
+SRR7631622	GSM3316312	MON105: Normal	MON105	Blood	monocytes	Normal	Batch 5	N/A	-	F
+SRR7631623	GSM3316313	MON106: Normal	MON106	Blood	monocytes	Normal	Batch 5	N/A	-	F
+SRR7631624	GSM3316314	MON107: Normal	MON107	Blood	monocytes	Normal	Batch 5	N/A	-	F
+SRR7631625	GSM3316315	MON93: Breast cancer	MON93	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	50	F
+SRR7631626	GSM3316315	MON93: Breast cancer	MON93	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	50	F
+SRR7631627	GSM3316316	MON94: Breast cancer	MON94	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	66	F
+SRR7631628	GSM3316317	MON95: Breast cancer	MON95	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	51	F
+SRR7631629	GSM3316318	MON96: Breast cancer	MON96	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	47	F
+SRR7631630	GSM3316318	MON96: Breast cancer	MON96	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	47	F
+SRR7631631	GSM3316319	MON97: Breast cancer	MON97	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	86	F
+SRR7631632	GSM3316320	MON118: Breast cancer	MON118	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	86	F
+SRR7631633	GSM3316321	MON119: Breast cancer	MON119	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	60	F
+SRR7631634	GSM3316322	MON120: Breast cancer	MON120	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	65	F
+SRR7631635	GSM3316323	MON121: Breast cancer	MON121	Blood	monocytes	Breast cancer	Batch 5	Invasive Breast cancer	64	F
+SRR7631636	GSM3316324	MON112: Endometrial cancer	MON112	Blood	monocytes	Endometrial cancer	Batch 5	Endometrioid	64	F
+SRR8512442	GSM3585969	mon103	mon103	Blood	monocytes	Normal	6	N/A		F
+SRR8512443	GSM3585970	mon104	mon104	Blood	monocytes	Normal	6	N/A		F
+SRR8512444	GSM3585971	mon105	mon105	Blood	monocytes	Normal	6	N/A		F
+SRR8512445	GSM3585972	mon106	mon106	Blood	monocytes	Normal	6	N/A		F
+SRR8512446	GSM3585973	mon107	mon107	Blood	monocytes	Normal	6	N/A		F
+SRR8512447	GSM3585974	mon108	mon108	Blood	monocytes	Breast cancer	6	Invasive_Breast_cancer		F
+SRR8512448	GSM3585975	mon109	mon109	Blood	monocytes	Breast cancer	6	Invasive_Breast_cancer		F
+SRR8512449	GSM3585976	mon110	mon110	Blood	monocytes	Breast cancer	6	DCIS		F
+SRR8512450	GSM3585977	mon111	mon111	Blood	monocytes	Breast cancer	6	Invasive_Breast_cancer		F
+SRR8512451	GSM3585978	mon112	mon112	Blood	monocytes	Breast cancer	6	DCIS		F
+SRR8512452	GSM3585979	mon113	mon113	Blood	monocytes	Breast cancer	6	DCIS		F
+SRR8512453	GSM3585980	mon114	mon114	Blood	monocytes	Breast cancer	6	Invasive_Breast_cancer		F
+SRR8512454	GSM3585981	mon115	mon115	Blood	monocytes	Breast cancer	6	Invasive_Breast_cancer		F
+SRR8512455	GSM3585982	mon116	mon116	Blood	monocytes	Breast cancer	6	Invasive_Breast_cancer		F
+SRR8512456	GSM3585983	mon117	mon117	Blood	monocytes	Breast cancer	6	Invasive_Breast_cancer		F
+SRR8512457	GSM3585984	mon118	mon118	Blood	monocytes	Breast cancer	6	DCIS		F
+SRR8512458	GSM3585985	mon127	mon127	Blood	monocytes	Normal	6	N/A		F
+SRR8512459	GSM3585986	mon128	mon128	Blood	monocytes	Normal	6	N/A		F
+SRR8512460	GSM3585987	mon129	mon129	Blood	monocytes	Normal	6	N/A		F
+SRR8512461	GSM3585988	mon130	mon130	Blood	monocytes	Normal	6	N/A		F
+SRR8512462	GSM3585989	mon131	mon131	Blood	monocytes	Normal	6	N/A		F
+SRR8512463	GSM3585990	mon132	mon132	Blood	monocytes	Normal	6	N/A		F
+SRR8512464	GSM3585991	mon133	mon133	Blood	monocytes	Normal	6	N/A		F
+SRR8512465	GSM3585992	mon134	mon134	Blood	monocytes	Normal	6	N/A		F
+SRR8512466	GSM3585993	mon135	mon135	Blood	monocytes	Normal	6	N/A		F
+SRR8512467	GSM3585994	mon136	mon136	Blood	monocytes	Normal	6	N/A		F
+SRR8512468	GSM3585995	mon137	mon137	Blood	monocytes	Normal	6	N/A		F
+SRR8512469	GSM3585996	mon138	mon138	Blood	monocytes	Normal	6	N/A		F
+SRR8512470	GSM3585997	mon139	mon139	Blood	monocytes	Normal	6	N/A		F
+SRR8512471	GSM3585998	mon140	mon140	Blood	monocytes	Normal	6	N/A		F
+SRR8512472	GSM3585999	mon141	mon141	Blood	monocytes	Normal	6	N/A		F
+SRR8512473	GSM3586000	mon142	mon142	Blood	monocytes	Normal	6	N/A		F
+SRR8512474	GSM3586001	mon144	mon144	Blood	monocytes	Normal	6	N/A		F
+SRR8512475	GSM3586002	mon145	mon145	Blood	monocytes	Normal	6	N/A		F
+SRR8512476	GSM3586003	mon146	mon146	Blood	monocytes	Normal	6	N/A		F
+SRR8512477	GSM3586004	mon147	mon147	Blood	monocytes	Normal	6	N/A		F
+SRR8512478	GSM3586005	mon155	mon155	Blood	monocytes	Normal	6	N/A		F
+SRR8512479	GSM3586006	mon156	mon156	Blood	monocytes	Normal	6	N/A		F
+SRR8512480	GSM3586007	mon157	mon157	Blood	monocytes	Normal	6	N/A		F
+SRR8512481	GSM3586008	mon158	mon158	Blood	monocytes	Normal	6	N/A		F
+SRR8512482	GSM3586009	mon159	mon159	Blood	monocytes	Normal	6	N/A		F
