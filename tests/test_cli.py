@@ -7,12 +7,13 @@ import shutil
 import subprocess
 import sys
 import textwrap
-from datetime import date
 from pathlib import Path
 
 import polars as pl
 import pytest
 import typer
+from conftest import DE_SPEC, setup_page, threads_unlike_default
+from conftest import FETCHNGS_DOWNLOAD as FIXTURE
 from test_packaging import build_wheel, run_from_wheel
 
 from ctx.cli import app, parameter_cards
@@ -31,158 +32,6 @@ def _ctx(
         [str(CTX), *args], cwd=cwd, env={**NO_SLURM, **(env or {})},
         capture_output=True, text=True, check=False,
     )  # fmt: skip
-
-
-def _report(root: Path) -> str:
-    (page,) = (root / "outputs" / "00_setup").glob("*_setup_environment_v1.html")
-    return page.read_text()
-
-
-@pytest.fixture(scope="module")
-def setup_run(tmp_path_factory):
-    root = tmp_path_factory.mktemp("root")
-    done = _ctx("--root", str(root), "setup", cwd=root)
-    assert done.returncode == 0, done.stderr
-    return root, _report(root)
-
-
-FIXTURE = ROOT / "tests" / "fixtures" / "fetchngs" / "download"
-
-
-@pytest.fixture(scope="module")
-def gather_run(tmp_path_factory):
-    root = tmp_path_factory.mktemp("gather_root")
-    args = (
-        "--root",
-        str(root),
-        "gather",
-        "--dataset",
-        "nfcore_test",
-        "--fetchngs-dir",
-        str(FIXTURE),
-    )
-    done = _ctx(*args, cwd=root)
-    assert done.returncode == 0, done.stderr
-    (page,) = (root / "outputs" / "01_gather").glob("*_gather_nfcore_test_overview_v1.html")
-    return root, page.read_text()
-
-
-DE_SPEC = ROOT / "tests" / "fixtures" / "datasets" / "de_synthetic.toml"
-
-
-@pytest.fixture(scope="module")
-def pipeline(tmp_path_factory):
-    """de, function and report on one root, from gather outputs written by gather's writer."""
-    from synth import (  # noqa: PLC0415
-        DE_GROUPS,
-        design_counts,
-        write_gather_outputs,
-        write_gene_sets,
-    )
-
-    from ctx.dataset import load  # noqa: PLC0415
-
-    root = tmp_path_factory.mktemp("pipeline")
-    write_gather_outputs(root, "desynth", design_counts(DE_GROUPS, batch_lfc=2.0), date.today())
-    write_gene_sets(root / load(DE_SPEC).resource("sets").dest)
-    gathered = {p.name: p.read_bytes() for p in (root / "outputs" / "01_gather").iterdir()}
-    runs = {}
-    with_spec = ["--dataset-file", str(DE_SPEC)]
-    for command, extra in (("de", with_spec), ("function", with_spec), ("report", with_spec)):
-        done = _ctx("--root", str(root), command, "--dataset", "desynth", *extra, cwd=root)
-        assert done.returncode == 0, (command, done.stderr[-3000:])
-        runs[command] = done
-    return root, gathered, runs
-
-
-def _page(root: Path, number_module: str, what: str) -> str:
-    (page,) = (root / "outputs" / number_module).glob(f"*_{what}_v1.html")
-    return page.read_text()
-
-
-@pytest.fixture(scope="module")
-def de_run(pipeline):
-    return pipeline[0], _page(pipeline[0], "05_de", "desynth_overview")
-
-
-@pytest.fixture(scope="module")
-def function_run(pipeline):
-    return pipeline[0], _page(pipeline[0], "06_function", "desynth_overview")
-
-
-@pytest.fixture(scope="module")
-def report_run(pipeline):
-    return pipeline[0], _page(pipeline[0], "09_report", "desynth_hub")
-
-
-@pytest.fixture(scope="module")
-def qc_run(tmp_path_factory):
-    from test_qc_run import plant  # noqa: PLC0415 - the planted gather outputs of the qc tests
-
-    root = tmp_path_factory.mktemp("qc_cli")
-    plant(root)
-    done = _ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file",
-                str(DE_SPEC), cwd=root)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root, _page(root, "02_qc", "desynth_overview")
-
-
-@pytest.fixture(scope="module")
-def clinical_run(tmp_path_factory):
-    from clinical_root import make  # noqa: PLC0415 - the made-up GDC root of the M10 tests
-
-    root, spec = make(tmp_path_factory.mktemp("clinical_cli"))
-    done = _ctx("--root", str(root), "clinical", "--dataset", "fake_brca", "--dataset-file",
-                str(spec), cwd=root)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root, _page(root, "12_clinical", "fake_brca_overview")
-
-
-@pytest.fixture(scope="module")
-def proteo_run(tmp_path_factory):
-    from proteo_root import cross  # noqa: PLC0415 - the made-up cross-dataset root of the M7 tests
-
-    root = cross(tmp_path_factory.mktemp("proteo_cli"))
-    return root, _page(root, "07_proteo", "fake_cells_overview")
-
-
-@pytest.fixture(scope="module")
-def genecard_run(tmp_path_factory):
-    from genecard_root import SLUG, make  # noqa: PLC0415 - the made-up root of the M9 tests
-
-    root = tmp_path_factory.mktemp("genecard_cli")
-    spec = make(root)
-    done = _ctx("--root", str(root), "genecard", "--dataset", SLUG, "--dataset-file", str(spec),
-                "--genes", "NPTX2", "--offline", cwd=root)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root, _page(root, "11_genecard", f"{SLUG}_overview")
-
-
-@pytest.fixture(scope="module")
-def ncrna_run(tmp_path_factory):
-    from datetime import date  # noqa: PLC0415
-
-    from ncrna_root import DATASET, make  # noqa: PLC0415 - the made-up root of the M8 tests
-
-    root, spec = make(tmp_path_factory.mktemp("ncrna_cli"), date.today())
-    done = _ctx("--root", str(root), "ncrna", "--dataset", DATASET, "--dataset-file", str(spec),
-                cwd=root)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root, _page(root, "08_ncrna", f"{DATASET}_overview")
-
-
-@pytest.fixture(scope="module")
-def guide_run(tmp_path_factory):
-    root = tmp_path_factory.mktemp("guide_cli")
-    done = _ctx("--root", str(root), "guide", cwd=root)
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root, _page(root, "09_report", "report_guide")
-
-
-@pytest.fixture(scope="module")
-def run_run(guide_run):
-    """`ctx run` writes no page of its own: its cards are on the guide, which teaches it."""
-    return guide_run
 
 
 # process_run is conftest.py's: a rerun of the session's one ctx process run.
@@ -242,11 +91,11 @@ def test_subcommands_in_modules():
 
 
 def test_threads_set_before_import(tmp_path):
-    threads = 2 if os.cpu_count() != 2 else 3
+    threads = threads_unlike_default()
     slurm = {"CTX_PROFILE": "hpc", "SLURM_CPUS_PER_TASK": str(threads), "SLURM_MEM_PER_CPU": "500"}
     done = _ctx("--root", str(tmp_path), "setup", cwd=tmp_path, env=slurm)
     assert done.returncode == 0, done.stderr
-    assert f"polars thread pool: {threads}; BLAS thread pools: [{threads}]" in _report(tmp_path)
+    assert f"polars thread pool: {threads}; BLAS thread pools: [{threads}]" in setup_page(tmp_path)
 
 
 def test_help_without_slurm(tmp_path):
@@ -287,7 +136,7 @@ def test_repro_block_shows_measured(tmp_path):
         app(["--root", {str(tmp_path)!r}, "setup"], standalone_mode=False)
     """)
     subprocess.run([sys.executable, "-c", stubbed], env=NO_SLURM, check=True, capture_output=True)
-    html = _report(tmp_path)
+    html = setup_page(tmp_path)
     assert '<td class="wall">12.345 s</td>' in html
     assert f'<td class="rss-self">678.0 MiB ({678 * 2**20} bytes)</td>' in html
 

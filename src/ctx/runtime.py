@@ -157,7 +157,8 @@ def measure(started: float) -> Usage:
     """Wall time since ``started`` and peak RSS of this process and of its largest reaped child.
 
     Valid once per fresh process: both peaks are lifetime maxima, so a second command in the
-    same process would inherit the first one's.
+    same process would inherit the first one's. On Linux a child's peak includes the RSS this
+    process had when it forked the child, so it is never below that.
 
     Args:
         started: A ``time.perf_counter()`` value.
@@ -169,9 +170,24 @@ def measure(started: float) -> Usage:
     scale = 1 if sys.platform == "darwin" else 1024
     return Usage(
         wall_seconds=perf_counter() - started,
-        peak_rss_self=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * scale,
+        peak_rss_self=_own_peak() or resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * scale,
         peak_rss_children=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * scale,
     )
+
+
+def _own_peak(status: Path = Path("/proc/self/status")) -> int | None:
+    """This program's peak RSS in bytes from Linux's VmHWM, or None where there is no such file.
+
+    Linux carries ru_maxrss across execve, so getrusage reported the 1.1 GB of the pytest
+    process that started it (run 37807649888); VmHWM belongs to the address space
+    exec created, so it counts this program alone (proc(5)).
+    """
+    try:
+        lines = status.read_text().splitlines()
+    except OSError:
+        return None
+    kib = next((line.split()[1] for line in lines if line.startswith("VmHWM:")), None)
+    return int(kib) * 1024 if kib else None
 
 
 def shown_path(path: str | Path) -> str:

@@ -9,6 +9,7 @@ import textwrap
 from pathlib import Path
 
 import pytest
+from conftest import threads_unlike_default
 
 from ctx.runtime import (
     BUDGETS,
@@ -113,7 +114,7 @@ def test_start_refuses_after_heavy_import():
 
 
 def test_threads_applied_before_import(tmp_path):
-    threads = 2 if os.cpu_count() != 2 else 3
+    threads = threads_unlike_default()
     slurm = {"CTX_PROFILE": "hpc", "SLURM_CPUS_PER_TASK": str(threads), "SLURM_MEM_PER_CPU": "100"}
     out = _python(
         f"""
@@ -150,6 +151,21 @@ def test_child_peak_attributed():
     assert own < 256 * MIB
     _, idle_child = json.loads(_python(PARENT.format(child="pass")))
     assert idle_child < 256 * MIB
+
+
+def test_own_peak_reads_vmhwm_in_bytes(tmp_path):
+    """Linux's own peak is VmHWM, in kibibytes, because ru_maxrss outlives execve; none where
+    the file is absent. On a Linux runner test_child_peak_attributed's ``own`` bound catches
+    the getrusage reading back (1,110,167,552 B in run 37807649888).
+
+    Mutations caught: VmHWM returned in kibibytes; VmRSS read instead (the current, not the peak).
+    """
+    from ctx.runtime import _own_peak  # noqa: PLC0415
+
+    status = tmp_path / "status"
+    status.write_text("Name:\tpython\nVmHWM:\t   20480 kB\nVmRSS:\t   10240 kB\n")
+    assert _own_peak(status) == 20480 * 1024
+    assert _own_peak(tmp_path / "absent") is None
 
 
 LOKY_CHILD = textwrap.dedent(
