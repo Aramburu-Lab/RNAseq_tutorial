@@ -87,3 +87,57 @@ def test_reads_without_a_fate_stop_the_run(tmp_path):
         QcError, match=r"miss its total for \['WT_REP1'\].*written for \['WT_REP1'\]"
     ):
         fates.fates(run, SAMPLES)
+
+
+FASTQ = ROOT / "tests" / "fixtures" / "fetchngs" / "download" / "fastq"
+# Reads of 126, 251 and 153 nt (measured): a pair's read 1 and read 2 differ in length, so a
+# value taken from read 2 shows.
+RAW = {"_raw": "ERX1234253_ERR1160846.fastq.gz", "_raw_1": "SRX9626017_SRR13191702_1.fastq.gz",
+       "_raw_2": "SRX11047067_SRR14709033.fastq.gz"}  # fmt: skip
+PAIRED = {"RAP1_IAA_30M_REP1", "WT_REP1", "WT_REP2"}
+
+
+def with_raw_fastqc(tmp: Path, leave_out: str = "") -> Path:
+    """The fixture copy with raw-read FastQC reports, named as nf-core/rnaseq names them."""
+    from ctx import tools  # noqa: PLC0415 - only these tests run FastQC
+
+    outdir = copy(tmp)
+    raw, staged = outdir / fates.RAW_FASTQC, tmp / "staged"
+    raw.mkdir(parents=True)
+    staged.mkdir()
+    for sample in SAMPLES:
+        for suffix in ("_raw_1", "_raw_2") if sample in PAIRED else ("_raw",):
+            if sample != leave_out:
+                shutil.copy(FASTQ / RAW[suffix], staged / f"{sample}{suffix}.fastq.gz")
+    tools.run("fastqc", ["--quiet", "--outdir", str(raw), *map(str, sorted(staged.iterdir()))],
+              cwd=tmp, log=tmp / "fastqc.log")  # fmt: skip
+    return outdir
+
+
+@pytest.fixture(scope="module")
+def raw_ran(tmp_path_factory):
+    tmp = tmp_path_factory.mktemp("raw")
+    run = fates.run_multiqc(with_raw_fastqc(tmp), tmp / "multiqc", config(tmp), SAMPLES)
+    return fates.values(run, SAMPLES, REG)
+
+
+def test_raw_fastqc_reports_judge_every_sample_by_read_1(raw_ran):
+    """nf-core's FastQC on the raw reads joins the values: FastQC's general statistics and its
+    verdicts per sample, read 1 of a pair standing for it (P2Q.9).
+
+    Mutation caught: `_raw_2` ranked before `_raw_1` (a pair read 153 nt, not 251)."""
+    assert {m.column for m in REG.metrics.values() if m.module == "fastqc"} <= set(raw_ran.columns)
+    length = dict(raw_ran.select("sample", "fastqc-avg_sequence_length").rows())
+    assert {length[s] for s in PAIRED} == {251.0}
+    assert {length[s] for s in set(SAMPLES) - PAIRED} == {126.0}
+    verdicts = set(raw_ran["per_base_sequence_quality"])
+    assert verdicts and verdicts <= {"pass", "warn", "fail"}
+
+
+def test_a_missing_raw_fastqc_report_stops_the_run(tmp_path):
+    """Once the copy holds FastQC reports, every sample needs one, as for Trim Galore and Salmon.
+
+    Mutation caught: fastqc left out of the modules checked for completeness."""
+    outdir = with_raw_fastqc(tmp_path, leave_out="WT_REP2")
+    with pytest.raises(QcError, match=r"no fastqc report for \['WT_REP2'\]"):
+        fates.run_multiqc(outdir, tmp_path / "multiqc", config(tmp_path), SAMPLES)

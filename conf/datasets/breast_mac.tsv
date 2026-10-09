@@ -1,0 +1,23 @@
+run_accession	gsm	title	donor	source_name	cell type	condition	sequencing batch	pathology	age
+SRR7631637	GSM3316325	MAC3: Normal Breast	MAC3	Tissue	tumour associated macrophages	Normal Breast	Batch 4	Normal tissue	52
+SRR7631638	GSM3316326	MAC4: Normal Breast	MAC4	Tissue	tumour associated macrophages	Normal Breast	Batch 4	Normal tissue	62
+SRR7631639	GSM3316327	MAC5: Normal Breast	MAC5	Tissue	tumour associated macrophages	Normal Breast	Batch 4	Normal tissue	-
+SRR7631640	GSM3316328	MAC9: Breast cancer	MAC9	Tissue	tumour associated macrophages	Breast cancer	Batch 4	Invasive Breast cancer	69
+SRR7631641	GSM3316329	MAC12: Breast cancer	MAC12	Tissue	tumour associated macrophages	Breast cancer	Batch 4	Invasive Breast cancer	84
+SRR7631642	GSM3316330	MAC14: Normal Endometrial	MAC14	Tissue	tumour associated macrophages	Normal Endometrial	Batch 4	Benign	43
+SRR7631643	GSM3316331	MAC16: Normal Endometrial	MAC16	Tissue	tumour associated macrophages	Normal Endometrial	Batch 4	Benign	39
+SRR7631644	GSM3316332	MAC17: Normal Endometrial	MAC17	Tissue	tumour associated macrophages	Normal Endometrial	Batch 4	Benign	48
+SRR7631645	GSM3316333	MAC19: Endometrial cancer	MAC19	Tissue	tumour associated macrophages	Endometrial cancer	Batch 4	Endometrioid	44
+SRR7631646	GSM3316334	MAC21: Endometrial cancer	MAC21	Tissue	tumour associated macrophages	Endometrial cancer	Batch 4	UPSC	63
+SRR7631647	GSM3316335	MAC22: Endometrial cancer	MAC22	Tissue	tumour associated macrophages	Endometrial cancer	Batch 4	UPSC	65
+SRR7631648	GSM3316337	MAC23: Endometrial cancer	MAC23	Tissue	tumour associated macrophages	Endometrial cancer	Batch 4	Endometrioid	81
+SRR7631649	GSM3316339	MAC24: Endometrial cancer	MAC24	Tissue	tumour associated macrophages	Endometrial cancer	Batch 4	Endometrioid	59
+SRR7631650	GSM3316342	MAC25: Endometrial cancer	MAC25	Tissue	tumour associated macrophages	Endometrial cancer	Batch 4	Endometrioid	67
+SRR7631651	GSM3316345	MAC27: Breast cancer	MAC27	Tissue	tumour associated macrophages	Breast cancer	Batch 4	Invasive Breast cancer	46
+SRR7631652	GSM3316347	MAC28: Normal Breast	MAC28	Tissue	tumour associated macrophages	Normal Breast	Batch 5	Normal tissue	-
+SRR7631653	GSM3316350	MAC29: Breast cancer	MAC29	Tissue	tumour associated macrophages	Breast cancer	Batch 5	Invasive Breast cancer	57
+SRR7631654	GSM3316352	MAC30: Normal Endometrial	MAC30	Tissue	tumour associated macrophages	Normal Endometrial	Batch 5	Benign	48
+SRR7631655	GSM3316353	MAC31: Normal Endometrial	MAC31	Tissue	tumour associated macrophages	Normal Endometrial	Batch 5	Benign	38
+SRR7631656	GSM3316354	MAC32: Endometrial cancer	MAC32	Tissue	tumour associated macrophages	Endometrial cancer	Batch 5	Endometrioid	74
+SRR7631657	GSM3316355	MAC33: Endometrial cancer	MAC33	Tissue	tumour associated macrophages	Endometrial cancer	Batch 5	Carcinosarcoma	70
+SRR7631658	GSM3316356	MAC35: Endometrial cancer	MAC35	Tissue	tumour associated macrophages	Endometrial cancer	Batch 5	UPSC	76

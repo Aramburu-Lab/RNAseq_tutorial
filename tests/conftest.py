@@ -5,6 +5,7 @@ import platform
 import shutil
 import subprocess
 import sys
+from datetime import date
 from pathlib import Path
 
 import pytest
@@ -82,6 +83,20 @@ def pytest_runtest_setup(item: pytest.Item) -> None:
     if kind == "skip":
         pytest.skip(why)
     pytest.fail(why, pytrace=False)
+
+
+def threads_unlike_default() -> int:
+    """A thread count no library would pick by itself and OpenBLAS can honour.
+
+    One below the cores this process may run on: OpenBLAS clamps OPENBLAS_NUM_THREADS to those
+    cores, so asking for more read back as the core count (3 asked, 2 seen on a 2-core runner,
+    run 37807649888), and polars sizes its pool to them by default, so asking for them proves
+    nothing. Skips on one core, where no count is both.
+    """
+    cores = len(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else os.cpu_count()
+    if not cores or cores < 2:
+        pytest.skip("one core: no thread count differs from the default and is honoured")
+    return cores - 1
 
 
 CTX = Path(sys.executable).parent / "ctx"
@@ -182,3 +197,172 @@ def quant_run(quant_built):
     """(root, overview html) of ``quant_built``: test_cli's card test reads its page."""
     root, _, written = quant_built
     return root, written[0].read_text()
+
+
+# Every module's end-to-end run, once per session: test_cli reads their pages for the cards,
+# test_outputs_contract every file they wrote (M3.14, V4).
+ROOT = Path(__file__).resolve().parents[1]
+FETCHNGS_DOWNLOAD = ROOT / "tests" / "fixtures" / "fetchngs" / "download"
+DE_SPEC = ROOT / "tests" / "fixtures" / "datasets" / "de_synthetic.toml"
+
+
+def setup_page(root: Path) -> str:
+    """The environment page ``ctx setup`` wrote under ``root``."""
+    (page,) = (root / "outputs" / "00_setup").glob("*_setup_environment_v1.html")
+    return page.read_text()
+
+
+def module_page(root: Path, number_module: str, what: str) -> str:
+    """The one ``*_<what>_v1.html`` page in ``outputs/<number_module>``."""
+    (page,) = (root / "outputs" / number_module).glob(f"*_{what}_v1.html")
+    return page.read_text()
+
+
+@pytest.fixture(scope="session")
+def wheel_site(tmp_path_factory):
+    """The wheel built and unzipped once; every test that runs ctx from it only reads it.
+
+    test_io builds its own, inside an unrelated git repository, which is what it tests.
+    """
+    from test_packaging import build_wheel  # noqa: PLC0415
+
+    return build_wheel(tmp_path_factory.mktemp("wheel"))
+
+
+def _ran(root: Path, *args: str) -> None:
+    done = ctx_run("--root", str(root), *args, cwd=root)
+    assert done.returncode == 0, (args[0], done.stderr[-3000:])
+
+
+@pytest.fixture(scope="session")
+def setup_run(tmp_path_factory):
+    """(root, page) of ``ctx setup``."""
+    root = tmp_path_factory.mktemp("root")
+    _ran(root, "setup")
+    return root, setup_page(root)
+
+
+@pytest.fixture(scope="session")
+def gather_run(tmp_path_factory):
+    """(root, overview page) of ``ctx gather`` on the fetchngs download fixture."""
+    root = tmp_path_factory.mktemp("gather_root")
+    _ran(root, "gather", "--dataset", "nfcore_test", "--fetchngs-dir", str(FETCHNGS_DOWNLOAD))
+    return root, module_page(root, "01_gather", "gather_nfcore_test_overview")
+
+
+@pytest.fixture(scope="session")
+def pipeline(tmp_path_factory, wheel_site):
+    """de, function and report on one root, from gather outputs written by gather's writer:
+    (root, the gather files' bytes before, the ctx package de imported).
+
+    de runs from the wheel, so its one fit also proves the wheel runs it; it was fitted twice,
+    80 s of CI run 37898263890's 1,778 s for the second (M3.14).
+    """
+    from synth import (  # noqa: PLC0415
+        DE_GROUPS,
+        design_counts,
+        write_gather_outputs,
+        write_gene_sets,
+    )
+    from test_packaging import run_from_wheel  # noqa: PLC0415
+
+    from ctx.dataset import load  # noqa: PLC0415
+
+    root = tmp_path_factory.mktemp("pipeline")
+    write_gather_outputs(root, "desynth", design_counts(DE_GROUPS, batch_lfc=2.0), date.today())
+    write_gene_sets(root / load(DE_SPEC).resource("sets").dest)
+    gathered = {p.name: p.read_bytes() for p in (root / "outputs" / "01_gather").iterdir()}
+    args = ["--root", str(root), "de", "--dataset", "desynth", "--dataset-file", str(DE_SPEC)]
+    imported = run_from_wheel(wheel_site, f"""
+        import ctx
+        from ctx.cli import app
+        print(ctx.__file__)
+        app({args!r}, standalone_mode=False)
+        """, cwd=root).splitlines()[0]  # fmt: skip
+    for command in ("function", "report"):
+        _ran(root, command, "--dataset", "desynth", "--dataset-file", str(DE_SPEC))
+    return root, gathered, Path(imported)
+
+
+@pytest.fixture(scope="session")
+def de_run(pipeline):
+    """(root, overview page) of the pipeline's ``ctx de``."""
+    return pipeline[0], module_page(pipeline[0], "05_de", "desynth_overview")
+
+
+@pytest.fixture(scope="session")
+def function_run(pipeline):
+    """(root, overview page) of the pipeline's ``ctx function``."""
+    return pipeline[0], module_page(pipeline[0], "06_function", "desynth_overview")
+
+
+@pytest.fixture(scope="session")
+def report_run(pipeline):
+    """(root, hub page) of the pipeline's ``ctx report``."""
+    return pipeline[0], module_page(pipeline[0], "09_report", "desynth_hub")
+
+
+@pytest.fixture(scope="session")
+def qc_run(tmp_path_factory):
+    """(root, overview page) of ``ctx qc`` on the planted gather outputs of the qc tests."""
+    from test_qc_run import plant  # noqa: PLC0415
+
+    root = tmp_path_factory.mktemp("qc_cli")
+    plant(root)
+    _ran(root, "qc", "--dataset", "desynth", "--dataset-file", str(DE_SPEC))
+    return root, module_page(root, "02_qc", "desynth_overview")
+
+
+@pytest.fixture(scope="session")
+def clinical_run(tmp_path_factory):
+    """(root, overview page) of ``ctx clinical`` on the made-up GDC root of the M10 tests."""
+    from clinical_root import make  # noqa: PLC0415
+
+    root, spec = make(tmp_path_factory.mktemp("clinical_cli"))
+    _ran(root, "clinical", "--dataset", "fake_brca", "--dataset-file", str(spec))
+    return root, module_page(root, "12_clinical", "fake_brca_overview")
+
+
+@pytest.fixture(scope="session")
+def proteo_run(tmp_path_factory):
+    """(root, overview page) of the made-up cross-dataset root of the M7 tests."""
+    from proteo_root import cross  # noqa: PLC0415
+
+    root = cross(tmp_path_factory.mktemp("proteo_cli"))
+    return root, module_page(root, "07_proteo", "fake_cells_overview")
+
+
+@pytest.fixture(scope="session")
+def genecard_run(tmp_path_factory):
+    """(root, overview page) of ``ctx genecard --offline`` on the made-up root of the M9 tests."""
+    from genecard_root import SLUG, make  # noqa: PLC0415
+
+    root = tmp_path_factory.mktemp("genecard_cli")
+    spec = make(root)
+    _ran(root, "genecard", "--dataset", SLUG, "--dataset-file", str(spec), "--genes", "NPTX2",
+         "--offline")  # fmt: skip
+    return root, module_page(root, "11_genecard", f"{SLUG}_overview")
+
+
+@pytest.fixture(scope="session")
+def ncrna_run(tmp_path_factory):
+    """(root, overview page) of ``ctx ncrna`` on the made-up root of the M8 tests."""
+    from ncrna_root import DATASET, make  # noqa: PLC0415
+
+    root, spec = make(tmp_path_factory.mktemp("ncrna_cli"), date.today())
+    _ran(root, "ncrna", "--dataset", DATASET, "--dataset-file", str(spec))
+    return root, module_page(root, "08_ncrna", f"{DATASET}_overview")
+
+
+@pytest.fixture(scope="session")
+def guide_run(tmp_path_factory):
+    """(root, page) of ``ctx guide``."""
+    root = tmp_path_factory.mktemp("guide_cli")
+    _ran(root, "guide")
+    return root, module_page(root, "09_report", "report_guide")
+
+
+@pytest.fixture(scope="session")
+def run_run(guide_run):
+    """`ctx run` writes no page of its own: its cards are on the guide, which teaches it."""
+    return guide_run

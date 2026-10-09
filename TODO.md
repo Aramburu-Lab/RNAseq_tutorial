@@ -449,15 +449,20 @@ Rytis, 2026-10-08: copy all of M4's Salmon files (9.76 GB, Q1) and download GTEx
 
 ## ▶️ Work-order item 13 answers (Rytis, 2026-10-09: all recommended answers of `docs/plans/2026-10-09_todo_triage.md`)
 
-1. [ ] One cluster block for M3.11 with M4's Q2, written by an agent; M3.13 and P2Q.8 planned from what it measures.
+1. [ ] One cluster block for M3.11 with M4's Q2, written by an agent (`docs/plans/2026-10-09_m3_11_q2_cluster_blocks.md`, 6 blocks; the STAR index's RAM and time are unmeasured, their limits marked as guesses); M3.13 and P2Q.8 planned from what it measures.
 2. [ ] The G.5/U.11 Kebnekaise rehearsal after package G's CONVENTIONS line.
 3. [ ] P2S.8: each contract's title room from its own drawn axis height (wave 2).
 4. [ ] TCGA mRNA sanity rules (rows 739, 740) registered now, labelled not blind (wave 2).
-5. [ ] CPTAC-2 breast miRNA and isoform files downloaded (104 tumour files each, 5,251,801 and 47,005,217 B).
+5. [x] CPTAC-2 breast miRNA and isoform files downloaded (104 tumour files each, 5,251,801 and 47,005,217 B), 2026-10-09: every md5 matched, metadata as `ctx_fetch_gdc.sh` writes it, into `~/ctx_breast/data/raw/cptac_brca_{mirna,isoform}`.
 6. [ ] SCAN-B, TOIL/GTEx, CPTAC ccRCC, LUAD and LSCC, and the GTEx V11 junction file: an agent measures sizes and reads licences first.
 7. [x] HPA's own tau: closed; v25's files carry none, and the page labels tau as ours (D-056).
 8. [ ] Cassetta breast: an agent writes the dataset files with the paper's comparisons and registers their sanity rules before `ctx de`; Step-2 and the D28 treatment dataset after the v1.0 pilot.
 9. [ ] GHCR: dispatch the containers workflow at 0.1.0 once package F adds the `figures` target.
+11. [ ] Dataset survey answers (Rytis 2026-10-09, `docs/plans/2026-10-09_dataset_survey.md`): CPTAC ccRCC downloaded now (PDC000127 freeze, mapping and clinical; GDC STAR counts, 202 tumour and 75 normal files; about 1.19 GB), one tumour aliquot per case chosen by the GDC reader's door; M9 stays on GTEx V11 release 2025-08-22, its page saying a 2026-05-19 re-release without the LCM samples exists; M9's junction panel from GTEx V10's per-gene medians through the API, labelled V10. SCAN-B, TOIL, LUAD, LSCC later in their phases; the V11 junction file not on the laptop.
+12. [ ] Raw GDC count matrices stay out of the kit (Rytis 2026-10-09): the four TCGA counts tables were 94,046,616 to 204,776,548 B against the 64 MB cap. The kit carries each project's GDC manifest and the commands that rebuild them (the fetch, then `ctx gather --gdc-dir`), names what it leaves out in README.md and MANIFEST.json, and ships every derived table; Step-1's counts still ship.
+13. [ ] Cassetta breast datasets (merged aec331d, rules registered 2026-10-09 09:56 before any `ctx de`), Rytis's answers 2026-10-09: tumour against adjacent normal kept as the course's own comparison on GSE100925, labelled as not the paper's; the non-classical monocyte groups inferred from batches 1 and 3, checked against the paper's Table S1 before teaching; the 4 DCIS samples kept in total_breast and named on the page; MON103-107 and mon103-107 as different donors; GSE100925 unpaired (no patient field); its 23 100-nt runs a batch in the design. Then `ctx de` on the three.
+14. [ ] read_length judged within each read-length group, not across a cohort that mixes 101, 76 and 75 nt by design (Rytis 2026-10-09; it flagged 39 Step-1 runs for their length alone).
+15. [ ] pytest-xdist added to the environment so the suite runs in parallel toward M3.14's 5 minutes (Rytis 2026-10-09; CI took 1,692 s serial).
 10. [ ] The kit as a GitHub release asset once kit v8 is built; Zenodo held until the Step-1 redistribution terms are settled.
 
 ## ▶️ Work order (Rytis, 2026-10-01)

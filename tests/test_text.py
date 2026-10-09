@@ -43,6 +43,47 @@ def _templates() -> str:
     return "\n".join(p.read_text() for p in (ROOT / "src/ctx/report/templates").glob("*.j2"))
 
 
+NAME = re.compile(r"[\w.\-]+")
+WORD = re.compile(r"\w")
+# A quote, the run of name characters it opens, and the character after the run.
+QUOTED = re.compile(r"""["']([\w.\-]*)(?=(.?))""", re.DOTALL)
+
+
+def _quoted_names(code: str) -> set[str]:
+    """Every name ``["']name(["'.{]|\\b)`` matches in ``code``, found in one pass.
+
+    One regex per key over 1.9 MB of code took 57 s for 2,526 keys (M3.14); this index answers
+    the same question for any key of name characters, which test_quoted_index_agrees checks.
+    """
+    names = set()
+    for found in QUOTED.finditer(code):
+        run, after = found.groups()
+        for cut in range(1, len(run) + 1):
+            following = run[cut] if cut < len(run) else after
+            boundary = bool(WORD.fullmatch(run[cut - 1])) != bool(WORD.fullmatch(following))
+            if (following and following in "\"'.{") or boundary:
+                names.add(run[:cut])
+    return names
+
+
+def _named_in_code(prefix: str, code: str, names: set[str]) -> bool:
+    if NAME.fullmatch(prefix):
+        return prefix in names
+    return re.search(rf"""["']{re.escape(prefix)}(["'.{{]|\b)""", code) is not None
+
+
+def test_quoted_index_agrees():
+    """The index equals the per-key regex on code built to hit each of its cases.
+
+    Mutations caught: the character after a run consumed (a run opened by it is lost); the end
+    of the code taken as no boundary; a dot taken as a word character."""
+    code = """x = 'a.b' + "c{d}" + 'e'f' + "g-h" + 'i.' + "j_k(" + 'l"""
+    names = _quoted_names(code)
+    for prefix in ("a", "a.b", "a.", "c", "e", "f", "g", "g-h", "i", "i.", "j", "j_k", "l", "h"):
+        expected = re.search(rf"""["']{re.escape(prefix)}(["'.{{]|\b)""", code) is not None
+        assert (prefix in names) is expected, prefix
+
+
 def test_every_key_is_read_somewhere():
     """A key no code names is text no page shows: edited, it would change nothing.
 
@@ -52,13 +93,14 @@ def test_every_key_is_read_somewhere():
     after a dot, so process.argv or ctx.qc.multiqc_io in code cannot vouch for a dead key.
     """
     code, templates = _code(), _templates()
+    names = _quoted_names(code)
     unused = []
     for file in sorted(CONTENT.glob("*.toml")):
         for path in _paths(tomllib.loads(file.read_text())):
             parts = path.split(".")
             prefixes = [".".join(parts[:i]) for i in range(len(parts), 0, -1)]
             named = any(
-                re.search(rf"""["']{re.escape(p)}(["'.{{]|\b)""", code)
+                _named_in_code(p, code, names)
                 or re.search(rf"(?<![\w.]){file.stem}\.{re.escape(p)}\b", templates)
                 for p in prefixes
             )

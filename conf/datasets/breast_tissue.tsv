@@ -1,0 +1,104 @@
+run_accession	gsm	title	donor	library_run	source_name	tissue	cell type	histology	grade	er status	pr status	her2 status	description
+SRR5811633	GSM2696500	RNA150213LC_C4	RNA150213LC_C4	RNA150213LC	No clinical information available	No clinical information available	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811634	GSM2696501	RNA140128LC_102	RNA140128LC_102	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal with prominent lobular features	2	0	0	2+ (20)	
+SRR5811635	GSM2696502	RNA140128LC_112	RNA140128LC_112	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811636	GSM2696503	RNA140128LC_125	RNA140128LC_125	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Metaplastic	3	0	0	0	
+SRR5811637	GSM2696504	RNA140128LC_128	RNA140128LC_128	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	2	8 (100)	8 (100)	1+ (10)	
+SRR5811638	GSM2696505	RNA140128LC_130	RNA140128LC_130	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811639	GSM2696506	RNA140128LC_139	RNA140128LC_139	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811640	GSM2696507	RNA140128LC_142	RNA140128LC_142	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	0	0	1+ (10)	
+SRR5811641	GSM2696508	RNA140128LC_144	RNA140128LC_144	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811642	GSM2696509	RNA140128LC_145	RNA140128LC_145	RNA140128LC	Human Breast Normal	Normal Breast	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811643	GSM2696510	RNA140128LC_147	RNA140128LC_147	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811644	GSM2696511	RNA140128LC_149	RNA140128LC_149	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811645	GSM2696512	RNA140128LC_155	RNA140128LC_155	RNA140128LC	Prophylactic Mastectomy	Prophylactic Mastectomy	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811646	GSM2696513	RNA140128LC_163	RNA140128LC_163	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	0	0	0	
+SRR5811647	GSM2696514	RNA140128LC_166	RNA140128LC_166	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (>95)	3+ (>90)	0	
+SRR5811648	GSM2696515	RNA140128LC_170	RNA140128LC_170	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (90)	0	2+	
+SRR5811649	GSM2696516	RNA140128LC_171	RNA140128LC_171	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (90)	0	2+	
+SRR5811650	GSM2696517	RNA140128LC_174	RNA140128LC_174	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	1	3+ (100)	3+ (100)	0	
+SRR5811651	GSM2696518	RNA140128LC_175	RNA140128LC_175	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	1	3+ (100)	3+ (100)	0	
+SRR5811652	GSM2696519	RNA140128LC_177	RNA140128LC_177	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (99)	3+ (60)	2+	
+SRR5811653	GSM2696520	RNA140128LC_178	RNA140128LC_178	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (30)	1-3+ (40)	3+	
+SRR5811654	GSM2696521	RNA140128LC_181	RNA140128LC_181	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	2	3+ (30)	3+ (30)	0	
+SRR5811655	GSM2696522	RNA140128LC_182	RNA140128LC_182	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (100)	0	2+	
+SRR5811656	GSM2696523	RNA140128LC_183	RNA140128LC_183	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (100)	0	2+	
+SRR5811657	GSM2696524	RNA140128LC_186	RNA140128LC_186	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	0	0	2+	
+SRR5811658	GSM2696525	RNA140128LC_188	RNA140128LC_188	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	1-3+ (90)	1-3+ (60)	-	No fpkms submitted for this sample because it was not included in current publication
+SRR5811659	GSM2696526	RNA140128LC_189	RNA140128LC_189	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	1-3+ (90)	1-3+ (60)	-	
+SRR5811660	GSM2696527	RNA140128LC_191	RNA140128LC_191	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	2	3+ (100)	1-3+ (60)	-	
+SRR5811661	GSM2696528	RNA140128LC_193	RNA140128LC_193	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	2	3+ (100)	1+ (10)	0	
+SRR5811662	GSM2696529	RNA140128LC_194	RNA140128LC_194	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	1	3+ (>95)	0	0	
+SRR5811663	GSM2696530	RNA140128LC_195	RNA140128LC_195	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	1	3+ (>95)	0	0	
+SRR5811664	GSM2696531	RNA140128LC_196	RNA140128LC_196	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	1	3+ (90)	3+ (70)	0	
+SRR5811665	GSM2696532	RNA140128LC_197	RNA140128LC_197	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	1	3+ (90)	3+ (70)	0	
+SRR5811666	GSM2696533	RNA140128LC_198	RNA140128LC_198	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	1	3+ (95)	3+ (50)	0	
+SRR5811667	GSM2696534	RNA140128LC_199	RNA140128LC_199	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	1	3+ (95)	3+ (50)	0	
+SRR5811668	GSM2696535	RNA140128LC_200	RNA140128LC_200	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	0	0	2+	
+SRR5811669	GSM2696536	RNA140128LC_201	RNA140128LC_201	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	0	0	2+	
+SRR5811670	GSM2696537	RNA140128LC_202	RNA140128LC_202	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	3+ (>95)	0	2+	
+SRR5811671	GSM2696538	RNA140128LC_207	RNA140128LC_207	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	0	0	3+	
+SRR5811672	GSM2696539	RNA140128LC_208	RNA140128LC_208	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	2+ (20)	0	2+	
+SRR5811673	GSM2696540	RNA140128LC_209	RNA140128LC_209	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	2+ (20)	0	2+	
+SRR5811674	GSM2696541	RNA140128LC_21	RNA140128LC_21	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811675	GSM2696542	RNA140128LC_40	RNA140128LC_40	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	0	0	2+	
+SRR5811676	GSM2696543	RNA140128LC_58	RNA140128LC_58	RNA140128LC	Prophylactic Mammoplasty	Prophylactic Mammoplasty	--	--	--	--	--	--	
+SRR5811677	GSM2696544	RNA140128LC_62	RNA140128LC_62	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811678	GSM2696545	RNA140128LC_69	RNA140128LC_69	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	3+ (>90)	1 (10)	2+	
+SRR5811679	GSM2696546	RNA140128LC_71	RNA140128LC_71	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811680	GSM2696547	RNA140128LC_72	RNA140128LC_72	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	1	8 (100)	7 (90)	1+ (20)	
+SRR5811681	GSM2696548	RNA140128LC_75	RNA140128LC_75	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811682	GSM2696549	RNA140128LC_77	RNA140128LC_77	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	DCIS (Comedo)	3	3 (10)	3 (<1)	-	
+SRR5811683	GSM2696550	RNA140128LC_86	RNA140128LC_86	RNA140128LC	Prophylactic Mastectomy	Prophylactic Mastectomy	--	--	--	--	--	--	
+SRR5811684	GSM2696551	RNA140128LC_87	RNA140128LC_87	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811685	GSM2696552	RNA140128LC_88	RNA140128LC_88	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811686	GSM2696553	RNA140128LC_96	RNA140128LC_96	RNA140128LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811687	GSM2696554	RNA140128LC_98	RNA140128LC_98	RNA140128LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	7-8 (89-90)	8 (100)	3+ (100)	
+SRR5811688	GSM2696555	RNA150213LC_A1	RNA150213LC_A1	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	7-8 (89-90)	8 (100)	3+ (100)	No fpkms submitted for this sample because it was not included in current publication
+SRR5811689	GSM2696556	RNA150213LC_A10	RNA150213LC_A10	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811690	GSM2696557	RNA150213LC_A11	RNA150213LC_A11	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811691	GSM2696558	RNA150213LC_A7	RNA150213LC_A7	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811692	GSM2696559	RNA150213LC_A8	RNA150213LC_A8	RNA150213LC	Prophylactic Mammoplasty	Prophylactic Mammoplasty	--	--	--	--	--	--	
+SRR5811693	GSM2696560	RNA150213LC_A9	RNA150213LC_A9	RNA150213LC	Human Breast Normal	Normal Breast	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811694	GSM2696561	RNA150213LC_B10	RNA150213LC_B10	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	0	0	0	
+SRR5811695	GSM2696562	RNA150213LC_B11	RNA150213LC_B11	RNA150213LC	Human Breast Normal	Normal Breast	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811696	GSM2696563	RNA150213LC_B12	RNA150213LC_B12	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	0	0	3+ (100)	
+SRR5811697	GSM2696564	RNA150213LC_B3	RNA150213LC_B3	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811698	GSM2696565	RNA150213LC_B6	RNA150213LC_B6	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811699	GSM2696566	RNA150213LC_B7	RNA150213LC_B7	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811700	GSM2696567	RNA150213LC_B8	RNA150213LC_B8	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811701	GSM2696568	RNA150213LC_C10	RNA150213LC_C10	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811702	GSM2696569	RNA150213LC_C11	RNA150213LC_C11	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	1 (95)	2 (99)	0	
+SRR5811703	GSM2696570	RNA150213LC_C12	RNA150213LC_C12	RNA150213LC	Human Breast Normal	Normal Breast	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811704	GSM2696571	RNA150213LC_C2	RNA150213LC_C2	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811705	GSM2696572	RNA150213LC_C6	RNA150213LC_C6	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811706	GSM2696573	RNA150213LC_D11	RNA150213LC_D11	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811707	GSM2696574	RNA150213LC_D2	RNA150213LC_D2	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	2	8 (100)	6-7 (66)	2+	
+SRR5811708	GSM2696575	RNA150213LC_D3	RNA150213LC_D3	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811709	GSM2696576	RNA150213LC_D4	RNA150213LC_D4	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811710	GSM2696577	RNA150213LC_D8	RNA150213LC_D8	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811711	GSM2696578	RNA150213LC_E10	RNA150213LC_E10	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811712	GSM2696579	RNA150213LC_E11	RNA150213LC_E11	RNA150213LC	Human Breast Normal	Normal Breast	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811713	GSM2696580	RNA150213LC_E12	RNA150213LC_E12	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	8 (100)	3-4 (1)	2+ (70)	
+SRR5811714	GSM2696581	RNA150213LC_E2	RNA150213LC_E2	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	3	3+ (30)	1-3+ (40)	3+	
+SRR5811715	GSM2696582	RNA150213LC_E3	RNA150213LC_E3	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811716	GSM2696583	RNA150213LC_E5	RNA150213LC_E5	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal and Micropapillary	3	7-8 (95)	6 (66)	1+ (80)	
+SRR5811717	GSM2696584	RNA150213LC_F1	RNA150213LC_F1	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811718	GSM2696585	RNA150213LC_F10	RNA150213LC_F10	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811719	GSM2696586	RNA150213LC_F11	RNA150213LC_F11	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811720	GSM2696587	RNA150213LC_F12	RNA150213LC_F12	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811721	GSM2696588	RNA150213LC_F4	RNA150213LC_F4	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811722	GSM2696589	RNA150213LC_F7	RNA150213LC_F7	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811723	GSM2696590	RNA150213LC_F8	RNA150213LC_F8	RNA150213LC	Human Breast Normal	Normal Breast	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811724	GSM2696591	RNA150213LC_F9	RNA150213LC_F9	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	1+ (1)	0	2+	
+SRR5811725	GSM2696592	RNA150213LC_G1	RNA150213LC_G1	RNA150213LC	No clinical information available	No clinical information available	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811726	GSM2696593	RNA150213LC_G12	RNA150213LC_G12	RNA150213LC	Human Breast Normal	Normal Breast	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811727	GSM2696594	RNA150213LC_G2	RNA150213LC_G2	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811728	GSM2696595	RNA150213LC_G3	RNA150213LC_G3	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811729	GSM2696596	RNA150213LC_G4	RNA150213LC_G4	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811730	GSM2696597	RNA150213LC_G7	RNA150213LC_G7	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811731	GSM2696598	RNA150213LC_G8	RNA150213LC_G8	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	3+ (100)	2-3+ (50)	3+	
+SRR5811732	GSM2696599	RNA150213LC_H10	RNA150213LC_H10	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Ductal	2	6	3	1+	
+SRR5811733	GSM2696600	RNA150213LC_H11	RNA150213LC_H11	RNA150213LC	Prophylactic Mastectomy	Prophylactic Mastectomy	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
+SRR5811734	GSM2696601	RNA150213LC_H12	RNA150213LC_H12	RNA150213LC	Human breast tumor	Breast tumor	Whole human breast tumor	Lobular	2	8 (100)	8 (100)	0	
+SRR5811735	GSM2696602	RNA150213LC_H8	RNA150213LC_H8	RNA150213LC	Human breast adjacent normal	Adjacent normal	--	--	--	--	--	--	No fpkms submitted for this sample because it was not included in current publication
