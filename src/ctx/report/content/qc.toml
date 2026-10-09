@@ -74,6 +74,7 @@ no_annotation = "Composition shares not measured: the dataset file names no {res
 not_fetched = "Composition shares not measured: the annotation is not at {path}; run ctx setup with this dataset file."
 no_counts = "Counts not judged: gather wrote no counts for this dataset (it needs --rnaseq-dir). The reads and the pipeline's reports are judged alone."
 skipped = "{n} runs left unread, their FASTQ not verified or not downloaded (the skipped table lists why): {runs}."
+no_sequence_content = "{title}: FastQC's verdict is judged, and no figure is drawn. MultiQC writes no table of it, and only MultiQC reads FastQC's reports."
 flat_grid = "The fastp grid on {run} is flat: every setting keeps {pct:.1f} % of its reads, so there is nothing to map."
 flat_floor = "The fastp grid on {run} is flat: {kept} settings each keep {pct:.1f} % of its reads, and the other {none} keep none. There is nothing to map."
 
@@ -189,7 +190,7 @@ columns.num_decoy_fragments = "Fragments whose best match was a decoy, the genom
 columns.not_assigned = "Fragments processed but neither assigned nor decoys."
 columns.mt_fraction = "Share of counted reads on chrM genes other than Mt_rRNA."
 columns.mt_rrna_fraction = "Share of counted reads on the Mt_rRNA genes."
-columns.rrna_fraction = "Share of counted reads on nuclear rRNA genes and pseudogenes."
+columns.rrna_fraction = "Share of counted reads on nuclear rRNA genes, their pseudogenes and the two 18S-antisense lncRNAs."
 columns.useful_share = "num_mapped / total_reads."
 columns.mt_rrna_share = "mt_fraction + mt_rrna_fraction + rrna_fraction."
 
@@ -223,6 +224,7 @@ glance = "Every sample at a glance"
 metrics = "Every metric, sample by sample"
 identity = "Composition and identity"
 run_metrics = "Every read metric, run by run"
+fastqc = "FastQC's own plots, sample by sample"
 
 [multiqc]
 comment = "Coloured by the course's QC registry: green good, orange usable, red bad, where a source gives a band. ctx qc also judges each sample against its own stratum."
@@ -241,29 +243,79 @@ columns.num_mapped = "Fragments Salmon assigned to a transcript."
 columns.num_decoy_fragments = "Fragments whose best match was a decoy, the genome outside the transcripts."
 columns.not_assigned = "Fragments processed but neither assigned nor decoys."
 
-[figures.quality]
+# FastQC's own plots behind its verdicts (P2Q.9): read 1 of every run or sample, through MultiQC.
+[figures.fastqc]
+bands.good = "good"
+bands.usable = "warn"
+bands.bad = "fail"
+theoretical = "theoretical GC of the human transcriptome"
+# One of these two follows the reading guide, by how many lines the figure draws.
+styles_distinct = "Each {unit} has its own colour and line pattern, named in the legend."
+styles_shared = "Lines share their group's colour: more than {most} lines cannot each have their own style. The hover names each {unit}."
+source = "Shading, display only: {source}"
+columns.run_accession = "Run accession."
+columns.sample = "Sample: the run, or read 1 of a pair."
+columns.group = "Every line, where no sheet column has few enough levels to colour by."
+columns.x = "Across: the position in read 1, in FastQC's bins, or the GC share of a read."
+columns.y = "Up: the value FastQC plots there."
+
+[figures.fastqc.fastqc_per_base_quality]
 title = "Base quality along the read"
-lead = "Mean base quality at each position of the first read, for {n} runs."
+lead = "Mean base quality at each position of the first read of {n} {unit}s."
 x = "Position in read"
 y = "Mean quality"
-good = "good"
-usable = "reasonable"
-bad = "poor"
-caption = "Mean [[Phred]] quality at each position of the first read, one line per run, in FastQC's position bins. Shading as in FastQC's own plot ({source}). {n} runs; no test."
+caption = "Mean [[Phred]] quality at each position of read 1, one line per {unit}, in FastQC's position bins. Shading as in FastQC's own plot. {n} lines; no test."
 reading = [
-    "Each line is one run: across, the position in the read; up, the mean quality of the bases there.",
-    "Shading follows FastQC's plot: green good, orange reasonable, red poor.",
-    "A line that drops into the lower bands at the end is a run whose last cycles degraded.",
+    "Each line is one {unit}: across, the position in the read; up, the mean quality of the bases there.",
+    "Shading follows FastQC's plot: green good, orange warn, red fail. A line that drops at the end had degraded last cycles.",
 ]
-# One of these two follows the reading guide, by how many runs the figure draws.
-styles_distinct = "Each run has its own colour and line pattern, named in the legend; the hover gives its sample."
-styles_shared = "Runs share their group's colour: more than {most} runs cannot each have their own style."
-units = { position = "nt", quality = "Phred" }
-columns.run_accession = "Run accession."
-columns.position = "Position in read 1, FastQC's bin."
-columns.quality = "Mean Phred quality of the bases there."
-columns.sample = "Sample the run belongs to."
-columns.group = "Every run, where no sheet column has few enough levels to colour by."
+units = { x = "nt", y = "Phred" }
+
+[figures.fastqc.fastqc_adapter]
+title = "Adapter content along the read"
+lead = "The share of reads carrying adapter up to each position of {n} {unit}s."
+x = "Position in read"
+y = "Reads with adapter"
+caption = "The largest of FastQC's [[adapter]] curves at each position of read 1, one line per {unit}. Shading at FastQC's warn and fail limits; display only. {n} lines; no test."
+reading = [
+    "Each line is one {unit}: across, the position in the read; up, the share of reads with adapter by there.",
+    "A line rising early is a {unit} with short inserts. FastQC's verdict reads the highest point of the line.",
+]
+units = { x = "nt", y = "%" }
+
+[figures.fastqc.fastqc_n_content]
+title = "N bases along the read"
+lead = "The share of bases called N at each position of {n} {unit}s."
+x = "Position in read"
+y = "N bases"
+caption = "The share of bases called N at each position of read 1, one line per {unit}. Shading at FastQC's warn and fail limits; display only. {n} lines; no test."
+reading = [
+    "Each line is one {unit}: across, the position in the read; up, the share of its bases called N there.",
+    "A spike at one position is a failed sequencing cycle, shared by the {unit}s of one run.",
+]
+units = { x = "nt", y = "%" }
+
+[figures.fastqc.fastqc_gc_distribution]
+title = "GC content of the reads"
+lead = "The share of reads at each GC content of {n} {unit}s, over the transcriptome's curve."
+x = "GC content of a read"
+y = "Reads"
+caption = "Per-read GC histogram of read 1, one line per {unit}; dashed, [[MultiQC]]'s theoretical curve for the human transcriptome. FastQC judges the deviation from its own normal fit. {n} lines; no test."
+reading = [
+    "Each line is one {unit}: across, a read's GC content; up, the share of reads with it.",
+    "A second peak or a shoulder is a set of sequences unlike the rest: contamination, or a few dominant transcripts.",
+]
+units = { x = "%", y = "%" }
+
+[figures.fastqc.fastqc_overrepresented]
+title = "The most frequent sequence"
+lead = "The top sequence's share of the reads of {n} {unit}s, by stratum."
+computed = "share of read 1 that is FastQC's top overrepresented sequence"
+meaning = "The share of reads that are the single most frequent sequence."
+reading = [
+    "Each point is one {unit}: up, the share of its reads that are its most frequent sequence.",
+    "FastQC warns from one limit and fails from the other; the verdict is shown as a status, not on this axis.",
+]
 
 [figures.grid]
 title = "Reads fastp keeps, by its quality and length settings"
@@ -320,8 +372,18 @@ range = "median ± k MAD"
 good = "good"
 usable = "usable"
 bad = "bad"
-spans = "Shaded: the metric's absolute bands ({source})."
-no_spans = "No absolute band applies; the page says why beside the figure."
+line = "reference line at {value}"
+calls = "a strand call: reverse, unstranded or forward"
+tolerance = "Salmon's unstranded strip, {low} to {high}"
+source = "Source of the shading: {source}"
+# Every unit at one value: a cut the course made, not a measurement (teaching runs, D-052).
+equal = "All {n} hold {value} {unit}: a value set upstream, such as a cut to a fixed read count, so the bands grade that cut, not the runs."
+# What the strip shades, by figures.shading_kind.
+shading.judged = "Shaded: the absolute bands, cited beside the figure."
+shading.display = "Shaded, display only: bands cited beside the figure; they judge nothing."
+shading.line = "Dashed: a cited reference line; it judges nothing."
+shading.calls = "Blue: the regions where a strand call is made; between them the call is undetermined."
+shading.none = "No absolute band applies; the page says why beside the figure."
 caption = "One point per sample or run, by stratum; the value is the {computed}. Grey bar: the stratum's median ± k scaled MAD; a triangle lies outside it on the bad side. {bands} No test."
 
 [figures.band_map]
@@ -385,7 +447,25 @@ unknown = "not recorded"
 recorded = "The recorded sex, or not recorded."
 label = "The sample's name where expression and record disagree."
 boundary = "the call's boundary: chrY equal to XIST"
-caption = "{xist} against the mean of {genes}, in log2 of CPM plus a pseudocount, for {n} samples. A transplanted sample is compared with its donor. No test."
+caption = "{xist} against the mean of {genes}, in log2 of CPM plus a pseudocount, for {n} samples. A transplanted sample is compared with its donor; most of both markers: {cross}. No test."
+
+# P2Q.3: the two rRNA and mitochondrial shares, after P2Q.10 counts 18S reads.
+[figures.composition]
+title = "Mitochondrial against nuclear rRNA share"
+lead = "{flagged} of {n} samples are flagged on some metric; triangles are flagged on either share."
+x = "Nuclear rRNA"
+y = "Mitochondrial transcripts"
+mt_fraction = "Share of counted reads on chrM genes other than Mt_rRNA, in %."
+rrna_fraction = "Share of counted reads on nuclear rRNA genes, their pseudogenes and the two 18S-antisense lncRNAs, in %."
+flag = "Whether either share flagged the sample: the point's shape."
+flagged = "flagged on either share"
+not_flagged = "not flagged on either"
+caption = "Per sample, the share of counted reads on nuclear rRNA against the mitochondrial share, {n} samples. 18S reads are counted only in an [[strandedness|unstranded]] [[library]]. No test."
+reading = [
+    "Each point is one sample: across, its nuclear rRNA share; up, its mitochondrial share.",
+    "Far right: rRNA the library preparation left. High up: stressed or dying cells, or lost cytoplasm.",
+    "The hover names every metric that flagged the sample.",
+]
 
 [figures.linked]
 title = "Samples on the PCA, beside their labels and QC status"
