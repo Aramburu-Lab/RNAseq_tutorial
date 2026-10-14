@@ -13,6 +13,7 @@ import polars as pl
 import pytest
 
 from ctx.dataset import load
+from ctx.de.page import words as de_words
 from ctx.de.run import Writer
 from ctx.de.stats import ALPHA
 from ctx.function import page as words
@@ -23,6 +24,7 @@ from ctx.report.builder import FigureBlock
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = load(ROOT / "tests" / "fixtures" / "datasets" / "de_synthetic.toml")
 FEATURED = SPEC.de.featured
+SAID = de_words(next(c for c in SPEC.contrasts if c.name == FEATURED), SPEC.columns)
 N, UP, DOWN = 3000, 1200, 300
 
 
@@ -85,7 +87,7 @@ def test_no_ora_figure_where_no_set_passes(tmp_path):
     """No passing set in either direction: a sentence in place of the figure, no empty bars."""
     writer = Writer(tmp_path / "06_function", "desynth", date(2026, 10, 7), {})
     nulls = {k: v for k, v in _sets().items() if k.startswith("NULL")}
-    group = m6._featured(writer, SPEC.contrasts[0], _enrichment(nulls, _gsea(16, 4)))
+    group = m6._featured(writer, SPEC.contrasts[0], SAID, _enrichment(nulls, _gsea(16, 4)))
     assert group.items[0] == text.fill("function", "figures.ora.none", alpha=ALPHA)
     assert not group.tabs and isinstance(group.items[1], FigureBlock)
 
@@ -95,7 +97,7 @@ def test_the_gsea_highlight_line_names_the_bars_drawn(tmp_path, passing, which):
     """Step-1 drew 15 GSEA bars, all passing, under "the others are shown for context". The
     line now follows the 15 drawn: 16 passing sets, 10, none. Mutation: the line fixed."""
     writer = Writer(tmp_path / "06_function", "desynth", date(2026, 10, 7), {})
-    group = m6._featured(writer, SPEC.contrasts[0], _enrichment(_sets(), _gsea(passing, 20)))
+    group = m6._featured(writer, SPEC.contrasts[0], SAID, _enrichment(_sets(), _gsea(passing, 20)))
     gsea = group.items[1]
     assert isinstance(gsea, FigureBlock) and len(gsea.rows) == m6.TOP_SETS
     assert gsea.text.reading[-1] == text.fill("function", f"figures.gsea.{which}", alpha=ALPHA)
@@ -106,10 +108,10 @@ def test_the_gsea_caption_counts_the_sets_drawn(tested, shown):
     """Package C: the caption said "the 15 sets with the smallest FDR" whatever was drawn. It
     counts the bars: 15 of 20 tested, all 9 of 9, and the one of 1. Mutation: the caption
     filled with TOP_SETS again."""
-    data = m6._gsea_bars(FEATURED, _gsea(tested // 2, tested - tested // 2))
+    data = m6._gsea_bars(SAID, _gsea(tested // 2, tested - tested // 2))
     assert data.frame.height == shown
     want = text.fill("function", "figures.gsea.caption_one" if shown == 1
-                     else "figures.gsea.caption", name=FEATURED, permutations=1000, seed=42,
+                     else "figures.gsea.caption", label=SAID.label, permutations=1000, seed=42,
                      shown=shown)  # fmt: skip
     assert data.caption == want
     assert ("the one set tested." if shown == 1 else f"the {shown} sets with") in data.caption
@@ -143,14 +145,16 @@ def test_the_background_words_follow_a_union_that_lowers_significance(planted):
 def test_the_background_words_follow_each_direction(planted_sets, moved, direction):
     """A union that only adds genes outside UP_A and UP_B makes both look more significant;
     one that also gives UP_B 300 untested members moves one each way."""
-    trap, tested, union = m6._trap(FEATURED, _results(), planted_sets)
+    trap, tested, union = m6._trap(SAID, _results(), planted_sets)
     more, less, shown = m6._moved(trap)
     assert (more, less) == moved and words.union_direction(more, less) == direction
     reading = words.trap_text(tested, union, (more, less), shown).reading[1]
     assert reading == text.word("function", f"figures.background.{direction}")
-    (check, *_) = words.think(direction)
+    (check, *_) = words.questions(direction)
     assert check.prompt == text.word("function", f"questions.union_{direction}.prompt")
-    assert words.think(None) == words.THINK
+    assert [c.prompt for c in words.questions(None)] == [
+        text.word("function", "questions.rank.prompt")
+    ]
 
 
 def test_the_background_caption_counts_calls_and_symbols(planted):

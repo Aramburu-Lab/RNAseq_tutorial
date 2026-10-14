@@ -27,7 +27,6 @@ from ctx.io.readme_companion import write_table
 from ctx.proteo import pdc
 from ctx.report import text
 from ctx.report.builder import (
-    FIELDS,
     KeyNumber,
     ModulePage,
     ParameterCard,
@@ -116,8 +115,8 @@ def _skeleton() -> dict[str, Any]:
         n_colours=len(DATA_COLOURS), minimum=MINIMUM,
     )  # fmt: skip
     return text.skeleton(PAGE) | {
-        FIELDS["method"]: text.fill(PAGE, "method", laptop_cores=runtime.LAPTOP_CORES),
-        FIELDS["interpretation"]: interpretation,
+        "method": text.fill(PAGE, "method", laptop_cores=runtime.LAPTOP_CORES),
+        "interpretation": interpretation,
     }
 
 

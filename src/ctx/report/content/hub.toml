@@ -1,0 +1,28 @@
+# The course hub (ctx report): the newest page of each module for one dataset, and the
+# verdicts of its pre-registered rules. Placeholders in {braces} are filled by the code.
+
+title = "Course hub: {dataset}"
+intro = "The newest page of every module run on {dataset}, in course order."
+# A value a rule needs that the run did not record.
+not_measured = "not measured"
+
+# Each module's name on the hub, the course page and the teacher guide, in course order.
+[modules]
+setup = "M0 Setup"
+gather = "M1 Gather"
+qc = "M2 Read QC"
+process = "M3 Trim, align, count"
+quant = "M4 Quantification"
+de = "M5 Differential expression"
+function = "M6 Function"
+proteo = "M7 RNA versus protein"
+ncrna = "M8 Non-coding RNA"
+genecard = "M9 Gene cards"
+clinical = "M10 Clinical and survival"
+
+[keys]
+modules = "Modules run"
+modules_value = "{run} of {all}"
+rules = "Rules passed"
+rules_value = "{passed} of {gated}"
+rules_detail = "recorded rules not counted"

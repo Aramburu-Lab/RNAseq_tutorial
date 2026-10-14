@@ -1,7 +1,7 @@
 """Statistical annotation shared by the static and the interactive rendering of a figure.
 
 One ``Caption`` object produces every string either renderer prints, so the PDF, the HTML
-and the README cannot state different numbers.
+and the README cannot state different numbers. The words are ``content/annotate.toml``'s.
 """
 
 import math
@@ -13,6 +13,7 @@ import numpy as np
 import polars as pl
 from scipy.stats import false_discovery_control, mannwhitneyu
 
+from ctx.report import text as content
 from ctx.report.marks import plain
 from ctx.viz.metrics import words, wrap_to
 from ctx.viz.style import (
@@ -24,8 +25,9 @@ from ctx.viz.style import (
     SIZES,
 )
 
-TEST_NAME = "Mann-Whitney U, two-sided"
-PERMANOVA_NAME = "PERMANOVA on Euclidean distances"
+PAGE = "annotate"
+TEST_NAME = content.word(PAGE, "test_name")
+PERMANOVA_NAME = content.word(PAGE, "permanova_name")
 
 
 @dataclass(frozen=True)
@@ -51,7 +53,7 @@ class Caption:
     def label(self, feature: str) -> str:
         """The annotation printed above one feature."""
         t = next(t for t in self.tests if t.feature == feature)
-        return f"p={_fmt(t.p_adj)}\nr={t.r:.2f}"
+        return content.fill(PAGE, "label", p=_fmt(t.p_adj), r=t.r)
 
     def text(self, width: int = 0) -> str:
         """The caption block: test, correction, n per group, and the sign of r.
@@ -64,11 +66,19 @@ class Caption:
         """
         reference, comparison = self.groups
         ns = sorted({(t.n_reference, t.n_comparison) for t in self.tests})
-        n_text = "; ".join(f"n = {a} {reference}, {b} {comparison}" for a, b in ns)
-        body = (
-            f"{TEST_NAME}; p is BH-adjusted over {len(self.tests)} plotted features; "
-            f"{n_text}; rank-biserial r > 0 when {comparison} is higher."
+        n_text = "; ".join(
+            content.fill(
+                PAGE,
+                "sizes",
+                n_reference=a,
+                reference=reference,
+                n_comparison=b,
+                comparison=comparison,
+            )
+            for a, b in ns
         )
+        body = content.fill(PAGE, "caption", test=TEST_NAME, features=len(self.tests),
+                            sizes=n_text, comparison=comparison)  # fmt: skip
         return wrap(body, width)
 
 
@@ -210,19 +220,13 @@ class Permanova:
 
     def text(self, factor: str) -> str:
         """The test as a caption sentence for one factor."""
-        within = ", labels permuted within individuals" if self.stratified else ""
+        within = content.word(PAGE, "permanova.within") if self.stratified else ""
+        values = {"name": PERMANOVA_NAME, "factor": factor, "r2": self.r2, "f": self.f,
+                  "n": self.n, "groups": self.groups}  # fmt: skip
         if math.isnan(self.p):
-            return (
-                f"{PERMANOVA_NAME} for {factor}: R\u00b2 = {self.r2:.2f}, pseudo-F = "
-                f"{self.f:.3g}; no p-value: no individual has samples in two groups, so "
-                f"permuting within individuals cannot move a label (n = {self.n} samples in "
-                f"{self.groups} groups)."
-            )
-        return (
-            f"{PERMANOVA_NAME} for {factor}: R\u00b2 = {self.r2:.2f}, pseudo-F = {self.f:.3g}, "
-            f"p = {_fmt(self.p)} ({self.permutations} permutations{within}; "
-            f"n = {self.n} samples in {self.groups} groups)."
-        )
+            return content.fill(PAGE, "permanova.untested", **values)
+        return content.fill(PAGE, "permanova.tested", p=_fmt(self.p), within=within,
+                            permutations=self.permutations, **values)  # fmt: skip
 
 
 def _pseudo_f(coords: np.ndarray, codes: np.ndarray, n_groups: int) -> tuple[float, float]:

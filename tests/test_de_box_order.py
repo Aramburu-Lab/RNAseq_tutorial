@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import polars as pl
 
+from ctx.de.page import Words
 from ctx.de.run import _box
 
 SAMPLES = ("s1", "s2", "s3", "s4")
@@ -35,7 +36,8 @@ def test_boxes_follow_the_named_order_and_the_first_gene_of_a_symbol():
     counts = pl.DataFrame({"gene_id": ["g1", "g2", "g3", "g4"],
                            **{s: [10.0 * (i + 1), 5.0 + 2 * i, 1.0 + i, 99.0]
                               for i, s in enumerate(SAMPLES)}})  # fmt: skip
-    data, missing = _box(fit(), counts, genes, ("A", "B", "C", "Z"))
+    result = fit()
+    data, missing = _box(result, counts, genes, ("A", "B", "C", "Z"), Words("t", "test", "ref"))
     assert data is not None and missing == ["Z"]
     assert data.frame["feature"].unique(maintain_order=True).to_list() == ["A", "B", "C"]
     assert [t.feature for t in data.caption.tests] == ["A", "B", "C"]

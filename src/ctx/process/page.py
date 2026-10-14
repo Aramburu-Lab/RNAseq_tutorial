@@ -20,7 +20,6 @@ from ctx.qc.checkpoint import gene_types
 from ctx.qc.registry import Metric
 from ctx.report import text
 from ctx.report.builder import (
-    FIELDS,
     FigureBlock,
     Group,
     KeyNumber,
@@ -407,7 +406,7 @@ def sections(ctx: Context, found: Frames, shown: Shown) -> dict[str, Any]:
         "release": ref.annotation.release or text.word(PAGE, "no_release"),
         "low": f"{low:.1f}", "high": f"{high:.1f}",
     })  # fmt: skip
-    return text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}
+    return text.skeleton(PAGE) | filled
 
 
 def build(ctx: Context) -> ModulePage:

@@ -191,6 +191,7 @@ BM = 39
 
 [[contrasts]]
 name = "ndn_gcsf"
+label = "Neutrophils, G-CSF donors against steady state"
 variable = "condition"
 reference = "steady_state"
 tested = "gcsf"
@@ -199,6 +200,7 @@ filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min
 
 [[contrasts]]
 name = "mono_gcsf"
+label = "Monocytes, G-CSF donors against steady state"
 variable = "condition"
 reference = "steady_state"
 tested = "gcsf"
@@ -207,6 +209,7 @@ filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["Reads ≤ 76 nt
 
 [[contrasts]]
 name = "ndn_hsct_early"
+label = "Neutrophils, early after HSCT against steady state"
 variable = "condition"
 reference = "steady_state"
 tested = "hsct"
@@ -215,6 +218,7 @@ filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min
 
 [[contrasts]]
 name = "mono_hsct_early"
+label = "Monocytes, early after HSCT against steady state"
 variable = "condition"
 reference = "steady_state"
 tested = "hsct"
@@ -223,6 +227,7 @@ filters = { tissue = ["PB"], cell_type = ["Monocyte"], batch = ["Reads ≤ 76 nt
 
 [[contrasts]]
 name = "ndn_gcsf_paired"
+label = "Neutrophils, G-CSF against steady state, paired by donor"
 variable = "condition"
 reference = "steady_state"
 tested = "gcsf"
@@ -233,6 +238,7 @@ filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min
 
 [[contrasts]]
 name = "ndn_gcsf_unpaired9"
+label = "Neutrophils, G-CSF against steady state, the same donors unpaired"
 variable = "condition"
 reference = "steady_state"
 tested = "gcsf"
@@ -241,6 +247,7 @@ filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads ≤ 76 nt (min
 
 [[contrasts]]
 name = "ndn_pdac_naive"
+label = "Neutrophils, PDAC against steady state, no batch term"
 variable = "condition"
 reference = "steady_state"
 tested = "pdac"
@@ -249,6 +256,7 @@ filters = { tissue = ["PB"], cell_type = ["NDN"] }
 
 [[contrasts]]
 name = "ndn_pdac_adjusted"
+label = "Neutrophils, PDAC against steady state, batch in the design"
 variable = "condition"
 reference = "steady_state"
 tested = "pdac"
@@ -258,6 +266,7 @@ filters = { tissue = ["PB"], cell_type = ["NDN"] }
 
 [[contrasts]]
 name = "ndn_pdac_within"
+label = "Neutrophils, PDAC against steady state, longer reads only"
 variable = "condition"
 reference = "steady_state"
 tested = "pdac"
@@ -266,6 +275,7 @@ filters = { tissue = ["PB"], cell_type = ["NDN"], batch = ["Reads > 76 nt (max 5
 
 [[contrasts]]
 name = "ndn_null_split"
+label = "Neutrophils at steady state, split in two at random"
 variable = "condition"
 reference = "steady_state"
 tested = "steady_state"
@@ -279,6 +289,7 @@ split = { seed = 42, strata = "sex" }
 # 76 nt or less, 2 over), so ~donor absorbs the batch.
 [[contrasts]]
 name = "ndn_vs_mono_steady"
+label = "Neutrophils against monocytes at steady state, paired by donor"
 variable = "cell_type"
 reference = "Monocyte"
 tested = "NDN"

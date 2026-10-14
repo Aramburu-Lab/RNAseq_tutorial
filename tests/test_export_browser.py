@@ -328,10 +328,10 @@ def _links(figure: str) -> str:
 
 def _module(blocks) -> ModulePage:
     return ModulePage(
-        title="M2 Demo: synthetic", question="Purpose.", concept="Method.",
+        title="M2 Demo: synthetic", purpose="Purpose.", input="Input.", method="Method.",
         parameters=(ParameterCard("--x", "A card.", "1", "Moves it."),),
-        results=(Group("Figures", tuple(blocks)),), practice="Interpretation.",
-        think=(SelfCheck("A question.", "An answer."),), mistakes=("A pitfall.",),
+        results=(Group("Figures", tuple(blocks)),), interpretation="Interpretation.",
+        questions=(SelfCheck("A question.", "An answer."),), pitfalls=("A pitfall.",),
         reproduce=Reproduction("ctx demo", 1.0, 1, 1, "laptop", "none", {"python": "3.12"}),
     )  # fmt: skip
 

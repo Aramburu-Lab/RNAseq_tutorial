@@ -62,11 +62,11 @@ def page(tmp_path_factory) -> Path:
     text = FigureText("cycle", reading=("Each cell is one sample pair's rho.",))
     write_figure(data, out, figure_stem, title="cycle", data_releases={}, text=text)
     built = ModulePage(
-        title="M4 Demo: cycle", question="Purpose.", input="Input.", concept="Method.",
+        title="M4 Demo: cycle", purpose="Purpose.", input="Input.", method="Method.",
         parameters=(ParameterCard("--x", "A card.", "1", "Moves it."),),
         results=(Group("Figures", (figure_block(data, figure_stem, text),)),),
-        practice="Interpretation.", think=(SelfCheck("A question.", "An answer."),),
-        mistakes=("A pitfall.",),
+        interpretation="Interpretation.", questions=(SelfCheck("A question.", "An answer."),),
+        pitfalls=("A pitfall.",),
         reproduce=Reproduction("ctx demo", 1.0, 1, 1, "laptop", "none", {"python": "3.12"}),
     )  # fmt: skip
     return write(built, out / f"{stem('quant', 'cycle_overview', 1, day=date(2026, 10, 14))}.html")

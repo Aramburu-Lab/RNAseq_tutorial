@@ -1,18 +1,254 @@
-# The M5 Differential expression page (ctx de): the sentences moved here so far. The rest of
-# its text is still in src/ctx/de/page.py and src/ctx/de/run.py and moves with P2S.4
-# (TODO.md). Placeholders in {braces} are filled by the code; keep their names.
+# The M5 Differential expression page (ctx de). Placeholders in {braces} are filled by the
+# code; keep their names. A contrast is named by its plain label (the dataset file's
+# [[contrasts]] label, or contrast.label below), never by its identifier (Rytis 2026-10-01).
 
-# The figure files draw every tested gene; a page that thins them ends its caption with
-# ui.toml's thinned sentence.
+title = "M5 Differential expression: {dataset}"
+budget = "Track B: under {minutes} min and {ram_gb} GB; RAM bound self + {threads} x largest child = {bound:,} bytes"
+inputs = "{name} (newest gather output)"
+purpose = "Find the genes whose [[raw counts|counts]] differ between two groups by more than they vary within each group, and state how sure each call is."
+input = "The newest [[gene counts]], sample sheet and gene table from `ctx gather`, and the dataset file's `[[contrasts]]` and `[de]`: comparisons, [[design formula|designs]] and group sizes."
+method = """DESeq2 tests, gene by gene, whether counts differ between two groups by more than they vary within each group. The design names everything else that differs between samples, such as the individual or the [[batch]], so it is not read as the group effect.
+
+An [[expression filter]] removes genes too weakly expressed to test. The [[PCA]] shows the samples on a blind [[VST]] of every gene with a count, before any test."""
+interpretation = """Check the p-value histogram and the [[dispersion]] plot before the volcano. Put a recorded batch in the design rather than dropping samples. Rank genes by the [[lfc_shrinkage|shrunk fold change]]; the test uses the raw one.
+
+[[padj]] below {alpha} bounds the average share of false calls only when the p-values of unchanged genes are exact. DESeq2 treats each gene's estimated dispersion as exact, so the p-values run small.
+
+On synthetic data with {per_group} samples per group, {false_pct} % of genes at padj below {alpha} were false on average. BH promised {bh_pct} %; the call's fold-change filter cut the share to {filtered_pct} %."""
+# "Term: rest" in a pitfall prints Term in bold.
+pitfalls = [
+    "Blaming batch for a small within-batch contrast: it also has fewer samples, so less [[power]].",
+    "Counting several samples from one individual as independent [[biological replicates]]: the test becomes overconfident.",
+    "Reading the volcano's height as the call: it is the raw p-value, and the call uses the adjusted one.",
+]
+
+[[terms]]
+term = "Size factor"
+meaning = "A per-sample scaling for sequencing depth, so counts compare across samples."
+
+[[terms]]
+term = "Dispersion"
+meaning = "How much a gene varies between samples beyond counting noise."
+
+[[terms]]
+term = "log2 fold change"
+meaning = "log2 of tested over reference: one is twice as high, minus one half as high."
+
+[[terms]]
+term = "Wald test"
+meaning = "Asks whether a gene's log2 fold change differs from zero, given its variation."
+
+[[terms]]
+term = "padj"
+meaning = "The p-value adjusted over all tested genes; DESeq2 uses BH."
+
+[[terms]]
+term = "BH, BY"
+meaning = "Benjamini-Hochberg and Benjamini-Yekutieli: they control the false discovery rate when the p-values are exact, BY under any dependence."
+
+[[terms]]
+term = "Holm, Bonferroni"
+meaning = "They control the chance of even one false call; stricter."
+
+[[terms]]
+term = "Called"
+meaning = "padj below {alpha} and a log2 fold change of at least {lfc_min} either way."
+
+[[terms]]
+term = "Shrunk fold change"
+meaning = "An estimate pulled toward zero where the data are thin; ranks genes."
+
+[[terms]]
+term = "PERMANOVA"
+meaning = "Tests whether groups of samples sit apart; R² is the share of variation they explain."
+
+# The self-checks, each asked only when the dataset's design can answer it.
+[questions.batch]
+prompt = "{a} and {b} fit the same {n} samples and differ only in design. Why can they call different genes?"
+answer = "When one group sits mostly in one batch, a design without batch reads the batch effect as a group effect. With batch in the design, DESeq2 estimates it from the groups present in both batches and removes it."
+
+[questions.paired]
+prompt = "Why does a paired design usually call more genes than an unpaired one on the same individuals?"
+answer = "Each individual is compared with themself, so the differences between individuals leave the error term."
+
+[questions.na]
+prompt = "Why can a gene with a large fold change have padj = NA?"
+answer = "Either one sample is an outlier (Cook's distance), or the gene is so weakly expressed that independent filtering removed it before the adjustment."
+
+# How a contrast reads without a label of its own; level words from the dataset file's value
+# map, as the SDRF spells them.
+[contrast]
+label = "{tested} against {reference}"
+# Two contrasts with no label of their own that read alike: the identifier tells them apart.
+alike = "{label} ({name})"
+sizes = "{n_tested} {tested} against {n_reference} {reference}"
+
+[groups]
+samples = "Samples"
+samples_lead = "Points that share a colour sit together when biology, not processing, separates the samples."
+featured = "Featured contrast: {label}"
+featured_lead = "The genes that changed, and by how much."
+health = "Model health"
+health_lead = "Check these before trusting any call."
+lesson = "Lesson: {title}"
+across = "Across contrasts"
+named = "Named genes"
+missing = "Named genes not in the annotation: {genes}."
+
+[contrasts]
+title = "Contrasts; tested means with an adjusted p"
+columns = ["Contrast", "Compares", "Design", "n", "Tested", "Up", "Down"]
+n = "{n_tested} against {n_reference}"
+
+[keys]
+samples = "Samples"
+samples_detail = "in the sample sheet"
+contrasts = "Contrasts"
+tested = "Genes tested"
+called = "Genes called"
+called_detail = "{up:,} up, {down:,} down"
+
+[figures.pca]
+title = "Samples, coloured by {colour}"
+title_subset = "Samples of {subset}, coloured by {colour}"
+filter = "{column} {values}"
+reading_points = "Each dot is one sample; samples close together have similar expression over the {top} most variable genes."
+reading_colour = "Colour marks the {colour}. PC1 holds {pc1:.0%} and PC2 {pc2:.0%} of those genes' variation."
+reading_shape = "Colour marks the {colour}, shape the {symbol}. PC1 holds {pc1:.0%} and PC2 {pc2:.0%} of those genes' variation."
+reading_test = "The {factor} accounts for {r2:.0%} of the variation between samples (PERMANOVA R², {p}): the larger, the further apart the groups sit."
+lead = "The {factor} accounts for {r2:.0%} of the variation between samples."
+p = "p = {p:.3g}"
+no_p = "no p-value possible"
+caption = "{test} Blind VST on {trend}; the {top} most variable genes after the transform; {shares} of their variance; n = {n} samples."
+share = "PC{i} {share:.0%}"
+x = "PC1"
+y = "PC2"
+
+# Which dispersion trend the blind VST used (P2S.7): pydeseq2 falls back to the mean of the
+# dispersions where its parametric fit does not converge.
+[figures.pca.trend]
+parametric = "a parametric dispersion trend"
+mean = "a mean-based dispersion trend, as the parametric fit did not converge"
+
 [figures.volcano]
+title = "Volcano: {label}"
+tab = "Volcano"
+caption = "{label}: DESeq2 Wald test, design {design}; n = {sizes}. {tested_sentence} Default call: BH-adjusted p below {alpha} and log2 FC at or beyond ±{lfc_min}."
 tested = "The four adjustments count over the same {tested:,} tested genes."
+untested = "{untested:,} genes with no adjusted p (Cook's outliers or independent filtering) are not drawn."
+floored = "{floored} p-values below {floor} are drawn at it."
+x = "log2 fold change, {tested} over {reference}"
+y = "-log10 raw p"
+unit = "genes"
+up = "up in {tested}"
+down = "down in {tested}"
+ns = "not called"
+raw = "raw p (no correction)"
+basis = "{short}-adjusted p"
+# The page fills these in the browser, at the cutoff the reader picks (templates/_calls.js.j2).
+reading = [
+    "Each dot is one of {n_tested} {unit} tested in both groups; right of 0 is higher in {tested}, left is higher in {reference}.",
+    "Up in {tested}: log2 FC at least {fc} ({fold_up} times as high, +{pct_up} %) and {line_rule}.",
+    "Down in {tested}: log2 FC at most -{fc} ({fold_down} times as high, -{pct_down} %) under the same p-value rule. Grey dots miss at least one of the two conditions.",
+]
+summary = "Up in {tested}: {n_up} {unit}. Down: {n_down} {unit}. Rule: log2 FC at or beyond ±{fc} and {basis} below {cutoff}."
+line_rule = "above the dashed line at -log10 p = {y_line}, where {basis} falls below {cutoff}"
+no_line_rule = "{basis} below {cutoff}; no {unit} were tested, so no line is drawn"
 
-# What a page that thins a figure's points calls the ones it may leave out (ui.toml, thinned).
 [figures.ma]
+title = "Fold change against expression: {label}"
+tab = "MA plot"
+lead = "Shrinkage tames the noisy fold changes of weakly expressed genes."
+reading = [
+    "Each gene appears twice against its mean expression: its raw log2 fold change and its shrunk one, as the legend marks.",
+    "Shrinkage pulls weakly expressed genes, which have few reads to go on, toward zero; strongly expressed genes barely move.",
+    "The test uses the raw estimate; rank genes by the shrunk one.",
+]
+lead_raw = "Shrinkage was off for this run (--no-lfc-shrink): the raw estimate alone."
+reading_raw = [
+    "Each gene is one point: its raw log2 fold change against its mean expression.",
+    "Weakly expressed genes spread widest, because few reads make a noisy fold change. Shrinkage, on by default, would pull them toward zero.",
+    "The test uses this raw estimate either way.",
+]
+caption = "{label}: raw and shrunk log2 FC against mean expression for {genes:,} genes. Shrinkage pulls noisy, weakly expressed genes toward zero; the test uses the raw estimate."
+caption_raw = "{label}: raw log2 FC against mean expression for {genes:,} genes; shrinkage was off for this run. The test uses the raw estimate."
+x = "Mean expression"
+y = "log2 fold change"
+raw = "raw estimate"
+shrunk = "shrunk estimate"
+# What a page that thins the points calls the ones it may leave out (ui.toml, thinned).
 thinned = "genes not called"
 
+[figures.phist]
+title = "p-value histogram: {label}"
+tab = "p-value histogram"
+lead = "{low:,} genes have p < {alpha}, against a flat level of {flat:,.1f} per bin."
+reading = [
+    "Each bar counts the genes whose p-value falls in a {width:g}-wide bin; {tested:,} genes in all.",
+    "The dashed line is the flat level, {flat:,.1f} genes per bin: how p-values spread where nothing changes.",
+    "The first bar holds {first:,} genes, {ratio} the flat level. A peak at 0 over a flat floor is signal; a hill anywhere else is a model problem.",
+]
+times = "{ratio:.1f} times"
+far = "far above"
+caption = "{label}: Wald p-values of the {genes:,} genes with one, in {bins} bins; {low:,} have p < {alpha}. The flat level, {flat:,.1f}, is the mean count per bin over [{start}, {end}]."
+x = "p-value"
+y = "Genes"
+series = "p-values"
+flat = "flat level"
+
 [figures.dispersion]
+title = "Dispersion: {label}"
+tab = "Dispersion"
+lead = "Each gene's final dispersion is pulled toward the trend fitted across genes."
+reading = [
+    "Each gene appears twice against its mean expression: its own (gene-wise) dispersion and the final one the test uses.",
+    "The line is the trend DESeq2 fits across genes; it pulls each final value toward it, more where the gene's own estimate is less certain.",
+    "A cloud far above the trend points to outlier samples or a missing design term.",
+]
+caption = "{label}: gene-wise and final dispersion estimates of {genes:,} genes, with the trend DESeq2 fitted across them."
+x = "Mean expression"
+y = "Dispersion"
+genewise = "gene-wise"
+final = "final"
+trend = "fitted trend"
 thinned = "genes"
 
+[figures.calls]
+title = "Genes called: {lesson} lesson"
+lead = "{label} calls the most genes: {n:,}."
+reading = [
+    "Each bar is one contrast; its length counts the genes called up and down (padj below {alpha}, log2 FC at or beyond ±{lfc_min}).",
+    "Compare contrasts only at equal n: a smaller contrast calls fewer genes even when nothing else differs.",
+    "The caption gives each contrast's n and design; the difference between designs on the same samples is the lesson.",
+]
+caption = "{lesson}: genes called per contrast (BH-adjusted p below {alpha}, log2 FC at or beyond ±{lfc_min}). {sizes}."
+size = "{label}: n = {sizes}, {design}"
+x = "Contrast"
+y = "Genes called"
+
 [figures.lfc]
+title = "{x} against {y}"
+lead = "The two contrasts agree with Spearman rho = {rho:.2f}."
+reading = [
+    "Each dot is one gene tested in both; it sits at its raw log2 fold change in {x} (across) and in {y} (up).",
+    "Dots on the solid diagonal changed the same way in both; the tighter the cloud around it, the more the two contrasts agree.",
+    "Highlighted dots are called in at least one of the two.",
+]
+caption = "Raw log2 FC of {genes:,} genes tested in both: Spearman rho = {rho:.2f}; the line is x = y. {note}"
+shared = "{n} individuals are in both contrasts, so the two estimates are not independent."
+apart = "No individual is in both contrasts."
+axis = "log2 FC, {label}"
+called = "called in either"
+neither = "neither"
+line = "x = y"
 thinned = "genes called in neither contrast"
+
+[figures.box]
+title = "Named genes: {label}"
+reading = [
+    "Each box is one gene in one group: the line is the median sample, the box holds the middle half, and each dot is a sample.",
+    "Expression is log2 of the count divided by the sample's size factor, plus 1.",
+    "Above each gene: the Mann-Whitney p, BH-adjusted over the {n_genes} plotted genes, and r, the rank-biserial effect, positive when {tested} is higher.",
+]
+x = "Gene"
+y = "Expression"

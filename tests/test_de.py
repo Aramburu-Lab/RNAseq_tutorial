@@ -19,7 +19,7 @@ from ctx.dataset import Contrast, Split
 from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
-from ctx.de.page import ma_text
+from ctx.de.page import ma_text, words
 from ctx.de.run import _fit_metrics, _ma, rule_genes, volcano
 from ctx.de.stats import ALPHA, LFC_MIN, classify
 from ctx.report import text
@@ -116,8 +116,13 @@ def test_ma_draws_the_estimates_the_fit_has(basic):
     )
     assert set(_ma(result, genes).frame["estimate"]) == {"raw", "shrunk"}
     assert set(_ma(plain, genes).frame["estimate"]) == {"raw"}
-    assert "--no-lfc-shrink" in _ma(plain, genes).caption
-    assert "--no-lfc-shrink" in ma_text(BASIC, shrunk=False).lead
+    assert _ma(plain, genes).caption == text.fill(
+        "de",
+        "figures.ma.caption_raw",
+        label=words(BASIC).label,
+        genes=_ma(plain, genes).frame.height,
+    )
+    assert "--no-lfc-shrink" in ma_text(words(BASIC), shrunk=False).lead
 
 
 # A page thins at this many units here, so a 1,000-gene fit thins as Step-1's 12,796 genes do.

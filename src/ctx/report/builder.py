@@ -43,10 +43,6 @@ SECTIONS = tuple(
         "pitfalls", "reproduce",
     )
 )  # fmt: skip
-# The ModulePage field behind each section. The frozen M5 and M6 pages still pass the old
-# names; P2S.4 renames the fields once the Step-1 record is taken (D-045).
-FIELDS = {"purpose": "question", "method": "concept", "interpretation": "practice",
-          "questions": "think", "pitfalls": "mistakes"}  # fmt: skip
 MAX_TABLE_COLUMNS = 8  # CONVENTIONS.md, HTML reports
 MAX_KEY_NUMBERS = 4
 # The packages a reader asks about first; the full list sits behind a disclosure.
@@ -300,27 +296,26 @@ class ModulePage:
     """A module report: every section of the skeleton is required and non-empty."""
 
     title: str
-    question: str
-    concept: str
+    purpose: str
+    input: str
+    method: str
     parameters: tuple[ParameterCard, ...]
     results: tuple[Result, ...]
-    practice: str
-    think: tuple[SelfCheck, ...]
-    mistakes: tuple[str, ...]
+    interpretation: str
+    questions: tuple[SelfCheck, ...]
+    pitfalls: tuple[str, ...]
     reproduce: Reproduction
     key_numbers: tuple[KeyNumber, ...] = ()
     terms: tuple[tuple[str, str], ...] = ()
-    input: str = ""
     kicker: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a page with an empty section; the skeleton is the teaching contract.
 
-        Key numbers and terms are optional: a page may have nothing to summarise. Input is
-        optional until the frozen M5 and M6 pages gain one after the Step-1 record (D-045).
+        Each section is the field of its key (P2P.3), every one required, Input too. Key
+        numbers and terms are optional: a page may have nothing to summarise.
         """
-        sections = (FIELDS.get(s, s) for s, _ in SECTIONS if s != "input")
-        required = ("title", *sections)
+        required = ("title", *(s for s, _ in SECTIONS))
         if empty := [name for name in required if not getattr(self, name)]:
             raise ValueError(f"empty report sections: {empty}")
         blocks = [i for r in self.results for i in (r.items if isinstance(r, Group) else (r,))]
@@ -374,8 +369,8 @@ def _marked(page: Page) -> list[str]:
         return texts if isinstance(page, HubPage) else []
     blocks = [i for r in page.results for i in (r.items if isinstance(r, Group) else (r,))]
     return [
-        *texts, page.question, page.input, page.concept, page.practice, *page.mistakes,
-        *(t for check in page.think for t in (check.prompt, check.answer)),
+        *texts, page.purpose, page.input, page.method, page.interpretation, *page.pitfalls,
+        *(t for check in page.questions for t in (check.prompt, check.answer)),
         *(b.caption for b in blocks if isinstance(b, FigureBlock)),
     ]  # fmt: skip
 

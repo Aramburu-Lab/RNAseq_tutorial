@@ -186,14 +186,14 @@ def test_size_guard(tmp_path):
 def _module(**overrides) -> ModulePage:
     fields = {
         "title": "Setup",
-        "question": "Is this machine ready?",
+        "purpose": "Is this machine ready?",
         "input": "This machine.",
-        "concept": "A concept.",
+        "method": "A concept.",
         "parameters": (ParameterCard("--root", "Where outputs go.", "cwd", "Moves outputs."),),
         "results": ("One result.",),
-        "practice": "In practice.",
-        "think": (SelfCheck("Why?", "Because one."), SelfCheck("How?", "Because two.")),
-        "mistakes": ("A mistake.",),
+        "interpretation": "In practice.",
+        "questions": (SelfCheck("Why?", "Because one."), SelfCheck("How?", "Because two.")),
+        "pitfalls": ("A mistake.",),
         "reproduce": Reproduction(
             "ctx setup", 12.345, 678 * 2**20, 0, "laptop", "B", {"python": "3"}
         ),
@@ -213,15 +213,15 @@ def test_skeleton_order():
     html = render(_module())
     positions = [html.index(f'<section id="{section}">') for section, _ in SECTIONS]
     assert positions == sorted(positions)
-    with pytest.raises(ValueError, match="think"):
-        _module(think=())
+    with pytest.raises(ValueError, match="questions"):
+        _module(questions=())
     # Every figure on a module page says how to read it (Rytis, 2026-09-30).
     bare_figure = FigureBlock(go.Figure(), "caption", [], "a.csv", text=FigureText(title="Grid"))
     with pytest.raises(ValueError, match="without a reading guide: \\['Grid'\\]"):
         _module(results=(Group("A group", (bare_figure,)),))
-    # The frozen M5 and M6 pages have no Input until P2S.4: no section, no contents link.
-    bare = render(_module(input=""))
-    assert '<section id="input">' not in bare and 'href="#input"' not in bare
+    # Input is required on every page since P2S.4 moved M5's and M6's text (P2P.3).
+    with pytest.raises(ValueError, match="input"):
+        _module(input="")
 
 
 class _Elements(HTMLParser):
@@ -253,7 +253,7 @@ def test_escaping():
     figure_page = render(
         FigurePage("t", FigureBlock(interactive(data), HOSTILE, frame.to_dicts(), "d.csv"))
     )
-    module_page = render(_module(think=(SelfCheck(HOSTILE, HOSTILE),), mistakes=(HOSTILE,)))
+    module_page = render(_module(questions=(SelfCheck(HOSTILE, HOSTILE),), pitfalls=(HOSTILE,)))
     for html in (figure_page, module_page):
         assert "b" not in _tags(html), "hostile text became an element"
 
@@ -262,8 +262,8 @@ def test_quiz_hidden():
     page = _module()
     html = render(page)
     answers = re.findall(r"<details><summary>Answer</summary><p>(.*?)</p></details>", html)
-    assert len(answers) == len(page.think) >= 1
-    assert answers == [check.answer for check in page.think]
+    assert len(answers) == len(page.questions) >= 1
+    assert answers == [check.answer for check in page.questions]
 
 
 # --- page structure: navigation, tabs, building blocks, copy ------------------------------

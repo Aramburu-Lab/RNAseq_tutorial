@@ -9,6 +9,7 @@ subset; check the group sizes and the design; fit; copy the raw results; shrink 
 """
 
 import re
+import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -70,12 +71,15 @@ class Pca:
         genes: The genes used: the ``TOP_GENES`` most variable after the VST.
         coords: Every component's scores, samples by components; Euclidean distances here
             equal those between the samples' centred VST values over ``genes``.
+        trend: The dispersion trend the VST used: ``parametric``, or ``mean`` where
+            pydeseq2's parametric fit did not converge and it fell back.
     """
 
     scores: pl.DataFrame
     share: tuple[float, float]
     genes: tuple[str, ...]
     coords: np.ndarray
+    trend: str = "parametric"
 
 
 @dataclass(frozen=True)
@@ -141,8 +145,10 @@ def select_samples(
         subset = subset.filter(pl.col(variable).is_in(list(levels)))
     first = _first_libraries(subset, order)
     dropped = subset.filter(~first)["run_accession"].to_list()
-    # A kept library's other runs are its lanes, part of the one sample, never dropped (D-063).
-    used = subset.filter(first).unique("sample", keep="first", maintain_order=True)
+    # A kept library's other runs are its lanes, part of the one sample, never dropped (D-063);
+    # runs of one sample that differ in a key are a library per value, as curation ranks them.
+    lanes = ["sample", *(k for k in (*REPLICATE_KEYS, *order) if k in subset.columns)]
+    used = subset.filter(first).unique(lanes, keep="first", maintain_order=True)
     if contrast.split is not None:
         used, variable = _split(used, contrast.split), "split"
     if contrast.paired:
@@ -296,6 +302,12 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
     Genes are ranked by their variance after the VST, not before: raw counts rank genes by
     depth, and a deep gene with no biology would lead every component.
 
+    The VST runs on every gene with a count, decided (P2S.7), not inherited from the fits'
+    expression filter: the view is unsupervised and design-blind, and a filter set per
+    contrast has no contrast here; the recorded PERMANOVA metrics stand on this set (D-046).
+    Where pydeseq2's parametric trend does not converge (Step-1's ss_ndn, 17 samples) it falls
+    back to the mean of the dispersions, and ``trend`` says so.
+
     Args:
         counts: ``gene_id`` then one integer column per sample.
         samples: The samples to include.
@@ -317,7 +329,10 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
         counts=frame, metadata=metadata, design="~1",
         inference=DefaultInference(n_cpus=threads), quiet=True,
     )  # fmt: skip
-    dds.vst(use_design=False)
+    with warnings.catch_warnings():
+        # The fallback is recorded in ``trend`` and printed in the caption, not warned.
+        warnings.filterwarnings("ignore", message="The dispersion trend curve fitting did not")
+        dds.vst(use_design=False)
     _shutdown_workers()
     values = np.asarray(dds.layers["vst_counts"])
     top = np.argsort(-values.var(axis=0), kind="stable")[:TOP_GENES]
@@ -326,4 +341,5 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
     share = s**2 / (s**2).sum()
     scores = pl.DataFrame({"sample": samples, "pc1": u[:, 0] * s[0], "pc2": u[:, 1] * s[1]})
     genes_used = tuple(genes[i] for i in top)
-    return Pca(scores, (float(share[0]), float(share[1])), genes_used, u * s)
+    trend = str(dds.vst_fit_type)
+    return Pca(scores, (float(share[0]), float(share[1])), genes_used, u * s, trend)

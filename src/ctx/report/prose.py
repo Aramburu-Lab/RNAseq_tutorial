@@ -122,8 +122,11 @@ def check_page(name: str, raw: Mapping[str, Any]) -> Iterator[str]:
         if key in raw:
             yield from check_text(f"{name}: {key}", raw[key], budget)
     for key, (most, each) in ITEMS.items():
-        items = raw.get(key, [])
-        if len(items) > most:
+        found = raw.get(key, [])
+        # A table of variants (M5's, M6's questions) is asked by what the data hold: each
+        # variant is held to the item budget, and the count to the page that asks them.
+        items = list(found.values()) if isinstance(found, dict) else found
+        if isinstance(found, list) and len(items) > most:
             yield f"{name}: {key}: {len(items)} items; at most {most}"
         for i, item in enumerate(items):
             text = item if isinstance(item, str) else item.get("prompt", "")
