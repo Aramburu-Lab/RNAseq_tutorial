@@ -276,6 +276,24 @@ def test_lanes_pairs_and_single_end(tmp_path, lanes):
     assert sheet == tmp_path / "run" / own_fastq.METADATA / "results"
 
 
+def test_lanes_are_one_replicate(tmp_path, lanes):
+    """The lanes of one sample are runs of one library, so they share one replicate number;
+    a second sample of the same donor, cell type and condition is the group's next (D-063).
+    Its Illumina name ties P1's on the trailing number, so the name decides. Catches each lane
+    numbered as a replicate (1, 2, then 3), and a tie left to the sort's whim."""
+    fq, table = lanes
+    _gz((FIXTURES / "chr22_se" / "se_b.fq").read_text(), fq / "P2_S2_L001_001.fastq.gz")
+    table.write_text(table.read_text() + "P2,d1,monocyte,control\n")
+    run, _ = own_fastq.write(tmp_path / "run", fq, table, "sample")
+    spec_path = tmp_path / "mine.toml"
+    spec_path.write_text(TEMPLATE.read_text().replace(
+        'join = ["run_accession", "run_accession"]', 'join = ["sample", "sample"]'))  # fmt: skip
+    curated = harmonise.curated_runs(tmp_path / "root", load(spec_path), fetchngs.read(run), {})
+    numbered = dict(curated.select("run_accession", "replicate").rows())
+    assert numbered == {"P1_S1_L001_001": 1, "P1_S1_L002_001": 1, "P2_S2_L001_001": 2,
+                        "se_a": 1}  # fmt: skip
+
+
 def test_files_stay_where_they_are(tmp_path, lanes):
     """The FASTQ files are linked, never moved or copied, and the samplesheet nf-core/rnaseq
     reads names each where it is, by its full path. Catches a copy into fastq/, a move, and a

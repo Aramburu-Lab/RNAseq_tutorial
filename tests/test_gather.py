@@ -9,6 +9,7 @@ from pathlib import Path
 import polars as pl
 import pytest
 
+from ctx.gather.curation import library_replicates
 from ctx.gather.fetchngs import FETCHNGS_VERSION, VERSIONS_FILE, FetchngsError, read
 from ctx.gather.harmonise import sheet
 
@@ -186,3 +187,25 @@ def test_counts_keep_int64_when_they_do_not_fit():
     assert frame.schema["read_count"] == pl.Int32
     assert 23415996610 in frame["base_count"].to_list()
     assert sheet(checked).schema["base_count"] == pl.Int32
+
+
+def test_runs_of_one_experiment_are_one_replicate():
+    """An ENA experiment is one library, so a fetchngs experiment's runs share one replicate
+    number, and a second experiment of the same group is the next (D-063). The fixture's one
+    experiment of four runs joins the group of an experiment whose run number is lower. Catches
+    each run numbered as a replicate (2, 3, 4, 5), and the experiments ranked by a later run."""
+    runs = read(FIXTURES / "metadata_only").runs.select("run_accession", "experiment_accession")
+    (several,) = [e for e, n in runs["experiment_accession"].value_counts().rows() if n > 1]
+    number = pl.col("run_accession").str.extract(r"(\d+)$").cast(pl.Int64)
+    lowest = runs.filter(pl.col("experiment_accession") != several).sort(number)["run_accession"][0]
+    grouped = (pl.col("experiment_accession") == several) | (pl.col("run_accession") == lowest)
+    frame = runs.with_columns(
+        donor=pl.when(grouped).then(pl.lit("d")).otherwise(pl.col("run_accession")),
+        cell_type=pl.lit("t"),
+        condition=pl.lit("c"),
+    )
+    numbered = frame.with_columns(replicate=library_replicates(frame, {}))
+    expected = pl.when(pl.col("experiment_accession") == several).then(2).otherwise(1).alias("e")
+    assert numbered["replicate"].to_list() == numbered.select(expected)["e"].to_list()
+    first = runs.filter(pl.col("experiment_accession") == several).select(number.min()).item()
+    assert runs.filter(pl.col("run_accession") == lowest).select(number).item() < first
