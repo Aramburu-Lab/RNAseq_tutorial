@@ -87,7 +87,7 @@ def build_list(spec: Dataset, genes_from: Path | None, table: genes.GeneTable
     Raises:
         ClinicalError: If the list names a gene ambiguously, or none the expressed genes hold.
     """
-    assert spec.clinical is not None  # noqa: S101 - run() refuses a dataset without [clinical]
+    assert spec.clinical and spec.gdc  # noqa: S101 - run() refuses a dataset without them
     if genes_from is not None:
         found, source = genes.read_list(genes_from, table).genes, genes_from.name
     else:
@@ -96,6 +96,12 @@ def build_list(spec: Dataset, genes_from: Path | None, table: genes.GeneTable
     if found.ambiguous or not found.found:
         named = found.ambiguous or found.missing
         raise ClinicalError(f"{source}: no expressed gene named unambiguously: {named}")
+    if genes_from is None and found.missing:
+        # A registered gene the table lacks was dropped in silence; GENCODE renames them
+        # (NDUFA4L2 is COXFA4L2 in GENCODE 50), so the dataset file names it as the table does.
+        model = spec.gdc.gene_model
+        raise ClinicalError(f"{spec.path.name} [clinical] genes: {list(found.missing)} name no "
+                            f"expressed gene of gather's table (GDC's {model})")  # fmt: skip
     return [table.row[n] for n in found.found], source
 
 

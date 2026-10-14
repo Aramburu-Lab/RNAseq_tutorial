@@ -13,9 +13,13 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 import pytest
-from clinical_root import PATIENTS, ctx, make
-from gdc_fixture import PROJECT
+from clinical_root import CLINICAL, PATIENTS, ctx, make
+from gdc_fixture import PROJECT, SPEC
 
+from ctx.clinical import ClinicalError
+from ctx.clinical.run import build_list
+from ctx.dataset import load
+from ctx.report import genes
 from ctx.report.builder import MAX_BYTES, plotly_js
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,6 +44,23 @@ def test_genes_from_replaces_the_build_list(tmp_path):
     html = outputs(root, "overview_v1.html").read_text()
     cfg = controls(html, "survival")
     assert cfg["defaults"]["genes"] == "G2\nG7" and cfg["source"] == "mine.txt"
+
+
+def test_a_registered_gene_the_table_lacks_stops_the_run(tmp_path):
+    """D-063's KIRC list names NDUFA4L2, which GENCODE 50 calls COXFA4L2: a name the table
+    lacks stops the run, named. Mutation caught: the name dropped in silence, the page scoring
+    three genes where the dataset file registered four."""
+    ids = [f"ENSG{n:011d}" for n in (1, 3, 185633)]
+    table = genes.table(ids, ["G1", "G3", "NDUFA4L2"])
+    spec_file = tmp_path / "fake_brca.toml"
+    spec_file.write_text(SPEC.format(protocol="unstranded", cdr="")
+                         + CLINICAL.replace('"G5"', '"NDUFA4L2"'))  # fmt: skip
+    rows, _ = build_list(load(spec_file), None, table)
+    assert rows == [0, 1, 2]
+    spec_file.write_text(SPEC.format(protocol="unstranded", cdr="")
+                         + CLINICAL.replace('"G5"', '"COXFA4L2"'))  # fmt: skip
+    with pytest.raises(ClinicalError, match=r"\['COXFA4L2'\] name no expressed gene"):
+        build_list(load(spec_file), None, table)
 
 
 def outputs(root: Path, what: str) -> Path:
