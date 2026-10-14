@@ -11,6 +11,7 @@ download, with ``ctx reads`` on a laptop and the same code run as a file on Kebn
 import functools
 import re
 import shlex
+from dataclasses import asdict, dataclass
 from datetime import date
 from pathlib import Path
 
@@ -42,6 +43,7 @@ DEFAULT = REPO / "conf" / "datasets" / "four_runs.toml"
 USAGE = {
     "fetch_laptop": ("fetchngs.sbatch", (
         'export CTX_REPO=<your clone of the course repository> RUN="$HOME/ctx_runs/<run name, no spaces>"',  # noqa: E501
+        'git clone <course repository> "$CTX_REPO"',
         'pixi install --manifest-path "$CTX_REPO/pixi.toml" -e fetch --frozen',
         'mkdir -p "$RUN" && cd "$RUN"',
         "printf '%s\\n' <accession> <accession> > ids.txt",
@@ -49,7 +51,7 @@ USAGE = {
     )),
     # Apart from the metadata run, so a pasted block never downloads before the size is read.
     "fetch_laptop_download": ("fetchngs.sbatch", (
-        "# its last line is the size at ENA: read it, then download",
+        "# its line before last is the size at ENA: read it, then download",
         'CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt',
     )),
     "setup": ("kebnekaise_env.sh", (
@@ -101,11 +103,39 @@ META, RNASEQ = "nfcore_fetchngs_meta/results", "nfcore_rnaseq/results"
 MINE = "mine"
 # The resource Part 2's laptop block saves where ctx setup finds it.
 GTF_RESOURCE = "annotation_gtf"
-# Measured, the one place the page's sizes come from. The Salmon index's peak resident memory,
-# the largest of Step-1's and the breast studies' four cluster builds (GENCODE 50, genome as
-# decoys; docs/plans/2026-10-07_custom_data_guide_plan_proposal.md). The laptop run folder of
-# U.10 (2026-10-08) before the index finished, with the references saved into results/.
-NEEDS = {"index_gib": 16.8, "folder_gb": 61, "work_gb": 37, "results_gb": 22}
+
+
+@dataclass(frozen=True)
+class Proof:
+    """What the laptop proof measured, and on what (``NEEDS``)."""
+
+    date: str
+    docker_gib: int
+    cpus: int
+    index_gib: float
+    trace_gb: float
+    folder_kib: int
+    work_kib: int
+    refs_bytes: int
+
+
+# Measured, the one place the page's sizes come from: the U.10 laptop proof of 2026-10-09 on the
+# worked example, its logs lost on the 2026-10-14 restart, so these are the proof agent's report
+# (TODO.md U.10). The Salmon index's peak by docker stats and by Nextflow's trace, no larger sum
+# of tasks running together; the run folder's peak with references not saved, and work/ at the
+# end; the three files Part 2 downloads (MD5SUMS, genome, GTF), together.
+NEEDS = Proof(date="2026-10-09", docker_gib=20, cpus=13, index_gib=17.020, trace_gb=17.5,
+              folder_kib=59_298_436, work_kib=37_496_696, refs_bytes=970_288_386)  # fmt: skip
+KIB = 1024
+
+
+def needs() -> dict[str, object]:
+    """``NEEDS`` with the sizes in GB, and the free disk a laptop needs: folder plus references."""
+    folder, work = NEEDS.folder_kib * KIB, NEEDS.work_kib * KIB
+    disk = folder + NEEDS.refs_bytes
+    return asdict(NEEDS) | {"folder_gb": f"{folder / 1e9:.1f}", "work_gb": f"{work / 1e9:.1f}",
+                            "refs_gb": f"{NEEDS.refs_bytes / 1e9:.2f}",
+                            "disk_gb": f"{disk / 1e9:.1f}"}  # fmt: skip
 
 
 # Part 1b: ctx reads as a file on Kebnekaise, whose fetch environment has Python and no ctx.
@@ -193,8 +223,9 @@ def reads_lines(spec: Dataset) -> tuple[tuple[str, ...], tuple[str, ...]]:
         return " ".join(("--run-folder", '"$RUN"', "--fastq-dir", FASTQ_DIR, "--table", table,
                          "--sample-column", column))  # fmt: skip
 
-    laptop_run, install = (filled(line, spec) for line in USAGE["fetch_laptop"][1][:2])
-    laptop = (laptop_run, install, 'cd "$CTX_REPO" && pixi install -e laptop --frozen',
+    # The export, the clone and the fetch environment, as Part 1 starts.
+    start = tuple(filled(line, spec) for line in USAGE["fetch_laptop"][1][:3])
+    laptop = (*start, 'cd "$CTX_REPO" && pixi install -e laptop --frozen',
               'mkdir -p "$RUN"', f"pixi run -e laptop ctx reads {options(False)}")  # fmt: skip
     cluster = (filled(USAGE["fetch_cluster"][1][0], spec), 'mkdir -p "$RUN"',
                f'python3 "$CTX_REPO/{OWN_SCRIPT}" {options(True)}')  # fmt: skip
@@ -235,6 +266,7 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
     given = shown(dataset_file)
     raw = f"~/ctx_{spec.slug}/data/raw/{spec.slug}"
     part3: list[Code | ResultTable | str] = [
+        word("part3.meta"),
         code("part3.laptop", course_lines(spec, given, f'"$RUN/{META}"', f'"$RUN/{RNASEQ}"')),
         code("part3.copy", copy_lines(spec.slug)),
         code("part3.cluster", course_lines(spec, given, f"{raw}_meta", f"{raw}_rnaseq")),
@@ -246,12 +278,14 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
         part3.insert(0, str(caution))
     part3.insert(0, downloads(spec))
     parts: tuple[tuple[Code | ResultTable | str, ...], ...] = (
-        (code("part1.laptop", usage("fetch_laptop")),
+        (word("part1.frozen"), code("part1.laptop", usage("fetch_laptop")),
          code("part1.laptop_download", usage("fetch_laptop_download")),
          code("part1.setup", usage("setup")), code("part1.cluster", usage("fetch_cluster")),
          code("part1.cluster_size", usage("fetch_cluster_size")),
          code("part1.cluster_download", usage("fetch_cluster_download"))),
-        (text.fill(PAGE, "part2.needs", **NEEDS), code("part2.laptop", usage("count_laptop")),
+        (text.fill(PAGE, "part2.needs", **needs()),
+         text.fill(PAGE, "part2.refs", release=release(), **needs()),
+         code("part2.laptop", usage("count_laptop")),
          code("part2.cluster", usage("count_cluster"))),
         tuple(part3),
     )  # fmt: skip
@@ -292,15 +326,20 @@ def downloads(spec: Dataset) -> ResultTable:
                        numeric=(1,))  # fmt: skip
 
 
+def release() -> str:
+    """The GENCODE release Part 2's Usage downloads."""
+    (found,) = set(re.findall(r"release_(\d+)", "\n".join(USAGE["count_laptop"][1])))
+    return str(found)
+
+
 def _keys(spec: Dataset) -> tuple[KeyNumber, ...]:
     """Accessions, the two pinned releases and the reference release the Usage downloads."""
     word = functools.partial(text.word, PAGE)
-    (release,) = set(re.findall(r"release_(\d+)", "\n".join(USAGE["count_laptop"][1])))
     return (
         KeyNumber(word("keys.runs"), f"{len(spec.accessions):,}"),
         KeyNumber(word("keys.fetchngs"), FETCHNGS_VERSION),
         KeyNumber(word("keys.rnaseq"), RNASEQ_VERSION),
-        KeyNumber(word("keys.genome"), text.fill(PAGE, "keys.genome_value", release=release)),
+        KeyNumber(word("keys.genome"), text.fill(PAGE, "keys.genome_value", release=release())),
     )
 
 

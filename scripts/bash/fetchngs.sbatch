@@ -31,11 +31,12 @@
 #   sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 #   # on a laptop, Docker running: the same script run by bash, each run printing its size
 #   export CTX_REPO=<your clone of the course repository> RUN="$HOME/ctx_runs/<run name, no spaces>"
+#   git clone <course repository> "$CTX_REPO"
 #   pixi install --manifest-path "$CTX_REPO/pixi.toml" -e fetch --frozen
 #   mkdir -p "$RUN" && cd "$RUN"
 #   printf '%s\n' <accession> <accession> > ids.txt
 #   CTX_SITE=laptop SKIP_DOWNLOAD=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
-#   # its last line is the size at ENA: read it, then download
+#   # its line before last is the size at ENA: read it, then download
 #   CTX_SITE=laptop bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 set -euo pipefail
 
