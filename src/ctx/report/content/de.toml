@@ -109,6 +109,8 @@ called = "Genes called"
 called_detail = "{up:,} up, {down:,} down"
 
 [figures.pca]
+# Work-order item 6: the colour of the points, each tested factor in turn.
+view = "Colour by"
 title = "Samples, coloured by {colour}"
 title_subset = "Samples of {subset}, coloured by {colour}"
 filter = "{column} {values}"

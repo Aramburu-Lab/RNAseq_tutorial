@@ -17,7 +17,8 @@ ACT = """(async () => {
   return await Promise.all(Array.from(document.querySelectorAll('form.view')).map(async form => {
     const fig = form.closest('.fig'), d = fig.querySelector('.js-plotly-plot');
     const words = s => (fig.querySelector(s) || {}).textContent;
-    const read = () => ({y: JSON.stringify(d.data.map(t => t.y)), caption: words('figcaption'),
+    const read = () => ({y: JSON.stringify(d.data.map(t => [t.y, t.marker && t.marker.color])),
+      caption: words('figcaption'),
       title: words('.fig-title'), line: words('.view-summary'),
       moved: !!fig.querySelector('a[data-export][role=button]'),
       options: form.elements.view.options.length});
@@ -48,13 +49,17 @@ def test_a_view_swaps_the_figure_and_its_words_and_comes_back(ran, page):
     not restored; the export switch left off."""
     seen = ran[page]
     assert seen["errors"] == []
-    (view,) = seen["acted"]
-    start, other, back = view["start"], view["other"], view["back"]
-    assert start["options"] > 1 and not start["moved"] and start["line"] == ""
-    assert other["y"] != start["y"] and other["caption"] != start["caption"]
-    assert other["moved"] and other["line"].startswith("This view shows ")
-    assert back["caption"] == start["caption"] and back["title"] == start["title"]
-    assert back["y"] == start["y"] and not back["moved"]
+    # M5: the samples' PCA by colour (when the fixture's sheet has a second factor) and the
+    # p-value histogram by contrast; M6: the GSEA bars by contrast.
+    assert seen["acted"]
+    for view in seen["acted"]:
+        start, other, back = view["start"], view["other"], view["back"]
+        assert start["options"] > 1 and not start["moved"] and start["line"] == ""
+        assert other["moved"] and other["line"].startswith("This view shows ")
+        assert other["title"] != start["title"] or other["caption"] != start["caption"]
+        assert back["caption"] == start["caption"] and back["title"] == start["title"]
+        assert back["y"] == start["y"] and not back["moved"]
+    assert any(v["other"]["y"] != v["start"]["y"] for v in seen["acted"])
 
 
 def test_a_view_needs_its_build_first_and_is_dropped_alone():

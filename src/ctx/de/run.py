@@ -165,7 +165,8 @@ def _pca_figure(
     counts: pl.DataFrame,
     threads: int,
     curated: Sequence[Column] = (),
-) -> tuple[ScatterData, list[tuple[str, float, str]], FigureText]:
+) -> tuple[ScatterData, list[tuple[str, float, str]], FigureText,
+           list[tuple[str, ScatterData, FigureText]]]:  # fmt: skip
     """One PCA scatter, a PERMANOVA per declared factor as metrics, and its page words."""
     used = _subset(sheet, spec.filters, spec.one_per)
     result = pca(counts, used["sample"].to_list(), threads=threads)
@@ -180,6 +181,7 @@ def _pca_figure(
     metrics: list[tuple[str, float, str]] = []
     first = ""
     shown: tuple[str, Permanova] | None = None
+    tests: dict[str, Permanova] = {}
     for factor in spec.factors:
         labels = frame[factor].to_list()
         if not 1 < len(set(labels)) < len(labels):
@@ -191,6 +193,8 @@ def _pca_figure(
         # varies within individuals, gets a p-value; R squared is descriptive for every one.
         strata = frame[spec.strata].to_list() if spec.strata and not first else None
         test = permanova(result.coords, labels, strata=strata)
+        # Only the first factor's p holds: the others were not permuted within individuals.
+        tests[factor] = test if not first else replace(test, p=math.nan)
         where = f"{test.n} samples, {test.groups} groups, top {TOP_GENES} genes by VST variance"
         metrics.append((f"permanova.{spec.name}.{factor}.r2", test.r2, where))
         if not first:
@@ -229,7 +233,18 @@ def _pca_figure(
     # The page describes the first factor's test, the one with a p-value.
     subset = subset_words(spec.filters, curated)
     text = pca_text(spec.name, subset, colour, spec.symbol, result.share, shown)
-    return data, metrics, text
+    # Work-order item 6 (D-051): every other tested factor colours the points as a view,
+    # with its own R2, descriptive.
+    views = [(colour.replace("_", " "), data, text)]
+    for factor, test in tests.items():
+        if factor in (colour, spec.symbol):
+            continue
+        recoloured = replace(data, colour=factor,
+                             colours=category_colours(sorted(set(frame[factor]))))  # fmt: skip
+        views.append((factor.replace("_", " "), recoloured,
+                      pca_text(spec.name, subset, factor, spec.symbol, result.share,
+                               (factor, test))))  # fmt: skip
+    return data, metrics, text, views
 
 
 def volcano(
@@ -839,9 +854,10 @@ def _figures(
     metrics = []
     pcas = []
     for pca_spec in spec.de.pca:
-        scatter, found, text = _pca_figure(pca_spec, sheet, counts, threads, spec.columns)
+        scatter, found, text, views = _pca_figure(pca_spec, sheet, counts, threads, spec.columns)
         metrics += found
-        pcas.append(writer.figure(scatter, f"pca_{pca_spec.name}", text))
+        block = writer.figure(scatter, f"pca_{pca_spec.name}", text)
+        pcas.append(viewed(block, views, figure("pca", "view")) if len(views) > 1 else block)
     if pcas:
         lead = word(PAGE, "groups.samples_lead")
         groups.append(Group(word(PAGE, "groups.samples"), tuple(pcas), lead=lead,
