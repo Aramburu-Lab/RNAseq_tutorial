@@ -99,8 +99,10 @@ jobs:
 
       # -rpfEsxX lists every test by outcome, so a test that must run (M3.10's fake-STAR
       # refusal) is seen to pass, not merely absent from the failures.
+      # Serial, not the test task's -n auto: on this 2-core runner xdist took 1,799 s against
+      # 1,372 s serial (runs 37942987776, 37943036813; Rytis 2026-10-14).
       - name: pytest
         if: ${{ !cancelled() }}
         env:
           PYTEST_ADDOPTS: "-rpfEsxX --durations=60"
-        run: pixi run test
+        run: pixi run pytest -q
