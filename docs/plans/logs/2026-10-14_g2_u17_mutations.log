@@ -1,0 +1,5 @@
+src/ctx/gather/curation.py: each run ranked, not each library: exit 1: 1 failed, 2 passed in 1.34s
+src/ctx/gather/curation.py: no tiebreak by name: exit 1: 1 failed, 2 passed in 1.22s
+src/ctx/gather/curation.py: library ranked by its last run: exit 1: 1 failed, 2 passed in 1.16s
+src/ctx/gather/curation.py: library key dropped from the dedupe: exit 1: 3 failed in 1.24s
+src/ctx/gather/curation.py: library carried no more (KeyError): exit 1: 1 failed, 2 passed in 1.31s
