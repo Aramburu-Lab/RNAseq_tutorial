@@ -479,7 +479,7 @@ D1 merged 2026-10-14 (wo13-d1, D-065 to D-068): P2S.4 and P2P.3, M5, M6, hub and
 - [ ] D1.2 Label the contrasts of breast_mac, breast_mono and breast_tissue (two each read alike, D-067); `conf/dataset_template.toml` gains a `label` line.
 
 Kit v8 built 2026-10-14 at 0ddc9e8, clean (`~/ctx_kit/2026-10-14_course_kit_v8`, 2,714 files, 2,466,329,481 B, zip 836,922,838 B, preview included; `..._v8_release`, `--release`, 2,164 files, 2,093,915,603 B, zip 721,240,360 B); check_kit passes on both folders and both unzipped zips; largest file 59,259,687 B; 26 raw GDC count files left out by rule; C3.3 fixed on ~/ctx_breast. Not released: K.9 and K.10 first.
-- [ ] K.9 A table's `_README.md` records its rebuild command with the dataset file's absolute path, and build_kit copies it into README.md and LEFT_OUT.json (v8 names `~/ctx_kit/src_0ddc9e8/conf/datasets/<slug>.toml`); record it relative to the repository, fixed where the README is written.
+- [ ] K.9 build_kit reuses a table README's `Command` row (`shlex.join(sys.argv)`, provenance, correct as run) as the reader's rebuild command, so v8's LEFT_OUT.json and README name `~/ctx_kit/src_0ddc9e8/conf/datasets/<slug>.toml`. Keep the provenance row verbatim; build_kit maps a `--dataset-file` inside the recorded code tree to `conf/datasets/<slug>.toml` (scripts/python/build_kit.py:104, after package E).
 - [ ] K.10 build_kit takes a root's note (M9 on TCGA roots carries the [clinical] genes only) instead of a README appended after the build; v8's was appended by hand and its MANIFEST rewritten with build_kit's own `manifest()`.
 - [ ] K.11 Kit v9 after package E, D1.1 (M6 on TCGA) and K.9, K.10; then the GitHub release asset (approved).
 
