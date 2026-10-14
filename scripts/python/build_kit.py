@@ -211,7 +211,12 @@ def select(
     outputs = (root / "outputs").resolve()
     out = {p for p in current(outputs) if any(belongs(p.name, s, set(slugs)) for s in left_out)}
     chosen = current(outputs) - out
+    # Undated, so current() never picks it: each module folder's entry page (GS.2) ships with
+    # the folder's pages, and its links are walked like theirs.
+    folders = {c.parent for c in chosen}
+    chosen |= {p for p in outputs.glob(f"*/{check_kit.ENTRY}") if p.parent in folders}
     found, problems = reached({p for p in chosen if p.suffix == ".html"}, outputs)
+    problems += [f"{root}: {e}" for e in check_kit.entry_problems(outputs.parent)]
     problems += [f"{p}: a shipped page links to it, but its dataset is left out"
                  for p in sorted(found & out)]  # fmt: skip
     matrices = {p: m for p in chosen | found if (m := gdc_matrix(p)) is not None}

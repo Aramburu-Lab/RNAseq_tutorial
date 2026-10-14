@@ -52,9 +52,17 @@ answer = "The product then measures the gene rather than one isoform, and the in
 
 [keys]
 genes = "Gene cards"
+genes_listed = "of {listed:,} listed; the rest are named below"
 samples = "GTEx samples"
 tissues = "GTEx tissues"
 hpa = "HPA release"
+
+# The card list's genes past the page cap (M9.8).
+[left_out]
+title = "Cards this page could not hold"
+lead = "{n:,} of the {listed:,} listed genes have no card here: their cards would take the page past its {cap:g} MB cap."
+genes = "Left out, in list order: {genes}."
+command = "Build their cards on a page of their own"
 
 [reasons]
 named = "named in this run"

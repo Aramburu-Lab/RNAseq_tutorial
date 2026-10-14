@@ -25,6 +25,7 @@ from ctx.genecard import run as module
 from ctx.genecard.cache import CACHE, MANIFEST, SUPERSEDED, Cache
 from ctx.genecard.summary import spread, tau
 from ctx.report import genes
+from ctx.report.builder import unpacked
 from ctx.setup import MANIFEST as SETUP_MANIFEST
 from ctx.setup import fetch
 
@@ -299,7 +300,7 @@ def test_run_degrades_and_stamps_the_footer(root):
     written = module.run(
         _settings(folder), _cards(), "ctx genecard", SLUG, options, Stub(responses())
     )
-    page = written[0].read_text()
+    page = unpacked(written[0].read_text())
     assert "Human Protein Atlas unavailable for ACTB" in page
     assert "Ensembl REST unavailable for ACTB" in page
     assert "Exon use of ACTB" in page and "NPTX2 across immune cell types" in page
@@ -338,7 +339,7 @@ def test_cli_offline_reads_only_the_cache(root):
     )  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
     (page,) = (folder / "outputs" / "11_genecard").glob("*_overview_v1.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     assert "NPTX2 in the Human Protein Atlas v25" in html
     assert "not cached, and --offline makes no request" in html  # ACTB
 
@@ -348,8 +349,8 @@ def test_unregistered_gtex_degrades(root):
     folder, spec = root
     options = module.Options(spec, genes=("NPTX2",), offline=True)
     written = module.run(_settings(folder), _cards(), "ctx genecard", SLUG, options)
-    assert "GTEx unavailable for NPTX2" in written[0].read_text()
-    assert "ctx setup --dataset-file" in written[0].read_text()
+    assert "GTEx unavailable for NPTX2" in unpacked(written[0].read_text())
+    assert "ctx setup --dataset-file" in unpacked(written[0].read_text())
 
 
 def test_number_joins_versions():

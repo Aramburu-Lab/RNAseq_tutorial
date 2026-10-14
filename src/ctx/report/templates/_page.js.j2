@@ -55,12 +55,20 @@
   });
 
   /* Glossary terms: a tooltip per marked term; on the glossary page, the search box. */
-  guard("tooltips", function () { ctxGlossary.tips(document, window); });
+  var tip = null;
+  guard("tooltips", function () { tip = ctxGlossary.tips(document, window); });
   guard("glossary search", function () { ctxGlossary.search(document); });
 
+  /* Everything a part of the page wires up, run over the page at load and over a packed part
+     when it is drawn (packed, below). */
+  function wire(scope) {
+  if (root.getAttribute("data-theme") === "black" && window.Plotly && scope !== document) {
+    plots(scope).forEach(function (d) { Plotly.relayout(d, { template: template(d, "black") }); });
+  }
+  if (scope !== document && tip && tip.bind) guard("tooltips", function () { tip.bind(scope); });
   /* Tabs: every panel drew visible at full width; hide the inactive ones only now, and resize
      a panel's plot when it is shown, so plotly never lays out a hidden div. */
-  document.querySelectorAll("[role=tablist]").forEach(function (list) {
+  scope.querySelectorAll("[role=tablist]").forEach(function (list) {
     guard("tabs", function () {
       var tabs = Array.prototype.slice.call(list.querySelectorAll("[role=tab]"));
       function show(tab) {
@@ -89,7 +97,7 @@
 
   /* The clipboard API is refused on some file:// pages; selecting the text lets the reader
      copy it by hand. */
-  document.querySelectorAll("button[data-copy]").forEach(function (button) {
+  scope.querySelectorAll("button[data-copy]").forEach(function (button) {
     guard("copy", function () {
       var code = document.getElementById(button.getAttribute("data-copy"));
       var label = button.textContent;
@@ -108,52 +116,25 @@
     });
   });
 
-  /* Mark the section being read: the last shown entry whose target is above the top third of
-     the window. Sub-entries hidden on a narrow screen are skipped, so a shown one is marked. */
-  guard("contents", function () {
-    var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
-    if (!links.length) return;
-    var queued = false;
-    function mark() {
-      queued = false;
-      var line = window.innerHeight / 3, current = null;
-      links.forEach(function (a) {
-        var target = document.getElementById(a.hash.slice(1));
-        if (a.getClientRects().length && target && target.getBoundingClientRect().top <= line) {
-          current = a;
-        }
-      });
-      links.forEach(function (a) {
-        if (a === current) a.setAttribute("aria-current", "location");
-        else a.removeAttribute("aria-current");
-      });
-    }
-    window.addEventListener("scroll", function () {
-      if (!queued) { queued = true; window.requestAnimationFrame(mark); }
-    }, { passive: true });
-    window.addEventListener("resize", mark);
-    mark();
-  });
-
   /* Live calling: ctxCalls holds the rule; this block reads the controls, redraws the points
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  document.querySelectorAll("form.calls:not(.filter):not(.pairs)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
   /* Filters: ctxFilter picks the rows; this block redraws every series from them, fits the
      category axis to the bars shown, moves the median line and refills the lead's numbers and
      the live line. */
-  document.querySelectorAll("form.filter").forEach(function (form) {
+  scope.querySelectorAll("form.filter").forEach(function (form) {
     guard("filter", function () { filtering(form); });
   });
 
   /* A plot wider than its box scrolls inside it: say so above the plot, and let the keyboard
      reach the box, while it does. */
   guard("scroll", function () {
-    document.querySelectorAll(".fig-plot, .fig-below").forEach(function (box) {
+    scope.querySelectorAll(".fig-plot, .fig-below").forEach(function (box) {
       var hint = box.querySelector(".scroll-hint");
       if (!hint) return;
       function check() {
@@ -192,7 +173,7 @@
      gives the cells instead. */
   guard("fit", function () {
     if (!window.Plotly) return;
-    plots().forEach(function (div) { guard("fit", function () { fitting(div); }); });
+    plots(scope).forEach(function (div) { guard("fit", function () { fitting(div); }); });
   });
 
   /* An x-axis title wider than the room under its plot wraps there, from its own words, a unit
@@ -204,7 +185,7 @@
   guard("titles", function () {
     if (!window.Plotly) return;
     var canvas = document.createElement("canvas").getContext("2d");
-    plots().forEach(function (div) {
+    plots(scope).forEach(function (div) {
       var original = null;
       function fit() {
         var full = div._fullLayout, axis = full && full.xaxis;
@@ -231,20 +212,94 @@
 
   /* Linked brushing: ctxBrush holds the logic; this block paints the samples a lasso or a tap
      names, in both traces, and keeps the live line in step. */
-  document.querySelectorAll("form.brush").forEach(function (form) {
+  scope.querySelectorAll("form.brush").forEach(function (form) {
     guard("brush", function () { brushing(form); });
   });
 
   /* M8's pair select: ctxPairs recomputes both rho for the pair chosen; this block redraws its
      points and refills the lead's numbers and the live line. */
-  document.querySelectorAll("form.pairs").forEach(function (form) {
+  scope.querySelectorAll("form.pairs").forEach(function (form) {
     guard("pairs", function () { pairing(form); });
   });
 
   /* M10's survival panel: ctxLive scores a gene list and redraws its figures (GS.7). */
-  document.querySelectorAll("form.survival").forEach(function (form) {
+  scope.querySelectorAll("form.survival").forEach(function (form) {
     guard("survival", function () { ctxLive.survival(form, exporting); });
   });
+  }
+  wire(document);
+
+  /* Mark the section being read: the last shown entry whose target is above the top third of
+     the window. Sub-entries hidden on a narrow screen are skipped, so a shown one is marked. */
+  guard("contents", function () {
+    var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+    if (!links.length) return;
+    var queued = false;
+    function mark() {
+      queued = false;
+      var line = window.innerHeight / 3, current = null;
+      links.forEach(function (a) {
+        var target = document.getElementById(a.hash.slice(1));
+        if (a.getClientRects().length && target && target.getBoundingClientRect().top <= line) {
+          current = a;
+        }
+      });
+      links.forEach(function (a) {
+        if (a === current) a.setAttribute("aria-current", "location");
+        else a.removeAttribute("aria-current");
+      });
+    }
+    window.addEventListener("scroll", function () {
+      if (!queued) { queued = true; window.requestAnimationFrame(mark); }
+    }, { passive: true });
+    window.addEventListener("resize", mark);
+    mark();
+  });
+
+  /* A packed part (builder.Group.packed): its HTML travels gzipped and base64'd in a script
+     beside it, and is drawn when it comes within a window's height of the view, or on its
+     button. Scripts set as HTML do not run, so each plot's script is run anew, then the part
+     is wired as the page was at load. */
+  guard("packed", function () {
+    var holders = Array.prototype.slice.call(document.querySelectorAll(".packed-body"));
+    if (!holders.length) return;
+    function unpack(holder) {
+      if (holder.getAttribute("data-state")) return;
+      var note = holder.querySelector(".packed-note");
+      holder.setAttribute("data-state", "drawing");
+      if (!window.DecompressionStream) { note.textContent = holder.getAttribute("data-failed"); return; }
+      note.textContent = holder.getAttribute("data-drawing");
+      var blob = document.getElementById(holder.getAttribute("data-packed")).textContent;
+      var bytes = Uint8Array.from(atob(blob), function (c) { return c.charCodeAt(0); });
+      var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
+      new Response(stream).text().then(function (html) {
+        holder.innerHTML = html;
+        holder.querySelectorAll("script").forEach(function (old) {
+          var type = old.getAttribute("type");
+          if (type && type !== "text/javascript") return;
+          var run = document.createElement("script");
+          run.textContent = old.textContent;
+          old.parentNode.replaceChild(run, old);
+        });
+        holder.setAttribute("data-state", "drawn");
+        wire(holder);
+      }, function (err) {
+        note.textContent = holder.getAttribute("data-failed");
+        if (window.console) console.error("ctx page: packed", err);
+      });
+    }
+    holders.forEach(function (holder) {
+      holder.querySelector("[data-unpack]").addEventListener("click", function () { unpack(holder); });
+    });
+    if (!window.IntersectionObserver) return;
+    var near = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { near.unobserve(e.target); unpack(e.target); }
+      });
+    }, { rootMargin: "100%" });
+    holders.forEach(function (holder) { near.observe(holder); });
+  });
+
 
   function at(o, key) {
     return key.split(/[.[\]]+/).filter(Boolean).reduce(function (o, p) { return o && o[p]; }, o);

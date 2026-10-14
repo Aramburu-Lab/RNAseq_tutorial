@@ -33,7 +33,15 @@
 {% if it.group.tabs %}
 <div class="tabs" role="tablist" aria-label="{{ it.group.title }}">{% for k2, f in it["items"] %}<button type="button" role="tab" id="tab-{{ f.number }}" aria-controls="figure-{{ f.number }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ f.tab }}</button>{% endfor %}</div>
 {% endif %}
+{% if it.group.packed %}
+{# Drawn when the reader reaches it, from the gzipped HTML below (page script: packed). #}
+{% set body %}{% for k2, sub in it["items"] %}{{ item(k2, sub, tab=it.group.tabs) }}{% endfor %}{% endset %}
+<div class="packed-body" data-packed="ctx-packed-{{ loop.index }}" data-drawing="{{ ui.packed.drawing }}" data-failed="{{ ui.packed.failed }}"><p class="note packed-note" aria-live="polite">{{ ui.packed.waiting }}</p><button type="button" data-unpack>{{ ui.packed.draw }}</button></div>
+<noscript><p class="note">{{ ui.packed.noscript }}</p></noscript>
+<script type="application/octet-stream" id="ctx-packed-{{ loop.index }}">{{ body | pack }}</script>
+{% else %}
 {% for k2, sub in it["items"] %}{{ item(k2, sub, tab=it.group.tabs) }}{% endfor %}
+{% endif %}
 </div>
 {% else %}
 {{ item(kind, it) }}

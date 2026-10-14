@@ -14,6 +14,7 @@ from test_genecard import _cards, _register, _settings
 
 from ctx.genecard import GenecardError, annotation, junctions
 from ctx.genecard import run as module
+from ctx.report.builder import unpacked
 
 GENE = "ENSG00000106236"
 V39 = "ENSG00000106236.4"
@@ -82,7 +83,7 @@ def test_page_labels_v10_and_states_the_rerelease(tmp_path):
     options = module.Options(spec, genes=("NPTX2",))
     written = module.run(_settings(folder), _cards(), "ctx genecard", SLUG, options,
                          Stub(responses()))  # fmt: skip
-    page = written[0].read_text()
+    page = unpacked(written[0].read_text())
     assert "Splice junctions of NPTX2 across tissues, GTEx V10" in page
     assert "4 of 4 MANE Select introns match a GTEx V10 junction" in page
     assert "re-released V11" in page and "2026-05-19" in page

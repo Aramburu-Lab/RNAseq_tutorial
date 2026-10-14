@@ -30,6 +30,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.report.entry import write_entry
 from ctx.viz.style import KM
 
 PAGE = "clinical"
@@ -501,4 +502,4 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
         ),
     )  # fmt: skip
     page = writer.out / f"{stem(PAGE, f'{writer.dataset}_overview', 1, day=writer.day)}.html"
-    return [write(built, page), *writer.files]
+    return [write(built, page), write_entry(writer.out, "clinical"), *writer.files]

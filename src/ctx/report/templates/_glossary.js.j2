@@ -109,7 +109,7 @@ var ctxGlossary = (function () {
       how = mode;
       position();
     }
-    Array.prototype.forEach.call(doc.querySelectorAll("button.info[data-term]"), function (button) {
+    function bind(button) {
       var term = button.parentNode;
       button.addEventListener("pointerenter", function (e) {
         if (e.pointerType === "mouse") show(button, "hover");
@@ -136,7 +136,12 @@ var ctxGlossary = (function () {
       term.addEventListener("focusout", function (e) {
         if (open === button && !term.contains(e.relatedTarget)) hide();
       });
-    });
+    }
+    /* A part drawn later (the page script's packed parts) brings terms of its own. */
+    panel.bind = function (scope) {
+      Array.prototype.forEach.call(scope.querySelectorAll("button.info[data-term]"), bind);
+    };
+    panel.bind(doc);
     doc.addEventListener("click", function (e) {
       if (open && !open.parentNode.contains(e.target)) hide();
     });

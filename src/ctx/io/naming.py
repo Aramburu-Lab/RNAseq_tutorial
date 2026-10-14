@@ -112,6 +112,9 @@ def figure_files(figure_stem: str) -> list[str]:
 # indices, trimmed reads, alignments and counts under `outputs/03_process/tools/` (D-037).
 # Only directly under the module folder: a "tools" folder deeper down is linted.
 NATIVE_DIRS = frozenset({"multiqc", "tools"})
+# A module folder's entry page (ctx.report.entry, GS.2): undated, so a link to it never goes
+# stale. Legal directly in the module folder only; deeper, or in another folder, it is linted.
+ENTRY = "index.html"
 
 
 def lint(directory: Path) -> tuple[int, list[str]]:
@@ -130,4 +133,6 @@ def lint(directory: Path) -> tuple[int, list[str]]:
         native = len(parts) > 1 and parts[0] in NATIVE_DIRS
         if path.is_file() and not native and not any(p.startswith(".") for p in parts):
             files.append(path)
-    return len(files), [str(p.relative_to(directory)) for p in files if not check(p.name)]
+    legal = {directory / ENTRY}
+    return len(files), [str(p.relative_to(directory)) for p in files
+                        if p not in legal and not check(p.name)]  # fmt: skip

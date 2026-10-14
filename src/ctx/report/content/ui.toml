@@ -172,6 +172,21 @@ number_empty = "The link's gene list has an empty entry where a gene number belo
 duplicate = "The link names {gene} twice."
 order = "The link names {gene} out of order: genes follow in ascending number."
 
+# A module folder's entry page, index.html, which forwards a link's gene list (GS.2).
+[entry]
+title = "{module}, newest pages"
+one = "Opening this module's newest page with the gene list of the link."
+lead = "This module holds a page per dataset; each link below carries the gene list of the link."
+noscript = "Without JavaScript the gene list stays behind: open a page below and paste the list there."
+
+# A packed group: drawn when the reader reaches it (C3.1, M9.8).
+[packed]
+waiting = "This part is drawn when it comes into view."
+draw = "Draw it now"
+drawing = "Drawing."
+failed = "This browser cannot unpack this part. The tables and figure files beside the page hold every number."
+noscript = "This part needs JavaScript: its figures travel packed in the page. The tables and figure files beside the page hold every number."
+
 # The glossary page and the term tooltips (ctx.report.glossary, D-048).
 [glossary]
 title = "Glossary"
