@@ -1,0 +1,21 @@
+2026-10-14T13:48:05Z ctx --root /Users/rytis/ctx_kidney report --dataset cptac_ccrcc --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/cptac_ccrcc.toml
+/Users/rytis/ctx_kidney/outputs/09_report/2026-10-14_report_cptac_ccrcc_hub_v1.html
+        1.67 real         0.35 user         0.08 sys
+           115671040  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+                9340  page reclaims
+                   0  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  14  voluntary context switches
+                1217  involuntary context switches
+          3820796396  instructions retired
+          1586874825  cycles elapsed
+            87901360  peak memory footprint
+exit 0

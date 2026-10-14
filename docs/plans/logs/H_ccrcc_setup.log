@@ -1,0 +1,24 @@
+2026-10-14T13:45:03Z ctx --root /Users/rytis/ctx_kidney setup --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/cptac_ccrcc.toml
+/Users/rytis/ctx_kidney/outputs/00_setup/2026-10-14_setup_environment_v1.html
+/Users/rytis/ctx_kidney/outputs/00_setup/2026-10-14_setup_versions_v1.parquet
+/Users/rytis/ctx_kidney/outputs/00_setup/2026-10-14_setup_versions_v1.csv
+/Users/rytis/ctx_kidney/outputs/00_setup/2026-10-14_setup_versions_v1_README.md
+        2.77 real         1.07 user         0.42 sys
+           181796864  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               20830  page reclaims
+                  23  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 392  voluntary context switches
+                3450  involuntary context switches
+         12993719675  instructions retired
+          4684057189  cycles elapsed
+           117523800  peak memory footprint
+exit 0
