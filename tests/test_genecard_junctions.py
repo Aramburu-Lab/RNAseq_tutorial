@@ -89,3 +89,22 @@ def test_page_labels_v10_and_states_the_rerelease(tmp_path):
     assert "adult-gtex/o, prefix bulk-gex/v11/rna-seq/" in page
     assert "V10 (gtex_v10), GENCODE v39" in page
     assert any(p.name.endswith("_junctions_v1.parquet") for p in written)
+
+
+@pytest.mark.parametrize(
+    ("dropped", "words"),
+    [(1, "1 sample without exon reads left out"), (2, "2 samples without exon reads left out")],
+)
+def test_exon_caption_counts_samples_in_the_right_number(dropped, words):
+    # C3.4: "1 samples without exon reads". Mutation: one template for every count.
+    import polars as pl  # noqa: PLC0415
+
+    from ctx.genecard.cards import Card  # noqa: PLC0415
+    from ctx.genecard.figures import exons  # noqa: PLC0415
+
+    shares = pl.DataFrame({"exon": ["E1", "E2"] * 2, "tissue": ["A", "A", "B", "B"],
+                           "n": [3] * 4, "share": [0.4, 0.6, 0.5, 0.5]})  # fmt: skip
+    card = Card(106236, "ENSG00000106236.6", "NPTX2", "named", exons=shares,
+                exons_dropped=dropped)  # fmt: skip
+    heat, _, _ = exons(card)
+    assert words in heat.caption

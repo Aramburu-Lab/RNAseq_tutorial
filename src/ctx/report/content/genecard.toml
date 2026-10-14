@@ -155,7 +155,9 @@ reading = [
 x = "Tissue"
 y = "Exon"
 stat = "CV"
-caption = "GTEx {release} exon read counts on the collapsed gene model: {exons} exons by {tissues} tissues; {dropped} samples without exon reads left out. CV: SD over mean. External data, no test."
+caption = "GTEx {release} exon read counts on the collapsed gene model: {exons} exons by {tissues} tissues; {dropped} left out. CV: SD over mean. External data, no test."
+dropped_one = "{n:,} sample without exon reads"
+dropped_many = "{n:,} samples without exon reads"
 
 [figures.exons.columns]
 exon = ["none", "Exon of the GTEx collapsed gene model, as GTEx numbers it."]

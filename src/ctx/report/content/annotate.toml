@@ -6,6 +6,8 @@ test_name = "Mann-Whitney U, two-sided"
 permanova_name = "PERMANOVA on Euclidean distances"
 # Printed above each feature of a box figure.
 label = "p={p}\nr={r:.2f}"
+# The same on one line, under a feature's name in a phone's turned tick label (C3.4).
+label_line = "p={p}, r={r:.2f}"
 caption = "{test}; p is BH-adjusted over {features} plotted features; {sizes}; rank-biserial r > 0 when {comparison} is higher."
 sizes = "n = {n_reference} {reference}, {n_comparison} {comparison}"
 

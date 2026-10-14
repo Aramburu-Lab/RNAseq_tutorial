@@ -24,6 +24,7 @@ from ctx.viz.style import (
     BOX_GAP_PX,
     FIGURE_WIDTH,
     HEADROOM,
+    LINE_SPACING,
     LINE_WIDTHS,
     MARKER_SIZE,
     PLOTLY_HEIGHT_PX,
@@ -297,9 +298,47 @@ def interactive(data: BoxData) -> Any:
         yaxis={"title": {"text": page_y_title(title, files_room(lambda t: static(data, t)))},
                "range": [low - 0.05 * span, high + HEADROOM * span]},
         annotations=labels,
-        meta={"least_width": least_width(data, (low - 0.05 * span, high + HEADROOM * span))},
     )  # fmt: skip
+    y_range = (low - 0.05 * span, high + HEADROOM * span)
+    wide, narrow = least_width(data, y_range), narrow_width(data, y_range)
+    fig.update_layout(meta={"least_width": narrow,
+                            "narrow": _narrow(data, sum(wide[0]), len(labels))})  # fmt: skip
     return fig
+
+
+def _narrow(data: BoxData, below: float, n_labels: int) -> dict[str, Any]:
+    """A phone's layout, swapped in below ``below`` px: each feature's p and r under its name.
+
+    At 375 px the kidney page's four genes needed 480 px of upright labels and the box
+    scrolled inside its card (C3.4). A feature's name and its p and r line go into one tick
+    label turned a quarter, whose slot needs only two lines' height, and the labels over the
+    boxes hide; plotly's automargin gives the turned labels their room below the axis.
+    """
+    features = data.frame["feature"].unique(maintain_order=True).to_list()
+    ticks = [f"{f}<br>{data.caption.label(f, 'label_line')}" for f in features]
+    relayout: dict[str, Any] = {"xaxis.tickangle": -90, "xaxis.tickmode": "array",
+                                "xaxis.tickvals": features, "xaxis.ticktext": ticks}  # fmt: skip
+    relayout |= {f"annotations[{i}].visible": False for i in range(n_labels)}
+    return {"below": below, "relayout": relayout, "restyle": []}
+
+
+def narrow_width(data: BoxData, y_range: tuple[float, float]) -> list[list[float]]:
+    """The narrowest plot the phone's layout (``_narrow``) keeps apart.
+
+    Each feature's turned label is as many lines tall as it has, with ``BOX_GAP_PX`` between,
+    then the y axis's ticks and title. The page draws the box no narrower and scrolls it
+    sideways only below that.
+
+    Returns:
+        One [scaled, fixed] px pair, as ``least_width``.
+    """
+    tick = on_page(SIZES["tick"])
+    features = data.frame["feature"].unique(maintain_order=True).to_list()
+    lines = max(2 + f.count("\n") for f in features)
+    y_ticks = max(text_width(f"{v:.0f}", tick) for v in y_range)
+    slot = lines * tick * LINE_SPACING + BOX_GAP_PX
+    scaled = len(features) * slot + y_ticks + on_page(SIZES["axis_label"])
+    return [[scaled, float(PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"])]]
 
 
 def least_width(data: BoxData, y_range: tuple[float, float]) -> list[list[float]]:
@@ -309,7 +348,7 @@ def least_width(data: BoxData, y_range: tuple[float, float]) -> list[list[float]
     ``BOX_GAP_PX``; the left margin holds the y tick labels and the axis title. At 375 px a
     phone squeezed four TCGA kidney genes into 63 px slots: NDUFA4L2, 101 px at the page's
     tick size, ran over VEGFA, and the p labels over each other (2026-10-09). The page draws
-    the box no narrower than this and scrolls it sideways (``report.figures``).
+    the box's upright layout no narrower than this, and a phone's below it (``_narrow``).
 
     Returns:
         One [scaled, fixed] px pair: at zoom s the plot needs s * scaled + fixed.

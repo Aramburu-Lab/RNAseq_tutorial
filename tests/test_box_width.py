@@ -6,7 +6,7 @@ NDUFA4L2's tick label 101 px wide over VEGFA's, the p labels over each other.
 
 import polars as pl
 
-from ctx.viz.box import box_data
+from ctx.viz.box import box_data, least_width
 from ctx.viz.metrics import text_width
 from ctx.viz.style import BOX_GAP_PX, PHONE_PLOT_PX, SIZES, on_page
 
@@ -28,7 +28,7 @@ def test_the_box_is_never_drawn_narrower_than_its_labels_need():
     data = box_data(kidney_like(), columns={"value": ("log2 CPM", "x")}, feature_label="Gene",
                     value_label="Expression", groups=("a", "b"))  # fmt: skip
     meta = data.interactive().to_plotly_json()["layout"]["meta"]
-    ((scaled, fixed),) = meta["least_width"]
+    ((scaled, fixed),) = least_width(data, (0.0, 10.0))
     tick, note = on_page(SIZES["tick"]), on_page(SIZES["annotation"])
     longest_note = max(text_width(line, note) for g in GENES
                        for line in data.caption.label(g).split("\n"))  # fmt: skip
@@ -38,5 +38,26 @@ def test_the_box_is_never_drawn_narrower_than_its_labels_need():
     short = box_data(kidney_like().with_columns(pl.col("feature").str.slice(0, 1)),
                      columns={"value": ("log2 CPM", "x")}, feature_label="Gene",
                      value_label="Expression", groups=("a", "b"))  # fmt: skip
-    ((one_letter, _),) = short.interactive().to_plotly_json()["layout"]["meta"]["least_width"]
+    ((one_letter, _),) = least_width(short, (0.0, 10.0))
     assert one_letter >= len(set(short.frame["feature"])) * (longest_note + BOX_GAP_PX)
+    assert meta["narrow"]["below"] > PHONE_PLOT_PX
+
+
+def test_a_phone_turns_the_labels_and_the_box_fits_its_plot():
+    """C3.4: the kidney page's stage box scrolled inside its card at 375 px. Below the upright
+    layout's least width a phone's turns each feature's name, p and r into one quarter-turned
+    tick label and hides the labels over the boxes, so four genes fit a phone's plot.
+
+    Mutations caught: no narrow layout; the turned labels without the p and r lines; the
+    least width left at the upright layout's, which scrolls the phone again."""
+    data = box_data(kidney_like(), columns={"value": ("log2 CPM", "x")}, feature_label="Gene",
+                    value_label="Expression", groups=("a", "b"))  # fmt: skip
+    meta = data.interactive().to_plotly_json()["layout"]["meta"]
+    ((scaled, fixed),) = meta["least_width"]
+    assert scaled + fixed <= PHONE_PLOT_PX
+    relayout = meta["narrow"]["relayout"]
+    assert relayout["xaxis.tickangle"] == -90  # noqa: PLR2004 - a quarter turn
+    for gene, tick in zip(GENES, relayout["xaxis.ticktext"], strict=True):
+        assert tick.split("<br>") == [gene, data.caption.label(gene, "label_line")]
+    hidden = [k for k, v in relayout.items() if k.startswith("annotations") and v is False]
+    assert len(hidden) == len(GENES)

@@ -119,7 +119,9 @@ def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | No
     finite = {e: v for e, v in cv.items() if np.isfinite(v)}
     uneven = max(finite, key=lambda e: finite[e]) if finite else names[0]
     numbers = {"symbol": card.symbol, "release": gtex.RELEASE, "exons": len(names),
-               "tissues": len(order), "dropped": f"{card.exons_dropped:,}", "uneven": uneven,
+               "tissues": len(order), "uneven": uneven,
+               "dropped": text.fill(PAGE, "figures.exons.dropped_one" if card.exons_dropped == 1
+                                    else "figures.exons.dropped_many", n=card.exons_dropped),
                "uneven_cv": finite.get(uneven, float("nan"))}  # fmt: skip
     if pair is not None:
         numbers |= {"first": pair.first, "second": pair.second, "pair_cv": pair.cv}

@@ -1,0 +1,8 @@
+CAUGHT: C3.4 track colours take the heat's role colours again (1 failed, 9 passed in 1.37s)
+CAUGHT: C3.2 greyed strip keeps one entry per plex (1 failed, 9 passed in 1.05s)
+CAUGHT: C3.2 static legend ignores the key (1 failed, 9 passed in 1.61s)
+CAUGHT: C3.2 page legend ignores the key (1 failed, 9 passed in 1.44s)
+CAUGHT: C3.4 one exon-caption template for every count (1 failed, 4 passed in 10.91s)
+CAUGHT: C3.4 box least width left at the upright layout's (1 failed, 1 passed in 2.57s)
+CAUGHT: C3.4 turned labels without p and r (1 failed, 1 passed in 2.22s)
+CAUGHT: C3.4 no narrow layout (1 failed in 17.41s)
