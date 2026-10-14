@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-064 — A GDC dataset's annotation columns are joined in gather; a track with more levels than colours takes two greys and sorts first; the kit refuses declared resources by hash
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** M7's F4 compared PAM50 and ER groups through a stand-in sheet; the plex strip had 22 levels against a 7-colour cap (D-063); the M7 plan's decision 3 ships derived tables only.
+
+**Decision.** A GDC dataset's `[columns]` come from its across-samples `[proteo]` table's column annotations, joined in `ctx gather --gdc-dir` through `pair_samples` (now in `ctx.proteo.annotate`) onto the chosen tumours only; every value must be mapped, or gather stops. A strip with more levels than colours takes the two `SPENT_GREYS` and sorts the columns by that strip first, the column title naming the order. `build_kit.py` refuses any file whose SHA-256 equals a `[[resources]]` entry in any dataset file.
+
+**Evidence.** The GCT's column annotations equal the freeze's `sample-annotation.csv` on 122 of 122 rows; F4 rho 0.6966 and 0.6747, equal to the stand-in. Sorted subtype first, the plexes broke into 63 runs over 122 tumours, and no one-grey-per-plex choice marks every boundary. 15 planted mutations caught.
+
+**Consequence.** The M7 heatmap is ordered by plex, not subtype; the subtype is still a strip. Reversing it needs a legend-only plex mark instead of a strip.
+
+---
+
 ## D-063 — Answers of 2026-10-14: OS for KIRC, LUAD and LUSC; each cohort's default genes; strip colours; the plex strip in two greys; lanes are one replicate
 
 **Date:** 2026-10-14 · **Status:** decided

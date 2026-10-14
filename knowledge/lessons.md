@@ -95,3 +95,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A sort that leaves ties to the row order passes every test whose rows arrive sorted: the tiebreak mutation survived until a test fed the twins in reverse (G2, 2026-10-14).
 - The scratch folder is shared between agents: another agent overwrote a mutation script mid-session. Prefix scratch files with the package's name (G2, 2026-10-14).
 - A worktree's suite can skip what main's runs: G2's skipped 83 tests where main skipped 10 on the same code; read the skip count against main's before trusting an agent's green run (2026-10-14).
+- Run M9's default gene list against the page cap before building a new root's cards: 50 TCGA cards made a 29.5 MB page after ten minutes (C3, 2026-10-14).
