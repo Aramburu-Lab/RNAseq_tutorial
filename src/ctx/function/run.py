@@ -6,8 +6,10 @@ down calls separately against the genes DESeq2 tested.
 """
 
 import hashlib
+import math
 import re
 from collections.abc import Mapping
+from typing import Any
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -57,6 +59,8 @@ from ctx.viz.style import ROLES, category_colours
 
 MODULE = "function"
 TOP_SETS = 15
+# A metric a [sanity] rule names for one gene set: gsea.<contrast>.<SET>.nes or .fdr.
+GSEA_METRIC = re.compile(r"gsea\.(?P<contrast>[^.]+)\.(?P<gene_set>[^.]+)\.(?P<what>nes|fdr)")
 GSEA_COLUMNS = {
     "gene_set": ("none", "Gene set name."),
     "size": ("genes", "Set members among the ranked genes."),
@@ -104,6 +108,37 @@ def _gsea(results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]) -> list[li
     """Preranked GSEA of one contrast."""
     names, scores = _ranking(results)
     return lite.prerank(names, scores, sets)
+
+
+def rule_sets(
+    rules: Mapping[str, Any], enriched: Mapping[str, Mapping[str, lite.Enriched]]
+) -> list[tuple[str, float, str]]:
+    """The NES and FDR of each gene set a ``[sanity]`` rule names, as metrics.
+
+    A rule names one as ``gsea.<contrast>.<SET>.nes`` or ``.fdr``. A value the run cannot give
+    is NaN with its reason, which the hub reports as NOT MEASURED.
+    """
+    named = {
+        m
+        for rule in rules.get("rules", [])
+        for c in rule.get("conditions", [])
+        for m in (c.get("metric"), c.get("other"))
+        if m and GSEA_METRIC.fullmatch(m)
+    }
+    metrics = []
+    for metric in sorted(named):
+        found = GSEA_METRIC.fullmatch(metric)
+        assert found is not None  # noqa: S101 - kept by the filter above
+        contrast, gene_set, what = found["contrast"], found["gene_set"], found["what"]
+        hit = enriched.get(contrast, {}).get(gene_set)
+        where = f"{gene_set} in {contrast}"
+        reason = (
+            f"no contrast {contrast}" if contrast not in enriched
+            else f"{where}: not tested" if hit is None
+            else where
+        )  # fmt: skip
+        metrics.append((metric, math.nan if hit is None else float(getattr(hit, what)), reason))
+    return metrics
 
 
 def _ora(
@@ -492,6 +527,9 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
             if hit
             else [(f"gsea.{name}.{fn.featured_set}.nes", float("nan"), f"{where}: not tested")]
         )
+    # The featured set's rows stay first and as they were; a rule adds only what they lack.
+    recorded = {m for m, _, _ in metrics}
+    metrics += [m for m in rule_sets(spec.sanity, enriched) if m[0] not in recorded]
     page_results, keys, checks = _page(
         writer, spec, _Enrichment(results, sets, gsea_tables, enriched, gmt)
     )
