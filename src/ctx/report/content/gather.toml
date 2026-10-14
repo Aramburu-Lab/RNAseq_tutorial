@@ -144,3 +144,6 @@ value = "Reads"
 good = "ENCODE: {millions:g} million aligned reads"
 usable = "ENCODE, older projects: {millions:g} million"
 median = "Median of the runs shown"
+# The filters' and the hover's words for their columns: the selects printed CELL_TYPE and
+# CONDITION, the column names in capitals (work-order item 2's leftover).
+labels = { cell_type = "Cell type", condition = "Condition" }
