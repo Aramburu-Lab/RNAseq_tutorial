@@ -1,0 +1,22 @@
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/09_report/2026-10-14_report_tcga_kirc_hub_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/09_report/2026-10-14_report_tcga_kirc_sanity_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/09_report/2026-10-14_report_tcga_kirc_sanity_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/09_report/2026-10-14_report_tcga_kirc_sanity_v1_README.md
+       15.63 real         0.61 user         0.24 sys
+           143294464  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               15912  page reclaims
+                  21  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 393  voluntary context switches
+                3248  involuntary context switches
+          7626183040  instructions retired
+          3130423360  cycles elapsed
+            94307528  peak memory footprint

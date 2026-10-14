@@ -11,6 +11,7 @@ import pytest
 from scipy.stats import hypergeom
 
 from ctx.function import lite
+from ctx.function.run import rule_sets
 
 ROOT = Path(__file__).resolve().parents[1]
 PERMUTATIONS = 1000
@@ -191,8 +192,6 @@ def test_a_rule_names_a_gene_set_and_m6_records_its_nes_and_fdr():
     an untested set or unknown contrast is NaN with its reason, and other metrics are left out.
     Mutations: ``fdr`` read for ``nes``; an untested set recorded as 0.
     """
-    from ctx.function.run import rule_sets
-
     hit = lite.Enriched("S", 20, 0.5, 1.7, 0.001, 0.02, (0,), (0.5,))
     rules = {"rules": [{"conditions": [
         {"metric": "gsea.c.S.nes", "op": ">", "value": 0},

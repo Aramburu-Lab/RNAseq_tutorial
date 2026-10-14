@@ -1,0 +1,43 @@
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_annotations_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_annotations_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_annotations_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_cases_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_cases_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_cases_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_treatments_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_treatments_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_treatments_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_molecular_tests_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_molecular_tests_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_molecular_tests_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_cdr_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_cdr_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/kidney/outputs/01_gather/2026-10-14_gather_tcga_kirc_cdr_v1_README.md
+       62.33 real        15.65 user         4.37 sys
+           819675136  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              165718  page reclaims
+              158941  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                3343  voluntary context switches
+              350974  involuntary context switches
+        213036634429  instructions retired
+         74308826041  cycles elapsed
+           674432704  peak memory footprint

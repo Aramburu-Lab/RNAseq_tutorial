@@ -1,0 +1,22 @@
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/breast/outputs/09_report/2026-10-14_report_tcga_brca_hub_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/breast/outputs/09_report/2026-10-14_report_tcga_brca_sanity_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/breast/outputs/09_report/2026-10-14_report_tcga_brca_sanity_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-afc0f325aa51cd002/scratch_roots/breast/outputs/09_report/2026-10-14_report_tcga_brca_sanity_v1_README.md
+        2.35 real         0.68 user         0.26 sys
+           145670144  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               15916  page reclaims
+                  18  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  75  voluntary context switches
+                3386  involuntary context switches
+          7636478142  instructions retired
+          2963646918  cycles elapsed
+            94127328  peak memory footprint
