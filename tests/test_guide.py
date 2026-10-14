@@ -6,10 +6,13 @@ stubs of test_cluster_scripts. T3: the copy's includes are COPIED_FILES. T4: no 
 into the guide's text. No accession is typed here. Each test names the mutation it catches.
 """
 
+import csv
+import gzip
 import hashlib
 import html
 import re
 import shlex
+import shutil
 import tomllib
 from pathlib import Path
 
@@ -21,6 +24,7 @@ from test_sites import DOCKER, UNAME
 
 from ctx.cli import app
 from ctx.dataset import load
+from ctx.gather import own_fastq
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 from ctx.report import builder, course, guide, prose, text
@@ -66,13 +70,13 @@ def page_blocks():
 
 def _ctx_lines(blocks) -> list[str]:
     return [line for c in codes(blocks).values() for line in c.text.splitlines()
-            if " ctx --root " in line]  # fmt: skip
+            if " ctx --root " in line or " ctx reads " in line]  # fmt: skip
 
 
 def parse(line: str) -> object:
     """A `ctx` line through the CLI's own parser, as typing it would: unknown or missing
     options raise."""
-    args = shlex.split(line[line.index("ctx --root") :])[1:]
+    args = shlex.split(line[line.index(" ctx ") + 1 :])[1:]
     group = typer.main.get_command(app)
     at = next(i for i, a in enumerate(args) if a in group.commands)
     head = group.make_context("ctx", args[: at + 1])
@@ -87,7 +91,7 @@ def test_ctx_lines_parse(page_blocks):
     ]
     assert len(lines) >= 8, lines
     parsed = [parse(line) for line in lines]
-    assert {c.info_name for c in parsed} >= {"setup", "run", "gather", "guide"}
+    assert {c.info_name for c in parsed} >= {"setup", "run", "gather", "guide", "reads"}
     # typer bundles its own click, so its errors are matched by their words.
     run = next(line for line in lines if " run --dataset four_runs " in line)
     with pytest.raises(Exception, match="No such option"):
@@ -322,7 +326,121 @@ def test_scripts_named_on_the_page_exist(page_blocks):
     """Every repository path the page names is a file of the repository. Catches a script or
     the template renamed and the page left behind."""
     every = "\n".join(c.text for c in codes(page_blocks[1]).values())
-    path = r"(?:\$CTX_REPO/|^|\s)((?:scripts|conf)/[\w/.]+\.(?:sbatch|sh|py|toml))"
+    path = r"(?:\$CTX_REPO/|^|\s)((?:scripts|conf|src)/[\w/.]+\.(?:sbatch|sh|py|toml|csv))"
     named = set(re.findall(path, every, re.M))
     assert named and all((ROOT / p).is_file() for p in named), named
     assert all((BASH / f"site_{s}.sh").is_file() for s in ("kebnekaise", "laptop"))
+
+
+def _own_blocks(spec) -> tuple[str, str]:
+    shown = codes(guide.blocks(spec, spec.path))
+    return (shown[text.word("guide", "part1b.laptop")].text,
+            shown[text.word("guide", "part1b.cluster")].text)  # fmt: skip
+
+
+def test_own_fastq_lines_name_one_command(page_blocks):
+    """Part 1b's two routes run one function: `ctx reads` on the laptop, the same file on
+    Kebnekaise, each line parsed by its own parser to the same options; the table and its
+    sample column are the dataset's own table and join. Catches an option renamed in one
+    entry point, and a column other than the one curation joins on."""
+    spec, _ = page_blocks
+    laptop, cluster = _own_blocks(spec)
+    (typed,) = [line for line in laptop.splitlines() if " ctx reads " in line]
+    (scripted,) = [line for line in cluster.splitlines() if guide.OWN_SCRIPT in line]
+    clicked = parse(typed).params
+    argv = shlex.split(scripted.replace("$CTX_REPO", "REPO").replace("$RUN", "RUN"))
+    assert argv[:2] == ["python3", f"REPO/{guide.OWN_SCRIPT}"]
+    scripted_args = vars(own_fastq.parser().parse_args(argv[2:]))
+    assert clicked["sample_column"] == scripted_args["sample_column"] == spec.sdrf.join[0]
+    assert str(clicked["table"]) == spec.table().relative_to(ROOT).as_posix()
+    assert str(scripted_args["table"]) == f"REPO/{clicked['table']}"
+    assert str(clicked["fastq_dir"]) == str(scripted_args["fastq_dir"]) == guide.FASTQ_DIR
+
+
+# `pixi run -e laptop ctx ...` runs this checkout's ctx; any other pixi call does nothing.
+PIXI_RUN = """#!/bin/sh
+echo "$@" >> "$STUB_LOG/pixi.calls"
+if [ "$1" = run ]; then shift 4; PYTHONPATH="{src}" exec "{ctx}" "$@"; fi
+"""
+REFS_OWN = {"genome.fa.gz": b"genome", "annotation.gtf.gz": b"annotation"}
+
+
+def _own_files(folder: Path, spec) -> Path:
+    """One gzipped single-end file per run of the dataset, named by the run, from chr22_se."""
+    data = gzip.compress((ROOT / "tests" / "fixtures" / "chr22_se" / "se_c.fq").read_bytes(),
+                         mtime=0)  # fmt: skip
+    folder.mkdir(parents=True)
+    for run in spec.accessions:
+        (folder / f"{run}.fastq.gz").write_bytes(data)
+    return folder
+
+
+def _cut(run: Path) -> list[dict[str, str]]:
+    with (run / "nfcore_rnaseq" / "samplesheet.csv").open(newline="") as fh:
+        return list(csv.DictReader(fh))
+
+
+def test_own_fastq_then_part2_laptop(site, tmp_path):
+    """Part 1b's laptop block, pasted in a fresh folder, then Part 2's laptop block unchanged:
+    nf-core/rnaseq takes the samplesheet ctx reads wrote, each run's file where it is. Catches
+    Part 1b leaving RUN or CTX_REPO unset for Part 2, the outdir where rnaseq.sbatch does not
+    look, and a samplesheet naming a link instead of the file."""
+    root, env = site
+    _stub(root / "stubs" / "uname", UNAME)
+    _stub(root / "stubs" / "docker", DOCKER)
+    _stub(root / "stubs" / "curl", CURL)
+    _stub(root / "stubs" / "pixi", PIXI_RUN.format(src=ROOT / "src", ctx=shutil.which("ctx")))
+    spec = load(FOUR)
+    clone = Path(env["CTX_REPO"])
+    (clone / "conf" / "datasets").mkdir(parents=True)
+    shutil.copy(spec.table(), clone / "conf" / "datasets")
+    files = _own_files(tmp_path / "my_fastq", spec)
+    laptop, _ = _own_blocks(spec)
+    part2 = codes(guide.blocks(spec, FOUR))[text.word("guide", "part2.laptop")].text
+    script = laptop.replace(CLONE_PLACEHOLDER, shlex.quote(env["CTX_REPO"]))
+    script = script.replace(guide.FASTQ_DIR, str(files))
+    (tmp_path / "paste.sh").write_text("set -e\n" + script + part2)
+    home = tmp_path / "home"
+    home.mkdir()
+    fresh = tmp_path / "fresh"
+    fresh.mkdir()
+    done = _run([tmp_path / "paste.sh"], fresh, env, HOME=str(home), STUB_ARCH="arm64")
+    assert done.returncode == 0, done.stderr[-3000:]
+    argv, _, _ = _recorded(root)
+    assert argv[:4] == ["run", "nf-core/rnaseq", "-r", RNASEQ_VERSION]
+    run = home / "ctx_runs" / spec.slug
+    assert [r["sample"] for r in _cut(run)] == list(spec.accessions)
+    assert {r["fastq_1"] for r in _cut(run)} == {str(p.resolve()) for p in files.iterdir()}
+    assert {r["strandedness"] for r in _cut(run)} == {"auto"}
+    assert (run / own_fastq.METADATA / "results.complete").is_file()
+
+
+def test_own_fastq_then_part2_kebnekaise(site, tmp_path):
+    """Part 1b's Kebnekaise block runs the file on the fetch environment's Python, then
+    rnaseq.sbatch, as Part 2's job runs it, takes that samplesheet. Catches the file run on
+    another Python, and an outdir the cluster job does not find."""
+    root, env = site
+    spec = load(FOUR)
+    clone = Path(env["CTX_REPO"])
+    for relative in (guide.OWN_SCRIPT, spec.table().relative_to(ROOT).as_posix()):
+        (clone / relative).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(ROOT / relative, clone / relative)
+    store = tmp_path / "store"
+    store.mkdir()
+    files = _own_files(tmp_path / "my_fastq", spec)
+    _, cluster = _own_blocks(spec)
+    fetch = clone / ".pixi" / "envs" / "fetch" / "bin"
+    (tmp_path / "paste.sh").write_text("set -e\n" + cluster.replace(guide.FASTQ_DIR, str(files)))
+    done = _run([tmp_path / "paste.sh"], tmp_path, env, CTX_STORE=str(store),
+                PATH=f"{fetch}:{env['PATH']}")  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    assert (root / "log" / "python3.calls").read_text().split() == ["called"]
+    run = store / spec.slug
+    for name, data in REFS_OWN.items():
+        (run / "refs" / name).parent.mkdir(parents=True, exist_ok=True)
+        (run / "refs" / name).write_bytes(data)
+    job = _run([BASH / "rnaseq.sbatch", run, *(run / "refs" / n for n in REFS_OWN), "true"],
+               run, env)  # fmt: skip
+    assert job.returncode == 0, job.stderr[-3000:]
+    assert [r["sample"] for r in _cut(run)] == list(spec.accessions)
+    assert {r["fastq_1"] for r in _cut(run)} == {str(p.resolve()) for p in files.iterdir()}

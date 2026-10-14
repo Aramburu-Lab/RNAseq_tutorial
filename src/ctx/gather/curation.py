@@ -7,13 +7,13 @@ so one run lists them all.
 """
 
 import csv
-import hashlib
 import io
 from pathlib import Path
 
 import polars as pl
 
 from ctx.dataset import Dataset
+from ctx.gather.own_fastq import table_rows
 
 REPLICATE_KEYS = ("donor", "cell_type", "condition")
 # (check, key, detail) of one curation problem.
@@ -38,8 +38,9 @@ class CurationError(ValueError):
 def read_table(path: Path) -> tuple[str, str]:
     """A student's own table as curation reads an SDRF: tab-separated text, and its SHA-256.
 
-    A spreadsheet's export is taken as saved: the byte-order mark and Windows line ends are
-    removed, and a ``.csv`` is read with commas, quotes honoured, every other ending with tabs.
+    A spreadsheet's export is taken as saved, by ``own_fastq.table_rows``, which ``ctx reads``
+    reads the same table with: the byte-order mark and Windows line ends are removed, and a
+    ``.csv`` is read with commas, quotes honoured, every other ending with tabs.
 
     Args:
         path: The table, as ``Dataset.table`` resolves it.
@@ -47,14 +48,10 @@ def read_table(path: Path) -> tuple[str, str]:
     Returns:
         The table as tab-separated text, and the SHA-256 of the file's bytes as saved.
     """
-    data = path.read_bytes()
-    body = data.decode("utf-8").removeprefix(chr(0xFEFF))
-    # newline="" keeps a CR inside a quoted cell for csv, which strips the rest itself.
-    rows = list(csv.reader(io.StringIO(body, newline=""),
-                           delimiter="," if path.suffix == ".csv" else "\t"))  # fmt: skip
+    rows, digest = table_rows(path)
     buffer = io.StringIO()
     csv.writer(buffer, delimiter="\t", lineterminator="\n").writerows(rows)
-    return buffer.getvalue(), hashlib.sha256(data).hexdigest()
+    return buffer.getvalue(), digest
 
 
 def normalise(value: str) -> str:
@@ -186,8 +183,8 @@ def curate(runs: pl.DataFrame, sdrf_text: str, spec: Dataset) -> pl.DataFrame:
         spec: The dataset file, with an ``[sdrf]`` table.
 
     Returns:
-        One row per run: ``run_accession``, the curated columns, ``read_length``, ``batch``
-        and ``replicate``.
+        One row per run, whatever column the join names: ``run_accession``, the curated
+        columns, ``read_length``, ``batch`` and ``replicate``.
 
     Raises:
         CurationError: With every problem found; nothing is returned in part.
@@ -205,7 +202,10 @@ def curate(runs: pl.DataFrame, sdrf_text: str, spec: Dataset) -> pl.DataFrame:
     problems += _join(runs, table, spec)
     names = [c.name for c in spec.columns]
     key, column = spec.sdrf.join
-    frame = runs.select(column, "library_layout", "base_count", "read_count").join(
+    # The run is carried whatever the join: a table of ctx reads' samples joins on sample, and
+    # each of a sample's lanes is still its own run.
+    carried = list(dict.fromkeys(("run_accession", column)))
+    frame = runs.select(*carried, "library_layout", "base_count", "read_count").join(
         table.select(key, *names).unique(key, keep="first"),
         left_on=column,
         right_on=key,
@@ -221,4 +221,6 @@ def curate(runs: pl.DataFrame, sdrf_text: str, spec: Dataset) -> pl.DataFrame:
     if problems:
         raise CurationError(problems)
     replicate = rank_replicates(frame, REPLICATE_KEYS, dict(spec.order))
-    return frame.select(column, *names, "read_length", "batch").with_columns(replicate=replicate)
+    return frame.select("run_accession", *names, "read_length", "batch").with_columns(
+        replicate=replicate
+    )

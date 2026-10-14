@@ -231,7 +231,11 @@ def test_fetchngs_runs_monochrome():
     (course,) = [line for line in todo if line.startswith("- Course command")]
     (command,) = re.findall(r"`(nextflow run nf-core/fetchngs[^`]*)`", course)
     assert "--monochrome_logs true" in command, command
-    (rule,) = [line for line in conventions if line.startswith("- Raw reads enter only through")]
+    (rule,) = [
+        line
+        for line in conventions
+        if line.startswith("- Raw reads enter through nf-core/fetchngs")
+    ]
     assert "--monochrome_logs true" in rule and "monochrome_logs = true" in rule, rule
     # Scripts: every file under scripts/ whose code (comment lines removed) names
     # nf-core/fetchngs must carry the flag's tokens in that code. Escapes: a pipeline name

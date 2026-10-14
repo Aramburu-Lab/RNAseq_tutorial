@@ -44,11 +44,13 @@ DEPTH_STANDARD = "total_sequences"
 # The depth figure's filters, columns of the curated sheet (Rytis, 2026-09-30).
 DEPTH_FILTERS = ("cell_type", "condition")
 ENA_SOURCE = "ENA Portal API returnFields, result=read_run, retrieved 2026-09-26"
+# Own files have no ENA record: ctx reads measures these, and takes the rest from the table.
+OWN_COUNTED = "; with ctx reads, measured from the files"
 # (unit, meaning) per column; ENA meanings quote ENA's own field description.
 ENA_COLUMNS = {
     "study_accession": ("none", f"study accession number ({ENA_SOURCE})"),
     "sample_accession": ("none", f"sample accession number ({ENA_SOURCE})"),
-    "library_layout": ("none", f"sequencing library layout ({ENA_SOURCE})"),
+    "library_layout": ("none", f"sequencing library layout ({ENA_SOURCE}){OWN_COUNTED}"),
     "library_selection": (
         "none",
         "method used to select or enrich the material being sequenced "
@@ -60,8 +62,8 @@ ENA_COLUMNS = {
         f"sequencing technique intended for the library ({ENA_SOURCE}); carried to M8",
     ),
     "instrument_model": ("none", f"instrument model used in sequencing experiment ({ENA_SOURCE})"),
-    "read_count": ("reads", f"number of reads ({ENA_SOURCE})"),
-    "base_count": ("base pairs", f"number of base pairs ({ENA_SOURCE})"),
+    "read_count": ("reads", f"number of reads ({ENA_SOURCE}){OWN_COUNTED}"),
+    "base_count": ("base pairs", f"number of base pairs ({ENA_SOURCE}){OWN_COUNTED}"),
     "fastq_bytes": (
         "bytes",
         f"size (in bytes) of FASTQ files, semicolon-separated per file ({ENA_SOURCE})",
@@ -76,12 +78,12 @@ OWN_COLUMNS = {
         "Experiment accession: fetchngs's sample, shared by every run of one experiment.",
     ),
     "run_accession": ("none", f"accession number ({ENA_SOURCE}); one row per run."),
-    "run_index": ("none", "Order of this run within its sample, by numeric accession, from 1."),
+    "run_index": ("none", "Order of the run in its sample, by accession number, then name."),
     "n_runs": (
         "runs",
         "Runs sharing this sample: technical replicates, combined where FASTQs are consumed.",
     ),
-    "single_end": ("none", "True when ENA reports the library layout as SINGLE."),
+    "single_end": ("none", "True for ENA's library layout SINGLE, or one file found by ctx reads."),
     "fastq_1": ("none", "First FASTQ, relative to the fetchngs outdir; empty when not downloaded."),
     "status_1": (
         "none",
@@ -192,9 +194,12 @@ def _facts(outdir: Outdir, frame: pl.DataFrame, curated: bool) -> ResultTable:
     counted = ", ".join(f"{k} {n}" for k, n in _statuses(frame).items())
     word = functools.partial(text.word, PAGE)
     none = word("checks.none")
-    source = text.fill(PAGE, "checks.source_value", fetchngs=outdir.provenance["fetchngs"],
-                       commit=outdir.provenance["fetchngs_commit"],
-                       nextflow=outdir.provenance["nextflow"])  # fmt: skip
+    found = outdir.provenance
+    if "ctx reads" in found:
+        source = text.fill(PAGE, "checks.source_own", layout=found["ctx reads"])
+    else:
+        source = text.fill(PAGE, "checks.source_value", fetchngs=found["fetchngs"],
+                           commit=found["fetchngs_commit"], nextflow=found["nextflow"])  # fmt: skip
     rows = [
         (word("checks.source"), source),
         (word("checks.by_status"), counted or none),

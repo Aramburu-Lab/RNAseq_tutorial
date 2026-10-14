@@ -13,6 +13,7 @@ from typing import Annotated, Any
 import typer
 
 from ctx import __version__, runtime
+from ctx.gather import own_fastq
 from ctx.genecard.hpa import RELEASE as HPA_RELEASE
 from ctx.process import DEFAULT_SETTINGS, Aligner, Strandedness
 from ctx.qc import Fastp
@@ -197,6 +198,28 @@ def gather(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
         raise typer.Exit(1) from error
     for path in written:
         typer.echo(path)
+
+
+@app.command()
+def reads(
+    run_folder: Annotated[Path, typer.Option(help=HELP["--run-folder"])],
+    fastq_dir: Annotated[Path, typer.Option(help=HELP["--fastq-dir"])],
+    table: Annotated[Path, typer.Option(help=HELP["--table"])],
+    sample_column: Annotated[
+        str, typer.Option(help=HELP["--sample-column"])
+    ] = own_fastq.DEFAULT_COLUMN,
+) -> None:
+    """Lay out your own FASTQ files as a fetchngs download, for nf-core/rnaseq and gather."""
+    # Standard library only and no page, so no profile to resolve first; on Kebnekaise the
+    # same function runs as a file (ctx.gather.own_fastq's Usage).
+    try:
+        written = own_fastq.write(run_folder, fastq_dir, table, sample_column)
+    except own_fastq.ReadsError as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
+        typer.echo(path)
+    typer.echo(own_fastq.summary(written[0]))
 
 
 def _columns(value: str) -> tuple[str, ...]:

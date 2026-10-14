@@ -4,7 +4,8 @@ Every command on the page comes from one place, and a test holds each to it: the
 lines are their Usage blocks' (``USAGE``, filled with the dataset's accessions and slug), the
 ``ctx`` lines are built here from option names the CLI parses, and the copy's includes are
 ``rnaseq.COPIED_FILES``. The dataset file fills Parts 1 and 2; the page text is in
-``content/guide.toml``.
+``content/guide.toml``. Part 1b lays out a student's own FASTQ files where Parts 2 and 3 read a
+download, with ``ctx reads`` on a laptop and the same code run as a file on Kebnekaise.
 """
 
 import functools
@@ -15,6 +16,7 @@ from pathlib import Path
 
 from ctx import runtime
 from ctx.dataset import Dataset
+from ctx.gather import own_fastq
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 from ctx.io.naming import MODULES, stem
@@ -106,6 +108,12 @@ GTF_RESOURCE = "annotation_gtf"
 NEEDS = {"index_gib": 16.8, "folder_gb": 61, "work_gb": 37, "results_gb": 22}
 
 
+# Part 1b: ctx reads as a file on Kebnekaise, whose fetch environment has Python and no ctx.
+OWN_SCRIPT = "src/ctx/gather/own_fastq.py"
+FASTQ_DIR = "<your_fastq_folder>"
+TABLE = "<your_sample_table.csv>"
+
+
 def filled(line: str, spec: Dataset) -> str:
     """A Usage line with the dataset's accessions and slug in place of their placeholders."""
     if spec.accessions:
@@ -152,6 +160,45 @@ def course_lines(spec: Dataset, dataset_file: str, meta: str, counts: str) -> tu
         ctx_line(root, "run", *run, "--check"),
         ctx_line(root, "run", *run),
     )
+
+
+def own_table(spec: Dataset, cluster: bool) -> tuple[str, str]:
+    """The table Part 1b names and its sample column: the dataset's own, else placeholders.
+
+    The column is the table's side of the dataset file's join, so the samples ``ctx reads``
+    names are the ones curation joins. A table in the repository is named from its folder on
+    the laptop, where the block runs, and from ``$CTX_REPO`` on Kebnekaise; any other is the
+    student's to copy there.
+    """
+    table = spec.table()
+    if table is None or spec.sdrf is None:
+        return TABLE, own_fastq.DEFAULT_COLUMN
+    path = table.resolve()
+    if not path.is_relative_to(REPO):
+        return (TABLE if cluster else runtime.retyped([str(path)])), spec.sdrf.join[0]
+    relative = path.relative_to(REPO).as_posix()
+    return (f'"$CTX_REPO/{relative}"' if cluster else shlex.quote(relative)), spec.sdrf.join[0]
+
+
+def reads_lines(spec: Dataset) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """Part 1b on a laptop, then on Kebnekaise: the run folder Part 2 reads, then ctx reads.
+
+    Each route starts as its Part 1 block does, so ``RUN`` and ``CTX_REPO`` are what Part 2
+    reads; Kebnekaise runs the file on the fetch environment's Python, after Part 1's login.
+    """
+
+    def options(cluster: bool) -> str:
+        """The options of ``ctx reads``, as both entry points name them."""
+        table, column = own_table(spec, cluster)
+        return " ".join(("--run-folder", '"$RUN"', "--fastq-dir", FASTQ_DIR, "--table", table,
+                         "--sample-column", column))  # fmt: skip
+
+    laptop_run, install = (filled(line, spec) for line in USAGE["fetch_laptop"][1][:2])
+    laptop = (laptop_run, install, 'cd "$CTX_REPO" && pixi install -e laptop --frozen',
+              'mkdir -p "$RUN"', f"pixi run -e laptop ctx reads {options(False)}")  # fmt: skip
+    cluster = (filled(USAGE["fetch_cluster"][1][0], spec), 'mkdir -p "$RUN"',
+               f'python3 "$CTX_REPO/{OWN_SCRIPT}" {options(True)}')  # fmt: skip
+    return laptop, cluster
 
 
 def mine_lines() -> tuple[str, ...]:
@@ -212,7 +259,11 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
         Group(text.fill(PAGE, f"part{n}.group", n=n), items, lead=word(f"part{n}.lead"))
         for n, items in enumerate(parts, start=1)
     )
-    return (find(), *numbered)
+    laptop, cluster = reads_lines(spec)
+    own = Group(text.fill(PAGE, "part1b.group", n=1),
+                (word("part1b.names"), word("part1b.links"), code("part1b.laptop", laptop),
+                 code("part1b.cluster", cluster)), lead=word("part1b.lead"))  # fmt: skip
+    return (find(), numbered[0], own, *numbered[1:])
 
 
 def find() -> Group:
