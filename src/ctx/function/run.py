@@ -54,6 +54,7 @@ from ctx.report.builder import (
 )
 from ctx.report.entry import write_entry
 from ctx.report.text import fill, word
+from ctx.report.views import viewed
 from ctx.viz.bar import BarData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import DATA_COLOURS, ROLES, category_colours
@@ -381,6 +382,25 @@ class _Enrichment:
     gmt: Path
 
 
+def _gsea_views(writer: Writer, featured: str, labelled: Mapping[str, Words],
+                e: _Enrichment) -> FigureBlock:  # fmt: skip
+    """The featured contrast's GSEA bars, with every other contrast's as a view.
+
+    Work-order item 7 (D-051): passing sets run from 36 of 49 in mono_gcsf to 2 of 48 in the
+    null split (figure controls plan); nothing is recomputed in the page, and each contrast's
+    numbers are its own GSEA table beside the page.
+    """
+    options = []
+    for name in [featured, *(n for n in e.gsea if n != featured)]:
+        gsea = e.gsea[name]
+        ranked = _gsea_bars(labelled[name], gsea)
+        drawn = (int((ranked.frame["fdr"] < ALPHA).sum()), ranked.frame.height)
+        words_ = gsea_text(labelled[name], int((gsea["fdr"] < ALPHA).sum()), gsea.height, drawn)
+        options.append((labelled[name].label, ranked, words_))
+    block = writer.figure(options[0][1], f"gsea_{featured}", options[0][2])
+    return viewed(block, options, figure("gsea", "view")) if len(options) > 1 else block
+
+
 def _featured(writer: Writer, contrast: Contrast, labelled: Mapping[str, Words],
               e: _Enrichment) -> Group:  # fmt: skip
     """The featured contrast's ORA, live on the reader's list (GS.5), and GSEA bars.
@@ -402,15 +422,11 @@ def _featured(writer: Writer, contrast: Contrast, labelled: Mapping[str, Words],
         # "all": the list as one family, in the palette's orange, which neither call takes.
         panel["colours"] = {**bars.colours, "all": DATA_COLOURS[0]}
         bars = replace(bars, live=panel)
-    gsea = e.gsea[name]
-    ranked = _gsea_bars(said, gsea)
-    drawn = (int((ranked.frame["fdr"] < ALPHA).sum()), ranked.frame.height)
     items = (
         writer.figure(bars, f"ora_{name}", ora_text(said, len(background),
                                                     passing.get("up", 0), passing.get("down", 0)))
         if bars else fill(PAGE, "figures.ora.none", alpha=ALPHA),
-        writer.figure(ranked, f"gsea_{name}",
-                      gsea_text(said, int((gsea["fdr"] < ALPHA).sum()), gsea.height, drawn)),
+        _gsea_views(writer, name, labelled, e),
     )  # fmt: skip
     # Tabs hold figures only: with no ORA figure its sentence stands above the GSEA bars.
     return Group(fill(PAGE, "groups.featured", label=said.label), items, tabs=bars is not None)

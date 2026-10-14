@@ -11,6 +11,7 @@ import json
 import math
 import string
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
 from markupsafe import Markup, escape
@@ -205,7 +206,14 @@ def lead_html(lead: Mapping[str, Any]) -> Markup:
 def prepare(
     block: "FigureBlock", index: int, number: int, level: int, scale: float = 1.0
 ) -> dict[str, Any]:
-    """Everything the figure macro prints for one figure; opened alone, at ``scale``."""
+    """Everything the figure macro prints for one figure; opened alone, at ``scale``.
+
+    Opened alone a ``view`` select is dropped: its options are drawn at the module page's
+    size, which a figure zoomed alone cannot take (D-051: a coupling a standalone page cannot
+    honour is dropped).
+    """
+    if scale != 1 and block.controls and block.controls.get("kind") == "view":
+        block = replace(block, controls=None)
     controls = dict(block.controls) if block.controls else None
     exporting = bool(controls and controls.get("export"))
     # Every character the view's PDF can set, which the page's embedded fonts must keep.
@@ -239,6 +247,15 @@ def prepare(
     }
 
 
+# What a form prints for the kinds that only pass on parts of their settings: a view's
+# option names (D-051) and M6's live ORA's words and backgrounds (GS.5).
+_SHAPED = {
+    "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"]},
+    "ora": lambda c: {"words": c["words"], "backgrounds": c["backgrounds"],
+                      "featured": c["featured"]},
+}  # fmt: skip
+
+
 def defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
     """What the controls show before the reader moves them: the default rule, no paint, or all.
 
@@ -250,10 +267,8 @@ def defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
         # The survival panel's own defaults, built by ctx.clinical.page.live; a figure that
         # follows the panel has none.
         return dict(controls.get("defaults", {}))
-    if controls["kind"] == "ora":
-        # M6's live ORA: the words and backgrounds the form prints (GS.5).
-        return {"words": controls["words"], "backgrounds": controls["backgrounds"],
-                "featured": controls["featured"]}  # fmt: skip
+    if (shaped := _SHAPED.get(controls["kind"])) is not None:
+        return shaped(controls)
     if controls["kind"] == "pairs":
         # The select's label: the figure's own where it gives one, M8's F8 naming miRNA pairs.
         return {

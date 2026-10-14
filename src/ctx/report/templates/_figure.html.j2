@@ -68,6 +68,14 @@
 <p class="pick-leave js-only"><button type="button" data-copy-tsv>{{ w.copy_table }}</button></p>
 <pre class="ora-tsv" hidden></pre>
 {% endif %}
+{% if f.kind == "view" %}
+{# A select between figures Python drew (D-051 view kind); the first is the figure as built. #}
+<form class="calls view" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.label }}">
+<label>{{ f.defaults.label }}<select name="view">{% for label in f.defaults.options %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+</form>
+<noscript><p class="note">{{ ui.view.noscript }}</p></noscript>
+<p class="calls-summary view-summary" aria-live="polite"></p>
+{% endif %}
 {% if f.kind == "pairs" %}
 <form class="calls pairs" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.pairs.label }}">
 <label>{{ f.defaults.label or ui.pairs.pair }}<select name="pair">{% for value, label in f.defaults.options %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>

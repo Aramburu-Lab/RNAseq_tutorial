@@ -122,7 +122,7 @@
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -233,6 +233,11 @@
      link; this block wires the volcano, the table, the buttons and the onward links. */
   scope.querySelectorAll("form.select").forEach(function (form) {
     guard("select", function () { picking(form); });
+  });
+
+  /* A view select (D-051): another figure Python drew, swapped in with its words. */
+  scope.querySelectorAll("form.view").forEach(function (form) {
+    guard("view", function () { viewing(form); });
   });
 
   /* M6's live over-representation (GS.5). */
@@ -927,6 +932,31 @@
       }
     }
     run();
+  }
+
+  function viewing(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var div = fig.querySelector(".js-plotly-plot"), mark = exporting(fig, cfg);
+    var lead = fig.querySelector(".fig-lead"), caption = fig.querySelector("figcaption");
+    var title = fig.querySelector(".fig-title"), summary = fig.querySelector(".view-summary");
+    var built = { lead: lead ? lead.innerHTML : "", caption: caption.innerHTML,
+                  title: title ? title.textContent : "" };
+    function show() {
+      var i = Number(form.elements.view.value), o = cfg.options[i];
+      var layout = Object.assign({}, o.figure.layout,
+                                 { template: template(div, root.getAttribute("data-theme")) });
+      Plotly.react(div, o.figure.data, layout);
+      if (lead) lead.innerHTML = i ? o.lead : built.lead;
+      caption.innerHTML = i ? o.caption : built.caption;
+      if (title) title.textContent = i ? o.title : built.title;
+      summary.textContent = i ? cfg.moved.replace("{label}", o.label).replace("{build}", cfg.build) : "";
+      mark(i !== 0, "view");
+    }
+    form.addEventListener("change", show);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the select without an event. */
+    if (form.elements.view.value !== "0") show();
   }
 
   function filtering(form) {

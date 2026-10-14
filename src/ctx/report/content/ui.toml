@@ -231,6 +231,11 @@ one = "Opening this module's newest page with the gene list of the link."
 lead = "This module holds a page per dataset; each link below carries the gene list of the link."
 noscript = "Without JavaScript the gene list stays behind: open a page below and paste the list there."
 
+# A view select (D-051): the page swaps in another figure Python drew.
+[view]
+moved = "This view shows {label}; the figure files and the reading guide show {build}."
+noscript = "Choosing a view needs JavaScript; the tables beside the page hold every view's numbers."
+
 # A packed group: drawn when the reader reaches it (C3.1, M9.8).
 [packed]
 waiting = "This part is drawn when it comes into view."

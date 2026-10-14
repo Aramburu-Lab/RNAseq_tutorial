@@ -118,6 +118,8 @@ line = "FDR {alpha}"
 [figures.gsea]
 title = "Gene set enrichment: {label}"
 tab = "GSEA"
+# The select between contrasts (work-order item 7).
+view = "Contrast"
 lead = "{passing} of {tested} tested gene sets pass FDR < {alpha}."
 reading = [
     "Each bar is one gene set, the sets with the smallest FDR on top; its length is the NES.",

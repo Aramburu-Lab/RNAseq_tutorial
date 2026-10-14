@@ -182,6 +182,8 @@ thinned = "genes not called"
 [figures.phist]
 title = "p-value histogram: {label}"
 tab = "p-value histogram"
+# The select between contrasts (work-order item 6).
+view = "Contrast"
 lead = "{low:,} genes have p < {alpha}, against a flat level of {flat:,.1f} per bin."
 reading = [
     "Each bar counts the genes whose p-value falls in a {width:g}-wide bin; {tested:,} genes in all.",

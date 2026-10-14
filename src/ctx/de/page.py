@@ -229,15 +229,23 @@ def box_text(said: Words, n_genes: int) -> FigureText:
     )
 
 
-def picking(spec: Dataset, contrast: str, hover: Sequence[str]) -> dict[str, Any]:
+def picking(spec: Dataset, contrast: str, hover: Sequence[str], ids: Sequence[str]
+            ) -> dict[str, Any] | None:  # fmt: skip
     """The featured volcano's gene picker (GS.4): its source, columns and onward links.
 
     The links go to the entry page of each module this dataset sends a list to
-    (``ctx.report.entry.onward``), never to a dated page, which a later build replaces.
+    (``ctx.report.entry.onward``), never to a dated page, which a later build replaces. None
+    where a gene is no Ensembl gene, which no link can carry (a made-up dataset's g00001).
     """
     from ctx.report.entry import onward  # noqa: PLC0415 - imports M9's names, once per run
-    from ctx.report.genes import picker  # noqa: PLC0415
+    from ctx.report.genes import number, picker  # noqa: PLC0415
     from ctx.report.hub import TITLES  # noqa: PLC0415
+
+    try:
+        for gene_id in ids:
+            number(gene_id)
+    except ValueError:
+        return None
 
     links = [(href, TITLES[module]) for module, href in onward(spec)]
     columns = {"id": "gene_id", "symbol": "gene", "lfc": "log2FoldChange", "padj": "padj"}
