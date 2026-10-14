@@ -42,7 +42,7 @@ it were reversed.
 
 **Evidence.** A preference on recommended defaults; the endpoint follows C2's reading of Liu 2018 Table 3, whose event counts C2 reproduced (24 of 24 for KIRC, LUAD, LUSC).
 
-**Consequence.** C3 applies the endpoint, the genes and the plex strip; the own-FASTQ follow-up changes `replicate` numbering in curation.
+**Consequence.** C3 applies the endpoint, the genes and the plex strip; the own-FASTQ follow-up changes `replicate` numbering in curation. Applied in curation (wo13-g2): `library_replicates` ranks each ENA experiment, the library, by its first run, and every run of it takes that number; `ctx reads` already names the sample as each lane's experiment. `rank_replicates` breaks a run-number tie by name. M5 still ranks runs (U.19).
 
 ---
 

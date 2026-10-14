@@ -108,8 +108,9 @@ CURATION_COLUMNS = {
 DERIVED_COLUMNS = {
     "replicate": (
         "none",
-        "Order of this sample among the runs of one donor, cell type and condition: by the "
-        "dataset file's [order], then by run accession; from 1.",
+        "Order of this run's library (its ENA experiment) among the libraries of one donor, "
+        "cell type and condition: by the dataset file's [order], then by the library's first "
+        "run, a tie by name; every run of one library shares it; from 1 (D-063).",
     ),
     "batch": ("none", "Batch from the dataset file's read-length bins ([derived.batch])."),
     "read_length": ("nt", "base_count / read_count / mates (2 for paired runs); never rounded."),

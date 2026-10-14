@@ -470,9 +470,10 @@ Wave 1 merged 2026-10-14 (main d53157c, preflight 1,519 passed): C1 (de17930) M4
 
 - [x] U.15 (M) Own FASTQ route: `ctx reads`, the guide's Part 1b, the template route, CONVENTIONS' Stack line; proved both ways on the worked example (D-059, local-fastq 06945f7).
 - [ ] U.16 (S) Rehearse Part 1b on real own files, on a laptop and on Kebnekaise; measure counting speed on gigabyte files.
-- [ ] U.17 (S) Number the lanes of one sample as one replicate (D-063).
+- [x] U.17 (S) The runs of one library share one replicate number: curation ranks libraries (experiment_accession) by their first run, a tie on the run number by name; Step-1's 210 runs are 210 experiments, unchanged (D-063, wo13-g2 6f0453a, 8fb5e13; 5 mutations caught).
+- [ ] U.19 (S) M5's `select_samples` and `de.run._subset` rank runs, not libraries: a library's second lane is listed in dropped_runs as a later replicate (D-063; given to D1).
 - [x] U.10 laptop proof rerun 2026-10-09 at 7f37024 with Docker 20 GiB: num_processed equal on all 4 runs, 78,470 genes, `ctx run` exit 0, the kit and its zip checked; SALMON_INDEX 17.020 GiB by docker stats (17.5 GB by Nextflow's trace), the largest concurrent sum the same; disk peak 60.7 GB. The run logs were in scratch and were lost on the 2026-10-14 restart; the numbers above are from the agent's report.
-- [ ] U.18 (S) The guide's seven proof defects: no clone or `pixi install` step on the laptop route; "its last line is the size at ENA" is the line before last; the memory figure (16.8 GiB) and disk figure (61 GB, saving off) brought to the measured 17.0 GiB and 60.7 GB; the reference download's 970,288,386 B stated before it; why Part 3 names the metadata outdir; a non-frozen `pixi install` rewrites pixi.lock and dirties the kit's commit.
+- [x] U.18 (S) The guide's seven proof defects fixed: clone on the laptop route, the size on the line before last, Docker over 17.020 GiB (17.5 GB by trace), 61.7 GB free disk, the references' 970,288,386 B before their download, why Part 3 names the metadata outdir, every install --frozen and why (wo13-g2 a062a9c; 14 mutations caught; 16 Copy buttons at 1280 and 375 px in both themes).
 
 ## ▶️ Work order (Rytis, 2026-10-01)
 

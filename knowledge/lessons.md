@@ -92,3 +92,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - On a 2-core runner, xdist is slower than serial (1,799 s against 1,372 s): measure there before switching CI (A, 2026-10-09).
 - The xdist summary leaves out deselected tests; compare passed and skipped counts only (A, 2026-10-09).
 - The Browser pane is shared between agents: each opens its own tab (C1, 2026-10-09).
+- A sort that leaves ties to the row order passes every test whose rows arrive sorted: the tiebreak mutation survived until a test fed the twins in reverse (G2, 2026-10-14).
+- The scratch folder is shared between agents: another agent overwrote a mutation script mid-session. Prefix scratch files with the package's name (G2, 2026-10-14).
