@@ -227,3 +227,18 @@ def box_text(said: Words, n_genes: int) -> FigureText:
         title=figure("box", "title", label=said.label),
         reading=reading("box", n_genes=n_genes, tested=said.tested),
     )
+
+
+def picking(spec: Dataset, contrast: str, hover: Sequence[str]) -> dict[str, Any]:
+    """The featured volcano's gene picker (GS.4): its source, columns and onward links.
+
+    The links go to the entry page of each module this dataset sends a list to
+    (``ctx.report.entry.onward``), never to a dated page, which a later build replaces.
+    """
+    from ctx.report.entry import onward  # noqa: PLC0415 - imports M9's names, once per run
+    from ctx.report.genes import picker  # noqa: PLC0415
+    from ctx.report.hub import TITLES  # noqa: PLC0415
+
+    links = [(href, TITLES[module]) for module, href in onward(spec)]
+    columns = {"id": "gene_id", "symbol": "gene", "lfc": "log2FoldChange", "padj": "padj"}
+    return picker(f"{spec.slug}:{contrast}", hover, links, columns)

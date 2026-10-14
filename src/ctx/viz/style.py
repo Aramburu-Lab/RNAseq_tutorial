@@ -23,6 +23,9 @@ PROJECTOR_UNSAFE = frozenset({"#F0E442"})
 ROLES = {"reference": "#0072B2", "comparison": "#D55E00"}
 # A QC band's colour, from the Okabe-Ito data colours (ctx.qc.registry, conf/qc_metrics.toml).
 BAND_COLOURS = {"good": "#009E73", "usable": "#E69F00", "bad": "#D55E00"}
+# The ring round a selected gene (GS.4): the purple no call colour takes, at 3:1 or more on
+# both themes (tests/test_select_page.py); a ring and its size mark a selection beside colour.
+SELECTED = "#CC79A7"
 # A two-level strip's colours once the data colours are spent: 4.0:1 to each other (WCAG 2),
 # so its levels read apart beside each other on either theme (``strip_colours``).
 SPENT_GREYS = ("#4D4D4D", "#B3B3B3")

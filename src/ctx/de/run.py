@@ -32,6 +32,7 @@ from ctx.de.page import (
     ma_text,
     pca_text,
     phist_text,
+    picking,
     questions,
     skeleton,
     subset_words,
@@ -823,9 +824,11 @@ def _figures(
     featured = fits[spec.de.featured]
     name, this = featured.contrast.name, said[featured.contrast.name]
     shrunk = bool(featured.results["log2FoldChange_shrunk"].is_not_null().any())
+    shown = volcano(featured, genes, said=this)
+    shown = replace(shown, select=picking(spec, name, shown.hover))
     groups.append(Group(
         fill(PAGE, "groups.featured", label=this.label),
-        (writer.figure(volcano(featured, genes, said=this), f"volcano_{name}", volcano_text(this)),
+        (writer.figure(shown, f"volcano_{name}", volcano_text(this)),
          writer.figure(_ma(featured, genes, this), f"ma_{name}", ma_text(this, shrunk))),
         lead=word(PAGE, "groups.featured_lead"), tabs=True,
     ))  # fmt: skip

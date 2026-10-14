@@ -1,0 +1,75 @@
+{% raw %}
+/* The gene picker's rules (GS.4), apart from the page so tests/test_pick.py runs them under
+   node: what a drag, a click or a button does to the list, the Undo steps, the counts by the
+   live call, and the table's rows. A list is the genes' unversioned numbers, ascending; the
+   sign is ctxSelect.select's to attach, from the source contrast's log2 FC. */
+var ctxPick = {
+  /* The list after a pick: replace takes the picked genes, add joins them, remove takes them
+     out. Each gene once, ascending, as ctxSelect.select orders a selection. */
+  apply: function (current, picked, mode) {
+    var have = Object.create(null), out = [];
+    if (mode === "replace") current = [];
+    current.forEach(function (n) { have[n] = true; });
+    picked.forEach(function (n) {
+      if (mode === "remove") delete have[n]; else have[n] = true;
+    });
+    Object.keys(have).forEach(function (k) { out.push(Number(k)); });
+    return out.sort(function (a, b) { return a - b; });
+  },
+  /* A click: the gene leaves the list if it is in it, else joins it. */
+  toggle: function (current, n) {
+    return ctxPick.apply(current, [n], current.indexOf(n) >= 0 ? "remove" : "add");
+  },
+  /* Undo's steps: the list before each change, the oldest dropped past max. A change that
+     leaves the list as it was takes no step. */
+  push: function (history, before, after, max) {
+    if (before.join(",") === after.join(",")) return history;
+    var out = history.concat([before]);
+    return out.length > max ? out.slice(out.length - max) : out;
+  },
+  /* How many genes of the list each live call holds; calls maps a number to up or down. */
+  counts: function (list, calls) {
+    var out = { n: list.length, up: 0, down: 0, ns: 0 };
+    list.forEach(function (n) {
+      var call = calls[n];
+      if (call === "up" || call === "down") out[call]++; else out.ns++;
+    });
+    return out;
+  },
+  /* The words for a count: the _one form for one, the _none form for none where it exists. */
+  word: function (words, key, n) {
+    if (n === 0 && words[key + "_none"] !== undefined) return words[key + "_none"];
+    if (n === 1 && words[key + "_one"] !== undefined) return words[key + "_one"];
+    return words[key];
+  },
+  fill: function (template, values) {
+    return template.replace(/\{(\w+)\}/g, function (all, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : all;
+    });
+  },
+  /* The table's page: rows matching the search (a symbol or an ID holding it, any case),
+     the selected only if asked, sorted by a column then by number, cut to one page. */
+  view: function (rows, cfg, state) {
+    var q = (state.query || "").trim().toUpperCase(), picked = Object.create(null);
+    state.list.forEach(function (n) { picked[n] = true; });
+    var kept = rows.filter(function (r) {
+      if (state.only && !picked[r.number]) return false;
+      return !q || String(r.symbol).toUpperCase().indexOf(q) >= 0 ||
+        String(r.id).toUpperCase().indexOf(q) >= 0;
+    });
+    var key = state.sort || "padj", dir = state.desc ? -1 : 1;
+    kept.sort(function (a, b) {
+      var x = a[key], y = b[key];
+      if (x === y || (x === null && y === null)) return a.number - b.number;
+      if (x === null) return 1;
+      if (y === null) return -1;
+      return (x < y ? -1 : 1) * dir;
+    });
+    var size = cfg.page_rows, pages = Math.max(1, Math.ceil(kept.length / size));
+    var page = Math.min(Math.max(state.page || 0, 0), pages - 1);
+    return { rows: kept.slice(page * size, page * size + size), total: kept.length, page: page,
+             pages: pages, first: kept.length ? page * size + 1 : 0,
+             last: Math.min(kept.length, page * size + size) };
+  }
+};
+{% endraw %}

@@ -399,3 +399,71 @@ def read_list(path: Path, table: GeneTable) -> GeneList:
     if count is not None and count != str(lines):
         raise GeneListError(f"{path}: '# count: {count}', but {lines} lines name genes")
     return GeneList(source, header.get("time"), parse(content, table))
+
+
+def post(selection: Selection) -> dict[str, object]:
+    """What Open beside sends to the windows it links (GS.6): the fragment's fields.
+
+    The page twin is ``ctxSelect.post``.
+    """
+    genes = ",".join(str(g) for g in selection.genes)
+    return {"ctx": "genes", "v": VERSION, "src": selection.src, "n": len(selection.genes),
+            "g": genes}  # fmt: skip
+
+
+def received(data: object) -> Selection | None:
+    """A message's selection, read as strictly as a link (``decode``).
+
+    Returns:
+        The selection; None for a message that is not a gene list.
+
+    Raises:
+        SelectionError: For a gene list that breaks the form, as ``decode`` names it.
+    """
+    if not isinstance(data, dict) or data.get("ctx") != "genes":
+        return None
+    values = [data.get(k) for k in ("v", "src", "n", "g")]
+    # A string or a number, as the page's typeof reads one; a boolean is neither there.
+    fields = [str(v) if isinstance(v, str | int) and not isinstance(v, bool) else ""
+              for v in values]  # fmt: skip
+    # A field holding '&' or '#' fails decode's form, as it would in a link.
+    v, src, n, g = fields
+    return decode(f"#v={v}&src={src}&n={n}&g={g}{END}")
+
+
+# The picker's table shows this many genes a page; Undo keeps this many steps (D-049).
+PAGE_ROWS = 25
+UNDO_STEPS = 50
+
+
+def picker(
+    src: str, hover: Sequence[str], links: Sequence[tuple[str, str]], columns: Mapping[str, str]
+) -> dict[str, object]:
+    """The gene picker's settings, which a volcano's controls carry for the page (GS.4).
+
+    Args:
+        src: ``<dataset>:<contrast>``, the contrast whose raw log2 FC signs the genes.
+        hover: The volcano's hover columns; a lasso's points name their gene by its ID there.
+        links: (href, module title) of each module the selection goes on to.
+        columns: The page rows' columns by role: ``id``, ``symbol``, ``lfc``, ``padj``.
+
+    Returns:
+        The settings, with ``ui.toml`` [picker]'s words for the page script.
+
+    Raises:
+        ValueError: If no fragment carries ``src``, or hover names no gene ID.
+    """
+    from ctx.viz.style import LINE_WIDTHS, PLOTLY_MARKER_PX, SELECTED  # noqa: PLC0415
+
+    if not _SOURCE.fullmatch(src):
+        raise ValueError(f"no fragment carries source {src!r}")
+    if columns["id"] not in hover:
+        raise ValueError(f"the hover names no {columns['id']}, so a lasso cannot name genes")
+    return {
+        "src": src, **columns, "id_at": list(hover).index(columns["id"]),
+        "ring": {"color": SELECTED, "size": 2 * PLOTLY_MARKER_PX, "width": LINE_WIDTHS["box"]},
+        "page_rows": PAGE_ROWS, "undo": UNDO_STEPS,
+        "links": [list(link) for link in links], "words": text.raw("ui", "picker"),
+        # A link's or a message's refusal, as SelectionError words it (ctxSelect.message).
+        "errors": text.raw("ui", "select"),
+    }  # fmt: skip

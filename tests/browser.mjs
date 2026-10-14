@@ -1,11 +1,15 @@
 // Drives headless Chromium over the DevTools protocol with node's own WebSocket, no package:
 // tests/test_export_browser.py hands it a plan on stdin and reads what each page did.
-// Plan: {chromium, downloads, tasks: [{name, url, width, height, act, figure, reset, resize}]}.
-// For each task it opens the page, evaluates `act`, presses the PDF and SVG buttons of the
-// figure `figure` selects when `figure` is set, evaluates `reset`, then, for each step of
-// `resize` in turn, sets the window to the step's `width` and evaluates its `act`; it reports
-// the results, `resized` in step order, the files saved, every request the page made and every
-// console error.
+// Plan: {chromium, downloads, tasks: [{name, url, width, height, act, mouse, others, figure,
+// reset, resize}]}. For each task it opens the page, evaluates `act` as a user gesture, then
+// for each step of `mouse` in turn evaluates its `at`, a list of [type, x, y] events, and
+// dispatches them as a real left-button mouse (a drag is pressed, moved, released) before
+// evaluating its `then`; evaluates `others` in every other page open then (a window the page
+// opened), presses the PDF and SVG buttons of the figure `figure` selects when `figure` is
+// set, evaluates `reset`, then, for each step of `resize` in turn, sets the window to the
+// step's `width` and evaluates its `act`; it reports the results, `moused` and `resized` in
+// step order, `others` by URL, the files saved, every request the page made and every console
+// error.
 import { spawn } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -98,11 +102,34 @@ try {
     await s("Page.navigate", { url: task.url });
     await loaded;
     const evaluate = async (expression) => {
-      const out = await s("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
+      const out = await s("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true,
+                                                userGesture: true });
       if (out.exceptionDetails) throw new Error(`${task.name}: ${JSON.stringify(out.exceptionDetails)}`);
       return out.result.value;
     };
     const result = { name: task.name, acted: await evaluate(task.act || "null"), files: {} };
+    result.moused = [];
+    // Input reaches only the page in front: a background tab drew no drag.
+    if (task.mouse) await s("Page.bringToFront");
+    for (const step of task.mouse || []) {
+      for (const [type, x, y] of await evaluate(step.at)) {
+        await s("Input.dispatchMouseEvent", { type, x, y, button: "left",
+                                              buttons: type === "mouseReleased" ? 0 : 1,
+                                              clickCount: type === "mouseMoved" ? 0 : 1 });
+      }
+      result.moused.push(await evaluate(step.then || "null"));
+    }
+    if (task.others) {
+      result.others = {};
+      const { targetInfos } = await send("Target.getTargets");
+      for (const info of targetInfos.filter((t) => t.type === "page" && t.targetId !== targetId)) {
+        const other = await send("Target.attachToTarget", { targetId: info.targetId, flatten: true });
+        const out = await send("Runtime.evaluate", { expression: task.others, awaitPromise: true,
+          returnByValue: true, userGesture: true }, other.sessionId);
+        result.others[info.url] = out.exceptionDetails ? { error: out.exceptionDetails.text }
+          : out.result.value;
+      }
+    }
     for (const ext of task.figure ? ["pdf", "svg"] : []) {
       const begun = waitFor((m) => m.method === "Browser.downloadWillBegin" && m.params, 30000);
       await evaluate(`document.querySelector(${JSON.stringify(task.figure)})` +

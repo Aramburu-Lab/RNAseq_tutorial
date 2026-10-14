@@ -235,6 +235,7 @@ def prepare(
         "export": exporting,
         "characters": carried,
         "defaults": defaults(block.controls) if block.controls else None,
+        "select": controls.get("select") if controls else None,
     }
 
 

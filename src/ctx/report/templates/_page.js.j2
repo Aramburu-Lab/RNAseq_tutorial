@@ -6,6 +6,7 @@
 {% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% if live %}{% include "_select.js.j2" %}
+{% include "_pick.js.j2" %}
 {% include "_surv.js.j2" %}
 {% include "_live.js.j2" %}{% endif %}
 {% raw %}
@@ -120,7 +121,7 @@
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  scope.querySelectorAll("form.calls:not(.filter):not(.pairs)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -225,6 +226,12 @@
   /* M10's survival panel: ctxLive scores a gene list and redraws its figures (GS.7). */
   scope.querySelectorAll("form.survival").forEach(function (form) {
     guard("survival", function () { ctxLive.survival(form, exporting); });
+  });
+
+  /* M5's gene picker (GS.4): ctxPick holds the rules, ctxSelect the list's form and its
+     link; this block wires the volcano, the table, the buttons and the onward links. */
+  scope.querySelectorAll("form.select").forEach(function (form) {
+    guard("select", function () { picking(form); });
   });
   }
   wire(document);
@@ -459,8 +466,9 @@
      links no file, so no middle click, new tab or "Save link as" reaches the default file
      under a label that names the view. */
   function exporting(fig, cfg) {
+    if (fig.ctxExporting) return fig.ctxExporting;
     var links = Array.prototype.slice.call(fig.querySelectorAll("a[data-export]"));
-    var moved = false;
+    var moved = false, keys = Object.create(null);
     if (!cfg.export || !window.jspdf || !links.length) return function () {};
     var reference = links.map(function (a) {
       return [a.textContent, a.getAttribute("title"), a.getAttribute("href")];
@@ -478,7 +486,10 @@
         if (moved && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); a.click(); }
       });
     });
-    return function (on) {
+    /* A figure with two controls (the calls and the picker) is moved while either is. */
+    fig.ctxExporting = function (on, key) {
+      keys[key || ""] = !!on;
+      on = Object.keys(keys).some(function (k) { return keys[k]; });
       moved = on;
       links.forEach(function (a, i) {
         a.textContent = on ? a.getAttribute("data-view") : reference[i][0];
@@ -490,6 +501,7 @@
         }
       });
     };
+    return fig.ctxExporting;
   }
 
   /* A figure's rows, embedded as column names once and a list of values per row
@@ -574,6 +586,228 @@
     form.addEventListener("submit", function (e) { e.preventDefault(); });
     /* A browser restoring the form on back-navigation sets the select without an event. */
     update();
+  }
+
+  function picking(form) {
+    var fig = form.closest(".fig");
+    var outer = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var cfg = outer.select, words = cfg.words, rows = ctxRows(form);
+    var div = fig.querySelector(".js-plotly-plot");
+    var count = fig.querySelector(".select-count"), problems = fig.querySelector(".select-problems");
+    var notice = fig.querySelector(".select-notice"), body = fig.querySelector("table.pick tbody");
+    var pages = fig.querySelector(".pick-pages span"), list = fig.querySelector(".pick-list");
+    var mark = exporting(fig, outer), undo = form.querySelector("[data-undo]");
+    var genes = rows.map(function (r) {
+      return { number: ctxSelect.number(r[cfg.id]), id: r[cfg.id], symbol: r[cfg.symbol],
+               lfc: r[cfg.lfc], padj: r[cfg.padj], call: r.call,
+               x: r[outer.lfc], y: -Math.log10(Math.max(r[outer.p], outer.p_floor)) };
+    });
+    var at = Object.create(null);
+    genes.forEach(function (g, i) { at[g.number] = i; });
+    var index = ctxSelect.index(genes.map(function (g) { return g.number; }),
+                                genes.map(function (g) { return g.symbol; }),
+                                genes.map(function (g) { return g.lfc; }));
+    var state = { list: [], query: "", only: false, sort: "padj", desc: false, page: 0 };
+    var steps = [], calls = Object.create(null), opened = [];
+    function called(parts) {
+      calls = Object.create(null);
+      ["up", "down"].forEach(function (k) {
+        parts[k].forEach(function (r) { calls[ctxSelect.number(r[cfg.id])] = k; });
+      });
+      genes.forEach(function (g) { g.call = calls[g.number] || "ns"; });
+    }
+    called({ up: rows.filter(function (r) { return r.call === "up"; }),
+             down: rows.filter(function (r) { return r.call === "down"; }) });
+    /* The rings: an overlay trace keyed by gene, outside the calls' traces, which restyle by
+       index. */
+    Plotly.addTraces(div, { type: "scatter", mode: "markers", x: [], y: [], name: words.ring,
+      hoverinfo: "skip", showlegend: true,
+      marker: { symbol: "circle-open", size: cfg.ring.size, color: cfg.ring.color,
+                line: { width: cfg.ring.width, color: cfg.ring.color } } });
+    var ring = div.data.length - 1;
+    var traces = Object.keys(outer.traces).map(function (k) { return outer.traces[k]; });
+    function selection() { return ctxSelect.select(cfg.src, state.list, index); }
+    function draw() {
+      var shown = state.list.map(function (n) { return genes[at[n]]; });
+      Plotly.restyle(div, { x: [shown.map(function (g) { return g.x; })],
+                            y: [shown.map(function (g) { return g.y; })] }, [ring]);
+      var c = ctxPick.counts(state.list, calls);
+      count.textContent = ctxPick.fill(ctxPick.word(words, "count", c.n), c);
+      notice.hidden = !state.list.length;
+      undo.disabled = !steps.length;
+      mark(state.list.length > 0, "select");
+      var sel = selection(), fragment = state.list.length ? ctxSelect.encode(sel) : "";
+      fig.querySelectorAll("a[data-onward]").forEach(function (a) {
+        a.setAttribute("href", a.getAttribute("href").split("#")[0] + fragment);
+        a.textContent = ctxPick.fill(ctxPick.word(words, "onward", c.n),
+                                     { n: ctxSelect.group(c.n), module: a.getAttribute("data-onward") });
+      });
+      if (fragment || ctxSelect.carries(location.hash)) {
+        history.replaceState(null, "", location.pathname + location.search + fragment);
+      }
+      table();
+      return sel;
+    }
+    function change(next, from) {
+      steps = ctxPick.push(steps, state.list, next, cfg.undo);
+      state.list = next;
+      var sel = draw();
+      opened.concat(window.opener ? [window.opener] : []).forEach(function (w) {
+        if (w !== from && !w.closed) w.postMessage(ctxSelect.post(sel), "*");
+      });
+    }
+    function mode() { return form.elements.mode.value; }
+    /* A refusal's page text, as ctx.report.genes.SelectionError words it. */
+    function said(err) { return err.key ? ctxSelect.message(err, { select: cfg.errors }) : String(err.message); }
+    function table() {
+      var v = ctxPick.view(genes, cfg, state), picked = Object.create(null);
+      state.list.forEach(function (n) { picked[n] = true; });
+      while (body.firstChild) body.removeChild(body.firstChild);
+      v.rows.forEach(function (g) {
+        var tr = document.createElement("tr"), box = document.createElement("input");
+        box.type = "checkbox"; box.checked = !!picked[g.number];
+        box.setAttribute("aria-label", g.symbol);
+        box.addEventListener("change", function () { change(ctxPick.toggle(state.list, g.number)); });
+        var cells = [box, g.symbol, g.lfc === null ? "" : g.lfc.toFixed(2),
+                     g.padj === null ? "" : g.padj.toPrecision(2), g.call];
+        cells.forEach(function (c, i) {
+          var td = document.createElement("td");
+          if (i === 2 || i === 3) td.className = "num";
+          if (typeof c === "string") td.textContent = c; else td.appendChild(c);
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+      pages.textContent = v.total ? ctxPick.fill(words.pages, { first: ctxSelect.group(v.first),
+        last: ctxSelect.group(v.last), total: ctxSelect.group(v.total) }) : words.pages_none;
+      state.page = v.page;
+    }
+    function picked(event) {
+      var out = [];
+      ((event && event.points) || []).forEach(function (p) {
+        if (p.curveNumber === ring || !p.customdata) return;
+        var n = ctxSelect.number(p.customdata[cfg.id_at]);
+        if (at[n] !== undefined) out.push(n);
+      });
+      return out;
+    }
+    /* Plotly's own dimming and the drawn outline go once the pick is taken, as the brush
+       clears its own. */
+    function cleared() {
+      Plotly.restyle(div, { selectedpoints: [null] }, traces);
+      Plotly.relayout(div, { selections: [] });
+    }
+    /* plotly swallows a handler's error: each is guarded, so one is logged. */
+    div.on("plotly_selected", function (event) {
+      guard("select", function () {
+        /* A press starts a new drag with an empty pick, which only clears a drawn outline. */
+        if (!event || !event.points || !event.points.length) return;
+        change(ctxPick.apply(state.list, picked(event), mode()));
+        cleared();
+      });
+    });
+    div.on("plotly_click", function (event) {
+      guard("select", function () {
+        var found = picked(event);
+        if (found.length === 1) change(ctxPick.toggle(state.list, found[0]));
+      });
+    });
+    form.addEventListener("change", function (e) {
+      if (e.target.name === "drag") Plotly.relayout(div, { dragmode: e.target.value });
+    });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    form.querySelectorAll("[data-pick]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var which = b.getAttribute("data-pick");
+        change(ctxPick.apply(state.list, Object.keys(calls).filter(function (n) {
+          return calls[n] === which;
+        }).map(Number), mode()));
+      });
+    });
+    undo.addEventListener("click", function () {
+      if (!steps.length) return;
+      state.list = steps[steps.length - 1]; steps = steps.slice(0, -1);
+      draw();
+    });
+    form.querySelector("[data-clear-list]").addEventListener("click", function () { change([]); });
+    form.querySelector("[data-paste]").addEventListener("click", function () {
+      var found = ctxSelect.parse(form.elements.pasted.value, index), said = [];
+      if (found.ambiguous.length) said.push(ctxPick.fill(words.ambiguous, { names:
+        found.ambiguous.map(function (a) { return a[0] + " (" + a[1].join(", ") + ")"; }).join("; ") }));
+      if (found.missing.length) said.push(ctxPick.fill(words.missing, { names: found.missing.join(", ") }));
+      problems.textContent = said.join(" ");
+      problems.hidden = !said.length;
+      if (found.found.length) change(ctxPick.apply(state.list, found.found, mode()));
+    });
+    var find = fig.querySelector("input[name=find]"), only = fig.querySelector("input[name=only]");
+    find.addEventListener("input", function () { state.query = find.value; state.page = 0; table(); });
+    only.addEventListener("change", function () { state.only = only.checked; state.page = 0; table(); });
+    fig.querySelectorAll("[data-sort]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var key = b.getAttribute("data-sort");
+        state.desc = state.sort === key ? !state.desc : false; state.sort = key; table();
+      });
+    });
+    fig.querySelectorAll("[data-page]").forEach(function (b) {
+      b.addEventListener("click", function () { state.page += Number(b.getAttribute("data-page")); table(); });
+    });
+    function listText() {
+      return ctxSelect.listText(selection(), index, new Date().toISOString());
+    }
+    fig.querySelector("[data-copy-list]").addEventListener("click", function (e) {
+      var button = e.target, label = button.textContent, said = listText();
+      function shown() {
+        list.textContent = said; list.hidden = false;
+        var range = document.createRange(); range.selectNodeContents(list);
+        var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+        button.textContent = words.selected_text;
+      }
+      if (!navigator.clipboard || !window.isSecureContext) { shown(); return; }
+      navigator.clipboard.writeText(said).then(function () {
+        button.textContent = words.copied;
+        setTimeout(function () { button.textContent = label; }, 1500);
+      }, shown);
+    });
+    fig.querySelector("[data-save-list]").addEventListener("click", function () {
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([listText()], { type: "text/plain" }));
+      a.download = cfg.src.replace(":", "_") + "_genes.txt";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    });
+    /* Open beside (GS.6): the module's entry page in a named window, which then hears every
+       change; a list it sends back is taken as Replace, with an Undo step. */
+    fig.querySelectorAll("[data-beside]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var a = fig.querySelectorAll("a[data-onward]")[Number(b.getAttribute("data-beside"))];
+        var w = window.open(a.getAttribute("href"), "ctx-" + a.getAttribute("data-onward"));
+        if (w && opened.indexOf(w) < 0) opened.push(w);
+      });
+    });
+    window.addEventListener("message", function (e) {
+      if (e.source !== window.opener && opened.indexOf(e.source) < 0) return;
+      var sel;
+      try { sel = ctxSelect.received(e.data); } catch (err) {
+        problems.textContent = ctxPick.fill(words.refused, { why: said(err) });
+        problems.hidden = false;
+        return;
+      }
+      if (!sel) return;
+      var found = sel.genes.map(Math.abs).filter(function (n) { return at[n] !== undefined; });
+      change(found, e.source);
+      problems.textContent = ctxPick.fill(ctxPick.word(words, "received", found.length),
+                                          { n: ctxSelect.group(found.length) });
+      problems.hidden = false;
+    });
+    fig.addEventListener("ctx-calls", function () { called(fig.ctxCalls); draw(); });
+    if (fig.ctxCalls) called(fig.ctxCalls);
+    /* A link that carries a list: reload and Back keep it. */
+    if (ctxSelect.carries(location.hash)) {
+      try {
+        var sel = ctxSelect.decode(location.hash);
+        state.list = sel.genes.map(Math.abs).filter(function (n) { return at[n] !== undefined; });
+      } catch (err) { problems.textContent = said(err); problems.hidden = false; }
+    }
+    draw();
   }
 
   function filtering(form) {
@@ -687,6 +921,8 @@
       });
       if (summary) summary.textContent = fill(cfg.summary, values);
       mark(ctxCalls.moved(cfg, t, column, alpha));
+      fig.ctxCalls = { up: parts.up, down: parts.down };
+      fig.dispatchEvent(new CustomEvent("ctx-calls"));
     }
     unit.addEventListener("change", function () {
       fc.value = ctxCalls.switchUnit(state, fc.value, unit.value);

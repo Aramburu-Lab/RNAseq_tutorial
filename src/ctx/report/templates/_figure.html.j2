@@ -23,6 +23,26 @@
 </form>
 <noscript><p class="note">{{ ui.calls.noscript }}</p></noscript>
 <p class="calls-summary" aria-live="polite">{{ f.defaults.summary }}</p>
+{% if f.select %}{% set w = f.select.words %}
+{# The gene picker (GS.4): a lasso, a box or a click on the volcano, the table, the paste box;
+   the page script fills the table, the count and the links' lists. #}
+<form class="calls select" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="{{ w.label }}">
+<fieldset><legend>{{ w.drag }}</legend>{% for value in ("zoom", "select", "lasso") %}<label class="paint"><input type="radio" name="drag" value="{{ value }}"{% if loop.first %} checked{% endif %}>{{ w[("zoom", "box", "lasso")[loop.index0]] }}</label>{% endfor %}</fieldset>
+<fieldset><legend>{{ w.mode }}</legend>{% for value in ("replace", "add", "remove") %}<label class="paint"><input type="radio" name="mode" value="{{ value }}"{% if loop.first %} checked{% endif %}>{{ w[value] }}</label>{% endfor %}</fieldset>
+<p class="pick-buttons"><button type="button" data-pick="up">{{ w.up }}</button><button type="button" data-pick="down">{{ w.down }}</button><button type="button" data-undo disabled>{{ w.undo }}</button><button type="button" data-clear-list>{{ w.clear_list }}</button></p>
+<label class="genes">{{ w.paste }}<textarea name="pasted" rows="2" spellcheck="false" autocomplete="off"></textarea></label><button type="button" data-paste>{{ w.paste_button }}</button>
+</form>
+<noscript><p class="note">{{ w.noscript }}</p></noscript>
+<p class="select-count calls-summary" aria-live="polite">{{ w.count_none }}</p>
+<p class="select-problems" aria-live="polite" hidden></p>
+<div class="pick-table js-only"><p class="pick-find"><label>{{ w.search }} <input type="search" name="find" autocomplete="off"></label> <label><input type="checkbox" name="only"> {{ w.only }}</label></p>
+<div class="table-scroll"><table class="result-table pick"><thead><tr><th>{{ w.columns.pick }}</th>{% for key in ("symbol", "lfc", "padj", "call") %}<th{% if key in ("lfc", "padj") %} class="num"{% endif %}><button type="button" data-sort="{{ key }}">{{ w.columns[("gene", "lfc", "padj", "call")[loop.index0]] }}</button></th>{% endfor %}</tr></thead><tbody></tbody></table></div>
+<p class="pick-pages"><button type="button" data-page="-1">{{ w.previous }}</button> <span aria-live="polite"></span> <button type="button" data-page="1">{{ w.next }}</button></p></div>
+<p class="pick-leave js-only"><button type="button" data-copy-list>{{ w.copy_list }}</button> <button type="button" data-save-list>{{ w.save_list }}</button></p>
+<pre class="pick-list" hidden></pre>
+{% if f.select.links %}<ul class="pick-links js-only">{% for href, module in f.select.links %}<li><a href="{{ href }}" data-onward="{{ module }}">{{ w.onward_none.format(module=module) }}</a> <button type="button" data-beside="{{ loop.index0 }}">{{ w.beside }}</button></li>{% endfor %}</ul>{% endif %}
+<p class="select-notice" hidden>{{ w.notice }}</p>
+{% endif %}
 {% endif %}
 {% if f.kind == "filter" %}
 {# Class "calls" for the panel's look only; the page script tells the two kinds apart. #}
