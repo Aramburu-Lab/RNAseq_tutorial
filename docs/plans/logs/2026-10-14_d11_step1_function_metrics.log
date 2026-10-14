@@ -1,0 +1,3 @@
+recorded function rows 20; values equal 20; details equal 20
+this run 22 rows; main's 2026-10-14 run 22; rows identical to main's: True
+in this run, not main's: []

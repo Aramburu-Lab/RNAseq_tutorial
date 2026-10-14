@@ -98,3 +98,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Run M9's default gene list against the page cap before building a new root's cards: 50 TCGA cards made a 29.5 MB page after ten minutes (C3, 2026-10-14).
 - A page script's settle loop must stop on any height already set: plotly's margins can be a step function of the height with no fixed point between (938.1 and 946.5 px, D1 2026-10-14).
 - Read a rebuilt page's headings as text in the browser: a PCA title printed a level's identifier (steady_state) that every unit test passed (D1, 2026-10-14).
+- A category named by its source can fail on a member nobody expected: Liberzon 2015's proliferation hallmarks include P53_PATHWAY, which failed BRCA's rule while the other five passed. Read every member of a category before registering a rule on all of it (D1.1, 2026-10-14).
+- A command recorded in an output's README with an absolute path travels into every kit built from it: kit v8's rebuild commands named the build clone's folder (2026-10-14).

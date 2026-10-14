@@ -1,0 +1,5 @@
+code: fdr read for nes: CAUGHT
+code: untested set recorded as 0: CAUGHT
+rule KIRC.hypoxia: measured {'PASS'}; planted {'gsea.tumour_normal.HALLMARK_HYPOXIA.nes': -2.366}: {'FAIL'}; CAUGHT
+rule KIRC.glycolysis: measured {'PASS'}; planted {'gsea.tumour_normal.HALLMARK_GLYCOLYSIS.fdr': 0.2}: {'FAIL'}; CAUGHT
+rule BRCA.proliferation: measured {'FAIL'}; planted {'gsea.tumour_normal.HALLMARK_P53_PATHWAY.nes': 0.885, 'gsea.tumour_normal.HALLMARK_P53_PATHWAY.fdr': 0.01}: {'PASS'}; CAUGHT

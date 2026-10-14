@@ -93,6 +93,17 @@ bytes = 20292
 sha256 = "2313caeaaf3718ac8aead8c6b9eab92b3f613509cfe1a6f7b6286310a7200e73"
 dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"
 
+# MSigDB Hallmark for M6 (D1.1, Rytis 2026-10-14), the file tier1.toml declares, not downloaded
+# again: the scratch root links the one copy, and ctx setup registers a file in place by hash.
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
 # TargetScan 8.0 (McGeary et al. 2019 Science, doi:10.1126/science.aav1741); no terms are
 # published on its home or download page, so the kit ships derived rows and links these.
 [[resources]]
@@ -142,6 +153,13 @@ n = [72, 72]
 
 [de]
 featured = "tumour_normal"
+
+# M6 on this project (D1.1, Rytis 2026-10-14), so the hypoxia and glycolysis rules read its GSEA.
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_HYPOXIA"
+running = ["tumour_normal", "HALLMARK_HYPOXIA"]
 
 # M8 (plan docs/plans/2026-10-07_m8_real_data_plan_proposal.md): M5's tumour_normal results by
 # biotype, and the mature miRNAs of the miRNA libraries, paired the same way. n is the
@@ -205,7 +223,8 @@ conditions = [{ metric = "agreement.median_rho", op = "<", value = 0.3 }]
 # from the sources; thresholds are M5's ALPHA 0.05 and LFC_MIN 1 (ctx.de.stats). M5 records
 # gene.<contrast>.<symbol>.lfc and .padj for each gene a rule names. GENCODE v36, GDC's
 # annotation, names NDUFA4L2, which GENCODE 50 renames COXFA4L2. TODO's hypoxia and
-# glycolysis enrichment is not registered: no [function] runs on this project.
+# glycolysis enrichment followed at 2026-10-14 13:44 (D1.1), once [function] was declared; see
+# each rule's registered_on.
 registered_on = "2026-10-14 11:14"
 
 [[sanity.rules]]
@@ -219,3 +238,23 @@ id = "KIRC.ndufa4l2"
 text = "NDUFA4L2 rises in clear cell tumours against their paired normals."
 source = "Liu et al. 2016 Ren Fail, doi:10.1080/0886022X.2016.1208517: NDUFA4L2 mRNA higher in 86 clear cell tumours than in their adjacent normal tissue"
 conditions = [{ metric = "gene.tumour_normal.NDUFA4L2.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.NDUFA4L2.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "KIRC.hypoxia"
+registered_on = "2026-10-14 13:44"
+text = "Hypoxia genes are enriched in clear cell tumours over their paired normals."
+source = "TODO.md Biology sanity, Step-3: KIRC shows hypoxia enriched; VHL loss stabilises HIF (Tostain et al. 2010 Eur J Cancer, doi:10.1016/j.ejca.2010.07.020); MSigDB v2026.1.Hs HALLMARK_HYPOXIA. Registered NOT blind: ctx de ran on these counts on 2026-10-09 and 2026-10-14, though no enrichment had been computed"
+conditions = [
+    { metric = "gsea.tumour_normal.HALLMARK_HYPOXIA.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_HYPOXIA.fdr", op = "<", value = 0.05 },
+]
+
+[[sanity.rules]]
+id = "KIRC.glycolysis"
+registered_on = "2026-10-14 13:44"
+text = "Glycolysis genes are enriched in clear cell tumours over their paired normals."
+source = "TODO.md Biology sanity, Step-3: KIRC shows glycolysis enriched, a HIF target programme after VHL loss; MSigDB v2026.1.Hs HALLMARK_GLYCOLYSIS. Registered NOT blind: ctx de ran on these counts on 2026-10-09 and 2026-10-14, though no enrichment had been computed"
+conditions = [
+    { metric = "gsea.tumour_normal.HALLMARK_GLYCOLYSIS.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_GLYCOLYSIS.fdr", op = "<", value = 0.05 },
+]

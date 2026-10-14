@@ -11,6 +11,7 @@ import pytest
 from scipy.stats import hypergeom
 
 from ctx.function import lite
+from ctx.function.run import rule_sets
 
 ROOT = Path(__file__).resolve().parents[1]
 PERMUTATIONS = 1000
@@ -184,3 +185,26 @@ def test_lite_imports_pyodide_safe():
         (n.module or "").split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)
     }
     assert imported and imported <= allowed, imported - allowed
+
+
+def test_a_rule_names_a_gene_set_and_m6_records_its_nes_and_fdr():
+    """A ``[sanity]`` rule naming ``gsea.<contrast>.<SET>.<nes|fdr>`` gets that set's values;
+    an untested set or unknown contrast is NaN with its reason, and other metrics are left out.
+    Mutations: ``fdr`` read for ``nes``; an untested set recorded as 0.
+    """
+    hit = lite.Enriched("S", 20, 0.5, 1.7, 0.001, 0.02, (0,), (0.5,))
+    rules = {"rules": [{"conditions": [
+        {"metric": "gsea.c.S.nes", "op": ">", "value": 0},
+        {"metric": "x", "op": "<", "other": "gsea.c.S.fdr"},
+        {"metric": "gsea.c.T.nes", "op": ">", "value": 0},
+        {"metric": "gsea.d.S.fdr", "op": "<", "value": 0.05},
+        {"metric": "gene.c.S.lfc", "op": ">", "value": 0},
+    ]}]}  # fmt: skip
+    found = {m: (v, why) for m, v, why in rule_sets(rules, {"c": {"S": hit}})}
+    assert set(found) == {"gsea.c.S.nes", "gsea.c.S.fdr", "gsea.c.T.nes", "gsea.d.S.fdr"}
+    assert found["gsea.c.S.nes"] == (1.7, "S in c")
+    assert found["gsea.c.S.fdr"][0] == 0.02
+    assert math.isnan(found["gsea.c.T.nes"][0])
+    assert found["gsea.c.T.nes"][1] == "T in c: not tested"
+    assert math.isnan(found["gsea.d.S.fdr"][0])
+    assert found["gsea.d.S.fdr"][1] == "no contrast d"
