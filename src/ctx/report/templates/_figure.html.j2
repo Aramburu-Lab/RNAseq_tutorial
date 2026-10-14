@@ -81,6 +81,7 @@
 <label>{{ ui.survival.split }}<select name="split">{% for value, label in f.defaults.splits %}<option value="{{ value }}"{% if value == f.defaults.split %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
 <label class="genes">{{ ui.survival.genes }}<textarea name="genes" rows="3" spellcheck="false" autocomplete="off" aria-describedby="ctx-genes-hint-{{ f.index }}">{{ f.defaults.genes }}</textarea><span class="hint" id="ctx-genes-hint-{{ f.index }}">{{ ui.survival.genes_hint }}</span></label>
 <button type="submit">{{ ui.survival.score }}</button>
+<button type="button" data-screen>{{ ui.survival.screen.format(rows=f.defaults.screen_rows) }}</button>
 <button type="button" data-undo disabled>{{ ui.survival.undo }}</button>
 <button type="button" data-reset>{{ ui.survival.reset }}</button>
 </form>
@@ -106,7 +107,7 @@
 </figure>
 {% endmacro %}
 {% macro result_table(t) %}
-<div class="table-scroll"><table class="result-table">
+<div class="table-scroll"><table class="result-table{% if t.css %} {{ t.css }}{% endif %}">
 {% if t.title %}<caption>{{ t.title }}</caption>{% endif %}
 <thead><tr>{% for c in t.columns %}<th{% if loop.index0 in t.numeric %} class="num"{% endif %}>{{ c }}</th>{% endfor %}</tr></thead>
 <tbody>{% for row in t.rows %}<tr>{% for cell in row %}<td{% if loop.index0 in t.numeric %} class="num"{% endif %}>{% if loop.index0 == t.swatch %}<span class="sw" style="--sw: {{ cell }}"></span>{% endif %}{{ cell }}</td>{% endfor %}</tr>

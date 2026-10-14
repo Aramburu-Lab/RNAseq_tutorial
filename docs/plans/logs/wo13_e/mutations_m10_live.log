@@ -1,0 +1,5 @@
+CAUGHT: screen left at the build's rows (1 failed in 92.18s (0:01:32))
+CAUGHT: caption left at the build's numbers (1 failed in 56.51s)
+CAUGHT: build caption not restored (1 failed in 38.55s)
+CAUGHT: double-dip flag missing (1 failed in 41.23s)
+CAUGHT: screen ties in the list's order (1 failed in 25.62s)

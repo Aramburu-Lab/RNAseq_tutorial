@@ -139,6 +139,8 @@ class ResultTable:
     rows: tuple[tuple[str, ...], ...]
     numeric: tuple[int, ...] = ()
     swatch: int | None = None
+    # A class a page script finds the table by, as M10's screen follows the scored list.
+    css: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a table the page could only print wrongly."""

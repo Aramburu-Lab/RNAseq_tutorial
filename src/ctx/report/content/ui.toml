@@ -132,6 +132,7 @@ noscript = "This shows the first pair; turn on JavaScript to choose another."
 
 # M10's survival panel: score a gene list on the page (GS.7). Its sentences are clinical.toml's.
 [survival]
+screen = "Score the {rows} strongest screen genes"
 label = "Score a gene list"
 endpoint = "Endpoint"
 split = "Split"

@@ -5,6 +5,7 @@ Patients and endpoints, the ER check, expression by clinical variable, a gene sc
 from ``content/clinical.toml``; numbers from ``analyses`` and ``survival``.
 """
 
+from collections.abc import Mapping
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -314,11 +315,12 @@ def values(result: Scored, ctx: Context) -> dict[str, Any]:
     }  # fmt: skip
 
 
-def live(result: Scored, ctx: Context) -> dict[str, Any]:
+def live(result: Scored, ctx: Context, screen: pl.DataFrame) -> dict[str, Any]:
     """The survival panel's settings and data.
 
     The panel's genes as the encoded block, every patient's endpoints in days and covariates,
-    and the words the page script fills.
+    the per-gene screen's rows, which the screen's table follows for a scored list, the
+    captions the page refills for it, and the words the page script fills.
     """
     p, carried, options = ctx.clinical.patients, ctx.carried, ctx.options
     layers = strata(p, options.strata)
@@ -338,6 +340,9 @@ def live(result: Scored, ctx: Context) -> dict[str, Any]:
         "scan": {"low": cutpoint.LOW, "high": cutpoint.HIGH,
                  "permutations": cutpoint.PERMUTATIONS, "seed": cutpoint.SEED},
         "names": {rule: list(split_names(rule)) for rule in score.SPLITS},
+        "screen": screen_rows(screen), "screen_rows": SCREEN_ROWS, "alpha": analyses.ALPHA,
+        "captions": {"km": text.raw(PAGE, "figures.km_score.caption"),
+                     "scan": text.raw(PAGE, "figures.scan_score.caption")},
         "risk_columns": KM["risk_columns"], "words": words, "source": ctx.source,
         "none": word("none"),
         "leads": {"km": text.raw(PAGE, "figures.km_score.lead"),
@@ -350,16 +355,18 @@ def live(result: Scored, ctx: Context) -> dict[str, Any]:
             "summary": fill("live.summary", **values(result, ctx)),
             "notice": fill("live.notice", genes=len(ctx.chosen), source=ctx.source),
             "panel": fill("live.panel", genes=carried.genes, patients=carried.patients),
+            "screen_rows": SCREEN_ROWS,
         },
     }  # fmt: skip
 
 
-def _scored(writer: Writer, ctx: Context, result: Scored) -> list[Result]:
+def _scored(writer: Writer, ctx: Context, result: Scored, screen: pl.DataFrame
+            ) -> list[Result]:  # fmt: skip
     """The score's curves, groups and models (live), then its cut-point scan (live)."""
     shown = values(result, ctx)
     km = figures.km(result.km, list(slots(ctx.options.split)),
                     fill("figures.km_score.caption", **shown), ctx.options.horizon,
-                    live=live(result, ctx))  # fmt: skip
+                    live=live(result, ctx, screen))  # fmt: skip
     block = writer.figure(km, "km_score", figures.words("km_score", **shown))
     models = pl.DataFrame([vars(m) for m in result.models])
     models = models.with_columns(model=pl.Series(["alone", "adjusted"]))
@@ -398,8 +405,8 @@ def _power(writer: Writer, ctx: Context, result: Scored) -> Group:
     return Group(word("power.title"), (block,))
 
 
-def _screen(writer: Writer, ctx: Context, result: Scored) -> Group:
-    """Cox per panel gene, alone and adjusted, BH over the panel; the top rows and the list."""
+def screen_table(ctx: Context, result: Scored) -> pl.DataFrame:
+    """Cox per panel gene, alone and adjusted, BH over the panel, in the panel's order."""
     p = ctx.clinical.patients
     analysed = p[ctx.endpoint].is_not_null().to_numpy()
     rows = ctx.carried.rows
@@ -410,21 +417,41 @@ def _screen(writer: Writer, ctx: Context, result: Scored) -> Group:
     names = pl.DataFrame(
         {"gene_id": [ids[r] for r in rows], "gene_name": [symbols[r] for r in rows]}
     )
-    table = names.hstack(found)
+    return names.hstack(found)
+
+
+def screen_cells(row: Mapping[str, Any]) -> tuple[str, ...]:
+    """One screen row as the table prints it, here and in the live panel's rows."""
+    return (row["gene_name"], number(row["hr_alone"], ".2f"), number(row["q_alone"]),
+            number(row["hr_adjusted"], ".2f"),
+            fill("models.ci", low=number(row["low_adjusted"], ".2f"),
+                 high=number(row["high_adjusted"], ".2f")), number(row["q_adjusted"]))  # fmt: skip
+
+
+def screen_rows(table: pl.DataFrame) -> list[list[Any]]:
+    """The live panel's screen: panel row, adjusted q (None where refused), printed cells.
+
+    In the panel's order, so a scored list's rows are read by its panel rows; the page sorts
+    them by q as the table does, the refused last.
+    """
+    return [[i, r["q_adjusted"] if r["q_adjusted"] is not None and np.isfinite(r["q_adjusted"])
+             else None, list(screen_cells(r))]
+            for i, r in enumerate(table.iter_rows(named=True))]  # fmt: skip
+
+
+def _screen(writer: Writer, ctx: Context, table: pl.DataFrame) -> Group:
+    """The screen's table file, its top rows, then the build list's."""
     writer.table(table, "cox_screen", figures.columns("columns.screen"))
     top = table.sort("q_adjusted", nulls_last=True).head(SCREEN_ROWS)
     shown = pl.concat([top, table[: len(ctx.chosen)]]).unique("gene_id", maintain_order=True)
-    cells = tuple((r["gene_name"], number(r["hr_alone"], ".2f"), number(r["q_alone"]),
-                   number(r["hr_adjusted"], ".2f"),
-                   fill("models.ci", low=number(r["low_adjusted"], ".2f"),
-                        high=number(r["high_adjusted"], ".2f")), number(r["q_adjusted"]))
-                  for r in shown.iter_rows(named=True))  # fmt: skip
+    cells = tuple(screen_cells(r) for r in shown.iter_rows(named=True))
     passing = int((table["q_adjusted"] < analyses.ALPHA).sum())
     lead = fill("screen.lead", genes=table.height, n=passing, alpha=analyses.ALPHA,
                 endpoint=ctx.endpoint)  # fmt: skip
     return Group(word("screen.title"), (ResultTable(fill("screen.table_title", rows=SCREEN_ROWS),
                                                     text.words(PAGE, "screen.columns"), cells,
-                                                    numeric=(1, 2, 3, 5)),), lead=lead)  # fmt: skip
+                                                    numeric=(1, 2, 3, 5), css="screen"),),
+                 lead=lead)  # fmt: skip
 
 
 def _context_groups(writer: Writer, ctx: Context) -> list[Result]:
@@ -482,11 +509,12 @@ def notes(ctx: Context) -> list[Result]:
 def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write every table and figure, then the page; the page first in the returned list."""
     result = scored(ctx)
+    screen = screen_table(ctx, result)
     results: list[Result] = [
         *notes(ctx), _patients(writer, ctx),
         *(_er_check(writer, ctx) if "er" in variables(ctx) else []), _expression(writer, ctx),
-        *_scored(writer, ctx, result), _competing(writer, ctx), _power(writer, ctx, result),
-        _screen(writer, ctx, result),
+        *_scored(writer, ctx, result, screen), _competing(writer, ctx),
+        _power(writer, ctx, result), _screen(writer, ctx, screen),
         *_context_groups(writer, ctx),
     ]  # fmt: skip
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(PAGE)
