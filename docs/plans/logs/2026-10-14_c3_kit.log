@@ -1,0 +1,23 @@
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/c3/2026-10-14_course_kit_c3_m7check: 938 files, 952.4 MB, commit 836c099
+left out: tcga_brca, tier1_teach
+      261.27 real         3.56 user         1.73 sys
+           547930112  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               76478  page reclaims
+                 496  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                1638  voluntary context switches
+                7935  involuntary context switches
+         64972528990  instructions retired
+         18944188808  cycles elapsed
+           101762248  peak memory footprint
+exit 0
+2026-10-14_course_kit_c3_m7check: every file, link and name checks out
+check exit 0

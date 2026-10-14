@@ -1,0 +1,60 @@
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_overview_v1.html
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_contrasts_v1.parquet
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_contrasts_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_contrasts_v1_README.md
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_basal_vs_luma_results_v1.parquet
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_basal_vs_luma_results_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_basal_vs_luma_results_v1_README.md
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_erneg_vs_erpos_results_v1.parquet
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_erneg_vs_erpos_results_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_erneg_vs_erpos_results_v1_README.md
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_volcano_basal_vs_luma_v1_white.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_volcano_basal_vs_luma_v1_black.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_volcano_basal_vs_luma_v1_white.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_volcano_basal_vs_luma_v1_black.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_volcano_basal_vs_luma_v1.html
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_volcano_basal_vs_luma_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_volcano_basal_vs_luma_v1_README.md
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_ma_basal_vs_luma_v1_white.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_ma_basal_vs_luma_v1_black.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_ma_basal_vs_luma_v1_white.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_ma_basal_vs_luma_v1_black.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_ma_basal_vs_luma_v1.html
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_ma_basal_vs_luma_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_ma_basal_vs_luma_v1_README.md
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_phist_basal_vs_luma_v1_white.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_phist_basal_vs_luma_v1_black.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_phist_basal_vs_luma_v1_white.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_phist_basal_vs_luma_v1_black.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_phist_basal_vs_luma_v1.html
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_phist_basal_vs_luma_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_phist_basal_vs_luma_v1_README.md
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_dispersion_basal_vs_luma_v1_white.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_dispersion_basal_vs_luma_v1_black.pdf
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_dispersion_basal_vs_luma_v1_white.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_dispersion_basal_vs_luma_v1_black.svg
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_dispersion_basal_vs_luma_v1.html
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_dispersion_basal_vs_luma_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_dispersion_basal_vs_luma_v1_README.md
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_metrics_v1.parquet
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_metrics_v1.csv
+/Users/rytis/ctx_breast/outputs/05_de/2026-10-14_de_cptac_brca_metrics_v1_README.md
+       43.46 real       101.60 user         5.73 sys
+          1036140544  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              819710  page reclaims
+                2726  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               18394  voluntary context switches
+              125250  involuntary context switches
+        263443841142  instructions retired
+         72110177480  cycles elapsed
+           541313160  peak memory footprint
+exit 0

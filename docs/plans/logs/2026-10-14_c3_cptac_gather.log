@@ -1,0 +1,41 @@
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_overview_v1.html
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_samplesheet_v1.parquet
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_samplesheet_v1.csv
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_samplesheet_v1_README.md
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_counts_v1.parquet
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_counts_v1.csv
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_counts_v1_README.md
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_genes_v1.parquet
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_genes_v1.csv
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_genes_v1_README.md
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_annotations_v1.parquet
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_annotations_v1.csv
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_annotations_v1_README.md
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_cases_v1.parquet
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_cases_v1.csv
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_cases_v1_README.md
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_treatments_v1.parquet
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_treatments_v1.csv
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_treatments_v1_README.md
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_molecular_tests_v1.parquet
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_molecular_tests_v1.csv
+/Users/rytis/ctx_breast/outputs/01_gather/2026-10-14_gather_cptac_brca_molecular_tests_v1_README.md
+        6.74 real         5.08 user         1.22 sys
+           434421760  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              128131  page reclaims
+                1176  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                1715  voluntary context switches
+               25332  involuntary context switches
+         76474111443  instructions retired
+         23680600898  cycles elapsed
+           348308776  peak memory footprint
+exit 0

@@ -1,0 +1,80 @@
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_overview_v1.html
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_patients_v1.parquet
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_patients_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_patients_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_tests_v1.parquet
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_tests_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_tests_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_dunn_pairs_v1.parquet
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_dunn_pairs_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_dunn_pairs_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_stage_group_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_stage_group_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_stage_group_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_stage_group_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_stage_group_v1.html
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_stage_group_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_expression_stage_group_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_km_score_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_km_score_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_km_score_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_km_score_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_km_score_v1.html
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_km_score_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_km_score_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_cox_score_v1.parquet
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_cox_score_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_cox_score_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_groups_score_v1.parquet
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_groups_score_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_groups_score_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_scan_score_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_scan_score_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_scan_score_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_scan_score_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_scan_score_v1.html
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_scan_score_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_scan_score_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_competing_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_competing_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_competing_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_competing_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_competing_v1.html
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_competing_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_competing_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_power_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_power_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_power_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_power_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_power_v1.html
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_power_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_power_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_cox_screen_v1.parquet
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_cox_screen_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_cox_screen_v1_README.md
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_confounding_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_confounding_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_confounding_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_confounding_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_confounding_v1.html
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_confounding_v1.csv
+/Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-14_clinical_tcga_kirc_confounding_v1_README.md
+       33.66 real        20.43 user         6.55 sys
+          1772437504  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              454014  page reclaims
+                9326  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                6487  voluntary context switches
+               29762  involuntary context switches
+        280713963566  instructions retired
+        104195364172  cycles elapsed
+          1263994800  peak memory footprint
+exit 0

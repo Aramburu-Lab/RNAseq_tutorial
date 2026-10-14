@@ -1,0 +1,80 @@
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_overview_v1.html
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_patients_v1.parquet
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_patients_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_patients_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_tests_v1.parquet
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_tests_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_tests_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_dunn_pairs_v1.parquet
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_dunn_pairs_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_dunn_pairs_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_stage_group_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_stage_group_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_stage_group_v1_white.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_stage_group_v1_black.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_stage_group_v1.html
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_stage_group_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_expression_stage_group_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_km_score_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_km_score_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_km_score_v1_white.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_km_score_v1_black.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_km_score_v1.html
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_km_score_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_km_score_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_cox_score_v1.parquet
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_cox_score_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_cox_score_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_groups_score_v1.parquet
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_groups_score_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_groups_score_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_scan_score_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_scan_score_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_scan_score_v1_white.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_scan_score_v1_black.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_scan_score_v1.html
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_scan_score_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_scan_score_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_competing_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_competing_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_competing_v1_white.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_competing_v1_black.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_competing_v1.html
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_competing_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_competing_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_power_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_power_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_power_v1_white.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_power_v1_black.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_power_v1.html
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_power_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_power_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_cox_screen_v1.parquet
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_cox_screen_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_cox_screen_v1_README.md
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_confounding_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_confounding_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_confounding_v1_white.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_confounding_v1_black.svg
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_confounding_v1.html
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_confounding_v1.csv
+/Users/rytis/ctx_lung/outputs/12_clinical/2026-10-14_clinical_tcga_lusc_confounding_v1_README.md
+       51.52 real        23.06 user         8.31 sys
+          1254031360  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              882166  page reclaims
+                3386  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                1955  voluntary context switches
+               54380  involuntary context switches
+        311425739949  instructions retired
+        120338612389  cycles elapsed
+          1193756640  peak memory footprint
+exit 0
