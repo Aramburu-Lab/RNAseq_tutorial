@@ -8,7 +8,7 @@ results table per contrast, a metrics table the sanity rules read, the figures a
 import hashlib
 import math
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
@@ -19,7 +19,7 @@ import polars as pl
 from scipy.stats import spearmanr
 
 from ctx import runtime
-from ctx.dataset import Dataset, DatasetError, PcaSpec, load
+from ctx.dataset import Column, Dataset, DatasetError, PcaSpec, load
 from ctx.de.deseq import RESULT_COLUMNS, TOP_GENES, Fit, fit, pca
 from ctx.de.page import (
     Words,
@@ -34,6 +34,7 @@ from ctx.de.page import (
     phist_text,
     questions,
     skeleton,
+    subset_words,
     volcano_text,
     words,
 )
@@ -157,7 +158,11 @@ def _subset(
 
 
 def _pca_figure(
-    spec: PcaSpec, sheet: pl.DataFrame, counts: pl.DataFrame, threads: int
+    spec: PcaSpec,
+    sheet: pl.DataFrame,
+    counts: pl.DataFrame,
+    threads: int,
+    curated: Sequence[Column] = (),
 ) -> tuple[ScatterData, list[tuple[str, float, str]], FigureText]:
     """One PCA scatter, a PERMANOVA per declared factor as metrics, and its page words."""
     used = _subset(sheet, spec.filters, spec.one_per)
@@ -220,7 +225,8 @@ def _pca_figure(
         width="double",
     )
     # The page describes the first factor's test, the one with a p-value.
-    text = pca_text(spec.name, spec.filters, colour, spec.symbol, result.share, shown)
+    subset = subset_words(spec.filters, curated)
+    text = pca_text(spec.name, subset, colour, spec.symbol, result.share, shown)
     return data, metrics, text
 
 
@@ -807,7 +813,7 @@ def _figures(
     metrics = []
     pcas = []
     for pca_spec in spec.de.pca:
-        scatter, found, text = _pca_figure(pca_spec, sheet, counts, threads)
+        scatter, found, text = _pca_figure(pca_spec, sheet, counts, threads, spec.columns)
         metrics += found
         pcas.append(writer.figure(scatter, f"pca_{pca_spec.name}", text))
     if pcas:

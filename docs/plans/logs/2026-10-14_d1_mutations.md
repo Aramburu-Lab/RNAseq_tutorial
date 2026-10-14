@@ -178,3 +178,13 @@ FAILED tests/test_page_axes.py::test_the_page_y_title_is_the_files[volcano-long 
 1 failed, 1 passed in 2.36s
 ```
 
+## CAUGHT: src/ctx/de/page.py
+- planted: 'values=", ".join(level_words(columns, k, level) for level in v)' -> 'values=", ".join(v)'
+- ran: tests/test_de_words.py::test_a_pca_names_its_samples_in_plain_words
+- exit 1
+```
+FAILED tests/test_de_words.py::test_a_pca_names_its_samples_in_plain_words - ...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 2.19s
+```
+

@@ -11,7 +11,7 @@ import polars as pl
 from test_function_words import SPEC, _enrichment, _gsea, _sets
 
 from ctx.dataset import PcaSpec, load
-from ctx.de.page import every, level_words, words
+from ctx.de.page import every, level_words, subset_words, words
 from ctx.de.run import Writer, _pca_figure
 from ctx.function import run as m6
 from ctx.gather import gdc
@@ -32,6 +32,15 @@ def test_every_step1_contrast_reads_in_plain_words():
     assert level_words(TIER1.columns, "condition", "steady_state") == "steady state"
     assert level_words(TIER1.columns, "condition", "gcsf") == "G-CSF"
     assert said["ndn_gcsf"].tested == "G-CSF" and said["ndn_gcsf"].reference == "steady state"
+
+
+def test_a_pca_names_its_samples_in_plain_words():
+    """The Step-1 page titled its steady-state PCA "condition steady_state", a level's
+    identifier, found reading the built page in Chromium (2026-10-14). Mutation: the filter's
+    levels joined as curated."""
+    (ss_ndn,) = [p for p in TIER1.de.pca if p.name == "ss_ndn"]
+    shown = subset_words(ss_ndn.filters, TIER1.columns)
+    assert "steady state" in shown and "_" not in shown
 
 
 def test_contrasts_with_no_label_that_read_alike_are_told_apart():

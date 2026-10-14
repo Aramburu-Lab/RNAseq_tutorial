@@ -124,13 +124,16 @@ def reading(name: str, key: str = "reading", **values: Any) -> tuple[str, ...]:
     return tuple(line.format_map(values) for line in lines)
 
 
-def _subset(filters: Mapping[str, Sequence[str]]) -> str:
-    """The samples a figure uses, in words."""
-    return "; ".join(figure("pca", "filter", column=k.replace("_", " "), values=", ".join(v))
-                     for k, v in filters.items())  # fmt: skip
+def subset_words(filters: Mapping[str, Sequence[str]], columns: Sequence[Column]) -> str:
+    """The samples a figure uses, in words: each level as the SDRF spells it."""
+    return "; ".join(
+        figure("pca", "filter", column=k.replace("_", " "),
+               values=", ".join(level_words(columns, k, level) for level in v))
+        for k, v in filters.items()
+    )  # fmt: skip
 
 
-def pca_text(name: str, filters: Mapping[str, Sequence[str]], factor: str, symbol: str | None,
+def pca_text(name: str, subset: str, factor: str, symbol: str | None,
              share: Sequence[float], test: tuple[str, Permanova] | None) -> FigureText:  # fmt: skip
     """Title, lead and reading guide of one PCA; ``test`` is the tested factor and its test.
 
@@ -149,7 +152,6 @@ def pca_text(name: str, filters: Mapping[str, Sequence[str]], factor: str, symbo
         p = figure("pca", "no_p") if math.isnan(result.p) else figure("pca", "p", p=result.p)
         lines.append(figure("pca", "reading_test", factor=tested, r2=result.r2, p=p))
         lead = figure("pca", "lead", factor=tested, r2=result.r2)
-    subset = _subset(filters)
     title = (figure("pca", "title_subset", subset=subset, colour=shown) if subset
              else figure("pca", "title", colour=shown))  # fmt: skip
     return FigureText(title=title, lead=lead, reading=tuple(lines), tab=name)
