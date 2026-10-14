@@ -347,18 +347,21 @@ def function(
     ctx: typer.Context,
     dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
     dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
+    genes_from: Annotated[Path | None, typer.Option(help=HELP["--genes-from"])] = None,
 ) -> None:
     """Enrichment of every contrast (ORA and preranked GSEA); the M6 tables, figures and page."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
     from ctx.function import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+    from ctx.report.genes import GeneListError  # noqa: PLC0415 - same reason
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
     try:
         written = module.run(
-            ctx.obj["settings"], cards, command, dataset, dataset_file=dataset_file
-        )
-    except DatasetError as error:
+            ctx.obj["settings"], cards, command, dataset, dataset_file=dataset_file,
+            genes_from=genes_from,
+        )  # fmt: skip
+    except (DatasetError, GeneListError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:

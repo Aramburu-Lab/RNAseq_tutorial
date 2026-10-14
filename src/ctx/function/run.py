@@ -9,7 +9,7 @@ import hashlib
 import math
 import re
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -22,7 +22,7 @@ from ctx.dataset import Contrast, Dataset, DatasetError, load
 from ctx.de.page import Words, every
 from ctx.de.run import Writer, newest
 from ctx.de.stats import ALPHA
-from ctx.function import lite
+from ctx.function import lite, live
 from ctx.function.page import (
     CALLS,
     PAGE,
@@ -52,10 +52,11 @@ from ctx.report.builder import (
     SelfCheck,
     write,
 )
+from ctx.report.entry import write_entry
 from ctx.report.text import fill, word
 from ctx.viz.bar import BarData
 from ctx.viz.scatter import Line, ScatterData
-from ctx.viz.style import ROLES, category_colours
+from ctx.viz.style import DATA_COLOURS, ROLES, category_colours
 
 MODULE = "function"
 TOP_SETS = 15
@@ -380,13 +381,27 @@ class _Enrichment:
     gmt: Path
 
 
-def _featured(writer: Writer, contrast: Contrast, said: Words, e: _Enrichment) -> Group:
-    """The featured contrast's ORA and GSEA bars; a sentence where no ORA set passes."""
+def _featured(writer: Writer, contrast: Contrast, labelled: Mapping[str, Words],
+              e: _Enrichment) -> Group:  # fmt: skip
+    """The featured contrast's ORA, live on the reader's list (GS.5), and GSEA bars.
+
+    A sentence stands for the ORA bars where no set passes on the build's calls; the live
+    panel rides on that figure, so it is absent then too.
+    """
     name = contrast.name
     background = _symbols(e.results[name])
     ora = _ora(e.results[name], e.sets, background)
     passing = dict(ora.filter(pl.col("fdr") < ALPHA)["direction"].value_counts().rows())
+    said = labelled[name]
     bars = _ora_bars(said, ora, len(background))
+    if bars is not None:
+        labels = {n: w.label for n, w in labelled.items() if n in e.results}
+        labels["union"] = word(PAGE, "live.union")
+        panel = live.panel(e.results, name, e.sets, labels,
+                           {s: set_words(s) for s in e.sets})  # fmt: skip
+        # "all": the list as one family, in the palette's orange, which neither call takes.
+        panel["colours"] = {**bars.colours, "all": DATA_COLOURS[0]}
+        bars = replace(bars, live=panel)
     gsea = e.gsea[name]
     ranked = _gsea_bars(said, gsea)
     drawn = (int((ranked.frame["fdr"] < ALPHA).sum()), ranked.frame.height)
@@ -411,7 +426,7 @@ def _page(
     contrasts = {c.name: c for c in spec.contrasts}
     said = every(spec.contrasts, spec.columns)
     gsea = e.gsea[featured]
-    first = _featured(writer, contrasts[featured], said[featured], e)
+    first = _featured(writer, contrasts[featured], said, e)
     one_set: list[FigureBlock | str] = []
     tested = [n for n, table in e.gsea.items() if fn.featured_set in set(table["gene_set"])]
     if tested:
@@ -466,6 +481,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     dataset: str,
     *,
     dataset_file: Path,
+    genes_from: Path | None = None,
 ) -> list[Path]:
     """Enrichment of every contrast; the M6 tables, figures and page.
 
@@ -475,12 +491,15 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         command: The command line, as the reader should retype it.
         dataset: Slug naming the dataset.
         dataset_file: The dataset file, with ``[function]`` and ``[de]``.
+        genes_from: A gene list (``ctx.report.genes.read_list``): its ORA table is written,
+            as the page's live panel tests the same list (GS.5).
 
     Returns:
         The page, then every table and figure file.
 
     Raises:
         DatasetError: If the dataset file lacks ``[function]``, or an input is missing.
+        GeneListError: If ``genes_from`` is no list file.
     """
     spec = load(dataset_file)
     if spec.slug != dataset or spec.function is None or spec.de is None:
@@ -527,6 +546,9 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
             if hit
             else [(f"gsea.{name}.{fn.featured_set}.nes", float("nan"), f"{where}: not tested")]
         )
+    if genes_from is not None:
+        writer.table(live.listed(genes_from, results[spec.de.featured], sets),
+                     f"{spec.de.featured}_ora_list", ORA_COLUMNS)  # fmt: skip
     # The featured set's rows stay first and as they were; a rule adds only what they lack.
     recorded = {m for m, _, _ in metrics}
     metrics += [m for m in rule_sets(spec.sanity, enriched) if m[0] not in recorded]
@@ -562,6 +584,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     )
     return [
         write(page, writer.out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html"),
+        write_entry(writer.out, MODULE),
         *writer.files,
     ]
 

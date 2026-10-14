@@ -52,6 +52,22 @@
 <noscript><p class="note">{{ ui.filter.noscript }}</p></noscript>
 <p class="calls-summary filter-summary" aria-live="polite" data-template="{{ f.defaults.template }}" data-none="{{ f.defaults.none }}">{{ f.defaults.summary }}</p>
 {% endif %}
+{% if f.kind == "ora" %}{% set w = f.defaults.words %}
+{# M6's live over-representation (GS.5): the reader's list against a background, rerun in
+   the page by ctxOra; the bars below are the sets that pass. #}
+<form class="calls ora" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ w.label }}">
+<label>{{ w.direction }}<select name="direction">{% for value, label in w.directions.items() %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label>{{ w.background }}<select name="background">{% for key, label, _, size in f.defaults.backgrounds %}<option value="{{ key }}"{% if key == f.defaults.featured %} selected{% endif %}>{{ label }} ({{ "{:,}".format(size) }})</option>{% endfor %}</select></label>
+<label class="genes">{{ w.paste }}<textarea name="pasted" rows="2" spellcheck="false" autocomplete="off"></textarea></label>
+<button type="button" data-paste>{{ w.paste_button }}</button>
+<button type="button" data-reset>{{ w.reset }}</button>
+</form>
+<noscript><p class="note">{{ w.noscript }}</p></noscript>
+<p class="calls-summary ora-summary" aria-live="polite"></p>
+<p class="ora-notes" aria-live="polite"></p>
+<p class="pick-leave js-only"><button type="button" data-copy-tsv>{{ w.copy_table }}</button></p>
+<pre class="ora-tsv" hidden></pre>
+{% endif %}
 {% if f.kind == "pairs" %}
 <form class="calls pairs" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.pairs.label }}">
 <label>{{ f.defaults.label or ui.pairs.pair }}<select name="pair">{% for value, label in f.defaults.options %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>

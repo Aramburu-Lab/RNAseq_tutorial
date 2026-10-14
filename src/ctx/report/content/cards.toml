@@ -275,6 +275,7 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 
 [effects.function]
 "--dataset-file" = "Selects the gene sets tested, the featured set and its running score."
+"--genes-from" = "Adds the list's ORA table, as the page's live panel tests it."
 
 # The guide's page documents `ctx run`, so its cards carry run's effects.
 [effects.guide]

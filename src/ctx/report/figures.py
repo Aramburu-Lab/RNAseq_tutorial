@@ -250,6 +250,10 @@ def defaults(controls: Mapping[str, Any]) -> dict[str, Any]:
         # The survival panel's own defaults, built by ctx.clinical.page.live; a figure that
         # follows the panel has none.
         return dict(controls.get("defaults", {}))
+    if controls["kind"] == "ora":
+        # M6's live ORA: the words and backgrounds the form prints (GS.5).
+        return {"words": controls["words"], "backgrounds": controls["backgrounds"],
+                "featured": controls["featured"]}  # fmt: skip
     if controls["kind"] == "pairs":
         # The select's label: the figure's own where it gives one, M8's F8 naming miRNA pairs.
         return {

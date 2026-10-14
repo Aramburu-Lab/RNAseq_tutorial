@@ -91,6 +91,8 @@ class BarData:
         summary_median: Whether the filter's live line prints the median bar length; off where
             that median is no number a reader asks for: bars stacked to 100 %, or several
             settings of one category pooled.
+        live: Settings of a page control that redraws the bars, with its ``kind``, such as M6's
+            live over-representation (GS.5); None for none. Not with ``filters``.
     """
 
     frame: pl.DataFrame
@@ -113,6 +115,7 @@ class BarData:
     filters: tuple[str, ...] = ()
     labels: Mapping[str, str] | None = None
     summary_median: bool = True
+    live: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -201,7 +204,7 @@ class BarData:
         the script computes for "All" (``tests/test_page_script.py`` compares the two).
         """
         if not self.filters:
-            return None
+            return dict(self.live) if self.live is not None else None
         unit = self.columns[self.value][0]
         unit = "" if unit == "none" else unit
         total = len(self.lengths())

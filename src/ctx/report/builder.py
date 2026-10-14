@@ -476,7 +476,8 @@ def _live(prepared: Iterable[Mapping[str, Any]]) -> bool:
     Such a page carries the selection and survival scripts (``_select``, ``_surv`` and
     ``_live``); other pages leave them out.
     """
-    return any(f.get("kind") in ("survival", "follow") or f.get("select") for f in prepared)
+    return any(f.get("kind") in ("survival", "follow", "ora") or f.get("select")
+               for f in prepared)  # fmt: skip
 
 
 def _heading(page: Page) -> dict[str, str]:

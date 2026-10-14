@@ -87,7 +87,9 @@ def test_no_ora_figure_where_no_set_passes(tmp_path):
     """No passing set in either direction: a sentence in place of the figure, no empty bars."""
     writer = Writer(tmp_path / "06_function", "desynth", date(2026, 10, 7), {})
     nulls = {k: v for k, v in _sets().items() if k.startswith("NULL")}
-    group = m6._featured(writer, SPEC.contrasts[0], SAID, _enrichment(nulls, _gsea(16, 4)))
+    group = m6._featured(
+        writer, SPEC.contrasts[0], {SPEC.contrasts[0].name: SAID}, _enrichment(nulls, _gsea(16, 4))
+    )
     assert group.items[0] == text.fill("function", "figures.ora.none", alpha=ALPHA)
     assert not group.tabs and isinstance(group.items[1], FigureBlock)
 
@@ -97,7 +99,12 @@ def test_the_gsea_highlight_line_names_the_bars_drawn(tmp_path, passing, which):
     """Step-1 drew 15 GSEA bars, all passing, under "the others are shown for context". The
     line now follows the 15 drawn: 16 passing sets, 10, none. Mutation: the line fixed."""
     writer = Writer(tmp_path / "06_function", "desynth", date(2026, 10, 7), {})
-    group = m6._featured(writer, SPEC.contrasts[0], SAID, _enrichment(_sets(), _gsea(passing, 20)))
+    group = m6._featured(
+        writer,
+        SPEC.contrasts[0],
+        {SPEC.contrasts[0].name: SAID},
+        _enrichment(_sets(), _gsea(passing, 20)),
+    )
     gsea = group.items[1]
     assert isinstance(gsea, FigureBlock) and len(gsea.rows) == m6.TOP_SETS
     assert gsea.text.reading[-1] == text.fill("function", f"figures.gsea.{which}", alpha=ALPHA)
