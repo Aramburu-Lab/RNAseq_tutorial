@@ -9,7 +9,7 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-from ctx.gather.curation import library_replicates
+from ctx.gather.curation import library_replicates, rank_replicates
 from ctx.gather.fetchngs import FETCHNGS_VERSION, VERSIONS_FILE, FetchngsError, read
 from ctx.gather.harmonise import sheet
 
@@ -209,3 +209,21 @@ def test_runs_of_one_experiment_are_one_replicate():
     assert numbered["replicate"].to_list() == numbered.select(expected)["e"].to_list()
     first = runs.filter(pl.col("experiment_accession") == several).select(number.min()).item()
     assert runs.filter(pl.col("run_accession") == lowest).select(number).item() < first
+
+
+def test_library_ranked_by_its_first_run_then_by_name():
+    """A library takes its place in the group by its first run, and a tie on the run number
+    is decided by the name, whatever the row order. Library x's runs 1 and 5 bracket y's run 3;
+    the rows list z_7 before its twin w_7. Catches a library ranked by its last run, and a tie
+    left to the row order."""
+    frame = pl.DataFrame({
+        "run_accession": ["x_5", "y_3", "x_1", "z_7", "w_7"],
+        "experiment_accession": ["x", "y", "x", "z", "w"],
+        "donor": ["d", "d", "d", "e", "e"],
+        "cell_type": ["t"] * 5,
+        "condition": ["c"] * 5,
+    })  # fmt: skip
+    assert library_replicates(frame, {}).to_list() == [1, 2, 1, 2, 1]
+    # M5 ranks runs with rank_replicates itself, so the tie is decided there too.
+    twins = frame.filter(pl.col("donor") == "e")
+    assert rank_replicates(twins, ("donor",), {}).to_list() == [2, 1]
