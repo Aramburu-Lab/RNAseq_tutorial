@@ -13,11 +13,13 @@ code only names a key and fills in the numbers. Rebuild a page by running its co
 | The teacher guide (`python -m ctx.report.teacher`) | `teacher.toml` | the same skeleton, its two argument cards, then the time table's words; every time is read from a module page |
 | The M1 Gather page of a GDC project (`--gdc-dir`) | `gather_gdc.toml` | the same skeleton, then the checks, the one-file-per-patient flow, the annotations and each table's columns |
 | The M3 Trim, align, count page | `process.toml` | the same skeleton, then the notes, groups, key numbers, outcomes, settings, comparisons, each figure's words and each table's columns; `[preview]` holds what the course preview alone says |
-| The M5 Differential expression page, the sentences moved so far | `de.toml` | the volcano's adjustment sentence, and what a thinned page calls the points it may leave out |
-| The M6 Function page, the sentences moved so far | `function.toml` | the ORA lead, caption and passing line; the GSEA highlight line; the background lesson's words in each direction, and its self-checks |
+| The M5 Differential expression page | `de.toml` | the same skeleton, `[questions.*]` asked by what the design holds, how an unlabelled contrast reads, then the groups, the contrasts table, the key numbers and each figure's words; the volcano's reading lines are filled live in the browser |
+| The M6 Function page | `function.toml` | the same skeleton, `[questions.*]` by the background's direction, a gene set in words (`[gene_sets]`), then the groups, the key numbers and each figure's words |
+| The course hub (`ctx report`) | `hub.toml` | its title and lead, each module's name, the key numbers |
+| The statistics every figure's caption shares | `annotate.toml` | the test names, the box figure's caption and labels, PERMANOVA's sentence |
 
-Not here yet: the rest of the M5 and M6 pages, the hub and the other figure captions. Their
-text moves with P2S.4 (TODO.md).
+A contrast reads by the `label` its dataset file gives it; without one, by its two levels as
+the SDRF spells them.
 
 ## Rules the tests hold
 
