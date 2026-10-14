@@ -1,3 +1,4 @@
+# ruff: noqa: SIM115, PLR2004 - a proof record, run once and kept as run
 """Package H: copy tcga_kirc.toml's GTEx V11 block into the two lung files, once each."""
 
 from pathlib import Path

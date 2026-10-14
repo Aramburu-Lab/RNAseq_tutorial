@@ -14,13 +14,23 @@ print("drop reasons", dict(Counter(zip(sheet["condition"], sheet["drop_reason"],
 kept = gdc.chosen(sheet)
 print("chosen by condition", dict(Counter(kept["condition"])))
 both = set(kept.filter(pl.col("condition") == "tumour")["case"]) & set(
-    kept.filter(pl.col("condition") == "normal")["case"])
+    kept.filter(pl.col("condition") == "normal")["case"]
+)
 print("pairs", len(both))
 for c in ("C3N-00435", "C3N-01175"):
     print(c, "in pairs", c in both)
 counts = pl.read_parquet(D + "counts_v1.parquet")
 print("counts", counts.height, "genes by", counts.width - 1, "files")
-pooled = ["CPT0012900007", "CPT0089460006", "CPT0088550007", "CPT0066470007", "CPT0014370010",
-          "CPT0025580007", "CPT0000870008", "CPT0014450014", "CPT0071150007"]
+pooled = [
+    "CPT0012900007",
+    "CPT0089460006",
+    "CPT0088550007",
+    "CPT0066470007",
+    "CPT0014370010",
+    "CPT0025580007",
+    "CPT0000870008",
+    "CPT0014450014",
+    "CPT0071150007",
+]
 p = sheet.filter(pl.col("sample").is_in(pooled))
 print("pooled-piece aliquots", p.height, "chosen", p.filter(pl.col("drop_reason") == "").height)
