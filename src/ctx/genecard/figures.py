@@ -1,4 +1,4 @@
-"""The three drawn panels of a card: GTEx tissues, HPA immune cells, GTEx exon use.
+"""The drawn panels of a card: GTEx tissues, HPA immune cells, GTEx exon use, V10 junctions.
 
 Each returns a figure contract and the numbers its words are filled with; the page writes
 them. Every panel is descriptive: n, median, IQR, tau, CV; external data get no test.
@@ -12,6 +12,7 @@ import polars as pl
 
 from ctx.genecard import annotation, gtex, hpa
 from ctx.genecard.cards import Card
+from ctx.genecard.junctions import RELEASE as RELEASE_JUNCTIONS
 from ctx.genecard.summary import tau
 from ctx.report import text
 from ctx.viz.bar import BarData
@@ -132,3 +133,47 @@ def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | No
                        row_stats_label=text.word(PAGE, "figures.exons.stat"),
                        row_stats_format=".2f")  # fmt: skip
     return heat, numbers, pair
+
+
+def junctions(card: Card) -> tuple[HeatmapData, dict[str, Any]]:
+    """GTEx V10 junction medians per tissue against each junction's median over tissues.
+
+    A junction is labelled by its coordinates, with a mark where it is an intron of the GTF's
+    MANE Select transcript base for base: the GTF's model, or Ensembl REST's where the GTF tags
+    none (GDC's GENCODE v36 has no MANE Select for NDUFA4L2; release 116 has).
+    """
+    assert card.junctions is not None  # noqa: S101 - the page draws this panel only with data
+    found = card.junctions
+    model = card.gtf or card.rest
+    introns = set(model.introns()) if model is not None else set()
+    order = list(dict.fromkeys(found.sort("start", "end")["junction"].to_list()))
+    tissues = list(dict.fromkeys(found["tissue"].to_list()))
+    middle = found.group_by("junction").agg(mid=pl.col("median").median())
+    framed = found.join(middle, on="junction").with_columns(
+        mane=pl.struct("start", "end").map_elements(lambda r: (r["start"], r["end"]) in introns,
+                                                    return_dtype=pl.Boolean),
+        log2_ratio=pl.when((pl.col("median") > 0) & (pl.col("mid") > 0))
+        .then((pl.col("median") / pl.col("mid")).log(2)).otherwise(None),
+    )  # fmt: skip
+    levels, swatches = diverging_levels(framed["log2_ratio"].to_list())
+    frame = framed.with_columns(level=pl.Series(levels, dtype=pl.String)).select(
+        "junction", "tissue", "median", "mane", "log2_ratio", "level"
+    )
+    mane = set(framed.filter(pl.col("mane"))["junction"].to_list())
+    marker = text.word(PAGE, "figures.junctions.mane")
+    # Short labels in genomic order: full coordinates left 54 tissue columns 80 px at 1280 px.
+    display = {j: f"J{k} {marker}" if j in mane else f"J{k}" for k, j in enumerate(order, 1)}
+    mids = dict(middle.iter_rows())
+    numbers = {"symbol": card.symbol, "release": RELEASE_JUNCTIONS, "junctions": len(order),
+               "tissues": len(tissues), "matched": len(mane), "introns": len(introns),
+               "gencode_id": card.junction_id}  # fmt: skip
+    heat = HeatmapData(frame=frame, columns=columns("junctions"), row="junction", column="tissue",
+                       value="log2_ratio", level="level",
+                       row_label=text.word(PAGE, "figures.junctions.y"),
+                       column_label=text.word(PAGE, "figures.junctions.x"), swatches=swatches,
+                       caption=text.fill(PAGE, "figures.junctions.caption", **numbers),
+                       row_order=tuple(order), column_order=tuple(tissues),
+                       row_stats={j: float(mids[j]) for j in order},
+                       row_stats_label=text.word(PAGE, "figures.junctions.stat"),
+                       row_stats_format=".3g", row_display=display)  # fmt: skip
+    return heat, numbers

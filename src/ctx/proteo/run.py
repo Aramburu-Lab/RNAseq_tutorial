@@ -18,11 +18,10 @@ from ctx.dataset import Dataset, DatasetError, ProteoSpec, load
 from ctx.de.filters import log2cpm
 from ctx.de.run import Writer, newest
 from ctx.de.sanity import decide, parse
-from ctx.de.stats import adjust, classify
 from ctx.function.lite import read_gmt
 from ctx.gather import gdc
 from ctx.io.naming import MODULES
-from ctx.proteo import ProteoError, measure, tables
+from ctx.proteo import ProteoError, folds, measure, tables
 from ctx.report.builder import ParameterCard
 
 MODULE = "proteo"
@@ -109,6 +108,42 @@ def _labelled(measured: Measured, known: dict[str, set[str]]) -> int:
     return twice
 
 
+def pair_samples(names: tuple[str, ...], sheet: pl.DataFrame, prefix: str
+                 ) -> tuple[list[tuple[int, str]], int]:  # fmt: skip
+    """Each protein column's chosen tumour: by its case after ``prefix``, else by GDC sample ID.
+
+    The CPTAC freeze names most columns by case and two by GDC's sample submitter ID, so a join
+    by case alone left both out (TODO.md, M7: the two freeze columns named by aliquot).
+
+    Args:
+        names: The protein table's sample names, in column order.
+        sheet: Gather's chosen tumours, one per case, with ``case``, ``sample_id`` and ``sample``.
+        prefix: Text before a case ID in the protein names.
+
+    Returns:
+        (protein column, sheet sample) per paired column in column order, and how many were
+        paired by sample ID.
+
+    Raises:
+        ProteoError: If no column pairs, or two columns pair with one tumour.
+    """
+    by_case = dict(sheet.select("case", "sample").rows())
+    by_id = dict(sheet.select("sample_id", "sample").rows())
+    pairs, by_sample_id = [], 0
+    for j, name in enumerate(names):
+        case = name.removeprefix(prefix)
+        if case in by_case:
+            pairs.append((j, by_case[case]))
+        elif name in by_id:
+            pairs.append((j, by_id[name]))
+            by_sample_id += 1
+    if not pairs:
+        raise ProteoError("no protein sample's case has a chosen tumour in gather's sheet")
+    if len({s for _, s in pairs}) < len(pairs):
+        raise ProteoError("two protein columns pair with one tumour of gather's sheet")
+    return pairs, by_sample_id
+
+
 def across(settings: runtime.Settings, spec: Dataset, options: Options) -> Measured:
     """One cohort at both layers: per-gene correlation across the samples in both.
 
@@ -120,12 +155,9 @@ def across(settings: runtime.Settings, spec: Dataset, options: Options) -> Measu
     found = {w: pl.read_parquet(newest(gather, spec.slug, w)) for w in GATHER}
     protein, annotation = tables.read_gct(resource(settings, spec, p.protein), p.member)
     sheet = gdc.chosen(found["samplesheet"], spec.gdc.tumour)
-    by_case = dict(sheet.select("case", "sample").rows())
-    cases = [s.removeprefix(p.sample_prefix) for s in protein.samples]
-    both = [j for j, c in enumerate(cases) if c in by_case]
-    if not both:
-        raise ProteoError("no protein sample's case has a chosen tumour in gather's sheet")
-    samples = [by_case[cases[j]] for j in both]
+    pairs, by_sample_id = pair_samples(protein.samples, sheet, p.sample_prefix)
+    both = [j for j, _ in pairs]
+    samples = [s for _, s in pairs]
     sizes = dict(sheet.select("sample", "library_size").rows())
     rna_all = log2cpm(found["counts"].select(samples).to_numpy(),
                       np.array([sizes[s] for s in samples]))  # fmt: skip
@@ -139,11 +171,35 @@ def across(settings: runtime.Settings, spec: Dataset, options: Options) -> Measu
     frame = measure.per_gene(tuple(genes), rna, values, options.min_quantified)
     out = Measured(protein, annotation[p.plex].to_list(), frame, rna.mean(axis=1))
     out.notes.append(("rna_twice", {"twice": twice}))
+    out.notes.append(("paired", {"n": len(both), "n_columns": len(protein.samples),
+                                 "by_sample_id": by_sample_id}))  # fmt: skip
     out.extra |= {"rna": rna, "values": values, "n_samples": len(both),
-                  "annotation": annotation[both]}  # fmt: skip
+                  "annotation": annotation[both], "pairs": pairs,
+                  "sheet": gdc.chosen(found["samplesheet"])}  # fmt: skip
     if p.tracks:
         out.extra["colour"] = [str(v) for v in annotation[p.tracks[0]]]
     return out
+
+
+def contrast_metrics(settings: runtime.Settings, spec: Dataset, measured: Measured,
+                     options: Options) -> None:  # fmt: skip
+    """F4 for every declared contrast whose M5 results exist; a missing one is noted as such."""
+    de_dir = settings.root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
+    found = []
+    for contrast in spec.contrasts:
+        path = folds.results_file(de_dir, spec.slug, contrast)
+        if path is None:
+            measured.notes.append(("f4_missing", {"contrast": contrast.name}))
+            continue
+        measured.extra.setdefault("inputs", {})[f"M5 results {contrast.name}"] = path.name
+        made = folds.contrast_folds(
+            pl.read_parquet(path), measured.extra["sheet"], measured.extra["pairs"],
+            (measured.protein.genes, measured.protein.values), contrast, order=dict(spec.order),
+            limits=(options.min_quantified, options.lfc_min),
+        )  # fmt: skip
+        measured.metrics += made.metrics()
+        found.append(made)
+    measured.extra["folds"] = found
 
 
 def cross(settings: runtime.Settings, spec: Dataset, options: Options) -> Measured:
@@ -162,23 +218,10 @@ def cross(settings: runtime.Settings, spec: Dataset, options: Options) -> Measur
     rna = results.filter(pl.Series(single)).select(
         gene="gene_name", rna_lfc="log2FoldChange", rna_padj="padj", rna_mean="baseMean"
     )
-    present = (~np.isnan(protein.values)).sum(axis=1)
-    tested = measure.enough(present, protein.values.shape[1], options.min_quantified)
-    lfc, pvalue = measure.welch(protein.values, group)
-    padj = np.full(lfc.size, np.nan)
-    ok = tested & ~np.isnan(pvalue)
-    padj[ok] = adjust(pvalue[ok], "padj")
-    layer = pl.DataFrame({
-        "gene": list(protein.genes), "n_samples": present.astype(np.int64),
-        "quantified_share": present / protein.values.shape[1], "tested": tested,
-        "protein_lfc": lfc, "protein_p": pvalue, "protein_padj": padj,
-    }).with_columns(pl.col("protein_p", "protein_padj").fill_nan(None))  # fmt: skip
+    layer = folds.protein_calls(protein.genes, protein.values, group, options.min_quantified,
+                                options.lfc_min)  # fmt: skip
     joined = rna.join(layer, on="gene", how="inner", maintain_order="right")
-    joined = joined.with_columns(
-        difference=pl.col("protein_lfc") - pl.col("rna_lfc"),
-        protein_call=classify(pl.col("protein_padj"), pl.col("protein_lfc"),
-                              lfc_min=options.lfc_min),
-    )  # fmt: skip
+    joined = joined.with_columns(difference=pl.col("protein_lfc") - pl.col("rna_lfc"))
     groups = [contrast.tested] * n_tested + [contrast.reference] * n_reference
     out = Measured(protein, groups, joined, np.log2(joined["rna_mean"].to_numpy() + 1))
     out.notes.append(("rna_twice", {"twice": twice}))
@@ -266,10 +309,12 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     measured.notes.append(("classes_note", {"twice": _labelled(measured, known)}))
     if spec.proteo.design == "across_samples":
         correlation_metrics(measured, spec.proteo, options.method)
+        contrast_metrics(settings, spec, measured, options)
     else:
         fold_metrics(measured)
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
     releases = {"dataset file": str(spec.path), "protein": spec.resource(spec.proteo.protein).dest,
-                **{f"sha256:{r.name}": r.sha256 for r in spec.resources}}  # fmt: skip
+                **{f"sha256:{r.name}": r.sha256 for r in spec.resources},
+                **measured.extra.get("inputs", {})}  # fmt: skip
     writer = Writer(out, dataset, date.today(), releases)
     return page.build(writer, page.Context(spec, options, measured, settings, command, cards))

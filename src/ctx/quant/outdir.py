@@ -114,14 +114,14 @@ def quants(folder: Path, samples: Sequence[str]) -> Iterator[tuple[str, pl.DataF
         yield sample, quant(folder / sample / "quant.sf")
 
 
-def salmon_run(rnaseq_dir: Path, dest: Path, samples: Sequence[str]) -> multiqc_io.MultiqcRun:
-    """MultiQC's Salmon module on the outdir's salmon folder; every sample must be there.
+def salmon_run(folder: Path, dest: Path, samples: Sequence[str]) -> multiqc_io.MultiqcRun:
+    """MultiQC's Salmon module on a salmon folder, one subfolder per sample; all must be there.
 
     Raises:
         QuantError: If MultiQC fails, or a sample has no row or one it does not know.
     """
     try:
-        run = multiqc_io.run([rnaseq_dir / "salmon"], dest, modules=("salmon",))
+        run = multiqc_io.run([folder], dest, modules=("salmon",))
         names = multiqc_io.map_names(multiqc_io.table(run, "salmon")["Sample"],
                                      {s: s for s in samples})  # fmt: skip
     except QcError as error:

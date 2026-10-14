@@ -42,9 +42,6 @@ P_STATED = re.compile(r"\bp\b|\bFDR\b|\bBH\b|adjusted|\bq\b", re.IGNORECASE)
 # version. Their text is in content files other work packages own; each fix removes its line
 # here, and the test fails until it does, so the list only shrinks.
 KNOWN = {
-    "quant_chrse_detection": "C1, content/quant.toml",
-    "quant_chrse_estimates": "C1, content/quant.toml",
-    "quant_chrse_fates": "C1, content/quant.toml",
     "de_desynth_calls_batch": "D, content/de.toml",
     "de_desynth_dispersion_a_case": "D, content/de.toml",
     "de_desynth_lfc_a_case_vs_b_case": "D, content/de.toml",

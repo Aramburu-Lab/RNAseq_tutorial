@@ -25,7 +25,7 @@ from ctx.viz.bar import MAX_TICK_LABELS, BarData
 from ctx.viz.curve import CurveData
 from ctx.viz.heatmap import HeatmapData, Swatch, Track
 from ctx.viz.scatter import Line, ScatterData
-from ctx.viz.style import BAND_COLOURS, CIVIDIS, DATA_COLOURS, category_colours
+from ctx.viz.style import BAND_COLOURS, CIVIDIS, DATA_COLOURS, category_colours, strip_colours
 
 PAGE = "quant"
 # Each fate by its role: a mapped fragment is good, one with no hit bad; a decoy's and a
@@ -125,12 +125,11 @@ def correlation_heatmap(rho: np.ndarray, sheet: pl.DataFrame,
                           "rho": rho.ravel().round(4), "level": levels}).filter(
         pl.col("sample_row").replace_strict(position, return_dtype=pl.Int64)
         > pl.col("sample_column").replace_strict(position, return_dtype=pl.Int64))  # fmt: skip
-    tracks = []
-    for column in ("cell_type", "batch"):
-        values = dict(zip(samples, sheet[column].cast(pl.String), strict=True))
-        levels_seen = list(dict.fromkeys(values.values()))
-        tracks.append(Track(text.word(PAGE, f"labels.{column}"), values,
-                            category_colours(levels_seen)))  # fmt: skip
+    strips = ("cell_type", "batch")
+    values = {c: dict(zip(samples, sheet[c].cast(pl.String), strict=True)) for c in strips}
+    colours = strip_colours([list(dict.fromkeys(values[c].values())) for c in strips])
+    tracks = [Track(text.word(PAGE, f"labels.{c}"), values[c], colours[i])
+              for i, c in enumerate(strips)]  # fmt: skip
     axis = text.word(PAGE, "figures.correlation.axis")
     return HeatmapData(
         frame=frame, columns=columns(frame), row="sample_row", column="sample_column",

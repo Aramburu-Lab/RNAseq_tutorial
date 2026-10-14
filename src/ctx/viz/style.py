@@ -23,6 +23,9 @@ PROJECTOR_UNSAFE = frozenset({"#F0E442"})
 ROLES = {"reference": "#0072B2", "comparison": "#D55E00"}
 # A QC band's colour, from the Okabe-Ito data colours (ctx.qc.registry, conf/qc_metrics.toml).
 BAND_COLOURS = {"good": "#009E73", "usable": "#E69F00", "bad": "#D55E00"}
+# A two-level strip's colours once the data colours are spent: 4.0:1 to each other (WCAG 2),
+# so its levels read apart beside each other on either theme (``strip_colours``).
+SPENT_GREYS = ("#4D4D4D", "#B3B3B3")
 # Cividis (Nuñez et al. 2018) for continuous values, in both themes: matplotlib 3.11.2's
 # colormap at the midpoints of eight equal bands; its ends are #00224E and #FEE838. The stops
 # run from 13.1:1 to 1.4:1 against white and back against black, so an isoline's label sits on
@@ -352,6 +355,34 @@ def category_colours(levels: list[str]) -> dict[str, str]:
     if len(levels) > MAX_CATEGORIES:
         raise ValueError(f"{len(levels)} categories; at most {MAX_CATEGORIES} can be coloured")
     return dict(zip(levels, DATA_COLOURS, strict=False))
+
+
+def strip_colours(strips: Sequence[Sequence[str]]) -> list[dict[str, str]]:
+    """Colour the levels of several strips over one figure, no colour in two strips.
+
+    The strips take the data colours in turn, so a batch strip never repeats a cell type's
+    colour: with Step-1's 7 cell types the batches took the first two again (2026-10-09). A
+    two-level strip left without colours takes ``SPENT_GREYS``, two lightnesses, not hues.
+
+    Args:
+        strips: Each strip's levels in display order.
+
+    Returns:
+        Each strip's level to hex colour, in the order given.
+
+    Raises:
+        ValueError: If a strip finds too few colours left and is not two levels.
+    """
+    left, out = list(DATA_COLOURS), []
+    for levels in strips:
+        if len(levels) <= len(left):
+            out.append(dict(zip(levels, left, strict=False)))
+            left = left[len(levels) :]
+        elif len(levels) == len(SPENT_GREYS):
+            out.append(dict(zip(levels, SPENT_GREYS, strict=True)))
+        else:
+            raise ValueError(f"{len(levels)} strip levels; {len(left)} data colours left")
+    return out
 
 
 def tint(colour: str, alpha: float) -> str:

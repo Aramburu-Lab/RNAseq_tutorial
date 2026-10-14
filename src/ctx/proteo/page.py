@@ -14,9 +14,9 @@ from ctx import concordance, runtime
 from ctx.dataset import Dataset
 from ctx.de.run import Writer
 from ctx.de.sanity import VERDICT_COLUMNS
-from ctx.de.stats import ALPHA
+from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.io.naming import stem
-from ctx.proteo import figures, measure
+from ctx.proteo import figures, folds, measure
 from ctx.proteo.run import Measured, Options, verdicts
 from ctx.report import text
 from ctx.report.builder import (
@@ -35,6 +35,8 @@ PAGE = MODULE = "proteo"
 MISSINGNESS = ("quantified", "coverage")
 # The page's figures before any test: the quantified counts, then the coverage curves.
 FIRST = len(MISSINGNESS)
+# F5 draws the named genes and this many of the highest and of the lowest per-gene rho.
+PAIRED_TOP = 8
 METRIC_COLUMNS = {
     "metric": ("none", "Name the [proteo.sanity] rules read."),
     "value": ("varies", "The measured value; the unit follows from the metric's name."),
@@ -130,7 +132,30 @@ def _across(writer: Writer, ctx: Context) -> list[Result]:
             "padj": _p(row["rho_padj"])}))  # fmt: skip
     if blocks:
         out.append(Group(text.word(PAGE, "groups.worked"), tuple(blocks)))
+    named = [*(k for k in p.published.get("mertins", {}) if k.isupper()), *p.genes]
+    chosen = figures.heatmap_genes(m.genes, named, PAIRED_TOP)
+    if chosen:
+        tracks = tuple((c, c) for c in dict.fromkeys([*p.tracks, p.plex]) if c)
+        out.append(Group(text.word(PAGE, "groups.paired"), (figures.paired(
+            writer, (m.genes, rna, protein), annotation, chosen, tracks),)))  # fmt: skip
+    found = [_contrast(writer, made) for made in m.extra.get("folds", [])]
+    if found:
+        out.append(Group(text.word(PAGE, "groups.contrast"), tuple(found)))
     return out
+
+
+def _contrast(writer: Writer, made: folds.Folds) -> FigureBlock:
+    """F4 for one contrast, its numbers filled into the text."""
+    rho, low, high = made.rho
+    c = made.contrast
+    values = {"tested": c.tested, "reference": c.reference, "n_genes": made.genes.height,
+              "n_rna": f"{c.reference} {c.expected_n[0]}, {c.tested} {c.expected_n[1]}",
+              "n_protein": f"{c.reference} {made.n_protein[0]}, {c.tested} {made.n_protein[1]}",
+              "alpha": ALPHA,
+              "lfc": LFC_MIN, "ci": round(100 * concordance.LEVEL),
+              "rho": np.nan if rho is None else rho, "low": np.nan if low is None else low,
+              "high": np.nan if high is None else high, **made.counts()}  # fmt: skip
+    return figures.contrast_density(writer, made, values)
 
 
 def _cross(writer: Writer, ctx: Context) -> list[Result]:

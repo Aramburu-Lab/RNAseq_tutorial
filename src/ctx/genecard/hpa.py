@@ -7,7 +7,9 @@ cache files it under. Standard library only, so notebook 09 can run it in Pyodid
 
 import json
 import re
+import urllib.parse
 import xml.etree.ElementTree as ET  # noqa: S405 - HPA's own XML, fetched over https
+from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -25,6 +27,12 @@ CATEGORIES = ("RNA tissue specificity", "RNA tissue distribution",
               "Secretome location", "Reliability (IH)", "Reliability (IF)")  # fmt: skip
 LOCATIONS = ("Subcellular main location", "Subcellular additional location")
 RELEASE_PATTERN = re.compile(r"v([0-9]+)")
+# The search API's cell-line groups, as HPA's search columns name them: cell_RNA_leukemia.
+GROUP_PATTERN = re.compile(r"cell_RNA_[a-z_]+")
+# One search row's key per cell line of the group asked for (read 2026-10-09).
+LINE_KEY = re.compile(r"Cell line RNA - (.+) \[nTPM\]")
+# The dataset file's [dataset] key naming an HPA cell-line group and the lines a card shows.
+CELL_LINES = "hpa_cell_lines"
 
 
 def url(release: str, gene: str, endpoint: str) -> str:
@@ -35,6 +43,12 @@ def url(release: str, gene: str, endpoint: str) -> str:
 def page(release: str, gene: str) -> str:
     """The gene's versioned HPA page, as the licence page asks a citation to give it."""
     return f"https://{release}.proteinatlas.org/{gene}"
+
+
+def search_url(release: str, query: str, columns: tuple[str, ...]) -> str:
+    """HPA's search API: the rows ``query`` finds, with ``columns``, as uncompressed JSON."""
+    terms = f"search={urllib.parse.quote(query)}&format=json&columns={','.join(columns)}"
+    return f"https://{release}.proteinatlas.org/api/search_download.php?{terms}&compress=no"
 
 
 @dataclass(frozen=True)
@@ -153,3 +167,84 @@ def parse_json(body: bytes) -> Facts:
     return Facts(categories, (locations[0], locations[1]), _concentration(raw.get(BLOOD_IM)),
                  _concentration(raw.get(BLOOD_MS)),
                  None if count is None else int(count))  # fmt: skip
+
+
+def _rows(body: bytes) -> list[dict[str, Any]]:
+    """A search response's rows.
+
+    Raises:
+        GenecardError: If the response is not a list of objects.
+    """
+    rows = json.loads(body)
+    if not isinstance(rows, list) or not all(isinstance(r, dict) for r in rows):
+        raise GenecardError("an HPA search response that is not a list of rows")
+    return rows
+
+
+@dataclass(frozen=True)
+class CellLines:
+    """The dataset file's HPA cell-line group and the lines its cards name.
+
+    Attributes:
+        group: HPA's search column of the group, as ``cell_RNA_leukemia``.
+        lines: The lines a card names, as HPA spells them.
+    """
+
+    group: str
+    lines: tuple[str, ...]
+
+
+def cell_lines(info: Mapping[str, Any], where: str) -> CellLines | None:
+    """``[dataset] hpa_cell_lines``, checked; None where the dataset file names none.
+
+    Raises:
+        GenecardError: If the group is not one of HPA's ``cell_RNA_*`` columns, or the lines
+            are not a non-empty list of names.
+    """
+    raw = info.get(CELL_LINES)
+    if raw is None:
+        return None
+    group = raw.get("group") if isinstance(raw, dict) else None
+    lines = raw.get("lines") if isinstance(raw, dict) else None
+    if not isinstance(group, str) or not GROUP_PATTERN.fullmatch(group):
+        raise GenecardError(f"{where}: {CELL_LINES}.group {group!r} is not a cell_RNA_ column")
+    if not (isinstance(lines, list) and lines and all(isinstance(x, str) for x in lines)):
+        raise GenecardError(f"{where}: {CELL_LINES}.lines must list the lines by name")
+    return CellLines(group, tuple(lines))
+
+
+@dataclass(frozen=True)
+class Lines:
+    """One gene's nTPM in every line of one HPA cell-line group, in HPA's order."""
+
+    group: str
+    values: tuple[tuple[str, float], ...]
+
+
+def parse_lines(body: bytes, gene: str, group: str) -> Lines:
+    """The group's cell-line nTPM in one gene's search row.
+
+    Raises:
+        GenecardError: If the response has no single row of ``gene``, or no cell line:
+            HPA leaves out a column it does not know, so a misspelt group gives none.
+    """
+    rows = [r for r in _rows(body) if r.get("Ensembl") == gene]
+    if len(rows) != 1:
+        raise GenecardError(f"HPA search for {gene}: {len(rows)} rows of that gene, not one")
+    values = []
+    for key, value in rows[0].items():
+        if match := LINE_KEY.fullmatch(key):
+            try:
+                values.append((match[1], float(value)))
+            except (TypeError, ValueError) as e:
+                raise GenecardError(f"HPA search for {gene}: {key} is {value!r}") from e
+    if not values:
+        raise GenecardError(f"HPA search for {gene}: no cell line in group {group!r}")
+    return Lines(group, tuple(values))
+
+
+def parse_names(body: bytes) -> tuple[tuple[str, str, tuple[str, ...]], ...]:
+    """(Ensembl ID, HPA symbol, HPA synonyms) of each row of a search by name."""
+    return tuple((str(r.get("Ensembl") or ""), str(r.get("Gene") or ""),
+                  tuple(str(s) for s in r.get("Gene synonym") or ()))
+                 for r in _rows(body))  # fmt: skip

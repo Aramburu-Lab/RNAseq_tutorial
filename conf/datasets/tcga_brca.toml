@@ -8,6 +8,9 @@
 slug = "tcga_brca"
 label = "TCGA breast"
 source = "The Cancer Genome Atlas, project TCGA-BRCA, through the NCI Genomic Data Commons; clinical endpoints from TCGA-CDR, Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052"
+# M9's cell-line row: HPA's breast cancer group (62 lines, read 2026-10-09), a luminal pair,
+# a triple-negative and an ERBB2-amplified line, as HPA spells them.
+hpa_cell_lines = { group = "cell_RNA_breast_cancer", lines = ["MCF-7", "T-47d", "MDA-MB-231", "SK-BR-3"] }
 
 # The folder's own record: gdc_status.json and every row of _retrieval_log.tsv name this
 # release, and the file query asked for this project, workflow and open access.

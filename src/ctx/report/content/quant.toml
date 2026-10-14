@@ -57,6 +57,25 @@ no_q1 = "The per-sample Salmon files are not here, so the gene and transcript fi
 q1 = "ctx's port of tximport summed every quant.sf of {n} samples and equals each gene table nf-core's R wrote; the gene and transcript figures read it."
 not_yet = "Not yet drawn: genes Salmon, STAR and featureCounts detect on the same reads, and the reads Salmon splits between genes. Both need cluster runs not made yet."
 
+# The laptop path (--genome): Salmon run here on M3's trimmed reads.
+[laptop]
+input = "M3's trimmed FASTQ files of {n} samples, the genome `{genome}` and the dataset file's annotation. Salmon {salmon} quantifies each sample here."
+method = """The transcripts are spliced from the genome at the annotation's exons. {decoys}
+
+tximport sums transcripts into genes: TPM by sum, length as the TPM-weighted mean of effective length. ctx's port of tximport equals R's on the course's test files. Length-scaled counts give DESeq2 counts free of isoform-length changes."""
+decoys_on = "The genome's sequence joins the index as decoys: Salmon maps each fragment to the transcripts it fits, or to a decoy where the genome fits better."
+decoys_off = "The index holds no decoys: Salmon maps each fragment to the transcripts it fits, and a fragment from unannotated sequence can land on a similar transcript."
+note = "The index holds the transcripts of {genes:,} genes on {contigs} contig(s); {atg:.1f} % of the annotation's start codons read ATG on this genome. A fragment from any other chromosome finds no transcript, so the mapping rate counts the reference, not the library."
+
+# The course preview (scripts/python/preview_quant.py): this page's code on made-up data.
+[preview]
+note = "Preview: every number on this page comes from made-up data, drawn to show how the page looks. Made-up quant.sf files went through ctx's tximport port as real ones do."
+# The start of every preview caption, so each figure file says it holds made-up data.
+caption = "Made-up data."
+input = "Made-up Salmon outputs for the {n} samples of the made-up dataset: a quant.sf per sample and the numbers of Salmon's logs."
+budget = "Preview build on made-up data; Salmon ran on no read. The real run's budget is Track A: under {minutes} min and {ram_gb} GB."
+profile = "preview build, one process"
+
 [groups]
 salmon = "Salmon: fragment fates, library type and agreement between samples"
 genes = "Genes: depth, units and length scaling"
@@ -175,7 +194,7 @@ reading = [
     "Decoy fragments came from genome sequence outside the transcriptome; no-hit fragments matched nothing.",
 ]
 caption = "Fragment fates of {n} samples. Mapping rate, {tested} over {reference} within each cell type, [[mann_whitney|Mann-Whitney]] U, BH over {n_tests}: {tests}."
-caption_untested = "Salmon's fragment fates for {n} samples; no cell type holds enough samples of two read-length batches to test the mapping rate."
+caption_untested = "Salmon's fragment fates for {n} samples. No test: no cell type holds enough samples of two read-length batches."
 category = "Sample"
 value = "Fragments processed"
 
@@ -204,7 +223,7 @@ reading = [
     "The dashed line is the depth every sample reaches; a line still rising at its right end would detect more with more reads.",
 ]
 caption = "Genes with {min_reads} or more reads in {n} samples thinned binomially. At {depth} reads, {tested} over {reference} within each cell type, Mann-Whitney U, BH over {n_tests}: {tests}."
-caption_untested = "Genes with {min_reads} or more reads as {n} samples are thinned binomially to {depth} reads and below; no cell type holds enough samples of two batches to test."
+caption_untested = "Genes with {min_reads} or more reads as {n} samples are thinned binomially to {depth} reads and below. No test: no cell type holds enough samples of two batches."
 x = "Reads kept"
 y = "Genes detected"
 depth_line = "Depth every sample reaches"
@@ -231,7 +250,7 @@ reading = [
     "Each point is one gene: its fold change from length-scaled counts across, from estimated counts up.",
     "Points off the dashed line change isoform use between the groups.",
 ]
-caption = "Contrast {contrast}, {n_ref} reference and {n_test} tested samples; {genes:,} genes past M5's expression filter. Descriptive: Spearman rho {rho:.3f} over every gene."
+caption = "Contrast {contrast}, {n_ref} reference and {n_test} tested samples; {genes:,} genes past M5's expression filter. Descriptive, no test: Spearman rho {rho:.3f} over every gene."
 thinned = "genes within two-fold"
 x = "Fold change, length-scaled"
 y = "Fold change, estimated"

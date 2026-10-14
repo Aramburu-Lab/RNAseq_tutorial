@@ -60,13 +60,38 @@ def resource_toml(name: str, dest: str) -> str:
             f'bytes = 1\nsha256 = "{"0" * 64}"\ndest = "{dest}"\n')  # fmt: skip
 
 
+def subtypes(sheet: pl.DataFrame) -> list[str]:
+    """Each sheet tumour's made-up PAM50 call, alternating in sheet order."""
+    return [("LumA", "Basal")[i % 2] for i in range(sheet.height)]
+
+
+def results(root: Path, names: list[str]) -> None:
+    """Made-up M5 results for basal_vs_luma: G9 and G11 up at RNA, G10 up but untested at
+    protein, G5 up with |log2 FC| under 1, the rest unchanged."""
+    planted = {"G9": (2.0, 1e-6), "G11": (2.5, 1e-6), "G10": (2.0, 1e-6), "G5": (0.9, 1e-6)}
+    lfc = [planted.get(n, (0.1, 0.0))[0] for n in names]
+    padj = [planted.get(n, (0.0, 0.6))[1] for n in names]
+    de = root / "outputs" / "05_de"
+    de.mkdir(parents=True, exist_ok=True)
+    name = f"{date.today().isoformat()}_de_fake_brca_basal_vs_luma_results_v1.parquet"
+    pl.DataFrame({"gene_id": [f"ENSG{i}" for i in range(len(names))], "gene_name": names,
+                  "log2FoldChange": lfc, "padj": padj}).write_parquet(de / name)  # fmt: skip
+
+
 def across(tmp: Path) -> Path:
-    """A gathered made-up project and a freeze archive under ``tmp``; ctx proteo run on it."""
+    """A gathered made-up project and a freeze archive under ``tmp``; ctx proteo run on it.
+
+    The sheet gains ``pam50`` after gather, as the declared annotation join is to write it, and
+    M5's results for basal_vs_luma are made up (``results``); the freeze names one column by its
+    GDC sample ID, as CPTAC's names two.
+    """
     items = [aliquot(i) for i in range(1, TUMOURS + 1)]
     build(tmp / "gdc", items, seed=3)
     root = tmp / "root"
     proteo = (resource_toml("freeze", "resources/freeze.tar.gz")
               + resource_toml("classes", "resources/msigdb/classes.gmt")
+              + '\n[[contrasts]]\nname = "basal_vs_luma"\nvariable = "pam50"\n'
+              f'reference = "LumA"\ntested = "Basal"\nn = [{TUMOURS // 2}, {TUMOURS // 2}]\n'
               + '\n[proteo]\ndesign = "across_samples"\nprotein = "freeze"\nmember = "p.gct"\n'
               'sample_prefix = "X"\nplex = "TMT.Plex"\ntracks = ["PAM50"]\n'
               'amplified = "ERBB2.Gene.Amplified"\ngenes = ["G9"]\n'
@@ -78,7 +103,10 @@ def across(tmp: Path) -> Path:
     ctx("--root", str(root), "gather", "--dataset", "fake_brca", "--gdc-dir", str(tmp / "gdc"),
         "--dataset-file", str(spec))  # fmt: skip
     gather = root / "outputs" / "01_gather"
-    sheet = pl.read_parquet(next(gather.glob("*_samplesheet_v1.parquet")))
+    sheet_file = next(gather.glob("*_samplesheet_v1.parquet"))
+    sheet = pl.read_parquet(sheet_file)
+    pam50 = subtypes(sheet)
+    sheet.with_columns(pam50=pl.Series(pam50)).write_parquet(sheet_file)
     counts = pl.read_parquet(next(gather.glob("*_counts_v1.parquet")))
     names = pl.read_parquet(next(gather.glob("*_genes_v1.parquet")))["gene_name"].to_list()
     samples = sheet["sample"].to_list()
@@ -89,12 +117,17 @@ def across(tmp: Path) -> Path:
     protein = np.where(follows[:, None], rna - rna.mean(axis=1, keepdims=True), 0.0)
     protein += rng.normal(0, np.where(follows, 0.02, 1.0)[:, None], rna.shape)
     protein[names.index("G10"), ::2] = np.nan
-    annotation = {"TMT.Plex": [f"P{j % 3}" for j in range(len(samples))],
-                  "PAM50": [("LumA", "Basal")[j % 2] for j in range(len(samples))],
+    # G11's protein is 3 log2 units higher in Basal tumours: called up at both layers.
+    protein[names.index("G11")] += 3.0 * (np.array(pam50) == "Basal")
+    annotation = {"TMT.Plex": [f"P{j % 3}" for j in range(len(samples))][::-1],
+                  "PAM50": pam50[::-1],
                   "ERBB2.Gene.Amplified": [str(j % 2) for j in range(len(samples))]}  # fmt: skip
-    # The freeze lists its samples in another order than gather's sheet: joined by case.
+    # The freeze lists its samples in another order than gather's sheet: joined by case, and
+    # its first column by GDC sample ID alone.
     cases = ["X" + c for c in sheet["case"].to_list()][::-1]
+    cases[0] = sheet["sample_id"][-1]
     protein = np.vstack([protein, np.full(len(samples), np.nan)])[:, ::-1]
+    results(root, names)
     body = gct([*names, "G1"], cases, protein, annotation)
     (root / "resources").mkdir(exist_ok=True)
     with tarfile.open(root / "resources" / "freeze.tar.gz", "w:gz") as tar:
