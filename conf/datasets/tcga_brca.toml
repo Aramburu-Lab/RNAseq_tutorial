@@ -148,6 +148,17 @@ dest = "data/raw/mirna_targets/miRTarBase_SE_WR.csv"
 # every ECDHE and DHE suite refused, 2026-10-08), which Python's default list omits.
 tls_ciphers = "AES256-GCM-SHA384:AES128-GCM-SHA256"
 
+# MSigDB Hallmark for M6 (D1.1, Rytis 2026-10-14), the file tier1.toml declares, not downloaded
+# again: the scratch root links the one copy, and ctx setup registers a file in place by hash.
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
 # M5 on this project (M8 plan, section 4): every patient with a tumour and a normal file
 # taken by ctx.gather.gdc.chosen, paired. n is the pairs the gather rule keeps
 # (tests/test_gdc.py, the four-project test).
@@ -162,6 +173,13 @@ n = [113, 113]
 
 [de]
 featured = "tumour_normal"
+
+# M6 on this project (D1.1, Rytis 2026-10-14), so the proliferation rule below reads its GSEA.
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_E2F_TARGETS"
+running = ["tumour_normal", "HALLMARK_E2F_TARGETS"]
 
 # M8 (plan docs/plans/2026-10-07_m8_real_data_plan_proposal.md): M5's tumour_normal results by
 # biotype, and the mature miRNAs of the miRNA libraries, paired the same way. n is the
@@ -205,3 +223,33 @@ id = "M8.absent"
 text = "Mature miRNAs are absent from mRNA-seq: per sample, miRNA-gene counts of the STAR files rank hairpins unlike the miRNA libraries."
 source = "size selection leaves mature miRNAs out of long-RNA libraries (CONVENTIONS.md, Statistics rules); the 0.3 is a course convention for a weak correlation; seen while planning, KIRC median rho 0.045 over 200 samples"
 conditions = [{ metric = "agreement.median_rho", op = "<", value = 0.3 }]
+
+[sanity]
+# M5's and M6's rules on this project, decided by the hub (ctx report --dataset-file). Registered
+# 2026-10-14 13:44, NOT blind: ctx de ran on these counts on 2026-10-09 and 2026-10-14, before this rule
+# existed, though no enrichment had been computed and no proliferation gene's value was read for
+# it. Thresholds are M6's ALPHA 0.05 (ctx.de.stats) and the sign of the NES.
+# Not registered (D1.1, Rytis 2026-10-14): TODO's "adipocyte genes lower in tumour". The only
+# named list in hand is HALLMARK_ADIPOGENESIS, genes up during adipocyte differentiation, a
+# process and not a list of adipocyte genes; the five genes TODO's breast row names come from a
+# conference abstract whose citation is not recorded. Neither is registered as the rule.
+registered_on = "2026-10-14 13:44"
+
+[[sanity.rules]]
+id = "BRCA.proliferation"
+text = "Every proliferation hallmark is enriched in tumours over their paired normals."
+source = "TODO.md cohort sanity line: proliferation hallmarks higher in tumour than in adjacent normal, from a microarray study whose citation TODO does not record; the hallmarks are the six of the proliferation category in Liberzon et al. 2015 Cell Syst, Table 1, doi:10.1016/j.cels.2015.12.004, as MSigDB v2026.1.Hs names them"
+conditions = [
+    { metric = "gsea.tumour_normal.HALLMARK_E2F_TARGETS.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_E2F_TARGETS.fdr", op = "<", value = 0.05 },
+    { metric = "gsea.tumour_normal.HALLMARK_G2M_CHECKPOINT.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_G2M_CHECKPOINT.fdr", op = "<", value = 0.05 },
+    { metric = "gsea.tumour_normal.HALLMARK_MYC_TARGETS_V1.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_MYC_TARGETS_V1.fdr", op = "<", value = 0.05 },
+    { metric = "gsea.tumour_normal.HALLMARK_MYC_TARGETS_V2.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_MYC_TARGETS_V2.fdr", op = "<", value = 0.05 },
+    { metric = "gsea.tumour_normal.HALLMARK_P53_PATHWAY.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_P53_PATHWAY.fdr", op = "<", value = 0.05 },
+    { metric = "gsea.tumour_normal.HALLMARK_MITOTIC_SPINDLE.nes", op = ">", value = 0 },
+    { metric = "gsea.tumour_normal.HALLMARK_MITOTIC_SPINDLE.fdr", op = "<", value = 0.05 },
+]
