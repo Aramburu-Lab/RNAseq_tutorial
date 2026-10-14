@@ -8,10 +8,10 @@ made-up gather or de folder) are test fixtures, not outputs.
 
 import html
 import re
-import shutil
 from pathlib import Path
 
 import pytest
+from conftest import writable_copy
 
 from ctx.io.naming import NATIVE_DIRS, figure_files, lint
 
@@ -124,7 +124,7 @@ def test_the_checks_see_a_planted_fault(tmp_path, quant_run):
     Mutations caught: a table with no README; a caption with neither a test nor "no test"; a
     figure's black SVG not written."""
     folder = tmp_path / "04_quant"
-    shutil.copytree(quant_run[0] / "outputs" / "04_quant", folder)
+    writable_copy(quant_run[0] / "outputs" / "04_quant", folder)
     assert table_problems(folder) == []
     before = figure_problems(folder)
     assert set(before) <= set(KNOWN)

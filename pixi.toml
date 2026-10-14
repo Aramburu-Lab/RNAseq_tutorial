@@ -121,7 +121,9 @@ prod = { features = ["analysis", "tools"], solve-group = "main" }
 [tasks]
 # pytest exits 5 when it collects nothing, which is the state of every project
 # on day one. Treat only that code as success; every other failure still fails.
-test = "sh -c 'pytest -q; c=$?; [ $c -eq 5 ] && exit 0; exit $c'"
+# -n auto: one worker per core (pytest-xdist); conftest.once builds each session run once
+# across them, and loadscope keeps a module's tests, and so its module fixtures, on one worker.
+test = "sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'"
 lint = "ruff check scripts"
 lint-prose = "python -m ctx.report.prose"
 lint-glossary = "python -m ctx.report.glossary_lint"
