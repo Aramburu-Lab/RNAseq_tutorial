@@ -2,8 +2,8 @@
 
 The order is fixed and tested: read the SDRF as text; refuse a configured header that
 repeats; collapse whitespace, then map values; join both ways and cross-check; derive read
-length and batch; rank replicates; compare the declared counts. Every problem is collected,
-so one run lists them all.
+length and batch; rank replicates, one number per library; compare the declared counts. Every
+problem is collected, so one run lists them all.
 """
 
 import csv
@@ -16,6 +16,9 @@ from ctx.dataset import Dataset
 from ctx.gather.own_fastq import table_rows
 
 REPLICATE_KEYS = ("donor", "cell_type", "condition")
+# One library: an ENA experiment holds one library, its runs the lanes or reruns of it, and
+# ctx reads names a sample's lanes by the sample (D-063).
+LIBRARY = "experiment_accession"
 # (check, key, detail) of one curation problem.
 Problem = tuple[str, str, str]
 PROBLEM_COLUMNS = {
@@ -79,10 +82,35 @@ def rank_replicates(
     run = pl.col("run_accession").str.extract(r"(\d+)$").cast(pl.Int64)
     return (
         frame.with_row_index("_row")
-        .sort([*ranks, run])
+        # Then by name: ctx reads' Illumina names all end in _001, so their numbers tie.
+        .sort([*ranks, run, pl.col("run_accession")])
         .with_columns(replicate=(pl.int_range(pl.len()).over(list(keys)) + 1).cast(pl.Int32))
         .sort("_row")["replicate"]
     )
+
+
+def library_replicates(frame: pl.DataFrame, order: dict[str, tuple[str, ...]]) -> pl.Series:
+    """``rank_replicates`` over libraries: every run of one library takes the library's number.
+
+    Each library is ranked once, by its first run, within the group its runs share; a library
+    whose runs differ in a key or an ordered column is a library per value, ranked apart.
+
+    Args:
+        frame: One row per run, with ``run_accession``, ``LIBRARY``, the keys and ``order``.
+        order: Column to its levels in order, as ``rank_replicates`` takes it.
+
+    Returns:
+        A replicate number per row, from 1, in the frame's row order.
+    """
+    columns = [LIBRARY, *REPLICATE_KEYS, *(c for c in order if c not in REPLICATE_KEYS)]
+    run = pl.col("run_accession").str.extract(r"(\d+)$").cast(pl.Int64)
+    first = frame.sort(run, "run_accession", nulls_last=True).unique(
+        columns, keep="first", maintain_order=True
+    )
+    ranked = first.select(*columns, replicate=rank_replicates(first, REPLICATE_KEYS, order))
+    return frame.join(ranked, on=columns, how="left", nulls_equal=True, maintain_order="left")[
+        "replicate"
+    ]
 
 
 def _header(text: str, spec: Dataset) -> tuple[list[str], list[list[str]], list[Problem]]:
@@ -204,7 +232,7 @@ def curate(runs: pl.DataFrame, sdrf_text: str, spec: Dataset) -> pl.DataFrame:
     key, column = spec.sdrf.join
     # The run is carried whatever the join: a table of ctx reads' samples joins on sample, and
     # each of a sample's lanes is still its own run.
-    carried = list(dict.fromkeys(("run_accession", column)))
+    carried = list(dict.fromkeys(("run_accession", column, LIBRARY)))
     frame = runs.select(*carried, "library_layout", "base_count", "read_count").join(
         table.select(key, *names).unique(key, keep="first"),
         left_on=column,
@@ -220,7 +248,7 @@ def curate(runs: pl.DataFrame, sdrf_text: str, spec: Dataset) -> pl.DataFrame:
     problems += _expect(frame, spec)
     if problems:
         raise CurationError(problems)
-    replicate = rank_replicates(frame, REPLICATE_KEYS, dict(spec.order))
+    replicate = library_replicates(frame, dict(spec.order))
     return frame.select("run_accession", *names, "read_length", "batch").with_columns(
         replicate=replicate
     )

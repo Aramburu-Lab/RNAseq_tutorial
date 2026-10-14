@@ -1,0 +1,14 @@
+CAUGHT src/ctx/report/guide.py: the Kebnekaise 16.8 GiB back: 1 failed, 18 passed in 3.25s
+CAUGHT src/ctx/report/guide.py: KiB read as kB: 1 failed, 18 passed in 2.91s
+CAUGHT src/ctx/report/guide.py: references left out of the disk: 1 failed, 18 passed in 3.45s
+CAUGHT src/ctx/report/guide.py: Part 3 install not frozen: 1 failed, 18 passed in 2.65s
+CAUGHT src/ctx/report/guide.py: clone off the laptop route: 2 failed, 17 passed in 2.65s
+CAUGHT src/ctx/report/guide.py: Part 1b starts without the clone: 1 failed, 18 passed in 3.02s
+CAUGHT src/ctx/report/guide.py: the last-line comment back: 2 failed, 17 passed in 2.42s
+CAUGHT src/ctx/report/guide.py: Part 3's reason dropped: 1 failed, 18 passed in 2.88s
+CAUGHT src/ctx/report/guide.py: references size not stated: 1 failed, 18 passed in 3.12s
+CAUGHT src/ctx/report/guide.py: frozen note dropped: 1 failed, 18 passed in 3.06s
+CAUGHT scripts/bash/fetchngs.sbatch: clone off the script's Usage: 1 failed in 0.25s
+CAUGHT scripts/bash/fetchngs.sbatch: the script's comment alone: 1 failed in 0.25s
+CAUGHT src/ctx/report/content/guide.toml: a number typed into the needs: 1 failed, 18 passed in 2.96s
+CAUGHT src/ctx/report/content/guide.toml: index read rounded: 1 failed, 18 passed in 3.17s

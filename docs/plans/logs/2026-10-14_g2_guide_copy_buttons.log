@@ -1,0 +1,14 @@
+G2, 2026-10-14: every Copy button of the guide page, clicked in the Browser pane (own tab)
+Page: ctx --root <scratch>/g2_guide guide at a062a9c, served by python -m http.server on 127.0.0.1
+Method: navigator.clipboard.writeText wrapped to record each text (the original still called);
+each of the 16 buttons clicked by its accessibility ref; the recorded texts compared with the
+textContent of the block each button's data-copy names, in page order.
+
+width  theme  buttons clicked  texts recorded  all equal to their block  scrollWidth - innerWidth
+1280   white  16               16              true                      -15
+1280   black  16               16              true                      -15
+375    black  16               16              true                      0
+375    white  16               16              true                      0
+
+Theme switched with the page's own Light/Dark button (aria-pressed true in black; body
+background rgb(16, 19, 22)). 375 px by the pane's device emulation.

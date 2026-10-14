@@ -47,6 +47,13 @@ def site(tmp_path):
 ROOT = Path(__file__).resolve().parents[1]
 FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
 CLONE_PLACEHOLDER = "<your clone of the course repository>"
+SOURCE_PLACEHOLDER = "<course repository>"
+# The clone's source as a student types it; the git stub records the call and clones nothing,
+# since the site fixture's clone is already in place.
+SOURCE = "https://example.org/course.git"
+GIT = """#!/bin/sh
+echo "$@" >> "$STUB_LOG/git.calls"
+"""
 # curl -fL --remote-name-all URL...: each file named by its URL, MD5SUMS listing the others.
 CURL = """#!/bin/sh
 echo "$@" >> "$STUB_LOG/curl.calls"
@@ -182,12 +189,22 @@ def test_accession_comes_before_the_download(page_blocks):
 
 
 def test_laptop_needs_from_one_place(page_blocks):
-    """Part 2 states Docker's memory floor and the run folder's size from guide.NEEDS, the
-    measured values. Catches a value typed into the page text instead."""
-    note = next(i for g in page_blocks[1] for i in g.items if isinstance(i, str)
-                and str(guide.NEEDS["index_gib"]) in i)  # fmt: skip
-    assert note == text.fill("guide", "part2.needs", **guide.NEEDS)
-    assert text.placeholders(text.raw("guide", "part2.needs")) == set(guide.NEEDS)
+    """U.18: Part 2 states, before its first block, Docker's memory floor by both readings, the
+    disk a laptop needs and the references' size, from guide.NEEDS, the laptop proof's report.
+    The numbers are typed here, apart from the code. Catches a value typed into the page text,
+    the Kebnekaise 16.8 GiB back, KiB read as kB, and the references left out of the disk."""
+    (part2,) = [g for g in page_blocks[1] if g.title == text.fill("guide", "part2.group", n=2)]
+    first = next(n for n, i in enumerate(part2.items) if isinstance(i, Code))
+    needs, refs = part2.items[:first]
+    assert needs == text.fill("guide", "part2.needs", **guide.needs())
+    assert refs == text.fill("guide", "part2.refs", release=guide.release(), **guide.needs())
+    for key in ("part2.needs", "part2.refs"):
+        assert text.placeholders(text.raw("guide", key)) <= set(guide.needs()) | {"release"}
+    for shown in ("17.020 GiB by docker stats", "17.5 GB by Nextflow's trace", "60.7 GB",
+                  "59,298,436 KiB", "38.4 GB", "61.7 GB free", "2026-10-09", "20 GiB", "13 CPUs",
+                  "Apple-silicon"):  # fmt: skip
+        assert shown in needs, shown
+    assert "970,288,386 B" in refs and "release 50" in refs and "16.8" not in needs
 
 
 def test_reference_is_the_datasets(page_blocks):
@@ -223,7 +240,14 @@ def test_laptop_blocks_run_in_page_order(site, tmp_path):
     # Between the parts, the harness keeps what Part 1's last launch recorded.
     keep = 'cp "$STUB_LOG/nextflow.argv" "$STUB_LOG/part1.argv"\n'
     keep += 'cp "$STUB_LOG/nextflow.env" "$STUB_LOG/part1.env"\n'
-    script = part1.replace(CLONE_PLACEHOLDER, clone) + keep + part2
+    _stub(root / "stubs" / "git", GIT)
+    # The marker ends the metadata run's output, whose line before last must be the size.
+    cut = "--- metadata run ends ---"
+    comment = guide.USAGE["fetch_laptop_download"][1][0]
+    assert "line before last is the size" in comment
+    part1 = part1.replace(comment, f'echo "{cut}"\n{comment}')
+    script = part1.replace(CLONE_PLACEHOLDER, clone).replace(SOURCE_PLACEHOLDER, SOURCE)
+    script += keep + part2
     (tmp_path / "paste.sh").write_text("set -e\n" + script)
     home = tmp_path / "home"
     home.mkdir()
@@ -233,6 +257,9 @@ def test_laptop_blocks_run_in_page_order(site, tmp_path):
                 STUB_FIXTURE=str(FETCHNGS / "download"))  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
     log = root / "log"
+    assert (log / "git.calls").read_text() == f"clone {SOURCE} {env['CTX_REPO']}\n"
+    printed = done.stdout.split(cut)[0].splitlines()
+    assert "bytes of FASTQ at ENA" in printed[-2] and printed[-1].startswith("complete: ")
     first = (log / "part1.argv").read_text().splitlines()
     assert first[:4] == ["run", "nf-core/fetchngs", "-r", FETCHNGS_VERSION]
     assert first[first.index("-profile") + 1] == "docker,arm"
@@ -397,7 +424,9 @@ def test_own_fastq_then_part2_laptop(site, tmp_path):
     files = _own_files(tmp_path / "my_fastq", spec)
     laptop, _ = _own_blocks(spec)
     part2 = codes(guide.blocks(spec, FOUR))[text.word("guide", "part2.laptop")].text
+    _stub(root / "stubs" / "git", GIT)
     script = laptop.replace(CLONE_PLACEHOLDER, shlex.quote(env["CTX_REPO"]))
+    script = script.replace(SOURCE_PLACEHOLDER, SOURCE)
     script = script.replace(guide.FASTQ_DIR, str(files))
     (tmp_path / "paste.sh").write_text("set -e\n" + script + part2)
     home = tmp_path / "home"
@@ -444,3 +473,29 @@ def test_own_fastq_then_part2_kebnekaise(site, tmp_path):
     assert job.returncode == 0, job.stderr[-3000:]
     assert [r["sample"] for r in _cut(run)] == list(spec.accessions)
     assert {r["fastq_1"] for r in _cut(run)} == {str(p.resolve()) for p in files.iterdir()}
+
+
+def test_every_install_is_frozen(page_blocks):
+    """U.18: every pixi install on the page is --frozen, the page says why before Part 1's
+    first block, and the laptop route clones the repository as Kebnekaise's does. Catches a
+    non-frozen install, which rewrites pixi.lock and dirties the kit's commit, and the clone
+    left off the laptop route or off Part 1b."""
+    every = "\n".join(c.text for c in codes(page_blocks[1]).values())
+    installs = re.findall(r'pixi"? install[^&\n]*', every)
+    assert len(installs) >= 5 and all("--frozen" in i for i in installs), installs
+    (part1,) = [g for g in page_blocks[1] if g.title == text.fill("guide", "part1.group", n=1)]
+    assert part1.items[0] == text.word("guide", "part1.frozen")
+    clone = f'git clone {SOURCE_PLACEHOLDER} "$CTX_REPO"'
+    for key in ("part1.laptop", "part1b.laptop", "part1.setup"):
+        lines = codes(page_blocks[1])[text.word("guide", key)].text.splitlines()
+        install = next(n for n, line in enumerate(lines) if " install " in line)
+        assert clone in lines[:install], key
+
+
+def test_part3_says_why_the_metadata_outdir(page_blocks):
+    """U.18: Part 3 says why --fetchngs-dir names the metadata run's outdir, before the first
+    block that names it. Catches the reason dropped or moved below the commands."""
+    (part3,) = [g for g in page_blocks[1] if g.title == text.fill("guide", "part3.group", n=3)]
+    first = next(n for n, i in enumerate(part3.items) if isinstance(i, Code))
+    assert text.word("guide", "part3.meta") in part3.items[:first]
+    assert f'--fetchngs-dir "$RUN/{guide.META}"' in part3.items[first].text
