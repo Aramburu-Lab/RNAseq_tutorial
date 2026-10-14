@@ -278,7 +278,8 @@ def _register(root: Path, spec: Path) -> None:
 def _cards():
     import typer  # noqa: PLC0415
 
-    from ctx.cli import app, parameter_cards  # noqa: PLC0415
+    from ctx.cli import app  # noqa: PLC0415
+    from ctx.report.cards import parameter_cards  # noqa: PLC0415
 
     group = typer.main.get_command(app)
     return parameter_cards(group, group.commands["genecard"])  # type: ignore[attr-defined]

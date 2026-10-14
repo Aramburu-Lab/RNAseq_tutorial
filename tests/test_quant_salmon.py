@@ -21,12 +21,13 @@ from process_root import SLICE
 from quant_root import DATASET, RNASEQ, quant_root
 
 from ctx import runtime, tools
-from ctx.cli import app, parameter_cards
+from ctx.cli import app
 from ctx.process.cache import MANIFEST
 from ctx.process.reference import records
 from ctx.quant import CountsFrom, QuantError, SalmonOptions, outdir, salmon, tximport
 from ctx.quant.laptop import counts as laptop_counts
 from ctx.quant.run import Options, resolve, run, run_salmon
+from ctx.report.cards import parameter_cards
 
 FIXTURE = Path(__file__).resolve().parent / "fixtures"
 TRIM = "trim_000000000000"

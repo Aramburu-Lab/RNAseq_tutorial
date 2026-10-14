@@ -16,8 +16,9 @@ from conftest import FETCHNGS_DOWNLOAD as FIXTURE
 from conftest import setup_page, threads_unlike_default
 from test_packaging import run_from_wheel
 
-from ctx.cli import app, parameter_cards
+from ctx.cli import app
 from ctx.io.naming import MODULES, lint
+from ctx.report.cards import parameter_cards
 from ctx.runtime import BUDGETS
 
 ROOT = Path(__file__).resolve().parents[1]

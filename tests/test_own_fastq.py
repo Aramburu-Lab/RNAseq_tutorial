@@ -22,10 +22,11 @@ import pytest
 import typer
 from conftest import ctx_run
 
-from ctx.cli import app, parameter_cards
+from ctx.cli import app
 from ctx.dataset import load
 from ctx.gather import fetchngs, harmonise, own_fastq
 from ctx.gather.curation import read_table
+from ctx.report.cards import parameter_cards
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"

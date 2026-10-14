@@ -28,7 +28,7 @@ import polars as pl
 import typer
 
 from ctx import runtime
-from ctx.cli import app, parameter_cards
+from ctx.cli import app
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
 from ctx.process import CATEGORIES, Aligner, figures
@@ -38,6 +38,7 @@ from ctx.qc import registry as reg
 from ctx.qc.checkpoint import gene_types
 from ctx.report import text
 from ctx.report.builder import FIELDS, ModulePage, Reproduction, write
+from ctx.report.cards import parameter_cards
 
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
 SHOWN = ("ui", "preview.dataset")

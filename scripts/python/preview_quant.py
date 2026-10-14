@@ -29,7 +29,7 @@ import polars as pl
 import typer
 
 from ctx import runtime
-from ctx.cli import app, parameter_cards
+from ctx.cli import app
 from ctx.dataset import load
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
@@ -39,6 +39,7 @@ from ctx.quant import page as pages
 from ctx.quant.run import Inputs, Measured, Options, featured_contrast
 from ctx.report import text
 from ctx.report.builder import FigureBlock, FigureText, write
+from ctx.report.cards import parameter_cards
 from ctx.viz.save import Figure
 
 MODULE = PAGE = "quant"
