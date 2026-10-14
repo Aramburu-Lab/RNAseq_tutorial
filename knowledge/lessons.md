@@ -85,3 +85,10 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - `max(0.05, nan)` returns 0.05 and `max(nan, 0.05)` returns nan: check every value is finite before taking a maximum (M9, 2026-10-08).
 - A fetch brief for a GDC project lists the metadata the reader needs (manifest, files table, cases, annotations, status, retrieval log), not only the data files: the first CPTAC fetch saved counts gather could not open (2026-10-08).
 - A pipeline on a laptop sizes Nextflow's executor to the container runtime, not the host: per-task limits alone let two tasks each take all of Docker's memory together (guide proof, 2026-10-08).
+- Proof logs go in the repo (`docs/plans/logs/`), not scratch: a macOS restart emptied /private/tmp and took the U.10 proof's logs with it (2026-10-14).
+- Under the xdist session guard, editing a tracked file or adding an untracked one in the checkout while the suite runs fails the run; set edits aside until it ends (2026-10-14).
+- A page script that sets a height until it stops changing must stop on an alternation, not only a repeat: two heights in turn hung a page (C1, 2026-10-09).
+- Salmon at -p 1 is not reproducible run to run; test its estimates on sums and allow an outlier (C1, 2026-10-09).
+- On a 2-core runner, xdist is slower than serial (1,799 s against 1,372 s): measure there before switching CI (A, 2026-10-09).
+- The xdist summary leaves out deselected tests; compare passed and skipped counts only (A, 2026-10-09).
+- The Browser pane is shared between agents: each opens its own tab (C1, 2026-10-09).

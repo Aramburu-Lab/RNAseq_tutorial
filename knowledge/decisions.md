@@ -27,6 +27,86 @@ it were reversed.
 
 ---
 
+## D-063 — Answers of 2026-10-14: OS for KIRC, LUAD and LUSC; each cohort's default genes; strip colours; the plex strip in two greys; lanes are one replicate
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** Wave 1 (C1, C2, the own-FASTQ route) left five questions open.
+
+**Decision.** Rytis approved every recommended answer, 2026-10-14:
+- M10's endpoint for KIRC, LUAD and LUSC is overall survival.
+- Default genes: KIRC CA9, NDUFA4L2, VEGFA, MKI67; LUAD NKX2-1, SFTPC, EGFR, MKI67; LUSC SOX2, TP63, KRT5, MKI67.
+- Strips take their own data colours (`style.strip_colours`); a two-level strip with none left takes two greys at 4.0:1 to each other.
+- M7's plex strip (22 plexes, over the 7-colour cap) alternates two greys to mark plex boundaries; the plex is named in the hover.
+- The lanes of one sample are runs of one library: one replicate, not one replicate per lane.
+
+**Evidence.** A preference on recommended defaults; the endpoint follows C2's reading of Liu 2018 Table 3, whose event counts C2 reproduced (24 of 24 for KIRC, LUAD, LUSC).
+
+**Consequence.** C3 applies the endpoint, the genes and the plex strip; the own-FASTQ follow-up changes `replicate` numbering in curation.
+
+---
+
+## D-062 — M4's laptop path quantifies with Salmon after a 10-read probe; unlabelled heatmap rows draw square cells; junctions from GTEx V10
+
+**Date:** 2026-10-09 · **Status:** decided
+
+**Context.** C1's remainders of M4, M7 and M9 on real data.
+
+**Decision.**
+- `ctx quant --genome` runs Salmon on the laptop after it maps 10 exact reads (a probe on D-036's model), on a transcriptome spliced from M3's reference with chr22 as decoys, into content-keyed folders; `--libtype`, `--gc-bias`, `--seq-bias`, `--decoys` each have a card.
+- A heatmap with more than 60 rows, which go unlabelled, draws square cells in the files, on the page and on a phone.
+- M9's junction panel reads GTEx V10 per-gene medians through API v2 (GENCODE v39), labelled V10; the expression panels stay on V11.
+
+**Evidence.** 8 teaching runs: 14,993 transcripts of 1,744 genes (1,747 chr22 genes in GENCODE 50), library U in 8 of 8, mapping 1.92 to 2.69 %, budget test 104.2 s and a 5.19 GB bound against Track A's 15 min and 6 GB. Step-1 heatmap: 105 samples were 2.9 times as tall as wide; now 4.46 by 4.46 px cells at 1280 px, page 9,801,774 to 8,779,901 B.
+
+**Consequence.** Labelled heatmaps keep their old rule until the page script stops on an alternation as well as a repeat (it set 938.1 and 946.5 px in turn without end on a held-square 8-sample heatmap).
+
+---
+
+## D-061 — read_length is judged within each read-length group
+
+**Date:** 2026-10-09 · **Status:** decided
+
+**Context.** Step-1 mixes 101, 76 and 75 nt by design (D-043); a cohort-wide robust z flagged runs for their length alone.
+
+**Decision.** The read_length band is applied within each read-length group (Rytis 2026-10-09). A group whose MAD is 0 is not judged, and says so.
+
+**Evidence.** Step-1 read_length flags fell from 39 to 0; runs flagged on any metric from 155 to 142. The 75 nt group's MAD is 0, so its 13 runs are unjudged.
+
+**Consequence.** `tests/test_qc_bands.py` reads the read_length column from the registry; a new length-confounded cohort gets the same grouping.
+
+---
+
+## D-060 — The suite runs under pytest-xdist on laptops and serially on CI
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** M3.14 asks for 5 minutes; CI took 1,692 s serial.
+
+**Decision.** The `test` task runs `pytest -n auto --dist loadscope`. Session module runs are built once across workers through `conftest.once` (a file lock in the controller's basetemp, the value pickled), sealed read-only and counted; the session fails on a run built twice or a changed checkout. CI runs `pytest -q` serially (Rytis 2026-10-14).
+
+**Evidence.** This Mac, 14 cores: 1,954 s serial, 351 s parallel, 1,450 passed in both. CI, 2 cores: 1,372 s serial (run 37943036813), 1,799 s parallel (run 37942987776). Without `once`, each worker built every session run: 2,027 s against 988 s with it.
+
+**Consequence.** CI stays over 5 minutes; only a matrix of shards could reach it there, not built. Editing tracked files, or adding a worktree under the checkout, while a suite runs fails the session.
+
+---
+
+## D-059 — A student's own FASTQ files enter through `ctx reads`, laid out as fetchngs.sbatch lays out a download
+
+**Date:** 2026-10-09 · **Status:** decided
+
+**Context.** Public reads enter through nf-core/fetchngs 1.12.0 (D-006); a student's own files have no accession.
+
+**Options.** A second gather reader; copying the files into a fetchngs layout; linking them into one.
+
+**Decision.** `ctx reads` writes the two outdirs `fetchngs.sbatch` writes (`nfcore_fetchngs`, `nfcore_fetchngs_meta`, each with `results.complete`), under fetchngs 1.12.0's headers, with MD5s and counts measured from the files and each file symlinked, never moved or copied; the samplesheet names each original by its resolved path. Standard library only, so Kebnekaise runs the same file on the fetch environment's Python. gather accepts only its layout version. Every refusal is listed together and nothing is written until all checks pass.
+
+**Evidence.** The worked example's reads, as a fetchngs outdir and as local files, give equal gather sheet, composition and library-size tables; 21 planted mutations each failed a test.
+
+**Consequence.** rnaseq.sbatch, gather, `ctx run` and the guide's Parts 2 and 3 run unchanged after Part 1b. Rejected: a second reader (two definitions of a run) and copies (twice the disk). Not run: Docker or Kebnekaise on real own files (U.16).
+
+---
+
 ## D-058 — M8's TCGA half: miRNA through the GDC reader, M5 on a GDC sheet by one mapping, targets apart, a NOT MEASURED verdict
 
 **Date:** 2026-10-08 · **Status:** decided (M8 TCGA merged, e202a43; plan recommended answers)
