@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-069 — M6 records every [sanity]-named gene set; TCGA-KIRC hypoxia and glycolysis and TCGA-BRCA proliferation registered not blind
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** D1.1, Rytis 2026-10-14: keep each TCGA rule's definition rather than substitute tumour against normal.
+
+**Decision.** M6 writes `gsea.<contrast>.<SET>.nes` and `.fdr` for every set a `[sanity]` rule names. Proliferation hallmarks are the six of Liberzon 2015 (Cell Syst, doi:10.1016/j.cels.2015.12.004) Table 1's proliferation category. Rules registered 2026-10-14 13:44, after M5 results existed and before any M6 run on TCGA. The adipocyte rule is not registered: HALLMARK_ADIPOGENESIS is a differentiation process, not adipocyte genes, and the TODO's five genes cite an unrecorded abstract. The lung contrast needs two GDC projects in one dataset, which gather does not take.
+
+**Evidence.** TCGA-KIRC (72 pairs): hypoxia NES 2.366 FDR 0, glycolysis NES 2.024 FDR 0.00036, PASS. TCGA-BRCA (113 pairs): proliferation FAIL on P53_PATHWAY NES -0.885 FDR 0.819; E2F, G2M, MYC v1, MYC v2 and mitotic spindle NES 2.29 to 3.92, FDR 0. MSigDB Hallmark v2026.1.Hs. Step-1's 20 function metrics equal; 5 planted mutations caught.
+
+**Consequence.** The BRCA proliferation FAIL stands as registered; retuning it now would not be blind.
+
+---
+
 ## D-068 — M5 records each [sanity]-named gene's log2 FC and padj; TCGA-KIRC's mRNA rules registered not blind
 
 **Date:** 2026-10-14 · **Status:** decided
