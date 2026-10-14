@@ -125,13 +125,14 @@ def strips(writer: Writer, stage: Stage, units: pl.DataFrame, registry: reg.Regi
     for metric in registry.metrics.values():
         if metric.kind not in STRIPPED or metric.column not in values.columns:
             continue
-        data = figures.strip(metric, values, (stage.bands, flags), units, options.strata, key)
+        within = checkpoint.strata_of(metric, options.strata)
+        data = figures.strip(metric, values, (stage.bands, flags), units, within, key)
         if data is None:
             continue
         lead = text.fill(PAGE, "figures.strip.lead", flagged=int(data.frame["flagged"].sum()),
                          n=data.frame.height, k=f"{registry.mad_multiplier:g}")  # fmt: skip
         reading = tuple(line for line in (metric.meaning, metric.rationale) if line)
-        reading += _equal_values(data.frame["value"], metric)
+        reading += _equal_values(data.frame["value"], metric) + _mixed_lengths(units, metric)
         if figures.shading_kind(metric) != "none":
             reading += (text.fill(PAGE, "figures.strip.source",
                                   source=metric.plot_source or metric.source),)  # fmt: skip
@@ -150,6 +151,15 @@ def _equal_values(values: pl.Series, metric: reg.Metric) -> tuple[str, ...]:
         return ()
     return (text.fill(PAGE, "figures.strip.equal", n=values.len(), value=figures.cut(values[0]),
                       unit=metric.unit),)  # fmt: skip
+
+
+def _mixed_lengths(units: pl.DataFrame, metric: reg.Metric) -> tuple[str, ...]:
+    """The line saying the cohort mixes read lengths by design, for a metric judged within them."""
+    groups = units[checkpoint.LENGTH_GROUP].unique(maintain_order=True).to_list()
+    if metric.judged_within != checkpoint.LENGTH_GROUP or len(groups) < 2:  # noqa: PLR2004
+        return ()
+    return (text.fill(PAGE, "figures.strip.mixed_lengths", n=len(groups),
+                      groups="; ".join(str(g) for g in groups)),)  # fmt: skip
 
 
 def lines(key: str, **values: Any) -> tuple[str, ...]:
@@ -241,7 +251,9 @@ def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured 
         linked = figures.linked_pca(measured.scores, measured.share, sheet, status, dims)
         glance.append(figure(writer, linked, "linked_pca", "linked"))
         identity = identity_figures(writer, stage, measured, sheet, registry, options)
-    units = sheet.unique("sample", keep="first").select("sample", *options.strata)
+    units = sheet.unique("sample", keep="first").select(
+        "sample", *options.strata, checkpoint.LENGTH_GROUP
+    )
     metrics = strips(writer, stage, units, registry, options, "sample")
     for title, items, tabs in (("glance", glance, False), ("metrics", metrics, True),
                                ("identity", identity, False)):  # fmt: skip

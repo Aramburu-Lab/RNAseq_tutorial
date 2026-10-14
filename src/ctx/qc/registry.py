@@ -44,8 +44,12 @@ REQUIRED = (
 OPTIONAL = (
     "module", "kind", "scale", "good", "usable", "bands", "rationale", "stranded", "unstranded",
     "plot_bands", "plot_line", "plot_source", "plot_expected_bias_positions",
-    "plot_unstranded_tolerance",
+    "plot_unstranded_tolerance", "judged_within",
 )  # fmt: skip
+# Groups a metric may be judged within instead of the --strata: read_length within its
+# read-length group, never across a cohort that mixes lengths by design (Rytis 2026-10-09).
+# ctx.qc.checkpoint.length_groups is the one definition of the group.
+JUDGED_WITHIN = ("read_length_group",)
 
 
 class RegistryError(ValueError):
@@ -84,6 +88,7 @@ class Metric:
     plot_line: float | None = None
     plot_expected_bias_positions: int | None = None
     plot_unstranded_tolerance: float | None = None
+    judged_within: str | None = None
 
     @property
     def banded(self) -> bool:
@@ -202,6 +207,9 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
         problems.append(f"[metrics.{key}] source_type = {raw.get('source_type')!r}, not one of "
                         f"{sorted(SOURCE_TYPES)}")  # fmt: skip
     problems += _band_problems(key, raw, kind)
+    if raw.get("judged_within", JUDGED_WITHIN[0]) not in JUDGED_WITHIN:
+        problems.append(f"[metrics.{key}] judged_within = {raw['judged_within']!r}, not one of "
+                        f"{JUDGED_WITHIN}")  # fmt: skip
     if problems:
         return None, problems
     return Metric(
@@ -217,6 +225,7 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
         plot_source=raw.get("plot_source", ""), plot_line=raw.get("plot_line"),
         plot_expected_bias_positions=raw.get("plot_expected_bias_positions"),
         plot_unstranded_tolerance=raw.get("plot_unstranded_tolerance"),
+        judged_within=raw.get("judged_within"),
     ), []  # fmt: skip
 
 

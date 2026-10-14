@@ -365,6 +365,34 @@ def _absolute(frame: pl.DataFrame, metric: Metric, label: str) -> list[tuple[str
     ]
 
 
+# The sheet column holding each run's read-length group, written by ``length_groups``.
+LENGTH_GROUP = "read_length_group"
+
+
+def length_groups(sheet: pl.DataFrame, declared: bool) -> pl.DataFrame:
+    """The sheet with each run's read-length group, the one definition (Rytis 2026-10-09).
+
+    The batch the dataset file declares by read length (``[derived.batch]``, gather's
+    ``batch`` column) where it declares one; else the run's own read length; else one group.
+
+    Args:
+        sheet: The harmonised sheet.
+        declared: Whether the dataset file declares read-length batches.
+    """
+    if declared and "batch" in sheet.columns:
+        group = pl.col("batch").cast(pl.String)
+    elif "read_length" in sheet.columns:
+        group = pl.col("read_length").cast(pl.Int64).cast(pl.String) + " nt"
+    else:
+        group = pl.lit("all")
+    return sheet.with_columns(group.fill_null("unknown").alias(LENGTH_GROUP))
+
+
+def strata_of(metric: Metric, strata: Sequence[str]) -> tuple[str, ...]:
+    """The columns a metric is judged within: its own group, else the --strata."""
+    return (LENGTH_GROUP,) if metric.judged_within == LENGTH_GROUP else tuple(strata)
+
+
 def judge(
     values: pl.DataFrame, samples: pl.DataFrame, registry: Registry, strata: Sequence[str]
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
@@ -383,13 +411,30 @@ def judge(
     Returns:
         The bands (one row per metric and stratum) and the flags (sample, metric, reason).
     """
+    if LENGTH_GROUP not in samples.columns:
+        samples = length_groups(samples, declared=False)
+    present = [m for m in registry.metrics.values() if m.column in values.columns]
+    bands, flags = [], []
+    for within in dict.fromkeys(strata_of(m, strata) for m in present):
+        found = _judge_within(values, samples, [m for m in present
+                                                if strata_of(m, strata) == within],
+                              registry, within)  # fmt: skip
+        bands += found[0]
+        flags += found[1]
+    return (pl.DataFrame(bands, schema=BAND_COLUMNS),
+            pl.DataFrame(flags, schema=FLAG_COLUMNS, orient="row"))  # fmt: skip
+
+
+def _judge_within(
+    values: pl.DataFrame, samples: pl.DataFrame, metrics: Sequence[Metric], registry: Registry,
+    strata: Sequence[str],
+) -> tuple[list[dict[str, object]], list[tuple[str, str, str]]]:  # fmt: skip
+    """The bands and flags of some metrics, judged within the groups ``strata`` make."""
     frame = values.join(samples.select("sample", *strata), on="sample", how="left")
     bands, flags = [], []
     for key, stratum in frame.group_by(list(strata), maintain_order=True):
         label = _stratum_label(dict(zip(strata, key, strict=True)), strata)
-        for metric in registry.metrics.values():
-            if metric.column not in values.columns:
-                continue
+        for metric in metrics:
             found = (
                 _absolute(stratum, metric, label)
                 if metric.kind != "numeric" or metric.banded
@@ -401,8 +446,7 @@ def judge(
                 found += outside
             if metric.action != "keep":
                 flags += [(s, metric.id, r) for s, r in found]
-    return (pl.DataFrame(bands, schema=BAND_COLUMNS),
-            pl.DataFrame(flags, schema=FLAG_COLUMNS, orient="row"))  # fmt: skip
+    return bands, flags
 
 
 def status(
