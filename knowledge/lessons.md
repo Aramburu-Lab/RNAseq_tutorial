@@ -96,3 +96,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - The scratch folder is shared between agents: another agent overwrote a mutation script mid-session. Prefix scratch files with the package's name (G2, 2026-10-14).
 - A worktree's suite can skip what main's runs: G2's skipped 83 tests where main skipped 10 on the same code; read the skip count against main's before trusting an agent's green run (2026-10-14).
 - Run M9's default gene list against the page cap before building a new root's cards: 50 TCGA cards made a 29.5 MB page after ten minutes (C3, 2026-10-14).
+- A page script's settle loop must stop on any height already set: plotly's margins can be a step function of the height with no fixed point between (938.1 and 946.5 px, D1 2026-10-14).
+- Read a rebuilt page's headings as text in the browser: a PCA title printed a level's identifier (steady_state) that every unit test passed (D1, 2026-10-14).

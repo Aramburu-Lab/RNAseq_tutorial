@@ -27,6 +27,62 @@ it were reversed.
 
 ---
 
+## D-068 — M5 records each [sanity]-named gene's log2 FC and padj; TCGA-KIRC's mRNA rules registered not blind
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** Work-order item 13 row 4 asked for TCGA mRNA sanity rules now, labelled not blind; the rules need the named genes' results as metrics.
+
+**Decision.** M5 writes `gene.<contrast>.<symbol>.lfc` and `.padj` for every gene a `[sanity]` rule names. TCGA-KIRC's CA9 and NDUFA4L2 rules were registered 2026-10-14 11:14, after the 2026-10-09 results existed, and say so. BRCA and lung rules are not registered: lung's markers are LUAD against LUSC, a contrast no dataset declares; BRCA's adipocyte rule names no gene list and its proliferation rule needs M6, which TCGA files do not run. KIRC's hypoxia and glycolysis enrichment is not registered for the same reason.
+
+**Evidence.** KIRC CA9 log2 FC 9.58, padj 0, PASS; NDUFA4L2 log2 FC 6.97, padj 1.7e-271, PASS, read from ~/ctx_kidney's M5 results of 2026-10-09.
+
+**Consequence.** The BRCA and lung rules wait on a declared LUAD-against-LUSC contrast, a named adipocyte list and M6 on TCGA; substituting tumour against normal would change the definition.
+
+---
+
+## D-067 — Unlabelled contrasts that read alike show their identifier after their levels
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** D1 moved M5's text to content files with plain contrast labels; Cassetta breast and the synthetic fixture have contrasts whose levels read alike.
+
+**Decision.** A contrast with no `label` whose plain levels collide with another's prints "levels (identifier)" until its dataset file gives a label.
+
+**Evidence.** A preference; the browser check found a PCA title printing `steady_state` before the fix.
+
+**Consequence.** breast_mac, breast_mono and breast_tissue each carry two such contrasts (TODO D1.2).
+
+---
+
+## D-066 — A vertical title's room is its own axis's drawn height (P2S.8)
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** Titles were wrapped to 0.55 of the figure height, which over- or under-states the axis each contract draws.
+
+**Decision.** `refit_y_title` wraps each vertical title to its drawn axis; `AXIS_TITLE_SHARE` is only the first-pass estimate; the page prints the files' lines.
+
+**Evidence.** Old room against drawn axis, pt: strip 145.8 and 131.7; vertical bar 132.5 and 117.7; density 145.8 and 153.6; curves 145.8 and 165.3; scatter 145.8 and 189.9.
+
+**Consequence.** KM has no demo, so P2S.8's test does not cover it.
+
+---
+
+## D-065 — M5's blind VST runs on every gene with a count, and its trend is recorded (P2S.7)
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** The PCA's VST could use the contrast's filtered genes or every gene with a count, and its dispersion trend was not stated.
+
+**Decision.** Every gene with a count: the PCA is unsupervised, no contrast's filter applies, and D-046's PERMANOVA metrics stand on it. `Pca.trend` is recorded and the caption names it.
+
+**Evidence.** Step-1 ss_ndn: "Blind VST on a mean-based dispersion trend, as the parametric fit did not converge"; pb: parametric. The 92 recorded metrics equal, 92 of 92.
+
+**Consequence.** Changing the gene set would move the recorded PERMANOVA metrics.
+
+---
+
 ## D-064 — A GDC dataset's annotation columns are joined in gather; a track with more levels than colours takes two greys and sorts first; the kit refuses declared resources by hash
 
 **Date:** 2026-10-14 · **Status:** decided
