@@ -15,7 +15,7 @@ import numpy as np
 import polars as pl
 
 from ctx.report import text
-from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title, screen_title
 from ctx.viz.style import (
     ALONE_SCALE,
@@ -611,6 +611,7 @@ class ScatterData:
         ]
         sns.despine(fig=fig)
         place_caption(fig, self.caption, width, height, ax=ax, handles=handles)
+        refit_y_title(fig, ax, self._axis_title(self.y_label, self.y))
         if self.label:
             renderer = FigureCanvasAgg(fig).get_renderer()  # type: ignore[no-untyped-call]
             self._place_labels(fig, ax, renderer, theme)
@@ -744,7 +745,7 @@ class ScatterData:
             showlegend=len(fig.data) > 1,
             xaxis={"title": {"text": screen_title(x_title)},
                    "type": "log" if self.log_x else "linear"},
-            yaxis={"title": {"text": page_y_title(y_title, self.inches()[1])},
+            yaxis={"title": {"text": page_y_title(y_title, files_room(self.static))},
                    "type": "log" if self.log_y else "linear"},
         )  # fmt: skip
         return fig

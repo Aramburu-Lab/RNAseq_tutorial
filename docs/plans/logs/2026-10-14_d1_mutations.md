@@ -137,3 +137,44 @@ FAILED tests/test_de.py::test_a_librarys_lanes_are_one_sample_and_a_second_libra
 1 failed in 6.11s
 ```
 
+## CAUGHT: src/ctx/viz/strip.py
+- planted: '        refit_y_title(fig, ax, self._value_title())' -> '        pass'
+- ran: tests/test_title_room.py
+- exit 1
+```
+FAILED tests/test_title_room.py::test_a_vertical_title_fits_its_own_drawn_axis[strip-long title]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 21 passed in 5.39s
+```
+
+## CAUGHT: src/ctx/viz/scatter.py
+- planted: '        refit_y_title(fig, ax, self._axis_title(self.y_label, self.y))' -> '        pass'
+- ran: tests/test_title_room.py
+- exit 1
+```
+FAILED tests/test_title_room.py::test_a_vertical_title_fits_its_own_drawn_axis[volcano-long title]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 2.04s
+```
+
+## CAUGHT: src/ctx/viz/axes.py
+- planted: '    return "<br>".join(wrap_title(title, room).split("\\n"))' -> '    return "<br>".join(fit_title(title, room / 72 / 0.55).split("\\n"))'
+- ran: tests/test_page_axes.py
+- exit 1
+```
+FAILED tests/test_page_axes.py::test_the_page_y_title_is_the_files[volcano-as built]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 9.64s
+```
+
+Note: the axes.py mutation above failed by a NameError (fit_title no longer imported there), so it proves nothing; the scatter one below replaces it.
+## CAUGHT: src/ctx/viz/scatter.py
+- planted: 'page_y_title(y_title, files_room(self.static))' -> 'page_y_title(y_title, self.inches()[1] * 72 * 0.55)'
+- ran: tests/test_page_axes.py
+- exit 1
+```
+FAILED tests/test_page_axes.py::test_the_page_y_title_is_the_files[volcano-long title]
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 1 passed in 2.36s
+```
+

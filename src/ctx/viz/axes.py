@@ -7,7 +7,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import fit_title
+from ctx.viz.annotate import wrap_title
 
 # Units that are no unit: the title is the label alone.
 NO_UNIT = frozenset({"none"})
@@ -60,7 +60,7 @@ def screen_title(title: str) -> str:
     return f"{label}<br>({unit}"
 
 
-def page_y_title(title: str, height: float) -> str:
+def page_y_title(title: str, room: float) -> str:
     """A y-axis title as the page prints it: the lines the figure files print, from one call.
 
     The page's own PDF and SVG of a moved view copy the page's y title, so a page that broke
@@ -68,13 +68,12 @@ def page_y_title(title: str, height: float) -> str:
 
     Args:
         title: The title ``axis_title`` gave.
-        height: The figure files' height in inches, as ``static()`` passes it to
-            ``fit_title``.
+        room: The files' drawn axis height in pt, ``annotate.files_room`` (P2S.8).
 
     Returns:
-        ``fit_title``'s lines, joined by plotly's line break.
+        ``wrap_title``'s lines, joined by plotly's line break.
     """
-    return "<br>".join(fit_title(title, height).split("\n"))
+    return "<br>".join(wrap_title(title, room).split("\n"))
 
 
 def hover_format(dtype: pl.DataType) -> str:

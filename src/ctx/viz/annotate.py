@@ -23,10 +23,13 @@ from ctx.viz.style import (
     LEGEND_MAX_COLUMNS,
     LINE_SPACING,
     SIZES,
+    THEMES,
 )
 
 PAGE = "annotate"
 TEST_NAME = content.word(PAGE, "test_name")
+# Where a laid-out figure keeps its layout rectangle and its vertical title's room.
+LAYOUT, ROOM = "ctx_layout", "ctx_title_room"
 PERMANOVA_NAME = content.word(PAGE, "permanova_name")
 
 
@@ -92,7 +95,10 @@ def wrap(text: str, width: int = 0) -> str:
 
 
 def fit_title(text: str, height: float) -> str:
-    """Wrap a vertical axis title to the length its axis has: a share of the figure height.
+    """Wrap a vertical axis title to a first estimate of its axis: a share of the figure height.
+
+    The estimate lays the figure out; ``refit_y_title`` then wraps the title again to the
+    axis's height as drawn (P2S.8), and ``wrap_title`` is that wrap.
 
     Measured as the files set it, so a line ends only where its next word would cross that
     length: an average glyph width broke M3's "Difference d (log2(count + 1))", 130.2 pt
@@ -107,8 +113,64 @@ def fit_title(text: str, height: float) -> str:
     Returns:
         The title, broken into lines that fit.
     """
-    room = height * 72 * AXIS_TITLE_SHARE
+    return wrap_title(text, height * 72 * AXIS_TITLE_SHARE)
+
+
+def wrap_title(text: str, room: float) -> str:
+    """A vertical title broken into lines no longer than ``room`` pt, as the files set it.
+
+    Args:
+        text: The title, with its unit.
+        room: The axis's length in pt.
+
+    Returns:
+        The title, broken where the next word would cross the room.
+    """
     return "\n".join(wrap_to(words(text), room, SIZES["axis_label"]))
+
+
+def drawn_height(fig: Any, ax: Any) -> float:
+    """An axes' height in pt as the figure lays it out."""
+    from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
+
+    renderer = FigureCanvasAgg(fig).get_renderer()  # type: ignore[no-untyped-call]
+    return float(ax.get_window_extent(renderer).height) * 72 / float(fig.dpi)
+
+
+def refit_y_title(fig: Any, ax: Any, title: str, *, label: Any = None) -> float:
+    """Wrap a vertical title to its own axis's drawn height, and lay the figure out again.
+
+    A share of the figure's height gave a scatter's room to strips and bars whose axes are
+    shorter: "Share of the top gene (fraction)" ran 2.5 pt past its axis (P2S.8). The axis's
+    height hardly moves with its title, which widens the left margin, so one pass holds. The
+    room is kept on the figure (``ROOM``) for the page, which prints the files' lines (D-053).
+
+    Args:
+        fig: The laid-out matplotlib Figure, from ``place_caption``.
+        ax: The axes whose height the title runs along.
+        title: The title, unwrapped.
+        label: The setter of the title, ``ax.set_ylabel`` unless given (a colour bar's).
+
+    Returns:
+        The room, in pt.
+    """
+    room = drawn_height(fig, ax)
+    (label or ax.set_ylabel)(wrap_title(title, room))
+    fig.tight_layout(rect=getattr(fig, LAYOUT))
+    setattr(fig, ROOM, room)
+    return room
+
+
+def files_room(static: Any) -> float:
+    """The room a contract's figure files give its vertical title, read off one render.
+
+    Args:
+        static: The contract's ``static``, taking a theme.
+
+    Returns:
+        The drawn axis height, in pt, the files wrapped the title to.
+    """
+    return float(getattr(static(THEMES["white"]), ROOM))
 
 
 def place_caption(
@@ -145,6 +207,7 @@ def place_caption(
              fontsize=SIZES["caption"])  # fmt: skip
     caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
     rect = (0, caption_inches / height, 1, 1)
+    setattr(fig, LAYOUT, rect)
     if not handles:
         fig.tight_layout(rect=rect)
         return

@@ -12,7 +12,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title
 from ctx.viz.scatter import log_ticks
 from ctx.viz.style import (
@@ -264,6 +264,7 @@ class StripData:
         ax.set_ylabel(fit_title(self._value_title(), height))
         sns.despine(fig=fig)
         place_caption(fig, self.caption, width, height, ax=ax, handles=self._handles(theme))
+        refit_y_title(fig, ax, self._value_title())
         return fig
 
     def _draw_bands(self, ax: Any, theme: Theme) -> None:
@@ -356,7 +357,7 @@ class StripData:
             xaxis={"title": {"text": self.category_label}, "tickvals": list(range(len(slots))),
                    "ticktext": slots, "range": [-0.5, len(slots) - 0.5],
                    "ticklabeloverflow": "allow"},
-            yaxis={"title": {"text": page_y_title(title, self._inches()[1])},
+            yaxis={"title": {"text": page_y_title(title, files_room(self.static))},
                    "type": "log" if self.log else "linear"},
         )  # fmt: skip
         return fig

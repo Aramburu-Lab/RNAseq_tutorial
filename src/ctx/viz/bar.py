@@ -14,7 +14,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title, screen_title
 from ctx.viz.style import (
     BAR_LABEL_ROTATION,
@@ -286,6 +286,8 @@ class BarData:
             ax.invert_yaxis()
         sns.despine(fig=fig)
         place_caption(fig, self.caption, width, height, ax=ax, handles=handles)
+        if not self.horizontal:
+            refit_y_title(fig, ax, self._value_title())
         return fig
 
     def interactive(self) -> Any:
@@ -334,7 +336,7 @@ class BarData:
             category_axis["autorange"] = "reversed"
         # The page script rewraps an x title for the screen; the export copies a y title.
         value_title = (screen_title(self._value_title()) if self.horizontal
-                       else page_y_title(self._value_title(), self.inches()[1]))  # fmt: skip
+                       else page_y_title(self._value_title(), files_room(self.static)))  # fmt: skip
         value_axis = {"title": {"text": value_title}}
         rows_px = PLOTLY_BAR_BASE_PX + PLOTLY_BAR_ROW_PX * len(categories)
         fig.update_layout(
