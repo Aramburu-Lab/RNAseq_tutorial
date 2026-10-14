@@ -94,3 +94,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - The Browser pane is shared between agents: each opens its own tab (C1, 2026-10-09).
 - A sort that leaves ties to the row order passes every test whose rows arrive sorted: the tiebreak mutation survived until a test fed the twins in reverse (G2, 2026-10-14).
 - The scratch folder is shared between agents: another agent overwrote a mutation script mid-session. Prefix scratch files with the package's name (G2, 2026-10-14).
+- A worktree's suite can skip what main's runs: G2's skipped 83 tests where main skipped 10 on the same code; read the skip count against main's before trusting an agent's green run (2026-10-14).
