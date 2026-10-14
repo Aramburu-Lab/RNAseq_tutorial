@@ -1,0 +1,4 @@
+cases 110 {'Clear cell renal cell carcinoma': 103, 'non-Clear Cell renal cell carcinoma': 7}
+GDC cases with both 75
+their histology {'Clear cell renal cell carcinoma': 73, 'non-Clear Cell renal cell carcinoma': 2}
+non-clear-cell cases with both: ['C3N-00435', 'C3N-01175']
