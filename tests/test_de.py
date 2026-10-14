@@ -20,7 +20,7 @@ from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
 from ctx.de.page import ma_text
-from ctx.de.run import _fit_metrics, _ma, volcano
+from ctx.de.run import _fit_metrics, _ma, rule_genes, volcano
 from ctx.de.stats import ALPHA, LFC_MIN, classify
 from ctx.report import text
 from ctx.viz import scatter
@@ -503,3 +503,30 @@ def test_pandas_only_at_boundary():
             if any(n == "pandas" or n.startswith("pandas.") for n in names):
                 importers.append(path.relative_to(ROOT).as_posix())
     assert sorted(set(importers)) == ["src/ctx/de/deseq.py"]
+
+
+def test_a_rule_names_a_gene_and_m5_records_its_fold_change_and_padj(basic):
+    """A ``[sanity]`` rule naming ``gene.<contrast>.<symbol>.<lfc|padj>`` gets that gene's
+    values from the fit, a symbol's first gene standing for it; an unknown symbol or contrast
+    is NaN with its reason. Mutations: ``padj`` read for ``lfc``; the last gene of a shared
+    symbol taken, not the first.
+    """
+    _, result = basic
+    tested = result.results.filter(pl.col("padj").is_not_null())
+    genes = pl.DataFrame({"gene_id": tested["gene_id"][:2], "gene_name": ["SYM", "SYM"]})
+    rules = {"rules": [{"conditions": [
+        {"metric": "gene.basic.SYM.lfc", "op": ">", "value": 0},
+        {"metric": "x", "op": "<", "other": "gene.basic.SYM.padj"},
+        {"metric": "gene.basic.NONE.lfc", "op": ">", "value": 0},
+        {"metric": "gene.other.SYM.padj", "op": "<", "value": 0.05},
+        {"metric": "calls.basic.up", "op": ">", "value": 0},
+    ]}]}  # fmt: skip
+    found = {m: (v, why) for m, v, why in rule_genes(rules, {"basic": result}, genes)}
+    assert set(found) == {"gene.basic.SYM.lfc", "gene.basic.SYM.padj", "gene.basic.NONE.lfc",
+                          "gene.other.SYM.padj"}  # fmt: skip
+    row = tested.row(0, named=True)
+    assert found["gene.basic.SYM.lfc"][0] == row["log2FoldChange"]
+    assert found["gene.basic.SYM.padj"][0] == row["padj"]
+    assert math.isnan(found["gene.basic.NONE.lfc"][0])
+    assert "not in the annotation" in found["gene.basic.NONE.lfc"][1]
+    assert "no contrast other" in found["gene.other.SYM.padj"][1]

@@ -38,3 +38,23 @@ FAILED tests/test_de.py::test_a_librarys_lanes_are_one_sample_and_a_second_libra
 1 failed in 4.98s
 ```
 
+## CAUGHT: src/ctx/de/run.py
+- planted: '        column = "log2FoldChange" if what == "lfc" else "padj"' -> '        column = "padj"'
+- ran: tests/test_de.py::test_a_rule_names_a_gene_and_m5_records_its_fold_change_and_padj
+- exit 1
+```
+FAILED tests/test_de.py::test_a_rule_names_a_gene_and_m5_records_its_fold_change_and_padj
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 14.06s
+```
+
+## CAUGHT: src/ctx/de/run.py
+- planted: 'once.unique("gene_name", keep="first", maintain_order=True)' -> 'once.unique("gene_name", keep="last", maintain_order=True)'
+- ran: tests/test_de.py::test_a_rule_names_a_gene_and_m5_records_its_fold_change_and_padj
+- exit 1
+```
+FAILED tests/test_de.py::test_a_rule_names_a_gene_and_m5_records_its_fold_change_and_padj
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 13.23s
+```
+

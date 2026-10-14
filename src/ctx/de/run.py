@@ -729,7 +729,8 @@ def rule_genes(
         for m in (c.get("metric"), c.get("other"))
         if m and GENE_METRIC.fullmatch(m)
     }
-    once = genes.select("gene_name", "gene_id").unique("gene_name", maintain_order=True)
+    once = genes.select("gene_name", "gene_id")
+    once = once.unique("gene_name", keep="first", maintain_order=True)
     first = dict(once.rows())
     metrics = []
     for metric in sorted(named):
