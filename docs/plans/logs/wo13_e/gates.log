@@ -1,0 +1,17 @@
+== ruff check
+All checks passed!
+== ruff format
+343 files already formatted
+== mypy
+Success: no issues found in 143 source files
+== interrogate
+| TOTAL                        |      1936 |        0 |      1936 |     100.0% |
+--------------- RESULT: PASSED (minimum: 100.0%, actual: 100.0%) ---------------
+== labdocs lint
+== labdocs render --check
+== prose
+prose lint: no violations
+== glossary
+warning: setup: pitfalls: 'counts' is raw_counts, unmarked
+warning: setup: questions: 'fastp' is fastp, unmarked
+glossary lint: no errors
