@@ -14,6 +14,7 @@ import numpy as np
 import polars as pl
 import pytest
 from clinical_root import PATIENTS, ctx, make
+from gdc_fixture import PROJECT
 
 from ctx.report.builder import MAX_BYTES, plotly_js
 
@@ -63,7 +64,9 @@ def test_the_page_is_offline_under_the_cap_and_names_its_sources(clinical_root):
     assert len(html.encode()) <= MAX_BYTES
     assert html.count(plotly_js()) == 1
     assert not re.search(r"<script[^>]+\bsrc\s*=", html, re.IGNORECASE)
-    assert "TCGA Research Network" in html and "CC BY-NC-ND 4.0" in html
+    assert "TCGA Research Network: https://www.cancer.gov/tcga." in html
+    assert "CC BY-NC-ND 4.0" in html
+    assert f"Data of {PROJECT} were retrieved from the NCI Genomic Data Commons" in html
     assert "ctxLive" in html and "ctxSurv" in html
 
 

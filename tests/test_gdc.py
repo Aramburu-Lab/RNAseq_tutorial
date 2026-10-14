@@ -12,7 +12,7 @@ import polars as pl
 import pytest
 from gdc_fixture import PROJECT, aliquot, build, counts_text, spec_file
 
-from ctx.dataset import load
+from ctx.dataset import DatasetError, load
 from ctx.gather import gdc, gdc_run
 from ctx.qc import registry
 
@@ -270,3 +270,26 @@ def test_the_four_tcga_projects_give_the_plans_numbers(slug):
                 count.get("protocol", 0), taken.height, tumours["case"].n_unique() - taken.height,
                 ties, (len(pairs & set(taken["case"])), len(both)))  # fmt: skip
     assert measured == FOUR[slug]
+
+
+def test_the_acknowledgement_names_the_project_and_quotes_its_own_policy(tmp_path):
+    """GDC's FAQ asks for the GDC's citation and defers to each project's own policy (ui.toml
+    [gdc], read 2026-10-09). Catches the project accession or release left out, TCGA's
+    sentence printed for a project that does not declare it, and an unknown policy accepted."""
+    plain = load(spec_file(tmp_path / "plain.toml")).gdc
+    assert plain is not None
+    (only,) = gdc.acknowledgement(plain)
+    assert f"Data of {PROJECT} were retrieved" in only and plain.release in only
+    assert "10.1038/s41588-021-00791-5" in only and "TCGA" not in only
+    text = (tmp_path / "plain.toml").read_text()
+    tcga = tmp_path / "tcga.toml"
+    tcga.write_text(text.replace("[guard]", 'attribution = "tcga"\n[guard]', 1))
+    found = load(tcga).gdc
+    assert found is not None
+    first, second = gdc.acknowledgement(found)
+    assert first.startswith("The results shown here are in whole or part based upon data")
+    assert first.endswith("TCGA Research Network: https://www.cancer.gov/tcga.")
+    assert second == only
+    tcga.write_text(text.replace("[guard]", 'attribution = "target"\n[guard]', 1))
+    with pytest.raises(DatasetError, match="gdc.attribution"):
+        load(tcga)

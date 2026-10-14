@@ -221,6 +221,24 @@ def test_composition_mirna_share_is_the_hairpin_genes_alone():
     assert wide["small_RNA_percent"].item() == pytest.approx(1.0)
 
 
+def test_composition_filters_by_biotype_too():
+    """F1's subset by biotype (M8 plan, F1's control): the page offers a biotype select holding
+    every group, beside cell type and condition, and a GDC sheet's bars filter by it as well.
+    Catches: the biotype filter left off, which leaves only the sheet's columns to filter by."""
+    genes = pl.DataFrame({"gene_type": ["miRNA", "lncRNA", "protein_coding"],
+                          "biotype": ["small_RNA", "lncRNA", "protein_coding"]})  # fmt: skip
+    counts = np.array([[1, 2], [9, 8], [990, 990]])
+    step1 = pl.DataFrame({"sample": ["s1", "s2"], "cell_type": ["A", "B"], "condition": ["c", "d"],
+                          "library_selection": ["Oligo-dT", "Oligo-dT"]})  # fmt: skip
+    gdc = pl.DataFrame({"sample": ["s1", "s2"], "condition": ["tumour", "normal"]})
+    for sheet, facets in ((step1, ["cell_type", "condition"]), (gdc, ["condition"])):
+        bars, _ = figures.composition(sheet, genes, counts, "caption")
+        controls = bars.controls()
+        assert controls is not None
+        assert list(controls["filters"]) == [*facets, "biotype"]
+        assert controls["filters"]["biotype"] == sorted(biotypes.GROUPS)
+
+
 def test_shown_pairs_are_cis_pairs_by_q_then_strength():
     """Catches: background pairs offered in the select, a pair without q (a constant gene)
     offered, or a tie in q broken by signed rho, which puts the strongest negative pair last."""

@@ -26,6 +26,10 @@ normal = "Solid Tissue Normal"
 mirna_workflow = "BCGSC miRNA Profiling"
 cdr_file = "TCGA-CDR-SupplementalTableS1.xlsx"
 cdr_type = "BRCA"
+# TCGA's own attribution policy, quoted on every page beside the GDC's citation
+# (https://www.cancer.gov/ccg/research/genome-sequencing/tcga/using-tcga-data/citing, read
+# 2026-10-09; the GDC FAQ defers to each project's policy).
+attribution = "tcga"
 
 # Case barcodes (TCGA-3C-AAAU) start with a digit or a letter, which COHORT_ID's TCGA-[A-Z]+
 # alone does not cover.
@@ -38,6 +42,10 @@ patterns = ['\bTCGA-[A-Z0-9]{2}-[A-Z0-9]{4}\b']
 [clinical]
 genes = ["ESR1", "PGR", "ERBB2", "MKI67"]
 endpoint = "PFI"
+# The variables breast records carry; ER adds the endpoints check, and the box splits by ER.
+variables = ["er", "stage", "histology", "menopause", "age"]
+box = "er"
+therapy = "Hormone Therapy"
 
 # Liu et al. 2018, read through PubMed Central (PMC6066282) for the plan, 2026-10-07. Table 3
 # counts event flags among the BRCA rows; Figure 2A to D compares ER-positive with ER-negative.

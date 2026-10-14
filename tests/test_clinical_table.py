@@ -18,10 +18,11 @@ from ctx.gather import gdc, gdc_run
 ROOT = Path(__file__).resolve().parents[1]
 XLSX = importlib.util.find_spec("openpyxl") is not None
 TUMOUR = "Primary Tumor"
+THERAPY = "Hormone Therapy"
 CDR_TEXT = {  # one CDR row as the workbook shows it, every value text
     "type": "BRCA", "age_at_initial_pathologic_diagnosis": "61", "gender": "FEMALE",
     "ajcc_pathologic_tumor_stage": "Stage IIA",
-    "histological_type": "Infiltrating Ductal Carcinoma",
+    "histological_type": "Infiltrating Ductal Carcinoma", "histological_grade": "[Not Available]",
     "menopause_status": ("Post (prior bilateral ovariectomy OR >12 mo since LMP with no prior "
                          "hysterectomy)"),
     "Redaction": "", **{e: "0" for e in ENDPOINTS}, **{f"{e}.time": "730" for e in ENDPOINTS},
@@ -47,7 +48,7 @@ def made(found: gdc_run.Read, rows: dict[str, dict[str, str]], sheet: pl.DataFra
     """The clinical table of the made-up folder with this CDR."""
     given = sheet if sheet is not None else found.sheet
     return harmonise.build(given, cdr(rows), found.cases, found.tests, found.treatments,
-                           found.annotations, tumour=TUMOUR)  # fmt: skip
+                           found.annotations, tumour=TUMOUR, therapy=THERAPY)  # fmt: skip
 
 
 def case(n: int) -> str:
@@ -130,8 +131,8 @@ def test_receptor_status_reads_every_record(tmp_path):
     assert p["er"].to_list()[:2] == [None, "positive"]
     assert p["er_missing"].to_list()[:3] == ["conflicting", None, "not tested"]
     assert p["her2"][1] == "positive"
-    assert p["hormone_therapy"].to_list() == [None, None, "yes", None, None]
-    assert harmonise.reasons(p, "hormone_therapy") == [("not recorded", 4)]
+    assert p["therapy"].to_list() == [None, None, "yes", None, None]
+    assert harmonise.reasons(p, "therapy") == [("not recorded", 4)]
 
 
 def test_table_3_counts_every_flag_of_the_type():
@@ -163,7 +164,7 @@ def test_tcga_brca_gives_liu_table_3_and_the_er_pattern():
     found = gdc_run.read_all(folder, load(ROOT / "conf/datasets/tcga_brca.toml"))
     assert found.cdr is not None
     result = harmonise.build(found.sheet, found.cdr, found.cases, found.tests, found.treatments,
-                             found.annotations, tumour=TUMOUR)  # fmt: skip
+                             found.annotations, tumour=TUMOUR, therapy=THERAPY)  # fmt: skip
     assert dict(result.flags) == TABLE_3
     assert result.flow == FLOW
     p = result.patients
@@ -182,3 +183,34 @@ def test_tcga_brca_gives_liu_table_3_and_the_er_pattern():
         assert hr > 1
         assert float(f"{p_value:.2g}") == OUR_ER_P[endpoint]
         assert (p_value < 0.05) == (LIU_ER_P[endpoint] < 0.05)
+
+
+# Liu et al. 2018, Table 3, read through PubMed Central's E-utilities (PMC6066282) on
+# 2026-10-09: events and censored per endpoint for the kidney and lung cohorts of M10.10.
+TABLE_3_M10_10 = {
+    "tcga_kirc": {"OS": (177, 360), "PFI": (162, 375), "DFI": (15, 102), "DSS": (110, 415)},
+    "tcga_luad": {"OS": (188, 334), "PFI": (213, 309), "DFI": (92, 217), "DSS": (116, 370)},
+    "tcga_lusc": {"OS": (219, 285), "PFI": (149, 355), "DFI": (63, 241), "DSS": (91, 361)},
+}
+FOLDERS = {"tcga_kirc": "ctx_kidney", "tcga_luad": "ctx_lung", "tcga_lusc": "ctx_lung"}
+
+
+@pytest.mark.realdata
+@pytest.mark.skipif(not XLSX, reason="openpyxl ==3.1.5 is pinned in pixi.toml; run pixi install")
+@pytest.mark.parametrize("slug", sorted(TABLE_3_M10_10))
+def test_kidney_and_lung_give_liu_table_3(slug):
+    """Opt-in (-m realdata), M10.10: the CDR's flags equal Liu's Table 3 in all 8 counts of
+    each cohort, and the table holds one row per patient. Catches another cohort's CDR rows,
+    a flag read as text, and a patient twice."""
+    home = Path(os.environ.get("CTX_GDC_HOME", Path.home()))
+    folder = home / FOLDERS[slug] / "data/raw" / slug
+    if not folder.is_dir():
+        pytest.skip(f"{folder} is not on this machine")
+    spec = load(ROOT / f"conf/datasets/{slug}.toml")
+    found = gdc_run.read_all(folder, spec)
+    assert found.cdr is not None and spec.clinical is not None
+    result = harmonise.build(found.sheet, found.cdr, found.cases, found.tests, found.treatments,
+                             found.annotations, tumour=TUMOUR,
+                             therapy=spec.clinical.therapy)  # fmt: skip
+    assert dict(result.flags) == TABLE_3_M10_10[slug]
+    assert result.patients["patient"].n_unique() == result.patients.height

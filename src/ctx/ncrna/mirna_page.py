@@ -326,6 +326,8 @@ def build(writer: Writer, ctx: "Context") -> tuple[list[Result], Metrics, dict[s
     shift_group, found = shift(writer, ctx, tcga, fit)
     pair_group, paired = pairs(writer, ctx, tcga, both)
     note, agreed = agreement(writer, tcga, both)
-    library, typed, reasons = libraries_page.group(writer, tcga, ctx.inputs.genes)
+    assert ctx.inputs.spec.gdc is not None  # noqa: S101 - a TCGA half reads a GDC dataset
+    library, typed, reasons = libraries_page.group(writer, tcga, ctx.inputs.genes,
+                                                   ctx.inputs.spec.gdc.tumour)  # fmt: skip
     shown = [fit_group, note, shift_group, pair_group, *([library] if library else [])]
     return shown, metrics | found | paired | agreed | typed, reasons

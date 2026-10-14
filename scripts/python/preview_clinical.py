@@ -2,14 +2,14 @@
 # /// codebase-meta
 # exempt: instructor-side preview builder; the M10 page on made-up data until ctx clinical exists
 # ///
-"""Course preview of M10 Clinical and survival, drawn on made-up data until the module is built.
+"""Course preview of M10 Clinical and survival, drawn on made-up data for the made-up dataset.
 
-The survival figures come from a made-up tumour cohort drawn here from a seeded generator:
-expression of one gene, age, stage and a progression-free interval with censoring. lifelines is
-not in the analysis environment, so Kaplan-Meier, the log-rank test and a Breslow Cox fit are
-computed with numpy below. The confounding map is computed on the made-up dataset's own sample
-sheet. The page text is ``content/clinical.toml``, which the built module will reuse. Run
-through ``build_preview.py --only clinical``.
+The cohort is made up here from a seeded generator: expression of one gene, age, stage and a
+progression-free interval with censoring. Every statistic and figure is ``ctx.clinical``'s, the
+built module's one definition: Kaplan-Meier, log-rank, Efron Cox with its PH test and C, the
+scan with its permutation p, power and Cramér's V, so the preview cannot disagree with the
+page it previews. The confounding map is computed on the made-up dataset's own sample sheet.
+The page text is ``content/clinical.toml``. Run through ``build_preview.py --only clinical``.
 """
 
 from __future__ import annotations
@@ -21,9 +21,9 @@ from typing import Any
 
 import numpy as np
 import polars as pl
-from scipy.stats import chi2, chi2_contingency, norm
 
 from ctx import runtime
+from ctx.clinical import analyses, cutpoint, figures, score, survival
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
 from ctx.report import text
@@ -38,10 +38,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
-from ctx.viz.contour import Mark, SurfaceData
-from ctx.viz.curve import CurveData
 from ctx.viz.heatmap import HeatmapData, Swatch
-from ctx.viz.scatter import Line
 from ctx.viz.style import HEAT_ALPHAS, ROLES
 
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
@@ -52,16 +49,9 @@ SEED = 10
 PATIENTS = 420
 ENDPOINT = "PFI"
 HORIZON = 60  # months: the RMST horizon
-RISK_MONTHS = (0, 24, 48, 72, 96, 120)
 COVARIATES = ("age", "stage")
-SCAN = (20, 80)  # percentiles scanned, as the Human Protein Atlas and bc-GenExMiner scan
-PERMUTATIONS = 1000
-ALPHA = 0.05
-TARGET_POWER = 80.0
-LEVEL = 0.95
 DAYS_PER_MONTH = 365.25 / 12
-TICK = 0.015  # half-height of a censor tick, in survival fraction
-MEDIAN, HALF = 50, 0.5
+MEDIAN = 50  # the scan's percentile of the pre-specified median split
 CONFOUNDERS = ("condition", "cell_type", "batch", "sex")
 V_EDGES = (0.1, 0.3, 0.5)  # Cohen's small, medium and large for one degree of freedom
 
@@ -93,11 +83,6 @@ def columns(what: str) -> dict[str, tuple[str, str]]:
     return {name: (unit, meaning) for name, (unit, meaning) in text.raw(PAGE, what).items()}
 
 
-def split(values: np.ndarray, percentile: float) -> np.ndarray:
-    """High is at or above the percentile: the one split rule of the curves and the scan."""
-    return np.asarray(values >= np.percentile(values, percentile))
-
-
 def made_up_cohort(rng: np.random.Generator) -> pl.DataFrame:
     """Patients with expression, age, stage and a censored time to progression, all made up.
 
@@ -113,7 +98,7 @@ def made_up_cohort(rng: np.random.Generator) -> pl.DataFrame:
     lost = rng.exponential(9000.0, PATIENTS)
     censor_days = np.minimum(rng.uniform(120.0, 4400.0, PATIENTS), lost)
     days = np.ceil(np.minimum(event_days, censor_days)).astype(int)
-    group = np.where(split(z, MEDIAN), fill("split.high"), fill("split.low"))
+    group = np.array(groups())[score.split(z, "median")]
     return pl.DataFrame({
         "patient": [f"P{i:03d}" for i in range(PATIENTS)], "age": age, "stage": stage,
         "log2cpm": log2cpm, "z": z, "group": group, "days": days,
@@ -121,198 +106,65 @@ def made_up_cohort(rng: np.random.Generator) -> pl.DataFrame:
     })  # fmt: skip
 
 
-def kaplan_meier(months: np.ndarray, event: np.ndarray) -> pl.DataFrame:
-    """The estimate at every time a patient has the event or is censored, with its interval.
-
-    The interval is Greenwood's variance on the log(-log) scale, as lifelines draws it.
-    """
-    times, first = np.unique(np.sort(months), return_index=True)
-    at_risk = len(months) - first
-    events = np.array([event[months == t].sum() for t in times])
-    survival = np.cumprod(1.0 - events / at_risk)
-    with np.errstate(divide="ignore", invalid="ignore"):
-        greenwood = np.cumsum(events / (at_risk * (at_risk - events)))
-        spread = np.where(greenwood > 0, norm.ppf(0.5 + LEVEL / 2) * np.sqrt(greenwood)
-                          / np.log(survival), 0.0)  # fmt: skip
-        bounds = [survival ** np.exp(sign * spread) for sign in (-1.0, 1.0)]
-    lower, upper = (np.where(np.isfinite(b), b, survival) for b in bounds)
-    followed = np.bincount(np.searchsorted(times, months), minlength=len(times))
-    return pl.DataFrame({"months": times, "at_risk": at_risk, "events": events,
-                         "censored": followed - events, "survival": survival, "lower": lower,
-                         "upper": upper})  # fmt: skip
+def groups() -> tuple[str, str]:
+    """The median split's two groups, low first, in the preview's words."""
+    return fill("split.low"), fill("split.high")
 
 
-def first_below_half(km: pl.DataFrame, column: str) -> float:
-    """The first time a curve reaches one half or below; NaN when it never does."""
-    reached = km.filter(pl.col(column) <= HALF)["months"]
-    return float(reached[0]) if reached.len() else float("nan")
+def outcome(cohort: pl.DataFrame) -> tuple[np.ndarray, np.ndarray]:
+    """Months and event flags, in cohort order."""
+    return cohort["months"].to_numpy().astype(float), cohort["event"].to_numpy().astype(int)
 
 
-def rmst(km: pl.DataFrame, horizon: float) -> float:
-    """Area under the step curve from 0 to the horizon, in months."""
-    kept = km.filter(pl.col("months") < horizon)
-    edges = np.concatenate([[0.0], kept["months"].to_numpy(), [horizon]])
-    heights = np.concatenate([[1.0], kept["survival"].to_numpy()])
-    return float(np.sum(heights * np.diff(edges)))
+def group_summary(table: pl.DataFrame) -> ResultTable:
+    """Patients, events, median with its interval, and RMST, per group (``analyses.groups``)."""
 
+    def months(value: float | None) -> str:
+        return fill("summary.not_reached") if value is None else f"{value:.1f}"
 
-def logrank(months: np.ndarray, event: np.ndarray, high: np.ndarray) -> np.ndarray:
-    """Log-rank chi-squared of each column of ``high`` (patients by splits), ties handled."""
-    order = np.argsort(months, kind="stable")
-    t, e, g = months[order], event[order].astype(float), high[order].astype(float)
-    _, first = np.unique(t, return_index=True)
-    at_risk = (len(t) - first).astype(float)[:, None]
-    share = np.cumsum(g[::-1], axis=0)[::-1][first] / at_risk
-    deaths = np.add.reduceat(e, first)[:, None]
-    deaths_high = np.add.reduceat(e[:, None] * g, first, axis=0)
-    ties = (at_risk - deaths) / np.maximum(at_risk - 1.0, 1.0)
-    excess = (deaths_high - deaths * share).sum(axis=0)
-    return np.asarray(excess**2 / (deaths * share * (1.0 - share) * ties).sum(axis=0))
-
-
-def cox(months: np.ndarray, event: np.ndarray, x: np.ndarray) -> dict[str, np.ndarray]:
-    """Cox fit by Newton-Raphson on Breslow's partial likelihood.
-
-    Returns:
-        ``beta``, its covariance ``cov``, the Schoenfeld residuals ``resid`` (one row per
-        event) and the event ``times``, both in time order.
-    """
-    order = np.argsort(months, kind="stable")
-    t, e, xs = months[order], event[order].astype(bool), x[order]
-    start = np.searchsorted(t, t, side="left")  # tied times share one risk set
-
-    def at_risk(values: np.ndarray) -> np.ndarray:
-        """Sum over each patient's risk set: everyone whose time is not earlier."""
-        return np.cumsum(values[::-1], axis=0)[::-1][start]
-
-    beta = np.zeros(xs.shape[1])
-    for _ in range(50):
-        w = np.exp(xs @ beta)
-        s0 = at_risk(w)[:, None]
-        mean = at_risk(w[:, None] * xs) / s0
-        second = at_risk(w[:, None, None] * xs[:, :, None] * xs[:, None, :]) / s0[:, :, None]
-        info = (second - mean[:, :, None] * mean[:, None, :])[e].sum(axis=0)
-        step = np.linalg.solve(info, (xs - mean)[e].sum(axis=0))
-        beta = beta + step
-        if np.abs(step).max() < 1e-10:  # noqa: PLR2004 - Newton converges in a few steps
-            break
-    return {"beta": beta, "cov": np.linalg.inv(info), "resid": (xs - mean)[e], "times": t[e]}
-
-
-def ph_test(fit: dict[str, np.ndarray]) -> np.ndarray:
-    """Grambsch-Therneau p per covariate: scaled Schoenfeld residuals against ranked time."""
-    rank = np.argsort(np.argsort(fit["times"], kind="stable")).astype(float)
-    centred = rank - rank.mean()
-    n_events = len(rank)
-    scaled = fit["beta"] + n_events * fit["resid"] @ fit["cov"]
-    statistic = (centred @ scaled) ** 2 / (n_events * np.diag(fit["cov"]) * (centred @ centred))
-    return np.asarray(chi2.sf(statistic, 1))
-
-
-def c_index(months: np.ndarray, event: np.ndarray, risk: np.ndarray) -> float:
-    """Harrell's C: of pairs where the earlier time is an event, the share ordered by risk."""
-    earlier = (months[:, None] < months[None, :]) & (event[:, None] == 1)
-    higher = (risk[:, None] > risk[None, :]) + 0.5 * (risk[:, None] == risk[None, :])
-    return float(higher[earlier].sum() / earlier.sum())
-
-
-def power(events: np.ndarray, hr: np.ndarray) -> np.ndarray:
-    """Power in % of the two-sided Wald test of a per-SD hazard ratio (Hsieh and Lavori 2000)."""
-    shift = np.sqrt(events) * np.abs(np.log(hr)) - norm.ppf(1 - ALPHA / 2)
-    return np.asarray(100.0 * norm.cdf(shift))
-
-
-def km_path(km: pl.DataFrame, group: str) -> list[tuple[Any, ...]]:
-    """Vertices of one group's step line, a censor tick drawn into it at each censored time.
-
-    The curve contract draws lines and no markers, so a tick is a short vertical run of the line.
-    """
-    step, tick = fill("figures.km.step"), fill("figures.km.censored")
-    rows: list[tuple[Any, ...]] = [(group, 0.0, 1.0, km["at_risk"][0], step)]
-    previous = 1.0
-    for t, n, d, c, s in km.select("months", "at_risk", "events", "censored", "survival").rows():
-        rows.append((group, t, previous, n, step))
-        if d:
-            rows.append((group, t, s, n, step))
-        if c:
-            rows += [(group, t, s + TICK, n, tick), (group, t, s - TICK, n, tick),
-                     (group, t, s, n, tick)]  # fmt: skip
-        previous = s
-    return rows
-
-
-def group_summary(estimates: dict[str, pl.DataFrame], cohort: pl.DataFrame) -> ResultTable:
-    """Patients, events, median with its interval, and RMST, per group."""
-    rows = []
-    for name, km in estimates.items():
-        mid = [first_below_half(km, c) for c in ("survival", "lower", "upper")]
-        shown = [fill("summary.not_reached") if np.isnan(v) else f"{v:.1f}" for v in mid]
-        members = cohort.filter(pl.col("group") == name)
-        rows.append((name, str(members.height), str(members["event"].sum()), shown[0],
-                     fill("summary.interval", low=shown[1], high=shown[2]),
-                     f"{rmst(km, HORIZON):.1f}"))  # fmt: skip
-    heads = tuple(fill(f"summary.columns.{k}", level=100 * LEVEL)
+    rows = tuple((r["group"], str(r["patients"]), str(r["events"]), months(r["median"]),
+                  fill("summary.interval", low=months(r["low"]), high=months(r["high"])),
+                  f"{r['rmst']:.1f}") for r in table.iter_rows(named=True))  # fmt: skip
+    heads = tuple(fill(f"summary.columns.{k}", level=100 * survival.LEVEL)
                   for k in text.raw(PAGE, "summary.columns"))  # fmt: skip
     title = fill("summary.title", endpoint=ENDPOINT, horizon=HORIZON)
-    return ResultTable(title, heads, tuple(rows), numeric=(1, 2, 3, 5))
-
-
-def risk_table(cohort: pl.DataFrame) -> ResultTable:
-    """Patients still followed at each of ``RISK_MONTHS``, per group."""
-    rows = tuple(
-        (name, *(str(members.filter(pl.col("months") >= t).height) for t in RISK_MONTHS))
-        for name in (fill("split.low"), fill("split.high"))
-        for members in (cohort.filter(pl.col("group") == name),)
-    )
-    heads = (fill("risk.group"), *(str(t) for t in RISK_MONTHS))
-    return ResultTable(fill("risk.title"), heads, rows, numeric=tuple(range(1, len(heads))))
+    return ResultTable(title, heads, rows, numeric=(1, 2, 3, 5))
 
 
 def survival_group(writer: Writer, cohort: pl.DataFrame, gene: str) -> tuple[Group, dict[str, Any]]:
-    """Kaplan-Meier figure, the per-group summary and the risk table; the numbers they print."""
-    months, event = cohort["months"].to_numpy(), cohort["event"].to_numpy()
-    low, high = fill("split.low"), fill("split.high")
-    estimates = {name: kaplan_meier(months[m], event[m]) for name in (low, high)
-                 for m in (cohort["group"].to_numpy() == name,)}  # fmt: skip
-    long = pl.concat([k.insert_column(0, pl.lit(n).alias("group")) for n, k in estimates.items()])
-    writer.table(long, "km_estimates", columns("columns.km_estimates"))
-    statistic = float(logrank(months, event, (cohort["group"] == high).to_numpy()[:, None])[0])
-    medians = [first_below_half(estimates[n], "survival") for n in (low, high)]
+    """Kaplan-Meier figure with its risk rows, and the per-group summary; the numbers they print.
+
+    Every number is ``ctx.clinical``'s: the curves, medians and RMST by ``analyses``, the
+    log-rank test by ``survival.logrank``, the figure by ``figures.km``, as the built page.
+    """
+    months, event = outcome(cohort)
+    labels, names = cohort["group"].to_numpy(), groups()
+    estimates = analyses.km_frame(months, event, labels, names)
+    writer.table(estimates, "km_estimates", figures.columns("columns.km_steps"))
+    summary = analyses.groups(months, event, labels, names, HORIZON)
+    chi, _, p = survival.logrank(months, event, labels)
+    medians = dict(summary.select("group", "median").rows())
+    rmst = dict(summary.select("group", "rmst").rows())
     numbers = {
         "source": fill("preview.source"), "n": cohort.height, "events": int(event.sum()),
-        "endpoint": ENDPOINT, "gene": gene, "chi2": statistic, "p": f"{chi2.sf(statistic, 1):.2g}",
-        "horizon": HORIZON, "rmst": rmst(estimates[high], HORIZON) - rmst(estimates[low], HORIZON),
-        **{f"median_{g}": fill("summary.not_reached") if np.isnan(m) else f"{m:.1f} months"
-           for g, m in zip(("low", "high"), medians, strict=True)},
+        "endpoint": ENDPOINT, "gene": gene, "chi2": chi, "p": f"{p:.2g}", "horizon": HORIZON,
+        "rmst": rmst[names[1]] - rmst[names[0]],
+        **{f"median_{g}": fill("summary.not_reached") if medians[n] is None
+           else f"{medians[n]:.1f} months" for g, n in zip(("low", "high"), names, strict=True)},
     }  # fmt: skip
-    path = pl.DataFrame([r for n, k in estimates.items() for r in km_path(k, n)],
-                        schema=list(columns("columns.km")), orient="row")  # fmt: skip
-    data = CurveData(
-        frame=path, columns=columns("columns.km"), series="group", x="months", y="survival",
-        x_label=fill("figures.km.x"), y_label=fill("figures.km.y", **numbers), colour="group",
-        colours={low: ROLES["reference"], high: ROLES["comparison"]},
-        caption=fill("figures.km.caption", **numbers), hover=("at_risk", "mark"),
-    )  # fmt: skip
+    data = figures.km(estimates, names, fill("figures.km.caption", **numbers), HORIZON)
     words = FigureText(title=fill("figures.km.title", **numbers),
                        lead=fill("figures.km.lead", **numbers),
                        reading=lines("figures.km.reading", **numbers))  # fmt: skip
-    items = (writer.figure(data, "km", words), group_summary(estimates, cohort), risk_table(cohort))
+    items = (writer.figure(data, "km", words), group_summary(summary))
     return Group(fill("results.survival", **numbers), items), numbers
 
 
 def fit_row(name: str, cohort: pl.DataFrame, used: list[str]) -> dict[str, Any]:
-    """One Cox fit: the expression term's hazard ratio, interval, p and PH test, and C."""
-    months, event = cohort["months"].to_numpy(), cohort["event"].to_numpy()
-    x = cohort.select(used).to_numpy().astype(float)
-    fit = cox(months, event, x)
-    beta, se = float(fit["beta"][0]), float(np.sqrt(fit["cov"][0, 0]))
-    wald = norm.ppf(0.5 + LEVEL / 2) * se
-    return {
-        "model": name, "patients": cohort.height, "events": int(event.sum()),
-        "hr": float(np.exp(beta)), "low": float(np.exp(beta - wald)),
-        "high": float(np.exp(beta + wald)), "p": float(2 * norm.sf(abs(beta) / se)),
-        "ph_p": float(ph_test(fit)[0]), "c_index": c_index(months, event, x @ fit["beta"]),
-    }  # fmt: skip
+    """One Cox fit by ``analyses.cox_model``: the expression term's HR, interval, p, PH p and C."""
+    months, event = outcome(cohort)
+    model = analyses.cox_model(months, event, cohort.select(used).to_numpy().astype(float))
+    return {"model": name, **vars(model)}
 
 
 def cox_group(writer: Writer, cohort: pl.DataFrame, gene: str) -> tuple[Group, dict[str, Any]]:
@@ -336,90 +188,42 @@ def cox_group(writer: Writer, cohort: pl.DataFrame, gene: str) -> tuple[Group, d
     return Group(fill("results.cox"), (table,), lead=lead), rows[1]
 
 
-def scan_group(
-    writer: Writer, cohort: pl.DataFrame, numbers: dict[str, Any], rng: np.random.Generator
-) -> Group:
-    """Log-rank p at every cut-off, beside p = alpha before and after correcting for the scan.
-
-    The correction is the maximally selected statistic's permutation p (Lausen and Schumacher
-    1992): expression is shuffled against the outcomes and the scan repeated each time.
-    """
-    months, event, z = (cohort[c].to_numpy() for c in ("months", "event", "z"))
-    cuts = np.arange(SCAN[0], SCAN[1] + 1)
-
-    def scan(values: np.ndarray) -> np.ndarray:
-        """Log-rank chi-squared at every cut-off of these values."""
-        return logrank(months, event, np.stack([split(values, float(q)) for q in cuts], axis=1))
-
-    observed = scan(z)
-    maxima = np.array([scan(rng.permutation(z)).max() for _ in range(PERMUTATIONS)])
-    beaten = int(np.sum(maxima >= observed.max()))
-    corrected = (1 + beaten) / (PERMUTATIONS + 1)
-    p = chi2.sf(observed, 1)
-    values = {**numbers, "low": SCAN[0], "high": SCAN[1], "alpha": ALPHA, "cuts": len(cuts),
-              "perms": PERMUTATIONS, "min_p": f"{p.min():.2g}", "best": int(cuts[p.argmin()]),
-              "corrected": f"{corrected:.2g}", "floor": f"{1 / (PERMUTATIONS + 1):.2g}",
-              "median_p": f"{p[cuts == MEDIAN][0]:.2g}"}  # fmt: skip
-    line = fill("figures.scan.line")
-    frame = pl.DataFrame({"line": line, "percentile": cuts, "chi2": observed, "p": p,
-                          "cutoff": np.percentile(cohort["log2cpm"].to_numpy(), cuts),
-                          "neglog10p": -np.log10(p)})  # fmt: skip
-    ends = (float(SCAN[0]), float(SCAN[1]))
-    needed = float(-np.log10(chi2.sf(np.quantile(maxima, 1 - ALPHA), 1)))
-    data = CurveData(
-        frame=frame, columns=columns("columns.scan"), series="line", x="percentile",
-        y="neglog10p", x_label=fill("figures.scan.x", **values), y_label=fill("figures.scan.y"),
-        colour="line", colours={line: ROLES["comparison"]}, hover=("p", "cutoff"),
-        caption=fill("figures.scan.caption", **values),
-        thresholds=(
-            Line(fill("figures.scan.uncorrected", **values), ends, (-np.log10(ALPHA),) * 2, True),
-            Line(fill("figures.scan.corrected", **values), ends, (needed, needed), True),
-        ),
-    )  # fmt: skip
+def scan_group(writer: Writer, cohort: pl.DataFrame, numbers: dict[str, Any]) -> Group:
+    """Log-rank p at every cut-off with the scan's corrected p: ``cutpoint.scan``, as built."""
+    months, event = outcome(cohort)
+    found = cutpoint.scan(months, event, cohort["log2cpm"].to_numpy())
+    values = {**numbers, "low": cutpoint.LOW, "high": cutpoint.HIGH, "alpha": analyses.ALPHA,
+              "cuts": len(found.cuts), "perms": cutpoint.PERMUTATIONS,
+              "min_p": f"{found.p.min():.2g}", "best": found.best,
+              "corrected": f"{found.corrected:.2g}",
+              "floor": f"{1 / (cutpoint.PERMUTATIONS + 1):.2g}",
+              "median_p": f"{found.p[found.cuts == MEDIAN][0]:.2g}"}  # fmt: skip
+    data = figures.scan(found, fill("figures.scan.caption", **values))
     words = FigureText(title=fill("figures.scan.title", **values),
-                       lead=fill("figures.scan.lead" if beaten else "figures.scan.lead_floor",
+                       lead=fill("figures.scan.lead" if found.beaten else "figures.scan.lead_floor",
                                  **values),
                        reading=lines("figures.scan.reading", **values))  # fmt: skip
     return Group(fill("results.scan"), (writer.figure(data, "cut_scan", words),))
 
 
-def power_group(writer: Writer, numbers: dict[str, Any], adjusted: dict[str, Any]) -> Group:
-    """Power over events and hazard ratio per SD, this cohort's events and HR marked."""
-    hrs = np.round(np.arange(1.05, 2.01, 0.05), 2)
-    grid = pl.DataFrame([(d, float(h)) for d in range(10, 401, 10) for h in hrs],
-                        schema=["events", "hr"], orient="row")  # fmt: skip
-    grid = grid.with_columns(
-        pl.Series("power", power(grid["events"].to_numpy(), grid["hr"].to_numpy()))
-    )
-    hr = max(adjusted["hr"], 1 / adjusted["hr"])  # power is the same either side of 1
-    values = {**numbers, "alpha": ALPHA, "target": TARGET_POWER, "hr": hr,
-              "power": float(power(np.array(numbers["events"]), np.array(hr)))}  # fmt: skip
-    data = SurfaceData(
-        frame=grid, columns=columns("columns.power"), x="events", y="hr", z="power",
-        x_label=fill("figures.power.x"), y_label=fill("figures.power.y"),
-        z_label=fill("figures.power.z"), caption=fill("figures.power.caption", **values),
-        isolines=(TARGET_POWER,), isoline_format=".0f",
-        mark=Mark(float(numbers["events"]), hr, fill("figures.power.mark")),
-    )  # fmt: skip
+def power_group(writer: Writer, numbers: dict[str, Any]) -> Group:
+    """Power over events and hazard ratio per SD by ``figures.power``.
+
+    The point marks this cohort's events and the hazard ratio they detect, as the built page
+    marks it, never an observed one.
+    """
+    events = int(numbers["events"])
+    values = {**numbers, "alpha": analyses.ALPHA, "target": analyses.TARGET_POWER,
+              "hr": analyses.detectable(events)}  # fmt: skip
+    data = figures.power(events, fill("figures.power.caption", **values))
     words = FigureText(title=fill("figures.power.title"),
                        lead=fill("figures.power.lead", **values),
                        reading=lines("figures.power.reading", **values))  # fmt: skip
     return Group(fill("results.power"), (writer.figure(data, "power", words),))
 
 
-def cramers_v(sheet: pl.DataFrame, a: str, b: str) -> tuple[float | None, int]:
-    """Cramér's V of two columns over samples with both, uncorrected; None if one is constant."""
-    both = sheet.select(a, b).drop_nulls().filter((pl.col(a) != "") & (pl.col(b) != ""))
-    counts = both.group_by(a, b).len().pivot(on=b, index=a, values="len").fill_null(0)
-    table = counts.drop(a).to_numpy()
-    if min(table.shape) < 2:  # noqa: PLR2004 - a constant column has no association
-        return None, both.height
-    statistic = chi2_contingency(table, correction=False).statistic
-    return float(np.sqrt(statistic / (both.height * (min(table.shape) - 1)))), both.height
-
-
 def confounding_group(writer: Writer, sheet: pl.DataFrame, dataset: str) -> Group:
-    """Cramér's V between every pair of the sheet's design columns, binned by Cohen's steps."""
+    """Cramér's V between every pair of the sheet's design columns (``analyses.cramers_v``)."""
     names = [fill("figures.confounding.below", a=V_EDGES[0]),
              *(fill("figures.confounding.between", a=a, b=b)
                for a, b in zip(V_EDGES, V_EDGES[1:], strict=False)),
@@ -427,7 +231,7 @@ def confounding_group(writer: Writer, sheet: pl.DataFrame, dataset: str) -> Grou
     rows = []
     for a in CONFOUNDERS:
         for b in CONFOUNDERS:
-            v, n = (None, sheet.height) if a == b else cramers_v(sheet, a, b)
+            v, n = (None, sheet.height) if a == b else analyses.cramers_v(sheet, a, b)
             level = None if v is None else names[int(np.searchsorted(V_EDGES, v, "right"))]
             rows.append((a, b, v, level, n))
     frame = pl.DataFrame(rows, schema=list(columns("columns.confounding")), orient="row")
@@ -451,17 +255,16 @@ def confounding_group(writer: Writer, sheet: pl.DataFrame, dataset: str) -> Grou
 
 def key_numbers(cohort: pl.DataFrame, adjusted: dict[str, Any]) -> tuple[KeyNumber, ...]:
     """Patients, events, median follow-up by reverse Kaplan-Meier, and the adjusted HR."""
-    events = int(cohort["event"].sum())
-    reverse = kaplan_meier(cohort["months"].to_numpy(), 1 - cohort["event"].to_numpy())
-    follow_up = first_below_half(reverse, "survival")
+    months, event = outcome(cohort)
     return (
         KeyNumber(fill("keys.patients"), f"{cohort.height:,}"),
-        KeyNumber(fill("keys.events", endpoint=ENDPOINT), f"{events:,}",
-                  fill("keys.events_detail", pct=100 * events / cohort.height)),
-        KeyNumber(fill("keys.follow_up"), fill("keys.follow_up_value", months=follow_up),
+        KeyNumber(fill("keys.events", endpoint=ENDPOINT), f"{int(event.sum()):,}",
+                  fill("keys.events_detail", pct=100 * event.sum() / cohort.height)),
+        KeyNumber(fill("keys.follow_up"),
+                  fill("keys.follow_up_value", months=survival.follow_up(months, event)),
                   fill("keys.follow_up_detail")),
         KeyNumber(fill("keys.hr"), f"{adjusted['hr']:.2f}",
-                  fill("keys.hr_detail", level=100 * LEVEL, low=adjusted["low"],
+                  fill("keys.hr_detail", level=100 * survival.LEVEL, low=adjusted["low"],
                        high=adjusted["high"])),
     )  # fmt: skip
 
@@ -502,7 +305,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
     cox_results, adjusted = cox_group(writer, cohort, gene)
     results: list[Result] = [
         text.word("ui", "preview.note"), survival, cox_results,
-        scan_group(writer, cohort, numbers, rng), power_group(writer, numbers, adjusted),
+        scan_group(writer, cohort, numbers), power_group(writer, numbers),
         confounding_group(writer, sheet, dataset),
     ]  # fmt: skip
     command = (f"ctx clinical --dataset {dataset} --endpoint {ENDPOINT} --split median "

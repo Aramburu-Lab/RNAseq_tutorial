@@ -428,6 +428,32 @@ def concordance(time: np.ndarray, event: np.ndarray, risk: np.ndarray) -> float:
     return float(higher[comparable].sum() / comparable.sum())
 
 
+def cumulative_incidence(time: np.ndarray, cause: np.ndarray, causes: Sequence[int] = (1, 2)
+                         ) -> tuple[np.ndarray, np.ndarray]:  # fmt: skip
+    """Aalen-Johansen cumulative incidence of each cause, as R's ``cmprsk::cuminc`` estimates.
+
+    At each distinct time the incidence of cause k rises by the overall Kaplan-Meier estimate
+    just before it, of an event of any cause, times d_k / n. With one cause it is 1 - KM.
+
+    Args:
+        time: Follow-up time per patient.
+        cause: 0 for censored, else the cause of the event.
+        causes: The causes to estimate, in order.
+
+    Returns:
+        The distinct times, ascending, and one row per cause of its incidence just after each.
+    """
+    time, cause = np.asarray(time, float), np.asarray(cause, int)
+    times, inverse = np.unique(time, return_inverse=True)
+    followed = np.bincount(inverse, minlength=len(times))
+    at_risk = len(time) - np.concatenate([[0], np.cumsum(followed)[:-1]])
+    any_event = np.bincount(inverse, weights=cause > 0, minlength=len(times))
+    before = np.concatenate([[1.0], np.cumprod(1.0 - any_event / at_risk)[:-1]])
+    rows = [np.cumsum(before * np.bincount(inverse, weights=cause == k, minlength=len(times))
+                      / at_risk) for k in causes]  # fmt: skip
+    return times, np.array(rows)
+
+
 def power(events: np.ndarray | float, hr: np.ndarray | float, alpha: float) -> np.ndarray:
     """Power in % of the two-sided Wald test of a per-SD hazard ratio (Hsieh and Lavori 2000)."""
     shift = np.sqrt(events) * np.abs(np.log(hr)) - norm.ppf(1 - alpha / 2)

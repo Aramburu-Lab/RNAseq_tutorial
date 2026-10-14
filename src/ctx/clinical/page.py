@@ -17,6 +17,7 @@ from ctx import runtime
 from ctx.clinical import analyses, cutpoint, figures, harmonise, panel, score, survival
 from ctx.dataset import ENDPOINTS, Dataset
 from ctx.de.run import Writer
+from ctx.gather import gdc
 from ctx.io.naming import stem
 from ctx.report import genes, text
 from ctx.report.builder import (
@@ -34,10 +35,10 @@ from ctx.viz.style import KM
 PAGE = "clinical"
 # Patient-table columns a model can stratify on.
 CATEGORICAL = ("er", "pr", "her2", "histology", "menopause", "sex", "plate", "site")
-CONFOUNDERS = ("stage", "er", "histology", "age_group", "plate", "site")
 ER = ("positive", "negative")
 SCREEN_ROWS = 20
-MISSING = ("age", "stage", "histology", "menopause", "er", "pr", "her2", "hormone_therapy")
+# Confounding-map columns every cohort has, after its own categorical variables.
+DESIGN = ("age_group", "plate", "site")
 
 
 @dataclass(frozen=True)
@@ -145,6 +146,25 @@ def scored(ctx: Context) -> Scored:
                   cutpoint.scan(months, event, value))  # fmt: skip
 
 
+def variables(ctx: Context) -> tuple[str, ...]:
+    """The patient-table variables the dataset file declares for this cohort."""
+    return ctx.spec.clinical.variables if ctx.spec.clinical else ()
+
+
+def missing_columns(ctx: Context) -> tuple[str, ...]:
+    """The columns the missing-values table counts.
+
+    The declared variables, PR and HER2 where ER is one, and the treatment.
+    """
+    receptors = ("pr", "her2") if "er" in variables(ctx) else ()
+    return (*variables(ctx), *receptors, "therapy")
+
+
+def confounders(ctx: Context) -> tuple[str, ...]:
+    """The confounding map's variables: the declared categorical ones, then ``DESIGN``."""
+    return (*(v for v in variables(ctx) if v != "age"), *DESIGN)
+
+
 def _patients(writer: Writer, ctx: Context) -> Group:
     """The flow to the analysed patients, each endpoint beside Table 3, the missing values."""
     clinical, p = ctx.clinical, ctx.clinical.patients
@@ -166,7 +186,7 @@ def _patients(writer: Writer, ctx: Context) -> Group:
                             numeric=(1, 2, 4, 5))  # fmt: skip
     gaps = tuple((word(f"patients.variables.{c}"), f"{p[c].null_count():,}",
                   "; ".join(f"{r} {n:,}" for r, n in harmonise.reasons(p, c)) or word("none"))
-                 for c in MISSING)  # fmt: skip
+                 for c in missing_columns(ctx))  # fmt: skip
     heads = text.words(PAGE, "patients.missing_columns")
     missing = ResultTable(word("patients.missing_title"), heads, gaps, numeric=(1,))
     noted = {k: int(p[k].sum()) for k in harmonise.NOTIFICATIONS}
@@ -216,24 +236,40 @@ def _er_check(writer: Writer, ctx: Context) -> list[Result]:
     ]
 
 
+def _dunn(pairs: pl.DataFrame) -> ResultTable:
+    """Dunn's pairs of every Kruskal-Wallis row, BH within each test's pairs."""
+    rows = tuple((r["gene"], word(f"patients.variables.{r['variable']}"),
+                  fill("expression.dunn_pair", a=r["level_a"], b=r["level_b"]), f"{r['z']:.2f}",
+                  number(r["p"]), number(r["p_adj"]))
+                 for r in pairs.iter_rows(named=True))  # fmt: skip
+    return ResultTable(word("expression.dunn_title"), text.words(PAGE, "expression.dunn_columns"),
+                       rows, numeric=(3, 4, 5))  # fmt: skip
+
+
 def _expression(writer: Writer, ctx: Context) -> Group:
-    """The build genes against ER, stage, histology, menopause and age."""
+    """The build genes against each declared variable, Dunn's pairs, and the box."""
     p = ctx.clinical.patients
     symbols = ctx.gene_table["gene_name"].to_list()
     values = {symbols[r]: ctx.values[r] / score.SCALE for r in ctx.chosen}
-    tests = analyses.expression_tests(p, values)
+    tests, pairs = analyses.expression_tests(p, values, analyses.plans(variables(ctx)))
     writer.table(tests, "expression_tests", figures.columns("columns.tests"))
+    writer.table(pairs, "dunn_pairs", figures.columns("columns.dunn"))
     rows = tuple((r["gene"], word(f"patients.variables.{r['variable']}"),
                   word(f"expression.tests.{r['test']}"), f"{r['n']:,}", f"{r['effect']:.3f}",
                   number(r["p"]), number(r["q"])) for r in tests.iter_rows(named=True))  # fmt: skip
     table = ResultTable(word("expression.table_title"), text.words(PAGE, "expression.columns"),
                         rows, numeric=(3, 4, 5, 6))  # fmt: skip
-    data = figures.er_box(p, values)
+    split = ctx.spec.clinical.box if ctx.spec.clinical else "er"
+    data = figures.box(p, values, split)
     first = data.caption.tests[0]
     auc = (first.r + 1) / 2
-    box = writer.figure(data, "expression_er", figures.words("expression", gene=first.feature,
-                                                             auc=auc))  # fmt: skip
-    return Group(word("expression.title"), (box, table))
+    box = writer.figure(
+        data,
+        f"expression_{split}",
+        figures.words(f"expression.{split}", gene=first.feature, auc=auc),
+    )
+    shown = (box, table, _dunn(pairs)) if pairs.height else (box, table)
+    return Group(word("expression.title"), shown)
 
 
 def _models(result: Scored, ctx: Context) -> ResultTable:
@@ -338,6 +374,19 @@ def _scored(writer: Writer, ctx: Context, result: Scored) -> list[Result]:
             Group(word("scan.title"), (scan_block,))]  # fmt: skip
 
 
+def _competing(writer: Writer, ctx: Context) -> Group:
+    """Death from the cancer and from other causes as competing risks, beside 1 - KM of DSS."""
+    competed = figures.Competing.of(ctx.clinical.patients)
+    at = competed.at(ctx.options.horizon)
+    shown = {"n": len(competed.months), "cancer": int((competed.cause == figures.CANCER).sum()),
+             "other": int((competed.cause == figures.OTHER).sum()), "unknown": competed.unknown,
+             "horizon": f"{ctx.options.horizon:g}", "cif": at["cancer"],
+             "naive": at["naive"]}  # fmt: skip
+    data = figures.competing(competed, fill("figures.competing.caption", **shown))
+    block = writer.figure(data, "competing", figures.words("competing", **shown))
+    return Group(word("competing.title"), (block,))
+
+
 def _power(writer: Writer, ctx: Context, result: Scored) -> Group:
     """Power over events and hazard ratio, this endpoint's events marked."""
     events = int(result.out.event.sum())
@@ -380,20 +429,26 @@ def _screen(writer: Writer, ctx: Context, result: Scored) -> Group:
 def _context_groups(writer: Writer, ctx: Context) -> list[Result]:
     """Confounding between patient variables, and who was treated, both descriptive."""
     p = ctx.clinical.patients
-    data, top = figures.confounding(p, CONFOUNDERS)
+    data, top = figures.confounding(p, confounders(ctx))
     shown = {"a": top["row_variable"], "b": top["column_variable"], "v": top["v"], "n": p.height}
     heat = writer.figure(data, "confounding", figures.words("confounding_map", **shown))
+    split = ctx.spec.clinical.box if ctx.spec.clinical else "er"
+    levels, names = figures.two_levels(p, split)
+    treated = (p["therapy"] == "yes").fill_null(False).to_numpy()
     rows = []
-    for status in (*ER, None):
-        members = p.filter(pl.col("er") == status) if status else p.filter(pl.col("er").is_null())
-        yes = members.filter(pl.col("hormone_therapy") == "yes").height
-        label = word(f"er.{status}") if status else word("treatment.unknown")
-        rows.append((label, f"{members.height:,}", f"{yes:,}", f"{members.height - yes:,}"))
-    table = ResultTable(word("treatment.table_title"), text.words(PAGE, "treatment.columns"),
-                        tuple(rows), numeric=(1, 2, 3))  # fmt: skip
+    for name in (*reversed(names), None):
+        member = np.array([v == name for v in levels])
+        yes = int((member & treated).sum())
+        label = name or word(f"treatment.unknown.{split}")
+        rows.append((label, f"{member.sum():,}", f"{yes:,}", f"{member.sum() - yes:,}"))
+    named = {"therapy": ctx.spec.clinical.therapy if ctx.spec.clinical else "",
+             "variable": word(f"patients.variables.{split}")}  # fmt: skip
+    heads = (named["variable"], *text.words(PAGE, "treatment.columns"))
+    table = ResultTable(fill("treatment.table_title", **named), heads, tuple(rows),
+                        numeric=(1, 2, 3))  # fmt: skip
     return [
         Group(word("confounding.title"), (heat,)),
-        Group(word("treatment.title"), (table, word("treatment.note"))),
+        Group(fill("treatment.title", **named), (table, word("treatment.note"))),
     ]
 
 
@@ -417,7 +472,8 @@ def _keys(ctx: Context, result: Scored) -> tuple[KeyNumber, ...]:
 def notes(ctx: Context) -> list[Result]:
     """The data's sources: the GDC acknowledgement, the CDR's licence, the filter's drops."""
     below, flat = ctx.filtered
-    return [text.word("ui", "gdc.acknowledgement"), word("cdr.licence"),
+    assert ctx.spec.gdc is not None  # noqa: S101 - run() refuses a dataset without [gdc]
+    return [*gdc.acknowledgement(ctx.spec.gdc), word("cdr.licence"),
             fill("panel.note", kept=ctx.values.shape[0], below=below, flat=flat,
                  carried=ctx.carried.genes, minimum=ctx.options.min_log2cpm)]  # fmt: skip
 
@@ -426,8 +482,10 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write every table and figure, then the page; the page first in the returned list."""
     result = scored(ctx)
     results: list[Result] = [
-        *notes(ctx), _patients(writer, ctx), *_er_check(writer, ctx), _expression(writer, ctx),
-        *_scored(writer, ctx, result), _power(writer, ctx, result), _screen(writer, ctx, result),
+        *notes(ctx), _patients(writer, ctx),
+        *(_er_check(writer, ctx) if "er" in variables(ctx) else []), _expression(writer, ctx),
+        *_scored(writer, ctx, result), _competing(writer, ctx), _power(writer, ctx, result),
+        _screen(writer, ctx, result),
         *_context_groups(writer, ctx),
     ]  # fmt: skip
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(PAGE)

@@ -17,7 +17,11 @@ from ctx.dataset import ENDPOINTS
 
 CTX = Path(sys.executable).parent / "ctx"
 PATIENTS = 80
-CLINICAL = '\n[clinical]\ngenes = ["G1", "G3", "G5"]\nendpoint = "PFI"\n'
+CLINICAL = (
+    '\n[clinical]\ngenes = ["G1", "G3", "G5"]\nendpoint = "PFI"\n'
+    'variables = ["er", "stage", "histology", "menopause", "age"]\n'
+    'box = "er"\ntherapy = "Hormone Therapy"\n'
+)
 STAGES = ("Stage I", "Stage IIA", "Stage IIB", "Stage IIIA", "Stage IV", "Stage X")
 
 
@@ -36,6 +40,7 @@ def cdr_rows(cases: list[str], seed: int) -> pl.DataFrame:
         row = {"bcr_patient_barcode": case, "type": "BRCA", "gender": "FEMALE",
                "age_at_initial_pathologic_diagnosis": str(rng.randint(35, 85)),
                "ajcc_pathologic_tumor_stage": rng.choice(STAGES),
+               "histological_grade": "[Not Available]",
                "histological_type": rng.choice(("Infiltrating Ductal Carcinoma",
                                                  "Infiltrating Lobular Carcinoma")),
                "menopause_status": rng.choice(("Pre (<6 months since LMP)",
@@ -44,6 +49,10 @@ def cdr_rows(cases: list[str], seed: int) -> pl.DataFrame:
         for e in ENDPOINTS:
             row[e] = str(int(rng.random() < 0.35))
             row[f"{e}.time"] = str(rng.randint(30, 3000))
+        # As in the CDR (all four TCGA cohorts, 2026-10-09): DSS takes the OS time, and a
+        # death from the cancer is a death.
+        row["DSS.time"] = row["OS.time"]
+        row["DSS"] = str(int(row["DSS"] == "1" and row["OS"] == "1"))
         rows.append(row)
     return pl.DataFrame(rows)
 
@@ -63,7 +72,7 @@ def make(tmp: Path) -> tuple[Path, Path]:
              for i in range(1, PATIENTS + 1)}  # fmt: skip
     build(tmp / "gdc", items, cases=cases, seed=9)
     spec = tmp / "fake_brca.toml"
-    spec.write_text(SPEC.format(protocol="unstranded", cdr="") + CLINICAL)
+    spec.write_text(SPEC.format(protocol="unstranded", cdr='attribution = "tcga"') + CLINICAL)
     root = tmp / "root"
     ctx("--root", str(root), "gather", "--dataset", "fake_brca", "--gdc-dir", str(tmp / "gdc"),
         "--dataset-file", str(spec))  # fmt: skip

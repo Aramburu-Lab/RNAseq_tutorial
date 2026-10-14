@@ -332,3 +332,24 @@ def test_the_page_score_and_split_equal_pythons():
     np.testing.assert_allclose(got["score"], score.score(score.zscores(rows), signs), rtol=1e-10)
     assert got["median"] == score.split(X1, "median").tolist()
     assert got["tertiles"] == score.split(X1, "tertiles").tolist()
+
+
+def test_cumulative_incidence_is_rs_aalen_johansen_and_one_minus_km_alone():
+    """M10.11: R 4.4.2 survival 3.7.0's survfit on a factor status (tests/fixtures/survival/
+    make_cif.R), and two identities: with one cause it is 1 - Kaplan-Meier, and the overall
+    estimate plus every incidence is 1 at each time. Mutations caught: the estimate just after
+    a time used in place of just before, and 1 - KM of one cause taken as its incidence."""
+    r = json.loads((ROOT / "tests/fixtures/survival/cif.json").read_text())
+    times, (one, two) = survival.cumulative_incidence(np.array(r["time"]), np.array(r["cause"]))
+    assert np.array_equal(times, r["times"])
+    assert one == pytest.approx(r["one"], rel=1e-12, abs=1e-15)
+    assert two == pytest.approx(r["two"], rel=1e-12, abs=1e-15)
+    t, cause = np.array(r["time"], float), np.array(r["cause"])
+    overall = survival.kaplan_meier(t, (cause > 0).astype(int)).survival
+    assert overall + one + two == pytest.approx(np.ones(len(times)), rel=1e-12)
+    _, (alone,) = survival.cumulative_incidence(t, (cause > 0).astype(int), (1,))
+    assert alone == pytest.approx(1 - overall, rel=1e-12, abs=1e-15)
+    hand_times, hand = survival.cumulative_incidence(np.array([1, 2, 2, 3, 4]),
+                                                     np.array([1, 2, 0, 1, 0]))  # fmt: skip
+    assert hand_times.tolist() == [1, 2, 3, 4]
+    assert np.allclose(hand, [[0.2, 0.2, 0.5, 0.5], [0, 0.2, 0.2, 0.2]], rtol=0, atol=1e-15)

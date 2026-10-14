@@ -33,6 +33,8 @@ WINDOWS_PREFIX = "C:\\Users\\" + "x" * 20 + "\\Downloads\\{kit}\\"
 _FORBIDDEN = re.compile(r'[<>:"|?*\\\x00-\x1f]')
 _RESERVED = {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(1, 10)),
              *(f"LPT{i}" for i in range(1, 10))}  # fmt: skip
+# The kit's record of the files left out of it by rule, each with its rebuild commands.
+LEFT_OUT = "LEFT_OUT.json"
 
 
 class _Links(HTMLParser):
@@ -97,9 +99,26 @@ def target(page: Path, value: str) -> Path | None:
     return (page.parent / unquote(url.path)).resolve()
 
 
+def declared(root: Path) -> set[Path]:
+    """The files the kit declares left out (``LEFT_OUT.json``), resolved; a link to one resolves.
+
+    GDC count matrices stay out of a kit (Rytis 2026-10-09); a page that links one keeps its
+    link, and the declaration names the file, its bytes and the commands that rebuild it.
+    """
+    record = root / LEFT_OUT
+    if not record.is_file():
+        return set()
+    entries = json.loads(record.read_text(encoding="utf-8"))["files"]
+    return {(root / e["path"]).resolve() for e in entries}
+
+
 def link_problems(root: Path, pages: list[Path]) -> list[str]:
-    """Every URL that fetches from off the machine, or names a file missing or outside root."""
+    """Every URL that fetches from off the machine, or names a file missing or outside root.
+
+    A file the kit declares left out (``declared``) counts as present.
+    """
     root = root.resolve()
+    absent = declared(root)
     problems = []
     for page in pages:
         where = page.resolve().relative_to(root)
@@ -107,7 +126,11 @@ def link_problems(root: Path, pages: list[Path]) -> list[str]:
             found = target(page, value)
             if fetches(tag, attribute, value):
                 problems.append(f"{where}: loads {value[:80]}")
-            elif found is not None and not (found.is_file() and found.is_relative_to(root)):
+            elif (
+                found is not None
+                and found not in absent
+                and not (found.is_file() and found.is_relative_to(root))
+            ):
                 problems.append(f"{where}: {value} does not resolve")
     return problems
 

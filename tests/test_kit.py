@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from ctx.report import course
+from ctx.report import course, text
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "python" / "build_kit.py"
@@ -316,3 +316,127 @@ def test_a_kit_folder_builds_a_kit(tmp_path):
     assert course.page(again, [(again / "step", True)]).guide == (
         f"step/outputs/09_report/{NEW}_report_guide_v1.html"
     )
+
+
+def release(tmp: Path, real: Path, *extra: str) -> tuple[Path, subprocess.CompletedProcess]:
+    """A --release build of one real root, with any other arguments."""
+    out = tmp / "kit"
+    done = subprocess.run([sys.executable, str(SCRIPT), "--out", str(out), "--release",
+                           f"--real=step={real}", *extra], capture_output=True, text=True,
+                          check=False)  # fmt: skip
+    return out, done
+
+
+def test_a_release_kit_refuses_a_made_up_root_and_writes_nothing(tmp_path):
+    """K.6: --release with --made-up stops before writing. Mutation caught: the release check
+    dropped from build(), which ships the preview root marked Made-up."""
+    real, made = a_root(tmp_path / "real", "Study", "study"), a_root(tmp_path / "made", "M", "m")
+    kit, done = release(tmp_path, real, f"--made-up=preview={made}")
+    assert done.returncode != 0 and "a release kit holds no made-up root" in done.stderr
+    assert nothing_written(kit)
+
+
+def test_a_release_kit_refuses_a_made_up_page_in_a_real_root(tmp_path):
+    """K.6: a preview page put in a real root is found by the preview's own note. Mutation
+    caught: made_up_pages returning nothing, so the page ships labelled real."""
+    real = a_root(tmp_path / "real", "Study", "study")
+    note = text.word("ui", "preview.note")
+    page(real / "outputs" / "12_clinical" / f"{NEW}_clinical_study_overview_v1.html",
+         "M10 Clinical and survival: Made-up study", extra=f"<p>{note}</p>")  # fmt: skip
+    kit, done = release(tmp_path, real)
+    assert done.returncode != 0 and "a made-up page; a release kit holds none" in done.stderr
+    assert nothing_written(kit)
+
+
+def test_a_release_kit_counts_zero_made_up_links_and_says_so(tmp_path):
+    """K.6: the release's MANIFEST.json and README.md state it, with 0 Made-up links counted;
+    a development kit counts its own. Mutation caught: made_up_links returning 0 whatever the
+    page holds, which a development kit with a preview root shows."""
+    real = a_root(tmp_path / "real", "Study", "study")
+    kit, done = release(tmp_path, real)
+    assert done.returncode == 0, done.stderr
+    record = json.loads((kit / "MANIFEST.json").read_text())
+    assert (record["release"], record["made_up_links"]) == (True, 0)
+    assert text.word("course", "readme.release") in (kit / "README.md").read_text()
+    assert "release kit: 0 Made-up links" in done.stdout
+    dev, done = build(tmp_path / "dev")
+    assert done.returncode == 0, done.stderr
+    record = json.loads((dev / "MANIFEST.json").read_text())
+    assert record["release"] is False and record["made_up_links"] > 0
+    assert text.word("course", "readme.release") not in (dev / "README.md").read_text()
+
+
+def ctx_readme(table: Path, rows: dict[str, str]) -> None:
+    """A table README as ctx.io.readme_companion writes it: the rows, then the file table."""
+    lines = ["| Field | Value |", "| --- | --- |", *(f"| {k} | {v} |" for k, v in rows.items())]
+    files = [f"| `{p.name}` | {p.stat().st_size} | `{'a' * 64}` |"
+             for p in sorted(table.parent.glob(table.name.split(".")[0] + ".*"))]  # fmt: skip
+    body = "\n".join([f"# {table.stem}", "", *lines, "", "## Files", "", *files, ""])
+    table.with_name(table.name.split(".")[0] + "_README.md").write_text(body)
+
+
+def gdc_root(tmp: Path) -> tuple[Path, Path]:
+    """Step-1's root (its counts with a README naming no GDC folder) plus a GDC dataset: its
+    gather counts, CSV and Parquet, read from a GDC folder that holds a manifest and a fetch
+    script, linked from its M1 page; and a DE table whose README names the folder too."""
+    root = a_root(tmp / "real", "Study", "study")
+    out = root / "outputs"
+    ctx_readme(out / "01_gather" / f"{NEW}_gather_study_counts_v1.csv",
+               {"Command": "`ctx gather --dataset study`"})  # fmt: skip
+    folder = tmp / "raw" / "tcga_x"
+    folder.mkdir(parents=True)
+    (folder / "gdc_manifest_star_counts.txt").write_text("id\tfilename\n")
+    (folder / "_fetch_tcga_x.sh").write_text("echo fetch\n")
+    gather = out / "01_gather"
+    counts = gather / f"{NEW}_gather_tcgax_counts_v1.csv"
+    counts.write_text("gene_id,A\nG1,1\n")
+    counts.with_suffix(".parquet").write_bytes(b"PAR1")
+    command = f"`/x/src/ctx/__main__.py --root {root} gather --dataset tcgax --gdc-dir {folder}`"
+    ctx_readme(counts, {"Command": command, "GDC folder": str(folder)})
+    page(gather / f"{NEW}_gather_tcgax_overview_v1.html", "M1 Gather: TCGA x", counts.name)
+    de = out / "05_de" / f"{NEW}_de_tcgax_results_v1.csv"
+    page(out / "05_de" / f"{NEW}_de_tcgax_overview_v1.html", "M5 DE: TCGA x", de.name)
+    de.write_text("gene_id,padj\nG1,0.1\n")
+    ctx_readme(de, {"Command": "`ctx de --dataset tcgax`", "GDC folder": str(folder)})
+    return root, folder
+
+
+def test_a_gdc_count_matrix_stays_out_with_its_rebuild_commands(tmp_path, checker):
+    """Rytis 2026-10-09: a raw GDC count matrix never ships; its manifest and fetch script do,
+    and LEFT_OUT.json, README.md and MANIFEST.json name it with its bytes and the commands that
+    rebuild it; a page linking it still passes the kit's own check. Mutations caught: the matrix
+    shipped; a derived table left out; Step-1's counts left out; the gather command missing
+    from the README."""
+    real, folder = gdc_root(tmp_path)
+    kit, done = build(tmp_path / "k", real=real)
+    assert done.returncode == 0, done.stderr
+    files = shipped_files(kit)
+    gathered = "step/outputs/01_gather"
+    assert f"{gathered}/{NEW}_gather_tcgax_counts_v1.csv" not in files
+    assert f"{gathered}/{NEW}_gather_tcgax_counts_v1.parquet" not in files
+    assert f"{gathered}/{NEW}_gather_tcgax_counts_v1_README.md" in files
+    assert f"step/outputs/05_de/{NEW}_de_tcgax_results_v1.csv" in files
+    assert f"{gathered}/{NEW}_gather_study_counts_v1.csv" in files
+    assert {
+        "step/gdc/tcga_x/gdc_manifest_star_counts.txt",
+        "step/gdc/tcga_x/_fetch_tcga_x.sh",
+    } <= files
+    left = json.loads((kit / "LEFT_OUT.json").read_text())["files"]
+    assert sorted(e["path"] for e in left) == [
+        f"{gathered}/{NEW}_gather_tcgax_counts_v1.csv",
+        f"{gathered}/{NEW}_gather_tcgax_counts_v1.parquet",
+    ]
+    gather_command = f"ctx --root {real} gather --dataset tcgax --gdc-dir {folder}"
+    for e in left:
+        assert (
+            e["bytes"]
+            == (real / "outputs" / e["path"].removeprefix("step/outputs/")).stat().st_size
+        )
+        assert e["rebuild"] == [
+            f"OUT={folder} bash step/gdc/tcga_x/_fetch_tcga_x.sh",
+            gather_command,
+        ]
+    readme = (kit / "README.md").read_text()
+    assert gather_command in readme and all(e["path"] in readme for e in left)
+    assert json.loads((kit / "MANIFEST.json").read_text())["left_out_files"] == left
+    assert checker.check(kit) == []

@@ -51,7 +51,6 @@ KNOWN = {
     "de_desynth_lfc_a_naive_vs_a_adjusted": "D, content/de.toml",
     "de_desynth_ma_a_case": "D, content/de.toml",
     "function_desynth_nes_up_set": "D, content/function.toml",
-    "clinical_fake_brca_power": "C2, content/clinical.toml",
 }
 
 

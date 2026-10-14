@@ -3,8 +3,9 @@
 A few TCGA tumours were sequenced twice, once after rRNA depletion. Their two STAR files are
 the one place a library type is compared within a sample, so F5 reads both, though
 ``gdc.chosen`` takes one file per patient: it is the deliberate exception, stated on the page.
-Files that the rule drops for a reason other than the tie-break (FFPE, another protocol, a
-redaction) stay out. Shares are of each file's counted reads; the replication-dependent histone
+The rule drops the rRNA-depleted file as another protocol, so F5 reads through
+``gdc.comparable``, the door that passes another protocol and never an FFPE or redacted file.
+Shares are of each file's counted reads; the replication-dependent histone
 genes are named by HGNC's cluster symbols, as the plan measured them.
 """
 
@@ -14,35 +15,39 @@ import numpy as np
 import polars as pl
 from scipy.stats import wilcoxon
 
+from ctx.gather import gdc
 from ctx.ncrna import biotypes
 
 RRNA_DEPLETION = "rRNA Depletion"
 # HGNC symbols of the replication-dependent histone clusters: H1 and the core histones.
 HISTONE = re.compile(r"^(H1-[0-6]|H2AC\d+|H2BC\d+|H3C\d+|H4C\d+)$")
 CLASSES = ("histone", biotypes.SMALL, biotypes.MITO)
-KEPT_REASONS = ("", "not_first")
 
 
-def pairs(files: pl.DataFrame, counts: pl.DataFrame, genes: pl.DataFrame) -> pl.DataFrame:
+def pairs(files: pl.DataFrame, counts: pl.DataFrame, genes: pl.DataFrame,
+          tumour: str) -> pl.DataFrame:  # fmt: skip
     """Each tumour sample with an rRNA-depleted and another library: both files' shares.
 
     Args:
         files: Gather's whole STAR sheet, every file, with library_selection.
         counts: STAR counts, gene_id then one column per aliquot.
         genes: The annotation's record of each count row, in count order, with biotype.
+        tumour: The dataset file's tumour sample type.
 
     Returns:
         sample_id, library (rRNA-depleted or the other selection, as GDC names it), sample
         (the aliquot) and the percent of counted reads of each class in ``CLASSES``; empty
         where no sample has both.
     """
-    usable = files.filter(pl.col("condition") == "tumour", pl.col("drop_reason").is_in(
-        list(KEPT_REASONS)), pl.col("library_selection").is_not_null())  # fmt: skip
+    usable = gdc.comparable(files, tumour).filter(pl.col("library_selection").is_not_null())
     kinds = usable.group_by("sample_id").agg(
         (pl.col("library_selection") == RRNA_DEPLETION).any().alias("rrna"),
         (pl.col("library_selection") != RRNA_DEPLETION).any().alias("other"))  # fmt: skip
     both = kinds.filter("rrna", "other")["sample_id"]
     chosen = usable.filter(pl.col("sample_id").is_in(both.implode())).sort("sample_id", "sample")
+    if chosen.is_empty():
+        schema = {"sample_id": pl.String, "sample": pl.String, "library_selection": pl.String}
+        return pl.DataFrame(schema=schema | dict.fromkeys(CLASSES, pl.Float64))
     row = {g: i for i, g in enumerate(counts["gene_id"].to_list())}
     named = genes.with_columns(histone=pl.col("gene_name").str.contains(HISTONE.pattern))
     masks = {"histone": named["histone"].to_numpy(),

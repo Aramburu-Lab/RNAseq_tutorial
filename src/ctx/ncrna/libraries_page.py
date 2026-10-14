@@ -42,22 +42,22 @@ def fill(key: str, **values: Any) -> str:
     return text.fill(PAGE, key, **values)
 
 
-def group(writer: Writer, tcga: "Tcga", genes: pl.DataFrame) -> tuple[
+def group(writer: Writer, tcga: "Tcga", genes: pl.DataFrame, tumour: str) -> tuple[
         Result | None, dict[str, tuple[float, str]], dict[str, str]]:  # fmt: skip
     """F5 and its table, the rule's metrics, and the reason they are absent where they are."""
     if not libraries.measured(tcga.files):
         why = word("tcga.no_read_groups")
         return None, {}, dict.fromkeys(RULE_METRICS, why)
-    paired = libraries.pairs(tcga.files, tcga.counts, genes)
-    found = libraries.compare(paired) if paired.height else {}
-    n = int(found["histone"]["pairs"]) if found else 0
-    higher = found["histone"]["higher"] if found else 0.0
+    paired = libraries.pairs(tcga.files, tcga.counts, genes, tumour)
+    if paired.is_empty():
+        return None, {}, dict.fromkeys(RULE_METRICS, word("tcga.no_pairs"))
+    found = libraries.compare(paired)
+    n = int(found["histone"]["pairs"])
     metrics = {
         "library.histone_pairs": (float(n), "tumours with both library types"),
-        "library.histone_higher": (higher, "of them, rRNA-depleted holds more histone"),
-    }
-    if not n:
-        return None, metrics, {}
+        "library.histone_higher": (found["histone"]["higher"],
+                                   "of them, rRNA-depleted holds more histone"),
+    }  # fmt: skip
     writer.table(paired, "library_pairs", {c: COLUMNS[c] for c in paired.columns})
     frame = libraries.wide(paired).with_columns(pair=pl.lit("tumour"))
     other = ", ".join(sorted(set(paired["library_selection"]) - {libraries.RRNA_DEPLETION}))
