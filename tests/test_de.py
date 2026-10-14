@@ -319,6 +319,26 @@ def test_dedupe_after_subset():
     assert dropped == ()
 
 
+def test_a_librarys_lanes_are_one_sample_and_a_second_library_is_dropped():
+    """Runs of one library share its rank (D-063): a second lane is part of the sample, not a
+    later replicate; a second library of the same donor, cell type and condition is.
+
+    Mutation: ranking runs, as before 2026-10-14 (``rank_replicates`` over the subset): the
+    first library's second lane is listed in dropped_runs.
+    """
+    synthetic = design_counts()
+    sheet = synthetic.samples
+    first = sheet.row(0, named=True)
+    lane = {**first, "run_accession": "XRR900001"}
+    other = {**first, "run_accession": "XRR900002", "sample": "S999"}
+    sheet = pl.concat([sheet, pl.DataFrame([lane, other], schema=sheet.schema)])
+    contrast = Contrast("d", "condition", "control", "case", (6, 6), filters={"batch": ("short",)})
+    used, dropped = select_samples(sheet, contrast, {})
+    assert dropped == ("XRR900002",)
+    assert used["sample"].to_list().count(first["sample"]) == 1
+    assert "S999" not in used["sample"].to_list()
+
+
 def test_pair_after_batch():
     synthetic = design_counts(paired=True)
     last = synthetic.samples.filter(pl.col("condition") == "case")["sample"][-1]

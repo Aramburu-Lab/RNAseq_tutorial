@@ -19,7 +19,7 @@ import polars as pl
 from ctx.dataset import Contrast, Split
 from ctx.de.filters import MIN_COUNT, expressed
 from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, classify
-from ctx.gather.curation import REPLICATE_KEYS, rank_replicates
+from ctx.gather.curation import LIBRARY, REPLICATE_KEYS, library_replicates, rank_replicates
 
 TOP_GENES = 500
 SPLIT_LEVELS = ("a", "b")
@@ -139,11 +139,10 @@ def select_samples(
     variable, levels = contrast.variable, (contrast.reference, contrast.tested)
     if contrast.split is None:
         subset = subset.filter(pl.col(variable).is_in(list(levels)))
-    # A GDC sheet has no cell type: its one file per patient and sample type is already chosen.
-    keys = tuple(k for k in REPLICATE_KEYS if k in subset.columns)
-    first = rank_replicates(subset, keys, dict(order)) == 1
+    first = _first_libraries(subset, order)
     dropped = subset.filter(~first)["run_accession"].to_list()
-    used = subset.filter(first)
+    # A kept library's other runs are its lanes, part of the one sample, never dropped (D-063).
+    used = subset.filter(first).unique("sample", keep="first", maintain_order=True)
     if contrast.split is not None:
         used, variable = _split(used, contrast.split), "split"
     if contrast.paired:
@@ -156,6 +155,21 @@ def select_samples(
         pl.when(pl.col(variable) == tested).then(pl.lit("tested")).otherwise(pl.lit("reference"))
     )
     return used.with_columns(group=group), tuple(sorted(dropped))
+
+
+def _first_libraries(subset: pl.DataFrame, order: Mapping[str, tuple[str, ...]]) -> pl.Series:
+    """Whether each run belongs to the first library of its donor, cell type and condition.
+
+    Curation's rule, ranked again over the contrast's subset: a sheet's sample is one library,
+    so every run of it, a lane, takes the library's rank (``library_replicates``, D-063). A GDC
+    sheet has no cell type: its one file per patient and sample type is already chosen, and
+    its runs are ranked as they are.
+    """
+    if not set(REPLICATE_KEYS) <= set(subset.columns):
+        keys = tuple(k for k in REPLICATE_KEYS if k in subset.columns)
+        return rank_replicates(subset, keys, dict(order)) == 1
+    libraries = subset.with_columns(pl.col("sample").alias(LIBRARY))
+    return library_replicates(libraries, dict(order)) == 1
 
 
 def covariates(contrast: Contrast, sheet: pl.DataFrame) -> list[str]:

@@ -28,3 +28,13 @@ FAILED tests/test_quant_figures.py::test_labelled_rows_are_square_where_a_column
 1 failed, 3 passed in 1.82s
 ```
 
+## CAUGHT: src/ctx/de/deseq.py
+- planted: '    return library_replicates(libraries, dict(order)) == 1' -> '    return rank_replicates(libraries, REPLICATE_KEYS, dict(order)) == 1'
+- ran: tests/test_de.py::test_a_librarys_lanes_are_one_sample_and_a_second_library_is_dropped
+- exit 1
+```
+FAILED tests/test_de.py::test_a_librarys_lanes_are_one_sample_and_a_second_library_is_dropped
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 4.98s
+```
+
