@@ -1,0 +1,65 @@
+== gather
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a904d0b8663de892c/outputs/scratch_roots/tier1/outputs/01_gather/2026-10-14_gather_tier1_library_sizes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a904d0b8663de892c/outputs/scratch_roots/tier1/outputs/01_gather/2026-10-14_gather_tier1_library_sizes_v1_README.md
+       20.21 real         5.46 user         1.40 sys
+           891092992  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              156358  page reclaims
+                9129  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 560  voluntary context switches
+               20152  involuntary context switches
+         85430287365  instructions retired
+         25951308370  cycles elapsed
+           713934432  peak memory footprint
+== de
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a904d0b8663de892c/outputs/scratch_roots/tier1/outputs/05_de/2026-10-14_de_tier1_metrics_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a904d0b8663de892c/outputs/scratch_roots/tier1/outputs/05_de/2026-10-14_de_tier1_metrics_v1_README.md
+      164.94 real       432.57 user        26.87 sys
+          2087911424  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             4234306  page reclaims
+                1232  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               36725  voluntary context switches
+              456734  involuntary context switches
+        768503405857  instructions retired
+        198580326794  cycles elapsed
+          1063652328  peak memory footprint
+== function
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a904d0b8663de892c/outputs/scratch_roots/tier1/outputs/06_function/2026-10-14_function_tier1_metrics_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a904d0b8663de892c/outputs/scratch_roots/tier1/outputs/06_function/2026-10-14_function_tier1_metrics_v1_README.md
+       25.33 real        13.70 user         3.52 sys
+           906608640  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              364686  page reclaims
+                 470  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 316  voluntary context switches
+               22615  involuntary context switches
+        257150980127  instructions retired
+         65829215690  cycles elapsed
+           603211504  peak memory footprint
+== compare
+recorded 92; equal 92; differ 0; missing 0
