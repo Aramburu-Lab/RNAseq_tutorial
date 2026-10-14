@@ -8,40 +8,35 @@ results table per contrast, a metrics table the sanity rules read, the figures a
 import hashlib
 import math
 import re
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import polars as pl
 from scipy.stats import spearmanr
 
 from ctx import runtime
-from ctx.dataset import Dataset, DatasetError, PcaSpec, load
+from ctx.dataset import Column, Dataset, DatasetError, PcaSpec, load
 from ctx.de.deseq import RESULT_COLUMNS, TOP_GENES, Fit, fit, pca
 from ctx.de.page import (
-    BASES,
-    CONCEPT,
-    LINE_RULE,
-    MISTAKES,
-    NO_LINE_RULE,
-    PRACTICE,
-    QUESTION,
-    RAW_WORDS,
-    TERMS,
-    UNIT,
-    VOLCANO_READING,
-    VOLCANO_SUMMARY,
+    Words,
     box_text,
     calls_text,
     dispersion_text,
+    every,
+    figure,
     lfc_text,
     ma_text,
     pca_text,
     phist_text,
-    think,
+    questions,
+    skeleton,
+    subset_words,
     volcano_text,
+    words,
 )
 from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, P_FLOOR, classify, p_line
 from ctx.gather import gdc
@@ -61,7 +56,8 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
-from ctx.report.text import fill, word
+from ctx.report.text import fill, raw, word
+from ctx.report.text import words as text_words
 from ctx.viz.annotate import Permanova, permanova
 from ctx.viz.bar import BarData
 from ctx.viz.box import box_data
@@ -70,11 +66,16 @@ from ctx.viz.scatter import CUTOFF_PRESETS, Calls, Line, ScatterData
 from ctx.viz.style import ROLES, category_colours
 
 MODULE = "de"
-# The content file holding the page's sentences moved so far (P2S.4 moves the rest).
+# The content file holding the page's words (P2S.4).
 PAGE = "de"
+# The adjustments as the page names them, from the one list of methods; the two long names
+# are abbreviated as the field does, and the terms spell them out.
+SHORT = {"Benjamini-Hochberg": "BH", "Benjamini-Yekutieli": "BY"}
 P_BINS = 20
 FLAT_FROM = 0.5
 MAX_VOLCANO_LABELS = 10
+# A metric a [sanity] rule names for one gene: gene.<contrast>.<symbol>.lfc or .padj.
+GENE_METRIC = re.compile(r"gene\.(?P<contrast>[^.]+)\.(?P<symbol>.+)\.(?P<what>lfc|padj)")
 CALL_COLOURS = {"up": ROLES["comparison"], "down": ROLES["reference"], "ns": None}
 METRIC_COLUMNS = {
     "metric": ("none", "Name the sanity rules read, e.g. permanova.<pca>.<factor>.r2."),
@@ -132,11 +133,11 @@ def n_tested(results: pl.DataFrame) -> int:
     return int(results["padj"].is_not_null().sum())
 
 
-def _sizes(result: Fit) -> str:
+def _sizes(result: Fit, said: Words) -> str:
     """Group sizes as the page prints them everywhere: tested group first, each named."""
-    c = result.contrast
     n = {g: result.samples.filter(pl.col("group") == g).height for g in ("tested", "reference")}
-    return f"{n['tested']} {c.tested} vs {n['reference']} {c.reference}"
+    return fill(PAGE, "contrast.sizes", n_tested=n["tested"], tested=said.tested,
+                n_reference=n["reference"], reference=said.reference)  # fmt: skip
 
 
 def _sha256(path: Path) -> str:
@@ -157,7 +158,11 @@ def _subset(
 
 
 def _pca_figure(
-    spec: PcaSpec, sheet: pl.DataFrame, counts: pl.DataFrame, threads: int
+    spec: PcaSpec,
+    sheet: pl.DataFrame,
+    counts: pl.DataFrame,
+    threads: int,
+    curated: Sequence[Column] = (),
 ) -> tuple[ScatterData, list[tuple[str, float, str]], FigureText]:
     """One PCA scatter, a PERMANOVA per declared factor as metrics, and its page words."""
     used = _subset(sheet, spec.filters, spec.one_per)
@@ -171,7 +176,7 @@ def _pca_figure(
         on="sample",
     )
     metrics: list[tuple[str, float, str]] = []
-    first: str | None = None
+    first = ""
     shown: tuple[str, Permanova] | None = None
     for factor in spec.factors:
         labels = frame[factor].to_list()
@@ -182,18 +187,17 @@ def _pca_figure(
             continue
         # Strata keep labels within an individual, so only the first factor, the one that
         # varies within individuals, gets a p-value; R squared is descriptive for every one.
-        strata = frame[spec.strata].to_list() if spec.strata and first is None else None
+        strata = frame[spec.strata].to_list() if spec.strata and not first else None
         test = permanova(result.coords, labels, strata=strata)
         where = f"{test.n} samples, {test.groups} groups, top {TOP_GENES} genes by VST variance"
         metrics.append((f"permanova.{spec.name}.{factor}.r2", test.r2, where))
-        if first is None:
+        if not first:
             metrics.append((f"permanova.{spec.name}.{factor}.p", test.p, where))
             first, shown = test.text(factor.replace("_", " ")), (factor, test)
-    share = ", ".join(f"PC{i + 1} {s:.0%}" for i, s in enumerate(result.share))
-    caption = (
-        f"{first} Blind VST, the {TOP_GENES} most variable genes after the transform; "
-        f"{share} of their variance; n = {frame.height} samples."
-    )
+    shares = ", ".join(figure("pca", "share", i=i + 1, share=s) for i, s in enumerate(result.share))
+    trend = word(PAGE, f"figures.pca.trend.{result.trend}")
+    caption = figure("pca", "caption", test=first, trend=trend, top=TOP_GENES, shares=shares,
+                     n=frame.height).strip()  # fmt: skip
     colour = spec.factors[0]
     columns = {
         "sample": ("none", "Sample (experiment accession)."),
@@ -211,8 +215,8 @@ def _pca_figure(
         columns=columns,
         x="pc1",
         y="pc2",
-        x_label="PC1",
-        y_label="PC2",
+        x_label=figure("pca", "x"),
+        y_label=figure("pca", "y"),
         colour=colour,
         colours=category_colours(sorted(set(frame[colour]))),
         caption=caption,
@@ -221,17 +225,23 @@ def _pca_figure(
         width="double",
     )
     # The page describes the first factor's test, the one with a p-value.
-    text = pca_text(spec.name, spec.filters, colour, spec.symbol, result.share, shown)
+    subset = subset_words(spec.filters, curated)
+    text = pca_text(spec.name, subset, colour, spec.symbol, result.share, shown)
     return data, metrics, text
 
 
-def volcano(result: Fit, genes: pl.DataFrame, unit: str = UNIT) -> ScatterData:
+def volcano(
+    result: Fit, genes: pl.DataFrame, unit: str | None = None, said: Words | None = None
+) -> ScatterData:
     """Volcano of one contrast: the default call drawn, and every cutoff callable live.
 
     Every gene some setting of the page could call is drawn; the rest, above the loosest
     cutoff offered or never tested, are thinned. All four adjustments count over the same
-    tested genes, so the live view and the table agree.
+    tested genes, so the live view and the table agree. ``unit`` names a point, genes unless
+    given; ``said`` the contrast in words, its levels as written unless given.
     """
+    said = said or words(result.contrast)
+    unit = unit or figure("volcano", "unit")
     # Only tested genes: the others have no adjusted p, so no setting of the page can call
     # them, and a dot the rule cannot reach would contradict the reading guide.
     frame = result.results.join(genes, on="gene_id", how="left").filter(
@@ -266,27 +276,32 @@ def volcano(result: Fit, genes: pl.DataFrame, unit: str = UNIT) -> ScatterData:
     }  # fmt: skip
     untested = result.results.height - frame.height
     floored = int((frame["pvalue"] < P_FLOOR).sum())
-    caption = (
-        f"{c.name}: DESeq2 Wald test of {c.tested} over {c.reference}, design {c.design}; "
-        f"n = {_sizes(result)}. {fill(PAGE, 'figures.volcano.tested', tested=frame.height)} "
-        f"Default call: BH-adjusted p below {ALPHA} and log2 FC at or beyond ±{LFC_MIN:g}."
-        + (f" {untested:,} genes with no adjusted p (Cook's outliers or independent "
-           "filtering) are not drawn." if untested else "")
-        + (f" {floored} p-values below {P_FLOOR:g} are drawn at it." if floored else "")
-    )  # fmt: skip
+    caption = " ".join([
+        figure("volcano", "caption", label=said.label, design=c.design,
+               sizes=_sizes(result, said), alpha=ALPHA, lfc_min=f"{LFC_MIN:g}",
+               tested_sentence=figure("volcano", "tested", tested=frame.height)),
+        *([figure("volcano", "untested", untested=untested)] if untested else []),
+        *([figure("volcano", "floored", floored=floored, floor=f"{P_FLOOR:g}")] if floored
+          else []),
+    ])  # fmt: skip
+    bases = {column: figure("volcano", "basis", short=SHORT.get(m, m))
+             for column, m in ADJUSTMENTS.items()}  # fmt: skip
     calls = Calls(
-        lfc="log2FoldChange", p="pvalue", adjusted=BASES, raw_words=RAW_WORDS, tested=c.tested,
-        reference=c.reference, alpha=ALPHA, lfc_min=LFC_MIN, max_cutoff=max(CUTOFF_PRESETS),
-        n_tested=frame.height, p_floor=P_FLOOR, p_line=line, reading=VOLCANO_READING,
-        summary=VOLCANO_SUMMARY, line_rule=LINE_RULE, no_line_rule=NO_LINE_RULE, unit=unit,
+        lfc="log2FoldChange", p="pvalue", adjusted=bases, raw_words=figure("volcano", "raw"),
+        tested=said.tested, reference=said.reference, alpha=ALPHA, lfc_min=LFC_MIN,
+        max_cutoff=max(CUTOFF_PRESETS), n_tested=frame.height, p_floor=P_FLOOR, p_line=line,
+        reading=tuple(raw(PAGE, "figures.volcano.reading")),
+        summary=raw(PAGE, "figures.volcano.summary"),
+        line_rule=raw(PAGE, "figures.volcano.line_rule"),
+        no_line_rule=raw(PAGE, "figures.volcano.no_line_rule"), unit=unit,
     )  # fmt: skip
     return ScatterData(
         frame=frame,
         columns=columns,
         x="log2FoldChange",
         y="neg_log10_p",
-        x_label=f"log2 fold change, {c.tested} over {c.reference}",
-        y_label="-log10 raw p",
+        x_label=figure("volcano", "x", tested=said.tested, reference=said.reference),
+        y_label=figure("volcano", "y"),
         colour="call",
         colours=CALL_COLOURS,
         caption=caption,
@@ -294,17 +309,22 @@ def volcano(result: Fit, genes: pl.DataFrame, unit: str = UNIT) -> ScatterData:
         hover=("gene", "gene_id", "padj"),
         width="double",
         keep="keep",
-        names={"up": f"up in {c.tested}", "down": f"down in {c.tested}", "ns": "not called"},
+        names={
+            "up": figure("volcano", "up", tested=said.tested),
+            "down": figure("volcano", "down", tested=said.tested),
+            "ns": figure("volcano", "ns"),
+        },
         calls=calls,
     )
 
 
-def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
+def _ma(result: Fit, genes: pl.DataFrame, said: Words | None = None) -> ScatterData:
     """Mean against fold change, raw and shrunk as two series; raw alone without shrinkage.
 
     A page that thins the genes not called draws both estimates of a gene or neither, so the
     pull of shrinkage stays visible gene by gene; genes in order of their raw estimate.
     """
+    said = said or words(result.contrast)
     base = result.results.join(genes, on="gene_id", how="left").filter(pl.col("baseMean") > 0)
     shrunk = base["log2FoldChange_shrunk"].is_not_null().any()
     estimates = (("log2FoldChange", "raw"), ("log2FoldChange_shrunk", "shrunk"))[: 1 + shrunk]
@@ -332,24 +352,18 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
         "estimate": ("none", "raw or shrunk."),
         "keep": ("none", "Called at the default rule; always drawn."),
     }
-    caption = (
-        f"{result.contrast.name}: raw and shrunk LFC against mean expression for "
-        f"{base.height:,} genes. Shrinkage pulls noisy, weakly expressed genes toward "
-        "0; the test uses the raw estimate."
-        if shrunk
-        else f"{result.contrast.name}: raw LFC against mean expression for {base.height:,} "
-        "genes; shrinkage was off (--no-lfc-shrink). The test uses the raw estimate."
-    )
+    caption = figure("ma", "caption" if shrunk else "caption_raw", label=said.label,
+                     genes=base.height)  # fmt: skip
     return ScatterData(
         frame=frame,
         columns=columns,
         x="baseMean",
         y="lfc",
-        x_label="Mean expression",
-        y_label="log2 fold change",
+        x_label=figure("ma", "x"),
+        y_label=figure("ma", "y"),
         colour="estimate",
         colours=category_colours([label for _, label in estimates]),
-        names={"raw": "raw estimate", "shrunk": "shrunk estimate"},
+        names={"raw": figure("ma", "raw"), "shrunk": figure("ma", "shrunk")},
         caption=caption,
         hover=("gene_name", "padj"),
         log_x=True,
@@ -360,7 +374,7 @@ def _ma(result: Fit, genes: pl.DataFrame) -> ScatterData:
     )
 
 
-def p_histogram(result: Fit) -> tuple[BarData, float, int]:
+def p_histogram(result: Fit, said: Words | None = None) -> tuple[BarData, float, int]:
     """Twenty p-value bins; the flat level is the mean count per bin over [0.5, 1]."""
     p = result.results["pvalue"].drop_nulls().to_numpy()
     counts, edges = np.histogram(p, bins=P_BINS, range=(0.0, 1.0))
@@ -370,7 +384,7 @@ def p_histogram(result: Fit) -> tuple[BarData, float, int]:
         {
             "bin": [f"{a:.2f}-{b:.2f}" for a, b in zip(edges[:-1], edges[1:], strict=True)],
             "genes": counts.astype(np.int64),
-            "series": ["p-values"] * P_BINS,
+            "series": [figure("phist", "series")] * P_BINS,
         }
     )
     columns = {
@@ -378,28 +392,26 @@ def p_histogram(result: Fit) -> tuple[BarData, float, int]:
         "genes": ("genes", "Genes in the bin."),
         "series": ("none", "One series."),
     }
-    caption = (
-        f"{result.contrast.name}: Wald p-values of the {len(p):,} genes with one, in "
-        f"{P_BINS} bins; {low:,} have p < {ALPHA}. The flat level, {flat:,.1f}, is the mean "
-        f"count per bin over [{FLAT_FROM}, 1]."
-    )
+    caption = figure("phist", "caption", label=(said or words(result.contrast)).label,
+                     genes=len(p), bins=P_BINS, low=low, alpha=ALPHA, flat=flat,
+                     start=FLAT_FROM, end=1)  # fmt: skip
     data = BarData(
         frame=frame,
         columns=columns,
         category="bin",
         value="genes",
-        category_label="p-value",
-        value_label="Genes",
+        category_label=figure("phist", "x"),
+        value_label=figure("phist", "y"),
         series="series",
-        colours=category_colours(["p-values"]),
+        colours=category_colours([figure("phist", "series")]),
         caption=caption,
-        hline=(flat, "flat level"),
+        hline=(flat, figure("phist", "flat")),
         width="double",
     )
     return data, flat, low
 
 
-def _dispersion(result: Fit) -> ScatterData:
+def _dispersion(result: Fit, said: Words) -> ScatterData:
     """Gene-wise and final dispersions against mean expression, with the fitted trend.
 
     A page that thins them draws both of a gene's estimates or neither, as the MA plot does.
@@ -414,7 +426,10 @@ def _dispersion(result: Fit) -> ScatterData:
                     pl.col(column).alias("dispersion"),
                     pl.lit(label).alias("estimate"),
                 )
-                for column, label in (("genewise", "gene-wise"), ("final", "final"))
+                for column, label in (
+                    ("genewise", figure("dispersion", "genewise")),
+                    ("final", figure("dispersion", "final")),
+                )
             ]
         )
         .filter(pl.col("dispersion") > 0)
@@ -422,7 +437,9 @@ def _dispersion(result: Fit) -> ScatterData:
     )
     trend = d.sort("baseMean")
     line = Line(
-        "fitted trend", tuple(trend["baseMean"].to_list()), tuple(trend["fitted"].to_list())
+        figure("dispersion", "trend"),
+        tuple(trend["baseMean"].to_list()),
+        tuple(trend["fitted"].to_list()),
     )
     columns = {
         "gene_id": RESULT_COLUMNS["gene_id"],
@@ -431,19 +448,16 @@ def _dispersion(result: Fit) -> ScatterData:
         "estimate": ("none", "gene-wise or final (shrunk toward the trend)."),
         "keep": ("none", "Never kept; the page thins these points."),
     }
-    caption = (
-        f"{result.contrast.name}: gene-wise and final dispersion estimates of {d.height:,} "
-        "genes, with the trend DESeq2 fitted across them."
-    )
+    caption = figure("dispersion", "caption", label=said.label, genes=d.height)
     return ScatterData(
         frame=frame,
         columns=columns,
         x="baseMean",
         y="dispersion",
-        x_label="Mean expression",
-        y_label="Dispersion",
+        x_label=figure("dispersion", "x"),
+        y_label=figure("dispersion", "y"),
         colour="estimate",
-        colours=category_colours(["gene-wise", "final"]),
+        colours=category_colours([figure("dispersion", k) for k in ("genewise", "final")]),
         caption=caption,
         lines=(line,),
         hover=("gene_id",),
@@ -456,32 +470,33 @@ def _dispersion(result: Fit) -> ScatterData:
     )
 
 
-def _calls(title: str, names: tuple[str, ...], fits: Mapping[str, Fit]) -> BarData:
-    """Up and down calls per contrast, for one lesson."""
+def _calls(title: str, said: Mapping[str, Words], fits: Mapping[str, Fit]) -> BarData:
+    """Up and down calls per contrast, for one lesson; ``said`` holds its contrasts in words."""
     rows = [
-        (n, call, int((fits[n].results["call"] == call).sum()))
-        for n in names
+        (n, said[n].label, call, int((fits[n].results["call"] == call).sum()))
+        for n in said
         for call in ("up", "down")
     ]
-    frame = pl.DataFrame(rows, schema=["contrast", "call", "genes"], orient="row")
-    sizes = "; ".join(f"{n}: n = {_sizes(fits[n])}, {fits[n].contrast.design}" for n in names)
+    frame = pl.DataFrame(rows, schema=["contrast", "label", "call", "genes"], orient="row")
+    sizes = "; ".join(figure("calls", "size", label=said[n].label, sizes=_sizes(fits[n], said[n]),
+                             design=fits[n].contrast.design) for n in said)  # fmt: skip
     columns = {
         "contrast": ("none", "Contrast."),
+        "label": ("none", "The contrast in words, as the page names it."),
         "call": ("none", "up or down."),
         "genes": ("genes", f"Genes called: padj < {ALPHA} and log2 FC at or beyond ±{LFC_MIN:g}."),
     }
     return BarData(
         frame=frame,
         columns=columns,
-        category="contrast",
+        category="label",
         value="genes",
-        category_label="Contrast",
-        value_label="Genes called",
+        category_label=figure("calls", "x"),
+        value_label=figure("calls", "y"),
         series="call",
         colours={"up": ROLES["comparison"], "down": ROLES["reference"]},
-        caption=(
-            f"{title}: genes called per contrast (BH-adjusted p < {ALPHA}, log2 FC at or beyond ±"
-            f"{LFC_MIN:g}). {sizes}."
+        caption=figure(
+            "calls", "caption", lesson=title, alpha=ALPHA, lfc_min=f"{LFC_MIN:g}", sizes=sizes
         ),
         horizontal=True,
         stacked=True,
@@ -489,8 +504,11 @@ def _calls(title: str, names: tuple[str, ...], fits: Mapping[str, Fit]) -> BarDa
     )
 
 
-def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, float]:
+def _lfc_scatter(
+    x: Fit, y: Fit, genes: pl.DataFrame, said: tuple[Words, Words]
+) -> tuple[ScatterData, float]:
     """One contrast's raw LFC against another's, on genes tested in both."""
+    called, neither = figure("lfc", "called"), figure("lfc", "neither")
     frame = (
         x.results.select(
             "gene_id", pl.col("log2FoldChange").alias("lfc_x"), pl.col("call").alias("call_x")
@@ -511,19 +529,14 @@ def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, floa
         .join(genes, on="gene_id", how="left")
         .with_columns(
             called=pl.when((pl.col("call_x") != "ns") | (pl.col("call_y") != "ns"))
-            .then(pl.lit("called in either"))
-            .otherwise(pl.lit("neither"))
+            .then(pl.lit(called))
+            .otherwise(pl.lit(neither))
         )
-        .with_columns(keep=pl.col("called") == "called in either")
+        .with_columns(keep=pl.col("called") == called)
     )
     rho = float(spearmanr(frame["lfc_x"], frame["lfc_y"]).statistic)
     shared = set(x.samples["donor"]) & set(y.samples["donor"])
-    note = (
-        f" {len(shared)} individuals are in both contrasts, so the two estimates are not "
-        "independent."
-        if shared
-        else " No individual is in both contrasts."
-    )
+    note = figure("lfc", "shared", n=len(shared)) if shared else figure("lfc", "apart")
     ends = (
         float(frame.select(pl.min_horizontal("lfc_x", "lfc_y").min()).item()),
         float(frame.select(pl.max_horizontal("lfc_x", "lfc_y").max()).item()),
@@ -538,22 +551,19 @@ def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, floa
         "called": ("none", "Called in either contrast, or neither."),
         "keep": ("none", "Called in either; always drawn on the page."),
     }
-    caption = (
-        f"Raw LFC of {frame.height:,} genes tested in both: Spearman rho = {rho:.2f}; the "
-        f"line is x = y.{note}"
-    )
+    caption = figure("lfc", "caption", genes=frame.height, rho=rho, note=note)
     data = ScatterData(
         frame=frame,
         columns=columns,
         x="lfc_x",
         y="lfc_y",
-        x_label=f"log2 FC, {x.contrast.name}",
-        y_label=f"log2 FC, {y.contrast.name}",
+        x_label=figure("lfc", "axis", label=said[0].label),
+        y_label=figure("lfc", "axis", label=said[1].label),
         colour="called",
-        colours={"called in either": ROLES["comparison"], "neither": None},
+        colours={called: ROLES["comparison"], neither: None},
         caption=caption,
         hover=("gene_name",),
-        lines=(Line("x = y", ends, ends),),
+        lines=(Line(figure("lfc", "line"), ends, ends),),
         width="double",
         keep="keep",
         thinned=word(PAGE, "figures.lfc.thinned"),
@@ -562,7 +572,11 @@ def _lfc_scatter(x: Fit, y: Fit, genes: pl.DataFrame) -> tuple[ScatterData, floa
 
 
 def _box(
-    result: Fit, counts: pl.DataFrame, genes: pl.DataFrame, symbols: tuple[str, ...]
+    result: Fit,
+    counts: pl.DataFrame,
+    genes: pl.DataFrame,
+    symbols: tuple[str, ...],
+    said: Words,
 ) -> tuple[Figure | None, list[str]]:
     """Normalised expression of named genes in one contrast, MWU in the caption, padj on hover.
 
@@ -579,8 +593,7 @@ def _box(
                          schema={"gene_id": pl.String, "gene_name": pl.String})  # fmt: skip
     if named.is_empty():
         return None, missing
-    c = result.contrast
-    labels = {"reference": c.reference, "tested": c.tested}
+    labels = {"reference": said.reference, "tested": said.tested}
     padj = dict(result.results.select("gene_id", "padj").rows())
     sf = dict(result.size_factors.rows())
     rows = []
@@ -605,9 +618,9 @@ def _box(
     data = box_data(
         frame,
         columns=columns,
-        feature_label="Gene",
-        value_label="Expression",
-        groups=(c.reference, c.tested),
+        feature_label=figure("box", "x"),
+        value_label=figure("box", "y"),
+        groups=(said.reference, said.tested),
         hover=("sample", "donor", "deseq2_padj"),
     )
     return data, missing
@@ -710,8 +723,54 @@ def _fit_metrics(fits: Mapping[str, Fit]) -> list[tuple[str, float, str]]:
     return metrics
 
 
+def rule_genes(
+    rules: Mapping[str, Any], fits: Mapping[str, Fit], genes: pl.DataFrame
+) -> list[tuple[str, float, str]]:
+    """The raw log2 FC and padj of each gene a ``[sanity]`` rule names, as metrics.
+
+    A rule names one as ``gene.<contrast>.<symbol>.lfc`` or ``.padj``; a symbol's first gene in
+    the table's order stands for it, as on the named-gene boxes. A value the run cannot give
+    is NaN with its reason, which the hub reports as NOT MEASURED.
+    """
+    named = {
+        m
+        for rule in rules.get("rules", [])
+        for c in rule.get("conditions", [])
+        for m in (c.get("metric"), c.get("other"))
+        if m and GENE_METRIC.fullmatch(m)
+    }
+    once = genes.select("gene_name", "gene_id")
+    once = once.unique("gene_name", keep="first", maintain_order=True)
+    first = dict(once.rows())
+    metrics = []
+    for metric in sorted(named):
+        found = GENE_METRIC.fullmatch(metric)
+        assert found is not None  # noqa: S101 - kept by the filter above
+        contrast, symbol, what = found["contrast"], found["symbol"], found["what"]
+        column = "log2FoldChange" if what == "lfc" else "padj"
+        row = (
+            fits[contrast].results.filter(pl.col("gene_id") == first[symbol])
+            if contrast in fits and symbol in first
+            else None
+        )
+        value = None if row is None or row.is_empty() else row[column][0]
+        reason = (
+            f"no contrast {contrast}" if contrast not in fits
+            else f"{symbol} is not in the annotation" if symbol not in first
+            else f"{first[symbol]}: not fitted, or no {column} (Cook's or independent filtering)"
+            if value is None
+            else f"{first[symbol]}: raw log2 FC" if what == "lfc" else f"{first[symbol]}: BH padj"
+        )  # fmt: skip
+        metrics.append((metric, math.nan if value is None else float(value), reason))
+    return metrics
+
+
 def _lessons(
-    writer: Writer, spec: Dataset, fits: Mapping[str, Fit], genes: pl.DataFrame
+    writer: Writer,
+    spec: Dataset,
+    fits: Mapping[str, Fit],
+    genes: pl.DataFrame,
+    said: Mapping[str, Words],
 ) -> tuple[list[Result], list[tuple[str, float, str]]]:
     """One group per lesson and one for the scatters no lesson holds; rho as metrics.
 
@@ -722,17 +781,20 @@ def _lessons(
     metrics: list[tuple[str, float, str]] = []
     placed: dict[tuple[str, str], FigureBlock] = {}
     for x, y in spec.de.scatters:
-        scatter, rho = _lfc_scatter(fits[x], fits[y], genes)
+        scatter, rho = _lfc_scatter(fits[x], fits[y], genes, (said[x], said[y]))
         metrics.append((f"spearman.{x}.{y}", rho, "raw LFC, genes tested in both"))
-        placed[(x, y)] = writer.figure(scatter, f"lfc_{x}_vs_{y}", lfc_text(x, y, rho))
+        placed[(x, y)] = writer.figure(scatter, f"lfc_{x}_vs_{y}",
+                                       lfc_text(said[x].label, said[y].label, rho))  # fmt: skip
     for title, names in spec.de.lessons.items():
         slug = re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_")
-        items = [writer.figure(_calls(title, names, fits), f"calls_{slug}",
-                               calls_text(title, names, fits))]  # fmt: skip
+        lesson = {n: said[n] for n in names}
+        labels = {n: w.label for n, w in lesson.items()}
+        items = [writer.figure(_calls(title, lesson, fits), f"calls_{slug}",
+                               calls_text(title, labels, fits))]  # fmt: skip
         items += [placed.pop(pair) for pair in list(placed) if set(pair) <= set(names)]
-        groups.append(Group(f"Lesson: {title}", tuple(items)))
+        groups.append(Group(fill(PAGE, "groups.lesson", title=title), tuple(items)))
     if placed:
-        groups.append(Group("Across contrasts", tuple(placed.values())))
+        groups.append(Group(word(PAGE, "groups.across"), tuple(placed.values())))
     return groups, metrics
 
 
@@ -746,39 +808,42 @@ def _figures(
     """Every M5 figure, grouped as the page shows them; and the metrics they measured."""
     sheet, counts, genes = data
     assert spec.de is not None  # noqa: S101 - run() refuses a dataset file without [de]
+    said = every(spec.contrasts, spec.columns)
     groups: list[Result] = []
     metrics = []
     pcas = []
     for pca_spec in spec.de.pca:
-        scatter, found, text = _pca_figure(pca_spec, sheet, counts, threads)
+        scatter, found, text = _pca_figure(pca_spec, sheet, counts, threads, spec.columns)
         metrics += found
         pcas.append(writer.figure(scatter, f"pca_{pca_spec.name}", text))
     if pcas:
-        groups.append(Group("Samples", tuple(pcas), lead="Do samples group by biology, or by "
-                            "how they were processed?", tabs=len(pcas) > 1))  # fmt: skip
+        lead = word(PAGE, "groups.samples_lead")
+        groups.append(Group(word(PAGE, "groups.samples"), tuple(pcas), lead=lead,
+                            tabs=len(pcas) > 1))  # fmt: skip
     featured = fits[spec.de.featured]
-    c, name = featured.contrast, featured.contrast.name
+    name, this = featured.contrast.name, said[featured.contrast.name]
+    shrunk = bool(featured.results["log2FoldChange_shrunk"].is_not_null().any())
     groups.append(Group(
-        f"Featured contrast: {name}",
-        (writer.figure(volcano(featured, genes), f"volcano_{name}", volcano_text(c)),
-         writer.figure(_ma(featured, genes), f"ma_{name}",
-                       ma_text(c, featured.results["log2FoldChange_shrunk"].is_not_null().any()))),
-        lead="Which genes changed, and by how much?", tabs=True,
+        fill(PAGE, "groups.featured", label=this.label),
+        (writer.figure(volcano(featured, genes, said=this), f"volcano_{name}", volcano_text(this)),
+         writer.figure(_ma(featured, genes, this), f"ma_{name}", ma_text(this, shrunk))),
+        lead=word(PAGE, "groups.featured_lead"), tabs=True,
     ))  # fmt: skip
-    phist, flat, low = p_histogram(featured)
+    phist, flat, low = p_histogram(featured, this)
     with_p = featured.results["pvalue"].drop_nulls().len()
     groups.append(Group(
-        "Model health",
+        word(PAGE, "groups.health"),
         (writer.figure(phist, f"phist_{name}", phist_text(
-            name, with_p, low, flat, int(phist.frame["genes"][0]), 1 / P_BINS)),
-         writer.figure(_dispersion(featured), f"dispersion_{name}", dispersion_text(name))),
-        lead="Check these before trusting any call.", tabs=True,
+            this, with_p, low, flat, int(phist.frame["genes"][0]), 1 / P_BINS)),
+         writer.figure(_dispersion(featured, this), f"dispersion_{name}", dispersion_text(this))),
+        lead=word(PAGE, "groups.health_lead"), tabs=True,
     ))  # fmt: skip
-    lessons, found = _lessons(writer, spec, fits, genes)
+    lessons, found = _lessons(writer, spec, fits, genes, said)
     groups += lessons
     metrics += found
     if spec.de.box_contrast:
-        box, missing = _box(fits[spec.de.box_contrast], counts, genes, spec.de.box_genes)
+        boxed = said[spec.de.box_contrast]
+        box, missing = _box(fits[spec.de.box_contrast], counts, genes, spec.de.box_genes, boxed)
         named: list[FigureBlock | str] = []
         if box is not None:
             n_genes = len(spec.de.box_genes) - len(missing)
@@ -786,40 +851,44 @@ def _figures(
                 writer.figure(
                     box,
                     f"box_{spec.de.box_contrast}",
-                    box_text(fits[spec.de.box_contrast].contrast, n_genes),
+                    box_text(boxed, n_genes),
                 )
             )
         if missing:
-            named.append(f"Named genes not in the annotation: {', '.join(missing)}.")
-        groups.append(Group("Named genes", tuple(named)))
+            named.append(fill(PAGE, "groups.missing", genes=", ".join(missing)))
+        groups.append(Group(word(PAGE, "groups.named"), tuple(named)))
     return groups, metrics + _fit_metrics(fits)
 
 
-def _contrasts_table(fits: Mapping[str, Fit]) -> ResultTable:
-    """The contrasts, as the page shows them; the CSV beside it holds every column."""
+def _contrasts_table(fits: Mapping[str, Fit], said: Mapping[str, Words]) -> ResultTable:
+    """The contrasts, as the page shows them, by label; the CSV beside it holds every column."""
     rows = []
     for name, f in fits.items():
-        c, r = f.contrast, f.results
+        c, r, w = f.contrast, f.results, said[name]
         rows.append((
-            name, f"{c.tested} vs {c.reference}", c.design,
-            f"{c.expected_n[1]} vs {c.expected_n[0]}", f"{n_tested(r):,}",
-            f"{(r['call'] == 'up').sum():,}", f"{(r['call'] == 'down').sum():,}",
+            w.label, fill(PAGE, "contrast.label", tested=w.tested, reference=w.reference),
+            c.design,
+            fill(PAGE, "contrasts.n", n_tested=c.expected_n[1], n_reference=c.expected_n[0]),
+            f"{n_tested(r):,}", f"{(r['call'] == 'up').sum():,}",
+            f"{(r['call'] == 'down').sum():,}",
         ))  # fmt: skip
-    columns = ("Contrast", "Compares", "Design", "n", "Tested", "Up", "Down")
-    return ResultTable("Contrasts; tested means with an adjusted p", columns, tuple(rows),
-                       numeric=(4, 5, 6))  # fmt: skip
+    return ResultTable(word(PAGE, "contrasts.title"), text_words(PAGE, "contrasts.columns"),
+                       tuple(rows), numeric=(4, 5, 6))  # fmt: skip
 
 
-def _keys(sheet: pl.DataFrame, fits: Mapping[str, Fit], featured: str) -> tuple[KeyNumber, ...]:
+def _keys(sheet: pl.DataFrame, fits: Mapping[str, Fit], featured: Words,
+          name: str) -> tuple[KeyNumber, ...]:  # fmt: skip
     """Samples, contrasts, and the featured contrast's tested and called genes."""
-    r = fits[featured].results
+    r = fits[name].results
     up, down = int((r["call"] == "up").sum()), int((r["call"] == "down").sum())
     return (
-        KeyNumber("Samples", f"{sheet['sample'].n_unique():,}", "in the sample sheet"),
-        KeyNumber("Contrasts", f"{len(fits)}"),
-        KeyNumber("Genes tested", f"{n_tested(r):,}", f"in {featured}"),
-        KeyNumber("Genes called", f"{up + down:,}", f"{up:,} up, {down:,} down in {featured}"),
-    )
+        KeyNumber(word(PAGE, "keys.samples"), f"{sheet['sample'].n_unique():,}",
+                  word(PAGE, "keys.samples_detail")),
+        KeyNumber(word(PAGE, "keys.contrasts"), f"{len(fits)}"),
+        KeyNumber(word(PAGE, "keys.tested"), f"{n_tested(r):,}", featured.label),
+        KeyNumber(word(PAGE, "keys.called"), f"{up + down:,}",
+                  fill(PAGE, "keys.called_detail", up=up, down=down)),
+    )  # fmt: skip
 
 
 def _acknowledged(spec: Dataset) -> tuple[str, ...]:
@@ -892,35 +961,36 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     sexes, found = sex_check(sheet, counts, genes)
     if sexes is not None:
         writer.table(sexes, "sex_check", SEX_COLUMNS)
+    found += rule_genes(spec.sanity, fits, genes)
     frame = pl.DataFrame(metrics + found, schema=["metric", "value", "detail"], orient="row")
     writer.table(frame, "metrics", METRIC_COLUMNS)
     out, files = writer.out, writer.files
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     bound = usage.peak_rss_self + settings.threads * usage.peak_rss_children
+    said = every(spec.contrasts, spec.columns)
     page = ModulePage(
-        title=f"M5 Differential expression: {spec.name}",
-        question=QUESTION,
-        concept=CONCEPT,
+        title=fill(PAGE, "title", dataset=spec.name),
+        **(skeleton() | {"questions": questions(spec, fits)}),
         parameters=cards,
-        results=(*_acknowledged(spec), _contrasts_table(fits), *groups),
-        practice=PRACTICE,
-        think=think(spec, fits),
-        mistakes=MISTAKES,
-        key_numbers=_keys(sheet, fits, spec.de.featured),
-        terms=TERMS,
+        results=(*_acknowledged(spec), _contrasts_table(fits, said), *groups),
+        key_numbers=_keys(sheet, fits, said[spec.de.featured], spec.de.featured),
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,
             peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children,
             profile=f"{settings.profile}, {settings.threads} threads",
-            budget=(
-                f"Track B: under {budget.minutes} min and {budget.ram_gb} GB; RAM bound "
-                f"self + {settings.threads} x largest child = {bound:,} bytes"
+            budget=fill(
+                PAGE,
+                "budget",
+                minutes=budget.minutes,
+                ram_gb=budget.ram_gb,
+                threads=settings.threads,
+                bound=bound,
             ),
             versions=runtime.versions(),
-            inputs=tuple(f"{p.name} (newest gather output)" for p in inputs.values()),
+            inputs=tuple(fill(PAGE, "inputs", name=p.name) for p in inputs.values()),
         ),
     )
     return [write(page, out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html"), *files]

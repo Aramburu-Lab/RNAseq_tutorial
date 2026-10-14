@@ -1,7 +1,7 @@
 """``ctx report``: the hub page linking the newest page of each module for one dataset.
 
 Links are relative, so the hub works after ``outputs/`` is copied elsewhere or opened from
-a zip; nothing points to the web.
+a zip; nothing points to the web. Its words are ``content/hub.toml``'s.
 """
 
 import hashlib
@@ -19,22 +19,13 @@ from ctx.dataset import load
 from ctx.de.sanity import VERDICT_COLUMNS, decide, parse
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
+from ctx.report import text
 from ctx.report.builder import HubLink, HubPage, HubRule, KeyNumber, ParameterCard, write
 
 MODULE = "report"
-TITLES = {
-    "setup": "M0 Setup",
-    "gather": "M1 Gather",
-    "qc": "M2 Read QC",
-    "process": "M3 Trim, align, count",
-    "quant": "M4 Quantification",
-    "de": "M5 Differential expression",
-    "function": "M6 Function",
-    "proteo": "M7 RNA versus protein",
-    "ncrna": "M8 Non-coding RNA",
-    "genecard": "M9 Gene cards",
-    "clinical": "M10 Clinical and survival",
-}
+# The content file of the hub's words.
+WORDS = "hub"
+TITLES: dict[str, str] = dict(text.raw(WORDS, "modules"))
 # Built with the pages, not a module of the course: it writes a site, never an overview page.
 NOT_MODULES = (MODULE, "lite_build")
 # The module is one of the MODULES tokens, longest first, so "lite_build" is not read as "lite".
@@ -118,7 +109,7 @@ def sanity(
 def _measured(value: Any) -> str:
     """A recorded value as the hub prints it; a missing one says so."""
     if value is None or (isinstance(value, float) and math.isnan(value)):
-        return "not measured"
+        return text.word(WORDS, "not_measured")
     # A count prints whole: .4g would show 10,523 genes as 1.052e+04.
     if float(value).is_integer():
         return f"{int(value):,}"
@@ -174,17 +165,16 @@ def run(
     rules = _rules(rows)
     shown = load(dataset_file).name if dataset_file else dataset
     gated = [r for r in rules if r.verdict != "RECORDED"]
-    keys: tuple[KeyNumber, ...] = (
-        KeyNumber("Modules run", f"{len(links)} of {len(links) + len(missing)}"),
-    )
+    run_of = text.fill(WORDS, "keys.modules_value", run=len(links), all=len(links) + len(missing))
+    keys: tuple[KeyNumber, ...] = (KeyNumber(text.word(WORDS, "keys.modules"), run_of),)
     if gated:
         passed = sum(r.verdict == "PASS" for r in gated)
-        keys += (
-            KeyNumber("Rules passed", f"{passed} of {len(gated)}", "recorded rules not counted"),
-        )
+        value = text.fill(WORDS, "keys.rules_value", passed=passed, gated=len(gated))
+        keys += (KeyNumber(text.word(WORDS, "keys.rules"), value,
+                           text.word(WORDS, "keys.rules_detail")),)  # fmt: skip
     hub = HubPage(
-        title=f"Course hub: {shown}",
-        intro=f"The newest page of every module run on {shown}, in course order.",
+        title=text.fill(WORDS, "title", dataset=shown),
+        intro=text.fill(WORDS, "intro", dataset=shown),
         parameters=cards,
         links=tuple(links),
         missing=tuple(missing),

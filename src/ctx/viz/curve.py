@@ -11,7 +11,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title
 from ctx.viz.scatter import Line
 from ctx.viz.strip import Span, shade, span_handles, span_traces
@@ -186,6 +186,7 @@ class CurveData:
         sns.despine(fig=fig)
         place_caption(fig, self.caption, width, height, ax=ax,
                       handles=handles + span_handles(self.spans))  # fmt: skip
+        refit_y_title(fig, ax, y_title)
         return fig
 
     def interactive(self) -> Any:
@@ -229,6 +230,6 @@ class CurveData:
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["scatter"],
             xaxis={"title": {"text": x_title}},
-            yaxis={"title": {"text": page_y_title(y_title, self._inches()[1])}},
+            yaxis={"title": {"text": page_y_title(y_title, files_room(self.static))}},
         )  # fmt: skip
         return fig

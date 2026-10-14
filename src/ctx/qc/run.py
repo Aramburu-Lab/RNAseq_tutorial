@@ -33,7 +33,6 @@ from ctx.qc.blocks import (
 )
 from ctx.report import text
 from ctx.report.builder import (
-    FIELDS,
     Group,
     KeyNumber,
     ModulePage,
@@ -336,7 +335,7 @@ def _sections(stage: Stage, registry: reg.Registry, tally: Mapping[str, int]) ->
         "interpretation": text.fill(PAGE, "interpretation", alpha=ALPHA, **tally),
         "pitfalls": lines("pitfalls", minimum=registry.min_samples),
     }  # fmt: skip
-    return text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}
+    return text.skeleton(PAGE) | filled
 
 
 def pipeline_groups(

@@ -113,24 +113,52 @@ def fill(page: str, key: str, **values: Any) -> str:
     return template.format_map(values)
 
 
-def skeleton(page: str) -> dict[str, Any]:
-    """The fixed parts of a module page, as ``ModulePage`` takes them.
+def lines(page: str, key: str, **values: Any) -> tuple[str, ...]:
+    """The list of texts at a key, each filled, as ``fill`` fills one.
+
+    Raises:
+        TextError: If the key is missing or not a list of text, or a placeholder has no value.
+    """
+    found = words(page, key)
+    if missing := set().union(*map(placeholders, found)) - values.keys():
+        raise TextError(f"content/{page}.toml {key!r} needs {sorted(missing)}")
+    return tuple(line.format_map(values) for line in found)
+
+
+def _filled(page: str, key: str, template: str, values: dict[str, Any]) -> str:
+    """One section's text filled from ``values``; a placeholder with no value is refused."""
+    if missing := placeholders(template) - values.keys():
+        raise TextError(f"content/{page}.toml {key!r} needs {sorted(missing)}")
+    return template.format_map(values)
+
+
+def skeleton(page: str, **values: Any) -> dict[str, Any]:
+    """The fixed parts of a module page, as ``ModulePage`` takes them, numbers filled.
 
     Args:
         page: The content file's stem.
+        values: One value per placeholder in the sections, terms, questions and pitfalls.
 
     Returns:
         The page's purpose, input, method, terms, interpretation, questions and pitfalls,
-        under the ``ModulePage`` field names (``builder.FIELDS``).
+        under the ``ModulePage`` field names, which are the section keys (P2P.3). A page whose
+        questions are a table of variants, asked by what its data hold, gets none here. With
+        no ``values`` the texts are left as written, for a page that fills its own sections.
     """
     from ctx.report.builder import SelfCheck  # noqa: PLC0415 - builder imports this module
 
+    def one(key: str, template: str) -> str:
+        """One text of the section at ``key``, filled when the caller gave values."""
+        return _filled(page, key, template, values) if values else template
+
+    asked = raw(page, "questions")
     return {
-        "question": raw(page, "purpose"),
-        "input": raw(page, "input"),
-        "concept": raw(page, "method"),
-        "terms": tuple((t["term"], t["meaning"]) for t in raw(page, "terms")),
-        "practice": raw(page, "interpretation"),
-        "think": tuple(SelfCheck(t["prompt"], t["answer"]) for t in raw(page, "questions")),
-        "mistakes": tuple(raw(page, "pitfalls")),
+        **{k: one(k, raw(page, k)) for k in ("purpose", "input", "method", "interpretation")},
+        "terms": tuple((t["term"], one("terms", t["meaning"])) for t in raw(page, "terms")),
+        "questions": tuple(
+            SelfCheck(one("questions", t["prompt"]), one("questions", t["answer"])) for t in asked
+        )
+        if isinstance(asked, list)
+        else (),  # fmt: skip
+        "pitfalls": tuple(one("pitfalls", m) for m in raw(page, "pitfalls")),
     }

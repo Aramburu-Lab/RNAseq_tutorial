@@ -21,7 +21,6 @@ from ctx.io.naming import stem
 from ctx.ncrna import biotypes, figures, mirna_page
 from ctx.report import text
 from ctx.report.builder import (
-    FIELDS,
     FigureText,
     Group,
     KeyNumber,
@@ -306,7 +305,7 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(PAGE)
     skeleton = text.skeleton(PAGE)
     if gdc:
-        skeleton |= {"input": word("tcga.input"), FIELDS["method"]: word("tcga.method")}
+        skeleton |= {"input": word("tcga.input"), "method": word("tcga.method")}
     built = ModulePage(
         title=fill("title", dataset=ctx.inputs.spec.name), **skeleton,
         parameters=ctx.cards, results=tuple(results),

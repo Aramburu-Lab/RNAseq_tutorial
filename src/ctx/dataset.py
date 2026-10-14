@@ -106,6 +106,8 @@ class Contrast:
         filters: Column to allowed values; a sample must match every one.
         paired: Keep only donors with a sample at both levels.
         split: Replace the compared levels by a seeded split of individuals.
+        label: The contrast in plain words, as titles, leads, captions and axes name it; empty
+            reads as its two levels (Rytis 2026-10-01: never the identifier on a page).
     """
 
     name: str
@@ -117,6 +119,7 @@ class Contrast:
     filters: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     paired: bool = False
     split: Split | None = None
+    label: str = ""
 
 
 @dataclass(frozen=True)
@@ -450,6 +453,7 @@ def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
             design=entry.get("design", "~group"),
             filters=_values(entry.get("filters", {})), paired=bool(entry.get("paired", False)),
             split=Split(int(split["seed"]), str(split["strata"])) if split else None,
+            label=str(entry.get("label", "")),
         ))  # fmt: skip
     names = [c.name for c in out]
     problems += [

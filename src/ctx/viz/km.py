@@ -14,7 +14,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title, page_y_title, screen_title
 from ctx.viz.style import (
     BAND_ALPHA,
@@ -207,6 +207,7 @@ class KmData:
         sns.despine(fig=fig)
         sns.despine(ax=risk, left=True)
         place_caption(fig, self.caption, width, height, ax=ax, handles=handles)
+        refit_y_title(fig, ax, y_title)
         return fig
 
     def _traces(self, g: str, hover: str) -> list[Any]:
@@ -264,7 +265,8 @@ class KmData:
         drawn = [g for g in self.groups if self._rows(g).height]
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["km"],
-            yaxis={"title": {"text": page_y_title(y_title, self.inches()[1])}, "range": [0, 1.02]},
+            yaxis={"title": {"text": page_y_title(y_title, files_room(self.static))},
+                   "range": [0, 1.02]},
             # A row's count is centred on its category: half a row of room at each end. Each
             # row takes its group's colour and the legend names it: written beside the rows,
             # the names left a 375 px phone a plot 20 px wide (2026-10-08).

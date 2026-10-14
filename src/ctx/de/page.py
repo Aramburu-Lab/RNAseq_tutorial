@@ -1,94 +1,84 @@
-"""M5 page copy: the words around the numbers, each sentence filled from the run's own fits.
+"""M5 page copy: the words around the numbers, each from ``content/de.toml``, filled by the run.
 
-Nothing here names a cohort. A self-check tied to a feature of the design (a batch term, a
-paired contrast) is asked only when the dataset file declares that feature.
+Nothing here names a cohort or writes a sentence. A self-check tied to a feature of the design
+(a batch term, a paired contrast) is asked only when the dataset file declares that feature. A
+contrast reads by its plain label, never its identifier (Rytis 2026-10-01).
 """
 
 import math
 import re
+from collections import Counter
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass, replace
+from typing import Any
 
-from ctx.dataset import Contrast, Dataset
+from ctx.dataset import Column, Contrast, Dataset
 from ctx.de.deseq import TOP_GENES, Fit
-from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN
+from ctx.de.stats import ALPHA, LFC_MIN
+from ctx.report import text
 from ctx.report.builder import FigureText, SelfCheck
 from ctx.viz.annotate import Permanova
 
-QUESTION = "Which genes change between two groups, and how sure can we be?"
-CONCEPT = (
-    "DESeq2 asks, gene by gene, whether read counts differ between two groups by more than "
-    "they vary within each group. The design names everything else that differs between "
-    "samples, such as the individual or the sequencing batch, so that it is not mistaken for "
-    "the group effect."
-)
-TERMS = (
-    ("Size factor", "A per-sample scaling for sequencing depth, so counts compare across samples."),
-    ("Dispersion", "How much a gene varies between samples beyond counting noise."),
-    ("log2 fold change", "log2 of tested over reference: 1 is twice as high, -1 half as high."),
-    ("Wald test", "Asks whether a gene's log2 fold change differs from 0, given its variation."),
-    ("padj", "The p-value adjusted over all tested genes; DESeq2 uses BH."),
-    ("BH, BY", "Benjamini-Hochberg and Benjamini-Yekutieli: they control the false discovery "
-     "rate when the p-values are exact, BY under any dependence."),
-    ("Holm, Bonferroni", "They control the chance of even one false call; stricter."),
-    ("Called", f"padj below {ALPHA} and a log2 fold change of at least {LFC_MIN:g} either way."),
-    ("Shrunk fold change", "An estimate pulled toward 0 where the data are thin; ranks genes."),
-    ("PERMANOVA", "Tests whether groups of samples sit apart; R² is the share of variation "
-     "they explain."),
-)  # fmt: skip
-PRACTICE = (
-    "Check the p-value histogram before the volcano. Put a known batch in the design rather "
-    "than dropping samples. Rank genes by the shrunk fold change; the test uses the raw one."
-)
-MISTAKES = (
-    "Blaming batch for the gap between a small within-batch contrast and a large pooled one: "
-    "the smaller contrast also has less power.",
-    "Counting several samples from one individual as independent replicates: the test "
-    "becomes overconfident.",
-    "Reading the volcano's height as the call: it is the raw p-value, and the call uses the "
-    "adjusted one.",
-    # Measured in D-018 on tests/synth.py design_counts, seeds 0-199; not this run's numbers.
-    "Reading padj < 0.05 as at most 5 % false genes: BH bounds the average share, and only "
-    "if the p-values of unchanged genes are exact. DESeq2 takes each gene's estimated "
-    "dispersion as known, so they run small. On synthetic data with 6 samples per group, "
-    "8.4 % of the genes at padj < 0.05 were false on average, against the 4.5 % BH "
-    "promised; the call's fold-change filter brought it to 3.2 %.",
-)
-NA_CHECK = SelfCheck(
-    "Why can a gene with a large fold change have padj = NA?",
-    "Either one sample is an outlier (Cook's distance), or the gene is so weakly expressed "
-    "that independent filtering removed it before the adjustment.",
-)
-BATCH_ANSWER = (
-    "When one group sits mostly in one batch, a design without batch reads the batch effect "
-    "as a group effect. With batch in the design, DESeq2 estimates it from the groups present "
-    "in both batches and removes it."
-)
-PAIRED_CHECK = SelfCheck(
-    "Why does a paired design usually call more genes than an unpaired one on the same "
-    "individuals?",
-    "Each individual is compared with themself, so the differences between individuals leave "
-    "the error term.",
-)
-# The words of each adjustment on the page, from the one list of methods; the two long
-# names are abbreviated as the field does, and TERMS spells them out.
-SHORT = {"Benjamini-Hochberg": "BH", "Benjamini-Yekutieli": "BY"}
-BASES = {column: f"{SHORT.get(m, m)}-adjusted p" for column, m in ADJUSTMENTS.items()}
-RAW_WORDS = "raw p (no correction)"
-VOLCANO_READING = (
-    "Each dot is one of {n_tested} {unit} tested in both groups; right of 0 is higher in "
-    "{tested}, left is higher in {reference}.",
-    "Up in {tested}: log2 FC at least {fc} ({fold_up} times as high, +{pct_up} %) and {line_rule}.",
-    "Down in {tested}: log2 FC at most -{fc} ({fold_down} times as high, -{pct_down} %) under "
-    "the same p-value rule. Grey dots miss at least one of the two conditions.",
-)
-VOLCANO_SUMMARY = (
-    "Up in {tested}: {n_up} {unit}. Down: {n_down} {unit}. Rule: log2 FC at or beyond "
-    "\u00b1{fc} and {basis} below {cutoff}."
-)
-LINE_RULE = "above the dashed line at -log10 p = {y_line}, where {basis} falls below {cutoff}"
-NO_LINE_RULE = "{basis} below {cutoff}; no {unit} were tested, so no line is drawn"
-# What one point of M5's volcano is.
-UNIT = "genes"
+PAGE = "de"
+# D-018, measured on tests/synth.py design_counts, seeds 0 to 199: the share of genes at
+# padj < 0.05 that were false, against what BH promised, and after the call's fold-change
+# filter. Not this run's numbers; the page says synthetic.
+SYNTHETIC = {"per_group": 6, "false_pct": 8.4, "bh_pct": 4.5, "filtered_pct": 3.2}
+
+
+@dataclass(frozen=True)
+class Words:
+    """How one contrast reads on the page: its label and its two levels in plain words."""
+
+    label: str
+    tested: str
+    reference: str
+
+
+def level_words(columns: Sequence[Column], variable: str, level: str) -> str:
+    """A level as the dataset's own table spells it, sentence case kept for acronyms.
+
+    The column's value map sends each SDRF value to its curated level; read backwards, a level
+    is the SDRF's words: ``steady_state`` is "steady state", ``gcsf`` "G-CSF". A level with no
+    map reads with spaces for underscores.
+    """
+    found = next((c.values for c in columns if c.name == variable and c.values), None)
+    words = next((k for k, v in (found or {}).items() if v == level and k), None)
+    if words is None:
+        return level.replace("_", " ")
+    # "Steady state" mid-sentence is "steady state"; "G-CSF" and "HSCT" stay as they are.
+    return words if any(c.isupper() for c in words[1:]) else words[:1].lower() + words[1:]
+
+
+def words(contrast: Contrast, columns: Sequence[Column] = ()) -> Words:
+    """The contrast's plain label, its own or its two levels', and the levels in words."""
+    variable = contrast.variable if contrast.split is None else ""
+    tested = level_words(columns, variable, contrast.tested)
+    reference = level_words(columns, variable, contrast.reference)
+    label = contrast.label or text.fill(PAGE, "contrast.label", tested=tested, reference=reference)
+    return Words(label, tested, reference)
+
+
+def every(contrasts: Sequence[Contrast], columns: Sequence[Column]) -> dict[str, Words]:
+    """Each contrast in words, by name; two with no label that read alike are told apart.
+
+    A file that labels none of its contrasts can declare two of the same levels (Cassetta's
+    breast files, the synthetic fixture), and two bars of one name would leave one unseen. Such
+    a pair reads as its levels with its identifier after them, until the file labels them.
+    """
+    found = {c.name: words(c, columns) for c in contrasts}
+    seen = Counter(w.label for w in found.values())
+    return {
+        c.name: replace(found[c.name], label=text.fill(PAGE, "contrast.alike",
+                                                       label=found[c.name].label, name=c.name))
+        if seen[found[c.name].label] > 1 and not c.label else found[c.name]
+        for c in contrasts
+    }  # fmt: skip
+
+
+def skeleton() -> dict[str, Any]:
+    """The page's fixed sections, their numbers filled, under ``ModulePage``'s names."""
+    return text.skeleton(PAGE, alpha=ALPHA, lfc_min=f"{LFC_MIN:g}", **SYNTHETIC)
 
 
 def _terms(design: str) -> set[str]:
@@ -96,8 +86,14 @@ def _terms(design: str) -> set[str]:
     return set(re.findall(r"[A-Za-z_]\w*", design))
 
 
-def think(spec: Dataset, fits: Mapping[str, Fit]) -> tuple[SelfCheck, ...]:
-    """The self-checks this dataset's design can answer, with its own names and counts."""
+def _check(key: str, **values: Any) -> SelfCheck:
+    """One self-check from ``[questions.<key>]``."""
+    return SelfCheck(text.fill(PAGE, f"questions.{key}.prompt", **values),
+                     text.word(PAGE, f"questions.{key}.answer"))  # fmt: skip
+
+
+def questions(spec: Dataset, fits: Mapping[str, Fit]) -> tuple[SelfCheck, ...]:
+    """The self-checks this dataset's design can answer, with its own labels and counts."""
     checks = []
     assert spec.de is not None  # noqa: S101 - M5 runs only with [de]
     for names in spec.de.lessons.values():
@@ -109,27 +105,35 @@ def think(spec: Dataset, fits: Mapping[str, Fit]) -> tuple[SelfCheck, ...]:
             and _terms(fits[a].contrast.design) ^ _terms(fits[b].contrast.design) == {"batch"}
         ]
         if batch:
-            a, b = batch[0]
-            n = fits[a].samples.height
-            checks.append(
-                SelfCheck(
-                    f"{a} and {b} fit the same {n} samples; only the design differs. Why can "
-                    "they call different genes?",
-                    BATCH_ANSWER,
-                )
-            )
+            a, b = (words(fits[n].contrast, spec.columns).label for n in batch[0])
+            checks.append(_check("batch", a=a, b=b, n=fits[batch[0][0]].samples.height))
             break
     if any(c.paired for c in spec.contrasts):
-        checks.append(PAIRED_CHECK)
-    return (*checks, NA_CHECK)
+        checks.append(_check("paired"))
+    return (*checks, _check("na"))
 
 
-def _subset(filters: Mapping[str, Sequence[str]]) -> str:
-    """The samples a figure uses, in words."""
-    return "; ".join(f"{k.replace('_', ' ')} {', '.join(v)}" for k, v in filters.items())
+def figure(name: str, key: str, **values: Any) -> str:
+    """One figure's word at ``figures.<name>.<key>``, filled."""
+    return text.fill(PAGE, f"figures.{name}.{key}", **values)
 
 
-def pca_text(name: str, filters: Mapping[str, Sequence[str]], factor: str, symbol: str | None,
+def reading(name: str, key: str = "reading", **values: Any) -> tuple[str, ...]:
+    """A figure's reading guide, each line filled."""
+    lines = text.raw(PAGE, f"figures.{name}.{key}")
+    return tuple(line.format_map(values) for line in lines)
+
+
+def subset_words(filters: Mapping[str, Sequence[str]], columns: Sequence[Column]) -> str:
+    """The samples a figure uses, in words: each level as the SDRF spells it."""
+    return "; ".join(
+        figure("pca", "filter", column=k.replace("_", " "),
+               values=", ".join(level_words(columns, k, level) for level in v))
+        for k, v in filters.items()
+    )  # fmt: skip
+
+
+def pca_text(name: str, subset: str, factor: str, symbol: str | None,
              share: Sequence[float], test: tuple[str, Permanova] | None) -> FigureText:  # fmt: skip
     """Title, lead and reading guide of one PCA; ``test`` is the tested factor and its test.
 
@@ -137,149 +141,89 @@ def pca_text(name: str, filters: Mapping[str, Sequence[str]], factor: str, symbo
     points but cannot be tested, and the next factor is.
     """
     shown = factor.replace("_", " ")
-    reading = [
-        f"Each dot is one sample; samples close together have similar expression over the "
-        f"{TOP_GENES} most variable genes.",
-        f"Colour marks the {shown}"
-        + (f", shape the {symbol.replace('_', ' ')}" if symbol else "")
-        + f". PC1 holds {share[0]:.0%} and PC2 {share[1]:.0%} of those genes' variation.",
-    ]
+    shares = {"pc1": share[0], "pc2": share[1]}
+    lines = [figure("pca", "reading_points", top=TOP_GENES)]
+    lines.append(figure("pca", "reading_shape", colour=shown, symbol=symbol.replace("_", " "),
+                        **shares) if symbol else figure("pca", "reading_colour", colour=shown,
+                                                        **shares))  # fmt: skip
     lead = ""
     if test is not None:
         tested, result = test[0].replace("_", " "), test[1]
-        p = "no p-value possible" if math.isnan(result.p) else f"p = {result.p:.3g}"
-        reading.append(
-            f"The {tested} accounts for {result.r2:.0%} of the variation between samples "
-            f"(PERMANOVA R², {p}): the larger, the further apart the groups sit."
-        )
-        lead = f"The {tested} accounts for {result.r2:.0%} of the variation between samples."
-    subset = _subset(filters)
-    return FigureText(
-        title=f"Samples{': ' + subset if subset else ''}, coloured by {shown}",
-        lead=lead,
-        reading=tuple(reading),
-        tab=name,
-    )
+        p = figure("pca", "no_p") if math.isnan(result.p) else figure("pca", "p", p=result.p)
+        lines.append(figure("pca", "reading_test", factor=tested, r2=result.r2, p=p))
+        lead = figure("pca", "lead", factor=tested, r2=result.r2)
+    title = (figure("pca", "title_subset", subset=subset, colour=shown) if subset
+             else figure("pca", "title", colour=shown))  # fmt: skip
+    return FigureText(title=title, lead=lead, reading=tuple(lines), tab=name)
 
 
-def volcano_text(contrast: Contrast) -> FigureText:
-    """Title and lead of the volcano; its reading guide comes live from the figure."""
-    return FigureText(
-        title=f"Volcano: {contrast.tested} over {contrast.reference}",
-        tab="Volcano",
-    )
+def volcano_text(said: Words) -> FigureText:
+    """Title of the volcano; its lead and reading guide come live from the figure."""
+    return FigureText(title=figure("volcano", "title", label=said.label),
+                      tab=figure("volcano", "tab"))  # fmt: skip
 
 
-def ma_text(contrast: Contrast, shrunk: bool = True) -> FigureText:
+def ma_text(said: Words, shrunk: bool = True) -> FigureText:
     """Title, lead and reading guide of the MA plot; the raw estimate alone without shrinkage."""
-    if not shrunk:
-        return FigureText(
-            title=f"Fold change against expression: {contrast.tested} over {contrast.reference}",
-            lead="Shrinkage was off for this run (--no-lfc-shrink): the raw estimate alone.",
-            reading=(
-                "Each gene is one point: its raw log2 fold change against its mean expression.",
-                "Weakly expressed genes spread widest, because few reads make a noisy fold "
-                "change. Shrinkage, on by default, would pull them toward 0.",
-                "The test uses this raw estimate either way.",
-            ),
-            tab="MA plot",
-        )
+    suffix = "" if shrunk else "_raw"
     return FigureText(
-        title=f"Fold change against expression: {contrast.tested} over {contrast.reference}",
-        lead="Shrinkage tames the noisy fold changes of weakly expressed genes.",
-        reading=(
-            "Each gene appears twice against its mean expression: its raw log2 fold change and "
-            "its shrunk one, as the legend marks.",
-            "Shrinkage pulls weakly expressed genes, which have few reads to go on, toward 0; "
-            "strongly expressed genes barely move.",
-            "The test uses the raw estimate; rank genes by the shrunk one.",
-        ),
-        tab="MA plot",
+        title=figure("ma", "title", label=said.label),
+        lead=figure("ma", f"lead{suffix}"),
+        reading=reading("ma", f"reading{suffix}"),
+        tab=figure("ma", "tab"),
     )
 
 
 def phist_text(
-    name: str, tested: int, low: int, flat: float, first: int, width: float
+    said: Words, tested: int, low: int, flat: float, first: int, width: float
 ) -> FigureText:
     """Title, lead and reading guide of the p-value histogram.
 
     ``low`` counts p below ALPHA and ``first`` the first bar; they agree only when the bin
     width equals ALPHA, so each sentence names its own.
     """
-    ratio = f"{first / flat:.1f} times" if flat else "far above"
+    ratio = figure("phist", "times", ratio=first / flat) if flat else figure("phist", "far")
     return FigureText(
-        title=f"p-value histogram: {name}",
-        lead=f"{low:,} genes have p < {ALPHA}, against a flat level of {flat:,.1f} per bin.",
-        reading=(
-            f"Each bar counts the genes whose p-value falls in a {width:g}-wide bin; "
-            f"{tested:,} genes in all.",
-            f"The dashed line is the flat level, {flat:,.1f} genes per bin: how p-values spread "
-            "where nothing changes.",
-            f"The first bar holds {first:,} genes, {ratio} the flat level. A peak at 0 over a "
-            "flat floor is signal; a hill anywhere else is a model problem.",
-        ),
-        tab="p-value histogram",
+        title=figure("phist", "title", label=said.label),
+        lead=figure("phist", "lead", low=low, alpha=ALPHA, flat=flat),
+        reading=reading("phist", width=width, tested=tested, flat=flat, first=first, ratio=ratio),
+        tab=figure("phist", "tab"),
     )
 
 
-def dispersion_text(name: str) -> FigureText:
+def dispersion_text(said: Words) -> FigureText:
     """Title, lead and reading guide of the dispersion plot."""
     return FigureText(
-        title=f"Dispersion: {name}",
-        lead="Each gene's final dispersion is pulled toward the trend fitted across genes.",
-        reading=(
-            "Each gene appears twice against its mean expression: its own (gene-wise) "
-            "dispersion and the final one the test uses.",
-            "The line is the trend DESeq2 fits across genes; it pulls each final value toward "
-            "it, more where the gene's own estimate is less certain.",
-            "A cloud far above the trend points to outlier samples or a missing design term.",
-        ),
-        tab="Dispersion",
+        title=figure("dispersion", "title", label=said.label),
+        lead=figure("dispersion", "lead"),
+        reading=reading("dispersion"),
+        tab=figure("dispersion", "tab"),
     )
 
 
-def calls_text(title: str, names: Sequence[str], fits: Mapping[str, Fit]) -> FigureText:
-    """Title, lead and reading guide of one lesson's call counts."""
-    counts = {n: int((fits[n].results["call"] != "ns").sum()) for n in names}
+def calls_text(lesson: str, labels: Mapping[str, str], fits: Mapping[str, Fit]) -> FigureText:
+    """Title, lead and reading guide of one lesson's call counts; ``labels`` by contrast."""
+    counts = {n: int((fits[n].results["call"] != "ns").sum()) for n in labels}
     most = max(counts, key=lambda n: counts[n])
     return FigureText(
-        title=f"Genes called: {title.lower()} lesson",
-        lead=f"{most} calls the most genes: {counts[most]:,}.",
-        reading=(
-            f"Each bar is one contrast; its length counts the genes called up and down (padj "
-            f"below {ALPHA}, log2 FC at or beyond ±{LFC_MIN:g}).",
-            "Compare contrasts only at equal n: a smaller contrast calls fewer genes even when "
-            "nothing else differs.",
-            "The caption gives each contrast's n and design; the difference between designs "
-            "on the same samples is the lesson.",
-        ),
+        title=figure("calls", "title", lesson=lesson.lower()),
+        lead=figure("calls", "lead", label=labels[most], n=counts[most]),
+        reading=reading("calls", alpha=ALPHA, lfc_min=f"{LFC_MIN:g}"),
     )
 
 
 def lfc_text(x: str, y: str, rho: float) -> FigureText:
     """Title, lead and reading guide of one contrast's fold changes against another's."""
     return FigureText(
-        title=f"{x} against {y}",
-        lead=f"The two contrasts agree with Spearman rho = {rho:.2f}.",
-        reading=(
-            f"Each dot is one gene tested in both; it sits at its raw log2 fold change in {x} "
-            f"(across) and in {y} (up).",
-            "Dots on the solid diagonal changed the same way in both; the tighter the cloud "
-            "around it, the more the two contrasts agree.",
-            "Highlighted dots are called in at least one of the two.",
-        ),
+        title=figure("lfc", "title", x=x, y=y),
+        lead=figure("lfc", "lead", rho=rho),
+        reading=reading("lfc", x=x, y=y),
     )
 
 
-def box_text(contrast: Contrast, n_genes: int) -> FigureText:
+def box_text(said: Words, n_genes: int) -> FigureText:
     """Title, lead and reading guide of the named-gene boxes."""
     return FigureText(
-        title=f"Named genes: {contrast.tested} against {contrast.reference}",
-        reading=(
-            "Each box is one gene in one group: the line is the median sample, the box holds "
-            "the middle half, and each dot is a sample.",
-            "Expression is log2 of the count divided by the sample's size factor, plus 1.",
-            f"Above each gene: the Mann-Whitney p, BH-adjusted over the {n_genes} plotted "
-            f"genes, and r, the rank-biserial effect, positive when {contrast.tested} is higher.",
-        ),
+        title=figure("box", "title", label=said.label),
+        reading=reading("box", n_genes=n_genes, tested=said.tested),
     )

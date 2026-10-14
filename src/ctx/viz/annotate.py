@@ -1,7 +1,7 @@
 """Statistical annotation shared by the static and the interactive rendering of a figure.
 
 One ``Caption`` object produces every string either renderer prints, so the PDF, the HTML
-and the README cannot state different numbers.
+and the README cannot state different numbers. The words are ``content/annotate.toml``'s.
 """
 
 import math
@@ -13,6 +13,7 @@ import numpy as np
 import polars as pl
 from scipy.stats import false_discovery_control, mannwhitneyu
 
+from ctx.report import text as content
 from ctx.report.marks import plain
 from ctx.viz.metrics import words, wrap_to
 from ctx.viz.style import (
@@ -22,10 +23,14 @@ from ctx.viz.style import (
     LEGEND_MAX_COLUMNS,
     LINE_SPACING,
     SIZES,
+    THEMES,
 )
 
-TEST_NAME = "Mann-Whitney U, two-sided"
-PERMANOVA_NAME = "PERMANOVA on Euclidean distances"
+PAGE = "annotate"
+TEST_NAME = content.word(PAGE, "test_name")
+# Where a laid-out figure keeps its layout rectangle and its vertical title's room.
+LAYOUT, ROOM = "ctx_layout", "ctx_title_room"
+PERMANOVA_NAME = content.word(PAGE, "permanova_name")
 
 
 @dataclass(frozen=True)
@@ -51,7 +56,7 @@ class Caption:
     def label(self, feature: str) -> str:
         """The annotation printed above one feature."""
         t = next(t for t in self.tests if t.feature == feature)
-        return f"p={_fmt(t.p_adj)}\nr={t.r:.2f}"
+        return content.fill(PAGE, "label", p=_fmt(t.p_adj), r=t.r)
 
     def text(self, width: int = 0) -> str:
         """The caption block: test, correction, n per group, and the sign of r.
@@ -64,11 +69,19 @@ class Caption:
         """
         reference, comparison = self.groups
         ns = sorted({(t.n_reference, t.n_comparison) for t in self.tests})
-        n_text = "; ".join(f"n = {a} {reference}, {b} {comparison}" for a, b in ns)
-        body = (
-            f"{TEST_NAME}; p is BH-adjusted over {len(self.tests)} plotted features; "
-            f"{n_text}; rank-biserial r > 0 when {comparison} is higher."
+        n_text = "; ".join(
+            content.fill(
+                PAGE,
+                "sizes",
+                n_reference=a,
+                reference=reference,
+                n_comparison=b,
+                comparison=comparison,
+            )
+            for a, b in ns
         )
+        body = content.fill(PAGE, "caption", test=TEST_NAME, features=len(self.tests),
+                            sizes=n_text, comparison=comparison)  # fmt: skip
         return wrap(body, width)
 
 
@@ -82,7 +95,10 @@ def wrap(text: str, width: int = 0) -> str:
 
 
 def fit_title(text: str, height: float) -> str:
-    """Wrap a vertical axis title to the length its axis has: a share of the figure height.
+    """Wrap a vertical axis title to a first estimate of its axis: a share of the figure height.
+
+    The estimate lays the figure out; ``refit_y_title`` then wraps the title again to the
+    axis's height as drawn (P2S.8), and ``wrap_title`` is that wrap.
 
     Measured as the files set it, so a line ends only where its next word would cross that
     length: an average glyph width broke M3's "Difference d (log2(count + 1))", 130.2 pt
@@ -97,8 +113,64 @@ def fit_title(text: str, height: float) -> str:
     Returns:
         The title, broken into lines that fit.
     """
-    room = height * 72 * AXIS_TITLE_SHARE
+    return wrap_title(text, height * 72 * AXIS_TITLE_SHARE)
+
+
+def wrap_title(text: str, room: float) -> str:
+    """A vertical title broken into lines no longer than ``room`` pt, as the files set it.
+
+    Args:
+        text: The title, with its unit.
+        room: The axis's length in pt.
+
+    Returns:
+        The title, broken where the next word would cross the room.
+    """
     return "\n".join(wrap_to(words(text), room, SIZES["axis_label"]))
+
+
+def drawn_height(fig: Any, ax: Any) -> float:
+    """An axes' height in pt as the figure lays it out."""
+    from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
+
+    renderer = FigureCanvasAgg(fig).get_renderer()  # type: ignore[no-untyped-call]
+    return float(ax.get_window_extent(renderer).height) * 72 / float(fig.dpi)
+
+
+def refit_y_title(fig: Any, ax: Any, title: str, *, label: Any = None) -> float:
+    """Wrap a vertical title to its own axis's drawn height, and lay the figure out again.
+
+    A share of the figure's height gave a scatter's room to strips and bars whose axes are
+    shorter: "Share of the top gene (fraction)" ran 2.5 pt past its axis (P2S.8). The axis's
+    height hardly moves with its title, which widens the left margin, so one pass holds. The
+    room is kept on the figure (``ROOM``) for the page, which prints the files' lines (D-053).
+
+    Args:
+        fig: The laid-out matplotlib Figure, from ``place_caption``.
+        ax: The axes whose height the title runs along.
+        title: The title, unwrapped.
+        label: The setter of the title, ``ax.set_ylabel`` unless given (a colour bar's).
+
+    Returns:
+        The room, in pt.
+    """
+    room = drawn_height(fig, ax)
+    (label or ax.set_ylabel)(wrap_title(title, room))
+    fig.tight_layout(rect=getattr(fig, LAYOUT))
+    setattr(fig, ROOM, room)
+    return room
+
+
+def files_room(static: Any) -> float:
+    """The room a contract's figure files give its vertical title, read off one render.
+
+    Args:
+        static: The contract's ``static``, taking a theme.
+
+    Returns:
+        The drawn axis height, in pt, the files wrapped the title to.
+    """
+    return float(getattr(static(THEMES["white"]), ROOM))
 
 
 def place_caption(
@@ -135,6 +207,7 @@ def place_caption(
              fontsize=SIZES["caption"])  # fmt: skip
     caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
     rect = (0, caption_inches / height, 1, 1)
+    setattr(fig, LAYOUT, rect)
     if not handles:
         fig.tight_layout(rect=rect)
         return
@@ -210,19 +283,13 @@ class Permanova:
 
     def text(self, factor: str) -> str:
         """The test as a caption sentence for one factor."""
-        within = ", labels permuted within individuals" if self.stratified else ""
+        within = content.word(PAGE, "permanova.within") if self.stratified else ""
+        values = {"name": PERMANOVA_NAME, "factor": factor, "r2": self.r2, "f": self.f,
+                  "n": self.n, "groups": self.groups}  # fmt: skip
         if math.isnan(self.p):
-            return (
-                f"{PERMANOVA_NAME} for {factor}: R\u00b2 = {self.r2:.2f}, pseudo-F = "
-                f"{self.f:.3g}; no p-value: no individual has samples in two groups, so "
-                f"permuting within individuals cannot move a label (n = {self.n} samples in "
-                f"{self.groups} groups)."
-            )
-        return (
-            f"{PERMANOVA_NAME} for {factor}: R\u00b2 = {self.r2:.2f}, pseudo-F = {self.f:.3g}, "
-            f"p = {_fmt(self.p)} ({self.permutations} permutations{within}; "
-            f"n = {self.n} samples in {self.groups} groups)."
-        )
+            return content.fill(PAGE, "permanova.untested", **values)
+        return content.fill(PAGE, "permanova.tested", p=_fmt(self.p), within=within,
+                            permutations=self.permutations, **values)  # fmt: skip
 
 
 def _pseudo_f(coords: np.ndarray, codes: np.ndarray, n_groups: int) -> tuple[float, float]:

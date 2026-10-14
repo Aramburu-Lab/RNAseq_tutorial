@@ -26,9 +26,9 @@ from synth import (
 from ctx.viz.axes import screen_title
 from ctx.viz.style import THEMES
 
-# A title fit_title and screen_title break apart: after "share" in the files, before "(%)" by
-# the phone rule.
-LONG, UNIT = "Mitochondrial rRNA share of reads", "%"
+# A title the files and screen_title break apart in every demo, at each axis's drawn height
+# (P2S.8): the old title broke before "(%)" in the curves and density files too.
+LONG, UNIT = "Share of reads from mitochondrial rRNA genes", "%"
 
 
 def _long(data):

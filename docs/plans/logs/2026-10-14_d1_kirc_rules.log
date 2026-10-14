@@ -1,0 +1,8 @@
+('gene.tumour_normal.CA9.lfc', 9.5829023098593, 'ENSG00000107159: raw log2 FC')
+('gene.tumour_normal.CA9.padj', 0.0, 'ENSG00000107159: BH padj')
+('gene.tumour_normal.NDUFA4L2.lfc', 6.966830398328274, 'ENSG00000185633: raw log2 FC')
+('gene.tumour_normal.NDUFA4L2.padj', 1.6638379616227852e-271, 'ENSG00000185633: BH padj')
+KIRC.ca9 gene.tumour_normal.CA9.lfc >= 1 9.5829023098593 PASS PASS
+KIRC.ca9 gene.tumour_normal.CA9.padj < 0.05 0.0 PASS PASS
+KIRC.ndufa4l2 gene.tumour_normal.NDUFA4L2.lfc >= 1 6.966830398328274 PASS PASS
+KIRC.ndufa4l2 gene.tumour_normal.NDUFA4L2.padj < 0.05 1.6638379616227852e-271 PASS PASS

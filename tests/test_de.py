@@ -19,8 +19,8 @@ from ctx.dataset import Contrast, Split
 from ctx.de import deseq
 from ctx.de.deseq import ContrastError, fit, pca, select_samples
 from ctx.de.filters import expressed, min_sample_size
-from ctx.de.page import ma_text
-from ctx.de.run import _fit_metrics, _ma, volcano
+from ctx.de.page import ma_text, words
+from ctx.de.run import _fit_metrics, _ma, rule_genes, volcano
 from ctx.de.stats import ALPHA, LFC_MIN, classify
 from ctx.report import text
 from ctx.viz import scatter
@@ -116,8 +116,13 @@ def test_ma_draws_the_estimates_the_fit_has(basic):
     )
     assert set(_ma(result, genes).frame["estimate"]) == {"raw", "shrunk"}
     assert set(_ma(plain, genes).frame["estimate"]) == {"raw"}
-    assert "--no-lfc-shrink" in _ma(plain, genes).caption
-    assert "--no-lfc-shrink" in ma_text(BASIC, shrunk=False).lead
+    assert _ma(plain, genes).caption == text.fill(
+        "de",
+        "figures.ma.caption_raw",
+        label=words(BASIC).label,
+        genes=_ma(plain, genes).frame.height,
+    )
+    assert "--no-lfc-shrink" in ma_text(words(BASIC), shrunk=False).lead
 
 
 # A page thins at this many units here, so a 1,000-gene fit thins as Step-1's 12,796 genes do.
@@ -319,6 +324,26 @@ def test_dedupe_after_subset():
     assert dropped == ()
 
 
+def test_a_librarys_lanes_are_one_sample_and_a_second_library_is_dropped():
+    """Runs of one library share its rank (D-063): a second lane is part of the sample, not a
+    later replicate; a second library of the same donor, cell type and condition is.
+
+    Mutation: ranking runs, as before 2026-10-14 (``rank_replicates`` over the subset): the
+    first library's second lane is listed in dropped_runs.
+    """
+    synthetic = design_counts()
+    sheet = synthetic.samples
+    first = sheet.row(0, named=True)
+    lane = {**first, "run_accession": "XRR900001"}
+    other = {**first, "run_accession": "XRR900002", "sample": "S999"}
+    sheet = pl.concat([sheet, pl.DataFrame([lane, other], schema=sheet.schema)])
+    contrast = Contrast("d", "condition", "control", "case", (6, 6), filters={"batch": ("short",)})
+    used, dropped = select_samples(sheet, contrast, {})
+    assert dropped == ("XRR900002",)
+    assert used["sample"].to_list().count(first["sample"]) == 1
+    assert "S999" not in used["sample"].to_list()
+
+
 def test_pair_after_batch():
     synthetic = design_counts(paired=True)
     last = synthetic.samples.filter(pl.col("condition") == "case")["sample"][-1]
@@ -483,3 +508,30 @@ def test_pandas_only_at_boundary():
             if any(n == "pandas" or n.startswith("pandas.") for n in names):
                 importers.append(path.relative_to(ROOT).as_posix())
     assert sorted(set(importers)) == ["src/ctx/de/deseq.py"]
+
+
+def test_a_rule_names_a_gene_and_m5_records_its_fold_change_and_padj(basic):
+    """A ``[sanity]`` rule naming ``gene.<contrast>.<symbol>.<lfc|padj>`` gets that gene's
+    values from the fit, a symbol's first gene standing for it; an unknown symbol or contrast
+    is NaN with its reason. Mutations: ``padj`` read for ``lfc``; the last gene of a shared
+    symbol taken, not the first.
+    """
+    _, result = basic
+    tested = result.results.filter(pl.col("padj").is_not_null())
+    genes = pl.DataFrame({"gene_id": tested["gene_id"][:2], "gene_name": ["SYM", "SYM"]})
+    rules = {"rules": [{"conditions": [
+        {"metric": "gene.basic.SYM.lfc", "op": ">", "value": 0},
+        {"metric": "x", "op": "<", "other": "gene.basic.SYM.padj"},
+        {"metric": "gene.basic.NONE.lfc", "op": ">", "value": 0},
+        {"metric": "gene.other.SYM.padj", "op": "<", "value": 0.05},
+        {"metric": "calls.basic.up", "op": ">", "value": 0},
+    ]}]}  # fmt: skip
+    found = {m: (v, why) for m, v, why in rule_genes(rules, {"basic": result}, genes)}
+    assert set(found) == {"gene.basic.SYM.lfc", "gene.basic.SYM.padj", "gene.basic.NONE.lfc",
+                          "gene.other.SYM.padj"}  # fmt: skip
+    row = tested.row(0, named=True)
+    assert found["gene.basic.SYM.lfc"][0] == row["log2FoldChange"]
+    assert found["gene.basic.SYM.padj"][0] == row["padj"]
+    assert math.isnan(found["gene.basic.NONE.lfc"][0])
+    assert "not in the annotation" in found["gene.basic.NONE.lfc"][1]
+    assert "no contrast other" in found["gene.other.SYM.padj"][1]

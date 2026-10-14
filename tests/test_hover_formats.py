@@ -26,6 +26,7 @@ from synth import (
     demo_volcano,
 )
 
+from ctx.de.page import Words
 from ctx.function import lite
 from ctx.function import run as m6
 from ctx.viz.axes import FLOAT_HOVER, INT_HOVER, hover_format, hover_value
@@ -58,17 +59,21 @@ def _running():
     positions = (10, 2_000, 12_345)
     result = lite.Enriched("SET", 3, 0.5, 2.0, 0.01, 0.0, positions,
                            tuple(0.001 * i for i in range(15_000)))  # fmt: skip
-    return m6._running("contrast", result)
+    return m6._running(Words("contrast", "b", "a"), result)
 
 
 def _gsea():
     rows = [(f"S{i}", 40 + i, 0.5, 2.0, 0.001, 0.13016621743036838 / (i + 1)) for i in range(5)]
-    return m6._gsea_bars("c", pl.DataFrame(rows, schema=list(m6.GSEA_COLUMNS), orient="row"))
+    return m6._gsea_bars(
+        Words("c", "b", "a"), pl.DataFrame(rows, schema=list(m6.GSEA_COLUMNS), orient="row")
+    )
 
 
 def _ora():
     rows = [("up", f"S{i}", 40, 20, 4.5, 1e-6, 1e-5, "") for i in range(3)]
-    return m6._ora_bars("c", pl.DataFrame(rows, schema=list(m6.ORA_COLUMNS), orient="row"), 900)
+    return m6._ora_bars(
+        Words("c", "b", "a"), pl.DataFrame(rows, schema=list(m6.ORA_COLUMNS), orient="row"), 900
+    )
 
 
 DEMOS = {

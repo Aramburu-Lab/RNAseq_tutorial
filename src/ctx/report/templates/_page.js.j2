@@ -284,7 +284,8 @@
         return [update, pair[1]];
       });
     });
-    var state = own, resizedAt = null, heightSet = null, swapping = false;
+    var state = own, resizedAt = null, swapping = false;
+    var heightsAt = null, heightsSet = [], settled = false;
     /* The layout for the box as it is. Below the floor the box takes the module page's
        width first, and a phone's layout follows the plot's width there. */
     function pick() {
@@ -305,7 +306,7 @@
        the new one before the first, and the draws it says it made wait for the last. */
     function swap(next) {
       var last = state, update = {};
-      state = next; resizedAt = null; heightSet = null; swapping = true;
+      state = next; resizedAt = null; heightsAt = null; swapping = true;
       try {
         Object.keys(last.relayout).forEach(function (k) { update[k] = wide[k]; });
         Object.assign(update, next.relayout);
@@ -364,10 +365,27 @@
         Plotly.Plots.resize(div);
         return;
       }
-      var height = held();
-      if (height !== null && Math.abs(height - full.height) > 1 && heightSet !== height) {
-        heightSet = height;
+      settle(held(), width);
+    }
+    /* plotly's margins follow the height it draws at, and not smoothly: Step-1's 8-sample
+       heatmap drawn 946.5 px tall took margins that held its cells at 938.1 px, and at
+       938.1 px margins that held them at 946.5 px, without end (C1, 2026-10-09). A height
+       set once already at this width is a cycle: the plot takes the tallest height of it,
+       once, so no margin is squeezed, and the cells stand within the cycle's span of square. */
+    function settle(height, width) {
+      var full = div._fullLayout;
+      if (height === null || Math.abs(height - full.height) <= 1) return;
+      if (heightsAt !== width) { heightsAt = width; heightsSet = []; settled = false; }
+      var seen = heightsSet.some(function (h) { return Math.abs(h - height) <= 1; });
+      if (!seen) {
+        heightsSet.push(height);
         setHeight(height);
+        return;
+      }
+      var tallest = Math.max.apply(null, heightsSet);
+      if (!settled && Math.abs(tallest - full.height) > 1) {
+        settled = true;
+        setHeight(tallest);
       }
     }
     if (window.ResizeObserver) {

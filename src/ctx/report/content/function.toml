@@ -1,37 +1,52 @@
-# The M6 Function page (ctx function): the sentences moved here so far. The rest of its text
-# is still in src/ctx/function/page.py and src/ctx/function/run.py and moves with P2S.4
-# (TODO.md). Placeholders in {braces} are filled by the code; keep their names.
+# The M6 Function page (ctx function). Placeholders in {braces} are filled by the code; keep
+# their names. A contrast is named by its plain label and a gene set in words, its identifier
+# kept in the hover and the data files (Rytis 2026-10-01).
 
-# Over-representation draws only the sets that pass, so a direction with none has no bar; the
-# lead counts both directions, 0 included.
-[figures.ora]
-lead = "{up} gene sets pass FDR < {alpha} on the up calls, {down} on the down calls."
-caption = "{name}: hypergeometric ORA of the up and down calls ({calls}), BH per direction. Background: the {background:,} gene symbols of the tested genes. Drawn: the sets past the dashed line, FDR = {alpha}."
-passing = "Every bar passes the dashed line, FDR = {alpha}: the set holds more calls than its share of the {background:,} tested gene symbols predicts."
-# Shown in place of the figure when no set passes in either direction.
-none = "No gene set passes FDR < {alpha} on the up or the down calls, so no bar is drawn."
+title = "M6 Function: {dataset}"
+budget = "Track B: under {minutes} min and {ram_gb} GB"
+purpose = "Find the pathways whose genes move together between two groups, beyond the genes called one at a time."
+input = "M5's newest results table per contrast, the dataset file's `[function]` and its [[gene set]] file, fetched by `ctx setup` with its licence."
+method = """[[ORA]] asks whether a gene set holds more of the called genes than chance predicts, counted against the genes that could have been called.
 
-# The last reading line of the GSEA bars, by how many of the bars drawn pass; the caption
-# counts the sets drawn, fewer than the fifteen where fewer were tested.
-[figures.gsea]
-caption = "{name}: preranked GSEA on the Wald statistic, {permutations} gene-set permutations, seed {seed}; the {shown} sets with the smallest FDR."
-caption_one = "{name}: preranked GSEA on the Wald statistic, {permutations} gene-set permutations, seed {seed}; the one set tested."
-some = "Highlighted bars pass FDR < {alpha}; the others are shown for context."
-all = "Every bar drawn passes FDR < {alpha}, so every bar is highlighted."
-no = "No bar drawn passes FDR < {alpha}, so none is highlighted."
+[[GSEA]] needs no cutoff: it ranks every gene by its [[Wald statistic]] and asks whether a set's genes gather at one end of the list."""
+interpretation = "Use the tested genes as the [[background]], rank by a signed statistic, and read each [[NES]] with its FDR. A pathway can move with no single gene called."
+# "Term: rest" in a pitfall prints Term in bold.
+pitfalls = [
+    "Using the whole genome, or every gene in the sets, as the ORA background: only tested genes could be called.",
+    "Reading the smallest GSEA p-value as exact: it is bounded below by the permutations of its sign.",
+    "Ranking genes for GSEA by padj: it has no sign, and many genes share its smallest values.",
+]
 
-# The background lesson. Against the gene-set union a set's share of the background grows
-# by its own untested members and shrinks by everyone else's; which wins differs by set, so
-# the words follow the plotted sets: more (most look more significant), less, or mixed.
-[figures.background]
-caption = "{name}: the same {calls:,} up calls, {hits:,} gene symbols, tested by hypergeometric p against two backgrounds. One is the tested genes' {tested:,} symbols; the other, {union:,}, adds every symbol in the sets, gseapy's default when given none."
-lead_same = "Here both backgrounds hold the same genes, so the bars match."
-lead_moved = "Against {union:,} gene symbols instead of {tested:,}, {more} of {shown} sets look more significant and {less} less."
-more = "A longer bar looks more significant. Here most sets grow proportionally less than the background, which gains genes that could never be called, so they look stronger."
-less = "A longer bar looks more significant. Here most sets grow proportionally more than the background, by their own members that could never be called, so they look weaker."
-mixed = "A longer bar looks more significant. A set that grows proportionally more than the background, by its own untested members, looks weaker; one that grows less looks stronger."
+[[terms]]
+term = "Gene set"
+meaning = "A named list of genes that share a pathway or a function."
 
-# The self-check on the background, in the direction the plotted sets moved.
+[[terms]]
+term = "Background"
+meaning = "The genes that could have been called: the ones DESeq2 tested."
+
+[[terms]]
+term = "NES"
+meaning = "Normalised enrichment score: positive when the set gathers among genes that went up."
+
+[[terms]]
+term = "ORA FDR"
+meaning = "Benjamini-Hochberg over the hypergeometric p-values of the sets tested."
+
+[[terms]]
+term = "GSEA FDR"
+meaning = "The false discovery rate over all sets tested, from gene-set permutations."
+
+[[terms]]
+term = "Wald statistic"
+meaning = "A gene's fold change divided by its standard error; it carries the sign."
+
+# The self-checks: the ranking always, the background one in the direction the plotted sets
+# moved, where the two backgrounds differ.
+[questions.rank]
+prompt = "Why rank by the Wald statistic rather than by the fold change?"
+answer = "The statistic weighs the change by its certainty; a large fold change on few counts would otherwise sit at the top."
+
 [questions.union_more]
 prompt = "Why does the gene-set union background make the same hits look more significant?"
 answer = "It adds genes that could never have been called, such as ones not expressed in the cells, so the expected overlap shrinks and ordinary overlaps look rare."
@@ -43,3 +58,119 @@ answer = "The union adds each set's own untested members, such as genes not expr
 [questions.union_mixed]
 prompt = "Why does the gene-set union background make some sets look more significant and others less?"
 answer = "It adds untested genes to the background and to each set. A set that grows proportionally more expects more calls and looks weaker; one that grows less looks stronger."
+
+# A gene set in words: the identifier's name after its collection prefix, in sentence case,
+# then the collection; a prefix not listed reads as the identifier in words.
+[gene_sets]
+named = "{name}, {collection}"
+
+[gene_sets.collections]
+HALLMARK = "MSigDB Hallmark"
+
+[groups]
+featured = "Featured contrast: {label}"
+one_set = "One gene set: {gene_set}"
+background = "Method: the background"
+untested = "{gene_set} was tested in no contrast: after the cut to the ranked genes its size is outside {low} to {high}, or it is not in {file}."
+no_running = "No running score: {gene_set} was not tested in {label}."
+
+[sets]
+title = "Gene sets"
+columns = ["File", "Sets", "Licence"]
+
+[keys]
+sets = "Gene sets"
+contrasts = "Contrasts"
+passing = "Sets at FDR < {alpha}"
+passing_detail = "GSEA, {label}"
+nes = "NES, {gene_set}"
+nes_detail = "FDR {fdr}, {label}"
+
+# An FDR of 0 means no null score was as extreme, not certainty.
+[fdr]
+zero = "0 (no null score as extreme)"
+
+[significance]
+passing = "FDR < {alpha}"
+failing = "not significant"
+
+# Over-representation draws only the sets that pass, so a direction with none has no bar; the
+# lead counts both directions, 0 included.
+[figures.ora]
+title = "Over-representation: {label}"
+tab = "ORA"
+lead = "{up} gene sets pass FDR < {alpha} on the up calls, {down} on the down calls."
+reading = [
+    "Each bar is one gene set; its length is -log10 of its FDR, so a longer bar is stronger evidence of over-representation.",
+    "Colour says which calls were counted: up or down in {tested} ({calls}).",
+]
+calls = "padj below {alpha}, log2 FC at or beyond ±{lfc_min}"
+caption = "{label}: hypergeometric ORA of the up and down calls ({calls}), BH per direction. Background: the {background:,} gene symbols of the tested genes. Drawn: the sets past the dashed line, FDR = {alpha}."
+passing = "Every bar passes the dashed line, FDR = {alpha}: the set holds more calls than its share of the {background:,} tested gene symbols predicts."
+# Shown in place of the figure when no set passes in either direction.
+none = "No gene set passes FDR < {alpha} on the up or the down calls, so no bar is drawn."
+x = "Gene set"
+y = "Significance"
+line = "FDR {alpha}"
+
+# The last reading line of the GSEA bars, by how many of the bars drawn pass; the caption
+# counts the sets drawn, fewer than the fifteen where fewer were tested.
+[figures.gsea]
+title = "Gene set enrichment: {label}"
+tab = "GSEA"
+lead = "{passing} of {tested} tested gene sets pass FDR < {alpha}."
+reading = [
+    "Each bar is one gene set, the sets with the smallest FDR on top; its length is the NES.",
+    "Right of 0, the set's genes gather among genes higher in {tested}; left of 0, among genes higher in {reference}.",
+]
+caption = "{label}: preranked GSEA on the Wald statistic, {permutations} gene-set permutations, seed {seed}; the {shown} sets with the smallest FDR."
+caption_one = "{label}: preranked GSEA on the Wald statistic, {permutations} gene-set permutations, seed {seed}; the one set tested."
+some = "Highlighted bars pass FDR < {alpha}; the others are shown for context."
+all = "Every bar drawn passes FDR < {alpha}, so every bar is highlighted."
+no = "No bar drawn passes FDR < {alpha}, so none is highlighted."
+x = "Gene set"
+y = "NES"
+
+[figures.nes]
+title = "{gene_set} in every contrast"
+lead = "The same set, ranked and permuted separately in each of {contrasts} contrasts."
+reading = [
+    "Each bar is one contrast; its length is the set's NES there.",
+    "Right of 0, the set's genes sit among genes higher in that contrast's tested group; left of 0, lower.",
+    "Highlighted bars pass FDR < {alpha}.",
+]
+caption = "{gene_set}: NES in every contrast, each ranked and permuted separately."
+x = "Contrast"
+y = "NES"
+
+[figures.running]
+title = "Running score: {gene_set} in {label}"
+lead = "ES = {es:.2f}, NES = {nes:.2f}, FDR = {fdr}."
+reading = [
+    "The {ranked:,} genes are ranked from most up to most down in {tested}; the curve rises at each set member and falls between them.",
+    "Dots mark the set's {size} members; the curve's furthest point from 0 is the enrichment score.",
+    "A peak near the start means the members gather among genes higher in {tested}; a trough near the end, among genes higher in {reference}.",
+]
+caption = "{gene_set} in {label}: ES = {es:.2f}, NES = {nes:.2f}, nominal p = {p:.2g}, FDR = {fdr}. {size} members of {ranked:,} ranked genes; {permutations} gene-set permutations, seed {seed}."
+x = "Rank"
+y = "Enrichment score"
+member = "set member"
+line = "running score"
+
+# The background lesson. Against the gene-set union a set's share of the background grows
+# by its own untested members and shrinks by everyone else's; which wins differs by set, so
+# the words follow the plotted sets: more (most look more significant), less, or mixed.
+[figures.background]
+title = "The background decides the p-value"
+reading_first = "Each gene set appears twice: tested against the genes DESeq2 tested, and against every gene in any set plus the tested ones, gseapy's default."
+reading_last = "Use the tested genes: only they could have been called."
+caption = "{label}: the same {calls:,} up calls, {hits:,} gene symbols, tested by hypergeometric p against two backgrounds. One is the tested genes' {tested:,} symbols; the other, {union:,}, adds every symbol in the sets, gseapy's default when given none."
+lead_same = "Here both backgrounds hold the same genes, so the bars match."
+lead_moved = "Against {union:,} gene symbols instead of {tested:,}, {more} of {shown} sets look more significant and {less} less."
+more = "A longer bar looks more significant. Here most sets grow proportionally less than the background, which gains genes that could never be called, so they look stronger."
+less = "A longer bar looks more significant. Here most sets grow proportionally more than the background, by their own members that could never be called, so they look weaker."
+mixed = "A longer bar looks more significant. A set that grows proportionally more than the background, by its own untested members, looks weaker; one that grows less looks stronger."
+tested_genes = "tested genes"
+union = "gene-set union"
+x = "Gene set"
+y = "Significance"

@@ -265,14 +265,14 @@ def test_plain_prints_the_display_text():
 def _module(**overrides) -> ModulePage:
     fields = {
         "title": "M1 Gather: Demo",
-        "question": "Check [[FASTQ]] files, [[fastq]] again, and [[FASTQ!]] once more.",
+        "purpose": "Check [[FASTQ]] files, [[fastq]] again, and [[FASTQ!]] once more.",
         "input": "The [[md5]] files.",
-        "concept": "A [[FASTQ]] in `[[FASTQ]]` code.",
+        "method": "A [[FASTQ]] in `[[FASTQ]]` code.",
         "parameters": (ParameterCard("--root", "Where outputs go.", "cwd", "Moves outputs."),),
         "results": ("One result.",),
-        "practice": "In practice.",
-        "think": (SelfCheck("Why?", "Because one."),),
-        "mistakes": ("A mistake.",),
+        "interpretation": "In practice.",
+        "questions": (SelfCheck("Why?", "Because one."),),
+        "pitfalls": ("A mistake.",),
         "reproduce": Reproduction("ctx gather", 1.0, 1, 0, "laptop", "B", {"python": "3"}),
     }
     return ModulePage(**{**fields, **overrides})
@@ -304,7 +304,7 @@ def test_a_page_without_marks_carries_no_tooltips():
 
     Mutation: the tooltips payload written whatever the page marks fails it.
     """
-    html = render(_module(question="Plain.", input="Plain.", concept="Plain."))
+    html = render(_module(purpose="Plain.", input="Plain.", method="Plain."))
     assert 'type="application/json" id="ctx-glossary"' not in html
     assert 'class="glossary-link"' not in html
 
@@ -542,8 +542,8 @@ def test_a_mark_in_code_is_code():
     Mutation: marks() reading the whole text, code included: phred's tooltip is embedded, and
     the unknown name in code raises.
     """
-    html = render(_module(question="Type `[[phred]]` to mark a term.", input="Plain.",
-                          concept="Type `[[your term]]` too."))  # fmt: skip
+    html = render(_module(purpose="Type `[[phred]]` to mark a term.", input="Plain.",
+                          method="Type `[[your term]]` too."))  # fmt: skip
     assert "<code>[[phred]]</code>" in html and "data-term=" not in html
     assert 'id="ctx-glossary"' not in html
     assert marks.plain("Type `[[phred]]` or [[phred|Q]].") == "Type `[[phred]]` or Q."
@@ -556,7 +556,7 @@ def test_render_refuses_an_unknown_mark():
     Mutation: Terms.html and used() both skipping an unknown mark: the page renders it as text.
     """
     with pytest.raises(glossary.GlossaryError, match="'no such term' is not in the glossary"):
-        render(_module(question="Check [[no such term]]."))
+        render(_module(purpose="Check [[no such term]]."))
 
 
 def test_blank_render_has_no_link_but_every_tooltip_names_its_term():

@@ -18,7 +18,6 @@ from ctx.quant import tables as tab
 from ctx.quant.figures import UNITS
 from ctx.report import text
 from ctx.report.builder import (
-    FIELDS,
     FigureBlock,
     Group,
     KeyNumber,
@@ -217,7 +216,7 @@ def sections(ctx: Context) -> dict[str, Any]:
         filled = {"input": text.fill(PAGE, "input", n=n,
                                      release=provenance.get("nf-core/rnaseq", ""),
                                      salmon=provenance.get("salmon", ""))}  # fmt: skip
-    return text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}
+    return text.skeleton(PAGE) | filled
 
 
 def build(ctx: Context) -> ModulePage:

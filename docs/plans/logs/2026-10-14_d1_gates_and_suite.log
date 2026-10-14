@@ -1,0 +1,28 @@
+== ruff check src tests scripts
+All checks passed!
+exit 0
+== ruff format --check src tests scripts
+281 files already formatted
+exit 0
+== mypy src
+Success: no issues found in 139 source files
+exit 0
+== python -m interrogate src
+RESULT: PASSED (minimum: 100.0%, actual: 100.0%)
+exit 0
+== labdocs lint
+exit 0
+== labdocs render --check
+exit 0
+== python -m ctx.report.prose
+prose lint: no violations
+exit 0
+== python -m ctx.report.glossary_lint
+warning: setup: pitfalls: 'counts' is raw_counts, unmarked
+warning: setup: questions: 'fastp' is fastp, unmarked
+glossary lint: no errors
+exit 0
+== pytest -q -n auto --dist loadscope
+1558 passed, 10 skipped, 1 warning in 366.32s (0:06:06)
+      369.08 real      1053.94 user       300.26 sys
+          1249689600  maximum resident set size

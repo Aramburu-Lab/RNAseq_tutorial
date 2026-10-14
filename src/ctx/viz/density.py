@@ -14,7 +14,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title
 from ctx.viz.contour import (
     DENSITY_BINS,
@@ -241,6 +241,7 @@ class DensityData:
         self._axes(ax, height)
         sns.despine(fig=fig)
         place_caption(fig, self.caption, width, height, ax=ax, handles=self._handles(theme))
+        refit_y_title(fig, ax, self._titles()[1])
         return fig
 
     def _axes(self, ax: Any, height: float) -> None:
@@ -312,7 +313,7 @@ class DensityData:
         fig.update_layout(
             template=plotly_templates()["white"], height=PLOTLY_HEIGHT_PX["contour"],
             xaxis={"title": {"text": x_title}, "type": "log" if self.log_x else "linear"},
-            yaxis={"title": {"text": page_y_title(y_title, self._inches()[1])},
+            yaxis={"title": {"text": page_y_title(y_title, files_room(self.static))},
                    "type": "log" if self.log_y else "linear"},
         )  # fmt: skip
         return fig

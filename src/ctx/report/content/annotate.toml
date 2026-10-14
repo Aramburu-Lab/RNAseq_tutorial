@@ -1,0 +1,15 @@
+# The statistical annotation every figure shares (ctx.viz.annotate): the test names and the
+# caption sentences the PDF, the SVG, the page and the README all print from one object.
+# Placeholders in {braces} are filled by the code; keep their names.
+
+test_name = "Mann-Whitney U, two-sided"
+permanova_name = "PERMANOVA on Euclidean distances"
+# Printed above each feature of a box figure.
+label = "p={p}\nr={r:.2f}"
+caption = "{test}; p is BH-adjusted over {features} plotted features; {sizes}; rank-biserial r > 0 when {comparison} is higher."
+sizes = "n = {n_reference} {reference}, {n_comparison} {comparison}"
+
+[permanova]
+tested = "{name} for {factor}: R² = {r2:.2f}, pseudo-F = {f:.3g}, p = {p} ({permutations} permutations{within}; n = {n} samples in {groups} groups)."
+within = ", labels permuted within individuals"
+untested = "{name} for {factor}: R² = {r2:.2f}, pseudo-F = {f:.3g}; no p-value: no individual has samples in two groups, so permuting within individuals cannot move a label (n = {n} samples in {groups} groups)."

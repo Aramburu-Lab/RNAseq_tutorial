@@ -83,16 +83,22 @@ def test_cells_are_square():
     assert edges[1] - edges[0] < 0.2  # in label pitches
 
 
-def test_labelled_rows_keep_their_height():
-    """Rows the page labels (60 or fewer) keep the label rule they had: 8 samples, never square.
+def test_labelled_rows_are_square_where_a_column_holds_their_label():
+    """Labelled rows draw square cells where a column's width holds a label: 8 samples do,
+    40 do not (4.25 mm against 4.5 mm) and keep the label rule.
 
-    Held square, Step-1's 8-sample laptop heatmap never finished loading: the page script set
-    heights 938.1 and 946.5 px in turn without end (2026-10-09). Mutation: ``_square`` without
-    its label check: the 8-sample page holds square cells through plotly.
+    The page script settles the 8-sample page's alternating heights (test_heatmap_cycle.py).
+    Mutations: ``_square`` for unlabelled rows only, as before 2026-10-14: the 8 samples' cells
+    stand 0.21 as tall as wide; ``_square`` without its label check: 40 labelled rows squeezed
+    to 4.25 mm.
     """
     labelled = heatmap(8)
-    assert labelled.interactive().layout.yaxis.scaleanchor is None
-    assert labelled.cell_aspect() < 1
+    assert labelled.interactive().layout.yaxis.scaleanchor == "x"
+    assert abs(labelled.cell_aspect() - 1) < 0.01
+    crowded = heatmap(40)
+    assert not crowded._square()
+    assert crowded.cell_aspect() > 1.02  # each row a label's 4.5 mm, a column 4.25 mm
+    assert crowded._static_edges()[-1] - crowded._static_edges()[-41] == 40
 
 
 def test_track_names_keep_their_row():

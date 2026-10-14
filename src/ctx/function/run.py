@@ -17,27 +17,27 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Contrast, Dataset, DatasetError, load
+from ctx.de.page import Words, every
 from ctx.de.run import Writer, newest
 from ctx.de.stats import ALPHA
 from ctx.function import lite
 from ctx.function.page import (
     CALLS,
-    CONCEPT,
-    MISTAKES,
     PAGE,
-    PRACTICE,
-    QUESTION,
-    TERMS,
     fdr_words,
+    figure,
     gsea_text,
     nes_text,
     ora_text,
+    questions,
     running_text,
-    think,
+    set_words,
     trap_text,
     union_direction,
 )
+from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
+from ctx.report import text
 from ctx.report.builder import (
     FigureBlock,
     Group,
@@ -50,7 +50,7 @@ from ctx.report.builder import (
     SelfCheck,
     write,
 )
-from ctx.report.text import fill
+from ctx.report.text import fill, word
 from ctx.viz.bar import BarData
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import ROLES, category_colours
@@ -119,24 +119,26 @@ def _ora(
     return pl.DataFrame(rows, schema=list(ORA_COLUMNS), orient="row")
 
 
-def _gsea_bars(name: str, frame: pl.DataFrame) -> BarData:
+def _passing() -> tuple[str, str]:
+    """The words of a set that passes FDR < ALPHA, and of one that does not."""
+    return text.fill(PAGE, "significance.passing", alpha=ALPHA), word(PAGE, "significance.failing")
+
+
+def _labelled(frame: pl.DataFrame) -> pl.DataFrame:
+    """The frame with each gene set in words, as the bars name it."""
+    return frame.with_columns(label=pl.col("gene_set").map_elements(set_words, pl.String))
+
+
+def _gsea_bars(said: Words, frame: pl.DataFrame) -> BarData:
     """NES of the sets with the smallest FDR."""
-    top = (
-        frame.sort("fdr", "gene_set")
-        .head(TOP_SETS)
-        .with_columns(
-            label=pl.col("gene_set")
-            .str.replace("^HALLMARK_", "")
-            .str.replace_all("_", " ")
-            .str.to_lowercase(),
-            significance=pl.when(pl.col("fdr") < ALPHA)
-            .then(pl.lit(f"FDR < {ALPHA}"))
-            .otherwise(pl.lit("not significant")),
-        )
-    )
+    passing, failing = _passing()
+    top = _labelled(frame.sort("fdr", "gene_set").head(TOP_SETS)).with_columns(
+        significance=pl.when(pl.col("fdr") < ALPHA).then(pl.lit(passing))
+        .otherwise(pl.lit(failing)),
+    )  # fmt: skip
     columns = {
         **GSEA_COLUMNS,
-        "label": ("none", "Set name, shortened."),
+        "label": ("none", "Set name in words."),
         "significance": ("none", f"FDR below {ALPHA} or not."),
     }
     # The sets drawn, which fall short of TOP_SETS where fewer were tested.
@@ -146,75 +148,78 @@ def _gsea_bars(name: str, frame: pl.DataFrame) -> BarData:
         columns=columns,
         category="label",
         value="nes",
-        category_label="Gene set",
-        value_label="NES",
+        category_label=figure("gsea", "x"),
+        value_label=figure("gsea", "y"),
         series="significance",
-        colours={f"FDR < {ALPHA}": ROLES["comparison"], "not significant": None},
+        colours={passing: ROLES["comparison"], failing: None},
         caption=fill(
-            PAGE, key, name=name, permutations=lite.PERMUTATIONS, seed=lite.SEED, shown=top.height
-        ),
+            PAGE,
+            key,
+            label=said.label,
+            permutations=lite.PERMUTATIONS,
+            seed=lite.SEED,
+            shown=top.height,
+        ),  # fmt: skip
         horizontal=True,
-        hover=("fdr", "size"),
+        hover=("gene_set", "fdr", "size"),
         width="double",
     )
 
 
-def _ora_bars(name: str, frame: pl.DataFrame, background: int) -> BarData | None:
+def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | None:
     """-log10 FDR of every set that passes, a block per direction; None when none passes.
 
     A set that fails has no bar: drawn among the top seven per direction, 5 of Step-1's down
     bars sat at FDR 1, a length of 1.6e-13.
     """
-    top = (
+    top = _labelled(
         frame.filter(pl.col("fdr") < ALPHA)
         # The direction holding the smallest FDR first, each direction's sets by FDR.
         .sort(pl.col("fdr").min().over("direction"), "direction", "fdr", "gene_set")
-        .with_columns(
-            neg_log10_fdr=-pl.col("fdr").log10(),
-            label=pl.col("gene_set")
-            .str.replace("^HALLMARK_", "")
-            .str.replace_all("_", " ")
-            .str.to_lowercase(),
-        )
-        .unique(["label", "direction"], maintain_order=True)
-    )
+        .with_columns(neg_log10_fdr=-pl.col("fdr").log10())
+    ).unique(["label", "direction"], maintain_order=True)
     if top.is_empty():
         return None
     columns = {
         **ORA_COLUMNS,
         "neg_log10_fdr": ("-log10 FDR", "Minus log10 of the FDR."),
-        "label": ("none", "Set name, shortened."),
+        "label": ("none", "Set name in words."),
     }
     return BarData(
         frame=top,
         columns=columns,
         category="label",
         value="neg_log10_fdr",
-        category_label="Gene set",
-        value_label="Significance",
+        category_label=figure("ora", "x"),
+        value_label=figure("ora", "y"),
         series="direction",
         colours={"up": ROLES["comparison"], "down": ROLES["reference"]},
-        caption=fill(
-            PAGE, "figures.ora.caption", name=name, calls=CALLS, background=background, alpha=ALPHA
-        ),
+        caption=figure(
+            "ora", "caption", label=said.label, calls=CALLS, background=background, alpha=ALPHA
+        ),  # fmt: skip
         horizontal=True,
-        hline=(-float(np.log10(ALPHA)), f"FDR {ALPHA}"),
-        hover=("hits", "size"),
+        hline=(-float(np.log10(ALPHA)), figure("ora", "line", alpha=ALPHA)),
+        hover=("gene_set", "hits", "size"),
         width="double",
     )
 
 
-def _featured_bars(featured: str, per_contrast: Mapping[str, pl.DataFrame]) -> BarData:
-    """One set's NES in every contrast."""
+def _featured_bars(
+    featured: str, per_contrast: Mapping[str, pl.DataFrame], said: Mapping[str, Words]
+) -> BarData:
+    """One set's NES in every contrast, each contrast by its label."""
+    passing, failing = _passing()
     rows = []
     for name, frame in per_contrast.items():
         found = frame.filter(pl.col("gene_set") == featured)
         if found.height:
             nes, fdr = found.row(0, named=True)["nes"], found.row(0, named=True)["fdr"]
-            rows.append((name, nes, fdr, f"FDR < {ALPHA}" if fdr < ALPHA else "not significant"))
-    frame = pl.DataFrame(rows, schema=["contrast", "nes", "fdr", "significance"], orient="row")
+            rows.append((name, said[name].label, nes, fdr, passing if fdr < ALPHA else failing))
+    frame = pl.DataFrame(rows, schema=["contrast", "label", "nes", "fdr", "significance"],
+                         orient="row")  # fmt: skip
     columns = {
         "contrast": ("none", "Contrast."),
+        "label": ("none", "The contrast in words, as the page names it."),
         "nes": GSEA_COLUMNS["nes"],
         "fdr": GSEA_COLUMNS["fdr"],
         "significance": ("none", f"FDR below {ALPHA} or not."),
@@ -222,20 +227,20 @@ def _featured_bars(featured: str, per_contrast: Mapping[str, pl.DataFrame]) -> B
     return BarData(
         frame=frame,
         columns=columns,
-        category="contrast",
+        category="label",
         value="nes",
-        category_label="Contrast",
-        value_label="NES",
+        category_label=figure("nes", "x"),
+        value_label=figure("nes", "y"),
         series="significance",
-        colours={f"FDR < {ALPHA}": ROLES["comparison"], "not significant": None},
-        caption=f"{featured}: NES in every contrast, each ranked and permuted separately.",
+        colours={passing: ROLES["comparison"], failing: None},
+        caption=figure("nes", "caption", gene_set=set_words(featured)),
         horizontal=True,
-        hover=("fdr",),
+        hover=("contrast", "fdr"),
         width="double",
     )
 
 
-def _running(name: str, result: lite.Enriched) -> ScatterData:
+def _running(said: Words, result: lite.Enriched) -> ScatterData:
     """The running enrichment score, with the set's genes as ticks along the ranking."""
     ranks = tuple(float(i) for i in range(len(result.running)))
     # A rank is a whole number: as a float, the hover printed 12,345 as 1.23e+4.
@@ -243,7 +248,7 @@ def _running(name: str, result: lite.Enriched) -> ScatterData:
         {
             "rank": pl.Series([int(p) for p in result.positions], dtype=pl.Int64),
             "running": [result.running[p] for p in result.positions],
-            "mark": ["set member"] * result.size,
+            "mark": [figure("running", "member")] * result.size,
         }
     )
     columns = {
@@ -251,30 +256,29 @@ def _running(name: str, result: lite.Enriched) -> ScatterData:
         "running": ("dimensionless", "Running enrichment score at this member."),
         "mark": ("none", "Set member."),
     }
-    caption = (
-        f"{result.name} in {name}: ES = {result.es:.2f}, NES = {result.nes:.2f}, nominal "
-        f"p = {result.p:.2g}, FDR = {fdr_words(result.fdr)}; {result.size} members of "
-        f"{len(ranks):,} ranked genes; {lite.PERMUTATIONS} gene-set permutations, seed "
-        f"{lite.SEED}."
-    )
+    caption = figure("running", "caption", gene_set=set_words(result.name), label=said.label,
+                     es=result.es, nes=result.nes, p=result.p, fdr=fdr_words(result.fdr),
+                     size=result.size, ranked=len(ranks), permutations=lite.PERMUTATIONS,
+                     seed=lite.SEED)  # fmt: skip
+    member = figure("running", "member")
     return ScatterData(
         frame=frame,
         columns=columns,
         x="rank",
         y="running",
-        x_label="Rank",
-        y_label="Enrichment score",
+        x_label=figure("running", "x"),
+        y_label=figure("running", "y"),
         colour="mark",
-        colours={"set member": ROLES["comparison"]},
-        names={"set member": "set member"},
+        colours={member: ROLES["comparison"]},
+        names={member: member},
         caption=caption,
-        lines=(Line("running score", ranks, result.running),),
+        lines=(Line(figure("running", "line"), ranks, result.running),),
         width="double",
     )
 
 
 def _trap(
-    name: str, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]
+    said: Words, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]
 ) -> tuple[BarData, int, int]:
     """The same up calls tested against the tested genes and against the gene-set union.
 
@@ -287,14 +291,15 @@ def _trap(
     right = {r.name: r for r in lite.ora(hits, tested, sets)}
     wrong = {r.name: r for r in lite.ora(hits, union, sets)}
     shown = sorted(right, key=lambda s: right[s].p)[: TOP_SETS // 2]
+    backgrounds = (figure("background", "tested_genes"), figure("background", "union"))
     rows = [
-        (s.replace("HALLMARK_", "").replace("_", " ").lower(), label, float(-np.log10(r[s].p)))
+        (set_words(s), label, float(-np.log10(r[s].p)))
         for s in shown
-        for label, r in (("tested genes", right), ("gene-set union", wrong))
+        for label, r in zip(backgrounds, (right, wrong), strict=True)
     ]
     frame = pl.DataFrame(rows, schema=["gene_set", "background", "neg_log10_p"], orient="row")
     columns = {
-        "gene_set": ("none", "Gene set, shortened."),
+        "gene_set": ("none", "Gene set in words."),
         "background": ("none", "ORA background."),
         "neg_log10_p": ("-log10 p", "Hypergeometric p of the up calls."),
     }
@@ -303,14 +308,14 @@ def _trap(
         columns=columns,
         category="gene_set",
         value="neg_log10_p",
-        category_label="Gene set",
-        value_label="Significance",
+        category_label=figure("background", "x"),
+        value_label=figure("background", "y"),
         series="background",
-        colours=category_colours(["tested genes", "gene-set union"]),
+        colours=category_colours(list(backgrounds)),
         caption=fill(
             PAGE,
             "figures.background.caption",
-            name=name,
+            label=said.label,
             calls=_tested(results, "up").height,
             hits=len(hits),
             tested=len(tested),
@@ -325,7 +330,7 @@ def _trap(
 def _moved(trap: BarData) -> tuple[int, int, int]:
     """The plotted sets that look more, and less, significant against the union; and all."""
     wide = trap.frame.pivot(on="background", index="gene_set", values="neg_log10_p")
-    union, tested = wide["gene-set union"], wide["tested genes"]
+    union, tested = wide[figure("background", "union")], wide[figure("background", "tested_genes")]
     return int((union > tested).sum()), int((union < tested).sum()), wide.height
 
 
@@ -340,25 +345,25 @@ class _Enrichment:
     gmt: Path
 
 
-def _featured(writer: Writer, contrast: Contrast, e: _Enrichment) -> Group:
+def _featured(writer: Writer, contrast: Contrast, said: Words, e: _Enrichment) -> Group:
     """The featured contrast's ORA and GSEA bars; a sentence where no ORA set passes."""
     name = contrast.name
     background = _symbols(e.results[name])
     ora = _ora(e.results[name], e.sets, background)
     passing = dict(ora.filter(pl.col("fdr") < ALPHA)["direction"].value_counts().rows())
-    bars = _ora_bars(name, ora, len(background))
+    bars = _ora_bars(said, ora, len(background))
     gsea = e.gsea[name]
-    ranked = _gsea_bars(name, gsea)
+    ranked = _gsea_bars(said, gsea)
     drawn = (int((ranked.frame["fdr"] < ALPHA).sum()), ranked.frame.height)
     items = (
-        writer.figure(bars, f"ora_{name}", ora_text(contrast, len(background),
+        writer.figure(bars, f"ora_{name}", ora_text(said, len(background),
                                                     passing.get("up", 0), passing.get("down", 0)))
         if bars else fill(PAGE, "figures.ora.none", alpha=ALPHA),
         writer.figure(ranked, f"gsea_{name}",
-                      gsea_text(contrast, int((gsea["fdr"] < ALPHA).sum()), gsea.height, drawn)),
+                      gsea_text(said, int((gsea["fdr"] < ALPHA).sum()), gsea.height, drawn)),
     )  # fmt: skip
     # Tabs hold figures only: with no ORA figure its sentence stands above the GSEA bars.
-    return Group(f"Featured contrast: {name}", items, tabs=bars is not None)
+    return Group(fill(PAGE, "groups.featured", label=said.label), items, tabs=bars is not None)
 
 
 def _page(
@@ -369,51 +374,54 @@ def _page(
     fn = spec.function
     featured = spec.de.featured
     contrasts = {c.name: c for c in spec.contrasts}
+    said = every(spec.contrasts, spec.columns)
     gsea = e.gsea[featured]
-    first = _featured(writer, contrasts[featured], e)
+    first = _featured(writer, contrasts[featured], said[featured], e)
     one_set: list[FigureBlock | str] = []
     tested = [n for n, table in e.gsea.items() if fn.featured_set in set(table["gene_set"])]
     if tested:
-        featured_bars = _featured_bars(fn.featured_set, e.gsea)
+        featured_bars = _featured_bars(fn.featured_set, e.gsea, said)
         one_set.append(writer.figure(featured_bars, f"nes_{_slug(fn.featured_set)}",
                                      nes_text(fn.featured_set, len(tested))))  # fmt: skip
     else:
-        one_set.append(
-            f"{fn.featured_set} was tested in no contrast: after the cut to the ranked genes its "
-            f"size is outside {lite.MIN_SIZE} to {lite.MAX_SIZE}, or it is not in {e.gmt.name}."
-        )
+        one_set.append(fill(PAGE, "groups.untested", gene_set=set_words(fn.featured_set),
+                            low=lite.MIN_SIZE, high=lite.MAX_SIZE, file=e.gmt.name))  # fmt: skip
     contrast, gene_set = fn.running
     if gene_set in e.enriched[contrast]:
         hit = e.enriched[contrast][gene_set]
         one_set.append(writer.figure(
-            _running(contrast, hit), f"running_{contrast}",
-            running_text(contrasts[contrast], hit, len(hit.running)),
+            _running(said[contrast], hit), f"running_{contrast}",
+            running_text(said[contrast], hit, len(hit.running)),
         ))  # fmt: skip
     else:
-        one_set.append(f"No running score: {gene_set} was not tested in {contrast}.")
-    trap, n_tested, n_union = _trap(featured, e.results[featured], e.sets)
+        one_set.append(fill(PAGE, "groups.no_running", gene_set=set_words(gene_set),
+                            label=said[contrast].label))  # fmt: skip
+    trap, n_tested, n_union = _trap(said[featured], e.results[featured], e.sets)
     more, less, shown_sets = _moved(trap)
     page_results: list[Result] = [
-        ResultTable("Gene sets", ("File", "Sets", "Licence"), ((e.gmt.name, f"{len(e.sets):,}",
-                                                               fn.licence),), numeric=(1,)),
+        *_acknowledged(spec),
+        ResultTable(word(PAGE, "sets.title"), text.words(PAGE, "sets.columns"),
+                    ((e.gmt.name, f"{len(e.sets):,}", fn.licence),), numeric=(1,)),
         first,
-        Group(f"One gene set: {fn.featured_set}", tuple(one_set)),
-        Group("Method: the background", (writer.figure(
+        Group(fill(PAGE, "groups.one_set", gene_set=set_words(fn.featured_set)), tuple(one_set)),
+        Group(word(PAGE, "groups.background"), (writer.figure(
             trap, f"background_{featured}",
             trap_text(n_tested, n_union, (more, less), shown_sets)),)),
     ]  # fmt: skip
+    label = said[featured].label
     keys: tuple[KeyNumber, ...] = (
-        KeyNumber("Gene sets", f"{len(e.sets):,}", e.gmt.name),
-        KeyNumber("Contrasts", f"{len(e.results)}"),
-        KeyNumber(f"Sets at FDR < {ALPHA}", f"{int((gsea['fdr'] < ALPHA).sum())}",
-                  f"GSEA, {featured}"),
+        KeyNumber(word(PAGE, "keys.sets"), f"{len(e.sets):,}", e.gmt.name),
+        KeyNumber(word(PAGE, "keys.contrasts"), f"{len(e.results)}"),
+        KeyNumber(fill(PAGE, "keys.passing", alpha=ALPHA), f"{int((gsea['fdr'] < ALPHA).sum())}",
+                  fill(PAGE, "keys.passing_detail", label=label)),
     )  # fmt: skip
     shown = e.enriched[featured].get(fn.featured_set)
     if shown:
-        keys += (KeyNumber(f"NES, {_short(fn.featured_set)}", f"{shown.nes:.2f}",
-                           f"FDR {fdr_words(shown.fdr)}, {featured}"),)  # fmt: skip
+        detail = fill(PAGE, "keys.nes_detail", fdr=fdr_words(shown.fdr), label=label)
+        keys += (KeyNumber(fill(PAGE, "keys.nes", gene_set=set_words(fn.featured_set)),
+                           f"{shown.nes:.2f}", detail),)  # fmt: skip
     direction = None if n_union == n_tested else union_direction(more, less)
-    return page_results, keys, think(direction)
+    return page_results, keys, questions(direction)
 
 
 def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named option or context
@@ -499,23 +507,18 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     usage = runtime.measure(settings.started)
     budget = runtime.budget(MODULE)
     page = ModulePage(
-        title=f"M6 Function: {spec.name}",
-        question=QUESTION,
-        concept=CONCEPT,
+        title=fill(PAGE, "title", dataset=spec.name),
+        **(text.skeleton(PAGE, alpha=ALPHA) | {"questions": checks}),
         parameters=cards,
         results=tuple(page_results),
-        practice=PRACTICE,
-        think=checks,
-        mistakes=MISTAKES,
         key_numbers=keys,
-        terms=TERMS,
         reproduce=Reproduction(
             command=command,
             wall_seconds=usage.wall_seconds,
             peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children,
             profile=f"{settings.profile}, {settings.threads} threads",
-            budget=f"Track B: under {budget.minutes} min and {budget.ram_gb} GB",
+            budget=fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
             versions=runtime.versions(),
         ),
     )
@@ -525,9 +528,9 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     ]
 
 
-def _short(name: str) -> str:
-    """A gene set name as a label, without the collection prefix."""
-    return re.sub(r"^HALLMARK_", "", name).replace("_", " ").lower()
+def _acknowledged(spec: Dataset) -> tuple[str, ...]:
+    """The GDC acknowledgement for a page drawn from GDC data, as M5's page prints it."""
+    return gdc.acknowledgement(spec.gdc) if spec.gdc is not None else ()
 
 
 def _slug(name: str) -> str:

@@ -159,10 +159,10 @@ def built(tmp_path_factory):
         write_figure(map_, out, figure_stem, title=name, data_releases={}, text=text)
         blocks.append(figure_block(map_, figure_stem, text))
     page = ModulePage(
-        title="M2 Demo: heatmaps", question="Purpose.", concept="Method.",
+        title="M2 Demo: heatmaps", purpose="Purpose.", input="Input.", method="Method.",
         parameters=(ParameterCard("--x", "A card.", "1", "Moves it."),),
-        results=(Group("Figures", tuple(blocks)),), practice="Interpretation.",
-        think=(SelfCheck("A question.", "An answer."),), mistakes=("A pitfall.",),
+        results=(Group("Figures", tuple(blocks)),), interpretation="Interpretation.",
+        questions=(SelfCheck("A question.", "An answer."),), pitfalls=("A pitfall.",),
         reproduce=Reproduction("ctx demo", 1.0, 1, 1, "laptop", "none", {"python": "3.12"}),
     )  # fmt: skip
     module = write(page, out / f"{stem('qc', 'heatmaps_overview', 1, day=date(2026, 10, 7))}.html")

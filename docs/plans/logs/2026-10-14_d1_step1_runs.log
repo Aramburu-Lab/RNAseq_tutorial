@@ -1,0 +1,12 @@
+== gather
+       37.62 real         5.58 user         1.46 sys
+           922632192  maximum resident set size
+== de
+      163.75 real       431.32 user        25.62 sys
+          2122547200  maximum resident set size
+== function
+       31.91 real        13.38 user         3.89 sys
+           687439872  maximum resident set size
+== report
+        1.55 real         0.43 user         0.14 sys
+           143048704  maximum resident set size

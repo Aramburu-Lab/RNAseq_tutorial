@@ -7,19 +7,19 @@
 {% block page_class %} has-rail{% endblock %}
 {% block rail %}
 <nav class="toc" aria-label="{{ ui.contents.label }}"><p class="toc-title">{{ ui.contents.title }}</p><ol>
-{% for id, title in sections if id != "input" or page.input %}<li><a href="#{{ id }}">{{ title }}</a>{% if id == "results" and outline %}<ol class="sub">{% for anchor, label in outline %}<li><a href="#{{ anchor }}">{{ label }}</a></li>{% endfor %}</ol>{% endif %}</li>
+{% for id, title in sections %}<li><a href="#{{ id }}">{{ title }}</a>{% if id == "results" and outline %}<ol class="sub">{% for anchor, label in outline %}<li><a href="#{{ anchor }}">{{ label }}</a></li>{% endfor %}</ol>{% endif %}</li>
 {% endfor %}</ol></nav>
 {% endblock %}
 {% block content %}
-{% for id, title in sections if id != "input" or page.input %}
+{% for id, title in sections %}
 <section id="{{ id }}">
 <h2>{{ title }}</h2>
 {% if id == "purpose" %}
-<p class="question">{{ page.question | explain_terms(id) }}</p>
+<p class="question">{{ page.purpose | explain_terms(id) }}</p>
 {% elif id == "input" %}
 <p class="input">{{ page.input | explain_terms(id) }}</p>
 {% elif id == "method" %}
-<p class="idea">{{ page.concept | explain_terms(id) }}</p>
+<p class="idea">{{ page.method | explain_terms(id) }}</p>
 {% if page.terms %}<details class="terms"><summary>{{ ui.page.terms }}</summary><dl>{% for term, meaning in page.terms %}<dt>{{ term }}</dt><dd>{{ meaning | code }}</dd>{% endfor %}</dl></details>{% endif %}
 {% elif id == "parameters" %}
 {{ cards_table(page.parameters) }}
@@ -40,16 +40,16 @@
 {% endif %}
 {% endfor %}
 {% elif id == "interpretation" %}
-<p class="practice">{{ page.practice | explain_terms(id) }}</p>
+<p class="practice">{{ page.interpretation | explain_terms(id) }}</p>
 {% elif id == "questions" %}
 <ol class="think">
-{% for check in page.think %}
+{% for check in page.questions %}
 <li><p class="prompt">{{ check.prompt | explain_terms(id) }}</p><details><summary>{{ ui.page.answer }}</summary><p>{{ check.answer | explain_terms(id) }}</p></details></li>
 {% endfor %}
 </ol>
 {% elif id == "pitfalls" %}
 <ul class="mistakes">
-{% for m in page.mistakes %}{% set head, colon, tail = m.partition(": ") %}<li>{% if colon %}<strong>{{ head | explain_terms(id) }}:</strong> {{ tail | explain_terms(id) }}{% else %}{{ m | explain_terms(id) }}{% endif %}</li>
+{% for m in page.pitfalls %}{% set head, colon, tail = m.partition(": ") %}<li>{% if colon %}<strong>{{ head | explain_terms(id) }}:</strong> {{ tail | explain_terms(id) }}{% else %}{{ m | explain_terms(id) }}{% endif %}</li>
 {% endfor %}
 </ul>
 {% elif id == "reproduce" %}

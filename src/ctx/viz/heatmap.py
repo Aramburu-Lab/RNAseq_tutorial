@@ -345,14 +345,19 @@ class HeatmapData:
                 (rows_mm + HEAT["margin_mm"] + label_mm) / MM_PER_INCH)  # fmt: skip
 
     def _square(self) -> bool:
-        """Whether the cells are drawn square: one kind of unit on both axes, rows unlabelled.
+        """Whether the cells are drawn square: one unit on both axes, every row holding its label.
 
-        A labelled row keeps the height its label needs, as before. Held square on the page,
-        Step-1's 8-sample laptop heatmap stopped the page loading: the page script set the
-        height that holds the aspect and plotly's margins answered with another, without end
-        (2026-10-09; the script's guard stops a repeat, not an alternation).
+        A row holds its label when it goes unlabelled or a column's width is a label's height.
+
+        A labelled row a square cell cannot hold keeps the height its label needs: 40 rows at
+        170 mm are 4.25 mm, under a 9 pt label's 4.5 mm. Step-1's 8-sample laptop heatmap,
+        21.25 mm a row, once stopped its page loading held square, until the page script
+        stopped on an alternation of heights as well as a repeat (2026-10-14).
         """
-        return self.thin and len(self.rows_in_order()) > HEAT["label_rows"]
+        if not self.thin:
+            return False
+        unlabelled = len(self.rows_in_order()) > HEAT["label_rows"]
+        return unlabelled or self._pitch_mm() >= HEAT["row_mm"] * self._row_lines()
 
     def _pitch_mm(self) -> float:
         """A column's width in mm were the cells to take the figure's whole width."""

@@ -37,7 +37,7 @@ from ctx.process import tables as tab
 from ctx.qc import registry as reg
 from ctx.qc.checkpoint import gene_types
 from ctx.report import text
-from ctx.report.builder import FIELDS, ModulePage, Reproduction, write
+from ctx.report.builder import ModulePage, Reproduction, write
 from ctx.report.cards import parameter_cards
 
 # The made-up dataset's name on the page, one word for every preview (content/ui.toml).
@@ -266,7 +266,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
     command = f"ctx process --dataset {dataset} --dataset-file {dataset}.toml --genome genome.fa.gz"
     built = ModulePage(
         title=text.fill(PAGE, "title", dataset=text.word(*SHOWN)),
-        **(text.skeleton(PAGE) | {FIELDS.get(s, s): v for s, v in filled.items()}),
+        **(text.skeleton(PAGE) | filled),
         parameters=parameter_cards(group, group.commands[MODULE]),  # type: ignore[attr-defined]
         results=body, key_numbers=pages.key_numbers(found),
         reproduce=Reproduction(

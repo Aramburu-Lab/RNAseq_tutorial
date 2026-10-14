@@ -9,6 +9,7 @@ subset; check the group sizes and the design; fit; copy the raw results; shrink 
 """
 
 import re
+import warnings
 from collections.abc import Mapping
 from dataclasses import dataclass
 from typing import Any
@@ -19,7 +20,7 @@ import polars as pl
 from ctx.dataset import Contrast, Split
 from ctx.de.filters import MIN_COUNT, expressed
 from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, classify
-from ctx.gather.curation import REPLICATE_KEYS, rank_replicates
+from ctx.gather.curation import LIBRARY, REPLICATE_KEYS, library_replicates, rank_replicates
 
 TOP_GENES = 500
 SPLIT_LEVELS = ("a", "b")
@@ -70,12 +71,15 @@ class Pca:
         genes: The genes used: the ``TOP_GENES`` most variable after the VST.
         coords: Every component's scores, samples by components; Euclidean distances here
             equal those between the samples' centred VST values over ``genes``.
+        trend: The dispersion trend the VST used: ``parametric``, or ``mean`` where
+            pydeseq2's parametric fit did not converge and it fell back.
     """
 
     scores: pl.DataFrame
     share: tuple[float, float]
     genes: tuple[str, ...]
     coords: np.ndarray
+    trend: str = "parametric"
 
 
 @dataclass(frozen=True)
@@ -139,11 +143,12 @@ def select_samples(
     variable, levels = contrast.variable, (contrast.reference, contrast.tested)
     if contrast.split is None:
         subset = subset.filter(pl.col(variable).is_in(list(levels)))
-    # A GDC sheet has no cell type: its one file per patient and sample type is already chosen.
-    keys = tuple(k for k in REPLICATE_KEYS if k in subset.columns)
-    first = rank_replicates(subset, keys, dict(order)) == 1
+    first = _first_libraries(subset, order)
     dropped = subset.filter(~first)["run_accession"].to_list()
-    used = subset.filter(first)
+    # A kept library's other runs are its lanes, part of the one sample, never dropped (D-063);
+    # runs of one sample that differ in a key are a library per value, as curation ranks them.
+    lanes = ["sample", *(k for k in (*REPLICATE_KEYS, *order) if k in subset.columns)]
+    used = subset.filter(first).unique(lanes, keep="first", maintain_order=True)
     if contrast.split is not None:
         used, variable = _split(used, contrast.split), "split"
     if contrast.paired:
@@ -156,6 +161,21 @@ def select_samples(
         pl.when(pl.col(variable) == tested).then(pl.lit("tested")).otherwise(pl.lit("reference"))
     )
     return used.with_columns(group=group), tuple(sorted(dropped))
+
+
+def _first_libraries(subset: pl.DataFrame, order: Mapping[str, tuple[str, ...]]) -> pl.Series:
+    """Whether each run belongs to the first library of its donor, cell type and condition.
+
+    Curation's rule, ranked again over the contrast's subset: a sheet's sample is one library,
+    so every run of it, a lane, takes the library's rank (``library_replicates``, D-063). A GDC
+    sheet has no cell type: its one file per patient and sample type is already chosen, and
+    its runs are ranked as they are.
+    """
+    if not set(REPLICATE_KEYS) <= set(subset.columns):
+        keys = tuple(k for k in REPLICATE_KEYS if k in subset.columns)
+        return rank_replicates(subset, keys, dict(order)) == 1
+    libraries = subset.with_columns(pl.col("sample").alias(LIBRARY))
+    return library_replicates(libraries, dict(order)) == 1
 
 
 def covariates(contrast: Contrast, sheet: pl.DataFrame) -> list[str]:
@@ -282,6 +302,12 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
     Genes are ranked by their variance after the VST, not before: raw counts rank genes by
     depth, and a deep gene with no biology would lead every component.
 
+    The VST runs on every gene with a count, decided (P2S.7), not inherited from the fits'
+    expression filter: the view is unsupervised and design-blind, and a filter set per
+    contrast has no contrast here; the recorded PERMANOVA metrics stand on this set (D-046).
+    Where pydeseq2's parametric trend does not converge (Step-1's ss_ndn, 17 samples) it falls
+    back to the mean of the dispersions, and ``trend`` says so.
+
     Args:
         counts: ``gene_id`` then one integer column per sample.
         samples: The samples to include.
@@ -303,7 +329,10 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
         counts=frame, metadata=metadata, design="~1",
         inference=DefaultInference(n_cpus=threads), quiet=True,
     )  # fmt: skip
-    dds.vst(use_design=False)
+    with warnings.catch_warnings():
+        # The fallback is recorded in ``trend`` and printed in the caption, not warned.
+        warnings.filterwarnings("ignore", message="The dispersion trend curve fitting did not")
+        dds.vst(use_design=False)
     _shutdown_workers()
     values = np.asarray(dds.layers["vst_counts"])
     top = np.argsort(-values.var(axis=0), kind="stable")[:TOP_GENES]
@@ -312,4 +341,5 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
     share = s**2 / (s**2).sum()
     scores = pl.DataFrame({"sample": samples, "pc1": u[:, 0] * s[0], "pc2": u[:, 1] * s[1]})
     genes_used = tuple(genes[i] for i in top)
-    return Pca(scores, (float(share[0]), float(share[1])), genes_used, u * s)
+    trend = str(dds.vst_fit_type)
+    return Pca(scores, (float(share[0]), float(share[1])), genes_used, u * s, trend)

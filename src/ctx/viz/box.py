@@ -10,7 +10,14 @@ from typing import Any
 
 import polars as pl
 
-from ctx.viz.annotate import Caption, compare_groups, fit_title, place_caption
+from ctx.viz.annotate import (
+    Caption,
+    compare_groups,
+    files_room,
+    fit_title,
+    place_caption,
+    refit_y_title,
+)
 from ctx.viz.axes import axis_title, hover_field, hover_rows, hover_value, page_y_title
 from ctx.viz.metrics import text_width
 from ctx.viz.style import (
@@ -200,6 +207,7 @@ def static(data: BoxData, theme: Theme) -> Any:
     ax.legend(title=None, loc="lower left", bbox_to_anchor=(0, 1), ncols=2, borderaxespad=0)
     sns.despine(fig=fig)
     place_caption(fig, data.caption.text(), width, height)
+    refit_y_title(fig, ax, axis_title(data.value_label, data.unit))
     return fig
 
 
@@ -286,7 +294,7 @@ def interactive(data: BoxData) -> Any:
         boxmode="group",
         xaxis_title=data.feature_label,
         # Room above the tallest box for the p and r labels, as the static figure leaves.
-        yaxis={"title": {"text": page_y_title(title, _inches()[1])},
+        yaxis={"title": {"text": page_y_title(title, files_room(lambda t: static(data, t)))},
                "range": [low - 0.05 * span, high + HEADROOM * span]},
         annotations=labels,
         meta={"least_width": least_width(data, (low - 0.05 * span, high + HEADROOM * span))},

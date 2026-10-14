@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 import polars as pl
 
-from ctx.viz.annotate import fit_title, place_caption
+from ctx.viz.annotate import fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title
 from ctx.viz.style import (
     CIVIDIS,
@@ -270,6 +270,8 @@ class SurfaceData:
         bar.outline.set_linewidth(LINE_WIDTHS["axes"])
         bar.ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.3g}"))
         place_caption(fig, self.caption, width, height, ax=ax, handles=handles or None)
+        refit_y_title(fig, ax, y_title)
+        refit_y_title(fig, bar.ax, z_title, label=bar.set_label)
         return fig
 
     def interactive(self) -> Any:
