@@ -440,3 +440,32 @@ def test_a_gdc_count_matrix_stays_out_with_its_rebuild_commands(tmp_path, checke
     assert gather_command in readme and all(e["path"] in readme for e in left)
     assert json.loads((kit / "MANIFEST.json").read_text())["left_out_files"] == left
     assert checker.check(kit) == []
+
+
+def test_a_source_file_never_ships_whatever_its_name(tmp_path, kit_script, monkeypatch):
+    """M7 plan, decision 3: a file equal to a declared resource stops the build by its bytes.
+
+    Mutations caught: the check removed from select; build passing no sources to select; the
+    sources read from no dataset file (the CPTAC freeze and Rieckmann's table missing)."""
+    root = a_root(tmp_path / "real", "Study", "study")
+    copy = root / "outputs" / "07_proteo" / f"{NEW}_proteo_study_table_v1.csv"
+    copy.parent.mkdir(parents=True)
+    copy.write_text("a freeze, renamed\n")
+    page(root / "outputs" / "07_proteo" / f"{NEW}_proteo_study_overview_v1.html", "M7: Study",
+         copy.name)  # fmt: skip
+    planted = {hashlib.sha256(copy.read_bytes()).hexdigest(): "fake.toml freeze"}
+    _, _, problems = kit_script.select(root, sources=planted)
+    assert problems == [f"{copy}: the source file fake.toml freeze; derived tables ship, "
+                        "sources never"]  # fmt: skip
+    monkeypatch.setattr(kit_script, "declared_sources", lambda: planted)
+    with pytest.raises(SystemExit, match="the source file fake.toml freeze"):
+        kit_script.build(tmp_path / "kit", [("step", root, True)])
+    assert nothing_written(tmp_path / "kit")
+
+
+def test_the_declared_sources_are_every_dataset_files_resources(kit_script):
+    """Mutation caught: the sources read from no dataset file, or from one alone."""
+    declared = kit_script.declared_sources()
+    cptac = "c27a0226cba4f14c96b905f86c30007b62dd2a67a176e608c96f642566862903"
+    assert declared[cptac] == "cptac_brca.toml cptac_freeze"
+    assert any(name.startswith("tier1.toml ") for name in declared.values())
