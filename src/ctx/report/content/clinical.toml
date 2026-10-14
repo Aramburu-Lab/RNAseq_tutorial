@@ -359,7 +359,7 @@ value = "Expression"
 
 [figures.expression.er]
 title = "Build genes by ER status"
-lead = "{gene} separates ER-positive from ER-negative tumours with an AUC of {auc:.3f}."
+lead = "{gene} has an AUC of {auc:.3f} between ER-positive and ER-negative tumours; 0.5 is no separation."
 reading = [
     "Each point is one patient's tumour: log2 CPM of the gene, by ER status from IHC.",
     "The box spans the middle half of the patients; the line inside is the median.",
@@ -367,7 +367,7 @@ reading = [
 
 [figures.expression.stage_group]
 title = "Build genes by stage group"
-lead = "{gene} separates stage III-IV from stage I-II tumours with an AUC of {auc:.3f}."
+lead = "{gene} has an AUC of {auc:.3f} between stage III-IV and stage I-II tumours; 0.5 is no separation."
 reading = [
     "Each point is one patient's tumour: log2 CPM of the gene, by AJCC pathologic stage from the CDR.",
     "The box spans the middle half of the patients; the line inside is the median.",
