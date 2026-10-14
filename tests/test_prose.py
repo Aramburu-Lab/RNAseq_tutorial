@@ -40,6 +40,18 @@ def test_lists_and_cards_have_budgets():
     assert any("13 words; at most 12" in p for p in prose.check_cards(cards))
 
 
+def test_a_table_of_question_variants_holds_each_prompt_to_its_budget():
+    """M5 and M6 ask by what their data hold, from a table of variants (P2S.4): each variant's
+    prompt keeps the 20 words, and four variants of which two are asked are not "4 items".
+    Mutation: the table's keys checked in place of its prompts, which passed a 21-word one."""
+    long = " ".join(["word"] * 21) + "?"
+    variants = {f"v{i}": {"prompt": "Why?", "answer": "Because."} for i in range(4)}
+    page = {**CLEAN, "questions": {**variants, "long": {"prompt": long, "answer": "Because."}}}
+    problems = list(prose.check_page("page", page))
+    assert any("21 words; at most 20" in p for p in problems), problems
+    assert not any("items" in p for p in problems), problems
+
+
 def test_a_caption_has_no_backticks():
     page = {**CLEAN, "figures": {"f": {"caption": "Made up; `fastp` kept {n} reads."}}}
     assert any("a backtick" in p for p in prose.check_page("page", page))

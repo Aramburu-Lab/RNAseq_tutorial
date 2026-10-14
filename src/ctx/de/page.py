@@ -47,7 +47,7 @@ def level_words(columns: Sequence[Column], variable: str, level: str) -> str:
     if words is None:
         return level.replace("_", " ")
     # "Steady state" mid-sentence is "steady state"; "G-CSF" and "HSCT" stay as they are.
-    return words if words[1:2].isupper() else words[:1].lower() + words[1:]
+    return words if any(c.isupper() for c in words[1:]) else words[:1].lower() + words[1:]
 
 
 def words(contrast: Contrast, columns: Sequence[Column] = ()) -> Words:

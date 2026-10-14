@@ -58,3 +58,82 @@ FAILED tests/test_de.py::test_a_rule_names_a_gene_and_m5_records_its_fold_change
 1 failed in 13.23s
 ```
 
+## CAUGHT: src/ctx/de/page.py
+- planted: '    if words is None:\n        return level.replace("_", " ")' -> '    if True:\n        return level'
+- ran: tests/test_de_words.py::test_every_step1_contrast_reads_in_plain_words
+- exit 1
+```
+FAILED tests/test_de_words.py::test_every_step1_contrast_reads_in_plain_words
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 12.03s
+```
+
+## CAUGHT: src/ctx/de/page.py
+- planted: '        if seen[found[c.name].label] > 1 and not c.label else found[c.name]' -> '        if False else found[c.name]'
+- ran: tests/test_de_words.py::test_contrasts_with_no_label_that_read_alike_are_told_apart
+- exit 1
+```
+FAILED tests/test_de_words.py::test_contrasts_with_no_label_that_read_alike_are_told_apart
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 1.15s
+```
+
+## CAUGHT: src/ctx/de/run.py
+- planted: 'trend = word(PAGE, f"figures.pca.trend.{result.trend}")' -> 'trend = word(PAGE, "figures.pca.trend.parametric")'
+- ran: tests/test_de_words.py::test_the_pca_caption_names_the_dispersion_trend_the_vst_used
+- exit 1
+```
+FAILED tests/test_de_words.py::test_the_pca_caption_names_the_dispersion_trend_the_vst_used
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 31.58s
+```
+
+## CAUGHT: src/ctx/function/run.py
+- planted: '        *_acknowledged(spec),\n' -> ''
+- ran: tests/test_de_words.py::test_m6_of_gdc_data_acknowledges_the_project_and_the_gdc
+- exit 1
+```
+FAILED tests/test_de_words.py::test_m6_of_gdc_data_acknowledges_the_project_and_the_gdc
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 25.30s
+```
+
+## CAUGHT: src/ctx/report/builder.py
+- planted: '        required = ("title", *(s for s, _ in SECTIONS))' -> '        required = ("title", *(s for s, _ in SECTIONS if s != "input"))'
+- ran: tests/test_report.py::test_skeleton_order
+- exit 1
+```
+FAILED tests/test_report.py::test_skeleton_order - Failed: DID NOT RAISE Valu...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 3.13s
+```
+
+## NOT CAUGHT: src/ctx/report/prose.py
+- planted: '        items = list(found.values()) if isinstance(found, dict) else found' -> '        items = list(found) if isinstance(found, dict) else found'
+- ran: tests/test_prose.py
+- exit 0
+```
+.....................................                                    [100%]
+37 passed in 1.71s
+```
+
+## CAUGHT: src/ctx/report/prose.py
+- planted: '        items = list(found.values()) if isinstance(found, dict) else found' -> '        items = list(found) if isinstance(found, dict) else found'
+- ran: tests/test_prose.py
+- exit 1
+```
+FAILED tests/test_prose.py::test_a_table_of_question_variants_holds_each_prompt_to_its_budget
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 9 passed in 0.33s
+```
+
+## CAUGHT: src/ctx/de/deseq.py
+- planted: '    return library_replicates(libraries, dict(order)) == 1' -> '    return rank_replicates(libraries, REPLICATE_KEYS, dict(order)) == 1'
+- ran: tests/test_de.py::test_a_librarys_lanes_are_one_sample_and_a_second_library_is_dropped
+- exit 1
+```
+FAILED tests/test_de.py::test_a_librarys_lanes_are_one_sample_and_a_second_library_is_dropped
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed in 6.11s
+```
+
