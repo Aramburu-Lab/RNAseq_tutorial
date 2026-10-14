@@ -1,0 +1,153 @@
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_overview_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_evidence_v1.parquet
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_evidence_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_evidence_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_v1.parquet
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_v1.parquet
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_v1.parquet
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_v1.parquet
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_consensus_v1.parquet
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_consensus_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_consensus_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_lines_v1.parquet
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_lines_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_lines_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ca9_107159_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ca9_107159_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ca9_107159_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ca9_107159_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ca9_107159_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ca9_107159_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ca9_107159_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ca9_107159_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ca9_107159_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ca9_107159_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ca9_107159_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ca9_107159_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ca9_107159_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ca9_107159_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ca9_107159_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ca9_107159_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ca9_107159_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ca9_107159_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ca9_107159_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ca9_107159_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ca9_107159_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ca9_107159_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ca9_107159_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ca9_107159_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ca9_107159_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ca9_107159_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ca9_107159_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ca9_107159_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ndufa4l2_185633_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ndufa4l2_185633_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ndufa4l2_185633_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ndufa4l2_185633_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ndufa4l2_185633_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ndufa4l2_185633_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_ndufa4l2_185633_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ndufa4l2_185633_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ndufa4l2_185633_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ndufa4l2_185633_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ndufa4l2_185633_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ndufa4l2_185633_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ndufa4l2_185633_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_ndufa4l2_185633_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ndufa4l2_185633_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ndufa4l2_185633_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ndufa4l2_185633_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ndufa4l2_185633_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ndufa4l2_185633_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ndufa4l2_185633_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_ndufa4l2_185633_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ndufa4l2_185633_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ndufa4l2_185633_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ndufa4l2_185633_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ndufa4l2_185633_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ndufa4l2_185633_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ndufa4l2_185633_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_ndufa4l2_185633_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_vegfa_112715_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_vegfa_112715_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_vegfa_112715_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_vegfa_112715_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_vegfa_112715_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_vegfa_112715_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_vegfa_112715_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_vegfa_112715_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_vegfa_112715_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_vegfa_112715_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_vegfa_112715_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_vegfa_112715_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_vegfa_112715_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_vegfa_112715_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_vegfa_112715_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_vegfa_112715_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_vegfa_112715_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_vegfa_112715_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_vegfa_112715_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_vegfa_112715_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_vegfa_112715_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_vegfa_112715_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_vegfa_112715_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_vegfa_112715_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_vegfa_112715_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_vegfa_112715_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_vegfa_112715_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_vegfa_112715_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_mki67_148773_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_mki67_148773_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_mki67_148773_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_mki67_148773_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_tissues_mki67_148773_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_mki67_148773_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_mki67_148773_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_mki67_148773_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_mki67_148773_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_exons_mki67_148773_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_mki67_148773_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_mki67_148773_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_mki67_148773_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_mki67_148773_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_junctions_mki67_148773_v1_README.md
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_mki67_148773_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_mki67_148773_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_mki67_148773_v1.html
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_mki67_148773_v1.csv
+/Users/rytis/ctx_kidney/outputs/11_genecard/2026-10-14_genecard_tcga_kirc_immune_mki67_148773_v1_README.md
+      123.72 real        58.04 user         8.69 sys
+           801718272  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              892382  page reclaims
+             1337587  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                 355  messages sent
+                9190  messages received
+                   0  signals received
+                3257  voluntary context switches
+              157835  involuntary context switches
+        697255304514  instructions retired
+        256890622093  cycles elapsed
+           581142304  peak memory footprint
+exit 0

@@ -1,0 +1,93 @@
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a44086 │
+│ e1aa874eb94/src/ctx/cli.py:80 in wrapper                                     │
+│                                                                              │
+│    77 │   │   │   **options,                                                 │
+│    78 │   │   │   "settings": runtime.start(options.get("profile"),          │
+│       options.get("root")),                                                  │
+│    79 │   │   }                                                              │
+│ ❱  80 │   │   return command(ctx, *args, **kwargs)                           │
+│    81 │                                                                      │
+│    82 │   return wrapper                                                     │
+│    83                                                                        │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a44086 │
+│ e1aa874eb94/src/ctx/cli.py:481 in genecard                                   │
+│                                                                              │
+│   478 │   options = module.Options(dataset_file, _columns(genes),            │
+│       genes_from, contrast, hpa_release,                                     │
+│   479 │   │   │   │   │   │   │    offline, refresh)  # fmt: skip            │
+│   480 │   try:                                                               │
+│ ❱ 481 │   │   written = module.run(ctx.obj["settings"], cards, command,      │
+│       dataset, options)                                                      │
+│   482 │   except (DatasetError, GenecardError, GeneListError) as error:      │
+│   483 │   │   typer.echo(str(error), err=True)                               │
+│   484 │   │   raise typer.Exit(1) from error                                 │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a44086 │
+│ e1aa874eb94/src/ctx/genecard/run.py:253 in run                               │
+│                                                                              │
+│   250 │   context = page.Context(spec=spec, options=options, chosen=chosen,  │
+│       evidence=evidence,                                                     │
+│   251 │   │   │   │   │   │      provenance=provenance, settings=settings,   │
+│       command=command,                                                       │
+│   252 │   │   │   │   │   │      cards=cards_)  # fmt: skip                  │
+│ ❱ 253 │   return page.build(writer, context)                                 │
+│   254                                                                        │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a44086 │
+│ e1aa874eb94/src/ctx/genecard/page.py:301 in build                            │
+│                                                                              │
+│   298 │   │   ),                                                             │
+│   299 │   )  # fmt: skip                                                     │
+│   300 │   page = writer.out / f"{stem(PAGE, f'{writer.dataset}_overview', 1, │
+│       day=writer.day)}.html"                                                 │
+│ ❱ 301 │   return [write(built, page), *writer.files]                         │
+│   302                                                                        │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a44086 │
+│ e1aa874eb94/src/ctx/report/builder.py:543 in write                           │
+│                                                                              │
+│   540 │   target = None                                                      │
+│   541 │   if isinstance(page, HubPage) or glossary.used(_marked(page)):      │
+│   542 │   │   target = glossary.page_path(path)                              │
+│ ❱ 543 │   html = _sized(render(page, glossary.href(path, target) if target   │
+│       else ""), path)                                                        │
+│   544 │   if target is not None:                                             │
+│   545 │   │   book = GlossaryPage(text.word("ui", "glossary.title"),         │
+│       glossary.grouped())                                                    │
+│   546 │   │   entries = _sized(render(book), target)                         │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a44086 │
+│ e1aa874eb94/src/ctx/report/builder.py:558 in _sized                          │
+│                                                                              │
+│   555 │   """A page's bytes, refused over ``MAX_BYTES`` before anything is   │
+│       written."""                                                            │
+│   556 │   data = html.encode()                                               │
+│   557 │   if len(data) > MAX_BYTES:                                          │
+│ ❱ 558 │   │   raise ValueError(f"{path.name}: {len(data)} bytes, over the    │
+│       {MAX_BYTES}-byte cap")                                                 │
+│   559 │   return data                                                        │
+│   560                                                                        │
+╰──────────────────────────────────────────────────────────────────────────────╯
+ValueError: 2026-10-14_genecard_tcga_brca_overview_v1.html: 29472416 bytes, over
+the 15000000-byte cap
+      596.90 real       234.29 user        53.58 sys
+           773537792  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             4462872  page reclaims
+             1338609  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                3709  messages sent
+               64296  messages received
+                   0  signals received
+                3581  voluntary context switches
+              779962  involuntary context switches
+       3379366466543  instructions retired
+       1065780830130  cycles elapsed
+           696240072  peak memory footprint
+exit 1

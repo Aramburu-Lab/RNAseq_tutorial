@@ -33,6 +33,11 @@ and the commands that rebuild it, the gather command read from the table's own R
 that links a left-out matrix keeps its link: the link check counts a declared file as present
 (``check_kit.declared``). Every derived table ships, and a count matrix not from GDC ships.
 
+A source file never ships whole (M7 plan, decision 3: the CPTAC freeze rests on a data use
+agreement silent on redistribution, Rieckmann's table is the publisher's): a file whose SHA-256
+equals any ``[[resources]]`` entry of ``conf/datasets/*.toml`` stops the build, whatever it is
+named. Derived tables and figure data ship.
+
 Every page is rebuilt from one commit first, so the pages and ``MANIFEST.json`` name the same
 commit. The steps for the Step-1 root, kept here since a session's scratch copy was lost twice
 (kits v5 and v6); ``build_preview.py`` refuses an existing root, so move the last one aside:
@@ -71,6 +76,7 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_kit  # noqa: E402 - the kit's own checker, beside this file
 
+from ctx.dataset import load  # noqa: E402
 from ctx.io import naming  # noqa: E402
 from ctx.report import text  # noqa: E402
 from ctx.report.course import label, newest, write_home  # noqa: E402
@@ -183,15 +189,24 @@ def gdc_matrix(path: Path) -> dict[str, Any] | None:
             "sha256": sizes.get(path.name, (0, ""))[1] or check_kit.sha256(path)}  # fmt: skip
 
 
+def declared_sources(folder: Path = REPO / "conf" / "datasets") -> dict[str, str]:
+    """SHA-256 of every resource a dataset file declares, to the file and resource naming it."""
+    return {r.sha256: f"{path.name} {r.name}" for path in sorted(folder.glob("*.toml"))
+            for r in load(path).resources}  # fmt: skip
+
+
 def select(
-    root: Path, left_out: tuple[str, ...] = (), slugs: frozenset[str] = frozenset()
-) -> tuple[list[Path], dict[Path, dict[str, Any]], list[str]]:
+    root: Path, left_out: tuple[str, ...] = (), slugs: frozenset[str] = frozenset(),
+    sources: dict[str, str] | None = None,
+) -> tuple[list[Path], dict[Path, dict[str, Any]], list[str]]:  # fmt: skip
     """A root's files for the kit, its raw GDC count matrices apart, and what stops a ship.
 
     A shipped page that links to a left-out dataset's file is a problem: following the link
     would put the dataset back into the kit. A matrix left out by rule needs its rebuild
-    command and its GDC folder's manifest and fetch script.
+    command and its GDC folder's manifest and fetch script. A file equal to a declared source
+    (``declared_sources``, the default for ``sources``) is a problem by its bytes, not its name.
     """
+    sources = declared_sources() if sources is None else sources
     # Resolved, so a symlinked outputs/ holds the same paths the links resolve to.
     outputs = (root / "outputs").resolve()
     out = {p for p in current(outputs) if any(belongs(p.name, s, set(slugs)) for s in left_out)}
@@ -211,6 +226,8 @@ def select(
             problems.append(f"{p}: reads or alignments never ship")
         elif p.stat().st_size > CAP_BYTES:
             problems.append(f"{p}: {p.stat().st_size:,} bytes, over the {CAP_BYTES:,} cap")
+        elif (named := sources.get(check_kit.sha256(p))) is not None:
+            problems.append(f"{p}: the source file {named}; derived tables ship, sources never")
     return sorted(kept), matrices, problems
 
 
@@ -380,9 +397,9 @@ def build(
     slugs = frozenset().union(*(slugs_in(root) for _, root, _ in roots))
     if unknown := sorted(set(left_out) - slugs):
         sys.exit(f"--leave-out {', '.join(unknown)}: no root holds that dataset; nothing written")
-    chosen, matrices, problems = {}, {}, []
+    chosen, matrices, problems, sources = {}, {}, [], declared_sources()
     for folder, root, _ in roots:
-        chosen[folder], matrices[folder], found = select(root, left_out, slugs)
+        chosen[folder], matrices[folder], found = select(root, left_out, slugs, sources)
         problems += found
     if release:
         problems += release_problems(roots, chosen)

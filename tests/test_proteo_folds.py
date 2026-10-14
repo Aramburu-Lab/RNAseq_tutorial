@@ -9,7 +9,8 @@ from scipy import stats
 from ctx.dataset import Contrast
 from ctx.de.stats import adjust
 from ctx.proteo import ProteoError, figures, folds
-from ctx.proteo.run import pair_samples
+from ctx.proteo.annotate import pair_samples
+from ctx.viz.style import DATA_COLOURS, SPENT_GREYS, contrast
 
 SHEET = pl.DataFrame({"case": ["C1", "C2", "C3"], "sample_id": ["S1", "S2", "S3"],
                       "sample": ["A1", "A2", "A3"]})  # fmt: skip
@@ -150,3 +151,26 @@ def test_heatmap_genes_named_first_then_both_ends():
                           "rho": [0.1, 0.9, 0.8, 0.5, 0.3, -0.2, -0.7]})  # fmt: skip
     assert figures.heatmap_genes(genes, ["N", "U"], 2) == ["N", "a", "b", "c", "d"]
     assert figures.heatmap_genes(genes, [], 4) == ["a", "b", "e", "N", "c", "d"]
+
+
+def test_plex_strip_alternates_two_greys_one_run_per_plex():
+    """22 plexes, over the colour cap, take two greys in turn and sort first, so every plex
+    boundary changes grey (D-063); five subtypes keep their data colours.
+
+    Mutations caught: the plexes given data colours in turn (as before D-063); the subtype
+    sorted first, which breaks plexes into runs whose neighbours can share a grey; the greys
+    alternating by anything but display order (plex 2 before plex 10)."""
+    plexes = [str(p) for p in range(1, 23)]
+    subtypes = ["Basal", "Her2", "LumA", "LumB", "Normal-like"]
+    annotation = pl.DataFrame({"PAM50": [subtypes[i % 5] for i in range(44)],
+                               "Plex": [plexes[(i * 7) % 22] for i in range(44)]})  # fmt: skip
+    tracks = (("PAM50", "PAM50"), ("Plex", "Plex"))
+    assert figures.sort_order(annotation, tracks) == [tracks[1], tracks[0]]
+    greys = figures.track_colours(figures.by_label(annotation["Plex"]))
+    assert greys["2"] == greys["10"] != greys["1"] == greys["3"]
+    assert set(greys.values()) == set(SPENT_GREYS)
+    by = [pl.col("Plex").str.len_chars(), pl.col("Plex"), pl.col("PAM50")]
+    shown = annotation.sort(by)["Plex"].to_list()
+    assert all(greys[a] != greys[b] for a, b in zip(shown, shown[1:], strict=False) if a != b)
+    assert contrast(*SPENT_GREYS) >= 3  # noqa: PLR2004 - the 3:1 graphics threshold
+    assert set(figures.track_colours(subtypes).values()) <= set(DATA_COLOURS)

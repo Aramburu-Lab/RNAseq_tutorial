@@ -62,11 +62,22 @@ patterns = ['\b\d{2}BR\d{3}\b', '\bX\d{2}BR\d{3}\b']
 
 # F4 (M7 plan, section 2): M5's DESeq2 on the tumours of two subtype contrasts, against the
 # protein of the same tumours. pam50 and er_status are the freeze's PAM50 and
-# ER.Updated.Clinical.Status (positive ER+, negative ER-), to reach gather's sheet through a
-# declared annotation join that is not built yet (it needs ctx.gather and ctx.dataset); until
-# then ctx de cannot fit these and the M7 page says so. n: chosen tumours with both a freeze
-# column and a counts file, paired by ctx.proteo.run.pair_samples (121, two of them by GDC
-# sample ID), measured 2026-10-09 on the scratch join; the third LumA case lacks RNA.
+# ER.Updated.Clinical.Status, its Table S1A as the protein GCT's column annotations (equal, column
+# by column, to the freeze's sample-annotation.csv, checked 2026-10-14). `ctx gather --gdc-dir`
+# writes them onto the chosen tumours paired by ctx.proteo.annotate.pair_samples (121 of the 122
+# freeze columns, two by GDC sample ID; the third LumA case lacks RNA), so ctx de fits these
+# contrasts and F4 compares the same tumours. Every value the freeze holds is mapped; a new one
+# stops gather. ER "unknown" (2 tumours) is no ER level, so neither contrast takes them.
+[columns.pam50]
+source = "PAM50"
+meaning = "PAM50 intrinsic subtype of the tumour, from the CPTAC freeze's Table S1A"
+values = { Basal = "Basal", Her2 = "Her2", LumA = "LumA", LumB = "LumB", Normal-like = "Normal-like" }
+
+[columns.er_status]
+source = "ER.Updated.Clinical.Status"
+meaning = "Clinical oestrogen receptor status of the tumour, from the CPTAC freeze's Table S1A"
+values = { positive = "ER+", negative = "ER-", unknown = "unknown" }
+
 [[contrasts]]
 name = "basal_vs_luma"
 variable = "pam50"
@@ -80,6 +91,9 @@ variable = "er_status"
 reference = "ER+"
 tested = "ER-"
 n = [80, 39]
+
+[de]
+featured = "basal_vs_luma"
 
 # What M7 reads from the freeze: the protein ratios (log2 to the pooled reference, NAs left in
 # place) and their GCT column annotations: plex, PAM50, ERBB2 amplification. Member name as the
