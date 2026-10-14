@@ -20,7 +20,7 @@ from ctx.viz.curve import CurveData
 from ctx.viz.density import DensityData
 from ctx.viz.heatmap import HeatmapData, Track, diverging_levels
 from ctx.viz.scatter import Line, ScatterData
-from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, ROLES
+from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, ROLES, SPENT_GREYS
 
 PAGE = "proteo"
 # Category colours, the projector-unsafe yellow left out; at most seven levels (CONVENTIONS.md).
@@ -260,12 +260,30 @@ def heatmap_genes(genes: pl.DataFrame, named: list[str], top: int) -> list[str]:
 def track_colours(levels: list[str]) -> dict[str, str]:
     """A heatmap track's colours, the heat's own two role colours last.
 
-    A track with more levels than the palette holds takes two colours in turn, so neighbouring
-    plexes differ.
+    A track with more levels than the palette holds (CPTAC's 22 plexes) takes two greys in turn
+    (D-063): lightnesses, not hues, so no plex reads as a category of the data colours. Its
+    levels must be one run each in the column order (``sort_keys``), or a boundary between two
+    plexes of one grey is lost; the hover names the plex.
     """
     if len(levels) <= len(TRACK_COLOURS):
         return dict(zip(levels, TRACK_COLOURS, strict=False))
-    return {level: TRACK_COLOURS[2 + i % 2] for i, level in enumerate(levels)}
+    return {level: SPENT_GREYS[i % 2] for i, level in enumerate(levels)}
+
+
+def by_label(values: pl.Series) -> list[str]:
+    """A track's levels in display order: plex 2 before plex 10, by length, then text."""
+    return sorted(set(values.cast(pl.String)), key=lambda v: (len(v), v))
+
+
+def sort_order(annotation: pl.DataFrame, tracks: tuple[tuple[str, str], ...]
+               ) -> list[tuple[str, str]]:  # fmt: skip
+    """The tracks the columns sort by, greyed ones first, so each of their levels is one run.
+
+    Sorted subtype first, CPTAC's plexes broke into 63 runs over 122 tumours, and no two greys
+    given per plex could mark every boundary (the plexes' neighbour graph has an odd cycle).
+    """
+    greyed = [t for t in tracks if len(by_label(annotation[t[1]])) > len(TRACK_COLOURS)]
+    return [*greyed, *(t for t in tracks if t not in greyed)]
 
 
 def paired(writer: Writer, measured: tuple[pl.DataFrame, np.ndarray, np.ndarray],
@@ -283,9 +301,9 @@ def paired(writer: Writer, measured: tuple[pl.DataFrame, np.ndarray, np.ndarray]
     genes, rna, protein = measured
     row_of = {g: i for i, g in enumerate(genes["gene"])}
     samples = short(tuple(annotation["sample"]))
-    # Plex 2 before plex 10: each track sorts by its length, then its text.
-    by = [k for _, c in tracks for k in (pl.col(c).cast(pl.String).str.len_chars(),
-                                         pl.col(c).cast(pl.String))]  # fmt: skip
+    sort = sort_order(annotation, tracks)
+    by = [k for _, c in sort for k in (pl.col(c).cast(pl.String).str.len_chars(),
+                                       pl.col(c).cast(pl.String))]  # fmt: skip
     order = (annotation.with_columns(shown=pl.Series(samples), at=pl.int_range(pl.len()))
              .sort([*by, pl.col("shown")]))  # fmt: skip
     at, shown = order["at"].to_list(), order["shown"].to_list()
@@ -303,11 +321,11 @@ def paired(writer: Writer, measured: tuple[pl.DataFrame, np.ndarray, np.ndarray]
     strips = []
     for name, column in tracks:
         values_of = dict(zip(shown, order[column].cast(pl.String), strict=True))
-        seen = sorted(set(values_of.values()), key=lambda v: (len(v), v))
-        strips.append(Track(name, values_of, track_colours(seen)))
+        strips.append(Track(name, values_of, track_colours(by_label(order[column]))))
     counts = {"n_genes": len(chosen), "n_samples": len(shown),
               "missing": sum(v is None for v in flat),
-              "tracks": ", ".join(n for n, _ in tracks)}  # fmt: skip
+              "tracks": ", ".join(n for n, _ in tracks),
+              "sorted": ", ".join(n for n, _ in sort)}  # fmt: skip
     data = HeatmapData(
         frame=frame, columns=columns("row", "sample", "z", "level"), row="row", column="sample",
         value="z", level="level", row_label=text.word(PAGE, "figures.paired.row"),
