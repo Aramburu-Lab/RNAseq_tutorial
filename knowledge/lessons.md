@@ -100,3 +100,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Read a rebuilt page's headings as text in the browser: a PCA title printed a level's identifier (steady_state) that every unit test passed (D1, 2026-10-14).
 - A category named by its source can fail on a member nobody expected: Liberzon 2015's proliferation hallmarks include P53_PATHWAY, which failed BRCA's rule while the other five passed. Read every member of a category before registering a rule on all of it (D1.1, 2026-10-14).
 - A command recorded in an output's README with an absolute path travels into every kit built from it: kit v8's rebuild commands named the build clone's folder (2026-10-14).
+- A schema check on a header is a check on the widest row: GDC's TSV gave every ccRCC file a second-sample column because 2 files had three pieces, and gather refused the whole folder. Check the values a row fills (H, 2026-10-14).
+- Move a same-day output aside before rerunning a module in a shared root: ctx setup rewrote kit v8's 2026-10-14 setup page in ~/ctx_kidney (H, 2026-10-14).

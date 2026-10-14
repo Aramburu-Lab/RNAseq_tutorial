@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-070 — A GDC file listed under several samples of one case is one file
+
+**Date:** 2026-10-14 · **Status:** decided
+
+**Context.** CPTAC-3 lists 9 of 277 ccRCC files once per pooled tumour piece of one case, and GDC's file TSV gives every file the widest file's columns; the reader refused the whole folder.
+
+**Decision.** A second-entity column stops gather only where a file fills it with something other than its first entity's value, a sample's own ID apart; `sample_id` is the first piece GDC lists.
+
+**Evidence.** 277 of 277 files read; 8 of the 9 pooled aliquots chosen as their case's tumour; 3 planted mutations caught.
+
+**Consequence.** A file whose pieces disagree on anything but their sample IDs still stops gather.
+
+---
+
 ## D-069 — M6 records every [sanity]-named gene set; TCGA-KIRC hypoxia and glycolysis and TCGA-BRCA proliferation registered not blind
 
 **Date:** 2026-10-14 · **Status:** decided

@@ -1,0 +1,86 @@
+2026-10-14T13:51:25Z ctx --root /Users/rytis/ctx_lung genecard --dataset tcga_luad --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/tcga_luad.toml --genes NKX2-1,SFTPC,EGFR,MKI67 --offline
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_overview_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_evidence_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_evidence_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_evidence_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_nkx2_1_136352_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_nkx2_1_136352_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_nkx2_1_136352_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_nkx2_1_136352_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_nkx2_1_136352_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_nkx2_1_136352_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_nkx2_1_136352_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_nkx2_1_136352_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_nkx2_1_136352_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_nkx2_1_136352_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_nkx2_1_136352_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_nkx2_1_136352_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_nkx2_1_136352_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_nkx2_1_136352_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_sftpc_168484_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_sftpc_168484_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_sftpc_168484_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_sftpc_168484_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_sftpc_168484_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_sftpc_168484_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_sftpc_168484_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_sftpc_168484_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_sftpc_168484_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_sftpc_168484_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_sftpc_168484_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_sftpc_168484_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_sftpc_168484_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_sftpc_168484_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_egfr_146648_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_egfr_146648_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_egfr_146648_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_egfr_146648_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_egfr_146648_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_egfr_146648_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_egfr_146648_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_egfr_146648_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_egfr_146648_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_egfr_146648_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_egfr_146648_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_egfr_146648_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_egfr_146648_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_egfr_146648_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_tissues_mki67_148773_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_luad_exons_mki67_148773_v1_README.md
+       70.68 real        55.47 user         9.21 sys
+           614563840  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              795696  page reclaims
+             1334692  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                1218  voluntary context switches
+              190220  involuntary context switches
+        573810140766  instructions retired
+        233144539310  cycles elapsed
+           586532736  peak memory footprint
+exit 0

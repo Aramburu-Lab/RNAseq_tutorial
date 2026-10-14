@@ -1,0 +1,86 @@
+2026-10-14T13:52:48Z ctx --root /Users/rytis/ctx_lung genecard --dataset tcga_lusc --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/tcga_lusc.toml --genes SOX2,TP63,KRT5,MKI67 --offline
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_overview_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_evidence_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_evidence_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_evidence_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_sox2_181449_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_sox2_181449_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_sox2_181449_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_sox2_181449_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_sox2_181449_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_sox2_181449_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_sox2_181449_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_sox2_181449_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_sox2_181449_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_sox2_181449_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_sox2_181449_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_sox2_181449_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_sox2_181449_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_sox2_181449_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_tp63_73282_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_tp63_73282_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_tp63_73282_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_tp63_73282_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_tp63_73282_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_tp63_73282_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_tp63_73282_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_tp63_73282_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_tp63_73282_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_tp63_73282_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_tp63_73282_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_tp63_73282_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_tp63_73282_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_tp63_73282_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_krt5_186081_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_krt5_186081_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_krt5_186081_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_krt5_186081_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_krt5_186081_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_krt5_186081_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_krt5_186081_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_krt5_186081_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_krt5_186081_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_krt5_186081_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_krt5_186081_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_krt5_186081_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_krt5_186081_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_krt5_186081_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_tissues_mki67_148773_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-14_genecard_tcga_lusc_exons_mki67_148773_v1_README.md
+       69.71 real        51.43 user         8.25 sys
+           772440064  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              880573  page reclaims
+             1336225  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 243  voluntary context switches
+              149526  involuntary context switches
+        567672192827  instructions retired
+        227851340281  cycles elapsed
+           606128048  peak memory footprint
+exit 0
