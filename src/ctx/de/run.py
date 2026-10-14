@@ -12,6 +12,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import polars as pl
@@ -75,6 +76,8 @@ PAGE = "de"
 P_BINS = 20
 FLAT_FROM = 0.5
 MAX_VOLCANO_LABELS = 10
+# A metric a [sanity] rule names for one gene: gene.<contrast>.<symbol>.lfc or .padj.
+GENE_METRIC = re.compile(r"gene\.(?P<contrast>[^.]+)\.(?P<symbol>.+)\.(?P<what>lfc|padj)")
 CALL_COLOURS = {"up": ROLES["comparison"], "down": ROLES["reference"], "ns": None}
 METRIC_COLUMNS = {
     "metric": ("none", "Name the sanity rules read, e.g. permanova.<pca>.<factor>.r2."),
@@ -710,6 +713,48 @@ def _fit_metrics(fits: Mapping[str, Fit]) -> list[tuple[str, float, str]]:
     return metrics
 
 
+def rule_genes(
+    rules: Mapping[str, Any], fits: Mapping[str, Fit], genes: pl.DataFrame
+) -> list[tuple[str, float, str]]:
+    """The raw log2 FC and padj of each gene a ``[sanity]`` rule names, as metrics.
+
+    A rule names one as ``gene.<contrast>.<symbol>.lfc`` or ``.padj``; a symbol's first gene in
+    the table's order stands for it, as on the named-gene boxes. A value the run cannot give
+    is NaN with its reason, which the hub reports as NOT MEASURED.
+    """
+    named = {
+        m
+        for rule in rules.get("rules", [])
+        for c in rule.get("conditions", [])
+        for m in (c.get("metric"), c.get("other"))
+        if m and GENE_METRIC.fullmatch(m)
+    }
+    first = dict(
+        genes.select("gene_name", "gene_id").unique("gene_name", keep="first", maintain_order=True).rows()
+    )
+    metrics = []
+    for metric in sorted(named):
+        found = GENE_METRIC.fullmatch(metric)
+        assert found is not None  # noqa: S101 - kept by the filter above
+        contrast, symbol, what = found["contrast"], found["symbol"], found["what"]
+        column = "log2FoldChange" if what == "lfc" else "padj"
+        row = (
+            fits[contrast].results.filter(pl.col("gene_id") == first[symbol])
+            if contrast in fits and symbol in first
+            else None
+        )
+        value = None if row is None or row.is_empty() else row[column][0]
+        reason = (
+            f"no contrast {contrast}" if contrast not in fits
+            else f"{symbol} is not in the annotation" if symbol not in first
+            else f"{first[symbol]}: not fitted, or no {column} (Cook's or independent filtering)"
+            if value is None
+            else f"{first[symbol]}: raw log2 FC" if what == "lfc" else f"{first[symbol]}: BH padj"
+        )  # fmt: skip
+        metrics.append((metric, math.nan if value is None else float(value), reason))
+    return metrics
+
+
 def _lessons(
     writer: Writer, spec: Dataset, fits: Mapping[str, Fit], genes: pl.DataFrame
 ) -> tuple[list[Result], list[tuple[str, float, str]]]:
@@ -892,6 +937,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     sexes, found = sex_check(sheet, counts, genes)
     if sexes is not None:
         writer.table(sexes, "sex_check", SEX_COLUMNS)
+    found += rule_genes(spec.sanity, fits, genes)
     frame = pl.DataFrame(metrics + found, schema=["metric", "value", "detail"], orient="row")
     writer.table(frame, "metrics", METRIC_COLUMNS)
     out, files = writer.out, writer.files

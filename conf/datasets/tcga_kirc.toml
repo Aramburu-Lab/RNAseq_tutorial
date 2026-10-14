@@ -166,3 +166,25 @@ id = "M8.absent"
 text = "Mature miRNAs are absent from mRNA-seq: per sample, miRNA-gene counts of the STAR files rank hairpins unlike the miRNA libraries."
 source = "size selection leaves mature miRNAs out of long-RNA libraries (CONVENTIONS.md, Statistics rules); the 0.3 is a course convention for a weak correlation; seen while planning, KIRC median rho 0.045 over 200 samples"
 conditions = [{ metric = "agreement.median_rho", op = "<", value = 0.3 }]
+
+[sanity]
+# M5's rules on this project, decided by the hub (ctx report --dataset-file). Registered
+# 2026-10-14, NOT blind: ctx de ran on these counts on 2026-10-08 (D-058), before any rule
+# existed, though no CA9 or NDUFA4L2 value was read for this registration. Directions come
+# from the sources; thresholds are M5's ALPHA 0.05 and LFC_MIN 1 (ctx.de.stats). M5 records
+# gene.<contrast>.<symbol>.lfc and .padj for each gene a rule names. GENCODE v36, GDC's
+# annotation, names NDUFA4L2, which GENCODE 50 renames COXFA4L2. TODO's hypoxia and
+# glycolysis enrichment is not registered: no [function] runs on this project.
+registered_on = "2026-10-14 11:14"
+
+[[sanity.rules]]
+id = "KIRC.ca9"
+text = "CA9 rises in clear cell tumours against their paired normals."
+source = "Tostain et al. 2010 Eur J Cancer, doi:10.1016/j.ejca.2010.07.020: CA9 is not expressed in healthy renal tissue and is expressed in most clear cell renal carcinomas, through HIF-1 alpha after VHL loss"
+conditions = [{ metric = "gene.tumour_normal.CA9.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.CA9.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "KIRC.ndufa4l2"
+text = "NDUFA4L2 rises in clear cell tumours against their paired normals."
+source = "Liu et al. 2016 Ren Fail, doi:10.1080/0886022X.2016.1208517: NDUFA4L2 mRNA higher in 86 clear cell tumours than in their adjacent normal tissue"
+conditions = [{ metric = "gene.tumour_normal.NDUFA4L2.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.NDUFA4L2.padj", op = "<", value = 0.05 }]
