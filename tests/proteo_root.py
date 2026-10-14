@@ -34,6 +34,13 @@ id = "K3"
 source = "planted"
 conditions = [{{ metric = "page.missingness_first", op = "==", value = 1 }}]
 {extra}"""
+# The declared annotation join (ctx.proteo.annotate): the freeze's PAM50 onto gather's sheet.
+COLUMNS = """
+[columns.pam50]
+source = "PAM50"
+meaning = "made-up subtype"
+values = { LumA = "LumA", Basal = "Basal" }
+"""
 GMT = "SET_COMPLEX\tx\t" + "\t".join(COMPLEX) + "\nSET_METABOLIC\tx\t" + "\t".join(METABOLIC)
 
 
@@ -81,9 +88,10 @@ def results(root: Path, names: list[str]) -> None:
 def across(tmp: Path) -> Path:
     """A gathered made-up project and a freeze archive under ``tmp``; ctx proteo run on it.
 
-    The sheet gains ``pam50`` after gather, as the declared annotation join is to write it, and
-    M5's results for basal_vs_luma are made up (``results``); the freeze names one column by its
-    GDC sample ID, as CPTAC's names two.
+    Gather runs twice: once to make the freeze from its counts, then with ``[columns.pam50]``
+    declared, so the sheet's ``pam50`` comes through the declared annotation join. M5's results
+    for basal_vs_luma are made up (``results``); the freeze names one column by its GDC sample
+    ID, as CPTAC's names two.
     """
     items = [aliquot(i) for i in range(1, TUMOURS + 1)]
     build(tmp / "gdc", items, seed=3)
@@ -106,7 +114,6 @@ def across(tmp: Path) -> Path:
     sheet_file = next(gather.glob("*_samplesheet_v1.parquet"))
     sheet = pl.read_parquet(sheet_file)
     pam50 = subtypes(sheet)
-    sheet.with_columns(pam50=pl.Series(pam50)).write_parquet(sheet_file)
     counts = pl.read_parquet(next(gather.glob("*_counts_v1.parquet")))
     names = pl.read_parquet(next(gather.glob("*_genes_v1.parquet")))["gene_name"].to_list()
     samples = sheet["sample"].to_list()
@@ -135,6 +142,9 @@ def across(tmp: Path) -> Path:
         info.size = len(body)
         tar.addfile(info, io.BytesIO(body))
     resources(root)
+    spec.write_text(spec.read_text() + COLUMNS)
+    ctx("--root", str(root), "gather", "--dataset", "fake_brca", "--gdc-dir", str(tmp / "gdc"),
+        "--dataset-file", str(spec))  # fmt: skip
     ctx("--root", str(root), "proteo", "--dataset", "fake_brca", "--dataset-file", str(spec))
     return root
 

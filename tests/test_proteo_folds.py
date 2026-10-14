@@ -9,7 +9,7 @@ from scipy import stats
 from ctx.dataset import Contrast
 from ctx.de.stats import adjust
 from ctx.proteo import ProteoError, figures, folds
-from ctx.proteo.run import pair_samples
+from ctx.proteo.annotate import pair_samples
 
 SHEET = pl.DataFrame({"case": ["C1", "C2", "C3"], "sample_id": ["S1", "S2", "S3"],
                       "sample": ["A1", "A2", "A3"]})  # fmt: skip

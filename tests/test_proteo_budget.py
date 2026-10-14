@@ -2,9 +2,9 @@
 Rieckmann, from this Mac's roots, against the Track B budget, under 10 min and 4 GB each
 (CONVENTIONS.md, Stack), and the 15 MB page cap. Inputs are linked, never written.
 
-CPTAC's PAM50 and ER calls are joined onto gather's sheet here, by ``pair_samples``, the way the
-declared annotation join is to write them; that join is not built (it needs ctx.gather and
-ctx.dataset). Opt-in: -m "realdata and budget"; minutes."""
+CPTAC's PAM50 and ER calls reach gather's sheet through the declared annotation join: ctx gather
+--gdc-dir runs here on the fetched folder, read in place. Opt-in: -m "realdata and budget";
+minutes."""
 
 import os
 import re
@@ -15,21 +15,12 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-from ctx.gather import gdc
-from ctx.proteo import tables
-from ctx.proteo.run import pair_samples
 from ctx.report.builder import MAX_BYTES
 from ctx.runtime import BUDGETS
 
 ROOT = Path(__file__).resolve().parents[1]
 HOME = Path(os.environ.get("CTX_GDC_HOME", Path.home()))
 FREEZE = "resources/datasets/cptac_brca/S060_Breast_Cancer_data_freeze_GCTfiles_v5.4-public.tar.gz"
-MEMBER = "prosp-brca-v5.4-public-proteome-ratio-norm-NArm.gct"
-# The freeze's annotation columns and the sheet columns cptac_brca.toml's contrasts name.
-JOINED = {
-    "pam50": ("PAM50", {}),
-    "er_status": ("ER.Updated.Clinical.Status", {"positive": "ER+", "negative": "ER-"}),
-}
 
 
 def measured(page: Path) -> tuple[float, int]:
@@ -55,24 +46,6 @@ def link(source: Path, root: Path, relative: str) -> None:
     target.symlink_to(source / relative)
 
 
-def joined_sheet(home: Path, root: Path) -> None:
-    """Gather's CPTAC sheet with pam50 and er_status from the freeze, written into ``root``."""
-    gather = home / "outputs" / "01_gather"
-    (path,) = sorted(gather.glob("*_gather_cptac_brca_samplesheet_v1.parquet"))[-1:]
-    sheet = pl.read_parquet(path)
-    layer, annotation = tables.read_gct(home / FREEZE, MEMBER)
-    pairs, _ = pair_samples(layer.samples, gdc.chosen(sheet, "Primary Tumor"), "X")
-    added = {}
-    for column, (source, spelling) in JOINED.items():
-        found = {s: spelling.get(v, v) for j, s in pairs if (v := annotation[source][j])}
-        added[column] = pl.col("sample").replace_strict(found, default=None,
-                                                        return_dtype=pl.String)  # fmt: skip
-    (root / "outputs" / "01_gather").mkdir(parents=True, exist_ok=True)
-    sheet.with_columns(**added).write_parquet(root / "outputs" / "01_gather" / path.name)
-    for what in ("counts", "genes"):
-        link(home, root, str(path.relative_to(home)).replace("samplesheet", what))
-
-
 def within(root: Path, module: str, slug: str) -> None:
     """The module's page within Track B and the page cap."""
     budget = BUDGETS["B"]
@@ -91,14 +64,13 @@ def test_cptac_brca_with_f4_fits_track_b(tmp_path):
     if not (home / FREEZE).is_file():
         pytest.skip(f"{home / FREEZE} is not on this machine")
     root = tmp_path / "root"
-    joined_sheet(home, root)
     for name in (FREEZE, "resources/msigdb/c5.go.cc.v2026.1.Hs.symbols.gmt",
                  "resources/msigdb/c2.cp.reactome.v2026.1.Hs.symbols.gmt"):  # fmt: skip
         link(home, root, name)
     spec = ROOT / "conf" / "datasets" / "cptac_brca.toml"
-    with_de = tmp_path / "cptac_brca.toml"
-    with_de.write_text(spec.read_text() + '\n[de]\nfeatured = "basal_vs_luma"\n')
-    ctx(root, "de", "--dataset", "cptac_brca", "--dataset-file", str(with_de))
+    ctx(root, "gather", "--dataset", "cptac_brca", "--dataset-file", str(spec),
+        "--gdc-dir", str(home / "data" / "raw" / "cptac_brca"))  # fmt: skip
+    ctx(root, "de", "--dataset", "cptac_brca", "--dataset-file", str(spec))
     ctx(root, "proteo", "--dataset", "cptac_brca", "--dataset-file", str(spec))
     for module in ("05_de", "07_proteo"):
         within(root, module, "cptac_brca")

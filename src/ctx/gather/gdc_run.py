@@ -4,6 +4,7 @@ Everything is read and checked before the first file is written (``ctx.gather.gd
 outputs follow ``harmonise.run``'s pattern under ``outputs/01_gather/``.
 """
 
+import dataclasses
 import functools
 import hashlib
 import time
@@ -20,6 +21,7 @@ from ctx.dataset import Dataset, DatasetError, GdcSpec, load
 from ctx.gather import gdc, gdc_mirna
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
+from ctx.proteo import annotate
 from ctx.qc import registry
 from ctx.report import text
 from ctx.report.builder import (
@@ -311,15 +313,19 @@ def _matrix(found: Read) -> pl.DataFrame:
 
 
 def _write(  # noqa: PLR0913 - each a part of the write
-    found: Read, out: Path, dataset: str, day: date, spec: GdcSpec,
+    found: Read, out: Path, dataset: str, day: date, spec: Dataset,
     releases: Mapping[str, str], *, mirna: MirnaRead | None = None,
 ) -> list[Path]:  # fmt: skip
     """Every table, each with its README; the miRNA tables too where both folders were read."""
+    assert spec.gdc is not None  # noqa: S101 - run() checked
     matrix = _matrix(found)
-    per_file = {s: ("reads", text.fill(PAGE, "columns.count", protocol=spec.protocol, sample=s))
+    per_file = {s: ("reads", text.fill(PAGE, "columns.count", protocol=spec.gdc.protocol,
+                                       sample=s))
                 for s in matrix.columns[1:]}  # fmt: skip
+    # The sheet's own columns, then those the dataset file declares (ctx.proteo.annotate).
+    declared = columns(SHEET) | {c.name: (c.unit, c.meaning) for c in spec.columns}
     tables = [
-        ("samplesheet", found.sheet, columns(SHEET)),
+        ("samplesheet", found.sheet, declared),
         ("counts", matrix, {"gene_id": columns("columns.genes")["gene_id"], **per_file}),
         ("genes", found.counts.genes, columns("columns.genes")),
         ("annotations", found.annotations, columns("columns.annotations")),
@@ -405,6 +411,10 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     if (mirna_dir is None) != (isoform_dir is None):
         raise DatasetError("--mirna-dir and --isoform-dir are given together or not at all")
     found = read_all(source, spec)
+    if spec.columns:
+        found = dataclasses.replace(
+            found, sheet=annotate.sheet_columns(found.sheet, spec, settings.root)
+        )
     mirna = None
     if mirna_dir is not None and isoform_dir is not None:
         mirna = read_mirna(mirna_dir, isoform_dir, spec.gdc, found)
@@ -412,7 +422,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     releases = _releases(source, spec)
     if mirna is not None:
         releases |= _mirna_releases(mirna)
-    files = _write(found, out, dataset, day, spec.gdc, releases, mirna=mirna)
+    files = _write(found, out, dataset, day, spec, releases, mirna=mirna)
     word = functools.partial(text.word, PAGE)
     results: tuple[ResultTable | str, ...] = (_checks(found, spec.gdc), _flow(found.sheet),
                                               _pairs(found.sheet),
