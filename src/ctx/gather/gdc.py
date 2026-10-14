@@ -48,6 +48,10 @@ PRIMARY_SITE = "cases.0.primary_site"
 # A column for a second case, sample, portion, analyte or aliquot: a file of two would be
 # counted for one alone.
 SECOND = re.compile(r"(?:^|\.)(?:cases|samples|portions|analytes|aliquots)\.[1-9]")
+# Every entity index of a column, to name its first entity's twin; and a sample's own ID, the one
+# field a pooled aliquot's samples differ in.
+ENTITY = re.compile(r"((?:^|\.)(?:cases|samples|portions|analytes|aliquots)\.)\d+")
+POOLED = re.compile(r"(?:^|\.)samples\.\d+\.submitter_id$")
 N_ROWS = ("N_unmapped", "N_multimapping", "N_noFeature", "N_ambiguous")
 COUNT_COLUMNS = ("unstranded", "stranded_first", "stranded_second")
 GENE_COLUMNS = ("gene_id", "gene_name", "gene_type")
@@ -160,6 +164,24 @@ def _queried(folder: Path, name: str, field: str) -> set[str]:
     return {v for f, values in _filters(query) if f.endswith(field) for v in values}
 
 
+def _second_entities(rows: list[dict[str, str]], header: list[str], name: str) -> list[str]:
+    """Each second-entity column a file fills with other than its first entity's value.
+
+    GDC's TSV gives every row the widest row's columns, so an empty one says nothing. CPTAC-3
+    lists an aliquot cut from pooled tumour pieces once per piece: the same aliquot, type and
+    preservation under another sample ID of the case, still one file of one aliquot.
+    """
+    problems = []
+    for column in (c for c in header if SECOND.search(c)):
+        first = ENTITY.sub(r"\g<1>0", column)
+        pooled = POOLED.search(column) is not None
+        bad = [r for r in rows if r.get(column)
+               and (first not in r or (not pooled and r[column] != r[first]))]  # fmt: skip
+        if bad:
+            problems.append(f"{name}: column {column} is for a second entity in {len(bad)} files")
+    return problems
+
+
 def _metadata(folder: Path, spec: GdcSpec, name: str = METADATA) -> tuple[pl.DataFrame, int]:
     """A fetch's file metadata by our names, kept to the declared primary site.
 
@@ -169,8 +191,7 @@ def _metadata(folder: Path, spec: GdcSpec, name: str = METADATA) -> tuple[pl.Dat
     rows = _table(folder / name)
     header = list(rows[0]) if rows else []
     problems = [f"{name}: no column {c}" for c in FIELDS.values() if c not in header]
-    problems += [f"{name}: column {c} is for a second entity" for c in header
-                 if SECOND.search(c)]  # fmt: skip
+    problems += _second_entities(rows, header, name)
     if spec.primary_site and PRIMARY_SITE not in header:
         problems.append(f"{name}: no {PRIMARY_SITE}, which a primary_site filter needs")
     if problems:

@@ -1,0 +1,9 @@
+sheet rows 277 cases 110
+by condition {'tumour': 202, 'normal': 75}
+drop reasons {('tumour', ''): 110, ('tumour', 'not_first'): 92, ('normal', ''): 75}
+chosen by condition {'tumour': 110, 'normal': 75}
+pairs 75
+C3N-00435 in pairs True
+C3N-01175 in pairs True
+counts 60616 genes by 277 files
+pooled-piece aliquots 9 chosen 8

@@ -2,7 +2,9 @@
 catches; and, opt-in with -m realdata, the four TCGA projects on this Mac against the plan's
 numbers (docs/plans/2026-10-07_m10_real_data_plan_proposal.md, section 1.1), typed here."""
 
+import csv
 import importlib.util
+import io
 import os
 import subprocess
 import sys
@@ -176,6 +178,42 @@ def test_a_file_of_two_cases_or_another_project_is_refused(tmp_path):
         gdc.read_folder(folder.path, spec.gdc)
 
 
+def test_an_aliquot_listed_under_two_samples_of_its_case_is_one_file(tmp_path):
+    """CPTAC-3 lists an aliquot cut from pooled tumour pieces once per piece (9 of 277 ccRCC
+    files), and GDC's TSV gives every file the widest file's columns. Catches: a second entity
+    refused by its header alone, and a second listing accepted when it names another aliquot or
+    sample type."""
+    folder = build(tmp_path / "gdc", [aliquot(1), aliquot(2)], crlf=False, shuffle=False)
+    spec = load(spec_file(tmp_path / "x.toml"))
+    meta = folder.path / gdc.METADATA
+    rows = list(csv.DictReader(io.StringIO(meta.read_text()), delimiter="\t"))
+    first, second = "cases.0.samples.0.", "cases.0.samples.1."
+    fields = ("sample_type", "preservation_method", "submitter_id",
+              "portions.0.analytes.0.aliquots.0.submitter_id")  # fmt: skip
+
+    def listed(again: bool = True, **changed: str) -> pl.DataFrame:
+        """Read the folder with the first file listed again under a second sample, or not."""
+        for i, row in enumerate(rows):
+            for f in fields:
+                value = changed.get(f.split(".")[0], row[first + f])
+                row[second + f] = value if again and i == 0 else ""
+        out = io.StringIO()
+        writer = csv.DictWriter(out, fieldnames=list(rows[0]), delimiter="\t", lineterminator="\n")
+        writer.writeheader()
+        writer.writerows(rows)
+        meta.write_text(out.getvalue(), newline="")
+        return gdc.read_folder(folder.path, spec.gdc).files
+
+    assert listed(again=False).height == 2
+    piece = rows[0][first + "submitter_id"] + "-2"
+    files = listed(submitter_id=piece)
+    assert files.height == 2
+    assert piece not in files["sample_id"].to_list()
+    for changed in ({"portions": "CPT0000000001"}, {"sample_type": "Solid Tissue Normal"}):
+        with pytest.raises(gdc.GdcError, match="second entity in 1 files"):
+            listed(submitter_id=piece, **changed)
+
+
 def test_barcode_parts_come_from_a_tcga_shaped_aliquot_of_the_same_case_only():
     """Catches: parts taken from an aliquot of another case, or from an identifier of another
     shape, where a CPTAC aliquot carries none."""
@@ -184,7 +222,7 @@ def test_barcode_parts_come_from_a_tcga_shaped_aliquot_of_the_same_case_only():
                                              "site": "A1"}  # fmt: skip
     assert gdc.barcode(a.sample, "FAKE-A1-0008") == dict.fromkeys(("vial", "portion", "plate",
                                                                    "site"), "")  # fmt: skip
-    assert set(gdc.barcode("CPT0001230001", "C3L-00001").values()) == {""}
+    assert set(gdc.barcode("CPT0001230001", "C3X-00001").values()) == {""}
 
 
 def test_gather_writes_the_sheet_counts_and_clinical_tables(tmp_path):

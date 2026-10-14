@@ -1,0 +1,21 @@
+2026-10-14T13:48:11Z ctx --root /Users/rytis/ctx_kidney proteo --dataset cptac_ccrcc --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/cptac_ccrcc.toml
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/cptac_ccrcc.toml: needs slug 'cptac_ccrcc' and [proteo]
+        1.52 real         0.74 user         0.15 sys
+           154288128  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               24806  page reclaims
+                   1  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                   3  voluntary context switches
+                2308  involuntary context switches
+          9085091744  instructions retired
+          3458076905  cycles elapsed
+           116802712  peak memory footprint
+exit 1

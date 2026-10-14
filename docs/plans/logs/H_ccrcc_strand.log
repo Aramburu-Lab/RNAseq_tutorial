@@ -1,0 +1,3 @@
+files read 277 dropped by site 0
+calls {'reverse': 277}
+first-strand share min 0.0573 max 0.0767 median 0.0655

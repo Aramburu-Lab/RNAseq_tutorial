@@ -1,0 +1,17 @@
+PDC biospecimens: 208 rows
+  aliquots 208 cases 124
+  aliquots by sample_type {'Primary Tumor': 110, 'Solid Tissue Normal': 84, 'Not Reported': 9, 'Cell Lines': 5}
+  cases by sample_type {'Primary Tumor': 110, 'Solid Tissue Normal': 84, 'Not Reported': 9, 'Cell Lines': 5}
+Mapping workbook: proteome plexes 23 labelled channels 207 distinct labels 207
+  labels in two plexes 0
+Protein table: 6_CPTAC3_CCRCC_Whole_abundance_gene_protNorm=2_CB.tsv 207 sample columns, 207 distinct
+  by PDC sample_type {'Solid Tissue Normal': 84, 'Primary Tumor': 110, 'Cell Lines': 5, 'Not Reported': 8}
+  not in the mapping workbook []
+  mapping labels not in the table []
+  cases with a tumour column 110 with a normal column 84 with both 84
+GDC files: 277
+  files by sample_type {'Primary Tumor': 202, 'Solid Tissue Normal': 75}
+  cases by sample_type {'Primary Tumor': 110, 'Solid Tissue Normal': 75}
+GDC manifest: 277 files
+  GDC cases with tumour and normal files 75
+  of them with protein tumour and normal 75

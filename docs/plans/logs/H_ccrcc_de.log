@@ -1,0 +1,58 @@
+2026-10-14T13:46:00Z ctx --root /Users/rytis/ctx_kidney de --dataset cptac_ccrcc --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/cptac_ccrcc.toml
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_overview_v1.html
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_contrasts_v1.parquet
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_contrasts_v1.csv
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_contrasts_v1_README.md
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_tumour_normal_results_v1.parquet
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_tumour_normal_results_v1.csv
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_tumour_normal_results_v1_README.md
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_volcano_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_volcano_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_volcano_tumour_normal_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_volcano_tumour_normal_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_volcano_tumour_normal_v1.html
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_volcano_tumour_normal_v1.csv
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_volcano_tumour_normal_v1_README.md
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_ma_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_ma_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_ma_tumour_normal_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_ma_tumour_normal_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_ma_tumour_normal_v1.html
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_ma_tumour_normal_v1.csv
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_ma_tumour_normal_v1_README.md
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_phist_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_phist_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_phist_tumour_normal_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_phist_tumour_normal_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_phist_tumour_normal_v1.html
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_phist_tumour_normal_v1.csv
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_phist_tumour_normal_v1_README.md
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_dispersion_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_dispersion_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_dispersion_tumour_normal_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_dispersion_tumour_normal_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_dispersion_tumour_normal_v1.html
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_dispersion_tumour_normal_v1.csv
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_dispersion_tumour_normal_v1_README.md
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_metrics_v1.parquet
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_metrics_v1.csv
+/Users/rytis/ctx_kidney/outputs/05_de/2026-10-14_de_cptac_ccrcc_metrics_v1_README.md
+      116.55 real       316.84 user        18.27 sys
+          3401777152  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              849541  page reclaims
+                 187  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               43183  voluntary context switches
+              286458  involuntary context switches
+        280253734775  instructions retired
+         88966684698  cycles elapsed
+          2835910856  peak memory footprint
+exit 0

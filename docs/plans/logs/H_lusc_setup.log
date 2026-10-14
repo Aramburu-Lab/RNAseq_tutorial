@@ -1,0 +1,24 @@
+2026-10-14T13:51:01Z ctx --root /Users/rytis/ctx_lung setup --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a01b45b7d9228a7fd/conf/datasets/tcga_lusc.toml
+/Users/rytis/ctx_lung/outputs/00_setup/2026-10-14_setup_environment_v1.html
+/Users/rytis/ctx_lung/outputs/00_setup/2026-10-14_setup_versions_v1.parquet
+/Users/rytis/ctx_lung/outputs/00_setup/2026-10-14_setup_versions_v1.csv
+/Users/rytis/ctx_lung/outputs/00_setup/2026-10-14_setup_versions_v1_README.md
+       13.91 real         9.29 user         2.94 sys
+           172425216  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               23677  page reclaims
+                  80  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 858  voluntary context switches
+               13162  involuntary context switches
+         70848769025  instructions retired
+         46659644851  cycles elapsed
+           111494368  peak memory footprint
+exit 0
