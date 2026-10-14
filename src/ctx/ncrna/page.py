@@ -31,6 +31,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.report.views import viewed
 from ctx.viz.aggregates import Aggregate, Lead
 from ctx.viz.scatter import ScatterData
 from ctx.viz.style import ROLES
@@ -39,6 +40,8 @@ if TYPE_CHECKING:
     from ctx.ncrna.run import Inputs
 
 PAGE = "ncrna"
+# M8 F2's presets of the filter's minimum count (M8 plan: 1 to 50; the run's own first).
+FILTER_PRESETS = (1, 2, 5, 10, 20, 50)
 METRIC_COLUMNS = {
     "metric": ("none", "Name the sanity rules read."),
     "value": ("varies", "The value."),
@@ -73,6 +76,46 @@ def figure_text(key: str, **values: Any) -> FigureText:
     reading = tuple(line.format_map(values) for line in text.raw(PAGE, f"figures.{key}.reading"))
     return FigureText(title=fill(f"figures.{key}.title", **values),
                       lead=fill(f"figures.{key}.lead", **values), reading=reading)  # fmt: skip
+
+
+def _filter_panel(ctx: Context, values: pl.DataFrame, k: int, min_count: int
+                  ) -> tuple[Any, FigureText, dict[str, float]]:  # fmt: skip
+    """F2 at one minimum count: the curves, their words, and each biotype's kept share, %."""
+    test = figures.rank_test(values)
+    data = figures.curves(values, ctx.biotypes, float(np.log2(min_count + 1)),
+                          fill("figures.filter.caption", **contrast_words(ctx),
+                               min_count=min_count, **test))  # fmt: skip
+    kept = {b: 100 * float(np.mean(values.filter(pl.col("biotype") == b)["kept"].to_numpy()))
+            for b in ctx.biotypes}  # fmt: skip
+    words = figure_text("filter", protein_coding=kept.get(biotypes.CODING, float("nan")),
+                        lncrna=kept.get(biotypes.LNCRNA, float("nan")), k=k,
+                        min_count=min_count)  # fmt: skip
+    return data, words, kept
+
+
+def _filter_views(writer: Writer, ctx: Context, columns: Any, sizes: list[int]) -> Any:
+    """F2 at the run's minimum count, with the plan's presets as views (M8 F2's control).
+
+    M5's filter is the same rule at any count, so each preset is M5's own filter, computed
+    here, never a stand-in; the kept shares of every preset are one table.
+    """
+    inp = ctx.inputs
+    counts = [ctx.min_count, *(m for m in FILTER_PRESETS if m != ctx.min_count)]
+    options, rows = [], []
+    for m in counts:
+        values, k = figures.filter_values(inp.genes, inp.matrix[:, columns], sizes, m)
+        data, words, kept = _filter_panel(ctx, values, k, m)
+        key = "figures.filter.preset_one" if m == 1 else "figures.filter.preset"
+        options.append((fill(key, min_count=m), data, words))
+        rows += [(m, b, share) for b, share in kept.items()]
+    writer.table(pl.DataFrame(rows, schema=["min_count", "biotype", "kept_pct"], orient="row"),
+                 "filter_presets", {
+                     "min_count": ("reads", "Minimum count at the median library size."),
+                     "biotype": ("none", "Gene biotype."),
+                     "kept_pct": ("%", "Share of the biotype's genes M5's filter keeps."),
+                 })  # fmt: skip
+    block = writer.figure(options[0][1], "filter_by_biotype", options[0][2])
+    return viewed(block, options, word("figures.filter.view"))
 
 
 def contrast_words(ctx: Context) -> dict[str, Any]:
@@ -116,19 +159,7 @@ def library(writer: Writer, ctx: Context) -> tuple[list[Result], dict[str, tuple
     sizes = [int((used["group"] == "reference").sum()), int((used["group"] == "tested").sum())]
     values, k = figures.filter_values(inp.genes, inp.matrix[:, columns], sizes, ctx.min_count)
     writer.table(values, "filter_values", figures.columns(values))
-    test = figures.rank_test(values)
-    cutoff = float(np.log2(ctx.min_count + 1))
-    data = figures.curves(
-        values,
-        ctx.biotypes,
-        cutoff,
-        fill("figures.filter.caption", **contrast_words(ctx), min_count=ctx.min_count, **test),
-    )
-    kept = {b: 100 * float(np.mean(values.filter(pl.col("biotype") == b)["kept"].to_numpy()))
-            for b in (biotypes.CODING, biotypes.LNCRNA)}  # fmt: skip
-    curve = writer.figure(data, "filter_by_biotype", figure_text(
-        "filter", protein_coding=kept[biotypes.CODING], lncrna=kept[biotypes.LNCRNA], k=k,
-        min_count=ctx.min_count))  # fmt: skip
+    curve = _filter_views(writer, ctx, columns, sizes)
     name = inp.contrast.name
     metrics = {
         "mirna.max_percent": (top, f"largest miRNA-gene share of counted reads, {which}, %"),

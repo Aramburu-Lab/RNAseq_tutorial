@@ -120,6 +120,10 @@ caption = "{n_ref} {reference} and {n_test} {tested} samples of {cell_type}; cut
 x = "Reads at the median library size"
 y = "Share of genes"
 cutoff = "filter cutoff"
+# M8 F2's control: the filter's minimum count, presets of the plan (1 to 50).
+view = "Minimum count"
+preset = "{min_count} reads"
+preset_one = "{min_count} read"
 
 [figures.volcano]
 title = "{tested} against {reference} in {cell_type}, by biotype"
