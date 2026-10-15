@@ -106,3 +106,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A running sum of 15,000 logs drifts 2.6e-10 in a hypergeometric p; Kahan summation brings it to 4.2e-11 (E, 2026-10-14).
 - An agent's gates must lint every file it commits: H's proof scripts under docs/plans/logs failed ruff only in main's preflight (2026-10-14).
 - Default `git log` follows one parent of a merge, so a search for every version of a file needs `--full-history -m`: 6 of 8 kidney rebuild commands kept the build clone's path until it did (K, 2026-10-15).
+- A module that reads a GDC sheet without `gdc.chosen` silently counts unchosen files (ctx qc: 517 against 515): grep each new consumer of a GDC sheet for the door (S, 2026-10-15).

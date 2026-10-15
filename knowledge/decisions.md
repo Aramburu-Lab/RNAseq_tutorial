@@ -27,6 +27,48 @@ it were reversed.
 
 ---
 
+## D-078 — M7's tumour_normal design for CPTAC ccRCC
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** H.1: Clark 2019's ccRCC freeze is a TSV of log2 abundance by PDC aliquot, with paired normals, which neither existing M7 design took.
+
+**Decision.** `ctx.proteo.tables.read_tsv` reads it with NA as missing, never zero; `read_plexes` takes the plex from the mapping workbook's proteome rows; gather reads PDC biospecimens into an `aliquots` table and asks PDC's Other Metadata category too. The design runs a paired t on each case's tumour and normal at protein beside M5's paired DESeq2 at RNA on the same cases, with correlation per tissue. The registered rules C0 to C6 are pasted unchanged, and a test compares them with the plan file as first committed (f90eda5).
+
+**Evidence.** 103 tumours, 73 pairs. C0 recorded: tumour positive share 0.657 (5,541 of 8,437 genes) against Clark's 74 % of 7,027; normals 0.471 against 52 %, on M7's 70 % quantified filter rather than Clark's gene set. C1 to C6 PASS: CA9 protein log2 FC 2.35 (padj 2.4e-39); OXPHOS protein -0.98 against RNA -0.38 (p 1.8e-28); glycolysis protein +0.165.
+
+**Consequence.** The page's Interpretation, Questions and Pitfalls are still M7's generic text (TODO S.4).
+
+---
+
+## D-077 — `[gdc] exclude_cases` with a reason drops a case first
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** Clark analysed 103 clear cell tumours; GDC metadata carry no histology, and 2 of the 75 GDC pairs are non-clear-cell.
+
+**Decision.** `[gdc] exclude_cases` with a required `exclude_reason` is the first drop reason in `gdc.choose`, so M5 and M7 see the same cases. ccRCC's 7 non-clear-cell cases come from the clinical workbook.
+
+**Evidence.** 110 tumours less 7 gives 103, equal to Clark; 73 pairs (Clark used 72 normals).
+
+**Consequence.** Any dataset can exclude cases only with a stated reason, through the one door.
+
+---
+
+## D-076 — A GDC dataset may name several projects; a comparison across them is labelled cross-project with batch diagnostics
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** D1.1: LUSC against LUAD spans two TCGA projects; a dataset named one.
+
+**Decision.** `[gdc] projects`, a repeatable `--gdc-dir`, each folder's project read from its own file query, one sheet with a `project` column, run accessions numbered across the combined sheet. The page labels the contrast cross-project, with PCA by project and per-project library size, composition, plates and sites beside it.
+
+**Evidence.** LUSC over LUAD on 501 and 515 tumours: TP63 5.12, KRT5 7.05, SOX2 3.19, NKX2-1 -3.46, NAPSA -3.45, all PASS (registered 15:21 before any fit). Project PERMANOVA R2 0.276, p 0.001; every QC metric differs by project at BH < 0.05; 6 of 21 and 24 plates shared.
+
+**Consequence.** `ctx run` still takes one `--gdc-dir` (TODO S.3). The marker sources were checked by title and DOI only (S.2).
+
+---
+
 ## D-075 — A rebuild command's dataset file is the codebase's by its committed bytes; a root's note is a build option
 
 **Date:** 2026-10-15 · **Status:** decided
