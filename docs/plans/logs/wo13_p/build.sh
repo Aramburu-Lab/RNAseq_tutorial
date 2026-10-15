@@ -14,7 +14,12 @@ case $which in
   breast) real=/Users/rytis/ctx_breast dataset=tcga_brca
           gather=(--gdc-dir $real/data/raw/tcga_brca --mirna-dir $real/data/raw/tcga_brca_mirna
                   --isoform-dir $real/data/raw/tcga_brca_isoform) ;;
-  *) echo "tier1 or breast"; exit 2 ;;
+  lusc) real=/Users/rytis/ctx_lung dataset=tcga_lusc
+        gather=(--gdc-dir $real/data/raw/tcga_lusc --mirna-dir $real/data/raw/tcga_lusc_mirna
+                --isoform-dir $real/data/raw/tcga_lusc_isoform) ;;
+  ccrcc) real=/Users/rytis/ctx_kidney dataset=cptac_ccrcc
+         gather=(--gdc-dir $real/data/raw/cptac_ccrcc_star) ;;
+  *) echo "tier1, breast, lusc or ccrcc"; exit 2 ;;
 esac
 root=$WT/outputs/scratch_roots/${which}_$label
 mkdir -p "$root/outputs"

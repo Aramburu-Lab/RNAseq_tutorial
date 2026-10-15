@@ -688,6 +688,9 @@ class ScatterData:
     def interactive(self) -> Any:
         """Render the plotly figure; hover shows x, y and every ``hover`` column.
 
+        With ``calls`` the point traces are empty: the page script fills them from the page's
+        rows (``liveCalls``), which the figure files and the CSV do not need.
+
         Returns:
             A plotly Figure with the light template; the page switches themes.
         """
@@ -712,8 +715,15 @@ class ScatterData:
         fig = go.Figure()
         shapes = self._levels(self.symbol)
         pairs = [(level, j, s) for level in self.colours for j, s in enumerate(shapes)]
+        # With live calls the page script draws the points from the page's rows, at load as at
+        # every setting, so the traces carry none and each point travels once, which keeps an
+        # unthinned volcano's page under the cap (GS.3). SVG, not WebGL: a browser without
+        # WebGL draws no WebGL trace at all, as headless Chromium showed.
+        rows_only = self.calls is not None
         for (level, j, shape), rows in zip(
-            pairs, self._trace_rows(frame, self.colour), strict=True
+            pairs,
+            self._trace_rows(frame.clear() if rows_only else frame, self.colour),
+            strict=True,
         ):
             fig.add_trace(
                 go.Scatter(

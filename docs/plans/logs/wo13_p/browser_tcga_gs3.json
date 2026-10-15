@@ -1,0 +1,269 @@
+{
+ "2026-10-15_de_tcga_brca_overview_v1.html": {
+  "measure": {
+   "drawn": 21606,
+   "rows": 21606,
+   "n_tested": 21606,
+   "type": "scatter",
+   "redraw_ms": [
+    796,
+    819,
+    822,
+    804,
+    802
+   ],
+   "scroll": true
+  },
+  "errors": {},
+  "box_1280": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_1280_dark": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "box_375": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_375_dark": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_1280": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_1280_dark": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_375": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_375_dark": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  }
+ },
+ "2026-10-15_de_tcga_lusc_overview_v1.html": {
+  "measure": {
+   "drawn": 21725,
+   "rows": 21725,
+   "n_tested": 21725,
+   "type": "scatter",
+   "redraw_ms": [
+    814,
+    828,
+    834,
+    820,
+    807
+   ],
+   "scroll": true
+  },
+  "errors": {},
+  "box_1280": {
+   "inside": 192,
+   "edge": 30,
+   "picked": 206,
+   "picks_what_is_inside": true,
+   "count": "206 genes selected: 206 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_1280_dark": {
+   "inside": 192,
+   "edge": 30,
+   "picked": 206,
+   "picks_what_is_inside": true,
+   "count": "206 genes selected: 206 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "box_375": {
+   "inside": 184,
+   "edge": 56,
+   "picked": 208,
+   "picks_what_is_inside": true,
+   "count": "208 genes selected: 208 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_375_dark": {
+   "inside": 184,
+   "edge": 56,
+   "picked": 208,
+   "picks_what_is_inside": true,
+   "count": "208 genes selected: 208 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_1280": {
+   "inside": 192,
+   "edge": 30,
+   "picked": 206,
+   "picks_what_is_inside": true,
+   "count": "206 genes selected: 206 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_1280_dark": {
+   "inside": 192,
+   "edge": 30,
+   "picked": 206,
+   "picks_what_is_inside": true,
+   "count": "206 genes selected: 206 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_375": {
+   "inside": 184,
+   "edge": 56,
+   "picked": 208,
+   "picks_what_is_inside": true,
+   "count": "208 genes selected: 208 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_375_dark": {
+   "inside": 184,
+   "edge": 56,
+   "picked": 208,
+   "picks_what_is_inside": true,
+   "count": "208 genes selected: 208 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  }
+ },
+ "2026-10-15_de_cptac_ccrcc_overview_v1.html": {
+  "measure": {
+   "drawn": 24375,
+   "rows": 24375,
+   "n_tested": 24375,
+   "type": "scatter",
+   "redraw_ms": [
+    897,
+    924,
+    933,
+    911,
+    910
+   ],
+   "scroll": true
+  },
+  "errors": {},
+  "box_1280": {
+   "inside": 351,
+   "edge": 148,
+   "picked": 408,
+   "picks_what_is_inside": true,
+   "count": "408 genes selected: 375 up, 18 down, 15 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_1280_dark": {
+   "inside": 351,
+   "edge": 148,
+   "picked": 408,
+   "picks_what_is_inside": true,
+   "count": "408 genes selected: 375 up, 18 down, 15 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "box_375": {
+   "inside": 332,
+   "edge": 222,
+   "picked": 425,
+   "picks_what_is_inside": true,
+   "count": "425 genes selected: 392 up, 16 down, 17 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_375_dark": {
+   "inside": 332,
+   "edge": 222,
+   "picked": 425,
+   "picks_what_is_inside": true,
+   "count": "425 genes selected: 392 up, 16 down, 17 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_1280": {
+   "inside": 351,
+   "edge": 148,
+   "picked": 408,
+   "picks_what_is_inside": true,
+   "count": "408 genes selected: 375 up, 18 down, 15 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_1280_dark": {
+   "inside": 351,
+   "edge": 148,
+   "picked": 408,
+   "picks_what_is_inside": true,
+   "count": "408 genes selected: 375 up, 18 down, 15 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_375": {
+   "inside": 332,
+   "edge": 222,
+   "picked": 425,
+   "picks_what_is_inside": true,
+   "count": "425 genes selected: 392 up, 16 down, 17 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_375_dark": {
+   "inside": 332,
+   "edge": 222,
+   "picked": 425,
+   "picks_what_is_inside": true,
+   "count": "425 genes selected: 392 up, 16 down, 17 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  }
+ }
+}

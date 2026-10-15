@@ -1,0 +1,511 @@
+== ruff check src tests scripts docs/plans/logs/wo13_p
+D205 1 blank line required between summary line and description
+ --> docs/plans/logs/wo13_p/browser_gl_probe.py:1:1
+  |
+1 | / """Package P, GS.3: one live-calls redraw timed on a built M5 page, as built (SVG scatter) and
+2 | | with its point traces switched to WebGL (scattergl) in the page, to decide whether the point
+3 | | count needs WebGL. Headless Chromium with --disable-gpu, as tests/browser.mjs runs it.
+4 | | Run: python browser_gl_probe.py <page.html> [...]
+5 | | """
+  | |___^
+6 |
+7 |   import json
+  |
+help: Insert single blank line
+
+D415 First line should end with a period, question mark, or exclamation point
+ --> docs/plans/logs/wo13_p/browser_gl_probe.py:1:1
+  |
+1 | / """Package P, GS.3: one live-calls redraw timed on a built M5 page, as built (SVG scatter) and
+2 | | with its point traces switched to WebGL (scattergl) in the page, to decide whether the point
+3 | | count needs WebGL. Headless Chromium with --disable-gpu, as tests/browser.mjs runs it.
+4 | | Run: python browser_gl_probe.py <page.html> [...]
+5 | | """
+  | |___^
+6 |
+7 |   import json
+  |
+help: Add closing punctuation
+
+E501 Line too long (102 > 100)
+  --> docs/plans/logs/wo13_p/browser_gl_probe.py:18:101
+   |
+16 |   await new Promise(r => setTimeout(r, 4000));
+17 |   const fig = document.querySelector('form.select').closest('.fig');
+18 |   const d = fig.querySelector('.js-plotly-plot'), form = fig.querySelector('form.calls:not(.select)');
+   |                                                                                                     ^^
+19 |   const cfg = JSON.parse(document.getElementById(form.getAttribute('data-controls')).textContent);
+20 |   const traces = Object.values(cfg.traces);
+   |
+
+D415 First line should end with a period, question mark, or exclamation point
+ --> docs/plans/logs/wo13_p/browser_summary.py:1:1
+  |
+1 | """Package P: one line per page from browser_volcano.py's JSON. Run: python browser_summary.py <json>"""
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2 |
+3 | import json
+  |
+help: Add closing punctuation
+
+E501 Line too long (104 > 100)
+ --> docs/plans/logs/wo13_p/browser_summary.py:1:101
+  |
+1 | """Package P: one line per page from browser_volcano.py's JSON. Run: python browser_summary.py <json>"""
+  |                                                                                                     ^^^^
+2 |
+3 | import json
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> docs/plans/logs/wo13_p/browser_volcano.py:15:1
+   |
+14 |   sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "tests"))
+15 | / from test_export_browser import _browse  # noqa: E402
+16 | | import test_pick_browser  # noqa: E402
+17 | | from test_pick_browser import BOX, LASSO, _drag  # noqa: E402
+   | |_______________________________________________^
+18 |
+19 |   # A root built without M6 gives its picker no onward link; read none as none.
+   |
+help: Organize imports
+   |
+14 | sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "tests"))
+15 + import test_pick_browser  # noqa: E402
+16 | from test_export_browser import _browse  # noqa: E402
+   - import test_pick_browser  # noqa: E402
+17 | from test_pick_browser import BOX, LASSO, _drag  # noqa: E402
+   |
+
+E501 Line too long (102 > 100)
+  --> docs/plans/logs/wo13_p/browser_volcano.py:28:101
+   |
+26 |   await new Promise(r => setTimeout(r, 4000));
+27 |   const fig = document.querySelector('form.select').closest('.fig');
+28 |   const d = fig.querySelector('.js-plotly-plot'), form = fig.querySelector('form.calls:not(.select)');
+   |                                                                                                     ^^
+29 |   const cfg = JSON.parse(document.getElementById(form.getAttribute('data-controls')).textContent);
+30 |   const rows = JSON.parse(document.getElementById(form.getAttribute('data-rows')).textContent);
+   |
+
+E501 Line too long (106 > 100)
+  --> docs/plans/logs/wo13_p/browser_volcano.py:65:101
+   |
+63 |         summary[task] = {"inside": len(inside), "edge": len(edge), "picked": len(picked),
+64 |                          "picks_what_is_inside": bool(inside) and inside <= picked <= inside | edge,
+65 |                          "count": got["count"], "scroll": got["scroll"], "font": got["font"]}  # fmt: skip
+   |                                                                                                     ^^^^^^
+66 |     out[page.name] = summary
+67 | print(json.dumps(out, indent=1))
+   |
+
+SIM115 Use a context manager for opening files
+  --> docs/plans/logs/wo13_p/compare_metrics.py:13:44
+   |
+11 | def read(path: str, module: str | None = None) -> dict[tuple[str, str], tuple[str, str]]:
+12 |     """(module, metric) to (value, detail); a module-less table takes ``module``."""
+13 |     rows = csv.DictReader(line for line in Path(path).open() if not line.startswith("#"))
+   |                                            ^^^^^^^^^^^^^^^
+14 |     return {(r.get("module") or module, r["metric"]): (r["value"], r["detail"]) for r in rows}
+   |
+
+Found 9 errors.
+[*] 1 fixable with the `--fix` option (2 hidden fixes can be enabled with the `--unsafe-fixes` option).
+exit 1
+== ruff format --check src tests scripts docs/plans/logs/wo13_p
+unformatted: File would be reformatted
+  --> docs/plans/logs/wo13_p/browser_summary.py:12:11
+   |
+11 |     picked = sorted({v[k]["picked"] for k in drags})
+   -     print(f"{page}: drawn {m['drawn']:,}, rows {m['rows']:,}, tested {m['n_tested']:,}, "
+   -           f"redraw ms {m['redraw_ms']}, no sideways scroll {m['scroll']}, drags right "
+   -           f"{len(ok)} of {len(drags)} (picked {picked}), errors {v['errors'] or 'none'}")
+12 +     print(
+13 +         f"{page}: drawn {m['drawn']:,}, rows {m['rows']:,}, tested {m['n_tested']:,}, "
+14 +         f"redraw ms {m['redraw_ms']}, no sideways scroll {m['scroll']}, drags right "
+15 +         f"{len(ok)} of {len(drags)} (picked {picked}), errors {v['errors'] or 'none'}"
+16 +     )
+   |
+
+unformatted: File would be reformatted
+  --> docs/plans/logs/wo13_p/compare_metrics.py:23:7
+   |
+22 | details = [k for k in recorded if k in now and now[k][1] == recorded[k][1]]
+   - print(f"recorded {len(recorded)}; equal {len(equal)}; differ {len(differ)}; "
+   -       f"missing {len(missing)}; details equal {len(details)}")
+23 + print(
+24 +     f"recorded {len(recorded)}; equal {len(equal)}; differ {len(differ)}; "
+25 +     f"missing {len(missing)}; details equal {len(details)}"
+26 + )
+27 | for k in differ + missing:
+   |
+
+unformatted: File would be reformatted
+   --> src/ctx/viz/scatter.py:724:19
+    |
+723 |         for (level, j, shape), rows in zip(
+    -             pairs, self._trace_rows(frame.clear() if rows_only else frame, self.colour),
+724 +             pairs,
+725 +             self._trace_rows(frame.clear() if rows_only else frame, self.colour),
+726 |             strict=True,
+    |
+
+3 files would be reformatted, 307 files already formatted
+exit 1
+== mypy src
+Success: no issues found in 143 source files
+exit 0
+== interrogate -q src/ctx
+exit 0
+== labdocs lint
+exit 0
+== labdocs render --check
+exit 0
+== python -m ctx.report.prose
+prose lint: no violations
+exit 0
+== python -m ctx.report.glossary_lint
+warning: insert_size.long: the number 1 has no source
+warning: rrna_depletion.long: the number 80 has no source
+warning: spike_in.long: the number 92 has no source
+warning: rin.short: the number 1 has no source
+warning: reference_genome.long: the number 2013 has no source
+warning: ensembl_id.long: the number 236.3 has no source
+warning: lncrna.short: the number 200 has no source
+warning: index_alignment.long: the number 32 has no source
+warning: uniquely_mapped.long: the number 255 has no source
+warning: mapq.short: the number 255 has no source
+warning: cpm.long: the number 1 has no source
+warning: log2fc.short: the number 1 has no source
+warning: expression_filter.long: the number 10 has no source
+warning: mad.short: the number 3 has no source
+warning: qc_bands.long: the number 3 has no source
+warning: p_value.long: the number 20,000 has no source
+warning: multiple_testing.long: the number 0.05 has no source
+warning: padj.short: the number 0.05 has no source
+warning: confidence_interval.short: the number 95 has no source
+warning: power.short: the number 80 has no source
+warning: dispersion.long: the number 0.1 has no source
+warning: spearman.long: the number 1 has no source
+warning: kruskal_wallis.long: the number 1 has no source
+warning: permutation_test.long: the number 1,000 has no source
+warning: cramers_v.short: the number 0 has no source
+warning: hazard_ratio.short: the number 2 has no source
+warning: c_index.short: the number 0.5 has no source
+warning: msigdb.short: the number 50 has no source
+warning: ratio_compression.short: the number 1 has no source
+warning: fastq.long: the number 0.4 has no source
+warning: tcga.short: the number 11,000 has no source
+warning: tcga_barcode.short: the number 01 has no source
+warning: gtex.short: the number 50 has no source
+warning: cards: parameters: 'reads' is read, unmarked
+warning: cards: parameters: 'nf-core/fetchngs' is fetchngs, unmarked
+warning: cards: parameters: 'FASTQ' is fastq, unmarked
+warning: cards: parameters: 'gene sets' is gene_set, unmarked
+warning: cards: parameters: 'filterByExpr' is expression_filter, unmarked
+warning: cards: parameters: 'apeGLM' is lfc_shrinkage, unmarked
+warning: cards: parameters: 'MA plot' is ma_plot, unmarked
+warning: cards: parameters: 'Salmon' is salmon, unmarked
+warning: cards: parameters: 'counts' is raw_counts, unmarked
+warning: cards: parameters: 'GDC' is tcga, unmarked
+warning: cards: parameters: 'STAR' is star, marked only at a later mention
+warning: cards: parameters: 'miRNA' is mirna, unmarked
+warning: cards: parameters: 'isoform' is transcript, unmarked
+warning: cards: parameters: 'OS' is survival_endpoints, unmarked
+warning: cards: parameters: 'follow-up' is follow_up, unmarked
+warning: cards: parameters: 'at risk' is number_at_risk, unmarked
+warning: cards: parameters: 'Cox model' is hazard_ratio, unmarked
+warning: cards: parameters: 'stage' is stage, unmarked
+warning: cards: parameters: 'Ensembl' is gencode, unmarked
+warning: cards: parameters: 'fastp' is fastp, unmarked
+warning: cards: parameters: 'trimming' is quality_trimming, unmarked
+warning: cards: parameters: 'mapping rate' is mapping_rate, unmarked
+warning: cards: parameters: 'alignment' is aligner, unmarked
+warning: cards: parameters: 'fragment GC bias' is gc_bias, unmarked
+warning: cards: parameters: 'fragment' is fragment, unmarked
+warning: cards: parameters: 'GC content' is gc_content, unmarked
+warning: cards: parameters: 'Index' is index, unmarked
+warning: cards: parameters: 'spearman' is spearman, unmarked
+warning: cards: parameters: 'compressed ratios' is ratio_compression, unmarked
+warning: cards: parameters: 'BH' is padj, unmarked
+warning: cards: parameters: 'biotype' is biotype, unmarked
+warning: cards: parameters: 'confounding' is covariate, unmarked
+warning: cards: parameters: 'running score' is gsea, unmarked
+warning: cards: parameters: 'ORA' is ora, unmarked
+warning: cards: parameters: 'GTEx' is gtex, unmarked
+warning: clinical: input: 'counts' is raw_counts, unmarked
+warning: clinical: method: 'stage' is stage, unmarked
+warning: clinical: interpretation: 'Read' is read, unmarked
+warning: clinical: interpretation: 'stage' is stage, unmarked
+warning: clinical: questions: 'Follow-up' is follow_up, unmarked
+warning: clinical: questions: 'power' is power, unmarked
+warning: clinical: questions: 'log-rank p' is log_rank, unmarked
+warning: clinical: questions: 'permutation' is permutation_test, unmarked
+warning: clinical: questions: 'TCGA' is tcga, unmarked
+warning: clinical: questions: 'ER-positive' is receptor_status, unmarked
+warning: clinical: results: 'GDC' is tcga, unmarked
+warning: clinical: results: 'ER-negative' is receptor_status, unmarked
+warning: clinical: results: 'OS' is survival_endpoints, unmarked
+warning: clinical: results: 'power' is power, unmarked
+warning: de: method: 'counts' is raw_counts, unmarked
+warning: de: method: 'design' is design_formula, unmarked
+warning: de: method: 'read' is read, unmarked
+warning: de: interpretation: 'p-value' is p_value, unmarked
+warning: de: interpretation: 'volcano' is volcano_plot, unmarked
+warning: de: interpretation: 'batch' is batch_effect, unmarked
+warning: de: interpretation: 'design' is design_formula, unmarked
+warning: de: pitfalls: 'batch' is batch_effect, unmarked
+warning: de: pitfalls: 'volcano' is volcano_plot, unmarked
+warning: de: pitfalls: 'p-value' is p_value, unmarked
+warning: de: questions: 'design' is design_formula, unmarked
+warning: de: questions: 'batch' is batch_effect, unmarked
+warning: de: questions: 'reads' is read, unmarked
+warning: de: questions: 'paired design' is paired_design, unmarked
+warning: de: questions: 'term' is gene_set, unmarked
+warning: de: questions: 'fold change' is log2fc, unmarked
+warning: de: questions: 'padj' is padj, unmarked
+warning: de: questions: "Cook's distance" is cooks_distance, unmarked
+warning: de: questions: 'independent filtering' is independent_filtering, unmarked
+warning: de: questions: 'adjustment' is covariate, unmarked
+warning: de: results: 'VST' is vst, unmarked
+warning: de: results: 'Wald test' is wald_test, unmarked
+warning: de: results: 'design' is design_formula, unmarked
+warning: de: results: 'Shrinkage' is lfc_shrinkage, unmarked
+warning: de: results: 'dispersion' is dispersion, unmarked
+warning: de: results: 'rho' is spearman, unmarked
+warning: function: method: 'gene set' is gene_set, unmarked
+warning: function: interpretation: 'read' is read, unmarked
+warning: function: interpretation: 'FDR' is padj, unmarked
+warning: function: interpretation: 'pathway' is gene_set, unmarked
+warning: function: pitfalls: 'ORA' is ora, unmarked
+warning: function: pitfalls: 'GSEA' is gsea, unmarked
+warning: function: pitfalls: 'p-value' is p_value, unmarked
+warning: function: pitfalls: 'permutations' is permutation_test, unmarked
+warning: function: pitfalls: 'padj' is padj, unmarked
+warning: function: questions: 'Wald statistic' is wald_test, unmarked
+warning: function: questions: 'fold change' is log2fc, unmarked
+warning: function: questions: 'counts' is raw_counts, unmarked
+warning: function: results: 'ORA' is ora, unmarked
+warning: function: results: 'BH' is padj, unmarked
+warning: function: results: 'hypergeometric' is fisher_test, unmarked
+warning: function: results: 'preranked GSEA' is gsea, unmarked
+warning: function: results: 'Wald statistic' is wald_test, unmarked
+warning: function: results: 'permutations' is permutation_test, unmarked
+warning: function: results: 'NES' is nes, unmarked
+warning: function: results: 'nominal p' is p_value, unmarked
+warning: gather: purpose: 'ENA' is ena, unmarked
+warning: gather: purpose: 'reads' is read, unmarked
+warning: gather: input: 'nf-core/fetchngs' is fetchngs, unmarked
+warning: gather: method: 'fetchngs' is fetchngs, unmarked
+warning: gather: method: 'read' is read, unmarked
+warning: gather: interpretation: 'read length' is read_length, unmarked
+warning: gather: interpretation: 'design' is design_formula, unmarked
+warning: gather: interpretation: 'depth' is sequencing_depth, unmarked
+warning: gather: pitfalls: 'library' is library, unmarked
+warning: gather: pitfalls: 'fetchngs' is fetchngs, unmarked
+warning: gather: pitfalls: 'depth' is sequencing_depth, unmarked
+warning: gather: questions: 'fetchngs' is fetchngs, unmarked
+warning: gather: questions: 'ENA' is ena, unmarked
+warning: gather: questions: 'counts' is raw_counts, unmarked
+warning: gather: questions: 'reads' is read, unmarked
+warning: gather: results: 'batch' is batch_effect, unmarked
+warning: gather: results: 'counts' is raw_counts, unmarked
+warning: gather: results: 'Reads' is read, unmarked
+warning: gather: results: 'alignment' is aligner, unmarked
+warning: gather_gdc: method: 'counts' is raw_counts, unmarked
+warning: gather_gdc: method: 'GDC' is tcga, unmarked
+warning: gather_gdc: interpretation: 'reads' is read, unmarked
+warning: gather_gdc: interpretation: 'stranded library' is strandedness, unmarked
+warning: gather_gdc: interpretation: 'counts' is raw_counts, unmarked
+warning: gather_gdc: pitfalls: 'barcode' is index, unmarked
+warning: gather_gdc: pitfalls: 'aliquot' is tcga_barcode, unmarked
+warning: gather_gdc: questions: 'read' is read, unmarked
+warning: gather_gdc: questions: 'counts' is raw_counts, unmarked
+warning: genecard: purpose: 'reference' is reference_genome, unmarked
+warning: genecard: input: 'Ensembl' is gencode, unmarked
+warning: genecard: method: 'GTEx' is gtex, unmarked
+warning: genecard: method: 'exon' is exon, unmarked
+warning: genecard: method: 'reads' is read, unmarked
+warning: genecard: method: 'Ensembl' is gencode, unmarked
+warning: genecard: method: 'Reference' is reference_genome, unmarked
+warning: genecard: interpretation: 'GTEx' is gtex, unmarked
+warning: genecard: interpretation: 'reference' is reference_genome, unmarked
+warning: genecard: interpretation: 'exons' is exon, unmarked
+warning: genecard: pitfalls: 'GTEx' is gtex, unmarked
+warning: genecard: pitfalls: 'splicing' is splicing, unmarked
+warning: genecard: pitfalls: 'exon' is exon, unmarked
+warning: genecard: pitfalls: 'coverage' is coverage, unmarked
+warning: genecard: pitfalls: 'junctions' is splice_junction, unmarked
+warning: genecard: pitfalls: 'isoform' is transcript, unmarked
+warning: genecard: pitfalls: 'Ensembl' is gencode, unmarked
+warning: genecard: questions: 'GTEx' is gtex, unmarked
+warning: genecard: questions: 'p-value' is p_value, unmarked
+warning: genecard: questions: 'exons' is exon, unmarked
+warning: genecard: questions: 'isoform' is transcript, unmarked
+warning: genecard: results: 'GTEx' is gtex, unmarked
+warning: genecard: results: 'TPM' is tpm, unmarked
+warning: genecard: results: 'exon' is exon, unmarked
+warning: genecard: results: 'read counts' is raw_counts, unmarked
+warning: genecard: results: 'collapsed gene model' is gene_model, unmarked
+warning: genecard: results: 'MANE Select' is mane, unmarked
+warning: genecard: results: 'junction' is splice_junction, unmarked
+warning: genecard_preview: purpose: 'reference' is reference_genome, unmarked
+warning: genecard_preview: input: 'Reference' is reference_genome, unmarked
+warning: genecard_preview: input: 'Ensembl' is gencode, unmarked
+warning: genecard_preview: method: 'exon' is exon, unmarked
+warning: genecard_preview: method: 'junction' is splice_junction, unmarked
+warning: genecard_preview: method: 'counts' is raw_counts, unmarked
+warning: genecard_preview: method: 'Reference' is reference_genome, unmarked
+warning: genecard_preview: interpretation: 'GTEx' is gtex, unmarked
+warning: genecard_preview: interpretation: 'reference' is reference_genome, unmarked
+warning: genecard_preview: interpretation: 'exons' is exon, unmarked
+warning: genecard_preview: interpretation: 'isoform' is transcript, unmarked
+warning: genecard_preview: interpretation: 'junction' is splice_junction, unmarked
+warning: genecard_preview: pitfalls: 'GTEx' is gtex, unmarked
+warning: genecard_preview: pitfalls: 'splicing' is splicing, unmarked
+warning: genecard_preview: pitfalls: 'exon' is exon, unmarked
+warning: genecard_preview: pitfalls: 'coverage' is coverage, unmarked
+warning: genecard_preview: pitfalls: 'counts' is raw_counts, unmarked
+warning: genecard_preview: pitfalls: 'Ensembl' is gencode, unmarked
+warning: genecard_preview: questions: 'GTEx' is gtex, unmarked
+warning: genecard_preview: questions: 'p-value' is p_value, unmarked
+warning: genecard_preview: questions: 'exons' is exon, unmarked
+warning: genecard_preview: questions: 'isoform' is transcript, unmarked
+warning: genecard_preview: results: 'CPM' is cpm, unmarked
+warning: genecard_preview: results: 'exon' is exon, unmarked
+warning: genecard_preview: results: 'read counts' is raw_counts, unmarked
+warning: guide: purpose: 'reads' is read, unmarked
+warning: guide: method: 'read' is read, unmarked
+warning: guide: interpretation: 'counts' is raw_counts, unmarked
+warning: guide: pitfalls: 'ENA' is ena, unmarked
+warning: guide: pitfalls: 'read' is read, unmarked
+warning: guide: pitfalls: 'batch' is batch_effect, unmarked
+warning: guide: questions: 'FASTQ' is fastq, unmarked
+warning: guide: questions: 'ENA' is ena, unmarked
+warning: ncrna: input: 'counts' is raw_counts, unmarked
+warning: ncrna: input: 'annotation' is annotation, unmarked
+warning: ncrna: method: 'biotype' is biotype, unmarked
+warning: ncrna: method: 'rho' is spearman, unmarked
+warning: ncrna: interpretation: 'library type' is strandedness, unmarked
+warning: ncrna: interpretation: 'lncRNAs' is lncrna, unmarked
+warning: ncrna: interpretation: 'histone mRNAs' is histone_mrna, unmarked
+warning: ncrna: interpretation: 'miRNAs' is mirna, unmarked
+warning: ncrna: interpretation: 'library' is library, unmarked
+warning: ncrna: pitfalls: 'miRNAs' is mirna, unmarked
+warning: ncrna: pitfalls: 'lncRNAs' is lncrna, unmarked
+warning: ncrna: pitfalls: 'reads' is read, unmarked
+warning: ncrna: questions: 'library type' is strandedness, unmarked
+warning: ncrna: questions: 'transcripts' is transcript, unmarked
+warning: ncrna: questions: 'reads' is read, unmarked
+warning: ncrna: questions: 'biotype' is biotype, unmarked
+warning: ncrna: questions: 'power' is power, unmarked
+warning: ncrna: results: 'GENCODE' is gencode, unmarked
+warning: ncrna: results: 'reads' is read, unmarked
+warning: ncrna: results: 'Mann-Whitney' is mann_whitney, unmarked
+warning: ncrna: results: 'lncRNAs' is lncrna, unmarked
+warning: ncrna: results: 'rank-biserial' is effect_size, unmarked
+warning: ncrna: results: 'Wald test' is wald_test, unmarked
+warning: ncrna: results: 'CPM' is cpm, unmarked
+warning: ncrna: results: 'KS test' is ks_test, unmarked
+warning: ncrna: results: 'library' is library, unmarked
+warning: ncrna: results: 'GDC' is tcga, unmarked
+warning: process: purpose: 'reads' is read, unmarked
+warning: process: purpose: 'counts' is raw_counts, unmarked
+warning: process: input: 'read' is read, unmarked
+warning: process: method: 'read' is read, unmarked
+warning: process: method: 'counts' is raw_counts, unmarked
+warning: process: interpretation: 'reads' is read, unmarked
+warning: process: pitfalls: 'reads' is read, unmarked
+warning: process: pitfalls: 'counts' is raw_counts, unmarked
+warning: process: questions: 'Reads' is read, unmarked
+warning: process: questions: 'counts' is raw_counts, unmarked
+warning: process: results: 'Reads' is read, unmarked
+warning: proteo: input: 'counts' is raw_counts, unmarked
+warning: proteo: input: 'CPTAC' is cptac, unmarked
+warning: proteo: interpretation: 'Read' is read, unmarked
+warning: proteo: interpretation: 'ρ' is spearman, unmarked
+warning: proteo: pitfalls: 'ρ' is spearman, unmarked
+warning: proteo: pitfalls: 'fold change' is log2fc, unmarked
+warning: proteo: pitfalls: 'isoforms' is transcript, unmarked
+warning: proteo: questions: 'fold change' is log2fc, unmarked
+warning: proteo: questions: 'neutrophils' is immune_cell_types, unmarked
+warning: proteo: results: 'Counts' is raw_counts, unmarked
+warning: proteo: results: 'ρ' is spearman, unmarked
+warning: proteo: results: 'BH' is padj, unmarked
+warning: proteo: results: 'Mann-Whitney' is mann_whitney, marked only at a later mention
+warning: proteo: results: 'CPM' is cpm, unmarked
+warning: proteo: results: 'reference' is reference_genome, unmarked
+warning: proteo: results: 'CI' is confidence_interval, unmarked
+warning: proteo: results: 'rank-biserial' is effect_size, unmarked
+warning: proteo_preview: input: 'counts' is raw_counts, unmarked
+warning: proteo_preview: input: 'gene symbol' is ensembl_id, unmarked
+warning: proteo_preview: method: 'reference' is reference_genome, unmarked
+warning: proteo_preview: interpretation: 'ρ' is spearman, unmarked
+warning: proteo_preview: interpretation: 'TMT' is tmt, unmarked
+warning: proteo_preview: interpretation: 'Read' is read, unmarked
+warning: proteo_preview: pitfalls: 'ρ' is spearman, unmarked
+warning: proteo_preview: pitfalls: 'fold change' is log2fc, unmarked
+warning: proteo_preview: pitfalls: 'gene symbol' is ensembl_id, unmarked
+warning: proteo_preview: pitfalls: 'isoforms' is transcript, unmarked
+warning: proteo_preview: pitfalls: 'design' is design_formula, unmarked
+warning: proteo_preview: questions: 'fold change' is log2fc, unmarked
+warning: proteo_preview: results: 'reference' is reference_genome, unmarked
+warning: proteo_preview: results: 'protein groups' is protein_group, unmarked
+warning: proteo_preview: results: 'Counts' is raw_counts, unmarked
+warning: proteo_preview: results: 'ρ' is spearman, unmarked
+warning: proteo_preview: results: 'BH' is padj, unmarked
+warning: proteo_preview: results: 'CI' is confidence_interval, unmarked
+warning: proteo_preview: results: 'bootstrap' is bootstrap, unmarked
+warning: proteo_preview: results: 'CPM' is cpm, unmarked
+warning: qc: input: 'counts' is raw_counts, unmarked
+warning: qc: method: 'adjustment' is covariate, unmarked
+warning: qc: interpretation: 'confounding' is covariate, unmarked
+warning: qc: pitfalls: 'depth' is sequencing_depth, unmarked
+warning: qc: pitfalls: 'library' is library, unmarked
+warning: qc: questions: 'depth' is sequencing_depth, unmarked
+warning: qc: questions: 'library' is library, unmarked
+warning: qc: questions: 'confounding' is covariate, unmarked
+warning: qc: results: 'fragment' is fragment, unmarked
+warning: qc: results: 'counts' is raw_counts, unmarked
+warning: qc: results: 'read' is read, unmarked
+warning: qc: results: 'fastp' is fastp, unmarked
+warning: qc: results: 'CPM' is cpm, unmarked
+warning: quant: purpose: 'Read' is read, unmarked
+warning: quant: purpose: 'gene counts' is raw_counts, unmarked
+warning: quant: input: 'Salmon' is salmon, unmarked
+warning: quant: input: 'read' is read, unmarked
+warning: quant: method: 'fragment' is fragment, unmarked
+warning: quant: method: 'tximport' is tx2gene, unmarked
+warning: quant: method: 'counts' is raw_counts, unmarked
+warning: quant: interpretation: 'counts' is raw_counts, unmarked
+warning: quant: interpretation: 'depth' is sequencing_depth, unmarked
+warning: quant: interpretation: 'library' is library, unmarked
+warning: quant: interpretation: 'isoform' is transcript, unmarked
+warning: quant: pitfalls: 'counts' is raw_counts, unmarked
+warning: quant: pitfalls: 'reads' is read, unmarked
+warning: quant: pitfalls: 'index' is index, unmarked
+warning: quant: pitfalls: 'decoys' is decoy, unmarked
+warning: quant: pitfalls: 'transcripts' is transcript, unmarked
+warning: quant: questions: 'reads' is read, unmarked
+warning: quant: questions: 'counts' is raw_counts, unmarked
+warning: quant: questions: 'Salmon' is salmon, unmarked
+warning: quant: questions: 'isoform' is transcript, unmarked
+warning: quant: questions: 'tximport' is tx2gene, unmarked
+warning: quant: questions: 'depth' is sequencing_depth, unmarked
+warning: quant: questions: 'mapping rate' is mapping_rate, unmarked
+warning: quant: results: 'Fragment' is fragment, unmarked
+warning: quant: results: 'Mapping rate' is mapping_rate, unmarked
+warning: quant: results: 'BH' is padj, unmarked
+warning: quant: results: 'counts' is raw_counts, unmarked
+warning: quant: results: 'reads' is read, unmarked
+warning: quant: results: 'TPM' is tpm, unmarked
+warning: quant: results: 'effective length' is effective_length, unmarked
+warning: quant: results: 'reference' is reference_genome, unmarked
+warning: quant: results: 'expression filter' is expression_filter, unmarked
+warning: quant: results: 'isoforms' is transcript, unmarked
+warning: setup: pitfalls: 'counts' is raw_counts, unmarked
+warning: setup: questions: 'fastp' is fastp, unmarked
+glossary lint: no errors
+exit 0
+== file length (warn 200, fail 600)
+exit 0

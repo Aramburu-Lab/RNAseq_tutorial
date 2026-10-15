@@ -1,0 +1,57 @@
+== gather 2026-10-15T13:32:36Z src=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/src_main/src
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_annotations_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_annotations_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_annotations_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_cases_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_cases_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_cases_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_treatments_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_treatments_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_treatments_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_molecular_tests_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_molecular_tests_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_molecular_tests_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_cdr_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_cdr_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_cdr_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_mature_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_mature_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_mature_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_hairpin_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_hairpin_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_hairpin_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_hairpins_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_hairpins_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/lusc_base/outputs/01_gather/2026-10-15_gather_tcga_lusc_mirna_hairpins_v1_README.md
+       66.27 real        21.88 user         6.73 sys
+          1298792448  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              215993  page reclaims
+              109184  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                3153  voluntary context switches
+              649685  involuntary context switches
+        265345598535  instructions retired
+         98565191841  cycles elapsed
+          1152387112  peak memory footprint
+exit 0

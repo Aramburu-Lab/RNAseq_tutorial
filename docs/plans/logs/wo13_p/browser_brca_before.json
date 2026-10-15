@@ -1,0 +1,91 @@
+{
+ "2026-10-15_de_tcga_brca_overview_v1.html": {
+  "measure": {
+   "drawn": 19844,
+   "rows": 19844,
+   "n_tested": 21606,
+   "type": "scatter",
+   "redraw_ms": [
+    732,
+    746,
+    764,
+    755,
+    750
+   ],
+   "scroll": true
+  },
+  "errors": {},
+  "box_1280": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_1280_dark": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "box_375": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_375_dark": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_1280": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_1280_dark": {
+   "inside": 85,
+   "edge": 25,
+   "picked": 93,
+   "picks_what_is_inside": true,
+   "count": "93 genes selected: 93 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_375": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_375_dark": {
+   "inside": 81,
+   "edge": 33,
+   "picked": 95,
+   "picks_what_is_inside": true,
+   "count": "95 genes selected: 95 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  }
+ }
+}

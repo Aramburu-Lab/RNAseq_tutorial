@@ -252,10 +252,10 @@ def volcano(
 ) -> ScatterData:
     """Volcano of one contrast: the default call drawn, and every cutoff callable live.
 
-    Every gene some setting of the page could call is drawn; the rest, above the loosest
-    cutoff offered or never tested, are thinned. All four adjustments count over the same
-    tested genes, so the live view and the table agree. ``unit`` names a point, genes unless
-    given; ``said`` the contrast in words, its levels as written unless given.
+    Every tested gene is drawn, so the picker reaches each one (GS.3); the page carries the
+    points once, in its rows (``ScatterData.interactive``). All four adjustments count over
+    the same tested genes, so the live view and the table agree. ``unit`` names a point, genes
+    unless given; ``said`` the contrast in words, its levels as written unless given.
     """
     said = said or words(result.contrast)
     unit = unit or figure("volcano", "unit")
@@ -268,14 +268,13 @@ def volcano(
     frame = frame.with_columns(
         gene=pl.coalesce("gene_name", "gene_id"),
         neg_log10_p=-pl.max_horizontal(pl.col("pvalue"), pl.lit(P_FLOOR)).log10(),
-        keep=pl.col("pvalue") < max(CUTOFF_PRESETS),
     )
     top = set(frame.filter(pl.col("call") != "ns").sort("padj").head(MAX_VOLCANO_LABELS)["gene_id"])
     frame = frame.with_columns(
         label=pl.when(pl.col("gene_id").is_in(top)).then(pl.col("gene")).otherwise(pl.lit(""))
     ).select(
         "gene", "gene_id", "log2FoldChange", "pvalue", *ADJUSTMENTS, "neg_log10_p", "call",
-        "keep", "label",
+        "label",
     )  # fmt: skip
     c = result.contrast
     columns = {
@@ -287,8 +286,6 @@ def volcano(
         "neg_log10_p": ("-log10 p", f"Minus log10 of the raw p-value, drawn at {P_FLOOR:g} "
                                     "at least."),
         "call": RESULT_COLUMNS["call"],
-        "keep": ("none", f"Raw p below {max(CUTOFF_PRESETS)}: callable at some setting, so "
-                         "always drawn."),
         "label": ("none", "Symbol printed beside the point; empty for none."),
     }  # fmt: skip
     untested = result.results.height - frame.height
@@ -325,7 +322,6 @@ def volcano(
         label="label",
         hover=("gene", "gene_id", "padj"),
         width="double",
-        keep="keep",
         names={
             "up": figure("volcano", "up", tested=said.tested),
             "down": figure("volcano", "down", tested=said.tested),

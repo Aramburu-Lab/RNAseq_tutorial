@@ -1,0 +1,3 @@
+{"2026-10-15_de_tcga_brca_overview_v1.html": {"drawn": 21606, "svg_ms": [949, 950, 984, 968, 949], "gl_ms": [36, 38, 35, 36, 33], "gl_type": "scattergl", "errors": []}}
+{"2026-10-15_de_tier1_overview_v1.html": {"drawn": 12796, "svg_ms": [562, 590, 579, 584, 561], "gl_ms": [28, 28, 27, 26, 23], "gl_type": "scattergl", "errors": []}}
+CORRECTION: the gl_ms values above are not a WebGL redraw. tests/browser.mjs runs Chromium with --disable-gpu, where plotly reports 'WebGL is not supported by your browser' and draws no WebGL trace; the times measure nothing drawn. WebGL was not adopted (scatter.py).
