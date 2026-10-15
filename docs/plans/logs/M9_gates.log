@@ -1,19 +1,8 @@
 == ruff check src tests scripts docs
-E501 Line too long (105 > 100)
-   --> docs/plans/logs/M9_mutate.py:199:101
-    |
-197 |         (
-198 |             "src/ctx/report/templates/_m9.js.j2",
-199 |             "Object.keys(cv).sort(function (a, b) { return Number(a.slice(1)) - Number(b.slice(1)); });",
-    |                                                                                                     ^^^^^
-200 |             "Object.keys(cv).sort();",
-201 |             ["tests/test_genecard_twins.py"],
-    |
-
-Found 1 error.
-exit 1
+All checks passed!
+exit 0
 == ruff format --check src tests scripts docs
-333 files already formatted
+335 files already formatted
 exit 0
 == mypy src
 Success: no issues found in 143 source files
