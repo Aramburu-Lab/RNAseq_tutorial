@@ -25,11 +25,21 @@ page carrying the preview's made-up note inside a ``--real`` root, before anythi
 it then counts the home page's Made-up links, which must be 0, and states the release in
 README.md and MANIFEST.json. A development kit keeps the previews, marked Made-up.
 
+``--note FOLDER=TEXT`` writes one root's note into README.md, on its dataset line, and into
+MANIFEST.json (K.10), so no README is edited after a build: for example
+``--note "kidney=M9 on TCGA-KIRC shows the [clinical] genes only."``. A note passes the prose
+lint; one naming no ``--real`` or ``--made-up`` folder stops the build before anything is
+written.
+
 A raw GDC count matrix never ships (Rytis 2026-10-09; kit v8's were 94 to 205 MB). The rule
 reads the data, not a list of names: a gather table of the counts kind whose README names a
 GDC folder is left out, with its README kept; the kit carries that folder's GDC manifest and
 fetch script, and ``LEFT_OUT.json``, README.md and MANIFEST.json name each file with its bytes
-and the commands that rebuild it, the gather command read from the table's own README. A page
+and the commands that rebuild it, the gather command read from the table's own README. That
+row is provenance, the command as run, and stays verbatim in the shipped README; the command
+shown to a reader names a ``--dataset-file`` the codebase committed as ``conf/datasets/<file>``
+(``codebase_datasets``), and README.md names the builder's ctx root and any dataset file of
+the builder's own, for the reader to replace (K.9). A page
 that links a left-out matrix keeps its link: the link check counts a declared file as present
 (``check_kit.declared``). Every derived table ships, and a count matrix not from GDC ships.
 
@@ -63,6 +73,7 @@ commit. The steps for the Step-1 root, kept here since a session's scratch copy 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import shutil
@@ -78,7 +89,7 @@ import check_kit  # noqa: E402 - the kit's own checker, beside this file
 
 from ctx.dataset import load  # noqa: E402
 from ctx.io import naming  # noqa: E402
-from ctx.report import text  # noqa: E402
+from ctx.report import prose, text  # noqa: E402
 from ctx.report.course import label, newest, write_home  # noqa: E402
 from ctx.runtime import shown_path  # noqa: E402
 
@@ -102,6 +113,9 @@ MATRIX_KIND = "_counts"
 # The rows ctx's table READMEs carry (ctx.io.readme_companion): the folders read, the command.
 GDC_FOLDER_ROW = re.compile(r"^\| GDC (?:\w+ )?folder \| (.+?) \|$", re.MULTILINE)
 COMMAND_ROW = re.compile(r"^\| Command \| `(.+)` \|$", re.MULTILINE)
+# The dataset file's SHA-256 as gather read it, from the README's Data releases rows.
+DATASET_SHA_ROW = re.compile(r"^\| sha256:([^|/ ]+\.toml) \| ([0-9a-f]{64}) \|$", re.MULTILINE)
+DATASETS = "conf/datasets"
 FILE_ROW = re.compile(r"^\| `([^`]+)` \| (\d+) \| `([0-9a-f]{64})` \|$", re.MULTILINE)
 # How a GDC folder's own fetch script is run again, into the folder it fetched.
 FETCH = "OUT={folder} bash {script}"
@@ -161,18 +175,64 @@ def table_readme(path: Path) -> Path:
     return path.with_name(path.name.split(".")[0] + "_README.md")
 
 
-def shown_command(command: str) -> str:
-    """A command as a README recorded it, with ``ctx`` for its entry point and ~ for home."""
+def _after(words: list[str], flag: str) -> str | None:
+    """The value following ``flag`` in a split command, or None."""
+    return next((v for f, v in zip(words, words[1:], strict=False) if f == flag), None)
+
+
+def shown_command(
+    command: str, recorded: dict[str, str] | None = None, codebase: dict[str, str] | None = None
+) -> tuple[str, str | None]:
+    """A command as a README recorded it, with ``ctx`` for its entry point and ~ for home.
+
+    A ``--dataset-file`` whose recorded SHA-256 (``recorded``, file name to hash) is a version
+    the codebase committed (``codebase``, hash to path) is shown by that repository path.
+
+    Returns:
+        The command shown, and the dataset file it names that is the builder's own, or None.
+    """
     words = command.split()
-    first = "ctx" if words[0].endswith(("__main__.py", "/ctx")) else words[0]
-    return " ".join([first, *(shown_path(w) if w.startswith("/") else w for w in words[1:])])
+    shown, own = ["ctx" if words[0].endswith(("__main__.py", "/ctx")) else words[0]], None
+    for flag, word in zip(words, words[1:], strict=False):
+        mapped = None
+        if flag == "--dataset-file":
+            mapped = (codebase or {}).get((recorded or {}).get(Path(word).name, ""))
+            own = None if mapped else shown_path(word)
+        shown.append(mapped or (shown_path(word) if word.startswith("/") else word))
+    return " ".join(shown), own
 
 
-def gdc_matrix(path: Path) -> dict[str, Any] | None:
+def codebase_datasets() -> dict[str, str]:
+    """SHA-256 of every version of every dataset file the codebase committed, to its path.
+
+    Bytes a commit holds are the repository's, from whichever clone or checkout ran them; a
+    reader's own file, even one saved in ``conf/datasets/`` of a clone, has bytes no commit
+    holds. A path test would take that file for the codebase's, and needs the tree on disk.
+    """
+    raw = _git("log", "--format=", "--raw", "--no-abbrev", "HEAD", "--", f"{DATASETS}/*.toml")
+    blobs: dict[str, str] = {}
+    for line in raw.decode().splitlines():
+        meta, *paths = line.split("\t")
+        if line.startswith(":") and meta.split()[3].strip("0"):
+            blobs.setdefault(meta.split()[3], paths[-1])
+    asked = "".join(f"{b}\n" for b in blobs).encode()
+    batch = subprocess.run(["git", "-C", str(REPO), "cat-file", "--batch"], input=asked,
+                           capture_output=True, check=True).stdout  # fmt: skip
+    found, at = {}, 0
+    for path in blobs.values():  # cat-file answers in the order asked
+        end = batch.index(b"\n", at)
+        size = int(batch[at:end].split()[2])
+        found[hashlib.sha256(batch[end + 1 : end + 1 + size]).hexdigest()] = path
+        at = end + size + 2
+    return found
+
+
+def gdc_matrix(path: Path, codebase: dict[str, str] | None = None) -> dict[str, Any] | None:
     """What a raw GDC count matrix's README records, or None for any other file.
 
     A gather table of the counts kind whose README names a GDC folder; its bytes and SHA-256
-    from the README's own file table, the folders and the gather command from its rows.
+    from the README's own file table, the folders and the gather command from its rows, the
+    command as ``shown_command`` shows it against ``codebase`` (``codebase_datasets``).
     """
     note = table_readme(path)
     kind = (naming.description(path.name) or "").endswith(MATRIX_KIND)
@@ -183,8 +243,12 @@ def gdc_matrix(path: Path) -> dict[str, Any] | None:
     if not folders:
         return None
     command = COMMAND_ROW.search(written)
+    recorded = dict(DATASET_SHA_ROW.findall(written))
+    shown, own = shown_command(command[1], recorded, codebase) if command else (None, None)
+    root = _after(command[1].split(), "--root") if command else None
     sizes = {name: (int(n), sha) for name, n, sha in FILE_ROW.findall(written)}
-    return {"folders": folders, "command": shown_command(command[1]) if command else None,
+    return {"folders": folders, "command": shown, "own_dataset_file": own,
+            "root": shown_path(root) if root else None,
             "bytes": sizes.get(path.name, (path.stat().st_size, ""))[0],
             "sha256": sizes.get(path.name, (0, ""))[1] or check_kit.sha256(path)}  # fmt: skip
 
@@ -197,7 +261,7 @@ def declared_sources(folder: Path = REPO / "conf" / "datasets") -> dict[str, str
 
 def select(
     root: Path, left_out: tuple[str, ...] = (), slugs: frozenset[str] = frozenset(),
-    sources: dict[str, str] | None = None,
+    sources: dict[str, str] | None = None, codebase: dict[str, str] | None = None,
 ) -> tuple[list[Path], dict[Path, dict[str, Any]], list[str]]:  # fmt: skip
     """A root's files for the kit, its raw GDC count matrices apart, and what stops a ship.
 
@@ -219,7 +283,7 @@ def select(
     problems += [f"{root}: {e}" for e in check_kit.entry_problems(outputs.parent)]
     problems += [f"{p}: a shipped page links to it, but its dataset is left out"
                  for p in sorted(found & out)]  # fmt: skip
-    matrices = {p: m for p in chosen | found if (m := gdc_matrix(p)) is not None}
+    matrices = {p: m for p in chosen | found if (m := gdc_matrix(p, codebase)) is not None}
     for p, m in sorted(matrices.items()):
         problems += [f"{p}: left out as a GDC matrix, but its README records no command"
                      ] if m["command"] is None else []  # fmt: skip
@@ -260,9 +324,16 @@ def carry_matrices(out: Path, folder: str, base: Path,
         entries.append({
             "path": (Path(folder) / "outputs" / p.relative_to(base)).as_posix(),
             "bytes": m["bytes"], "sha256": m["sha256"], "carried": carried,
-            "rebuild": [*fetches, m["command"]],
+            "rebuild": [*fetches, m["command"]], "builder_root": m["root"],
+            "builder_dataset_file": m["own_dataset_file"],
         })  # fmt: skip
     return entries
+
+
+def _git(*args: str) -> bytes:
+    """What git prints for one command in this repository."""
+    return subprocess.run(["git", "-C", str(REPO), *args], capture_output=True,
+                          check=True).stdout  # fmt: skip
 
 
 def _commit() -> str:
@@ -271,13 +342,8 @@ def _commit() -> str:
     Untracked code counts: a builder not yet committed cannot be rebuilt from the commit.
     Untracked notes elsewhere in the tree do not build the kit, so they do not count.
     """
-
-    def git(*args: str) -> str:
-        return subprocess.run(["git", "-C", str(REPO), *args], capture_output=True, text=True,
-                              check=True).stdout.strip()  # fmt: skip
-
-    changed = git("status", "--porcelain", "--untracked-files=all", "--", *CODE)
-    return git("rev-parse", "--short", "HEAD") + ("-dirty" if changed else "")
+    changed = _git("status", "--porcelain", "--untracked-files=all", "--", *CODE).strip()
+    return _git("rev-parse", "--short", "HEAD").decode().strip() + ("-dirty" if changed else "")
 
 
 def made_up_pages(files: list[Path]) -> list[str]:
@@ -313,6 +379,7 @@ def manifest(
     commit: str,
     left_out: tuple[str, ...] = (),
     release: bool = False,
+    notes: dict[str, str] | None = None,
 ) -> Path:
     """``MANIFEST.json``: every other file of the kit with its size and SHA-256."""
     out = kit / "MANIFEST.json"
@@ -324,7 +391,9 @@ def manifest(
     record = {
         "built": date.today().isoformat(),
         "commit": commit,
-        "roots": [{"folder": f, "real": real} for f, real in roots],
+        "roots": [
+            {"folder": f, "real": real, "note": (notes or {}).get(f)} for f, real in roots
+        ],  # fmt: skip
         "left_out": sorted(left_out),
         "release": release,
         "made_up_links": made_up_links(kit),
@@ -337,17 +406,30 @@ def manifest(
     return out
 
 
+def left_out_text(entry: dict[str, Any]) -> str:
+    """One left-out file in README.md: its commands, and which of their paths are the builder's."""
+    said = [text.fill("course", "readme.left_out_file", path=entry["path"],
+                      bytes=f"{entry['bytes']:,}",
+                      commands="\n".join(f"    {c}" for c in entry["rebuild"]))]  # fmt: skip
+    if entry.get("builder_root"):
+        said.append(text.fill("course", "readme.left_out_root", root=entry["builder_root"]))
+    if entry.get("builder_dataset_file"):
+        said.append(text.fill("course", "readme.left_out_own",
+                              path=entry["builder_dataset_file"]))  # fmt: skip
+    return "\n".join(said)
+
+
 def readme(kit: Path, roots: list[tuple[str, bool]], shipped: list[Path], commit: str,
-           release: bool = False) -> Path:  # fmt: skip
-    """The kit's README.md, its text from ``content/course.toml``."""
+           release: bool = False, notes: dict[str, str] | None = None) -> Path:  # fmt: skip
+    """The kit's README.md, its text from ``content/course.toml``; a root's note on its line."""
     lines = []
     for folder, real in roots:
         pages = [p for d in sorted((kit / folder / "outputs").iterdir()) if d.is_dir()
                  for p in newest(d, "overview")]  # fmt: skip
         names = sorted({label(p) for p in pages})
         kind = text.word("course", "real" if real else "made_up").lower()
-        lines.append(text.fill("course", "readme.dataset", folder=folder,
-                               names=", ".join(names), kind=kind))  # fmt: skip
+        lines.append(text.fill("course", "readme.dataset", folder=folder, names=", ".join(names),
+                               kind=kind, note=(notes or {}).get(folder, "")).rstrip())  # fmt: skip
     size = f"{sum(p.stat().st_size for p in shipped) / 1e6:,.0f} MB"
     body = text.fill("course", "readme.text", files=f"{len(shipped):,}", size=size,
                      datasets="\n".join(lines), built=date.today().isoformat(),
@@ -355,10 +437,7 @@ def readme(kit: Path, roots: list[tuple[str, bool]], shipped: list[Path], commit
     if release:
         body += "\n" + text.word("course", "readme.release") + "\n"
     if entries := left_out_files(kit):
-        listed = "\n".join(text.fill("course", "readme.left_out_file", path=e["path"],
-                                      bytes=f"{e['bytes']:,}",
-                                      commands="\n".join(f"    {c}" for c in e["rebuild"]))
-                           for e in entries)  # fmt: skip
+        listed = "\n".join(left_out_text(e) for e in entries)
         body += "\n" + text.fill("course", "readme.left_out", files=listed) + "\n"
     out = kit / "README.md"
     out.write_text(body, encoding="utf-8")
@@ -372,6 +451,27 @@ def pack(kit: Path) -> Path:
         for p in sorted(kit.rglob("*")):
             archive.write(p, Path(kit.name) / p.relative_to(kit))
     return out
+
+
+def _notes(args: argparse.Namespace, roots: list[tuple[str, Path, bool]]) -> dict[str, str]:
+    """Each ``--note folder=text`` as {folder: text}; a bad one stops the build, writing nothing.
+
+    A note goes into the README beside the course's own text, so it passes the same prose lint.
+    """
+    notes: dict[str, str] = {}
+    folders, problems = {f for f, _, _ in roots}, []
+    for spec in args.note:
+        folder, _, note = spec.partition("=")
+        where = f"--note {folder}"
+        if folder not in folders:
+            problems.append(f"{where}: no --real or --made-up folder of that name")
+        if folder in notes or not note.strip():
+            problems.append(f"{where}: one note per folder, and not empty")
+        problems += [*prose.check_text(where, note, None), *prose.asks(where, note)]
+        notes[folder] = note.strip()
+    if problems:
+        sys.exit("kit refused, nothing written:\n" + "\n".join(problems))
+    return notes
 
 
 def _roots(args: argparse.Namespace) -> list[tuple[str, Path, bool]]:
@@ -403,8 +503,9 @@ def build(
     if unknown := sorted(set(left_out) - slugs):
         sys.exit(f"--leave-out {', '.join(unknown)}: no root holds that dataset; nothing written")
     chosen, matrices, problems, sources = {}, {}, [], declared_sources()
+    codebase = codebase_datasets()
     for folder, root, _ in roots:
-        chosen[folder], matrices[folder], found = select(root, left_out, slugs, sources)
+        chosen[folder], matrices[folder], found = select(root, left_out, slugs, sources, codebase)
         problems += found
     if release:
         problems += release_problems(roots, chosen)
@@ -440,6 +541,8 @@ def main() -> None:
     parser.add_argument("--made-up", action="append", default=[], metavar="FOLDER=ROOT")
     parser.add_argument("--leave-out", action="append", default=[], metavar="DATASET",
                         help="a dataset slug whose outputs stay out of the kit")  # fmt: skip
+    parser.add_argument("--note", action="append", default=[], metavar="FOLDER=TEXT",
+                        help="a sentence on one root, for README.md and MANIFEST.json")  # fmt: skip
     parser.add_argument("--zip", action="store_true", help="also write <out>.zip")
     parser.add_argument("--release", action="store_true",
                         help="the students' kit: no made-up root or page")  # fmt: skip
@@ -449,6 +552,7 @@ def main() -> None:
     if taken := [p for p in (out, partial, out.with_suffix(".zip")) if p.exists()]:
         sys.exit(f"{', '.join(map(str, taken))} exists; a kit is never written over")
     roots = _roots(args)
+    notes = _notes(args, roots)
     left_out = tuple(args.leave_out)
     shipped = build(partial, roots, left_out, args.release)
     names = [p.relative_to(partial).as_posix() for p in partial.rglob("*") if p.is_file()]
@@ -459,8 +563,9 @@ def main() -> None:
     if problems:
         sys.exit(f"kit checks fail; left in {partial} for inspection:\n" + "\n".join(problems))
     commit, folders = _commit(), [(f, real) for f, _, real in roots]
-    readme(partial, folders, shipped, commit, args.release)
-    record = json.loads(manifest(partial, folders, commit, left_out, args.release).read_text())
+    readme(partial, folders, shipped, commit, args.release, notes)
+    record = json.loads(manifest(partial, folders, commit, left_out, args.release,
+                                 notes).read_text())  # fmt: skip
     partial.rename(out)
     print(f"{out}: {record['files']:,} files, {record['bytes'] / 1e6:,.1f} MB, commit {commit}")
     if left_out:

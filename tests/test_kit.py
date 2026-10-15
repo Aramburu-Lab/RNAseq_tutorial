@@ -375,10 +375,11 @@ def ctx_readme(table: Path, rows: dict[str, str]) -> None:
     table.with_name(table.name.split(".")[0] + "_README.md").write_text(body)
 
 
-def gdc_root(tmp: Path) -> tuple[Path, Path]:
+def gdc_root(tmp: Path, dataset_file: tuple[str, str] | None = None) -> tuple[Path, Path]:
     """Step-1's root (its counts with a README naming no GDC folder) plus a GDC dataset: its
     gather counts, CSV and Parquet, read from a GDC folder that holds a manifest and a fetch
-    script, linked from its M1 page; and a DE table whose README names the folder too."""
+    script, linked from its M1 page; and a DE table whose README names the folder too.
+    ``dataset_file``, (path, SHA-256), adds a ``--dataset-file`` and its recorded hash row."""
     root = a_root(tmp / "real", "Study", "study")
     out = root / "outputs"
     ctx_readme(out / "01_gather" / f"{NEW}_gather_study_counts_v1.csv",
@@ -392,7 +393,12 @@ def gdc_root(tmp: Path) -> tuple[Path, Path]:
     counts.write_text("gene_id,A\nG1,1\n")
     counts.with_suffix(".parquet").write_bytes(b"PAR1")
     command = f"`/x/src/ctx/__main__.py --root {root} gather --dataset tcgax --gdc-dir {folder}`"
-    ctx_readme(counts, {"Command": command, "GDC folder": str(folder)})
+    rows = {"Command": command, "GDC folder": str(folder)}
+    if dataset_file is not None:
+        path, sha = dataset_file
+        rows["Command"] = command[:-1] + f" --dataset-file {path}`"
+        rows[f"sha256:{Path(path).name}"] = sha
+    ctx_readme(counts, rows)
     page(gather / f"{NEW}_gather_tcgax_overview_v1.html", "M1 Gather: TCGA x", counts.name)
     de = out / "05_de" / f"{NEW}_de_tcgax_results_v1.csv"
     page(out / "05_de" / f"{NEW}_de_tcgax_overview_v1.html", "M5 DE: TCGA x", de.name)
@@ -469,3 +475,79 @@ def test_the_declared_sources_are_every_dataset_files_resources(kit_script):
     cptac = "c27a0226cba4f14c96b905f86c30007b62dd2a67a176e608c96f642566862903"
     assert declared[cptac] == "cptac_brca.toml cptac_freeze"
     assert any(name.startswith("tier1.toml ") for name in declared.values())
+
+
+def committed(name: str, at: str = "HEAD") -> str:
+    """The SHA-256 of a dataset file as one commit of this repository holds it."""
+    shown = subprocess.run(["git", "-C", str(ROOT), "show", f"{at}:conf/datasets/{name}"],
+                           capture_output=True, check=True).stdout  # fmt: skip
+    return hashlib.sha256(shown).hexdigest()
+
+
+def test_every_committed_version_of_a_dataset_file_is_the_codebases(kit_script):
+    """K.9: a gather run reads whichever version its commit held, so every version counts.
+    Mutation caught: only the newest commit read (git log -n 1), which loses tier1.toml's
+    first version."""
+    codebase = kit_script.codebase_datasets()
+    first = subprocess.run(["git", "-C", str(ROOT), "log", "--format=%H", "--reverse", "--",
+                            "conf/datasets/tier1.toml"], capture_output=True, text=True,
+                           check=True).stdout.split()[0]  # fmt: skip
+    for at in ("HEAD", first):
+        assert codebase[committed("tier1.toml", at)] == "conf/datasets/tier1.toml"
+
+
+@pytest.mark.parametrize("ours", [True, False])
+def test_a_rebuild_command_names_the_codebases_dataset_file(tmp_path, ours):
+    """K.9: kit v8 showed the build clone's folder as the reader's dataset file. A
+    --dataset-file whose recorded bytes a commit holds, from any clone, is shown as
+    conf/datasets/<file>; one no commit holds keeps its path, and README.md names it the
+    builder's own; README.md names the builder's ctx root too; the table's own README, the
+    provenance, ships byte for byte. Mutations caught: no mapping; a mapping by path, which
+    takes a reader's file saved in conf/datasets/ of a clone for the codebase's; the root
+    sentence dropped."""
+    clone = tmp_path / "some_clone" / "conf" / "datasets" / "tier1.toml"
+    sha = committed("tier1.toml") if ours else "f" * 64
+    real, folder = gdc_root(tmp_path, (str(clone), sha))
+    kit, done = build(tmp_path / "k", real=real)
+    assert done.returncode == 0, done.stderr
+    left = json.loads((kit / "LEFT_OUT.json").read_text())["files"]
+    shown = "conf/datasets/tier1.toml" if ours else str(clone)
+    gather = f"ctx --root {real} gather --dataset tcgax --gdc-dir {folder} --dataset-file {shown}"
+    assert [e["rebuild"][-1] for e in left] == [gather, gather]
+    assert {e["builder_dataset_file"] for e in left} == {None if ours else str(clone)}
+    readme = (kit / "README.md").read_text()
+    root_line = text.fill("course", "readme.left_out_root", root=str(real)).strip()
+    own_line = text.fill("course", "readme.left_out_own", path=str(clone)).strip()
+    assert readme.count(root_line) == 2 and (own_line in readme) is not ours
+    name = f"{NEW}_gather_tcgax_counts_v1_README.md"
+    shipped = kit / "step" / "outputs" / "01_gather" / name
+    assert shipped.read_bytes() == (real / "outputs" / "01_gather" / name).read_bytes()
+
+
+def test_a_root_note_is_written_by_the_build(tmp_path):
+    """K.10: kit v8's M9 note was appended to README.md by hand and MANIFEST.json rewritten.
+    Mutations caught: the note left out of README.md; left out of MANIFEST.json."""
+    note = "M9 on this study shows the clinical genes only."
+    kit, done = build(tmp_path, f"--note=step={note}")
+    assert done.returncode == 0, done.stderr
+    readme = (kit / "README.md").read_text()
+    assert f"`step/`: Study; real data. {note}\n" in readme
+    assert "`preview/`: Made-up; made-up data.\n" in readme
+    roots = json.loads((kit / "MANIFEST.json").read_text())["roots"]
+    assert [(r["folder"], r["note"]) for r in roots] == [("step", note), ("preview", None)]
+
+
+@pytest.mark.parametrize(
+    ("note", "reason"),
+    [
+        ("nowhere=M9 shows the clinical genes only.", "no --real or --made-up folder"),
+        ("step=M9 is very short.", "banned word 'very'"),
+        ("step=Is M9 short?", "--note step"),
+        ("step=", "one note per folder, and not empty"),
+    ],
+)
+def test_a_bad_note_writes_nothing(tmp_path, note, reason):
+    """K.10: a note naming no root, failing the prose lint, or empty stops the build first.
+    Mutations caught: the folder unchecked; the prose lint skipped."""
+    kit, done = build(tmp_path, f"--note={note}")
+    assert done.returncode != 0 and reason in done.stderr and nothing_written(kit)

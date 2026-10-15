@@ -31,13 +31,16 @@ value = "{n} of {total}"
 [readme]
 left_out = """## Left out: raw GDC count matrices
 
-Raw count matrices fetched from the NCI Genomic Data Commons stay out of the kit; every table and figure computed from them is here. Each one below is named with its size and the commands that rebuild it, in order; LEFT_OUT.json lists the same.
+Raw count matrices fetched from the NCI Genomic Data Commons stay out of the kit; every table and figure computed from them is here. Each one below is named with its size and the commands that rebuild it, in order; LEFT_OUT.json lists the same. A path starting `conf/datasets/` names a dataset file in the course codebase.
 
 {files}"""
 left_out_file = """- `{path}`, {bytes} bytes:
 
 {commands}
 """
+# Under a left-out file's commands: the paths in them that are the builder's, not the reader's.
+left_out_root = "`{root}` is the builder's ctx root. In these commands, put your own ctx root in its place.\n"
+left_out_own = "`{path}` is the builder's own dataset file: no commit of the course codebase holds its bytes. Put your own dataset file in its place.\n"
 release = "This is a release kit: every page in it comes from public data, and it holds no made-up page."
 text = """# Cancer Transcriptomics course kit
 
@@ -73,5 +76,5 @@ This kit only reads. Rerunning a module needs the course codebase and its enviro
 
 Built on {built} from codebase commit `{commit}`.
 """
-# One line per dataset folder in the README's list.
-dataset = "- `{folder}/`: {names}; {kind} data."
+# One line per dataset folder in the README's list; {note} is build_kit's --note, or empty.
+dataset = "- `{folder}/`: {names}; {kind} data. {note}"

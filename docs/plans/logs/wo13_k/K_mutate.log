@@ -1,0 +1,10 @@
+no mapping of a committed dataset file: caught (1 failed, 2 passed, 25 deselected in 2.44s)
+mapping by path, not by bytes: caught (1 failed, 3 passed, 25 deselected in 2.19s)
+only the newest commit read: caught (1 failed, 1 passed, 25 deselected in 0.93s)
+root sentence dropped: caught (1 failed, 2 passed, 25 deselected in 1.78s)
+own-file sentence dropped: caught (1 failed, 3 passed, 25 deselected in 2.23s)
+note left out of README.md: caught (1 failed, 4 passed, 25 deselected in 2.60s)
+note left out of MANIFEST.json: caught (1 failed, 4 passed, 25 deselected in 2.74s)
+note folder unchecked: caught (1 failed, 5 passed, 25 deselected in 3.26s)
+note prose lint skipped: caught (1 failed, 6 passed, 25 deselected in 3.20s)
+restored
