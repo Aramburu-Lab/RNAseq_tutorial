@@ -496,8 +496,9 @@ H merged 2026-10-14 (wo13-h, D-070): CPTAC ccRCC gathered on ~/ctx_kidney, 277 f
 E merged 2026-10-15 (wo13-e, D-071 to D-074): C3.1 M9 packs cards (TCGA-BRCA 50 cards, 9,213,859 B), C3.2 and C3.4, GS.2 entry pages and packed links, GS.4 the M5 gene picker on the drawn volcano, GS.5 live ORA and `ctx function --genes-from`, GS.6 Open beside (Chromium only), M10's Cox screen on the live selection with live captions, WO5's two leftovers, view controls on M5, M6 and M8 F2. Step-1's 92 metrics equal; full suite 1,623 passed, 10 skipped; 75 of 78 planted mutations caught (the M10 screen gene's sign is untested).
 - [ ] E.1 M9.8 remainder: the genes-by-contrasts evidence view, the box, F1 to F4, M9 reading a list from a link.
 - [ ] E.2 WO5 M1 F1 and M2 (judge twin, peers, sex view, flows, band map); WO6 M5 F8 to F12; WO7 M6 background view, running set, ORA sets and contrast; WO8 M3 controls; M4.14; P7.10; M8 F3 (after GS.3) and F7.
-- [ ] E.3 GS.3 the unthinned volcano; GS.6 in Edge and Firefox; a test of the M10 screen gene's sign.
-- [ ] E.4 `_page.js.j2` is over 600 lines (660 before E): split it.
+- [x] E.3 GS.3 the unthinned volcano (wo13-p ad612fa, D-081) and the M10 screen gene's sign tested and fixed (7b35af9, D-080).
+- [ ] P.1 GS.6 in Edge and Firefox; a debounce, or WebGL with an SVG fallback, for 21,000+ points (796 to 933 ms per redraw, headless); M8's miRNA volcano page measured after GS.3.
+- [x] E.4 `_page.js.j2` split into six partials, 290 lines (wo13-p 2eab53f); rendered script byte-identical on Step-1 M5, M6, hub and TCGA-BRCA M5; tests/test_templates.py holds every template to the 600-line fail limit, which prek's hook does not scan.
 
 S merged 2026-10-15 (wo13-s, D-076 to D-078): H.1 ccRCC M7 on 103 tumours and 73 pairs, C1 to C6 PASS, C0 0.657; D1.1's lung contrast in `tcga_lung.toml`, LUSC over LUAD, five marker rules PASS. 19 planted mutations caught; suite 1,639 passed, 10 skipped.
 - [ ] S.1 `ctx qc` reads every file of a GDC sheet, not `gdc.chosen`: 517 LUAD tumours against M5's 515. Route it through the door.

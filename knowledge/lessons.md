@@ -110,3 +110,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A median over units that do not express a gene collapses to 0: restrict to the expressing units, then take it (H.3, NKX2-1 over 68 tissues).
 - JSON writes NaN as null, so a twin compared through JSON cannot tell NaN from undefined: name NaN in the harness (M9, 2026-10-15).
 - Ensembl REST answered HTTP 500 to three lookups that succeeded minutes later: move the outputs aside and rerun once before calling a panel unavailable (M9, 2026-10-15).
+- A speed measured in headless Chromium with --disable-gpu says nothing about WebGL: plotly drew nothing there and the fast redraw timed an empty plot. Check the plot drew before timing it (P, 2026-10-15).
+- "The largest page" is measured, not assumed: TCGA-BRCA was named the largest M5 page while CPTAC ccRCC stood at 14,984,671 B, 15 kB under the cap (P, 2026-10-15).

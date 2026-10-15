@@ -27,6 +27,34 @@ it were reversed.
 
 ---
 
+## D-081 — With live calls a volcano's points travel once, in the page's rows; SVG over WebGL
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** GS.3: M5's volcano was thinned for page size, so GS.4's picker saw drawn genes only.
+
+**Decision.** Every tested gene is drawn; its point is carried once in the page's rows, the trace JSON ships empty and liveCalls draws it at load. SVG is kept over WebGL: a browser without WebGL draws no WebGL trace.
+
+**Evidence.** M5 overviews, main against now: Step-1 11,227,632 to 10,761,470 B; TCGA-BRCA 13,238,960 to 11,638,697; TCGA-LUSC 14,085,109 to 12,497,681; CPTAC ccRCC 14,984,671 to 13,084,611. Real box and lasso picked exactly the inside on 32 of 32 drags. One live-calls redraw in headless Chromium: 511 to 555 ms on Step-1 (12,796 points), 897 to 933 ms on ccRCC (24,375). A first WebGL timing of 33 to 38 ms timed an empty plot in a GPU-less browser and was withdrawn. 92 Step-1 metrics equal.
+
+**Consequence.** A debounce, or WebGL with an SVG fallback, is open (TODO P.1).
+
+---
+
+## D-080 — A gene taken from M10's Cox screen carries the side of its adjusted hazard ratio
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** E.3: the button that scores the screen's strongest genes signed every gene +1.
+
+**Decision.** `page.screen_rows` carries the side of 1 of the adjusted hazard ratio, the one the screen ranks by; an HR of exactly 1 signs +1 and a refused row carries no sign; `ctxLive.strongest` takes it.
+
+**Evidence.** A planted gene with alone HR 1.4 and adjusted HR 0.7 gets -1 in Python and in node; every row of the made-up root's page matches its cox_screen table, with genes on both sides of 1. 4 planted mutations caught.
+
+**Consequence.** Before this, a protective gene cancelled a harmful one in the signed mean. Recorded for Rytis to confirm.
+
+---
+
 ## D-079 — M9's exon panel reads exon use over the tissues where GTEx expresses the gene
 
 **Date:** 2026-10-15 · **Status:** decided
