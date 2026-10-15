@@ -71,11 +71,25 @@ class Swatch:
 
 @dataclass(frozen=True)
 class Track:
-    """A category drawn as one strip of cells above the heatmap, one cell per column."""
+    """A category drawn as one strip of cells above the heatmap, one cell per column.
+
+    Attributes:
+        name: What the strip shows.
+        values: Each column's level.
+        colours: Each level's colour.
+        key: The legend's entries for the strip, (words, colour) each, in place of one entry
+            per level: M7's 22 plexes in two greys listed 22 grey entries that named no plex
+            apart; one entry names the alternation and the hover names the plex (C3.2).
+    """
 
     name: str
     values: Mapping[str, str]
     colours: Mapping[str, str]
+    key: tuple[tuple[str, str], ...] = ()
+
+    def entries(self) -> list[tuple[str, str]]:
+        """The legend's (words, colour) for this strip: its key, or one entry per level."""
+        return list(self.key) or [(f"{self.name}: {lv}", c) for lv, c in self.colours.items()]
 
 
 def _suffix(n: int) -> str:
@@ -420,8 +434,8 @@ class HeatmapData:
             spine.set_visible(False)
         handles = [Patch(facecolor=c, label=s.level) for s, c in zip(self.swatches, colours,
                                                                       strict=False)]  # fmt: skip
-        handles += [Patch(facecolor=c, label=f"{t.name}: {level}")
-                    for t in self.tracks for level, c in t.colours.items()]  # fmt: skip
+        handles += [Patch(facecolor=c, label=words)
+                    for t in self.tracks for words, c in t.entries()]  # fmt: skip
         place_caption(fig, self.caption, width, height, ax=ax, handles=handles)
         return fig
 
@@ -571,7 +585,7 @@ class HeatmapData:
                                 for line in label.split("\n"))
                  for i, label in enumerate(self._shown()) if label}  # fmt: skip
         legend = [s.level for s in self.swatches]
-        legend += [f"{t.name}: {level}" for t in self.tracks for level in t.colours]
+        legend += [words for t in self.tracks for words, _ in t.entries()]
         if phone:
             room = PHONE_PLOT_PX - PLOTLY_LEGEND_SYMBOL_PX
             legend = [_fit(name, room, SIZES["legend"]) for name in legend]
@@ -896,7 +910,7 @@ class HeatmapData:
     def _colours(self) -> list[str]:
         """The static legend's colours on the page, in its order."""
         return [*(_page_colour(s) for s in self.swatches),
-                *(c for t in self.tracks for c in t.colours.values())]  # fmt: skip
+                *(c for t in self.tracks for _, c in t.entries())]  # fmt: skip
 
     def _stat(self, row: str) -> str:
         """A row's statistic as the figure prints it; empty where it has none."""

@@ -338,6 +338,9 @@ loading = "Reading the expression data."
 pasted = "the pasted list"
 build = "the build list"
 no_stream = "This browser cannot inflate the expression data: the page shows the build list only."
+screen = "The screen's rows for the {genes} genes scored, by adjusted q; {absent} have no row on this page."
+screen_source = "the screen's strongest genes"
+double_dip = "These genes were chosen by this screen on these patients, so their p values here read too small: the list and its test share their data."
 
 [figures.axes]
 time = "Time since diagnosis"

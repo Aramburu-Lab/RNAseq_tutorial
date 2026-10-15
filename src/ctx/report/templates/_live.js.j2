@@ -32,8 +32,29 @@ var ctxLive = {
       corrected: g(found.scan.corrected, 2),
       min_p: g(ctxSurv.chi2Sf(Math.max.apply(null, found.scan.statistic), 1), 2),
       best: found.scan.best, perms: cfg.scan.permutations,
-      floor: g(1 / (cfg.scan.permutations + 1), 2)
+      floor: g(1 / (cfg.scan.permutations + 1), 2),
+      cuts: found.scan.cuts.length, seed: cfg.scan.seed
     };
+  },
+  /* A caption's template as plain words: a glossary mark as its display text. */
+  plain: function (template) {
+    return template.replace(/\[\[([^\]|!]+)(?:\|([^\]]+))?!?\]\]/g, function (all, term, shown) {
+      return shown || term;
+    });
+  },
+  /* The screen's rows for a scored list (page.screen_rows): by adjusted q, the refused last,
+     ties by panel row; and how many of the list have no row. */
+  screen: function (rows, genes) {
+    var at = Object.create(null), out = [], absent = 0;
+    rows.forEach(function (r) { at[r[0]] = r; });
+    genes.forEach(function (g) { if (at[g]) out.push(at[g]); else absent++; });
+    out.sort(function (a, b) {
+      if (a[1] === b[1]) return a[0] - b[0];
+      if (a[1] === null) return 1;
+      if (b[1] === null) return -1;
+      return a[1] - b[1];
+    });
+    return { rows: out, absent: absent };
   },
   /* figures.risk_step: whole years between at-risk counts, at most columns of them. */
   riskStep: function (last, columns) {
@@ -115,12 +136,22 @@ var ctxLive = {
     var summary = fig.querySelector(".survival-summary"), notes = fig.querySelector(".survival-notes");
     var mark = exporting(fig, cfg), scanMark = function () {}, scanDiv = null, scanLead = null;
     var lead = fig.querySelector(".fig-lead");
+    /* The captions, the screen's table and its title follow a scored list; at the build list
+       they show what the page was built with. */
+    var kmCaption = fig.querySelector("figcaption"), kmBuilt = kmCaption.innerHTML;
+    var table = document.querySelector("table.screen"), scanCaption = null, scanBuilt = "";
+    var tableBody = table ? table.querySelector("tbody") : null;
+    var tableBuilt = tableBody ? tableBody.innerHTML : "";
+    var tableTitle = table ? table.querySelector("caption") : null;
+    var titleBuilt = tableTitle ? tableTitle.textContent : "";
+    var fromScreen = false;
     document.querySelectorAll("script[id^='ctx-controls-']").forEach(function (s) {
       var c = JSON.parse(s.textContent);
       if (c.kind !== "follow" || c.part !== "scan") return;
       var other = s.closest(".fig");
       scanDiv = other.querySelector(".js-plotly-plot");
       scanLead = other.querySelector(".fig-lead");
+      scanCaption = other.querySelector("figcaption"); scanBuilt = scanCaption.innerHTML;
       scanMark = exporting(other, c);
     });
     cfg.split_words = {};
@@ -145,7 +176,34 @@ var ctxLive = {
       if (scanLead) {
         scanLead.textContent = ctxLive.fill(found.scan.beaten ? cfg.leads.scan : cfg.leads.scan_floor, shown);
       }
+      var moved_ = moved();
+      kmCaption[moved_ ? "textContent" : "innerHTML"] = moved_
+        ? ctxLive.fill(ctxLive.plain(cfg.captions.km), shown) : kmBuilt;
+      if (scanCaption) {
+        scanCaption[moved_ ? "textContent" : "innerHTML"] = moved_
+          ? ctxLive.fill(ctxLive.plain(cfg.captions.scan), shown) : scanBuilt;
+      }
+      if (tableBody) {
+        if (state.genes === build.genes) {
+          tableBody.innerHTML = tableBuilt; tableTitle.textContent = titleBuilt;
+        } else {
+          var picked = ctxLive.screen(cfg.screen, state.genes);
+          while (tableBody.firstChild) tableBody.removeChild(tableBody.firstChild);
+          picked.rows.forEach(function (r) {
+            var tr = document.createElement("tr");
+            r[2].forEach(function (cell, i) {
+              var td = document.createElement("td");
+              if ([1, 2, 3, 5].indexOf(i) >= 0) td.className = "num";
+              td.textContent = cell; tr.appendChild(td);
+            });
+            tableBody.appendChild(tr);
+          });
+          tableTitle.textContent = ctxLive.fill(words.screen, { genes: state.genes.length,
+                                                                absent: picked.absent });
+        }
+      }
       var lines = [extra || ""];
+      if (fromScreen && state.genes !== build.genes) lines.push(words.double_dip);
       if (found.alone.refused || found.adjusted.refused) lines.push(words.refused);
       if (state.genes !== build.genes) lines.push(ctxLive.fill(words.cross, { tries: tries }));
       lines.push(ctxLive.fill(words.notice, { genes: build.genes.length, source: build.source }));
@@ -159,7 +217,7 @@ var ctxLive = {
       var said = ctxLive.fill(words.scored, { genes: rows.length, found: rows.length,
         missing: parsed.missing.length, ambiguous: parsed.ambiguous.length });
       if (!rows.length) { notes.textContent = words.empty + " " + said; return; }
-      history.push(state); tries++;
+      history.push(state); tries++; fromScreen = false;
       state = { genes: rows, signs: rows.map(function () { return 1; }), source: source,
                 endpoint: state.endpoint, split: state.split };
       apply(said + " " + words.unsigned);
@@ -175,6 +233,17 @@ var ctxLive = {
     form.elements.split.addEventListener("change", function () {
       if (!panel) return;
       history.push(state); state = Object.assign({}, state, { split: form.elements.split.value }); apply();
+    });
+    /* The screen's strongest genes scored on the patients that chose them: flagged. */
+    form.querySelector("[data-screen]").addEventListener("click", function () {
+      if (!panel) return;
+      var top = ctxLive.screen(cfg.screen, cfg.screen.map(function (r) { return r[0]; }))
+        .rows.filter(function (r) { return r[1] !== null; }).slice(0, cfg.screen_rows);
+      history.push(state); tries++;
+      state = { genes: top.map(function (r) { return r[0]; }), signs: top.map(function () { return 1; }),
+                source: words.screen_source, endpoint: state.endpoint, split: state.split };
+      fromScreen = true;
+      apply();
     });
     form.querySelector("[data-undo]").addEventListener("click", function () {
       if (!history.length || !panel) return;

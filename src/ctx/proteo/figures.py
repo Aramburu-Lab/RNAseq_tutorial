@@ -32,8 +32,9 @@ CLASS_COLOURS = {"granule": ROLES["comparison"], "complex": DATA_COLOURS[0],
 # F4's groups by where a gene was called; neither is the reference population.
 KIND_COLOURS = {"neither": ROLES["reference"], "rna": DATA_COLOURS[0],
                 "protein": DATA_COLOURS[6], "both": DATA_COLOURS[2]}  # fmt: skip
-# F5's track colours: the heat draws in the two role colours, so they come last.
-TRACK_COLOURS = (*(c for c in COLOURS if c not in ROLES.values()), *ROLES.values())
+# F5's track colours: never the heat's two role colours, or a PAM50 Normal-like cell read as a
+# low z (C3.4); a fifth level takes the lighter grey, two lightnesses being the colours left.
+TRACK_COLOURS = (*(c for c in COLOURS if c not in ROLES.values()), SPENT_GREYS[1])
 # The two highest-density regions, as the captions name them.
 HDR = {"inner": f"{HDR_MASSES[0] * 100:.0f} %", "outer": f"{HDR_MASSES[1] * 100:.0f} %"}
 
@@ -270,6 +271,15 @@ def track_colours(levels: list[str]) -> dict[str, str]:
     return {level: SPENT_GREYS[i % 2] for i, level in enumerate(levels)}
 
 
+def track(name: str, values: Mapping[str, str], levels: list[str]) -> Track:
+    """F5's strip for one annotation column: a greyed one names its alternation in one entry."""
+    colours = track_colours(levels)
+    if len(levels) <= len(TRACK_COLOURS):
+        return Track(name, values, colours)
+    words = text.fill(PAGE, "figures.paired.alternating", track=name, n=len(levels))
+    return Track(name, values, colours, key=((words, SPENT_GREYS[0]),))
+
+
 def by_label(values: pl.Series) -> list[str]:
     """A track's levels in display order: plex 2 before plex 10, by length, then text."""
     return sorted(set(values.cast(pl.String)), key=lambda v: (len(v), v))
@@ -321,7 +331,7 @@ def paired(writer: Writer, measured: tuple[pl.DataFrame, np.ndarray, np.ndarray]
     strips = []
     for name, column in tracks:
         values_of = dict(zip(shown, order[column].cast(pl.String), strict=True))
-        strips.append(Track(name, values_of, track_colours(by_label(order[column]))))
+        strips.append(track(name, values_of, by_label(order[column])))
     counts = {"n_genes": len(chosen), "n_samples": len(shown),
               "missing": sum(v is None for v in flat),
               "tracks": ", ".join(n for n, _ in tracks),

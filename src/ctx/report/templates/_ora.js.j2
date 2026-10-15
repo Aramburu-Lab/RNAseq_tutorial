@@ -1,0 +1,66 @@
+{% raw %}
+/* M6's live over-representation (GS.5), the page twin of ctx.function.lite.ora, apart from the
+   page so tests/test_ora_page.py runs it against lite.ora under node. The same order: the
+   universe is the background; the hits are cut to it; each set is cut to it, then kept at
+   min to max genes; P(X >= k) is hypergeom.sf(k - 1, N, K, n); BH runs over the kept sets. */
+var ctxOra = {
+  /* log(i!) for i up to n, by running sums of logs, compensated (Kahan): a plain running sum
+     drifted 2.6e-10 in p from lite.ora on Step-1, over D-049's 1.52e-10. */
+  logFactorials: function (n) {
+    var out = new Float64Array(n + 1), sum = 0, lost = 0;
+    for (var i = 1; i <= n; i++) {
+      var y = Math.log(i) - lost, t = sum + y;
+      lost = (t - sum) - y; sum = t; out[i] = sum;
+    }
+    return out;
+  },
+  /* P(X >= k) for X hypergeometric: n drawn from N holding K, summed over the upper tail
+     from its largest term, so a small p keeps its digits. */
+  upper: function (k, N, K, n, lf) {
+    var lo = Math.max(k, 0, n - (N - K)), hi = Math.min(K, n);
+    if (lo > hi) return 0;
+    function choose(a, b) { return lf[a] - lf[b] - lf[a - b]; }
+    var whole = choose(N, n), terms = [], top = -Infinity;
+    for (var x = lo; x <= hi; x++) {
+      var t = choose(K, x) + choose(N - K, n - x) - whole;
+      terms.push(t);
+      if (t > top) top = t;
+    }
+    var sum = 0;
+    terms.forEach(function (t) { sum += Math.exp(t - top); });
+    return Math.min(1, Math.exp(top) * sum);
+  },
+  /* scipy.stats.false_discovery_control(method="bh"): p times m over its rank, the running
+     minimum from the largest p down, at most 1; in the order given. */
+  bh: function (ps) {
+    var m = ps.length, order = ps.map(function (_, i) { return i; });
+    order.sort(function (a, b) { return ps[a] - ps[b] || a - b; });
+    var out = new Array(m), low = 1;
+    for (var r = m - 1; r >= 0; r--) {
+      var i = order[r];
+      low = Math.min(low, ps[i] * m / (r + 1));
+      out[i] = low;
+    }
+    return out;
+  },
+  /* lite.ora: hits and background as gene names, sets as [name, genes] in order. */
+  ora: function (hits, background, sets, minSize, maxSize, lf) {
+    var universe = Object.create(null), drawn = Object.create(null), N = 0, n = 0;
+    background.forEach(function (g) { if (!universe[g]) { universe[g] = true; N++; } });
+    hits.forEach(function (g) { if (universe[g] && !drawn[g]) { drawn[g] = true; n++; } });
+    lf = lf || ctxOra.logFactorials(N);
+    var rows = [];
+    sets.forEach(function (pair) {
+      var genes = pair[1].filter(function (g) { return universe[g]; });
+      if (genes.length < minSize || genes.length > maxSize) return;
+      var overlap = genes.filter(function (g) { return drawn[g]; });
+      rows.push({ name: pair[0], size: genes.length, hits: overlap.length,
+                  expected: n * genes.length / N,
+                  p: ctxOra.upper(overlap.length, N, genes.length, n, lf), genes: overlap });
+    });
+    var fdr = ctxOra.bh(rows.map(function (r) { return r.p; }));
+    rows.forEach(function (r, i) { r.fdr = fdr[i]; });
+    return rows;
+  }
+};
+{% endraw %}

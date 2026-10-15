@@ -178,6 +178,7 @@ column_title = "{n_samples:,} tumours, sorted by {sorted}"
 rna_row = "{gene} RNA"
 protein_row = "{gene} protein"
 rho = "Spearman ρ"
+alternating = "{track}: {n:,} levels, one run each, in two greys in turn"
 
 [figures.shift]
 title = "Protein minus RNA fold change, by gene class"

@@ -304,6 +304,29 @@ def test_page_end_to_end(built):
     assert len(controls["options"]) == 5
 
 
+def test_the_filter_figure_offers_each_preset_as_m5_counts_it(built):
+    """M8 F2's control: the run's minimum count first, then the plan's presets, each kept
+    share M5's own filter at that count; a higher count keeps no more genes.
+
+    Mutations caught: the presets' kept shares all taken at the run's count; the run's count
+    not the first view, so the page opens on another figure than its files."""
+    out, written = built
+    html = Path(written[0]).read_text()
+    blocks = re.findall(r'<script type="application/json" id="ctx-controls-\d+">(.*?)</script>',
+                        html, flags=re.S)  # fmt: skip
+    (view,) = [c for c in map(json.loads, blocks) if c["kind"] == "view"]
+    assert [o["label"] for o in view["options"]] == [
+        "10 reads", "1 read", "2 reads", "5 reads", "20 reads", "50 reads"]  # fmt: skip
+    presets = table(out, "filter_presets")
+    for biotype in set(presets["biotype"]):
+        shares = presets.filter(pl.col("biotype") == biotype).sort("min_count")["kept_pct"]
+        assert shares.to_list() == sorted(shares.to_list(), reverse=True)
+        assert shares.n_unique() > 1
+    metrics = dict(table(out, "metrics").select("metric", "value").rows())
+    at_ten = presets.filter(pl.col("min_count") == 10)  # noqa: PLR2004 - the run's own
+    assert len(at_ten) and metrics["filter.kept"] > 0
+
+
 def test_refuses_without_ncrna(tmp_path, built):
     """Catches: a dataset file without [ncrna] run with some default contrast."""
     out, _ = built

@@ -1,0 +1,4 @@
+CAUGHT: no phone legend on a bar (1 failed in 53.49s)
+CAUGHT: the lines' shape names left unwrapped (1 failed in 20.05s)
+CAUGHT: wrap room without the key (1 failed in 34.23s)
+CAUGHT: M1 filters unlabelled (1 failed in 11.23s)

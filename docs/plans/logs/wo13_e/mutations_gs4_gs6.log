@@ -1,0 +1,13 @@
+CAUGHT: plotly_selected not wired (1 failed in 71.84s (0:01:11))
+CAUGHT: a point named by its index, not its gene (1 failed in 66.16s (0:01:06))
+CAUGHT: onward link without the fragment (1 failed in 72.08s (0:01:12))
+CAUGHT: export switch left off (1 failed in 72.30s (0:01:12))
+CAUGHT: no message sent to the windows opened beside (1 failed in 66.25s (0:01:06))
+CAUGHT: undo without its cap (1 failed, 1 passed in 0.28s)
+CAUGHT: replace keeping the old list (1 failed in 0.17s)
+CAUGHT: the one-gene word unused (1 failed, 2 passed in 0.33s)
+CAUGHT: table ties in row order (1 failed, 3 passed in 0.37s)
+CAUGHT: message count not checked (Python) (1 failed, 5 passed in 0.48s)
+CAUGHT: a boolean read as a version (Python) (1 failed, 7 passed in 0.61s)
+SURVIVED: a field's & read as a new field (JS) (11 passed in 0.73s)
+NOTE: 'a field's & read as a new field (JS)' survived because the check was redundant: decode's strict form already refuses a field holding '&' or '#'. The check was removed in both languages; the test case stays and passes through decode.

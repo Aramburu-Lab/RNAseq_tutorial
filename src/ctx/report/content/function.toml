@@ -118,6 +118,8 @@ line = "FDR {alpha}"
 [figures.gsea]
 title = "Gene set enrichment: {label}"
 tab = "GSEA"
+# The select between contrasts (work-order item 7).
+view = "Contrast"
 lead = "{passing} of {tested} tested gene sets pass FDR < {alpha}."
 reading = [
     "Each bar is one gene set, the sets with the smallest FDR on top; its length is the NES.",
@@ -174,3 +176,35 @@ tested_genes = "tested genes"
 union = "gene-set union"
 x = "Gene set"
 y = "Significance"
+
+# The live over-representation beside the ORA figure (GS.5): the page script fills these.
+[live]
+label = "Test a gene list"
+direction = "Calls counted"
+background = "Background"
+paste = "Paste symbols to test"
+paste_button = "Test the pasted genes"
+reset = "Back to the build's calls"
+copy_table = "Copy the table"
+build = "The featured contrast's calls"
+link = "The list of the link"
+window = "The list of the window beside"
+pasted = "The pasted list"
+union = "gene-set union and tested genes (the background trap)"
+summary = "{source}: {n} genes, {up} up and {down} down, tested against {background}, {size} symbols; {passing} set results pass FDR < 0.05. Lists tested on this page: {tries}; no correction runs across them."
+taken = "{n} genes of the list have a symbol on this page; genes left out for want of one: {missing}."
+pasted_found = "{n} pasted names are symbols on this page; names matching none: {missing}."
+hover = "%{customdata[0]}<br>FDR %{customdata[1]:.2g}<br>%{customdata[2]} of %{customdata[3]} set genes in the list"
+columns = "calls\tgene_set\tsize\thits\texpected\tp\tfdr\tgenes"
+noscript = "Testing a gene list needs JavaScript; ctx function --genes-from tests a saved list."
+
+[live.directions]
+each = "Up and down, each its own family"
+all = "Every gene of the list together"
+up = "Up only"
+down = "Down only"
+
+[live.families]
+up = "up"
+down = "down"
+all = "the list"

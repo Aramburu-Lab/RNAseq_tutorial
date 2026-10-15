@@ -132,6 +132,7 @@ noscript = "This shows the first pair; turn on JavaScript to choose another."
 
 # M10's survival panel: score a gene list on the page (GS.7). Its sentences are clinical.toml's.
 [survival]
+screen = "Score the {rows} strongest screen genes"
 label = "Score a gene list"
 endpoint = "Endpoint"
 split = "Split"
@@ -171,6 +172,77 @@ number = "The link holds {found} where a gene number belongs."
 number_empty = "The link's gene list has an empty entry where a gene number belongs."
 duplicate = "The link names {gene} twice."
 order = "The link names {gene} out of order: genes follow in ascending number."
+
+# The gene picker beside M5's volcano (GS.4); the page script fills the placeholders. A word
+# that counts genes has a form for one gene (_one).
+[picker]
+label = "Select genes"
+drag = "Drag to"
+zoom = "Zoom"
+box = "Box"
+lasso = "Lasso"
+mode = "A drag or a click"
+replace = "Replaces the list"
+add = "Adds to it"
+remove = "Removes from it"
+up = "Select the current up calls"
+down = "Select the current down calls"
+undo = "Undo"
+clear_list = "Clear"
+paste = "Paste symbols or Ensembl IDs"
+paste_button = "Add the pasted genes"
+search = "Search the genes"
+only = "Selected only"
+previous = "Previous"
+next = "Next"
+pages = "Genes {first} to {last} of {total}"
+pages_none = "No gene matches the search."
+copy_list = "Copy list"
+copied = "Copied"
+selected_text = "Selected: copy it with the keyboard"
+save_list = "Save list"
+beside = "Open beside"
+onward = "Open these {n} genes in {module}"
+onward_one = "Open this gene in {module}"
+onward_none = "Open {module} with its own list"
+count = "{n} genes selected: {up} up, {down} down, {ns} not called at the current cut-offs."
+count_one = "1 gene selected: {up} up, {down} down, {ns} not called at the current cut-offs."
+count_none = "No gene selected. Drag over the volcano, tick genes in the table, or paste names."
+ambiguous = "Names matching several genes, none added: {names}."
+missing = "Names matching no gene on this page: {names}."
+notice = "The PDF and SVG files show no selection; this view rings the selected genes."
+received = "The list changed on another page: {n} genes."
+received_one = "The list changed on another page: 1 gene."
+refused = "A list from another page was refused. {why}"
+ring = "Selected"
+noscript = "Selecting genes needs JavaScript. Every gene drawn is in the data file beside the figure."
+
+[picker.columns]
+pick = "Select"
+gene = "Gene"
+lfc = "log2 FC"
+padj = "padj"
+call = "Call at the cut-offs"
+
+# A module folder's entry page, index.html, which forwards a link's gene list (GS.2).
+[entry]
+title = "{module}, newest pages"
+one = "Opening this module's newest page with the gene list of the link."
+lead = "This module holds a page per dataset; each link below carries the gene list of the link."
+noscript = "Without JavaScript the gene list stays behind: open a page below and paste the list there."
+
+# A view select (D-051): the page swaps in another figure Python drew.
+[view]
+moved = "This view shows {label}; the figure files and the reading guide show {build}."
+noscript = "Choosing a view needs JavaScript; the tables beside the page hold every view's numbers."
+
+# A packed group: drawn when the reader reaches it (C3.1, M9.8).
+[packed]
+waiting = "This part is drawn when it comes into view."
+draw = "Draw it now"
+drawing = "Drawing."
+failed = "This browser cannot unpack this part. The tables and figure files beside the page hold every number."
+noscript = "This part needs JavaScript: its figures travel packed in the page. The tables and figure files beside the page hold every number."
 
 # The glossary page and the term tooltips (ctx.report.glossary, D-048).
 [glossary]

@@ -5,7 +5,8 @@ not be read leaves a line naming why in place of its panels (degraded, never dro
 """
 
 import re
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,8 @@ from ctx.genecard.summary import spread, tau
 from ctx.io.naming import stem
 from ctx.report import text
 from ctx.report.builder import (
+    MAX_BYTES,
+    Code,
     FigureText,
     Group,
     KeyNumber,
@@ -28,8 +31,12 @@ from ctx.report.builder import (
     Reproduction,
     Result,
     ResultTable,
+    packed_bytes,
+    rendered,
     write,
 )
+from ctx.report.entry import write_entry
+from ctx.viz.save import figure_block, write_figure
 
 PAGE = "genecard"
 # HPA single cell types listed per card.
@@ -180,34 +187,86 @@ def _facts(card: Card, release: str, named_lines: hpa.CellLines | None) -> Resul
                        text.words(PAGE, "facts.columns"), tuple(rows))  # fmt: skip
 
 
-def _card(writer: Writer, card: Card, ctx: Context) -> Group:
+@dataclass(frozen=True)
+class Drawn:
+    """One gene's card as the page prints it, and the figures whose files it links.
+
+    The files are written only for a card the page keeps (``build``): 50 TCGA cards drawn and
+    written whole took ten minutes for a page the cap then refused (C3.1).
+    """
+
+    card: Card
+    items: tuple[Any, ...]
+    figures: tuple[tuple[Any, str, FigureText], ...]
+
+
+def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
     """One gene's card: own evidence, structure, then each reference panel or why it is absent."""
     release = ctx.options.hpa_release
     items: list[Any] = [_evidence(card, ctx.evidence), *_structure(card)]
+    panels: list[tuple[Any, str, FigureText]] = []
     if card.renamed:
         items.insert(0, fill("gene.renamed", typed=card.renamed, release=release,
                              gene=f"ENSG{card.number:011d}", symbol=card.symbol))  # fmt: skip
+
+    def panel(data: Any, kind: str, words: FigureText) -> None:
+        """A figure of the card: its page block now, its files once the card is kept."""
+        what, words = (
+            f"{kind}_{_slug(card)}",
+            replace(words, back=f"{writer.stem('overview')}.html"),
+        )
+        panels.append((data, what, words))
+        items.append(figure_block(data, writer.stem(what), words))
+
     if card.tissues is not None:
         strip, numbers = figures.tissues(card)
-        items.append(writer.figure(strip, f"tissues_{_slug(card)}", _words("tissues", numbers)))
+        panel(strip, "tissues", _words("tissues", numbers))
     if card.exons is not None:
         heat, numbers, pair = figures.exons(card)
-        lead = "lead" if pair is not None else "lead_none"
-        items.append(writer.figure(heat, f"exons_{_slug(card)}",
-                                   _words("exons", numbers, lead)))  # fmt: skip
+        panel(heat, "exons", _words("exons", numbers, "lead" if pair is not None else "lead_none"))
     if card.junctions is not None:
         heat, numbers = figures.junctions(card)
-        items.append(writer.figure(heat, f"junctions_{_slug(card)}",
-                                   _words("junctions", numbers)))  # fmt: skip
+        panel(heat, "junctions", _words("junctions", numbers))
     if card.xml is not None and card.facts is not None:
         bars, numbers = figures.immune(card, release)
-        items.append(writer.figure(bars, f"immune_{_slug(card)}", _words("immune", numbers)))
+        panel(bars, "immune", _words("immune", numbers))
         items.append(_facts(card, release, hpa.cell_lines(ctx.spec.info, ctx.spec.path.name)))
     items += [_unavailable(card, source) for source in card.notes]
+    return Drawn(card, tuple(items), tuple(panels))
+
+
+def _group(drawn: Drawn, packed: bool) -> Group:
+    """A card's group; packed, its figures travel gzipped and are drawn when reached."""
+    card = drawn.card
     lead = fill("gene.lead", reason=_reason(card.reason), gene_id=card.gene_id,
                 gtex_id=card.gtex_id or word("none"))  # fmt: skip
     return Group(fill("gene.title", symbol=card.symbol, gene=f"ENSG{card.number:011d}"),
-                 tuple(items), lead=lead)  # fmt: skip
+                 drawn.items, lead=lead, packed=packed)  # fmt: skip
+
+
+def left_out_command(ctx: Context, cards: list[Card]) -> str:
+    """The command that builds the cards a page could not hold, on a page of their own.
+
+    Each gene by its Ensembl ID: a symbol can name two genes, and an ID cannot.
+    """
+    argv = ["--root", str(ctx.settings.root), "genecard", "--dataset", ctx.spec.slug,
+            "--dataset-file", str(ctx.options.dataset_file),
+            "--genes", ",".join(f"ENSG{c.number:011d}" for c in cards)]  # fmt: skip
+    if ctx.options.hpa_release != hpa.RELEASE:
+        argv += ["--hpa-release", ctx.options.hpa_release]
+    if ctx.options.offline:
+        argv.append("--offline")
+    return runtime.retypable(argv)
+
+
+def _left_out(ctx: Context, cards: list[Card]) -> Group:
+    """The genes of the card list the page could not hold, and the command for their page."""
+    names = ", ".join(c.symbol for c in cards)
+    lead = fill("left_out.lead", n=len(cards), listed=len(ctx.chosen), cap=MAX_BYTES / 1e6)
+    return Group(word("left_out.title"), (fill("left_out.genes", genes=names),
+                                          Code(word("left_out.command"),
+                                               left_out_command(ctx, cards))),
+                 lead=lead)  # fmt: skip
 
 
 def _named(frame: pl.DataFrame, card: Card) -> pl.DataFrame:
@@ -273,20 +332,22 @@ def _sources(ctx: Context) -> Group:
                                          word("sources.gtex_rerelease")))  # fmt: skip
 
 
-def build(writer: Writer, ctx: Context) -> list[Path]:
-    """Write every table and figure, then the page; the page first in the returned list."""
-    _tables(writer, ctx)
-    results: list[Result] = [_card(writer, c, ctx) for c in ctx.chosen]
+def _module_page(ctx: Context, drawn: list[Drawn], left: list[Card]) -> ModulePage:
+    """The page over the cards it keeps: the first drawn whole, the rest packed (C3.1)."""
+    results: list[Result] = [_group(d, packed=i > 0) for i, d in enumerate(drawn)]
+    if left:
+        results.append(_left_out(ctx, left))
     results.append(_sources(ctx))
     gtex_numbers = ctx.provenance["gtex"]
-    tissues = next((c.tissues for c in ctx.chosen if c.tissues is not None), None)
-    keys = (KeyNumber(word("keys.genes"), f"{len(ctx.chosen):,}"),
+    tissues = next((d.card.tissues for d in drawn if d.card.tissues is not None), None)
+    keys = (KeyNumber(word("keys.genes"), f"{len(drawn):,}",
+                      fill("keys.genes_listed", listed=len(ctx.chosen)) if left else ""),
             KeyNumber(word("keys.samples"), gtex_numbers.get("samples", word("none"))),
             KeyNumber(word("keys.tissues"), word("none") if tissues is None else
                       f"{tissues['tissue'].n_unique():,}"),
             KeyNumber(word("keys.hpa"), ctx.options.hpa_release))  # fmt: skip
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(PAGE)
-    built = ModulePage(
+    return ModulePage(
         title=fill("title", dataset=ctx.spec.name), **text.skeleton(PAGE),
         parameters=ctx.cards, results=tuple(results), key_numbers=keys,
         reproduce=Reproduction(
@@ -297,5 +358,55 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
             versions=runtime.versions(),
         ),
     )  # fmt: skip
+
+
+def fit(pages: Callable[[int], tuple[str, list[int]]], cards: int, cap: int = MAX_BYTES) -> int:
+    """How many cards, in list order, a page holds under ``cap`` bytes: measured, never guessed.
+
+    ``pages(k)`` renders the page over the first ``k`` cards and gives its HTML and the bytes of
+    each packed card, in order. Cards leave from the end, the most packed bytes first needed to
+    cover the excess, and the page is measured again, since the lines naming the cards left out
+    grow as they leave. The first card, drawn whole, always stays.
+    """
+    kept = cards
+    while kept > 1:
+        html, packed = pages(kept)
+        over = len(html.encode()) - cap
+        if over <= 0:
+            break
+        freed = 0
+        while kept > 1 and freed < over:
+            kept -= 1
+            freed += packed[kept - 1] if kept - 1 < len(packed) else 0
+    return kept
+
+
+def build(writer: Writer, ctx: Context) -> list[Path]:
+    """Write the kept cards' tables and figures, then the page; the page first in the list.
+
+    The card list is packed to the page cap (M9.8): every card is laid out without its
+    files, the page is measured, and the cards past what fits are named with the command
+    that builds them.
+    """
     page = writer.out / f"{stem(PAGE, f'{writer.dataset}_overview', 1, day=writer.day)}.html"
-    return [write(built, page), *writer.files]
+    drawn = [_card(writer, c, ctx) for c in ctx.chosen]
+
+    def pages(k: int) -> tuple[str, list[int]]:
+        """The page over the first ``k`` cards, as written, and each packed card's bytes."""
+        html = rendered(_module_page(ctx, drawn[:k], [d.card for d in drawn[k:]]), page)
+        return html, packed_bytes(html)
+
+    kept = fit(pages, len(drawn), MAX_BYTES)
+    numbers = [d.card.number for d in drawn[:kept]]
+    shown = replace(
+        ctx,
+        chosen=[d.card for d in drawn[:kept]],
+        evidence=ctx.evidence.filter(pl.col("number").is_in(numbers)),
+    )
+    _tables(writer, shown)
+    for d in drawn[:kept]:
+        for data, what, words in d.figures:
+            writer.files += write_figure(data, writer.out, writer.stem(what), title=words.title,
+                                         data_releases=writer.releases, text=words)  # fmt: skip
+    built = _module_page(ctx, drawn[:kept], [d.card for d in drawn[kept:]])
+    return [write(built, page), write_entry(writer.out, "genecard"), *writer.files]

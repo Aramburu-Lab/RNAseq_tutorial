@@ -1,0 +1,8 @@
+CAUGHT: view: figure left as built (1 failed in 89.30s (0:01:29))
+CAUGHT: view: caption not swapped (1 failed in 79.09s (0:01:19))
+CAUGHT: view: build caption not restored (1 failed in 153.34s (0:02:33))
+CAUGHT: view: export switch left off (1 failed in 98.50s (0:01:38))
+CAUGHT: view: one option accepted (1 failed in 3.04s)
+CAUGHT: view: another figure taken as the build (1 failed in 2.65s)
+CAUGHT: view: select kept alone (1 failed in 2.63s)
+CAUGHT: picker built over non-Ensembl genes (1 failed in 71.21s (0:01:11))

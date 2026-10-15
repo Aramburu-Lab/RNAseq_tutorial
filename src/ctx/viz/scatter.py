@@ -275,6 +275,8 @@ class ScatterData:
             ``calls``, else other points. Needed with ``unit``.
         live: Settings of another page control that redraws the points, with its ``kind``,
             such as M8's pair select; None for none. Not with ``calls``, which is one itself.
+        select: The gene picker's settings (``ctx.report.genes.picker``) beside ``calls``:
+            a lasso, a box or a click selects genes on the volcano (GS.4); None for none.
     """
 
     frame: pl.DataFrame
@@ -302,6 +304,7 @@ class ScatterData:
     unit: str | None = None
     thinned: str = ""
     live: Mapping[str, Any] | None = None
+    select: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -393,6 +396,7 @@ class ScatterData:
             "hover": list(self.hover), "cutoff_lines": [first_line + i for i in range(3)],
             "presets": [_js_number(c) for c in CUTOFF_PRESETS if c <= self.calls.max_cutoff],
             "default_summary": self.summary(),
+            **({"select": dict(self.select)} if self.select is not None else {}),
         }  # fmt: skip
 
     def reading(self) -> tuple[str, ...]:

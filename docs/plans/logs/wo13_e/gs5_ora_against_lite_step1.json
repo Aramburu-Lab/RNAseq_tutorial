@@ -1,0 +1,8 @@
+{
+ "contrasts": 11,
+ "cases": 44,
+ "sets_compared": 2164,
+ "max_rel_p": 4.233074735333085e-11,
+ "max_rel_fdr": 3.362685992211149e-11,
+ "node_ms_all_cases": 62
+}

@@ -32,6 +32,7 @@ from ctx.de.page import (
     ma_text,
     pca_text,
     phist_text,
+    picking,
     questions,
     skeleton,
     subset_words,
@@ -58,6 +59,7 @@ from ctx.report.builder import (
 )
 from ctx.report.text import fill, raw, word
 from ctx.report.text import words as text_words
+from ctx.report.views import viewed
 from ctx.viz.annotate import Permanova, permanova
 from ctx.viz.bar import BarData
 from ctx.viz.box import box_data
@@ -163,7 +165,8 @@ def _pca_figure(
     counts: pl.DataFrame,
     threads: int,
     curated: Sequence[Column] = (),
-) -> tuple[ScatterData, list[tuple[str, float, str]], FigureText]:
+) -> tuple[ScatterData, list[tuple[str, float, str]], FigureText,
+           list[tuple[str, ScatterData, FigureText]]]:  # fmt: skip
     """One PCA scatter, a PERMANOVA per declared factor as metrics, and its page words."""
     used = _subset(sheet, spec.filters, spec.one_per)
     result = pca(counts, used["sample"].to_list(), threads=threads)
@@ -178,6 +181,7 @@ def _pca_figure(
     metrics: list[tuple[str, float, str]] = []
     first = ""
     shown: tuple[str, Permanova] | None = None
+    tests: dict[str, Permanova] = {}
     for factor in spec.factors:
         labels = frame[factor].to_list()
         if not 1 < len(set(labels)) < len(labels):
@@ -189,6 +193,8 @@ def _pca_figure(
         # varies within individuals, gets a p-value; R squared is descriptive for every one.
         strata = frame[spec.strata].to_list() if spec.strata and not first else None
         test = permanova(result.coords, labels, strata=strata)
+        # Only the first factor's p holds: the others were not permuted within individuals.
+        tests[factor] = test if not first else replace(test, p=math.nan)
         where = f"{test.n} samples, {test.groups} groups, top {TOP_GENES} genes by VST variance"
         metrics.append((f"permanova.{spec.name}.{factor}.r2", test.r2, where))
         if not first:
@@ -227,7 +233,18 @@ def _pca_figure(
     # The page describes the first factor's test, the one with a p-value.
     subset = subset_words(spec.filters, curated)
     text = pca_text(spec.name, subset, colour, spec.symbol, result.share, shown)
-    return data, metrics, text
+    # Work-order item 6 (D-051): every other tested factor colours the points as a view,
+    # with its own R2, descriptive.
+    views = [(colour.replace("_", " "), data, text)]
+    for factor, test in tests.items():
+        if factor in (colour, spec.symbol):
+            continue
+        recoloured = replace(data, colour=factor,
+                             colours=category_colours(sorted(set(frame[factor]))))  # fmt: skip
+        views.append((factor.replace("_", " "), recoloured,
+                      pca_text(spec.name, subset, factor, spec.symbol, result.share,
+                               (factor, test))))  # fmt: skip
+    return data, metrics, text, views
 
 
 def volcano(
@@ -409,6 +426,30 @@ def p_histogram(result: Fit, said: Words | None = None) -> tuple[BarData, float,
         width="double",
     )
     return data, flat, low
+
+
+def _phist_views(writer: "Writer", fits: Mapping[str, Fit], said: Mapping[str, Words],
+                 featured: str) -> FigureBlock:  # fmt: skip
+    """The featured contrast's p-value histogram, with every other contrast's as a view.
+
+    Work-order item 6 (D-051): the first bar over the flat level reads 1.0 for the null split
+    and 31.7 paired against 20.1 unpaired (figure controls plan), so the select teaches what
+    a design does to the histogram. Every view's bins are one table.
+    """
+    options, tables = [], []
+    for name in [featured, *(n for n in fits if n != featured)]:
+        data, flat, low = p_histogram(fits[name], said[name])
+        with_p = fits[name].results["pvalue"].drop_nulls().len()
+        words_ = phist_text(said[name], with_p, low, flat, int(data.frame["genes"][0]),
+                            1 / P_BINS)  # fmt: skip
+        options.append((said[name].label, data, words_))
+        tables.append(data.frame.select("bin", "genes").with_columns(contrast=pl.lit(name)))
+    writer.table(pl.concat(tables).select("contrast", "bin", "genes"), "phist_contrasts", {
+        "contrast": ("none", "The contrast."), "bin": ("dimensionless", "Range of Wald p-values."),
+        "genes": ("genes", "Genes in the bin."),
+    })  # fmt: skip
+    block = writer.figure(options[0][1], f"phist_{featured}", options[0][2])
+    return viewed(block, options, figure("phist", "view")) if len(options) > 1 else block
 
 
 def _dispersion(result: Fit, said: Words) -> ScatterData:
@@ -813,9 +854,10 @@ def _figures(
     metrics = []
     pcas = []
     for pca_spec in spec.de.pca:
-        scatter, found, text = _pca_figure(pca_spec, sheet, counts, threads, spec.columns)
+        scatter, found, text, views = _pca_figure(pca_spec, sheet, counts, threads, spec.columns)
         metrics += found
-        pcas.append(writer.figure(scatter, f"pca_{pca_spec.name}", text))
+        block = writer.figure(scatter, f"pca_{pca_spec.name}", text)
+        pcas.append(viewed(block, views, figure("pca", "view")) if len(views) > 1 else block)
     if pcas:
         lead = word(PAGE, "groups.samples_lead")
         groups.append(Group(word(PAGE, "groups.samples"), tuple(pcas), lead=lead,
@@ -823,18 +865,19 @@ def _figures(
     featured = fits[spec.de.featured]
     name, this = featured.contrast.name, said[featured.contrast.name]
     shrunk = bool(featured.results["log2FoldChange_shrunk"].is_not_null().any())
+    shown = volcano(featured, genes, said=this)
+    shown = replace(
+        shown, select=picking(spec, name, shown.hover, shown.frame["gene_id"].to_list())
+    )
     groups.append(Group(
         fill(PAGE, "groups.featured", label=this.label),
-        (writer.figure(volcano(featured, genes, said=this), f"volcano_{name}", volcano_text(this)),
+        (writer.figure(shown, f"volcano_{name}", volcano_text(this)),
          writer.figure(_ma(featured, genes, this), f"ma_{name}", ma_text(this, shrunk))),
         lead=word(PAGE, "groups.featured_lead"), tabs=True,
     ))  # fmt: skip
-    phist, flat, low = p_histogram(featured, this)
-    with_p = featured.results["pvalue"].drop_nulls().len()
     groups.append(Group(
         word(PAGE, "groups.health"),
-        (writer.figure(phist, f"phist_{name}", phist_text(
-            this, with_p, low, flat, int(phist.frame["genes"][0]), 1 / P_BINS)),
+        (_phist_views(writer, fits, said, name),
          writer.figure(_dispersion(featured, this), f"dispersion_{name}", dispersion_text(this))),
         lead=word(PAGE, "groups.health_lead"), tabs=True,
     ))  # fmt: skip

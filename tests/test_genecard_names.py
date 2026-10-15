@@ -15,6 +15,7 @@ from test_genecard import _cards, _register, _settings
 from ctx.genecard import GenecardError, cards, hpa
 from ctx.genecard import run as module
 from ctx.genecard.cache import Cache
+from ctx.report.builder import unpacked
 
 GENE = "ENSG00000106236"
 RENAMED = 185633
@@ -120,7 +121,7 @@ def test_run_shows_lines_and_rename(root):
     options = module.Options(spec, genes=("NPTX2", "NDUFA4L2"))
     written = module.run(_settings(folder), _cards(), "ctx genecard", SLUG, options,
                          Stub(responses()))  # fmt: skip
-    page = written[0].read_text()
+    page = unpacked(written[0].read_text())
     assert "HL-60 0.0 nTPM; THP-1 1.9 nTPM; U-937 0.4 nTPM" in page
     assert "93 lines in the group, median 0.0 nTPM" in page
     assert "Jin et al., Nat Commun 2023" in page

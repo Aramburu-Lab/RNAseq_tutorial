@@ -1,0 +1,59 @@
+{
+ "name": "m6_1280",
+ "acted": {
+  "page": "2026-10-14_function_tier1_overview_v1.html",
+  "hash": 11604,
+  "summary": "The list of the link: 1683 genes, 1683 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 16 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them.",
+  "notes": "1683 genes of the list have a symbol on this page; genes left out for want of one: 0.",
+  "bars": [
+   [
+    "up",
+    16
+   ],
+   [
+    "down",
+    0
+   ]
+  ],
+  "scroll": true
+ },
+ "moused": [],
+ "reset": null,
+ "resized": [],
+ "errors": []
+}
+{
+ "name": "m6_375",
+ "acted": {
+  "page": "2026-10-14_function_tier1_overview_v1.html",
+  "hash": 11604,
+  "summary": "The list of the link: 1683 genes, 1683 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 16 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them.",
+  "notes": "1683 genes of the list have a symbol on this page; genes left out for want of one: 0.",
+  "bars": [
+   [
+    "up",
+    16
+   ],
+   [
+    "down",
+    0
+   ]
+  ],
+  "scroll": true
+ },
+ "moused": [],
+ "reset": null,
+ "resized": [],
+ "errors": []
+}
+{
+ "name": "m5_375",
+ "acted": {
+  "scroll": true,
+  "sw": 375
+ },
+ "moused": [],
+ "reset": null,
+ "resized": [],
+ "errors": []
+}

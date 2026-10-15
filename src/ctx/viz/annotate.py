@@ -53,10 +53,10 @@ class Caption:
     groups: tuple[str, str]
     tests: tuple[FeatureTest, ...]
 
-    def label(self, feature: str) -> str:
-        """The annotation printed above one feature."""
+    def label(self, feature: str, key: str = "label") -> str:
+        """The annotation printed above one feature; ``label_line`` gives it on one line."""
         t = next(t for t in self.tests if t.feature == feature)
-        return content.fill(PAGE, "label", p=_fmt(t.p_adj), r=t.r)
+        return content.fill(PAGE, key, p=_fmt(t.p_adj), r=t.r)
 
     def text(self, width: int = 0) -> str:
         """The caption block: test, correction, n per group, and the sign of r.

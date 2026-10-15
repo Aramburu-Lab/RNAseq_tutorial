@@ -195,6 +195,23 @@ var ctxSelect = {
     });
     return out;
   },
+  /* post(): what Open beside sends to the windows it links (GS.6): the fragment's fields. */
+  post: function (sel) {
+    ctxSelect.check(sel);
+    return { ctx: "genes", v: ctxSelect.VERSION, src: sel.src, n: sel.genes.length,
+             g: sel.genes.join(",") };
+  },
+  /* received(): a message's selection, read as strictly as a link: null for a message that
+     is not a gene list, a refusal for one that is and breaks the form. */
+  received: function (data) {
+    if (!data || typeof data !== "object" || data.ctx !== "genes") return null;
+    var fields = [data.v, data.src, data.n, data.g].map(function (f) {
+      return typeof f === "string" || typeof f === "number" ? String(f) : "";
+    });
+    /* A field holding '&' or '#' fails decode's form, as it would in a link. */
+    return ctxSelect.decode("#v=" + fields[0] + "&src=" + fields[1] + "&n=" + fields[2] +
+                            "&g=" + fields[3] + ctxSelect.END);
+  },
   /* The Save-list file read_list reads: source, time and count, then one gene per line, its
      ID and, where the table has one, its symbol. */
   listText: function (sel, index, time) {

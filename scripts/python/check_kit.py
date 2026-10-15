@@ -15,6 +15,8 @@ Usage:
 
 from __future__ import annotations
 
+import base64
+import gzip
 import hashlib
 import json
 import re
@@ -35,6 +37,17 @@ _RESERVED = {"CON", "PRN", "AUX", "NUL", *(f"COM{i}" for i in range(1, 10)),
              *(f"LPT{i}" for i in range(1, 10))}  # fmt: skip
 # The kit's record of the files left out of it by rule, each with its rebuild commands.
 LEFT_OUT = "LEFT_OUT.json"
+# A packed part of a page (ctx.report.builder.PACKED): its HTML gzipped and base64'd in a
+# script, drawn when the reader reaches it. Its links are links of the page.
+PACKED = re.compile(
+    r'<script type="application/octet-stream" id="ctx-packed-([0-9]+)">([^<]*)</script>'
+)
+# The modules that read a gene list from a link (ctx.report.entry.CONSUMERS), and the entry
+# page each one's folder must hold: a link from another page names it, never a dated page.
+CONSUMERS = ("function", "genecard", "clinical")
+ENTRY = "index.html"
+_MODULE_FOLDER = re.compile(r"[0-9]{2}_([a-z_]+)")
+_DATED_PAGE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}_.+[.]html")
 
 
 class _Links(HTMLParser):
@@ -72,11 +85,33 @@ class _Links(HTMLParser):
             self.found += [("style", "url", a or b) for a, b in _CSS.findall(data)]
 
 
+def unpacked(html: str) -> str:
+    """A page with each packed part's HTML in place of its script (twin of builder.unpacked)."""
+    return PACKED.sub(lambda m: gzip.decompress(base64.b64decode(m[2])).decode(), html)
+
+
 def links(page: Path) -> list[tuple[str, str, str]]:
-    """The (tag, attribute, value) of every URL on one page."""
+    """The (tag, attribute, value) of every URL on one page, its packed parts' included."""
     parser = _Links()
-    parser.feed(page.read_text(encoding="utf-8", errors="replace"))
+    parser.feed(unpacked(page.read_text(encoding="utf-8", errors="replace")))
     return parser.found
+
+
+def entry_problems(root: Path) -> list[str]:
+    """Each folder of a gene-list-reading module that holds dated pages and no entry page.
+
+    ``root`` is a ctx root (``outputs/NN_<module>``) or a kit (``<folder>/outputs/...``).
+    """
+    problems = []
+    for folder in sorted({*root.glob("outputs/*"), *root.glob("*/outputs/*")}):
+        found = _MODULE_FOLDER.fullmatch(folder.name)
+        if not folder.is_dir() or not found or found[1] not in CONSUMERS:
+            continue
+        dated = any(_DATED_PAGE.fullmatch(p.name) for p in folder.glob("*.html"))
+        if dated and not (folder / ENTRY).is_file():
+            where = folder.relative_to(root).as_posix()
+            problems.append(f"{where}: no {ENTRY}, which a link to this module names")
+    return problems
 
 
 def fetches(tag: str, attribute: str, value: str) -> bool:
@@ -182,6 +217,7 @@ def check(kit: Path) -> list[str]:
     return [
         *manifest_problems(kit),
         *link_problems(kit, sorted(kit.rglob("*.html"))),
+        *entry_problems(kit),
         *windows_problems(names, kit.name),
     ]
 

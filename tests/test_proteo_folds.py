@@ -4,13 +4,15 @@ it catches. Nothing here comes from a real dataset."""
 import numpy as np
 import polars as pl
 import pytest
+from matplotlib.text import Text
 from scipy import stats
 
 from ctx.dataset import Contrast
 from ctx.de.stats import adjust
 from ctx.proteo import ProteoError, figures, folds
 from ctx.proteo.annotate import pair_samples
-from ctx.viz.style import DATA_COLOURS, SPENT_GREYS, contrast
+from ctx.viz.heatmap import HeatmapData, Swatch
+from ctx.viz.style import DATA_COLOURS, ROLES, SPENT_GREYS, THEMES, contrast
 
 SHEET = pl.DataFrame({"case": ["C1", "C2", "C3"], "sample_id": ["S1", "S2", "S3"],
                       "sample": ["A1", "A2", "A3"]})  # fmt: skip
@@ -173,4 +175,33 @@ def test_plex_strip_alternates_two_greys_one_run_per_plex():
     shown = annotation.sort(by)["Plex"].to_list()
     assert all(greys[a] != greys[b] for a, b in zip(shown, shown[1:], strict=False) if a != b)
     assert contrast(*SPENT_GREYS) >= 3  # noqa: PLR2004 - the 3:1 graphics threshold
-    assert set(figures.track_colours(subtypes).values()) <= set(DATA_COLOURS)
+    assert set(figures.track_colours(subtypes).values()) <= {*DATA_COLOURS, SPENT_GREYS[1]}
+
+
+def test_tracks_never_take_the_heats_colours_and_a_greyed_strip_is_one_legend_entry():
+    """C3.4: PAM50's fifth level, Normal-like, took the reference blue the heat draws its low z
+    in; C3.2: the plex strip listed 22 grey legend entries naming no plex apart.
+
+    Mutations caught: the role colours back in TRACK_COLOURS; the key dropped, so the legend
+    lists every plex again; the key ignored by the static, the page or the colour list."""
+    subtypes = ["Her2", "LumA", "LumB", "Basal", "Normal-like"]
+    colours = figures.track_colours(subtypes)
+    assert not set(colours.values()) & set(ROLES.values())
+    assert len(set(colours.values())) == len(subtypes)
+    plexes = [str(p) for p in range(1, 23)]
+    strip = figures.track("Plex", {f"s{i}": plexes[i] for i in range(22)}, plexes)
+    pam = figures.track("PAM50", {f"s{i}": subtypes[i % 5] for i in range(22)}, subtypes)
+    assert strip.entries() == [("Plex: 22 levels, one run each, in two greys in turn",
+                                SPENT_GREYS[0])]  # fmt: skip
+    assert [w for w, _ in pam.entries()] == [f"PAM50: {s}" for s in subtypes]
+    frame = pl.DataFrame({"row": ["g"] * 22, "col": [f"s{i}" for i in range(22)],
+                          "z": [0.0] * 22, "level": ["mid"] * 22})  # fmt: skip
+    heat = HeatmapData(frame=frame, columns={c: ("none", c) for c in frame.columns}, row="row",
+                       column="col", value="z", level="level", row_label="Gene",
+                       column_label="Tumour", swatches=(Swatch("mid", None),), caption="No test.",
+                       tracks=(strip, pam))  # fmt: skip
+    names = [t.name for t in heat.interactive().data if t.showlegend is not False and t.name]
+    assert names == ["mid", strip.entries()[0][0], *(f"PAM50: {s}" for s in subtypes)]
+    fig = heat.static(THEMES["white"])
+    labels = [t.get_text() for t in fig.findobj(Text)]
+    assert strip.entries()[0][0] in labels and "Plex: 1" not in labels

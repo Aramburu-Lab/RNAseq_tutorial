@@ -7,6 +7,8 @@ page and the glossary page. A page that marks a glossary term links the glossary
 embeds the tooltips of the terms it marks, and writing it writes the glossary too (D-048).
 """
 
+import base64
+import gzip
 import hashlib
 import re
 from collections.abc import Iterable, Mapping, Sequence
@@ -137,6 +139,8 @@ class ResultTable:
     rows: tuple[tuple[str, ...], ...]
     numeric: tuple[int, ...] = ()
     swatch: int | None = None
+    # A class a page script finds the table by, as M10's screen follows the scored list.
+    css: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a table the page could only print wrongly."""
@@ -170,12 +174,18 @@ class Code:
 
 @dataclass(frozen=True)
 class Group:
-    """Results that answer one question, under one heading; tabs for alternative views."""
+    """Results that answer one question, under one heading; tabs for alternative views.
+
+    A packed group's items travel gzipped in the page and are drawn when the reader reaches
+    them (``templates/_page.js.j2``, packed): M9's 50 TCGA cards drawn whole made a
+    29,472,416-byte page, where their figures' JSON and rows compress about eight times (C3.1).
+    """
 
     title: str
     items: tuple["FigureBlock | ResultTable | Code | str", ...]
     lead: str = ""
     tabs: bool = False
+    packed: bool = False
 
     def __post_init__(self) -> None:
         """Refuse an empty group, and tabs over anything but two or more figures."""
@@ -326,7 +336,23 @@ class ModulePage:
             raise ValueError(f"{len(self.key_numbers)} key numbers; at most {MAX_KEY_NUMBERS}")
 
 
-Page = FigurePage | ModulePage | HubPage | CoursePage | GlossaryPage
+@dataclass(frozen=True)
+class EntryPage:
+    """A module folder's entry page, ``index.html``: it forwards a link's gene list (GS.2).
+
+    Pages are dated and a module is rebuilt after the pages that link it, so a link names the
+    folder's entry page, which each build of the module rewrites to its newest pages.
+
+    Attributes:
+        title: The page's title.
+        links: (dataset, href) of each dataset's newest overview in the folder.
+    """
+
+    title: str
+    links: tuple[tuple[str, str], ...]
+
+
+Page = FigurePage | ModulePage | HubPage | CoursePage | GlossaryPage | EntryPage
 
 _ENV = Environment(
     loader=PackageLoader("ctx.report", "templates"),
@@ -355,8 +381,35 @@ def explain_terms(context: Any, value: str, section: str) -> Markup:
     return terms.html(value, section)
 
 
+def pack(html: str) -> str:
+    """A packed group's HTML as the page carries it: gzip with no timestamp, then base64.
+
+    ``mtime=0``: a timestamp in the header would make two builds of one page differ.
+    """
+    return base64.b64encode(gzip.compress(html.encode(), mtime=0)).decode("ascii")
+
+
+PACKED = re.compile(
+    r'<script type="application/octet-stream" id="ctx-packed-([0-9]+)">([^<]*)</script>'
+)
+
+
+def packed_bytes(html: str) -> list[int]:
+    """The bytes of each packed group in a rendered page, in page order: what each one costs."""
+    return [len(m[0].encode()) for m in PACKED.finditer(html)]
+
+
+def unpacked(html: str) -> str:
+    """A page with each packed group's HTML in place of its script, as the reader sees it drawn.
+
+    For whatever reads a page's words or links without a browser: a test, the kit's link walk.
+    """
+    return PACKED.sub(lambda m: gzip.decompress(base64.b64decode(m[2])).decode(), html)
+
+
 _ENV.filters["code"] = code_spans
 _ENV.filters["explain_terms"] = explain_terms
+_ENV.filters["pack"] = pack
 
 
 def _marked(page: Page) -> list[str]:
@@ -425,7 +478,8 @@ def _live(prepared: Iterable[Mapping[str, Any]]) -> bool:
     Such a page carries the selection and survival scripts (``_select``, ``_surv`` and
     ``_live``); other pages leave them out.
     """
-    return any(f.get("kind") in ("survival", "follow") for f in prepared)
+    return any(f.get("kind") in ("survival", "follow", "ora") or f.get("select")
+               for f in prepared)  # fmt: skip
 
 
 def _heading(page: Page) -> dict[str, str]:
@@ -435,7 +489,7 @@ def _heading(page: Page) -> dict[str, str]:
         return {"kicker": figure, "headline": page.title, "dataset": "", "suite": SUITE}
     match = TITLE.fullmatch(page.title)
     assert match is not None  # noqa: S101 - the pattern accepts any title
-    if isinstance(page, HubPage | CoursePage | GlossaryPage):
+    if isinstance(page, HubPage | CoursePage | GlossaryPage | EntryPage):
         kicker = SUITE
     elif page.kicker:
         kicker = page.kicker
@@ -483,6 +537,9 @@ def render(page: Page, glossary_href: str = "") -> str:
         names = {e.id: e.term for _, entries in page.groups for e in entries}
         context |= {"plotly_js": "", "names": names}
         return _ENV.get_template("glossary.html.j2").render(**context)
+    if isinstance(page, EntryPage):
+        context["plotly_js"] = ""
+        return _ENV.get_template("entry.html.j2").render(**context)
     if isinstance(page, HubPage):
         context["plotly_js"] = ""  # 4.8 MB of library for a page that draws nothing
         return _ENV.get_template("hub.html.j2").render(**context)
@@ -514,6 +571,17 @@ def render(page: Page, glossary_href: str = "") -> str:
     return _ENV.get_template("module.html.j2").render(**context)
 
 
+def rendered(page: Page, path: Path) -> str:
+    """The page as ``write`` would write it to ``path``, glossary link and all; nothing written.
+
+    A builder that fits a page to ``MAX_BYTES`` measures this, then writes.
+    """
+    target = None
+    if isinstance(page, HubPage) or glossary.used(_marked(page)):
+        target = glossary.page_path(path)
+    return render(page, glossary.href(path, target) if target else "")
+
+
 def write(page: Page, path: Path) -> Path:
     """Render and write a page, refusing one over 15 MB before anything is written.
 
@@ -535,7 +603,7 @@ def write(page: Page, path: Path) -> Path:
     target = None
     if isinstance(page, HubPage) or glossary.used(_marked(page)):
         target = glossary.page_path(path)
-    html = _sized(render(page, glossary.href(path, target) if target else ""), path)
+    html = _sized(rendered(page, path), path)
     if target is not None:
         book = GlossaryPage(text.word("ui", "glossary.title"), glossary.grouped())
         entries = _sized(render(book), target)

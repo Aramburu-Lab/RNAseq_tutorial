@@ -350,6 +350,7 @@ def _library_sizes(frame: pl.DataFrame, spec: Dataset, bands: tuple[float, float
         lines=((good, text.fill(PAGE, "figures.library.good", millions=good)),
                (usable, text.fill(PAGE, "figures.library.usable", millions=usable))),
         median=text.word(PAGE, "figures.library.median"), filters=DEPTH_FILTERS,
+        labels=text.raw(PAGE, "figures.library.labels"),
     )  # fmt: skip
 
 
