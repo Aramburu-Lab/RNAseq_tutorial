@@ -1,0 +1,44 @@
+== gather 2026-10-15T13:05:19Z src=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/src_main/src
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_composition_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_composition_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_composition_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_composition_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_composition_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_composition_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_composition_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_library_sizes_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_library_sizes_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_library_sizes_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_library_sizes_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_library_sizes_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_library_sizes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/tier1_base/outputs/01_gather/2026-10-15_gather_tier1_library_sizes_v1_README.md
+        7.83 real         5.21 user         0.99 sys
+           902086656  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              103282  page reclaims
+                2181  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                1323  voluntary context switches
+               14527  involuntary context switches
+         84842857576  instructions retired
+         24133569864  cycles elapsed
+           714278448  peak memory footprint
+exit 0

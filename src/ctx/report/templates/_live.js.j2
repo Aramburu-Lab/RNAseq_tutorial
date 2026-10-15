@@ -56,6 +56,13 @@ var ctxLive = {
     });
     return { rows: out, absent: absent };
   },
+  /* The screen's strongest genes as a list: its first n rows by adjusted q, the refused left
+     out, each signed by its adjusted hazard ratio's side of 1 (page.screen_rows, E.3). */
+  strongest: function (rows, n) {
+    var top = ctxLive.screen(rows, rows.map(function (r) { return r[0]; })).rows
+      .filter(function (r) { return r[1] !== null; }).slice(0, n);
+    return { genes: top.map(function (r) { return r[0]; }), signs: top.map(function (r) { return r[3]; }) };
+  },
   /* figures.risk_step: whole years between at-risk counts, at most columns of them. */
   riskStep: function (last, columns) {
     return 12 * Math.max(1, Math.ceil(last / (columns - 1) / 12));
@@ -237,10 +244,9 @@ var ctxLive = {
     /* The screen's strongest genes scored on the patients that chose them: flagged. */
     form.querySelector("[data-screen]").addEventListener("click", function () {
       if (!panel) return;
-      var top = ctxLive.screen(cfg.screen, cfg.screen.map(function (r) { return r[0]; }))
-        .rows.filter(function (r) { return r[1] !== null; }).slice(0, cfg.screen_rows);
+      var top = ctxLive.strongest(cfg.screen, cfg.screen_rows);
       history.push(state); tries++;
-      state = { genes: top.map(function (r) { return r[0]; }), signs: top.map(function () { return 1; }),
+      state = { genes: top.genes, signs: top.signs,
                 source: words.screen_source, endpoint: state.endpoint, split: state.split };
       fromScreen = true;
       apply();

@@ -1,0 +1,57 @@
+== gather 2026-10-15T13:05:19Z src=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/src_main/src
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_annotations_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_annotations_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_annotations_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_cases_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_cases_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_cases_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_treatments_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_treatments_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_treatments_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_molecular_tests_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_molecular_tests_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_molecular_tests_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_cdr_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_cdr_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_cdr_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_mature_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_mature_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_mature_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_hairpin_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_hairpin_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_hairpin_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_hairpins_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_hairpins_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/breast_base/outputs/01_gather/2026-10-15_gather_tcga_brca_mirna_hairpins_v1_README.md
+       39.80 real        31.55 user         5.79 sys
+          2492661760  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              539439  page reclaims
+               25758  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                6387  voluntary context switches
+              514785  involuntary context switches
+        462059288031  instructions retired
+        142989377491  cycles elapsed
+          2226932640  peak memory footprint
+exit 0

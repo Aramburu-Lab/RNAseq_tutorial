@@ -1,0 +1,7 @@
+05_de/2026-10-15_de_tier1_overview_v1.html: script 150,592 / 150,592 B, identical True, sha 270f8e995ecb77a2; page 11,227,632 / 11,227,631 B, identical False
+05_de/2026-10-15_de_tier1_volcano_ndn_gcsf_v1.html: script 150,592 / 150,592 B, identical True, sha 270f8e995ecb77a2; page 7,915,548 / 7,915,548 B, identical True
+06_function/2026-10-15_function_tier1_overview_v1.html: script 150,592 / 150,592 B, identical True, sha 270f8e995ecb77a2; page 6,625,458 / 6,625,457 B, identical False
+09_report/2026-10-15_report_tier1_hub_v1.html: script 95,216 / 95,216 B, identical True, sha bf0cfe4a7f01045a; page 153,216 / 153,216 B, identical True
+05_de/2026-10-15_de_tcga_brca_overview_v1.html: script 150,592 / 150,592 B, identical True, sha 270f8e995ecb77a2; page 13,238,960 / 13,238,959 B, identical False
+05_de/2026-10-15_de_tcga_brca_volcano_tumour_normal_v1.html: script 150,592 / 150,592 B, identical True, sha 270f8e995ecb77a2; page 10,637,405 / 10,637,405 B, identical True
+The whole pages differ only in the Reproduce block's measured wall time and RAM (page_diff.py).

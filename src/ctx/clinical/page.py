@@ -429,14 +429,21 @@ def screen_cells(row: Mapping[str, Any]) -> tuple[str, ...]:
 
 
 def screen_rows(table: pl.DataFrame) -> list[list[Any]]:
-    """The live panel's screen: panel row, adjusted q (None where refused), printed cells.
+    """The live panel's screen: panel row, adjusted q (None where refused), printed cells, sign.
 
     In the panel's order, so a scored list's rows are read by its panel rows; the page sorts
-    them by q as the table does, the refused last.
+    them by q as the table does, the refused last. The sign is the side of 1 of the adjusted
+    hazard ratio, the one the screen ranks by: a gene taken from the screen into a list adds
+    its z where higher expression goes with more risk and subtracts it where with less, so a
+    protective gene does not cancel a harmful one in the signed mean (E.3). None where refused.
     """
-    return [[i, r["q_adjusted"] if r["q_adjusted"] is not None and np.isfinite(r["q_adjusted"])
-             else None, list(screen_cells(r))]
-            for i, r in enumerate(table.iter_rows(named=True))]  # fmt: skip
+    out = []
+    for i, r in enumerate(table.iter_rows(named=True)):
+        q, hr = r["q_adjusted"], r["hr_adjusted"]
+        kept = q is not None and np.isfinite(q) and hr is not None and np.isfinite(hr)
+        out.append([i, q if kept else None, list(screen_cells(r)),
+                    (1 if hr >= 1 else -1) if kept else None])  # fmt: skip
+    return out
 
 
 def _screen(writer: Writer, ctx: Context, table: pl.DataFrame) -> Group:
