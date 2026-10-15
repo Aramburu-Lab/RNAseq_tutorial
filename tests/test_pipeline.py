@@ -249,7 +249,10 @@ def test_folders_carried_to_the_modules_that_take_them(tmp_path, runs):
     for module, args in (*pipeline.steps(spec, reads), *pipeline.steps(spec, gdc)):
         parsed = commands[module].make_context(module, list(args)).params
         for flag, value in zip(args[::2], args[1::2], strict=True):
-            assert str(parsed[flag.lstrip("-").replace("-", "_")]) == value, (module, flag)
+            found = parsed[flag.lstrip("-").replace("-", "_")]
+            # A repeatable option (gather's --gdc-dir) parses to a tuple of each value given.
+            found = [str(f) for f in found] if isinstance(found, tuple) else [str(found)]
+            assert found == [value], (module, flag)
 
 
 def test_check_refuses_folders_no_module_reads(tmp_path, runs):
