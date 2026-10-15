@@ -102,3 +102,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A command recorded in an output's README with an absolute path travels into every kit built from it: kit v8's rebuild commands named the build clone's folder (2026-10-14).
 - A schema check on a header is a check on the widest row: GDC's TSV gave every ccRCC file a second-sample column because 2 files had three pieces, and gather refused the whole folder. Check the values a row fills (H, 2026-10-14).
 - Move a same-day output aside before rerunning a module in a shared root: ctx setup rewrote kit v8's 2026-10-14 setup page in ~/ctx_kidney (H, 2026-10-14).
+- A plotly `relayout` of `selections: []` fires `plotly_selected` again with no points: a picker must ignore an empty pick, or it clears what it just set (E, 2026-10-14).
+- A running sum of 15,000 logs drifts 2.6e-10 in a hypergeometric p; Kahan summation brings it to 4.2e-11 (E, 2026-10-14).
+- An agent's gates must lint every file it commits: H's proof scripts under docs/plans/logs failed ruff only in main's preflight (2026-10-14).

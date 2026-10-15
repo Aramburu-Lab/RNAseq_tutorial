@@ -27,6 +27,62 @@ it were reversed.
 
 ---
 
+## D-074 — PAM50's fifth level takes the lighter spent grey
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** Track colours may not use the heat's two role colours (C3.4); Normal-like took the reference blue.
+
+**Decision.** Normal-like takes #B3B3B3, the lighter of `SPENT_GREYS`.
+
+**Evidence.** A preference on the colour rule; drawn and checked in both themes (wo13-e bf51b75).
+
+**Consequence.** Recorded for Rytis to confirm.
+
+---
+
+## D-073 — The `view` control kind is lookup only
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** WO6 and WO7 needed controls that change what a figure shows without recomputing it.
+
+**Decision.** A `view` select switches between figures built in Python; its first option is the figure as built, and the select is dropped on a figure's standalone page. Used by M5's p-value histogram and PCA colour, M6's GSEA by contrast and M8 F2's minimum-count presets.
+
+**Evidence.** Chromium at 1280 and 375 px in both themes; each view's figure equals its Python build.
+
+**Consequence.** A control that recomputes in the page is a different kind, with a JS twin tested against Python (D-012).
+
+---
+
+## D-072 — Entry pages for M6, M9 and M10, and a kit that refuses a consuming folder without one
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** GS.5 and GS.2 pass a gene list between pages by link; a module needs one address to receive it.
+
+**Decision.** `outputs/NN_<module>/index.html` exists for M6, M9 and M10, exempt from the naming lint in the module folder only. build_kit and check_kit refuse such a folder without it.
+
+**Evidence.** Step-1's 1,683 up calls pass as a link of 11,604 characters; M6's entry page tests them against 12,768 symbols.
+
+**Consequence.** Every root's M6, M9 and M10 must be rebuilt at or after wo13-e before a kit passes.
+
+---
+
+## D-071 — M9 packs its cards to the page cap; a packed group travels gzipped and base64-encoded and is drawn near the view
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** C3.1: TCGA-BRCA's 50-card default list made 29,472,416 B against the 15 MB cap.
+
+**Decision.** A packed group's HTML is gzipped (mtime 0) and base64-encoded, then drawn when it nears the view. M9 measures the rendered page and keeps the cards that fit, naming the rest with the command that builds them. The kit walks links inside packed parts.
+
+**Evidence.** TCGA-BRCA: 50 cards on a 9,213,859 B page (29,502,168 B unpacked); 49 packed cards, median 65,160 B. Live ORA equals `lite.ora` within 4.23e-11 (bound 1.52e-10) with Kahan summation; a plain running sum drifted 2.59e-10.
+
+**Consequence.** A page's size is its packed size; the cap is measured on the written file.
+
+---
+
 ## D-070 — A GDC file listed under several samples of one case is one file
 
 **Date:** 2026-10-14 · **Status:** decided
