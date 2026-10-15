@@ -27,8 +27,10 @@ PAGE = "proteo"
 COLOURS = tuple(c for c in DATA_COLOURS if c not in PROJECTOR_UNSAFE)
 # One colour per gene class on every figure, by role: Other is the reference population.
 # Complex and metabolic take the palette's orange and green, which no role holds.
+# OXPHOS and glycolysis (ccRCC) take the same two, never on a page with complex and metabolic.
 CLASS_COLOURS = {"granule": ROLES["comparison"], "complex": DATA_COLOURS[0],
-                 "metabolic": DATA_COLOURS[2], measure.OTHER: ROLES["reference"]}  # fmt: skip
+                 "metabolic": DATA_COLOURS[2], "oxphos": DATA_COLOURS[0],
+                 "glycolysis": DATA_COLOURS[2], measure.OTHER: ROLES["reference"]}  # fmt: skip
 # F4's groups by where a gene was called; neither is the reference population.
 KIND_COLOURS = {"neither": ROLES["reference"], "rna": DATA_COLOURS[0],
                 "protein": DATA_COLOURS[6], "both": DATA_COLOURS[2]}  # fmt: skip
@@ -173,15 +175,15 @@ def rho_by_class(writer: Writer, tested: pl.DataFrame, values: Mapping[str, obje
         reading=lines("figures.rho.reading")))  # fmt: skip
 
 
-def worked(writer: Writer, gene: str, frame: pl.DataFrame, values: Mapping[str, object]
-           ) -> FigureBlock:  # fmt: skip
+def worked(writer: Writer, gene: str, frame: pl.DataFrame, values: Mapping[str, object],
+           caption: str = "figures.worked.caption") -> FigureBlock:  # fmt: skip
     """F6: one worked gene's RNA against protein per sample, coloured by the annotation."""
     levels = sorted(set(frame["track"]))
     data = ScatterData(
         frame=frame, columns=columns("sample", "rna", "protein", "track"), x="rna", y="protein",
         x_label=text.word(PAGE, "figures.worked.x"), y_label=text.word(PAGE, "figures.worked.y"),
         colour="track", colours=dict(zip(levels, COLOURS, strict=False)), hover=("sample",),
-        caption=text.fill(PAGE, "figures.worked.caption", gene=gene, **values),
+        caption=text.fill(PAGE, caption, gene=gene, **values),
     )  # fmt: skip
     return writer.figure(data, f"worked_{gene.lower()}", FigureText(
         title=text.fill(PAGE, "figures.worked.title", gene=gene),

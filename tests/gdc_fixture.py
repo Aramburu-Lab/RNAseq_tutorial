@@ -168,6 +168,7 @@ def build(  # noqa: PLR0913 - every part of a folder a test may change
     annotations: Sequence[Mapping[str, Any]] = (),
     cases: Mapping[str, Mapping[str, Any]] | None = None,
     release: str = RELEASE,
+    project: str = PROJECT,
 ) -> Folder:
     """Write a GDC folder holding one counts file per aliquot, every record consistent.
 
@@ -180,6 +181,7 @@ def build(  # noqa: PLR0913 - every part of a folder a test may change
         annotations: Annotation hits as the annotations endpoint returns them.
         cases: Extra fields per case for ``case_record``; every case gets a record.
         release: The release the status file and the log name.
+        project: The project the file and case queries name.
 
     Returns:
         What was written.
@@ -219,8 +221,8 @@ def build(  # noqa: PLR0913 - every part of a folder a test may change
                                           crlf), newline="")  # fmt: skip
     status = {"data_release": release, "status": "OK"}
     (path / gdc.STATUS).write_text(json.dumps(status))
-    (path / f"{gdc.METADATA}{gdc.QUERY}").write_text(_query(PROJECT, WORKFLOW))
-    (path / f"{gdc.CASES}{gdc.QUERY}").write_text(_query(PROJECT))
+    (path / f"{gdc.METADATA}{gdc.QUERY}").write_text(_query(project, WORKFLOW))
+    (path / f"{gdc.CASES}{gdc.QUERY}").write_text(_query(project))
     every = sorted({a.case for a in aliquots})
     extra = cases or {}
     hits = [case_record(c, **dict(extra.get(c, {}))) for c in every]

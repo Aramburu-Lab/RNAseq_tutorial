@@ -1,0 +1,6 @@
+files 277 cases 110 projects ['CPTAC-3']
+drop reasons {'': 176, 'not_first': 92, 'excluded': 9}
+chosen by condition {'tumour': 103, 'normal': 73}
+pairs 73
+excluded files 9 cases ['C3L-00359', 'C3N-00313', 'C3N-00435', 'C3N-00492', 'C3N-00832', 'C3N-01175', 'C3N-01180']
+aliquots 208 cases 124 {'Primary Tumor': 110, 'Solid Tissue Normal': 84, 'Cell Lines': 5, 'Not Reported': 9}

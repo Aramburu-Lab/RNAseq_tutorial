@@ -1,0 +1,32 @@
+qc rows 1163 columns ['sample', 'library_size', 'genes_detected', 'top_gene_share', 'replicate_spearman', 'pca_distance', 'sex_agrees']
+sheet files 1163 chosen 1128
+rows by chosen [(True, 1128), (False, 35)]
+shape: (2, 7)
+┌───────────┬─────┬──────────────┬────────────────┬────────────────┬────────────────────┬──────────────┐
+│ project   ┆ len ┆ library_size ┆ genes_detected ┆ top_gene_share ┆ replicate_spearman ┆ pca_distance │
+│ ---       ┆ --- ┆ ---          ┆ ---            ┆ ---            ┆ ---                ┆ ---          │
+│ str       ┆ u32 ┆ f64          ┆ f64            ┆ f64            ┆ f64                ┆ f64          │
+╞═══════════╪═════╪══════════════╪════════════════╪════════════════╪════════════════════╪══════════════╡
+│ TCGA-LUAD ┆ 515 ┆ 4.5252017e7  ┆ 32834.0        ┆ 0.017          ┆ 0.883729           ┆ 16.257203    │
+│ TCGA-LUSC ┆ 501 ┆ 5.190411e7   ┆ 33738.0        ┆ 0.012419       ┆ 0.881385           ┆ 21.546347    │
+└───────────┴─────┴──────────────┴────────────────┴────────────────┴────────────────────┴──────────────┘
+shape: (7, 14)
+┌───────────┬───────────┬───────────┬─────────────┬──────────┬────────────────────┬──────────────────┬────────────────────────────────┬───────────┬────────────────────────────────┬───────────┬────────────┬───────────────────────────────┬────────────┐
+│ contrasts ┆ reference ┆ tested    ┆ n_reference ┆ n_tested ┆ metric             ┆ read_length_tied ┆ test                           ┆ statistic ┆ effect_name                    ┆ effect    ┆ p          ┆ note                          ┆ p_adj      │
+│ ---       ┆ ---       ┆ ---       ┆ ---         ┆ ---      ┆ ---                ┆ ---              ┆ ---                            ┆ ---       ┆ ---                            ┆ ---       ┆ ---        ┆ ---                           ┆ ---        │
+│ str       ┆ str       ┆ str       ┆ i64         ┆ i64      ┆ str                ┆ bool             ┆ str                            ┆ f64       ┆ str                            ┆ f64       ┆ f64        ┆ str                           ┆ f64        │
+╞═══════════╪═══════════╪═══════════╪═════════════╪══════════╪════════════════════╪══════════════════╪════════════════════════════════╪═══════════╪════════════════════════════════╪═══════════╪════════════╪═══════════════════════════════╪════════════╡
+│ lusc_luad ┆ TCGA-LUAD ┆ TCGA-LUSC ┆ 517         ┆ 501      ┆ library_size       ┆ false            ┆ Mann-Whitney U, two-sided      ┆ 152584.0  ┆ rank-biserial r, tested over   ┆ 0.178177  ┆ 8.6464e-7  ┆                               ┆ 0.000001   │
+│           ┆           ┆           ┆             ┆          ┆                    ┆                  ┆                                ┆           ┆ r…                             ┆           ┆            ┆                               ┆            │
+│ lusc_luad ┆ TCGA-LUAD ┆ TCGA-LUSC ┆ 517         ┆ 501      ┆ genes_detected     ┆ false            ┆ Mann-Whitney U, two-sided      ┆ 156245.5  ┆ rank-biserial r, tested over   ┆ 0.20645   ┆ 1.1917e-8  ┆                               ┆ 2.3834e-8  │
+│           ┆           ┆           ┆             ┆          ┆                    ┆                  ┆                                ┆           ┆ r…                             ┆           ┆            ┆                               ┆            │
+│ lusc_luad ┆ TCGA-LUAD ┆ TCGA-LUSC ┆ 517         ┆ 501      ┆ top_gene_share     ┆ false            ┆ Mann-Whitney U, two-sided      ┆ 87954.0   ┆ rank-biserial r, tested over   ┆ -0.320863 ┆ 7.9744e-19 ┆                               ┆ 4.7846e-18 │
+│           ┆           ┆           ┆             ┆          ┆                    ┆                  ┆                                ┆           ┆ r…                             ┆           ┆            ┆                               ┆            │
+│ lusc_luad ┆ TCGA-LUAD ┆ TCGA-LUSC ┆ 517         ┆ 501      ┆ replicate_spearman ┆ false            ┆ Mann-Whitney U, two-sided      ┆ 108823.0  ┆ rank-biserial r, tested over   ┆ -0.159723 ┆ 0.00001    ┆                               ┆ 0.000012   │
+│           ┆           ┆           ┆             ┆          ┆                    ┆                  ┆                                ┆           ┆ r…                             ┆           ┆            ┆                               ┆            │
+│ lusc_luad ┆ TCGA-LUAD ┆ TCGA-LUSC ┆ 517         ┆ 501      ┆ pca_distance       ┆ false            ┆ Mann-Whitney U, two-sided      ┆ 159675.0  ┆ rank-biserial r, tested over   ┆ 0.232931  ┆ 1.2580e-10 ┆                               ┆ 3.7740e-10 │
+│           ┆           ┆           ┆             ┆          ┆                    ┆                  ┆                                ┆           ┆ r…                             ┆           ┆            ┆                               ┆            │
+│ lusc_luad ┆ TCGA-LUAD ┆ TCGA-LUSC ┆ 517         ┆ 501      ┆ sex_check          ┆ false            ┆ null                           ┆ null      ┆ null                           ┆ null      ┆ null       ┆ no test: a group has no value ┆ null       │
+│ lusc_luad ┆ TCGA-LUAD ┆ TCGA-LUSC ┆ 517         ┆ 501      ┆ qc_status          ┆ false            ┆ Fisher's exact test, two-sided ┆ null      ┆ odds ratio, tested over        ┆ 1.580667  ┆ 0.045749   ┆                               ┆ 0.045749   │
+│           ┆           ┆           ┆             ┆          ┆                    ┆                  ┆                                ┆           ┆ refere…                        ┆           ┆            ┆                               ┆            │
+└───────────┴───────────┴───────────┴─────────────┴──────────┴────────────────────┴──────────────────┴────────────────────────────────┴───────────┴────────────────────────────────┴───────────┴────────────┴───────────────────────────────┴────────────┘

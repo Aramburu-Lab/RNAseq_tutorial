@@ -1,0 +1,66 @@
+shape: (9, 5)
+┌──────┬───────────────────────────────────────────────────────────────┬───────────────────────────────────────────────────────────┬────────────────────┬──────────┐
+│ rule ┆ condition                                                     ┆ left                                                      ┆ right              ┆ verdict  │
+│ ---  ┆ ---                                                           ┆ ---                                                       ┆ ---                ┆ ---      │
+│ str  ┆ str                                                           ┆ str                                                       ┆ str                ┆ str      │
+╞══════╪═══════════════════════════════════════════════════════════════╪═══════════════════════════════════════════════════════════╪════════════════════╪══════════╡
+│ C0   ┆ pergene.tumour.positive_share > 0                             ┆ 0.6567500296313855                                        ┆ 0                  ┆ RECORDED │
+│ C1   ┆ pergene.tumour.positive_share > 0.5                           ┆ 0.6567500296313855                                        ┆ 0.5                ┆ PASS     │
+│ C2   ┆ pergene.tumour.positive_share > pergene.normal.positive_share ┆ 0.6567500296313855                                        ┆ 0.4707547169811321 ┆ PASS     │
+│ C3   ┆ class.oxphos.protein_lfc.median < 0                           ┆ -0.9799136991609562                                       ┆ 0                  ┆ PASS     │
+│ C3   ┆ class.oxphos_below_other.p < 0.05                             ┆ 0.00000000000000000000000000018083166349123398            ┆ 0.05               ┆ PASS     │
+│ C4   ┆ class.glycolysis.protein_lfc.median > 0                       ┆ 0.16470518886290525                                       ┆ 0                  ┆ PASS     │
+│ C5   ┆ protein.tumour_normal.CA9.lfc >= 1                            ┆ 2.3456978779420936                                        ┆ 1                  ┆ PASS     │
+│ C5   ┆ protein.tumour_normal.CA9.padj < 0.05                         ┆ 0.0000000000000000000000000000000000000023933377640308996 ┆ 0.05               ┆ PASS     │
+│ C6   ┆ page.missingness_first == 1                                   ┆ 1                                                         ┆ 1                  ┆ PASS     │
+└──────┴───────────────────────────────────────────────────────────────┴───────────────────────────────────────────────────────────┴────────────────────┴──────────┘
+shape: (34, 3)
+┌────────────────────────────────────────────┬────────────┬───────────────────────────────────────────────────────────────────────────────────────┐
+│ metric                                     ┆ value      ┆ detail                                                                                │
+│ ---                                        ┆ ---        ┆ ---                                                                                   │
+│ str                                        ┆ f64        ┆ str                                                                                   │
+╞════════════════════════════════════════════╪════════════╪═══════════════════════════════════════════════════════════════════════════════════════╡
+│ pergene.pearson.median                     ┆ 0.396429   ┆ 8437 genes                                                                            │
+│ pergene.spearman.median                    ┆ 0.375401   ┆ 8437 genes                                                                            │
+│ class.oxphos.median                        ┆ 0.187248   ┆ 185 genes, spearman                                                                   │
+│ class.glycolysis.median                    ┆ 0.517364   ┆ 137 genes, spearman                                                                   │
+│ class.other.median                         ┆ 0.37759    ┆ 8107 genes, spearman                                                                  │
+│ pergene.tumour.positive_share              ┆ 0.65675    ┆ 5541 of 8437 genes with Spearman rho above zero at BH < 0.01, over 103 tumour samples │
+│ pergene.normal.positive_share              ┆ 0.470755   ┆ 3992 of 8480 genes with Spearman rho above zero at BH < 0.01, over 73 normal samples  │
+│ f4.tumour_normal.rna_up                    ┆ 769.0      ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.rna_down                  ┆ 973.0      ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.protein_up                ┆ 287.0      ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.protein_down              ┆ 654.0      ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.both                      ┆ 706.0      ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.rna                       ┆ 1036.0     ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.protein                   ┆ 235.0      ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.neither                   ┆ 6363.0     ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.opposite                  ┆ 10.0       ┆ 8340 genes tested at both layers                                                      │
+│ f4.tumour_normal.spearman                  ┆ 0.720816   ┆ 8340 genes tested at both layers, bootstrap 1000, seed 42                             │
+│ f4.tumour_normal.spearman.low              ┆ 0.707298   ┆ 8340 genes tested at both layers, bootstrap 1000, seed 42                             │
+│ f4.tumour_normal.spearman.high             ┆ 0.734084   ┆ 8340 genes tested at both layers, bootstrap 1000, seed 42                             │
+│ class.oxphos.protein_lfc.median            ┆ -0.979914  ┆ 184 genes tested at both layers, 73 pairs                                             │
+│ class.oxphos.rna_lfc.median                ┆ -0.383623  ┆ 184 genes tested at both layers, 73 pairs                                             │
+│ class.oxphos_below_other.p                 ┆ 1.8083e-28 ┆ 184 against 8011 genes, one-sided Mann-Whitney                                        │
+│ class.oxphos_below_other.rank_biserial     ┆ 0.473781   ┆ 184 against 8011 genes, one-sided Mann-Whitney                                        │
+│ class.oxphos.p                             ┆ 1.0        ┆ 184 against 8011 genes, one-sided Mann-Whitney                                        │
+│ class.oxphos.rank_biserial                 ┆ -0.473781  ┆ 184 against 8011 genes, one-sided Mann-Whitney                                        │
+│ class.glycolysis.protein_lfc.median        ┆ 0.164705   ┆ 137 genes tested at both layers, 73 pairs                                             │
+│ class.glycolysis.rna_lfc.median            ┆ 0.205485   ┆ 137 genes tested at both layers, 73 pairs                                             │
+│ class.glycolysis_below_other.p             ┆ 0.032719   ┆ 137 against 8011 genes, one-sided Mann-Whitney                                        │
+│ class.glycolysis_below_other.rank_biserial ┆ 0.091652   ┆ 137 against 8011 genes, one-sided Mann-Whitney                                        │
+│ class.glycolysis.p                         ┆ 0.967284   ┆ 137 against 8011 genes, one-sided Mann-Whitney                                        │
+│ class.glycolysis.rank_biserial             ┆ -0.091652  ┆ 137 against 8011 genes, one-sided Mann-Whitney                                        │
+│ protein.tumour_normal.CA9.lfc              ┆ 2.345698   ┆ paired t over 73 pairs                                                                │
+│ protein.tumour_normal.CA9.padj             ┆ 2.3933e-39 ┆ paired t over 73 pairs                                                                │
+│ page.missingness_first                     ┆ 1.0        ┆ the first two figures are the quantified counts and coverage                          │
+└────────────────────────────────────────────┴────────────┴───────────────────────────────────────────────────────────────────────────────────────┘
+genes in both layers 11161 tested tumour 8453 tested normal 8503
+shape: (1, 6)
+┌──────┬──────────────┬────────┬──────────┬─────────────────────┬───────────────┐
+│ gene ┆ n_quantified ┆ tested ┆ rho      ┆ normal_n_quantified ┆ normal_tested │
+│ ---  ┆ ---          ┆ ---    ┆ ---      ┆ ---                 ┆ ---           │
+│ str  ┆ i64          ┆ bool   ┆ f64      ┆ i64                 ┆ bool          │
+╞══════╪══════════════╪════════╪══════════╪═════════════════════╪═══════════════╡
+│ CA9  ┆ 103          ┆ true   ┆ 0.694702 ┆ 73                  ┆ true          │
+└──────┴──────────────┴────────┴──────────┴─────────────────────┴───────────────┘

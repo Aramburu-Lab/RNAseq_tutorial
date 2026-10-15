@@ -1,0 +1,68 @@
+2026-10-15T13:23:31Z ctx --root /Users/rytis/ctx_lung de --dataset tcga_lung --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a8ab53e1e7f33bad4/conf/datasets/tcga_lung.toml
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_overview_v1.html
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_contrasts_v1.parquet
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_contrasts_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_contrasts_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_lusc_luad_results_v1.parquet
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_lusc_luad_results_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_lusc_luad_results_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_pca_tumours_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_pca_tumours_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_pca_tumours_v1_white.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_pca_tumours_v1_black.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_pca_tumours_v1.html
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_pca_tumours_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_pca_tumours_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_volcano_lusc_luad_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_volcano_lusc_luad_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_volcano_lusc_luad_v1_white.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_volcano_lusc_luad_v1_black.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_volcano_lusc_luad_v1.html
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_volcano_lusc_luad_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_volcano_lusc_luad_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_ma_lusc_luad_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_ma_lusc_luad_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_ma_lusc_luad_v1_white.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_ma_lusc_luad_v1_black.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_ma_lusc_luad_v1.html
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_ma_lusc_luad_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_ma_lusc_luad_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_contrasts_v1.parquet
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_contrasts_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_contrasts_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_lusc_luad_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_lusc_luad_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_lusc_luad_v1_white.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_lusc_luad_v1_black.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_lusc_luad_v1.html
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_lusc_luad_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_phist_lusc_luad_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_dispersion_lusc_luad_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_dispersion_lusc_luad_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_dispersion_lusc_luad_v1_white.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_dispersion_lusc_luad_v1_black.svg
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_dispersion_lusc_luad_v1.html
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_dispersion_lusc_luad_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_dispersion_lusc_luad_v1_README.md
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_metrics_v1.parquet
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_metrics_v1.csv
+/Users/rytis/ctx_lung/outputs/05_de/2026-10-15_de_tcga_lung_metrics_v1_README.md
+       88.94 real       163.77 user        11.49 sys
+          5358305280  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             2503827  page reclaims
+                 208  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               95706  voluntary context switches
+              123789  involuntary context switches
+        438788630628  instructions retired
+        128673757721  cycles elapsed
+          4468266384  peak memory footprint
+exit 0

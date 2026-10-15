@@ -173,6 +173,36 @@ def welch(values: np.ndarray, tested: np.ndarray) -> tuple[np.ndarray, np.ndarra
     return np.asarray(lfc, dtype=np.float64), np.asarray(result.pvalue, dtype=np.float64)
 
 
+def paired(tested: np.ndarray, reference: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Per row: the mean within-pair difference, tested minus reference, and the paired t's p.
+
+    Column j of both is one individual. A pair missing either value leaves that row's test; a
+    row with fewer than two complete pairs, or constant differences, gets NaN from scipy.
+    """
+    differences = tested - reference
+    with np.errstate(invalid="ignore", divide="ignore"), warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        lfc = np.nanmean(differences, axis=1)
+        result = stats.ttest_1samp(differences, 0.0, axis=1, nan_policy="omit")
+    return np.asarray(lfc, dtype=np.float64), np.asarray(result.pvalue, dtype=np.float64)
+
+
+def positive_share(frame: pl.DataFrame, prefix: str, fdr: float) -> tuple[float, int, int]:
+    """The share of genes with a correlation whose rho is above zero at BH below ``fdr``.
+
+    ``prefix`` picks the layer's columns (``""`` or ``normal_``). The denominator is every gene
+    with a defined rho: a gene untested or constant in the samples is not counted either way.
+
+    Returns:
+        The share (NaN for no gene), the positive count and the denominator.
+    """
+    rho, padj = pl.col(f"{prefix}rho"), pl.col(f"{prefix}rho_padj")
+    defined = frame.filter(rho.is_not_null())
+    positive = defined.filter((rho > 0) & (padj < fdr)).height
+    share = positive / defined.height if defined.height else float("nan")
+    return share, positive, defined.height
+
+
 def median(values: pl.Series) -> float:
     """The median of a column's present values, NaN when none is present."""
     present = values.drop_nulls().drop_nans() if values.dtype.is_float() else values.drop_nulls()

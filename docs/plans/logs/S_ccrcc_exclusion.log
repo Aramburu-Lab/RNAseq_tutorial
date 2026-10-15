@@ -1,0 +1,8 @@
+workbook cases 110 {'Clear cell renal cell carcinoma': 103, 'non-Clear Cell renal cell carcinoma': 7}
+non-clear-cell 7 ['C3L-00359', 'C3N-00313', 'C3N-00435', 'C3N-00492', 'C3N-00832', 'C3N-01175', 'C3N-01180']
+Primary Tumor protein cases 110 of them clear cell 103
+Solid Tissue Normal protein cases 84 of them clear cell 81
+Primary Tumor GDC cases 110 of them clear cell 103
+Solid Tissue Normal GDC cases 75 of them clear cell 73
+GDC cases with both 75 clear cell 73
+clear-cell cases with GDC normal and protein normal 73

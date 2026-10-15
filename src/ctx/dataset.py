@@ -7,7 +7,7 @@ the counts the curated sheet must reproduce. Every schema error is reported at o
 
 import tomllib
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -23,13 +23,17 @@ PROTOCOLS = ("unstranded", "stranded_first", "stranded_second")
 TABLE_SUFFIXES = (".csv", ".tsv", ".txt")
 # TCGA-CDR's four endpoints (Liu et al. 2018), each an event flag and a time in days.
 ENDPOINTS = ("OS", "DSS", "DFI", "PFI")
-# M7's two designs: one cohort measured at both layers, or RNA and protein from two studies.
-PROTEO_DESIGNS = ("across_samples", "cross_dataset")
+# M7's designs: one cohort measured at both layers, RNA and protein from two studies, or one
+# cohort's tumours against their paired normals at both layers.
+PROTEO_DESIGNS = ("across_samples", "cross_dataset", "tumour_normal")
 # The patient-table variables M10 tests expression against and maps for confounding, with the
 # tests each takes (ctx.clinical.analyses); a dataset file lists those its patients carry.
 CLINICAL_VARIABLES = ("er", "stage", "grade", "histology", "menopause", "age", "sex")
 # The two-level variables M10's box can split patients by (ctx.clinical.figures.box).
 CLINICAL_BOXES = ("er", "stage_group")
+# [gdc]'s optional text keys.
+GDC_OPTIONAL = ("primary_site", "cdr_file", "cdr_type", "mirna_workflow", "attribution",
+                "biospecimens")  # fmt: skip
 # Projects whose own attribution policy the course quotes: the key under ui.toml [gdc.attribution].
 ATTRIBUTIONS = ("tcga",)
 
@@ -187,6 +191,12 @@ class GdcSpec:
             gathered without them.
         attribution: The project's own attribution policy, a key of ``ATTRIBUTIONS``, which
             pages quote beside the GDC's citation; None where none was read from its source.
+        projects: Every project of the dataset, one folder each, in the file's order;
+            ``project`` names them together. One unless ``[gdc] projects`` lists several.
+        exclude_cases: Cases whose files no analysis takes, by the dataset file's own rule.
+        exclude_reason: Why, with its source; required with ``exclude_cases``.
+        biospecimens: A PDC biospecimen record in the folder, ``biospecimenPerStudy`` as the
+            fetch saved it, giving each protein aliquot's case and sample type; None for none.
     """
 
     project: str
@@ -201,6 +211,14 @@ class GdcSpec:
     cdr_type: str | None = None
     mirna_workflow: str | None = None
     attribution: str | None = None
+    projects: tuple[str, ...] = ()
+    exclude_cases: tuple[str, ...] = ()
+    exclude_reason: str = ""
+    biospecimens: str | None = None
+
+    def one(self, project: str) -> "GdcSpec":
+        """This spec for one of its projects' folders: the project and that project alone."""
+        return replace(self, project=project, projects=(project,))
 
 
 @dataclass(frozen=True)
@@ -254,6 +272,13 @@ class ProteoSpec:
         published: Numbers a page prints beside its own, each table with its ``source``.
         sanity: The ``[proteo.sanity]`` table: ``registered_at`` and ``[[rules]]``; not
             ``registered``, the key whose commits mark the Step-1 [sanity] registration.
+        descriptors: A TSV protein table's leading row-descriptor columns, the gene symbol
+            first; the sample columns follow them (tumour against normal).
+        plex_map: The ``[[resources]]`` workbook naming each aliquot's TMT plex.
+        plex_rows: A regular expression the plex rows' folder names match, the whole proteome's
+            and not another enrichment's.
+        unit: The protein table's values as a page names them; empty for a log2 ratio.
+        positive_fdr: The BH level a per-gene correlation needs to count as positive.
     """
 
     design: str
@@ -271,6 +296,11 @@ class ProteoSpec:
     classes: Mapping[str, GeneClass] = field(default_factory=dict)
     published: Mapping[str, Any] = field(default_factory=dict)
     sanity: Mapping[str, Any] = field(default_factory=dict)
+    descriptors: tuple[str, ...] = ()
+    plex_map: str | None = None
+    plex_rows: str = ""
+    unit: str = ""
+    positive_fdr: float = 0.05
 
 
 @dataclass(frozen=True)
@@ -512,14 +542,44 @@ def _function(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource
     return FunctionSpec(gene_sets, licence, featured, running=(running[0], running[1]))
 
 
+def _projects(raw: Mapping[str, Any], problems: list[str]) -> tuple[str, ...]:
+    """[gdc] project, one string, or projects, a list of two or more, never both."""
+    if ("project" in raw) == ("projects" in raw):
+        problems.append("gdc: give project (one) or projects (several), not both")
+        return ()
+    if "project" in raw:
+        one = _need(raw, "project", str, "gdc", problems)
+        return (one,) if one is not None else ()
+    listed = raw["projects"]
+    names = isinstance(listed, list) and all(isinstance(x, str) for x in listed)
+    if not names or not len(set(listed)) == len(listed) > 1:
+        problems.append(f"gdc.projects: two or more distinct project IDs, found {listed!r}")
+        return ()
+    return tuple(listed)
+
+
+def _excluded(raw: Mapping[str, Any], problems: list[str]) -> tuple[tuple[str, ...], str]:
+    """[gdc] exclude_cases with the exclude_reason it needs."""
+    cases, reason = raw.get("exclude_cases", []), raw.get("exclude_reason", "")
+    if not isinstance(cases, list) or not all(isinstance(c, str) for c in cases):
+        problems.append(f"gdc.exclude_cases: a list of case IDs, found {cases!r}")
+        return (), ""
+    if len(set(cases)) < len(cases):
+        problems.append("gdc.exclude_cases: a case is listed twice")
+    if cases and (not isinstance(reason, str) or not reason):
+        problems.append("gdc.exclude_reason: exclude_cases needs the reason, with its source")
+    return tuple(cases), str(reason)
+
+
 def _gdc(raw: Mapping[str, Any], problems: list[str]) -> GdcSpec | None:
     """Parse [gdc]."""
-    keys = ("project", "release", "workflow", "gene_model", "protocol", "tumour", "normal")
-    fields = [_need(raw, k, str, "gdc", problems) for k in keys]
-    optional = {
-        k: raw.get(k)
-        for k in ("primary_site", "cdr_file", "cdr_type", "mirna_workflow", "attribution")
-    }
+    projects = _projects(raw, problems)
+    keys = ("release", "workflow", "gene_model", "protocol", "tumour", "normal")
+    fields = [" and ".join(projects) or None, *(_need(raw, k, str, "gdc", problems) for k in keys)]
+    optional = {k: raw.get(k) for k in GDC_OPTIONAL}
+    excluded, reason = _excluded(raw, problems)
+    if len(projects) > 1 and (optional["cdr_file"] or optional["mirna_workflow"]):
+        problems.append("gdc.projects: a CDR or miRNA folder is read for one project alone")
     problems += [f"gdc.{k}: expected str, found {v!r}" for k, v in optional.items()
                  if v is not None and not isinstance(v, str)]  # fmt: skip
     if fields[4] is not None and fields[4] not in PROTOCOLS:
@@ -535,7 +595,9 @@ def _gdc(raw: Mapping[str, Any], problems: list[str]) -> GdcSpec | None:
                    primary_site=optional["primary_site"], cdr_file=optional["cdr_file"],
                    cdr_type=optional["cdr_type"],
                    mirna_workflow=optional["mirna_workflow"],
-                   attribution=optional["attribution"])  # fmt: skip
+                   attribution=optional["attribution"], projects=projects,
+                   exclude_cases=excluded, exclude_reason=reason,
+                   biospecimens=optional["biospecimens"])  # fmt: skip
 
 
 def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | None:
@@ -574,11 +636,19 @@ def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, 
     if protein is not None and protein not in known:
         problems.append(f"proteo.protein: no [[resources]] entry named {protein!r}")
     keys = {"across_samples": ("member", "plex"),
-            "cross_dataset": ("contrast", "tested", "reference")}  # fmt: skip
+            "cross_dataset": ("contrast", "tested", "reference"),
+            "tumour_normal": ("member", "plex", "contrast", "descriptors", "plex_map",
+                              "plex_rows", "positive_fdr")}  # fmt: skip
     needed = keys.get(design or "", ())
     problems += [f"proteo.{k}: the {design} design needs it" for k in needed if not raw.get(k)]
     if raw.get("contrast") and raw["contrast"] not in names:
         problems.append(f"proteo.contrast: {raw['contrast']!r} is not a declared contrast")
+    if raw.get("plex_map") and raw["plex_map"] not in known:
+        problems.append(f"proteo.plex_map: no [[resources]] entry named {raw['plex_map']!r}")
+    fdr = raw.get("positive_fdr", 0.05)
+    if not isinstance(fdr, float) or not 0 < fdr < 1:
+        problems.append(f"proteo.positive_fdr: a level in (0, 1), found {fdr!r}")
+        fdr = 0.05
     classes = {}
     for name, entry in raw.get("classes", {}).items():
         if entry.get("resource") not in known or not entry.get("sets"):
@@ -597,6 +667,8 @@ def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, 
         genes=tuple(raw.get("genes", [])), contrast=raw.get("contrast"),
         tested=raw.get("tested"), reference=raw.get("reference"), classes=classes,
         published=published, sanity=raw.get("sanity", {}),
+        descriptors=tuple(raw.get("descriptors", [])), plex_map=raw.get("plex_map"),
+        plex_rows=raw.get("plex_rows", ""), unit=raw.get("unit", ""), positive_fdr=fdr,
     )  # fmt: skip
 
 
@@ -674,6 +746,9 @@ def load(path: Path) -> Dataset:
     ncrna = _ncrna(raw["ncrna"], names, problems) if "ncrna" in raw else None
     if "clinical" in raw and "gdc" not in raw:
         problems.append("[clinical] needs [gdc]: M10 reads a GDC project's gather outputs")
+    if proteo and proteo.design == "tumour_normal" and not (gdc and gdc.biospecimens):
+        problems.append("proteo: the tumour_normal design needs [gdc] biospecimens, which "
+                        "gather reads for each aliquot's case and sample type")  # fmt: skip
     if problems:
         raise DatasetError(f"{path}:\n  " + "\n  ".join(problems))
     return Dataset(

@@ -18,16 +18,22 @@ BODY = b"a made-up freeze archive"
 URL = "pdc://PDCFAKE/freeze.tar.gz"
 
 
-def opener(md5: str = hashlib.md5(BODY).hexdigest(), listed: int = 1):  # noqa: S324 - PDC's checksum
-    """A stand-in for urlopen: PDC's GraphQL answer, then the file at its signed URL."""
+def opener(md5: str = hashlib.md5(BODY).hexdigest(), listed: int = 1,  # noqa: S324 - PDC's checksum
+           category: str = pdc.CATEGORIES[0]):  # fmt: skip
+    """A stand-in for urlopen: PDC's GraphQL answer per category, then the signed URL's file.
+
+    The file is listed ``listed`` times under ``category`` and under no other category.
+    """
     seen = []
 
     def open_(target, timeout):
         if hasattr(target, "data"):
             query = json.loads(target.data)["query"]
             seen.append(query)
-            files = [{"file_name": "freeze.tar.gz", "md5sum": md5, "file_size": len(BODY),
-                      "signedUrl": {"url": "https://signed.example/once"}}] * listed  # fmt: skip
+            here = f'data_category: "{category}"' in query
+            entry = {"file_name": "freeze.tar.gz", "md5sum": md5, "file_size": len(BODY),
+                     "signedUrl": {"url": "https://signed.example/once"}}  # fmt: skip
+            files = [entry] * listed * here
             return io.BytesIO(json.dumps({"data": {"filesPerStudy": files}}).encode())
         seen.append(target)
         assert target == "https://signed.example/once"
@@ -51,7 +57,27 @@ def test_resolved_fetched_and_recorded_by_its_pdc_url(tmp_path, capsys):
     assert "accepts the CPTAC data use agreement" in said and pdc.DUA_URL in said
     assert (tmp_path / "resources" / "freeze.tar.gz").read_bytes() == BODY
     assert entry["url"] == URL and 'pdc_study_id: "PDCFAKE"' in seen[0]
-    assert seen[1] == "https://signed.example/once"
+    assert seen[len(pdc.CATEGORIES)] == "https://signed.example/once"
+
+
+def test_other_metadata_resolved():
+    """Mutation caught: Other Metadata never asked, so a mapping or clinical workbook, which
+    PDC files there, cannot be a resource (H.1)."""
+    open_, seen = opener(category="Other Metadata")
+    assert pdc.resolve(URL, open_).url == "https://signed.example/once"
+    assert any('data_category: "Other Metadata"' in q for q in seen)
+
+
+def test_listed_in_two_categories_refused():
+    """Mutation caught: the first category's listing taken when a second lists the file too."""
+
+    def open_(target, timeout):
+        files = [{"file_name": "freeze.tar.gz", "md5sum": "x", "file_size": 1,
+                  "signedUrl": {"url": "https://signed.example/once"}}]  # fmt: skip
+        return io.BytesIO(json.dumps({"data": {"filesPerStudy": files}}).encode())
+
+    with pytest.raises(OSError, match="2 times"):
+        pdc.resolve(URL, open_)
 
 
 def test_md5_checked_against_pdc(tmp_path):
