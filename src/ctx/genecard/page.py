@@ -17,7 +17,7 @@ from ctx.dataset import Dataset
 from ctx.de.run import Writer
 from ctx.genecard import annotation, figures, gtex, hpa, junctions
 from ctx.genecard.cards import Card
-from ctx.genecard.summary import spread, tau
+from ctx.genecard.summary import DETECTED, spread, tau
 from ctx.io.naming import stem
 from ctx.report import text
 from ctx.report.builder import (
@@ -222,8 +222,13 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         strip, numbers = figures.tissues(card)
         panel(strip, "tissues", _words("tissues", numbers))
     if card.exons is not None:
-        heat, numbers, pair = figures.exons(card)
-        panel(heat, "exons", _words("exons", numbers, "lead" if pair is not None else "lead_none"))
+        if (drawn := figures.exons(card)) is None:
+            items.append(fill("figures.exons.too_few", symbol=card.symbol,
+                              floor=DETECTED))  # fmt: skip
+        else:
+            heat, numbers, pair = drawn
+            lead = "lead" if pair is not None else "lead_none"
+            panel(heat, "exons", _words("exons", numbers, lead))
     if card.junctions is not None:
         heat, numbers = figures.junctions(card)
         panel(heat, "junctions", _words("junctions", numbers))

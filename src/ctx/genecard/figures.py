@@ -7,13 +7,12 @@ them. Every panel is descriptive: n, median, IQR, tau, CV; external data get no 
 import math
 from typing import Any
 
-import numpy as np
 import polars as pl
 
 from ctx.genecard import annotation, gtex, hpa
 from ctx.genecard.cards import Card
 from ctx.genecard.junctions import RELEASE as RELEASE_JUNCTIONS
-from ctx.genecard.summary import tau
+from ctx.genecard.summary import DETECTED, tau
 from ctx.report import text
 from ctx.viz.bar import BarData
 from ctx.viz.heatmap import HeatmapData, diverging_levels
@@ -99,27 +98,28 @@ def immune(card: Card, release: str) -> tuple[BarData, dict[str, Any]]:
     return bars, numbers
 
 
-def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | None]:
-    """Each exon's median share per tissue against its median over tissues, with its CV."""
-    assert card.exons is not None  # noqa: S101 - the page draws this panel only with data
-    shares = card.exons
-    names = list(dict.fromkeys(shares["exon"].to_list()))
-    order = list(dict.fromkeys(shares["tissue"].to_list()))
-    middle = shares.group_by("exon").agg(mid=pl.col("share").median())
-    framed = shares.join(middle, on="exon").with_columns(
-        log2_ratio=pl.when((pl.col("share") > 0) & (pl.col("mid") > 0))
-        .then((pl.col("share") / pl.col("mid")).log(2)).otherwise(None)
-    )  # fmt: skip
-    levels, swatches = diverging_levels(framed["log2_ratio"].to_list())
-    frame = framed.with_columns(level=pl.Series(levels, dtype=pl.String)).select(
-        "exon", "tissue", "n", "share", "log2_ratio", "level"
+def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | None] | None:
+    """Each exon's median share per tissue against its median over the tissues that express it.
+
+    Only tissues at ``DETECTED`` TPM or more are drawn (``gtex.detected``, H.3); fewer than two
+    leave no panel, and None. The CV is printed only where it is defined.
+    """
+    assert card.exons is not None and card.tissues is not None  # noqa: S101 - drawn with data
+    use = annotation.exon_use(card.exons, gtex.detected(card.tissues))
+    if len(use.tissues) < 2:  # noqa: PLR2004 - a reference across tissues needs two
+        return None
+    names = list(dict.fromkeys(use.frame["exon"].to_list()))
+    levels, swatches = diverging_levels(list(use.steps))
+    frame = use.frame.with_columns(level=pl.Series(levels, dtype=pl.String)).select(
+        "exon", "tissue", "n", "share", "reference", "log2_ratio", "level"
     )
-    cv = annotation.exon_cv(shares)
-    pair = annotation.qpcr_pair(cv)
-    finite = {e: v for e, v in cv.items() if np.isfinite(v)}
+    pair = annotation.qpcr_pair(use.cv)
+    finite = {e: v for e, v in use.cv.items() if v is not None}
     uneven = max(finite, key=lambda e: finite[e]) if finite else names[0]
+    unreferenced = frame.filter(pl.col("reference") == 0)["exon"].n_unique()
     numbers = {"symbol": card.symbol, "release": gtex.RELEASE, "exons": len(names),
-               "tissues": len(order), "uneven": uneven,
+               "tissues": len(use.tissues), "left": len(use.left_out), "floor": DETECTED,
+               "unreferenced": unreferenced, "uneven": uneven,
                "dropped": text.fill(PAGE, "figures.exons.dropped_one" if card.exons_dropped == 1
                                     else "figures.exons.dropped_many", n=card.exons_dropped),
                "uneven_cv": finite.get(uneven, float("nan"))}  # fmt: skip
@@ -130,8 +130,8 @@ def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | No
                        row_label=text.word(PAGE, "figures.exons.y"),
                        column_label=text.word(PAGE, "figures.exons.x"), swatches=swatches,
                        caption=text.fill(PAGE, "figures.exons.caption", **numbers),
-                       row_order=tuple(names), column_order=tuple(order),
-                       row_stats=cv,
+                       row_order=tuple(names), column_order=use.tissues,
+                       row_stats=finite,
                        row_stats_label=text.word(PAGE, "figures.exons.stat"),
                        row_stats_format=".2f")  # fmt: skip
     return heat, numbers, pair

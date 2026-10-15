@@ -154,16 +154,18 @@ ntpm = ["nTPM", "HPA normalised transcripts per million of the cell type."]
 [figures.exons]
 title = "Exon use of {symbol} across tissues, GTEx {release}"
 lead = "Most even adjacent pair: {first} and {second}, larger CV {pair_cv:.2f}; least even exon {uneven}, CV {uneven_cv:.2f}."
-lead_none = "No adjacent exon pair has reads in every tissue, so none is proposed for qPCR."
+lead_none = "No adjacent exon pair has a defined CV across the tissues drawn, so none is proposed for qPCR."
 reading = [
-    "A cell is one exon in one tissue: log2 of its median share over the exon's median across tissues.",
-    "Right of each row: the exon's CV of share across tissues; low CV suits qPCR. A blank cell has no reads.",
-    "Too many tissues to name on the axis: hover a cell, or read the tissue column of the data file.",
+    "A cell is one exon in one tissue: log2 of its median share over the exon's median across the tissues drawn.",
+    "Only tissues where the gene's median reaches 1 TPM are drawn: elsewhere a few reads set the shares.",
+    "A share over a median of 0 takes the top step; no share against a median above 0, the bottom. No pseudocount.",
+    "Right of each row: the exon's CV of share across the tissues; low CV suits qPCR. Blank where undefined.",
 ]
 x = "Tissue"
 y = "Exon"
 stat = "CV"
-caption = "GTEx {release} exon read counts on the collapsed gene model: {exons} exons by {tissues} tissues; {dropped} left out. CV: SD over mean. External data, no test."
+caption = "GTEx {release} exon reads, collapsed model: {exons} exons by {tissues} tissues at {floor:g} TPM or more; {left} tissues below and {dropped} left out. {unreferenced} exons have a median share of zero. CV: SD over mean, no test."
+too_few = "No exon panel for {symbol}: fewer than two GTEx tissues reach a median of {floor:g} TPM, so no exon has a median share across tissues."
 dropped_one = "{n:,} sample without exon reads"
 dropped_many = "{n:,} samples without exon reads"
 
@@ -172,8 +174,9 @@ exon = ["none", "Exon of the GTEx collapsed gene model, as GTEx numbers it."]
 tissue = ["none", "GTEx tissue."]
 n = ["samples", "Samples of the tissue with reads on the gene."]
 share = ["fraction", "Median over samples of the exon's share of the gene's exon reads."]
-log2_ratio = ["log2", "log2 of the share over the exon's median share across tissues; empty without reads."]
-level = ["none", "The step of the diverging scale the cell is drawn in."]
+reference = ["fraction", "The exon's median share over the tissues drawn, those at 1 TPM or more."]
+log2_ratio = ["log2", "log2 of share over reference; empty where either is 0, with no pseudocount."]
+level = ["none", "Step of the diverging scale: share over a reference of 0 is the top step, 0 over one above 0 the bottom."]
 
 [figures.junctions]
 title = "Splice junctions of {symbol} across tissues, GTEx {release}"
