@@ -105,7 +105,11 @@ def test_exon_caption_counts_samples_in_the_right_number(dropped, words):
 
     shares = pl.DataFrame({"exon": ["E1", "E2"] * 2, "tissue": ["A", "A", "B", "B"],
                            "n": [3] * 4, "share": [0.4, 0.6, 0.5, 0.5]})  # fmt: skip
-    card = Card(106236, "ENSG00000106236.6", "NPTX2", "named", exons=shares,
+    spread = pl.DataFrame({"tissue": ["A", "B"], "sex": ["all"] * 2, "n": [3] * 2,
+                           "median": [5.0] * 2, "q1": [5.0] * 2, "q3": [5.0] * 2})  # fmt: skip
+    card = Card(106236, "ENSG00000106236.6", "NPTX2", "named", tissues=spread, exons=shares,
                 exons_dropped=dropped)  # fmt: skip
-    heat, _, _ = exons(card)
+    drawn = exons(card)
+    assert drawn is not None
+    heat, _, _ = drawn
     assert words in heat.caption

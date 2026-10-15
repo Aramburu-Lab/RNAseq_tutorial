@@ -124,7 +124,10 @@ reading = [
 ]
 x = "Tissue"
 y = "Median expression"
-caption = "GTEx {release} per-sample TPM summarised per tissue and sex: {samples} samples in {tissues} tissues, {least} to {most} each. Median and IQR only; external data, no test."
+caption = "GTEx {release} per-sample TPM summarised per tissue, {donors}: {samples} samples in {tissues} tissues, {least} to {most} each. Median and IQR only; external data, no test."
+view = "Donors"
+views = { female_male = "By sex", all = "All donors", female = "Female donors", male = "Male donors" }
+donors = { female_male = "female and male donors apart", all = "all donors", female = "female donors", male = "male donors" }
 
 [figures.tissues.columns]
 tissue = ["none", "GTEx tissue, the SMTSD field."]
@@ -154,16 +157,18 @@ ntpm = ["nTPM", "HPA normalised transcripts per million of the cell type."]
 [figures.exons]
 title = "Exon use of {symbol} across tissues, GTEx {release}"
 lead = "Most even adjacent pair: {first} and {second}, larger CV {pair_cv:.2f}; least even exon {uneven}, CV {uneven_cv:.2f}."
-lead_none = "No adjacent exon pair has reads in every tissue, so none is proposed for qPCR."
+lead_none = "No adjacent exon pair has a defined CV across the tissues drawn, so none is proposed for qPCR."
 reading = [
-    "A cell is one exon in one tissue: log2 of its median share over the exon's median across tissues.",
-    "Right of each row: the exon's CV of share across tissues; low CV suits qPCR. A blank cell has no reads.",
-    "Too many tissues to name on the axis: hover a cell, or read the tissue column of the data file.",
+    "A cell is one exon in one tissue: log2 of its median share over the exon's median across the tissues drawn.",
+    "Only tissues where the gene's median reaches 1 TPM are drawn: elsewhere a few reads set the shares.",
+    "A share over a median of 0 takes the top step; no share against a median above 0, the bottom. No pseudocount.",
+    "Right of each row: the exon's CV of share across the tissues; low CV suits qPCR. Blank where undefined.",
 ]
 x = "Tissue"
 y = "Exon"
 stat = "CV"
-caption = "GTEx {release} exon read counts on the collapsed gene model: {exons} exons by {tissues} tissues; {dropped} left out. CV: SD over mean. External data, no test."
+caption = "GTEx {release} exon reads, collapsed model: {exons} exons by {tissues} tissues at {floor:g} TPM or more; {left} tissues below and {dropped} left out. {unreferenced} exons have a median share of zero. CV: SD over mean, no test."
+too_few = "No exon panel for {symbol}: fewer than two GTEx tissues reach a median of {floor:g} TPM, so no exon has a median share across tissues."
 dropped_one = "{n:,} sample without exon reads"
 dropped_many = "{n:,} samples without exon reads"
 
@@ -172,8 +177,33 @@ exon = ["none", "Exon of the GTEx collapsed gene model, as GTEx numbers it."]
 tissue = ["none", "GTEx tissue."]
 n = ["samples", "Samples of the tissue with reads on the gene."]
 share = ["fraction", "Median over samples of the exon's share of the gene's exon reads."]
-log2_ratio = ["log2", "log2 of the share over the exon's median share across tissues; empty without reads."]
-level = ["none", "The step of the diverging scale the cell is drawn in."]
+reference = ["fraction", "The exon's median share over the tissues drawn, those at 1 TPM or more."]
+log2_ratio = ["log2", "log2 of share over reference; empty where either is 0, with no pseudocount."]
+level = ["none", "Step of the diverging scale: share over a reference of 0 is the top step, 0 over one above 0 the bottom."]
+
+[figures.evidence]
+group = "The listed genes in every contrast"
+title = "The listed genes across the contrasts of this dataset, M5"
+lead = "{called:,} of {cells:,} tested cells are called; {genes:,} of {listed:,} listed genes drawn."
+reading = [
+    "A row is a gene, a column a contrast: a called cell takes the step of its raw log2 FC, an uncalled one is grey.",
+    "A blank cell: that contrast did not test the gene. The data file holds padj, the shrunk fold change and the call.",
+]
+x = "Contrast"
+y = "Gene"
+not_called = "not called"
+caption = "M5 results in {contrasts} contrasts: DESeq2 Wald test, BH within each contrast, called at padj below {alpha:g} and absolute log2 FC of {lfc_min:g} or more. {genes:,} of {listed:,} listed genes drawn."
+rest = "{n:,} more listed genes, past the view's rows"
+rest_columns = ["Gene", "Contrasts up", "Contrasts down", "Contrasts testing it"]
+
+[figures.evidence.columns]
+gene = ["none", "Gene symbol, with its Ensembl ID where two genes share it."]
+contrast = ["none", "M5 contrast, in words."]
+log2FoldChange = ["log2", "Raw log2 fold change, M5; drawn."]
+log2FoldChange_shrunk = ["log2", "Shrunken log2 fold change, M5."]
+padj = ["none", "BH-adjusted p, M5; empty where M5 did not test the gene."]
+call = ["none", "M5 call: up, down or ns."]
+level = ["none", "The cell's step: its log2 FC step if called, not called if tested, empty if not tested."]
 
 [figures.junctions]
 title = "Splice junctions of {symbol} across tissues, GTEx {release}"

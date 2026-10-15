@@ -41,12 +41,13 @@ def spread(values: Sequence[float] | np.ndarray) -> Spread:
     return Spread(int(x.size), float(median), float(q1), float(q3))
 
 
-def tau(values: Sequence[float] | np.ndarray) -> float | None:
+def tau(values: Sequence[float] | np.ndarray, log: bool = True) -> float | None:
     """Tissue specificity index of Yanai et al. 2005 (Bioinformatics 21:650), on log2(x + 1).
 
-    The log comes first, then the maximum: tau on linear values is a different, larger number
-    (0.9575 for NPTX2's 51 HPA consensus tissues, against 0.6710 here). 0 is even expression,
-    1 expression in one tissue or cell type only.
+    The log comes first, then the maximum: tau on linear values (``log=False``, F3's other
+    scale) is a different, larger number (0.9575 for NPTX2's 51 HPA consensus tissues, against
+    0.6710 here). 0 is even expression, 1 expression in one tissue or cell type only. The
+    page's twin is ``ctxM9.tau`` (``templates/_m9.js.j2``).
 
     Below ``DETECTED`` everywhere the ratios are noise: NPTX2's HPA immune cells, all under
     0.2 nTPM, gave tau 1.00 for a gene HPA calls not detected in immune cells.
@@ -57,5 +58,5 @@ def tau(values: Sequence[float] | np.ndarray) -> float | None:
     raw = np.asarray(values, dtype=float)
     if raw.size < 2 or raw.max() < DETECTED:  # noqa: PLR2004 - tau needs two types to compare
         return None
-    x = np.log2(raw + 1.0)
+    x = np.log2(raw + 1.0) if log else raw
     return float(np.sum(1.0 - x / x.max()) / (x.size - 1))

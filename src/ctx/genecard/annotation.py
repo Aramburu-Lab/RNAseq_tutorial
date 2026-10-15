@@ -9,8 +9,9 @@ the same MANE transcript and exon count, or the card says they differ.
 
 import gzip
 import json
+import math
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -118,32 +119,92 @@ class Pair:
     cv: float
 
 
-def exon_cv(shares: pl.DataFrame) -> dict[str, float]:
+@dataclass(frozen=True)
+class ExonUse:
+    """An exon panel's cells over the tissues that express the gene, and each exon's CV.
+
+    Attributes:
+        frame: One row per exon and tissue: exon, tissue, n, share, the exon's reference share,
+            and the log2 ratio of share over reference, null where either is 0.
+        steps: Each row's ratio for the diverging scale: the log2 ratio, +inf for a share over
+            a reference of 0, -inf for no share against one above 0, NaN where both are 0.
+        cv: Each exon's CV of share across the tissues; None where it is undefined.
+        tissues: The tissues drawn, in the shares' order.
+        left_out: The tissues not drawn, left out before anything is computed.
+    """
+
+    frame: pl.DataFrame
+    steps: tuple[float, ...]
+    cv: dict[str, float | None]
+    tissues: tuple[str, ...]
+    left_out: tuple[str, ...]
+
+
+def exon_cv(shares: pl.DataFrame) -> dict[str, float | None]:
     """Each exon's coefficient of variation of median share across tissues (SD over mean).
 
-    An exon with no reads in any tissue has no CV.
+    Undefined, so None, for an exon with no reads in any tissue, and over fewer than two
+    tissues: a CV printed as "nan" read as a number on the figure (H.3).
     """
-    out = {}
+    out: dict[str, float | None] = {}
     for (exon,), part in shares.group_by("exon", maintain_order=True):
         values = part["share"].to_numpy()
-        mean = values.mean()
-        out[str(exon)] = float(values.std(ddof=1) / mean) if mean > 0 else float("nan")
+        mean = values.mean() if values.size else 0.0
+        defined = mean > 0 and values.size >= 2  # noqa: PLR2004 - an SD needs two values
+        out[str(exon)] = float(values.std(ddof=1) / mean) if defined else None
     return out
 
 
-def qpcr_pair(cv: dict[str, float]) -> Pair | None:
+def _step(share: float, reference: float) -> float:
+    """A cell's place on the diverging scale; infinite where the ratio is, never smoothed.
+
+    A share above a reference of 0 exceeds every finite ratio, and no share against a reference
+    above 0 falls below every one, so each takes the scale's outer step with no pseudocount.
+    Both 0 has no ratio and no step.
+    """
+    if share > 0 and reference > 0:
+        return math.log2(share / reference)
+    if share > 0:
+        return math.inf
+    return -math.inf if reference > 0 else math.nan
+
+
+def exon_use(shares: pl.DataFrame, tissues: Iterable[str]) -> ExonUse:
+    """The exon panel over ``tissues``: the reference is each exon's median share there.
+
+    The order is the rule: tissues are restricted first, then the reference and the CV are
+    taken over what is left. Over every GTEx tissue a gene expressed in a few has a reference
+    of 0 for most exons (NKX2-1: E1, E2, E4 at 0 over 68 tissues, 0.021, 0.013, 0.072 over its
+    6 at 1 TPM), and the shares of a gene barely read in a tissue are noise.
+    """
+    keep = list(tissues)
+    held = shares.filter(pl.col("tissue").is_in(keep))
+    middle = held.group_by("exon").agg(reference=pl.col("share").median())
+    framed = held.join(middle, on="exon", how="left", maintain_order="left").with_columns(
+        log2_ratio=pl.when((pl.col("share") > 0) & (pl.col("reference") > 0))
+        .then((pl.col("share") / pl.col("reference")).log(2)).otherwise(None)
+    )  # fmt: skip
+    steps = tuple(_step(s, r) for s, r in framed.select("share", "reference").iter_rows())
+    drawn = tuple(dict.fromkeys(held["tissue"].to_list()))
+    every = dict.fromkeys(shares["tissue"].to_list())
+    return ExonUse(framed, steps, exon_cv(held), drawn,
+                   tuple(t for t in every if t not in drawn))  # fmt: skip
+
+
+def qpcr_pair(cv: Mapping[str, float | None]) -> Pair | None:
     """The preview's rule on GTEx's collapsed exons: neighbours, smallest larger CV.
 
     Exons are taken in their GTEx numbering, so neighbours in the collapsed model; a pair
-    with an exon of no reads is never chosen.
+    with an exon of no defined CV is never chosen.
     """
     names = sorted(cv, key=lambda e: int(e[1:]))
     best = None
     for a, b in zip(names, names[1:], strict=False):
+        x, y = cv[a], cv[b]
         # Both checked: max(0.05, nan) is 0.05 in Python, so a NaN partner would pass.
-        if not (np.isfinite(cv[a]) and np.isfinite(cv[b])):
+        if x is None or y is None or not (np.isfinite(x) and np.isfinite(y)):
             continue
-        worst = max(cv[a], cv[b])
+        worst = max(x, y)
         if best is None or worst < best.cv:
             best = Pair(a, b, worst)
     return best

@@ -5,18 +5,19 @@ them. Every panel is descriptive: n, median, IQR, tau, CV; external data get no 
 """
 
 import math
+from collections.abc import Mapping
 from typing import Any
 
-import numpy as np
 import polars as pl
 
+from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.genecard import annotation, gtex, hpa
 from ctx.genecard.cards import Card
 from ctx.genecard.junctions import RELEASE as RELEASE_JUNCTIONS
-from ctx.genecard.summary import tau
+from ctx.genecard.summary import DETECTED, tau
 from ctx.report import text
 from ctx.viz.bar import BarData
-from ctx.viz.heatmap import HeatmapData, diverging_levels
+from ctx.viz.heatmap import HeatmapData, Swatch, diverging_levels
 from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, category_colours
 
 PAGE = "genecard"
@@ -40,8 +41,13 @@ def _log(value: float) -> float:
     return math.log2(value + 1.0)
 
 
-def tissues(card: Card) -> tuple[BarData, dict[str, Any]]:
-    """GTEx median per tissue and sex, as bars, tissues by their all-donor median.
+def tissues(card: Card, donors: tuple[str, ...] = SEXES) -> tuple[BarData, dict[str, Any]]:
+    """GTEx median per tissue of ``donors``, as bars, tissues by their all-donor median.
+
+    ``donors`` is both sexes side by side (the figure as built), ``(gtex.ALL,)``, or one sex:
+    F2's views (D-056: summaries, so the donor control is three precomputed options). Every
+    view keeps the all-donor order, so a bar that moves between views is the sex's own; its
+    lead and caption are the view's own numbers. A sex with no sample in a tissue has no bar.
 
     Bars, not points over a range: a horizontal bar chart grows with its 68 tissue names,
     which a strip's fixed height could not hold. Quartiles and n are on hover and in the
@@ -53,28 +59,57 @@ def tissues(card: Card) -> tuple[BarData, dict[str, Any]]:
     order = every["tissue"].to_list()
     rank = {t: i for i, t in enumerate(order)}
     bars = (
-        spread.filter(pl.col("sex").is_in(SEXES))
+        spread.filter(pl.col("sex").is_in(donors))
         .with_columns(value=pl.col("median").map_elements(_log, return_dtype=pl.Float64),
                       slot=pl.col("tissue").replace_strict(rank, return_dtype=pl.Int64))
         .sort("slot", "sex").select("tissue", "sex", "value", "n", "median", "q1", "q3")
     )  # fmt: skip
-    numbers = {"symbol": card.symbol, "release": gtex.RELEASE, "top": order[0],
-               "top_median": every["median"][0], "bottom": order[-1],
-               "bottom_median": every["median"][-1], "tau": shown(tau(every["median"].to_numpy())),
-               "tissues": len(order), "samples": f"{int(every['n'].sum()):,}",
-               "least": every["n"].min(), "most": every["n"].max()}  # fmt: skip
+    # Both sexes side by side are read against the all-donor medians that order them.
+    own = every if donors == SEXES else bars.sort("median", descending=True)
+    numbers = {"symbol": card.symbol, "release": gtex.RELEASE, "top": own["tissue"][0],
+               "top_median": own["median"][0], "bottom": own["tissue"][-1],
+               "bottom_median": own["median"][-1], "tau": shown(tau(own["median"].to_numpy())),
+               "tissues": own.height, "samples": f"{int(own['n'].sum()):,}",
+               "least": own["n"].min(), "most": own["n"].max(),
+               "donors": text.word(PAGE, f"figures.tissues.donors.{'_'.join(donors)}")}  # fmt: skip
+    palette = category_colours(list(SEXES))
     data = BarData(frame=bars, columns=columns("tissues"), category="tissue", value="value",
                    category_label=text.word(PAGE, "figures.tissues.x"),
                    value_label=text.word(PAGE, "figures.tissues.y"), series="sex",
-                   colours=category_colours(list(SEXES)),
+                   colours={d: palette.get(d) for d in donors},
                    caption=text.fill(PAGE, "figures.tissues.caption", **numbers),
                    horizontal=True, hover=("n", "median", "q1", "q3"))  # fmt: skip
     return data, numbers
 
 
+# F2's views, the figure as built first (D-056, figure controls plan).
+DONOR_VIEWS = (SEXES, (gtex.ALL,), ("female",), ("male",))
+
+
+def tissue_views(card: Card) -> list[tuple[str, BarData, dict[str, Any]]]:
+    """(label, bars, numbers) of each donor view a reader may choose; one view per sex present."""
+    assert card.tissues is not None  # noqa: S101 - the page draws this panel only with data
+    present = set(card.tissues["sex"].to_list())
+    return [(text.word(PAGE, f"figures.tissues.views.{'_'.join(d)}"), *tissues(card, d))
+            for d in DONOR_VIEWS if set(d) & present]  # fmt: skip
+
+
 def immune_tau(xml: hpa.Xml) -> float | None:
     """Our tau over HPA's immune cell types, the pooled PBMC total left out."""
     return tau([v for cell, _, v in xml.immune if cell != hpa.POOLED])
+
+
+def immune_subset(rows: list[tuple[str, str, float]], lineages: set[str],
+                  log: bool = True) -> dict[str, Any]:  # fmt: skip
+    """F3's numbers over the cell types of ``lineages``: tau on the scale, the top cell type.
+
+    The page's twin is ``ctxM9.immune``; ``rows`` are (cell type, lineage, nTPM), the pooled
+    total already left out. With no cell type left, tau and the top are None.
+    """
+    kept = [(c, v) for c, lineage, v in rows if lineage in lineages]
+    top = max(kept, key=lambda r: r[1]) if kept else None
+    return {"tau": tau([v for _, v in kept], log), "cells": len(kept),
+            "top": top[0] if top else None, "top_ntpm": top[1] if top else None}  # fmt: skip
 
 
 def immune(card: Card, release: str) -> tuple[BarData, dict[str, Any]]:
@@ -99,27 +134,28 @@ def immune(card: Card, release: str) -> tuple[BarData, dict[str, Any]]:
     return bars, numbers
 
 
-def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | None]:
-    """Each exon's median share per tissue against its median over tissues, with its CV."""
-    assert card.exons is not None  # noqa: S101 - the page draws this panel only with data
-    shares = card.exons
-    names = list(dict.fromkeys(shares["exon"].to_list()))
-    order = list(dict.fromkeys(shares["tissue"].to_list()))
-    middle = shares.group_by("exon").agg(mid=pl.col("share").median())
-    framed = shares.join(middle, on="exon").with_columns(
-        log2_ratio=pl.when((pl.col("share") > 0) & (pl.col("mid") > 0))
-        .then((pl.col("share") / pl.col("mid")).log(2)).otherwise(None)
-    )  # fmt: skip
-    levels, swatches = diverging_levels(framed["log2_ratio"].to_list())
-    frame = framed.with_columns(level=pl.Series(levels, dtype=pl.String)).select(
-        "exon", "tissue", "n", "share", "log2_ratio", "level"
+def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | None] | None:
+    """Each exon's median share per tissue against its median over the tissues that express it.
+
+    Only tissues at ``DETECTED`` TPM or more are drawn (``gtex.detected``, H.3); fewer than two
+    leave no panel, and None. The CV is printed only where it is defined.
+    """
+    assert card.exons is not None and card.tissues is not None  # noqa: S101 - drawn with data
+    use = annotation.exon_use(card.exons, gtex.detected(card.tissues))
+    if len(use.tissues) < 2:  # noqa: PLR2004 - a reference across tissues needs two
+        return None
+    names = list(dict.fromkeys(use.frame["exon"].to_list()))
+    levels, swatches = diverging_levels(list(use.steps))
+    frame = use.frame.with_columns(level=pl.Series(levels, dtype=pl.String)).select(
+        "exon", "tissue", "n", "share", "reference", "log2_ratio", "level"
     )
-    cv = annotation.exon_cv(shares)
-    pair = annotation.qpcr_pair(cv)
-    finite = {e: v for e, v in cv.items() if np.isfinite(v)}
+    pair = annotation.qpcr_pair(use.cv)
+    finite = {e: v for e, v in use.cv.items() if v is not None}
     uneven = max(finite, key=lambda e: finite[e]) if finite else names[0]
+    unreferenced = frame.filter(pl.col("reference") == 0)["exon"].n_unique()
     numbers = {"symbol": card.symbol, "release": gtex.RELEASE, "exons": len(names),
-               "tissues": len(order), "uneven": uneven,
+               "tissues": len(use.tissues), "left": len(use.left_out), "floor": DETECTED,
+               "unreferenced": unreferenced, "uneven": uneven,
                "dropped": text.fill(PAGE, "figures.exons.dropped_one" if card.exons_dropped == 1
                                     else "figures.exons.dropped_many", n=card.exons_dropped),
                "uneven_cv": finite.get(uneven, float("nan"))}  # fmt: skip
@@ -130,11 +166,57 @@ def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | No
                        row_label=text.word(PAGE, "figures.exons.y"),
                        column_label=text.word(PAGE, "figures.exons.x"), swatches=swatches,
                        caption=text.fill(PAGE, "figures.exons.caption", **numbers),
-                       row_order=tuple(names), column_order=tuple(order),
-                       row_stats=cv,
+                       row_order=tuple(names), column_order=use.tissues,
+                       row_stats=finite,
                        row_stats_label=text.word(PAGE, "figures.exons.stat"),
                        row_stats_format=".2f")  # fmt: skip
     return heat, numbers, pair
+
+
+# The evidence view draws at most this many genes; the rest are listed in a table (GS.9).
+EVIDENCE_ROWS = 100
+CALLS = ("up", "down")
+
+
+def evidence_view(
+    evidence: pl.DataFrame, symbols: Mapping[int, str], labels: Mapping[str, str]
+) -> tuple[HeatmapData, dict[str, Any], list[int]]:
+    """The listed genes by contrasts: a called cell in its log2 FC's step, an uncalled one grey.
+
+    ``evidence`` is ``cards.evidence``'s long table, genes in list order; ``labels`` each
+    contrast's words. A gene untested in a contrast draws nothing there. The first
+    ``EVIDENCE_ROWS`` genes are drawn; the rest are returned for a table.
+
+    Returns:
+        The figure, its numbers, and the numbers of the genes left out of it.
+    """
+    order = list(dict.fromkeys(evidence["number"].to_list()))
+    drawn, rest = order[:EVIDENCE_ROWS], order[EVIDENCE_ROWS:]
+    frame = evidence.filter(pl.col("number").is_in(drawn)).with_columns(
+        gene=pl.col("number").replace_strict(dict(symbols), return_dtype=pl.String),
+        contrast=pl.col("contrast").replace_strict(dict(labels), return_dtype=pl.String),
+    )
+    called = frame["call"].is_in(CALLS).fill_null(value=False).to_list()
+    steps, swatches = diverging_levels(frame["log2FoldChange"].to_list())
+    none = text.word(PAGE, "figures.evidence.not_called")
+    levels = [s if c else (none if p is not None else None)
+              for s, c, p in zip(steps, called, frame["padj"].to_list(), strict=True)]  # fmt: skip
+    used = set(levels)
+    keys = (*(w for w in swatches if w.level in used), Swatch(none, None))
+    frame = frame.with_columns(level=pl.Series(levels, dtype=pl.String)).select(
+        "gene", "contrast", "log2FoldChange", "log2FoldChange_shrunk", "padj", "call", "level"
+    )
+    numbers = {"genes": len(drawn), "listed": len(order), "contrasts": len(labels),
+               "called": sum(called), "cells": frame["padj"].is_not_null().sum(),
+               "alpha": ALPHA, "lfc_min": LFC_MIN}  # fmt: skip
+    heat = HeatmapData(frame=frame, columns=columns("evidence"), row="gene", column="contrast",
+                       value="log2FoldChange", level="level",
+                       row_label=text.word(PAGE, "figures.evidence.y"),
+                       column_label=text.word(PAGE, "figures.evidence.x"), swatches=keys,
+                       caption=text.fill(PAGE, "figures.evidence.caption", **numbers),
+                       row_order=tuple(symbols[n] for n in drawn),
+                       column_order=tuple(labels.values()))  # fmt: skip
+    return heat, numbers, rest
 
 
 def junctions(card: Card) -> tuple[HeatmapData, dict[str, Any]]:

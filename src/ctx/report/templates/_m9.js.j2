@@ -1,0 +1,81 @@
+{% raw %}
+/* M9's card controls (E.1): F3 recomputes the immune panel over the lineages a reader keeps,
+   on either scale, and F4 the exon panel over the tissues a reader keeps. Each function names
+   its Python twin; tests/test_genecard_twins.py runs both under node on the same cases. */
+var ctxM9 = {
+  /* summary.DETECTED: below it everywhere, tau is undefined. */
+  DETECTED: 1,
+  /* numpy's median: the middle value, or the mean of the two middle ones. */
+  median: function (xs) {
+    var s = xs.slice().sort(function (a, b) { return a - b; }), n = s.length;
+    return n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2;
+  },
+  /* summary.tau: log2(x + 1) first unless log is false, then the maximum. */
+  tau: function (values, log) {
+    if (values.length < 2 || Math.max.apply(null, values) < ctxM9.DETECTED) return null;
+    var x = values.map(function (v) { return log === false ? v : Math.log2(v + 1); });
+    var top = Math.max.apply(null, x), sum = 0;
+    x.forEach(function (v) { sum += 1 - v / top; });
+    return sum / (x.length - 1);
+  },
+  /* figures.immune_subset: rows [cell type, lineage, nTPM]; the first of tied tops. */
+  immune: function (rows, lineages, log) {
+    var kept = rows.filter(function (r) { return lineages.indexOf(r[1]) >= 0; }), top = null;
+    kept.forEach(function (r) { if (top === null || r[2] > top[2]) top = r; });
+    return { tau: ctxM9.tau(kept.map(function (r) { return r[2]; }), log), cells: kept.length,
+             top: top ? top[0] : null, top_ntpm: top ? top[2] : null };
+  },
+  /* annotation._step: the ratio, or the scale's outer step where it is infinite. */
+  step: function (share, reference) {
+    if (share > 0 && reference > 0) return Math.log2(share / reference);
+    if (share > 0) return Infinity;
+    return reference > 0 ? -Infinity : NaN;
+  },
+  /* heatmap.diverging_levels: the index of a step's level, 0 most negative; null for none. */
+  level: function (step, edges) {
+    if (isNaN(step)) return null;
+    var e = edges || [0.5, 1, 2], bounds = [-e[2], -e[1], -e[0], e[0], e[1], e[2]], i = 0;
+    while (i < bounds.length && bounds[i] <= step) i++;
+    return i;
+  },
+  /* annotation.exon_cv: SD (n - 1) over mean; null without reads or over one tissue. */
+  cv: function (values) {
+    var n = values.length, mean = 0, ss = 0;
+    values.forEach(function (v) { mean += v; });
+    mean = n ? mean / n : 0;
+    if (!(mean > 0) || n < 2) return null;
+    values.forEach(function (v) { ss += (v - mean) * (v - mean); });
+    return Math.sqrt(ss / (n - 1)) / mean;
+  },
+  /* annotation.qpcr_pair: neighbours in GTEx numbering, the smallest larger CV first found. */
+  pair: function (cv) {
+    var names = Object.keys(cv).sort(function (a, b) { return Number(a.slice(1)) - Number(b.slice(1)); });
+    var best = null;
+    for (var i = 0; i + 1 < names.length; i++) {
+      var x = cv[names[i]], y = cv[names[i + 1]];
+      if (x === null || y === null || !isFinite(x) || !isFinite(y)) continue;
+      var worst = Math.max(x, y);
+      if (best === null || worst < best.cv) best = { first: names[i], second: names[i + 1], cv: worst };
+    }
+    return best;
+  },
+  /* annotation.exon_use over the kept tissues: rows [exon, tissue, share] in frame order.
+     The tissues are restricted first, then each exon's reference and CV are taken. */
+  exonUse: function (rows, tissues) {
+    var held = rows.filter(function (r) { return tissues.indexOf(r[1]) >= 0; });
+    var by = {}, order = [];
+    held.forEach(function (r) {
+      if (!by[r[0]]) { by[r[0]] = []; order.push(r[0]); }
+      by[r[0]].push(r[2]);
+    });
+    var reference = {}, cv = {};
+    order.forEach(function (e) { reference[e] = ctxM9.median(by[e]); cv[e] = ctxM9.cv(by[e]); });
+    var cells = held.map(function (r) {
+      var ref = reference[r[0]], step = ctxM9.step(r[2], ref);
+      return { exon: r[0], tissue: r[1], share: r[2], reference: ref,
+               ratio: isFinite(step) ? step : null, level: ctxM9.level(step) };
+    });
+    return { cells: cells, cv: cv, pair: ctxM9.pair(cv) };
+  }
+};
+{% endraw %}

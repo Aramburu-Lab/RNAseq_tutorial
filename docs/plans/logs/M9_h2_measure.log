@@ -1,0 +1,11 @@
+run starts (UTC): {'luad_online': '2026-10-15T13:33:20Z', 'lusc_online': '2026-10-15T13:36:40Z', 'lusc_online_retry': '2026-10-15T13:38:41Z'}
+luad_online: 24 requests cached, 10,074,842 B bodies; by provider {'ensembl': 5, 'gtex': 8, 'hpa': 11}; status {200: 24}
+lusc_online: 15 requests cached, 4,802,847 B bodies; by provider {'gtex': 6, 'hpa': 9}; status {200: 15}
+lusc_online_retry: 3 requests cached, 61,030 B bodies; by provider {'ensembl': 3}; status {200: 3}
+before the runs: 1 (hpa/v25/ENSG00000136352/lines_cell_RNA_lung_cancer.gz)
+cache: 43 gz files, 627,504 B on disk; bodies 14,948,149 B as received
+2026-10-15_genecard_tcga_luad_overview_v1.html: 6,240,227 B (41.6% of 15,000,000); packed parts [60059, 177211, 69763]; unpacked 7,757,027 B; unavailable 0
+    nan as text: 0
+2026-10-15_genecard_tcga_lusc_overview_v1.html: 6,093,219 B (40.6% of 15,000,000); packed parts [67007, 72367, 69759]; unpacked 7,094,219 B; unavailable 1
+    GTEx V10 junctions unavailable for SOX2: no junction of ENSG00000181449.4 in gtex_v10.
+    nan as text: 0

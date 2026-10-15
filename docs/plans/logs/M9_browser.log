@@ -1,0 +1,18 @@
+Package M9 (wo13-m9) browser check, 2026-10-15, Chromium in the Browser pane, own tab, pages
+served over http from a scratch copy (the LUAD and LUSC pages of ~/ctx_lung, built online,
+and M9_e1_fixture_page.py's page with two contrasts).
+
+1280 px, light, LUAD: NKX2-1's exon panel draws 6 tissues (four brain regions, Lung,
+  Thyroid); E1 Lung in "0.5 to 1", Thyroid E1 "1 to 2"; E3 row blank with no CV printed; CV
+  column 0.76, 0.41, blank, 0.19, 0.05. Donors select: By sex, All donors, Female donors,
+  Male donors; Female donors swaps the lead to "Highest median in Thyroid, 370.6 TPM; lowest
+  in Stomach - Muscularis, 0 TPM; tau 0.97 over 66 tissues" and prints the view line.
+1280 px, dark, LUAD: every packed card drawn; 8 panel headings; no "nan" in any plot's
+  text; MKI67's exon panel 15 rows by 19 tissues, every row with a reference and a CV
+  (caption "0 exons have a median share of zero"); scrollWidth 1280.
+375 px, dark, LUAD: exon panel legend and rows readable; clientWidth 375, scrollWidth 375.
+1280 px, light, fixture: evidence view of 7 genes by 2 contrasts, "8 of 8 tested cells are
+  called; 7 of 7 listed genes drawn"; untested rows blank; the two TWIN genes on two rows.
+375 px, light, fixture: evidence view whole, column labels and title readable;
+  clientWidth 375, scrollWidth 375. 375 px, dark, fixture: evidence view legend and rows.
+Not checked: Edge, Firefox, Safari; F3 and F4 (not on the page); a list from a link.
