@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-079 — M9's exon panel reads exon use over the tissues where GTEx expresses the gene
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** H.3: the reference share was the median over all 68 GTEx tissues, so a gene expressed in few tissues got a reference of 0 on most exons; NKX2-1's lung signal drew as an empty row and an undefined CV printed "nan".
+
+**Decision.** The panel draws only tissues where the gene's all-donor median TPM is at least 1 (`summary.DETECTED`, tau's floor), then takes each exon's reference and CV over them. A share over a reference of 0 takes the top step, no share against a reference above 0 the bottom step, 0 over 0 none; `log2_ratio` stays empty in all three, with no pseudocount, and the page and README say so. An undefined CV prints nothing. Fewer than two expressing tissues: a line of text, no panel. M9's evidence view draws a called cell in its log2 FC step and an uncalled tested cell grey; F2 is a view over precomputed donor summaries.
+
+**Evidence.** NKX2-1: 4 of 5 exons had reference 0; over its 6 expressing tissues E1 0.021, E2 0.013, E4 0.072, E3 no reads anywhere. MKI67: 15 of 15 exon rows filled over 19 tissues, from 3. 33 planted mutations caught.
+
+**Consequence.** The junction panel keeps the all-tissue median (E.1c).
+
+---
+
 ## D-078 — M7's tumour_normal design for CPTAC ccRCC
 
 **Date:** 2026-10-15 · **Status:** decided

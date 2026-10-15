@@ -107,3 +107,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - An agent's gates must lint every file it commits: H's proof scripts under docs/plans/logs failed ruff only in main's preflight (2026-10-14).
 - Default `git log` follows one parent of a merge, so a search for every version of a file needs `--full-history -m`: 6 of 8 kidney rebuild commands kept the build clone's path until it did (K, 2026-10-15).
 - A module that reads a GDC sheet without `gdc.chosen` silently counts unchosen files (ctx qc: 517 against 515): grep each new consumer of a GDC sheet for the door (S, 2026-10-15).
+- A median over units that do not express a gene collapses to 0: restrict to the expressing units, then take it (H.3, NKX2-1 over 68 tissues).
+- JSON writes NaN as null, so a twin compared through JSON cannot tell NaN from undefined: name NaN in the harness (M9, 2026-10-15).
+- Ensembl REST answered HTTP 500 to three lookups that succeeded minutes later: move the outputs aside and rerun once before calling a panel unavailable (M9, 2026-10-15).
