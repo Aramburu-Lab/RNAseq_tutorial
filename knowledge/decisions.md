@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-075 — A rebuild command's dataset file is the codebase's by its committed bytes; a root's note is a build option
+
+**Date:** 2026-10-15 · **Status:** decided
+
+**Context.** K.9 and K.10: kit v8 named the build clone's dataset file in its rebuild commands, and its M9 note was appended to README.md by hand.
+
+**Decision.** build_kit shows a recorded `--dataset-file` as `conf/datasets/<file>` when its recorded SHA-256 equals any version in HEAD's history, merges included (`git log --full-history -m`); otherwise the path stays and README.md calls it the builder's own. A path test was rejected: a reader's own file saved in `conf/datasets/` of a clone would pass it, and it needs the build tree on disk. A note per root is `--note FOLDER=TEXT`, recorded in README.md and MANIFEST.json, not a file in the root, which only modules write.
+
+**Evidence.** ~/ctx_kidney: 8 of 8 left-out entries mapped; 2 of 8 before merge commits were read. 10 planted mutations caught.
+
+**Consequence.** A mapped file may differ from the kit commit's copy (K.12).
+
+---
+
 ## D-074 — PAM50's fifth level takes the lighter spent grey
 
 **Date:** 2026-10-15 · **Status:** decided
