@@ -5,6 +5,10 @@
 slug = "tcga_luad"
 label = "TCGA lung adenocarcinoma"
 source = "The Cancer Genome Atlas, project TCGA-LUAD, through the NCI Genomic Data Commons"
+# M9's cell-line row: HPA's lung cancer group (232 lines, read 2026-10-15; it also holds
+# small cell and mesothelioma lines) and three adenocarcinoma lines common in EGFR studies,
+# as HPA spells them. Their histology is from common use, not checked against Cellosaurus.
+hpa_cell_lines = { group = "cell_RNA_lung_cancer", lines = ["A-549", "NCI-H1975", "HCC827"] }
 
 [gdc]
 project = "TCGA-LUAD"

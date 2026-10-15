@@ -5,6 +5,10 @@
 slug = "tcga_lusc"
 label = "TCGA lung squamous"
 source = "The Cancer Genome Atlas, project TCGA-LUSC, through the NCI Genomic Data Commons"
+# M9's cell-line row: HPA's lung cancer group (232 lines, read 2026-10-15; it also holds
+# small cell and mesothelioma lines) and three squamous cell carcinoma lines, as HPA spells
+# them. Their histology is from common use, not checked against Cellosaurus.
+hpa_cell_lines = { group = "cell_RNA_lung_cancer", lines = ["NCI-H520", "SK-MES-1", "NCI-H2170"] }
 
 [gdc]
 project = "TCGA-LUSC"
