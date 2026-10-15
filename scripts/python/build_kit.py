@@ -209,7 +209,10 @@ def codebase_datasets() -> dict[str, str]:
     reader's own file, even one saved in ``conf/datasets/`` of a clone, has bytes no commit
     holds. A path test would take that file for the codebase's, and needs the tree on disk.
     """
-    raw = _git("log", "--format=", "--raw", "--no-abbrev", "HEAD", "--", f"{DATASETS}/*.toml")
+    # Every parent of a merge too: a version can first appear in a merge (tcga_kirc.toml at
+    # 789f8ad, which ~/ctx_kidney's gather read), and default log follows one parent.
+    raw = _git("log", "--full-history", "-m", "--format=", "--raw", "--no-abbrev", "HEAD", "--",
+               f"{DATASETS}/*.toml")  # fmt: skip
     blobs: dict[str, str] = {}
     for line in raw.decode().splitlines():
         meta, *paths = line.split("\t")

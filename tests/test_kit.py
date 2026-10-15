@@ -484,16 +484,18 @@ def committed(name: str, at: str = "HEAD") -> str:
     return hashlib.sha256(shown).hexdigest()
 
 
-def test_every_committed_version_of_a_dataset_file_is_the_codebases(kit_script):
-    """K.9: a gather run reads whichever version its commit held, so every version counts.
-    Mutation caught: only the newest commit read (git log -n 1), which loses tier1.toml's
-    first version."""
+@pytest.mark.parametrize("name", ["tier1.toml", "tcga_kirc.toml"])
+def test_every_committed_version_of_a_dataset_file_is_the_codebases(kit_script, name):
+    """K.9: a gather run reads whichever version its commit held, so every version counts,
+    a merge's included: ~/ctx_kidney's TCGA-KIRC gather read the version merge 789f8ad made.
+    Mutations caught: only the newest commit read (git log -n 1); merges skipped (no -m)."""
     codebase = kit_script.codebase_datasets()
-    first = subprocess.run(["git", "-C", str(ROOT), "log", "--format=%H", "--reverse", "--",
-                            "conf/datasets/tier1.toml"], capture_output=True, text=True,
-                           check=True).stdout.split()[0]  # fmt: skip
-    for at in ("HEAD", first):
-        assert codebase[committed("tier1.toml", at)] == "conf/datasets/tier1.toml"
+    commits = subprocess.run(["git", "-C", str(ROOT), "log", "--format=%H", "--",
+                              f"conf/datasets/{name}"], capture_output=True, text=True,
+                             check=True).stdout.split()  # fmt: skip
+    assert len(commits) > 1
+    for at in commits:
+        assert codebase[committed(name, at)] == f"conf/datasets/{name}", at
 
 
 @pytest.mark.parametrize("ours", [True, False])

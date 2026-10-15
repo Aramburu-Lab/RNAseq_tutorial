@@ -1,0 +1,24 @@
+kit refused, nothing written:
+/Users/rytis/ctx_kidney: outputs/11_genecard: no index.html, which a link to this module names
+/Users/rytis/ctx_kidney: outputs/12_clinical: no index.html, which a link to this module names
+build_kit exit 1
+refusals on this root:
+  /Users/rytis/ctx_kidney: outputs/11_genecard: no index.html, which a link to this module names
+  /Users/rytis/ctx_kidney: outputs/12_clinical: no index.html, which a link to this module names
+2026-10-14_gather_cptac_ccrcc_counts_v1.csv	conf/datasets/cptac_ccrcc.toml	root=~/ctx_kidney	own=None
+2026-10-14_gather_cptac_ccrcc_counts_v1.parquet	conf/datasets/cptac_ccrcc.toml	root=~/ctx_kidney	own=None
+2026-10-14_gather_tcga_kirc_counts_v1.csv	conf/datasets/tcga_kirc.toml	root=~/ctx_kidney	own=None
+2026-10-14_gather_tcga_kirc_counts_v1.parquet	conf/datasets/tcga_kirc.toml	root=~/ctx_kidney	own=None
+2026-10-14_gather_tcga_kirc_mirna_hairpin_counts_v1.csv	conf/datasets/tcga_kirc.toml	root=~/ctx_kidney	own=None
+2026-10-14_gather_tcga_kirc_mirna_hairpin_counts_v1.parquet	conf/datasets/tcga_kirc.toml	root=~/ctx_kidney	own=None
+2026-10-14_gather_tcga_kirc_mirna_mature_counts_v1.csv	conf/datasets/tcga_kirc.toml	root=~/ctx_kidney	own=None
+2026-10-14_gather_tcga_kirc_mirna_mature_counts_v1.parquet	conf/datasets/tcga_kirc.toml	root=~/ctx_kidney	own=None
+8 left out; 8 name conf/datasets/
+README.md under the first:
+- `kidney/outputs/01_gather/2026-10-14_gather_cptac_ccrcc_counts_v1.csv`, 47,309,668 bytes:
+
+    OUT=~/ctx_kidney/data/raw/cptac_ccrcc_star bash kidney/gdc/cptac_ccrcc_star/_fetch_cptac_ccrcc_star.sh
+    ctx --root ~/ctx_kidney gather --dataset cptac_ccrcc --dataset-file conf/datasets/cptac_ccrcc.toml --gdc-dir ~/ctx_kidney/data/raw/cptac_ccrcc_star
+
+`~/ctx_kidney` is the builder's ctx root. In these commands, put your own ctx root in its place.
+

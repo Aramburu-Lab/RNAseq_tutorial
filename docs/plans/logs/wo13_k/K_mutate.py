@@ -20,10 +20,8 @@ MUTATIONS = {
         'mapped = f"conf/datasets/{Path(word).name}" if Path(word).parent.name == "datasets"'
         " else None",
     ),
-    "only the newest commit read": (
-        '_git("log", "--format=", "--raw"',
-        '_git("log", "-n", "1", "--format=", "--raw"',
-    ),
+    "only the newest commit read": ('_git("log", "--full-history"', '_git("log", "-n", "1"'),
+    "merges skipped": ('"--full-history", "-m",', ""),
     "root sentence dropped": ('    if entry.get("builder_root"):', "    if False:"),
     "own-file sentence dropped": ('    if entry.get("builder_dataset_file"):', "    if False:"),
     "note left out of README.md": ('note=(notes or {}).get(folder, "")', 'note=""'),

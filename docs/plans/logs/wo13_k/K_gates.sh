@@ -9,7 +9,7 @@ echo "== ruff check"; ruff check $FILES
 echo "== ruff format --check"; ruff format --check $FILES
 echo "== mypy src"; mypy src | tail -1
 echo "== interrogate"; interrogate src | tail -1
-echo "== labdocs lint"; labdocs lint | tail -3
-echo "== labdocs render --check"; labdocs render --check | tail -3
+echo "== labdocs lint"; labdocs lint; echo "exit $?"
+echo "== labdocs render --check"; labdocs render --check; echo "exit $?"
 echo "== prose lint"; python -m ctx.report.prose
 echo "== glossary lint"; python -m ctx.report.glossary_lint | tail -3
