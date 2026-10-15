@@ -1,0 +1,57 @@
+{# A figure's PDF and SVG buttons for a moved view; its rows. Included by _page.js.j2, inside its one function. #}
+{% raw %}  /* A figure's PDF and SVG buttons: the figure files while its controls are at their
+     defaults; once one is moved, the view as set, drawn by ctxExport. Each control's wiring
+     calls the switch this returns with whether the view is moved (D-033). Moved, a button
+     links no file, so no middle click, new tab or "Save link as" reaches the default file
+     under a label that names the view. */
+  function exporting(fig, cfg) {
+    if (fig.ctxExporting) return fig.ctxExporting;
+    var links = Array.prototype.slice.call(fig.querySelectorAll("a[data-export]"));
+    var moved = false, keys = Object.create(null);
+    if (!cfg.export || !window.jspdf || !links.length) return function () {};
+    var reference = links.map(function (a) {
+      return [a.textContent, a.getAttribute("title"), a.getAttribute("href")];
+    });
+    links.forEach(function (a) {
+      a.addEventListener("click", function (e) {
+        if (!moved) return;
+        e.preventDefault();
+        var ext = a.getAttribute("data-export");
+        ctxExport.draw(fig, cfg, ext).then(function (blob) {
+          ctxExport.save(blob, cfg.export.file + "_view." + ext);
+        }, function (err) { if (window.console) console.error("ctx page: export", err); });
+      });
+      a.addEventListener("keydown", function (e) {
+        if (moved && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); a.click(); }
+      });
+    });
+    /* A figure with two controls (the calls and the picker) is moved while either is. */
+    fig.ctxExporting = function (on, key) {
+      keys[key || ""] = !!on;
+      on = Object.keys(keys).some(function (k) { return keys[k]; });
+      moved = on;
+      links.forEach(function (a, i) {
+        a.textContent = on ? a.getAttribute("data-view") : reference[i][0];
+        a.setAttribute("title", on ? a.getAttribute("data-view-title") : reference[i][1]);
+        if (on) {
+          a.removeAttribute("href"); a.setAttribute("role", "button"); a.setAttribute("tabindex", "0");
+        } else {
+          a.setAttribute("href", reference[i][2]); a.removeAttribute("role"); a.removeAttribute("tabindex");
+        }
+      });
+    };
+    return fig.ctxExporting;
+  }
+
+  /* A figure's rows, embedded as column names once and a list of values per row
+     (ctx.report.figures.columnar), as one object per row again. */
+  function ctxRows(form) {
+    var t = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    return t.data.map(function (values) {
+      var row = {};
+      t.columns.forEach(function (c, i) { row[c] = values[i]; });
+      return row;
+    });
+  }
+
+{% endraw %}

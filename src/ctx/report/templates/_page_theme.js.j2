@@ -1,0 +1,43 @@
+{# The page's templates, the theme toggle and the tooltips. Included by _page.js.j2, inside its one function. #}
+{% raw %}  var root = document.documentElement;
+  var templates = JSON.parse(document.getElementById("ctx-templates").textContent);
+  /* Opened alone, the page's own templates, for a plot drawn at the page's size (fit). */
+  var paged = document.getElementById("ctx-templates-page");
+  var pageTemplates = paged ? JSON.parse(paged.textContent) : templates;
+  var toggle = document.getElementById("ctx-theme-toggle");
+  function plots(scope) { return (scope || document).querySelectorAll(".js-plotly-plot"); }
+  /* A plot's template in a theme: at the zoom it is drawn at, which its layout.meta.zoom
+     gives opened alone, 1 where it is drawn at the page's size. */
+  function template(div, theme) {
+    var meta = div.layout && div.layout.meta;
+    return (meta && meta.zoom === 1 ? pageTemplates : templates)[theme];
+  }
+  function retheme(theme) {
+    if (!window.Plotly) return;
+    plots().forEach(function (d) { Plotly.relayout(d, { template: template(d, theme) }); });
+  }
+
+  guard("theme", function () {
+    function apply(theme, redraw) {
+      root.setAttribute("data-theme", theme);
+      toggle.setAttribute("aria-pressed", theme === "black" ? "true" : "false");
+      if (redraw) retheme(theme);
+    }
+    toggle.addEventListener("click", function () {
+      var next = root.getAttribute("data-theme") === "black" ? "white" : "black";
+      try { localStorage.setItem("ctx-theme", next); } catch (e) {}
+      apply(next, true);
+    });
+    /* Figures are drawn with the light template baked in; only a dark start needs a relayout. */
+    var start = root.getAttribute("data-theme");
+    apply(start, start === "black");
+    /* Paper is white: print with the light figures, then restore the reader's theme. */
+    window.addEventListener("beforeprint", function () { retheme("white"); });
+    window.addEventListener("afterprint", function () { retheme(root.getAttribute("data-theme")); });
+  });
+
+  /* Glossary terms: a tooltip per marked term; on the glossary page, the search box. */
+  var tip = null;
+  guard("tooltips", function () { tip = ctxGlossary.tips(document, window); });
+  guard("glossary search", function () { ctxGlossary.search(document); });
+{% endraw %}

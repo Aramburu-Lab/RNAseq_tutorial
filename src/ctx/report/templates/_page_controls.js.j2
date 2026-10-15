@@ -1,0 +1,277 @@
+{# Controls: live ORA, views, filters and live calls. Included by _page.js.j2, inside its one function. #}
+{% raw %}  /* M6's live ORA (GS.5): ctxOra reruns lite.ora on the reader's list; this block reads the
+     form, redraws the bars of the sets that pass, and fills the live line and the table. A
+     bar's set becomes the list the onward links and Open beside send. */
+  function oraLive(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var words = cfg.words, div = fig.querySelector(".js-plotly-plot");
+    var line = fig.querySelector(".ora-summary"), notes = fig.querySelector(".ora-notes");
+    var table = fig.querySelector(".ora-tsv"), mark = exporting(fig, cfg);
+    var lf = ctxOra.logFactorials(cfg.symbols.length), opened = [];
+    var colours = cfg.colours;
+    var backgrounds = {};
+    cfg.backgrounds.forEach(function (b) {
+      var bits = Uint8Array.from(atob(b[2]), function (c) { return c.charCodeAt(0); }), out = [];
+      for (var i = 0; i < cfg.symbols.length; i++) if (bits[i >> 3] >> (i & 7) & 1) out.push(cfg.symbols[i]);
+      backgrounds[b[0]] = { label: b[1], genes: out };
+    });
+    var sets = cfg.sets.map(function (s) { return [s[0], s[1].map(function (i) { return cfg.symbols[i]; })]; });
+    var number = Object.create(null);
+    cfg.numbers.forEach(function (n) { number[n[0]] = n[1]; });
+    function names(list) { return list.map(function (i) { return cfg.symbols[i]; }); }
+    var build = { up: names(cfg.calls.up), down: names(cfg.calls.down), source: words.build };
+    var list = build, tries = 0, drawn = false;
+    function families() {
+      var d = form.elements.direction.value;
+      if (d === "all") return [["all", list.up.concat(list.down).concat(list.none || [])]];
+      if (d === "up" || d === "down") return [[d, list[d]]];
+      return [["up", list.up], ["down", list.down]];
+    }
+    function run() {
+      var bg = backgrounds[form.elements.background.value], traces = [], rows = [], passing = 0;
+      var cats = [];
+      families().forEach(function (f) {
+        var found = ctxOra.ora(f[1], bg.genes, sets, cfg.min_size, cfg.max_size, lf);
+        found.forEach(function (r) { rows.push([f[0]].concat([r.name, r.size, r.hits, r.expected, r.p, r.fdr, r.genes.join(";")])); });
+        var shown = found.filter(function (r) { return r.fdr < cfg.alpha; })
+          .sort(function (a, b) { return a.fdr - b.fdr || (a.name < b.name ? -1 : 1); });
+        passing += shown.length;
+        shown.forEach(function (r) { if (cats.indexOf(cfg.labels[r.name]) < 0) cats.push(cfg.labels[r.name]); });
+        traces.push({ type: "bar", orientation: "h", name: words.families[f[0]],
+          marker: { color: colours[f[0]] },
+          x: shown.map(function (r) { return -Math.log10(r.fdr); }),
+          y: shown.map(function (r) { return cfg.labels[r.name]; }),
+          customdata: shown.map(function (r) { return [r.name, r.fdr, r.hits, r.size]; }),
+          hovertemplate: words.hover + "<extra></extra>" });
+      });
+      var moved = list !== build || form.elements.direction.value !== "each" ||
+        form.elements.background.value !== cfg.featured;
+      /* At the build's settings the figure stays as built, which the PDF and SVG draw. */
+      if (moved || drawn) {
+        var others = div.data.filter(function (t) { return t.type !== "bar"; });
+        Plotly.react(div, traces.concat(others), Object.assign(div.layout,
+          { yaxis: Object.assign(div.layout.yaxis || {}, { categoryarray: cats }) }));
+        drawn = true;
+      }
+      var n = list.up.length + list.down.length + (list.none || []).length;
+      line.textContent = ctxPick.fill(words.summary, { n: n, up: list.up.length, down: list.down.length,
+        background: bg.label, size: bg.genes.length.toLocaleString("en-US"), passing: passing,
+        source: list.source, tries: tries });
+      table.textContent = [words.columns].concat(rows.map(function (r) {
+        return r.map(function (v) { return typeof v === "number" ? String(v) : v; }).join("\t");
+      })).join("\n");
+      mark(moved);
+      return { rows: rows, passing: passing };
+    }
+    /* A list from a link or a window: its signed numbers, each named by its symbol here. */
+    function take(sel, source) {
+      var up = [], down = [], missing = 0;
+      sel.genes.forEach(function (g) {
+        var at = number[Math.abs(g)];
+        if (at === undefined) { missing++; return; }
+        (g < 0 ? down : up).push(cfg.symbols[at]);
+      });
+      tries++;
+      list = { up: up, down: down, source: source };
+      notes.textContent = ctxPick.fill(words.taken, { n: up.length + down.length, missing: missing });
+      run();
+    }
+    form.addEventListener("change", run);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    form.querySelector("[data-paste]").addEventListener("click", function () {
+      var pasted = form.elements.pasted.value.split(/[^A-Za-z0-9._-]+/).filter(Boolean);
+      var known = Object.create(null);
+      cfg.symbols.forEach(function (s) { known[s.toUpperCase()] = s; });
+      var found = pasted.map(function (w) { return known[w.toUpperCase()]; }).filter(Boolean);
+      tries++;
+      list = { up: [], down: [], none: found, source: words.pasted };
+      form.elements.direction.value = "all";
+      notes.textContent = ctxPick.fill(words.pasted_found, { n: found.length, missing: pasted.length - found.length });
+      run();
+    });
+    form.querySelector("[data-reset]").addEventListener("click", function () {
+      list = build; form.reset(); notes.textContent = ""; run();
+    });
+    fig.querySelector("[data-copy-tsv]").addEventListener("click", function () {
+      var range = document.createRange(); table.hidden = false; range.selectNodeContents(table);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(range);
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(table.textContent);
+    });
+    window.addEventListener("message", function (e) {
+      if (e.source !== window.opener && opened.indexOf(e.source) < 0) return;
+      try { var sel = ctxSelect.received(e.data); if (sel) take(sel, words.window); } catch (err) {
+        notes.textContent = err.key ? ctxSelect.message(err, { select: cfg.errors }) : String(err.message);
+      }
+    });
+    if (ctxSelect.carries(location.hash)) {
+      try { take(ctxSelect.decode(location.hash), words.link); } catch (err) {
+        notes.textContent = err.key ? ctxSelect.message(err, { select: cfg.errors }) : String(err.message);
+      }
+    }
+    run();
+  }
+
+  function viewing(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var div = fig.querySelector(".js-plotly-plot"), mark = exporting(fig, cfg);
+    var lead = fig.querySelector(".fig-lead"), caption = fig.querySelector("figcaption");
+    var title = fig.querySelector(".fig-title"), summary = fig.querySelector(".view-summary");
+    var built = { lead: lead ? lead.innerHTML : "", caption: caption.innerHTML,
+                  title: title ? title.textContent : "" };
+    function show() {
+      var i = Number(form.elements.view.value), o = cfg.options[i];
+      var layout = Object.assign({}, o.figure.layout,
+                                 { template: template(div, root.getAttribute("data-theme")) });
+      Plotly.react(div, o.figure.data, layout);
+      if (lead) lead.innerHTML = i ? o.lead : built.lead;
+      caption.innerHTML = i ? o.caption : built.caption;
+      if (title) title.textContent = i ? o.title : built.title;
+      summary.textContent = i ? cfg.moved.replace("{label}", o.label).replace("{build}", cfg.build) : "";
+      mark(i !== 0, "view");
+    }
+    form.addEventListener("change", show);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the select without an event. */
+    if (form.elements.view.value !== "0") show();
+  }
+
+  function filtering(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = ctxRows(form);
+    var div = fig.querySelector(".js-plotly-plot");
+    var summary = fig.querySelector(".filter-summary");
+    var lead = fig.querySelector(".fig-lead");
+    var selects = Array.prototype.slice.call(form.querySelectorAll("select[data-column]"));
+    var axis = cfg.horizontal ? "yaxis" : "xaxis", along = cfg.horizontal ? "x" : "y";
+    var mark = exporting(fig, cfg);
+    var traces = cfg.traces.map(function (_, i) { return i; });
+    /* The lead's numbers sit in spans named for their placeholders; only they change, so its
+       words and marks stay as built. With nothing to take a number over, the lead hides. */
+    function refill(view) {
+      if (!cfg.lead || !lead) return;
+      var values = view.bars ? ctxFilter.aggregate(rows, view.shown, cfg.lead.aggregates) : null;
+      lead.hidden = values === null;
+      if (values === null) return;
+      lead.querySelectorAll("[data-fill]").forEach(function (span) {
+        span.textContent = values[span.getAttribute("data-fill")];
+      });
+    }
+    function update() {
+      var chosen = {};
+      selects.forEach(function (s) { chosen[s.getAttribute("data-column")] = s.value; });
+      var view = ctxFilter.view(rows, cfg, chosen), layout = {}, moved = ctxFilter.moved(chosen);
+      Plotly.restyle(div, { x: view.x, y: view.y, customdata: view.customdata }, traces);
+      layout[axis + ".categoryarray"] = view.categories;
+      layout[axis + ".showticklabels"] = view.categories.length <= cfg.max_tick_labels;
+      if (cfg.median_shape !== null) {
+        var shape = "shapes[" + cfg.median_shape + "].";
+        layout[shape + "visible"] = view.median !== null;
+        if (view.median !== null) {
+          layout[shape + along + "0"] = view.median;
+          layout[shape + along + "1"] = view.median;
+        }
+      }
+      Plotly.relayout(div, layout);
+      refill(view);
+      summary.textContent = ctxFilter.summary(view, cfg, summary.getAttribute("data-template"),
+                                              summary.getAttribute("data-none"), moved);
+      mark(moved);
+    }
+    form.addEventListener("change", update);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the selects without an event. */
+    update();
+  }
+
+  function liveCalls(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = ctxRows(form);
+    var div = fig.querySelector(".js-plotly-plot");
+    var reading = fig.querySelectorAll("[data-reading]");
+    var summary = fig.querySelector(".calls-summary");
+    var fc = form.elements.fc, unit = form.elements.fc_unit;
+    var basis = form.elements.basis, cutoff = form.elements.cutoff;
+    var mark = exporting(fig, cfg);
+    function height(p) { return -Math.log10(Math.max(p, cfg.p_floor)); }
+    /* The cutoff lines span the whole plot, thinned points included, as drawn on load. */
+    var span = div.data[cfg.cutoff_lines[0]].y, across = div.data[cfg.cutoff_lines[2]].x;
+    var ytop = span[1], xmin = across[0], xmax = across[1];
+    /* The rounding rule of a unit switch lives in ctxCalls, where the tests run it. */
+    var state = { exact: null, shown: null, unit: unit.value };
+    function threshold() { return ctxCalls.applied(state, fc.value, unit.value); }
+    function fmt(n, digits) { return n.toFixed(digits); }
+    function count(n) { return n.toLocaleString("en-US"); }
+    function fill(text, values) {
+      return text.replace(/\{(\w+)\}/g, function (all, key) {
+        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : all;
+      });
+    }
+    /* A line the reader hid through the legend stays hidden. */
+    function shownAs(index, on) {
+      if (div.data[index].visible === "legendonly") return "legendonly";
+      return on;
+    }
+    function update(settle) {
+      var t = threshold(), alpha = ctxCalls.cutoff(cutoff.value, cfg), column = basis.value;
+      if (settle && String(alpha) !== cutoff.value) cutoff.value = String(alpha);
+      var found = ctxCalls.call(rows, cfg, t, column, alpha), parts = found.parts;
+      var restyled = { x: [], y: [], customdata: [] }, traces = [];
+      ["up", "down", "ns"].forEach(function (k) {
+        traces.push(cfg.traces[cfg.levels[k]]);
+        restyled.x.push(parts[k].map(function (r) { return r[cfg.lfc]; }));
+        restyled.y.push(parts[k].map(function (r) { return height(r[cfg.p]); }));
+        restyled.customdata.push(parts[k].map(function (r) { return ctxHover.row(r, cfg.hover); }));
+      });
+      var yline = found.line === null ? null : height(found.line), lines = cfg.cutoff_lines;
+      Plotly.restyle(div, restyled, traces);
+      Plotly.restyle(div, {
+        x: [[t, t], [-t, -t], [Math.min(xmin, -t), Math.max(xmax, t)]],
+        y: [[0, ytop], [0, ytop], yline === null ? [null, null] : [yline, yline]],
+        visible: [shownAs(lines[0], true), shownAs(lines[1], true),
+                  yline === null ? false : shownAs(lines[2], true)]
+      }, lines);
+      var values = {
+        n_tested: count(cfg.n_tested), tested: cfg.tested, reference: cfg.reference,
+        fc: fmt(t, 2), fold_up: fmt(Math.pow(2, t), 2), fold_down: fmt(Math.pow(2, -t), 2),
+        pct_up: fmt(100 * (Math.pow(2, t) - 1), 1), pct_down: fmt(100 * (1 - Math.pow(2, -t)), 1),
+        basis: cfg.bases[column], cutoff: String(alpha),
+        y_line: yline === null ? "" : fmt(yline, 2),
+        n_up: count(parts.up.length), n_down: count(parts.down.length), unit: cfg.unit
+      };
+      values.line_rule = fill(yline === null ? cfg.no_line_rule : cfg.line_rule, values);
+      reading.forEach(function (li) {
+        li.textContent = fill(cfg.reading[Number(li.getAttribute("data-reading"))], values);
+      });
+      if (summary) summary.textContent = fill(cfg.summary, values);
+      mark(ctxCalls.moved(cfg, t, column, alpha));
+      fig.ctxCalls = { up: parts.up, down: parts.down };
+      fig.dispatchEvent(new CustomEvent("ctx-calls"));
+    }
+    unit.addEventListener("change", function () {
+      fc.value = ctxCalls.switchUnit(state, fc.value, unit.value);
+      update(true);
+    });
+    function stepCutoff(dir) {
+      cutoff.value = String(ctxCalls.step(cutoff.value, dir, cfg));
+      update(true);
+    }
+    cutoff.addEventListener("keydown", function (e) {
+      var dir = e.key === "ArrowUp" ? 1 : e.key === "ArrowDown" ? -1 : 0;
+      if (dir) { e.preventDefault(); stepCutoff(dir); }
+    });
+    form.querySelectorAll("[data-step]").forEach(function (b) {
+      b.addEventListener("click", function () { stepCutoff(Number(b.getAttribute("data-step"))); });
+    });
+    form.addEventListener("input", function (e) { if (e.target !== unit) update(false); });
+    form.addEventListener("change", function (e) { if (e.target !== unit) update(true); });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    form.addEventListener("reset", function () {
+      setTimeout(function () { state = { exact: null, shown: null, unit: unit.value }; update(true); }, 0);
+    });
+    update(false);
+  }
+{% endraw %}
