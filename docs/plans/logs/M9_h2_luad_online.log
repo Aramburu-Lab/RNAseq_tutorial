@@ -1,0 +1,155 @@
+2026-10-15T13:33:20Z ctx --root /Users/rytis/ctx_lung genecard --dataset tcga_luad --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a209f728a6cb9c172/conf/datasets/tcga_luad.toml --genes NKX2-1,SFTPC,EGFR,MKI67 --online
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_overview_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/index.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_evidence_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_evidence_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_evidence_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_consensus_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_consensus_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_consensus_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_lines_v1.parquet
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_lines_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_lines_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_nkx2_1_136352_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_nkx2_1_136352_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_nkx2_1_136352_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_nkx2_1_136352_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_nkx2_1_136352_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_nkx2_1_136352_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_nkx2_1_136352_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_nkx2_1_136352_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_nkx2_1_136352_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_nkx2_1_136352_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_nkx2_1_136352_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_nkx2_1_136352_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_nkx2_1_136352_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_nkx2_1_136352_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_nkx2_1_136352_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_nkx2_1_136352_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_nkx2_1_136352_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_nkx2_1_136352_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_nkx2_1_136352_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_nkx2_1_136352_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_nkx2_1_136352_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_nkx2_1_136352_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_nkx2_1_136352_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_nkx2_1_136352_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_nkx2_1_136352_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_nkx2_1_136352_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_nkx2_1_136352_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_nkx2_1_136352_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_sftpc_168484_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_sftpc_168484_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_sftpc_168484_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_sftpc_168484_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_sftpc_168484_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_sftpc_168484_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_sftpc_168484_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_sftpc_168484_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_sftpc_168484_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_sftpc_168484_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_sftpc_168484_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_sftpc_168484_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_sftpc_168484_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_sftpc_168484_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_sftpc_168484_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_sftpc_168484_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_sftpc_168484_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_sftpc_168484_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_sftpc_168484_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_sftpc_168484_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_sftpc_168484_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_sftpc_168484_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_sftpc_168484_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_sftpc_168484_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_sftpc_168484_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_sftpc_168484_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_sftpc_168484_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_sftpc_168484_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_egfr_146648_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_egfr_146648_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_egfr_146648_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_egfr_146648_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_egfr_146648_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_egfr_146648_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_egfr_146648_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_egfr_146648_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_egfr_146648_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_egfr_146648_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_egfr_146648_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_egfr_146648_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_egfr_146648_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_egfr_146648_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_egfr_146648_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_egfr_146648_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_egfr_146648_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_egfr_146648_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_egfr_146648_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_egfr_146648_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_egfr_146648_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_egfr_146648_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_egfr_146648_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_egfr_146648_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_egfr_146648_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_egfr_146648_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_egfr_146648_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_egfr_146648_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_tissues_mki67_148773_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_exons_mki67_148773_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_junctions_mki67_148773_v1_README.md
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_mki67_148773_v1_white.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_mki67_148773_v1_black.pdf
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_mki67_148773_v1_white.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_mki67_148773_v1_black.svg
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_mki67_148773_v1.html
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_mki67_148773_v1.csv
+/Users/rytis/ctx_lung/outputs/11_genecard/2026-10-15_genecard_tcga_luad_immune_mki67_148773_v1_README.md
+      198.09 real        68.70 user        11.78 sys
+           706871296  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             1189753  page reclaims
+             1336420  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                 337  messages sent
+               12353  messages received
+                   0  signals received
+                 339  voluntary context switches
+              205130  involuntary context switches
+        761088878957  instructions retired
+        278356866113  cycles elapsed
+           596707152  peak memory footprint
+exit 0
