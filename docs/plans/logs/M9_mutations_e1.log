@@ -1,0 +1,24 @@
+caught: F2: a sex view drawing both sexes
+caught: F2: a view's lead from the all-donor medians
+caught: F2: a view of a sex with no donor
+caught: F2: a view in its own order
+caught: F2: the built figure not first
+caught: F3: the scale ignored in Python
+caught: F3 twin: the scale ignored
+caught: F3 twin: the last of tied tops
+caught: F3 twin: lineages not filtered
+caught: F3 twin: tau below the detection limit
+caught: F4 twin: tissues not restricted
+caught: F4 twin: a CV over one tissue
+caught: F4 twin: the top step lost
+caught: F4 twin: bounds left-closed
+caught: F4 twin: the last of tied pairs
+caught: F4 twin: exons ordered as text
+caught: evidence: an uncalled cell in its step
+caught: evidence: an untested cell grey
+caught: evidence: no row limit
+caught: evidence: the rest lost
+caught: evidence: drawn for one contrast
+caught: evidence: left off the page
+caught: evidence: two genes of one symbol on one row
+23 of 23 caught

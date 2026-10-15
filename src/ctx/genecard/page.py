@@ -5,6 +5,7 @@ not be read leaves a line naming why in place of its panels (degraded, never dro
 """
 
 import re
+from collections import Counter
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -14,6 +15,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Dataset
+from ctx.de.page import every
 from ctx.de.run import Writer
 from ctx.genecard import annotation, figures, gtex, hpa, junctions
 from ctx.genecard.cards import Card
@@ -36,6 +38,7 @@ from ctx.report.builder import (
     write,
 )
 from ctx.report.entry import write_entry
+from ctx.report.views import viewed
 from ctx.viz.save import figure_block, write_figure
 
 PAGE = "genecard"
@@ -209,18 +212,27 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         items.insert(0, fill("gene.renamed", typed=card.renamed, release=release,
                              gene=f"ENSG{card.number:011d}", symbol=card.symbol))  # fmt: skip
 
-    def panel(data: Any, kind: str, words: FigureText) -> None:
-        """A figure of the card: its page block now, its files once the card is kept."""
+    def panel(data: Any, kind: str, words: FigureText,
+              views: list[tuple[str, Any, FigureText]] | None = None) -> None:  # fmt: skip
+        """A figure of the card: its page block now, its files once the card is kept.
+
+        With ``views``, the first being the figure as built, the block carries a select
+        between them (the D-051 view kind); the files draw the first.
+        """
         what, words = (
             f"{kind}_{_slug(card)}",
             replace(words, back=f"{writer.stem('overview')}.html"),
         )
         panels.append((data, what, words))
-        items.append(figure_block(data, writer.stem(what), words))
+        block = figure_block(data, writer.stem(what), words)
+        if views is not None and len(views) > 1:
+            block = viewed(block, views, word(f"figures.{kind}.view"))
+        items.append(block)
 
     if card.tissues is not None:
-        strip, numbers = figures.tissues(card)
-        panel(strip, "tissues", _words("tissues", numbers))
+        views = [(label, data, _words("tissues", numbers))
+                 for label, data, numbers in figures.tissue_views(card)]  # fmt: skip
+        panel(views[0][1], "tissues", views[0][2], views)
     if card.exons is not None:
         if (drawn := figures.exons(card)) is None:
             items.append(fill("figures.exons.too_few", symbol=card.symbol,
@@ -337,9 +349,52 @@ def _sources(ctx: Context) -> Group:
                                          word("sources.gtex_rerelease")))  # fmt: skip
 
 
-def _module_page(ctx: Context, drawn: list[Drawn], left: list[Card]) -> ModulePage:
+@dataclass(frozen=True)
+class Evidence:
+    """The genes-by-contrasts view of the whole card list, and its figure for the files."""
+
+    group: Group
+    figure: tuple[Any, str, FigureText]
+
+
+def _shown_names(cards: list[Card]) -> dict[int, str]:
+    """Each card's row name in the evidence view: its symbol, with its ID where two share one."""
+    seen = Counter(c.symbol for c in cards)
+    return {c.number: c.symbol if seen[c.symbol] == 1 else f"{c.symbol} {c.gene_id}" for c in cards}
+
+
+def evidence_view(writer: Writer, ctx: Context) -> Evidence | None:
+    """Every listed gene in every contrast (GS.9's tier 1), before the cards; None for one contrast.
+
+    It covers the whole list, cards left out included, since its numbers are M5's alone. A
+    dataset with one contrast has its one column in each card's table already.
+    """
+    if len(ctx.spec.contrasts) < 2:  # noqa: PLR2004 - a view across contrasts needs two
+        return None
+    labels = {n: w.label for n, w in every(ctx.spec.contrasts, ctx.spec.columns).items()}
+    names = _shown_names(ctx.chosen)
+    heat, numbers, rest = figures.evidence_view(ctx.evidence, names, labels)
+    words = replace(_words("evidence", numbers), back=f"{writer.stem('overview')}.html")
+    items: list[Any] = [figure_block(heat, writer.stem("evidence_view"), words)]
+    if rest:
+        rows = []
+        for n in rest:
+            calls = ctx.evidence.filter(pl.col("number") == n)
+            counts = [int((calls["call"] == k).sum()) for k in figures.CALLS]
+            rows.append((names[n], *(f"{c:,}" for c in counts),
+                         f"{calls['padj'].is_not_null().sum():,}"))  # fmt: skip
+        items.append(ResultTable(fill("figures.evidence.rest", n=len(rest)),
+                                 text.words(PAGE, "figures.evidence.rest_columns"), tuple(rows),
+                                 numeric=(1, 2, 3)))  # fmt: skip
+    group = Group(word("figures.evidence.group"), tuple(items))
+    return Evidence(group, (heat, "evidence_view", words))
+
+
+def _module_page(ctx: Context, drawn: list[Drawn], left: list[Card],
+                 evidence: Evidence | None = None) -> ModulePage:  # fmt: skip
     """The page over the cards it keeps: the first drawn whole, the rest packed (C3.1)."""
-    results: list[Result] = [_group(d, packed=i > 0) for i, d in enumerate(drawn)]
+    results: list[Result] = [] if evidence is None else [evidence.group]
+    results += [_group(d, packed=i > 0) for i, d in enumerate(drawn)]
     if left:
         results.append(_left_out(ctx, left))
     results.append(_sources(ctx))
@@ -395,10 +450,11 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     """
     page = writer.out / f"{stem(PAGE, f'{writer.dataset}_overview', 1, day=writer.day)}.html"
     drawn = [_card(writer, c, ctx) for c in ctx.chosen]
+    view = evidence_view(writer, ctx)
 
     def pages(k: int) -> tuple[str, list[int]]:
         """The page over the first ``k`` cards, as written, and each packed card's bytes."""
-        html = rendered(_module_page(ctx, drawn[:k], [d.card for d in drawn[k:]]), page)
+        html = rendered(_module_page(ctx, drawn[:k], [d.card for d in drawn[k:]], view), page)
         return html, packed_bytes(html)
 
     kept = fit(pages, len(drawn), MAX_BYTES)
@@ -409,9 +465,9 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
         evidence=ctx.evidence.filter(pl.col("number").is_in(numbers)),
     )
     _tables(writer, shown)
-    for d in drawn[:kept]:
-        for data, what, words in d.figures:
-            writer.files += write_figure(data, writer.out, writer.stem(what), title=words.title,
-                                         data_releases=writer.releases, text=words)  # fmt: skip
-    built = _module_page(ctx, drawn[:kept], [d.card for d in drawn[kept:]])
+    figures_kept = [f for d in drawn[:kept] for f in d.figures]
+    for data, what, words in ([view.figure] if view is not None else []) + figures_kept:
+        writer.files += write_figure(data, writer.out, writer.stem(what), title=words.title,
+                                     data_releases=writer.releases, text=words)  # fmt: skip
+    built = _module_page(ctx, drawn[:kept], [d.card for d in drawn[kept:]], view)
     return [write(built, page), write_entry(writer.out, "genecard"), *writer.files]
