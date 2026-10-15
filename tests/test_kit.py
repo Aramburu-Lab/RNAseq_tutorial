@@ -487,7 +487,7 @@ def committed(name: str, at: str = "HEAD") -> str:
 @pytest.mark.parametrize("name", ["tier1.toml", "tcga_kirc.toml"])
 def test_every_committed_version_of_a_dataset_file_is_the_codebases(kit_script, name):
     """K.9: a gather run reads whichever version its commit held, so every version counts,
-    a merge's included: ~/ctx_kidney's TCGA-KIRC gather read the version merge 789f8ad made.
+    a merge's included: ~/ctx_kidney's TCGA gather read the version merge 789f8ad made.
     Mutations caught: only the newest commit read (git log -n 1); merges skipped (no -m)."""
     codebase = kit_script.codebase_datasets()
     commits = subprocess.run(["git", "-C", str(ROOT), "log", "--format=%H", "--",

@@ -27,9 +27,9 @@ README.md and MANIFEST.json. A development kit keeps the previews, marked Made-u
 
 ``--note FOLDER=TEXT`` writes one root's note into README.md, on its dataset line, and into
 MANIFEST.json (K.10), so no README is edited after a build: for example
-``--note "kidney=M9 on TCGA-KIRC shows the [clinical] genes only."``. A note passes the prose
-lint; one naming no ``--real`` or ``--made-up`` folder stops the build before anything is
-written.
+``--note "kidney=M9 on the TCGA dataset shows the [clinical] genes only."``. A note passes
+the prose lint; one naming no ``--real`` or ``--made-up`` folder stops the build before
+anything is written.
 
 A raw GDC count matrix never ships (Rytis 2026-10-09; kit v8's were 94 to 205 MB). The rule
 reads the data, not a list of names: a gather table of the counts kind whose README names a
