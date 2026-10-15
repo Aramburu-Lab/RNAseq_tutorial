@@ -111,11 +111,11 @@ def gather(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
     dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
-    gdc_dir: Annotated[Path | None, typer.Option(help=HELP["--gdc-dir"])] = None,
+    gdc_dir: Annotated[list[Path] | None, typer.Option(help=HELP["--gdc-dir"])] = None,
     mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
     isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
 ) -> None:
-    """Check one nf-core/fetchngs outdir or GDC folder and write the sample sheet (M1c)."""
+    """Check one nf-core/fetchngs outdir or GDC folders and write the sample sheet (M1c)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
     from ctx.gather import gdc_run, harmonise  # noqa: PLC0415 - heavy; after the runtime profile
     from ctx.gather.curation import CurationError  # noqa: PLC0415 - same reason
@@ -128,11 +128,11 @@ def gather(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
     try:
-        if gdc_dir is not None:
+        if gdc_dir:
             if fetchngs_dir or rnaseq_dir or dataset_file is None:
                 raise DatasetError("--gdc-dir takes --dataset-file, and neither --fetchngs-dir "
                                    "nor --rnaseq-dir")  # fmt: skip
-            written = gdc_run.run(ctx.obj["settings"], cards, command, dataset, gdc_dir=gdc_dir,
+            written = gdc_run.run(ctx.obj["settings"], cards, command, dataset, gdc_dirs=gdc_dir,
                                   dataset_file=dataset_file, mirna_dir=mirna_dir,
                                   isoform_dir=isoform_dir)  # fmt: skip
         elif mirna_dir or isoform_dir:

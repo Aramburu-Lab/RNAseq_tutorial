@@ -1,0 +1,45 @@
+2026-10-15T13:20:30Z ctx --root /Users/rytis/ctx_kidney gather --dataset cptac_ccrcc --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a8ab53e1e7f33bad4/conf/datasets/cptac_ccrcc.toml --gdc-dir /Users/rytis/ctx_kidney/data/raw/cptac_ccrcc_star
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_overview_v1.html
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_samplesheet_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_samplesheet_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_samplesheet_v1_README.md
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_counts_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_counts_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_counts_v1_README.md
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_genes_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_genes_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_genes_v1_README.md
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_annotations_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_annotations_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_annotations_v1_README.md
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_cases_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_cases_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_cases_v1_README.md
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_treatments_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_treatments_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_treatments_v1_README.md
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_molecular_tests_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_molecular_tests_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_molecular_tests_v1_README.md
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_aliquots_v1.parquet
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_aliquots_v1.csv
+/Users/rytis/ctx_kidney/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_aliquots_v1_README.md
+       38.27 real         8.15 user         2.31 sys
+           527859712  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              166021  page reclaims
+               15363  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 734  voluntary context switches
+              121884  involuntary context switches
+        109339195126  instructions retired
+         37760305865  cycles elapsed
+           411354696  peak memory footprint
+exit 0

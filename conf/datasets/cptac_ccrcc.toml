@@ -12,8 +12,11 @@
 # 75 normal files of 75 cases, every normal case also with a tumour.
 #
 # Clark 2019 analysed 103 of the 110 tumours: the clinical workbook (S050_S044 r4) calls 7
-# non-clear-cell, and 2 of them, C3N-00435 and C3N-01175, have GDC tumour and normal files, so
-# the paired contrast below holds them; GDC's metadata carries no histology to leave them out by.
+# non-clear-cell, and 2 of them, C3N-00435 and C3N-01175, have GDC tumour and normal files.
+# GDC's metadata carries no histology, so [gdc] exclude_cases names the 7 from the workbook
+# (docs/plans/logs/S_ccrcc_exclusion.log, package S 2026-10-15): gather drops their files first,
+# so M5 and M7 both read the 103 clear cell tumours. Of the 84 protein normals, 81 are of clear
+# cell cases and 73 of them have a GDC normal file; Clark's correlations used 72 NATs.
 
 [dataset]
 slug = "cptac_ccrcc"
@@ -23,11 +26,12 @@ source = "CPTAC clear cell renal cell carcinoma, Clark et al. 2019 Cell, doi:10.
 # The paper's protein table: one TSV in the tarball, 6_CPTAC3_CCRCC_Whole_abundance_gene_
 # protNorm=2_CB.tsv, log2 abundance per gene with each sample named by its PDC aliquot (Clark
 # 2019 STAR Methods use this file for the mRNA-protein correlations). It is not GCT and carries
-# no column annotation, so M7's reader (ctx.proteo.tables.read_gct) cannot open it and no
-# [proteo] or [columns] table is declared yet. PDC's md5 0fa5f5b83969d0b12a177c912a206a77;
-# size and SHA-256 measured on the download of 2026-10-09 (_manifest_cptac_ccrcc.tsv). Fetched
-# by hand under the CPTAC data use agreement (D-057), so ctx setup registers it in place by hash
-# and the kit ships derived tables only (D-064).
+# no column annotation: ctx.proteo.tables.read_tsv reads it, gather's aliquots (PDC's
+# biospecimens) give each column's case and sample type, and the mapping workbook its plex.
+# PDC's md5 0fa5f5b83969d0b12a177c912a206a77; size and SHA-256 measured on the download of
+# 2026-10-09 (_manifest_cptac_ccrcc.tsv). Fetched by hand under the CPTAC data use agreement
+# (D-057), so ctx setup registers it in place by hash and the kit ships derived tables only
+# (D-064).
 [[resources]]
 name = "cptac_proteome"
 urls = ["pdc://PDC000127/Supplementary_Data_Proteome_TMT.tar.gz"]
@@ -35,12 +39,41 @@ bytes = 15052030
 sha256 = "7720ddd6caf3cc2877b892a3fa4a9d9fc33a4c853395477c13cc0bbfa8bbdf9d"
 dest = "data/raw/cptac_ccrcc/Supplementary_Data_Proteome_TMT.tar.gz"
 
+# PDC files both workbooks under Other Metadata (ctx.proteo.pdc.CATEGORIES); md5, size and
+# SHA-256 from the same manifest, each equal to PDC's listing (pdc_response_other_metadata.json).
+# The TMT10 mapping: each aliquot's plex, 23 whole-proteome plexes.
+[[resources]]
+name = "cptac_tmt_mapping"
+urls = ["pdc://PDC000127/S044_TMT10_Label_to_Sample_Mapping_File_CCRCC_r2_Jan2019.xlsx"]
+bytes = 23811
+sha256 = "aec0c4821adae98e8cc385e76e1b5d31cc72a4ab5d511a6fdf53d7521fcfe07e"
+dest = "data/raw/cptac_ccrcc/S044_TMT10_Label_to_Sample_Mapping_File_CCRCC_r2_Jan2019.xlsx"
+
+# The clinical workbook, release 4: the histologic types [gdc] exclude_cases is read from.
+[[resources]]
+name = "cptac_clinical"
+urls = ["pdc://PDC000127/S050_S044_CPTAC_ccRCC_Discovery_Cohort_Clinical_Data_r4_Sept2019.xlsx"]
+bytes = 139294
+sha256 = "222c97ae4b6a63b890d5a08c97ceefb104afd17e319617e074720e3dc442c365"
+dest = "data/raw/cptac_ccrcc/S050_S044_CPTAC_ccRCC_Discovery_Cohort_Clinical_Data_r4_Sept2019.xlsx"
+
+# MSigDB Hallmark for M7's OXPHOS and glycolysis classes, the file tcga_kirc.toml and tier1.toml
+# declare, copied in place from ~/ctx_tier1 and registered by hash.
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
 # CPTAC-3 holds kidney, lung, pancreas and other sites, so the primary-site filter keeps kidney;
 # the folder was fetched for PDC000127's 110 tumour cases only. All 277 files are reverse
 # stranded by the QC registry's strand rule (first-strand share 0.0573 to 0.0767, measured
 # 2026-10-14 with ctx.gather.gdc's reader, docs/plans/logs/H_ccrcc_strand.log), so the counts
-# come from stranded_second. No TCGA-CDR: CPTAC is not in it. M7's rules are registered in
-# docs/plans/2026-10-14_cptac_ccrcc_m7_rules.md until [proteo] can be declared.
+# come from stranded_second. No TCGA-CDR: CPTAC is not in it. M7's rules were registered in
+# docs/plans/2026-10-14_cptac_ccrcc_m7_rules.md and are pasted under [proteo.sanity] unchanged.
 [gdc]
 project = "CPTAC-3"
 release = "Data Release 46.0 - August 10, 2026"
@@ -50,6 +83,11 @@ protocol = "stranded_second"
 tumour = "Primary Tumor"
 normal = "Solid Tissue Normal"
 primary_site = "Kidney"
+# The fetch saved PDC000127's biospecimens beside the counts, logged under the release.
+biospecimens = "pdc_biospecimen_PDC000127.json"
+exclude_cases = ["C3L-00359", "C3N-00313", "C3N-00435", "C3N-00492", "C3N-00832", "C3N-01175",
+                 "C3N-01180"]
+exclude_reason = "non-clear-cell renal cell carcinoma by the clinical workbook's histologic_type (S050_S044 r4), which Clark et al. 2019 left out of their 103 tumours."
 
 # Case IDs (C3L-00004, C3N-00148). Aliquot IDs (CPT followed by digits) are not guarded:
 # tests/test_gdc.py builds a made-up one for the reader's CPTAC path.
@@ -58,7 +96,8 @@ ids = ["PDC000127"]
 patterns = ['\bC3[LN]-\d{5}\b']
 
 # M5 on this project: every patient with a tumour and a normal file taken by
-# ctx.gather.gdc.chosen, paired. n is the pairs `ctx gather --gdc-dir` kept on 2026-10-14.
+# ctx.gather.gdc.chosen, paired. n is the pairs `ctx gather --gdc-dir` keeps once the 7
+# non-clear-cell cases are excluded: 73 of the 75 (75 on 2026-10-14, before the exclusion).
 [[contrasts]]
 name = "tumour_normal"
 variable = "condition"
@@ -66,7 +105,89 @@ reference = "normal"
 tested = "tumour"
 design = "~donor + group"
 paired = true
-n = [75, 75]
+n = [73, 73]
 
 [de]
 featured = "tumour_normal"
+
+# M7 (H.1): each case's tumour and normal at both layers. Per-gene correlation across the
+# tumours and across the normals, and the paired fold changes of tumour_normal: M5's at RNA,
+# the paired t at protein on the same cases. The quantified filter is M7's 70 %; a missing
+# protein value is never a zero. positive_fdr is Clark 2019's BH 0.01 for a positive
+# mRNA-protein correlation, which rules C0 to C2 compare with.
+[proteo]
+design = "tumour_normal"
+protein = "cptac_proteome"
+label = "CPTAC ccRCC proteome, Clark et al. 2019"
+member = "6_CPTAC3_CCRCC_Whole_abundance_gene_protNorm=2_CB.tsv"
+descriptors = ["Index", "NumberPSM", "Proteins", "ReferenceIntensity"]
+unit = "log2 abundance"
+plex = "plex"
+plex_map = "cptac_tmt_mapping"
+plex_rows = "_Proteome_"
+contrast = "tumour_normal"
+genes = ["CA9"]
+positive_fdr = 0.01
+
+[proteo.classes.oxphos]
+resource = "msigdb_hallmark"
+sets = ["HALLMARK_OXIDATIVE_PHOSPHORYLATION"]
+
+[proteo.classes.glycolysis]
+resource = "msigdb_hallmark"
+sets = ["HALLMARK_GLYCOLYSIS"]
+
+# Registered in docs/plans/2026-10-14_cptac_ccrcc_m7_rules.md (commit f90eda5) before any M7
+# run on this cohort, pasted here unchanged (lessons.md: compare the rule in force with the one
+# first committed; tests/test_proteo_tumour_normal.py does).
+[proteo.sanity]
+registered_at = "2026-10-14 15:45"
+
+[[proteo.sanity.rules]]
+id = "C0"
+text = "Recorded, not gating: the share of genes with a positive Spearman rho at BH 0.01 across tumours and across NATs, beside Clark 2019's 74 % and 52 %."
+source = "Clark et al. 2019 Cell, doi:10.1016/j.cell.2019.10.007: 74 % and 52 % of 7,027 mRNA-protein pairs significant and positive, BH 0.01, over 103 tumours and 72 NATs"
+gate = false
+conditions = [{ metric = "pergene.tumour.positive_share", op = ">", value = 0 }]
+
+[[proteo.sanity.rules]]
+id = "C1"
+text = "Most genes have a positive Spearman rho between mRNA and protein across tumours, at BH 0.01."
+source = "Clark et al. 2019 Cell: 74 % of mRNA-protein pairs over 103 tumours; 0.5 is a course convention for a majority"
+conditions = [{ metric = "pergene.tumour.positive_share", op = ">", value = 0.5 }]
+
+[[proteo.sanity.rules]]
+id = "C2"
+text = "More genes correlate positively across tumours than across normal-adjacent tissue."
+source = "Clark et al. 2019 Cell: 74 % over 103 tumours against 52 % over 72 NATs"
+conditions = [{ metric = "pergene.tumour.positive_share", op = ">", other = "pergene.normal.positive_share" }]
+
+[[proteo.sanity.rules]]
+id = "C3"
+text = "OXPHOS proteins fall in tumours against their paired normals, more than their mRNA does."
+source = "Clark et al. 2019 Cell: OXPHOS downregulated in tumours at the protein level, its mRNA and protein uncoupled; MSigDB v2026.1.Hs HALLMARK_OXIDATIVE_PHOSPHORYLATION"
+conditions = [
+    { metric = "class.oxphos.protein_lfc.median", op = "<", value = 0 },
+    { metric = "class.oxphos_below_other.p", op = "<", value = 0.05 },
+]
+
+[[proteo.sanity.rules]]
+id = "C4"
+text = "Glycolysis proteins rise in tumours against their paired normals."
+source = "Clark et al. 2019 Cell: proteins of the glycolysis pathway and their mRNAs upregulated in tumours; MSigDB v2026.1.Hs HALLMARK_GLYCOLYSIS"
+conditions = [{ metric = "class.glycolysis.protein_lfc.median", op = ">", value = 0 }]
+
+[[proteo.sanity.rules]]
+id = "C5"
+text = "CA9 protein rises in clear cell tumours against their paired normals."
+source = "Tostain et al. 2010 Eur J Cancer, doi:10.1016/j.ejca.2010.07.020: CA9 absent from healthy renal tissue, expressed in most clear cell carcinomas; thresholds M5's"
+conditions = [
+    { metric = "protein.tumour_normal.CA9.lfc", op = ">=", value = 1.0 },
+    { metric = "protein.tumour_normal.CA9.padj", op = "<", value = 0.05 },
+]
+
+[[proteo.sanity.rules]]
+id = "C6"
+text = "The missingness figures come before every test on the page."
+source = "TODO.md, Verification: M7 sanity, missingness plotted before any test"
+conditions = [{ metric = "page.missingness_first", op = "==", value = 1 }]

@@ -70,7 +70,7 @@ def _notes(ctx: Context) -> list[Result]:
     if p.design == "cross_dataset":
         out.append(text.fill(PAGE, "cross_study", rna=ctx.spec.name,
                              protein=p.label or p.protein))  # fmt: skip
-    else:
+    elif p.design == "across_samples":
         out.append(text.word(PAGE, "unregistered"))
     out.append(text.fill(PAGE, "collapse", rows=c.rows, no_symbol=c.no_symbol,
                          several=c.several_genes, twice=c.genes_twice, kept=c.kept))  # fmt: skip
@@ -108,28 +108,36 @@ def _across(writer: Writer, ctx: Context) -> list[Result]:
               "eps": test.epsilon2, "p_class": _p(below[0]),
               "n_sig": tested.filter((pl.col("rho_padj") < ALPHA)
                                      & (pl.col("rho") > 0)).height}  # fmt: skip
-    out: list[Result] = [Group(text.word(PAGE, "groups.correlation"),
-                               (figures.rho_by_class(writer, tested, values),))]  # fmt: skip
+    values["class_test"] = text.fill(PAGE, "figures.rho.class_test", p_class=_p(below[0])
+                                     ) if "complex_below" in m.extra else ""  # fmt: skip
+    figure = figures.rho_by_class(writer, tested, values)
+    out: list[Result] = [*_shifts(ctx), Group(text.word(PAGE, "groups.correlation"), (figure,))]
     rna, protein = m.extra["rna"], m.extra["values"]
     annotation = m.extra["annotation"]
     rows = {g: i for i, g in enumerate(m.genes["gene"])}
     blocks = []
     tested_rows = set(m.genes.filter("tested")["gene"])
+    # Tumour against normal draws both tissues, coloured by tissue; rho stays the tumours'.
+    paired = "worked" in m.extra
+    shown_rna, shown_protein, shown = m.extra.get("worked", (rna, protein, annotation))
+    track = "tissue" if paired else p.amplified or p.plex
     for gene in [g for g in p.genes if g in tested_rows]:
         i = rows[gene]
-        keep = ~np.isnan(protein[i])
+        keep = ~np.isnan(shown_protein[i])
         frame = pl.DataFrame(
             {
-                "sample": annotation["sample"].filter(pl.Series(keep)),
-                "rna": rna[i][keep],
-                "protein": protein[i][keep],
-                "track": annotation[p.amplified or p.plex].filter(pl.Series(keep)),
+                "sample": shown["sample"].filter(pl.Series(keep)),
+                "rna": shown_rna[i][keep],
+                "protein": shown_protein[i][keep],
+                "track": shown[track].filter(pl.Series(keep)),
             }
         )
         row = m.genes.row(i, named=True)
         blocks.append(figures.worked(writer, gene, frame, {
-            "rho": row["rho"], "r": row["r"], "n": frame.height, "track": p.amplified,
-            "padj": _p(row["rho_padj"])}))  # fmt: skip
+            "rho": row["rho"], "r": row["r"], "track": track, "padj": _p(row["rho_padj"]),
+            "n": int(row["n_quantified"]) if paired else frame.height,
+            "unit": p.unit or text.word(PAGE, "unit_ratio")},
+            caption=f"figures.worked.caption{'_paired' if paired else ''}"))  # fmt: skip
     if blocks:
         out.append(Group(text.word(PAGE, "groups.worked"), tuple(blocks)))
     named = [*(k for k in p.published.get("mertins", {}) if k.isupper()), *p.genes]
@@ -144,13 +152,35 @@ def _across(writer: Writer, ctx: Context) -> list[Result]:
     return out
 
 
+def _shifts(ctx: Context) -> list[Result]:
+    """One line per declared class of the paired design: its fold changes and its shift test."""
+    m = ctx.measured
+    if "paired_genes" not in m.extra:
+        return []
+    found = {name: value for name, value, _ in m.metrics}
+    out: list[Result] = []
+    for name in ctx.spec.proteo.classes if ctx.spec.proteo else ():
+        n = m.extra["paired_genes"].filter(pl.col("gene_class") == name).height
+        out.append(text.fill(PAGE, "class_shift", name=figures.class_name(name), n=n,
+                             protein=found[f"class.{name}.protein_lfc.median"],
+                             rna=found[f"class.{name}.rna_lfc.median"],
+                             below=_p(found.get(f"class.{name}_below_other.p", np.nan)),
+                             above=_p(found.get(f"class.{name}.p", np.nan))))  # fmt: skip
+    return out
+
+
 def _contrast(writer: Writer, made: folds.Folds) -> FigureBlock:
     """F4 for one contrast, its numbers filled into the text."""
     rho, low, high = made.rho
     c = made.contrast
+    n_protein = f"{c.reference} {made.n_protein[0]}, {c.tested} {made.n_protein[1]}"
+    if made.paired:
+        n_protein = text.fill(PAGE, "figures.contrast.pairs", n=made.n_protein[0])
+    test = "paired" if made.paired else "welch"
     values = {"tested": c.tested, "reference": c.reference, "n_genes": made.genes.height,
               "n_rna": f"{c.reference} {c.expected_n[0]}, {c.tested} {c.expected_n[1]}",
-              "n_protein": f"{c.reference} {made.n_protein[0]}, {c.tested} {made.n_protein[1]}",
+              "n_protein": n_protein,
+              "test": text.word(PAGE, f"figures.contrast.test.{test}"),
               "alpha": ALPHA,
               "lfc": LFC_MIN, "ci": round(100 * concordance.LEVEL),
               "rho": np.nan if rho is None else rho, "low": np.nan if low is None else low,
@@ -223,7 +253,7 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write every table and figure, decide the rules, then the page; the page first."""
     m = ctx.measured
     missing = _missingness(writer, ctx)
-    across = ctx.spec.proteo is not None and ctx.spec.proteo.design == "across_samples"
+    across = ctx.spec.proteo is not None and ctx.spec.proteo.design != "cross_dataset"
     tests = _across(writer, ctx) if across else _cross(writer, ctx)  # fmt: skip
     results: list[Result] = [*_notes(ctx), Group(text.word(PAGE, "groups.missing"), tuple(missing)),
                              *tests]  # fmt: skip

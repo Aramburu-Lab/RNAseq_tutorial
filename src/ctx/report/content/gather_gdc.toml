@@ -84,7 +84,7 @@ step = "Step"
 tumour = "Tumour"
 normal = "Normal"
 other = "Other"
-steps = ["Files", "Patients", "FFPE dropped", "Other protocol dropped", "Redacted", "Patients kept", "Patients lost", "Decided by the first aliquot ID"]
+steps = ["Files", "Patients", "Excluded by the dataset file", "FFPE dropped", "Other protocol dropped", "Redacted", "Patients kept", "Patients lost", "Decided by the first aliquot ID"]
 pairs = "Patients with a tumour and a normal file taken: {kept:,} of the {both:,} with files of both."
 
 [annotations]
@@ -101,6 +101,7 @@ md5sum = ["none", "MD5 GDC lists, matched against the file on disk."]
 file_size = ["bytes", "Size GDC lists."]
 case = ["none", "Patient submitter ID."]
 case_id = ["none", "Patient UUID in GDC."]
+project = ["none", "GDC project of the file's folder; a two-project sheet compares across projects."]
 sample_id = ["none", "Sample submitter ID: the vial the aliquot came from."]
 sample_type = ["none", "GDC sample type, e.g. Primary Tumor or Solid Tissue Normal."]
 condition = ["none", "tumour, normal or other, from the dataset file's [gdc] sample types."]
@@ -123,7 +124,7 @@ n_nofeature = ["reads", "STAR's N_noFeature row of the protocol's column: reads 
 n_ambiguous = ["reads", "STAR's N_ambiguous row of the protocol's column: reads on several genes."]
 redacted = ["none", "True when a GDC redaction hits this file."]
 chosen = ["none", "True for the one file taken per patient and sample type; select with ctx.gather.gdc.chosen."]
-drop_reason = ["none", "ffpe, protocol, redacted or not_first, in the rule's order; empty when chosen."]
+drop_reason = ["none", "excluded, ffpe, protocol, redacted or not_first, in the rule's order; empty when chosen."]
 library_selection = ["none", "GDC read groups' library selection of the aliquot, e.g. rRNA Depletion; empty without the read-group record."]
 
 [columns.genes]
@@ -131,6 +132,11 @@ gene_id = ["none", "Ensembl gene ID without its version; unique once the _PAR_Y 
 gene_id_version = ["none", "Ensembl gene ID as the counts file gives it."]
 gene_name = ["none", "Gene symbol from the counts file."]
 gene_type = ["none", "GENCODE gene type from the counts file."]
+
+[columns.aliquots]
+aliquot = ["none", "PDC aliquot submitter ID, as a protein table names its sample column."]
+case = ["none", "Patient submitter ID, as the counts files' case."]
+sample_type = ["none", "PDC sample type, e.g. Primary Tumor, Solid Tissue Normal or Cell Lines."]
 
 [columns.annotations]
 case = ["none", "Patient submitter ID."]
@@ -205,7 +211,7 @@ donor = ["none", "The patient, as M5's paired designs name the individual."]
 run_accession = ["none", "GDC and the file's place in aliquot order, which M5 ranks replicates by."]
 redacted = ["none", "True when a GDC redaction of the STAR folder's annotations hits this aliquot."]
 chosen = ["none", "True for the one miRNA library taken per patient and sample type; select with ctx.gather.gdc.chosen."]
-drop_reason = ["none", "ffpe, redacted or not_first, in the rule's order; empty when chosen."]
+drop_reason = ["none", "excluded, ffpe, redacted or not_first, in the rule's order; empty when chosen."]
 rna_sample = ["none", "The STAR aliquot taken for the same sample barcode; empty where none was."]
 
 [columns.mirna_hairpins]

@@ -258,6 +258,6 @@ def sheet(found: Matrices, notes: pl.DataFrame, rna: pl.DataFrame, spec: GdcSpec
         run_accession=gdc.run_accession(),
         redacted=pl.col("sample").is_in(sorted(redacted)),
     )  # fmt: skip
-    frame = gdc.choose(frame, None)
+    frame = gdc.choose(frame, None, spec.exclude_cases)
     taken = gdc.chosen(rna).select("sample_id", rna_sample="sample")
     return frame.join(taken, on="sample_id", how="left", maintain_order="left")

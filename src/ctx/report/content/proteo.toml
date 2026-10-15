@@ -4,7 +4,7 @@
 title = "M7 RNA versus protein: {dataset}"
 budget = "Track {track}: under {minutes} min and {ram_gb} GB."
 purpose = "Measure how far protein follows RNA, per gene across samples or as fold changes in one contrast. Name the genes whose protein departs from their RNA."
-input = "Gather's counts or M5's results, and a protein table: [[TMT]] log2 ratios or [[proteomic ruler]] copy numbers. `ctx setup` accepts the CPTAC data use agreement on the reader's behalf when it fetches a PDC file: `https://cptac-data-portal.georgetown.edu/cptac/s?id=73217`."
+input = "Gather's counts or M5's results, and a protein table: [[TMT]] log2 ratios or abundances, or [[proteomic ruler]] copy numbers. `ctx setup` accepts the CPTAC data use agreement on the reader's behalf when it fetches a PDC file: `https://cptac-data-portal.georgetown.edu/cptac/s?id=73217`."
 method = """[[mass spectrometry proteomics|Mass spectrometry]] measures peptides, assembled into [[protein groups]]. Each group becomes one gene; groups naming several genes leave, and a gene measured twice keeps its best-quantified row.
 
 A protein not quantified in a sample is [[missingness|missing]], never zero. Only proteins quantified in enough samples are tested, decided in exact fractions.
@@ -28,6 +28,9 @@ zeros = "{zeros:,} cells written as 0 in the source were read as missing."
 rna_twice = "RNA: {twice:,} gene symbols shared by two or more gene IDs were left out."
 classes_note = "Gene classes from {sources}; {twice:,} genes in more than one class were left out of the class comparisons."
 paired = "{n:,} of {n_columns:,} protein samples have a chosen tumour in gather's sheet. {by_sample_id:,} of them are named by their GDC sample ID, not their case, and are paired by it."
+tumour_normal = "{n_tumour:,} tumour and {n_normal:,} normal columns of {n_columns:,} have the same patient's chosen RNA file; {n_cases:,} patients have both. {excluded:,} patients are left out by the dataset file: {reason}"
+class_shift = "{name}, {n:,} genes tested at both layers: median protein log2 FC {protein:.2f}, RNA {rna:.2f}. Protein minus RNA, one-sided Mann-Whitney against the other genes: below p = {below}, above p = {above}."
+unit_ratio = "log2 ratio to the reference"
 f4_missing = "RNA and protein calls for {contrast} are not compared: M5's results for it are absent. Run `ctx de` on a sheet with the contrast's column."
 unregistered = "The Krug 2020 band rule is not registered: its supplement prints the per-gene correlations only as a histogram, Figure S2G, with no median."
 sanity_title = "Sanity rules, registered before any protein value was read"
@@ -63,6 +66,7 @@ answer = "Granule proteins are made in the bone marrow and stored; mature neutro
 
 [abundance]
 across_samples = "log2(CPM + 1), mean over samples"
+tumour_normal = "log2(CPM + 1), mean over tumours"
 cross_dataset = "log2(M5 baseMean + 1)"
 
 [keys]
@@ -77,7 +81,7 @@ fold_detail = "Bootstrap 95 % CI {low:.2f} to {high:.2f}"
 missing = "Missingness first"
 correlation = "Does protein follow RNA"
 fold = "Do fold changes agree"
-worked = "Worked example: the ERBB2 amplicon"
+worked = "Worked genes"
 paired = "RNA and protein, tumour by tumour"
 contrast = "RNA and protein calls on the same tumours"
 
@@ -86,6 +90,8 @@ other = "Other"
 complex = "Complex subunit"
 metabolic = "Metabolic enzyme"
 granule = "Granule protein"
+oxphos = "Oxidative phosphorylation"
+glycolysis = "Glycolysis"
 count = "{name} {n:,}"
 
 [figures.quantified]
@@ -93,7 +99,7 @@ title = "Protein groups quantified per sample"
 lead = "{n_kept:,} of {n_ids:,} genes have a protein value in at least {min_pct} % of samples; the rest are not tested."
 reading = [
     "Each bar is one sample; its height counts the genes with a protein value in it.",
-    "Colour marks the group the sample belongs to: a plex or a cell type.",
+    "Colour marks the group the sample belongs to: a plex, a cell type or a tissue.",
 ]
 caption = "{n_samples} samples, {n_groups} groups; {n_ids:,} genes with a protein value in some sample, {n_all:,} in every sample. Counts, no test."
 category = "Sample"
@@ -119,7 +125,8 @@ reading = [
     "Each curve is one gene class: the share of its genes with ρ at or below each value.",
     "A curve further right holds genes whose protein follows their RNA more.",
 ]
-caption = "Spearman ρ per gene over {n_samples} samples, BH over {n_genes:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}; complex below metabolic, one-sided Mann-Whitney p = {p_class}."
+caption = "Spearman ρ per gene over {n_samples} samples, BH over {n_genes:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}{class_test}."
+class_test = "; complex below metabolic, one-sided Mann-Whitney p = {p_class}"
 x = "RNA-protein Spearman ρ"
 y = "Cumulative share of genes"
 median = "median"
@@ -130,7 +137,8 @@ lead = "Spearman ρ = {rho:.2f}, Pearson r = {r:.2f} over {n:,} samples with bot
 reading = [
     "Each dot is one sample; colour marks the {track} call of the source annotation.",
 ]
-caption = "{gene}: RNA as log2 CPM against protein as log2 ratio to the reference, over {n} samples; Spearman ρ = {rho:.2f}, BH-adjusted p = {padj}."
+caption = "{gene}: RNA as log2 CPM against protein as {unit}, over {n} samples; Spearman ρ = {rho:.2f}, BH-adjusted p = {padj}."
+caption_paired = "{gene}: RNA as log2 CPM against protein as {unit}, tumours and normals drawn; Spearman ρ = {rho:.2f} over the {n} tumours, BH-adjusted p = {padj}."
 x = "RNA"
 y = "Protein"
 
@@ -146,16 +154,21 @@ x = "RNA log2 fold change"
 y = "Protein log2 fold change"
 
 [figures.contrast]
-title = "RNA against protein fold change on the same tumours: {tested} over {reference}"
+title = "RNA against protein fold change on the same samples: {tested} over {reference}"
 lead = "RNA calls {rna_up:,} genes up and {rna_down:,} down; protein calls {protein_up:,} up and {protein_down:,} down. {both:,} genes are called at both layers, {opposite:,} of them in opposite directions."
 reading = [
     "Each contour holds most genes of one group: called at both layers, at RNA only, at protein only, or at neither.",
     "Solid line: the smallest region holding {inner} of a group's genes; dashed: {outer}. A group under {minimum} genes is drawn as points.",
     "A call at either layer needs BH-adjusted p < {alpha} and an absolute log2 fold change of at least {lfc}.",
 ]
-caption = "{tested} over {reference}; RNA: M5's DESeq2, {n_rna}; protein: Welch t, {n_protein}; BH each. Spearman ρ = {rho:.2f} over {n_genes:,} genes, {ci} % CI {low:.2f} to {high:.2f}; regions {inner} and {outer}, {bandwidth}."
+pairs = "{n:,} pairs"
+caption = "{tested} over {reference}; RNA: M5's DESeq2, {n_rna}; protein: {test}, {n_protein}; BH each. Spearman ρ = {rho:.2f} over {n_genes:,} genes, {ci} % CI {low:.2f} to {high:.2f}; regions {inner} and {outer}, {bandwidth}."
 x = "RNA log2 fold change"
 y = "Protein log2 fold change"
+
+[figures.contrast.test]
+welch = "Welch t"
+paired = "paired t"
 
 [figures.contrast.kinds]
 both = "called at both layers"
@@ -211,14 +224,23 @@ rho_padj = ["dimensionless", "Benjamini-Hochberg adjusted rho_p over the tested 
 r = ["Pearson r", "Pearson correlation of RNA and protein across samples."]
 r_p = ["dimensionless", "Two-sided p of r."]
 r_padj = ["dimensionless", "Benjamini-Hochberg adjusted r_p over the tested genes."]
+normal_n_quantified = ["samples", "Normal samples with a protein value."]
+normal_quantified_share = ["fraction", "Share of normal samples with a protein value."]
+normal_tested = ["none", "True when quantified in enough normal samples to be tested."]
+normal_rho = ["Spearman ρ", "Spearman correlation of RNA and protein across normal samples."]
+normal_rho_p = ["dimensionless", "Two-sided p of normal_rho, t-distribution."]
+normal_rho_padj = ["dimensionless", "Benjamini-Hochberg adjusted normal_rho_p over the genes tested in normals."]
+normal_r = ["Pearson r", "Pearson correlation of RNA and protein across normal samples."]
+normal_r_p = ["dimensionless", "Two-sided p of normal_r."]
+normal_r_padj = ["dimensionless", "Benjamini-Hochberg adjusted normal_r_p over the genes tested in normals."]
 rna = ["log2 CPM", "log2(CPM + 1) of the gene in the sample."]
-protein = ["log2 ratio", "Protein log2 ratio to the pooled reference."]
+protein = ["log2", "Protein as the table gives it: a log2 ratio to the pooled reference, or a log2 abundance."]
 track = ["none", "The annotation's call for the sample."]
 rna_lfc = ["log2 fold change", "M5's raw log2 fold change, tested over reference."]
 rna_padj = ["dimensionless", "M5's Benjamini-Hochberg adjusted p."]
 rna_mean = ["normalised reads", "M5's baseMean: mean of DESeq2-normalised counts."]
-protein_lfc = ["log2 fold change", "Mean log2 copies, tested minus reference, over present values."]
-protein_p = ["dimensionless", "Welch t-test p on log2 copies."]
+protein_lfc = ["log2 fold change", "Mean log2 protein, tested minus reference, over present values; paired: the mean within-pair difference."]
+protein_p = ["dimensionless", "Welch t-test p on log2 protein; paired: the paired t-test p."]
 protein_padj = ["dimensionless", "Benjamini-Hochberg adjusted protein_p over the tested proteins."]
 difference = ["log2 fold change", "protein_lfc minus rna_lfc."]
 protein_call = ["none", "up, down or ns by protein_padj < 0.05 and abs(protein_lfc) at least --lfc-min."]

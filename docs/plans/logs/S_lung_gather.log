@@ -1,0 +1,42 @@
+2026-10-15T13:22:29Z ctx --root /Users/rytis/ctx_lung gather --dataset tcga_lung --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a8ab53e1e7f33bad4/conf/datasets/tcga_lung.toml --gdc-dir /Users/rytis/ctx_lung/data/raw/tcga_lusc --gdc-dir /Users/rytis/ctx_lung/data/raw/tcga_luad
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_overview_v1.html
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_samplesheet_v1.parquet
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_samplesheet_v1.csv
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_samplesheet_v1_README.md
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_counts_v1.parquet
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_counts_v1.csv
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_counts_v1_README.md
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_genes_v1.parquet
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_genes_v1.csv
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_genes_v1_README.md
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_annotations_v1.parquet
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_annotations_v1.csv
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_annotations_v1_README.md
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_cases_v1.parquet
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_cases_v1.csv
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_cases_v1_README.md
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_treatments_v1.parquet
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_treatments_v1.csv
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_treatments_v1_README.md
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_molecular_tests_v1.parquet
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_molecular_tests_v1.csv
+/Users/rytis/ctx_lung/outputs/01_gather/2026-10-15_gather_tcga_lung_molecular_tests_v1_README.md
+       26.30 real        24.34 user         4.31 sys
+          1544011776  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              476142  page reclaims
+                 218  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                2589  voluntary context switches
+              249851  involuntary context switches
+        305012717110  instructions retired
+         99426510064  cycles elapsed
+          1355630824  peak memory footprint
+exit 0

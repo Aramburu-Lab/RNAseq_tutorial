@@ -1,4 +1,4 @@
-"""The protein readers: a GCT member of a data-freeze archive, and a copy-number workbook.
+"""The protein readers: a GCT or TSV member of an archive, and a copy-number workbook.
 
 Both end in a ``Layer``: one row per gene symbol, a missing value as NaN, never as zero
 (CONVENTIONS.md, proteomics). ``one_per_gene`` is the single place where protein groups become
@@ -6,6 +6,8 @@ genes, and it reports what it dropped: rows with no symbol, groups naming severa
 peptides), and every extra row of a gene measured twice (isoforms).
 """
 
+import csv
+import io
 import re
 import tarfile
 from dataclasses import dataclass
@@ -25,6 +27,8 @@ GCT_SYMBOL = "geneSymbol"
 GROUP, GENES = "Majority protein IDs", "Gene names"
 # MaxQuant joins several genes of one group with a semicolon.
 SEVERAL = ";"
+# A CPTAC TMT mapping workbook's plex column and the ending of each channel's label column.
+FOLDER, LABEL = "Folder Name", "Specimen Label"
 
 
 @dataclass(frozen=True)
@@ -152,6 +156,67 @@ def read_gct(archive: Path, member: str) -> tuple[Layer, pl.DataFrame]:
     ).with_columns(pl.Series("sample", samples))
     genes = tuple(cells[i][symbol_at].strip() for i in kept)
     return Layer(genes, tuple(samples), values[kept], report), annotation
+
+
+def read_tsv(archive: Path, member: str, descriptors: tuple[str, ...]) -> Layer:
+    """A tab-separated table from the archive: one row per gene, NA read as missing.
+
+    The header must begin with ``descriptors``, the gene symbol first; every later column is a
+    sample. Values may be quoted, as CPTAC's own tables quote their text cells.
+
+    Raises:
+        ProteoError: If the header does not begin with the descriptors, or a row's width differs.
+    """
+    rows = list(csv.reader(io.StringIO(_member(archive, member).decode("utf-8")), delimiter="\t"))
+    if not rows or tuple(rows[0][: len(descriptors)]) != descriptors:
+        raise ProteoError(f"{member}: the header does not begin with {list(descriptors)}")
+    header, body = rows[0], rows[1:]
+    if bad := [i for i, r in enumerate(body, 2) if len(r) != len(header)]:
+        raise ProteoError(f"{member}: line {bad[0]} has not the header's {len(header)} cells")
+    first = len(descriptors)
+    values = np.array([[np.nan if c in GCT_MISSING else float(c) for c in r[first:]]
+                       for r in body], dtype=np.float64)  # fmt: skip
+    values = values.reshape(len(body), len(header) - first)
+    kept, report = one_per_gene([r[0] for r in body], values)
+    genes = tuple(body[i][0].strip() for i in kept)
+    return Layer(genes, tuple(header[first:]), values[kept], report)
+
+
+def read_plexes(path: Path, rows: str) -> dict[str, set[str]]:
+    """Each specimen label of a CPTAC TMT mapping workbook to the plexes it was run in.
+
+    A plex is a row whose folder name matches ``rows``; its labels are the cells under every
+    header ending ``Specimen Label``. A label in several plexes (the pooled reference) keeps
+    them all; the caller refuses one it needs to be in a single plex.
+
+    Raises:
+        ProteoError: If openpyxl is missing, the workbook is missing, or a header is absent.
+    """
+    try:
+        import openpyxl  # noqa: PLC0415 - only the mapping workbook needs it
+    except ImportError as error:
+        raise ProteoError("reading the plex map needs openpyxl ==3.1.5, pinned in pixi.toml"
+                          ) from error  # fmt: skip
+    if not path.is_file():
+        raise ProteoError(f"{path} is missing; run ctx setup with the dataset file")
+    book = openpyxl.load_workbook(path, read_only=True, data_only=True)
+    try:
+        lines = book[book.sheetnames[0]].iter_rows(values_only=True)
+        header = [str(h) for h in next(lines)]
+        labels = [i for i, h in enumerate(header) if h.endswith(LABEL)]
+        if FOLDER not in header or not labels:
+            raise ProteoError(f"{path.name}: needs {FOLDER!r} and {LABEL!r} columns")
+        at = header.index(FOLDER)
+        found: dict[str, set[str]] = {}
+        for line in lines:
+            if line[at] is None or not re.search(rows, str(line[at])):
+                continue
+            for i in labels:
+                if line[i] is not None:
+                    found.setdefault(str(line[i]), set()).add(str(line[at]))
+    finally:
+        book.close()
+    return found
 
 
 def read_copies(path: Path, tested: str, reference: str) -> tuple[Layer, int, int]:

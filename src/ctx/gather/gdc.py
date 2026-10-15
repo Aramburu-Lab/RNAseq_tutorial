@@ -60,8 +60,9 @@ PAR_Y = "_PAR_Y"
 CALLS = {"unstranded": "unstranded", "stranded_first": "forward", "stranded_second": "reverse"}
 STRAND_METRIC = "gdc_strand_share"
 FFPE = "FFPE"
-# Why a file is not the one taken for its case and sample type, in the order the rule applies.
-DROPS = ("ffpe", "protocol", "redacted", "not_first")
+# Why a file is not the one taken for its case and sample type, in the order the rule applies:
+# a case the dataset file excludes goes first, so no other reason can name its files.
+DROPS = ("excluded", "ffpe", "protocol", "redacted", "not_first")
 # The drop reasons ``comparable`` passes: none, the tie-break, and another protocol.
 COMPARABLE = ("", "not_first", "protocol")
 # Annotation entities that are biospecimens; the rest annotate other data types' files.
@@ -237,6 +238,46 @@ def _release(folder: Path, spec: GdcSpec, files: pl.DataFrame) -> list[str]:
     if _queried(folder, CASES, "project_id") != {spec.project}:
         problems.append(f"{CASES}{QUERY}: project_id is not {spec.project!r} alone")
     return problems
+
+
+def project_of(path: Path) -> str:
+    """The one project a fetch's file query names, which picks the folder's [gdc] project.
+
+    Raises:
+        GdcError: If the query names none or several.
+    """
+    found = _queried(path, METADATA, "project_id")
+    if len(found) != 1:
+        raise GdcError(f"{path / METADATA}{QUERY}: project_id is {sorted(found)}, not one project")
+    return found.pop()
+
+
+def biospecimens(path: Path, spec: GdcSpec) -> pl.DataFrame:
+    """Each protein aliquot's case and sample type, from the PDC record the fetch saved.
+
+    The record is ``biospecimenPerStudy`` as PDC's GraphQL API returns it, logged in the
+    folder's retrieval log under the declared release as every record of the fetch is.
+
+    Returns:
+        aliquot, case and sample_type, one row per aliquot, in aliquot order.
+
+    Raises:
+        GdcError: If the record is missing, not logged, lacks a field, or lists an aliquot twice.
+    """
+    assert spec.biospecimens is not None  # noqa: S101 - gather reads it only where declared
+    name = spec.biospecimens
+    logged = {r["file"]: r["gdc_release"] for r in _table(path / RETRIEVAL)}
+    if logged.get(name) != spec.release:
+        raise GdcError(f"{RETRIEVAL}: no row for {name} from {spec.release!r}")
+    rows = (json.loads(_text(path / name)).get("data") or {}).get("biospecimenPerStudy") or []
+    fields = {"aliquot": "aliquot_submitter_id", "case": "case_submitter_id",
+              "sample_type": "sample_type"}  # fmt: skip
+    if not rows or any(f not in r for r in rows for f in fields.values()):
+        raise GdcError(f"{name}: no biospecimenPerStudy rows with {sorted(fields.values())}")
+    frame = pl.DataFrame({ours: [str(r[theirs]) for r in rows] for ours, theirs in fields.items()})
+    if frame["aliquot"].is_duplicated().any():
+        raise GdcError(f"{name}: an aliquot is listed twice")
+    return frame.sort("aliquot")
 
 
 def read_folder(path: Path, spec: GdcSpec) -> Folder:
@@ -419,18 +460,20 @@ def annotations(path: Path, files: pl.DataFrame) -> pl.DataFrame:
     return pl.DataFrame(rows, schema=schema, orient="row").sort("case", "category", "entity")
 
 
-def choose(sheet: pl.DataFrame, protocol: str | None) -> pl.DataFrame:
+def choose(sheet: pl.DataFrame, protocol: str | None,
+           excluded: tuple[str, ...] = ()) -> pl.DataFrame:  # fmt: skip
     """One file per case and sample type, by the approved rule (decision 1, 2026-10-08).
 
-    In this order: drop FFPE, drop libraries of another protocol, drop redacted files, then
-    take the first aliquot ID of what is left. Every file gets ``chosen`` and the reason it is
-    not, ``drop_reason``; the tie-break runs last, so an FFPE or stranded aliquot that sorts
-    first cannot take a case. A protocol of None skips its step: a miRNA file has no strand
-    call (``ctx.gather.gdc_mirna``).
+    In this order: drop the cases the dataset file excludes, drop FFPE, drop libraries of
+    another protocol, drop redacted files, then take the first aliquot ID of what is left.
+    Every file gets ``chosen`` and the reason it is not, ``drop_reason``; the tie-break runs
+    last, so an FFPE or stranded aliquot that sorts first cannot take a case. A protocol of
+    None skips its step: a miRNA file has no strand call (``ctx.gather.gdc_mirna``).
     """
     other = pl.lit(value=False) if protocol is None else pl.col("strand_call") != CALLS[protocol]
     reason = (
-        pl.when(pl.col("preservation") == FFPE).then(pl.lit("ffpe"))
+        pl.when(pl.col("case").is_in(list(excluded))).then(pl.lit("excluded"))
+        .when(pl.col("preservation") == FFPE).then(pl.lit("ffpe"))
         .when(other).then(pl.lit("protocol"))
         .when(pl.col("redacted")).then(pl.lit("redacted"))
         .otherwise(pl.lit(""))

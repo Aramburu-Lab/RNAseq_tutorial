@@ -1,0 +1,92 @@
+# TCGA lung squamous against lung adenocarcinoma tumours (D1.1, TODO.md's LUAD-vs-LUSC contrast):
+# a CROSS-PROJECT comparison. The two histologies were collected, sequenced and released as two
+# TCGA projects, so project and histology are one variable here: every difference below may be
+# part batch. The batch diagnostics sit beside it: M5's PCA coloured by project, and gather's
+# library sizes per project. The one committed place for this pair's identifiers beside
+# tcga_luad.toml and tcga_lusc.toml, whose folders it reads unchanged.
+#
+#   ctx gather --dataset tcga_lung --dataset-file conf/datasets/tcga_lung.toml \
+#     --gdc-dir <root>/data/raw/tcga_luad --gdc-dir <root>/data/raw/tcga_lusc
+
+[dataset]
+slug = "tcga_lung"
+label = "TCGA lung, squamous against adenocarcinoma (cross-project)"
+source = "The Cancer Genome Atlas, projects TCGA-LUAD and TCGA-LUSC, through the NCI Genomic Data Commons"
+
+# Both folders as the fetch wrote them for tcga_luad.toml and tcga_lusc.toml; each folder's
+# project is read from its own file query, so the two --gdc-dir may come in any order. No CDR
+# and no miRNA folders: gather reads those for one project alone.
+[gdc]
+projects = ["TCGA-LUAD", "TCGA-LUSC"]
+release = "Data Release 46.0 - August 10, 2026"
+workflow = "STAR - Counts"
+gene_model = "GENCODE v36"
+protocol = "unstranded"
+tumour = "Primary Tumor"
+normal = "Solid Tissue Normal"
+attribution = "tcga"
+
+[guard]
+ids = ["TCGA-LUAD", "TCGA-LUSC"]
+patterns = ['\bTCGA-[A-Z0-9]{2}-[A-Z0-9]{4}\b']
+
+# Every chosen primary tumour of either project, one per patient, unpaired: no patient is in
+# both. n is the chosen tumours of each project's gather of 2026-10-14 (LUAD 515, LUSC 501).
+[[contrasts]]
+name = "lusc_luad"
+variable = "project"
+reference = "TCGA-LUAD"
+tested = "TCGA-LUSC"
+label = "LUSC over LUAD tumours, a cross-project comparison"
+filters = { condition = ["tumour"] }
+n = [515, 501]
+
+[de]
+featured = "lusc_luad"
+
+# The batch diagnostic: the tumours' PCA coloured by project, with PERMANOVA's R2.
+[[de.pca]]
+name = "tumours"
+filters = { condition = ["tumour"] }
+factors = ["project"]
+
+[sanity]
+# Registered 2026-10-15 15:21, before any LUSC-against-LUAD fit, but NOT blind: M5 results of
+# each project's tumour against normal exist (2026-10-09, 2026-10-14), though no value of these
+# genes between the projects was read for this registration. The markers are TODO.md's
+# (Verification, cohort sanity checks): TP63, KRT5 and SOX2 higher in LUSC, NKX2-1 and NAPSA
+# higher in LUAD, established as immunohistochemistry markers, so the mRNA direction is an
+# expectation. Thresholds are M5's ALPHA 0.05 and LFC_MIN 1 (ctx.de.stats), not tuned. Sources
+# were checked by PubMed metadata (title, DOI) on 2026-10-15; the marker statements inside
+# their full texts were not read here and are flagged for confirmation.
+registered_on = "2026-10-15 15:21"
+
+[[sanity.rules]]
+id = "LUNG.tp63"
+text = "TP63 is higher in lung squamous tumours than in adenocarcinomas."
+source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630, the WHO classification that asks immunohistochemistry to prove squamous differentiation (p40, a TP63 isoform; marker statement to confirm in its full text); TCGA 2012 Nature, doi:10.1038/nature11404"
+conditions = [{ metric = "gene.lusc_luad.TP63.lfc", op = ">=", value = 1.0 }, { metric = "gene.lusc_luad.TP63.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LUNG.krt5"
+text = "KRT5 is higher in lung squamous tumours than in adenocarcinomas."
+source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630: CK5/6, KRT5's antibody, a squamous immunohistochemistry marker (to confirm in its full text)"
+conditions = [{ metric = "gene.lusc_luad.KRT5.lfc", op = ">=", value = 1.0 }, { metric = "gene.lusc_luad.KRT5.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LUNG.sox2"
+text = "SOX2 is higher in lung squamous tumours than in adenocarcinomas."
+source = "TCGA 2012 Nature, doi:10.1038/nature11404: squamous differentiation genes altered in 44 % of lung squamous tumours, SOX2 at the 3q26 amplicon (to confirm in its full text)"
+conditions = [{ metric = "gene.lusc_luad.SOX2.lfc", op = ">=", value = 1.0 }, { metric = "gene.lusc_luad.SOX2.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LUNG.nkx2_1"
+text = "NKX2-1 is higher in lung adenocarcinomas than in squamous tumours."
+source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630: TTF-1, NKX2-1's protein, an adenocarcinoma immunohistochemistry marker (to confirm in its full text); TCGA 2014 Nature, doi:10.1038/nature13385"
+conditions = [{ metric = "gene.lusc_luad.NKX2-1.lfc", op = "<=", value = -1.0 }, { metric = "gene.lusc_luad.NKX2-1.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LUNG.napsa"
+text = "NAPSA is higher in lung adenocarcinomas than in squamous tumours."
+source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630: napsin A an adenocarcinoma immunohistochemistry marker (to confirm in its full text)"
+conditions = [{ metric = "gene.lusc_luad.NAPSA.lfc", op = "<=", value = -1.0 }, { metric = "gene.lusc_luad.NAPSA.padj", op = "<", value = 0.05 }]

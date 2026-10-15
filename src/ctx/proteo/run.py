@@ -2,10 +2,11 @@
 
 Across samples, RNA is gather's counts of the chosen tumours (``gdc.chosen``) as log2(CPM + 1)
 and protein the freeze's GCT; across studies, RNA is M5's results for the declared contrast and
-protein the copy-number table. Either way each layer is one row per gene before it is joined.
+protein the copy-number table; tumour against normal, both layers of each case's chosen tumour
+and normal, and M5's paired results beside the paired t. Each layer is one row per gene first.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -146,6 +147,182 @@ def across(settings: runtime.Settings, spec: Dataset, options: Options) -> Measu
     return out
 
 
+def _typed_columns(protein: tables.Layer, aliquots: pl.DataFrame, sheet: pl.DataFrame,
+                   sample_type: str) -> list[tuple[int, str, str]]:  # fmt: skip
+    """(protein column, sheet sample, case) of each protein column of a type with a chosen file.
+
+    A column's case and type are PDC's (gather's ``aliquots``); its RNA is the case's file of
+    the same type that ``gdc.chosen`` takes, so a case gather excludes has no column here.
+
+    Raises:
+        ProteoError: If two columns of one type name one case, or none pairs.
+    """
+    kind = dict(aliquots.select("aliquot", "sample_type").rows())
+    case_of = dict(aliquots.select("aliquot", "case").rows())
+    chosen = dict(gdc.chosen(sheet, sample_type).select("case", "sample").rows())
+    out: list[tuple[int, str, str]] = []
+    for j, name in enumerate(protein.samples):
+        case = case_of.get(name)
+        if case is None or kind.get(name) != sample_type or case not in chosen:
+            continue
+        if any(c == case for _, _, c in out):
+            raise ProteoError(f"two {sample_type} protein columns of case {case}")
+        out.append((j, chosen[case], case))
+    if not out:
+        raise ProteoError(f"no {sample_type} protein column has a chosen file in gather's sheet")
+    return out
+
+
+def _plex_of(names: list[str], plexes: dict[str, set[str]]) -> list[str]:
+    """Each named column's one plex.
+
+    Raises:
+        ProteoError: If a column is in no plex of the workbook, or in several.
+    """
+    if bad := [n for n in names if len(plexes.get(n, ())) != 1]:
+        raise ProteoError(f"{len(bad)} protein columns are not in exactly one plex: {bad[:5]}")
+    return [next(iter(plexes[n])) for n in names]
+
+
+def tumour_normal(settings: runtime.Settings, spec: Dataset, options: Options) -> Measured:
+    """One cohort's tumours and paired normals at both layers: per-gene correlation in each.
+
+    Each protein column is a PDC aliquot; gather's ``aliquots`` give its case and type, and its
+    RNA is that case's chosen file of the type. The genes table holds the tumours' correlation
+    and the normals' as ``normal_`` columns; the paired fold changes are ``paired_metrics``'s.
+
+    Raises:
+        ProteoError: If a used column lacks one plex, or a type has no column with RNA.
+    """
+    p, gather = spec.proteo, settings.root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
+    assert p is not None and p.member and p.plex and p.plex_map and spec.gdc  # noqa: S101 - load()
+    found = {w: pl.read_parquet(newest(gather, spec.slug, w)) for w in (*GATHER, "aliquots")}
+    protein = tables.read_tsv(resource(settings, spec, p.protein), p.member, p.descriptors)
+    plexes = tables.read_plexes(resource(settings, spec, p.plex_map), p.plex_rows)
+    sheet = found["samplesheet"]
+    types = (("tumour", spec.gdc.tumour), ("normal", spec.gdc.normal))
+    by = {kind: _typed_columns(protein, found["aliquots"], sheet, sample_type)
+          for kind, sample_type in types}  # fmt: skip
+    used = [*by["tumour"], *by["normal"]]
+    plex = _plex_of([protein.samples[j] for j, _, _ in used], plexes)
+    sizes = dict(sheet.select("sample", "library_size").rows())
+    names = found["genes"]["gene_name"].to_list()
+    single, twice = unique_symbols(names)
+    rna_row = {n: i for i, n in enumerate(names) if single[i]}
+    genes = [g for g in protein.genes if g in rna_row]
+    rows = protein.row()
+    frames, layers = {}, {}
+    for kind, columns in by.items():
+        samples = [s for _, s, _ in columns]
+        rna = log2cpm(found["counts"].select(samples).to_numpy(),
+                      np.array([sizes[s] for s in samples]))  # fmt: skip
+        rna = rna[[rna_row[g] for g in genes]]
+        values = protein.values[[rows[g] for g in genes]][:, [j for j, _, _ in columns]]
+        frames[kind] = measure.per_gene(tuple(genes), rna, values, options.min_quantified)
+        layers[kind] = (rna, values)
+    normal = frames["normal"].drop("gene").rename(lambda c: f"normal_{c}")
+    shown = replace(protein, samples=tuple(protein.samples[j] for j, _, _ in used),
+                    values=protein.values[:, [j for j, _, _ in used]])  # fmt: skip
+    n_tumour = len(by["tumour"])
+    out = Measured(shown, plex, pl.concat([frames["tumour"], normal], how="horizontal"),
+                   layers["tumour"][0].mean(axis=1))  # fmt: skip
+    normals = {c: j for j, _, c in by["normal"]}
+    both = {c: (j, normals[c]) for j, _, c in by["tumour"] if c in normals}
+    out.notes.append(("rna_twice", {"twice": twice}))
+    out.notes.append(("tumour_normal", {
+        "n_tumour": n_tumour, "n_normal": len(by["normal"]), "n_columns": len(protein.samples),
+        "n_cases": len(both), "excluded": len(spec.gdc.exclude_cases),
+        "reason": spec.gdc.exclude_reason or "none"}))  # fmt: skip
+    annotation = pl.DataFrame({"sample": [protein.samples[j] for j, _, _ in by["tumour"]],
+                               p.plex: plex[:n_tumour]})  # fmt: skip
+    out.extra |= {"rna": layers["tumour"][0], "values": layers["tumour"][1],
+                  "n_samples": n_tumour, "n_normal": len(by["normal"]), "annotation": annotation,
+                  "pairs": [(j, s) for j, s, _ in by["tumour"]], "sheet": gdc.chosen(sheet),
+                  "colour": ["tumour"] * n_tumour + ["normal"] * len(by["normal"]),
+                  "columns": both, "protein_all": (protein.genes, protein.values),
+                  "worked": (np.hstack([layers["tumour"][0], layers["normal"][0]]),
+                             np.hstack([layers["tumour"][1], layers["normal"][1]]),
+                             pl.DataFrame({"sample": list(shown.samples),
+                                           "tissue": ["tumour"] * n_tumour
+                                           + ["normal"] * len(by["normal"])}))}  # fmt: skip
+    return out
+
+
+def _named_genes(spec: ProteoSpec, contrast: str) -> list[str]:
+    """The worked genes, then each gene a rule names: ``protein.<contrast>.<gene>.<lfc|padj>``."""
+    head = f"protein.{contrast}."
+    named = [c["metric"].removeprefix(head).rsplit(".", 1)[0]
+             for rule in spec.sanity.get("rules", []) for c in rule.get("conditions", [])
+             if c.get("metric", "").startswith(head)]  # fmt: skip
+    return list(dict.fromkeys([*spec.genes, *named]))
+
+
+def _class_shifts(measured: Measured, joined: pl.DataFrame, classes: dict[str, set[str]],
+                  detail: str) -> None:  # fmt: skip
+    """Per class: the median fold changes, and protein minus RNA against the other genes."""
+    labels, _ = measure.membership(joined["gene"].to_list(), classes)
+    joined = joined.with_columns(gene_class=pl.Series(labels),
+                                 difference=pl.col("protein_lfc") - pl.col("rna_lfc"))  # fmt: skip
+    other = joined.filter(pl.col("gene_class") == measure.OTHER)["difference"].to_numpy()
+    for name in classes:
+        inside = joined.filter(pl.col("gene_class") == name)
+        where = f"{inside.height} genes tested at both layers, {detail}"
+        measured.metrics += [
+            (f"class.{name}.protein_lfc.median", measure.median(inside["protein_lfc"]), where),
+            (f"class.{name}.rna_lfc.median", measure.median(inside["rna_lfc"]), where)]  # fmt: skip
+        if inside.height and other.size:
+            below, r = measure.shifted(other, inside["difference"].to_numpy())
+            above, r_above = measure.shifted(inside["difference"].to_numpy(), other)
+            test = f"{inside.height} against {other.size} genes, one-sided Mann-Whitney"
+            measured.metrics += [(f"class.{name}_below_other.p", below, test),
+                                 (f"class.{name}_below_other.rank_biserial", r, test),
+                                 (f"class.{name}.p", above, test),
+                                 (f"class.{name}.rank_biserial", r_above, test)]  # fmt: skip
+    measured.extra["paired_genes"] = joined
+
+
+def paired_metrics(settings: runtime.Settings, spec: Dataset, measured: Measured,
+                   options: Options, known: dict[str, set[str]]) -> None:  # fmt: skip
+    """The positive shares in tumours and normals, then F4 and the class shifts of the pairs.
+
+    The fold changes are the declared paired contrast's: M5's results at RNA, the paired t at
+    protein, on the cases M5 compared with both protein columns. A missing M5 result is noted.
+    """
+    p = spec.proteo
+    assert p is not None and p.contrast  # noqa: S101 - load() checks
+    for prefix, layer in (("", "tumour"), ("normal_", "normal")):
+        n = measured.extra["n_samples" if not prefix else "n_normal"]
+        share, k, total = measure.positive_share(measured.genes, prefix, p.positive_fdr)
+        measured.metrics.append((f"pergene.{layer}.positive_share", share,
+                                 f"{k} of {total} genes with Spearman rho above zero at BH "
+                                 f"< {p.positive_fdr}, over {n} {layer} samples"))  # fmt: skip
+    contrast = next(c for c in spec.contrasts if c.name == p.contrast)
+    de_dir = settings.root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
+    path = folds.results_file(de_dir, spec.slug, contrast)
+    measured.extra["folds"] = []
+    if path is None:
+        measured.notes.append(("f4_missing", {"contrast": contrast.name}))
+        return
+    measured.extra.setdefault("inputs", {})[f"M5 results {contrast.name}"] = path.name
+    made = folds.paired_folds(
+        pl.read_parquet(path), measured.extra["sheet"], measured.extra["columns"],
+        measured.extra["protein_all"], contrast, order=dict(spec.order),
+        limits=(options.min_quantified, options.lfc_min),
+    )  # fmt: skip
+    measured.metrics += made.metrics()
+    measured.extra["folds"] = [made]
+    _class_shifts(measured, made.genes, known, f"{made.n_protein[0]} pairs")
+    assert made.protein is not None  # noqa: S101 - paired_folds keeps every protein's test
+    for gene in _named_genes(p, contrast.name):
+        row = made.protein.filter(pl.col("gene") == gene)
+        values = row.row(0, named=True) if row.height else {}
+        for key, column in (("lfc", "protein_lfc"), ("padj", "protein_padj")):
+            value = values.get(column)
+            measured.metrics.append((f"protein.{contrast.name}.{gene}.{key}",
+                                     np.nan if value is None else float(value),
+                                     f"paired t over {made.n_protein[0]} pairs"))  # fmt: skip
+
+
 def contrast_metrics(settings: runtime.Settings, spec: Dataset, measured: Measured,
                      options: Options) -> None:  # fmt: skip
     """F4 for every declared contrast whose M5 results exist; a missing one is noted as such."""
@@ -269,12 +446,15 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
             f"--gene-class {options.gene_class!r}: all or {list(spec.proteo.classes)}"
         )
     known = classes(settings, spec)
-    design = across if spec.proteo.design == "across_samples" else cross
-    measured = design(settings, spec, options)
+    design = {"across_samples": across, "cross_dataset": cross, "tumour_normal": tumour_normal}
+    measured = design[spec.proteo.design](settings, spec, options)
     measured.notes.append(("classes_note", {"twice": _labelled(measured, known)}))
     if spec.proteo.design == "across_samples":
         correlation_metrics(measured, spec.proteo, options.method)
         contrast_metrics(settings, spec, measured, options)
+    elif spec.proteo.design == "tumour_normal":
+        correlation_metrics(measured, spec.proteo, options.method)
+        paired_metrics(settings, spec, measured, options, known)
     else:
         fold_metrics(measured)
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"

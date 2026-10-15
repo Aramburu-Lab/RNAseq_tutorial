@@ -15,7 +15,9 @@ from typing import Any
 
 SCHEME = "pdc://"
 GRAPHQL = "https://pdc.cancer.gov/graphql"
-CATEGORY = "Publication Supplementary Material"
+# The PDC data categories a resource may sit in: a paper's tables, and the study's own metadata
+# workbooks (TMT plex maps, clinical data), which PDC files as Other Metadata.
+CATEGORIES = ("Publication Supplementary Material", "Other Metadata")
 QUERY = ('{ filesPerStudy(pdc_study_id: "%s", data_category: "%s", acceptDUA: true) '
          "{ file_name md5sum file_size signedUrl { url } } }")  # fmt: skip
 # The agreement the query accepts; ctx setup names it before fetching (Rytis, 2026-10-08).
@@ -35,6 +37,8 @@ class Signed:
 def resolve(url: str, opener: Callable[..., Any] = urllib.request.urlopen) -> Signed:
     """The signed URL, MD5 and size PDC gives now for ``pdc://<study>/<file name>``.
 
+    Every category of ``CATEGORIES`` is asked; the file must be listed once over all of them.
+
     Raises:
         OSError: If the URL is malformed, PDC answers with errors, or lists the file other
             than once; setup records it as that mirror's failure.
@@ -42,16 +46,18 @@ def resolve(url: str, opener: Callable[..., Any] = urllib.request.urlopen) -> Si
     study, _, name = url.removeprefix(SCHEME).partition("/")
     if not url.startswith(SCHEME) or not study or not name:
         raise OSError(f"{url}: expected {SCHEME}<study>/<file name>")
-    body = json.dumps({"query": QUERY % (study, CATEGORY)}).encode()
-    request = urllib.request.Request(  # noqa: S310 - a fixed https endpoint
-        GRAPHQL, data=body, headers={"Content-Type": "application/json"}, method="POST"
-    )
-    with opener(request, timeout=TIMEOUT) as response:
-        answer = json.loads(response.read())
-    if answer.get("errors"):
-        raise OSError(f"{url}: PDC answered {answer['errors']}")
-    files = [f for f in (answer.get("data") or {}).get("filesPerStudy") or []
-             if f.get("file_name") == name]  # fmt: skip
+    files = []
+    for category in CATEGORIES:
+        body = json.dumps({"query": QUERY % (study, category)}).encode()
+        request = urllib.request.Request(  # noqa: S310 - a fixed https endpoint
+            GRAPHQL, data=body, headers={"Content-Type": "application/json"}, method="POST"
+        )
+        with opener(request, timeout=TIMEOUT) as response:
+            answer = json.loads(response.read())
+        if answer.get("errors"):
+            raise OSError(f"{url}: PDC answered {answer['errors']}")
+        files += [f for f in (answer.get("data") or {}).get("filesPerStudy") or []
+                  if f.get("file_name") == name]  # fmt: skip
     if len(files) != 1 or not (files[0].get("signedUrl") or {}).get("url"):
         raise OSError(f"{url}: PDC lists the file {len(files)} times or without a signed URL")
     found = files[0]

@@ -1,0 +1,74 @@
+2026-10-15T13:34:54Z ctx --root /Users/rytis/ctx_kidney proteo --dataset cptac_ccrcc --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a8ab53e1e7f33bad4/conf/datasets/cptac_ccrcc.toml
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/openpyxl/worksheet/_reader.py:329: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_overview_v1.html
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_quantified_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_quantified_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_quantified_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_quantified_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_quantified_v1.html
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_quantified_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_quantified_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_coverage_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_coverage_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_coverage_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_coverage_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_coverage_v1.html
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_coverage_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_coverage_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_rho_by_class_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_rho_by_class_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_rho_by_class_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_rho_by_class_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_rho_by_class_v1.html
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_rho_by_class_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_rho_by_class_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_worked_ca9_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_worked_ca9_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_worked_ca9_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_worked_ca9_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_worked_ca9_v1.html
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_worked_ca9_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_worked_ca9_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_paired_zscores_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_paired_zscores_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_paired_zscores_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_paired_zscores_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_paired_zscores_v1.html
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_paired_zscores_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_paired_zscores_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_contrast_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_contrast_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_contrast_tumour_normal_v1_white.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_contrast_tumour_normal_v1_black.svg
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_contrast_tumour_normal_v1.html
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_contrast_tumour_normal_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_contrast_tumour_normal_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_genes_v1.parquet
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_genes_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_genes_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_metrics_v1.parquet
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_metrics_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_metrics_v1_README.md
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_sanity_v1.parquet
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_sanity_v1.csv
+/Users/rytis/ctx_kidney/outputs/07_proteo/2026-10-15_proteo_cptac_ccrcc_sanity_v1_README.md
+       21.76 real        16.22 user         2.58 sys
+          1351598080  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              310620  page reclaims
+                1728  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 339  voluntary context switches
+               26500  involuntary context switches
+        210573633944  instructions retired
+         62638114422  cycles elapsed
+           908478552  peak memory footprint
+exit 0

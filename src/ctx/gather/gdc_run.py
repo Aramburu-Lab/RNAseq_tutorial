@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
+import numpy as np
 import polars as pl
 
 from ctx import runtime
@@ -52,6 +53,7 @@ class Read:
     tests: pl.DataFrame
     cdr: pl.DataFrame | None
     md5_seconds: float
+    aliquots: pl.DataFrame | None = None
 
 
 @dataclass(frozen=True)
@@ -152,9 +154,9 @@ def build_sheet(folder: gdc.Folder, counts: gdc.Counts, notes: pl.DataFrame,  # 
                  .otherwise(pl.lit("other")))  # fmt: skip
     frame = folder.files.hstack(parts).join(stats, on="sample", maintain_order="left")
     frame = frame.with_columns(condition=condition, batch=pl.col("plate"), donor=pl.col("case"),
-                               run_accession=gdc.run_accession(),
+                               run_accession=gdc.run_accession(), project=pl.lit(spec.project),
                                redacted=pl.col("sample").is_in(sorted(redacted)))  # fmt: skip
-    frame = gdc.choose(frame, spec.protocol)
+    frame = gdc.choose(frame, spec.protocol, spec.exclude_cases)
     if libraries is None:
         frame = frame.with_columns(library_selection=pl.lit(None, dtype=pl.String))
     else:
@@ -186,7 +188,71 @@ def read_all(path: Path, spec: Dataset) -> Read:
         folder, counts, notes, spec.gdc, metric, gdc.library_selection(path, spec.gdc)
     )
     cases, treatments, tests = gdc.clinical(path / gdc.CASES)
-    return Read(folder, counts, sheet, notes, cases, treatments, tests, cdr, md5_seconds)
+    aliquots = gdc.biospecimens(path, spec.gdc) if spec.gdc.biospecimens else None
+    return Read(folder, counts, sheet, notes, cases, treatments, tests, cdr, md5_seconds,
+                aliquots)  # fmt: skip
+
+
+def read_projects(paths: list[Path], spec: Dataset) -> list[tuple[GdcSpec, Read]]:
+    """Each folder read with its own project's spec, in the dataset file's project order.
+
+    A folder's project is the one its file query names (``gdc.project_of``), so the folders may
+    be given in any order; each declared project needs exactly one.
+
+    Raises:
+        gdc.GdcError: If a folder is of an undeclared project, two are of one, or one is missing.
+    """
+    assert spec.gdc is not None  # noqa: S101 - run() refuses a dataset file without [gdc]
+    by: dict[str, Path] = {}
+    for path in (p.resolve() for p in paths):
+        project = gdc.project_of(path)
+        if project not in spec.gdc.projects:
+            raise gdc.GdcError(f"{path}: project {project!r}, not one of {spec.gdc.projects}")
+        if project in by:
+            raise gdc.GdcError(f"{by[project]} and {path} are both {project!r}")
+        by[project] = path
+    if missing := [p for p in spec.gdc.projects if p not in by]:
+        raise gdc.GdcError(f"no --gdc-dir for {missing}: give one folder per declared project")
+    found = []
+    for project in spec.gdc.projects:
+        one = spec.gdc.one(project)
+        found.append((one, read_all(by[project], dataclasses.replace(spec, gdc=one))))
+    return found
+
+
+def combine(found: list[Read]) -> Read:
+    """One sheet and one matrix over every project's folder, files in project then aliquot order.
+
+    ``run_accession`` is numbered again over the combined sheet, so no two files share one; the
+    choice of one file per case is each folder's own, as no case is in two projects.
+
+    Raises:
+        gdc.GdcError: If the projects' counts files list different genes, or share a case.
+    """
+    if len(found) == 1:
+        return found[0]
+    first = found[0]
+    if any(not r.counts.genes.equals(first.counts.genes) for r in found[1:]):
+        raise gdc.GdcError("the projects' counts files list different genes")
+    cases = [set(r.sheet["case"]) for r in found]
+    if len(set().union(*cases)) < sum(len(c) for c in cases):
+        raise gdc.GdcError("a case has files in two projects")
+    files = pl.concat([r.folder.files for r in found])
+    folder = gdc.Folder(first.folder.path, files, first.folder.release,
+                        sum(r.folder.dropped_site for r in found))  # fmt: skip
+    counts = dataclasses.replace(first.counts,
+                                 matrix=np.hstack([r.counts.matrix for r in found]),
+                                 stats=pl.concat([r.counts.stats for r in found]))  # fmt: skip
+    sheet = pl.concat([r.sheet for r in found]).with_columns(run_accession=gdc.run_accession())
+
+    def stacked(name: str) -> pl.DataFrame:
+        """One clinical or annotation table over every project; a column one lacks is null."""
+        frames: list[pl.DataFrame] = [getattr(r, name) for r in found]
+        return pl.concat(frames, how="diagonal_relaxed")
+
+    return Read(folder, counts, sheet, stacked("annotations"), stacked("cases"),
+                stacked("treatments"), stacked("tests"), None,
+                sum(r.md5_seconds for r in found))  # fmt: skip
 
 
 def _flow(sheet: pl.DataFrame) -> ResultTable:
@@ -201,7 +267,8 @@ def _flow(sheet: pl.DataFrame) -> ResultTable:
         candidates = part.filter(pl.col("drop_reason").is_in(["", "not_first"]))
         ties = candidates.group_by("case").len().filter(pl.col("len") > 1).height
         cells[kind] = [f"{part.height:,}", f"{part['case'].n_unique():,}",
-                       *(f"{reasons.get(r, 0):,}" for r in ("ffpe", "protocol", "redacted")),
+                       *(f"{reasons.get(r, 0):,}"
+                         for r in ("excluded", "ffpe", "protocol", "redacted")),
                        f"{kept:,}", f"{part['case'].n_unique() - kept:,}", f"{ties:,}"]  # fmt: skip
     steps = text.words(PAGE, "flow.steps")
     rows = tuple((step, *(cells[k][i] for k in kinds)) for i, step in enumerate(steps))
@@ -336,6 +403,8 @@ def _write(  # noqa: PLR0913 - each a part of the write
     if found.cdr is not None:
         tables.append(("cdr", found.cdr, {c: ("none", text.fill(PAGE, "columns.cdr", column=c))
                                           for c in found.cdr.columns}))  # fmt: skip
+    if found.aliquots is not None:
+        tables.append(("aliquots", found.aliquots, columns("columns.aliquots")))
     tables += _mirna_tables(mirna) if mirna is not None else []
     files: list[Path] = []
     for name, frame, described in tables:
@@ -344,17 +413,21 @@ def _write(  # noqa: PLR0913 - each a part of the write
     return files
 
 
-def _releases(path: Path, spec: Dataset) -> dict[str, str]:
-    """The releases and files every table derives from, with the SHA-256 of each record read."""
-    assert spec.gdc is not None  # noqa: S101 - run() checked
+def _releases(path: Path, spec: Dataset, one: GdcSpec, prefix: str = "") -> dict[str, str]:
+    """The releases and files every table derives from, with the SHA-256 of each record read.
+
+    ``one`` is the folder's own project; ``prefix`` names it before each folder-specific key
+    where the sheet joins several projects.
+    """
     named = [gdc.METADATA, gdc.MANIFEST, gdc.STATUS, gdc.CASES, gdc.ANNOTATIONS]
-    named += [spec.gdc.cdr_file] if spec.gdc.cdr_file else []
+    named += [n for n in (one.cdr_file, one.biospecimens) if n]
     return {
-        "GDC": spec.gdc.release, "GDC folder": str(path), "project": spec.gdc.project,
-        "workflow": spec.gdc.workflow, "gene model": spec.gdc.gene_model,
+        "GDC": one.release, f"{prefix}GDC folder": str(path), f"{prefix}project": one.project,
+        "workflow": one.workflow, "gene model": one.gene_model,
         "dataset file": str(spec.path),
         f"sha256:{spec.path.name}": hashlib.sha256(spec.path.read_bytes()).hexdigest(),
-        **{f"sha256:{n}": hashlib.sha256((path / n).read_bytes()).hexdigest() for n in named},
+        **{f"sha256:{prefix}{n}": hashlib.sha256((path / n).read_bytes()).hexdigest()
+           for n in named},
     }  # fmt: skip
 
 
@@ -376,7 +449,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     command: str,
     dataset: str,
     *,
-    gdc_dir: Path,
+    gdc_dirs: list[Path],
     dataset_file: Path,
     mirna_dir: Path | None = None,
     isoform_dir: Path | None = None,
@@ -388,7 +461,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         cards: Parameter cards for every option of this command.
         command: The command line, as the reader should retype it.
         dataset: Slug naming the dataset in output names.
-        gdc_dir: The GDC project folder as the fetch wrote it.
+        gdc_dirs: The GDC project folders as the fetch wrote them, one per declared project.
         dataset_file: The dataset file, with a ``[gdc]`` table.
         mirna_dir: The project's miRNA folder as the fetch wrote it; given with isoform_dir.
         isoform_dir: The project's isoform folder, the same aliquots' files.
@@ -397,7 +470,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         The page, then the tables.
 
     Raises:
-        DatasetError: If the dataset file has no ``[gdc]`` or names another slug.
+        DatasetError: If the dataset file has no ``[gdc]`` or names another slug, or miRNA
+            folders are given for several projects.
         gdc.GdcError: On any failed check of the folder; nothing is written.
     """
     day = date.today()
@@ -407,10 +481,12 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         raise DatasetError(f"{dataset_file} is for {spec.slug!r}, not --dataset {dataset!r}")
     if spec.gdc is None:
         raise DatasetError(f"{dataset_file}: no [gdc] table; not a GDC dataset")
-    source = gdc_dir.resolve()
     if (mirna_dir is None) != (isoform_dir is None):
         raise DatasetError("--mirna-dir and --isoform-dir are given together or not at all")
-    found = read_all(source, spec)
+    if mirna_dir is not None and len(spec.gdc.projects) > 1:
+        raise DatasetError("--mirna-dir reads one project; this dataset file names several")
+    projects = read_projects(gdc_dirs, spec)
+    found = combine([r for _, r in projects])
     if spec.columns:
         found = dataclasses.replace(
             found, sheet=annotate.sheet_columns(found.sheet, spec, settings.root)
@@ -419,13 +495,16 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     if mirna_dir is not None and isoform_dir is not None:
         mirna = read_mirna(mirna_dir, isoform_dir, spec.gdc, found)
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
-    releases = _releases(source, spec)
+    several = len(projects) > 1
+    releases: dict[str, str] = {}
+    for one, read in projects:
+        releases |= _releases(read.folder.path, spec, one, f"{one.project} " if several else "")
     if mirna is not None:
         releases |= _mirna_releases(mirna)
     files = _write(found, out, dataset, day, spec, releases, mirna=mirna)
     word = functools.partial(text.word, PAGE)
-    results: tuple[ResultTable | str, ...] = (_checks(found, spec.gdc), _flow(found.sheet),
-                                              _pairs(found.sheet),
+    results: tuple[ResultTable | str, ...] = (*(_checks(r, one) for one, r in projects),
+                                              _flow(found.sheet), _pairs(found.sheet),
                                               _annotations(found.annotations))  # fmt: skip
     if mirna is not None:
         results = (*results, _mirna_checks(mirna, spec.gdc))

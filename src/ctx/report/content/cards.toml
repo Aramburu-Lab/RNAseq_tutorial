@@ -243,6 +243,7 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 [effects.gather]
 "--dataset-file" = "Set: curates each run from the SDRF; any problem stops gather."
 "--dataset" = "Renames every output. Unless --fetchngs-dir is set, gather reads <root>/data/raw/<dataset>."
+"--gdc-dir" = "Set: gather checks each folder; one per project the dataset file names."
 
 [effects.report]
 "--dataset-file" = "Set: the hub also shows the verdict of each sanity rule."
