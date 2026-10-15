@@ -1,0 +1,75 @@
+{# Controls: the linked brush and M8's pair select. Included by _page.js.j2, inside its one function. #}
+{% raw %}  function brushing(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = ctxRows(form);
+    /* The scatter beside the reading guide; the parallel sets under both, across the card. */
+    var div = fig.querySelector(".fig-plot .js-plotly-plot");
+    var sets = fig.querySelector(".fig-below .js-plotly-plot") || div;
+    var summary = fig.querySelector(".brush-summary");
+    var mark = exporting(fig, cfg);
+    var painted = ctxBrush.start(rows.length);
+    /* A painted sample shows its paint at full strength: the lasso's own dimming of the
+       samples it missed, and its outline, go once the paint is laid. */
+    function draw() {
+      Plotly.restyle(div, { "marker.color": [ctxBrush.markers(painted, cfg)],
+                            selectedpoints: [null] }, [cfg.scatter]);
+      Plotly.relayout(div, { selections: [] });
+      Plotly.restyle(sets, { "line.color": [ctxBrush.codes(painted)] }, [cfg.parcats]);
+      summary.textContent = ctxBrush.summary(painted, rows, cfg);
+      mark(ctxBrush.moved(painted));
+    }
+    function paint(event) {
+      var picked = ctxBrush.indices(event);
+      if (!picked.length) return;
+      painted = ctxBrush.paint(painted, picked, Number(form.elements.colour.value));
+      draw();
+    }
+    div.on("plotly_selected", paint);
+    div.on("plotly_click", paint);
+    if (sets !== div) sets.on("plotly_click", paint);
+    form.querySelector("[data-clear]").addEventListener("click", function () {
+      painted = ctxBrush.clear(painted);
+      draw();
+    });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+  }
+
+  /* The chosen pair's values replace every trace's points, sample by sample (cfg.members
+     names each trace's samples in order); rho on values and on residuals comes from ctxPairs,
+     q from the pair's row, which BH set over every pair. */
+  function pairing(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var div = fig.querySelector(".js-plotly-plot");
+    var lead = fig.querySelector(".fig-lead"), summary = fig.querySelector(".pairs-summary");
+    var mark = exporting(fig, cfg);
+    function rho(value) { return value === null ? cfg.none : value.toFixed(2); }
+    function fill(text, values) {
+      return text.replace(/\{(\w+)\}/g, function (all, key) {
+        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : all;
+      });
+    }
+    function update() {
+      var i = Number(form.elements.pair.value), pair = cfg.pairs[i];
+      var x = ctxPairs.residuals(pair.x, cfg.strata), y = ctxPairs.residuals(pair.y, cfg.strata);
+      var values = Object.assign({}, pair.words, {
+        rho: rho(ctxPairs.spearman(pair.x, pair.y)), rho_within: rho(ctxPairs.spearman(x, y))
+      });
+      Plotly.restyle(div, {
+        x: cfg.members.map(function (m) { return m.map(function (j) { return pair.x[j]; }); }),
+        y: cfg.members.map(function (m) { return m.map(function (j) { return pair.y[j]; }); })
+      }, cfg.members.map(function (m, k) { return k; }));
+      if (lead) lead.querySelectorAll("[data-fill]").forEach(function (span) {
+        span.textContent = values[span.getAttribute("data-fill")];
+      });
+      summary.textContent = fill(cfg.summary_template, values);
+      mark(i !== 0);
+    }
+    form.addEventListener("change", update);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the select without an event. */
+    update();
+  }
+
+{% endraw %}

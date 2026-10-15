@@ -658,7 +658,9 @@ def test_points_drawn_equal_csv_rows():
     other = data.frame.filter(~pl.col("keep")).height
     assert other > THIN_MAX, "the case must thin"
     assert _points_in(data.static(THEMES["white"])) == data.table().height
-    drawn = sum(len(t.x) for t in _marker_traces(data.interactive()))
+    # With live calls the page draws its points from the rows it embeds (GS.3).
+    assert sum(len(t.x) for t in _marker_traces(data.interactive())) == 0
+    drawn = len(figure_block(data, "x").rows)
     stride = math.ceil(other / THIN_MAX)
     assert drawn == data.table().height - other + math.ceil(other / stride)
     # The caption read "every 3th" (review, 2026-10-01).
@@ -749,18 +751,21 @@ def _live_volcano(padj: list | None = None) -> ScatterData:
 
 
 def test_live_volcano_default_from_figure():
+    """GS.3: the point traces carry no points, which the page script draws from the rows; the
+    default colours are the call column's. Mutation: the traces' points left in."""
     data = _live_volcano()
     fig = data.interactive()
     controls = data.controls()
-    xs = {fig.data[i].name: fig.data[i].x for i in controls["traces"].values()}
+    assert [len(fig.data[i].x) for i in controls["traces"].values()] == [0, 0, 0]
+    calls = data.frame["call"].to_list()
     # Written here, independently of classify: padj strictly below 0.05, |LFC| at least 1.
     rows = [
-        (p, fc)
-        for p, fc in data.frame.select("padj", "lfc").rows()
+        (p, fc, call)
+        for p, fc, call in data.frame.select("padj", "lfc", "call").rows()
         if p is not None and not math.isnan(p)
     ]
-    assert len(xs["up"]) == sum(p < 0.05 and fc >= 1 for p, fc in rows) == 2
-    assert len(xs["down"]) == sum(p < 0.05 and fc <= -1 for p, fc in rows) == 1
+    assert calls.count("up") == sum(p < 0.05 and fc >= 1 for p, fc, _ in rows) == 2
+    assert calls.count("down") == sum(p < 0.05 and fc <= -1 for p, fc, _ in rows) == 1
     fc_up, fc_down, p_line = (fig.data[i] for i in controls["cutoff_lines"])
     assert (fc_up.x, fc_down.x) == ((1.0, 1.0), (-1.0, -1.0))
     # The bar of the 5th of 8 tested genes: 5 x 0.05 / 8, written without p_line.

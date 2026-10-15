@@ -7,7 +7,6 @@ import ast
 import base64
 import dataclasses
 import math
-import shutil
 from pathlib import Path
 
 import numpy as np
@@ -133,35 +132,22 @@ def _genes(synthetic) -> pl.DataFrame:
     return synthetic.counts.select("gene_id", gene_name=pl.col("gene_id"))
 
 
-def test_a_thinned_volcano_page_says_what_it_draws(basic, monkeypatch, tmp_path):
-    """Item 2, D7: Step-1's volcano caption called its 12,796 tested genes "all drawn", then
-    said the page drew 1,842 of the 5,526 no setting can call, from English written in
-    scatter.py. The files' caption claims nothing about drawing; the page's ends with ui.toml's
-    sentence, numbers from the thinning. Mutations: ", all drawn" restored in volcano's
-    caption; the sentence written in scatter.py again, so an edited ui.toml misses the page."""
+def test_the_volcano_page_draws_every_tested_gene(basic, monkeypatch):
+    """GS.3: the page drew the genes some setting could call and every k-th of the rest, so
+    the picker could not reach 3,684 of Step-1's 12,796 tested genes. Every tested gene is
+    now a row of the page, at any point budget, and the caption says nothing of thinning.
+    Mutation: the keep column restored in volcano(), raw p below the loosest preset."""
     synthetic, result = basic
     monkeypatch.setattr(scatter, "THIN_MAX", THIN_AT)
     data = volcano(result, _genes(synthetic))
-    other = data.frame.filter(~pl.col("keep")).height
-    stride = math.ceil(other / THIN_AT)
-    assert stride > 1, "the case must thin"
-    sentence = text.fill(
-        "ui", "thinned.rows", drawn=math.ceil(other / stride), units=other,
-        rest=text.word("ui", "thinned.callable"), nth=scatter._ordinal(stride),
-        order="-log10 raw p", total=data.frame.height,
-    )  # fmt: skip
-    assert data.caption_text() == f"{data.caption} {sentence}"
-    assert "all drawn" not in data.caption_text()
-    copy = tmp_path / "content"
-    shutil.copytree(Path(text.__file__).parent / "content", copy)
-    ui = (copy / "ui.toml").read_text()
-    (copy / "ui.toml").write_text(ui.replace("This page draws {drawn:,}", "Shown: {drawn:,}"))
-    monkeypatch.setenv(text.CONTENT_ENV, str(copy))
-    text.load.cache_clear()
-    try:
-        assert f"{data.caption} Shown: " in data.caption_text()
-    finally:
-        text.load.cache_clear()
+    tested = result.results.filter(pl.col("padj").is_not_null()).height
+    assert data.frame.height == tested > THIN_AT
+    assert data.frame.filter(pl.col("pvalue") >= max(scatter.CUTOFF_PRESETS)).height > THIN_AT, (
+        "the case holds more genes no setting can call than the budget"
+    )
+    assert data.on_page().height == tested
+    assert data.caption_text() == data.caption
+    assert "keep" not in data.frame.columns
 
 
 def test_a_thinned_ma_page_draws_both_estimates_of_a_gene_or_neither(basic, monkeypatch):

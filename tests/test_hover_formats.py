@@ -77,7 +77,9 @@ def _ora():
 
 
 DEMOS = {
-    "volcano": lambda: _with_numbers(demo_volcano(counts())),
+    # With live calls the page fills the points (GS.3; ctxHover.row against hover_rows in
+    # test_page_script); without them the figure draws its own, by the same template.
+    "volcano": lambda: dataclasses.replace(_with_numbers(demo_volcano(counts())), calls=None),
     "ma": lambda: _with_numbers(demo_ma(counts())),
     "pca": lambda: _with_numbers(demo_pca(counts())),
     "bubble": lambda: _with_numbers(demo_bubble()),

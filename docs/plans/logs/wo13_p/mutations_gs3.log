@@ -1,0 +1,3 @@
+CAUGHT: GS.3 the keep column restored in volcano() (1 failed, 24 deselected in 10.44s)
+CAUGHT: GS.3 the traces' points left in (1 failed, 89 deselected in 4.11s)
+CAUGHT: GS.3 the page script not drawing the points at load (1 failed, 11 deselected in 74.42s (0:01:14))

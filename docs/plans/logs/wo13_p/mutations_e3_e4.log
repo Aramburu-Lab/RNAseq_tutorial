@@ -1,0 +1,7 @@
+CAUGHT: E.4 a partial included twice (1 failed, 1 passed in 1.29s)
+CAUGHT: E.4 a partial left out (1 failed, 1 passed in 5.50s)
+CAUGHT: E.4 the page script over the fail line (1 failed in 1.16s)
+CAUGHT: E.3 every screen sign +1 in page.screen_rows (1 failed, 2 deselected in 68.69s (0:01:08))
+CAUGHT: E.3 the sign from the alone HR (1 failed, 2 deselected in 71.06s (0:01:11))
+CAUGHT: E.3 the page script's signs all +1 again (1 failed, 2 deselected in 47.98s)
+CAUGHT: E.3 the sign read from another position (1 failed, 2 deselected in 26.54s)

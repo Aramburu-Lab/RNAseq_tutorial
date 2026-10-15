@@ -1,0 +1,42 @@
+== gather 2026-10-15T13:32:36Z src=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/src_main/src
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_annotations_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_annotations_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_annotations_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_cases_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_cases_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_cases_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_treatments_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_treatments_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_treatments_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_molecular_tests_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_molecular_tests_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a4bc57162a0d35df8/outputs/scratch_roots/ccrcc_base/outputs/01_gather/2026-10-15_gather_cptac_ccrcc_molecular_tests_v1_README.md
+       18.61 real         8.61 user         2.49 sys
+           489340928  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              131560  page reclaims
+                  19  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 642  voluntary context switches
+              132804  involuntary context switches
+        104975489066  instructions retired
+         38624069700  cycles elapsed
+           407946704  peak memory footprint
+exit 0

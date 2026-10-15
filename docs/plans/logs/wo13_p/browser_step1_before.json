@@ -1,0 +1,91 @@
+{
+ "2026-10-15_de_tier1_overview_v1.html": {
+  "measure": {
+   "drawn": 9112,
+   "rows": 9112,
+   "n_tested": 12796,
+   "type": "scatter",
+   "redraw_ms": [
+    376,
+    375,
+    372,
+    380,
+    381
+   ],
+   "scroll": true
+  },
+  "errors": {},
+  "box_1280": {
+   "inside": 5,
+   "edge": 3,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_1280_dark": {
+   "inside": 5,
+   "edge": 3,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "box_375": {
+   "inside": 5,
+   "edge": 4,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "box_375_dark": {
+   "inside": 5,
+   "edge": 4,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_1280": {
+   "inside": 5,
+   "edge": 3,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_1280_dark": {
+   "inside": 5,
+   "edge": 3,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  },
+  "lasso_375": {
+   "inside": 5,
+   "edge": 4,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#000000"
+  },
+  "lasso_375_dark": {
+   "inside": 5,
+   "edge": 4,
+   "picked": 6,
+   "picks_what_is_inside": true,
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "scroll": true,
+   "font": "#F2F2F2"
+  }
+ }
+}

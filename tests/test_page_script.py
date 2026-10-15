@@ -698,6 +698,17 @@ def _plain(figure) -> dict:
     )
 
 
+def _filled(figure, data, cfg) -> dict:
+    """A live-calls figure as the page draws it at the default rule: its empty point traces
+    filled from the rows it embeds, by the default call, as liveCalls fills them (GS.3)."""
+    plain, rows = _plain(figure), data.on_page()
+    for level, index in cfg["traces"].items():
+        part = rows.filter(pl.col(data.colour) == level)
+        plain["data"][index]["x"] = part[cfg["lfc"]].to_list()
+        plain["data"][index]["y"] = [-math.log10(max(p, cfg["p_floor"])) for p in part[cfg["p"]]]
+    return plain
+
+
 def test_export_draws_marks_at_the_figure_files_sizes_from_any_zoom():
     """Every point MARKER_SIZE pt, every line its LINE_WIDTHS pt, from the module page and
     from a page opened alone at twice the size, each plot's zoom read off its layout's
@@ -859,7 +870,7 @@ def test_export_draws_what_the_figure_files_draw_and_the_page_lacks(monkeypatch)
     monkeypatch.setattr(scatter, "THIN_MAX", 300)
     data = demo_volcano(design_counts(condition_lfc=1.0))
     block = figure_block(data, "x")
-    (drawn,) = _figure([[[_plain(block.figure)], block.controls]])
+    (drawn,) = _figure([[[_filled(block.figure, data, block.controls)], block.controls]])
     traces, cfg = drawn["data"], block.controls
     points = [t for t in traces if t.get("mode") == "markers" and t["x"] != [None]]
     assert sum(len(t["x"]) for t in points) == data.frame.height

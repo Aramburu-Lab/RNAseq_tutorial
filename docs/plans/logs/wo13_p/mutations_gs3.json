@@ -1,0 +1,12 @@
+[
+  {"label": "GS.3 the keep column restored in volcano()", "file": "src/ctx/de/run.py",
+   "edits": [["        \"label\",\n    )  # fmt: skip", "        \"label\", keep=pl.col(\"pvalue\") < max(CUTOFF_PRESETS),\n    )  # fmt: skip"],
+             ["        width=\"double\",\n        names={", "        width=\"double\",\n        keep=\"keep\",\n        names={"]],
+   "tests": ["tests/test_de.py", "-k", "every_tested_gene"]},
+  {"label": "GS.3 the traces' points left in", "file": "src/ctx/viz/scatter.py",
+   "old": "rows_only = self.calls is not None", "new": "rows_only = False",
+   "tests": ["tests/test_viz.py", "-k", "live_volcano_default_from_figure"]},
+  {"label": "GS.3 the page script not drawing the points at load", "file": "src/ctx/report/templates/_page_controls.js.j2",
+   "old": "    update(false);\n  }\n", "new": "  }\n",
+   "tests": ["tests/test_pick_browser.py", "-k", "1280 and box and False"]}
+]
