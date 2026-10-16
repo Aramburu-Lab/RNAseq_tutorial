@@ -577,8 +577,8 @@ def test_a_dataset_ships_its_newest_run_not_each_names_newest_copy(tmp_path):
     cards = real / "outputs" / "11_genecard"
     for gene in ("a", "b"):
         page(cards / f"{OLD}_genecard_study_card_{gene}_v1.html", f"M9 card {gene}")
-    page(cards / f"{OLD}_genecard_study_overview_v1.html", "M9 Gene cards: Study",
-         f"{OLD}_genecard_study_card_a_v1.html", f"{OLD}_genecard_study_card_b_v1.html")  # fmt: skip
+    old_cards = [f"{OLD}_genecard_study_card_{gene}_v1.html" for gene in ("a", "b")]
+    page(cards / f"{OLD}_genecard_study_overview_v1.html", "M9 Gene cards: Study", *old_cards)
     page(cards / f"{NEW}_genecard_study_card_c_v1.html", "M9 card c")
     page(cards / f"{NEW}_genecard_study_overview_v1.html", "M9 Gene cards: Study",
          f"{NEW}_genecard_study_card_c_v1.html")  # fmt: skip
