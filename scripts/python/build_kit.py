@@ -122,15 +122,27 @@ FILE_ROW = re.compile(r"^\| `([^`]+)` \| (\d+) \| `([0-9a-f]{64})` \|$", re.MULT
 FETCH = "OUT={folder} bash {script}"
 
 
-def current(outputs: Path) -> set[Path]:
-    """The newest dated copy of every output in each module folder; older days are dropped."""
-    best: dict[tuple[Path, str], Path] = {}
-    for p in outputs.glob("*/*"):
-        if p.is_file() and DATED.match(p.name):
-            key = (p.parent, p.name[11:])
-            if key not in best or p.name > best[key].name:
-                best[key] = p
-    return set(best.values())
+def current(outputs: Path, slugs: frozenset[str] = frozenset()) -> set[Path]:
+    """Each module folder's newest run of each dataset, and the newest copy of any other output.
+
+    A run writes all its files on one day, so a dataset's newest day in a folder is its run;
+    keeping the newest copy per file name instead shipped 114 files of an older M9 run whose
+    genes the newer run did not draw (kit v9, 2026-10-16). A file no known dataset owns keeps
+    the per-name rule.
+    """
+    newest_day: dict[tuple[Path, str], str] = {}
+    files = [p for p in outputs.glob("*/*") if p.is_file() and DATED.match(p.name)]
+    for p in files:
+        key = _run_key(p, slugs)
+        newest_day[key] = max(newest_day.get(key, ""), p.name[:10])
+    return {p for p in files if p.name[:10] == newest_day[_run_key(p, slugs)]}
+
+
+def _run_key(path: Path, slugs: frozenset[str]) -> tuple[Path, str]:
+    """A file's module folder and its dataset, or its undated name when no dataset owns it."""
+    desc = naming.description(path.name) or ""
+    owners = [s for s in slugs if desc == s or desc.startswith(f"{s}_")]
+    return path.parent, max(owners, key=len) if owners else "name:" + path.name[11:]
 
 
 def slugs_in(root: Path) -> set[str]:
@@ -277,8 +289,9 @@ def select(
     sources = declared_sources() if sources is None else sources
     # Resolved, so a symlinked outputs/ holds the same paths the links resolve to.
     outputs = (root / "outputs").resolve()
-    out = {p for p in current(outputs) if any(belongs(p.name, s, set(slugs)) for s in left_out)}
-    chosen = current(outputs) - out
+    newest = current(outputs, frozenset(slugs))
+    out = {p for p in newest if any(belongs(p.name, s, set(slugs)) for s in left_out)}
+    chosen = newest - out
     # Undated, so current() never picks it: each module folder's entry page (GS.2) ships with
     # the folder's pages, and its links are walked like theirs.
     folders = {c.parent for c in chosen}

@@ -567,3 +567,24 @@ def test_a_two_project_count_matrix_stays_out(tmp_path, checker):
     files = shipped_files(kit)
     assert f"step/outputs/01_gather/{NEW}_gather_tcgax_counts_v1.csv" not in files
     assert "step/gdc/tcga_x/gdc_manifest_star_counts.txt" in files
+
+
+def test_a_dataset_ships_its_newest_run_not_each_names_newest_copy(tmp_path):
+    """A run writes its files on one day, so a dataset's newest day in a folder is its run.
+    Kit v9 kept the newest copy per file name and shipped 114 files of an older M9 run whose
+    genes the newer run did not draw (2026-10-16). Mutation caught: the per-name rule back."""
+    real = a_root(tmp_path / "real", "Study", "study")
+    cards = real / "outputs" / "11_genecard"
+    for gene in ("a", "b"):
+        page(cards / f"{OLD}_genecard_study_card_{gene}_v1.html", f"M9 card {gene}")
+    page(cards / f"{OLD}_genecard_study_overview_v1.html", "M9 Gene cards: Study",
+         f"{OLD}_genecard_study_card_a_v1.html", f"{OLD}_genecard_study_card_b_v1.html")  # fmt: skip
+    page(cards / f"{NEW}_genecard_study_card_c_v1.html", "M9 card c")
+    page(cards / f"{NEW}_genecard_study_overview_v1.html", "M9 Gene cards: Study",
+         f"{NEW}_genecard_study_card_c_v1.html")  # fmt: skip
+    page(cards / "index.html", "M9", f"{NEW}_genecard_study_overview_v1.html")
+    kit, done = build(tmp_path / "k", real=real)
+    assert done.returncode == 0, done.stderr
+    shipped = {Path(f).name for f in shipped_files(kit) if "/11_genecard/" in f}
+    assert f"{NEW}_genecard_study_card_c_v1.html" in shipped
+    assert not {n for n in shipped if n.startswith(OLD)}, shipped
