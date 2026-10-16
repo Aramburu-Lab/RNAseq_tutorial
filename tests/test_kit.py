@@ -561,7 +561,7 @@ def test_a_two_project_count_matrix_stays_out(tmp_path, checker):
     taken for a file to ship and stopped the build at the cap (2026-10-16)."""
     real, folder = gdc_root(tmp_path)
     readme = real / "outputs" / "01_gather" / f"{NEW}_gather_tcgax_counts_v1_README.md"
-    readme.write_text(readme.read_text().replace("| GDC folder |", "| TCGA-X GDC folder |"))
+    readme.write_text(readme.read_text().replace("| GDC folder |", "| PROJ-X GDC folder |"))
     kit, done = build(tmp_path / "k", real=real)
     assert done.returncode == 0, done.stderr
     files = shipped_files(kit)

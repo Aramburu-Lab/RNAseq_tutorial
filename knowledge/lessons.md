@@ -112,3 +112,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Ensembl REST answered HTTP 500 to three lookups that succeeded minutes later: move the outputs aside and rerun once before calling a panel unavailable (M9, 2026-10-15).
 - A speed measured in headless Chromium with --disable-gpu says nothing about WebGL: plotly drew nothing there and the fast redraw timed an empty plot. Check the plot drew before timing it (P, 2026-10-15).
 - "The largest page" is measured, not assumed: TCGA-BRCA was named the largest M5 page while CPTAC ccRCC stood at 14,984,671 B, 15 kB under the cap (P, 2026-10-15).
+- A push chained after a preflight must test its exit code: 4b99c9b went out with one failing test because the push followed a grep of the log, not the preflight's status (2026-10-16).
