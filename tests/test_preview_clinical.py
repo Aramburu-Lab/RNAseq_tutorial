@@ -96,3 +96,8 @@ def test_the_previews_km_and_scan_are_ctx_clinicals(built, preview):
     found = cutpoint.scan(t, e, cohort["log2cpm"].to_numpy())
     scan = pl.read_csv(written(built, "cut_scan", "csv"))
     assert np.allclose(scan["chi2"].to_numpy(), found.statistic, rtol=1e-12, atol=0)
+
+
+def test_the_preview_writes_the_entry_page_a_kit_needs(built):
+    """A kit refuses an M10 folder without index.html (D-072); kit v9's preview had none."""
+    assert (built / "outputs" / "12_clinical" / "index.html").is_file()

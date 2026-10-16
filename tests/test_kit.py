@@ -553,3 +553,17 @@ def test_a_bad_note_writes_nothing(tmp_path, note, reason):
     Mutations caught: the folder unchecked; the prose lint skipped."""
     kit, done = build(tmp_path, f"--note={note}")
     assert done.returncode != 0 and reason in done.stderr and nothing_written(kit)
+
+
+def test_a_two_project_count_matrix_stays_out(tmp_path, checker):
+    """A sheet joining two GDC projects names each folder after its project (D-076); the
+    matrix it read stays out all the same. Kit v9's tcga_lung counts, 192,637,178 B, were
+    taken for a file to ship and stopped the build at the cap (2026-10-16)."""
+    real, folder = gdc_root(tmp_path)
+    readme = real / "outputs" / "01_gather" / f"{NEW}_gather_tcgax_counts_v1_README.md"
+    readme.write_text(readme.read_text().replace("| GDC folder |", "| TCGA-X GDC folder |"))
+    kit, done = build(tmp_path / "k", real=real)
+    assert done.returncode == 0, done.stderr
+    files = shipped_files(kit)
+    assert f"step/outputs/01_gather/{NEW}_gather_tcgax_counts_v1.csv" not in files
+    assert "step/gdc/tcga_x/gdc_manifest_star_counts.txt" in files

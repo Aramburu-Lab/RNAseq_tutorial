@@ -38,6 +38,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.report.entry import write_entry
 from ctx.viz.heatmap import HeatmapData, Swatch
 from ctx.viz.style import HEAT_ALPHAS, ROLES
 
@@ -321,4 +322,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
             versions=runtime.versions(), inputs=(sheet_file.name,),
         ),
     )  # fmt: skip
-    return write(built, writer.out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html")
+    written = write(built, writer.out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html")
+    # A kit refuses this folder without its entry page (D-072), as for a real root.
+    write_entry(writer.out, MODULE)
+    return written

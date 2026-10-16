@@ -111,7 +111,8 @@ MADE_UP_LINK = '<span class="pill" data-kind="made-up">'
 # A gather table of this kind, from a GDC folder, is a raw count matrix (counts, miRNA counts).
 MATRIX_KIND = "_counts"
 # The rows ctx's table READMEs carry (ctx.io.readme_companion): the folders read, the command.
-GDC_FOLDER_ROW = re.compile(r"^\| GDC (?:\w+ )?folder \| (.+?) \|$", re.MULTILINE)
+# A sheet joining several projects names each folder after its project (gdc_run, D-076).
+GDC_FOLDER_ROW = re.compile(r"^\| (?:[\w-]+ )?GDC (?:\w+ )?folder \| (.+?) \|$", re.MULTILINE)
 COMMAND_ROW = re.compile(r"^\| Command \| `(.+)` \|$", re.MULTILINE)
 # The dataset file's SHA-256 as gather read it, from the README's Data releases rows.
 DATASET_SHA_ROW = re.compile(r"^\| sha256:([^|/ ]+\.toml) \| ([0-9a-f]{64}) \|$", re.MULTILINE)

@@ -40,6 +40,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.report.entry import write_entry
 from ctx.viz.annotate import Caption, wrap
 from ctx.viz.bar import BarData
 from ctx.viz.box import box_data
@@ -247,4 +248,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
             versions=runtime.versions(), inputs=(sheet_file.name,),
         ),
     )  # fmt: skip
-    return write(built, out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html")
+    written = write(built, out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html")
+    # A kit refuses this folder without its entry page (D-072), as for a real root.
+    write_entry(out, MODULE)
+    return written
