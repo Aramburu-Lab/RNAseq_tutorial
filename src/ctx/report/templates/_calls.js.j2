@@ -79,6 +79,25 @@ var ctxCalls = {
       parts[level].push(r);
     });
     return { parts: parts, line: ctxCalls.line(column, alpha, cfg, passing) };
+  },
+  /* How long typing must pause before the plot redraws, in ms. One redraw of 24,375 points
+     took 897 to 933 ms headless (D-081), and a redraw per key held a burst for seconds. */
+  QUIET_MS: 300,
+  /* fn once, ms after the last of a burst of calls; cancel() drops a run not yet made.
+     timers is {set, clear}: the page's setTimeout and clearTimeout, or a test's clock. */
+  debounce: function (fn, ms, timers) {
+    var t = timers || { set: function (f, d) { return setTimeout(f, d); },
+                        clear: function (h) { clearTimeout(h); } };
+    var pending = null;
+    function later() {
+      if (pending !== null) t.clear(pending);
+      pending = t.set(function () { pending = null; fn(); }, ms);
+    }
+    later.cancel = function () {
+      if (pending !== null) t.clear(pending);
+      pending = null;
+    };
+    return later;
   }
 };
 {% endraw %}

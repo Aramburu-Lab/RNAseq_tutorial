@@ -236,6 +236,9 @@ noscript = "Without JavaScript the gene list stays behind: open a page below and
 moved = "This view shows {label}; the figure files and the reading guide show {build}."
 noscript = "Choosing a view needs JavaScript; the tables beside the page hold every view's numbers."
 
+[subset]
+noscript = "Ticking what to include needs JavaScript; the table beside the figure holds every value."
+
 # A packed group: drawn when the reader reaches it (C3.1, M9.8).
 [packed]
 waiting = "This part is drawn when it comes into view."

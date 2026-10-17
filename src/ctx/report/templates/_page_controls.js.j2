@@ -215,7 +215,11 @@
       if (div.data[index].visible === "legendonly") return "legendonly";
       return on;
     }
+    /* Typing redraws once its burst pauses; a change, a step or a reset redraws at once, and
+       drops a redraw still waiting for the typing to pause. */
+    var typed = ctxCalls.debounce(function () { update(false); }, ctxCalls.QUIET_MS);
     function update(settle) {
+      typed.cancel();
       var t = threshold(), alpha = ctxCalls.cutoff(cutoff.value, cfg), column = basis.value;
       if (settle && String(alpha) !== cutoff.value) cutoff.value = String(alpha);
       var found = ctxCalls.call(rows, cfg, t, column, alpha), parts = found.parts;
@@ -266,7 +270,7 @@
     form.querySelectorAll("[data-step]").forEach(function (b) {
       b.addEventListener("click", function () { stepCutoff(Number(b.getAttribute("data-step"))); });
     });
-    form.addEventListener("input", function (e) { if (e.target !== unit) update(false); });
+    form.addEventListener("input", function (e) { if (e.target !== unit) typed(); });
     form.addEventListener("change", function (e) { if (e.target !== unit) update(true); });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
     form.addEventListener("reset", function () {

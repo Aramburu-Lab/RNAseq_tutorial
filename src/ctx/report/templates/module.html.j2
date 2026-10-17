@@ -1,9 +1,9 @@
 {% extends "base.html.j2" %}
-{% from "_figure.html.j2" import figure_block, result_table with context %}
+{% from "_figure.html.j2" import figure_block, panel_block, result_table with context %}
 {% from "_cards.html.j2" import cards_table with context %}
 {# A code block's text is printed as given: pre keeps every space and line end, and its Copy button names this block's own id. #}
 {% macro code_block(it) %}<figure class="code"><figcaption>{{ it.code.title }}{% if it.code.source %} <code>{{ it.code.source }}</code>{% endif %}</figcaption><div class="command"><pre><code id="{{ it.id }}">{{ it.code.text }}</code></pre><button type="button" class="copy" data-copy="{{ it.id }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div><p class="sha">{{ ui.code.sha256 }} <code>{{ it.code.sha256 }}</code></p></figure>{% endmacro %}
-{% macro item(kind, it, tab=false) %}{% if kind == "figure" %}{{ figure_block(it, tab=tab) }}{% elif kind == "table" %}{{ result_table(it) }}{% elif kind == "code" %}{{ code_block(it) }}{% else %}<p class="note">{{ it }}</p>{% endif %}{% endmacro %}
+{% macro item(kind, it, tab=false) %}{% if kind == "figure" %}{{ figure_block(it, tab=tab) }}{% elif kind == "table" %}{{ result_table(it) }}{% elif kind == "code" %}{{ code_block(it) }}{% elif kind == "panel" %}{{ panel_block(it) }}{% else %}<p class="note">{{ it }}</p>{% endif %}{% endmacro %}
 {% block page_class %} has-rail{% endblock %}
 {% block rail %}
 <nav class="toc" aria-label="{{ ui.contents.label }}"><p class="toc-title">{{ ui.contents.title }}</p><ol>

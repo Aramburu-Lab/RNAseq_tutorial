@@ -16,6 +16,7 @@ from ctx.genecard.cards import Card
 from ctx.genecard.junctions import RELEASE as RELEASE_JUNCTIONS
 from ctx.genecard.summary import DETECTED, tau
 from ctx.report import text
+from ctx.viz.axes import axis_title
 from ctx.viz.bar import BarData
 from ctx.viz.heatmap import HeatmapData, Swatch, diverging_levels
 from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, category_colours
@@ -130,8 +131,39 @@ def immune(card: Card, release: str) -> tuple[BarData, dict[str, Any]]:
                    value_label=text.word(PAGE, "figures.immune.y"), series="lineage",
                    colours=dict(zip(lineages, LINEAGE_COLOURS, strict=False)),
                    caption=text.fill(PAGE, "figures.immune.caption", **numbers),
-                   horizontal=True, stacked=True)  # fmt: skip
+                   horizontal=True, stacked=True,
+                   live=immune_controls(lineages, frame.height))  # fmt: skip
     return bars, numbers
+
+
+def immune_controls(lineages: list[str], cells: int) -> dict[str, Any]:
+    """F3's checkbox set: the lineages kept and the scale tau is taken on (``ctxM9.immune``).
+
+    One bar trace per lineage, in ``lineages``' order, as ``BarData`` draws a series; the page
+    hides a lineage's trace and recomputes tau and the top cell type over what is left. The
+    lead is the build's own template, filled in the page.
+    """
+    words = text.raw(PAGE, "figures.immune.live")
+    start = {"cells": cells, "total": cells, "kept": len(lineages), "lineages": len(lineages),
+             "scale": words["log"]}  # fmt: skip
+    return {"kind": "subset", "twin": "immune", "options": list(lineages),
+            "traces": list(lineages),
+            "scales": [["log", words["log"]], ["linear", words["linear"]]],
+            "template": text.raw(PAGE, "figures.immune.lead"), "none": text.word(PAGE, "none"),
+            "words": words,
+            "summary": text.fill(PAGE, "figures.immune.live.summary", **start)}  # fmt: skip
+
+
+def least_even(cv: Mapping[str, float | None]) -> tuple[str, float] | None:
+    """The exon with the largest defined CV and that CV; None where no CV is defined.
+
+    The first of tied exons in ``cv``'s order; the page's twin is ``ctxM9.uneven``.
+    """
+    finite = {e: v for e, v in cv.items() if v is not None}
+    if not finite:
+        return None
+    exon = max(finite, key=lambda e: finite[e])
+    return exon, finite[exon]
 
 
 def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | None] | None:
@@ -151,7 +183,7 @@ def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | No
     )
     pair = annotation.qpcr_pair(use.cv)
     finite = {e: v for e, v in use.cv.items() if v is not None}
-    uneven = max(finite, key=lambda e: finite[e]) if finite else names[0]
+    uneven = (least_even(use.cv) or (names[0], math.nan))[0]
     unreferenced = frame.filter(pl.col("reference") == 0)["exon"].n_unique()
     numbers = {"symbol": card.symbol, "release": gtex.RELEASE, "exons": len(names),
                "tissues": len(use.tissues), "left": len(use.left_out), "floor": DETECTED,
@@ -171,6 +203,25 @@ def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | No
                        row_stats_label=text.word(PAGE, "figures.exons.stat"),
                        row_stats_format=".2f")  # fmt: skip
     return heat, numbers, pair
+
+
+def exon_controls(heat: HeatmapData) -> dict[str, Any]:
+    """F4's checkbox set: the tissues kept, over which ``ctxM9.exonUse`` retakes the panel.
+
+    Every drawn tissue starts kept. A tissue left out keeps its column, drawn empty, so the
+    plot keeps the size it was laid out at. The page's heatmap has no PDF and SVG of a changed
+    view, so the live line says the files draw every tissue (D-051).
+    """
+    unit = heat.columns[heat.value][0]
+    tissues = len(heat.columns_in_order())
+    return {"kind": "subset", "twin": "exons", "options": heat.columns_in_order(),
+            "exons": heat.rows_in_order(), "template": text.raw(PAGE, "figures.exons.lead"),
+            "template_none": text.raw(PAGE, "figures.exons.lead_none"),
+            "words": text.raw(PAGE, "figures.exons.live"),
+            "hover": [heat.row_label, heat.column_label, axis_title(heat.value, unit)],
+            "levels": [s.level for s in heat.swatches],
+            "summary": text.fill(PAGE, "figures.exons.live.summary", kept=tissues,
+                                 tissues=tissues)}  # fmt: skip
 
 
 # The evidence view draws at most this many genes; the rest are listed in a table (GS.9).

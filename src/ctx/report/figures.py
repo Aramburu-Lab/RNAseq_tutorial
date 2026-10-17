@@ -248,11 +248,16 @@ def prepare(
 
 
 # What a form prints for the kinds that only pass on parts of their settings: a view's
-# option names (D-051) and M6's live ORA's words and backgrounds (GS.5).
+# option names (D-051), M6's live ORA's words and backgrounds (GS.5), M9's checkbox sets and
+# its list from a link (E.1a).
 _SHAPED = {
     "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"]},
     "ora": lambda c: {"words": c["words"], "backgrounds": c["backgrounds"],
                       "featured": c["featured"]},
+    "subset": lambda c: {"words": c["words"], "options": c["options"],
+                         "scales": c.get("scales", []), "summary": c["summary"]},
+    "genelist": lambda c: {"words": c["words"], "contrasts": c["contrasts"],
+                           "featured": c["featured"]},
 }  # fmt: skip
 
 

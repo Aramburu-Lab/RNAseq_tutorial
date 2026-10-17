@@ -16,7 +16,7 @@ from typing import Any
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer
-from ctx.genecard import GenecardError, annotation, cards, gtex, hpa, junctions, page
+from ctx.genecard import GenecardError, annotation, cards, gtex, hpa, junctions, listing, page
 from ctx.genecard.cache import Cache
 from ctx.io.naming import MODULES
 from ctx.report import genes
@@ -235,6 +235,8 @@ def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: 
                          renamed=renamer.renamed.get(n, ""))
               for n, why in listed]  # fmt: skip
     evidence = cards.evidence(root, spec, [c.number for c in chosen])
+    tested = listing.evidence({c.name: cards.results(root, dataset, c.name)
+                               for c in spec.contrasts}, table)  # fmt: skip
     provenance = {"gtex": _gtex(root, spec, chosen)}
     gtf = _registered(root, spec, GTF)
     mane = annotation.gtf_mane(gtf, [c.number for c in chosen]) if isinstance(gtf, Path) else {}
@@ -249,5 +251,5 @@ def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: 
     writer = Writer(out, dataset, date.today(), releases)
     context = page.Context(spec=spec, options=options, chosen=chosen, evidence=evidence,
                            provenance=provenance, settings=settings, command=command,
-                           cards=cards_)  # fmt: skip
+                           cards=cards_, tested=tested)  # fmt: skip
     return page.build(writer, context)

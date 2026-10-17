@@ -35,6 +35,7 @@ const out = {
     return u;
   }),
   levels: (input.levels || []).map(s => ctxM9.level(s)),
+  uneven: (input.uneven || []).map(cv => ctxM9.uneven(cv)),
 };
 console.log(JSON.stringify(out));
 """
@@ -155,3 +156,23 @@ def test_f4_ties_and_bounds_are_planted():
     page = _node({"immune": [], "exons": [], "levels": bounds})["levels"]
     assert [names[i] for i in page] == diverging_levels(bounds)[0]
     assert diverging_levels(bounds)[0][:3] == ["0.5 to 1", "-0.5 to 0.5", "≥ 2"]
+
+
+def test_the_least_even_exon_equals_python_ties_and_undefined_planted():
+    # Mutations: the last of tied CVs taken; an undefined CV taken as 0 or as the largest; the
+    # exons walked in text order.
+    rng = random.Random(5)
+
+    def cv() -> dict:
+        exons = rng.sample(range(1, 14), rng.randint(0, 6))
+        return {f"E{k}": rng.choice([None, 0.1, 0.4, round(rng.random(), 3)]) for k in exons}
+
+    cases = [cv() for _ in range(300)]
+    cases += [{"E2": 0.4, "E10": 0.4, "E1": None}, {"E1": None, "E2": None}, {}]
+    page = _node({"immune": [], "exons": [], "uneven": cases})["uneven"]
+    for cv, got in zip(cases, page, strict=True):
+        want = figures.least_even(cv)
+        assert (got is None) is (want is None), (cv, got)
+        if want is not None:
+            assert (got["exon"], got["cv"]) == want, (cv, got)
+    assert figures.least_even({"E2": 0.4, "E10": 0.4, "E1": None}) == ("E2", 0.4)

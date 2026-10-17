@@ -20,7 +20,7 @@ from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
 from ctx.report import export, glossary, marks, text
-from ctx.report.figures import json_for_script, prepare
+from ctx.report.figures import defaults, json_for_script, prepare
 from ctx.viz.style import (
     ALONE_SCALE,
     NARROW_PX,
@@ -173,6 +173,20 @@ class Code:
 
 
 @dataclass(frozen=True)
+class Panel:
+    """A page control with no figure of its own: its form and live parts, then its settings.
+
+    Attributes:
+        kind: What the page script wires, as a figure's controls name theirs: ``genelist``
+            for M9's list from a link (E.1a).
+        controls: Settings for the page script, embedded as JSON beside the form.
+    """
+
+    kind: str
+    controls: Mapping[str, Any]
+
+
+@dataclass(frozen=True)
 class Group:
     """Results that answer one question, under one heading; tabs for alternative views.
 
@@ -182,7 +196,7 @@ class Group:
     """
 
     title: str
-    items: tuple["FigureBlock | ResultTable | Code | str", ...]
+    items: tuple["FigureBlock | ResultTable | Code | Panel | str", ...]
     lead: str = ""
     tabs: bool = False
     packed: bool = False
@@ -298,7 +312,7 @@ class GlossaryPage:
     groups: tuple[tuple[str, tuple[glossary.Entry, ...]], ...]
 
 
-Result = Group | FigureBlock | ResultTable | Code | str
+Result = Group | FigureBlock | ResultTable | Code | Panel | str
 
 
 @dataclass(frozen=True)
@@ -449,13 +463,19 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
     outline: list[tuple[str, str]] = []
     counter = 0
     codes = 0
+    panels = 0
 
-    def one(item: FigureBlock | ResultTable | Code | str, level: int) -> tuple[str, Any]:
+    def one(item: FigureBlock | ResultTable | Code | Panel | str, level: int) -> tuple[str, Any]:
         """One item, prepared; each code block gets its own id, which its Copy button names."""
-        nonlocal counter, codes
+        nonlocal counter, codes, panels
         if isinstance(item, FigureBlock):
             counter += 1
             return "figure", prepare(item, counter - 1, counter, level)
+        if isinstance(item, Panel):
+            panels += 1
+            return "panel", {"kind": item.kind, "index": panels,
+                             "controls": json_for_script(item.controls),
+                             "defaults": defaults(dict(item.controls))}  # fmt: skip
         if isinstance(item, Code):
             codes += 1
             return "code", {"id": f"ctx-code-{codes}", "code": item}
@@ -472,14 +492,18 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
     return out, outline, counter > 0
 
 
-def _live(prepared: Iterable[Mapping[str, Any]]) -> bool:
-    """Whether a page scores gene lists live.
+# The kinds whose page script is in the live scripts: the gene lists' (``_select``, ``_live``)
+# and M9's twins (``_m9``, E.1a).
+LIVE_KINDS = ("survival", "follow", "ora", "subset", "genelist")
 
-    Such a page carries the selection and survival scripts (``_select``, ``_surv`` and
-    ``_live``); other pages leave them out.
+
+def _live(prepared: Iterable[Mapping[str, Any]]) -> bool:
+    """Whether a page carries the live scripts: it scores or reads a gene list, or recomputes M9.
+
+    Such a page carries the selection, survival and M9 scripts (``_select``, ``_surv``,
+    ``_live`` and ``_m9``); other pages leave them out.
     """
-    return any(f.get("kind") in ("survival", "follow", "ora") or f.get("select")
-               for f in prepared)  # fmt: skip
+    return any(f.get("kind") in LIVE_KINDS or f.get("select") for f in prepared)
 
 
 def _heading(page: Page) -> dict[str, str]:
@@ -561,12 +585,13 @@ def render(page: Page, glossary_href: str = "") -> str:
     versions = page.reproduce.versions
     items = [i for k, it in results for i in (it["items"] if k == "group" else [(k, it)])]
     prepared = [it for k, it in items if k == "figure"]
+    panels = [it for k, it in items if k == "panel"]
     context |= {
         "results": results,
         "outline": outline,
         "key_versions": [(n, versions[n]) for n in KEY_PACKAGES if n in versions],
         "export": export.assets(prepared),
-        "live": _live(prepared),
+        "live": _live([*prepared, *panels]),
     }
     return _ENV.get_template("module.html.j2").render(**context)
 

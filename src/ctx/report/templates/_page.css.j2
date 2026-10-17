@@ -153,6 +153,13 @@ html:not(.js) .js-only{display:none}
 .calls.select .paint{flex-direction:row;align-items:center;text-transform:none;letter-spacing:0;font-weight:400;font-size:var(--fs-sm);color:var(--text);cursor:pointer}
 .select .pick-buttons{display:flex;flex-wrap:wrap;gap:var(--space-2);margin:0}
 .calls.select .genes{flex:1 1 100%}
+.subset fieldset{display:flex;flex-wrap:wrap;gap:var(--space-2) var(--space-3);margin:0;padding:0;border:0}
+.subset legend{margin-bottom:var(--space-1);font-size:var(--fs-xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.calls.subset .paint{flex-direction:row;align-items:center;text-transform:none;letter-spacing:0;font-weight:400;font-size:var(--fs-sm);color:var(--text);cursor:pointer}
+.calls.subset input[type=checkbox]{width:auto;min-height:0}
+.calls.genelist .genes{flex:1 1 100%}
+.genelist textarea{font:inherit;font-size:var(--fs-sm);letter-spacing:0;text-transform:none;font-weight:400;color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-2);width:100%;box-sizing:border-box}
+.list-notes{margin:var(--space-2) 0 0;font-size:var(--fs-sm);color:var(--text)}
 .select textarea{font:inherit;font-size:var(--fs-sm);letter-spacing:0;text-transform:none;font-weight:400;color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-2);width:100%;box-sizing:border-box}
 .pick-table,.pick-leave,.pick-links,.select-problems,.select-notice{margin:var(--space-3) 0 0;font-size:var(--fs-sm);color:var(--text)}
 .pick-find,.pick-pages{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2) var(--space-3);margin:0 0 var(--space-2)}
@@ -165,8 +172,8 @@ table.pick th button{font:inherit;font-weight:700;color:var(--link);background:n
 .calls input,.calls select{font:inherit;font-size:var(--fs-sm);letter-spacing:0;text-transform:none;font-weight:400;color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-2);min-height:calc(var(--space-6) + var(--space-2))}
 .calls input{width:11ch}
 .calls input:focus,.calls select:focus{border-color:var(--link)}
-.calls.pairs label,.calls.view label,.calls.ora label{min-width:0;flex:1 1 auto}
-.calls.pairs select,.calls.view select,.calls.ora select{width:100%;min-width:0}
+.calls.pairs label,.calls.view label,.calls.ora label,.calls.genelist label{min-width:0;flex:1 1 auto}
+.calls.pairs select,.calls.view select,.calls.ora select,.calls.genelist select{width:100%;min-width:0}
 .calls button{font-size:var(--fs-sm);color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-3);min-height:calc(var(--space-6) + var(--space-2));cursor:pointer}
 .calls button:hover{border-color:var(--link)}
 .calls .pair button{padding:var(--space-1) var(--space-2)}

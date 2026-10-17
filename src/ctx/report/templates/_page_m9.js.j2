@@ -1,0 +1,210 @@
+{# Controls: M9's checkbox sets and its list from a link (E.1a). Included by _page.js.j2, inside its one function. #}
+{% raw %}  /* M9's checkbox sets: ctxM9 retakes F3 over the lineages kept, on the scale chosen, and F4
+     over the tissues kept; this block redraws them and fills the lead's own template. At the
+     build's settings the figure, lead and caption are as built. */
+  function subsetting(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = ctxRows(form), div = fig.querySelector(".js-plotly-plot"), words = cfg.words;
+    var lead = fig.querySelector(".fig-lead"), summary = fig.querySelector(".subset-summary");
+    var built = lead ? lead.innerHTML : "", mark = exporting(fig, cfg), drawn = false;
+    var boxes = Array.prototype.slice.call(form.querySelectorAll("input[name=kept]"));
+    function kept() { return boxes.filter(function (b) { return b.checked; }).map(function (b) { return b.value; }); }
+    function say(moved, text) {
+      if (lead) { if (moved) lead.textContent = text; else lead.innerHTML = built; }
+    }
+    function immune() {
+      var k = kept(), scale = form.elements.scale, log = !scale || scale.value === "log";
+      var got = ctxM9.immune(rows.map(function (r) { return [r.cell_type, r.lineage, r.ntpm]; }), k, log);
+      var moved = k.length !== cfg.options.length || !log;
+      if (moved || drawn) {
+        var cats = rows.filter(function (r) { return k.indexOf(r.lineage) >= 0; })
+          .map(function (r) { return String(r.cell_type); });
+        Plotly.restyle(div, { visible: cfg.traces.map(function (l) { return k.indexOf(l) >= 0; }) },
+                       cfg.traces.map(function (_, i) { return i; }));
+        Plotly.relayout(div, { "yaxis.categoryarray": cats });
+        drawn = true;
+      }
+      say(moved, got.cells ? ctxLive.fill(cfg.template, { top: got.top, top_ntpm: got.top_ntpm, cells: got.cells,
+        tau: got.tau === null ? cfg.none : got.tau.toFixed(2) }) : words.lead_none);
+      var label = cfg.scales.filter(function (s) { return s[0] === (log ? "log" : "linear"); })[0][1];
+      summary.textContent = ctxLive.fill(words.summary, { cells: got.cells, total: rows.length,
+        kept: k.length, lineages: cfg.options.length, scale: label });
+      mark(moved);
+      fig.ctxM9 = got;
+    }
+    function exons() {
+      var k = kept(), moved = k.length !== cfg.options.length;
+      var u = ctxM9.exonUse(rows.map(function (r) { return [r.exon, r.tissue, r.share]; }), k);
+      var at = Object.create(null);
+      u.cells.forEach(function (c) { at[c.exon + "\u0000" + c.tissue] = c; });
+      function cell(e, t) { return at[e + "\u0000" + t]; }
+      function hover(c) {
+        var lines = [cfg.hover[0] + ": " + c.exon, cfg.hover[1] + ": " + c.tissue];
+        if (c.ratio !== null) lines.push(cfg.hover[2] + ": " + String(Number(c.ratio.toPrecision(3))));
+        if (c.level !== null) lines.push(cfg.levels[c.level]);
+        return lines.join("<br>");
+      }
+      if (moved || drawn) {
+        var z = cfg.exons.map(function (e) {
+          return cfg.options.map(function (t) { var c = cell(e, t); return c ? c.level : null; });
+        });
+        var text = cfg.exons.map(function (e) {
+          return cfg.options.map(function (t) { var c = cell(e, t); return c ? hover(c) : ""; });
+        });
+        Plotly.restyle(div, { z: [z], text: [text] }, [0]);
+        if (div.layout.yaxis2) {
+          Plotly.relayout(div, { "yaxis2.ticktext": cfg.exons.map(function (e) {
+            return typeof u.cv[e] === "number" ? u.cv[e].toFixed(2) : "";
+          }) });
+        }
+        drawn = true;
+      }
+      var worst = ctxM9.uneven(u.cv);
+      say(moved, u.pair ? ctxLive.fill(cfg.template, { first: u.pair.first, second: u.pair.second,
+        pair_cv: u.pair.cv, uneven: worst.exon, uneven_cv: worst.cv }) : cfg.template_none);
+      summary.textContent = ctxLive.fill(words.summary, { kept: k.length, tissues: cfg.options.length });
+      fig.ctxM9 = u;
+    }
+    var update = cfg.twin === "immune" ? immune : exons;
+    form.addEventListener("change", function () { guard("subset", update); });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the boxes without an event. */
+    if (kept().length !== cfg.options.length || (form.elements.scale && form.elements.scale.value !== "log")) update();
+  }
+
+  /* M9's list from a link (E.1a): the M5 evidence of every gene any contrast tested travels
+     gzipped in the page; a list from a link, from the page that opened this one, or pasted is
+     shown against it, gene by gene, with each gene's card where the page holds one and the
+     command that builds the others. */
+  function listing(form) {
+    var panel = form.closest(".genelist-panel");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var words = cfg.words, summary = panel.querySelector(".list-summary");
+    var notes = panel.querySelector(".list-notes"), box = panel.querySelector(".pick-table");
+    var head = panel.querySelector("thead tr"), body = panel.querySelector("tbody");
+    var pages = panel.querySelector(".pick-pages span"), command = panel.querySelector(".list-command");
+    var code = command.querySelector("code"), data = null, index = null, at = null;
+    var cards = Object.create(null), named = Object.create(null), shown = null;
+    var state = { list: [], query: "", only: false, page: 0 };
+    cfg.cards.forEach(function (c) { cards[c[0]] = c[1]; named[c[0]] = c[2]; });
+    function said(err) { return err.key ? ctxSelect.message(err, { select: cfg.errors }) : String(err.message); }
+    function link(n) {
+      if (!cards[n]) return document.createTextNode(words.no_card);
+      var a = document.createElement("a");
+      a.href = "#" + cards[n]; a.textContent = words.card;
+      return a;
+    }
+    function rows() {
+      var c = form.elements.contrast.value, ci = -1;
+      cfg.contrasts.forEach(function (x, i) { if (x[0] === c) ci = i; });
+      return shown.genes.map(function (n, order) {
+        var r = at[n], id = ctxSelect.ensembl(n);
+        var g = { number: n, id: id, order: order, padj: null,
+                  symbol: (r === undefined ? named[n] : data.symbols[r]) || id };
+        /* A carded gene no contrast tested: its card, and no evidence. */
+        if (r === undefined) {
+          g.cells = ci < 0 ? ["0", "0", "0"] : ["", "", words.calls["-"]];
+        } else if (ci < 0) {
+          var calls = data.calls.map(function (s) { return s.charAt(r); });
+          g.cells = [calls.filter(function (x) { return x === "u"; }).length,
+                     calls.filter(function (x) { return x === "d"; }).length,
+                     calls.filter(function (x) { return x !== "-"; }).length].map(ctxSelect.group);
+        } else {
+          var lfc = data.lfc[ci][r], p = data.padj[ci][r];
+          g.padj = p;
+          g.cells = [lfc === null ? "" : lfc.toPrecision(3), p === null ? "" : p.toPrecision(2),
+                     words.calls[data.calls[ci].charAt(r)]];
+        }
+        return g;
+      });
+    }
+    function table() {
+      var every = !form.elements.contrast.value;
+      var v = ctxPick.view(rows(), { page_rows: cfg.page_rows },
+                           { list: state.list, query: "", only: false, sort: every ? "order" : "padj",
+                             desc: false, page: state.page });
+      while (head.firstChild) head.removeChild(head.firstChild);
+      (every ? words.columns_every : words.columns_one).forEach(function (name, i) {
+        var th = document.createElement("th"); th.textContent = name;
+        if (i > 0 && i < 4) th.className = "num";
+        head.appendChild(th);
+      });
+      while (body.firstChild) body.removeChild(body.firstChild);
+      v.rows.forEach(function (g) {
+        var tr = document.createElement("tr");
+        [g.symbol].concat(g.cells).forEach(function (text, i) {
+          var td = document.createElement("td");
+          if (i > 0) td.className = "num";
+          td.textContent = text;
+          if (i === 0) td.title = g.id;
+          tr.appendChild(td);
+        });
+        var td = document.createElement("td"); td.appendChild(link(g.number)); tr.appendChild(td);
+        body.appendChild(tr);
+      });
+      pages.textContent = v.total ? ctxPick.fill(words.pages, { first: ctxSelect.group(v.first),
+        last: ctxSelect.group(v.last), total: ctxSelect.group(v.total) }) : "";
+      state.page = v.page;
+    }
+    /* A list's genes against the evidence: one no contrast tested is counted, and shown only
+       where the page holds its card. */
+    function take(genes, source) {
+      var found = [], rows = [], missing = 0, carded = 0;
+      genes.forEach(function (gene) {
+        var n = Math.abs(gene);
+        if (at[n] === undefined) missing++; else found.push(n);
+        if (cards[n]) carded++;
+        if (at[n] !== undefined || cards[n]) rows.push(n);
+      });
+      shown = { genes: rows, source: source };
+      state.page = 0;
+      summary.textContent = ctxLive.fill(words.summary, { n: ctxSelect.group(genes.length), source: source,
+        found: ctxSelect.group(found.length), missing: ctxSelect.group(missing), cards: ctxSelect.group(carded) });
+      box.hidden = !rows.length;
+      var other = found.filter(function (n) { return !cards[n]; });
+      code.textContent = other.length ? cfg.command + " --genes " + other.map(ctxSelect.ensembl).join(",") : "";
+      command.hidden = !other.length;
+      if (rows.length) table();
+      panel.ctxList = { found: found, missing: missing, cards: carded };
+    }
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    form.addEventListener("change", function (e) {
+      if (e.target === form.elements.contrast && shown) { state.page = 0; table(); }
+    });
+    panel.querySelectorAll("[data-page]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (!shown) return;
+        state.page += Number(b.getAttribute("data-page")); table();
+      });
+    });
+    if (!window.DecompressionStream) { summary.textContent = words.no_stream; return; }
+    ctxLive.inflate(cfg.block).then(function (bytes) {
+      data = JSON.parse(new TextDecoder().decode(bytes));
+      at = Object.create(null);
+      data.numbers.forEach(function (n, i) { at[n] = i; });
+      index = ctxSelect.index(data.numbers, data.symbols);
+      form.querySelector("[data-paste]").addEventListener("click", function () {
+        var found = ctxSelect.parse(form.elements.pasted.value, index), problems = [];
+        if (found.ambiguous.length) problems.push(ctxPick.fill(cfg.picker.ambiguous, { names:
+          found.ambiguous.map(function (a) { return a[0] + " (" + a[1].join(", ") + ")"; }).join("; ") }));
+        if (found.missing.length) problems.push(ctxPick.fill(cfg.picker.missing, { names: found.missing.join(", ") }));
+        notes.textContent = problems.join(" ");
+        take(found.found, words.pasted);
+      });
+      /* Open beside on M5 sends its list to the window it opened: this one. */
+      window.addEventListener("message", function (e) {
+        if (e.source !== window.opener) return;
+        try { var sel = ctxSelect.received(e.data); if (sel) { notes.textContent = ""; take(sel.genes, words.window); } }
+        catch (err) { notes.textContent = said(err); }
+      });
+      if (ctxSelect.carries(location.hash)) {
+        try { take(ctxSelect.decode(location.hash).genes, words.link); } catch (err) { notes.textContent = said(err); }
+      }
+    }, function (err) {
+      summary.textContent = words.no_stream;
+      if (window.console) console.error("ctx page: genelist", err);
+    });
+  }
+
+{% endraw %}

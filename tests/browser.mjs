@@ -1,7 +1,9 @@
 // Drives headless Chromium over the DevTools protocol with node's own WebSocket, no package:
 // tests/test_export_browser.py hands it a plan on stdin and reads what each page did.
-// Plan: {chromium, downloads, tasks: [{name, url, width, height, act, mouse, others, figure,
-// reset, resize}]}. For each task it opens the page, evaluates `act` as a user gesture, then
+// Plan: {chromium, downloads, trace, tasks: [{name, url, width, height, until, act, mouse,
+// others, figure, reset, resize}]}. For each task it opens the page, waits, where `until` is
+// set, until a loaded page's URL holds it (a page that forwards to another, as an entry page
+// does), evaluates `act` as a user gesture, then
 // for each step of `mouse` in turn evaluates its `at`, a list of [type, x, y] events, and
 // dispatches them as a real left-button mouse (a drag is pressed, moved, released) before
 // evaluating its `then`; evaluates `others` in every other page open then (a window the page
@@ -16,6 +18,12 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
 const plan = JSON.parse(readFileSync(0, "utf8"));
+// With plan.trace, each step's start goes to stderr with the seconds since launch, so a
+// driver that stops names the step it stopped in.
+const began = Date.now();
+const trace = plan.trace
+  ? (step) => process.stderr.write(`trace ${((Date.now() - began) / 1000).toFixed(1)} ${step}\n`)
+  : () => {};
 const profile = mkdtempSync(join(tmpdir(), "ctx-browser-"));
 const proc = spawn(plan.chromium, [
   "--headless=new", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run",
@@ -97,8 +105,10 @@ try {
     const size = (width, height) => s("Emulation.setDeviceMetricsOverride", {
       width: width || 1280, height: height || 900, deviceScaleFactor: 1, mobile: (width || 1280) < 768,
     });
+    trace(`${task.name}: size`);
     await size(task.width, task.height);
     const loaded = waitFor((m) => m.sessionId === sessionId && m.method === "Page.loadEventFired", 60000);
+    trace(`${task.name}: navigate`);
     await s("Page.navigate", { url: task.url });
     await loaded;
     const evaluate = async (expression) => {
@@ -107,6 +117,15 @@ try {
       if (out.exceptionDetails) throw new Error(`${task.name}: ${JSON.stringify(out.exceptionDetails)}`);
       return out.result.value;
     };
+    for (let waited = 0; task.until; waited += 100) {
+      // Mid-navigation the old page's context is gone and an evaluation fails: try again.
+      const at = await evaluate('document.readyState === "complete" ? location.href : ""')
+        .catch(() => "");
+      if (at.includes(task.until)) break;
+      if (waited > 60000) throw new Error(`${task.name}: no loaded page at ${task.until}`);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    trace(`${task.name}: act`);
     const result = { name: task.name, acted: await evaluate(task.act || "null"), files: {} };
     result.moused = [];
     // Input reaches only the page in front: a background tab drew no drag.
@@ -141,6 +160,7 @@ try {
     result.reset = await evaluate(task.reset || "null");
     result.resized = [];
     for (const step of task.resize || []) {
+      trace(`${task.name}: resize ${step.width}`);
       await size(step.width, step.height);
       result.resized.push(await evaluate(step.act));
     }
@@ -148,13 +168,18 @@ try {
     result.errors = errors;
     results.push(result);
     listeners.delete(watch);
+    trace(`${task.name}: close`);
     await send("Target.closeTarget", { targetId });
   }
 } finally {
   const exited = new Promise((resolve) => proc.on("exit", resolve));
+  trace("browser close");
   try { await send("Browser.close"); } catch (e) { /* already closing */ }
+  trace("browser exit");
   await Promise.race([exited, new Promise((resolve) => setTimeout(resolve, 5000))]);
   proc.kill();
+  trace("profile removal");
   rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  trace("done");
 }
 console.log(JSON.stringify(results));

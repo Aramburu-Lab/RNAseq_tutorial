@@ -64,6 +64,32 @@ lead = "{n:,} of the {listed:,} listed genes have no card here: their cards woul
 genes = "Left out, in list order: {genes}."
 command = "Build their cards on a page of their own"
 
+# The list from a link (E.1a): every gene M5 tested travels in the page; the script fills these.
+[list]
+group = "Genes from a link"
+lead = "A list sent from the M5 gene picker, through this folder's entry page or Open beside, shows here with each gene's M5 evidence."
+label = "Genes from a link"
+contrast = "Contrast"
+every = "Every contrast, as counts"
+paste = "Paste symbols or Ensembl IDs"
+paste_button = "Show the pasted genes"
+noscript = "Reading a gene list needs JavaScript; the cards below are the build's list."
+waiting = "No list yet: open this page from the M5 gene picker, or paste genes."
+no_stream = "This browser cannot unpack the M5 evidence the page carries, so it reads no list."
+summary = "{n} genes from {source}: {found} tested by M5, {missing} not; {cards} with a card on this page."
+link = "a link"
+window = "the page that opened this one"
+pasted = "the paste box"
+rounded = "M5's log2 FC at 3 and padj at 2 significant digits; each card's table holds the full values."
+columns_every = ["Gene", "Contrasts up", "Contrasts down", "Contrasts testing it", "Card"]
+columns_one = ["Gene", "log2 FC", "padj", "Call", "Card"]
+card = "Card"
+no_card = "none here"
+command = "Build cards for the listed genes this page holds none of"
+previous = "Previous"
+next = "Next"
+pages = "Genes {first} to {last} of {total}"
+
 [reasons]
 named = "named in this run"
 registered = "registered in the dataset file"
@@ -154,6 +180,16 @@ cell_type = ["none", "HPA immune cell type."]
 lineage = ["none", "HPA lineage of the cell type."]
 ntpm = ["nTPM", "HPA normalised transcripts per million of the cell type."]
 
+# F3's checkbox set (E.1a); the page fills the lead's own template and this summary.
+[figures.immune.live]
+label = "Cell types drawn"
+legend = "Lineages included"
+scale = "tau on"
+log = "log2(nTPM + 1)"
+linear = "nTPM"
+lead_none = "No cell type is left: tick a lineage."
+summary = "{cells} of {total} cell types, in {kept} of {lineages} lineages; tau on {scale}."
+
 [figures.exons]
 title = "Exon use of {symbol} across tissues, GTEx {release}"
 lead = "Most even adjacent pair: {first} and {second}, larger CV {pair_cv:.2f}; least even exon {uneven}, CV {uneven_cv:.2f}."
@@ -180,6 +216,12 @@ share = ["fraction", "Median over samples of the exon's share of the gene's exon
 reference = ["fraction", "The exon's median share over the tissues drawn, those at 1 TPM or more."]
 log2_ratio = ["log2", "log2 of share over reference; empty where either is 0, with no pseudocount."]
 level = ["none", "Step of the diverging scale: share over a reference of 0 is the top step, 0 over one above 0 the bottom."]
+
+# F4's checkbox set (E.1a); the page fills the lead's own templates and this summary.
+[figures.exons.live]
+label = "Tissues drawn"
+legend = "Tissues included"
+summary = "Medians and CVs over {kept} of {tissues} tissues. The PDF and SVG draw all {tissues}."
 
 [figures.evidence]
 group = "The listed genes in every contrast"

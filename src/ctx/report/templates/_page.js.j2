@@ -9,7 +9,8 @@
 {% include "_pick.js.j2" %}
 {% include "_ora.js.j2" %}
 {% include "_surv.js.j2" %}
-{% include "_live.js.j2" %}{% endif %}
+{% include "_live.js.j2" %}
+{% include "_m9.js.j2" %}{% endif %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
    is logged and never stops the others; every feature degrades to a readable page without
@@ -83,7 +84,7 @@
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -205,6 +206,14 @@
   scope.querySelectorAll("form.ora").forEach(function (form) {
     guard("ora", function () { oraLive(form); });
   });
+
+  /* M9's checkbox sets and its list from a link (E.1a): ctxM9 holds the twins. */
+  scope.querySelectorAll("form.subset").forEach(function (form) {
+    guard("subset", function () { subsetting(form); });
+  });
+  scope.querySelectorAll("form.genelist").forEach(function (form) {
+    guard("genelist", function () { listing(form); });
+  });
   }
   wire(document);
 
@@ -286,5 +295,6 @@
 {% include "_page_brush.js.j2" %}
 {% include "_page_pick.js.j2" %}
 {% include "_page_controls.js.j2" %}
+{% if live %}{% include "_page_m9.js.j2" %}{% endif %}
 {% raw %}})();
 {% endraw %}
