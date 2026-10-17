@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-082 — M9 carries every tested gene's M5 evidence; live-calls typing waits for a pause
+
+**Date:** 2026-10-17 · **Status:** decided
+
+**Context.** E.1a: M9 receives a gene list from M5's picker, and must show each listed gene whether or not the page holds its card; P.1: a live-calls redraw takes about 0.9 s on 21,000 or more points, once per key.
+
+**Decision.** M9 embeds every tested gene's M5 evidence, gzipped and base64-encoded (log2 FC at 3 and padj at 2 significant digits, the call as M5 made it). A received list shows each gene's evidence, links its card when the page has one, and gives the command to build the others. F3's lineage boxes and F4's tissue boxes recompute in the page through the JS twins; a dropped tissue's column is drawn empty, and the page says the PDF and SVG still draw every tissue. Live-calls typing redraws 300 ms after the last key; a change, an arrow step or a reset redraws at once.
+
+**Evidence.** Step-1 M9 6,570,840 to 7,656,484 B (block 971,416 B; 2,721,192 B as plain JSON); TCGA-BRCA 10,068,785 to 10,587,500 B. F3 and F4 equal Python on every card in Chromium. A five-key burst on ccRCC: 1 redraw, not 5. 19 planted mutations caught.
+
+**Consequence.** M9's page grows with the number of tested genes and contrasts; a cohort with many contrasts must be measured against the cap.
+
+---
+
 ## D-081 — With live calls a volcano's points travel once, in the page's rows; SVG over WebGL
 
 **Date:** 2026-10-15 · **Status:** decided

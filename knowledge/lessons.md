@@ -120,3 +120,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Max RSS of one qc run on one input spread 3.99 to 5.32 GB under load while macOS's peak memory footprint held at 4.77 to 4.78 GB: report both and repeat the run (Q, 2026-10-17).
 - A NUL byte cannot pass in argv: a log format with chr(0) raised "embedded null byte" in subprocess; use git's own %x00 placeholder (RUN, 2026-10-17).
 - Under a load average of 21 to 34, xdist runs hit tool timeouts (multiqc --version past 120 s) that pass serially: read failures against the load before blaming the change, and rerun when the machine is quiet (RUN, 2026-10-17).
+- A test that slows 20 times under load can be the machine, not the code: time a CPU loop against file operations first; under Defender, writing 500 small files went from 4.2 to 133 s while the CPU loop did not change (W, 2026-10-17).
+- A driver killed alone leaves its browser running: start it in a session of its own and kill the whole session (W, 2026-10-17).
+- `Path.resolve()` follows a scratch root's link into the real root, whose links then open the real pages: use `absolute()` (W, 2026-10-17).
