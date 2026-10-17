@@ -25,6 +25,7 @@ import polars as pl
 from ctx import runtime
 from ctx.clinical import analyses, cutpoint, figures, score, survival
 from ctx.de.run import Writer, newest
+from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
 from ctx.report import text
 from ctx.report.builder import (
@@ -294,7 +295,7 @@ def page(root: Path, dataset: str, day: date) -> Path:
     started = time.perf_counter()
     gather = root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
     sheet_file = newest(gather, dataset, "samplesheet")
-    sheet = pl.read_parquet(sheet_file)
+    sheet = gdc.chosen(pl.read_parquet(sheet_file))  # the one door (S.9)
     gene = str(pl.read_parquet(newest(gather, dataset, "genes"))["gene_name"][0])
     out = root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
     release = {fill("preview.release_name"): fill("preview.release", seed=SEED)}

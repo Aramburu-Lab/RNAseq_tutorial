@@ -146,7 +146,7 @@ def resolve(root: Path, dataset: str, options: Options) -> Inputs:
     spec, contrast = found
     sheet = pl.read_parquet(sheet_path).unique("sample", keep="first", maintain_order=True)
     # A GDC sheet lists every file; its approved choice of one per patient is the one door.
-    sheet = gdc.chosen(sheet) if "chosen" in sheet.columns else sheet
+    sheet = gdc.chosen(sheet)
     counts = pl.read_parquet(counts_path)
     if absent := [s for s in sheet["sample"] if s not in counts.columns]:
         raise NcrnaError(f"{counts_path.name} lacks {len(absent)} samples of the sheet, "

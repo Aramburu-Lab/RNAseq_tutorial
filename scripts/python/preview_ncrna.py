@@ -28,6 +28,7 @@ from ctx import runtime
 from ctx.de.filters import MIN_COUNT, TOLERANCE, expressed, min_sample_size
 from ctx.de.run import Writer, newest
 from ctx.de.stats import ALPHA, LFC_MIN, classify
+from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
 from ctx.ncrna import biotypes
 from ctx.report import text
@@ -418,7 +419,10 @@ def page(root: Path, dataset: str, day: date) -> Path:
     started = perf_counter()
     gathered = root / "outputs" / "01_gather"
     sheet_path = newest(gathered, dataset, "samplesheet")
-    sheet = pl.read_parquet(sheet_path).unique("sample", keep="first", maintain_order=True)
+    # Through the one door, so a GDC sheet counts its chosen files only (S.9).
+    sheet = gdc.chosen(pl.read_parquet(sheet_path)).unique(
+        "sample", keep="first", maintain_order=True
+    )
     con = Contrast.of(sheet)
     genes, counts = made_up(sheet, con.tested, np.random.default_rng(SEED))
     logs = _log_cpm(counts)
