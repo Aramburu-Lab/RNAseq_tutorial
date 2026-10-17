@@ -129,3 +129,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A door a caller wraps in "if the column is there" is two doors: de, qc and ncrna each passed a GDC sheet that had lost its `chosen` column. The door decides what a sheet is, from columns only that kind writes (T, 2026-10-17).
 - `thin_tick_labels` hides colliding tick labels without an error, so a layout check passed an F1 figure with half its labels hidden: count the drawn labels (M9b, 2026-10-17).
 - An exception message passed into page text carried the root's absolute path and widened a 375 px page: page reasons name the table and the module, never a path (M9b, 2026-10-17).
+- In a worktree pass PYTHONPATH as an absolute path: a relative `src` does not follow test subprocesses that change folder, so they ran main's editable install (E2a, 2026-10-17).
+- A browser mutation run needs Chromium on PATH: without it the browser tests skip, and a skip reads as a surviving mutation (E2a, 2026-10-17).

@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-085 — M2's judge and M1's recount recompute in the page from one Python definition each; a view may carry its own export settings
+
+**Date:** 2026-10-17 · **Status:** decided; M1's colour columns await a dataset-file declaration
+
+**Context.** E.2's M1 and M2 controls (WO5).
+
+**Decision.** `ctxJudge` is the twin of `checkpoint.judge`: k, strata and peers move in the page, bad-band reasons and strand calls stay decided in Python, and the JS prints numbers as Python does, ties rounded half to even. Judging with no strata is one stratum named "the whole cohort" (`group_by([])` returned no groups and flagged nothing). `composition.recount` is the one definition of M1 Figure 1's bars; a contrast keeps the runs `select_samples` picks. `identity.against` is the one agreement rule of the sex check for M5 and the page. A view option may carry its own PDF and SVG settings, swapped in by `viewing()`. M1's colour columns are batch, then each curated column of 2 to 7 levels, until a dataset file declares them.
+
+**Evidence.** Step-1: 92 of 92 metrics equal; read-length flags 0, 142 of 210 runs flagged; every qc table byte-identical except S.8's three, same rows in a fixed order; 21 planted mutations caught.
+
+**Consequence.** The colour rule offers tissue and time point on Step-1, which the plan's question 6 recommended leaving out.
+
+---
+
 ## D-084 — M9's own-sample panels read each contrast's own M5 fit
 
 **Date:** 2026-10-17 · **Status:** decided; F1's per-contrast layout awaits Rytis's confirmation
