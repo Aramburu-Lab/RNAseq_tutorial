@@ -1,0 +1,14 @@
+== 2026-10-17T14:22:35Z Mozilla Firefox 156.0.1
+file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/docs/plans/logs/wo13_w/gs6_firefox.mjs:23
+  proc.on("exit", (code) => reject(new Error(`firefox exited ${code}: ${seen}`)));
+                                   ^
+
+Error: firefox exited 1: *** You are running in headless mode.
+Could not find profile folder.
+
+    at ChildProcess.<anonymous> (file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/docs/plans/logs/wo13_w/gs6_firefox.mjs:23:36)
+    at ChildProcess.emit (node:events:514:20)
+    at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+Node.js v26.10.0
+exit 1

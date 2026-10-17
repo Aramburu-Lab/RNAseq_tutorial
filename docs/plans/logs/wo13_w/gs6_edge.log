@@ -1,0 +1,27 @@
+== 2026-10-17T14:18:51Z Microsoft Edge 155.0.4283.60 
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+rootdir: /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82
+configfile: pyproject.toml
+plugins: zarr-3.4.0, xdist-3.8.0, anyio-4.15.1
+collecting ... collected 16 items
+
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[False-1280-box] PASSED [  6%]
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[False-1280-lasso] PASSED [ 12%]
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[False-375-box] PASSED [ 18%]
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[False-375-lasso] PASSED [ 25%]
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[True-1280-box] PASSED [ 31%]
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[True-1280-lasso] PASSED [ 37%]
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[True-375-box] PASSED [ 43%]
+tests/test_pick_browser.py::test_a_real_drag_picks_the_genes_inside_it[True-375-lasso] PASSED [ 50%]
+tests/test_pick_browser.py::test_the_dark_theme_draws_the_picked_view_in_its_own_ink[1280] PASSED [ 56%]
+tests/test_pick_browser.py::test_the_dark_theme_draws_the_picked_view_in_its_own_ink[375] PASSED [ 62%]
+tests/test_pick_browser.py::test_the_ring_reads_on_both_themes PASSED    [ 68%]
+tests/test_pick_browser.py::test_open_beside_sends_both_ways_through_the_entry_page PASSED [ 75%]
+tests/test_ora_browser.py::test_the_live_ora_reruns_on_each_setting PASSED [ 81%]
+tests/test_genecard_browser.py::test_f3_retakes_tau_and_the_top_cell_over_the_lineages_kept PASSED [ 87%]
+tests/test_genecard_browser.py::test_f4_retakes_the_exon_panel_over_the_tissues_kept PASSED [ 93%]
+tests/test_genecard_browser.py::test_a_list_from_a_link_opens_the_page_through_its_entry_with_each_gene PASSED [100%]
+
+======================== 16 passed in 160.43s (0:02:40) ========================
+exit 0

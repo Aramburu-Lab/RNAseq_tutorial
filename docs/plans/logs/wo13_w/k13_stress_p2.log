@@ -1,0 +1,4 @@
+== p2: drivers 2, deadline 900 s, rounds 1, load 14 yes, 2026-10-17T13:21:15Z
+round 0 driver 0: exit 0 in 126.0 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 0 driver 1: exit 0 in 124.8 s; draws after settling [0, 0, 0, 0, 0, 0]
+== exit 0

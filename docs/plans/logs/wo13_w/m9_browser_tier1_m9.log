@@ -1,0 +1,157 @@
+== 2026-10-17T14:37:42Z 2026-10-17_genecard_tier1_overview_v1.html 2026-10-16_de_tier1_overview_v1.html
+{
+ "errors": {},
+ "move_1280_white": {
+  "theme": "white",
+  "width": 1280,
+  "fits": true,
+  "f3": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "f4": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "problems": [],
+  "tau_defined": 7
+ },
+ "move_1280_black": {
+  "theme": "black",
+  "width": 1280,
+  "fits": true,
+  "f3": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "f4": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "problems": [],
+  "tau_defined": 7
+ },
+ "move_375_white": {
+  "theme": "black",
+  "width": 375,
+  "fits": true,
+  "f3": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "f4": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "problems": [],
+  "tau_defined": 7
+ },
+ "move_375_black": {
+  "theme": "white",
+  "width": 375,
+  "fits": true,
+  "f3": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "f4": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "problems": [],
+  "tau_defined": 7
+ },
+ "link": {
+  "sent": 1683,
+  "tested": 1683,
+  "carded": 2,
+  "page": {
+   "found": 1683,
+   "missing": 0,
+   "cards": 2
+  },
+  "summary": "1,683 genes from a link: 1,683 tested by M5, 0 not; 2 with a card on this page.",
+  "pages": "Genes 1 to 25 of 1,683",
+  "first_rows": [
+   [
+    "LAIR1",
+    "7.89",
+    "2.0e-168",
+    "up",
+    "none here"
+   ],
+   [
+    "PLAC8",
+    "8.36",
+    "1.6e-134",
+    "up",
+    "none here"
+   ],
+   [
+    "NECAB1",
+    "8.18",
+    "2.7e-108",
+    "up",
+    "none here"
+   ]
+  ],
+  "fits": true,
+  "errors": [],
+  "url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/tie"
+ },
+ "beside": {
+  "about:blank": [
+   null,
+   null
+  ],
+  "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outpu": [
+   {
+    "found": 1683,
+    "missing": 0,
+    "cards": 2
+   },
+   "1,683 genes from a link: 1,683 tested by M5, 0 not; 2 with a card on this page."
+  ]
+ }
+}
+exit 0

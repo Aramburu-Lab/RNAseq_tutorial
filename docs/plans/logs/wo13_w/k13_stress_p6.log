@@ -1,0 +1,34 @@
+== p6: drivers 6, deadline 300 s, rounds 3, load 14 yes, 2026-10-17T12:48:40Z
+Traceback (most recent call last):
+  File "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/docs/plans/logs/wo13_w/k13_stress.py", line 123, in <module>
+    main()
+  File "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/docs/plans/logs/wo13_w/k13_stress.py", line 104, in main
+    stdout, _ = proc.communicate(timeout=max(1.0, deadline - (time.monotonic() - start)))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/subprocess.py", line 2067, in _communicate
+    self.stdin.flush()
+ValueError: I/O operation on closed file.
+== exit 1
+== p6: drivers 6, deadline 300 s, rounds 3, load 14 yes, 2026-10-17T12:49:42Z
+round 0 driver 0: exit 0 in 92.8 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 0 driver 1: exit 0 in 92.8 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 0 driver 2: exit 0 in 92.7 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 0 driver 3: exit 0 in 92.7 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 0 driver 4: exit 0 in 92.6 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 0 driver 5: exit 0 in 92.3 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 1 driver 0: exit 0 in 95.1 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 1 driver 1: exit 0 in 95.0 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 1 driver 2: exit 0 in 95.0 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 1 driver 3: exit 0 in 94.8 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 1 driver 4: exit 0 in 94.7 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 1 driver 5: exit 0 in 94.9 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 2 driver 0: exit 0 in 249.5 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 2 driver 1: exit 0 in 249.9 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 2 driver 2: exit 0 in 249.8 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 2 driver 3: exit 0 in 249.9 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 2 driver 4: exit 0 in 249.7 s; draws after settling [0, 0, 0, 0, 0, 0]
+round 2 driver 5: exit 0 in 249.6 s; draws after settling [0, 0, 0, 0, 0, 0]
+== exit 0
