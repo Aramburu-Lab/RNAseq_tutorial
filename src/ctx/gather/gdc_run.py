@@ -200,19 +200,13 @@ def read_projects(paths: list[Path], spec: Dataset) -> list[tuple[GdcSpec, Read]
     be given in any order; each declared project needs exactly one.
 
     Raises:
-        gdc.GdcError: If a folder is of an undeclared project, two are of one, or one is missing.
+        gdc.GdcError: If a folder is of an undeclared project, two are of one, or one is
+            missing (``gdc.by_project``), every problem named.
     """
     assert spec.gdc is not None  # noqa: S101 - run() refuses a dataset file without [gdc]
-    by: dict[str, Path] = {}
-    for path in (p.resolve() for p in paths):
-        project = gdc.project_of(path)
-        if project not in spec.gdc.projects:
-            raise gdc.GdcError(f"{path}: project {project!r}, not one of {spec.gdc.projects}")
-        if project in by:
-            raise gdc.GdcError(f"{by[project]} and {path} are both {project!r}")
-        by[project] = path
-    if missing := [p for p in spec.gdc.projects if p not in by]:
-        raise gdc.GdcError(f"no --gdc-dir for {missing}: give one folder per declared project")
+    by, problems = gdc.by_project(paths, spec.gdc.projects)
+    if problems:
+        raise gdc.GdcError("; ".join(problems))
     found = []
     for project in spec.gdc.projects:
         one = spec.gdc.one(project)

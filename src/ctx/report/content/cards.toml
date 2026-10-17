@@ -252,6 +252,7 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 "--salmon-dir" = "Carried to quant, which needs --rnaseq-dir beside it."
 "--mirna-dir" = "Carried to gather; needs --gdc-dir and --isoform-dir."
 "--isoform-dir" = "Carried to gather; needs --gdc-dir and --mirna-dir."
+"--gdc-dir" = "Carried to gather, once per project the dataset file names."
 
 [effects.qc]
 "--fetchngs-dir" = "With --reads: FASTQ paths resolve against it; nothing else there is read."
@@ -283,7 +284,7 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 "--dataset-file" = "Writes that study's commands; unset, the worked example's."
 "--dataset" = "Names every output of every module run, and the study's ctx root."
 "--rnaseq-dir" = "Set: gather reads its counts, so quant, de and function can run."
-"--gdc-dir" = "Set: gather reads a GDC project; clinical runs where declared."
+"--gdc-dir" = "Set: gather reads one folder per GDC project; clinical runs where declared."
 
 [effects.clinical]
 "--dataset-file" = "Selects the build list, default endpoint and the published numbers shown."

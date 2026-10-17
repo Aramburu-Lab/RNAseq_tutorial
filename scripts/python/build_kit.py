@@ -38,8 +38,10 @@ fetch script, and ``LEFT_OUT.json``, README.md and MANIFEST.json name each file 
 and the commands that rebuild it, the gather command read from the table's own README. That
 row is provenance, the command as run, and stays verbatim in the shipped README; the command
 shown to a reader names a ``--dataset-file`` the codebase committed as ``conf/datasets/<file>``
-(``codebase_datasets``), and README.md names the builder's ctx root and any dataset file of
-the builder's own, for the reader to replace (K.9). A page
+(``kit_datasets.codebase_datasets``), and README.md names the builder's ctx root and any
+dataset file of the builder's own, for the reader to replace (K.9). Where the kit commit's
+copy is not the bytes the run read, a ``git show`` from the newest commit holding them comes
+first among the commands and LEFT_OUT.json names that commit (K.12). A page
 that links a left-out matrix keeps its link: the link check counts a declared file as present
 (``check_kit.declared``). Every derived table ships, and a count matrix not from GDC ships.
 
@@ -73,7 +75,6 @@ commit. The steps for the Step-1 root, kept here since a session's scratch copy 
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 import shutil
@@ -86,6 +87,7 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import check_kit  # noqa: E402 - the kit's own checker, beside this file
+from kit_datasets import Version, codebase_datasets, restore, shown_command  # noqa: E402
 
 from ctx.dataset import load  # noqa: E402
 from ctx.io import naming  # noqa: E402
@@ -116,7 +118,6 @@ GDC_FOLDER_ROW = re.compile(r"^\| (?:[\w-]+ )?GDC (?:\w+ )?folder \| (.+?) \|$",
 COMMAND_ROW = re.compile(r"^\| Command \| `(.+)` \|$", re.MULTILINE)
 # The dataset file's SHA-256 as gather read it, from the README's Data releases rows.
 DATASET_SHA_ROW = re.compile(r"^\| sha256:([^|/ ]+\.toml) \| ([0-9a-f]{64}) \|$", re.MULTILINE)
-DATASETS = "conf/datasets"
 FILE_ROW = re.compile(r"^\| `([^`]+)` \| (\d+) \| `([0-9a-f]{64})` \|$", re.MULTILINE)
 # How a GDC folder's own fetch script is run again, into the folder it fetched.
 FETCH = "OUT={folder} bash {script}"
@@ -193,57 +194,7 @@ def _after(words: list[str], flag: str) -> str | None:
     return next((v for f, v in zip(words, words[1:], strict=False) if f == flag), None)
 
 
-def shown_command(
-    command: str, recorded: dict[str, str] | None = None, codebase: dict[str, str] | None = None
-) -> tuple[str, str | None]:
-    """A command as a README recorded it, with ``ctx`` for its entry point and ~ for home.
-
-    A ``--dataset-file`` whose recorded SHA-256 (``recorded``, file name to hash) is a version
-    the codebase committed (``codebase``, hash to path) is shown by that repository path.
-
-    Returns:
-        The command shown, and the dataset file it names that is the builder's own, or None.
-    """
-    words = command.split()
-    shown, own = ["ctx" if words[0].endswith(("__main__.py", "/ctx")) else words[0]], None
-    for flag, word in zip(words, words[1:], strict=False):
-        mapped = None
-        if flag == "--dataset-file":
-            mapped = (codebase or {}).get((recorded or {}).get(Path(word).name, ""))
-            own = None if mapped else shown_path(word)
-        shown.append(mapped or (shown_path(word) if word.startswith("/") else word))
-    return " ".join(shown), own
-
-
-def codebase_datasets() -> dict[str, str]:
-    """SHA-256 of every version of every dataset file the codebase committed, to its path.
-
-    Bytes a commit holds are the repository's, from whichever clone or checkout ran them; a
-    reader's own file, even one saved in ``conf/datasets/`` of a clone, has bytes no commit
-    holds. A path test would take that file for the codebase's, and needs the tree on disk.
-    """
-    # Every parent of a merge too: a version can first appear in a merge (tcga_kirc.toml at
-    # 789f8ad, which ~/ctx_kidney's gather read), and default log follows one parent.
-    raw = _git("log", "--full-history", "-m", "--format=", "--raw", "--no-abbrev", "HEAD", "--",
-               f"{DATASETS}/*.toml")  # fmt: skip
-    blobs: dict[str, str] = {}
-    for line in raw.decode().splitlines():
-        meta, *paths = line.split("\t")
-        if line.startswith(":") and meta.split()[3].strip("0"):
-            blobs.setdefault(meta.split()[3], paths[-1])
-    asked = "".join(f"{b}\n" for b in blobs).encode()
-    batch = subprocess.run(["git", "-C", str(REPO), "cat-file", "--batch"], input=asked,
-                           capture_output=True, check=True).stdout  # fmt: skip
-    found, at = {}, 0
-    for path in blobs.values():  # cat-file answers in the order asked
-        end = batch.index(b"\n", at)
-        size = int(batch[at:end].split()[2])
-        found[hashlib.sha256(batch[end + 1 : end + 1 + size]).hexdigest()] = path
-        at = end + size + 2
-    return found
-
-
-def gdc_matrix(path: Path, codebase: dict[str, str] | None = None) -> dict[str, Any] | None:
+def gdc_matrix(path: Path, codebase: dict[str, Version] | None = None) -> dict[str, Any] | None:
     """What a raw GDC count matrix's README records, or None for any other file.
 
     A gather table of the counts kind whose README names a GDC folder; its bytes and SHA-256
@@ -260,10 +211,11 @@ def gdc_matrix(path: Path, codebase: dict[str, str] | None = None) -> dict[str, 
         return None
     command = COMMAND_ROW.search(written)
     recorded = dict(DATASET_SHA_ROW.findall(written))
-    shown, own = shown_command(command[1], recorded, codebase) if command else (None, None)
+    shown, own, earlier = (shown_command(command[1], recorded, codebase) if command
+                           else (None, None, None))  # fmt: skip
     root = _after(command[1].split(), "--root") if command else None
     sizes = {name: (int(n), sha) for name, n, sha in FILE_ROW.findall(written)}
-    return {"folders": folders, "command": shown, "own_dataset_file": own,
+    return {"folders": folders, "command": shown, "own_dataset_file": own, "earlier": earlier,
             "root": shown_path(root) if root else None,
             "bytes": sizes.get(path.name, (path.stat().st_size, ""))[0],
             "sha256": sizes.get(path.name, (0, ""))[1] or check_kit.sha256(path)}  # fmt: skip
@@ -277,7 +229,7 @@ def declared_sources(folder: Path = REPO / "conf" / "datasets") -> dict[str, str
 
 def select(
     root: Path, left_out: tuple[str, ...] = (), slugs: frozenset[str] = frozenset(),
-    sources: dict[str, str] | None = None, codebase: dict[str, str] | None = None,
+    sources: dict[str, str] | None = None, codebase: dict[str, Version] | None = None,
 ) -> tuple[list[Path], dict[Path, dict[str, Any]], list[str]]:  # fmt: skip
     """A root's files for the kit, its raw GDC count matrices apart, and what stops a ship.
 
@@ -329,7 +281,7 @@ def carry_matrices(out: Path, folder: str, base: Path,
     """Copy each left-out matrix's GDC manifest and fetch script; its LEFT_OUT.json entries."""
     entries = []
     for p, m in sorted(matrices.items()):
-        carried, fetches = [], []
+        carried, fetches, earlier = [], [], m["earlier"]
         for source in m["folders"]:
             place = out / folder / "gdc" / source.name
             place.mkdir(parents=True, exist_ok=True)
@@ -341,8 +293,9 @@ def carry_matrices(out: Path, folder: str, base: Path,
         entries.append({
             "path": (Path(folder) / "outputs" / p.relative_to(base)).as_posix(),
             "bytes": m["bytes"], "sha256": m["sha256"], "carried": carried,
-            "rebuild": [*fetches, m["command"]], "builder_root": m["root"],
-            "builder_dataset_file": m["own_dataset_file"],
+            "rebuild": [*fetches, *([restore(earlier)] if earlier else []), m["command"]],
+            "builder_root": m["root"], "builder_dataset_file": m["own_dataset_file"],
+            "dataset_file_commit": earlier.commit if earlier else None,
         })  # fmt: skip
     return entries
 

@@ -14,6 +14,8 @@ import polars as pl
 import pytest
 import typer
 from conftest import ctx_run
+from gdc_fixture import PROJECT, aliquot, build
+from test_gdc_projects import OTHER, folders, two_projects
 from test_own_table import FIXTURE, SPEC, dataset, table
 
 from ctx import pipeline
@@ -74,18 +76,18 @@ def test_steps_in_course_order(tmp_path, runs):
     no_counts = pipeline.steps(full, replace(options, rnaseq_dir=None))
     assert [m for m, _ in no_counts] == ["gather", "qc", "report"]
     gdc = replace(full, clinical=object())  # type: ignore[arg-type]
-    planned = pipeline.steps(gdc, pipeline.Options("mine", spec_path, gdc_dir=tmp_path))
+    planned = pipeline.steps(gdc, pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,)))
     assert [m for m, _ in planned] == ["gather", "de", "function", "clinical", "report"]
     both = replace(gdc, ncrna=object())  # type: ignore[arg-type]
-    planned = pipeline.steps(both, pipeline.Options("mine", spec_path, gdc_dir=tmp_path))
+    planned = pipeline.steps(both, pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,)))
     assert [m for m, _ in planned] == ["gather", "de", "function", "ncrna", "clinical", "report"]
     # M7 reads gather's counts and, across studies, M5's results: after de, before ncrna.
     across = replace(both, proteo=replace_proteo("across_samples"))
-    planned = pipeline.steps(across, pipeline.Options("mine", spec_path, gdc_dir=tmp_path))
+    planned = pipeline.steps(across, pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,)))
     assert [m for m, _ in planned] == ["gather", "de", "function", "proteo", "ncrna", "clinical",
                                        "report"]  # fmt: skip
     no_de = replace(across, de=None, proteo=replace_proteo("cross_dataset"))
-    gdc_options = pipeline.Options("mine", spec_path, gdc_dir=tmp_path)
+    gdc_options = pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,))
     assert "proteo" not in dict(pipeline.steps(no_de, gdc_options))
 
 
@@ -238,7 +240,7 @@ def test_folders_carried_to_the_modules_that_take_them(tmp_path, runs):
     spec = replace(load(spec_path), resources=(*load(spec_path).resources, replace_resource()))
     salmon, mirna, isoform = tmp_path / "salmon", tmp_path / "mirna", tmp_path / "isoform"
     reads = pipeline.Options("mine", spec_path, FIXTURE, tmp_path / "rnaseq", salmon_dir=salmon)
-    gdc = pipeline.Options("mine", spec_path, gdc_dir=tmp_path, mirna_dir=mirna,
+    gdc = pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,), mirna_dir=mirna,
                            isoform_dir=isoform)  # fmt: skip
     quant = dict(pipeline.steps(spec, reads))["quant"]
     gather = dict(pipeline.steps(spec, gdc))["gather"]
@@ -289,3 +291,69 @@ def test_run_check_takes_the_folders(tmp_path, runs):
     for text in ("--salmon-dir takes --rnaseq-dir", f"--mirna-dir {tmp_path / 'm'} is not",
                  f"--isoform-dir {tmp_path / 'i'} is not"):  # fmt: skip
         assert text in done.stderr, done.stderr
+
+
+def test_two_projects_reach_gather_each_folder(tmp_path):
+    """S.3: a dataset of two GDC projects runs through `ctx run` as `ctx gather` runs it, one
+    --gdc-dir per project, and the sheet holds both. Catches every folder but one dropped on
+    the way to gather, and the run command taking one --gdc-dir."""
+    a, b = folders(tmp_path)
+    spec_path = two_projects(tmp_path)
+    options = pipeline.Options("fake_brca", spec_path, gdc_dirs=(b, a))
+    gather = dict(pipeline.steps(load(spec_path), options))["gather"]
+    given = [v for f, v in zip(gather, gather[1:], strict=False) if f == "--gdc-dir"]
+    assert given == [str(b), str(a)], gather
+    commands = typer.main.get_command(app).commands  # type: ignore[attr-defined]
+    parsed = commands["gather"].make_context("gather", list(gather)).params["gdc_dir"]
+    assert [str(p) for p in parsed] == [str(b), str(a)], parsed
+    root = tmp_path / "root"
+    root.mkdir()
+    done = ctx_run("--root", str(root), "run", "--dataset", "fake_brca", "--dataset-file",
+                   str(spec_path), "--gdc-dir", str(a), "--gdc-dir", str(b), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    assert "ctx run runs: gather, report" in done.stdout, done.stdout
+    sheets = (root / "outputs" / "01_gather").glob("*_samplesheet_v1.parquet")
+    assert sorted(set(pl.read_parquet(next(sheets))["project"])) == [PROJECT, OTHER]
+
+
+def test_check_names_every_projects_folder_problem_together(tmp_path):
+    """S.3: --check lists, at once, a folder that is not there, one of a project the file does
+    not declare, two of one project, and each declared project with no folder, each stopping
+    the run. Catches the check stopping at the first folder, a doubled project passing, and a
+    project with no folder left unnamed."""
+    a, _ = folders(tmp_path)
+    twin = build(tmp_path / "twin", [aliquot(4)]).path
+    stray = build(tmp_path / "stray", [aliquot(5)], project="FAKE-KIRC").path
+    gone = tmp_path / "gone"
+    spec_path = two_projects(tmp_path)
+    options = pipeline.Options("fake_brca", spec_path, gdc_dirs=(a, twin, stray, gone))
+    problems, planned = pipeline.check(tmp_path / "root", options)
+    texts = [p.text for p in problems]
+    assert all(p.blocks for p in problems) and planned == ["gather", "report"], texts
+    assert texts == [
+        f"--gdc-dir {gone} is not a folder",
+        f"{a.resolve()} and {twin.resolve()} are both {PROJECT!r}",
+        f"{stray.resolve()}: project 'FAKE-KIRC', not one of {(PROJECT, OTHER)}",
+        f"no --gdc-dir for {OTHER!r}: give one folder per declared project",
+    ], texts
+    root = tmp_path / "root"
+    root.mkdir()
+    done = ctx_run("--root", str(root), "run", "--dataset", "fake_brca", "--dataset-file",
+                   str(spec_path), "--gdc-dir", str(stray), "--gdc-dir", str(a), "--check",
+                   cwd=root)  # fmt: skip
+    assert done.returncode == 1
+    assert "not one of" in done.stderr and f"no --gdc-dir for {OTHER!r}" in done.stderr
+
+
+def test_check_refuses_gdc_folders_gather_would_refuse(tmp_path, runs):
+    """--gdc-dir with a dataset file that has no [gdc], and a miRNA folder for two projects,
+    are problems before any run. Catches either passing --check while gather refuses it."""
+    a, b = folders(tmp_path)
+    own = _spec(tmp_path, runs)
+    found = pipeline.check(tmp_path, pipeline.Options("mine", own, gdc_dirs=(a,)))[0]
+    texts = [p.text for p in found]
+    assert f"--gdc-dir takes a dataset file with a [gdc] table; {own} has none" in texts, texts
+    two = pipeline.Options("fake_brca", two_projects(tmp_path), gdc_dirs=(a, b),
+                           mirna_dir=tmp_path, isoform_dir=tmp_path)  # fmt: skip
+    texts = [p.text for p in pipeline.check(tmp_path, two)[0]]
+    assert texts == ["--mirna-dir reads one project; this dataset file names several"], texts

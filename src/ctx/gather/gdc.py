@@ -12,7 +12,7 @@ import hashlib
 import io
 import json
 import re
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from fractions import Fraction
 from pathlib import Path
@@ -250,6 +250,31 @@ def project_of(path: Path) -> str:
     if len(found) != 1:
         raise GdcError(f"{path / METADATA}{QUERY}: project_id is {sorted(found)}, not one project")
     return found.pop()
+
+
+def by_project(paths: Sequence[Path], projects: Sequence[str]) -> tuple[dict[str, Path], list[str]]:
+    """Each folder under the project its file query names (``project_of``), and every problem.
+
+    The problems: a folder whose project cannot be read, one of an undeclared project, two of
+    one project, and each declared project with no folder.
+    """
+    by: dict[str, Path] = {}
+    problems = []
+    for path in (p.resolve() for p in paths):
+        try:
+            project = project_of(path)
+        except GdcError as error:
+            problems.append(str(error))
+            continue
+        if project not in projects:
+            problems.append(f"{path}: project {project!r}, not one of {tuple(projects)}")
+        elif project in by:
+            problems.append(f"{by[project]} and {path} are both {project!r}")
+        else:
+            by[project] = path
+    problems += [f"no --gdc-dir for {p!r}: give one folder per declared project"
+                 for p in projects if p not in by]  # fmt: skip
+    return by, problems
 
 
 def biospecimens(path: Path, spec: GdcSpec) -> pl.DataFrame:
