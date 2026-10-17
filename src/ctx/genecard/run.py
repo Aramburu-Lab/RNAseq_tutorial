@@ -13,10 +13,22 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+import polars as pl
+
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer
-from ctx.genecard import GenecardError, annotation, cards, gtex, hpa, junctions, listing, page
+from ctx.genecard import (
+    GenecardError,
+    annotation,
+    cards,
+    gtex,
+    hpa,
+    junctions,
+    listing,
+    page,
+    samples,
+)
 from ctx.genecard.cache import Cache
 from ctx.io.naming import MODULES
 from ctx.report import genes
@@ -196,6 +208,26 @@ def _remote(cache: Cache, release: str, chosen: list[cards.Card],
     return newest
 
 
+def _own(root: Path, spec: Dataset, chosen: list[cards.Card], evidence: pl.DataFrame
+         ) -> tuple[samples.Values | None, dict[str, samples.Test]]:  # fmt: skip
+    """The listed genes' M5 normalised values and the box's family, BH over the card list.
+
+    The family is the listed genes M5 tested in the featured contrast that a test can rank.
+    Without M5's size factors every card names why, and draws no own-sample panel.
+    """
+    own = samples.read(root, spec, [c.gene_id for c in chosen])
+    if isinstance(own, str):
+        for card in chosen:
+            card.notes["own"] = own
+        return None, {}
+    if spec.de is None:
+        return own, {}
+    featured = spec.de.featured
+    tested = set(evidence.filter((pl.col("contrast") == featured)
+                                 & pl.col("padj").is_not_null())["number"].to_list())  # fmt: skip
+    return own, samples.family(own, featured, [c.gene_id for c in chosen if c.number in tested])
+
+
 def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: str,
         dataset: str, options: Options, opener: Callable[[str], Any] | None = None
         ) -> list[Path]:  # fmt: skip
@@ -237,6 +269,7 @@ def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: 
     evidence = cards.evidence(root, spec, [c.number for c in chosen])
     tested = listing.evidence({c.name: cards.results(root, dataset, c.name)
                                for c in spec.contrasts}, table)  # fmt: skip
+    own, family = _own(root, spec, chosen, evidence)
     provenance = {"gtex": _gtex(root, spec, chosen)}
     gtf = _registered(root, spec, GTF)
     mane = annotation.gtf_mane(gtf, [c.number for c in chosen]) if isinstance(gtf, Path) else {}
@@ -251,5 +284,5 @@ def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: 
     writer = Writer(out, dataset, date.today(), releases)
     context = page.Context(spec=spec, options=options, chosen=chosen, evidence=evidence,
                            provenance=provenance, settings=settings, command=command,
-                           cards=cards_, tested=tested)  # fmt: skip
+                           cards=cards_, tested=tested, own=own, family=family)  # fmt: skip
     return page.build(writer, context)

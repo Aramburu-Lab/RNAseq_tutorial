@@ -1,0 +1,28 @@
+own_factor_fitted	CAUGHT	1 failed in 3.15s
+batch_not_joined	CAUGHT	1 failed in 2.78s
+min_per_group_one	CAUGHT	1 failed, 5 passed in 9.34s
+tied_group_tested	CAUGHT	1 failed, 5 passed in 8.97s
+pairs_by_row_order	CAUGHT	1 failed, 3 passed in 10.08s
+r_sign_flipped	CAUGHT	1 failed, 2 passed in 9.12s
+zeros_ranked	CAUGHT	1 failed, 4 passed in 9.61s
+bh_none	CAUGHT	1 failed, 6 passed in 9.17s
+batches_uncapped	CAUGHT	1 failed, 9 passed in 9.03s
+family_with_untested	CAUGHT	1 failed, 12 passed in 25.81s
+missing_table_silent	CAUGHT	1 failed, 1 passed in 9.33s
+per_figure_seven	CAUGHT	1 failed, 7 passed in 9.54s
+labels_wider	CAUGHT	1 failed, 10 passed in 9.86s
+f1_bh_per_page	CAUGHT	1 failed, 8 passed in 9.76s
+f1_n_dropped	CAUGHT	1 failed, 8 passed in 9.90s
+f1_no_headroom	CAUGHT	1 failed, 11 passed in 10.84s
+f1_ticks_to_plotly	CAUGHT	1 failed, 11 passed in 10.27s
+f1_phone_layout_kept	CAUGHT	1 failed, 11 passed in 9.76s
+f1_one_contrast_view	CAUGHT	1 failed, 9 passed in 9.91s
+alone_without_controls	CAUGHT	1 failed, 12 passed in 26.02s
+steps_from_rounded	CAUGHT	1 failed, 1 passed in 1.20s
+uncalled_given_step	CAUGHT	1 failed in 1.15s
+heat_cap_two	CAUGHT	1 failed, 3 passed in 33.48s
+heat_untested_grey	CAUGHT	1 failed, 3 passed in 32.96s
+heat_key_every_step	CAUGHT	1 failed, 3 passed in 31.86s
+heat_rows_resorted	CAUGHT	1 failed, 3 passed in 32.42s
+heat_no_least_width	CAUGHT	1 failed, 3 passed in 32.25s
+live_scale_legend_reordered	CAUGHT	1 failed, 1 passed in 1.43s

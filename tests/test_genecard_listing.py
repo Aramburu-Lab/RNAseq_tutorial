@@ -11,9 +11,10 @@ import pytest
 from genecard_root import SLUG, Stub, make, responses
 from test_genecard import _cards, _register, _settings
 
-from ctx.genecard import listing
+from ctx.genecard import figures, listing
 from ctx.genecard import run as module
 from ctx.report import genes
+from ctx.viz.heatmap import diverging_levels
 
 TABLE = genes.table(["ENSG00000000001.1", "ENSG00000000002.1", "ENSG00000000003.1"],
                     ["AAA", "", "CCC"])  # fmt: skip
@@ -37,6 +38,25 @@ def test_every_tested_gene_travels_rounded_with_m5s_own_call():
     assert data["lfc"] == [[1.23, -0.5], [0.7, -3.22]]
     assert data["padj"] == [[0.05, 0.5], [None, 1.2e-07]]
     assert data["calls"] == ["un", "-d"]
+    assert data["steps"] == ["5-", "-0"]
+
+
+def test_a_called_cell_travels_with_the_evidence_views_step_of_its_exact_fold_change():
+    """E.1d: 1.99996 rounds to 2.00, a step higher than its own, and -0.999 is called down at
+    a shrunk fold change the step does not read. Mutations caught: the step taken from the
+    rounded log2 FC; an uncalled cell given a step; the step of a down call read as up; the
+    page's heatmap keyed on the view's legend in another order."""
+    first = _results([(1, 1.99996, 1e-5, "up"), (2, -0.999, 1e-6, "down"), (3, 2.5, 0.5, "ns")])
+    data = listing.evidence({"a": first}, genes.table(
+        [f"ENSG{n:011d}.1" for n in (1, 2, 3)], ["A", "B", "C"]))  # fmt: skip
+    steps = [s.level for s in diverging_levels([])[1]]
+    assert data["lfc"][0][0] == 2.0  # noqa: PLR2004 - the rounded value crosses the edge
+    assert [steps[int(c)] if c != "-" else None for c in data["steps"][0]] == [
+        "1 to 2", "-1 to -0.5", None]  # fmt: skip
+    scale = figures.live_scale(["A over control"])
+    assert scale["levels"][:-1] == steps and scale["levels"][-1] == "not called"
+    assert [name for name, _ in scale["legend"]] == scale["levels"]
+    assert len(scale["ticks"]) == 1 and scale["least_px"] > scale["label_px"] > 0
 
 
 def test_the_block_reads_back_and_holds_no_timestamp():

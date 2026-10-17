@@ -134,6 +134,8 @@
 <noscript><p class="note">{{ w.noscript }}</p></noscript>
 <p class="calls-summary list-summary" aria-live="polite">{{ w.waiting }}</p>
 <p class="list-notes" aria-live="polite"></p>
+{# The live heatmap of the list (E.1d): drawn by the page script from the evidence it carries. #}
+<figure class="fig list-heat js-only" hidden><p class="fig-title">{{ w.heat_label }}</p><div class="fig-plot"><p class="scroll-hint" hidden>{{ ui.figures.scroll }}</p><div class="list-heat-plot"></div></div><figcaption class="list-heat-caption"></figcaption><p class="note">{{ w.heat_files }}</p></figure>
 <div class="pick-table js-only" hidden><div class="table-scroll"><table class="result-table pick list"><caption>{{ w.rounded }}</caption><thead><tr></tr></thead><tbody></tbody></table></div>
 <p class="pick-pages"><button type="button" data-page="-1">{{ w.previous }}</button> <span aria-live="polite"></span> <button type="button" data-page="1">{{ w.next }}</button></p></div>
 <figure class="code list-command" hidden><figcaption>{{ w.command }}</figcaption><div class="command"><pre><code id="ctx-list-command-{{ p.index }}"></code></pre><button type="button" class="copy" data-copy="ctx-list-command-{{ p.index }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div></figure>

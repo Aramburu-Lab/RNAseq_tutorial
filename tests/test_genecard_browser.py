@@ -6,6 +6,10 @@ panel. Each test names the mutation it catches; each was planted and seen to fai
 where no Chromium is found; set ``CTX_CHROMIUM``.
 """
 
+import json
+import math
+import re
+
 import polars as pl
 import pytest
 from genecard_root import CALLED, SLUG, Stub, make, responses
@@ -59,7 +63,27 @@ LISTED = """(async () => {
             Array.from(tr.children).map(td => td.textContent)),
           links: Array.from(panel.querySelectorAll("tbody a")).map(a => a.getAttribute("href")),
           command: panel.querySelector(".list-command code").textContent,
-          hidden: panel.querySelector(".list-command").hidden};
+          hidden: panel.querySelector(".list-command").hidden,
+          heat: panel.ctxHeat || null,
+          keys: Array.from(panel.querySelector(".list-heat-plot").data || []).slice(1)
+            .map(t => t.name),
+          caption: panel.querySelector(".list-heat-caption").textContent,
+          least: panel.querySelector(".list-heat-plot").style.minWidth,
+          shown: !panel.querySelector(".list-heat").hidden};
+})()"""
+# F4 opened alone (E.1d): untick its first tissue, then read what the plot drew.
+ALONE = """(async () => {
+  await new Promise(r => setTimeout(r, 1500));
+  const form = document.querySelector("form.subset");
+  if (!form) return null;
+  const fig = form.closest(".fig"), box = form.querySelector("input[name=kept]");
+  box.checked = false;
+  form.dispatchEvent(new Event("change"));
+  const d = fig.querySelector(".js-plotly-plot"), at = Array.from(form.querySelectorAll(
+    "input[name=kept]")).indexOf(box);
+  return {dropped: box.value, got: fig.ctxM9 ? fig.ctxM9.cells.length : null,
+          column: d.data[0].z.map(row => row[at]),
+          summary: fig.querySelector(".subset-summary").textContent};
 })()"""
 
 
@@ -80,6 +104,9 @@ def ran(tmp_path_factory):
              for w in (1280, 375) for dark in (False, True)]  # fmt: skip
     tasks.append({"name": "link", "url": entry.as_uri() + genes.encode(listed),
                   "until": "_overview_v1.html", "act": LISTED})  # fmt: skip
+    alone = next(p for p in written if "_exons_nptx2_" in p.name and p.suffix == ".html")
+    tasks += [{"name": f"alone_{w}", "url": alone.as_uri(), "width": w, "height": 900,
+               "act": ALONE} for w in (1280, 375)]  # fmt: skip
     return folder, _browse(tasks, tmp_path_factory.mktemp("downloads"))
 
 
@@ -177,3 +204,34 @@ def test_a_list_from_a_link_opens_the_page_through_its_entry_with_each_gene(ran)
     assert got["links"] == ["#group-3", "#group-2"]
     assert got["command"].endswith(" --genes ENSG00000900011") and not got["hidden"]
     assert "4 genes from a link: 2 tested by M5, 2 not; 2 with a card" in got["summary"]
+
+
+def test_the_list_draws_its_evidence_as_the_evidence_view_does(ran):
+    """E.1d: the list's genes in list order by every contrast: UPA's up call at 3.0 in the top
+    step, ACTB tested and not called grey, NPTX2 untested blank; the key holds the steps drawn;
+    the plot is no narrower than its turned labels need. Mutations caught: an untested cell
+    drawn grey; the key listing steps not drawn; the rows in another order than the list's;
+    the cap below the list; the least width left to plotly."""
+    got = results_link = ran[1]["link"]["acted"]
+    page = next((ran[0] / "outputs" / "11_genecard").glob("*_overview_v1.html")).read_text()
+    heat = json.loads(re.search(r'id="ctx-panel-1">([^<]*)</script>', page)[1])["heat"]
+    assert got["least"] == f"{math.ceil(heat['least_px'])}px"
+    steps = [s.level for s in diverging_levels([])[1]]
+    assert results_link["shown"]
+    assert got["heat"]["genes"] == [ACTB, NPTX2, UPA]
+    assert got["heat"]["z"] == [[len(steps)], [None], [steps.index("≥ 2")]]
+    assert got["keys"] == ["≥ 2", "not called"]
+    assert got["caption"].startswith("Columns are M5 contrasts, 1 here: DESeq2 Wald test")
+    assert "The first 3 of 3 genes in list order" in got["caption"]
+
+
+def test_f4_opened_alone_keeps_its_tissue_boxes(ran):
+    """E.1d: F4's own page carries its checkbox set, and unticking a tissue empties its column
+    there as on the module page, at 1,280 and 375 px. Mutation caught: the page opened alone
+    written from the contract, which carries no controls."""
+    _, results = ran
+    for width in (1280, 375):
+        r = results[f"alone_{width}"]
+        assert r["errors"] == [] and r["acted"] is not None, width
+        assert r["acted"]["got"] and all(c is None for c in r["acted"]["column"])
+        assert r["acted"]["summary"].startswith("Medians and CVs over 1 of 2 tissues")

@@ -1,0 +1,116 @@
+{
+ "page_1280_light": {
+  "errors": [],
+  "theme": "white",
+  "fits": true,
+  "boxes": 50,
+  "every_box_drew": true,
+  "views": 0,
+  "view_options": [],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "not called"
+  ],
+  "heat_width": 903,
+  "heat_min": "174px",
+  "heat_hint": false,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "M5 results in 1 contrasts: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 0 with a card on this page.",
+  "first_view": null
+ },
+ "page_1280_dark": {
+  "errors": [],
+  "theme": "black",
+  "fits": true,
+  "boxes": 50,
+  "every_box_drew": true,
+  "views": 0,
+  "view_options": [],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "not called"
+  ],
+  "heat_width": 903,
+  "heat_min": "174px",
+  "heat_hint": false,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "M5 results in 1 contrasts: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 0 with a card on this page.",
+  "first_view": null
+ },
+ "alone_1280": {
+  "errors": [],
+  "tissues": 58,
+  "column_empty": true,
+  "summary": "Medians and CVs over 57 of 58 tissues. The PDF and SVG draw all 58.",
+  "fits": true
+ },
+ "page_375_light": {
+  "errors": [],
+  "theme": "white",
+  "fits": true,
+  "boxes": 50,
+  "every_box_drew": true,
+  "views": 0,
+  "view_options": [],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "not called"
+  ],
+  "heat_width": 317,
+  "heat_min": "174px",
+  "heat_hint": false,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "M5 results in 1 contrasts: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 0 with a card on this page.",
+  "first_view": null
+ },
+ "page_375_dark": {
+  "errors": [],
+  "theme": "black",
+  "fits": true,
+  "boxes": 50,
+  "every_box_drew": true,
+  "views": 0,
+  "view_options": [],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "not called"
+  ],
+  "heat_width": 317,
+  "heat_min": "174px",
+  "heat_hint": false,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "M5 results in 1 contrasts: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 0 with a card on this page.",
+  "first_view": null
+ },
+ "alone_375": {
+  "errors": [],
+  "tissues": 58,
+  "column_empty": true,
+  "summary": "Medians and CVs over 57 of 58 tissues. The PDF and SVG draw all 58.",
+  "fits": true
+ }
+}
