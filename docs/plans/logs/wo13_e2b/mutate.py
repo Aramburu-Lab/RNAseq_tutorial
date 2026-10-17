@@ -102,6 +102,19 @@ GROUPS["m7"] = {
 }  # fmt: skip
 
 
+QB, QT, T_M4B = (
+    "src/ctx/quant/blocks.py",
+    "src/ctx/quant/tables.py",
+    "tests/test_quant_views_browser.py",
+)
+GROUPS["m4"] = {
+    "detection_at_build": (QB, 'column = "genes" if t == tab.MIN_READS else f"genes_{t}"', 'column = "genes"', [T_M4B]),
+    "extra_strict": (QT, "*(int((kept >= t).sum()) for t in extra)", "*(int((kept > t).sum()) for t in extra)", [T_M4B]),
+    "units_mode_ignored": (QB, '"counts": port.counts_from(mode)[:, j],', '"counts": port.counts[:, j],', [T_M4B]),
+    "estimates_type_ignored": (QB, 'part = frame if shown_type is None else frame.filter(pl.col("gene_type") == shown_type)', "part = frame", [T_M4B]),
+}  # fmt: skip
+
+
 def run(group: str, name: str) -> str:
     """Plant one mutation, run its tests, restore; the verdict as one line."""
     path, old, new, tests = GROUPS[group][name]
