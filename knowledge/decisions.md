@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-084 — M9's own-sample panels read each contrast's own M5 fit
+
+**Date:** 2026-10-17 · **Status:** decided; F1's per-contrast layout awaits Rytis's confirmation
+
+**Context.** E.1c2: the box and F1 call `log2_normalised` with M5's size factors (D-083). F1 was planned by cell type over all samples.
+
+**Options.** By cell type, as planned: a sample has one size factor per contrast fit, and Step-1's LDN and BM samples sit in no fit, so it would need a size factor no fit produced. Per contrast, with each contrast's own factors.
+
+**Decision.** F1 per contrast. The box's BH family is the card list's genes M5 tested in the featured contrast; Mann-Whitney for an unpaired contrast and signed-rank over donors for a paired one, with rank-biserial r. F1 shows at most six contrasts per figure (eleven hid every other label) and adds a view per batch level where the sheet has 2 to 3. The live heatmap's steps are computed from the exact log2 FC, since 3-digit rounding can cross a step edge.
+
+**Evidence.** Step-1 12,727,500 B with 57 cards and 5 F1 views each; TCGA-BRCA 11,421,589 B with 50 signed-rank boxes over 113 pairs; 28 planted mutations caught.
+
+**Consequence.** The real roots rerun `ctx de` before M9 draws its boxes.
+
+---
+
 ## D-083 — M5's pydeseq2 boundary holds one copy of the counts and returns only what it reads; M5 writes its size factors
 
 **Date:** 2026-10-17 · **Status:** decided

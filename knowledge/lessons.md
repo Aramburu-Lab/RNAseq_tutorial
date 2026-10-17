@@ -127,3 +127,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A profiler that lists child processes every 20 ms stalled a fit sevenfold on macOS: list them every few seconds and read only their RSS between (DE, 2026-10-17).
 - A browser test that assumes the light theme pins it: pages follow prefers-color-scheme with no theme stored, and macOS switches by the clock, so the packed-cards test failed after 20:00 on code that passed at 17:00 (2026-10-17).
 - A door a caller wraps in "if the column is there" is two doors: de, qc and ncrna each passed a GDC sheet that had lost its `chosen` column. The door decides what a sheet is, from columns only that kind writes (T, 2026-10-17).
+- `thin_tick_labels` hides colliding tick labels without an error, so a layout check passed an F1 figure with half its labels hidden: count the drawn labels (M9b, 2026-10-17).
+- An exception message passed into page text carried the root's absolute path and widened a 375 px page: page reasons name the table and the module, never a path (M9b, 2026-10-17).
