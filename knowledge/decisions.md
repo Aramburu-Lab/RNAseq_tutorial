@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-086 — A Writer's `marked()` is the one place a run changes how its figures are drawn; M3's strand twin decides in exact integers
+
+**Date:** 2026-10-18 · **Status:** decided
+
+**Context.** E2b's M3 to M8 controls: the preview marked only the figure it wrote, so its views kept the real caption and `lookup` refused the build; the strand twin compared a forward share in floats.
+
+**Decision.** `Writer.marked()` is the one place a run changes its figures' drawing; every view built beside a figure goes through it, so a preview's views say "Made-up data." as its figures do. The M3 strand twin decides on the two featureCounts totals in exact BigInt arithmetic, as `Metric.strandedness` does on a Fraction. Where two packages each built per-view export settings, one rule stands: a view exports with its own settings, otherwise the build's (`viewing()`).
+
+**Evidence.** All 10 preview pages build (152 s, 366 MB); the strand twin is exact on 17 totals by 7 thresholds including 2^53 - 1 reads, where float division misjudges 0.95.
+
+**Consequence.** A new view kind goes through `marked()` or the preview refuses it.
+
+---
+
 ## D-085 — M2's judge and M1's recount recompute in the page from one Python definition each; a view may carry its own export settings
 
 **Date:** 2026-10-17 · **Status:** decided; M1's colour columns await a dataset-file declaration

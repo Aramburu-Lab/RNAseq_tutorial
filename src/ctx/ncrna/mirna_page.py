@@ -18,6 +18,7 @@ from ctx.ncrna import libraries_page, mirna, targets
 from ctx.ncrna.figures import columns as figure_columns
 from ctx.report import text
 from ctx.report.builder import FigureText, Group, Result, ResultTable
+from ctx.report.lookups import lookup
 from ctx.viz.curve import CurveData
 from ctx.viz.scatter import ScatterData, needed_points
 from ctx.viz.style import ALONE_SCALE, LARGEST_PLOT_PX, PLOTLY_HEIGHT_PX, ROLES, THEMES
@@ -28,6 +29,11 @@ if TYPE_CHECKING:
 
 PAGE = "ncrna"
 Metrics = dict[str, tuple[float, str]]
+# F7's views (WO10, D-051): the context++ cutoffs, the build's first, and the classes drawn
+# beside the non-targets: both apart (the build's), validated only, predicted only.
+PRESET_ORDER = (targets.DEFAULT_PRESET,
+                *(p for p in targets.PRESETS if p != targets.DEFAULT_PRESET))  # fmt: skip
+SHOWN = ((targets.VALIDATED, targets.PREDICTED), (targets.VALIDATED,), (targets.PREDICTED,))
 CLASS_COLOURS = {targets.VALIDATED: ROLES["comparison"], targets.PREDICTED: ROLES["reference"],
                  targets.NON_TARGET: THEMES["white"].reference}  # fmt: skip
 COLUMNS = {
@@ -163,34 +169,19 @@ def shift(writer: Writer, ctx: "Context", tcga: "Tcga",
     shifts = mirna.shifts(tcga.found, mirnas, tested)
     writer.table(shifts, "target_shift", described(shifts))
     first = mirnas[0]
-    curves = _thinned(mirna.curves(tcga.found, first, tested))
-    row = {(r["target"], r["preset"]): r for r in shifts.filter(pl.col("mirna") == first)
-           .iter_rows(named=True)}  # fmt: skip
-    valid = row[(targets.VALIDATED, None)]
-    pred = row[(targets.PREDICTED, targets.DEFAULT_PRESET)]
-    c = ctx.inputs.contrast
-    caption = fill("figures.shift.caption", n_validated=int(valid["n"]),
-                   n_predicted=int(pred["n"]), n_non=int(valid["n_non"]), n_tests=shifts.height,
-                   preset=targets.DEFAULT_PRESET,
-                   d_validated=_number(valid["d"], ".3f"),
-                   q_validated=_number(valid["q_ks"], ".2g"),
-                   d_predicted=_number(pred["d"], ".3f"),
-                   q_predicted=_number(pred["q_ks"], ".2g"))  # fmt: skip
-    data = CurveData(
-        frame=curves, columns=described(curves), series="target", x="log2FoldChange", y="share",
-        x_label=fill("figures.shift.x", tested=c.tested, reference=c.reference),
-        y_label=word("figures.shift.y"), colour="target",
-        colours={k: v for k, v in CLASS_COLOURS.items() if k in set(curves["target"])},
-        caption=caption,
-    )  # fmt: skip
-    reading = tuple(line.format(preset=targets.DEFAULT_PRESET)
-                    for line in text.raw(PAGE, "figures.shift.reading"))  # fmt: skip
-    shown = FigureText(title=fill("figures.shift.title", mirna=first),
-                       lead=fill("figures.shift.lead",
-                                 shift_validated=_number(valid["shift"], "+.3f"),
-                                 shift_predicted=_number(pred["shift"], "+.3f")),
-                       reading=reading)  # fmt: skip
-    block = writer.figure(data, "target_shift", shown)
+    options, at = [], []
+    for i, preset in enumerate(PRESET_ORDER):
+        curves = _thinned(mirna.curves(tcga.found, first, tested, preset))
+        for j, classes in enumerate(SHOWN):
+            data, words_ = _shift_figure(ctx, shifts, first, curves, preset, classes)
+            options.append((fill("figures.shift.option", classes=word(f"figures.shift.shown_{j}"),
+                                 preset=preset), data, words_))  # fmt: skip
+            at.append((i, j))
+    block = writer.figure(options[0][1], "target_shift", options[0][2])
+    axes = [(word("figures.shift.axis_preset"), [f"{p:g}" for p in PRESET_ORDER]),
+            (word("figures.shift.axis_shown"),
+             [word(f"figures.shift.shown_{j}") for j in range(len(SHOWN))])]  # fmt: skip
+    block = lookup(block, options, word("figures.shift.view"), axes, at)
     tests = ResultTable(word("figures.shift.table_title"),
                         text.words(PAGE, "figures.shift.columns"), _shift_rows(shifts),
                         numeric=(3, 4, 5, 6, 7))  # fmt: skip
@@ -212,6 +203,42 @@ def shift(writer: Writer, ctx: "Context", tcga: "Tcga",
         r["shift"], f"median log2 FC shift; KS q {r['q_ks']:.2g}")
         for r in shifts.iter_rows(named=True)}  # fmt: skip
     return Group(word("groups.targets"), (block, tests, enrich)), metrics
+
+
+def _shift_figure(
+    ctx: "Context", shifts: pl.DataFrame, first: str, curves: pl.DataFrame, preset: float,
+    kept: tuple[str, ...],
+) -> tuple[CurveData, FigureText]:  # fmt: skip
+    """F7 at one context++ cutoff, drawing the classes ``kept`` and the non-targets.
+
+    The caption and lead state both classes' tests at that cutoff, whichever are drawn.
+    """
+    row = {(r["target"], r["preset"]): r for r in shifts.filter(pl.col("mirna") == first)
+           .iter_rows(named=True)}  # fmt: skip
+    valid = row[(targets.VALIDATED, None)]
+    pred = row[(targets.PREDICTED, preset)]
+    c = ctx.inputs.contrast
+    caption = fill("figures.shift.caption", n_validated=int(valid["n"]),
+                   n_predicted=int(pred["n"]), n_non=int(valid["n_non"]), n_tests=shifts.height,
+                   preset=preset, d_validated=_number(valid["d"], ".3f"),
+                   q_validated=_number(valid["q_ks"], ".2g"),
+                   d_predicted=_number(pred["d"], ".3f"),
+                   q_predicted=_number(pred["q_ks"], ".2g"))  # fmt: skip
+    drawn = curves.filter(pl.col("target").is_in([*kept, targets.NON_TARGET]))
+    data = CurveData(
+        frame=drawn, columns=described(drawn), series="target", x="log2FoldChange", y="share",
+        x_label=fill("figures.shift.x", tested=c.tested, reference=c.reference),
+        y_label=word("figures.shift.y"), colour="target",
+        colours={k: v for k, v in CLASS_COLOURS.items() if k in set(drawn["target"])},
+        caption=caption,
+    )  # fmt: skip
+    reading = tuple(line.format(preset=preset) for line in text.raw(PAGE, "figures.shift.reading"))
+    shown = FigureText(title=fill("figures.shift.title", mirna=first),
+                       lead=fill("figures.shift.lead",
+                                 shift_validated=_number(valid["shift"], "+.3f"),
+                                 shift_predicted=_number(pred["shift"], "+.3f")),
+                       reading=reading)  # fmt: skip
+    return data, shown
 
 
 def _thinned(curves: pl.DataFrame) -> pl.DataFrame:

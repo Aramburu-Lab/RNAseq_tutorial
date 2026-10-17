@@ -1,0 +1,4 @@
+#figure-6 option 8: svg 10,234 B, pdf 1 page 481.9 x 265.0 pt, errors []
+  export caption: 122 validated, 17 predicted-only, at a context++ score of at most -0.4, and 15,169 non-target genes M5 tested. KS test against non-targets, BH over 8 tests: validated D = 0.125, q = 0.085; predicted-only D = 0.156, q = 0.75.
+  svg caption: 122 validated, 17 predicted-only, at a context++ score of at most -0.4, and 15,169 non-target genes M5 tested. KS test against non-targets, BH over 8 tests: validated D = 0.125, q = 0.085; predicted-only D = 0.156, q = 0.75. This view shows predicted-only targets, context++ at most -0.4; the figure files and the reading guide show both classes apart, context++ at most -0.2. Drawn in the browser from the view as set on the page, at the figure files' width.
+svg 3,850,282 B; point paths 2786; marker paths 19650; errors []

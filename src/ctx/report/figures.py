@@ -251,9 +251,11 @@ def prepare(
 # option names (D-051), M6's live ORA's words and backgrounds (GS.5), M9's checkbox sets and
 # its list from a link (E.1a).
 _SHAPED = {
-    "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"]},
+    "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"],
+                       "axes": c.get("axes", [])},  # fmt: skip
     "ora": lambda c: {"words": c["words"], "backgrounds": c["backgrounds"],
-                      "featured": c["featured"]},
+                      "featured": c["featured"], "contrasts": c.get("contrasts", []),
+                      "top": c.get("top")},
     "subset": lambda c: {"words": c["words"], "options": c["options"],
                          "scales": c.get("scales", []), "summary": c["summary"]},
     "genelist": lambda c: {"words": c["words"], "contrasts": c["contrasts"],
@@ -267,6 +269,12 @@ _SHAPED = {
                           "colours": list(c["colours"]),
                           "summary": c["all"] + " " + c["words"]["shown"].format(
                               count=c["words"]["counts"]["runs"], colour="batch")},
+    # M6's running score for any tested set (WO7): the select's label and its sets in words.
+    "running": lambda c: {"label": c["label"], "options": [s["label"] for s in c["sets"]]},
+    # M3's strand calls at the reader's thresholds (WO8): the boxes' words and ranges.
+    "strand": lambda c: {"words": c["words"], "stranded": c["stranded"],
+                         "unstranded": c["unstranded"], "ranges": c["ranges"],
+                         "summary": c["default_summary"]},
 }  # fmt: skip
 
 

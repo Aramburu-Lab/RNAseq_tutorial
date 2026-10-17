@@ -131,3 +131,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - An exception message passed into page text carried the root's absolute path and widened a 375 px page: page reasons name the table and the module, never a path (M9b, 2026-10-17).
 - In a worktree pass PYTHONPATH as an absolute path: a relative `src` does not follow test subprocesses that change folder, so they ran main's editable install (E2a, 2026-10-17).
 - A browser mutation run needs Chromium on PATH: without it the browser tests skip, and a skip reads as a surviving mutation (E2a, 2026-10-17).
+- A fixture with fewer units than a cap cannot test the cap: hold it on a made-up frame of cap and cap plus one (E2b, 2026-10-18).
+- A twin tested only on small counts lets a float comparison pass: include a total near 2**53, where float division rounds onto the threshold (E2b, 2026-10-18).
+- Two packages told to add to a shared file can each add the same feature: read a conflict for meaning before keeping both sides (viewing()'s export rule, 2026-10-18).

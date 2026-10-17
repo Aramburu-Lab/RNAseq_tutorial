@@ -1,0 +1,21 @@
+page 2026-10-17_ncrna_tier1_overview_v1.html 9,121,733 B
+  1280_light padj_within 0.05 1: Called at BH within the biotype below 0.05 and log2 FC at or beyond ±1.00: protein_coding 2,484 (1,476 up, 1,008 down); lncRNA 1,061 (175 up, 886 down).
+  1280_light pvalue 0.01 0.5: Called at raw p below 0.01 and log2 FC at or beyond ±0.50: protein_coding 3,559 (2,052 up, 1,507 down); lncRNA 1,123 (184 up, 939 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  1280_light padj_within 0.1 0: Called at BH within the biotype below 0.1 and log2 FC at or beyond ±0.00: protein_coding 4,686 (2,597 up, 2,089 down); lncRNA 1,439 (251 up, 1,188 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  1280_light pvalue 0.001 2: Called at raw p below 0.001 and log2 FC at or beyond ±2.00: protein_coding 687 (480 up, 207 down); lncRNA 349 (47 up, 302 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+1280_light: 4 of 4 settings equal classify gene for gene; box 1265 scroll 1265; reset moved False; errors []
+  1280_dark padj_within 0.05 1: Called at BH within the biotype below 0.05 and log2 FC at or beyond ±1.00: protein_coding 2,484 (1,476 up, 1,008 down); lncRNA 1,061 (175 up, 886 down).
+  1280_dark pvalue 0.01 0.5: Called at raw p below 0.01 and log2 FC at or beyond ±0.50: protein_coding 3,559 (2,052 up, 1,507 down); lncRNA 1,123 (184 up, 939 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  1280_dark padj_within 0.1 0: Called at BH within the biotype below 0.1 and log2 FC at or beyond ±0.00: protein_coding 4,686 (2,597 up, 2,089 down); lncRNA 1,439 (251 up, 1,188 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  1280_dark pvalue 0.001 2: Called at raw p below 0.001 and log2 FC at or beyond ±2.00: protein_coding 687 (480 up, 207 down); lncRNA 349 (47 up, 302 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+1280_dark: 4 of 4 settings equal classify gene for gene; box 1265 scroll 1265; reset moved False; errors []
+  375_light padj_within 0.05 1: Called at BH within the biotype below 0.05 and log2 FC at or beyond ±1.00: protein_coding 2,484 (1,476 up, 1,008 down); lncRNA 1,061 (175 up, 886 down).
+  375_light pvalue 0.01 0.5: Called at raw p below 0.01 and log2 FC at or beyond ±0.50: protein_coding 3,559 (2,052 up, 1,507 down); lncRNA 1,123 (184 up, 939 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  375_light padj_within 0.1 0: Called at BH within the biotype below 0.1 and log2 FC at or beyond ±0.00: protein_coding 4,686 (2,597 up, 2,089 down); lncRNA 1,439 (251 up, 1,188 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  375_light pvalue 0.001 2: Called at raw p below 0.001 and log2 FC at or beyond ±2.00: protein_coding 687 (480 up, 207 down); lncRNA 349 (47 up, 302 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+375_light: 4 of 4 settings equal classify gene for gene; box 375 scroll 385; reset moved False; errors []
+  375_dark padj_within 0.05 1: Called at BH within the biotype below 0.05 and log2 FC at or beyond ±1.00: protein_coding 2,484 (1,476 up, 1,008 down); lncRNA 1,061 (175 up, 886 down).
+  375_dark pvalue 0.01 0.5: Called at raw p below 0.01 and log2 FC at or beyond ±0.50: protein_coding 3,559 (2,052 up, 1,507 down); lncRNA 1,123 (184 up, 939 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  375_dark padj_within 0.1 0: Called at BH within the biotype below 0.1 and log2 FC at or beyond ±0.00: protein_coding 4,686 (2,597 up, 2,089 down); lncRNA 1,439 (251 up, 1,188 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+  375_dark pvalue 0.001 2: Called at raw p below 0.001 and log2 FC at or beyond ±2.00: protein_coding 687 (480 up, 207 down); lncRNA 349 (47 up, 302 down). Moved, the page draws every gene some cut-off can call, and its sample of the rest.
+375_dark: 4 of 4 settings equal classify gene for gene; box 375 scroll 385; reset moved False; errors []

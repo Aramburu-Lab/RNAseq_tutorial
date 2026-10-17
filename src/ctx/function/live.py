@@ -19,6 +19,9 @@ from ctx.function import lite
 from ctx.report import genes, text
 
 PAGE = "function"
+# The sets drawn per family when the reader asks for the smallest FDR rather than the passing
+# ones (figure controls plan: "7 smallest FDR per direction").
+TOP = 7
 
 
 def bitset(members: Sequence[int], size: int) -> str:
@@ -105,9 +108,13 @@ def panel(
             except ValueError:
                 continue  # an ID no link can carry (not Ensembl) is reached by its symbol
     calls = {k: [at[s] for s in symbols(results[featured], k)] for k in ("up", "down")}
+    # Every contrast's own calls, each tested against its own tested genes (WO7): the build's
+    # first, as the select lists them.
+    contrasts = [[c, labels[c], *([at[s] for s in symbols(results[c], k)] for k in ("up", "down"))]
+                 for c in [featured, *(n for n in results if n != featured)]]  # fmt: skip
     return {
         "kind": "ora", "featured": featured, "symbols": every, "labels": dict(words),
-        "backgrounds": backgrounds,
+        "backgrounds": backgrounds, "contrasts": contrasts, "top": TOP,
         "sets": [[name, [at[g] for g in gs if g in at]] for name, gs in sets.items()],
         "numbers": sorted(numbers.items()), "calls": calls,
         "min_size": lite.MIN_SIZE, "max_size": lite.MAX_SIZE, "alpha": ALPHA,

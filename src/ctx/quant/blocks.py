@@ -22,6 +22,7 @@ from ctx.quant import tables as tab
 from ctx.quant.tximport import GeneTables
 from ctx.report import text
 from ctx.report.builder import FigureBlock, FigureText, ResultTable
+from ctx.report.lookups import lookup
 from ctx.viz.aggregates import Aggregate, Lead
 from ctx.viz.annotate import Caption, compare_groups
 
@@ -31,6 +32,10 @@ MIN_PER_BATCH = 3
 # A fold change differing by this much (log2) is always drawn on the page: the genes F6's lead
 # counts, two-fold or more.
 FAR = 1.0
+# F2's detection thresholds, the build's first: 1, 10 and 100 reads (the controls plan, M4).
+DETECT_AT = (tab.MIN_READS, 1, 100)
+# F4's gene counts, tximport's three countsFromAbundance modes, the build's estimates first.
+UNIT_MODES = (CountsFrom.NO, CountsFrom.SCALED_TPM, CountsFrom.LENGTH_SCALED_TPM)
 
 
 @dataclass(frozen=True)
@@ -135,45 +140,73 @@ def correlation_figure(writer: Writer, matrix: np.ndarray, shown: Shown) -> Figu
 
 def detection_figure(writer: Writer, port: GeneTables, shown: Shown
                      ) -> tuple[FigureBlock, pl.DataFrame]:  # fmt: skip
-    """F2: genes detected as each sample's estimated counts are thinned; tested at the common."""
-    frame, common = tab.thinned(port.counts, port.samples)
+    """F2: genes detected as each sample's estimated counts are thinned; tested at the common.
+
+    M4.14 (D-051): the same draws counted at 1 and at 100 reads as views, looked up; the
+    detection threshold moves every count, and the tools compare fairly only at one.
+    """
+    others = tuple(t for t in DETECT_AT if t != tab.MIN_READS)
+    frame, common = tab.thinned(port.counts, port.samples, others)
     frame = frame.join(shown.sheet.select("sample", "cell_type", "condition", "batch"),
                        on="sample", maintain_order="left")  # fmt: skip
-    at = frame.filter("common")
-    found = batch_tests(at, "genes", shown)
-    words = caption("detection", found, n=at.height, depth=f"{common:,.0f}",
-                    min_reads=tab.MIN_READS)  # fmt: skip
-    data = fig.detection_curves(frame.drop("common"), shown.cells, common, words)
-    genes = at["genes"]
-    lead = text.fill(PAGE, "figures.detection.lead", depth=f"{common:,.0f}",
-                     median=f"{tab.stat(genes, 'median'):,.0f}",
-                     low=f"{tab.stat(genes, 'min'):,.0f}",
-                     high=f"{tab.stat(genes, 'max'):,.0f}")  # fmt: skip
-    block = writer.figure(data, "detection", figure_text("detection", lead,
-                                                         min_reads=tab.MIN_READS))  # fmt: skip
-    return block, frame
+    options = []
+    for t in (tab.MIN_READS, *others):
+        column = "genes" if t == tab.MIN_READS else f"genes_{t}"
+        at_t = frame.drop("genes").rename({column: "genes"}) if column != "genes" else frame
+        at = at_t.filter("common")
+        found = batch_tests(at, "genes", shown)
+        words = caption("detection", found, n=at.height, depth=f"{common:,.0f}", min_reads=t)
+        drawn = at_t.select("sample", "depth", "genes", "cell_type", "condition", "batch")
+        data = fig.detection_curves(drawn, shown.cells, common, words)
+        genes = at["genes"]
+        lead = text.fill(PAGE, "figures.detection.lead", depth=f"{common:,.0f}",
+                         median=f"{tab.stat(genes, 'median'):,.0f}",
+                         low=f"{tab.stat(genes, 'min'):,.0f}",
+                         high=f"{tab.stat(genes, 'max'):,.0f}")  # fmt: skip
+        options.append((text.fill(PAGE, "figures.detection.option", min_reads=t), data,
+                        figure_text("detection", lead, min_reads=t)))  # fmt: skip
+    return _viewed(writer, "detection", options), frame
 
 
 def units_figure(writer: Writer, port: GeneTables, fates: pl.DataFrame,
                  names: dict[str, str]) -> tuple[FigureBlock, pl.DataFrame]:  # fmt: skip
-    """F4: the median-depth sample's genes, reads against TPM; descriptive."""
+    """F4: the median-depth sample's genes, reads against TPM; descriptive.
+
+    M4.14 (D-051): the gene counts as tximport's other two modes make them, as views: what
+    pydeseq2 receives under each choice of --counts-from-abundance.
+    """
     sample = fates.sort("mapped", "sample")["sample"][fates.height // 2]
     j = port.samples.index(sample)
-    whole = pl.DataFrame({"gene_id": port.genes, "tpm": port.tpm[:, j],
-                          "counts": port.counts[:, j], "length": port.lengths[:, j]})  # fmt: skip
-    whole = whole.filter(pl.col("counts") >= tab.MIN_READS).with_columns(
-        gene_name=pl.col("gene_id").replace(names))  # fmt: skip
-    whole, classes = fig.length_classes(whole)
-    per_tpm = dict(whole.group_by("length_class").agg((pl.col("counts") / pl.col("tpm"))
-                                                       .median()).iter_rows())  # fmt: skip
-    drawn = whole.select("gene_id", "gene_name", "tpm", "counts", "length", "length_class",
-                         keep=pl.lit(value=False))  # fmt: skip
-    data = fig.units_scatter(drawn, classes, text.fill(PAGE, "figures.units.caption",
-                                                       sample=sample, total=whole.height,
-                                                       min_reads=tab.MIN_READS))  # fmt: skip
-    ratio = per_tpm.get(classes["long"], float("nan")) / per_tpm.get(classes["short"], float("nan"))
-    lead = text.fill(PAGE, "figures.units.lead", sample=sample, ratio=ratio)
-    return writer.figure(data, "units", figure_text("units", lead)), whole
+    options, built = [], None
+    for mode in UNIT_MODES:
+        whole = pl.DataFrame({"gene_id": port.genes, "tpm": port.tpm[:, j],
+                              "counts": port.counts_from(mode)[:, j],
+                              "length": port.lengths[:, j]})  # fmt: skip
+        whole = whole.filter(pl.col("counts") >= tab.MIN_READS).with_columns(
+            gene_name=pl.col("gene_id").replace(names))  # fmt: skip
+        whole, classes = fig.length_classes(whole)
+        per_tpm = dict(whole.group_by("length_class").agg((pl.col("counts") / pl.col("tpm"))
+                                                           .median()).iter_rows())  # fmt: skip
+        drawn = whole.select("gene_id", "gene_name", "tpm", "counts", "length", "length_class",
+                             keep=pl.lit(value=False))  # fmt: skip
+        said = text.word(PAGE, f"figures.units.mode_{mode}")
+        data = fig.units_scatter(drawn, classes, text.fill(
+            PAGE, f"figures.units.caption{_mode_key(mode)}", sample=sample, total=whole.height,
+            min_reads=tab.MIN_READS, mode=said))  # fmt: skip
+        data = replace(data, y_label=text.word(PAGE, f"figures.units.y{_mode_key(mode)}"))
+        ratio = (per_tpm.get(classes["long"], float("nan"))
+                 / per_tpm.get(classes["short"], float("nan")))  # fmt: skip
+        lead = text.fill(PAGE, f"figures.units.lead{_mode_key(mode)}", sample=sample, ratio=ratio)
+        options.append((text.word(PAGE, f"figures.units.mode_{mode}"), data,
+                        figure_text("units", lead)))  # fmt: skip
+        built = whole if built is None else built
+    assert built is not None  # noqa: S101 - UNIT_MODES holds the build's mode
+    return _viewed(writer, "units", options), built
+
+
+def _mode_key(mode: CountsFrom) -> str:
+    """The content key suffix of a counts mode: none for the build's estimated reads."""
+    return "" if mode is CountsFrom.NO else "_scaled"
 
 
 def contrast_samples(inputs: Any) -> pl.DataFrame:
@@ -196,15 +229,44 @@ def estimates_figure(writer: Writer, port: GeneTables, used: pl.DataFrame, genes
         "length_scaled": tab.fold_change(scaled, tested)[keep],
     }).with_columns(difference=pl.col("estimated") - pl.col("length_scaled")).join(
         genes.select("gene_id", "gene_name", "gene_type"), on="gene_id", how="left")  # fmt: skip
-    frame = fig.type_names(frame)
-    rho = float(rank_correlation(frame["estimated"].to_numpy(), frame["length_scaled"].to_numpy()))
-    frame = frame.with_columns(keep=pl.col("difference").abs() >= FAR)
-    far = int(frame["keep"].sum())
-    data = fig.estimates_scatter(frame, text.fill(
-        PAGE, "figures.estimates.caption", contrast=name, n_ref=int((~tested).sum()),
-        n_test=int(tested.sum()), genes=frame.height, rho=rho))  # fmt: skip
-    lead = text.fill(PAGE, "figures.estimates.lead", far=far, genes=frame.height, rho=rho)
-    return writer.figure(data, "estimates", figure_text("estimates", lead)), frame
+    frame = fig.type_names(frame).with_columns(keep=pl.col("difference").abs() >= FAR)
+    n = (int((~tested).sum()), int(tested.sum()))
+    # M4.14 (D-051): each gene type alone as a view; rho over all genes can hide a type whose
+    # isoform use differs between the groups.
+    types = [t for t in fig.type_colours() if t in set(frame["gene_type"])]
+    options = []
+    for shown_type in (None, *types):
+        part = frame if shown_type is None else frame.filter(pl.col("gene_type") == shown_type)
+        data, lead = _estimates(part, name, n, shown_type)
+        label = shown_type or text.word(PAGE, "figures.estimates.every_type")
+        options.append((label, data, figure_text("estimates", lead)))
+    shown = options if len(options) > 2 else options[:1]  # noqa: PLR2004 - one type repeats all
+    return _viewed(writer, "estimates", shown), frame
+
+
+def _viewed(writer: Writer, what: str, options: list[tuple[str, Any, FigureText]]) -> FigureBlock:
+    """The build's figure with its views looked up, each drawn as the writer draws its figures.
+
+    One option is the figure alone.
+    """
+    shown = [(name, writer.marked(data), words) for name, data, words in options]
+    block = writer.figure(shown[0][1], what, shown[0][2])
+    if len(shown) == 1:
+        return block
+    return lookup(block, shown, text.word(PAGE, f"figures.{what}.view"))
+
+
+def _estimates(part: pl.DataFrame, name: str, n: tuple[int, int],
+               shown_type: str | None) -> tuple[Any, str]:  # fmt: skip
+    """F6 over the genes of one type, or every gene: its contract and its lead."""
+    rho = float(rank_correlation(part["estimated"].to_numpy(), part["length_scaled"].to_numpy()))
+    key = "caption" if shown_type is None else "caption_type"
+    data = fig.estimates_scatter(part, text.fill(
+        PAGE, f"figures.estimates.{key}", contrast=name, n_ref=n[0], n_test=n[1],
+        genes=part.height, rho=rho, gene_type=shown_type or ""))  # fmt: skip
+    lead = text.fill(PAGE, "figures.estimates.lead", far=int(part["keep"].sum()),
+                     genes=part.height, rho=rho)  # fmt: skip
+    return data, lead
 
 
 def isoforms_figure(writer: Writer, folder: Any, samples: Sequence[str], genes: pl.DataFrame

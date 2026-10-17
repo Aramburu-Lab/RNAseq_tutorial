@@ -152,6 +152,10 @@ reading = [
 caption = "Cross-study; RNA: M5's log2 FC, n = {n_rna}; protein: Welch t on log2 copies, n = {n_protein}, BH. Spearman ρ = {rho:.2f}, {ci} % CI {low:.2f} to {high:.2f}; regions {inner} and {outer}, {bandwidth}."
 x = "RNA log2 fold change"
 y = "Protein log2 fold change"
+# A density per class, or per kind of call (P7.10, D-051).
+view = "A density per"
+view_0 = "gene class"
+view_1 = "kind of call: both layers, RNA only, protein only, neither"
 
 [figures.contrast]
 title = "RNA against protein fold change on the same samples: {tested} over {reference}"
@@ -165,6 +169,9 @@ pairs = "{n:,} pairs"
 caption = "{tested} over {reference}; RNA: M5's DESeq2, {n_rna}; protein: {test}, {n_protein}; BH each. Spearman ρ = {rho:.2f} over {n_genes:,} genes, {ci} % CI {low:.2f} to {high:.2f}; regions {inner} and {outer}, {bandwidth}."
 x = "RNA log2 fold change"
 y = "Protein log2 fold change"
+# The call rule at every setting, looked up (P7.10, D-051).
+view = "Calls at log2 FC at least"
+option = "log2 FC at least {lfc:g}, BH-adjusted p below {alpha:g}"
 
 [figures.contrast.test]
 welch = "Welch t"

@@ -1,0 +1,63 @@
+{# M8's volcano by biotype with M5's cut-offs (WO10). Included by _page.js.j2, inside its one function. #}
+{% raw %}  /* ctxStrata calls every tested gene of the chosen biotypes at the reader's cut-offs; this
+     block redraws each biotype's trace and the genes not called, moves the fold-change lines
+     and fills the live line. Moved, every tested gene is drawn; at the build's setting the
+     figure stays as built, its thinning and all. */
+  function strataCalls(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = ctxStrata.rows(cfg.rows, cfg);
+    var div = fig.querySelector(".js-plotly-plot"), mark = exporting(fig, cfg);
+    var summary = fig.querySelector(".strata-summary");
+    var fc = form.elements.fc, unit = form.elements.fc_unit;
+    var basis = form.elements.basis, cutoff = form.elements.cutoff;
+    var state = { exact: null, shown: null, unit: unit.value }, drawn = false;
+    var built = { thinned: cfg.export && cfg.export.thinned };
+    var top = div.data[cfg.lines[0]].y;
+    function update(settle) {
+      var t = ctxCalls.applied(state, fc.value, unit.value), alpha = ctxCalls.cutoff(cutoff.value, cfg);
+      if (settle && String(alpha) !== cutoff.value) cutoff.value = String(alpha);
+      var column = basis.value, split = ctxStrata.split(rows, cfg, t, column, alpha);
+      var moved = ctxCalls.moved(cfg, t, column, alpha);
+      if (moved || drawn) {
+        var levels = cfg.levels.concat([cfg.ns]), restyled = { x: [], y: [], customdata: [] };
+        levels.forEach(function (level) {
+          var shown = split[level].rows.filter(function (r) { return moved || r.drawn; });
+          restyled.x.push(shown.map(function (r) { return r[cfg.lfc]; }));
+          restyled.y.push(shown.map(function (r) { return r[cfg.y]; }));
+          restyled.customdata.push(shown.map(function (r) { return ctxHover.row(r, cfg.hover); }));
+        });
+        Plotly.restyle(div, restyled, levels.map(function (l) { return cfg.traces[l]; }));
+        Plotly.restyle(div, { x: [[-t, -t], [t, t]], y: [top, top] }, cfg.lines);
+        drawn = true;
+      }
+      /* Moved, the files add the genes no cut-off calls, which the page leaves out. */
+      if (cfg.export) cfg.export.thinned = ctxStrata.thinned(cfg, moved, built.thinned);
+      summary.textContent = ctxStrata.summary(split, cfg, t, column, alpha) +
+        (moved ? " " + cfg.every : "");
+      mark(moved);
+    }
+    unit.addEventListener("change", function () {
+      fc.value = ctxCalls.switchUnit(state, fc.value, unit.value);
+      update(true);
+    });
+    function stepCutoff(dir) {
+      cutoff.value = String(ctxCalls.step(cutoff.value, dir, cfg));
+      update(true);
+    }
+    cutoff.addEventListener("keydown", function (e) {
+      var dir = e.key === "ArrowUp" ? 1 : e.key === "ArrowDown" ? -1 : 0;
+      if (dir) { e.preventDefault(); stepCutoff(dir); }
+    });
+    form.querySelectorAll("[data-step]").forEach(function (b) {
+      b.addEventListener("click", function () { stepCutoff(Number(b.getAttribute("data-step"))); });
+    });
+    form.addEventListener("change", function (e) { if (e.target !== unit) update(true); });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    form.addEventListener("reset", function () {
+      setTimeout(function () { state = { exact: null, shown: null, unit: unit.value }; update(true); }, 0);
+    });
+    update(false);
+  }
+
+{% endraw %}

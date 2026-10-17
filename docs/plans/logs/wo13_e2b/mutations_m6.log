@@ -1,0 +1,15 @@
+twin_misses_members	CAUGHT	1 failed in 4.09s
+twin_peak_on_tie	CAUGHT	1 failed, 1 passed in 2.76s
+twin_weight_not_shared	CAUGHT	1 failed in 2.98s
+ranking_tie_by_input	CAUGHT	1 failed, 2 passed in 3.48s
+page_dots_on_build	CAUGHT	1 failed in 155.72s (0:02:35)
+page_line_x_kept	CAUGHT	1 failed in 100.74s (0:01:40)
+page_caption_kept	CAUGHT	1 failed in 101.85s (0:01:41)
+page_export_kept	CAUGHT	1 failed in 126.44s (0:02:06)
+ora_contrast_keeps_build	CAUGHT	1 failed, 2 passed in 103.66s (0:01:43)
+ora_background_kept	CAUGHT	1 failed, 2 passed in 105.13s (0:01:45)
+ora_top_uncapped	CAUGHT	1 failed, 2 passed in 100.99s (0:01:40)
+background_all_capped	SURVIVED	7 passed in 125.96s (0:02:05)
+background_down_as_up	SURVIVED	7 passed in 183.48s (0:03:03)
+background_all_capped	CAUGHT	1 failed, 4 passed in 171.52s (0:02:51)
+background_down_as_up	CAUGHT	1 failed, 4 passed in 100.97s (0:01:40)

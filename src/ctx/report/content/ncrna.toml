@@ -141,6 +141,14 @@ threshold = "fold-change threshold"
 table_title = "Calls by biotype: pooled BH and BH within each"
 columns = ["Biotype", "Tested", "Called, pooled BH", "Called, BH within", "Up", "Down"]
 stratum = "{biotype} {n:,}"
+# M5's cut-offs moved live, BH and the others within each biotype (WO10, D-051).
+summary = "Called at {basis} below {cutoff} and log2 FC at or beyond ±{fc}: {counts}."
+entry = "{biotype} {n:,} ({up:,} up, {down:,} down)"
+every = "Moved, the page draws every gene some cut-off can call, and its sample of the rest."
+
+[figures.volcano.bases]
+padj_within = "BH within the biotype"
+pvalue = "raw p"
 
 [figures.neighbour]
 title = "lncRNAs against their nearest protein-coding genes"
@@ -210,6 +218,14 @@ table_title = "Target classes against non-targets, every featured miRNA and cuto
 columns = ["miRNA", "Targets", "context++ at most", "Genes", "Median shift", "KS D", "KS q", "Mann-Whitney q"]
 any = "any"
 enrich_title = "Targets among the genes called against the miRNA's change"
+# The context++ cutoff and the classes drawn, looked up (WO10, D-051).
+view = "Targets"
+axis_preset = "context++ at most"
+axis_shown = "Classes drawn"
+shown_0 = "both classes apart"
+shown_1 = "validated targets"
+shown_2 = "predicted-only targets"
+option = "{classes}, context++ at most {preset:g}"
 enrich_columns = ["miRNA", "Targets", "Called genes", "Set", "Hits", "Expected", "p", "BH q"]
 
 [figures.mirna_pairs]

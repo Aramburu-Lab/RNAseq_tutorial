@@ -5,19 +5,17 @@ Every sentence comes from ``content/proteo.toml``; numbers are filled from the r
 
 import os
 from collections.abc import Mapping
-from dataclasses import replace
 
 import numpy as np
 import polars as pl
 
 from ctx.de.run import Writer
-from ctx.proteo import folds, measure, tables
+from ctx.proteo import measure, tables
 from ctx.report import text
 from ctx.report.builder import FigureBlock, FigureText
 from ctx.viz.bar import BarData
-from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES
+from ctx.viz.contour import HDR_MASSES
 from ctx.viz.curve import CurveData
-from ctx.viz.density import DensityData
 from ctx.viz.heatmap import HeatmapData, Track, diverging_levels
 from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, ROLES, SPENT_GREYS
@@ -189,59 +187,6 @@ def worked(writer: Writer, gene: str, frame: pl.DataFrame, values: Mapping[str, 
         title=text.fill(PAGE, "figures.worked.title", gene=gene),
         lead=text.fill(PAGE, "figures.worked.lead", **values),
         reading=lines("figures.worked.reading", **values)))  # fmt: skip
-
-
-def fold(writer: Writer, tested: pl.DataFrame, values: Mapping[str, object]) -> FigureBlock:
-    """F7: RNA against protein fold change per gene, a density per class, the class marked."""
-    frame = tested.select(
-        "gene", "gene_class", "rna_lfc", "protein_lfc", "rna_padj", "protein_padj"
-    ).with_columns(keep=pl.col("gene_class") != measure.OTHER)
-    frame = frame.with_columns(gene_class=pl.col("gene_class").replace_strict(
-        {c: class_name(c) for c in frame["gene_class"].unique()}))  # fmt: skip
-    data = DensityData(
-        frame=frame, columns=columns(*frame.columns), x="rna_lfc", y="protein_lfc",
-        group="gene_class", x_label=text.word(PAGE, "figures.fold.x"),
-        y_label=text.word(PAGE, "figures.fold.y"), colours=class_colours(frame), caption="",
-        highlight="keep", highlight_label=", ".join(
-            c for c in class_colours(frame) if c != class_name(measure.OTHER)),
-        hover=("gene", "rna_padj", "protein_padj"),
-    )  # fmt: skip
-    data = replace(data, caption=text.fill(PAGE, "figures.fold.caption", **values, **HDR,
-                                           bandwidth=data.bandwidth()))  # fmt: skip
-    return writer.figure(data, "fold_change", FigureText(
-        title=text.fill(PAGE, "figures.fold.title", **values),
-        lead=text.fill(PAGE, "figures.fold.lead", **values),
-        reading=lines("figures.fold.reading", minimum=DENSITY_MIN_POINTS, **HDR)))  # fmt: skip
-
-
-def contrast_density(writer: Writer, made: folds.Folds, values: Mapping[str, object]
-                     ) -> FigureBlock:  # fmt: skip
-    """F4: one contrast's RNA against protein fold change on the same tumours.
-
-    A density per group of where a gene was called; the genes called at both layers are drawn
-    as points over the contours.
-    """
-    names = {k: text.word(PAGE, f"figures.contrast.kinds.{k}") for k in folds.KINDS}
-    frame = made.genes.select(
-        "gene", "rna_lfc", "protein_lfc", "rna_padj", "protein_padj", "rna_call", "protein_call",
-        called=pl.col("kind") == folds.KINDS[0], kind=pl.col("kind").replace_strict(names),
-    )  # fmt: skip
-    present = set(frame["kind"])
-    colours = {names[k]: c for k, c in KIND_COLOURS.items() if names[k] in present}
-    data = DensityData(
-        frame=frame, columns=columns(*frame.columns), x="rna_lfc", y="protein_lfc", group="kind",
-        x_label=text.word(PAGE, "figures.contrast.x"),
-        y_label=text.word(PAGE, "figures.contrast.y"), colours=colours, caption="",
-        highlight="called", highlight_label=names[folds.KINDS[0]],
-        hover=("gene", "rna_padj", "protein_padj"),
-    )  # fmt: skip
-    data = replace(data, caption=text.fill(PAGE, "figures.contrast.caption", **values, **HDR,
-                                           bandwidth=data.bandwidth()))  # fmt: skip
-    return writer.figure(data, f"contrast_{made.contrast.name}", FigureText(
-        title=text.fill(PAGE, "figures.contrast.title", **values),
-        lead=text.fill(PAGE, "figures.contrast.lead", **values),
-        reading=lines("figures.contrast.reading", minimum=DENSITY_MIN_POINTS, **HDR,
-                      **values)))  # fmt: skip
 
 
 def zscores(values: np.ndarray) -> np.ndarray:

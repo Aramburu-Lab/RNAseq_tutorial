@@ -47,7 +47,7 @@ UNITS = {
     "decoys": "sequences", "length_scaled_sum": "reads", "relative_difference": "fraction",
     "n_reference": "samples", "n_tested": "samples", "u": "dimensionless", "p": "probability",
     "p_bh": "probability", "r": "dimensionless", "annotated": "transcripts",
-    "expressed": "transcripts", "keep": "none",
+    "expressed": "transcripts", "keep": "none", "genes_1": "genes", "genes_100": "genes",
 }  # fmt: skip
 
 

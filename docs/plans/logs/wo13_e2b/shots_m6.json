@@ -1,0 +1,14 @@
+{"chromium": "/opt/homebrew/bin/chromium", "shots": [
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/tier1_e2b/outputs/06_function/2026-10-17_function_tier1_overview_v1.html", "width": 375, "scheme": "dark",
+  "act": "(()=>{const f=document.querySelector('form.running'); f.elements.set.value='5'; f.dispatchEvent(new Event('change'));})()",
+  "selector": ".fig:has(form.running)", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m6_running_375_dark.png"},
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/tier1_e2b/outputs/06_function/2026-10-17_function_tier1_overview_v1.html", "width": 1280, "scheme": "light",
+  "act": "(()=>{const f=document.querySelector('#figure-5 form.view'); const s=f.querySelectorAll('select[data-axis]'); s[0].value='1'; s[1].value='0'; s[2].value='1'; s[0].dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": "#figure-5", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m6_background_1280_light.png"},
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/tier1_e2b/outputs/06_function/2026-10-17_function_tier1_overview_v1.html", "width": 375, "scheme": "dark",
+  "act": "(()=>{const f=document.querySelector('#figure-5 form.view'); const s=f.querySelectorAll('select[data-axis]'); s[0].value='2'; s[1].value='1'; s[2].value='0'; s[0].dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": "#figure-5", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m6_background_375_dark.png"},
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/tier1_e2b/outputs/06_function/2026-10-17_function_tier1_overview_v1.html", "width": 375, "scheme": "light",
+  "act": "(()=>{const f=document.querySelector('form.ora'); f.elements.contrast.value=f.elements.contrast.options[3].value; f.elements.contrast.dispatchEvent(new Event('change',{bubbles:true})); f.elements.sets.value='top'; f.elements.sets.dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": ".fig:has(form.ora)", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m6_ora_375_light.png"}
+]}

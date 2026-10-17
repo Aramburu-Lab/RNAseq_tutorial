@@ -99,6 +99,14 @@ class BoxData:
         """The caption, unwrapped."""
         return self.caption.text()
 
+    def inches(self) -> tuple[float, float]:
+        """The figure files' size, which a page's own PDF and SVG of a changed view take too."""
+        return _inches()
+
+    def export_layers(self) -> dict[str, Any]:
+        """Nothing: the page draws every box, point and label the figure files draw."""
+        return {}
+
 
 def box_data(
     frame: pl.DataFrame,

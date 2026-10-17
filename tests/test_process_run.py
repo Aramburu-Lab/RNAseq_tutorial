@@ -37,7 +37,7 @@ PAIRED = ROOT / "tests" / "fixtures" / "chr22"
 CLEAN = ("SF3A1", "CCDC157", "RNF215", "ENSG00000273350", "ENSG00000303189")
 # A STAR that maps, where this machine has one off the pin's path (D-036's route).
 STAR_ENV = {k: v for k, v in os.environ.items() if k == "CTX_TOOLS"}
-FIGURES = ("mapping", "featured_settings", "strand_assigned",
+FIGURES = ("mapping", "featured_settings", "strand_assigned", "strand_share",
            *(f"{k}_{c}" for k in ("counters", "agreement")
              for c in ("strand", "overlap", "fraction", "multimap")))  # fmt: skip
 
@@ -79,7 +79,7 @@ def template(key: str) -> re.Pattern[str]:
 
 
 def test_every_output_is_named_described_and_offline(process_root):
-    """Eleven figures of seven files each; no file written twice; a README beside every CSV and
+    """Twelve figures of seven files each; no file written twice; a README beside every CSV and
     Parquet; the naming lint clean outside the tool folders; tools/README.md; the page offline
     and under 15 MB.
 
@@ -270,8 +270,9 @@ def test_the_run_is_within_track_a(process_root):
     assert all(r > 0 for r in rss) and sum(rss) < BUDGETS["A"].ram_gb * 10**9
 
 
-# Each figure's caption key, in page order: F1, F1b, F2, then the scatters and the plots.
-CAPTION_KEYS = ("mapping", "settings", "strandedness", *("counters",) * 4, *("agreement",) * 4)
+# Each figure's caption key, in page order: F1, F1b, F2, the share, the scatters and the plots.
+CAPTION_KEYS = ("mapping", "settings", "strandedness", "share", *("counters",) * 4,
+                *("agreement",) * 4)  # fmt: skip
 REGISTRY = registry.load(ROOT / "conf" / "qc_metrics.toml")
 
 

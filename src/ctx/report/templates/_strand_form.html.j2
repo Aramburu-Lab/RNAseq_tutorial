@@ -1,0 +1,9 @@
+{# M3's strand calls at the reader's thresholds (WO8): ctxStrand calls each sample again. The
+   panel's look is the calls panel's; the form is not one, so live calling never wires it. #}
+<div class="calls view"><form class="strand" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.words.label }}" style="display:contents">
+<label>{{ f.defaults.words.stranded }}<input name="stranded" type="number" min="{{ f.defaults.ranges.stranded[0] }}" max="{{ f.defaults.ranges.stranded[1] }}" step="0.05" value="{{ f.defaults.stranded }}"></label>
+<label>{{ f.defaults.words.unstranded }}<input name="unstranded" type="number" min="{{ f.defaults.ranges.unstranded[0] }}" max="{{ f.defaults.ranges.unstranded[1] }}" step="0.05" value="{{ f.defaults.unstranded }}"></label>
+<button type="reset">{{ f.defaults.words.reset }}</button>
+</form></div>
+<noscript><p class="note">{{ ui.view.noscript }}</p></noscript>
+<p class="calls-summary strand-summary" aria-live="polite">{{ f.defaults.summary }}</p>

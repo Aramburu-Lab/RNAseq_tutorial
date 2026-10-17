@@ -1,0 +1,8 @@
+== 1280_light: theme white, page box 1280 px, scroll 1280 px, errors []
+figure-3 'A density per': 2 options, each drawn as built False, build unmoved True, others moved True, back to build True, widest plot 582 px
+== 1280_dark: theme black, page box 1280 px, scroll 1280 px, errors []
+figure-3 'A density per': 2 options, each drawn as built False, build unmoved True, others moved True, back to build True, widest plot 582 px
+== 375_light: theme white, page box 375 px, scroll 375 px, errors []
+figure-3 'A density per': 2 options, each drawn as built False, build unmoved True, others moved True, back to build True, widest plot 317 px
+== 375_dark: theme black, page box 375 px, scroll 375 px, errors []
+figure-3 'A density per': 2 options, each drawn as built False, build unmoved True, others moved True, back to build True, widest plot 317 px

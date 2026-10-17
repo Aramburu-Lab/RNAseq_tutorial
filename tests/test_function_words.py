@@ -16,6 +16,7 @@ from ctx.dataset import load
 from ctx.de.page import words as de_words
 from ctx.de.run import Writer
 from ctx.de.stats import ALPHA
+from ctx.function import background
 from ctx.function import page as words
 from ctx.function import run as m6
 from ctx.report import text
@@ -132,7 +133,7 @@ def test_the_background_words_follow_a_union_that_lowers_significance(planted):
     found, checks = planted
     (trap,) = found[3].items
     assert isinstance(trap, FigureBlock)
-    assert trap.text.lead == text.fill(
+    assert trap.text.lead.startswith(text.fill(
         "function",
         "figures.background.lead_moved",
         union=2999 + 700,
@@ -140,7 +141,7 @@ def test_the_background_words_follow_a_union_that_lowers_significance(planted):
         more=0,
         less=2,
         shown=7,
-    )
+    ))  # fmt: skip
     assert trap.text.reading[1] == text.word("function", "figures.background.less")
     assert checks[0].prompt == text.word("function", "questions.union_less.prompt")
 
@@ -152,10 +153,15 @@ def test_the_background_words_follow_a_union_that_lowers_significance(planted):
 def test_the_background_words_follow_each_direction(planted_sets, moved, direction):
     """A union that only adds genes outside UP_A and UP_B makes both look more significant;
     one that also gives UP_B 300 untested members moves one each way."""
-    trap, tested, union = m6._trap(SAID, _results(), planted_sets)
-    more, less, shown = m6._moved(trap)
+    results = _results()
+    tested = m6._symbols(results)
+    wide = background.backgrounds(tested, planted_sets, None)["union"]
+    found = background.tested_against(m6._symbols(results, "up"), tested, wide, planted_sets,
+                                      "up", "union")  # fmt: skip
+    more, less, shown = found.moved("top")
     assert (more, less) == moved and words.union_direction(more, less) == direction
-    reading = words.trap_text(tested, union, (more, less), shown).reading[1]
+    reading = words.trap_text(len(tested), len(wide), (more, less), shown,
+                              found.passing()).reading[1]  # fmt: skip
     assert reading == text.word("function", f"figures.background.{direction}")
     (check, *_) = words.questions(direction)
     assert check.prompt == text.word("function", f"questions.union_{direction}.prompt")

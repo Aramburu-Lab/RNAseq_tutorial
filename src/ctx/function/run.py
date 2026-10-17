@@ -22,7 +22,7 @@ from ctx.dataset import Contrast, Dataset, DatasetError, load
 from ctx.de.page import Words, every
 from ctx.de.run import Writer, newest
 from ctx.de.stats import ALPHA
-from ctx.function import lite, live
+from ctx.function import background, lite, live, running
 from ctx.function.page import (
     CALLS,
     PAGE,
@@ -39,7 +39,8 @@ from ctx.function.page import (
 )
 from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
-from ctx.report import text
+from ctx.qc.run import GTF_RESOURCE, gene_types
+from ctx.report import export, text
 from ctx.report.builder import (
     FigureBlock,
     Group,
@@ -53,11 +54,12 @@ from ctx.report.builder import (
     write,
 )
 from ctx.report.entry import write_entry
+from ctx.report.lookups import lookup
 from ctx.report.text import fill, word
 from ctx.report.views import viewed
 from ctx.viz.bar import BarData
 from ctx.viz.scatter import Line, ScatterData
-from ctx.viz.style import DATA_COLOURS, ROLES, category_colours
+from ctx.viz.style import DATA_COLOURS, ROLES
 
 MODULE = "function"
 TOP_SETS = 15
@@ -83,17 +85,6 @@ ORA_COLUMNS = {
 }
 
 
-def _ranking(results: pl.DataFrame) -> tuple[list[str], np.ndarray]:
-    """Symbols and Wald statistics, one gene per symbol (highest baseMean)."""
-    rows = results.filter(pl.col("stat").is_not_null())
-    return lite.collapse(
-        rows["gene_id"].to_list(),
-        rows["gene_name"].fill_null("").to_list(),
-        rows["stat"].to_list(),
-        rows["baseMean"].to_list(),
-    )
-
-
 def _tested(results: pl.DataFrame, call: str | None = None) -> pl.DataFrame:
     """The tested genes, or those of them with one call."""
     tested = set(lite.background(results["gene_id"].to_list(), results["padj"].to_list()))
@@ -108,7 +99,7 @@ def _symbols(results: pl.DataFrame, call: str | None = None) -> list[str]:
 
 def _gsea(results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]) -> list[lite.Enriched]:
     """Preranked GSEA of one contrast."""
-    names, scores = _ranking(results)
+    names, scores = running.ranking(results)
     return lite.prerank(names, scores, sets)
 
 
@@ -293,10 +284,6 @@ def _running(said: Words, result: lite.Enriched) -> ScatterData:
         "running": ("dimensionless", "Running enrichment score at this member."),
         "mark": ("none", "Set member."),
     }
-    caption = figure("running", "caption", gene_set=set_words(result.name), label=said.label,
-                     es=result.es, nes=result.nes, p=result.p, fdr=fdr_words(result.fdr),
-                     size=result.size, ranked=len(ranks), permutations=lite.PERMUTATIONS,
-                     seed=lite.SEED)  # fmt: skip
     member = figure("running", "member")
     return ScatterData(
         frame=frame,
@@ -308,67 +295,68 @@ def _running(said: Words, result: lite.Enriched) -> ScatterData:
         colour="mark",
         colours={member: ROLES["comparison"]},
         names={member: member},
-        caption=caption,
+        caption=running.caption(said, result, len(ranks)),
         lines=(Line(figure("running", "line"), ranks, result.running),),
         width="double",
     )
 
 
-def _trap(
-    said: Words, results: pl.DataFrame, sets: Mapping[str, tuple[str, ...]]
-) -> tuple[BarData, int, int]:
-    """The same up calls tested against the tested genes and against the gene-set union.
+def _running_set(writer: Writer, name: str, said: Words, results: pl.DataFrame,
+                 enriched: Mapping[str, lite.Enriched], shown: str) -> FigureBlock:  # fmt: skip
+    """The running score of the dataset's set, and of any set the contrast tested (WO7).
 
-    The caption counts the calls and their symbols apart: on Step-1 ndn_gcsf 1,683 up calls
-    carry 1,681 symbols, as CMAHP and RRN3P3 each name two called genes.
+    The page draws another set's running sum through ctxRunning, the twin of lite._running,
+    and looks its NES, p and FDR up: the student sees what an enrichment score is for any
+    pathway, an early peak, a late trough or a flat wander (figure controls plan).
+    """
+    hit = enriched[shown]
+    data = _running(said, hit)
+    block = writer.figure(data, f"running_{name}",
+                          running_text(said, hit, len(hit.running)))  # fmt: skip
+    exported = export.settings(data.inches(), data.caption, block.stem, data.export_layers())
+    if len(enriched) < 2:  # noqa: PLR2004 - a choice needs two
+        return block
+    return replace(block, controls=running.panel(said, results, enriched, shown, exported))
+
+
+def _background_views(
+    writer: Writer, name: str, said: Words, results: pl.DataFrame, e: "_Enrichment"
+) -> tuple[FigureBlock, tuple[int, int, int, int, int]]:
+    """The background lesson, with every background, call and set count as a view (WO7).
+
+    The build draws the up calls against the tested genes and the gene-set union; the page
+    looks every other view up.
+
+    Returns:
+        The figure, and the build's tested and union sizes, sets moved more and less, and
+        sets drawn, for the page's words.
     """
     tested = _symbols(results)
-    union = sorted({g for genes in sets.values() for g in genes} | set(tested))
-    hits = _symbols(results, "up")
-    right = {r.name: r for r in lite.ora(hits, tested, sets)}
-    wrong = {r.name: r for r in lite.ora(hits, union, sets)}
-    shown = sorted(right, key=lambda s: right[s].p)[: TOP_SETS // 2]
-    backgrounds = (figure("background", "tested_genes"), figure("background", "union"))
-    rows = [
-        (set_words(s), label, float(-np.log10(r[s].p)))
-        for s in shown
-        for label, r in zip(backgrounds, (right, wrong), strict=True)
-    ]
-    frame = pl.DataFrame(rows, schema=["gene_set", "background", "neg_log10_p"], orient="row")
-    columns = {
-        "gene_set": ("none", "Gene set in words."),
-        "background": ("none", "ORA background."),
-        "neg_log10_p": ("-log10 p", "Hypergeometric p of the up calls."),
-    }
-    data = BarData(
-        frame=frame,
-        columns=columns,
-        category="gene_set",
-        value="neg_log10_p",
-        category_label=figure("background", "x"),
-        value_label=figure("background", "y"),
-        series="background",
-        colours=category_colours(list(backgrounds)),
-        caption=fill(
-            PAGE,
-            "figures.background.caption",
-            label=said.label,
-            calls=_tested(results, "up").height,
-            hits=len(hits),
-            tested=len(tested),
-            union=len(union),
-        ),
-        horizontal=True,
-        width="double",
-    )
-    return data, len(tested), len(union)
-
-
-def _moved(trap: BarData) -> tuple[int, int, int]:
-    """The plotted sets that look more, and less, significant against the union; and all."""
-    wide = trap.frame.pivot(on="background", index="gene_set", values="neg_log10_p")
-    union, tested = wide[figure("background", "union")], wide[figure("background", "tested_genes")]
-    return int((union > tested).sum()), int((union < tested).sum()), wide.height
+    wide = background.backgrounds(tested, e.sets, e.types)
+    found = {(b, d): background.tested_against(_symbols(results, d), tested, wide[b], e.sets, d, b)
+             for b in background.BACKGROUNDS if b in wide
+             for d in background.DIRECTIONS}  # fmt: skip
+    options, at = [], []
+    kept = [b for b in background.BACKGROUNDS if b in wide]
+    for i, b in enumerate(kept):
+        for j, d in enumerate(background.DIRECTIONS):
+            for k, how in enumerate(background.SHOWN):
+                t = found[(b, d)]
+                calls = _tested(results, d).height
+                bars = background.bars(said, calls, len(tested), t, how)
+                words_ = trap_text(len(tested), t.size, t.moved(how)[:2], t.moved(how)[2],
+                                   t.passing())  # fmt: skip
+                options.append((background.option(b, d, how), bars, words_))
+                at.append((i, j, k))
+    first = options[0]
+    writer.table(background.table(list(found.values())), f"background_{name}_views",
+                 background.TABLE)  # fmt: skip
+    block = writer.figure(first[1], f"background_{name}", first[2])
+    built = found[(kept[0], background.DIRECTIONS[0])]
+    more, less, shown = built.moved(background.SHOWN[0])
+    sizes = (len(tested), built.size, more, less, shown)
+    axes = background.axes(kept)
+    return lookup(block, options, figure("background", "view"), axes, at), sizes
 
 
 @dataclass(frozen=True)
@@ -380,6 +368,7 @@ class _Enrichment:
     gsea: Mapping[str, pl.DataFrame]
     enriched: Mapping[str, Mapping[str, lite.Enriched]]
     gmt: Path
+    types: pl.DataFrame | None = None
 
 
 def _gsea_views(writer: Writer, featured: str, labelled: Mapping[str, Words],
@@ -454,25 +443,21 @@ def _page(
                             low=lite.MIN_SIZE, high=lite.MAX_SIZE, file=e.gmt.name))  # fmt: skip
     contrast, gene_set = fn.running
     if gene_set in e.enriched[contrast]:
-        hit = e.enriched[contrast][gene_set]
-        one_set.append(writer.figure(
-            _running(said[contrast], hit), f"running_{contrast}",
-            running_text(said[contrast], hit, len(hit.running)),
-        ))  # fmt: skip
+        one_set.append(_running_set(writer, contrast, said[contrast], e.results[contrast],
+                                    e.enriched[contrast], gene_set))  # fmt: skip
     else:
         one_set.append(fill(PAGE, "groups.no_running", gene_set=set_words(gene_set),
                             label=said[contrast].label))  # fmt: skip
-    trap, n_tested, n_union = _trap(said[featured], e.results[featured], e.sets)
-    more, less, shown_sets = _moved(trap)
+    trap, (n_tested, n_union, more, less, _) = _background_views(
+        writer, featured, said[featured], e.results[featured], e
+    )
     page_results: list[Result] = [
         *_acknowledged(spec),
         ResultTable(word(PAGE, "sets.title"), text.words(PAGE, "sets.columns"),
                     ((e.gmt.name, f"{len(e.sets):,}", fn.licence),), numeric=(1,)),
         first,
         Group(fill(PAGE, "groups.one_set", gene_set=set_words(fn.featured_set)), tuple(one_set)),
-        Group(word(PAGE, "groups.background"), (writer.figure(
-            trap, f"background_{featured}",
-            trap_text(n_tested, n_union, (more, less), shown_sets)),)),
+        Group(word(PAGE, "groups.background"), (trap,)),
     ]  # fmt: skip
     label = said[featured].label
     keys: tuple[KeyNumber, ...] = (
@@ -528,12 +513,15 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     de_dir = settings.root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
     paths = {c.name: newest(de_dir, dataset, f"{c.name}_results") for c in spec.contrasts}
     results = {name: pl.read_parquet(path) for name, path in paths.items()}
+    # The background lesson's annotation backgrounds (WO7); without the GTF, the union alone.
+    types, _ = gene_types(settings.root, spec)
+    annotation = [settings.root / r.dest for r in spec.resources if r.name == GTF_RESOURCE]
     day = date.today()
     releases = {
         "gene sets": f"{fn.gene_sets} ({gmt.name}); {fn.licence}",
         **{
             f"sha256:{p.name}": hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in (gmt, *paths.values())
+            for p in (gmt, *paths.values(), *(annotation if types is not None else []))
         },
     }
     writer = Writer(
@@ -569,7 +557,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     recorded = {m for m, _, _ in metrics}
     metrics += [m for m in rule_sets(spec.sanity, enriched) if m[0] not in recorded]
     page_results, keys, checks = _page(
-        writer, spec, _Enrichment(results, sets, gsea_tables, enriched, gmt)
+        writer, spec, _Enrichment(results, sets, gsea_tables, enriched, gmt, types)
     )
     writer.table(
         pl.DataFrame(metrics, schema=["metric", "value", "detail"], orient="row"),

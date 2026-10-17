@@ -199,10 +199,11 @@ def counter_scatter(sums: pl.DataFrame, words: Mapping[str, str], caption: str) 
 
 
 def agreement_plot(sums: pl.DataFrame, every: Mapping[str, Any], words: Mapping[str, str],
-                   caption: str) -> ScatterData:  # fmt: skip
+                   caption: str, empirical: bool = False) -> ScatterData:  # fmt: skip
     """F4: Bland and Altman's plot, d = log2(b + 1) - log2(a + 1) against the pair's mean.
 
-    The bias is solid, the limits of agreement dashed; a line whose value is undefined is not
+    The bias is solid, the limits dashed: bias plus and minus 1.96 SD, or with ``empirical``
+    the 2.5th and 97.5th percentiles of d (WO8, D-051). A line whose value is undefined is not
     drawn.
     """
     frame = _typed(sums).select(
@@ -213,10 +214,12 @@ def agreement_plot(sums: pl.DataFrame, every: Mapping[str, Any], words: Mapping[
     lines = []
     if every["bias"] is not None:
         lines.append(Line(text.word(PAGE, "figures.agreement.bias"), span, (every["bias"],) * 2))
-    for limit in ("loa_low", "loa_high"):
+    limits = ("d_p2_5", "d_p97_5") if empirical else ("loa_low", "loa_high")
+    label = text.word(PAGE, "figures.agreement.percentiles" if empirical
+                      else "figures.agreement.limits")  # fmt: skip
+    for limit in limits:
         if every[limit] is not None:
-            lines.append(Line(text.word(PAGE, "figures.agreement.limits"), span,
-                              (every[limit],) * 2, dash=True))  # fmt: skip
+            lines.append(Line(label, span, (every[limit],) * 2, dash=True))
     extra = {"a": text.fill(PAGE, "figures.counters.columns.a", a=words["a"]),
              "b": text.fill(PAGE, "figures.counters.columns.b", b=words["b"])}  # fmt: skip
     return ScatterData(

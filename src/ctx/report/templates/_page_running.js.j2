@@ -1,0 +1,50 @@
+{# M6's running score for any tested set (WO7). Included by _page.js.j2, inside its one function. #}
+{% raw %}  /* ctxRunning draws the chosen set's running sum and its members along the ranking; the
+     title, lead and caption are the set's own, looked up, as are NES, p and FDR. The ES the
+     page draws is checked against the table's, and the live line says where they differ. */
+  function runningSet(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var div = fig.querySelector(".js-plotly-plot"), mark = exporting(fig, cfg);
+    var lead = fig.querySelector(".fig-lead"), caption = fig.querySelector("figcaption");
+    var title = fig.querySelector(".fig-title"), summary = fig.querySelector(".running-summary");
+    var weights = ctxRunning.values(cfg.weights), built = cfg.export;
+    var start = { lead: lead ? lead.innerHTML : "", caption: caption.innerHTML,
+                  title: title ? title.textContent : "" };
+    function trace(name) {
+      for (var i = 0; i < div.data.length; i++) if (div.data[i].name === name) return i;
+      return -1;
+    }
+    var line = trace(cfg.line), dots = trace(cfg.member);
+    function fill(text, values) {
+      return text.replace(/\{(\w+)\}/g, function (all, key) {
+        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : all;
+      });
+    }
+    function show() {
+      var i = Number(form.elements.set.value), s = cfg.sets[i];
+      var run = ctxRunning.running(weights, s.positions), es = ctxRunning.score(run);
+      /* Every rank, x with y: the build's line may carry fewer points than the ranking. */
+      Plotly.restyle(div, { x: [run.map(function (_, r) { return r; })], y: [run] }, [line]);
+      Plotly.restyle(div, { x: [s.positions], y: [s.positions.map(function (p) { return run[p]; })] },
+                     [dots]);
+      if (lead) lead.innerHTML = i ? s.lead : start.lead;
+      caption.innerHTML = i ? s.caption : start.caption;
+      if (title) title.textContent = i ? s.title : start.title;
+      var words = i ? fill(cfg.moved, { label: s.label, build: cfg.build }) : "";
+      if (Math.abs(es - s.es) > cfg.tolerance) {
+        words = (words + " " + fill(cfg.differs, { page: es.toFixed(4), table: s.es.toFixed(4) })).trim();
+      }
+      summary.textContent = words;
+      if (built) cfg.export = i ? Object.assign({}, built, { caption: s.export_caption }) : built;
+      mark(i !== 0, "running");
+      /* What the page drew and its files would print, for a reader's script and the tests. */
+      fig.ctxRunning = { es: es, set: s.label, caption: cfg.export ? cfg.export.caption : null };
+    }
+    form.addEventListener("change", show);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the select without an event. */
+    if (form.elements.set.value !== "0") show();
+  }
+
+{% endraw %}

@@ -1,0 +1,7 @@
+{# M6's running score for any tested set (WO7): the page draws it with ctxRunning. The panel's
+   look is the calls panel's; the form is not one, so live calling never wires it. #}
+<div class="calls view"><form class="running" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.label }}" style="display:contents">
+<label>{{ f.defaults.label }}<select name="set">{% for label in f.defaults.options %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+</form></div>
+<noscript><p class="note">{{ ui.view.noscript }}</p></noscript>
+<p class="calls-summary running-summary" aria-live="polite"></p>

@@ -128,11 +128,13 @@ def questions(direction: str | None) -> tuple[SelfCheck, ...]:
     return (rank,) if direction is None else (_check(f"union_{direction}"), rank)
 
 
-def trap_text(tested: int, union: int, moved: tuple[int, int], shown: int) -> FigureText:
+def trap_text(tested: int, union: int, moved: tuple[int, int], shown: int,
+              passing: tuple[int, int]) -> FigureText:  # fmt: skip
     """Title, lead and reading guide of the background lesson, from the bars drawn.
 
-    ``moved`` counts the plotted sets that look more and less significant against the union;
-    the second reading line explains the direction most of them took.
+    ``moved`` counts the plotted sets that look more and less significant against the wider
+    background, ``union`` its size; ``passing`` the sets passing FDR < ALPHA against the tested
+    genes and against it. The second reading line explains the direction most of them took.
     """
     more, less = moved
     lead = (
@@ -141,6 +143,8 @@ def trap_text(tested: int, union: int, moved: tuple[int, int], shown: int) -> Fi
         else figure("background", "lead_moved", union=union, tested=tested, more=more,
                     less=less, shown=shown)
     )  # fmt: skip
+    lead = " ".join([lead, figure("background", "lead_passing", right=passing[0],
+                                  wrong=passing[1], alpha=ALPHA)])  # fmt: skip
     return FigureText(
         title=figure("background", "title"),
         lead=lead,

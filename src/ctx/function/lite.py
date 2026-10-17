@@ -184,6 +184,26 @@ def background(genes: Sequence[str], padj: Sequence[float]) -> list[str]:
     return [g for g, q in zip(genes, padj, strict=True) if q is not None and not math.isnan(q)]
 
 
+def ranking(
+    names: Sequence[str], scores: np.ndarray, weight: float = 1.0
+) -> tuple[list[str], np.ndarray]:
+    """The list GSEA walks, and the weight each gene carries along it.
+
+    Genes from the most positive score, a tie by name; each weighs |score|^weight. ``prerank``
+    and M6's running score on the page (``ctx.function.running``) read this one ordering.
+
+    Args:
+        names: Genes, one score each.
+        scores: The ranking statistic.
+        weight: Exponent on |score|.
+
+    Returns:
+        The genes in rank order, and their weights in the same order.
+    """
+    order = sorted(range(len(names)), key=lambda i: (-scores[i], names[i]))
+    return [names[i] for i in order], np.abs(np.asarray(scores, dtype=float)[order]) ** weight
+
+
 def prerank(  # noqa: PLR0913 - the GSEA parameters, each with its CONVENTIONS default
     names: Sequence[str],
     scores: np.ndarray,
@@ -215,9 +235,7 @@ def prerank(  # noqa: PLR0913 - the GSEA parameters, each with its CONVENTIONS d
     """
     if len(set(names)) != len(names):
         raise ValueError("a gene is ranked twice; collapse the ranking first")
-    order = sorted(range(len(names)), key=lambda i: (-scores[i], names[i]))
-    ranked = [names[i] for i in order]
-    magnitude = np.abs(np.asarray(scores, dtype=float)[order]) ** weight
+    ranked, magnitude = ranking(names, scores, weight)
     rank_of = {g: i for i, g in enumerate(ranked)}
     kept = sized(sets, set(ranked), min_size, max_size)
     rng = np.random.default_rng(seed)

@@ -149,16 +149,18 @@ def within_minus_between(rho: Matrix, labels: Sequence[str], strata: Sequence[st
     return Permutation(observed, p, within, between, permutations, len(movable))
 
 
-def thinned(counts: Matrix, samples: Sequence[str]) -> tuple[pl.DataFrame, float]:
+def thinned(counts: Matrix, samples: Sequence[str],
+            extra: Sequence[int] = ()) -> tuple[pl.DataFrame, float]:  # fmt: skip
     """Genes detected as each sample's reads are thinned binomially, and the common depth.
 
     Each sample is thinned to shares of its own reads and to the depth every sample reaches,
     the smallest library: a gene's reads are drawn Binomial(reads, depth / total), counts
-    rounded half to even first, as tximport's estimates are fractional.
+    rounded half to even first, as tximport's estimates are fractional. Each threshold of
+    ``extra`` counts the same draws, so the curves differ by the threshold alone.
 
     Returns:
         sample, depth (reads kept), genes (detected at ``MIN_READS``), common (whether the
-        point is the common depth); and that depth.
+        point is the common depth), then genes_<t> for each extra threshold; and that depth.
     """
     whole = np.rint(counts).astype(np.int64)
     totals = whole.sum(axis=0)
@@ -170,9 +172,11 @@ def thinned(counts: Matrix, samples: Sequence[str]) -> tuple[pl.DataFrame, float
             kept = (
                 rng.binomial(whole[:, j], depth / totals[j]) if depth < totals[j] else whole[:, j]
             )
-            rows.append((sample, float(depth), int((kept >= MIN_READS).sum()), depth == common))
+            rows.append((sample, float(depth), int((kept >= MIN_READS).sum()), depth == common,
+                         *(int((kept >= t).sum()) for t in extra)))  # fmt: skip
     frame = pl.DataFrame(rows, schema={"sample": pl.String, "depth": pl.Float64,
-                                       "genes": pl.Int64, "common": pl.Boolean},
+                                       "genes": pl.Int64, "common": pl.Boolean,
+                                       **{f"genes_{t}": pl.Int64 for t in extra}},
                          orient="row")  # fmt: skip
     return frame, common
 

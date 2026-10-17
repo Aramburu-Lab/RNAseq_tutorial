@@ -1,0 +1,24 @@
+py_key_separator	CAUGHT	1 failed in 2.25s
+js_key_separator	CAUGHT	1 failed in 2.21s
+js_missing_key_not_build	CAUGHT	1 failed in 2.52s
+grid_start_not_build	CAUGHT	1 failed in 1.90s
+grid_repeat_accepted	CAUGHT	1 failed, 1 passed in 1.91s
+option_keeps_template	CAUGHT	1 failed, 2 passed in 3.56s
+option_export_is_builds	CAUGHT	1 failed, 2 passed in 3.33s
+counted_untested_genes	CAUGHT	1 failed in 1.11s
+counted_cutoff_ignored	NOT PLANTED: 0 matches
+counted_basis_ignored	NOT PLANTED: 0 matches
+build_not_first	CAUGHT	1 failed, 1 passed in 1.10s
+agreement_sides_swapped	CAUGHT	1 failed, 2 passed in 1.27s
+agreement_opposite_as_same	CAUGHT	1 failed, 2 passed in 1.14s
+deseq_label_from_mwu	CAUGHT	1 failed, 4 passed in 134.59s (0:02:14)
+deseq_padj_wrong_gene	CAUGHT	1 failed, 4 passed in 101.64s (0:01:41)
+grid_lead_last_on_tie	CAUGHT	1 failed in 100.51s (0:01:40)
+view_export_builds	CAUGHT	1 failed, 8 passed in 105.07s (0:01:45)
+view_no_refit	CAUGHT	1 failed, 5 passed in 97.14s (0:01:37)
+refit_keeps_build_phone	CAUGHT	1 failed, 5 passed in 97.50s (0:01:37)
+grid_select_start_first	CAUGHT	1 failed, 6 passed in 97.05s (0:01:37)
+grid_sync_on_any_change	CAUGHT	1 failed in 96.14s (0:01:36)
+box_no_export	CAUGHT	1 failed, 9 passed in 108.31s (0:01:48)
+counted_cutoff_ignored	CAUGHT	1 failed in 0.94s
+counted_basis_ignored	CAUGHT	1 failed in 0.95s

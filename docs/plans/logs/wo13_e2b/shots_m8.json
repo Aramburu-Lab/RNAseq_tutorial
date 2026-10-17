@@ -1,0 +1,8 @@
+{"chromium": "/opt/homebrew/bin/chromium", "shots": [
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/breast_e2b/outputs/08_ncrna/2026-10-17_ncrna_tcga_brca_overview_v1.html", "width": 375, "scheme": "dark",
+  "act": "(()=>{const f=document.querySelector('form.strata'); f.elements.basis.value='pvalue'; f.elements.cutoff.value='0.001'; f.elements.fc.value='2'; f.elements.fc.dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": ".fig:has(form.strata)", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m8_strata_375_dark.png"},
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/breast_e2b/outputs/08_ncrna/2026-10-17_ncrna_tcga_brca_overview_v1.html", "width": 1280, "scheme": "light",
+  "act": "(()=>{const f=Array.from(document.querySelectorAll('form.view')).find(x=>x.getAttribute('aria-label')==='Targets'); const s=f.querySelectorAll('select[data-axis]'); s[0].value='2'; s[1].value='2'; s[0].dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": ".fig:has(form[aria-label=Targets])", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m8_targets_1280_light.png"}
+]}

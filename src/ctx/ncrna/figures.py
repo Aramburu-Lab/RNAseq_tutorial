@@ -5,8 +5,10 @@ featured contrast by biotype, BH within each; F4 a lncRNA against its nearest pr
 gene, the pair chosen on the page. Each builder returns the figure's data and its numbers.
 """
 
+import base64
 import math
 from collections.abc import Mapping, Sequence
+from dataclasses import replace
 from typing import Any
 
 import numpy as np
@@ -15,11 +17,12 @@ from scipy.stats import mannwhitneyu
 
 from ctx.de.filters import TOLERANCE, expressed, min_sample_size
 from ctx.de.stats import ALPHA, LFC_MIN, P_FLOOR, adjust_within, classify
+from ctx.function.live import bitset
 from ctx.ncrna import biotypes, neighbours
 from ctx.report import text
 from ctx.viz.bar import BarData
 from ctx.viz.curve import CurveData
-from ctx.viz.scatter import Line, ScatterData, needed_points
+from ctx.viz.scatter import CUTOFF_PRESETS, MIN_CUTOFF, Line, ScatterData, needed_points
 from ctx.viz.style import ALONE_SCALE, LARGEST_PLOT_PX, PLOTLY_HEIGHT_PX
 
 PAGE = "ncrna"
@@ -54,6 +57,7 @@ COLUMNS = {
     "pvalue": ("dimensionless", "M5: Wald test p-value."),
     "padj": ("dimensionless", "M5: Benjamini-Hochberg over every tested gene, pooled."),
     "padj_within": ("dimensionless", "Benjamini-Hochberg within the gene's biotype."),
+    "drawn": ("none", "True where the page draws the gene at the build's setting."),
     "call_pooled": ("none", "up, down or ns by the call rule on padj."),
     "call": ("none", "up, down or ns by the call rule on padj_within."),
     "neg_log10_p": (
@@ -207,10 +211,16 @@ def by_biotype(results: pl.DataFrame, genes: pl.DataFrame, chosen: Sequence[str]
 
 def volcano(frame: pl.DataFrame, chosen: Sequence[str], words: Mapping[str, Any],
             caption: str) -> ScatterData:  # fmt: skip
-    """F3: the featured contrast's volcano, a called gene coloured by its biotype."""
+    """F3: the featured contrast's volcano, a called gene coloured by its biotype.
+
+    M5's cut-offs move live (Rytis, TODO.md M8): ctxCalls calls every tested gene of the
+    chosen biotypes on a p adjusted within its biotype, and the page colours the called ones by
+    biotype (``_page_strata.js.j2``). Every tested gene travels in the control's rows, since a
+    looser cut-off calls genes the build's thinning left out.
+    """
     top = float(frame["neg_log10_p"].to_numpy().max(initial=1.0)) * 1.05
     name = word("figures.volcano.threshold")
-    return ScatterData(
+    data = ScatterData(
         frame=frame, columns=columns(frame), x="log2FoldChange", y="neg_log10_p",
         x_label=text.fill(PAGE, "figures.volcano.x", **words),
         y_label=word("figures.volcano.y"), colour="level",
@@ -219,6 +229,80 @@ def volcano(frame: pl.DataFrame, chosen: Sequence[str], words: Mapping[str, Any]
         hover=("gene_name", "padj_within", "padj"), keep="keep",
         lines=tuple(Line(name, (x, x), (0.0, top), dash=True) for x in (-LFC_MIN, LFC_MIN)),
     )  # fmt: skip
+    return replace(data, live=strata(data, chosen))
+
+
+# The bases the page offers: BH within the biotype (Rytis, TODO.md M8), then the raw p. The
+# other adjustments within each biotype would add 3 columns of float64 per gene, and put
+# the breast cohort's page at 14,660,097 B with them, 340 kB under the cap.
+STRATA_BASES = ("padj_within", "pvalue")
+
+
+def strata_summary(frame: pl.DataFrame, chosen: Sequence[str], basis: str, alpha: float,
+                   lfc_min: float) -> str:  # fmt: skip
+    """The live line at one setting: each biotype's calls, as the page fills it again."""
+    calls = frame.select("biotype", call=classify(pl.col(basis), pl.col("log2FoldChange"),
+                                                  alpha, lfc_min))  # fmt: skip
+    entries = []
+    for b in chosen:
+        mine = calls.filter(pl.col("biotype") == b)["call"]
+        up, down = int((mine == "up").sum()), int((mine == "down").sum())
+        entries.append(text.fill(PAGE, "figures.volcano.entry", biotype=b, n=up + down, up=up,
+                                 down=down))  # fmt: skip
+    return text.fill(
+        PAGE, "figures.volcano.summary", basis=word(f"figures.volcano.bases.{basis}"),
+        cutoff=f"{alpha:g}", fc=f"{lfc_min:.2f}", counts="; ".join(entries),
+    )  # fmt: skip
+
+
+def packed(rows: pl.DataFrame, chosen: Sequence[str]) -> dict[str, Any]:
+    """F3's rows as the page receives them, packed.
+
+    Names joined, biotypes by index, the numbers the call rule reads as float64 and the hover's
+    pooled padj as float32, in base64. As JSON, Step-1's 12,246 rows took 2,177,184 B, and
+    the breast cohort's 19,650 would have put its page over the cap.
+    """
+
+    def encoded(column: str, kind: str) -> str:
+        return base64.b64encode(rows[column].to_numpy().astype(kind).tobytes()).decode("ascii")
+
+    return {
+        "n": rows.height, "names": "\n".join(rows["gene_name"].fill_null("").to_list()),
+        "biotype": [chosen.index(b) for b in rows["biotype"]],
+        "f64": {c: encoded(c, "<f8") for c in ("log2FoldChange", *STRATA_BASES)},
+        "f32": {"padj": encoded("padj", "<f4")},
+        "drawn": bitset([i for i, d in enumerate(rows["drawn"]) if d], rows.height),
+    }  # fmt: skip
+
+
+def strata(data: ScatterData, chosen: Sequence[str]) -> dict[str, Any]:
+    """F3's live cut-offs: the rows a cut-off can call, the bases, the words the page fills.
+
+    A gene whose raw p is at or above the loosest cut-off is called at no setting, as every
+    adjusted p is at least the raw one: it travels only where the build draws it.
+    """
+    frame = data.frame.with_columns(drawn=data.thinning.page)
+    callable_ = pl.col("drawn") | (pl.col("pvalue") < max(CUTOFF_PRESETS))
+    carried = frame.filter(callable_)
+    traces = {level: i for i, level in enumerate(data.colours)}
+    # Moved, the files draw the genes no cut-off calls and the page leaves out, as the ns
+    # trace's points (export.settings' thinned layer: float32 x, y pairs by trace index).
+    left = frame.filter(~callable_).select("log2FoldChange", "neg_log10_p").to_numpy()
+    never = {str(traces[NOT_CALLED]):
+             base64.b64encode(left.astype("<f4").tobytes()).decode("ascii")}  # fmt: skip
+    return {
+        "kind": "strata", "lfc": "log2FoldChange", "y": "neg_log10_p", "gate": "padj_within",
+        "stratum": "biotype", "levels": list(chosen), "ns": NOT_CALLED, "traces": traces,
+        "lines": [len(data.colours), len(data.colours) + 1], "hover": list(data.hover),
+        "bases": {b: word(f"figures.volcano.bases.{b}") for b in STRATA_BASES},
+        "alpha": ALPHA, "lfc_min": LFC_MIN, "max_cutoff": max(CUTOFF_PRESETS),
+        "min_cutoff": MIN_CUTOFF, "presets": [f"{c:g}" for c in CUTOFF_PRESETS],
+        "p_floor": P_FLOOR, "rows": packed(carried, chosen), "never": never,
+        "summary": text.raw(PAGE, "figures.volcano.summary"),
+        "entry": text.raw(PAGE, "figures.volcano.entry"),
+        "every": word("figures.volcano.every"),
+        "default_summary": strata_summary(frame, chosen, "padj_within", ALPHA, LFC_MIN),
+    }  # fmt: skip
 
 
 def calls_table(frame: pl.DataFrame, chosen: Sequence[str]) -> list[tuple[str, ...]]:

@@ -208,6 +208,14 @@ class DensityData:
         """The figure files' size, whose height also sets where the page breaks its y title."""
         return figure_inches(self.width, "contour")
 
+    def inches(self) -> tuple[float, float]:
+        """The figure files' size, which a page's own PDF and SVG of a changed view take too."""
+        return self._inches()
+
+    def export_layers(self) -> dict[str, Any]:
+        """Nothing: the page draws every contour and point the figure files draw."""
+        return {}
+
     def static(self, theme: Theme) -> Any:
         """Render the matplotlib figure for one theme.
 

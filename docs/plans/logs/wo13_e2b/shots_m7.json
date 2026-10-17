@@ -1,0 +1,13 @@
+{"chromium": "/opt/homebrew/bin/chromium", "shots": [
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/breast_e2b/outputs/07_proteo/2026-10-17_proteo_cptac_brca_overview_v1.html", "width": 1280, "scheme": "light",
+  "act": "null", "selector": "#figure-8", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m7_f4_build_1280.png"},
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/breast_e2b/outputs/07_proteo/2026-10-17_proteo_cptac_brca_overview_v1.html", "width": 1280, "scheme": "light",
+  "act": "(()=>{const f=document.querySelector('#figure-8 form.view'); f.elements.view.value='1'; f.elements.view.dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": "#figure-8", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m7_f4_half_1280.png"},
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/breast_e2b/outputs/07_proteo/2026-10-17_proteo_cptac_brca_overview_v1.html", "width": 1280, "scheme": "light",
+  "act": "(()=>{const f=document.querySelector('#figure-8 form.view'); f.elements.view.value='1'; f.elements.view.dispatchEvent(new Event('change',{bubbles:true})); f.elements.view.value='0'; f.elements.view.dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": "#figure-8", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m7_f4_back_1280.png"},
+ {"url": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/tier1_e2b/outputs/07_proteo/2026-10-17_proteo_tier1_overview_v1.html", "width": 375, "scheme": "dark",
+  "act": "(()=>{const f=document.querySelector('form.view'); f.elements.view.value='1'; f.elements.view.dispatchEvent(new Event('change',{bubbles:true}));})()",
+  "selector": ".fig:has(form.view)", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/m7_f7_kind_375_dark.png"}
+]}

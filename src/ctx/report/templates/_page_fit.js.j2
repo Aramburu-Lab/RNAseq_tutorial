@@ -148,6 +148,28 @@
     }
     window.addEventListener("resize", apply);
     div.on("plotly_afterplot", apply);
+    /* A view (viewing) draws another figure in this div with Plotly.react: its own phone
+       layout replaces the build's, and what a swap sets back is read from it, so a narrowed
+       box plot's labels are the view's and stay the view's when the window widens again. A
+       view is never drawn opened alone (figures.prepare), so the page's layouts stay. */
+    div.addEventListener("ctx-view", function () {
+      var m = div.layout.meta || {};
+      narrow = m.narrow;
+      phone = narrow ? layout(narrow.relayout, narrow.restyle) : null;
+      wide = {};
+      [own, phone].filter(Boolean).forEach(function (s) {
+        Object.keys(s.relayout).forEach(function (k) { wide[k] = ctxExport.plain(at(div.layout, k)); });
+        s.unstyle = s.restyle.map(function (pair) {
+          var update = {};
+          Object.keys(pair[0]).forEach(function (k) {
+            update[k] = pair[1].map(function (i) { return ctxExport.plain(at(div.data[i], k)); });
+          });
+          return [update, pair[1]];
+        });
+      });
+      state = own; resizedAt = null; heightsAt = null;
+      apply();
+    });
     apply();
   }
 

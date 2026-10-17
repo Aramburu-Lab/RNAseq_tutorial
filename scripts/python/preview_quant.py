@@ -38,7 +38,7 @@ from ctx.quant import CountsFrom, laptop, outdir, salmon, tables, tximport
 from ctx.quant import page as pages
 from ctx.quant.run import Inputs, Measured, Options, featured_contrast
 from ctx.report import text
-from ctx.report.builder import FigureBlock, FigureText, write
+from ctx.report.builder import write
 from ctx.report.cards import parameter_cards
 from ctx.viz.save import Figure
 
@@ -59,10 +59,11 @@ MADE_UP = re.compile(r"Made-up", re.I)
 class MadeUpWriter(Writer):
     """A Writer whose figures each start their caption "Made-up data."."""
 
-    def figure(self, data: Figure, what: str, text_: FigureText) -> FigureBlock:
-        """Write the figure with the made-up mark in front of its caption."""
-        marked = replace(data, caption=f"{text.word(PAGE, 'preview.caption')} {data.caption}")
-        return super().figure(marked, what, text_)
+    def marked(self, data: Figure) -> Figure:
+        """The figure with the made-up mark in front of its caption, once."""
+        mark = text.word(PAGE, "preview.caption")
+        return data if data.caption.startswith(mark) else replace(
+            data, caption=f"{mark} {data.caption}")  # fmt: skip
 
 
 def made_up_quants(rng: np.random.Generator, counts: pl.DataFrame, folder: Path) -> None:

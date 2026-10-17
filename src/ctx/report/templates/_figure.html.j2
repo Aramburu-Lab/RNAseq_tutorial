@@ -58,6 +58,7 @@
 <form class="calls ora" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ w.label }}">
 <label>{{ w.direction }}<select name="direction">{% for value, label in w.directions.items() %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
 <label>{{ w.background }}<select name="background">{% for key, label, _, size in f.defaults.backgrounds %}<option value="{{ key }}"{% if key == f.defaults.featured %} selected{% endif %}>{{ label }} ({{ "{:,}".format(size) }})</option>{% endfor %}</select></label>
+{% if f.defaults.contrasts %}{% include "_ora_more.html.j2" %}{% endif %}
 <label class="genes">{{ w.paste }}<textarea name="pasted" rows="2" spellcheck="false" autocomplete="off"></textarea></label>
 <button type="button" data-paste>{{ w.paste_button }}</button>
 <button type="button" data-reset>{{ w.reset }}</button>
@@ -70,12 +71,17 @@
 {% endif %}
 {% if f.kind == "view" %}
 {# A select between figures Python drew (D-051 view kind); the first is the figure as built. #}
-<form class="calls view" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.label }}">
+<form class="calls view" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.label }}"{% if f.defaults.axes %} data-grid{% endif %}>
+{% if f.defaults.axes %}{% include "_view_grid.html.j2" %}{% else %}
 <label>{{ f.defaults.label }}<select name="view">{% for label in f.defaults.options %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+{% endif %}
 </form>
 <noscript><p class="note">{{ ui.view.noscript }}</p></noscript>
 <p class="calls-summary view-summary" aria-live="polite"></p>
 {% endif %}
+{% if f.kind == "running" %}{% include "_running_form.html.j2" %}{% endif %}
+{% if f.kind == "strata" %}{% include "_strata_form.html.j2" %}{% endif %}
+{% if f.kind == "strand" %}{% include "_strand_form.html.j2" %}{% endif %}
 {% if f.kind == "subset" %}{% set w = f.defaults.words %}
 {# M9's checkbox sets (E.1a): F3's lineages and tau's scale, F4's tissues; ctxM9 retakes the
    panel over what is ticked. #}

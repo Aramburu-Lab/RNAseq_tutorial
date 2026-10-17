@@ -166,6 +166,8 @@ rho = "Spearman rho of the two samples over genes detected on average."
 level = "The rho bin the cell is drawn in; empty on the diagonal."
 depth = "Reads kept after binomial thinning."
 genes = "Genes with at least the detection threshold of reads at this depth."
+genes_1 = "Genes with 1 read or more at this depth, from the same draws."
+genes_100 = "Genes with 100 reads or more at this depth, from the same draws."
 common = "Whether this depth is the one every sample reaches."
 gene_id = "GENCODE gene identifier."
 gene_name = "Gene symbol from the annotation."
@@ -227,6 +229,9 @@ caption_untested = "Genes with {min_reads} or more reads as {n} samples are thin
 x = "Reads kept"
 y = "Genes detected"
 depth_line = "Depth every sample reaches"
+# The detection threshold, looked up (M4.14, D-051).
+view = "Detected at"
+option = "a count of {min_reads} or more"
 
 [figures.units]
 title = "Estimated reads against TPM in one sample"
@@ -239,6 +244,14 @@ caption = "Sample {sample}, the median by mapped fragments: {total:,} genes with
 thinned = "genes"
 x = "Abundance"
 y = "Estimated reads"
+# tximport's other two modes, looked up (M4.14, D-051).
+view = "Gene counts as"
+mode_no = "Salmon's estimated reads"
+mode_scaled_tpm = "scaled TPM"
+mode_length_scaled_tpm = "length-scaled TPM"
+caption_scaled = "Sample {sample}, the median by mapped fragments: {total:,} genes with {min_reads} or more counts from {mode}. Descriptive, no test: tximport scales each sample's TPM to its reads."
+lead_scaled = "In {sample}, the median long gene has {ratio:.1f} times the counts per TPM of the median short gene."
+y_scaled = "Gene counts"
 short = "Under {short:,} nt"
 medium = "{short:,} to {long:,} nt"
 long = "Over {long:,} nt"
@@ -255,6 +268,10 @@ thinned = "genes within two-fold"
 x = "Fold change, length-scaled"
 y = "Fold change, estimated"
 identity = "Equal fold changes"
+# Each gene type alone, looked up (M4.14, D-051).
+view = "Genes"
+every_type = "Every gene type"
+caption_type = "Contrast {contrast}, {n_ref} reference and {n_test} tested samples; {genes:,} {gene_type} genes past M5's expression filter. Descriptive, no test: Spearman rho {rho:.3f} over them."
 
 [figures.isoforms]
 title = "Isoforms expressed against isoforms annotated"
