@@ -65,6 +65,8 @@ FFPE = "FFPE"
 DROPS = ("excluded", "ffpe", "protocol", "redacted", "not_first")
 # The drop reasons ``comparable`` passes: none, the tie-break, and another protocol.
 COMPARABLE = ("", "not_first", "protocol")
+# Columns a GDC sheet, STAR's or miRNA's, carries and a fetchngs sheet never does.
+GDC_ONLY = ("chosen", "drop_reason", "file_id", "md5sum", "case_id")
 # Annotation entities that are biospecimens; the rest annotate other data types' files.
 BIOSPECIMEN = ("case", "sample", "portion", "analyte", "aliquot")
 REDACTION = "Redaction"
@@ -583,14 +585,38 @@ def comparable(sheet: pl.DataFrame, sample_type: str) -> pl.DataFrame:
     )  # fmt: skip
 
 
+def is_sheet(sheet: pl.DataFrame) -> bool:
+    """Whether a gather sheet is a GDC one: it carries any column only a GDC sheet has."""
+    return any(c in sheet.columns for c in GDC_ONLY)
+
+
 def chosen(sheet: pl.DataFrame, sample_type: str | None = None) -> pl.DataFrame:
     """The one door: the files taken, one per case and sample type, optionally of one type.
 
-    Every consumer of gather's GDC sheet selects through this function; a sheet that holds only
-    the chosen rows passes through unchanged.
+    Every reader of a gather sheet selects through this function. A fetchngs sheet has no file
+    choice and passes unchanged; a sheet with any GDC-only column but no ``chosen`` is refused,
+    so a lost ``chosen`` column cannot pass every file through as a fetchngs sheet would.
+
+    Raises:
+        GdcError: A GDC sheet without ``chosen``, or a sample type asked of a fetchngs sheet.
     """
+    if not is_sheet(sheet):
+        if sample_type is not None:
+            raise GdcError(f"a fetchngs sheet has no GDC sample type {sample_type!r}")
+        return sheet
+    if "chosen" not in sheet.columns:
+        found = sorted(c for c in GDC_ONLY if c in sheet.columns)
+        raise GdcError(f"a GDC sheet (columns {found}) without its chosen column")
     kept = sheet.filter(pl.col("chosen"))
     return kept if sample_type is None else kept.filter(pl.col("sample_type") == sample_type)
+
+
+def refuse_sheet(sheet: pl.DataFrame, path: Path, command: str) -> list[str]:
+    """Why a module that reads a fetchngs dataset's runs cannot read this sheet, or nothing."""
+    if not is_sheet(sheet):
+        return []
+    return [f"{path.name} is a GDC sheet: ctx {command} reads a fetchngs dataset's runs, and a "
+            "GDC folder holds STAR counts; ctx qc and ctx de read it"]  # fmt: skip
 
 
 def _primary(diagnoses: list[dict[str, Any]]) -> dict[str, Any]:

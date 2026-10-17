@@ -13,6 +13,8 @@ from pathlib import Path
 import pytest
 from test_kit import NEW, SCRIPT, gdc_root, load
 
+from ctx.report import text
+
 ROOT = Path(__file__).resolve().parents[1]
 FILE = "conf/datasets/x.toml"
 OTHER = "conf/datasets/y.toml"
@@ -112,3 +114,26 @@ def test_a_rebuild_reads_the_bytes_the_run_read(tmp_path, history, kit_script, m
     assert f"{NEW}_gather_tcgax_counts_v1.csv" in readme
     subprocess.run(restore, shell=True, cwd=repo, check=True)  # noqa: S602 - the line a reader runs
     assert hashlib.sha256((repo / "x.toml").read_bytes()).hexdigest() == sha("v2\n")
+
+
+@pytest.mark.parametrize("version", ["v2", "v7"])
+def test_readme_explains_a_git_show_line_exactly_where_one_is(tmp_path, history, kit_script,
+                                                              monkeypatch, version):  # fmt: skip
+    """K.14: README.md says in one sentence what a `git show` line writes, under each left-out
+    file whose commands hold one (v2, an earlier version), and nowhere when none does (v7, the
+    kit commit's copy). Mutations caught: the sentence never written; written for every entry."""
+    repo, commits = history
+    clone = tmp_path / "builder" / "conf" / "datasets" / "x.toml"
+    real, _ = gdc_root(tmp_path, (str(clone), sha(f"{version}\n")))
+    codebase = kit_script.codebase_datasets(repo)
+    monkeypatch.setattr(kit_script, "codebase_datasets", lambda: codebase)
+    out = tmp_path / "kit"
+    shipped = kit_script.build(out, [("step", real, True)])
+    readme = (kit_script.readme(out, [("step", True)], shipped, "abc1234")).read_text()
+    left = json.loads((out / "LEFT_OUT.json").read_text())["files"]
+    shows = sum(c.startswith("git show ") for e in left for c in e["rebuild"])
+    said = text.fill("course", "readme.left_out_earlier", name="x.toml", path=FILE,
+                     commit=commits["v2"]).strip()  # fmt: skip
+    assert shows == (2 if version == "v2" else 0), left
+    assert readme.count(said) == shows, readme
+    assert readme.count("an earlier version;") == shows

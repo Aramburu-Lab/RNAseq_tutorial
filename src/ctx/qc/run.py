@@ -134,8 +134,7 @@ def read_gathered(inputs: Mapping[str, Path]) -> dict[str, pl.DataFrame]:
     case and sample type, so both modules count the same samples (TODO S.1: 517 LUAD tumours
     here against M5's 515). The counts are read for the kept samples' columns alone.
     """
-    sheet = pl.read_parquet(inputs["samplesheet"])
-    sheet = gdc.chosen(sheet) if "chosen" in sheet.columns else sheet
+    sheet = gdc.chosen(pl.read_parquet(inputs["samplesheet"]))
     samples = sheet.unique("sample", keep="first", maintain_order=True)["sample"].to_list()
     gathered = {"samplesheet": sheet}
     if "counts" in inputs:

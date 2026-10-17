@@ -296,6 +296,7 @@ def carry_matrices(out: Path, folder: str, base: Path,
             "rebuild": [*fetches, *([restore(earlier)] if earlier else []), m["command"]],
             "builder_root": m["root"], "builder_dataset_file": m["own_dataset_file"],
             "dataset_file_commit": earlier.commit if earlier else None,
+            "dataset_file_path": earlier.path if earlier else None,
         })  # fmt: skip
     return entries
 
@@ -386,6 +387,10 @@ def left_out_text(entry: dict[str, Any]) -> str:
     if entry.get("builder_dataset_file"):
         said.append(text.fill("course", "readme.left_out_own",
                               path=entry["builder_dataset_file"]))  # fmt: skip
+    if entry.get("dataset_file_commit"):
+        path = entry["dataset_file_path"]
+        said.append(text.fill("course", "readme.left_out_earlier", name=Path(path).name,
+                              path=path, commit=entry["dataset_file_commit"]))  # fmt: skip
     return "\n".join(said)
 
 

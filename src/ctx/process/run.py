@@ -21,6 +21,7 @@ import polars as pl
 from ctx import runtime, tools
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
+from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
 from ctx.process import (
     DEFAULT_SETTINGS,
@@ -193,6 +194,9 @@ def _sheet(root: Path, dataset: str, options: Options) -> tuple[Sheet | None, li
     try:
         path = newest(folder, dataset, "samplesheet")
         sheet = pl.read_parquet(path)
+        if refused := gdc.refuse_sheet(sheet, path, MODULE):
+            return None, refused
+        sheet = gdc.chosen(sheet)
         files, skipped = reads.fastq_files(sheet, options.fetchngs_dir or root / "data" / "raw"
                                            / dataset)  # fmt: skip
     except (DatasetError, QcError) as error:

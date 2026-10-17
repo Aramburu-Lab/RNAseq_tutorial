@@ -26,6 +26,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.de.run import Writer
+from ctx.gather import gdc
 from ctx.genecard.summary import tau
 from ctx.io.naming import MODULES, stem
 from ctx.report import text
@@ -209,12 +210,18 @@ def exons(writer: Writer, rng: np.random.Generator) -> tuple[FigureBlock, str]:
     return writer.figure(heat, "exon_use", words), text.fill(PAGE, "keys.pair_value", **pair)
 
 
+def samples(sheet_file: Path) -> pl.DataFrame:
+    """Gather's sheet through the GDC door, one row per sample."""
+    return gdc.chosen(pl.read_parquet(sheet_file)).unique("sample", keep="first",
+                                                          maintain_order=True)  # fmt: skip
+
+
 def page(root: Path, dataset: str, day: date) -> Path:
     """Write the M9 preview page and its figures under root; return the page."""
     started = perf_counter()
     gathered = root / "outputs" / "01_gather"
     sheet_file = sorted(gathered.glob(f"*_gather_{dataset}_samplesheet_v1.parquet"))[-1]
-    sheet = pl.read_parquet(sheet_file).unique("sample", keep="first", maintain_order=True)
+    sheet = samples(sheet_file)
     out = root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
     writer = Writer(out, dataset, day, {"made_up_seed": str(SEED),
                                         "input:samplesheet": sheet_file.name})  # fmt: skip
