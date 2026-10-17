@@ -224,7 +224,7 @@ def test_sample_metrics_on_gathered_counts(tmp_path):
     genes = read["genes"]
     types = genes.with_columns(gene_type=pl.lit("protein_coding"), chrom=pl.lit("chr1"))
     measured = checkpoint.sample_metrics(read["counts"], sheet, genes, types,
-                                         ["cell_type", "condition"], threads=1)  # fmt: skip
+                                         [["cell_type", "condition"]], threads=1)  # fmt: skip
     frame, sexes = measured.values, measured.sexes
     assert sexes is not None
     assert measured.scores.columns == ["sample", "pc1", "pc2"]

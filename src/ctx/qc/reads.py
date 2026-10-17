@@ -168,7 +168,7 @@ def run_values(mqc: multiqc_io.MultiqcRun, files: pl.DataFrame, registry: Regist
         "run_accession", "sample"
     )
     for frame in frames:
-        values = values.join(frame, on="run_accession", how="left")
+        values = values.join(frame, on="run_accession", how="left", maintain_order="left")
     return values
 
 

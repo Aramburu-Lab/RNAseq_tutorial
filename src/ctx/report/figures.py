@@ -258,6 +258,15 @@ _SHAPED = {
                          "scales": c.get("scales", []), "summary": c["summary"]},
     "genelist": lambda c: {"words": c["words"], "contrasts": c["contrasts"],
                            "featured": c["featured"]},
+    # M2's judge panel (work-order item 5): the run's k and strata, and its peers, selected.
+    "judge": lambda c: {"words": c["words"], "ks": [(f"{k:g}", f"{k:g}") for k in c["ks"]],
+                        "k": f"{c['k']:g}", "strata": [s[0] for s in c["strata"]],
+                        "peers": [p[0] for p in c.get("peers", [])]},
+    # M1 Figure 1's recount (work-order item 5): every run, coloured by batch, counted as runs.
+    "recount": lambda c: {"words": c["words"], "contrasts": [x["label"] for x in c["contrasts"]],
+                          "colours": list(c["colours"]),
+                          "summary": c["all"] + " " + c["words"]["shown"].format(
+                              count=c["words"]["counts"]["runs"], colour="batch")},
 }  # fmt: skip
 
 

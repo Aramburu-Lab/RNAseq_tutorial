@@ -1,0 +1,191 @@
+{% raw %}
+/* M1's and M2's page twins (work-order item 5): each the twin of one Python definition, run
+   under node against it by the tests. No DOM here; _page_qc.js.j2 wires them to the page. */
+var ctxRecount = {
+  /* ctx.gather.composition.recount: n runs or distinct individuals per group and colour
+     level, over the rows kept (indices, or null for every row). Groups and levels in first
+     appearance; a group's total is its runs or its distinct individuals; other is the count
+     the bar does not show. rows holds columns: group, donor and each colour column. */
+  counts: function (rows, keep, colour, count) {
+    var n = rows.group.length, order = [], bars = Object.create(null), totals = Object.create(null);
+    var at = keep || Array.from({ length: n }, function (_, i) { return i; });
+    at.forEach(function (i) {
+      var g = rows.group[i], level = rows[colour][i], key = g + "\u0000" + level, d = rows.donor[i];
+      if (!bars[key]) { bars[key] = { group: g, level: level, runs: 0, donors: Object.create(null) }; order.push(key); }
+      if (!totals[g]) totals[g] = { runs: 0, donors: Object.create(null) };
+      bars[key].runs += 1; bars[key].donors[d] = 1;
+      totals[g].runs += 1; totals[g].donors[d] = 1;
+    });
+    function measure(b, which) { return which === "runs" ? b.runs : Object.keys(b.donors).length; }
+    var other = count === "runs" ? "individuals" : "runs";
+    return order.map(function (key) {
+      var b = bars[key];
+      return { group: b.group, level: b.level, n: measure(b, count), other: measure(b, other),
+               total: measure(totals[b.group], count) };
+    });
+  },
+  /* ctx.gather.composition.smallest: groups, and the smallest group's name and total, fewest
+     first, a tie by name. */
+  smallest: function (bars) {
+    var seen = Object.create(null), groups = [];
+    bars.forEach(function (b) { if (!seen[b.group]) { seen[b.group] = 1; groups.push(b); } });
+    groups.sort(function (a, b) {
+      return a.total - b.total || (a.group < b.group ? -1 : a.group > b.group ? 1 : 0);
+    });
+    return groups.length ? [groups.length, groups[0].group, groups[0].total] : [0, "", 0];
+  },
+  fill: function (template, values) {
+    return String(template).replace(/\{(\w+)\}/g, function (all, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : all;
+    });
+  }
+};
+
+/* M2's judge (work-order item 5): ctx.qc.checkpoint.judge for one metric over one grouping,
+   the twin the page rejudges a strip with at another k and strata. Numbers print as Python
+   prints them: exact decimal digits of the double, rounded half to even. */
+var ctxJudge = {
+  /* scipy's scale="normal": the 0.75 quantile of the standard normal. */
+  NORMAL: 0.6744897501960817,
+  /* The exact decimal of |v|: digits (no leading zero) and the exponent of the first. */
+  decimal: function (v) {
+    var s = Math.abs(v).toExponential(99), at = s.indexOf("e");
+    return { digits: s.slice(0, at).replace(".", ""), exp: Number(s.slice(at + 1)) };
+  },
+  /* Those digits rounded to count significant ones, half to even; count may be 0. */
+  round: function (d, count) {
+    var digits = d.digits, exp = d.exp;
+    if (count <= 0) {
+      var up0 = count === 0 && (digits[0] > "5" || (digits[0] === "5" && /[1-9]/.test(digits.slice(1))));
+      return up0 ? { digits: "1", exp: exp + 1 } : { digits: "0", exp: exp };
+    }
+    var kept = digits.slice(0, count), rest = digits.slice(count);
+    var up = rest[0] > "5" || (rest[0] === "5" && (/[1-9]/.test(rest.slice(1)) ||
+             Number(kept[kept.length - 1]) % 2 === 1));
+    if (up) {
+      var arr = kept.split("").map(Number), i = arr.length - 1;
+      while (i >= 0 && arr[i] === 9) { arr[i] = 0; i--; }
+      if (i < 0) { arr.unshift(1); arr.pop(); exp += 1; } else arr[i] += 1;
+      kept = arr.join("");
+    }
+    return { digits: kept, exp: exp };
+  },
+  /* f"{v:,.{f}f}": fixed, f decimals, thousands grouped. */
+  fixed: function (v, f, grouped) {
+    if (v === 0) return f ? "0." + "0".repeat(f) : "0";
+    var d = ctxJudge.decimal(v), r = ctxJudge.round(d, d.exp + 1 + f);
+    var digits = r.digits, exp = r.exp, whole, frac;
+    if (r.digits === "0") { digits = "0".repeat(f + 1); exp = 0; }
+    if (exp >= 0) {
+      digits = digits + "0".repeat(Math.max(0, exp + 1 + f - digits.length));
+      whole = digits.slice(0, exp + 1); frac = digits.slice(exp + 1, exp + 1 + f);
+    } else {
+      var padded = "0".repeat(-exp) + digits;
+      whole = padded.slice(0, 1); frac = (padded.slice(1) + "0".repeat(f)).slice(0, f);
+    }
+    if (grouped) whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    var neg = v < 0 && /[1-9]/.test(whole + frac);
+    return (neg ? "-" : "") + whole + (f ? "." + frac : "");
+  },
+  /* f"{v:.{p}g}". */
+  general: function (v, p) {
+    if (v === 0) return "0";
+    if (!isFinite(v)) return isNaN(v) ? "nan" : v > 0 ? "inf" : "-inf";
+    var r = ctxJudge.round(ctxJudge.decimal(v), p), x = r.exp, sign = v < 0 ? "-" : "";
+    if (x >= -4 && x < p) {
+      var s = ctxJudge.fixed(Math.abs(v), p - 1 - x, false);
+      if (s.indexOf(".") >= 0) s = s.replace(/0+$/, "").replace(/\.$/, "");
+      return sign + s;
+    }
+    var m = r.digits[0] + (r.digits.length > 1 ? "." + r.digits.slice(1) : "");
+    if (m.indexOf(".") >= 0) m = m.replace(/0+$/, "").replace(/\.$/, "");
+    return sign + m + "e" + (x < 0 ? "-" : "+") + (Math.abs(x) < 10 ? "0" : "") + Math.abs(x);
+  },
+  /* checkpoint._show. */
+  show: function (v, digits) {
+    return Math.abs(v) >= 1000 ? ctxJudge.fixed(v, digits - 3, true) : ctxJudge.general(v, digits);
+  },
+  /* checkpoint.shown_apart: the fewest digits, from 3 to 15, that tell value and bound apart. */
+  apart: function (v, bound) {
+    var pair;
+    for (var d = 3; d <= 15; d++) {
+      pair = [ctxJudge.show(v, d), ctxJudge.show(bound, d)];
+      if (pair[0] !== pair[1]) return pair;
+    }
+    return pair;
+  },
+  /* checkpoint._stratum_label per unit: the grouping columns' values joined by " / ", or the
+     cohort's words with none. units holds the scope's key and every column as text. */
+  labels: function (units, scope, cols, none) {
+    return units[scope].map(function (_, i) {
+      return cols.length ? cols.map(function (c) { return units[c][i]; }).join(" / ") : none;
+    });
+  },
+  median: function (xs) {
+    var s = xs.slice().sort(function (a, b) { return a - b; }), n = s.length, h = n >> 1;
+    return n % 2 ? s[h] : (s[h - 1] + s[h]) / 2;
+  },
+  /* checkpoint.mad_band: median, MAD and median ± k MAD, on the metric's scale, in its units. */
+  band: function (values, log, k, scaled) {
+    var x = log ? values.map(Math.log10) : values, m = ctxJudge.median(x);
+    var mad = ctxJudge.median(x.map(function (v) { return Math.abs(v - m); })) / (scaled ? ctxJudge.NORMAL : 1);
+    var three = [m, m - k * mad, m + k * mad].map(function (v) { return log ? Math.pow(10, v) : v; });
+    return { median: three[0], mad: mad, low: three[1], high: three[2] };
+  },
+  /* One metric judged within the strata labels give each unit: the bands per stratum, and the
+     reason per flagged unit, the MAD's after the absolute one, as the strip reads them.
+     m: kind, scale, direction, keep, title; absolute: unit index to reason; calls: each unit's
+     strand call or null; w: the reason and note templates. */
+  judge: function (values, labels, m, k, cfg, absolute, calls, w) {
+    var order = [], members = Object.create(null), bands = [], reasons = Object.create(null);
+    labels.forEach(function (label, i) {
+      if (!members[label]) { members[label] = []; order.push(label); }
+      members[label].push(i);
+    });
+    var kText = ctxJudge.general(k, 6);
+    order.forEach(function (label) {
+      var units = members[label], found = [];
+      if (m.kind === "strandedness") {
+        var tally = Object.create(null), seen = [];
+        units.forEach(function (i) {
+          if (calls[i] === null) return;
+          if (!(calls[i] in tally)) { tally[calls[i]] = 0; seen.push(calls[i]); }
+          tally[calls[i]] += 1;
+        });
+        var usual = "";
+        seen.slice().sort().forEach(function (c) { if (usual === "" || tally[c] > tally[usual]) usual = c; });
+        units.forEach(function (i) {
+          var c = calls[i];
+          if (c !== null && (c === "undetermined" || c !== usual)) {
+            found.push([i, ctxRecount.fill(w.strand, { title: m.title, call: c, usual: usual, stratum: label })]);
+          }
+        });
+      } else if (m.banded) {
+        units.forEach(function (i) { if (absolute[i] !== undefined) found.push([i, absolute[i]]); });
+      }
+      if (m.kind === "numeric") {
+        var present = units.filter(function (i) { return values[i] !== null && !isNaN(values[i]); });
+        var band = { stratum: label, n: present.length, median: null, mad: null, low: null, high: null, note: "" };
+        if (present.length < cfg.min_samples) {
+          band.note = ctxRecount.fill(w.small, { n: present.length, minimum: cfg.min_samples });
+        } else {
+          var b = ctxJudge.band(present.map(function (i) { return values[i]; }), m.scale === "log10", k, cfg.scaled);
+          band.median = b.median; band.mad = b.mad; band.low = b.low; band.high = b.high;
+          if (b.mad === 0) band.note = w.spread;
+          else present.forEach(function (i) {
+            var v = values[i], side = v < b.low ? "low" : v > b.high ? "high" : null;
+            if (side && (m.direction === "none" || m.direction === (side === "low" ? "higher" : "lower"))) {
+              var pair = ctxJudge.apart(v, side === "low" ? b.low : b.high);
+              found.push([i, ctxRecount.fill(w[side], { title: m.title, value: pair[0], bound: pair[1],
+                k: kText, n: present.length, stratum: label })]);
+            }
+          });
+        }
+        bands.push(band);
+      }
+      if (!m.keep) found.forEach(function (f) { reasons[f[0]] = f[1]; });
+    });
+    return { bands: bands, reasons: reasons };
+  }
+};
+{% endraw %}

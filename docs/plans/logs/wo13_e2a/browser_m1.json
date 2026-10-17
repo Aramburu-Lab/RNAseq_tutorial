@@ -1,0 +1,626 @@
+{
+ "0:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 1,
+    "data": 70,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "2 groups; the smallest, NDN hsct, has 5 runs, which limits what any contrast on it can find.",
+    "line": "The 18 runs M5 compares in Neutrophils, early after HSCT against steady state: condition hsct against steady_state. Bars count runs, coloured by batch.",
+    "moved": true,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 13452,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 7933,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "0:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 1,
+    "data": 70,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "2 groups; the smallest, NDN hsct, has 5 runs, which limits what any contrast on it can find.",
+    "line": "The 18 runs M5 compares in Neutrophils, early after HSCT against steady state: condition hsct against steady_state. Bars count runs, coloured by batch.",
+    "moved": true,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 13452,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 7933,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "0:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 1,
+    "data": 70,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "2 groups; the smallest, NDN hsct, has 5 runs, which limits what any contrast on it can find.",
+    "line": "The 18 runs M5 compares in Neutrophils, early after HSCT against steady state: condition hsct against steady_state. Bars count runs, coloured by batch.",
+    "moved": true,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 13451,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 7931,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "0:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 1,
+    "data": 70,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "2 groups; the smallest, NDN hsct, has 5 runs, which limits what any contrast on it can find.",
+    "line": "The 18 runs M5 compares in Neutrophils, early after HSCT against steady state: condition hsct against steady_state. Bars count runs, coloured by batch.",
+    "moved": true,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 13451,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 7931,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 4,
+    "data": 596,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by isolation.",
+    "moved": true,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14081,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 23642,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 4,
+    "data": 596,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by isolation.",
+    "moved": true,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14081,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 23642,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 4,
+    "data": 596,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by isolation.",
+    "moved": true,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14082,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 23640,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 4,
+    "data": 596,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by isolation.",
+    "moved": true,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14082,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 23640,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 2,
+    "data": 683,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, holds 1 individual, the n a contrast on it tests with.",
+    "line": "Every one of the 210 runs. Bars count individuals, coloured by batch.",
+    "moved": true,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14741,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 22616,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 2,
+    "data": 683,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, holds 1 individual, the n a contrast on it tests with.",
+    "line": "Every one of the 210 runs. Bars count individuals, coloured by batch.",
+    "moved": true,
+    "pageWide": 1265,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14741,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 22616,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 2,
+    "data": 683,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, holds 1 individual, the n a contrast on it tests with.",
+    "line": "Every one of the 210 runs. Bars count individuals, coloured by batch.",
+    "moved": true,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14743,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 22614,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 2,
+    "data": 685,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, has 1 run, which limits what any contrast on it can find.",
+    "line": "Every one of the 210 runs. Bars count runs, coloured by batch.",
+    "moved": false,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 2,
+    "data": 683,
+    "caption": "210 runs from 62 individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars.",
+    "lead": "22 groups; the smallest, BM_2 hsct, holds 1 individual, the n a contrast on it tests with.",
+    "line": "Every one of the 210 runs. Bars count individuals, coloured by batch.",
+    "moved": true,
+    "pageWide": 375,
+    "window": 375,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 14743,
+    "pages": 1,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     408.1889763779528
+    ]
+   },
+   "svg": {
+    "bytes": 22614,
+    "images": 0,
+    "name": "2026-10-17_gather_tier1_composition_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ }
+}

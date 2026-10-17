@@ -113,8 +113,11 @@ minutes = "{minutes:,.1f} min"
 
 [figures.composition]
 title = "Samples by cell type and condition"
-lead_one = "{groups} groups; the smallest, {name}, has {runs} run, which limits what any contrast on it can find."
-lead_many = "{groups} groups; the smallest, {name}, has {runs} runs, which limits what any contrast on it can find."
+# The lead by what the bars count; the page refills it after a recount (ctxRecount).
+lead_one_runs = "{groups} groups; the smallest, {name}, has {n} run, which limits what any contrast on it can find."
+lead_many_runs = "{groups} groups; the smallest, {name}, has {n} runs, which limits what any contrast on it can find."
+lead_one_individuals = "{groups} groups; the smallest, {name}, holds {n} individual, the n a contrast on it tests with."
+lead_many_individuals = "{groups} groups; the smallest, {name}, holds {n} individuals, the n a contrast on it tests with."
 bars = "Each bar is one cell type and condition; its length counts the runs in it."
 # Shown only when the runs fall in more than one batch.
 batches = "Colour splits each bar by batch: {batches}. A group found in one batch only is confounded with that batch."
@@ -122,6 +125,22 @@ individuals = "Hover a bar for the individuals behind it; one individual can giv
 caption = "{runs} runs from {individuals} individuals, by cell type, condition and batch; counts, no test. An individual can give several cell types, so individuals do not add up across bars."
 category = "Cell type and condition"
 value = "Runs"
+# The recount panel (work-order item 5): which runs, what colours them, what the bars count.
+contrast = "Runs of"
+every = "every sample"
+colour = "Colour by"
+count = "Count"
+counts.runs = "runs"
+counts.individuals = "individuals"
+empty = "No run left to count."
+noscript = "Recounting needs JavaScript; the sample sheet beside the page holds every run."
+live_all = "Every one of the {runs} runs."
+live_contrast = "The {runs} runs M5 compares in {contrast}: {variable} {tested} against {reference}."
+# Filled in the page with the count and the colour chosen.
+live_shown = "Bars count {count}, coloured by {colour}."
+notes.paired = "Paired: an individual without both groups is left out."
+notes.split = "One group split in two at random: both halves share one bar."
+notes.donors = "The contrast lists its individuals, so its bars filter no group."
 
 [figures.library]
 title = "Sequencing depth per run"

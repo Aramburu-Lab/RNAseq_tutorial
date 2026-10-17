@@ -139,7 +139,12 @@ def curve_figure(plots: Plots, metric: Metric, units: pl.DataFrame,
         return None
     key, words = plots.key, f"figures.fastqc.{metric.id}"
     extra = [c for c in ("sample", colour) if c and c != key and c in units.columns]
-    frame = frame.join(units.select(key, *extra).unique(key), on=key, how="left")
+    frame = frame.join(
+        units.select(key, *extra).unique(key, keep="first", maintain_order=True),
+        on=key,
+        how="left",
+        maintain_order="left",
+    )
     if colour is None:
         colour = "group"
         frame = frame.with_columns(group=pl.lit(text.word(PAGE, "figures.fates.all")))

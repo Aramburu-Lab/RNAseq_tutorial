@@ -61,6 +61,21 @@ band = "{title} {value} is in the bad band ({source})"
 category = "{title}: {value}"
 strand = "{title}: {call}, where {stratum} is mostly {usual}"
 
+# The judge panel on every strip (work-order item 5): k, strata and peers, judged again.
+[judge]
+label = "Judge again"
+k = "k, MADs from the median"
+strata = "Strata"
+peers = "Peers"
+no_strata = "none"
+noscript = "Judging again needs JavaScript; the bands and flags tables hold the run's own judgement."
+line = "At k {k} within {strata}: {flagged} of {n} {unit}s flagged here, {any} of {units} on any of these {m} metrics. The status table, key numbers and confounding tests keep k {k0} within {strata0}."
+missing = "{missing} {unit}s have no peer here and are not drawn."
+
+# A judgement with no strata: every unit one stratum, as a reason names it.
+[strata]
+none = "the whole cohort"
+
 # Why a band or a test is missing.
 [notes]
 small_stratum = "no band: {n} samples, fewer than the {minimum} a band needs"
@@ -157,6 +172,23 @@ columns.chry_log2cpm = "Mean log2 CPM + 1 of RPS4Y1, DDX3Y, KDM5D, UTY and EIF1A
 columns.expression_sex = "The sex the expression says: M when chrY exceeds XIST."
 columns.agrees = "Whether they agree; empty with no recorded sex."
 
+# Every view of the read flow, one row per view and link.
+[tables.flow_views]
+units = { value = "reads" }
+columns.view = "Whose fragments the flow sums."
+columns.source = "The fate the fragments leave."
+columns.target = "The fate they reach."
+columns.value = "Fragments along the link, summed over the view's samples."
+
+# Every view of the sex figure, one row per view and sample.
+[tables.sex_views]
+units = {}
+columns.view = "What the expression is compared with."
+columns.sample = "Sample."
+columns.expected = "The sex compared with: the donor's or the sample's own."
+columns.expression_sex = "The sex the expression says: M when chrY exceeds XIST."
+columns.agrees = "Whether they agree; empty with no recorded sex."
+
 # Read fates: every read of a sample, from Trim Galore's reports and then Salmon's.
 [figures.fates]
 title = "Read fates: raw against useful fragments"
@@ -216,6 +248,10 @@ nodes.not_assigned = "not assigned"
 columns.source = "The fate the fragments leave."
 columns.target = "The fate they reach."
 columns.value = "Fragments along the link, summed over the samples."
+# The view select (work-order item 5): whose fragments the flow sums.
+view = "Flows for"
+view_all = "all samples"
+view_level = "the samples whose {column} is {level}"
 
 [groups]
 fates = "Where the reads went"
@@ -450,6 +486,11 @@ recorded = "The recorded sex, or not recorded."
 label = "The sample's name where expression and record disagree."
 boundary = "the call's boundary: chrY equal to XIST"
 caption = "{xist} against the mean of {genes}, in log2 of CPM plus a pseudocount, for {n} samples. A transplanted sample is compared with its donor; most of both markers: {cross}. No test."
+# The view select (work-order item 5): what each sample's expression is compared with.
+view = "Compare with"
+view_donor = "the donor's sex for a transplanted sample"
+view_own = "each sample's own recorded sex"
+caption_own = "{xist} against the mean of {genes}, in log2 of CPM plus a pseudocount, for {n} samples. Each sample is compared with its own recorded sex, which ignores a transplant's donor cells. Most of both markers: {cross}. No test."
 
 # P2Q.3: the two rRNA and mitochondrial shares, after P2Q.10 counts 18S reads.
 [figures.composition]

@@ -1,0 +1,42 @@
+a outputs/scratch_roots/tier1_main/outputs/02_qc
+  read_length flags 0; runs flagged 142 of 210; sample flags 282
+b outputs/scratch_roots/tier1_s8/outputs/02_qc
+  read_length flags 0; runs flagged 142 of 210; sample flags 282
+band_map_v1.csv: bytes equal
+bands_v1.csv: bytes equal
+base_quality_v1.csv: bytes equal
+composition_v1.csv: bytes differ; rows equal as sets True
+confounding_v1.csv: bytes equal
+fastqc_adapter_v1.csv: bytes equal
+fastqc_n_content_v1.csv: bytes equal
+fates_v1.csv: bytes equal
+flags_v1.csv: bytes equal
+gc_distribution_v1.csv: bytes equal
+linked_pca_v1.csv: bytes differ; rows equal as sets True
+metrics_v1.csv: bytes equal
+overrepresented_v1.csv: bytes equal
+read_fates_v1.csv: bytes equal
+read_flow_v1.csv: bytes equal
+sex_check_v1.csv: bytes equal
+size_genes_v1.csv: bytes differ; rows equal as sets True
+status_v1.csv: bytes equal
+strip_genes_detected_v1.csv: bytes equal
+strip_globin_fraction_v1.csv: bytes equal
+strip_library_size_v1.csv: bytes equal
+strip_mt_fraction_v1.csv: bytes equal
+strip_mt_rrna_fraction_v1.csv: bytes equal
+strip_pca_distance_v1.csv: bytes equal
+strip_percent_duplicates_v1.csv: bytes equal
+strip_percent_gc_v1.csv: bytes equal
+strip_read_length_v1.csv: bytes equal
+strip_replicate_spearman_v1.csv: bytes equal
+strip_rrna_fraction_v1.csv: bytes equal
+strip_salmon_compatible_ratio_v1.csv: bytes equal
+strip_salmon_percent_mapped_v1.csv: bytes equal
+strip_salmon_strand_bias_v1.csv: bytes equal
+strip_tg_pct_passing_v1.csv: bytes equal
+strip_tg_pct_quality_trimmed_v1.csv: bytes equal
+strip_tg_pct_with_adapter_v1.csv: bytes equal
+strip_tg_total_reads_v1.csv: bytes equal
+strip_top_gene_share_v1.csv: bytes equal
+strip_total_sequences_v1.csv: bytes equal

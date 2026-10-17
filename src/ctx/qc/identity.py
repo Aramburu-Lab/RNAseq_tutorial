@@ -13,6 +13,30 @@ SEX_X = "XIST"
 SEX_Y = ("RPS4Y1", "DDX3Y", "KDM5D", "UTY", "EIF1AY")
 
 
+def against(called: pl.DataFrame, expected: list[str]) -> pl.DataFrame:
+    """The sex called from expression compared with the sex it is expected to be, per sample.
+
+    The one agreement rule: an empty expectation compares nothing (null), else the two agree
+    when they are equal. ``sex_check`` expects a transplanted sample's donor's sex; M2's view
+    of each sample's own recorded sex expects that instead (work-order item 5).
+
+    Args:
+        called: ``sample``, the two markers and ``expression_sex``, in sample order.
+        expected: The expected sex of each sample in that order; "" where none is recorded.
+
+    Returns:
+        ``sample``, ``expected``, the markers, ``expression_sex`` and ``agrees``.
+    """
+    return called.select(
+        "sample", pl.Series("expected", expected, pl.String), "xist_log2cpm", "chry_log2cpm",
+        "expression_sex",
+    ).with_columns(
+        agrees=pl.when(pl.col("expected") == "")
+        .then(None)
+        .otherwise(pl.col("expected") == pl.col("expression_sex"))
+    )  # fmt: skip
+
+
 def sex_check(
     sheet: pl.DataFrame, counts: pl.DataFrame, genes: pl.DataFrame
 ) -> tuple[pl.DataFrame | None, list[tuple[str, float, str]]]:
@@ -38,19 +62,10 @@ def sex_check(
         d if d else s
         for s, d in zip(samples["sex"].fill_null(""), donor.fill_null(""), strict=True)
     ]
-    frame = pl.DataFrame(
-        {
-            "sample": names,
-            "expected": expected,
-            "xist_log2cpm": xist,
-            "chry_log2cpm": chr_y,
-            "expression_sex": np.where(chr_y > xist, "M", "F"),
-        }
-    ).with_columns(
-        agrees=pl.when(pl.col("expected") == "")
-        .then(None)
-        .otherwise(pl.col("expected") == pl.col("expression_sex"))
-    )
+    frame = against(pl.DataFrame({
+        "sample": names, "xist_log2cpm": xist, "chry_log2cpm": chr_y,
+        "expression_sex": np.where(chr_y > xist, "M", "F"),
+    }), expected)  # fmt: skip
     compared = frame.filter(pl.col("agrees").is_not_null())
     wrong = compared.filter(~pl.col("agrees"))["sample"].to_list()
     unrecorded = frame.filter(pl.col("agrees").is_null())["sample"].to_list()

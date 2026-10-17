@@ -1,0 +1,8 @@
+strip metrics: 20
+strata ('cell_type',): any strip metric k 2: 151; k 2.5: 126; k 3: 109; k 3.5: 91; k 4: 78; k 5: 60; globin at k 3 53
+strata none: any strip metric k 2: 163; k 2.5: 141; k 3: 121; k 3.5: 102; k 4: 92; k 5: 73; globin at k 3 61
+strata ('cell_type', 'condition'): any strip metric k 2: 151; k 2.5: 133; k 3: 110; k 3.5: 95; k 4: 84; k 5: 62; globin at k 3 38
+strata ('batch',): any strip metric k 2: 154; k 2.5: 131; k 3: 113; k 3.5: 92; k 4: 83; k 5: 67; globin at k 3 44
+strata ('cell_type', 'batch'): any strip metric k 2: 140; k 2.5: 116; k 3: 102; k 3.5: 85; k 4: 78; k 5: 60; globin at k 3 45
+replicate_spearman by peers: cell_type and condition: 9 flagged, 1 no peer; cell_type: 18 flagged, 0 no peer; cell_type and batch: 9 flagged, 2 no peer
+pca_distance by peers: cell_type and condition: 16 flagged, 1 no peer; cell_type: 12 flagged, 0 no peer; cell_type and batch: 17 flagged, 2 no peer

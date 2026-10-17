@@ -4,6 +4,7 @@
 {% include "_filter.js.j2" %}
 {% include "_pairs.js.j2" %}
 {% include "_export.js.j2" %}
+{% include "_qc.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% if live %}{% include "_select.js.j2" %}
 {% include "_pick.js.j2" %}
@@ -84,7 +85,7 @@
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist):not(.recount):not(.judge)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -160,6 +161,9 @@
         if (original === null) {
           original = String(div.layout.xaxis.title.text || "").replace(/<br>/g, " ");
           div.layout.meta = Object.assign({}, div.layout.meta, { xtitle: original });
+        } else if (div.layout.meta && typeof div.layout.meta.xtitle === "string") {
+          /* A control that renames the axis (M1's recount) names its title in meta.xtitle. */
+          original = div.layout.meta.xtitle;
         }
         var size = full._size, centre = size.l + size.w / 2;
         var room = 2 * Math.min(centre, full.width - centre);
@@ -200,6 +204,16 @@
   /* A view select (D-051): another figure Python drew, swapped in with its words. */
   scope.querySelectorAll("form.view").forEach(function (form) {
     guard("view", function () { viewing(form); });
+  });
+
+  /* M1 Figure 1's recount (work-order item 5): ctxRecount holds the twin. */
+  scope.querySelectorAll("form.recount").forEach(function (form) {
+    guard("recount", function () { recounting(form); });
+  });
+
+  /* M2's judge panel (work-order item 5): ctxJudge holds the twin. */
+  scope.querySelectorAll("form.judge").forEach(function (form) {
+    guard("judge", function () { judging(form); });
   });
 
   /* M6's live over-representation (GS.5). */
@@ -295,6 +309,7 @@
 {% include "_page_brush.js.j2" %}
 {% include "_page_pick.js.j2" %}
 {% include "_page_controls.js.j2" %}
+{% include "_page_qc.js.j2" %}
 {% if live %}{% include "_page_m9.js.j2" %}{% endif %}
 {% raw %}})();
 {% endraw %}

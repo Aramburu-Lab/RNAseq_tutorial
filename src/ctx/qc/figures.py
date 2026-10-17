@@ -53,8 +53,10 @@ def fates_bubble(
     if colour is None:
         colour, samples = "group", samples.with_columns(
             group=pl.lit(text.word(PAGE, "figures.fates.all")))  # fmt: skip
-    frame = fates.join(samples.select("sample", colour), on="sample", how="left").join(
-        values.select("sample", *shares), on="sample", how="left")  # fmt: skip
+    frame = fates.join(samples.select("sample", colour), on="sample", how="left",
+                       maintain_order="left").join(
+        values.select("sample", *shares), on="sample", how="left",
+        maintain_order="left")  # fmt: skip
     frame = frame.with_columns(useful_share=pl.col("num_mapped") / pl.col("total_reads"))
     if shares:
         frame = frame.with_columns(mt_rrna_share=pl.sum_horizontal(shares))
@@ -168,7 +170,12 @@ def flat_grid(grid: pl.DataFrame, run: str) -> str:
 
 
 def stratum_labels(strata: Sequence[str]) -> pl.Expr:
-    """Each row's stratum as the judge names it: its strata values joined by " / "."""
+    """Each row's stratum as the judge names it: its strata values joined by " / ".
+
+    With no strata every row is one stratum, named as ``checkpoint`` names it.
+    """
+    if not strata:
+        return pl.lit(text.word(PAGE, "strata.none")).alias("stratum")
     parts = [pl.col(c).cast(pl.String).fill_null("None") for c in strata]
     return pl.concat_str(parts, separator=" / ").alias("stratum")
 
@@ -191,7 +198,11 @@ def strip(
         The strip, or None where no unit has a value.
     """
     bands, flags = judged
-    frame = values.select(key, metric.column).drop_nulls().join(units, on=key, how="left")
+    frame = (
+        values.select(key, metric.column)
+        .drop_nulls()
+        .join(units, on=key, how="left", maintain_order="left")
+    )
     if frame.is_empty():
         return None
     frame = frame.with_columns(stratum_labels(strata))
@@ -343,14 +354,17 @@ def density(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
     if not set(SIZE_GENES) <= set(values.columns):
         return None
     plotted = [m.id for m in registry.metrics.values() if m.column in SIZE_GENES]
-    samples = sheet.unique("sample", keep="first").select("sample", *([colour] if colour else []))
-    frame = values.select("sample", *SIZE_GENES).join(samples, on="sample")
+    samples = sheet.unique("sample", keep="first", maintain_order=True).select(
+        "sample", *([colour] if colour else [])
+    )
+    frame = values.select("sample", *SIZE_GENES).join(samples, on="sample", maintain_order="left")
     frame = frame.filter(pl.col("library_size") > 0)
     group = colour or "group"
     if colour is None:
         frame = frame.with_columns(group=pl.lit(text.word(PAGE, "figures.fates.all")))
     on_axes = flags.filter(pl.col("metric").is_in(plotted))["sample"].implode()
-    frame = frame.join(flagged_by(flags), on="sample", how="left").with_columns(
+    frame = frame.join(flagged_by(flags), on="sample", how="left",
+                       maintain_order="left").with_columns(
         pl.col(group).cast(pl.String), flagged=pl.col("sample").is_in(on_axes),
         flagged_by=pl.col("flagged_by").fill_null(""))  # fmt: skip
     levels = [str(v) for v in frame[group].unique(maintain_order=True)]
@@ -388,16 +402,19 @@ def composition(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
     if not set(COMPOSITION) <= set(values.columns):
         return None
     plotted = [m.id for m in registry.metrics.values() if m.column in COMPOSITION]
-    samples = sheet.unique("sample", keep="first").select("sample", *([colour] if colour else []))
+    samples = sheet.unique("sample", keep="first", maintain_order=True).select(
+        "sample", *([colour] if colour else [])
+    )
     group = colour or "group"
     percent = values.select("sample", *(pl.col(c) * 100 for c in COMPOSITION))
-    frame = percent.join(samples, on="sample")
+    frame = percent.join(samples, on="sample", maintain_order="left")
     if colour is None:
         frame = frame.with_columns(group=pl.lit(text.word(PAGE, "figures.fates.all")))
     on_axes = flags.filter(pl.col("metric").is_in(plotted))["sample"].implode()
     shape = {True: text.word(PAGE, "figures.composition.flagged"),
              False: text.word(PAGE, "figures.composition.not_flagged")}  # fmt: skip
-    frame = frame.join(flagged_by(flags), on="sample", how="left").with_columns(
+    frame = frame.join(flagged_by(flags), on="sample", how="left",
+                       maintain_order="left").with_columns(
         pl.col(group).cast(pl.String), flagged_by=pl.col("flagged_by").fill_null(""),
         flag=pl.col("sample").is_in(on_axes).replace_strict(shape,
                                                             return_dtype=pl.String))  # fmt: skip
@@ -427,8 +444,11 @@ def cross_sex(sexes: pl.DataFrame, n: int = 2) -> list[str]:
     return sexes.sort(weaker, descending=True)["sample"].head(n).to_list()
 
 
-def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
-    """XIST against the chrY genes, coloured by the recorded sex, disagreements named."""
+def sex_scatter(sexes: pl.DataFrame, caption: str = "caption") -> ScatterData:
+    """XIST against the chrY genes, coloured by the expected sex, disagreements named.
+
+    ``caption`` is the key under ``figures.sex`` that says what each sample is compared with.
+    """
     unknown = text.word(PAGE, "figures.sex.unknown")
     frame = sexes.with_columns(
         recorded=pl.when(pl.col("expected") == "").then(pl.lit(unknown)).otherwise("expected"),
@@ -449,7 +469,7 @@ def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
         x="xist_log2cpm", y="chry_log2cpm", x_label=text.word(PAGE, "figures.sex.x"),
         y_label=text.word(PAGE, "figures.sex.y"), colour="recorded",
         colours=category_colours(levels), label="label",
-        caption=text.fill(PAGE, "figures.sex.caption", n=frame.height, xist=SEX_X,
+        caption=text.fill(PAGE, f"figures.sex.{caption}", n=frame.height, xist=SEX_X,
                           genes=", ".join(SEX_Y), cross=", ".join(cross_sex(sexes))),  # fmt: skip
         lines=(Line(text.word(PAGE, "figures.sex.boundary"), (0.0, top), (0.0, top)),),
         hover=("sample", "expected", "expression_sex"),
@@ -463,8 +483,9 @@ def linked_pca(scores: pl.DataFrame, share: tuple[float, float], sheet: pl.DataF
         qc_status=pl.col("qc_status").sort_by(pl.col("qc_status").replace_strict(STATUS_ORDER))
         .last())  # fmt: skip
     dims = [d for d in dimensions if d in sheet.columns and sheet[d].n_unique() <= MAX_CATEGORIES]
-    samples = sheet.unique("sample", keep="first").select("sample", *dims)
-    frame = scores.join(samples, on="sample").join(worst, on="sample").with_columns(
+    samples = sheet.unique("sample", keep="first", maintain_order=True).select("sample", *dims)
+    frame = scores.join(samples, on="sample", maintain_order="left").join(
+        worst, on="sample", maintain_order="left").with_columns(
         [pl.col(d).cast(pl.String).fill_null("") for d in dims])  # fmt: skip
     return LinkedData(
         frame=frame,
