@@ -1,0 +1,418 @@
+{
+ "0:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 208 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. Each sample is compared with its own recorded sex, which ignores a transplant's donor cells. Most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "31 of 208 samples disagree with their recorded sex.",
+    "line": "This view shows each sample's own recorded sex; the figure files and the reading guide show the donor's sex for a transplanted sample.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18321,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 55646,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ },
+ "0:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 208 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. Each sample is compared with its own recorded sex, which ignores a transplant's donor cells. Most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "31 of 208 samples disagree with their recorded sex.",
+    "line": "This view shows each sample's own recorded sex; the figure files and the reading guide show the donor's sex for a transplanted sample.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18324,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 55644,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ },
+ "0:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 208 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. Each sample is compared with its own recorded sex, which ignores a transplant's donor cells. Most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "31 of 208 samples disagree with their recorded sex.",
+    "line": "This view shows each sample's own recorded sex; the figure files and the reading guide show the donor's sex for a transplanted sample.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18324,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 55642,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ },
+ "0:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 208 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. Each sample is compared with its own recorded sex, which ignores a transplant's donor cells. Most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "31 of 208 samples disagree with their recorded sex.",
+    "line": "This view shows each sample's own recorded sex; the figure files and the reading guide show the donor's sex for a transplanted sample.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18324,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 55642,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_sex_check_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ },
+ "1:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 210 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 5,875,408,555 fragments, 4,555,177,481 (77.5%) were assigned to a transcript.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 38 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 971,107,502 fragments, 769,097,279 (79.2%) were assigned to a transcript.",
+    "line": "This view shows the samples whose cell_type is LDN; the figure files and the reading guide show all samples.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 12072,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 8020,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ },
+ "1:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 210 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 5,875,408,555 fragments, 4,555,177,481 (77.5%) were assigned to a transcript.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 38 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 971,107,502 fragments, 769,097,279 (79.2%) were assigned to a transcript.",
+    "line": "This view shows the samples whose cell_type is LDN; the figure files and the reading guide show all samples.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 12072,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 8020,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ },
+ "1:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 210 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 5,875,408,555 fragments, 4,555,177,481 (77.5%) were assigned to a transcript.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 38 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 971,107,502 fragments, 769,097,279 (79.2%) were assigned to a transcript.",
+    "line": "This view shows the samples whose cell_type is LDN; the figure files and the reading guide show all samples.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 12072,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 8020,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ },
+ "1:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 210 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 5,875,408,555 fragments, 4,555,177,481 (77.5%) were assigned to a transcript.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 1,
+    "data": 18,
+    "caption": "Every fragment of the 38 samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test.",
+    "lead": "Of 971,107,502 fragments, 769,097,279 (79.2%) were assigned to a transcript.",
+    "line": "This view shows the samples whose cell_type is LDN; the figure files and the reading guide show all samples.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 12072,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 8020,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_read_flow_v1_view.svg",
+    "has_view_line": true
+   }
+  }
+ }
+}

@@ -3,18 +3,19 @@
 ``ctx.qc.run`` measures and judges; this module turns a judgement into the page's groups.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
 from ctx.de.run import Writer
-from ctx.qc import checkpoint, fastqc, figures
+from ctx.qc import checkpoint, fastqc, figures, identity
 from ctx.qc import registry as reg
-from ctx.report import text
+from ctx.report import export, text
 from ctx.report.builder import FigureBlock, FigureText, Group
+from ctx.report.views import viewed
 from ctx.viz.contour import DENSITY_MIN_POINTS
-from ctx.viz.style import MAX_CATEGORIES, MAX_DISTINCT
+from ctx.viz.style import MAX_CATEGORIES, MAX_DISTINCT, figure_inches
 
 if TYPE_CHECKING:
     from ctx.qc.run import Options
@@ -230,11 +231,81 @@ def identity_figures(writer: Writer, stage: Stage, measured: checkpoint.Measured
                             n=mix.frame.height,
                             flagged=int((mix.frame["flagged_by"] != "").sum())))  # fmt: skip
     if measured.sexes is not None:
-        sexes = figures.sex_scatter(measured.sexes)
-        disagree = sexes.frame.filter(pl.col("agrees").not_()).height
-        items.append(figure(writer, sexes, "sex_check", "sex", n=sexes.frame.height,
-                            disagree=disagree))  # fmt: skip
+        items.append(sex_figure(writer, measured.sexes, sheet))
     return items
+
+
+def own_sex(sexes: pl.DataFrame, sheet: pl.DataFrame) -> pl.DataFrame | None:
+    """The sex check against each sample's own recorded sex; None where no donor sex differs.
+
+    The method compares a transplanted sample with its donor (``identity.sex_check``); this is
+    the rule it avoids, through the same agreement rule (``identity.against``).
+    """
+    if "donor_sex" not in sheet.columns or not (sheet["donor_sex"].fill_null("") != "").any():
+        return None
+    recorded = sexes.select("sample").join(
+        sheet.unique("sample", keep="first", maintain_order=True).select("sample", "sex"),
+        on="sample", how="left", maintain_order="left")  # fmt: skip
+    return identity.against(sexes, recorded["sex"].fill_null("").to_list())
+
+
+def sex_figure(writer: Writer, sexes: pl.DataFrame, sheet: pl.DataFrame) -> FigureBlock:
+    """Recorded sex against expression; with donor sexes, a view against each sample's own.
+
+    Work-order item 5 (D-051): by the method 0 of Step-1's 208 compared samples disagree,
+    against their own sex 31 (figure controls plan), so the select shows why the method
+    compares a transplanted sample with its donor. Both views' calls are one table.
+    """
+    shown = [(text.word(PAGE, "figures.sex.view_donor"), sexes, "caption")]
+    if (own := own_sex(sexes, sheet)) is not None:
+        shown.append((text.word(PAGE, "figures.sex.view_own"), own, "caption_own"))
+    options = []
+    for label, frame, caption in shown:
+        data = figures.sex_scatter(frame, caption)
+        words = FigureText(
+            title=text.word(PAGE, "figures.sex.title"),
+            lead=text.fill(PAGE, "figures.sex.lead", n=data.frame["agrees"].count(),
+                           disagree=data.frame.filter(pl.col("agrees").not_()).height),
+            reading=lines("figures.sex.reading"))  # fmt: skip
+        options.append((label, data, words))
+    block = writer.figure(options[0][1], "sex_check", options[0][2])
+    if len(options) < 2:  # noqa: PLR2004 - a view needs a second option
+        return block
+    views = pl.concat([f.select("sample", "expected", "expression_sex", "agrees")
+                       .with_columns(view=pl.lit(label)) for label, f, _ in shown])  # fmt: skip
+    table(writer, views.select("view", "sample", "expected", "expression_sex", "agrees"),
+          "sex_views")  # fmt: skip
+    return exported(block, options, text.word(PAGE, "figures.sex.view"))
+
+
+def exported(block: FigureBlock, options: list[tuple[str, Any, FigureText]], label: str,
+             inches: tuple[float, float] | None = None) -> FigureBlock:  # fmt: skip
+    """``viewed``, each option carrying the settings of its own PDF and SVG.
+
+    The view kind exports the shown figure with the build's caption and labels (D-073): M2's
+    own-sex view printed "A transplanted sample is compared with its donor" under 31 samples
+    compared with their own sex. Each option here takes its own caption, size and layers;
+    ``inches`` sizes a contract that names no size of its own, as FlowData names none.
+    """
+    shown = viewed(block, options, label)
+    controls = dict(shown.controls or {})
+
+    def settings(data: Any) -> dict[str, Any]:
+        layers = data.export_layers() if hasattr(data, "export_layers") else None
+        return export.settings(inches or data.inches(), data.caption, block.stem, layers)
+
+    each = [settings(data) for _, data, _ in options]
+    controls["options"] = [{**o, "export": e} for o, e in zip(controls["options"], each,
+                                                               strict=True)]  # fmt: skip
+    controls["export"] = each[0]
+    return replace(shown, controls=controls)
+
+
+def table(writer: Writer, frame: pl.DataFrame, what: str) -> None:
+    """A table the page's views read, each column described by ``tables.<what>`` in the content."""
+    units = text.raw(PAGE, f"tables.{what}.units")
+    words = {c: text.word(PAGE, f"tables.{what}.columns.{c}") for c in frame.columns}
+    writer.table(frame, what, {c: (units.get(c, "none"), words[c]) for c in frame.columns})
 
 
 def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured | None,
@@ -269,11 +340,51 @@ def fate_figures(writer: Writer, fate: pl.DataFrame, values: pl.DataFrame, sheet
     colour = figures.colour_column(sheet, options.peers)
     bubble = figures.fates_bubble(fate, values, sheet, colour, registry)
     median = float(bubble.frame["useful_share"].median())  # type: ignore[arg-type]
-    total, useful = int(fate["total_reads"].sum()), int(fate["num_mapped"].sum())
     blocks = (
         figure(writer, bubble, "read_fates", "fates", colour_line(colour), median=median,
                k=f"{registry.mad_multiplier:g}"),
-        figure(writer, figures.fates_flow(fate), "read_flow", "flow", total=total, useful=useful,
-               share=useful / total if total else 0.0),
+        flow_figure(writer, fate, sheet, (*dict.fromkeys([*options.strata, *options.peers,
+                                                         "batch"]),)),
     )  # fmt: skip
     return Group(text.word(PAGE, "groups.fates"), blocks)
+
+
+def flow_words(fate: pl.DataFrame) -> FigureText:
+    """The Sankey's title, lead and reading guide, its numbers summed over ``fate``'s samples."""
+    total, useful = int(fate["total_reads"].sum()), int(fate["num_mapped"].sum())
+    return FigureText(
+        title=text.word(PAGE, "figures.flow.title"),
+        lead=text.fill(PAGE, "figures.flow.lead", total=total, useful=useful,
+                       share=useful / total if total else 0.0),
+        reading=lines("figures.flow.reading"))  # fmt: skip
+
+
+def flow_figure(writer: Writer, fate: pl.DataFrame, sheet: pl.DataFrame,
+                dims: tuple[str, ...]) -> FigureBlock:  # fmt: skip
+    """Where every read goes, over all samples; a view per level of each of ``dims``.
+
+    Work-order item 5 (D-051): the per-sample median decoy share is 0.260 in BM_4 against
+    0.150 in LDN on Step-1 (figure controls plan), so where reads go depends on the cells. A
+    level's links are its samples' fates summed by the same ``fates_flow``; every view's links
+    are one table. A column with more levels than a page colours, or only one, offers none.
+    """
+    samples = sheet.unique("sample", keep="first", maintain_order=True)
+    shown = [(text.word(PAGE, "figures.flow.view_all"), fate)]
+    for column in (d for d in dims if d in samples.columns):
+        levels = samples[column].cast(pl.String).fill_null("").unique(maintain_order=True)
+        if not 1 < levels.len() <= MAX_CATEGORIES:
+            continue
+        for level in levels.sort().filter(levels.sort() != ""):
+            kept = samples.filter(pl.col(column).cast(pl.String).fill_null("") == level)["sample"]
+            part = fate.filter(pl.col("sample").is_in(kept.implode()))
+            if part.height:
+                label = text.fill(PAGE, "figures.flow.view_level", column=column, level=level)
+                shown.append((label, part))
+    options = [(label, figures.fates_flow(part), flow_words(part)) for label, part in shown]
+    block = writer.figure(options[0][1], "read_flow", options[0][2])
+    if len(options) < 2:  # noqa: PLR2004 - a view needs a second option
+        return block
+    links = pl.concat([data.links.with_columns(view=pl.lit(label)) for label, data, _ in options])
+    table(writer, links.select("view", "source", "target", "value"), "flow_views")
+    return exported(block, options, text.word(PAGE, "figures.flow.view"),
+                    figure_inches(options[0][1].width, "flow"))  # fmt: skip

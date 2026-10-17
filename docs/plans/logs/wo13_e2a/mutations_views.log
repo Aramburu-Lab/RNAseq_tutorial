@@ -1,0 +1,4 @@
+CAUGHT: sex view: own sex compared by the donor rule (1 failed in 32.98s)
+CAUGHT: flow view: a level sums every sample (1 failed in 33.79s)
+CAUGHT: view export: the build's caption for every option (1 failed in 43.87s)
+CAUGHT: view export: each option's settings left off (1 failed in 33.64s)

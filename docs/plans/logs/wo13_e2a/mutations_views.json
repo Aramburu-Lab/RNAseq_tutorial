@@ -1,0 +1,22 @@
+[
+  {"label": "sex view: own sex compared by the donor rule",
+   "file": "src/ctx/qc/blocks.py",
+   "old": "    return identity.against(sexes, recorded[\"sex\"].fill_null(\"\").to_list())",
+   "new": "    return identity.against(sexes, sexes[\"expected\"].to_list())",
+   "tests": ["tests/test_qc_views.py::test_the_sex_view_compares_each_sample_with_its_own_record"]},
+  {"label": "flow view: a level sums every sample",
+   "file": "src/ctx/qc/blocks.py",
+   "old": "            part = fate.filter(pl.col(\"sample\").is_in(kept.implode()))",
+   "new": "            part = fate",
+   "tests": ["tests/test_qc_views.py::test_each_flow_view_sums_its_own_samples"]},
+  {"label": "view export: the build's caption for every option",
+   "file": "src/ctx/report/templates/_page_controls.js.j2",
+   "old": "      cfg.export = o.export || builtExport;",
+   "new": "      cfg.export = builtExport;",
+   "tests": ["tests/test_qc_views.py::test_a_view_s_files_carry_its_own_caption"]},
+  {"label": "view export: each option's settings left off",
+   "file": "src/ctx/qc/blocks.py",
+   "old": "    controls[\"options\"] = [{**o, \"export\": e} for o, e in zip(controls[\"options\"], each,",
+   "new": "    controls[\"options\"] = [{**o} for o, e in zip(controls[\"options\"], each,",
+   "tests": ["tests/test_qc_views.py::test_the_sex_view_compares_each_sample_with_its_own_record"]}
+]

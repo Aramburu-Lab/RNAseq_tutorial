@@ -1,0 +1,90 @@
+{
+ "0:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 210 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "noControl": "form.none"
+  },
+  "files": {}
+ },
+ "0:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 210 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "noControl": "form.none"
+  },
+  "files": {}
+ },
+ "0:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 210 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "noControl": "form.none"
+  },
+  "files": {}
+ },
+ "0:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 4,
+    "data": 6519,
+    "caption": "XIST against the mean of RPS4Y1, DDX3Y, KDM5D, UTY, EIF1AY, in log2 of CPM plus a pseudocount, for 210 samples. A transplanted sample is compared with its donor; most of both markers: ERX6994414, ERX6994379. No test.",
+    "lead": "0 of 210 samples disagree with their recorded sex.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "noControl": "form.none"
+  },
+  "files": {}
+ }
+}

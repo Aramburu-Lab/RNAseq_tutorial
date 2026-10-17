@@ -439,8 +439,11 @@ def cross_sex(sexes: pl.DataFrame, n: int = 2) -> list[str]:
     return sexes.sort(weaker, descending=True)["sample"].head(n).to_list()
 
 
-def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
-    """XIST against the chrY genes, coloured by the recorded sex, disagreements named."""
+def sex_scatter(sexes: pl.DataFrame, caption: str = "caption") -> ScatterData:
+    """XIST against the chrY genes, coloured by the expected sex, disagreements named.
+
+    ``caption`` is the key under ``figures.sex`` that says what each sample is compared with.
+    """
     unknown = text.word(PAGE, "figures.sex.unknown")
     frame = sexes.with_columns(
         recorded=pl.when(pl.col("expected") == "").then(pl.lit(unknown)).otherwise("expected"),
@@ -461,7 +464,7 @@ def sex_scatter(sexes: pl.DataFrame) -> ScatterData:
         x="xist_log2cpm", y="chry_log2cpm", x_label=text.word(PAGE, "figures.sex.x"),
         y_label=text.word(PAGE, "figures.sex.y"), colour="recorded",
         colours=category_colours(levels), label="label",
-        caption=text.fill(PAGE, "figures.sex.caption", n=frame.height, xist=SEX_X,
+        caption=text.fill(PAGE, f"figures.sex.{caption}", n=frame.height, xist=SEX_X,
                           genes=", ".join(SEX_Y), cross=", ".join(cross_sex(sexes))),  # fmt: skip
         lines=(Line(text.word(PAGE, "figures.sex.boundary"), (0.0, top), (0.0, top)),),
         hover=("sample", "expected", "expression_sex"),

@@ -120,8 +120,12 @@
     var title = fig.querySelector(".fig-title"), summary = fig.querySelector(".view-summary");
     var built = { lead: lead ? lead.innerHTML : "", caption: caption.innerHTML,
                   title: title ? title.textContent : "" };
+    /* An option that carries its own file settings (ctx.qc.blocks.exported) exports with its
+       caption and labels; others with the build's. */
+    var builtExport = cfg.export;
     function show() {
       var i = Number(form.elements.view.value), o = cfg.options[i];
+      cfg.export = o.export || builtExport;
       var layout = Object.assign({}, o.figure.layout,
                                  { template: template(div, root.getAttribute("data-theme")) });
       Plotly.react(div, o.figure.data, layout);

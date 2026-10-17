@@ -15,8 +15,9 @@ from pathlib import Path
 
 WT = Path(__file__).resolve().parents[4]
 BIN = Path("/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin")
-ENV = {**os.environ, "PATH": f"{BIN}:/usr/bin:/bin", "PYTHONPATH": str(WT / "src"),
-       "PYTHONDONTWRITEBYTECODE": "1"}  # fmt: skip
+# /opt/homebrew/bin holds Chromium: without it the browser tests skip, and a skip passes.
+ENV = {**os.environ, "PATH": f"{BIN}:/opt/homebrew/bin:/usr/bin:/bin",
+       "PYTHONPATH": str(WT / "src"), "PYTHONDONTWRITEBYTECODE": "1"}  # fmt: skip
 
 mutations = json.loads(Path(sys.argv[1]).read_text())
 log = Path(sys.argv[2])
