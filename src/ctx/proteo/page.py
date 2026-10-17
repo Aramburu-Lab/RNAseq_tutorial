@@ -16,7 +16,7 @@ from ctx.de.run import Writer
 from ctx.de.sanity import VERDICT_COLUMNS
 from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.io.naming import stem
-from ctx.proteo import figures, folds, measure
+from ctx.proteo import densities, figures, folds, measure
 from ctx.proteo.run import Measured, Options, verdicts
 from ctx.report import text
 from ctx.report.builder import (
@@ -185,7 +185,7 @@ def _contrast(writer: Writer, made: folds.Folds) -> FigureBlock:
               "lfc": LFC_MIN, "ci": round(100 * concordance.LEVEL),
               "rho": np.nan if rho is None else rho, "low": np.nan if low is None else low,
               "high": np.nan if high is None else high, **made.counts()}  # fmt: skip
-    return figures.contrast_density(writer, made, values)
+    return densities.contrast_density(writer, made, values)
 
 
 def _cross(writer: Writer, ctx: Context) -> list[Result]:
@@ -201,7 +201,7 @@ def _cross(writer: Writer, ctx: Context) -> list[Result]:
               "n_rna": " and ".join(map(str, contrast.expected_n)),
               "n_protein": f"{m.extra['n_tested']} and {m.extra['n_reference']}",
               "ci": round(100 * concordance.LEVEL)}  # fmt: skip
-    blocks: list[FigureBlock] = [figures.fold(writer, tested, values)]
+    blocks: list[FigureBlock] = [densities.fold(writer, tested, values)]
     assert ctx.spec.proteo is not None  # noqa: S101 - run() checks
     named = [c for c in ctx.spec.proteo.classes if f"shift.{c}" in m.extra]
     if named:

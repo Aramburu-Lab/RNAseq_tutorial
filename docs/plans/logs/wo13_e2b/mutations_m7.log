@@ -1,0 +1,8 @@
+f4_build_fold_everywhere	CAUGHT	1 failed in 48.33s
+protein_at_build_fold	SURVIVED	5 passed in 48.36s
+f4_build_not_first	CAUGHT	1 failed in 48.43s
+f7_kind_view_by_class	CAUGHT	1 failed, 2 passed in 48.86s
+level_left_unscaled	CAUGHT	1 failed, 4 passed in 51.49s
+grid_max_not_last_step	CAUGHT	1 failed, 4 passed in 48.45s
+protein_at_build_fold	CAUGHT	1 failed in 48.25s
+f4_build_fold_everywhere	CAUGHT	1 failed in 48.48s

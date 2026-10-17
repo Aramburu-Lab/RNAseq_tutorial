@@ -91,6 +91,17 @@ GROUPS["m8"] = {
 }  # fmt: skip
 
 
+DENS, T_M7B = "src/ctx/proteo/densities.py", "tests/test_proteo_views_browser.py"
+GROUPS["m7"] = {
+    "f4_build_fold_everywhere": (DENS, "data, words = _contrast_data(made.genes, values, ALPHA, lfc_min)", "data, words = _contrast_data(made.genes, values, ALPHA, LFC_MIN)", [T_M7B]),
+    "protein_at_build_fold": (DENS, 'protein_call=classify(pl.col("protein_padj"), pl.col("protein_lfc"), alpha, lfc_min),', 'protein_call=classify(pl.col("protein_padj"), pl.col("protein_lfc"), alpha, LFC_MIN),', [T_M7B]),
+    "f4_build_not_first": (DENS, "for lfc_min in sorted(FOLDS, key=lambda f: f != LFC_MIN):", "for lfc_min in FOLDS:", [T_M7B]),
+    "f7_kind_view_by_class": (DENS, "data = _fold_data(tested, by_kind)", "data = _fold_data(tested, False)", [T_M7B]),
+    "level_left_unscaled": (DENS, '"start": trace["contours"]["start"] / top * QUANTA,', '"start": trace["contours"]["start"],', [T_M7B]),
+    "grid_max_not_last_step": (DENS, "q = np.rint(z / top * QUANTA)", "q = np.rint(z / top * (QUANTA - 1))", [T_M7B]),
+}  # fmt: skip
+
+
 def run(group: str, name: str) -> str:
     """Plant one mutation, run its tests, restore; the verdict as one line."""
     path, old, new, tests = GROUPS[group][name]
