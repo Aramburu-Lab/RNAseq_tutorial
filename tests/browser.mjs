@@ -102,6 +102,11 @@ try {
     };
     listeners.add(watch);
     await s("Network.enable"); await s("Runtime.enable"); await s("Page.enable");
+    // Pages follow prefers-color-scheme when no theme is stored, and macOS switches it by the
+    // clock: the light tasks drew dark after 20:00 (2026-10-17). A task asks for dark itself.
+    await s("Emulation.setEmulatedMedia", {
+      features: [{ name: "prefers-color-scheme", value: task.scheme || "light" }],
+    });
     const size = (width, height) => s("Emulation.setDeviceMetricsOverride", {
       width: width || 1280, height: height || 900, deviceScaleFactor: 1, mobile: (width || 1280) < 768,
     });

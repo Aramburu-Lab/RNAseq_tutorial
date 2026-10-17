@@ -170,23 +170,19 @@ def measure(started: float) -> Usage:
     scale = 1 if sys.platform == "darwin" else 1024
     return Usage(
         wall_seconds=perf_counter() - started,
-        peak_rss_self=_own_peak() or resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * scale,
+        peak_rss_self=(_darwin_footprint() if sys.platform == "darwin" else _own_peak())
+        or resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * scale,
         peak_rss_children=resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss * scale,
     )
 
 
 def _own_peak(status: Path = Path("/proc/self/status")) -> int | None:
-    """This program's peak memory in bytes: Linux's VmHWM, macOS's lifetime peak footprint.
+    """This program's peak RSS in bytes from Linux's VmHWM, or None where there is no such file.
 
     Linux carries ru_maxrss across execve, so getrusage reported the 1.1 GB of the pytest
     process that started it (run 37807649888); VmHWM belongs to the address space
-    exec created, so it counts this program alone (proc(5)). On macOS ru_maxrss keeps
-    pages malloc freed but did not return: TCGA lung's M5 read 3.89 to 4.30 GB there at a
-    3.20 to 3.29 GB footprint (Rytis 2026-10-17, S.7), the number ``/usr/bin/time -l`` prints.
-    None where neither exists.
+    exec created, so it counts this program alone (proc(5)).
     """
-    if sys.platform == "darwin":
-        return _darwin_footprint()
     try:
         lines = status.read_text().splitlines()
     except OSError:
@@ -201,7 +197,12 @@ _RUSAGE_INFO_V4, _FOOTPRINT_SLOT, _SLOTS = 4, 2 + 28, 40
 
 
 def _darwin_footprint() -> int | None:
-    """This process's lifetime peak physical footprint from proc_pid_rusage, or None on failure."""
+    """This process's lifetime peak physical footprint from proc_pid_rusage, or None on failure.
+
+    On macOS ru_maxrss keeps pages malloc freed but did not return: TCGA lung's M5 read 3.89
+    to 4.30 GB there at a 3.20 to 3.29 GB footprint (Rytis 2026-10-17, S.7). The footprint is
+    the number ``/usr/bin/time -l`` prints.
+    """
     import ctypes  # noqa: PLC0415 - macOS only
 
     try:

@@ -125,3 +125,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - `Path.resolve()` follows a scratch root's link into the real root, whose links then open the real pages: use `absolute()` (W, 2026-10-17).
 - On macOS ru_maxrss counts freed pages malloc keeps resident: lung de read 4.2 GB RSS at a 3.2 GB footprint. Read /usr/bin/time -l's peak memory footprint beside RSS and repeat the run (DE, 2026-10-17).
 - A profiler that lists child processes every 20 ms stalled a fit sevenfold on macOS: list them every few seconds and read only their RSS between (DE, 2026-10-17).
+- A browser test that assumes the light theme pins it: pages follow prefers-color-scheme with no theme stored, and macOS switches by the clock, so the packed-cards test failed after 20:00 on code that passed at 17:00 (2026-10-17).
