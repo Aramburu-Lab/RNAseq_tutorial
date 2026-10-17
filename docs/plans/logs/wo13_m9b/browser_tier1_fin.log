@@ -1,0 +1,232 @@
+{
+ "page_1280_light": {
+  "errors": [],
+  "theme": "white",
+  "fits": true,
+  "boxes": 114,
+  "every_box_drew": true,
+  "views": 57,
+  "view_options": [
+   5
+  ],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "≥ 2",
+   "not called"
+  ],
+  "heat_width": 903,
+  "heat_min": "888px",
+  "heat_hint": false,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "Columns are M5 contrasts, 11 here: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 1 with a card on this page.",
+  "first_view": [
+   {
+    "label": "All samples, contrasts 1 to 6 of 11",
+    "points": 108,
+    "lead": "All samples: largest shift drawn in Neutrophils, G-CSF against steady state, pai"
+   },
+   {
+    "label": "All samples, contrasts 7 to 11 of 11",
+    "points": 111,
+    "lead": "All samples: largest shift drawn in Neutrophils at steady state, split in two at"
+   },
+   {
+    "label": "Reads > 76 nt (max 500 nt) only, contrasts 1 to 4 of 4",
+    "points": 58,
+    "lead": "Reads > 76 nt (max 500 nt) only: largest shift drawn in Neutrophils against mono"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 1 to 4 of 8",
+    "points": 72,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Monocytes, early after HS"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 5 to 8 of 8",
+    "points": 63,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Neutrophils, G-CSF agains"
+   }
+  ]
+ },
+ "page_1280_dark": {
+  "errors": [],
+  "theme": "black",
+  "fits": true,
+  "boxes": 114,
+  "every_box_drew": true,
+  "views": 57,
+  "view_options": [
+   5
+  ],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "≥ 2",
+   "not called"
+  ],
+  "heat_width": 903,
+  "heat_min": "888px",
+  "heat_hint": false,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "Columns are M5 contrasts, 11 here: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 1 with a card on this page.",
+  "first_view": [
+   {
+    "label": "All samples, contrasts 1 to 6 of 11",
+    "points": 108,
+    "lead": "All samples: largest shift drawn in Neutrophils, G-CSF against steady state, pai"
+   },
+   {
+    "label": "All samples, contrasts 7 to 11 of 11",
+    "points": 111,
+    "lead": "All samples: largest shift drawn in Neutrophils at steady state, split in two at"
+   },
+   {
+    "label": "Reads > 76 nt (max 500 nt) only, contrasts 1 to 4 of 4",
+    "points": 58,
+    "lead": "Reads > 76 nt (max 500 nt) only: largest shift drawn in Neutrophils against mono"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 1 to 4 of 8",
+    "points": 72,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Monocytes, early after HS"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 5 to 8 of 8",
+    "points": 63,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Neutrophils, G-CSF agains"
+   }
+  ]
+ },
+ "alone_1280": {
+  "errors": [],
+  "tissues": 11,
+  "column_empty": true,
+  "summary": "Medians and CVs over 10 of 11 tissues. The PDF and SVG draw all 11.",
+  "fits": true
+ },
+ "page_375_light": {
+  "errors": [],
+  "theme": "white",
+  "fits": true,
+  "boxes": 114,
+  "every_box_drew": true,
+  "views": 57,
+  "view_options": [
+   5
+  ],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "≥ 2",
+   "not called"
+  ],
+  "heat_width": 888,
+  "heat_min": "888px",
+  "heat_hint": true,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "Columns are M5 contrasts, 11 here: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 1 with a card on this page.",
+  "first_view": [
+   {
+    "label": "All samples, contrasts 1 to 6 of 11",
+    "points": 108,
+    "lead": "All samples: largest shift drawn in Neutrophils, G-CSF against steady state, pai"
+   },
+   {
+    "label": "All samples, contrasts 7 to 11 of 11",
+    "points": 111,
+    "lead": "All samples: largest shift drawn in Neutrophils at steady state, split in two at"
+   },
+   {
+    "label": "Reads > 76 nt (max 500 nt) only, contrasts 1 to 4 of 4",
+    "points": 58,
+    "lead": "Reads > 76 nt (max 500 nt) only: largest shift drawn in Neutrophils against mono"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 1 to 4 of 8",
+    "points": 72,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Monocytes, early after HS"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 5 to 8 of 8",
+    "points": 63,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Neutrophils, G-CSF agains"
+   }
+  ]
+ },
+ "page_375_dark": {
+  "errors": [],
+  "theme": "black",
+  "fits": true,
+  "boxes": 114,
+  "every_box_drew": true,
+  "views": 57,
+  "view_options": [
+   5
+  ],
+  "every_view_drew": true,
+  "heat_rows": 100,
+  "heat_equal": true,
+  "heat_keys": [
+   "< -2",
+   "-2 to -1",
+   "1 to 2",
+   "≥ 2",
+   "not called"
+  ],
+  "heat_width": 888,
+  "heat_min": "888px",
+  "heat_hint": true,
+  "pages": "Genes 1 to 25 of 150",
+  "caption": "Columns are M5 contrasts, 11 here: DESeq2 Wald test, BH within each contrast, called at padj below 0.05 and absolute log2 FC of 1 or more. The first 100 of 150 genes in list order; the table holds every gene.",
+  "summary": "150 genes from the paste box: 150 tested by M5, 0 not; 1 with a card on this page.",
+  "first_view": [
+   {
+    "label": "All samples, contrasts 1 to 6 of 11",
+    "points": 108,
+    "lead": "All samples: largest shift drawn in Neutrophils, G-CSF against steady state, pai"
+   },
+   {
+    "label": "All samples, contrasts 7 to 11 of 11",
+    "points": 111,
+    "lead": "All samples: largest shift drawn in Neutrophils at steady state, split in two at"
+   },
+   {
+    "label": "Reads > 76 nt (max 500 nt) only, contrasts 1 to 4 of 4",
+    "points": 58,
+    "lead": "Reads > 76 nt (max 500 nt) only: largest shift drawn in Neutrophils against mono"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 1 to 4 of 8",
+    "points": 72,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Monocytes, early after HS"
+   },
+   {
+    "label": "Reads ≤ 76 nt (min 35 nt) only, contrasts 5 to 8 of 8",
+    "points": 63,
+    "lead": "Reads ≤ 76 nt (min 35 nt) only: largest shift drawn in Neutrophils, G-CSF agains"
+   }
+  ]
+ },
+ "alone_375": {
+  "errors": [],
+  "tissues": 11,
+  "column_empty": true,
+  "summary": "Medians and CVs over 10 of 11 tissues. The PDF and SVG draw all 11.",
+  "fits": true
+ }
+}
