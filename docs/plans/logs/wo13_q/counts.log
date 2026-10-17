@@ -1,0 +1,5 @@
+qc_before [(517, 501)] metrics 1163 status 1163 tests 6 below .05 6
+qc_before2 [(517, 501)] metrics 1163 status 1163 tests 6 below .05 6
+qc_after1 [(515, 501)] metrics 1128 status 1128 tests 6 below .05 6
+qc_after2 [(515, 501)] metrics 1128 status 1128 tests 6 below .05 6
+qc_after3 [(515, 501)] metrics 1128 status 1128 tests 6 below .05 6

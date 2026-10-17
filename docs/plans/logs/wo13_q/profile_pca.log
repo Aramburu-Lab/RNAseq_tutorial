@@ -1,0 +1,13 @@
+traced peak 4029 MB, current 88 MB
+<frozen importlib._bootstrap_external>:757: size=41.5 MiB, count=290945, average=150 B
+<frozen importlib._bootstrap>:488: size=7811 KiB, count=56578, average=141 B
+<frozen abc>:106: size=2047 KiB, count=6249, average=335 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/dataclasses.py:473: size=792 KiB, count=8037, average=101 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/json/decoder.py:354: size=698 KiB, count=12304, average=58 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/linecache.py:142: size=538 KiB, count=5762, average=96 B
+<frozen abc>:123: size=526 KiB, count=4993, average=108 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/fontTools/agl.py:5084: size=481 KiB, count=12699, average=39 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/inspect.py:3074: size=480 KiB, count=7568, average=65 B
+<frozen importlib._bootstrap_external>:128: size=450 KiB, count=2677, average=172 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/functools.py:58: size=421 KiB, count=4349, average=99 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/matplotlib/_docstring.py:124: size=418 KiB, count=118, average=3630 B

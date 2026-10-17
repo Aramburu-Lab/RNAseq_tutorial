@@ -1,0 +1,8 @@
+read sheet                   before      137 MB  peak      137 MB
+read counts                  before      166 MB  peak      438 MB
+counts estimated_size 283 MB, shape (60616, 1164)
+sex_check                    before      492 MB  peak      492 MB
+pca (ctx.de.deseq)           before      492 MB  peak     4009 MB
+count_metrics                before      480 MB  peak     1929 MB
+replicate_spearman           before      872 MB  peak     2283 MB
+process max RSS 1392 MB now
