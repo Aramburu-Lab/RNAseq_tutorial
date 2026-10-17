@@ -251,7 +251,7 @@ def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured 
         linked = figures.linked_pca(measured.scores, measured.share, sheet, status, dims)
         glance.append(figure(writer, linked, "linked_pca", "linked"))
         identity = identity_figures(writer, stage, measured, sheet, registry, options)
-    units = sheet.unique("sample", keep="first").select(
+    units = sheet.unique("sample", keep="first", maintain_order=True).select(
         "sample", *options.strata, checkpoint.LENGTH_GROUP
     )
     metrics = strips(writer, stage, units, registry, options, "sample")

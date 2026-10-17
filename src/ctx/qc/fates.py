@@ -94,7 +94,7 @@ def values(run: multiqc_io.MultiqcRun, samples: list[str], registry: Registry) -
         numbers = [m.column for m in wanted if m.kind in ("numeric", "strandedness")]
         table = multiqc_io.numeric(table, numbers).select("Sample", *(m.column for m in wanted))
         part = multiqc_io.by_unit(table, ranks(samples), "sample", FIRST_UNUSED_RANK)
-        frame = frame.join(part, on="sample", how="left")
+        frame = frame.join(part, on="sample", how="left", maintain_order="left")
     return frame
 
 
@@ -110,7 +110,8 @@ def fates(run: multiqc_io.MultiqcRun, samples: list[str]) -> pl.DataFrame:
     frame = multiqc_io.by_unit(trim.select("Sample", *TRIM), ranks(samples), "sample",
                                FIRST_UNUSED_RANK).join(
         multiqc_io.by_unit(salmon.select("Sample", *SALMON), ranks(samples), "sample",
-                           FIRST_UNUSED_RANK), on="sample", how="left")  # fmt: skip
+                           FIRST_UNUSED_RANK), on="sample", how="left",
+        maintain_order="left")  # fmt: skip
     frame = frame.with_columns(
         not_assigned=pl.col("num_processed") - pl.col("num_mapped") - pl.col("num_decoy_fragments")
     )

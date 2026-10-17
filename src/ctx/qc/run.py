@@ -169,8 +169,8 @@ def align_stage(tables: Mapping[str, Path], registry: reg.Registry) -> pl.DataFr
         if missing := [c for c in wanted if c not in table.columns]:
             raise QcError(f"{path.name} has no {missing}, which the registry's align stage reads")
         part = table.select("sample", *[pl.col(c).cast(pl.Float64) for c in wanted])
-        frame = part if frame is None else frame.join(part, on="sample", how="full",
-                                                      coalesce=True)  # fmt: skip
+        frame = part if frame is None else frame.join(
+            part, on="sample", how="full", coalesce=True, maintain_order="left")  # fmt: skip
     return frame
 
 
@@ -260,7 +260,7 @@ def confounding(stage: Stage, sheet: pl.DataFrame, spec: Dataset,
         own = stage.run_values.drop("sample", *(c for c in values.columns if c != "sample"),
                                     strict=False)  # fmt: skip
         values = values.join(by_first_run(own, sheet, "run_accession"), on="sample",
-                             how="left")  # fmt: skip
+                             how="left", maintain_order="left")  # fmt: skip
         flags = pl.concat([flags, by_first_run(stage.run_flags, sheet, "sample")
                            .select(flags.columns)])  # fmt: skip
     return checkpoint.confounding(values, flags, sheet, spec.contrasts, spec.order, registry)
@@ -272,7 +272,7 @@ def by_first_run(run_frame: pl.DataFrame, sheet: pl.DataFrame, key: str) -> pl.D
                                                                              "sample")  # fmt: skip
     return (
         run_frame.rename({key: "run_accession"})
-        .join(first, on="run_accession", how="inner")
+        .join(first, on="run_accession", how="inner", maintain_order="left")
         .drop("run_accession")
     )
 
@@ -413,7 +413,7 @@ def run(
     inputs |= align_tables(settings.root, dataset)
     aligned = align_stage({w: inputs[w] for w in ALIGN_TABLES if w in inputs}, registry)
     if aligned is not None:
-        values = values.join(aligned, on="sample", how="left")
+        values = values.join(aligned, on="sample", how="left", maintain_order="left")
     day = date.today()
     releases = {"registry": str(registry.path), **{f"input:{w}": p.name for w, p in inputs.items()}}
     writer = Writer(settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}", dataset,
@@ -422,7 +422,7 @@ def run(
     if options.rnaseq_dir:
         found, fate, plots = rnaseq_stage(writer, options.rnaseq_dir, values["sample"].to_list(),
                                           registry)  # fmt: skip
-        values = values.join(found, on="sample", how="left")
+        values = values.join(found, on="sample", how="left", maintain_order="left")
     seen = (
         reads_stage(writer, settings, dataset, sheet, registry, options) if options.reads else None
     )

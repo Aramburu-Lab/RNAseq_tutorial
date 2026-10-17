@@ -1,0 +1,12 @@
+[
+  {"label": "S.8 linked_pca's sample table unordered",
+   "file": "src/ctx/qc/figures.py",
+   "old": "    samples = sheet.unique(\"sample\", keep=\"first\", maintain_order=True).select(\"sample\", *dims)\n    frame = scores.join(samples, on=\"sample\", maintain_order=\"left\")",
+   "new": "    samples = sheet.unique(\"sample\", keep=\"first\").select(\"sample\", *dims)\n    frame = scores.join(samples, on=\"sample\")",
+   "tests": ["tests/test_qc_run.py::test_a_second_run_writes_every_table_byte_for_byte"]},
+  {"label": "S.8 size_genes' inner join order unspecified",
+   "file": "src/ctx/qc/figures.py",
+   "old": "    frame = values.select(\"sample\", *SIZE_GENES).join(samples, on=\"sample\", maintain_order=\"left\")",
+   "new": "    frame = values.select(\"sample\", *SIZE_GENES).join(samples, on=\"sample\")",
+   "tests": ["tests/test_qc_run.py::test_a_second_run_writes_every_table_byte_for_byte"]}
+]

@@ -160,6 +160,33 @@ def test_the_composition_scatter_plots_both_shares(ran):
     assert shares == pytest.approx({s: 100 * v for s, v in metrics.items()})
 
 
+def test_a_second_run_writes_every_table_byte_for_byte(ran, tmp_path):
+    """S.8: the same inputs give the same bytes, row order included.
+
+    linked_pca, size_genes and composition changed row order run to run: a sample table made
+    by an unordered ``unique`` met an inner join whose order polars leaves unspecified, and
+    a figure's colour levels followed that order too. Every qc join now keeps its left
+    table's order. Mutations caught: the unordered table and join put back in
+    ``figures.linked_pca``, and in ``figures.density``; either one alone survives in density,
+    where the other still holds the order."""
+    import shutil  # noqa: PLC0415
+
+    root, _, _, _ = ran
+    again = tmp_path / "again"
+    shutil.copytree(root / "outputs" / "01_gather", again / "outputs" / "01_gather")
+    spec = with_annotation(again, tmp_path)
+    done = ctx("--root", str(again), "qc", "--dataset", "desynth", "--dataset-file", str(spec),
+               cwd=again)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    first = {p.name: p.read_bytes() for p in (root / "outputs" / "02_qc").glob("*.csv")}
+    second = {p.name: p.read_bytes() for p in (again / "outputs" / "02_qc").glob("*.csv")}
+    assert first.keys() == second.keys() and len(first) > 10  # noqa: PLR2004
+    differ = [n for n in sorted(first) if first[n] != second[n]]
+    shown = {n: [(a, b) for a, b in zip(first[n].splitlines(), second[n].splitlines(),
+                                        strict=False) if a != b][:2] for n in differ}  # fmt: skip
+    assert differ == [], shown
+
+
 def test_the_m3_alignment_table_is_judged_on_the_align_stage(tmp_path):
     """M3.12: with `ctx process`'s tables beside gather's, M2 judges them with dataset bands.
 

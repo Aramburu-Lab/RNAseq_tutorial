@@ -1,0 +1,4 @@
+CAUGHT: S.8 linked_pca's sample table unordered (1 failed in 45.72s)
+SURVIVED: S.8 size_genes' inner join order unspecified (1 passed in 50.94s)
+SURVIVED: S.8 size_genes' sample table unordered (1 passed in 95.48s (0:01:35))
+CAUGHT: S.8 size_genes' sample table unordered and its join unordered (1 failed in 46.41s)

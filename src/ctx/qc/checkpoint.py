@@ -131,7 +131,7 @@ def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFr
                 "top_gene_share": top,
             }
         )
-    typed = counts.join(types, on="gene_id", how="left")
+    typed = counts.join(types, on="gene_id", how="left", maintain_order="left")
     missing = typed.filter(pl.col("gene_type").is_null())["gene_id"]
     if missing.len():
         raise QcError(f"{missing.len():,} gene IDs of the counts are not in the annotation, "
@@ -186,7 +186,9 @@ def pca_distance(scores: pl.DataFrame, samples: pl.DataFrame, peers: Sequence[st
     The scores are one PCA of every sample's blind VST, the one M5 draws, so the distance is
     read on the plot students see.
     """
-    scores = scores.join(samples.select("sample", *peers), on="sample", how="left")
+    scores = scores.join(
+        samples.select("sample", *peers), on="sample", how="left", maintain_order="left"
+    )
     centre = [pl.col(c).median().over(peers) for c in ("pc1", "pc2")]
     distance = ((pl.col("pc1") - centre[0]) ** 2 + (pl.col("pc2") - centre[1]) ** 2).sqrt()
     alone = pl.len().over(peers) < 2  # noqa: PLR2004 - a centre needs a second sample
@@ -238,7 +240,7 @@ def sample_metrics(
     frame = count_metrics(counts, types)
     for part in (replicate_spearman(counts, samples, peers),
                  pca_distance(found.scores, samples, peers)):  # fmt: skip
-        frame = frame.join(part, on="sample", how="left")
+        frame = frame.join(part, on="sample", how="left", maintain_order="left")
     agrees = pl.Series("sex_agrees", [None] * frame.height, pl.String)
     if sexes is not None:
         label = (
@@ -248,7 +250,9 @@ def sample_metrics(
             .then(pl.lit("agrees"))
             .otherwise(pl.lit(FLAGGED_CATEGORY))
         )
-        frame = frame.join(sexes.select("sample", sex_agrees=label), on="sample", how="left")
+        frame = frame.join(
+            sexes.select("sample", sex_agrees=label), on="sample", how="left", maintain_order="left"
+        )
     else:
         frame = frame.with_columns(agrees)
     return Measured(frame, sexes, found.scores, found.share)
@@ -430,7 +434,9 @@ def _judge_within(
     strata: Sequence[str],
 ) -> tuple[list[dict[str, object]], list[tuple[str, str, str]]]:  # fmt: skip
     """The bands and flags of some metrics, judged within the groups ``strata`` make."""
-    frame = values.join(samples.select("sample", *strata), on="sample", how="left")
+    frame = values.join(
+        samples.select("sample", *strata), on="sample", how="left", maintain_order="left"
+    )
     bands, flags = [], []
     for key, stratum in frame.group_by(list(strata), maintain_order=True):
         label = _stratum_label(dict(zip(strata, key, strict=True)), strata)
@@ -460,17 +466,22 @@ def status(
     metric's action says so; none does before the Step-1 record, so no run is excluded here.
     """
     excluding = [m.id for m in registry.metrics.values() if m.action == "exclude"]
-    by_run = runs.select("run_accession", "sample").join(flags, on="sample", how="inner")
+    by_run = runs.select("run_accession", "sample").join(
+        flags, on="sample", how="inner", maintain_order="left"
+    )
     if run_flags is not None:
         own = run_flags.rename({"sample": "run_accession"}).join(
-            runs.select("run_accession", "sample"), on="run_accession", how="inner")  # fmt: skip
+            runs.select("run_accession", "sample"), on="run_accession", how="inner",
+            maintain_order="left")  # fmt: skip
         by_run = pl.concat([by_run, own.select(by_run.columns)])
     per = by_run.group_by("run_accession", maintain_order=True).agg(
         n_flags=pl.col("metric").n_unique(),
         qc_reason=pl.col("reason").str.join("; "),
         excluded=pl.col("metric").is_in(excluding).any(),
     )
-    joined = runs.select("run_accession", "sample").join(per, on="run_accession", how="left")
+    joined = runs.select("run_accession", "sample").join(
+        per, on="run_accession", how="left", maintain_order="left"
+    )
     return joined.select(
         "run_accession", "sample",
         qc_status=pl.when(pl.col("excluded")).then(pl.lit("exclude"))
