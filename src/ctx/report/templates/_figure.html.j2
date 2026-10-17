@@ -96,6 +96,16 @@
 <noscript><p class="note">{{ w.noscript }}</p></noscript>
 <p class="calls-summary recount-summary" aria-live="polite">{{ f.defaults.summary }}</p>
 {% endif %}
+{% if f.kind == "judge" %}{% set w = f.defaults.words %}
+{# M2's judge panel (work-order item 5): every strip of one scope moves with it; ctxJudge judges. #}
+<form class="calls judge" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ w.label }}">
+<label>{{ w.k }}<select name="k">{% for value, label in f.defaults.ks %}<option value="{{ value }}"{% if value == f.defaults.k %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label>{{ w.strata }}<select name="strata">{% for label in f.defaults.strata %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+{% if f.defaults.peers %}<label>{{ w.peers }}<select name="peers">{% for label in f.defaults.peers %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>{% endif %}
+</form>
+<noscript><p class="note">{{ w.noscript }}</p></noscript>
+<p class="calls-summary judge-summary" aria-live="polite"></p>
+{% endif %}
 {% if f.kind == "pairs" %}
 <form class="calls pairs" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.pairs.label }}">
 <label>{{ f.defaults.label or ui.pairs.pair }}<select name="pair">{% for value, label in f.defaults.options %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>

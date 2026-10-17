@@ -1,0 +1,11 @@
+[
+ {
+  "label": "judge twin: the absolute reason winning over the MAD's",
+  "file": "src/ctx/report/templates/_qc.js.j2",
+  "old": "if (!m.keep) found.forEach(",
+  "new": "if (!m.keep) found.slice().reverse().forEach(",
+  "tests": [
+   "tests/test_qc_judge.py::test_the_page_judges_as_checkpoint_judge_does"
+  ]
+ }
+]

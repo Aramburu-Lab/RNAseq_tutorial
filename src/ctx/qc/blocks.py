@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 
 from ctx.de.run import Writer
-from ctx.qc import checkpoint, fastqc, figures, identity
+from ctx.qc import checkpoint, fastqc, figures, identity, judge
 from ctx.qc import registry as reg
 from ctx.report import export, text
 from ctx.report.builder import FigureBlock, FigureText, Group
@@ -35,6 +35,7 @@ class Stage:
     notes: tuple[str, ...] = ()
     run_values: pl.DataFrame | None = None
     run_flags: pl.DataFrame | None = None
+    by_peers: tuple[pl.DataFrame, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -117,12 +118,17 @@ def read_figures(writer: Writer, seen: Reads, sheet: pl.DataFrame, registry: reg
 
 def strips(writer: Writer, stage: Stage, units: pl.DataFrame, registry: reg.Registry,
            options: "Options", key: str) -> list[FigureBlock]:  # fmt: skip
-    """A strip per numeric or strandedness metric the values hold, one tab each, in order."""
+    """A strip per numeric or strandedness metric the values hold, one tab each, in order.
+
+    Each carries the judge panel (``judge.settings``): ``units`` holds every grouping column
+    the panel offers, and a moved panel's PDF and SVG draw the strip as rejudged.
+    """
+    options_offered = checkpoint.groupings(options.strata, options.peers, units.columns)
     values = stage.values if key == "sample" else stage.run_values
     flags = stage.flags if key == "sample" else stage.run_flags
     if values is None or flags is None:
         return []
-    blocks = []
+    blocks: list[FigureBlock] = []
     for metric in registry.metrics.values():
         if metric.kind not in STRIPPED or metric.column not in values.columns:
             continue
@@ -138,7 +144,16 @@ def strips(writer: Writer, stage: Stage, units: pl.DataFrame, registry: reg.Regi
             reading += (text.fill(PAGE, "figures.strip.source",
                                   source=metric.plot_source or metric.source),)  # fmt: skip
         text_around = FigureText(title=metric.title, tab=metric.title, lead=lead, reading=reading)
-        blocks.append(writer.figure(data, f"strip_{metric.id}", text_around))
+        block = writer.figure(data, f"strip_{metric.id}", text_around)
+        panel = judge.settings(metric, data, values=values.select(key, metric.column),
+                               units=units, key=key, registry=registry, options=options_offered,
+                               by_peers=stage.by_peers)  # fmt: skip
+        if any(b.controls and b.controls.get("units") for b in blocks):
+            # One scope's strips share their units, which the page reads from the first:
+            # 20 copies were 407,060 of Step-1's 612,692 bytes of panels.
+            panel = {k: v for k, v in panel.items() if k != "units"}
+        ready = export.settings(figure_inches(data.width, "strip"), data.caption, block.stem)
+        blocks.append(replace(block, controls={**panel, "export": ready}))
     return blocks
 
 
@@ -161,6 +176,13 @@ def _mixed_lengths(units: pl.DataFrame, metric: reg.Metric) -> tuple[str, ...]:
         return ()
     return (text.fill(PAGE, "figures.strip.mixed_lengths", n=len(groups),
                       groups="; ".join(str(g) for g in groups)),)  # fmt: skip
+
+
+def grouping_columns(sheet: pl.DataFrame, options: "Options") -> list[str]:
+    """Every sheet column a strata or peer grouping of the judge panel names, each once."""
+    strata, peers = checkpoint.groupings(options.strata, options.peers, sheet.columns)
+    return [c for c in dict.fromkeys(c for o in (*strata, *peers) for c in o)
+            if c != checkpoint.LENGTH_GROUP]  # fmt: skip
 
 
 def lines(key: str, **values: Any) -> tuple[str, ...]:
@@ -323,9 +345,10 @@ def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured 
         glance.append(figure(writer, linked, "linked_pca", "linked"))
         identity = identity_figures(writer, stage, measured, sheet, registry, options)
     units = sheet.unique("sample", keep="first", maintain_order=True).select(
-        "sample", *options.strata, checkpoint.LENGTH_GROUP
+        "sample", *grouping_columns(sheet, options), checkpoint.LENGTH_GROUP
     )
-    metrics = strips(writer, stage, units, registry, options, "sample")
+    peered = replace(stage, by_peers=measured.by_peers) if measured is not None else stage
+    metrics = strips(writer, peered, units, registry, options, "sample")
     for title, items, tabs in (("glance", glance, False), ("metrics", metrics, True),
                                ("identity", identity, False)):  # fmt: skip
         if items:

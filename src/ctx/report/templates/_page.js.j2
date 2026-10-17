@@ -85,7 +85,7 @@
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist):not(.recount)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist):not(.recount):not(.judge)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -209,6 +209,11 @@
   /* M1 Figure 1's recount (work-order item 5): ctxRecount holds the twin. */
   scope.querySelectorAll("form.recount").forEach(function (form) {
     guard("recount", function () { recounting(form); });
+  });
+
+  /* M2's judge panel (work-order item 5): ctxJudge holds the twin. */
+  scope.querySelectorAll("form.judge").forEach(function (form) {
+    guard("judge", function () { judging(form); });
   });
 
   /* M6's live over-representation (GS.5). */

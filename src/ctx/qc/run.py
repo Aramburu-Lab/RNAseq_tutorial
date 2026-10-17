@@ -27,6 +27,7 @@ from ctx.qc.blocks import (
     Stage,
     fastqc_figures,
     fate_figures,
+    grouping_columns,
     lines,
     overview_groups,
     read_figures,
@@ -109,9 +110,10 @@ def counts_stage(
     if "counts" not in gathered:
         return None, (text.word(PAGE, "notes.no_counts"),)
     types, note = gene_types(settings.root, spec)
-    measured = checkpoint.sample_metrics(gathered["counts"], gathered["samplesheet"],
-                                         gathered["genes"], types, options.peers,
-                                         settings.threads)  # fmt: skip
+    sheet = gathered["samplesheet"]
+    _, peers = checkpoint.groupings(options.strata, options.peers, sheet.columns)
+    measured = checkpoint.sample_metrics(gathered["counts"], sheet, gathered["genes"], types,
+                                         peers or [options.peers], settings.threads)  # fmt: skip
     return measured, (note,) if note else ()
 
 
@@ -376,7 +378,8 @@ def pipeline_groups(
         groups.append(Group(text.word(PAGE, "groups.fastqc"), tuple(items)))
     if seen is not None:
         groups.append(read_figures(writer, seen, sheet, registry, options))
-        run_units = sheet.select("run_accession", *options.strata, checkpoint.LENGTH_GROUP)
+        run_units = sheet.select("run_accession", *grouping_columns(sheet, options),
+                                 checkpoint.LENGTH_GROUP)  # fmt: skip
         run_strips = strips(writer, stage, run_units, registry, options, "run_accession")
         if run_strips:
             groups.append(Group(text.word(PAGE, "groups.run_metrics"), tuple(run_strips),

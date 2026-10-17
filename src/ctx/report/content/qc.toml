@@ -61,6 +61,21 @@ band = "{title} {value} is in the bad band ({source})"
 category = "{title}: {value}"
 strand = "{title}: {call}, where {stratum} is mostly {usual}"
 
+# The judge panel on every strip (work-order item 5): k, strata and peers, judged again.
+[judge]
+label = "Judge again"
+k = "k, MADs from the median"
+strata = "Strata"
+peers = "Peers"
+no_strata = "none"
+noscript = "Judging again needs JavaScript; the bands and flags tables hold the run's own judgement."
+line = "At k {k} within {strata}: {flagged} of {n} {unit}s flagged here, {any} of {units} on any of these {m} metrics. The status table, key numbers and confounding tests keep k {k0} within {strata0}."
+missing = "{missing} {unit}s have no peer here and are not drawn."
+
+# A judgement with no strata: every unit one stratum, as a reason names it.
+[strata]
+none = "the whole cohort"
+
 # Why a band or a test is missing.
 [notes]
 small_stratum = "no band: {n} samples, fewer than the {minimum} a band needs"

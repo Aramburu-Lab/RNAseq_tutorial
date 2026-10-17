@@ -170,7 +170,12 @@ def flat_grid(grid: pl.DataFrame, run: str) -> str:
 
 
 def stratum_labels(strata: Sequence[str]) -> pl.Expr:
-    """Each row's stratum as the judge names it: its strata values joined by " / "."""
+    """Each row's stratum as the judge names it: its strata values joined by " / ".
+
+    With no strata every row is one stratum, named as ``checkpoint`` names it.
+    """
+    if not strata:
+        return pl.lit(text.word(PAGE, "strata.none")).alias("stratum")
     parts = [pl.col(c).cast(pl.String).fill_null("None") for c in strata]
     return pl.concat_str(parts, separator=" / ").alias("stratum")
 

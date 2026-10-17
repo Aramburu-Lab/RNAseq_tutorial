@@ -30,6 +30,13 @@ ACT = """(async () => {
   const fig = Array.from(document.querySelectorAll('figure.fig')).find(f =>
     ((f.querySelector('.fig-title') || {}).textContent || '').includes(want));
   if (!fig) return {missing: want};
+  /* A figure in a hidden tab: open its tab first, as a reader would. */
+  const panel = fig.closest('[role=tabpanel]');
+  if (panel && panel.hidden) {
+    const tab = document.querySelector('[role=tab][aria-controls="' + panel.id + '"]');
+    if (tab) tab.click();
+    await wait(500);
+  }
   fig.scrollIntoView();
   await wait(500);
   fig.setAttribute('data-probe', '1');

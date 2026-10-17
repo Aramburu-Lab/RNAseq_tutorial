@@ -1,0 +1,626 @@
+{
+ "0:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 7336,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "5 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 18,
+    "data": 7340,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "14 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 2 MAD.",
+    "line": "At k 2 within cell_type: 14 of 210 samples flagged here, 151 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18330,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 63678,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "0:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 7336,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "5 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 18,
+    "data": 7340,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "14 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 2 MAD.",
+    "line": "At k 2 within cell_type: 14 of 210 samples flagged here, 151 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18330,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 63678,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "0:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 7336,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "5 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 18,
+    "data": 7340,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "14 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 2 MAD.",
+    "line": "At k 2 within cell_type: 14 of 210 samples flagged here, 151 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18329,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 63676,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "0:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 7336,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "5 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 18,
+    "data": 7340,
+    "caption": "One point per sample or run, by stratum; the value is the column sum of the gene counts. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "14 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 2 MAD.",
+    "line": "At k 2 within cell_type: 14 of 210 samples flagged here, 151 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18329,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 63676,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_library_size_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 10301,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "53 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 42,
+    "data": 12858,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "38 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type and condition: 38 of 210 samples flagged here, 110 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18813,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 78909,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 10301,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "53 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 42,
+    "data": 12858,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "38 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type and condition: 38 of 210 samples flagged here, 110 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18813,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 78909,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 10301,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "53 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 42,
+    "data": 12858,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "38 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type and condition: 38 of 210 samples flagged here, 110 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18813,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 78907,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "1:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 18,
+    "data": 10301,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "53 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 42,
+    "data": 12858,
+    "caption": "One point per sample or run, by stratum; the value is the counts on HBA1, HBA2, HBB / library size. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. Shaded, display only: bands cited beside the figure; they judge nothing. No test.",
+    "lead": "38 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type and condition: 38 of 210 samples flagged here, 110 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 18813,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 78907,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_globin_fraction_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:1280:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 13,
+    "data": 8975,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "9 of 209 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 15,
+    "data": 9221,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "18 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type: 18 of 210 samples flagged here, 108 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type. 0 samples have no peer here and are not drawn.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 17923,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 58882,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:1280:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 13,
+    "data": 8975,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "9 of 209 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 15,
+    "data": 9221,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "18 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type: 18 of 210 samples flagged here, 108 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type. 0 samples have no peer here and are not drawn.",
+    "moved": true,
+    "pageWide": 1579,
+    "window": 1280,
+    "plotWide": 567,
+    "boxWide": 567,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 17923,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 58882,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:375:light": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 13,
+    "data": 8975,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "9 of 209 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   },
+   "after": {
+    "traces": 15,
+    "data": 9221,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "18 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type: 18 of 210 samples flagged here, 108 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type. 0 samples have no peer here and are not drawn.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "white",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#000000"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 17921,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 58880,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ },
+ "2:375:dark": {
+  "errors": [],
+  "acted": {
+   "start": {
+    "traces": 13,
+    "data": 8975,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "9 of 209 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "",
+    "moved": false,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   },
+   "after": {
+    "traces": 15,
+    "data": 9221,
+    "caption": "One point per sample or run, by stratum; the value is the median Spearman correlation with each other sample of the peer group, over the genes read in any sample of it. Grey bar: the stratum's median \u00b1 k scaled MAD; a triangle lies outside it on the bad side. No absolute band applies; the page says why beside the figure. No test.",
+    "lead": "18 of 210 flagged; a triangle is flagged, the grey bar is its stratum's median \u00b1 3 MAD.",
+    "line": "At k 3 within cell_type: 18 of 210 samples flagged here, 108 of 210 on any of these 20 metrics. The status table, key numbers and confounding tests keep k 3 within cell_type. 0 samples have no peer here and are not drawn.",
+    "moved": true,
+    "pageWide": 712,
+    "window": 712,
+    "plotWide": 317,
+    "boxWide": 317,
+    "theme": "black",
+    "paper": "rgba(0,0,0,0)",
+    "font": "#F2F2F2"
+   }
+  },
+  "files": {
+   "pdf": {
+    "bytes": 17921,
+    "pages": 1,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.pdf",
+    "pt": [
+     481.8897637795276,
+     265.0393700787402
+    ]
+   },
+   "svg": {
+    "bytes": 58880,
+    "images": 0,
+    "name": "2026-10-17_qc_tier1_strip_replicate_spearman_v1_view.svg",
+    "has_view_line": false
+   }
+  }
+ }
+}

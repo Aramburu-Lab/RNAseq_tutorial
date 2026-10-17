@@ -49,4 +49,103 @@
     if (form.elements.contrast.value !== "" || form.elements.colour.value !== "batch" ||
         form.elements.count.value !== "runs") update();
   }
+
+  /* M2's judge panel: every strip of one scope (samples, or runs) judged again by ctxJudge,
+     the twin of ctx.qc.checkpoint.judge, at one k, within one strata grouping and, for
+     agreement and distance, one peer grouping. Moving one panel moves them all, so the live
+     line can count the units any of them flags. */
+  /* Set at the first panel's wiring: this partial runs after the page wires its figures. */
+  var judges;
+  function judging(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    judges = judges || Object.create(null);
+    judges[cfg.scope] = judges[cfg.scope] || [];
+    var entry = { form: form, fig: fig, cfg: cfg, div: fig.querySelector(".js-plotly-plot"),
+                  line: fig.querySelector(".judge-summary"), lead: fig.querySelector(".fig-lead"),
+                  mark: exporting(fig, cfg), result: null };
+    entry.built = { lead: entry.lead ? entry.lead.textContent : "", data: entry.div.data.slice(),
+                    layout: { xaxis: JSON.parse(JSON.stringify(entry.div.layout.xaxis)) } };
+    /* A scope's strips share one units table, carried by its first (ctx.qc.blocks.strips). */
+    cfg.units = cfg.units || judges[cfg.scope][0].cfg.units;
+    judges[cfg.scope].push(entry);
+    form.addEventListener("change", function () {
+      var state = { k: form.elements.k.value, strata: form.elements.strata.value,
+                    peers: form.elements.peers ? form.elements.peers.value : null };
+      judges[cfg.scope].forEach(function (e) {
+        e.form.elements.k.value = state.k; e.form.elements.strata.value = state.strata;
+        if (state.peers !== null && e.form.elements.peers) e.form.elements.peers.value = state.peers;
+      });
+      judges[cfg.scope].forEach(rejudge);
+      judges[cfg.scope].forEach(redraw);
+    });
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+  }
+  function judgeState(e) {
+    var f = e.form.elements;
+    return { k: Number(f.k.value), strata: Number(f.strata.value), peers: f.peers ? Number(f.peers.value) : 0 };
+  }
+  function rejudge(e) {
+    var cfg = e.cfg, s = judgeState(e), cols = cfg.strata[s.strata][1], w = cfg.words;
+    var labels = ctxJudge.labels(cfg.units, cfg.scope, cfg.metric.within ? ["read_length_group"] : cols,
+                                 w.none);
+    var values = cfg.peered ? cfg.peered[s.peers] : cfg.values;
+    e.labels = labels; e.values = values;
+    e.result = ctxJudge.judge(values, labels, cfg.metric, s.k, cfg, cfg.absolute, cfg.calls, w);
+  }
+  function redraw(e) {
+    var cfg = e.cfg, d = cfg.draw, s = judgeState(e), w = cfg.words;
+    var moved = s.k !== cfg.k || s.strata !== 0 || s.peers !== 0;
+    var shown = [];
+    e.values.forEach(function (v, i) { if (v !== null) shown.push(i); });
+    var slots = [], at = Object.create(null), seen = Object.create(null);
+    shown.forEach(function (i) { if (!(e.labels[i] in at)) { at[e.labels[i]] = slots.length; slots.push(e.labels[i]); } });
+    var x = shown.map(function (i) {
+      var level = e.labels[i], k = seen[level] = (seen[level] === undefined ? -1 : seen[level]) + 1;
+      return at[level] + ((k * d.spread) % 1 - 0.5) * 2 * d.jitter;
+    });
+    var n = slots.length, base = e.built.data, lo = -0.5, hi = n - 0.5;
+    var fixed = base.slice(0, d.fixed).map(function (t) {
+      var copy = Object.assign({}, t), xs = Array.from(t.x), min = Math.min.apply(null, xs);
+      copy.x = xs.map(function (v) { return v === min ? lo : hi; });
+      return copy;
+    });
+    var ranges = [];
+    e.result.bands.filter(function (b) { return b.median !== null && b.stratum in at; })
+      .forEach(function (b, k) {
+        var i = at[b.stratum];
+        ranges.push({ type: "scatter", x: [i - d.half, i + d.half, i + d.half, i - d.half, i - d.half],
+          y: [b.low, b.low, b.high, b.high, b.low], fill: "toself", mode: "lines", name: d.range.name,
+          legendgroup: "range", showlegend: k === 0, fillcolor: d.range.fill, line: { width: 0 }, hoverinfo: "skip" });
+        ranges.push({ type: "scatter", x: [i - d.half, i + d.half], y: [b.median, b.median], mode: "lines",
+          legendgroup: "range", showlegend: false, hoverinfo: "skip",
+          line: { color: d.range.colour, width: d.range.width } });
+      });
+    var points = Object.assign({}, base[d.points]), reasons = e.result.reasons;
+    points.x = x; points.y = shown.map(function (i) { return e.values[i]; });
+    points.customdata = shown.map(function (i) { return [e.labels[i], cfg.units[cfg.scope][i], reasons[i] || ""]; });
+    points.marker = Object.assign({}, points.marker, {
+      symbol: shown.map(function (i) { return d.symbols[reasons[i] !== undefined ? 1 : 0]; }) });
+    var layout = Object.assign({}, e.div.layout, { xaxis: Object.assign({}, e.div.layout.xaxis,
+      { tickvals: slots.map(function (_, i) { return i; }), ticktext: slots, range: [lo, hi] }) });
+    /* Back at the run's own judgement the strip is the one built, which its files draw. */
+    if (moved) Plotly.react(e.div, fixed.concat(ranges, [points]), layout);
+    else Plotly.react(e.div, base, Object.assign({}, e.div.layout, { xaxis: e.built.layout.xaxis }));
+    var flagged = shown.filter(function (i) { return reasons[i] !== undefined; }).length;
+    var kText = ctxJudge.general(s.k, 6);
+    if (e.lead) e.lead.textContent = moved ? ctxRecount.fill(w.lead, { flagged: flagged, n: shown.length, k: kText })
+      : e.built.lead;
+    var any = Object.create(null), units = cfg.units[cfg.scope].length;
+    judges[cfg.scope].forEach(function (o) {
+      Object.keys(o.result.reasons).forEach(function (i) { any[o.cfg.units[o.cfg.scope][i]] = 1; });
+    });
+    var line = moved ? ctxRecount.fill(w.line, { k: kText, strata: cfg.strata[s.strata][0], flagged: flagged,
+      n: shown.length, unit: w.unit, any: Object.keys(any).length, units: units, m: judges[cfg.scope].length,
+      k0: ctxJudge.general(cfg.k, 6), strata0: cfg.strata[0][0] }) : "";
+    if (moved && cfg.peered) {
+      line += " " + ctxRecount.fill(w.missing, { missing: units - shown.length, unit: w.unit });
+    }
+    e.line.textContent = line;
+    e.mark(moved);
+  }
 {% endraw %}

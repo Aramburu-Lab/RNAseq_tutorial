@@ -37,7 +37,8 @@ def test_the_page_script_defines_each_of_its_functions_once():
     assert {n: k for n, k in names.items() if k > 1} == {}
     expected = {"guard", "plots", "template", "retheme", "wire", "at", "fitting", "exporting",
                 "ctxRows", "brushing", "pairing", "picking", "oraLive", "viewing", "filtering",
-                "liveCalls", "subsetting", "listing", "recounting"}  # fmt: skip
+                "liveCalls", "subsetting", "listing", "recounting", "judging", "judgeState",
+                "rejudge", "redraw"}  # fmt: skip
     assert set(names) == expected
     partials = sorted(p.name for p in TEMPLATES.glob("_page_*.js.j2"))
     page = (TEMPLATES / "_page.js.j2").read_text()

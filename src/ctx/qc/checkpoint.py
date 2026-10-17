@@ -204,12 +204,15 @@ class Measured:
         sexes: The sex check's own table, or None where it could not run.
         scores: PC1 and PC2 of the blind VST per sample.
         share: The variance share of PC1 and PC2.
+        by_peers: Agreement and distance per peer grouping of ``groupings``, the run's first:
+            ``sample``, ``replicate_spearman`` and ``pca_distance`` each (work-order item 5).
     """
 
     values: pl.DataFrame
     sexes: pl.DataFrame | None
     scores: pl.DataFrame
     share: tuple[float, float]
+    by_peers: tuple[pl.DataFrame, ...] = ()
 
 
 def sample_metrics(
@@ -217,7 +220,7 @@ def sample_metrics(
     sheet: pl.DataFrame,
     genes: pl.DataFrame,
     types: pl.DataFrame | None,
-    peers: Sequence[str],
+    peers: Sequence[Sequence[str]],
     threads: int,
 ) -> Measured:
     """Every count-stage metric, one row per sample, with the sex check and the PCA.
@@ -228,19 +231,24 @@ def sample_metrics(
         genes: Gather's ``gene_id`` and ``gene_name``, which the sex check reads.
         types: ``gene_types`` of the annotation the counts were made with; None leaves the
             composition shares out.
-        peers: Sheet columns whose shared values make a peer group.
+        peers: Peer groupings, the run's first: sheet columns whose shared values make a
+            peer group. The values hold the first's agreement and distance; ``by_peers`` each.
         threads: CPUs for the VST.
 
     Returns:
-        The metrics, the sex check's table, and the PCA scores.
+        The metrics, the sex check's table, the PCA scores, and each peer grouping's values.
     """
     samples = sheet.unique("sample", keep="first", maintain_order=True)
     sexes, _ = sex_check(sheet, counts, genes)
     found = pca(counts, samples["sample"].to_list(), threads=threads)
     frame = count_metrics(counts, types)
-    for part in (replicate_spearman(counts, samples, peers),
-                 pca_distance(found.scores, samples, peers)):  # fmt: skip
-        frame = frame.join(part, on="sample", how="left", maintain_order="left")
+    by_peers = tuple(
+        replicate_spearman(counts, samples, grouping).join(
+            pca_distance(found.scores, samples, grouping), on="sample", how="left",
+            maintain_order="left")
+        for grouping in dict.fromkeys(tuple(g) for g in peers)
+    )  # fmt: skip
+    frame = frame.join(by_peers[0], on="sample", how="left", maintain_order="left")
     agrees = pl.Series("sex_agrees", [None] * frame.height, pl.String)
     if sexes is not None:
         label = (
@@ -255,7 +263,31 @@ def sample_metrics(
         )
     else:
         frame = frame.with_columns(agrees)
-    return Measured(frame, sexes, found.scores, found.share)
+    return Measured(frame, sexes, found.scores, found.share, by_peers)
+
+
+Groupings = list[tuple[str, ...]]
+
+
+def groupings(strata: Sequence[str], peers: Sequence[str],
+              columns: Sequence[str]) -> tuple[Groupings, Groupings]:  # fmt: skip
+    """The strata and the peer groupings the page's judge panel offers, the run's own first.
+
+    Strata: the run's, none, the peers', batch, the run's with batch. Peers: the run's, its
+    first column alone, that column with batch (figure controls plan, work-order item 5).
+    A grouping naming a column the sheet lacks is left out.
+    """
+    batch = ("batch",)
+    strata_options = [tuple(strata), (), tuple(peers), batch, (*strata, *batch)]
+    peer_options = [tuple(peers), tuple(peers[:1]), (*peers[:1], *batch)]
+    held = set(columns)
+
+    def kept(options: Groupings) -> Groupings:
+        """The options whose columns the sheet holds, each once, in order."""
+        return [o for o in dict.fromkeys(tuple(dict.fromkeys(o)) for o in options)
+                if set(o) <= held]  # fmt: skip
+
+    return kept(strata_options), [o for o in kept(peer_options) if o]
 
 
 def _show(value: float, digits: int = 3) -> str:
@@ -298,7 +330,12 @@ def mad_band(values: np.ndarray, metric: Metric, k: float, scaled: bool) -> tupl
 
 
 def _stratum_label(row: Mapping[str, object], strata: Sequence[str]) -> str:
-    """A stratum as a reason names it: its values joined, e.g. "PB / NDN"."""
+    """A stratum as a reason names it: its values joined, e.g. "PB / NDN", or the cohort's words.
+
+    With no strata every unit is one stratum, named in words.
+    """
+    if not strata:
+        return text.word(PAGE, "strata.none")
     return " / ".join(str(row[c]) for c in strata)
 
 
@@ -438,7 +475,9 @@ def _judge_within(
         samples.select("sample", *strata), on="sample", how="left", maintain_order="left"
     )
     bands, flags = [], []
-    for key, stratum in frame.group_by(list(strata), maintain_order=True):
+    # No strata is one stratum of every unit: group_by over no column yields no group at all.
+    groups = frame.group_by(list(strata), maintain_order=True) if strata else [((), frame)]
+    for key, stratum in groups:
         label = _stratum_label(dict(zip(strata, key, strict=True)), strata)
         for metric in metrics:
             found = (
