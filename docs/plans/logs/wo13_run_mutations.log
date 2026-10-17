@@ -1,0 +1,14 @@
+caught: run plans only the first --gdc-dir
+caught: ctx run keeps the last --gdc-dir alone
+caught: a doubled project passes
+caught: a project with no folder unnamed
+caught: the check stops at the first folder problem
+caught: --gdc-dir on a file with no [gdc] passes
+caught: miRNA folders for two projects pass
+caught: the oldest commit holding a version kept
+caught: merges skipped (no -m)
+caught: the kit commit's copy not compared
+caught: the command still names conf/datasets/<file>
+caught: git show after the gather command
+caught: the commit left out of LEFT_OUT.json
+13 of 13 caught
