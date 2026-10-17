@@ -114,3 +114,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - "The largest page" is measured, not assumed: TCGA-BRCA was named the largest M5 page while CPTAC ccRCC stood at 14,984,671 B, 15 kB under the cap (P, 2026-10-15).
 - A push chained after a preflight must test its exit code: 4b99c9b went out with one failing test because the push followed a grep of the log, not the preflight's status (2026-10-16).
 - A kit picks a dataset's newest run per folder, not each file name's newest copy: per name, an older M9 run's genes that the newer run did not draw shipped as 114 stale files (kit v9, 2026-10-16).
+- A research brief forbids sending Rytis's address anywhere: an agent passed it as Unpaywall's `email` parameter while looking for an open copy of a paper (S.2, 2026-10-17). Name it in every brief that searches the web.
+- A source cited for a rule is read in full before the rule ships: three of three lung citations, checked by title and DOI only, supported no LUSC-against-LUAD RNA comparison (S.2, 2026-10-17).

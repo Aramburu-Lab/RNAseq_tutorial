@@ -503,7 +503,7 @@ E merged 2026-10-15 (wo13-e, D-071 to D-074): C3.1 M9 packs cards (TCGA-BRCA 50 
 
 S merged 2026-10-15 (wo13-s, D-076 to D-078): H.1 ccRCC M7 on 103 tumours and 73 pairs, C1 to C6 PASS, C0 0.657; D1.1's lung contrast in `tcga_lung.toml`, LUSC over LUAD, five marker rules PASS. 19 planted mutations caught; suite 1,639 passed, 10 skipped.
 - [ ] S.1 `ctx qc` reads every file of a GDC sheet, not `gdc.chosen`: 517 LUAD tumours against M5's 515. Route it through the door.
-- [ ] S.2 Read the full texts behind the lung marker rules (10.1097/JTO.0000000000000630, 10.1038/nature11404, 10.1038/nature13385); the rules say "to confirm".
+- [x] S.2 Lung marker sources read in full 2026-10-17: Travis 2015, TCGA 2012 and TCGA 2014 support no LUSC-against-LUAD RNA comparison (TCGA's statements sit within one histology; Travis's full text was not readable); Girard et al. 2016 Clin Cancer Res, doi:10.1158/1078-0432.CCR-15-2900, supports all five directions on mRNA (Illumina WG-6 V3 microarrays, 80 squamous against 183 adenocarcinoma). Sources corrected in tcga_lung.toml, conditions unchanged, the correction dated after registration and after the results. Supplementary Table 1 (the 42-gene values) not opened: PMC served a bot check.
 - [ ] S.3 `ctx run` takes one `--gdc-dir`; a two-project dataset cannot run through it.
 - [ ] S.4 ccRCC M7 page: Interpretation, Questions and Pitfalls written for ccRCC; a correlation-by-class figure for normals; 1 px overflow at 375 px (BRCA's M7 page overflows to 541 px); two "Download checks" tables with one title on the lung gather page.
 - [ ] S.5 Lung `de` peaks at 5.36 GB and `qc` at 4.44 GB, over Track B's 4 GB.

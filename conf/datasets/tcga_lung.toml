@@ -59,34 +59,39 @@ factors = ["project"]
 # expectation. Thresholds are M5's ALPHA 0.05 and LFC_MIN 1 (ctx.de.stats), not tuned. Sources
 # were checked by PubMed metadata (title, DOI) on 2026-10-15; the marker statements inside
 # their full texts were not read here and are flagged for confirmation.
+# Sources corrected 2026-10-17, after registration and after the 2026-10-15 results, with the
+# conditions unchanged: read in full, Travis 2015, TCGA 2012 and TCGA 2014 support no LUSC-against-
+# LUAD RNA comparison (TCGA's statements are within one histology; Travis was not readable). Girard
+# 2016 supports all five directions on mRNA, microarrays not RNA-seq; its TCGA arm validates the
+# classifier on these data, its per-gene evidence comes from a separate cohort.
 registered_on = "2026-10-15 15:21"
 
 [[sanity.rules]]
 id = "LUNG.tp63"
 text = "TP63 is higher in lung squamous tumours than in adenocarcinomas."
-source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630, the WHO classification that asks immunohistochemistry to prove squamous differentiation (p40, a TP63 isoform; marker statement to confirm in its full text); TCGA 2012 Nature, doi:10.1038/nature11404"
+source = "Girard et al. 2016 Clin Cancer Res, doi:10.1158/1078-0432.CCR-15-2900, Fig. 1A and B and Discussion: TP63 among the top mRNAs higher in squamous carcinoma than adenocarcinoma, 80 against 183 resected tumours on Illumina WG-6 V3 microarrays, not RNA-seq; read in full 2026-10-17. TCGA 2012 Nature, doi:10.1038/nature11404, reports TP63 overexpression within squamous tumours only, with no adenocarcinoma comparison"
 conditions = [{ metric = "gene.lusc_luad.TP63.lfc", op = ">=", value = 1.0 }, { metric = "gene.lusc_luad.TP63.padj", op = "<", value = 0.05 }]
 
 [[sanity.rules]]
 id = "LUNG.krt5"
 text = "KRT5 is higher in lung squamous tumours than in adenocarcinomas."
-source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630: CK5/6, KRT5's antibody, a squamous immunohistochemistry marker (to confirm in its full text)"
+source = "Girard et al. 2016 Clin Cancer Res, doi:10.1158/1078-0432.CCR-15-2900, Fig. 1A and B: KRT5 among the top mRNAs higher in squamous carcinoma than adenocarcinoma, 80 against 183 resected tumours on Illumina WG-6 V3 microarrays, not RNA-seq; named in the figure only; read in full 2026-10-17"
 conditions = [{ metric = "gene.lusc_luad.KRT5.lfc", op = ">=", value = 1.0 }, { metric = "gene.lusc_luad.KRT5.padj", op = "<", value = 0.05 }]
 
 [[sanity.rules]]
 id = "LUNG.sox2"
 text = "SOX2 is higher in lung squamous tumours than in adenocarcinomas."
-source = "TCGA 2012 Nature, doi:10.1038/nature11404: squamous differentiation genes altered in 44 % of lung squamous tumours, SOX2 at the 3q26 amplicon (to confirm in its full text)"
+source = "Girard et al. 2016 Clin Cancer Res, doi:10.1158/1078-0432.CCR-15-2900, Discussion and Fig. 1A: SOX2 significantly overexpressed in squamous carcinoma against adenocarcinoma, rank 46, outside the 42-gene classifier, Illumina WG-6 V3 microarrays, not RNA-seq; read in full 2026-10-17. TCGA 2012 Nature, doi:10.1038/nature11404, reports SOX2 amplification and overexpression within squamous tumours only"
 conditions = [{ metric = "gene.lusc_luad.SOX2.lfc", op = ">=", value = 1.0 }, { metric = "gene.lusc_luad.SOX2.padj", op = "<", value = 0.05 }]
 
 [[sanity.rules]]
 id = "LUNG.nkx2_1"
 text = "NKX2-1 is higher in lung adenocarcinomas than in squamous tumours."
-source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630: TTF-1, NKX2-1's protein, an adenocarcinoma immunohistochemistry marker (to confirm in its full text); TCGA 2014 Nature, doi:10.1038/nature13385"
+source = "Girard et al. 2016 Clin Cancer Res, doi:10.1158/1078-0432.CCR-15-2900, Results and Fig. 1A and B: NKX2-1 among the top mRNAs higher in adenocarcinoma than squamous carcinoma, 183 against 80 resected tumours on Illumina WG-6 V3 microarrays, not RNA-seq; read in full 2026-10-17. TCGA 2014 Nature, doi:10.1038/nature13385, reports NKX2-1 amplification within adenocarcinomas only"
 conditions = [{ metric = "gene.lusc_luad.NKX2-1.lfc", op = "<=", value = -1.0 }, { metric = "gene.lusc_luad.NKX2-1.padj", op = "<", value = 0.05 }]
 
 [[sanity.rules]]
 id = "LUNG.napsa"
 text = "NAPSA is higher in lung adenocarcinomas than in squamous tumours."
-source = "Travis et al. 2015 J Thorac Oncol, doi:10.1097/JTO.0000000000000630: napsin A an adenocarcinoma immunohistochemistry marker (to confirm in its full text)"
+source = "Girard et al. 2016 Clin Cancer Res, doi:10.1158/1078-0432.CCR-15-2900, Discussion and Fig. 1A: NAPSA higher in adenocarcinoma than squamous carcinoma, rank 177, outside the 42-gene classifier, Illumina WG-6 V3 microarrays, not RNA-seq; read in full 2026-10-17"
 conditions = [{ metric = "gene.lusc_luad.NAPSA.lfc", op = "<=", value = -1.0 }, { metric = "gene.lusc_luad.NAPSA.padj", op = "<", value = 0.05 }]
