@@ -1,0 +1,10 @@
+to_numpy                 before      642 MB  peak      665 MB
+matrix dtype int32 (60616, 1128)
+pandas frame             before      923 MB  peak     1448 MB
+DeseqDataSet             before     1190 MB  peak     1517 MB
+X dtype int64 (1128, 58063)
+vst                      before     1785 MB  peak     4780 MB
+layer None: int64 524 MB
+layer normed_counts: float64 524 MB
+layer _vst_mu_hat: float64 524 MB
+layer vst_counts: float64 524 MB
