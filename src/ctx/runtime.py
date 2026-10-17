@@ -176,18 +176,42 @@ def measure(started: float) -> Usage:
 
 
 def _own_peak(status: Path = Path("/proc/self/status")) -> int | None:
-    """This program's peak RSS in bytes from Linux's VmHWM, or None where there is no such file.
+    """This program's peak memory in bytes: Linux's VmHWM, macOS's lifetime peak footprint.
 
     Linux carries ru_maxrss across execve, so getrusage reported the 1.1 GB of the pytest
     process that started it (run 37807649888); VmHWM belongs to the address space
-    exec created, so it counts this program alone (proc(5)).
+    exec created, so it counts this program alone (proc(5)). On macOS ru_maxrss keeps
+    pages malloc freed but did not return: TCGA lung's M5 read 3.89 to 4.30 GB there at a
+    3.20 to 3.29 GB footprint (Rytis 2026-10-17, S.7), the number ``/usr/bin/time -l`` prints.
+    None where neither exists.
     """
+    if sys.platform == "darwin":
+        return _darwin_footprint()
     try:
         lines = status.read_text().splitlines()
     except OSError:
         return None
     kib = next((line.split()[1] for line in lines if line.startswith("VmHWM:")), None)
     return int(kib) * 1024 if kib else None
+
+
+# rusage_info_v4 (sys/resource.h): a 16-byte UUID, then uint64 fields, of which
+# ri_lifetime_max_phys_footprint is the 29th.
+_RUSAGE_INFO_V4, _FOOTPRINT_SLOT, _SLOTS = 4, 2 + 28, 40
+
+
+def _darwin_footprint() -> int | None:
+    """This process's lifetime peak physical footprint from proc_pid_rusage, or None on failure."""
+    import ctypes  # noqa: PLC0415 - macOS only
+
+    try:
+        libproc = ctypes.CDLL("/usr/lib/libproc.dylib")
+    except OSError:
+        return None
+    info = (ctypes.c_uint64 * _SLOTS)()
+    if libproc.proc_pid_rusage(os.getpid(), _RUSAGE_INFO_V4, info) != 0:
+        return None
+    return int(info[_FOOTPRINT_SLOT])
 
 
 def shown_path(path: str | Path) -> str:

@@ -20,8 +20,8 @@ term = "Profile"
 meaning = "`laptop` or `hpc`; it sets the threads and memory a run may use, never its results."
 
 [[terms]]
-term = "Peak RSS"
-meaning = "Peak resident set size: the most physical memory a process held at once."
+term = "Peak memory"
+meaning = "The most physical memory this process held at once: Linux's peak resident set size, macOS's peak footprint."
 
 [[terms]]
 term = "Child process"

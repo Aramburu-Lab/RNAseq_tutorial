@@ -53,6 +53,15 @@ def repo_state(checkout: Path) -> str | None:
     return done.stdout if done.returncode == 0 else None
 
 
+# Optional: a run without xdist (-p no:xdist) has no such hook to validate it against.
+@pytest.hookimpl(optionalhook=True)
+def pytest_xdist_auto_num_workers(config: pytest.Config) -> int:
+    """Leave two cores free under `-n auto`: with every core busy, Defender's scan of the
+    browser tests' profile files made a Chromium launch take 44 s against 0.7 s (K.13; Rytis
+    2026-10-17, K.15)."""
+    return max(1, (os.cpu_count() or 1) - 2)
+
+
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
     # The template's `test` task maps pytest exit 5 (nothing collected) to success, so a
     # wrong path or an over-eager -k would pass CI silently. That one code fails here instead.

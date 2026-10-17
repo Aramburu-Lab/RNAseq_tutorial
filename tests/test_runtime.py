@@ -221,3 +221,23 @@ def test_launcher_names_the_pixi_environment():
 
     assert launcher("/home/a/repo/.pixi/envs/laptop") == ["pixi", "run", "-e", "laptop", "ctx"]
     assert launcher("/opt/venv") == ["ctx"]
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="the peak footprint is macOS's measure")
+def test_macos_reports_the_peak_footprint_time_prints():
+    """On macOS a page's peak memory is the lifetime peak footprint, the number
+    `/usr/bin/time -l` prints, not ru_maxrss, which keeps freed pages (S.7, Rytis 2026-10-17).
+    The child touches 300 MB, frees it, and prints what ctx measured."""
+    script = (
+        "from time import perf_counter; from ctx import runtime; t = perf_counter()\n"
+        "x = bytearray(300_000_000)\n"
+        "for i in range(0, len(x), 4096): x[i] = 1\n"
+        "del x; print(runtime.measure(t).peak_rss_self)"
+    )
+    done = subprocess.run(["/usr/bin/time", "-l", sys.executable, "-c", script],
+                          capture_output=True, text=True, check=True)  # fmt: skip
+    measured = int(done.stdout.strip())
+    printed = int(re.search(r"(\d+)\s+peak memory footprint", done.stderr).group(1))
+    assert measured >= 300_000_000
+    # time reads the footprint after the child exits, a little later than measure did.
+    assert abs(printed - measured) <= 2_000_000, (measured, printed)

@@ -71,7 +71,7 @@ it were reversed.
 
 ## D-080 — A gene taken from M10's Cox screen carries the side of its adjusted hazard ratio
 
-**Date:** 2026-10-15 · **Status:** decided
+**Date:** 2026-10-15 · **Status:** decided, confirmed by Rytis 2026-10-17
 
 **Context.** E.3: the button that scores the screen's strongest genes signed every gene +1.
 
@@ -155,7 +155,7 @@ it were reversed.
 
 ## D-074 — PAM50's fifth level takes the lighter spent grey
 
-**Date:** 2026-10-15 · **Status:** decided
+**Date:** 2026-10-15 · **Status:** decided, confirmed by Rytis 2026-10-17
 
 **Context.** Track colours may not use the heat's two role colours (C3.4); Normal-like took the reference blue.
 
