@@ -18,6 +18,7 @@ import polars as pl
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
+from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
 from ctx.qc import Fastp, QcError, checkpoint, fastqc, fates, multiqc_io, reads
 from ctx.qc import registry as reg
@@ -124,6 +125,24 @@ def gathered_tables(root: Path, dataset: str) -> dict[str, Path]:
         except DatasetError:
             continue
     return inputs
+
+
+def read_gathered(inputs: Mapping[str, Path]) -> dict[str, pl.DataFrame]:
+    """Gather's tables, the sheet through the GDC door and the counts cut to its samples.
+
+    A GDC sheet lists every file; ``gdc.chosen``, the door M5 reads it through, keeps one per
+    case and sample type, so both modules count the same samples (TODO S.1: 517 LUAD tumours
+    here against M5's 515). The counts are read for the kept samples' columns alone.
+    """
+    sheet = pl.read_parquet(inputs["samplesheet"])
+    sheet = gdc.chosen(sheet) if "chosen" in sheet.columns else sheet
+    samples = sheet.unique("sample", keep="first", maintain_order=True)["sample"].to_list()
+    gathered = {"samplesheet": sheet}
+    if "counts" in inputs:
+        gathered["counts"] = pl.read_parquet(inputs["counts"], columns=["gene_id", *samples])
+    if "genes" in inputs:
+        gathered["genes"] = pl.read_parquet(inputs["genes"])
+    return gathered
 
 
 def align_tables(root: Path, dataset: str) -> dict[str, Path]:
@@ -383,7 +402,7 @@ def run(
         raise DatasetError(f"{options.dataset_file}: slug {spec.slug!r}, not {dataset!r}")
     registry = load_registry(options)
     inputs = gathered_tables(settings.root, dataset)
-    gathered = {w: pl.read_parquet(p) for w, p in inputs.items()}
+    gathered = read_gathered(inputs)
     sheet = checkpoint.length_groups(gathered["samplesheet"], bool(spec.batch_bins))
     if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
         raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
