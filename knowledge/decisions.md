@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-083 — M5's pydeseq2 boundary holds one copy of the counts and returns only what it reads; M5 writes its size factors
+
+**Date:** 2026-10-17 · **Status:** decided
+
+**Context.** S.5: TCGA de runs peaked at 5.27 to 5.36 GB against Track B's 4 GB; E.1b: M9's box needs M5's normalisation without a second definition.
+
+**Decision.** `samples_by_genes` builds the one int64 copy pydeseq2 keeps. `lean_inference`, a DefaultInference subclass, returns one inverse-Hessian entry per gene from shrinkage and runs the initial dispersions in blocks of 4,096 genes; the VST's fitted means are dropped before the transform. M5 writes each contrast's size factors, and `ctx.de.normalised.log2_normalised` is the one normalised value every reader calls. The subclass rests on pydeseq2 0.5.4's private `_backend`, `_batch_size` and `_joblib_verbosity`; a pydeseq2 bump reruns `test_the_lean_inference_gives_pydeseq2s_numbers`.
+
+**Evidence.** Counts were held three times (953 MB against 471 MB at 1,016 by 58,038); breast's shrinkage collected every gene's 114 by 114 inverse Hessian twice (4,929,470,107 B traced); lung's initial dispersions held 2,358,713,336 B above entry. Every output equal to the bit on Step-1, TCGA lung and TCGA breast; Step-1 92 of 92 metrics; 11 planted mutations caught.
+
+**Consequence.** Writing the tested genes' normalised values was rejected on size (74,441,762 B on TCGA lung).
+
+---
+
 ## D-082 — M9 carries every tested gene's M5 evidence; live-calls typing waits for a pause
 
 **Date:** 2026-10-17 · **Status:** decided

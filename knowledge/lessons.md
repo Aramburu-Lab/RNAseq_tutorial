@@ -123,3 +123,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A test that slows 20 times under load can be the machine, not the code: time a CPU loop against file operations first; under Defender, writing 500 small files went from 4.2 to 133 s while the CPU loop did not change (W, 2026-10-17).
 - A driver killed alone leaves its browser running: start it in a session of its own and kill the whole session (W, 2026-10-17).
 - `Path.resolve()` follows a scratch root's link into the real root, whose links then open the real pages: use `absolute()` (W, 2026-10-17).
+- On macOS ru_maxrss counts freed pages malloc keeps resident: lung de read 4.2 GB RSS at a 3.2 GB footprint. Read /usr/bin/time -l's peak memory footprint beside RSS and repeat the run (DE, 2026-10-17).
+- A profiler that lists child processes every 20 ms stalled a fit sevenfold on macOS: list them every few seconds and read only their RSS between (DE, 2026-10-17).
