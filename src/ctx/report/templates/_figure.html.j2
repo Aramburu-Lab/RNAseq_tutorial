@@ -70,8 +70,10 @@
 {% endif %}
 {% if f.kind == "view" %}
 {# A select between figures Python drew (D-051 view kind); the first is the figure as built. #}
-<form class="calls view" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.label }}">
+<form class="calls view" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.label }}"{% if f.defaults.axes %} data-grid{% endif %}>
+{% if f.defaults.axes %}{% include "_view_grid.html.j2" %}{% else %}
 <label>{{ f.defaults.label }}<select name="view">{% for label in f.defaults.options %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+{% endif %}
 </form>
 <noscript><p class="note">{{ ui.view.noscript }}</p></noscript>
 <p class="calls-summary view-summary" aria-live="polite"></p>

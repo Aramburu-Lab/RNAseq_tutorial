@@ -3,6 +3,7 @@
 {% include "_brush.js.j2" %}
 {% include "_filter.js.j2" %}
 {% include "_pairs.js.j2" %}
+{% include "_grid.js.j2" %}
 {% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% if live %}{% include "_select.js.j2" %}
@@ -200,6 +201,10 @@
   /* A view select (D-051): another figure Python drew, swapped in with its words. */
   scope.querySelectorAll("form.view").forEach(function (form) {
     guard("view", function () { viewing(form); });
+  });
+  /* A view's grid: a select per setting names the option the view draws (ctxGrid). */
+  scope.querySelectorAll("form.view[data-grid]").forEach(function (form) {
+    guard("grid", function () { ctxGrid.wire(form); });
   });
 
   /* M6's live over-representation (GS.5). */

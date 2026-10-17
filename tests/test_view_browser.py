@@ -21,7 +21,8 @@ ACT = """(async () => {
       caption: words('figcaption'),
       title: words('.fig-title'), line: words('.view-summary'),
       moved: !!fig.querySelector('a[data-export][role=button]'),
-      options: form.elements.view.options.length});
+      options: JSON.parse(document.getElementById(form.getAttribute('data-controls'))
+        .textContent).options.length});
     const out = {start: read()};
     form.elements.view.value = '1'; form.dispatchEvent(new Event('change'));
     await wait(300); out.other = read();

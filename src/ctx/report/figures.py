@@ -251,7 +251,8 @@ def prepare(
 # option names (D-051), M6's live ORA's words and backgrounds (GS.5), M9's checkbox sets and
 # its list from a link (E.1a).
 _SHAPED = {
-    "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"]},
+    "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"],
+                       "axes": c.get("axes", [])},  # fmt: skip
     "ora": lambda c: {"words": c["words"], "backgrounds": c["backgrounds"],
                       "featured": c["featured"]},
     "subset": lambda c: {"words": c["words"], "options": c["options"],

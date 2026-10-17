@@ -1,0 +1,4 @@
+{# A view's grid (ctx.report.lookups): one select per setting, each at the build's choice; the
+   hidden field is the view's own select, set by ctxGrid before the view redraws. #}
+<input type="hidden" name="view" value="0">
+{% for axis in f.defaults.axes %}<label>{{ axis.label }}<select data-axis="{{ loop.index0 }}">{% for choice in axis.choices %}<option value="{{ loop.index0 }}"{% if loop.index0 == axis.start %} selected{% endif %}>{{ choice }}</option>{% endfor %}</select></label>{% endfor %}

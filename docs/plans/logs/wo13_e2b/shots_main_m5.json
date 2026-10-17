@@ -1,0 +1,6 @@
+{"chromium": "/opt/homebrew/bin/chromium", "shots": [
+ {"url": "file:///Users/rytis/ctx_tier1/outputs/05_de/2026-10-16_de_tier1_overview_v1.html", "width": 375, "scheme": "dark",
+  "act": "null", "selector": "#figure-8", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/main_calls_375_dark.png"},
+ {"url": "file:///Users/rytis/ctx_tier1/outputs/05_de/2026-10-16_de_tier1_overview_v1.html", "width": 375, "scheme": "light",
+  "act": "null", "selector": "#figure-12", "out": "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/shots/main_box_375_light.png"}
+]}

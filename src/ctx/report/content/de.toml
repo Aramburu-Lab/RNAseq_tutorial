@@ -220,15 +220,37 @@ thinned = "genes"
 [figures.calls]
 title = "Genes called: {lesson} lesson"
 lead = "{label} calls the most genes: {n:,}."
+lead_none = "No contrast calls a gene at this setting."
 reading = [
     "Each bar is one contrast; its length counts the genes called up and down (padj below {alpha}, log2 FC at or beyond ±{lfc_min}).",
     "Compare contrasts only at equal n: a smaller contrast calls fewer genes even when nothing else differs.",
     "The caption gives each contrast's n and design; the difference between designs on the same samples is the lesson.",
 ]
-caption = "{lesson}: genes called per contrast (BH-adjusted p below {alpha}, log2 FC at or beyond ±{lfc_min}). {sizes}."
+caption = "{lesson}: genes called per contrast ({rule}). {sizes}."
+rule = "{basis} below {alpha}, log2 FC at or beyond ±{lfc_min}"
 size = "{label}: n = {sizes}, {design}"
 x = "Contrast"
 y = "Genes called"
+# The lesson grid (WO6, D-051): the volcano's rule at every setting, looked up.
+view = "Calls by"
+axis_basis = "Significance"
+axis_alpha = "Below"
+axis_fold = "log2 FC at least"
+option = "{short} below {alpha}, log2 FC at least {lfc_min}"
+
+[figures.calls.bases]
+padj = "BH-adjusted p"
+padj_by = "BY-adjusted p"
+padj_holm = "Holm-adjusted p"
+padj_bonferroni = "Bonferroni-adjusted p"
+pvalue = "raw p"
+
+[figures.calls.short]
+padj = "BH"
+padj_by = "BY"
+padj_holm = "Holm"
+padj_bonferroni = "Bonferroni"
+pvalue = "raw p"
 
 [figures.lfc]
 title = "{x} against {y}"
@@ -246,6 +268,19 @@ called = "called in either"
 neither = "neither"
 line = "x = y"
 thinned = "genes called in neither contrast"
+# Colour by agreement of the calls (WO6, D-051), a view.
+view = "Colour by"
+view_called = "Called in either"
+view_agreement = "Agreement of the calls"
+agree_same = "same way in both"
+agree_x_only = "x-axis contrast only"
+agree_y_only = "y-axis contrast only"
+agree_opposite = "opposite ways"
+agree_neither = "neither"
+agree_entry = "{level} ({n:,})"
+agree_lead = "Of {called_x:,} genes called in {x}, {same:,} are called the same way in {y}; {y_only:,} are called in {y} only."
+rho_called = "Over the {either:,} genes called in either, rho = {rho:.2f}."
+rho_none = "Too few genes are called in either for a rho."
 
 [figures.box]
 title = "Named genes: {label}"
@@ -256,3 +291,14 @@ reading = [
 ]
 x = "Gene"
 y = "Expression"
+# The p above each gene (WO6, D-051), a view: the boxes' own test, or DESeq2's over every gene.
+lead = "{passing} of {shown} genes have a Mann-Whitney p below {alpha}, BH-adjusted over the genes shown."
+view = "p above each gene"
+view_mwu = "Mann-Whitney, BH over the genes shown"
+view_deseq = "DESeq2 padj, BH over every tested gene"
+deseq_label = "padj={p}\nlfc={lfc:.2f}"
+deseq_label_line = "padj={p}, lfc={lfc:.2f}"
+deseq_label_none = "no padj"
+deseq_label_line_none = "no padj"
+deseq_caption = "DESeq2 Wald test; padj is BH-adjusted over all {tested:,} tested genes; lfc is the raw log2 fold change, > 0 when {comparison} is higher; {sizes}."
+deseq_lead = "{passing} of {shown} genes have padj below {alpha} over every tested gene, against {mwu} of {shown} by Mann-Whitney over the genes shown."

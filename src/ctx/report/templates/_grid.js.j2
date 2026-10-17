@@ -1,0 +1,32 @@
+{% raw %}
+/* A view's grid (ctx.report.lookups): a select per setting names one of the options Python
+   drew; the view's own select, a hidden field here, takes that option's number before the
+   view redraws, so viewing() is unchanged. tests/test_lookups.py runs key and index under
+   node against the Python definition. */
+var ctxGrid = {
+  /* Each axis's choice position, joined by commas: ctx.report.lookups.key. */
+  key: function (choices) { return choices.map(function (c) { return String(c); }).join(","); },
+  /* The option a combination names, the build's where the grid names none. */
+  index: function (cfg, choices) {
+    var found = cfg.grid[ctxGrid.key(choices)];
+    return found === undefined ? 0 : found;
+  },
+  wire: function (form) {
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var selects = Array.prototype.slice.call(form.querySelectorAll("select[data-axis]"));
+    function sync() {
+      form.elements.view.value = String(ctxGrid.index(cfg, selects.map(function (s) {
+        return Number(s.value);
+      })));
+    }
+    /* Capture runs before the view's own listener, on the form, reads the field. */
+    form.addEventListener("change", function (e) {
+      if (e.target.hasAttribute && e.target.hasAttribute("data-axis")) sync();
+    }, true);
+    /* A browser restoring the selects on back-navigation sets them without an event. */
+    var before = form.elements.view.value;
+    sync();
+    if (form.elements.view.value !== before) form.dispatchEvent(new Event("change"));
+  }
+};
+{% endraw %}

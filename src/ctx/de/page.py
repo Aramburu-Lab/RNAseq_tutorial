@@ -204,10 +204,21 @@ def dispersion_text(said: Words) -> FigureText:
 def calls_text(lesson: str, labels: Mapping[str, str], fits: Mapping[str, Fit]) -> FigureText:
     """Title, lead and reading guide of one lesson's call counts; ``labels`` by contrast."""
     counts = {n: int((fits[n].results["call"] != "ns").sum()) for n in labels}
-    most = max(counts, key=lambda n: counts[n])
+    return calls_text_at(lesson, labels, counts)
+
+
+def calls_text_at(lesson: str, labels: Mapping[str, str], counts: Mapping[str, int]
+                  ) -> FigureText:  # fmt: skip
+    """The same at any setting of the rule: ``counts`` holds each contrast's calls there.
+
+    The contrast that calls the most leads, the first in lesson order on a tie.
+    """
+    most = max(labels, key=lambda n: counts[n])
+    lead = (figure("calls", "lead", label=labels[most], n=counts[most]) if counts[most]
+            else figure("calls", "lead_none"))  # fmt: skip
     return FigureText(
         title=figure("calls", "title", lesson=lesson.lower()),
-        lead=figure("calls", "lead", label=labels[most], n=counts[most]),
+        lead=lead,
         reading=reading("calls", alpha=ALPHA, lfc_min=f"{LFC_MIN:g}"),
     )
 
@@ -221,10 +232,34 @@ def lfc_text(x: str, y: str, rho: float) -> FigureText:
     )
 
 
-def box_text(said: Words, n_genes: int) -> FigureText:
-    """Title, lead and reading guide of the named-gene boxes."""
+def agreement_text(x: str, y: str, numbers: Mapping[str, Any]) -> FigureText:
+    """The fold-change scatter's words coloured by agreement: the lead counts the calls."""
+    return FigureText(
+        title=figure("lfc", "title", x=x, y=y),
+        lead=figure("lfc", "agree_lead", x=x, y=y, **numbers),
+        reading=reading("lfc", x=x, y=y),
+    )
+
+
+def deseq_box_text(said: Words, n_genes: int, passing: tuple[int, int]) -> FigureText:
+    """The named-gene boxes' words with DESeq2's padj above each gene.
+
+    ``passing`` counts the genes below ALPHA by DESeq2's padj and by the boxes' own test.
+    """
     return FigureText(
         title=figure("box", "title", label=said.label),
+        lead=figure(
+            "box", "deseq_lead", passing=passing[0], mwu=passing[1], shown=n_genes, alpha=ALPHA
+        ),  # fmt: skip
+        reading=reading("box", n_genes=n_genes, tested=said.tested),
+    )
+
+
+def box_text(said: Words, n_genes: int, passing: int) -> FigureText:
+    """Title, lead and reading guide of the named-gene boxes; ``passing`` below ALPHA."""
+    return FigureText(
+        title=figure("box", "title", label=said.label),
+        lead=figure("box", "lead", passing=passing, shown=n_genes, alpha=ALPHA),
         reading=reading("box", n_genes=n_genes, tested=said.tested),
     )
 

@@ -120,15 +120,20 @@
     var title = fig.querySelector(".fig-title"), summary = fig.querySelector(".view-summary");
     var built = { lead: lead ? lead.innerHTML : "", caption: caption.innerHTML,
                   title: title ? title.textContent : "" };
+    built.export = cfg.export;
     function show() {
       var i = Number(form.elements.view.value), o = cfg.options[i];
       var layout = Object.assign({}, o.figure.layout,
                                  { template: template(div, root.getAttribute("data-theme")) });
       Plotly.react(div, o.figure.data, layout);
+      /* The fit takes the view's own phone layout (_page_fit.js.j2). */
+      div.dispatchEvent(new Event("ctx-view"));
       if (lead) lead.innerHTML = i ? o.lead : built.lead;
       caption.innerHTML = i ? o.caption : built.caption;
       if (title) title.textContent = i ? o.title : built.title;
       summary.textContent = i ? cfg.moved.replace("{label}", o.label).replace("{build}", cfg.build) : "";
+      /* A view that carries its own export settings exports with them (ctx.report.lookups). */
+      if (built.export) cfg.export = (i && o.export) || built.export;
       mark(i !== 0, "view");
     }
     form.addEventListener("change", show);

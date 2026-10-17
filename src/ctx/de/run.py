@@ -16,18 +16,21 @@ from typing import Any
 
 import numpy as np
 import polars as pl
-from scipy.stats import spearmanr
 
 from ctx import runtime
 from ctx.dataset import Column, Dataset, DatasetError, PcaSpec, load
+from ctx.de import figures as m5_figures
 from ctx.de.deseq import RESULT_COLUMNS, TOP_GENES, Fit, fit, pca
 from ctx.de.normalised import COLUMNS as SIZE_FACTOR_COLUMNS
 from ctx.de.normalised import WHAT as SIZE_FACTORS
 from ctx.de.normalised import log2_normalised, size_factors
 from ctx.de.page import (
     Words,
+    agreement_text,
     box_text,
     calls_text,
+    calls_text_at,
+    deseq_box_text,
     dispersion_text,
     every,
     figure,
@@ -60,12 +63,13 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.report.lookups import lookup
 from ctx.report.text import fill, raw, word
 from ctx.report.text import words as text_words
 from ctx.report.views import viewed
 from ctx.viz.annotate import Permanova, permanova
 from ctx.viz.bar import BarData
-from ctx.viz.box import box_data
+from ctx.viz.box import BoxData, box_data
 from ctx.viz.save import Figure, figure_block, write_figure
 from ctx.viz.scatter import CUTOFF_PRESETS, Calls, Line, ScatterData
 from ctx.viz.style import ROLES, category_colours
@@ -510,107 +514,6 @@ def _dispersion(result: Fit, said: Words) -> ScatterData:
     )
 
 
-def _calls(title: str, said: Mapping[str, Words], fits: Mapping[str, Fit]) -> BarData:
-    """Up and down calls per contrast, for one lesson; ``said`` holds its contrasts in words."""
-    rows = [
-        (n, said[n].label, call, int((fits[n].results["call"] == call).sum()))
-        for n in said
-        for call in ("up", "down")
-    ]
-    frame = pl.DataFrame(rows, schema=["contrast", "label", "call", "genes"], orient="row")
-    sizes = "; ".join(figure("calls", "size", label=said[n].label, sizes=_sizes(fits[n], said[n]),
-                             design=fits[n].contrast.design) for n in said)  # fmt: skip
-    columns = {
-        "contrast": ("none", "Contrast."),
-        "label": ("none", "The contrast in words, as the page names it."),
-        "call": ("none", "up or down."),
-        "genes": ("genes", f"Genes called: padj < {ALPHA} and log2 FC at or beyond ±{LFC_MIN:g}."),
-    }
-    return BarData(
-        frame=frame,
-        columns=columns,
-        category="label",
-        value="genes",
-        category_label=figure("calls", "x"),
-        value_label=figure("calls", "y"),
-        series="call",
-        colours={"up": ROLES["comparison"], "down": ROLES["reference"]},
-        caption=figure(
-            "calls", "caption", lesson=title, alpha=ALPHA, lfc_min=f"{LFC_MIN:g}", sizes=sizes
-        ),
-        horizontal=True,
-        stacked=True,
-        width="double",
-    )
-
-
-def _lfc_scatter(
-    x: Fit, y: Fit, genes: pl.DataFrame, said: tuple[Words, Words]
-) -> tuple[ScatterData, float]:
-    """One contrast's raw LFC against another's, on genes tested in both."""
-    called, neither = figure("lfc", "called"), figure("lfc", "neither")
-    frame = (
-        x.results.select(
-            "gene_id", pl.col("log2FoldChange").alias("lfc_x"), pl.col("call").alias("call_x")
-        )
-        .join(
-            y.results.select(
-                "gene_id", pl.col("log2FoldChange").alias("lfc_y"), pl.col("call").alias("call_y")
-            ),
-            on="gene_id",
-        )
-        .drop_nulls()
-        .join(
-            x.results.filter(pl.col("padj").is_not_null())
-            .select("gene_id")
-            .join(y.results.filter(pl.col("padj").is_not_null()).select("gene_id"), on="gene_id"),
-            on="gene_id",
-        )
-        .join(genes, on="gene_id", how="left")
-        .with_columns(
-            called=pl.when((pl.col("call_x") != "ns") | (pl.col("call_y") != "ns"))
-            .then(pl.lit(called))
-            .otherwise(pl.lit(neither))
-        )
-        .with_columns(keep=pl.col("called") == called)
-    )
-    rho = float(spearmanr(frame["lfc_x"], frame["lfc_y"]).statistic)
-    shared = set(x.samples["donor"]) & set(y.samples["donor"])
-    note = figure("lfc", "shared", n=len(shared)) if shared else figure("lfc", "apart")
-    ends = (
-        float(frame.select(pl.min_horizontal("lfc_x", "lfc_y").min()).item()),
-        float(frame.select(pl.max_horizontal("lfc_x", "lfc_y").max()).item()),
-    )
-    columns = {
-        "gene_id": RESULT_COLUMNS["gene_id"],
-        "gene_name": ("none", "Gene symbol."),
-        "lfc_x": ("log2 FC", f"Raw log2 fold change in {x.contrast.name}."),
-        "lfc_y": ("log2 FC", f"Raw log2 fold change in {y.contrast.name}."),
-        "call_x": ("none", f"Call in {x.contrast.name}."),
-        "call_y": ("none", f"Call in {y.contrast.name}."),
-        "called": ("none", "Called in either contrast, or neither."),
-        "keep": ("none", "Called in either; always drawn on the page."),
-    }
-    caption = figure("lfc", "caption", genes=frame.height, rho=rho, note=note)
-    data = ScatterData(
-        frame=frame,
-        columns=columns,
-        x="lfc_x",
-        y="lfc_y",
-        x_label=figure("lfc", "axis", label=said[0].label),
-        y_label=figure("lfc", "axis", label=said[1].label),
-        colour="called",
-        colours={called: ROLES["comparison"], neither: None},
-        caption=caption,
-        hover=("gene_name",),
-        lines=(Line(figure("lfc", "line"), ends, ends),),
-        width="double",
-        keep="keep",
-        thinned=word(PAGE, "figures.lfc.thinned"),
-    )
-    return data, rho
-
-
 def _box(
     result: Fit,
     counts: pl.DataFrame,
@@ -803,6 +706,83 @@ def rule_genes(
     return metrics
 
 
+def _calls_grid(writer: Writer, title: str, slug: str, lesson: Mapping[str, Words],
+                fits: Mapping[str, Fit]) -> FigureBlock:  # fmt: skip
+    """One lesson's call counts, with every setting of the volcano's rule as a view (WO6).
+
+    Under BH the naive batch contrast calls the most at all 20 cutoff and fold-change settings,
+    but on raw p with a 1.5 log2 floor the within-batch contrast leads (figure controls plan),
+    so the grid shows where a design's excess sits. Every count is one table beside the page.
+    """
+    sizes = "; ".join(
+        figure("calls", "size", label=w.label, sizes=_sizes(fits[n], w),
+               design=fits[n].contrast.design)
+        for n, w in lesson.items()
+    )  # fmt: skip
+    labels = {n: w.label for n, w in lesson.items()}
+    options, at = [], []
+    for setting, position in m5_figures.settings():
+        counts = {n: sum(m5_figures.counted(fits[n], setting)) for n in lesson}
+        options.append((m5_figures.option_name(setting),
+                        m5_figures.calls_bars(title, lesson, fits, sizes, setting),
+                        calls_text_at(title, labels, counts)))  # fmt: skip
+        at.append(position)
+    writer.table(m5_figures.grid_table(lesson, fits), f"calls_grid_{slug}",
+                 m5_figures.GRID_COLUMNS)  # fmt: skip
+    block = writer.figure(options[0][1], f"calls_{slug}", calls_text(title, labels, fits))
+    return lookup(block, options, figure("calls", "view"), m5_figures.axes(), at)
+
+
+def _lfc_views(writer: Writer, pair: tuple[Fit, Fit], genes: pl.DataFrame,
+               said: tuple[Words, Words]) -> tuple[FigureBlock, float]:  # fmt: skip
+    """Two contrasts' fold changes, coloured by a call in either or by the calls' agreement.
+
+    Of the naive design's 659 calls, 27 survive adding batch and 13 appear only after it
+    (figure controls plan); the agreement view names each, its counts in the legend and in a
+    table beside the page.
+    """
+    x, y = pair
+    scatter, rho = m5_figures.lfc_scatter(x, y, genes, said)
+    agreed, numbers = m5_figures.agreement(scatter, said)
+    what = f"lfc_{x.contrast.name}_vs_{y.contrast.name}"
+    built = lfc_text(said[0].label, said[1].label, rho)
+    block = writer.figure(scatter, what, built)
+    counts = pl.DataFrame({"agreement": list(m5_figures.AGREEMENT),
+                           "genes": [numbers[k] for k in m5_figures.AGREEMENT],
+                           "rho_called": [numbers["rho_called"]] * len(m5_figures.AGREEMENT)},
+                          schema={"agreement": pl.String, "genes": pl.Int64,
+                                  "rho_called": pl.Float64})  # fmt: skip
+    writer.table(counts, f"{what}_agreement", m5_figures.AGREEMENT_TABLE)
+    options = [(figure("lfc", "view_called"), scatter, built),
+               (figure("lfc", "view_agreement"), agreed,
+                agreement_text(said[0].label, said[1].label, numbers))]  # fmt: skip
+    return lookup(block, options, figure("lfc", "view")), rho
+
+
+def _box_views(writer: Writer, result: Fit, box: Figure, said: Words,
+               first: Mapping[str, str]) -> FigureBlock:  # fmt: skip
+    """The named genes' boxes, with DESeq2's padj above each gene as a view (WO6, F12).
+
+    6 of 7 named genes pass 0.05 in the 7-gene family and 3 of 7 under DESeq2's padj over
+    every tested gene (figure controls plan): the family a p is adjusted over is the lesson.
+    ``first`` names each symbol's gene as the boxes chose it, the table's first.
+    """
+    assert isinstance(box, BoxData)  # noqa: S101 - _box returns one
+    chosen = [(t.feature, first[t.feature]) for t in box.caption.tests]
+    deseq = m5_figures.deseq_box(box, result, chosen)
+    assert isinstance(deseq.caption, m5_figures.DeseqCaption)  # noqa: S101 - deseq_box sets it
+    n = len(box.caption.tests)
+    mwu = sum(t.p_adj < ALPHA for t in box.caption.tests)
+    passing = sum(p is not None and p < ALPHA for p in deseq.caption.padj.values())
+    built = box_text(said, n, mwu)
+    block = writer.figure(box, f"box_{result.contrast.name}", built)
+    options = [
+        (figure("box", "view_mwu"), box, built),
+        (figure("box", "view_deseq"), deseq, deseq_box_text(said, n, (passing, mwu))),
+    ]
+    return lookup(block, options, figure("box", "view"))
+
+
 def _lessons(
     writer: Writer,
     spec: Dataset,
@@ -819,16 +799,12 @@ def _lessons(
     metrics: list[tuple[str, float, str]] = []
     placed: dict[tuple[str, str], FigureBlock] = {}
     for x, y in spec.de.scatters:
-        scatter, rho = _lfc_scatter(fits[x], fits[y], genes, (said[x], said[y]))
+        placed[(x, y)], rho = _lfc_views(writer, (fits[x], fits[y]), genes, (said[x], said[y]))
         metrics.append((f"spearman.{x}.{y}", rho, "raw LFC, genes tested in both"))
-        placed[(x, y)] = writer.figure(scatter, f"lfc_{x}_vs_{y}",
-                                       lfc_text(said[x].label, said[y].label, rho))  # fmt: skip
     for title, names in spec.de.lessons.items():
         slug = re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_")
         lesson = {n: said[n] for n in names}
-        labels = {n: w.label for n, w in lesson.items()}
-        items = [writer.figure(_calls(title, lesson, fits), f"calls_{slug}",
-                               calls_text(title, labels, fits))]  # fmt: skip
+        items = [_calls_grid(writer, title, slug, lesson, fits)]
         items += [placed.pop(pair) for pair in list(placed) if set(pair) <= set(names)]
         groups.append(Group(fill(PAGE, "groups.lesson", title=title), tuple(items)))
     if placed:
@@ -886,14 +862,11 @@ def _figures(
         box, missing = _box(fits[spec.de.box_contrast], counts, genes, spec.de.box_genes, boxed)
         named: list[FigureBlock | str] = []
         if box is not None:
-            n_genes = len(spec.de.box_genes) - len(missing)
-            named.append(
-                writer.figure(
-                    box,
-                    f"box_{spec.de.box_contrast}",
-                    box_text(boxed, n_genes),
-                )
+            first = genes.select("gene_name", "gene_id").unique(
+                "gene_name", keep="first", maintain_order=True
             )
+            named.append(_box_views(writer, fits[spec.de.box_contrast], box, boxed,
+                                    dict(first.rows())))  # fmt: skip
         if missing:
             named.append(fill(PAGE, "groups.missing", genes=", ".join(missing)))
         groups.append(Group(word(PAGE, "groups.named"), tuple(named)))
