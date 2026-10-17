@@ -336,6 +336,7 @@ def results(writer: Writer, found: Frames, shown: Shown, first: Sequence[Result]
         align_items += [tables["context"], blocks.context_note(found.context)]
     strand_items: list[FigureBlock | ResultTable | str] = [
         blocks.strand_figure(writer, found, shown),
+        blocks.share_figure(writer, found, shown),
         tables["strandedness"],
     ]
     scatters, plots = blocks.agreement_figures(writer, found, shown)

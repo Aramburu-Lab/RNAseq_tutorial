@@ -1,0 +1,46 @@
+{# M3's strand calls at the reader's thresholds (WO8). Included by _page.js.j2, inside its one function. #}
+{% raw %}  /* ctxStrand calls each sample again at the two thresholds the reader types; this block
+     moves each sample to its call's trace, the four threshold lines with them, and fills the
+     live line. At the registry's thresholds the figure is the build's. */
+  function strandCalls(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var rows = cfg.rows.data.map(function (values) {
+      var row = {};
+      cfg.rows.columns.forEach(function (c, i) { row[c] = values[i]; });
+      return row;
+    });
+    var div = fig.querySelector(".js-plotly-plot"), mark = exporting(fig, cfg);
+    var summary = fig.querySelector(".strand-summary");
+    function update() {
+      var st = ctxStrand.threshold(form.elements.stranded.value, cfg.ranges.stranded, cfg.stranded);
+      var un = ctxStrand.threshold(form.elements.unstranded.value, cfg.ranges.unstranded,
+                                   cfg.unstranded);
+      var calls = rows.map(function (r) { return ctxStrand.call(r.s1, r.s2, st, un); });
+      var restyled = { x: [], y: [], customdata: [] };
+      cfg.calls.forEach(function (c) {
+        var mine = rows.filter(function (_, i) { return calls[i] === c; });
+        restyled.x.push(mine.map(function (r) { return r.rank; }));
+        restyled.y.push(mine.map(function (r) { return r.share; }));
+        restyled.customdata.push(mine.map(function (r) { return ctxHover.row(r, cfg.hover); }));
+      });
+      Plotly.restyle(div, restyled, cfg.calls.map(function (c) { return cfg.traces[c]; }));
+      var s = Number(st), half = Number(un) / 2;
+      Plotly.restyle(div, { y: [[s, s], [1 - s, 1 - s], [0.5 - half, 0.5 - half],
+                               [0.5 + half, 0.5 + half]] }, cfg.lines);
+      var moved = st !== cfg.stranded || un !== cfg.unstranded;
+      var values = ctxStrand.counted(calls, cfg.calls);
+      values.n = rows.length; values.stranded_at = st; values.unstranded_at = un;
+      summary.textContent = ctxStrand.fill(cfg.summary, values) +
+        (moved ? " " + ctxStrand.fill(cfg.moved, { stranded: cfg.stranded, unstranded: cfg.unstranded }) : "");
+      mark(moved);
+      fig.ctxStrand = { calls: calls };
+    }
+    form.addEventListener("change", update);
+    form.addEventListener("submit", function (e) { e.preventDefault(); update(); });
+    form.addEventListener("reset", function () { setTimeout(update, 0); });
+    /* A browser restoring the form on back-navigation sets the boxes without an event. */
+    update();
+  }
+
+{% endraw %}

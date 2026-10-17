@@ -262,6 +262,33 @@ columns.ambiguous = "Reads on more than one gene at this setting, so left out."
 columns.forward_share = "Reads at -s 1 over reads at -s 1 plus -s 2, the sample's own, on each of its bars."
 columns.call = "The strand the forward share gives, by the registry's gene_strand_bias bands."
 
+# Each sample's forward share and call, the thresholds moved live (WO8, D-051).
+[figures.share]
+title = "Forward share per sample, at the strand thresholds"
+lead = "{forward} of {n} samples are called forward, {reverse} reverse, {unstranded} unstranded and {undetermined} undetermined."
+reading = [
+    "Each dot is one sample, in sheet order: its reads at `-s 1` over `-s 1` plus `-s 2`.",
+    "Above the upper dashed line a sample is forward, below the lowest reverse, between the two middle lines unstranded.",
+    "Move either threshold and every call follows; each sample's two read totals decide it exactly.",
+]
+caption = "Forward share of {n} samples: reads [[featureCounts]] assigned on the gene's own strand over those on either single strand. Calls at nf-core/rnaseq's thresholds, stranded {stranded}, unstranded {unstranded}. No test."
+x = "Sample"
+y = "Forward share"
+line_forward = "forward threshold"
+line_reverse = "reverse threshold"
+line_unstranded = "unstranded band"
+summary = "At stranded {stranded_at} and unstranded {unstranded_at}: {forward} forward, {reverse} reverse, {unstranded} unstranded, {undetermined} undetermined of {n} samples."
+moved = "The figure files and the reading guide keep stranded {stranded} and unstranded {unstranded}."
+calls = { forward = "forward", reverse = "reverse", unstranded = "unstranded", undetermined = "undetermined" }
+labels = { sample = "Sample", s1 = "Reads at -s 1", s2 = "Reads at -s 2" }
+columns.rank = "The sample's place in sheet order: the x axis."
+columns.sample = "Sample, from the gather sheet."
+columns.s1 = "Reads featureCounts assigned to genes at -s 1."
+columns.s2 = "Reads featureCounts assigned to genes at -s 2."
+columns.share = "s1 over s1 plus s2: the y axis."
+columns.call = "The call at the registry's thresholds."
+form = { label = "Strand thresholds", stranded = "Stranded at", unstranded = "Unstranded within", reset = "Back to the registry's" }
+
 [figures.counters]
 title = "Gene counts: {name}"
 tab = "{name}"
@@ -272,6 +299,14 @@ reading = [
 ]
 caption = "{n} genes, {samples} samples. Per-sample [[Spearman]] ρ median {rho_med}, range {rho_min} to {rho_max}; gene sums {rho}, [[bootstrap]] {ci} % interval {rho_low} to {rho_high}. Pearson r on {log_unit} {r}, interval {r_low} to {r_high}; nominal intervals, no test."
 identity = "Equal counts"
+# A gene type and a sample as views, looked up (WO8, D-051).
+view = "Show"
+axis_type = "Genes"
+axis_sample = "Counts"
+every_type = "Every gene"
+every_sample = "every sample summed"
+one_sample = "sample {sample}"
+subset = "{genes}; {unit}"
 labels = { gene_name = "Gene", gene_id = "Gene ID" }
 units = { a = "reads", b = "reads", log2_a = "log2(count + 1)", log2_b = "log2(count + 1)" }
 columns.gene_id = "Gene, from the annotation."
@@ -296,6 +331,14 @@ x = "Mean of both"
 y = "Difference d"
 bias = "Bias"
 limits = "Limits of agreement"
+percentiles = "2.5th and 97.5th percentiles"
+# The limits and a gene type as views, looked up (WO8, D-051).
+view = "Show"
+axis_limits = "Limits"
+limits_sd = "bias ± 1.96 SD"
+limits_empirical = "2.5th and 97.5th percentiles of d"
+option = "{genes}; limits {limits}"
+lead_empirical = "Bias {bias} in log2(count + 1); {n_out} of {n} genes lie beyond the 2.5th and 97.5th percentiles of d."
 units = { a = "reads", b = "reads", mean_log2 = "log2(count + 1)", diff_log2 = "log2(count + 1)" }
 columns.gene_id = "Gene, from the annotation."
 columns.gene_name = "Gene symbol, from the annotation."

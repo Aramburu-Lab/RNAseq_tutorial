@@ -6,6 +6,7 @@
 {% include "_grid.js.j2" %}
 {% include "_running.js.j2" %}
 {% include "_strata.js.j2" %}
+{% include "_strand.js.j2" %}
 {% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% if live %}{% include "_select.js.j2" %}
@@ -216,6 +217,10 @@
   scope.querySelectorAll("form.strata").forEach(function (form) {
     guard("strata", function () { strataCalls(form); });
   });
+  /* M3's strand calls at the reader's thresholds (ctxStrand). */
+  scope.querySelectorAll("form.strand").forEach(function (form) {
+    guard("strand", function () { strandCalls(form); });
+  });
 
   /* M6's live over-representation (GS.5). */
   scope.querySelectorAll("form.ora").forEach(function (form) {
@@ -312,6 +317,7 @@
 {% include "_page_controls.js.j2" %}
 {% include "_page_running.js.j2" %}
 {% include "_page_strata.js.j2" %}
+{% include "_page_strand.js.j2" %}
 {% if live %}{% include "_page_m9.js.j2" %}{% endif %}
 {% raw %}})();
 {% endraw %}

@@ -1,0 +1,30 @@
+   1.3 s  exit 0  ctx setup
+   4.6 s  exit 0  ctx gather --dataset desynth --fetchngs-dir /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/preview_e2b/data/raw/desynth --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/preview_e2b/desynth.toml
+  18.7 s  exit 0  ctx qc --dataset desynth --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/preview_e2b/desynth.toml
+  52.1 s  exit 0  ctx de --dataset desynth --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/preview_e2b/desynth.toml
+  13.9 s  exit 0  ctx function --dataset desynth --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/preview_e2b/desynth.toml
+  25.2 s  preview process: 2026-10-18_process_desynth_overview_v1.html
+  11.5 s  preview quant: 2026-10-18_quant_desynth_overview_v1.html
+   6.0 s  preview proteo: 2026-10-18_proteo_desynth_overview_v1.html
+   5.1 s  preview ncrna: 2026-10-18_ncrna_desynth_overview_v1.html
+   4.7 s  preview genecard: 2026-10-18_genecard_desynth_overview_v1.html
+   6.5 s  preview clinical: 2026-10-18_clinical_desynth_overview_v1.html
+   0.7 s  exit 0  ctx report --dataset desynth --dataset-file /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6353f37f240ddb6a/outputs/scratch_roots/preview_e2b/desynth.toml
+      152.30 real       157.19 user        30.20 sys
+          1334591488  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             4266371  page reclaims
+                2170  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                1667  voluntary context switches
+              508782  involuntary context switches
+        800117679376  instructions retired
+        235748500420  cycles elapsed
+           366135432  peak memory footprint

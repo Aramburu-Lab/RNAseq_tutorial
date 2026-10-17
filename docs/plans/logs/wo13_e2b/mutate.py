@@ -115,6 +115,30 @@ GROUPS["m4"] = {
 }  # fmt: skip
 
 
+PV, SJS, SPAGE, T_M3B, T_M3S = (
+    "src/ctx/process/views.py",
+    "src/ctx/report/templates/_strand.js.j2",
+    "src/ctx/report/templates/_page_strand.js.j2",
+    "tests/test_process_views_browser.py",
+    "tests/test_strand_page.py",
+)
+GROUPS["m3"] = {
+    "view_every_gene": (PV, '    genes = part if subset.gene_type is None else part.filter(\n        pl.col("type_group") == subset.gene_type)  # fmt: skip', "    genes = part", [T_M3B]),
+    "sample_from_sums": (PV, "    if subset.sample == concordance.ALL:", "    if True:", [T_M3B]),
+    "sample_cap_ignored": (PV, "*(samples if len(samples) <= SAMPLES_MAX else [])", "*samples[:SAMPLES_MAX + 1]", ["tests/test_process_views.py"]),
+    "empirical_at_sd": (PV, 'low, high = ("d_p2_5", "d_p97_5") if empirical else ("loa_low", "loa_high")', 'low, high = ("loa_low", "loa_high")', [T_M3B]),
+    "sample_left_in_trace": (SPAGE, "      Plotly.restyle(div, restyled, cfg.calls.map(function (c) { return cfg.traces[c]; }));", "", [T_M3B]),
+    "lines_left": (SPAGE, "      Plotly.restyle(div, { y: [[s, s], [1 - s, 1 - s], [0.5 - half, 0.5 - half],\n                               [0.5 + half, 0.5 + half]] }, cfg.lines);\n", "", [T_M3B]),
+    "live_line_at_registry": (SPAGE, "values.stranded_at = st; values.unstranded_at = un;", "values.stranded_at = cfg.stranded; values.unstranded_at = cfg.unstranded;", [T_M3B]),
+    "forward_strict": (SJS, 'if (a * st[1] >= st[0] * n) return "forward";', 'if (a * st[1] > st[0] * n) return "forward";', [T_M3S]),
+    "band_inclusive": (SJS, "gap * un[1] < un[0] * n ?", "gap * un[1] <= un[0] * n ?", [T_M3S]),
+    "share_in_floats": (SJS, 'if (a * st[1] >= st[0] * n) return "forward";', 'if (Number(a) / Number(n) >= Number(stranded)) return "forward";', [T_M3S]),
+    "exponent_as_digits": (SJS, '    if (/e/i.test(text)) text = Number(text).toFixed(20).replace(/0+$/, "").replace(/\\.$/, "");\n', "", [T_M3S]),
+    "box_unclamped": (SJS, "return String(Math.min(range[1], Math.max(range[0], v)));", "return String(v);", [T_M3S]),
+    "empty_box_zero": (SJS, "if (!isFinite(v)) return fallback;", 'if (!isFinite(v)) return "0";', [T_M3S]),
+}  # fmt: skip
+
+
 def run(group: str, name: str) -> str:
     """Plant one mutation, run its tests, restore; the verdict as one line."""
     path, old, new, tests = GROUPS[group][name]

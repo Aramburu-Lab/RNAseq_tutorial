@@ -1,0 +1,48 @@
+{% raw %}
+/* M3's strand call at the reader's thresholds (WO8): the page twin of the registry's
+   Metric.strandedness, decided in exact arithmetic on a sample's two featureCounts totals,
+   as Python decides it on a Fraction. tests/test_strand_page.py runs both on the same cases,
+   9 of 20 and 11 of 20 among them, where floats put one inside the band and one outside. */
+var ctxStrand = {
+  /* A decimal as written ("0.8") as an exact [numerator, denominator] of BigInts. */
+  exact: function (value) {
+    var text = String(value).trim();
+    /* A tiny value prints in exponent form; written out it reads as Python's str() of it. */
+    if (/e/i.test(text)) text = Number(text).toFixed(20).replace(/0+$/, "").replace(/\.$/, "");
+    var parts = text.split(".");
+    var digits = parts.length > 1 ? parts[1] : "";
+    return [BigInt(parts[0] + digits), BigInt("1" + "0".repeat(digits.length))];
+  },
+  /* The value a box holds, as a decimal the rule reads: the default for a box that is no
+     number, else held within [low, high]. */
+  threshold: function (typed, range, fallback) {
+    var v = parseFloat(String(typed).replace(",", "."));
+    if (!isFinite(v)) return fallback;
+    return String(Math.min(range[1], Math.max(range[0], v)));
+  },
+  /* forward, reverse, unstranded or undetermined, as Metric.strandedness calls the share
+     s1 / (s1 + s2); undetermined with no read at either. */
+  call: function (s1, s2, stranded, unstranded) {
+    var a = BigInt(s1), n = BigInt(s1) + BigInt(s2);
+    if (n === 0n) return "undetermined";
+    var st = ctxStrand.exact(stranded), un = ctxStrand.exact(unstranded);
+    if (a * st[1] >= st[0] * n) return "forward";
+    if ((n - a) * st[1] >= st[0] * n) return "reverse";
+    var gap = 2n * a - n;
+    if (gap < 0n) gap = -gap;
+    return gap * un[1] < un[0] * n ? "unstranded" : "undetermined";
+  },
+  /* Samples per call, every call named. */
+  counted: function (calls, names) {
+    var out = {};
+    names.forEach(function (c) { out[c] = 0; });
+    calls.forEach(function (c) { out[c] += 1; });
+    return out;
+  },
+  fill: function (template, values) {
+    return template.replace(/\{(\w+)(?::[^}]*)?\}/g, function (all, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : all;
+    });
+  }
+};
+{% endraw %}

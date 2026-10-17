@@ -11,11 +11,14 @@ from typing import TYPE_CHECKING, Any
 
 import polars as pl
 
+from ctx import concordance
 from ctx.de.run import Writer
-from ctx.process import Aligner, figures
+from ctx.process import Aligner, figures, views
+from ctx.process import strand as strand_share
 from ctx.process import tables as tab
 from ctx.report import text
 from ctx.report.builder import FigureBlock, FigureText, ResultTable
+from ctx.report.lookups import lookup
 from ctx.viz.aggregates import Aggregate, Lead
 
 if TYPE_CHECKING:
@@ -123,10 +126,24 @@ def strand_figure(writer: Writer, found: "Frames", shown: "Shown") -> FigureBloc
     return writer.figure(data, "strand_assigned", words)
 
 
+def share_figure(writer: Writer, found: "Frames", shown: "Shown") -> FigureBlock:
+    """F2b: each sample's forward share and call, its thresholds moved live (WO8)."""
+    metric = shown.strand_metric
+    shares = found.strand.filter(pl.col("forward_share").is_not_null())["forward_share"]
+    caption = shown.prefix + text.fill(
+        PAGE, "figures.share.caption", n=shares.len(), stranded=metric.stranded,
+        unstranded=metric.unstranded)  # fmt: skip
+    data = strand_share.share_plot(found.strand, metric, caption)
+    counts = strand_share.counted(data.frame["call"].to_list())
+    lead = text.fill(PAGE, "figures.share.lead", n=data.frame.height, **counts)
+    return writer.figure(data, "strand_share", _text("share", lead))
+
+
 def agreement_figures(writer: Writer, found: "Frames", shown: "Shown"
                       ) -> tuple[list[FigureBlock], list[FigureBlock]]:  # fmt: skip
     """F3 and F4 for every comparison the aligner allows, in ``tables.COMPARISONS`` order."""
     table, sums = found.agreements.concordance, found.agreements.sums
+    long = views.typed(found.comparison, sums)
     scatters, plots = [], []
     for name in table["comparison"].unique(maintain_order=True):
         rows = table.filter(pl.col("comparison") == name)
@@ -137,18 +154,64 @@ def agreement_figures(writer: Writer, found: "Frames", shown: "Shown"
         part = sums.filter(pl.col("comparison") == name)
         scatter = figures.counter_scatter(part, words, shown.prefix + text.fill(
             PAGE, "figures.counters.caption", **values))  # fmt: skip
-        scatters.append(writer.figure(scatter, f"counters_{name}", _text(
-            "counters", text.fill(PAGE, "figures.counters.lead", **values), **words)))  # fmt: skip
+        built = _text("counters", text.fill(PAGE, "figures.counters.lead", **values), **words)
+        block = writer.figure(scatter, f"counters_{name}", built)
+        scatters.append(_scatter_views(block, (scatter, built), long, name, words, shown))
         plot = figures.agreement_plot(part, every, words, shown.prefix + text.fill(
             PAGE, "figures.agreement.caption", **values))  # fmt: skip
         outside = text.word(PAGE, "undefined")
         if every["loa_low"] is not None:
             beyond = ~pl.col("diff_log2").is_between(every["loa_low"], every["loa_high"])
             outside = f"{plot.frame.filter(beyond).height:,}"
-        plots.append(writer.figure(plot, f"agreement_{name}", _text(
-            "agreement", text.fill(PAGE, "figures.agreement.lead", **values, n_out=outside),
-            **words)))  # fmt: skip
+        built = _text("agreement", text.fill(PAGE, "figures.agreement.lead", **values,
+                                             n_out=outside), **words)  # fmt: skip
+        block = writer.figure(plot, f"agreement_{name}", built)
+        plots.append(_plot_views(block, (plot, built), long, name, words, shown))
     return scatters, plots
+
+
+def _scatter_views(block: FigureBlock, build: tuple[Any, FigureText], long: pl.DataFrame,
+                   name: str, words: dict[str, str], shown: "Shown") -> FigureBlock:  # fmt: skip
+    """F3 with a gene type and a sample as views (WO8): the build's every gene, every sample."""
+    part = long.filter(pl.col("comparison") == name)
+    found, axes, at = views.subsets(part)
+    options = [(found[0].words(), *build)]
+    for subset in found[1:]:
+        data, filled = views.scatter(part, subset, words, shown.prefix)
+        options.append((subset.words(), data, _text(
+            "counters", text.fill(PAGE, "figures.counters.lead", **filled), **words)))  # fmt: skip
+    return lookup(block, options, text.word(PAGE, "figures.counters.view"), axes, at)
+
+
+def _plot_views(block: FigureBlock, build: tuple[Any, FigureText], long: pl.DataFrame,
+                name: str, words: dict[str, str], shown: "Shown") -> FigureBlock:  # fmt: skip
+    """F4 with its limits and a gene type as views (WO8): the build's 1.96 SD, every gene."""
+    part = long.filter(pl.col("comparison") == name)
+    options, at = [], []
+    offered = views.types(part, [concordance.ALL])
+    for i, empirical in enumerate((False, True)):
+        for j, gene_type in enumerate(offered):
+            if (i, j) == (0, 0):
+                options.append((_plot_name(gene_type, empirical), *build))
+            else:
+                data, filled = views.plot(part, gene_type, empirical, words, shown.prefix)
+                lead = text.fill(PAGE, f"figures.agreement.lead{'_empirical' * empirical}",
+                                 **filled)  # fmt: skip
+                options.append((_plot_name(gene_type, empirical), data,
+                                _text("agreement", lead, **words)))  # fmt: skip
+            at.append((i, j))
+    axes = [(text.word(PAGE, "figures.agreement.axis_limits"),
+             [text.word(PAGE, f"figures.agreement.limits_{k}") for k in ("sd", "empirical")]),
+            (text.word(PAGE, "figures.counters.axis_type"),
+             [views.type_words(t) for t in offered])]  # fmt: skip
+    return lookup(block, options, text.word(PAGE, "figures.agreement.view"), axes, at)
+
+
+def _plot_name(gene_type: str | None, empirical: bool) -> str:
+    """How the live line names one F4 view."""
+    return text.fill(PAGE, "figures.agreement.option", genes=views.type_words(gene_type),
+                     limits=text.word(PAGE, "figures.agreement.limits_"
+                                      + ("empirical" if empirical else "sd")))  # fmt: skip
 
 
 def page_table(key: str, rows: Sequence[Sequence[str]], numeric: tuple[int, ...],

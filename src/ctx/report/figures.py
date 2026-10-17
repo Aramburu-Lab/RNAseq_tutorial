@@ -262,6 +262,10 @@ _SHAPED = {
                            "featured": c["featured"]},
     # M6's running score for any tested set (WO7): the select's label and its sets in words.
     "running": lambda c: {"label": c["label"], "options": [s["label"] for s in c["sets"]]},
+    # M3's strand calls at the reader's thresholds (WO8): the boxes' words and ranges.
+    "strand": lambda c: {"words": c["words"], "stranded": c["stranded"],
+                         "unstranded": c["unstranded"], "ranges": c["ranges"],
+                         "summary": c["default_summary"]},
 }  # fmt: skip
 
 
