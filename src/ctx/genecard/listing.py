@@ -17,14 +17,21 @@ from typing import Any
 import polars as pl
 
 from ctx.report import genes
+from ctx.viz.heatmap import diverging_levels
 
 # Significant digits each number travels at.
 LFC_DIGITS, PADJ_DIGITS = 3, 2
 # A call as one character: up, down, tested and not called, not tested.
 CALL_CODES = {"up": "u", "down": "d", "ns": "n"}
 UNTESTED = "-"
+CALLED = ("up", "down")
+# The evidence view's steps, most negative first; a step travels as its index.
+STEPS = tuple(s.level for s in diverging_levels([])[1])
 # Table rows per page of the list's table, as the M5 picker's.
 PAGE_ROWS = 25
+# Genes the live heatmap draws (E.1d), as the evidence view does (CONVENTIONS: heatmaps cap
+# at 100 genes); the rest stay in the table.
+HEAT_ROWS = 100
 
 
 def rounded(value: float | None, digits: int) -> float | None:
@@ -44,7 +51,10 @@ def evidence(results: Mapping[str, pl.DataFrame], table: genes.GeneTable) -> dic
     Returns:
         ``numbers`` and ``symbols``, one per gene; ``lfc`` and ``padj``, one list per contrast
         aligned to the genes, None where M5 has no value; ``calls``, one string per contrast
-        with a character per gene (``CALL_CODES``, ``UNTESTED`` where padj is missing).
+        with a character per gene (``CALL_CODES``, ``UNTESTED`` where padj is missing); and
+        ``steps``, the same shape: a called gene's step of the evidence view's scale as a
+        digit, from the exact log2 FC, since the rounded one can cross a step's edge, and
+        ``UNTESTED`` for the rest.
     """
     tested = sorted({n for frame in results.values()
                      for n in frame.filter(pl.col("padj").is_not_null())["number"]})  # fmt: skip
@@ -52,21 +62,26 @@ def evidence(results: Mapping[str, pl.DataFrame], table: genes.GeneTable) -> dic
     out: dict[str, Any] = {
         "numbers": tested,
         "symbols": [table.symbols[table.row[n]] if n in table.row else "" for n in tested],
-        "lfc": [], "padj": [], "calls": [],
+        "lfc": [], "padj": [], "calls": [], "steps": [],
     }  # fmt: skip
     for frame in results.values():
         lfc: list[float | None] = [None] * len(tested)
         padj: list[float | None] = [None] * len(tested)
-        calls = [UNTESTED] * len(tested)
-        for n, fc, p, call in frame.select("number", "log2FoldChange", "padj", "call").iter_rows():
+        calls, steps = [UNTESTED] * len(tested), [UNTESTED] * len(tested)
+        rows = frame.select("number", "log2FoldChange", "padj", "call").rows()
+        levels, _ = diverging_levels([fc for _, fc, _, _ in rows])
+        for (n, fc, p, call), level in zip(rows, levels, strict=True):
             if (i := at.get(n)) is None:
                 continue
             lfc[i], padj[i] = rounded(fc, LFC_DIGITS), rounded(p, PADJ_DIGITS)
             if p is not None:
                 calls[i] = CALL_CODES[call]
+            if p is not None and call in CALLED and level is not None:
+                steps[i] = str(STEPS.index(level))
         out["lfc"].append(lfc)
         out["padj"].append(padj)
         out["calls"].append("".join(calls))
+        out["steps"].append("".join(steps))
     return out
 
 
@@ -94,9 +109,11 @@ def controls(data: Mapping[str, Any], contrasts: Sequence[tuple[str, str]], feat
         cards: (number, anchor, symbol) of each gene with a card on the page.
         command: The command that builds cards, to which the page adds ``--genes``.
         words: The panel's words, the picker's for names it cannot read and the selection's
-            refusals: ``list``, ``picker`` and ``errors``, and ``calls``, a call code's words.
+            refusals: ``list``, ``picker`` and ``errors``; ``calls``, a call code's words; and
+            ``heat``, the live heatmap's steps, colours and legend (``figures.live_scale``).
     """
     return {"kind": "genelist", "block": block(data), "contrasts": [list(c) for c in contrasts],
             "featured": featured, "cards": [list(c) for c in cards], "command": command,
             "page_rows": PAGE_ROWS, "words": {**words["list"], "calls": words["calls"]},
-            "picker": words["picker"], "errors": words["errors"]}  # fmt: skip
+            "picker": words["picker"], "errors": words["errors"],
+            "heat": {**words["heat"], "rows": HEAT_ROWS}}  # fmt: skip

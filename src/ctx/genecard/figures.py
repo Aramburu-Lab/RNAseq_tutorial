@@ -5,7 +5,7 @@ them. Every panel is descriptive: n, median, IQR, tau, CV; external data get no 
 """
 
 import math
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from typing import Any
 
 import polars as pl
@@ -19,7 +19,17 @@ from ctx.report import text
 from ctx.viz.axes import axis_title
 from ctx.viz.bar import BarData
 from ctx.viz.heatmap import HeatmapData, Swatch, diverging_levels
-from ctx.viz.style import DATA_COLOURS, PROJECTOR_UNSAFE, category_colours
+from ctx.viz.metrics import text_width, wrap_to
+from ctx.viz.style import (
+    BOX_GAP_PX,
+    DATA_COLOURS,
+    PLOTLY_HEAT_ROW_PX,
+    PLOTLY_LEGEND_SWATCH_PX,
+    PROJECTOR_UNSAFE,
+    SIZES,
+    category_colours,
+    on_page,
+)
 
 PAGE = "genecard"
 SEXES = ("female", "male")
@@ -224,6 +234,12 @@ def exon_controls(heat: HeatmapData) -> dict[str, Any]:
                                  tissues=tissues)}  # fmt: skip
 
 
+# The live heatmap (E.1d): a contrast's words wrap at this width under its column, and the
+# legend, margins and axis titles take this much height besides its rows and labels, in px.
+LIVE_LABEL_PX = 220
+LIVE_CHROME_PX = 160
+# Room for the gene names and the y title beside the columns, in px.
+LIVE_SIDES_PX = 140
 # The evidence view draws at most this many genes; the rest are listed in a table (GS.9).
 EVIDENCE_ROWS = 100
 CALLS = ("up", "down")
@@ -268,6 +284,36 @@ def evidence_view(
                        row_order=tuple(symbols[n] for n in drawn),
                        column_order=tuple(labels.values()))  # fmt: skip
     return heat, numbers, rest
+
+
+def live_scale(labels: Sequence[str]) -> dict[str, Any]:
+    """The live heatmap's scale (E.1d): the evidence view's steps and grey as its figure draws them.
+
+    Read from a heatmap of one cell per step, drawn by ``HeatmapData``, so the page's list
+    takes the evidence view's colours and legend, never a second copy of them. Each contrast's
+    words are wrapped at ``LIVE_LABEL_PX`` and turned upright under its column: turned 45
+    degrees, the first ran off the plot's left edge at 1,009 px; ``label_px`` is the room
+    the longest line takes below the plot.
+    """
+    none = text.word(PAGE, "figures.evidence.not_called")
+    keys = (*diverging_levels([])[1], Swatch(none, None))
+    names = [s.level for s in keys]
+    frame = pl.DataFrame({"gene": names, "contrast": ["-"] * len(keys),
+                          "log2FoldChange": [0.0] * len(keys), "level": names})  # fmt: skip
+    heat = HeatmapData(frame=frame, columns=columns("evidence"), row="gene", column="contrast",
+                       value="log2FoldChange", level="level", row_label="", column_label="",
+                       swatches=keys, caption="")  # fmt: skip
+    fig = heat.interactive()
+    size = on_page(SIZES["tick"])
+    lines = [wrap_to(label, LIVE_LABEL_PX, size) for label in labels]
+    return {"colorscale": [list(stop) for stop in fig.data[0].colorscale], "levels": names,
+            "legend": [[t.name, t.marker.color] for t in fig.data[1:] if t.name],
+            "row_px": PLOTLY_HEAT_ROW_PX, "ticks": ["<br>".join(w) for w in lines],
+            "label_px": max((text_width(x, size) for w in lines for x in w), default=0.0),
+            "chrome_px": LIVE_CHROME_PX, "swatch_px": PLOTLY_LEGEND_SWATCH_PX,
+            # plotly sets a turned label's lines one font size apart, measured on Step-1.
+            "least_px": len(labels) * (max(map(len, lines), default=1) * size + BOX_GAP_PX)
+            + LIVE_SIDES_PX}  # fmt: skip
 
 
 def junctions(card: Card) -> tuple[HeatmapData, dict[str, Any]]:

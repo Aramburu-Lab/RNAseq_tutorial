@@ -201,3 +201,53 @@ class Stub:
 def tpm_values() -> np.ndarray:
     """NPTX2's made-up TPM in column order, for the tests to recompute from."""
     return np.array([v for t in TISSUES for v in NPTX2_TPM[t]])
+
+
+# M9's own samples (E.1c2): eight samples of four individuals in two batches; NPTX2's counts,
+# ACTB at 1,000 everywhere. The size factors are planted, not median-of-ratios, so a reader
+# that fits its own cannot meet them.
+SAMPLES = {
+    "s1": ("d1", "B1"),
+    "s2": ("d2", "B1"),
+    "s3": ("d3", "B1"),
+    "s4": ("d1", "B1"),
+    "s5": ("d2", "B2"),
+    "s6": ("d3", "B2"),
+    "s7": ("d4", "B2"),
+    "s8": ("d4", "B2"),
+}
+NPTX2_COUNTS = {"s1": 10, "s2": 20, "s3": 40, "s4": 100, "s5": 400, "s6": 25, "s7": 7, "s8": 9}
+# UPA, which M5 tested in a_case, as NPTX2 was not.
+UPA_ID = "ENSG00000900011.1"
+UPA_COUNTS = {"s1": 5, "s2": 6, "s3": 7, "s4": 50, "s5": 60, "s6": 70, "s7": 8, "s8": 80}
+FACTORS = {
+    "a_case": {"s1": ("reference", 0.5), "s2": ("reference", 1.0), "s3": ("reference", 2.0),
+               "s4": ("tested", 1.0), "s5": ("tested", 4.0), "s6": ("tested", 0.25)},
+    "b_case": {"s1": ("reference", 1.0), "s2": ("reference", 1.0), "s3": ("reference", 1.0),
+               "s7": ("reference", 2.0), "s4": ("tested", 2.0), "s5": ("tested", 2.0),
+               "s6": ("tested", 1.0), "s8": ("tested", 0.5)},
+}  # fmt: skip
+
+
+def own_files(
+    root: Path, contrasts: tuple[str, ...] = ("a_case",), day: date | None = None
+) -> None:
+    """Gather's counts and sample sheet, and M5's size factors of ``contrasts``."""
+    day = day or date.today()
+    names = list(SAMPLES)
+    counts = pl.DataFrame({"gene_id": [OURS[NPTX2], OURS[ACTB], UPA_ID],
+                           **{s: [NPTX2_COUNTS[s], 1000, UPA_COUNTS[s]] for s in names}},
+                          schema_overrides={s: pl.Int32 for s in names})  # fmt: skip
+    gathered = root / "outputs" / "01_gather"
+    described = {c: ("none", c) for c in counts.columns}
+    write_table(counts, gathered, stem("gather", f"{SLUG}_counts", 1, day=day), columns=described,
+                data_releases={})  # fmt: skip
+    sheet = pl.DataFrame({"sample": names, "donor": [SAMPLES[s][0] for s in names],
+                          "batch": [SAMPLES[s][1] for s in names]})  # fmt: skip
+    write_table(sheet, gathered, stem("gather", f"{SLUG}_samplesheet", 1, day=day),
+                columns={c: ("none", c) for c in sheet.columns}, data_releases={})  # fmt: skip
+    rows = [(c, s, SAMPLES[s][0], g, f) for c in contrasts for s, (g, f) in FACTORS[c].items()]
+    factors = pl.DataFrame(rows, schema=["contrast", "sample", "donor", "group", "size_factor"],
+                           orient="row")  # fmt: skip
+    write_table(factors, root / "outputs" / "05_de", stem("de", f"{SLUG}_size_factors", 1, day=day),
+                columns={c: ("none", c) for c in factors.columns}, data_releases={})  # fmt: skip

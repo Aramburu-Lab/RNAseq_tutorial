@@ -89,6 +89,13 @@ command = "Build cards for the listed genes this page holds none of"
 previous = "Previous"
 next = "Next"
 pages = "Genes {first} to {last} of {total}"
+# The live heatmap of the list (E.1d); the page fills genes, listed and the hover lines.
+heat_label = "The list's genes across the contrasts"
+heat_caption = "Columns are M5 contrasts, {contrasts} here: DESeq2 Wald test, BH within each contrast, called at padj below {alpha:g} and absolute log2 FC of {lfc_min:g} or more. The first {genes} of {listed} genes in list order; the table holds every gene."
+heat_files = "Drawn in the page from the list, so it has no PDF or SVG; the table holds its numbers."
+heat_x = "Contrast"
+heat_y = "Gene"
+heat_lfc = "log2 FC"
 
 [reasons]
 named = "named in this run"
@@ -100,8 +107,9 @@ down = "a top down call of {contrast}"
 title = "{symbol}, {gene}"
 lead = "On this page as {reason}. Our ID {gene_id}; GTEx {gtex_id}."
 unavailable = "{source} unavailable for {symbol}: {why}."
+no_table = "no {what} table for this dataset; run ctx {module} again"
 renamed = "{typed} is not in this dataset's gene table: HPA {release} lists it as a symbol or synonym of {gene}, here named {symbol}."
-sources = { gtex = "GTEx", hpa = "Human Protein Atlas", ensembl = "Ensembl REST", lines = "HPA cell lines", junctions = "GTEx V10 junctions" }
+sources = { gtex = "GTEx", hpa = "Human Protein Atlas", ensembl = "Ensembl REST", lines = "HPA cell lines", junctions = "GTEx V10 junctions", own = "M5 normalised values" }
 
 [evidence]
 title = "{symbol} in every M5 contrast of this dataset"
@@ -247,8 +255,92 @@ padj = ["none", "BH-adjusted p, M5; empty where M5 did not test the gene."]
 call = ["none", "M5 call: up, down or ns."]
 level = ["none", "The cell's step: its log2 FC step if called, not called if tested, empty if not tested."]
 
+# The own-sample panels (E.1c2): M5's size factors over gather's counts, never refitted.
+[figures.own]
+unpaired = "Mann-Whitney U, two-sided"
+paired = "Wilcoxon signed-rank over individuals, two-sided"
+
+[figures.own.stats]
+n_group = ["samples", "Values of this group drawn; for a paired test, the pairs."]
+u = ["pairs", "Mann-Whitney U of the tested group against the reference."]
+u_paired = ["dimensionless", "Wilcoxon signed-rank statistic, the smaller rank sum, as scipy gives it."]
+u_both = ["dimensionless", "Mann-Whitney U for an unpaired contrast, the signed-rank statistic for a paired one."]
+p = ["dimensionless", "Two-sided p of the test, before adjustment."]
+p_adj = ["dimensionless", "BH-adjusted p over the family the caption names."]
+r = ["dimensionless", "Rank-biserial r, matched-pairs for a paired test; positive when the tested group is higher."]
+
+[figures.box]
+title = "{symbol} in {contrast}, M5 normalised values"
+lead = "Rank-biserial r {r:.2f}, p {p} after BH over {family} listed genes; DESeq2's padj {padj} comes from its fitted model."
+reading = [
+    "A point is one sample: log2 of its count over the contrast's M5 size factor, plus one.",
+    "The test ranks these values, while DESeq2 fits counts; on hover, its padj can differ from the p above the box.",
+]
+x = "Gene"
+y = "Expression"
+caption = "{test}. p BH-adjusted over the {family} listed genes with a box in this contrast. n = {n_reference} {reference}, {n_tested} {tested}; rank-biserial r is positive when {tested} is higher."
+none = "No box for {symbol} in {contrast}: M5 did not test it there, or a group holds too few values to rank."
+
+[figures.box.columns]
+feature = ["none", "Gene symbol."]
+group = ["none", "Compared level."]
+sample = ["none", "Sample."]
+donor = ["none", "Individual."]
+value = ["log2 reads", "log2(count / M5 size factor + 1): normalised, as M5 writes it."]
+deseq2_padj = ["dimensionless", "DESeq2 padj of the gene in this contrast; empty where M5 did not test it."]
+
+[figures.contrasts]
+title = "{symbol} in every contrast of this dataset, M5 normalised values"
+lead = "{view}: largest shift drawn in {top}, r {r:.2f}, p {p}; {below} of {family} tested contrasts below {alpha:g} after BH; {left} not tested."
+reading = [
+    "A box pair is one contrast's samples, each normalised by that contrast's own M5 size factors.",
+    "A sample in two contrasts has a value in each. Above each pair: n per group, p and r.",
+    "A contrast with too few values in a group, or nothing to rank, is not tested; the select pages through the rest.",
+]
+x = "Contrast"
+y = "Expression"
+groups = ["Reference", "Tested"]
+n = "n={reference}/{tested}"
+caption = "Mann-Whitney U, two-sided, for an unpaired contrast; Wilcoxon signed-rank over individuals for a paired one. p BH-adjusted over the {family} contrasts this view tests; rank-biserial r is positive when the tested group is higher."
+view = "Samples"
+views = { all = "All samples", batch = "{batch} only", page = "{view}, contrasts {first} to {last} of {family}" }
+
+[figures.contrasts.columns]
+feature = ["none", "Contrast, in words, wrapped as drawn."]
+group = ["none", "Reference or tested level of the contrast."]
+contrast = ["none", "Contrast, in words."]
+sample = ["none", "Sample."]
+donor = ["none", "Individual."]
+batch = ["none", "Batch of the sample sheet; empty where it has none."]
+value = ["log2 reads", "log2(count / the contrast's M5 size factor + 1)."]
+
+# Every value the own-sample panels draw (E.1c2), one row per gene, contrast and sample.
+[figures.own_values.columns]
+symbol = ["none", "Gene symbol in gather's genes table."]
+gene_id = ["none", "Ensembl gene ID with our GENCODE version."]
+contrast = ["none", "M5 contrast, in words."]
+sample = ["none", "Sample in the contrast's fit."]
+donor = ["none", "Individual."]
+group = ["none", "reference or tested, as the fit coded the compared levels."]
+batch = ["none", "Batch of the sample sheet; empty where it has none."]
+value = ["log2 reads", "log2(count / the contrast's M5 size factor + 1), from ctx.de.normalised."]
+
+# Every F1 view's tests in one table per card list (E.1c2): views past the first have no files.
+[figures.contrast_tests.columns]
+symbol = ["none", "Gene symbol in gather's genes table."]
+gene_id = ["none", "Ensembl gene ID with our GENCODE version."]
+view = ["none", "The samples the view tests: all, or one batch."]
+contrast = ["none", "M5 contrast, in words."]
+n_reference = ["samples", "Reference values tested; for a paired test, the pairs."]
+n_tested = ["samples", "Tested values; for a paired test, the pairs."]
+test = ["none", "The test run on the contrast."]
+statistic = ["dimensionless", "Mann-Whitney U, or the signed-rank statistic as scipy gives it."]
+p = ["dimensionless", "Two-sided p, before adjustment."]
+p_adj = ["dimensionless", "BH-adjusted p over the contrasts the view tests."]
+r = ["dimensionless", "Rank-biserial r, matched-pairs for a paired test; positive when the tested group is higher."]
+
 [figures.junctions]
-title = "Splice junctions of {symbol} across tissues, GTEx {release}"
+title ="Splice junctions of {symbol} across tissues, GTEx {release}"
 lead = "{matched} of {introns} MANE Select introns match a GTEx {release} junction base for base; {junctions} junctions in all."
 reading = [
     "A cell is one junction in one tissue: log2 of its median reads over the junction's median across tissues.",

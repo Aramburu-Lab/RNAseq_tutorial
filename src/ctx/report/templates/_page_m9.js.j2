@@ -85,6 +85,7 @@
     var head = panel.querySelector("thead tr"), body = panel.querySelector("tbody");
     var pages = panel.querySelector(".pick-pages span"), command = panel.querySelector(".list-command");
     var code = command.querySelector("code"), data = null, index = null, at = null;
+    var heatBox = panel.querySelector(".list-heat"), heatDiv = panel.querySelector(".list-heat-plot");
     var cards = Object.create(null), named = Object.create(null), shown = null;
     var state = { list: [], query: "", only: false, page: 0 };
     cfg.cards.forEach(function (c) { cards[c[0]] = c[1]; named[c[0]] = c[2]; });
@@ -147,6 +148,59 @@
         last: ctxSelect.group(v.last), total: ctxSelect.group(v.total) }) : "";
       state.page = v.page;
     }
+    /* E.1d: the list's first genes by every contrast, as the evidence view draws its cells: a
+       called cell in its step, read from the block, an uncalled one grey, an untested one blank.
+       Rows follow the list; the table below holds every gene. */
+    function heat() {
+      var h = cfg.heat, genes = shown.genes.slice(0, h.rows), grey = h.levels.length - 1;
+      heatBox.hidden = !genes.length;
+      if (!genes.length || !window.Plotly) return;
+      var labels = [], z = [], hover = [];
+      genes.forEach(function (n) {
+        var r = at[n], label = (r === undefined ? named[n] : data.symbols[r]) || ctxSelect.ensembl(n);
+        var row = [], lines = [];
+        labels.push(label);
+        cfg.contrasts.forEach(function (c, ci) {
+          var call = r === undefined ? "-" : data.calls[ci].charAt(r);
+          if (call === "-") { row.push(null); lines.push(""); return; }
+          var step = data.steps[ci].charAt(r), level = step === "-" ? grey : Number(step);
+          var lfc = data.lfc[ci][r], p = data.padj[ci][r];
+          row.push(level);
+          lines.push([words.heat_y + ": " + label, words.heat_x + ": " + c[1],
+                      words.heat_lfc + ": " + (lfc === null ? "" : lfc.toPrecision(3)),
+                      "padj: " + (p === null ? "" : p.toPrecision(2)), h.levels[level]].join("<br>"));
+        });
+        z.push(row); hover.push(lines);
+      });
+      var columns = cfg.contrasts.map(function (_, i) { return i; });
+      var rows = genes.map(function (_, i) { return i; });
+      var used = Object.create(null);
+      z.forEach(function (row) { row.forEach(function (v) { if (v !== null) used[v] = true; }); });
+      var traces = [{ type: "heatmap", z: z, x: columns, y: rows, text: hover, showscale: false,
+        hoverongaps: false, zmin: -0.5, zmax: h.levels.length - 0.5, colorscale: h.colorscale,
+        xgap: 1, ygap: 1, hovertemplate: "%{text}<extra></extra>" }];
+      h.legend.forEach(function (entry, i) {
+        /* As the evidence view, the key holds only the steps drawn. */
+        if (!used[i]) return;
+        traces.push({ type: "scatter", x: [null], y: [null], mode: "markers", name: entry[0],
+          legendgroup: String(i), marker: { symbol: "square", color: entry[1], size: h.swatch_px } });
+      });
+      /* No narrower than its upright labels need: the box scrolls under its hint below. */
+      heatDiv.style.minWidth = Math.ceil(h.least_px) + "px";
+      Plotly.react(heatDiv, traces, {
+        template: template(heatDiv, root.getAttribute("data-theme")),
+        height: Math.round(genes.length * h.row_px + h.chrome_px + h.label_px),
+        showlegend: true, legend: { orientation: "h", x: 0, y: 1, yanchor: "bottom" },
+        margin: { t: 60 },
+        xaxis: { tickmode: "array", tickvals: columns, ticktext: h.ticks, tickangle: -90, automargin: true,
+                 showgrid: false, zeroline: false, title: { text: words.heat_x } },
+        yaxis: { tickmode: "array", tickvals: rows, ticktext: labels, autorange: "reversed",
+                 automargin: true, showgrid: false, zeroline: false, title: { text: words.heat_y } }
+      }, { displaylogo: false, responsive: true, displayModeBar: false });
+      panel.querySelector(".list-heat-caption").textContent = ctxLive.fill(words.heat_caption,
+        { genes: ctxSelect.group(genes.length), listed: ctxSelect.group(shown.genes.length) });
+      panel.ctxHeat = { genes: genes, z: z };
+    }
     /* A list's genes against the evidence: one no contrast tested is counted, and shown only
        where the page holds its card. */
     function take(genes, source) {
@@ -166,6 +220,7 @@
       code.textContent = other.length ? cfg.command + " --genes " + other.map(ctxSelect.ensembl).join(",") : "";
       command.hidden = !other.length;
       if (rows.length) table();
+      heat();
       panel.ctxList = { found: found, missing: missing, cards: carded };
     }
     form.addEventListener("submit", function (e) { e.preventDefault(); });

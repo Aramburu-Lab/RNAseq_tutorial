@@ -7,7 +7,7 @@ not be read leaves a line naming why in place of its panels (degraded, never dro
 import re
 from collections import Counter
 from collections.abc import Callable
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +17,8 @@ from ctx import runtime
 from ctx.dataset import Dataset
 from ctx.de.page import every
 from ctx.de.run import Writer
-from ctx.genecard import annotation, figures, gtex, hpa, junctions, listing
+from ctx.de.stats import ALPHA, LFC_MIN
+from ctx.genecard import annotation, boxes, figures, gtex, hpa, junctions, listing, samples
 from ctx.genecard.cards import Card
 from ctx.genecard.summary import DETECTED, spread, tau
 from ctx.io.naming import stem
@@ -25,6 +26,7 @@ from ctx.report import text
 from ctx.report.builder import (
     MAX_BYTES,
     Code,
+    FigurePage,
     FigureText,
     Group,
     KeyNumber,
@@ -53,7 +55,9 @@ class Context:
     """What the page is built from: the run's options and every card's data.
 
     ``tested`` is every tested gene's M5 evidence for the list from a link
-    (``listing.evidence``); None leaves the page without that panel.
+    (``listing.evidence``); None leaves the page without that panel. ``own`` is the listed
+    genes' M5 normalised values (``samples.read``), None for none, and ``family`` the box's
+    tests in the featured contrast, BH over the card list (``samples.family``).
     """
 
     spec: Dataset
@@ -65,6 +69,8 @@ class Context:
     command: str
     cards: tuple[ParameterCard, ...]
     tested: dict[str, Any] | None = None
+    own: samples.Values | None = None
+    family: dict[str, samples.Test] = field(default_factory=dict)
 
 
 def fill(key: str, **values: Any) -> str:
@@ -206,17 +212,15 @@ class Drawn:
 
     card: Card
     items: tuple[Any, ...]
-    figures: tuple[tuple[Any, str, FigureText], ...]
+    figures: tuple[tuple[Any, str, FigureText, dict[str, Any] | None], ...]
 
 
 def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
     """One gene's card: own evidence, structure, then each reference panel or why it is absent."""
     release = ctx.options.hpa_release
-    items: list[Any] = [_evidence(card, ctx.evidence), *_structure(card)]
-    panels: list[tuple[Any, str, FigureText]] = []
-    if card.renamed:
-        items.insert(0, fill("gene.renamed", typed=card.renamed, release=release,
-                             gene=f"ENSG{card.number:011d}", symbol=card.symbol))  # fmt: skip
+    items: list[Any] = [*_renamed(card, release), _evidence(card, ctx.evidence),
+                        *_structure(card)]  # fmt: skip
+    panels: list[tuple[Any, str, FigureText, dict[str, Any] | None]] = []
 
     def panel(data: Any, kind: str, words: FigureText,
               views: list[tuple[str, Any, FigureText]] | None = None,
@@ -231,7 +235,7 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
             f"{kind}_{_slug(card)}",
             replace(words, back=f"{writer.stem('overview')}.html"),
         )
-        panels.append((data, what, words))
+        panels.append((data, what, words, controls))
         block = figure_block(data, writer.stem(what), words)
         if views is not None and len(views) > 1:
             block = viewed(block, views, word(f"figures.{kind}.view"))
@@ -239,20 +243,19 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
             block = replace(block, controls=controls)
         items.append(block)
 
+    lines, own = _own(card, ctx)
+    items += lines
+    for kind, data, words, choices in own:
+        panel(data, kind, words, choices)
     if card.tissues is not None:
         views = [(label, data, _words("tissues", numbers))
                  for label, data, numbers in figures.tissue_views(card)]  # fmt: skip
         panel(views[0][1], "tissues", views[0][2], views)
     if card.exons is not None:
-        if (drawn := figures.exons(card)) is None:
-            items.append(fill("figures.exons.too_few", symbol=card.symbol,
-                              floor=DETECTED))  # fmt: skip
+        if isinstance(exon := _exon_panel(card), str):
+            items.append(exon)
         else:
-            heat, numbers, pair = drawn
-            lead = "lead" if pair is not None else "lead_none"
-            panel(
-                heat, "exons", _words("exons", numbers, lead), controls=figures.exon_controls(heat)
-            )
+            panel(exon[0], "exons", exon[1], controls=figures.exon_controls(exon[0]))
     if card.junctions is not None:
         heat, numbers = figures.junctions(card)
         panel(heat, "junctions", _words("junctions", numbers))
@@ -262,6 +265,51 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         items.append(_facts(card, release, hpa.cell_lines(ctx.spec.info, ctx.spec.path.name)))
     items += [_unavailable(card, source) for source in card.notes]
     return Drawn(card, tuple(items), tuple(panels))
+
+
+def _renamed(card: Card, release: str) -> list[str]:
+    """The line naming the symbol HPA gave a gene the table lacks, where it was renamed."""
+    if not card.renamed:
+        return []
+    return [fill("gene.renamed", typed=card.renamed, release=release,
+                 gene=f"ENSG{card.number:011d}", symbol=card.symbol)]  # fmt: skip
+
+
+def _exon_panel(card: Card) -> tuple[Any, FigureText] | str:
+    """F4's figure and words, or the line standing in where too few tissues express the gene."""
+    if (drawn := figures.exons(card)) is None:
+        return fill("figures.exons.too_few", symbol=card.symbol, floor=DETECTED)
+    heat, numbers, pair = drawn
+    return heat, _words("exons", numbers, "lead" if pair is not None else "lead_none")
+
+
+def _own(card: Card, ctx: Context) -> tuple[list[str], list[tuple[str, Any, FigureText, Any]]]:
+    """The card's own-sample panels: the featured contrast's box, then F1 with its batch views.
+
+    Each panel is (kind, figure, words, views); a box the family holds no test for is a line
+    printed in its place.
+    """
+    if ctx.own is None or ctx.spec.de is None:
+        return [], []
+    labels = every(ctx.spec.contrasts, ctx.spec.columns)
+    featured = ctx.spec.de.featured
+    row = ctx.evidence.filter((pl.col("number") == card.number)
+                              & (pl.col("contrast") == featured))  # fmt: skip
+    padj = row["padj"][0] if row.height else None
+    out: list[tuple[str, Any, FigureText, Any]] = []
+    lines = []
+    drawn = boxes.box(card, ctx.own, featured, labels[featured], ctx.family, padj)
+    if drawn is not None:
+        out.append(("box", drawn[0], _words("box", drawn[1]), None))
+    else:
+        lines.append(fill("figures.box.none", symbol=card.symbol, contrast=labels[featured].label))
+    if len(ctx.spec.contrasts) > 1:
+        names = boxes.names(ctx.spec)
+        found = boxes.views(card, ctx.own, names, samples.batches(ctx.own, boxes.MAX_BATCHES))
+        choices = [(name, data, _words("contrasts", numbers)) for name, data, numbers in found]
+        if choices:
+            out.append(("contrasts", choices[0][1], choices[0][2], choices))
+    return lines, out
 
 
 def _group(drawn: Drawn, packed: bool) -> Group:
@@ -308,6 +356,10 @@ def _list_panel(ctx: Context, drawn: list["Drawn"], first: int) -> Group | None:
     calls[listing.UNTESTED] = word("evidence.untested")
     words = {"list": text.raw(PAGE, "list"), "picker": text.raw("ui", "picker"),
              "errors": text.raw("ui", "select"), "calls": calls}  # fmt: skip
+    words["list"] = {**words["list"], "heat_caption": fill(
+        "list.heat_caption", alpha=ALPHA, lfc_min=LFC_MIN, contrasts=len(contrasts),
+        genes="{genes}", listed="{listed}")}  # fmt: skip
+    words["heat"] = figures.live_scale([label for _, label in contrasts])
     settings = listing.controls(ctx.tested, contrasts, featured, cards,
                                 runtime.retypable(_argv(ctx)), words)  # fmt: skip
     return Group(word("list.group"), (Panel("genelist", settings),), lead=word("list.lead"))
@@ -508,9 +560,16 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
         evidence=ctx.evidence.filter(pl.col("number").is_in(numbers)),
     )
     _tables(writer, shown)
+    if shown.own is not None:
+        boxes.write_tables(writer, shown.own, shown.spec, shown.chosen)
     figures_kept = [f for d in drawn[:kept] for f in d.figures]
-    for data, what, words in ([view.figure] if view is not None else []) + figures_kept:
+    shown_view = [(*view.figure, None)] if view is not None else []
+    for data, what, words, controls in shown_view + figures_kept:
         writer.files += write_figure(data, writer.out, writer.stem(what), title=words.title,
                                      data_releases=writer.releases, text=words)  # fmt: skip
+        if controls is not None:
+            # Opened alone, the figure keeps the control its contract does not carry (E.1d).
+            block = replace(figure_block(data, writer.stem(what), words), controls=controls)
+            write(FigurePage(words.title, block), writer.out / f"{writer.stem(what)}.html")
     built = _module_page(ctx, drawn[:kept], [d.card for d in drawn[kept:]], view)
     return [write(built, page), write_entry(writer.out, "genecard"), *writer.files]
