@@ -254,11 +254,14 @@ _SHAPED = {
     "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"],
                        "axes": c.get("axes", [])},  # fmt: skip
     "ora": lambda c: {"words": c["words"], "backgrounds": c["backgrounds"],
-                      "featured": c["featured"]},
+                      "featured": c["featured"], "contrasts": c.get("contrasts", []),
+                      "top": c.get("top")},
     "subset": lambda c: {"words": c["words"], "options": c["options"],
                          "scales": c.get("scales", []), "summary": c["summary"]},
     "genelist": lambda c: {"words": c["words"], "contrasts": c["contrasts"],
                            "featured": c["featured"]},
+    # M6's running score for any tested set (WO7): the select's label and its sets in words.
+    "running": lambda c: {"label": c["label"], "options": [s["label"] for s in c["sets"]]},
 }  # fmt: skip
 
 

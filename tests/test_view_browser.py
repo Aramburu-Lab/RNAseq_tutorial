@@ -57,7 +57,9 @@ def test_a_view_swaps_the_figure_and_its_words_and_comes_back(ran, page):
         start, other, back = view["start"], view["other"], view["back"]
         assert start["options"] > 1 and not start["moved"] and start["line"] == ""
         assert other["moved"] and other["line"].startswith("This view shows ")
-        assert other["title"] != start["title"] or other["caption"] != start["caption"]
+        # A grid view may keep the words and change the bars (M6's background, every set).
+        assert (other["title"], other["caption"], other["y"]) != (
+            start["title"], start["caption"], start["y"])  # fmt: skip
         assert back["caption"] == start["caption"] and back["title"] == start["title"]
         assert back["y"] == start["y"] and not back["moved"]
     assert any(v["other"]["y"] != v["start"]["y"] for v in seen["acted"])

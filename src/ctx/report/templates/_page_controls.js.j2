@@ -22,6 +22,19 @@
     function names(list) { return list.map(function (i) { return cfg.symbols[i]; }); }
     var build = { up: names(cfg.calls.up), down: names(cfg.calls.down), source: words.build };
     var list = build, tries = 0, drawn = false;
+    /* Another contrast's calls, tested against its own tested genes (WO7): picking one sets the
+       background with it; the build's contrast gives the build's list back. */
+    var contrast = form.elements.contrast, setsShown = form.elements.sets;
+    var calls = Object.create(null);
+    (cfg.contrasts || []).forEach(function (c) {
+      calls[c[0]] = { up: names(c[2]), down: names(c[3]),
+                      source: ctxPick.fill(words.contrast_calls, { label: c[1] }) };
+    });
+    if (contrast) contrast.addEventListener("change", function () {
+      list = contrast.value === cfg.featured ? build : calls[contrast.value];
+      form.elements.background.value = contrast.value;
+      notes.textContent = "";
+    });
     function families() {
       var d = form.elements.direction.value;
       if (d === "all") return [["all", list.up.concat(list.down).concat(list.none || [])]];
@@ -34,8 +47,10 @@
       families().forEach(function (f) {
         var found = ctxOra.ora(f[1], bg.genes, sets, cfg.min_size, cfg.max_size, lf);
         found.forEach(function (r) { rows.push([f[0]].concat([r.name, r.size, r.hits, r.expected, r.p, r.fdr, r.genes.join(";")])); });
-        var shown = found.filter(function (r) { return r.fdr < cfg.alpha; })
+        var top = setsShown && setsShown.value === "top";
+        var shown = found.filter(function (r) { return top || r.fdr < cfg.alpha; })
           .sort(function (a, b) { return a.fdr - b.fdr || (a.name < b.name ? -1 : 1); });
+        if (top) shown = shown.slice(0, cfg.top);
         passing += shown.length;
         shown.forEach(function (r) { if (cats.indexOf(cfg.labels[r.name]) < 0) cats.push(cfg.labels[r.name]); });
         traces.push({ type: "bar", orientation: "h", name: words.families[f[0]],
@@ -46,7 +61,8 @@
           hovertemplate: words.hover + "<extra></extra>" });
       });
       var moved = list !== build || form.elements.direction.value !== "each" ||
-        form.elements.background.value !== cfg.featured;
+        form.elements.background.value !== cfg.featured ||
+        (!!setsShown && setsShown.value !== "passing");
       /* At the build's settings the figure stays as built, which the PDF and SVG draw. */
       if (moved || drawn) {
         var others = div.data.filter(function (t) { return t.type !== "bar"; });

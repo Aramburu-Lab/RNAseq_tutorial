@@ -1,0 +1,33 @@
+{% raw %}
+/* M6's running enrichment score for any tested set (WO7): the page twin of
+   ctx.function.lite._running and of its enrichment score, apart from the page so
+   tests/test_running_page.py runs it against lite under node. The ranking's |statistic|, in
+   rank order, travels as little-endian float64 in base64; a set is its members' ranks. */
+var ctxRunning = {
+  /* Little-endian float64 values from base64. */
+  values: function (encoded) {
+    var bytes = Uint8Array.from(atob(encoded), function (c) { return c.charCodeAt(0); });
+    var view = new DataView(bytes.buffer), out = new Array(bytes.length / 8);
+    for (var i = 0; i < out.length; i++) out[i] = view.getFloat64(8 * i, true);
+    return out;
+  },
+  /* lite._running: each member adds its weight's share, each other gene takes 1 / (n - k),
+     summed along the ranking from the most positive statistic. */
+  running: function (weights, positions) {
+    var n = weights.length, k = positions.length, total = 0, tags = new Float64Array(n);
+    positions.forEach(function (p) { total += weights[p]; });
+    positions.forEach(function (p) { tags[p] = weights[p] / total; });
+    var miss = 1 / (n - k), member = new Uint8Array(n), out = new Array(n), sum = 0;
+    positions.forEach(function (p) { member[p] = 1; });
+    for (var i = 0; i < n; i++) { sum += tags[i] - (member[i] ? 0 : miss); out[i] = sum; }
+    return out;
+  },
+  /* The enrichment score: the running sum's extreme of larger magnitude, 0 counting as a
+     value it takes; the minimum on a tie, as lite._pick takes it. */
+  score: function (running) {
+    var top = 0, bottom = 0;
+    running.forEach(function (v) { if (v > top) top = v; if (v < bottom) bottom = v; });
+    return Math.abs(top) > Math.abs(bottom) ? top : bottom;
+  }
+};
+{% endraw %}

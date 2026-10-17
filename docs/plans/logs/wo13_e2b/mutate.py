@@ -51,6 +51,26 @@ GROUPS = {
         "box_no_export": ("src/ctx/viz/box.py", '    def export_layers(self) -> dict[str, Any]:\n        """Nothing: the page draws every box, point and label the figure files draw."""\n        return {}\n', "", [T_M5B]),
     },
 }  # fmt: skip
+RUNJS, PAGERUN = (
+    "src/ctx/report/templates/_running.js.j2",
+    "src/ctx/report/templates/_page_running.js.j2",
+)
+T_RUN, T_M6B = "tests/test_running_page.py", "tests/test_function_views_browser.py"
+GROUPS["m6"] = {
+    "twin_misses_members": (RUNJS, "sum += tags[i] - (member[i] ? 0 : miss);", "sum += tags[i] - miss;", [T_RUN]),
+    "twin_peak_on_tie": (RUNJS, "return Math.abs(top) > Math.abs(bottom) ? top : bottom;", "return Math.abs(top) >= Math.abs(bottom) ? top : bottom;", [T_RUN]),
+    "twin_weight_not_shared": (RUNJS, "tags[p] = weights[p] / total;", "tags[p] = weights[p];", [T_RUN]),
+    "ranking_tie_by_input": ("src/ctx/function/lite.py", "key=lambda i: (-scores[i], names[i])", "key=lambda i: -scores[i]", [T_RUN]),
+    "page_dots_on_build": (PAGERUN, "Plotly.restyle(div, { x: [s.positions], y: [s.positions.map(function (p) { return run[p]; })] },\n                     [dots]);", "", [T_M6B]),
+    "page_line_x_kept": (PAGERUN, "Plotly.restyle(div, { x: [run.map(function (_, r) { return r; })], y: [run] }, [line]);", "Plotly.restyle(div, { y: [run] }, [line]);", [T_M6B]),
+    "page_caption_kept": (PAGERUN, "caption.innerHTML = i ? s.caption : start.caption;", "caption.innerHTML = start.caption;", [T_M6B]),
+    "page_export_kept": (PAGERUN, "if (built) cfg.export = i ? Object.assign({}, built, { caption: s.export_caption }) : built;", "", [T_M6B]),
+    "ora_contrast_keeps_build": (CONTROLS, "list = contrast.value === cfg.featured ? build : calls[contrast.value];", "list = build;", [T_M6B]),
+    "ora_background_kept": (CONTROLS, "      form.elements.background.value = contrast.value;\n", "", [T_M6B]),
+    "ora_top_uncapped": (CONTROLS, "        if (top) shown = shown.slice(0, cfg.top);\n", "", [T_M6B]),
+    "background_all_capped": ("src/ctx/function/background.py", 'return both[:TOP] if how == "top" else both', "return both[:TOP]", [T_M6B]),
+    "background_down_as_up": ("src/ctx/function/run.py", "background.tested_against(_symbols(results, d),", 'background.tested_against(_symbols(results, "up"),', [T_M6B]),
+}  # fmt: skip
 
 
 def run(group: str, name: str) -> str:

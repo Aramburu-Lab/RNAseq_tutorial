@@ -4,6 +4,7 @@
 {% include "_filter.js.j2" %}
 {% include "_pairs.js.j2" %}
 {% include "_grid.js.j2" %}
+{% include "_running.js.j2" %}
 {% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% if live %}{% include "_select.js.j2" %}
@@ -206,6 +207,10 @@
   scope.querySelectorAll("form.view[data-grid]").forEach(function (form) {
     guard("grid", function () { ctxGrid.wire(form); });
   });
+  /* M6's running score for any tested set (ctxRunning). */
+  scope.querySelectorAll("form.running").forEach(function (form) {
+    guard("running", function () { runningSet(form); });
+  });
 
   /* M6's live over-representation (GS.5). */
   scope.querySelectorAll("form.ora").forEach(function (form) {
@@ -300,6 +305,7 @@
 {% include "_page_brush.js.j2" %}
 {% include "_page_pick.js.j2" %}
 {% include "_page_controls.js.j2" %}
+{% include "_page_running.js.j2" %}
 {% if live %}{% include "_page_m9.js.j2" %}{% endif %}
 {% raw %}})();
 {% endraw %}
