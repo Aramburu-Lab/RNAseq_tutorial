@@ -423,6 +423,8 @@ it were reversed.
 
 **Evidence.** On TCGA-BRCA: 1,231 files md5-checked; 1,095 tumour cases, 1,093 kept, 113 of 113 pairs; patients 1,095, 1,093, 1,092, 1,088; Liu Table 3's counts equal. `cox.zph` weights each event time's score by g of that time: weighting each patient by their own time gave chi-square 2.52 against R's 0.12. 63 planted mutations caught.
 
+
+**Amended 2026-10-17 (wo13-t).** `chosen()` takes any gather sheet. A sheet with none of GDC's own columns (chosen, drop_reason, file_id, md5sum, case_id) is a fetchngs sheet and passes unchanged; one with any of them but no `chosen` is refused, so a lost column cannot pass every file through. Rejected: passing any sheet without `chosen` unchanged, which hides exactly that loss. Modules that read FASTQ runs or Salmon files (quant, process) refuse a GDC sheet through `refuse_sheet`.
 ---
 
 ## D-054 — M4 quantifies by ctx's own tximport port and reads the cluster's Salmon files from their own folder
