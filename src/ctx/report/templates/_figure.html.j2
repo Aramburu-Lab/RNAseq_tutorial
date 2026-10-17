@@ -80,6 +80,7 @@
 <p class="calls-summary view-summary" aria-live="polite"></p>
 {% endif %}
 {% if f.kind == "running" %}{% include "_running_form.html.j2" %}{% endif %}
+{% if f.kind == "strata" %}{% include "_strata_form.html.j2" %}{% endif %}
 {% if f.kind == "subset" %}{% set w = f.defaults.words %}
 {# M9's checkbox sets (E.1a): F3's lineages and tau's scale, F4's tissues; ctxM9 retakes the
    panel over what is ticked. #}

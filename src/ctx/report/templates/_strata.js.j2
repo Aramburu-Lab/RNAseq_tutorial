@@ -1,0 +1,67 @@
+{% raw %}
+/* M8's volcano by biotype (WO10): M5's call rule, ctxCalls.call, on a p adjusted within each
+   biotype, and each called gene drawn in its biotype's colour. tests/test_strata_page.py runs
+   split and summary under node against ctx.ncrna.figures.strata_summary. */
+var ctxStrata = {
+  /* Little-endian floats from base64: 8 bytes each, or 4 with wide false. */
+  floats: function (encoded, wide) {
+    var bytes = Uint8Array.from(atob(encoded), function (c) { return c.charCodeAt(0); });
+    var view = new DataView(bytes.buffer), size = wide ? 8 : 4, out = new Array(bytes.length / size);
+    for (var i = 0; i < out.length; i++) {
+      out[i] = wide ? view.getFloat64(size * i, true) : view.getFloat32(size * i, true);
+    }
+    return out;
+  },
+  /* The packed rows (ctx.ncrna.figures.packed) as one object per gene; y is -log10 of the raw
+     p at the floor at least, as the figure draws it. */
+  rows: function (packed, cfg) {
+    var columns = {}, n = packed.n, names = packed.names.split("\n");
+    Object.keys(packed.f64).forEach(function (c) { columns[c] = ctxStrata.floats(packed.f64[c], true); });
+    Object.keys(packed.f32).forEach(function (c) { columns[c] = ctxStrata.floats(packed.f32[c], false); });
+    var drawn = Uint8Array.from(atob(packed.drawn), function (c) { return c.charCodeAt(0); });
+    var out = new Array(n);
+    for (var i = 0; i < n; i++) {
+      var row = { gene_name: names[i], drawn: !!(drawn[i >> 3] >> (i & 7) & 1) };
+      row[cfg.stratum] = cfg.levels[packed.biotype[i]];
+      Object.keys(columns).forEach(function (c) { row[c] = columns[c][i]; });
+      row[cfg.y] = -Math.log10(Math.max(row.pvalue, cfg.p_floor));
+      out[i] = row;
+    }
+    return out;
+  },
+  /* The rows by level: each chosen biotype's called genes, then the genes not called. A
+     column adjusted within the biotype draws no line of its own, so the rule's line is unused. */
+  split: function (rows, cfg, t, basis, alpha) {
+    var rule = { gate: cfg.gate, lfc: cfg.lfc, p: basis, n_tested: rows.length };
+    var parts = ctxCalls.call(rows, rule, t, basis, alpha).parts, out = {};
+    cfg.levels.forEach(function (level) { out[level] = { up: 0, down: 0, rows: [] }; });
+    ["up", "down"].forEach(function (k) {
+      parts[k].forEach(function (r) {
+        var level = out[r[cfg.stratum]];
+        if (!level) return;
+        level[k] += 1; level.rows.push(r);
+      });
+    });
+    out[cfg.ns] = { rows: parts.ns };
+    return out;
+  },
+  /* The points the files add to the page's: at the build's setting the build's thinned ones;
+     moved, the page draws every gene a cut-off can call, so only those no cut-off calls. */
+  thinned: function (cfg, moved, built) { return moved ? cfg.never : built; },
+  fill: function (text, values) {
+    return text.replace(/\{(\w+)(?::[^}]*)?\}/g, function (all, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : all;
+    });
+  },
+  /* The live line: each biotype's calls, numbers grouped as Python's {:,} groups them. */
+  summary: function (split, cfg, t, basis, alpha) {
+    var counts = cfg.levels.map(function (b) {
+      var s = split[b];
+      return ctxStrata.fill(cfg.entry, { biotype: b, n: (s.up + s.down).toLocaleString("en-US"),
+        up: s.up.toLocaleString("en-US"), down: s.down.toLocaleString("en-US") });
+    }).join("; ");
+    return ctxStrata.fill(cfg.summary, { basis: cfg.bases[basis], cutoff: String(alpha),
+                                         fc: t.toFixed(2), counts: counts });
+  }
+};
+{% endraw %}

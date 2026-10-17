@@ -5,6 +5,7 @@
 {% include "_pairs.js.j2" %}
 {% include "_grid.js.j2" %}
 {% include "_running.js.j2" %}
+{% include "_strata.js.j2" %}
 {% include "_export.js.j2" %}
 {% include "_glossary.js.j2" %}
 {% if live %}{% include "_select.js.j2" %}
@@ -86,7 +87,7 @@
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist):not(.strata)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -211,6 +212,10 @@
   scope.querySelectorAll("form.running").forEach(function (form) {
     guard("running", function () { runningSet(form); });
   });
+  /* M8's volcano by biotype at the reader's cut-offs (ctxStrata). */
+  scope.querySelectorAll("form.strata").forEach(function (form) {
+    guard("strata", function () { strataCalls(form); });
+  });
 
   /* M6's live over-representation (GS.5). */
   scope.querySelectorAll("form.ora").forEach(function (form) {
@@ -306,6 +311,7 @@
 {% include "_page_pick.js.j2" %}
 {% include "_page_controls.js.j2" %}
 {% include "_page_running.js.j2" %}
+{% include "_page_strata.js.j2" %}
 {% if live %}{% include "_page_m9.js.j2" %}{% endif %}
 {% raw %}})();
 {% endraw %}

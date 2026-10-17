@@ -166,9 +166,10 @@ def shifts(found: targets.Targets, mirnas: Sequence[str], results: pl.DataFrame)
     return frame
 
 
-def curves(found: targets.Targets, mirna: str, results: pl.DataFrame) -> pl.DataFrame:
-    """The cumulative share of each class's genes at or below each fold change, default preset."""
-    classed = targets.classes(found, mirna, results, targets.DEFAULT_PRESET)
+def curves(found: targets.Targets, mirna: str, results: pl.DataFrame,
+           preset: float = targets.DEFAULT_PRESET) -> pl.DataFrame:  # fmt: skip
+    """The cumulative share of each class's genes at or below each fold change, at a preset."""
+    classed = targets.classes(found, mirna, results, preset)
     parts = []
     for target in targets.CLASSES:
         x = np.sort(classed.filter(pl.col("target") == target)["log2FoldChange"].to_numpy())

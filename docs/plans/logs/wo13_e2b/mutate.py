@@ -73,6 +73,24 @@ GROUPS["m6"] = {
 }  # fmt: skip
 
 
+STRATAJS, PAGESTRATA = (
+    "src/ctx/report/templates/_strata.js.j2",
+    "src/ctx/report/templates/_page_strata.js.j2",
+)
+T_STRATA, T_M8B = "tests/test_strata_page.py", "tests/test_ncrna_views_browser.py"
+GROUPS["m8"] = {
+    "strata_pooled_padj": (STRATAJS, "var parts = ctxCalls.call(rows, rule, t, basis, alpha).parts", 'var parts = ctxCalls.call(rows, rule, t, "padj", alpha).parts', [T_STRATA]),
+    "strata_carries_all": ("src/ctx/ncrna/figures.py", 'callable_ = pl.col("drawn") | (pl.col("pvalue") < max(CUTOFF_PRESETS))', 'callable_ = pl.col("pvalue") < 2', [T_STRATA]),
+    "strata_summary_fc_digits": (STRATAJS, "fc: t.toFixed(2), counts: counts", "fc: String(t), counts: counts", [T_STRATA]),
+    "page_lines_left": (PAGESTRATA, "        Plotly.restyle(div, { x: [[-t, -t], [t, t]], y: [top, top] }, cfg.lines);\n", "", [T_M8B]),
+    "export_build_thinned": (STRATAJS, "thinned: function (cfg, moved, built) { return moved ? cfg.never : built; },", "thinned: function (cfg, moved, built) { return built; },", [T_STRATA]),
+    "page_reset_ignored": (PAGESTRATA, '    form.addEventListener("reset", function () {\n      setTimeout(function () { state = { exact: null, shown: null, unit: unit.value }; update(true); }, 0);\n    });\n', "", [T_M8B]),
+    "page_called_grey": (PAGESTRATA, "var shown = split[level].rows.filter(function (r) { return moved || r.drawn; });", "var shown = level === cfg.ns ? split[level].rows : [];", [T_M8B]),
+    "f7_default_cutoff": ("src/ctx/ncrna/mirna_page.py", "mirna.curves(tcga.found, first, tested, preset)", "mirna.curves(tcga.found, first, tested)", [T_M8B]),
+    "f7_classes_ignored": ("src/ctx/ncrna/mirna_page.py", 'drawn = curves.filter(pl.col("target").is_in([*kept, targets.NON_TARGET]))', "drawn = curves", [T_M8B]),
+}  # fmt: skip
+
+
 def run(group: str, name: str) -> str:
     """Plant one mutation, run its tests, restore; the verdict as one line."""
     path, old, new, tests = GROUPS[group][name]

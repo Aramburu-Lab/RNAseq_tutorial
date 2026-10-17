@@ -1,0 +1,10 @@
+{# M8's volcano by biotype (WO10): the volcano's cut-offs, each p adjusted within the biotype;
+   ctxStrata calls the genes in the page. Live calling never wires it (class strata). #}
+<form class="calls strata" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.calls.label }}">
+<label>{{ ui.calls.fc }}<span class="pair"><input name="fc" type="number" min="0" step="any" value="{{ f.defaults.fc }}" aria-label="{{ ui.calls.fc_input }}"><select name="fc_unit" aria-label="{{ ui.calls.fc_unit }}"><option value="log2" selected>{{ ui.calls.log2 }}</option><option value="pct">{{ ui.calls.pct }}</option></select></span></label>
+<label>{{ ui.calls.basis }}<select name="basis">{% for column, words in f.defaults.bases %}<option value="{{ column }}"{% if loop.first %} selected{% endif %}>{{ words }}</option>{% endfor %}</select></label>
+<label>{{ ui.calls.cutoff }}<span class="pair"><input name="cutoff" type="text" inputmode="decimal" autocomplete="off" value="{{ f.defaults.alpha }}" aria-label="{{ ui.calls.cutoff_input.format(presets=f.defaults.presets | join(', ')) }}"><button type="button" data-step="-1" aria-label="{{ ui.calls.stricter }}" title="{{ ui.calls.stricter }}">&#9660;</button><button type="button" data-step="1" aria-label="{{ ui.calls.looser }}" title="{{ ui.calls.looser }}">&#9650;</button></span></label>
+<button type="reset">{{ ui.calls.reset }}</button>
+</form>
+<noscript><p class="note">{{ ui.calls.noscript }}</p></noscript>
+<p class="calls-summary strata-summary" aria-live="polite">{{ f.defaults.summary }}</p>
