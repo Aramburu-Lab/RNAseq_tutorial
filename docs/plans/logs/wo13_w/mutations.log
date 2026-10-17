@@ -1,0 +1,22 @@
+uneven_last_of_ties	CAUGHT	1 failed, 4 passed in 1.76s
+f3_trace_left_visible	CAUGHT	1 failed in 27.83s
+f3_axis_keeps_cells	CAUGHT	1 failed in 28.68s
+f3_scale_ignored	CAUGHT	1 failed in 28.98s
+f4_reference_over_every_tissue	CAUGHT	1 failed, 1 passed in 28.67s
+f4_cv_axis_as_built	CAUGHT	1 failed, 1 passed in 28.87s
+list_anchor_without_list_group	CAUGHT	1 failed, 2 passed in 13.71s
+list_carries_untested	CAUGHT	1 failed in 1.26s
+list_digits_uncut	CAUGHT	1 failed in 1.25s
+list_call_from_rounded_padj	CAUGHT	1 failed in 1.28s
+entry_drops_fragment	CAUGHT	1 failed, 2 passed in 39.53s
+list_shows_untested_uncarded	CAUGHT	1 failed, 2 passed in 29.25s
+list_drops_carded_untested	CAUGHT	1 failed, 2 passed in 29.29s
+list_command_names_carded	SURVIVED	3 passed in 28.86s
+debounce_none	CAUGHT	1 failed in 1.58s
+debounce_pending_kept	CAUGHT	1 failed in 1.61s
+debounce_cancel_noop	CAUGHT	1 failed, 1 passed in 1.57s
+input_redraws_per_key	CAUGHT	1 failed in 11.17s
+driver_killed_alone	CAUGHT	1 failed in 11.79s
+list_command_names_carded	CAUGHT	1 failed, 2 passed in 28.27s
+list_shows_untested_uncarded	CAUGHT	1 failed, 2 passed in 28.42s
+list_drops_carded_untested	CAUGHT	1 failed, 2 passed in 28.17s

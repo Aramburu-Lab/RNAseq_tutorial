@@ -17,7 +17,7 @@ from ctx import runtime
 from ctx.dataset import Dataset
 from ctx.de.page import every
 from ctx.de.run import Writer
-from ctx.genecard import annotation, figures, gtex, hpa, junctions
+from ctx.genecard import annotation, figures, gtex, hpa, junctions, listing
 from ctx.genecard.cards import Card
 from ctx.genecard.summary import DETECTED, spread, tau
 from ctx.io.naming import stem
@@ -29,6 +29,7 @@ from ctx.report.builder import (
     Group,
     KeyNumber,
     ModulePage,
+    Panel,
     ParameterCard,
     Reproduction,
     Result,
@@ -49,7 +50,11 @@ PG_PER_UG = 1e6
 
 @dataclass(frozen=True)
 class Context:
-    """What the page is built from: the run's options and every card's data."""
+    """What the page is built from: the run's options and every card's data.
+
+    ``tested`` is every tested gene's M5 evidence for the list from a link
+    (``listing.evidence``); None leaves the page without that panel.
+    """
 
     spec: Dataset
     options: Any
@@ -59,6 +64,7 @@ class Context:
     settings: runtime.Settings
     command: str
     cards: tuple[ParameterCard, ...]
+    tested: dict[str, Any] | None = None
 
 
 def fill(key: str, **values: Any) -> str:
@@ -213,11 +219,13 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
                              gene=f"ENSG{card.number:011d}", symbol=card.symbol))  # fmt: skip
 
     def panel(data: Any, kind: str, words: FigureText,
-              views: list[tuple[str, Any, FigureText]] | None = None) -> None:  # fmt: skip
+              views: list[tuple[str, Any, FigureText]] | None = None,
+              controls: dict[str, Any] | None = None) -> None:  # fmt: skip
         """A figure of the card: its page block now, its files once the card is kept.
 
         With ``views``, the first being the figure as built, the block carries a select
-        between them (the D-051 view kind); the files draw the first.
+        between them (the D-051 view kind); the files draw the first. ``controls`` are a
+        figure's page controls where its contract carries none, as F4's heatmap.
         """
         what, words = (
             f"{kind}_{_slug(card)}",
@@ -227,6 +235,8 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         block = figure_block(data, writer.stem(what), words)
         if views is not None and len(views) > 1:
             block = viewed(block, views, word(f"figures.{kind}.view"))
+        if controls is not None:
+            block = replace(block, controls=controls)
         items.append(block)
 
     if card.tissues is not None:
@@ -240,7 +250,9 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         else:
             heat, numbers, pair = drawn
             lead = "lead" if pair is not None else "lead_none"
-            panel(heat, "exons", _words("exons", numbers, lead))
+            panel(
+                heat, "exons", _words("exons", numbers, lead), controls=figures.exon_controls(heat)
+            )
     if card.junctions is not None:
         heat, numbers = figures.junctions(card)
         panel(heat, "junctions", _words("junctions", numbers))
@@ -261,19 +273,44 @@ def _group(drawn: Drawn, packed: bool) -> Group:
                  drawn.items, lead=lead, packed=packed)  # fmt: skip
 
 
+def _argv(ctx: Context) -> list[str]:
+    """This run's ``ctx genecard`` arguments, its gene list apart."""
+    argv = ["--root", str(ctx.settings.root), "genecard", "--dataset", ctx.spec.slug,
+            "--dataset-file", str(ctx.options.dataset_file)]  # fmt: skip
+    if ctx.options.hpa_release != hpa.RELEASE:
+        argv += ["--hpa-release", ctx.options.hpa_release]
+    if ctx.options.offline:
+        argv.append("--offline")
+    return argv
+
+
 def left_out_command(ctx: Context, cards: list[Card]) -> str:
     """The command that builds the cards a page could not hold, on a page of their own.
 
     Each gene by its Ensembl ID: a symbol can name two genes, and an ID cannot.
     """
-    argv = ["--root", str(ctx.settings.root), "genecard", "--dataset", ctx.spec.slug,
-            "--dataset-file", str(ctx.options.dataset_file),
-            "--genes", ",".join(f"ENSG{c.number:011d}" for c in cards)]  # fmt: skip
-    if ctx.options.hpa_release != hpa.RELEASE:
-        argv += ["--hpa-release", ctx.options.hpa_release]
-    if ctx.options.offline:
-        argv.append("--offline")
-    return runtime.retypable(argv)
+    return runtime.retypable([*_argv(ctx), "--genes",
+                              ",".join(f"ENSG{c.number:011d}" for c in cards)])  # fmt: skip
+
+
+def _list_panel(ctx: Context, drawn: list["Drawn"], first: int) -> Group | None:
+    """The list from a link: every tested gene's evidence, and where each kept card sits.
+
+    ``first`` is the group number of the first card, as the page numbers its groups.
+    """
+    if ctx.tested is None:
+        return None
+    labels = {n: w.label for n, w in every(ctx.spec.contrasts, ctx.spec.columns).items()}
+    contrasts = [(c.name, labels[c.name]) for c in ctx.spec.contrasts]
+    featured = ctx.spec.de.featured if ctx.spec.de is not None else contrasts[0][0]
+    cards = [(d.card.number, f"group-{first + i}", d.card.symbol) for i, d in enumerate(drawn)]
+    calls = {code: name for name, code in listing.CALL_CODES.items()}
+    calls[listing.UNTESTED] = word("evidence.untested")
+    words = {"list": text.raw(PAGE, "list"), "picker": text.raw("ui", "picker"),
+             "errors": text.raw("ui", "select"), "calls": calls}  # fmt: skip
+    settings = listing.controls(ctx.tested, contrasts, featured, cards,
+                                runtime.retypable(_argv(ctx)), words)  # fmt: skip
+    return Group(word("list.group"), (Panel("genelist", settings),), lead=word("list.lead"))
 
 
 def _left_out(ctx: Context, cards: list[Card]) -> Group:
@@ -392,8 +429,14 @@ def evidence_view(writer: Writer, ctx: Context) -> Evidence | None:
 
 def _module_page(ctx: Context, drawn: list[Drawn], left: list[Card],
                  evidence: Evidence | None = None) -> ModulePage:  # fmt: skip
-    """The page over the cards it keeps: the first drawn whole, the rest packed (C3.1)."""
+    """The page over the cards it keeps: the first drawn whole, the rest packed (C3.1).
+
+    The list from a link comes first, then the evidence view, then the cards: a card's group
+    number counts the groups before it.
+    """
     results: list[Result] = [] if evidence is None else [evidence.group]
+    if (listed := _list_panel(ctx, drawn, len(results) + 2)) is not None:
+        results.insert(0, listed)
     results += [_group(d, packed=i > 0) for i, d in enumerate(drawn)]
     if left:
         results.append(_left_out(ctx, left))

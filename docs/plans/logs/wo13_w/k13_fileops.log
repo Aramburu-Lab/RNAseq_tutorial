@@ -1,0 +1,53 @@
+loaded	cpu loop	0.098 s
+loaded	write 500 new files	133.385 s
+loaded	read 500 files	82.783 s
+loaded	delete 500 files	5.542 s
+loaded	30 starts of /usr/bin/true	0.487 s
+real 232.02
+user 0.23
+sys 0.32
+quiet	cpu loop	0.097 s
+quiet	write 500 new files	4.208 s
+quiet	read 500 files	1.793 s
+quiet	delete 500 files	1.610 s
+quiet	30 starts of /usr/bin/true	0.816 s
+real 9.25
+user 0.17
+sys 0.22
+15:27  up 3 days, 23:07, 4 users, load averages: 34.02 36.14 34.11
+load12	cpu loop	0.130 s
+load12	write 500 new files	4.309 s
+load12	read 500 files	2.415 s
+load12	delete 500 files	2.348 s
+load12	30 starts of /usr/bin/true	1.632 s
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73705 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73706 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73707 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73708 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73709 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73710 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73711 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73712 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73713 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73714 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73715 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 15: 73716 Terminated: 15          yes > /dev/null
+load14	cpu loop	0.174 s
+load14	write 500 new files	8.540 s
+load14	read 500 files	6.659 s
+load14	delete 500 files	5.003 s
+load14	30 starts of /usr/bin/true	2.548 s
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73796 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73797 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73798 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73799 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73800 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73801 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73802 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73803 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73804 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73805 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73806 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73807 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 14: 73808 Terminated: 15          yes > /dev/null
+docs/plans/logs/wo13_w/k13_load.sh: line 15: 73809 Terminated: 15          yes > /dev/null

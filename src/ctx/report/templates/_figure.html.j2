@@ -76,6 +76,16 @@
 <noscript><p class="note">{{ ui.view.noscript }}</p></noscript>
 <p class="calls-summary view-summary" aria-live="polite"></p>
 {% endif %}
+{% if f.kind == "subset" %}{% set w = f.defaults.words %}
+{# M9's checkbox sets (E.1a): F3's lineages and tau's scale, F4's tissues; ctxM9 retakes the
+   panel over what is ticked. #}
+<form class="calls subset" data-controls="ctx-controls-{{ f.index }}" data-rows="ctx-data-{{ f.index }}" aria-label="{{ w.label }}">
+<fieldset><legend>{{ w.legend }}</legend>{% for option in f.defaults.options %}<label class="paint"><input type="checkbox" name="kept" value="{{ option }}" checked>{{ option }}</label>{% endfor %}</fieldset>
+{% if f.defaults.scales %}<label>{{ w.scale }}<select name="scale">{% for value, label in f.defaults.scales %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>{% endif %}
+</form>
+<noscript><p class="note">{{ ui.subset.noscript }}</p></noscript>
+<p class="calls-summary subset-summary" aria-live="polite">{{ f.defaults.summary }}</p>
+{% endif %}
 {% if f.kind == "pairs" %}
 <form class="calls pairs" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.pairs.label }}">
 <label>{{ f.defaults.label or ui.pairs.pair }}<select name="pair">{% for value, label in f.defaults.options %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
@@ -113,6 +123,22 @@
 {% endif %}
 <script type="application/json" id="ctx-data-{{ f.index }}">{{ f.rows }}</script>
 </figure>
+{% endmacro %}
+{% macro panel_block(p) %}{% set w = p.defaults.words %}
+{# M9's list from a link (E.1a): the page script fills the line, the table and the command. #}
+<div class="genelist-panel">
+<form class="calls genelist" data-controls="ctx-panel-{{ p.index }}" aria-label="{{ w.label }}">
+<label>{{ w.contrast }}<select name="contrast"><option value="">{{ w.every }}</option>{% for value, label in p.defaults.contrasts %}<option value="{{ value }}"{% if value == p.defaults.featured %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+<label class="genes">{{ w.paste }}<textarea name="pasted" rows="2" spellcheck="false" autocomplete="off"></textarea></label><button type="button" data-paste>{{ w.paste_button }}</button>
+</form>
+<noscript><p class="note">{{ w.noscript }}</p></noscript>
+<p class="calls-summary list-summary" aria-live="polite">{{ w.waiting }}</p>
+<p class="list-notes" aria-live="polite"></p>
+<div class="pick-table js-only" hidden><div class="table-scroll"><table class="result-table pick list"><caption>{{ w.rounded }}</caption><thead><tr></tr></thead><tbody></tbody></table></div>
+<p class="pick-pages"><button type="button" data-page="-1">{{ w.previous }}</button> <span aria-live="polite"></span> <button type="button" data-page="1">{{ w.next }}</button></p></div>
+<figure class="code list-command" hidden><figcaption>{{ w.command }}</figcaption><div class="command"><pre><code id="ctx-list-command-{{ p.index }}"></code></pre><button type="button" class="copy" data-copy="ctx-list-command-{{ p.index }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div></figure>
+<script type="application/json" id="ctx-panel-{{ p.index }}">{{ p.controls }}</script>
+</div>
 {% endmacro %}
 {% macro result_table(t) %}
 <div class="table-scroll"><table class="result-table{% if t.css %} {{ t.css }}{% endif %}">

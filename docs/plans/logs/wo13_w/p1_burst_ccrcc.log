@@ -1,0 +1,82 @@
+{
+ "ccrcc_main/2026-10-17_de_cptac_ccrcc_overview_v1.html": {
+  "burst_0": {
+   "measured": {
+    "drawn": 24321,
+    "one_redraw_ms": 954,
+    "keys": 5,
+    "redraws": 5,
+    "first_key_to_last_redraw_ms": 5046,
+    "handler_ms": [
+     927,
+     945,
+     941,
+     912,
+     912
+    ],
+    "threshold_in_force": "1.5",
+    "summary": "Up in tumour: 1,880 genes. Down: 2,964 genes. Rule: log2 FC at or beyond \u00b11.50 and BH-adjusted p below 0.05."
+   },
+   "errors": []
+  },
+  "burst_1": {
+   "measured": {
+    "drawn": 24321,
+    "one_redraw_ms": 932,
+    "keys": 5,
+    "redraws": 5,
+    "first_key_to_last_redraw_ms": 5057,
+    "handler_ms": [
+     940,
+     934,
+     939,
+     916,
+     918
+    ],
+    "threshold_in_force": "1.5",
+    "summary": "Up in tumour: 1,880 genes. Down: 2,964 genes. Rule: log2 FC at or beyond \u00b11.50 and BH-adjusted p below 0.05."
+   },
+   "errors": []
+  }
+ },
+ "ccrcc_p1/2026-10-17_de_cptac_ccrcc_overview_v1.html": {
+  "burst_0": {
+   "measured": {
+    "drawn": 24321,
+    "one_redraw_ms": 943,
+    "keys": 5,
+    "redraws": 1,
+    "first_key_to_last_redraw_ms": 1631,
+    "handler_ms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "threshold_in_force": "1.5",
+    "summary": "Up in tumour: 1,880 genes. Down: 2,964 genes. Rule: log2 FC at or beyond \u00b11.50 and BH-adjusted p below 0.05."
+   },
+   "errors": []
+  },
+  "burst_1": {
+   "measured": {
+    "drawn": 24321,
+    "one_redraw_ms": 918,
+    "keys": 5,
+    "redraws": 1,
+    "first_key_to_last_redraw_ms": 1645,
+    "handler_ms": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "threshold_in_force": "1.5",
+    "summary": "Up in tumour: 1,880 genes. Down: 2,964 genes. Rule: log2 FC at or beyond \u00b11.50 and BH-adjusted p below 0.05."
+   },
+   "errors": []
+  }
+ }
+}

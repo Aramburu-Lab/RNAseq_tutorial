@@ -18,6 +18,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import subprocess
 from datetime import date
 from pathlib import Path
@@ -499,16 +500,30 @@ def _fit_tasks(page: Path, pages: dict, volcano: str, bands: str) -> list[dict]:
     return [*tasks, {"name": "untested", "url": pages["untested"].as_uri(), "act": HOVERED}]
 
 
-def _browse(tasks: list[dict], downloads: Path) -> dict[str, dict]:
-    """Run tasks in headless Chromium through tests/browser.mjs; results by task name."""
-    plan = {"chromium": CHROMIUM, "downloads": str(downloads), "tasks": tasks}
+def _browse(tasks: list[dict], downloads: Path, chromium: str | None = None,
+            timeout: float = 900) -> dict[str, dict]:  # fmt: skip
+    """Run tasks in headless Chromium through tests/browser.mjs; results by task name.
+
+    The driver traces each step to stderr, so one past ``timeout`` names the step it stopped
+    in. It runs in a session of its own, and past ``timeout`` the whole session is killed:
+    killing the driver alone left its Chromium running, four of them for days (K.13).
+    """
+    plan = {"chromium": chromium or CHROMIUM, "downloads": str(downloads), "tasks": tasks,
+            "trace": True}  # fmt: skip
     node = shutil.which("node")
     assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
-    done = subprocess.run([node, str(ROOT / "tests" / "browser.mjs")], input=json.dumps(plan),
-                          capture_output=True, text=True, check=False, timeout=900)  # fmt: skip
+    with subprocess.Popen([node, str(ROOT / "tests" / "browser.mjs")], stdin=subprocess.PIPE,
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                          start_new_session=True) as proc:  # fmt: skip
+        try:
+            stdout, stderr = proc.communicate(json.dumps(plan), timeout=timeout)
+        except subprocess.TimeoutExpired:
+            os.killpg(proc.pid, signal.SIGKILL)
+            _, stderr = proc.communicate()
+            raise AssertionError(f"browser driver past {timeout:g} s:\n{stderr[-2000:]}") from None
     # The driver's own error, which a bare exit status hides.
-    assert done.returncode == 0, done.stderr[-4000:]
-    return {r["name"]: r for r in json.loads(done.stdout)}
+    assert proc.returncode == 0, stderr[-4000:]
+    return {r["name"]: r for r in json.loads(stdout)}
 
 
 def _decoded(data_url: str, folder: Path, name: str) -> Path:

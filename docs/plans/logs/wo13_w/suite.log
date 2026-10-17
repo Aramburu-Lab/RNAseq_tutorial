@@ -1,0 +1,57 @@
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  4%]
+........................................................................ [  8%]
+........................................................................ [ 12%]
+........................................................................ [ 17%]
+........................................................................ [ 21%]
+........................................................................ [ 25%]
+........................................................................ [ 29%]
+........................................................................ [ 34%]
+.....................................................s.................. [ 38%]
+........................................................................ [ 42%]
+........................................................................ [ 46%]
+........................................................................ [ 51%]
+........................................................................ [ 55%]
+........................................................................ [ 59%]
+........................................................................ [ 63%]
+........................................................................ [ 68%]
+................ssss..................................................ss [ 72%]
+s....................................................................... [ 76%]
+........................................................................ [ 80%]
+........................................................................ [ 85%]
+........................................................................ [ 89%]
+........................................................................ [ 93%]
+........................................ss.............................. [ 97%]
+...................................                                      [100%]
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_sanity_record.py:155: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:173: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_09s9wiuh. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_09s9wiuh/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 17 16:46:00 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:173: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_70en2rp3. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_70en2rp3/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 17 16:46:06 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:173: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ms3bkiz7. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ms3bkiz7/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 17 16:48:33 ...... FATAL ERROR, exiting
+1681 passed, 10 skipped, 1 warning in 332.41s (0:05:32)

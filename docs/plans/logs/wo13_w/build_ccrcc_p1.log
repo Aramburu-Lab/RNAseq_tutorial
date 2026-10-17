@@ -1,0 +1,106 @@
+== gather 2026-10-17T13:36:25Z 628ad3a
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_samplesheet_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_samplesheet_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_samplesheet_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_counts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_counts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_counts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_annotations_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_annotations_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_annotations_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_cases_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_cases_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_cases_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_treatments_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_treatments_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_treatments_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_molecular_tests_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_molecular_tests_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_molecular_tests_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_aliquots_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_aliquots_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/01_gather/2026-10-17_gather_cptac_ccrcc_aliquots_v1_README.md
+        8.75 real         7.11 user         1.56 sys
+           542130176  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              172978  page reclaims
+                 129  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 615  voluntary context switches
+               37860  involuntary context switches
+        106759188821  instructions retired
+         32354711962  cycles elapsed
+           403785144  peak memory footprint
+exit 0
+== de 2026-10-17T13:36:34Z 628ad3a
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_contrasts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_contrasts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_contrasts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_tumour_normal_results_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_tumour_normal_results_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_tumour_normal_results_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_volcano_tumour_normal_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_volcano_tumour_normal_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_volcano_tumour_normal_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_volcano_tumour_normal_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_volcano_tumour_normal_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_volcano_tumour_normal_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_volcano_tumour_normal_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_ma_tumour_normal_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_ma_tumour_normal_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_ma_tumour_normal_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_ma_tumour_normal_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_ma_tumour_normal_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_ma_tumour_normal_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_ma_tumour_normal_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_contrasts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_contrasts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_contrasts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_tumour_normal_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_tumour_normal_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_tumour_normal_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_tumour_normal_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_tumour_normal_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_tumour_normal_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_phist_tumour_normal_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_dispersion_tumour_normal_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_dispersion_tumour_normal_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_dispersion_tumour_normal_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_dispersion_tumour_normal_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_dispersion_tumour_normal_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_dispersion_tumour_normal_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_dispersion_tumour_normal_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_metrics_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_metrics_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/outputs/scratch_roots/ccrcc_p1/outputs/05_de/2026-10-17_de_cptac_ccrcc_metrics_v1_README.md
+       84.30 real       266.18 user        11.42 sys
+          3485089792  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             1007669  page reclaims
+                 203  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               43707  voluntary context switches
+              126888  involuntary context switches
+        260590137803  instructions retired
+         71895484145  cycles elapsed
+          2647986328  peak memory footprint
+exit 0

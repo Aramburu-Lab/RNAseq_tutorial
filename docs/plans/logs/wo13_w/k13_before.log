@@ -1,0 +1,26 @@
+== run 1 of 3 (before)
+== load: 14 yes processes, 2026-10-17T12:42:02Z
+.                                                                        [100%]
+============================= slowest 2 durations ==============================
+61.39s call     tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+41.22s setup    tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+1 passed in 152.33s (0:02:32)
+== exit 0 after 203 s under load
+== run 2 of 3 (before)
+== load: 14 yes processes, 2026-10-17T12:45:25Z
+.                                                                        [100%]
+============================= slowest 2 durations ==============================
+55.91s call     tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+17.32s setup    tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+1 passed in 84.42s (0:01:24)
+== exit 0 after 96 s under load
+== run 3 of 3 (before)
+== load: 14 yes processes, 2026-10-17T12:47:02Z
+.                                                                        [100%]
+the test run changed the checkout: [' M tests/browser.mjs', '?? docs/plans/logs/wo13_w/k13_stress.py', '?? docs/plans/logs/wo13_w/k13_stress.sh']
+
+============================= slowest 2 durations ==============================
+47.88s call     tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+9.40s setup    tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+1 passed in 72.47s (0:01:12)
+== exit 1 after 91 s under load

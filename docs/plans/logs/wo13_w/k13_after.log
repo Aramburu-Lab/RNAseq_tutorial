@@ -1,0 +1,24 @@
+== run 1 of 3 (after)
+== load: 14 yes processes, 2026-10-17T14:39:57Z
+.                                                                        [100%]
+============================= slowest 2 durations ==============================
+43.13s call     tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+6.75s setup    tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+1 passed in 55.71s
+== exit 0 after 58 s under load
+== run 2 of 3 (after)
+== load: 14 yes processes, 2026-10-17T14:40:55Z
+.                                                                        [100%]
+============================= slowest 2 durations ==============================
+37.42s call     tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+15.13s setup    tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+1 passed in 65.82s (0:01:05)
+== exit 0 after 71 s under load
+== run 3 of 3 (after)
+== load: 14 yes processes, 2026-10-17T14:42:06Z
+.                                                                        [100%]
+============================= slowest 2 durations ==============================
+52.84s call     tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+22.43s setup    tests/test_heatmap_cycle.py::test_a_height_cycle_settles_square_at_every_width_in_both_themes
+1 passed in 86.96s (0:01:26)
+== exit 0 after 104 s under load

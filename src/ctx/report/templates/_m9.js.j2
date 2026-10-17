@@ -59,6 +59,15 @@ var ctxM9 = {
     }
     return best;
   },
+  /* figures.least_even: the exon of the largest defined CV, the first of ties; null for none. */
+  uneven: function (cv) {
+    var best = null;
+    Object.keys(cv).forEach(function (e) {
+      var v = cv[e];
+      if (v !== null && v !== undefined && (best === null || v > best.cv)) best = { exon: e, cv: v };
+    });
+    return best;
+  },
   /* annotation.exon_use over the kept tissues: rows [exon, tissue, share] in frame order.
      The tissues are restricted first, then each exon's reference and CV are taken. */
   exonUse: function (rows, tissues) {

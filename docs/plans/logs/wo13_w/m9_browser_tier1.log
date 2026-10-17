@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/docs/plans/logs/wo13_w/m9_browser.py", line 191, in <module>
+    main()
+  File "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/docs/plans/logs/wo13_w/m9_browser.py", line 154, in main
+    linked = _browse([{"name": "link", "url": href, "width": 375, "height": 812,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/tests/test_export_browser.py", line 525, in _browse
+    assert proc.returncode == 0, stderr[-4000:]
+           ^^^^^^^^^^^^^^^^^^^^
+AssertionError: trace 0.5 link: size
+trace 0.5 link: navigate
+trace 1.2 link: act
+trace 1.2 browser close
+trace 1.2 browser exit
+trace 1.3 profile removal
+trace 1.3 done
+file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/tests/browser.mjs:116
+      if (out.exceptionDetails) throw new Error(`${task.name}: ${JSON.stringify(out.exceptionDetails)}`);
+                                      ^
+
+Error: link: {"exceptionId":1,"text":"Uncaught (in promise) TypeError: Cannot read properties of null (reading 'ctxList')","lineNumber":3,"columnNumber":37,"scriptId":"15","stackTrace":{"callFrames":[{"functionName":"","scriptId":"15","url":"","lineNumber":2,"columnNumber":36},{"functionName":"","scriptId":"15","url":"","lineNumber":10,"columnNumber":2}]},"exception":{"type":"object","subtype":"error","className":"TypeError","description":"TypeError: Cannot read properties of null (reading 'ctxList')\n    at <anonymous>:3:37\n    at <anonymous>:11:3","objectId":"3900114625720031035.3.1"}}
+    at evaluate (file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/tests/browser.mjs:116:39)
+    at async file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aea85c67a862f2e82/tests/browser.mjs:119:46
+
+Node.js v26.10.0
+
