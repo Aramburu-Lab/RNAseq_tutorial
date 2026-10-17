@@ -86,6 +86,16 @@
 <noscript><p class="note">{{ ui.subset.noscript }}</p></noscript>
 <p class="calls-summary subset-summary" aria-live="polite">{{ f.defaults.summary }}</p>
 {% endif %}
+{% if f.kind == "recount" %}{% set w = f.defaults.words %}
+{# M1 Figure 1 (work-order item 5): a contrast's runs, a colour, a count; ctxRecount recounts. #}
+<form class="calls recount" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ w.contrast }}">
+<label>{{ w.contrast }}<select name="contrast"><option value="" selected>{{ w.every }}</option>{% for label in f.defaults.contrasts %}<option value="{{ loop.index0 }}">{{ label }}</option>{% endfor %}</select></label>
+<label>{{ w.colour }}<select name="colour">{% for column in f.defaults.colours %}<option value="{{ column }}"{% if loop.first %} selected{% endif %}>{{ column }}</option>{% endfor %}</select></label>
+<label>{{ w.count }}<select name="count">{% for value, label in w.counts.items() %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+</form>
+<noscript><p class="note">{{ w.noscript }}</p></noscript>
+<p class="calls-summary recount-summary" aria-live="polite">{{ f.defaults.summary }}</p>
+{% endif %}
 {% if f.kind == "pairs" %}
 <form class="calls pairs" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.pairs.label }}">
 <label>{{ f.defaults.label or ui.pairs.pair }}<select name="pair">{% for value, label in f.defaults.options %}<option value="{{ value }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>

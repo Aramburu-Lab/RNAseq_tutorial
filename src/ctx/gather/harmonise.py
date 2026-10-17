@@ -12,7 +12,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
-from ctx.gather import rnaseq, trace
+from ctx.gather import composition, rnaseq, trace
 from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, curate, normalise, read_table
 from ctx.gather.fetchngs import Outdir, read
 from ctx.io.naming import MODULES, stem
@@ -215,7 +215,7 @@ def _facts(outdir: Outdir, frame: pl.DataFrame, curated: bool) -> ResultTable:
 
 def _composition_text(data: BarData) -> FigureText:
     """Title, lead and reading guide of the composition bars, from the counts drawn."""
-    groups, batches = data.frame["group"].n_unique(), data.frame["batch"].unique().sort()
+    batches = data.frame["batch"].unique().sort()
     reading = [
         text.word(PAGE, "figures.composition.bars"),
         text.word(PAGE, "figures.composition.individuals"),
@@ -223,12 +223,13 @@ def _composition_text(data: BarData) -> FigureText:
     if batches.len() > 1:
         batch_line = text.fill(PAGE, "figures.composition.batches", batches=", ".join(batches))
         reading.insert(1, batch_line)
-    sizes = data.frame.group_by("group").agg(pl.col("n_samples").sum())
-    name, runs = sizes.sort("n_samples", "group").row(0)
-    lead = "figures.composition.lead_one" if runs == 1 else "figures.composition.lead_many"
+    # The smallest group as the page names it after a recount (composition.smallest).
+    groups, name, runs = composition.smallest(
+        data.frame.with_columns(total=pl.col("n_samples").sum().over("group")))  # fmt: skip
+    lead = f"figures.composition.lead_{'one' if runs == 1 else 'many'}_runs"
     return FigureText(
         title=text.word(PAGE, "figures.composition.title"),
-        lead=text.fill(PAGE, lead, groups=groups, name=name, runs=runs),
+        lead=text.fill(PAGE, lead, groups=groups, name=name, n=runs),
         reading=tuple(reading),
     )
 
@@ -271,14 +272,12 @@ def _library_text(data: BarData, good_reads: float) -> FigureText:
 
 
 def _composition(frame: pl.DataFrame, spec: Dataset) -> BarData:
-    """Samples per cell type and condition, stacked by batch, individuals on hover."""
-    groups = (
-        frame.with_columns(batch=pl.col("batch").replace("", "all"))
-        .group_by("cell_type", "condition", "batch")
-        .agg(n_samples=pl.len().cast(pl.Int64), n_individuals=pl.col("donor").n_unique())
-        .sort("cell_type", "condition", "batch")
-        .with_columns(group=pl.format("{} {}", "cell_type", "condition"))
-    )
+    """Samples per cell type and condition, stacked by batch, individuals on hover.
+
+    The bars are ``composition.recount``'s, which the page recounts for a contrast, a colour
+    and a count (work-order item 5).
+    """
+    groups = composition.built(frame)
     levels = [b for b in (*spec.batch_bins, "all") if b in set(groups["batch"])]
     columns = {
         "cell_type": ("none", "Cell type, curated."),
@@ -295,7 +294,7 @@ def _composition(frame: pl.DataFrame, spec: Dataset) -> BarData:
         category_label=text.word(PAGE, "figures.composition.category"),
         value_label=text.word(PAGE, "figures.composition.value"), series="batch",
         colours=category_colours(levels), caption=caption, horizontal=True, stacked=True,
-        hover=("n_individuals",), width="double",
+        hover=("n_individuals",), width="double", live=composition.controls(frame, spec),
     )  # fmt: skip
 
 

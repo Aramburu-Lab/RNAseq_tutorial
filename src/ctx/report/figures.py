@@ -258,6 +258,11 @@ _SHAPED = {
                          "scales": c.get("scales", []), "summary": c["summary"]},
     "genelist": lambda c: {"words": c["words"], "contrasts": c["contrasts"],
                            "featured": c["featured"]},
+    # M1 Figure 1's recount (work-order item 5): every run, coloured by batch, counted as runs.
+    "recount": lambda c: {"words": c["words"], "contrasts": [x["label"] for x in c["contrasts"]],
+                          "colours": list(c["colours"]),
+                          "summary": c["all"] + " " + c["words"]["shown"].format(
+                              count=c["words"]["counts"]["runs"], colour="batch")},
 }  # fmt: skip
 
 

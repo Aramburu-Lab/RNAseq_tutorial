@@ -1,0 +1,13 @@
+colours offered: ['batch', 'tissue', 'time_point', 'isolation', 'sex', 'donor_sex']
+every run: Monocyte hsct 19 runs from 8 individuals
+ndn_gcsf: declared n (13, 13); runs {'NDN gcsf': 13, 'NDN steady_state': 13}; individuals {'NDN gcsf': 13, 'NDN steady_state': 13}
+mono_gcsf: declared n (8, 8); runs {'Monocyte gcsf': 8, 'Monocyte steady_state': 8}; individuals {'Monocyte gcsf': 8, 'Monocyte steady_state': 8}
+ndn_hsct_early: declared n (13, 5); runs {'NDN hsct': 5, 'NDN steady_state': 13}; individuals {'NDN hsct': 5, 'NDN steady_state': 13}
+mono_hsct_early: declared n (8, 4); runs {'Monocyte hsct': 4, 'Monocyte steady_state': 8}; individuals {'Monocyte hsct': 4, 'Monocyte steady_state': 8}
+ndn_gcsf_paired: declared n (9, 9); runs {'NDN gcsf': 9, 'NDN steady_state': 9}; individuals {'NDN gcsf': 9, 'NDN steady_state': 9}
+ndn_gcsf_unpaired9: declared n (9, 9); runs {'NDN gcsf': 9, 'NDN steady_state': 9}; individuals {'NDN gcsf': 9, 'NDN steady_state': 9}
+ndn_pdac_naive: declared n (17, 14); runs {'NDN pdac': 14, 'NDN steady_state': 17}; individuals {'NDN pdac': 14, 'NDN steady_state': 17}
+ndn_pdac_adjusted: declared n (17, 14); runs {'NDN pdac': 14, 'NDN steady_state': 17}; individuals {'NDN pdac': 14, 'NDN steady_state': 17}
+ndn_pdac_within: declared n (4, 14); runs {'NDN pdac': 14, 'NDN steady_state': 4}; individuals {'NDN pdac': 14, 'NDN steady_state': 4}
+ndn_null_split: declared n (7, 6); runs {'NDN steady_state': 13}; individuals {'NDN steady_state': 13}
+ndn_vs_mono_steady: declared n (9, 9); runs {'Monocyte steady_state': 9, 'NDN steady_state': 9}; individuals {'Monocyte steady_state': 9, 'NDN steady_state': 9}

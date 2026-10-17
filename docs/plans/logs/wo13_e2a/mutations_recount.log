@@ -1,0 +1,8 @@
+CAUGHT: recount twin: individuals counted per run (1 failed in 1.49s)
+CAUGHT: recount twin: a group's total from one level (1 failed in 1.61s)
+SURVIVED: recount twin: smallest tie broken by order (1 passed in 1.53s)
+CAUGHT: recount: a contrast's runs ignore its pairing (1 failed in 7.12s)
+CAUGHT: recount: the build's individuals counted as runs (1 failed in 6.04s)
+SURVIVED: recount page: the x title's new name not kept for the title fitter (1 passed in 14.96s)
+CAUGHT: recount twin: smallest tie broken by order (1 failed in 2.02s)
+CAUGHT: recount page: the x title's new name not kept for the title fitter (1 failed in 19.29s)

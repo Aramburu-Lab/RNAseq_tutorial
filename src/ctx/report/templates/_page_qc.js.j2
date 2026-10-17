@@ -1,0 +1,52 @@
+{# M1's and M2's controls (work-order item 5). Included by _page.js.j2, inside its one function. #}
+{% raw %}  /* M1 Figure 1's recount: the runs of a contrast, coloured by a column, counted as runs or
+     individuals, by ctxRecount, the twin of ctx.gather.composition.recount. The bars, the
+     category axis, the value title, the lead and the live line follow; the build is every
+     run, coloured by batch, counted as runs. */
+  function recounting(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var div = fig.querySelector(".js-plotly-plot"), w = cfg.words, mark = exporting(fig, cfg);
+    var lead = fig.querySelector(".fig-lead"), line = fig.querySelector(".recount-summary");
+    var built = lead ? lead.textContent : "";
+    function update() {
+      var which = form.elements.contrast.value, colour = form.elements.colour.value;
+      var count = form.elements.count.value, chosen = which === "" ? null : cfg.contrasts[Number(which)];
+      var bars = ctxRecount.counts(cfg.rows, chosen ? chosen.runs : null, colour, count);
+      var cats = [];
+      bars.forEach(function (b) { if (cats.indexOf(b.group) < 0) cats.push(b.group); });
+      var other = count === "runs" ? "individuals" : "runs";
+      var traces = cfg.colours[colour].map(function (pair) {
+        var mine = bars.filter(function (b) { return b.level === pair[0]; });
+        return { type: "bar", orientation: "h", name: pair[0], marker: { color: pair[1], line: div.data[0].marker.line },
+          x: mine.map(function (b) { return b.n; }), y: mine.map(function (b) { return b.group; }),
+          customdata: mine.map(function (b) { return [b.other]; }),
+          hovertemplate: colour + ": " + ctxExport.escape(pair[0]) + "<br>" + w.category + ": %{y}<br>" +
+            w.titles[count] + ": %{x}<br>" + w.titles[other] + ": %{customdata[0]}<extra></extra>" };
+      }).filter(function (t) { return t.x.length; });
+      var title = w.titles[count];
+      var layout = Object.assign({}, div.layout, {
+        height: Math.max(cfg.height.least, cfg.height.base + cfg.height.row * cats.length),
+        meta: Object.assign({}, div.layout.meta, { xtitle: title }),
+        xaxis: Object.assign({}, div.layout.xaxis, { title: Object.assign({}, div.layout.xaxis.title, { text: title }) }),
+        yaxis: Object.assign({}, div.layout.yaxis, { categoryarray: cats })
+      });
+      Plotly.react(div, traces, layout);
+      var moved = which !== "" || colour !== "batch" || count !== "runs";
+      var small = ctxRecount.smallest(bars);
+      if (lead) {
+        lead.textContent = !moved ? built : small[0] === 0 ? w.empty
+          : ctxRecount.fill(w.lead[(small[2] === 1 ? "one_" : "many_") + count],
+                            { groups: small[0], name: small[1], n: small[2] });
+      }
+      line.textContent = (chosen ? chosen.line : cfg.all) + " " +
+        ctxRecount.fill(w.shown, { count: w.counts[count], colour: colour });
+      mark(moved);
+    }
+    form.addEventListener("change", update);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    /* A browser restoring the form on back-navigation sets the selects without an event. */
+    if (form.elements.contrast.value !== "" || form.elements.colour.value !== "batch" ||
+        form.elements.count.value !== "runs") update();
+  }
+{% endraw %}

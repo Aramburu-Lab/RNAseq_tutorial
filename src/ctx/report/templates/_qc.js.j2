@@ -1,0 +1,43 @@
+{% raw %}
+/* M1's and M2's page twins (work-order item 5): each the twin of one Python definition, run
+   under node against it by the tests. No DOM here; _page_qc.js.j2 wires them to the page. */
+var ctxRecount = {
+  /* ctx.gather.composition.recount: n runs or distinct individuals per group and colour
+     level, over the rows kept (indices, or null for every row). Groups and levels in first
+     appearance; a group's total is its runs or its distinct individuals; other is the count
+     the bar does not show. rows holds columns: group, donor and each colour column. */
+  counts: function (rows, keep, colour, count) {
+    var n = rows.group.length, order = [], bars = Object.create(null), totals = Object.create(null);
+    var at = keep || Array.from({ length: n }, function (_, i) { return i; });
+    at.forEach(function (i) {
+      var g = rows.group[i], level = rows[colour][i], key = g + "\u0000" + level, d = rows.donor[i];
+      if (!bars[key]) { bars[key] = { group: g, level: level, runs: 0, donors: Object.create(null) }; order.push(key); }
+      if (!totals[g]) totals[g] = { runs: 0, donors: Object.create(null) };
+      bars[key].runs += 1; bars[key].donors[d] = 1;
+      totals[g].runs += 1; totals[g].donors[d] = 1;
+    });
+    function measure(b, which) { return which === "runs" ? b.runs : Object.keys(b.donors).length; }
+    var other = count === "runs" ? "individuals" : "runs";
+    return order.map(function (key) {
+      var b = bars[key];
+      return { group: b.group, level: b.level, n: measure(b, count), other: measure(b, other),
+               total: measure(totals[b.group], count) };
+    });
+  },
+  /* ctx.gather.composition.smallest: groups, and the smallest group's name and total, fewest
+     first, a tie by name. */
+  smallest: function (bars) {
+    var seen = Object.create(null), groups = [];
+    bars.forEach(function (b) { if (!seen[b.group]) { seen[b.group] = 1; groups.push(b); } });
+    groups.sort(function (a, b) {
+      return a.total - b.total || (a.group < b.group ? -1 : a.group > b.group ? 1 : 0);
+    });
+    return groups.length ? [groups.length, groups[0].group, groups[0].total] : [0, "", 0];
+  },
+  fill: function (template, values) {
+    return String(template).replace(/\{(\w+)\}/g, function (all, key) {
+      return Object.prototype.hasOwnProperty.call(values, key) ? String(values[key]) : all;
+    });
+  }
+};
+{% endraw %}
