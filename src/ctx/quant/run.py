@@ -20,7 +20,7 @@ import polars as pl
 from ctx import runtime, tools
 from ctx.dataset import Contrast, Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
-from ctx.gather import rnaseq
+from ctx.gather import gdc, rnaseq
 from ctx.io.naming import MODULES, stem
 from ctx.process.reference import Reference, prepare
 from ctx.process.run import annotation
@@ -136,13 +136,16 @@ def _spec(options: Options, dataset: str) -> tuple[Dataset | None, list[str]]:
 
 
 def _sheet(root: Path, dataset: str) -> tuple[Path | None, pl.DataFrame | None, list[str]]:
-    """The newest gather sheet, one row per run, or why not."""
+    """The newest gather sheet, one row per run, or why not; a GDC sheet is refused."""
     try:
         path = newest(root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather", dataset,
                       "samplesheet")  # fmt: skip
     except DatasetError as error:
         return None, None, [str(error)]
-    return path, pl.read_parquet(path), []
+    sheet = pl.read_parquet(path)
+    if refused := gdc.refuse_sheet(sheet, path, MODULE):
+        return path, None, refused
+    return path, gdc.chosen(sheet), []
 
 
 def _counts(folder: Path, samples: set[str]) -> tuple[rnaseq.Counts | None, list[str]]:

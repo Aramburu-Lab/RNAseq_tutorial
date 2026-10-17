@@ -971,7 +971,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     inputs = {what: newest(gathered, dataset, what) for what in ("samplesheet", "counts", "genes")}
     sheet, counts, genes = (pl.read_parquet(inputs[w]) for w in ("samplesheet", "counts", "genes"))
     # A GDC sheet lists every file; its approved choice of one per patient is the one door.
-    sheet = gdc.chosen(sheet) if "chosen" in sheet.columns else sheet
+    sheet = gdc.chosen(sheet)
     releases = {
         "dataset file": str(spec.path),
         f"sha256:{spec.path.name}": _sha256(spec.path),

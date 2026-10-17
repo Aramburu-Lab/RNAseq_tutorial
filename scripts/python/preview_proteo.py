@@ -34,6 +34,7 @@ from scipy.stats import false_discovery_control, kruskal, spearmanr, ttest_ind
 from ctx import runtime
 from ctx.de.run import Writer
 from ctx.de.stats import ALPHA
+from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
 from ctx.report import text
 from ctx.report.builder import (
@@ -136,7 +137,7 @@ def design(root: Path) -> Design:
     Samples are dealt to plexes in turn after sorting by cell type and condition, so every
     plex holds every group: a group in one plex alone could not be told from the plex.
     """
-    sheet = pl.read_parquet(design_sheet(root))
+    sheet = gdc.chosen(pl.read_parquet(design_sheet(root)))
     samples = sheet.unique("sample", keep="first", maintain_order=True).select(
         "sample", "cell_type", "condition"
     )
