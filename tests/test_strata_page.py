@@ -51,8 +51,9 @@ def _frame() -> pl.DataFrame:
 
 
 def test_a_thinned_volcano_carries_what_a_cutoff_can_call_and_files_the_rest():
-    """Mutations caught: every gene carried, which put TCGA-BRCA's page near its cap; the files
-    of a moved view drawing the build's thinned genes, called ones among them, as not called."""
+    """Mutations caught: every gene carried, which put the breast cohort's page near its cap;
+    the files of a moved view drawing the build's thinned genes, called ones among them, as not
+    called."""
     rng = np.random.default_rng(11)
     n = 6000
     p = rng.uniform(0, 1, n)

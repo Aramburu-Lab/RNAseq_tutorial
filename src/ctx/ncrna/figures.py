@@ -234,7 +234,7 @@ def volcano(frame: pl.DataFrame, chosen: Sequence[str], words: Mapping[str, Any]
 
 # The bases the page offers: BH within the biotype (Rytis, TODO.md M8), then the raw p. The
 # other adjustments within each biotype would add 3 columns of float64 per gene, and put
-# TCGA-BRCA's page at 14,660,097 B with them, 340 kB under the cap.
+# the breast cohort's page at 14,660,097 B with them, 340 kB under the cap.
 STRATA_BASES = ("padj_within", "pvalue")
 
 
@@ -260,7 +260,7 @@ def packed(rows: pl.DataFrame, chosen: Sequence[str]) -> dict[str, Any]:
 
     Names joined, biotypes by index, the numbers the call rule reads as float64 and the hover's
     pooled padj as float32, in base64. As JSON, Step-1's 12,246 rows took 2,177,184 B, and
-    TCGA-BRCA's 19,650 would have put its page over the cap.
+    the breast cohort's 19,650 would have put its page over the cap.
     """
 
     def encoded(column: str, kind: str) -> str:
