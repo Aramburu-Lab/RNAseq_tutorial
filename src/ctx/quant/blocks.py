@@ -165,8 +165,7 @@ def detection_figure(writer: Writer, port: GeneTables, shown: Shown
                          high=f"{tab.stat(genes, 'max'):,.0f}")  # fmt: skip
         options.append((text.fill(PAGE, "figures.detection.option", min_reads=t), data,
                         figure_text("detection", lead, min_reads=t)))  # fmt: skip
-    block = writer.figure(options[0][1], "detection", options[0][2])
-    return lookup(block, options, text.word(PAGE, "figures.detection.view")), frame
+    return _viewed(writer, "detection", options), frame
 
 
 def units_figure(writer: Writer, port: GeneTables, fates: pl.DataFrame,
@@ -202,8 +201,7 @@ def units_figure(writer: Writer, port: GeneTables, fates: pl.DataFrame,
                         figure_text("units", lead)))  # fmt: skip
         built = whole if built is None else built
     assert built is not None  # noqa: S101 - UNIT_MODES holds the build's mode
-    block = writer.figure(options[0][1], "units", options[0][2])
-    return lookup(block, options, text.word(PAGE, "figures.units.view")), built
+    return _viewed(writer, "units", options), built
 
 
 def _mode_key(mode: CountsFrom) -> str:
@@ -242,10 +240,20 @@ def estimates_figure(writer: Writer, port: GeneTables, used: pl.DataFrame, genes
         data, lead = _estimates(part, name, n, shown_type)
         label = shown_type or text.word(PAGE, "figures.estimates.every_type")
         options.append((label, data, figure_text("estimates", lead)))
-    block = writer.figure(options[0][1], "estimates", options[0][2])
-    if len(options) > 2:  # noqa: PLR2004 - one type alone repeats every gene
-        block = lookup(block, options, text.word(PAGE, "figures.estimates.view"))
-    return block, frame
+    shown = options if len(options) > 2 else options[:1]  # noqa: PLR2004 - one type repeats all
+    return _viewed(writer, "estimates", shown), frame
+
+
+def _viewed(writer: Writer, what: str, options: list[tuple[str, Any, FigureText]]) -> FigureBlock:
+    """The build's figure with its views looked up, each drawn as the writer draws its figures.
+
+    One option is the figure alone.
+    """
+    shown = [(name, writer.marked(data), words) for name, data, words in options]
+    block = writer.figure(shown[0][1], what, shown[0][2])
+    if len(shown) == 1:
+        return block
+    return lookup(block, shown, text.word(PAGE, f"figures.{what}.view"))
 
 
 def _estimates(part: pl.DataFrame, name: str, n: tuple[int, int],

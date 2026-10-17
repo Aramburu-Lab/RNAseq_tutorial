@@ -631,8 +631,13 @@ class Writer:
             csv_decimals=csv_decimals,
         )  # fmt: skip
 
+    def marked(self, data: Figure) -> Figure:
+        """A figure as this run draws it; a view built beside a figure goes through it too."""
+        return data
+
     def figure(self, data: Figure, what: str, text: FigureText) -> FigureBlock:
         """Write one figure, its page linked back to the module page; return its page block."""
+        data = self.marked(data)
         figure_stem = self.stem(what)
         text = replace(text, back=f"{self.stem('overview')}.html")
         self.files += write_figure(
