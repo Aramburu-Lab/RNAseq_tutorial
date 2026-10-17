@@ -1,0 +1,71 @@
+== de 2026-10-17T13:51:50Z src=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/src
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_contrasts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_contrasts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_contrasts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_size_factors_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_size_factors_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_size_factors_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_lusc_luad_results_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_lusc_luad_results_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_lusc_luad_results_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_pca_tumours_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_pca_tumours_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_pca_tumours_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_pca_tumours_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_pca_tumours_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_pca_tumours_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_pca_tumours_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_volcano_lusc_luad_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_volcano_lusc_luad_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_volcano_lusc_luad_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_volcano_lusc_luad_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_volcano_lusc_luad_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_volcano_lusc_luad_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_volcano_lusc_luad_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_ma_lusc_luad_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_ma_lusc_luad_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_ma_lusc_luad_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_ma_lusc_luad_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_ma_lusc_luad_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_ma_lusc_luad_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_ma_lusc_luad_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_contrasts_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_contrasts_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_contrasts_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_lusc_luad_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_lusc_luad_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_lusc_luad_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_lusc_luad_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_lusc_luad_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_lusc_luad_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_phist_lusc_luad_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_dispersion_lusc_luad_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_dispersion_lusc_luad_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_dispersion_lusc_luad_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_dispersion_lusc_luad_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_dispersion_lusc_luad_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_dispersion_lusc_luad_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_dispersion_lusc_luad_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_metrics_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_metrics_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/lung_rep1_after/outputs/05_de/2026-10-17_de_tcga_lung_metrics_v1_README.md
+       57.56 real       142.26 user         7.44 sys
+          5006278656  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             2433665  page reclaims
+                 179  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               93319  voluntary context switches
+               79486  involuntary context switches
+        421209598168  instructions retired
+        107607826006  cycles elapsed
+          4162163656  peak memory footprint
+exit 0

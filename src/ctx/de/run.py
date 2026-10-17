@@ -21,6 +21,9 @@ from scipy.stats import spearmanr
 from ctx import runtime
 from ctx.dataset import Column, Dataset, DatasetError, PcaSpec, load
 from ctx.de.deseq import RESULT_COLUMNS, TOP_GENES, Fit, fit, pca
+from ctx.de.normalised import COLUMNS as SIZE_FACTOR_COLUMNS
+from ctx.de.normalised import WHAT as SIZE_FACTORS
+from ctx.de.normalised import log2_normalised, size_factors
 from ctx.de.page import (
     Words,
     box_text,
@@ -632,15 +635,13 @@ def _box(
         return None, missing
     labels = {"reference": said.reference, "tested": said.tested}
     padj = dict(result.results.select("gene_id", "padj").rows())
-    sf = dict(result.size_factors.rows())
-    rows = []
-    for gene_id, symbol in named.select("gene_id", "gene_name").rows():
-        values = counts.filter(pl.col("gene_id") == gene_id)
-        for sample, group, donor in result.samples.select("sample", "group", "donor").rows():
-            level = float(values[sample][0]) / sf[sample]
-            rows.append(
-                (symbol, labels[group], sample, donor, math.log2(level + 1), padj.get(gene_id))
-            )
+    levels = log2_normalised(counts, result.size_factors, named["gene_id"].to_list())
+    value = {(g, s): v for g, s, v in levels.rows()}
+    rows = [
+        (symbol, labels[group], sample, donor, value[(gene_id, sample)], padj.get(gene_id))
+        for gene_id, symbol in named.select("gene_id", "gene_name").rows()
+        for sample, group, donor in result.samples.select("sample", "group", "donor").rows()
+    ]
     frame = pl.DataFrame(
         rows, schema=["feature", "group", "sample", "donor", "value", "deseq2_padj"], orient="row"
     )
@@ -993,6 +994,7 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     )
     rows = [_contrast_row(f, sheet.columns) for f in fits.values()]
     writer.table(pl.DataFrame(rows), "contrasts", CONTRAST_COLUMNS)
+    writer.table(size_factors(fits), SIZE_FACTORS, SIZE_FACTOR_COLUMNS)
     for name, result in fits.items():
         frame = result.results.join(genes.select("gene_id", "gene_name"), on="gene_id", how="left")
         writer.table(frame, f"{name}_results", {**RESULT_COLUMNS, "gene_name": GENE_NAME})

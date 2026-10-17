@@ -1,0 +1,43 @@
+fit_size_factors#1: traced now 352,963,413 B, run peak 985,580,472 B
+fit_genewise_dispersions#1: traced now 531,146,521 B, run peak 1,231,409,665 B
+fit_MAP_dispersions#1: traced now 533,710,801 B, run peak 1,231,409,665 B
+fit_LFC#1: traced now 884,667,787 B, run peak 1,460,356,004 B
+calculate_cooks#1: traced now 1,059,923,942 B, run peak 1,655,570,634 B
+fit_genewise_dispersions#2: traced now 1,487,713,155 B, run peak 1,926,032,900 B
+fit_MAP_dispersions#2: traced now 1,487,610,071 B, run peak 1,926,032,900 B
+fit_LFC#2: traced now 1,509,760,089 B, run peak 1,926,032,900 B
+refit#1: traced now 1,629,998,664 B, run peak 1,926,032,900 B
+summary#1: traced now 1,640,236,033 B, run peak 2,156,438,971 B
+summary#2: traced now 1,651,401,686 B, run peak 2,167,657,671 B
+lfc_shrink#1: traced now 1,651,171,893 B, run peak 2,167,657,671 B
+fit#1: traced now 3,311,673 B, run peak 2,167,657,671 B
+fit_size_factors#2: traced now 959,300,083 B, run peak 2,167,657,671 B
+fit_genewise_dispersions#3: traced now 1,438,636,721 B, run peak 3,324,273,654 B
+vst_transform#1: traced now 1,916,189,442 B, run peak 3,324,273,654 B
+pca#1: traced now 15,283,742 B, run peak 3,324,273,654 B
+figures#1: traced now 89,435,764 B, run peak 3,324,273,654 B
+sex_check#1: traced now 89,435,760 B, run peak 3,324,273,654 B
+page#1: traced now 76,212,714 B, run peak 3,324,273,654 B
+phase                             main RSS   largest child   main + children
+load                           643,923,968      20,135,936       667,549,696
+fit#1                        1,463,926,784     264,929,280     1,847,902,208
+fit_size_factors#1           1,379,680,256               0     1,379,680,256
+fit_genewise_dispersions#1   1,554,038,784     282,640,384     2,053,046,272
+fit_MAP_dispersions#1        1,013,760,000     204,668,928     1,739,931,648
+fit_LFC#1                    1,080,524,800     216,645,632     1,848,180,736
+calculate_cooks#1            1,467,760,640     183,418,880     2,052,276,224
+refit#1                      1,958,576,128     147,783,680     2,515,419,136
+fit_genewise_dispersions#2   1,667,334,144     169,230,336     2,224,177,152
+fit_MAP_dispersions#2          948,092,928     166,412,288     1,619,968,000
+fit_LFC#2                      953,352,192     163,332,096     1,608,450,048
+summary#1                    1,456,095,232     162,136,064     1,983,660,032
+summary#2                    1,205,796,864     166,051,840     1,858,404,352
+lfc_shrink#1                 1,042,726,912     168,722,432     1,711,341,568
+figures#1                      682,803,200      20,070,400       706,428,928
+pca#1                        1,677,688,832     228,425,728     1,878,097,920
+fit_size_factors#2           2,095,611,904      20,135,936     2,119,303,168
+fit_genewise_dispersions#3   3,633,299,456     291,897,344     3,656,990,720
+vst_transform#1              1,556,267,008     159,252,480     1,981,808,640
+sex_check#1                              0               0                 0
+page#1                         700,710,912      18,874,368       724,336,640
+getrusage: self 3,688,071,168 B, children 291,897,344 B, wall 197.9 s

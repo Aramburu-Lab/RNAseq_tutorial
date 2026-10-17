@@ -1,0 +1,4 @@
+size-factor table 16,507 B
+lusc_luad: 21,562 genes x 1,016 samples = 21,906,992 values; wide64 74,441,762 B; wide32 60,419,642 B; long 116,314,426 B; estimated_size wide64 175,579,366 B
+all contrasts: wide64 74,441,762 B; wide32 60,419,642 B; long 116,314,426 B
+results tables, for scale: 1,891,203 B

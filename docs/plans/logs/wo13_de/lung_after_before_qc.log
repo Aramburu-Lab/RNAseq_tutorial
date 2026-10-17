@@ -1,0 +1,21 @@
+== qc 2026-10-17T13:39:04Z src=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/src_main/src
+no QC registry at /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ab82f97e3ba379d33/outputs/scratch_roots/src_main/conf/qc_metrics.toml; pass --registry or set CTX_QC_REGISTRY
+        1.16 real         0.63 user         0.11 sys
+           152403968  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               20691  page reclaims
+                   1  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  15  voluntary context switches
+                1614  involuntary context switches
+          8811777935  instructions retired
+          2843780991  cycles elapsed
+           114623544  peak memory footprint
+exit 1
