@@ -1,0 +1,14 @@
+size-factor table 4,054 B
+ndn_gcsf: 12,796 genes x 26 samples = 332,696 values; wide64 1,104,332 B; wide32 945,660 B; long 1,279,632 B; estimated_size wide64 2,887,806 B
+mono_gcsf: 13,896 genes x 16 samples = 222,336 values; wide64 757,084 B; wide32 660,483 B; long 858,942 B; estimated_size wide64 2,024,938 B
+ndn_hsct_early: 14,668 genes x 18 samples = 264,024 values; wide64 833,048 B; wide32 730,648 B; long 941,863 B; estimated_size wide64 2,370,770 B
+mono_hsct_early: 14,693 genes x 12 samples = 176,316 values; wide64 615,382 B; wide32 541,012 B; long 879,337 B; estimated_size wide64 1,670,530 B
+ndn_gcsf_paired: 12,939 genes x 18 samples = 232,902 values; wide64 798,707 B; wide32 681,962 B; long 1,029,578 B; estimated_size wide64 2,091,899 B
+ndn_gcsf_unpaired9: 12,939 genes x 18 samples = 232,902 values; wide64 798,707 B; wide32 681,962 B; long 1,029,578 B; estimated_size wide64 2,091,899 B
+ndn_pdac_naive: 12,754 genes x 31 samples = 395,374 values; wide64 1,272,582 B; wide32 1,096,093 B; long 1,522,849 B; estimated_size wide64 3,388,372 B
+ndn_pdac_adjusted: 11,739 genes x 31 samples = 363,909 values; wide64 1,216,051 B; wide32 1,031,630 B; long 1,573,008 B; estimated_size wide64 3,119,069 B
+ndn_pdac_within: 13,675 genes x 18 samples = 246,150 values; wide64 767,983 B; wide32 679,718 B; long 1,021,359 B; estimated_size wide64 2,210,701 B
+ndn_null_split: 14,000 genes x 13 samples = 182,000 values; wide64 617,292 B; wide32 536,365 B; long 724,628 B; estimated_size wide64 1,702,894 B
+ndn_vs_mono_steady: 14,829 genes x 18 samples = 266,922 values; wide64 865,059 B; wide32 759,172 B; long 1,133,142 B; estimated_size wide64 2,397,521 B
+all contrasts: wide64 9,646,227 B; wide32 8,344,705 B; long 11,993,916 B
+results tables, for scale: 10,889,956 B

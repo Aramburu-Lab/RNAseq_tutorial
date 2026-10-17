@@ -1,0 +1,7 @@
+tables in both 0; equal 0; differ 0
+  only after: 2026-10-17_qc_tcga_lung_bands_v1.parquet
+  only after: 2026-10-17_qc_tcga_lung_confounding_v1.parquet
+  only after: 2026-10-17_qc_tcga_lung_flags_v1.parquet
+  only after: 2026-10-17_qc_tcga_lung_metrics_v1.parquet
+  only after: 2026-10-17_qc_tcga_lung_status_v1.parquet
+csv in both 0; byte-equal 0

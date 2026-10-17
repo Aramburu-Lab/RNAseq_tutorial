@@ -1,0 +1,3 @@
+tables in both 15; equal 15; differ 0
+  only after: 2026-10-17_de_tier1_size_factors_v1.parquet
+csv in both 27; byte-equal 27

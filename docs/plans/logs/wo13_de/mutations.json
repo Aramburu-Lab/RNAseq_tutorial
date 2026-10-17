@@ -1,0 +1,101 @@
+[
+ {
+  "label": "normalised value without its pseudocount",
+  "file": "src/ctx/de/normalised.py",
+  "old": "np.log2(level + 1)",
+  "new": "np.log2(level)",
+  "tests": [
+   "tests/test_de_normalised.py::test_log2_normalised_hand_worked"
+  ]
+ },
+ {
+  "label": "a count times its size factor",
+  "file": "src/ctx/de/normalised.py",
+  "old": "astype(np.float64) / long[\"size_factor\"]",
+  "new": "astype(np.float64) * long[\"size_factor\"]",
+  "tests": [
+   "tests/test_de_normalised.py::test_log2_normalised_hand_worked"
+  ]
+ },
+ {
+  "label": "rows in the counts' column order, not the factors'",
+  "file": "src/ctx/de/normalised.py",
+  "old": ".select(\"gene_id\", *samples)",
+  "new": ".select(\"gene_id\", *[c for c in counts.columns if c in samples])",
+  "tests": [
+   "tests/test_de_normalised.py::test_log2_normalised_hand_worked"
+  ]
+ },
+ {
+  "label": "size factors laid beside the samples by position",
+  "file": "src/ctx/de/normalised.py",
+  "old": ".join(fit.size_factors, on=\"sample\", how=\"left\", maintain_order=\"left\")",
+  "new": ".hstack(fit.size_factors.select(\"size_factor\"))",
+  "tests": [
+   "tests/test_de_normalised.py::test_the_size_factor_table_joins_each_fits_samples_by_name"
+  ]
+ },
+ {
+  "label": "pydeseq2's counts as int32, copied again by its cast",
+  "file": "src/ctx/de/deseq.py",
+  "old": "to_numpy(order=\"c\").astype(np.int64).T",
+  "new": "to_numpy(order=\"c\").astype(np.int32).T",
+  "tests": [
+   "tests/test_de_normalised.py::test_the_counts_pydeseq2_fits_are_one_int64_copy_in_the_old_layout"
+  ]
+ },
+ {
+  "label": "pydeseq2's counts in C order",
+  "file": "src/ctx/de/deseq.py",
+  "old": "to_numpy(order=\"c\").astype(np.int64).T",
+  "new": "to_numpy().astype(np.int64).T",
+  "tests": [
+   "tests/test_de_normalised.py::test_the_counts_pydeseq2_fits_are_one_int64_copy_in_the_old_layout"
+  ]
+ },
+ {
+  "label": "the box normalising on its own, size factors of 1",
+  "file": "src/ctx/de/run.py",
+  "old": "log2_normalised(counts, result.size_factors, named",
+  "new": "log2_normalised(counts, result.size_factors.with_columns(size_factor=pl.lit(1.0)), named",
+  "tests": [
+   "tests/test_de_normalised.py::test_m5_writes_the_size_factors_its_box_reads"
+  ]
+ },
+ {
+  "label": "M5 writes no size-factor table",
+  "file": "src/ctx/de/run.py",
+  "old": "    writer.table(size_factors(fits), SIZE_FACTORS, SIZE_FACTOR_COLUMNS)\n",
+  "new": "",
+  "tests": [
+   "tests/test_de_normalised.py::test_m5_writes_the_size_factors_its_box_reads"
+  ]
+ },
+ {
+  "label": "the shrinkage keeps the Hessian's first diagonal entry",
+  "file": "src/ctx/de/deseq.py",
+  "old": "float(inverse_hessian[shrink_index, shrink_index])",
+  "new": "float(inverse_hessian[0, 0])",
+  "tests": [
+   "tests/test_de_normalised.py::test_the_lean_inference_gives_pydeseq2s_numbers"
+  ]
+ },
+ {
+  "label": "dispersion blocks that drop each block's last gene",
+  "file": "src/ctx/de/deseq.py",
+  "old": "normed_counts[:, i : i + GENE_BLOCK]",
+  "new": "normed_counts[:, i : i + GENE_BLOCK - 1]",
+  "tests": [
+   "tests/test_de_normalised.py::test_the_lean_inference_gives_pydeseq2s_numbers"
+  ]
+ },
+ {
+  "label": "the PCA's VST with pydeseq2's stock inference",
+  "file": "src/ctx/de/deseq.py",
+  "old": "        inference=lean_inference(threads), quiet=True,\n    )  # fmt: skip\n    with warnings",
+  "new": "        quiet=True,\n    )  # fmt: skip\n    with warnings",
+  "tests": [
+   "tests/test_de_normalised.py::test_the_pca_and_the_fit_run_the_lean_inference"
+  ]
+ }
+]

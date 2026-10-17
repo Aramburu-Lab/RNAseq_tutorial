@@ -1,0 +1,20 @@
+== Step-1 de: main's run against c1
+tables in both 15; equal 15; differ 0
+  only after: 2026-10-17_de_tier1_size_factors_v1.parquet
+csv in both 27; byte-equal 27
+== Step-1 function: main's run against c1
+tables in both 23; equal 23; differ 0
+csv in both 28; byte-equal 28
+== lung de: main's run against c11
+tables in both 4; equal 4; differ 0
+  only after: 2026-10-17_de_tcga_lung_size_factors_v1.parquet
+csv in both 9; byte-equal 9
+== lung qc: main's run against c11
+tables in both 5; equal 5; differ 0
+csv in both 12; byte-equal 10
+  csv differs: 2026-10-17_qc_tcga_lung_linked_pca_v1.csv
+  csv differs: 2026-10-17_qc_tcga_lung_size_genes_v1.csv
+== breast de: main's run against c11
+tables in both 4; equal 4; differ 0
+  only after: 2026-10-17_de_tcga_brca_size_factors_v1.parquet
+csv in both 8; byte-equal 8

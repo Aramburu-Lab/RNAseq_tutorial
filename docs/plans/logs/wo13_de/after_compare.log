@@ -1,0 +1,11 @@
+== breast: tables of main's code (base) against this run's
+tables in both 4; equal 4; differ 0
+  only after: 2026-10-17_de_tcga_brca_size_factors_v1.parquet
+csv in both 8; byte-equal 8
+== lung: tables of main's code (base) against this run's
+tables in both 4; equal 4; differ 0
+  only after: 2026-10-17_de_tcga_lung_size_factors_v1.parquet
+csv in both 9; byte-equal 9
+== lung qc: main's code against this run's
+tables in both 0; equal 0; differ 0
+csv in both 0; byte-equal 0

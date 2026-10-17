@@ -23,6 +23,9 @@ from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, adjust, classify
 from ctx.gather.curation import LIBRARY, REPLICATE_KEYS, library_replicates, rank_replicates
 
 TOP_GENES = 500
+# Genes per block of the initial dispersions (lean_inference): 33 MB a temporary at 1,016
+# samples.
+GENE_BLOCK = 4096
 SPLIT_LEVELS = ("a", "b")
 # The coefficient pydeseq2 names for the tested level once "group" is recoded.
 COEFFICIENT = "group[T.tested]"
@@ -198,6 +201,113 @@ def _check_design(contrast: Contrast, metadata: Any) -> None:
         )
 
 
+def samples_by_genes(counts: pl.DataFrame, samples: list[str], rows: np.ndarray) -> Any:
+    """The counts pydeseq2 fits, samples by genes, as the one int64 copy it keeps (S.5).
+
+    pydeseq2 casts its counts with ``astype(int)``, which under pandas' copy-on-write passes an
+    int64 frame through uncopied, so this array becomes its ``X``. Built from polars in one
+    step, it replaces three copies of the matrix: polars' int32 export, its row-filtered copy
+    and pydeseq2's int64 cast, 953 MB against 471 MB for 1,016 samples by 58,038 genes. Its
+    layout is the one those copies gave, Fortran order, so every reduction rounds as before.
+
+    Args:
+        counts: ``gene_id`` then one integer column per sample.
+        samples: The samples, in the order pydeseq2 gets them.
+        rows: Which genes, a boolean per row of ``counts``.
+
+    Returns:
+        A pandas frame, samples by genes, int64 in Fortran order.
+    """
+    import pandas as pd  # noqa: PLC0415 - heavy; the pydeseq2 boundary
+
+    kept = counts.filter(pl.Series(rows))
+    values = kept.select(samples).to_numpy(order="c").astype(np.int64).T
+    return pd.DataFrame(values, index=samples, columns=kept["gene_id"].to_list(), copy=False)
+
+
+def _shrunk_gene(shrink_index: int, **gene: Any) -> tuple[np.ndarray, float, bool]:
+    """One gene's apeGLM fit, keeping of its inverse Hessian the one entry DeseqStats reads."""
+    from pydeseq2.utils import nbinomGLM  # noqa: PLC0415 - heavy; runs in a worker
+
+    beta, inverse_hessian, converged = nbinomGLM(shrink_index=shrink_index, **gene)
+    return beta, float(inverse_hessian[shrink_index, shrink_index]), converged
+
+
+def lean_inference(threads: int) -> Any:
+    """pydeseq2's default inference, the same numbers from less memory (S.5).
+
+    Two of its steps hold far more than they keep (pydeseq2 0.5.4). ``DeseqStats.lfc_shrink``
+    collects each gene's full inverse Hessian, p by p for a design of p columns, twice over,
+    to read one entry, the shrunk coefficient's variance: for 113 donors paired, p = 114,
+    104 kB per gene, 4.9 GB traced over some 22,000 genes. Here each worker returns that entry,
+    and a view repeating it at every index of a p-by-p matrix stands in for the matrices. The
+    rough and moments dispersions take several samples-by-genes temporaries at once, 2.36 GB
+    above entry for 1,016 samples by 58,038 genes; each gene's estimate reads only its own
+    column, so they run ``GENE_BLOCK`` genes at a time, equal to the bit on that matrix.
+
+    Args:
+        threads: CPUs for the inference's workers.
+
+    Returns:
+        A ``DefaultInference``.
+    """
+    # joblib through pydeseq2's module, so the threads test's spy on its Parallel sees this loop.
+    from pydeseq2 import default_inference as pydeseq2_inference  # noqa: PLC0415 - heavy
+    from pydeseq2 import utils  # noqa: PLC0415 - heavy
+
+    def blocks(estimate: Any, normed_counts: np.ndarray, other: Any) -> np.ndarray:
+        """One per-gene estimate, ``GENE_BLOCK`` genes at a time."""
+        return np.concatenate([
+            estimate(normed_counts[:, i : i + GENE_BLOCK], other)
+            for i in range(0, normed_counts.shape[1], GENE_BLOCK)
+        ])  # fmt: skip
+
+    class LeanInference(pydeseq2_inference.DefaultInference):  # type: ignore[misc]
+        """DefaultInference with the shrinkage and initial dispersions above."""
+
+        def fit_rough_dispersions(self, normed_counts: np.ndarray, design: Any) -> np.ndarray:
+            """pydeseq2's rough dispersions, in blocks of genes."""
+            return blocks(utils.fit_rough_dispersions, normed_counts, design)
+
+        def fit_moments_dispersions(self, normed_counts: np.ndarray, factors: Any) -> np.ndarray:
+            """pydeseq2's moments dispersions, in blocks of genes."""
+            return blocks(utils.fit_moments_dispersions, normed_counts, factors)
+
+        def lfc_shrink_nbinom_glm(  # noqa: PLR0913, PLR0917 - pydeseq2's signature
+            self,
+            design_matrix: np.ndarray,
+            counts: np.ndarray,
+            size: np.ndarray,
+            offset: np.ndarray,
+            prior_no_shrink_scale: float,
+            prior_scale: float,
+            optimizer: str,
+            shrink_index: int,
+        ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+            """pydeseq2's loop over genes, each returning one variance, not a matrix."""
+            with pydeseq2_inference.parallel_backend(self._backend, inner_max_num_threads=1):
+                fits = pydeseq2_inference.Parallel(
+                    n_jobs=self.n_cpus, verbose=self._joblib_verbosity,
+                    batch_size=self._batch_size,
+                )(
+                    pydeseq2_inference.delayed(_shrunk_gene)(
+                        shrink_index, design_matrix=design_matrix, counts=counts[:, i],
+                        size=size[i], offset=offset, prior_no_shrink_scale=prior_no_shrink_scale,
+                        prior_scale=prior_scale, optimizer=optimizer,
+                    )
+                    for i in range(counts.shape[1])
+                )  # fmt: skip
+            lfcs, variances, converged = (np.array(m) for m in zip(*fits, strict=True))
+            p = design_matrix.shape[1]
+            stand_in = np.lib.stride_tricks.as_strided(
+                variances, shape=(len(variances), p, p), strides=(variances.strides[0], 0, 0),
+                writeable=False,
+            )  # fmt: skip
+            return lfcs, stand_in, converged
+
+    return LeanInference(n_cpus=threads)
+
+
 def _shutdown_workers() -> None:
     """Stop loky's reusable workers, so their memory is reaped into RUSAGE_CHILDREN."""
     from joblib.externals.loky import get_reusable_executor  # noqa: PLC0415 - heavy
@@ -237,7 +347,6 @@ def fit(  # noqa: PLR0913 - every argument is a separate input of the fit
     """
     import pandas as pd  # noqa: PLC0415 - heavy; the pydeseq2 boundary
     from pydeseq2.dds import DeseqDataSet  # noqa: PLC0415 - heavy
-    from pydeseq2.default_inference import DefaultInference  # noqa: PLC0415 - heavy
     from pydeseq2.ds import DeseqStats  # noqa: PLC0415 - heavy
 
     used, dropped = select_samples(sheet, contrast, order)
@@ -246,18 +355,16 @@ def fit(  # noqa: PLR0913 - every argument is a separate input of the fit
     if n != contrast.expected_n:
         raise ContrastError(f"{contrast.name}: n = {n}, declared {contrast.expected_n}")
     names = used["sample"].to_list()
-    matrix = counts.select(names).to_numpy()
-    keep = expressed(matrix, list(n), min_count)
+    keep = expressed(counts.select(names).to_numpy(), list(n), min_count)
     genes = counts["gene_id"].filter(pl.Series(keep)).to_list()
     metadata = pd.DataFrame(
         {c: used[c].to_list() for c in ["group", *covariates(contrast, used)]}, index=names
     ).astype("category")
     _check_design(contrast, metadata)
-    inference = DefaultInference(n_cpus=threads)
-    frame = pd.DataFrame(matrix[keep].T, index=names, columns=genes)
+    inference = lean_inference(threads)
     dds = DeseqDataSet(
-        counts=frame, metadata=metadata, design=contrast.design, refit_cooks=True,
-        inference=inference, quiet=True,
+        counts=samples_by_genes(counts, names, keep), metadata=metadata,
+        design=contrast.design, refit_cooks=True, inference=inference, quiet=True,
     )  # fmt: skip
     dds.deseq2()
     wald = ["group", "tested", "reference"]
@@ -318,28 +425,32 @@ def pca(counts: pl.DataFrame, samples: list[str], *, threads: int) -> Pca:
     """
     import pandas as pd  # noqa: PLC0415 - heavy; the pydeseq2 boundary
     from pydeseq2.dds import DeseqDataSet  # noqa: PLC0415 - heavy
-    from pydeseq2.default_inference import DefaultInference  # noqa: PLC0415 - heavy
 
-    matrix = counts.select(samples).to_numpy()
-    nonzero = matrix.sum(axis=1) > 0
+    nonzero = counts.select(pl.any_horizontal(pl.col(samples) > 0)).to_series().to_numpy()
     genes = counts["gene_id"].filter(pl.Series(nonzero)).to_list()
-    frame = pd.DataFrame(matrix[nonzero].T, index=samples, columns=genes)
     metadata = pd.DataFrame({"all": ["all"] * len(samples)}, index=samples)
     dds = DeseqDataSet(
-        counts=frame, metadata=metadata, design="~1",
-        inference=DefaultInference(n_cpus=threads), quiet=True,
+        counts=samples_by_genes(counts, samples, nonzero), metadata=metadata, design="~1",
+        inference=lean_inference(threads), quiet=True,
     )  # fmt: skip
     with warnings.catch_warnings():
         # The fallback is recorded in ``trend`` and printed in the caption, not warned.
         warnings.filterwarnings("ignore", message="The dispersion trend curve fitting did not")
-        dds.vst(use_design=False)
+        # dds.vst(use_design=False) in its own steps, so the fitted means, 471 MB at 1,016
+        # samples by 58,038 genes and read by nothing after the fit, go before the transform.
+        dds.vst_fit_type = dds.fit_type
+        dds.vst_fit(use_design=False)
     _shutdown_workers()
-    values = np.asarray(dds.layers["vst_counts"])
+    del dds.layers["_vst_mu_hat"]
+    values = np.asarray(dds.vst_transform())
+    trend = str(dds.vst_fit_type)
+    # The counts and normalised counts go before the variance ranking's samples-by-genes
+    # temporary is made, not after.
+    del dds
     top = np.argsort(-values.var(axis=0), kind="stable")[:TOP_GENES]
     centred = values[:, top] - values[:, top].mean(axis=0)
     u, s, _ = np.linalg.svd(centred, full_matrices=False)
     share = s**2 / (s**2).sum()
     scores = pl.DataFrame({"sample": samples, "pc1": u[:, 0] * s[0], "pc2": u[:, 1] * s[1]})
     genes_used = tuple(genes[i] for i in top)
-    trend = str(dds.vst_fit_type)
     return Pca(scores, (float(share[0]), float(share[1])), genes_used, u * s, trend)

@@ -1,0 +1,8 @@
+fit_size_factors             entry    475,805,434  peak  1,538,970,204  above entry  1,063,164,770
+  _fit_MoM_dispersions         entry    954,913,482  peak  3,313,626,818  above entry  2,358,713,336
+  lin_reg_mu                   entry  1,427,165,608  peak  2,414,596,855  above entry    987,431,247
+  alpha_mle                    entry  2,370,857,805  peak  2,381,137,779  above entry     10,279,974
+fit_genewise_dispersions     entry    948,559,274  peak  2,381,137,779  above entry  1,432,578,505
+_fit_parametric_dispersion_trend entry  1,428,117,379  peak  1,450,346,334  above entry     22,228,955
+vst_transform                entry  1,433,955,000  peak  2,849,153,882  above entry  1,415,198,882
+pca: 1016 samples; run peak 2,849,153,882 B

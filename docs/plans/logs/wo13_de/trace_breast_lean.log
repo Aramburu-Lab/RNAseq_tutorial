@@ -1,0 +1,31 @@
+fit_size_factors#1: traced now 81,105,768 B, run peak 219,395,381 B
+fit_genewise_dispersions#1: traced now 123,060,720 B, run peak 368,197,289 B
+fit_MAP_dispersions#1: traced now 125,649,002 B, run peak 368,197,289 B
+fit_LFC#1: traced now 223,496,379 B, run peak 410,186,554 B
+calculate_cooks#1: traced now 262,592,357 B, run peak 410,186,554 B
+refit#1: traced now 262,672,961 B, run peak 410,186,554 B
+summary#1: traced now 292,165,170 B, run peak 410,186,554 B
+summary#2: traced now 323,034,068 B, run peak 430,951,747 B
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/joblib/externals/loky/process_executor.py:787: UserWarning: A worker stopped while some jobs were given to the executor. This can be caused by a too short worker timeout or by a memory leak.
+  warnings.warn(
+lfc_shrink#1: traced now 323,155,094 B, run peak 4,929,470,107 B
+fit#1: traced now 3,460,572 B, run peak 4,929,470,107 B
+figures#1: traced now 89,741,530 B, run peak 4,929,470,107 B
+sex_check#1: traced now 89,741,526 B, run peak 4,929,470,107 B
+page#1: traced now 79,571,895 B, run peak 4,929,470,107 B
+phase                             main RSS   largest child   main + children
+load                         4,136,435,712      49,332,224     4,199,743,488
+fit#1                        4,446,978,048     418,856,960     5,923,373,056
+fit_size_factors#1           1,224,343,552               0     1,224,343,552
+fit_genewise_dispersions#1   1,770,012,672     318,783,488     3,074,736,128
+fit_MAP_dispersions#1        1,743,716,352     320,094,208     3,080,994,816
+fit_LFC#1                    1,820,917,760     322,289,664     3,165,896,704
+calculate_cooks#1            1,891,876,864     322,289,664     3,236,855,808
+refit#1                                  0               0                 0
+summary#1                    1,888,124,928     324,976,640     3,238,232,064
+summary#2                    1,879,392,256     325,615,616     3,238,658,048
+lfc_shrink#1                 6,693,306,368     593,805,312     8,169,504,768
+figures#1                    4,131,962,880      49,332,224     4,195,270,656
+sex_check#1                              0               0                 0
+page#1                       4,040,540,160      49,332,224     4,103,847,936
+getrusage: self 6,943,195,136 B, children 607,256,576 B, wall 211.5 s

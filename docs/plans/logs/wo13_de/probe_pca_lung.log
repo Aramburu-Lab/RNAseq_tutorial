@@ -1,0 +1,13 @@
+step                                           RSS      traced now     traced peak
+counts estimated_size 282,894,872
+read, 1016 samples                     651,657,216         152,240         152,517
+to_numpy int32 246,343,424             900,022,272         154,330         340,815
+pandas frame 58038 genes             1,149,730,816     239,943,123     479,178,075
+DeseqDataSet X int64 471,732,864     1,690,550,272     711,866,599     716,869,703
+fit_size_factors                     2,520,416,256   1,184,599,439   1,775,031,399
+fit_genewise_dispersions             2,435,432,448   1,664,187,709   3,549,687,142
+trend parametric                     2,450,964,480   1,670,031,098   1,686,411,300
+vst_transform                        2,864,857,088   2,141,751,869   3,085,217,763
+variance ranking                     2,864,873,472   2,142,216,439   2,614,414,486
+layers {None: '471,732,864', 'normed_counts': '471,732,864', '_vst_mu_hat': '471,732,864', 'vst_counts': '471,732,864'}
+peak RSS (getrusage) 4,634,656,768
