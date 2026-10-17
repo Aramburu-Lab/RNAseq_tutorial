@@ -1,0 +1,9 @@
+wo13-run full suite at e4ea1df, pytest -q -n auto --dist loadscope -rs, load average 21 to 34:
+4 failed, 1659 passed, 10 skipped, 1 warning, 12 errors in 1784.74s (0:29:44)
+     1786.08 real      1261.32 user       409.53 sys
+          1177649152  maximum resident set size
+Every failure and error in tests/test_process_align.py, test_process_count.py and
+test_qc_registry.py; 48 subprocess.TimeoutExpired lines in the log, multiqc --version among
+them timing out after 120 s.
+Rerun of those three files alone, serial:
+84 passed, 7 skipped in 77.56s (0:01:17)

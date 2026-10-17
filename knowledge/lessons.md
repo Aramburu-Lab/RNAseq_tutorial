@@ -118,3 +118,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A source cited for a rule is read in full before the rule ships: three of three lung citations, checked by title and DOI only, supported no LUSC-against-LUAD RNA comparison (S.2, 2026-10-17).
 - Measure a step's peak memory step by step before fixing the reader: qc's peak was pydeseq2's VST inside ctx.de.deseq.pca, not the counts read, which column pruning cut by 9 MB (Q, 2026-10-17).
 - Max RSS of one qc run on one input spread 3.99 to 5.32 GB under load while macOS's peak memory footprint held at 4.77 to 4.78 GB: report both and repeat the run (Q, 2026-10-17).
+- A NUL byte cannot pass in argv: a log format with chr(0) raised "embedded null byte" in subprocess; use git's own %x00 placeholder (RUN, 2026-10-17).
+- Under a load average of 21 to 34, xdist runs hit tool timeouts (multiqc --version past 120 s) that pass serially: read failures against the load before blaming the change, and rerun when the machine is quiet (RUN, 2026-10-17).

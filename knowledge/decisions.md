@@ -107,7 +107,7 @@ it were reversed.
 
 **Evidence.** LUSC over LUAD on 501 and 515 tumours: TP63 5.12, KRT5 7.05, SOX2 3.19, NKX2-1 -3.46, NAPSA -3.45, all PASS (registered 15:21 before any fit). Project PERMANOVA R2 0.276, p 0.001; every QC metric differs by project at BH < 0.05; 6 of 21 and 24 plates shared.
 
-**Consequence.** `ctx run` still takes one `--gdc-dir` (TODO S.3). The marker sources were checked by title and DOI only (S.2).
+**Consequence.** `ctx run` takes a repeatable `--gdc-dir` since wo13-run (S.3). The marker sources were checked by title and DOI only, then read in full on 2026-10-17 and corrected to Girard 2016 (S.2).
 
 ---
 
@@ -121,7 +121,7 @@ it were reversed.
 
 **Evidence.** ~/ctx_kidney: 8 of 8 left-out entries mapped; 2 of 8 before merge commits were read. 10 planted mutations caught.
 
-**Consequence.** A mapped file may differ from the kit commit's copy (K.12).
+**Consequence.** A mapped file may differ from the kit commit's copy (K.12). Since wo13-run, such a file is restored by `git show` from the newest commit holding its bytes, written to its file name, and the command names that file.
 
 ---
 

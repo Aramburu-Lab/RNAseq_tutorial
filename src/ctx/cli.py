@@ -512,7 +512,7 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
     fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
-    gdc_dir: Annotated[Path | None, typer.Option(help=HELP["--gdc-dir"])] = None,
+    gdc_dir: Annotated[list[Path] | None, typer.Option(help=HELP["--gdc-dir"])] = None,
     salmon_dir: Annotated[Path | None, typer.Option(help=HELP["--salmon-dir"])] = None,
     mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
     isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
@@ -522,7 +522,8 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     from ctx import pipeline  # noqa: PLC0415 - imported after the runtime profile
 
     settings = ctx.obj["settings"]
-    options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dir,
+    gdc_dirs = tuple(gdc_dir or ())
+    options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dirs,
                                salmon_dir, mirna_dir, isoform_dir)  # fmt: skip
     problems, planned = pipeline.check(settings.root, options)
     for problem in problems:

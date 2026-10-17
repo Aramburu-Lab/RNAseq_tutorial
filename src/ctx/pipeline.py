@@ -39,7 +39,7 @@ class Options:
     dataset_file: Path
     fetchngs_dir: Path | None = None
     rnaseq_dir: Path | None = None
-    gdc_dir: Path | None = None
+    gdc_dirs: tuple[Path, ...] = ()
     salmon_dir: Path | None = None
     mirna_dir: Path | None = None
     isoform_dir: Path | None = None
@@ -66,21 +66,21 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
     """Each module the dataset declares, with its own options, in ``ORDER``.
 
     gather and report always run; qc on a fetchngs route; quant with an rnaseq outdir and an
-    ``annotation_gtf``, and the salmon folder when given; gather on the GDC route takes the
-    miRNA and isoform folders when given; de with contrasts, ``[de]`` and counts; function
-    with ``[function]`` too; proteo with ``[proteo]`` and counts, and de's tables when it
-    compares fold changes; ncrna with ``[ncrna]`` and de's tables; clinical with
-    ``[clinical]``.
+    ``annotation_gtf``, and the salmon folder when given; gather on the GDC route takes every
+    ``--gdc-dir``, one per project, and the miRNA and isoform folders when given; de with
+    contrasts, ``[de]`` and counts; function with ``[function]`` too; proteo with ``[proteo]``
+    and counts, and de's tables when it compares fold changes; ncrna with ``[ncrna]`` and de's
+    tables; clinical with ``[clinical]``.
     """
     base = ("--dataset", options.dataset, "--dataset-file", str(options.dataset_file))
     rnaseq = ("--rnaseq-dir", str(options.rnaseq_dir)) if options.rnaseq_dir else ()
     fetchngs = ("--fetchngs-dir", str(options.fetchngs_dir)) if options.fetchngs_dir else ()
-    gdc = options.gdc_dir is not None
+    gdc = bool(options.gdc_dirs)
     salmon = ("--salmon-dir", str(options.salmon_dir)) if options.salmon_dir else ()
     mirna = tuple(arg for flag, folder in (("--mirna-dir", options.mirna_dir),
                                            ("--isoform-dir", options.isoform_dir))
                   if folder is not None for arg in (flag, str(folder)))  # fmt: skip
-    gdc_args = ("--gdc-dir", str(options.gdc_dir), *mirna)
+    gdc_args = (*(a for folder in options.gdc_dirs for a in ("--gdc-dir", str(folder))), *mirna)
     counts = gdc or options.rnaseq_dir is not None
     has_gtf = any(r.name == "annotation_gtf" for r in spec.resources)
     # Across studies M7 reads M5's fold changes; across samples, gather's counts alone.
@@ -209,15 +209,16 @@ def _resource(name: str) -> str:
 def _inputs(root: Path, spec: Dataset, options: Options) -> list[Problem]:
     """Outdirs that are not folders, and resources not fetched under the root."""
     problems = []
-    default = None if options.gdc_dir else options.dataset_root(root)
+    default = None if options.gdc_dirs or spec.gdc else options.dataset_root(root)
     given = (("--fetchngs-dir", options.fetchngs_dir or default),
-             ("--rnaseq-dir", options.rnaseq_dir), ("--gdc-dir", options.gdc_dir),
+             ("--rnaseq-dir", options.rnaseq_dir),
+             *(("--gdc-dir", folder) for folder in options.gdc_dirs),
              ("--salmon-dir", options.salmon_dir), ("--mirna-dir", options.mirna_dir),
              ("--isoform-dir", options.isoform_dir))  # fmt: skip
     for flag, folder in given:
         if folder is not None and not folder.is_dir():
             problems.append(Problem(f"{flag} {folder} is not a folder"))
-    problems += _pairing(options)
+    problems += _pairing(options) + _projects(spec, options)
     counts = options.rnaseq_dir
     if counts is not None and counts.is_dir() and not (matrix := counts / MATRIX_FILE).is_file():
         problems.append(Problem(f"--rnaseq-dir holds no count matrix, {matrix}: nf-core/rnaseq "
@@ -240,11 +241,30 @@ def _pairing(options: Options) -> list[Problem]:
     problems = []
     if (options.mirna_dir is None) != (options.isoform_dir is None):
         problems.append(Problem("--mirna-dir and --isoform-dir go together: gather reads both"))
-    if (options.mirna_dir or options.isoform_dir) and options.gdc_dir is None:
+    if (options.mirna_dir or options.isoform_dir) and not options.gdc_dirs:
         problems.append(Problem("--mirna-dir and --isoform-dir take --gdc-dir"))
     if options.salmon_dir is not None and options.rnaseq_dir is None:
         problems.append(Problem("--salmon-dir takes --rnaseq-dir: quant reads both"))
     return problems
+
+
+def _projects(spec: Dataset, options: Options) -> list[Problem]:
+    """The GDC folders gather would refuse, every one at once, before any run.
+
+    A folder of an undeclared or doubled project, each project with no folder, and miRNA
+    folders for several projects. Folders are matched to projects as gather matches them
+    (``gdc.by_project``); a folder that is not there is ``_inputs``'s to name.
+    """
+    if spec.gdc is None:
+        given = "--gdc-dir takes a dataset file with a [gdc] table"
+        return [Problem(f"{given}; {options.dataset_file} has none")] if options.gdc_dirs else []
+    from ctx.gather import gdc  # noqa: PLC0415 - heavy; after the runtime profile
+
+    folders = [folder for folder in options.gdc_dirs if folder.is_dir()]
+    _, problems = gdc.by_project(folders, spec.gdc.projects)
+    if options.mirna_dir is not None and len(spec.gdc.projects) > 1:
+        problems.append("--mirna-dir reads one project; this dataset file names several")
+    return [Problem(text) for text in problems]
 
 
 def _curatable(root: Path, spec: Dataset, options: Options) -> bool:

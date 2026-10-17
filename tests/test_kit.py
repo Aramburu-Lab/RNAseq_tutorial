@@ -495,7 +495,7 @@ def test_every_committed_version_of_a_dataset_file_is_the_codebases(kit_script, 
                              check=True).stdout.split()  # fmt: skip
     assert len(commits) > 1
     for at in commits:
-        assert codebase[committed(name, at)] == f"conf/datasets/{name}", at
+        assert codebase[committed(name, at)].path == f"conf/datasets/{name}", at
 
 
 @pytest.mark.parametrize("ours", [True, False])
