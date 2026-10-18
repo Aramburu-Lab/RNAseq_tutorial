@@ -27,6 +27,8 @@ SEVERAL_COLUMNS = {
     "group": ("none", "The protein table's identifier cell: a protein group's members."),
     "genes": ("none", "The distinct genes those members name, joined by ';'; none was chosen."),
 }
+# The page line on each acquisition, named whole so the content test finds both keys.
+DESIGN_NOTES = {"tmt": "table_tmt", "label_free": "table_label_free"}
 BATCH_COLUMNS = {
     "batch": ("none", "A TMT plex or a label-free run, from the sample table."),
     "samples": ("samples", "Protein samples in it."),
@@ -217,7 +219,7 @@ def _notes(
     sizes = [int(v) for v in batches["samples"]]
     out += [
         ("table_mapped", {"kind": table.id_kind, **read.mapped}),
-        (f"table_{table.acquisition}", {"n": len(sizes), "low": min(sizes), "high": max(sizes)}),
+        (DESIGN_NOTES[table.acquisition], {"n": len(sizes), "low": min(sizes), "high": max(sizes)}),
         ("table_paired", {"n": n[0], "n_columns": n[1]}),
     ]
     if table.reference:
