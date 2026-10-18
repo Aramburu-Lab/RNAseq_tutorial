@@ -38,7 +38,9 @@ sheet = quantities.SampleTable(samples, samples, ("p",) * len(samples), pl.DataF
 text = adapters.table(data, "\t", p.descriptors[0], samples)
 new = quantities.read(text, sheet, declared, genes, p.descriptors[0]).layer
 
-print(f"read_tsv layer: {len(old.genes):,} genes; joined with unique RNA symbols {len(old_joined):,}")
+print(
+    f"read_tsv layer: {len(old.genes):,} genes; joined with unique RNA symbols {len(old_joined):,}"
+)
 print(f"generic layer:  {len(new.genes):,} genes (only genes the RNA side holds)")
 same_genes = old_joined == list(new.genes)
 print(f"genes reaching per_gene equal, in order: {same_genes}")
