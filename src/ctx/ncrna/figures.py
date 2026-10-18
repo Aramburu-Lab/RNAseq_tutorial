@@ -264,6 +264,7 @@ def packed(rows: pl.DataFrame, chosen: Sequence[str]) -> dict[str, Any]:
     """
 
     def encoded(column: str, kind: str) -> str:
+        """One column as base64 of its values in the given little-endian dtype."""
         return base64.b64encode(rows[column].to_numpy().astype(kind).tobytes()).decode("ascii")
 
     return {

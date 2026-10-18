@@ -313,6 +313,7 @@ def exported(block: FigureBlock, options: list[tuple[str, Any, FigureText]], lab
     controls = dict(shown.controls or {})
 
     def settings(data: Any) -> dict[str, Any]:
+        """One view's PDF and SVG settings: its own caption, size and layers."""
         layers = data.export_layers() if hasattr(data, "export_layers") else None
         return export.settings(inches or data.inches(), data.caption, block.stem, layers)
 
