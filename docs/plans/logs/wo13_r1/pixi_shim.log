@@ -1,0 +1,2 @@
+pixi install --manifest-path /Users/rytis/ctx_r1_clone/pixi.toml -e fetch --frozen
+pixi install -e laptop --frozen

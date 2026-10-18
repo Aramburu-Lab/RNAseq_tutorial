@@ -48,6 +48,10 @@ class Api:
         """Serve the fixture folders under ``source``: star, mirna and isoform."""
         self.source = source
         self.requests: list[str] = []
+        # File IDs served with a byte added, as a transfer that went wrong would deliver them.
+        self.corrupt: set[str] = set()
+        # Records whose pagination says GDC holds more hits than it returned.
+        self.short: set[str] = set()
         self.files = {p.parent.name: p for p in source.rglob("*") if p.is_file()
                       and len(p.parent.name) == 36}  # fmt: skip
         self.files[CDR_ID] = source / CDR_NAME
@@ -59,7 +63,8 @@ class Api:
         if path == "/status":
             return json.dumps({"data_release": RELEASE, "status": "OK"}).encode()
         if path.startswith("/data/"):
-            return self.files[path.removeprefix("/data/")].read_bytes()
+            file_id = path.removeprefix("/data/")
+            return self.files[file_id].read_bytes() + (b"x" if file_id in self.corrupt else b"")
         if path.endswith(PANCAN):
             md5 = hashlib.md5(CDR_BODY).hexdigest()  # noqa: S324 - GDC's checksum
             row = f"{CDR_ID}\t{CDR_NAME}\t{md5}\t{len(CDR_BODY)}"
@@ -67,7 +72,12 @@ class Api:
         query = json.loads(body)
         if path in ("/cases", "/annotations"):
             name = gdc.CASES if path == "/cases" else gdc.ANNOTATIONS
-            return self._paged(json.loads((self.source / "star" / name).read_text()))
+            paged = self._paged(json.loads((self.source / "star" / name).read_text()))
+            if path in self.short:
+                record = json.loads(paged)
+                record["data"]["pagination"]["total"] += 1
+                return json.dumps(record).encode()
+            return paged
         types = [c["content"]["value"][0] for c in query["filters"]["content"]
                  if c["content"]["field"] == "data_type"]  # fmt: skip
         if types == ["Aligned Reads"]:
@@ -215,6 +225,9 @@ def test_a_partial_folder_fails_and_resumes(site, api):
     broken = _fetch(env, url, folder, root, KINDS="star", CDR="0", RETRIES="0")
     served.files[first.parent.name] = held
     assert broken.returncode == 1 and f"missing: {first}" in broken.stdout, broken.stdout[-2000:]
+    files = len(STAR) - 1, 0, 1
+    assert f"PASTE data files md5 OK, bad, missing: {', '.join(map(str, files))}   FAILS" in (
+        broken.stdout)  # fmt: skip
     assert broken.stdout.rstrip().endswith("read the lines marked FAIL")
     fixed = _fetch(env, url, folder, root, KINDS="star", CDR="0")
     assert fixed.returncode == 0, fixed.stdout[-3000:]
@@ -250,3 +263,35 @@ def test_kebnekaise_refuses_home_and_takes_the_store(site, api):
     done = _run([script, "FAKE-BRCA", store], root, run, GDC_API=url, KINDS="star", CDR="0")
     assert done.returncode == 0, done.stdout[-3000:] + done.stderr[-2000:]
     assert (root / "log" / "python3.calls").read_text().split() == ["called"]
+
+
+def test_a_corrupt_transfer_is_never_kept(site, api):
+    """A file whose bytes differ from the manifest's md5 on arrival stays a .part, is never
+    moved into place, and the end check fails on it; served right, the same command fixes it.
+    Catches the md5 check on arrival dropped, which would keep a damaged file as if it were
+    GDC's."""
+    root, env = site
+    served, url = api
+    folder = root / "store" / "fake"
+    (star_file,) = [k for k, p in served.files.items() if p.parent.parent.name == "star"][:1]
+    served.corrupt.add(star_file)
+    broken = _fetch(env, url, folder, root, KINDS="star", CDR="0", RETRIES="0")
+    assert broken.returncode == 1, broken.stdout[-3000:]
+    assert f"FAIL md5 {folder}/{star_file}/" in broken.stdout
+    assert not [p for p in (folder / star_file).iterdir() if not p.name.endswith(".part")]
+    served.corrupt.clear()
+    fixed = _fetch(env, url, folder, root, KINDS="star", CDR="0")
+    assert fixed.returncode == 0, fixed.stdout[-3000:]
+
+
+def test_a_record_cut_short_fails(site, api):
+    """A clinical record whose pagination counts more hits than it holds fails the end check,
+    named. Catches a record cut at the size limit passed as the whole project's."""
+    root, env = site
+    served, url = api
+    served.short.add("/cases")
+    done = _fetch(env, url, root / "store" / "fake", root, KINDS="star", CDR="0")
+    assert done.returncode == 1, done.stdout[-3000:]
+    cases = len({a.case for a in STAR})
+    assert f"PASTE gdc_cases_clinical.json, warnings: {cases} of {cases + 1}; {{}}   FAILS" in (
+        done.stdout)  # fmt: skip

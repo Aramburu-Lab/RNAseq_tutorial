@@ -1,0 +1,10 @@
+=== 2026-10-18T10:15:37Z paste_2_env.sh
+=== 2026-10-18T10:15:37Z paste_2_download.sh
+PASTE start 2026-10-18T10:15:37Z: TCGA-HNSC star into /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc
+kept gdc_manifest_star_counts.txt from an earlier run
+kept gdc_files_star_counts.tsv from an earlier run
+kept gdc_cases_clinical.json from an earlier run
+kept gdc_annotations.json from an earlier run
+kept gdc_read_groups.json from an earlier run
+kept PanCan-General_Open_GDC-Manifest_2.txt from an earlier run
+fetching 566 data files, 2395352858 bytes, 4 at a time

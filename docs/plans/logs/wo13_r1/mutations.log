@@ -1,0 +1,22 @@
+caught md5 on arrival dropped: tests/test_fetch_gdc.py: 1 failed, 5 passed in 7.13s
+caught another query's folder taken: tests/test_fetch_gdc.py: 1 failed, 3 passed in 4.68s
+SURVIVED missing files not counted: tests/test_fetch_gdc.py: 6 passed in 6.18s
+caught size run fetches data: tests/test_fetch_gdc.py: 1 failed, 1 passed in 2.47s
+caught CDR left unlogged: tests/test_fetch_gdc.py: 1 failed in 1.49s
+caught read groups not fetched: tests/test_fetch_gdc.py: 1 failed in 1.62s
+caught home check dropped: tests/test_fetch_gdc.py: 1 failed, 4 passed in 5.28s
+SURVIVED partial record passed: tests/test_fetch_gdc.py: 6 passed in 6.91s
+caught release not compared: tests/test_dataset_template_gdc.py: 1 failed, 3 passed in 0.73s
+caught Table 3 zeros pass: tests/test_dataset_template_gdc.py: 1 failed, 3 passed in 1.43s
+caught Table 3 mismatch silent: tests/test_dataset_template_gdc.py: 1 failed, 4 passed in 1.84s
+caught CDR type not guessed: tests/test_dataset_template_gdc.py: 1 failed, 3 passed in 1.21s
+caught miRNA n not checked: tests/test_dataset_template_gdc.py: 1 failed, 3 passed in 1.22s
+caught rules time not checked: tests/test_dataset_template_gdc.py: 1 failed, 4 passed in 1.34s
+caught slug left a placeholder: tests/test_guide_gdc.py: 1 failed, 1 passed in 0.62s
+caught copy overwrites: tests/test_guide_gdc.py: 1 failed, 2 passed in 0.48s
+caught isoform folder not named: tests/test_guide_gdc.py: 1 failed, 2 passed in 0.55s
+caught GDC check before folder refusals: tests/test_pipeline.py: 1 failed, 13 passed in 27.08s
+16 of 18 caught
+caught missing files not counted: tests/test_fetch_gdc.py: 1 failed, 2 passed in 4.99s
+caught partial record passed: tests/test_fetch_gdc.py: 1 failed, 6 passed in 7.87s
+2 of 2 caught

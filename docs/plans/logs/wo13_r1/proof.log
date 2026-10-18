@@ -1,0 +1,9 @@
+# wo13-r1 proof log: TCGA-HNSC through the guide's TCGA part.
+2026-10-18 before any download: accession TCGA-HNSC (GDC project), Data Release 46.0 - August 10, 2026.
+GDC API /files (gdc_sizes.log, 2026-10-18): STAR - Counts 566 files 2,395,352,858 B; miRNA 569 files 28,625,773 B;
+isoform 569 files 221,604,518 B; data files 1,704, 2,645,583,149 B. Plus the CDR (2,945,129 B per GDC's PanCan
+manifest), ctx setup's six resources (66,363,792 B by the template), and the metadata records. Under the 3 GB approval.
+Substitutions, every other line as the guide prints it: git clone of this worktree's branch; pixi by
+docs/plans/logs/wo13_r1/shim/pixi (main's environments; the default one for ctx, main's laptop copy lacking openpyxl).
+size read 2026-10-18: 2,645,583,149 B in 1,704 files, equal to the API's; downloading
+dataset file edited and rules registered 2026-10-18 12:16 (local), before any ctx command read it
