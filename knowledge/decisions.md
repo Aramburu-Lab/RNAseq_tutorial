@@ -53,11 +53,13 @@ it were reversed.
 
 **Consequence.** The colour rule offers tissue and time point on Step-1, which the plan's question 6 recommended leaving out.
 
+
+**Amended 2026-10-18 (Rytis).** M1's colour columns are batch, then the ones `[dataset] colours` names; a file naming none offers batch alone, and a named column that is not curated or holds fewer than 2 or more than 7 levels stops gather. tier1.toml names isolation and sex, following the figure-controls critique (line 232): tissue and time point nest in cell type and condition. On Step-1's 2026-10-16 sheet the offer is batch, isolation (4 levels), sex (3).
 ---
 
 ## D-084 — M9's own-sample panels read each contrast's own M5 fit
 
-**Date:** 2026-10-17 · **Status:** decided; F1's per-contrast layout awaits Rytis's confirmation
+**Date:** 2026-10-17 · **Status:** decided, F1 per contrast confirmed by Rytis 2026-10-18
 
 **Context.** E.1c2: the box and F1 call `log2_normalised` with M5's size factors (D-083). F1 was planned by cell type over all samples.
 

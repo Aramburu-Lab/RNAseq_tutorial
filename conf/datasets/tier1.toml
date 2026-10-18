@@ -5,6 +5,9 @@
 slug = "tier1"
 # The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
 label = "Step-1"
+# M1 Figure 1's colours besides batch: tissue and time point nest in cell type and condition,
+# so they are not offered (Rytis 2026-10-18). Sex is the recorded sex, the recipient's.
+colours = ["isolation", "sex"]
 ena_study = "PRJEB49000"
 ena_secondary_study = "ERP133445"
 arrayexpress = "E-MTAB-11190"

@@ -15,7 +15,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx.dataset import Dataset
+from ctx.dataset import Dataset, DatasetError
 from ctx.de.deseq import select_samples
 from ctx.report import text
 from ctx.viz.axes import axis_title
@@ -90,15 +90,27 @@ def smallest(bars: pl.DataFrame) -> tuple[int, str, int]:
 
 
 def colours(frame: pl.DataFrame, spec: Dataset) -> list[str]:
-    """The colour columns offered: batch, the build's, then each curated column of 2 to 7 levels.
+    """The colour columns offered: batch, then the ones ``[dataset] colours`` names.
 
-    Every curated column the dataset file declares, besides the bars' own and the
-    individual, that holds two levels or more and no more than a page colours.
+    A dataset file names them, because a column nested in the bars misleads as a colour:
+    Step-1's tissue and time point nest in cell type and condition (figure-controls critique,
+    line 232; Rytis 2026-10-18). A file naming none offers batch alone.
+
+    Raises:
+        DatasetError: If a named colour is not a curated column of the file, or has fewer than
+            two or more than a page's categories of levels.
     """
-    declared = [c.name for c in spec.columns if c.name not in (*NOT_COLOURS, "batch")]
-    fits = [c for c in dict.fromkeys(declared)
-            if c in frame.columns and 1 < frame[c].n_unique() <= MAX_CATEGORIES]  # fmt: skip
-    return ["batch", *fits]
+    named = list(dict.fromkeys(spec.info.get("colours", ())))
+    known = {c.name for c in spec.columns} - {*NOT_COLOURS, "batch"}
+    problems = [f"[dataset] colours names {c}, which is not a curated column" for c in named
+                if c not in known or c not in frame.columns]  # fmt: skip
+    problems += [f"[dataset] colours names {c}, which holds {frame[c].n_unique()} levels; "
+                 f"a colour needs 2 to {MAX_CATEGORIES}" for c in named
+                 if c in known and c in frame.columns
+                 and not 1 < frame[c].n_unique() <= MAX_CATEGORIES]  # fmt: skip
+    if problems:
+        raise DatasetError(f"{spec.path.name}: " + "; ".join(problems))
+    return ["batch", *named]
 
 
 def levels(rows: pl.DataFrame, colour: str, spec: Dataset) -> list[str]:

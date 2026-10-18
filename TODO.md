@@ -520,6 +520,15 @@ S merged 2026-10-15 (wo13-s, D-076 to D-078): H.1 ccRCC M7 on 103 tumours and 73
 - [x] S.8 (wo13-e2a 51d8cb2) Every qc join keeps its left table's order: an unordered `unique` met an inner join polars leaves unordered; a test runs qc twice and compares every CSV byte for byte.
 
 - [ ] E2a.1 The M2 page lays out wider than the window on main: at 1280 px the linked PCA reaches 1,394 px and the page scrolls to 1,579 px; at 375 px it lays out 712 px wide.
+## Reuse: any dataset, approved by Rytis 2026-10-18 with its proof downloads
+
+Rytis 2026-10-18: "It has to be a reusable tool. This is important." Measured 2026-10-18: own FASTQ (`ctx reads`) and public reads (fetchngs) work end to end; any TCGA project works only by hand (the GDC fetch script lives in the home folder, no GDC template, no guide part); a count matrix from another repository and own mass-spec quantification have no route. Each package is proved on a dataset its code was not written against, sizes and accessions stated before its download.
+- [ ] R1 Any TCGA project: the GDC fetch script in scripts/bash/, generic for any project; a GDC dataset template; a guide part with code from fetch to `ctx run`, survival from TCGA-CDR included; proof on a held-out project.
+- [ ] R2 A count matrix from any repository: `ctx gather --counts <matrix> --table <samples>`, integer counts, known gene IDs and the table's samples checked; a template and a guide part; proof on a held-out GEO dataset with a raw count matrix.
+- [ ] R3 Own mass-spec quantification: one reader of a protein by sample table with a sample table (intensities or log2, missing never zero, plex or batch, pairing to RNA samples), and adapters for MaxQuant proteinGroups.txt and the DIA-NN protein matrix; proof on a held-out PRIDE dataset with matched RNA-seq.
+- [ ] F The reuse layer (wave 4) after R1 to R3.
+- [ ] H.5 The round preflight of 2026-10-18 hung 10 h on an idle hisat2 under xdist (25 errors after it); a serial and a parallel rerun passed. Find the cause if it recurs: record the process tree before killing it.
+
 - [x] U.15 (M) Own FASTQ route: `ctx reads`, the guide's Part 1b, the template route, CONVENTIONS' Stack line; proved both ways on the worked example (D-059, local-fastq 06945f7).
 - [ ] U.16 (S) Rehearse Part 1b on real own files, on a laptop and on Kebnekaise; measure counting speed on gigabyte files.
 - [x] U.17 (S) The runs of one library share one replicate number: curation ranks libraries (experiment_accession) by their first run, a tie on the run number by name; Step-1's 210 runs are 210 experiments, unchanged (D-063, wo13-g2 6f0453a, 8fb5e13; 5 mutations caught).

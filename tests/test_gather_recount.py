@@ -8,6 +8,7 @@ Each test names the mutation it catches.
 import itertools
 import json
 import re
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -17,7 +18,7 @@ from test_curation import FIXTURE, SPEC, _gather, _place_sdrf, sdrf_rows
 from test_export_browser import CHROMIUM, _browse
 from test_page_script import _node
 
-from ctx.dataset import load
+from ctx.dataset import DatasetError, load
 from ctx.de.deseq import select_samples
 from ctx.gather import composition
 from ctx.gather.fetchngs import read
@@ -188,3 +189,16 @@ def test_the_page_draws_the_recount_and_exports_it(page, tmp_path):
     svg = (tmp_path / seen["files"]["svg"]["guid"]).read_text()
     words = " ".join(re.findall(r"<text[^>]*>([^<]*)</text>", svg))
     assert "<image" not in svg and "coloured by time_point" in words
+
+
+def test_colours_are_the_ones_the_dataset_file_names(page):
+    """M1 offers batch, then only the colours `[dataset] colours` names: Step-1's tissue and time
+    point nest in cell type and condition (Rytis 2026-10-18). Mutations caught: every curated
+    column offered again; an undeclared name passed through."""
+    _, sheet, spec = page
+    assert composition.colours(sheet, spec) == ["batch", "time_point"]
+    unnamed = replace(spec, info={k: v for k, v in spec.info.items() if k != "colours"})
+    assert composition.colours(sheet, unnamed) == ["batch"]
+    wrong = replace(spec, info={**spec.info, "colours": ["tissue_of_nowhere"]})
+    with pytest.raises(DatasetError, match="tissue_of_nowhere"):
+        composition.colours(sheet, wrong)

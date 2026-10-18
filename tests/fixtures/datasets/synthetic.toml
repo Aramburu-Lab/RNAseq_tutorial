@@ -3,6 +3,8 @@
 
 [dataset]
 slug = "synthetic"
+# M1 Figure 1's colours besides batch (ctx.gather.composition.colours).
+colours = ["time_point"]
 
 [[resources]]
 name = "sdrf"
