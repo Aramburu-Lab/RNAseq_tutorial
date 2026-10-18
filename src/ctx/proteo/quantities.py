@@ -107,11 +107,14 @@ def raw_bytes(path: Path, member: str | None) -> bytes:
         return archive.read(found[0])
 
 
-def text_frame(data: bytes, separator: str, columns: list[str] | None = None) -> pl.DataFrame:
+def text_frame(
+    data: bytes, separator: str, columns: list[str] | None = None, *, quoted: bool = True
+) -> pl.DataFrame:
     """A tab- or comma-separated table, every cell a string and an empty one "".
 
-    A tab table is read without quoting, as MaxQuant and DIA-NN write it; a comma table honours
-    quotes, as a spreadsheet saves it.
+    A plain table honours quotes, as a spreadsheet or CPTAC's own tables write them; MaxQuant
+    and DIA-NN quote nothing, so their adapters read with ``quoted`` off and keep a cell that
+    starts with a quote as written.
 
     Raises:
         ProteoError: If the text is not UTF-8 or a row's width differs from the header's.
@@ -121,7 +124,7 @@ def text_frame(data: bytes, separator: str, columns: list[str] | None = None) ->
             io.BytesIO(data),
             separator=separator,
             infer_schema=False,
-            quote_char='"' if separator == "," else None,
+            quote_char='"' if quoted else None,
             columns=columns,
         )
     except (pl.exceptions.ComputeError, UnicodeDecodeError) as error:

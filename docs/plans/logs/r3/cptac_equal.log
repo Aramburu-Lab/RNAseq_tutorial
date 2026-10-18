@@ -1,0 +1,6 @@
+read_tsv layer: 11,355 genes; joined with unique RNA symbols 11,161
+generic layer:  11,161 genes (only genes the RNA side holds)
+genes reaching per_gene equal, in order: True
+values equal to the bit: True
+collapse report read_tsv: Collapse(rows=11355, no_symbol=0, several_genes=0, extra_rows=0, genes_twice=0, kept=11355)
+collapse report generic:  Collapse(rows=11355, no_symbol=0, several_genes=0, extra_rows=0, genes_twice=0, kept=11161)

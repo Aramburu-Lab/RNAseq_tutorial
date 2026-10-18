@@ -16,6 +16,8 @@ by the run's file path; a sample is that file's name without its folder and endi
 leaves a protein not quantified in a run empty, and writes decoys and contaminants to no matrix.
 """
 
+import csv
+import io
 import re
 from pathlib import PurePosixPath, PureWindowsPath
 
@@ -62,15 +64,19 @@ def id_column(fmt: str, kind: str, declared: str | None) -> str:
     raise ProteoError(f"proteo.id_column: the {fmt} format has no own column for {kind!r}")
 
 
-def header(data: bytes, separator: str = "\t") -> list[str]:
-    """The table's first line, split."""
+def header(data: bytes, separator: str = "\t", *, quoted: bool = False) -> list[str]:
+    """The table's first line, split; quotes honoured for a plain table."""
     first = data.split(b"\n", 1)[0].decode("utf-8", errors="replace").rstrip("\r")
-    return first.split(separator)
+    return (
+        next(csv.reader(io.StringIO(first), delimiter=separator))
+        if quoted
+        else first.split(separator)
+    )
 
 
 def table(data: bytes, separator: str, id_col: str, samples: tuple[str, ...]) -> Text:
     """A plain table: the identifier column and the sample table's columns, nothing dropped."""
-    names = header(data, separator)
+    names = header(data, separator, quoted=True)
     wanted = [c for c in dict.fromkeys([id_col, *samples]) if c in names]
     frame = text_frame(data, separator, wanted)
     return Text(frame, (), len([c for c in names if c != id_col]))
@@ -97,7 +103,8 @@ def maxquant(data: bytes, id_col: str, quantity: str) -> Text:
         for reason, options in MAXQUANT_FLAGS
     ]
     present = [c for _, c in flags if c]
-    frame = text_frame(data, "\t", [c for c in names if c == id_col or c in picked or c in present])
+    wanted = [c for c in names if c == id_col or c in picked or c in present]
+    frame = text_frame(data, "\t", wanted, quoted=False)
     dropped, keep = [], pl.lit(value=True)
     for reason, column in flags:
         hit = keep & (pl.col(column) == FLAGGED) if column else pl.lit(value=False)
@@ -124,5 +131,6 @@ def diann(data: bytes, id_col: str) -> Text:
     runs = {c: run_name(c) for c in names if c not in DIANN_DESCRIPTORS}
     if len(set(runs.values())) < len(runs):
         raise ProteoError("pg_matrix.tsv: two run columns share a file name")
-    frame = text_frame(data, "\t", [c for c in names if c == id_col or c in runs]).rename(runs)
+    wanted = [c for c in names if c == id_col or c in runs]
+    frame = text_frame(data, "\t", wanted, quoted=False).rename(runs)
     return Text(frame, (), len(runs))

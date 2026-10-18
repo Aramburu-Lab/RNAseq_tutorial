@@ -274,3 +274,10 @@ def test_text_frame_keeps_empty_cells():
     frame = quantities.text_frame(b"a\tb\n1\t\n", "\t")
     assert frame.rows() == [("1", "")]
     assert quantities.text_frame(b'a,b\n"x,y",2\n', ",").rows() == [("x,y", "2")]
+
+
+def test_plain_table_honours_quotes():
+    """Catches a quoted tab table read with its quotes: CPTAC's own TSV quotes every cell, and
+    its identifier column was not found."""
+    found = adapters.table(b'"id"\t"a"\t"b"\n"TP53"\t"1.5"\t"NA"\n', "\t", "id", ("a",))
+    assert found.frame.rows() == [("TP53", "1.5")] and found.columns == 2
