@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-090 — M10 states its endpoint from the dataset file and Liu 2018 Table 3's marks; shared page text names no cancer type
+
+**Date:** 2026-10-19 · **Status:** decided
+
+**Context.** R1.2: M10's shared text was written for breast and printed on every cohort, including "384 men are kept and flagged by sex" on TCGA-HNSC and a Question on OS "for breast cancer".
+
+**Decision.** The endpoint sentence comes from the dataset file and from Liu 2018 Table 3's Use marks for the cohort's type, copied into `[clinical.published.table3_use]` (recommended, caution, not_recommended, with the verbatim caution). Sex is a flag only where the dataset file does not declare `sex`, and the page counts the less frequent sex. Content-file text names no cancer type; a test reads the cancer words from conf/datasets and refuses them in shared keys. Rejected: Questions keyed per cohort, and a threshold on the minority share (a made-up number).
+
+**Evidence.** Five cohorts before and after: 5 of 5 failed, 5 of 5 pass; Table 3 counts 20 of 20; 12 planted mutations caught.
+
+**Consequence.** A new cohort without `table3_use` prints that its file holds no copy (R1.4 for `--check`).
+
+---
+
 ## D-089 — Any TCGA project through one fetch script, its own dataset template, and a `--check` that reads the folders
 
 **Date:** 2026-10-18 · **Status:** decided

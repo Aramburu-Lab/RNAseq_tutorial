@@ -142,3 +142,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A fetch's walltime from one day's GDC speed is not a ceiling: 2.6 GB took 665 s on 2026-10-01 and 2.65 GB 5,965 s on 2026-10-18 (R1).
 - A name a page filters silently is checked where the student types it: GDC's miRBase 21 spells hsa-miR-375, and -3p dropped the miRNA with no error (R1, 2026-10-18).
 - Packages that each add a part to one list number it from the list's length and collide: R1 and R3 both made Part 4 of the guide (2026-10-18).
+- A sentence written for the first cohort reads as true on every later one: "N men are kept and flagged by sex" printed 384 men on HNSC. Grep shared content keys for one cohort's words whenever a cohort is added (V, 2026-10-19).
+- A script that inserts text after an anchor runs twice without error when the anchor stays: assert the inserted text is absent first (V, 2026-10-19).
