@@ -1,0 +1,13 @@
+status Data Release 46.0 - August 10, 2026
+TCGA-COAD star 524 2212376431 {"Primary Tumor": 481, "Solid Tissue Normal": 41, "Metastatic": 1, "Recurrent Tumor": 1}
+TCGA-COAD mirna 465 23353143 {"Primary Tumor": 455, "Solid Tissue Normal": 8, "Metastatic": 1, "Recurrent Tumor": 1}
+TCGA-COAD isoform 465 169470017 {"Primary Tumor": 455, "Solid Tissue Normal": 8, "Metastatic": 1, "Recurrent Tumor": 1}
+TCGA-COAD all three kinds 2405199591
+TCGA-HNSC star 566 2395352858 {"Primary Tumor": 520, "Solid Tissue Normal": 44, "Metastatic": 2}
+TCGA-HNSC mirna 569 28625773 {"Primary Tumor": 523, "Solid Tissue Normal": 44, "Metastatic": 2}
+TCGA-HNSC isoform 569 221604518 {"Primary Tumor": 523, "Solid Tissue Normal": 44, "Metastatic": 2}
+TCGA-HNSC all three kinds 2645583149
+TCGA-PRAD star 554 2348401820 {"Primary Tumor": 501, "Solid Tissue Normal": 52, "Metastatic": 1}
+TCGA-PRAD mirna 551 27635813 {"Primary Tumor": 498, "Solid Tissue Normal": 52, "Metastatic": 1}
+TCGA-PRAD isoform 551 160336189 {"Primary Tumor": 498, "Solid Tissue Normal": 52, "Metastatic": 1}
+TCGA-PRAD all three kinds 2536373822

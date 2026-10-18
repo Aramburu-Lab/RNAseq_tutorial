@@ -21,7 +21,7 @@ from ctx.gather import own_fastq
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 from ctx.io.naming import MODULES, stem
-from ctx.report import text
+from ctx.report import guide_gdc, text
 from ctx.report.builder import (
     Code,
     Group,
@@ -252,7 +252,12 @@ def kit_lines(slug: str) -> tuple[str, ...]:
 
 
 def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
-    """The accession, then the three parts, each a group of code blocks under its lead."""
+    """The accession, then the three parts, each a group of code blocks under its lead.
+
+    The TCGA part follows them; a dataset file with ``[gdc]`` gets that part alone, filled.
+    """
+    if spec.gdc is not None:
+        return (guide_gdc.group(spec, 1),)
     word = functools.partial(text.word, PAGE)
 
     def code(key: str, lines: tuple[str, ...]) -> Code:
@@ -297,7 +302,7 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
     own = Group(text.fill(PAGE, "part1b.group", n=1),
                 (word("part1b.names"), word("part1b.links"), code("part1b.laptop", laptop),
                  code("part1b.cluster", cluster)), lead=word("part1b.lead"))  # fmt: skip
-    return (find(), numbered[0], own, *numbered[1:])
+    return (find(), numbered[0], own, *numbered[1:], guide_gdc.group(spec, len(numbered) + 1))
 
 
 def find() -> Group:
@@ -335,6 +340,9 @@ def release() -> str:
 def _keys(spec: Dataset) -> tuple[KeyNumber, ...]:
     """Accessions, the two pinned releases and the reference release the Usage downloads."""
     word = functools.partial(text.word, PAGE)
+    if spec.gdc is not None:
+        return (KeyNumber(word("keys.project"), spec.gdc.project),
+                KeyNumber(word("keys.release"), spec.gdc.release))  # fmt: skip
     return (
         KeyNumber(word("keys.runs"), f"{len(spec.accessions):,}"),
         KeyNumber(word("keys.fetchngs"), FETCHNGS_VERSION),

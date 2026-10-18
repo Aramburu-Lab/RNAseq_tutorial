@@ -1,0 +1,88 @@
+== 1. existing folders, nothing fetched
+PASTE start 2026-10-18T09:57:23Z: TCGA-KIRC star into /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r1_layout/kept/tcga_kirc
+kept gdc_manifest_star_counts.txt from an earlier run
+kept gdc_files_star_counts.tsv from an earlier run
+kept gdc_cases_clinical.json from an earlier run
+kept gdc_annotations.json from an earlier run
+kept gdc_read_groups.json from an earlier run
+kept PanCan-General_Open_GDC-Manifest_2.txt from an earlier run
+fetching 614 data files, 2604662993 bytes, 4 at a time
+PASTE release now, of the saved metadata: Data Release 46.0 - August 10, 2026; Data Release 46.0 - August 10, 2026
+PASTE data files md5 OK, bad, missing: 614, 0, 0
+PASTE bytes on disk, in the manifest: 2604662993, 2604662993
+PASTE .part leftovers: 0
+PASTE metadata files not in the manifest: 0 of 614
+PASTE metadata files, cases: 614, 533
+PASTE sample types: Additional - New Primary 1, Primary Tumor 541, Solid Tissue Normal 72
+PASTE pairs, cases with a primary tumour and a solid tissue normal: 72
+PASTE preservation: FFPE 4, OCT 13, Unknown 597
+PASTE gdc_cases_clinical.json, warnings: 537 of 537; {}
+PASTE gdc_annotations.json, warnings: 2865 of 2865; {}
+PASTE gdc_read_groups.json, warnings: 1842 of 1842; {}
+PASTE CDR: TCGA-CDR-SupplementalTableS1.xlsx md5 a4591b2dcee39591f59e5e25a6ce75fa bytes 2945129
+PASTE checks: 9 of 9 pass
+PASTE start 2026-10-18T09:57:31Z: TCGA-KIRC mirna into /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r1_layout/kept/tcga_kirc_mirna
+kept gdc_manifest_mirna.txt from an earlier run
+kept gdc_files_mirna.tsv from an earlier run
+fetching 616 data files, 30885253 bytes, 4 at a time
+PASTE release now, of the saved metadata: Data Release 46.0 - August 10, 2026; Data Release 46.0 - August 10, 2026
+PASTE data files md5 OK, bad, missing: 616, 0, 0
+PASTE bytes on disk, in the manifest: 30885253, 30885253
+PASTE .part leftovers: 0
+PASTE metadata files not in the manifest: 0 of 616
+PASTE metadata files, cases: 616, 516
+PASTE sample types: Additional - New Primary 1, Primary Tumor 544, Solid Tissue Normal 71
+PASTE pairs, cases with a primary tumour and a solid tissue normal: 71
+PASTE preservation: FFPE 4, OCT 13, Unknown 599
+PASTE pairs also paired in STAR - Counts: 71
+PASTE checks: 5 of 5 pass
+PASTE start 2026-10-18T09:57:35Z: TCGA-KIRC isoform into /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r1_layout/kept/tcga_kirc_isoform
+kept gdc_manifest_isoform.txt from an earlier run
+kept gdc_files_isoform.tsv from an earlier run
+fetching 616 data files, 200249266 bytes, 4 at a time
+PASTE release now, of the saved metadata: Data Release 46.0 - August 10, 2026; Data Release 46.0 - August 10, 2026
+PASTE data files md5 OK, bad, missing: 616, 0, 0
+PASTE bytes on disk, in the manifest: 200249266, 200249266
+PASTE .part leftovers: 0
+PASTE metadata files not in the manifest: 0 of 616
+PASTE metadata files, cases: 616, 516
+PASTE sample types: Additional - New Primary 1, Primary Tumor 544, Solid Tissue Normal 71
+PASTE pairs, cases with a primary tumour and a solid tissue normal: 71
+PASTE preservation: FFPE 4, OCT 13, Unknown 599
+PASTE pairs also paired in STAR - Counts: 71
+PASTE checks: 5 of 5 pass
+PASTE wall time 14 s
+PASTE TCGA-KIRC: every check passed
+exit 0
+-- tcga_kirc: files added, removed or changed by the run
+< ./_fetch_gdc.log
+< ./_fetch_gdc.sh
+> ./_fetch_gdc.log
+> ./_fetch_gdc.sh
+> ./_fetch_gdc.sh.superseded_20261018T095723Z
+-- tcga_kirc: retrieval rows before, after:      623      623
+-- tcga_kirc_mirna: files added, removed or changed by the run
+< ./_fetch_gdc.log
+< ./_fetch_gdc.sh
+> ./_fetch_gdc.log
+> ./_fetch_gdc.sh
+> ./_fetch_gdc.sh.superseded_20261018T095731Z
+-- tcga_kirc_mirna: retrieval rows before, after:      620      620
+-- tcga_kirc_isoform: files added, removed or changed by the run
+< ./_fetch_gdc.log
+< ./_fetch_gdc.sh
+> ./_fetch_gdc.log
+> ./_fetch_gdc.sh
+> ./_fetch_gdc.sh.superseded_20261018T095735Z
+-- tcga_kirc_isoform: retrieval rows before, after:      620      620
+== 2. the queries of an empty folder against the existing folders' queries
+exit 1 (1 expected: the stand-in endpoints return no manifest)
+equal tcga_kirc/gdc_annotations.json.query.json
+equal tcga_kirc/gdc_cases_clinical.json.query.json
+equal tcga_kirc/gdc_files_star_counts.tsv.query.json
+equal tcga_kirc/gdc_manifest_star_counts.txt.query.json
+equal tcga_kirc/gdc_read_groups.json.query.json
+equal tcga_kirc_mirna/gdc_files_mirna.tsv.query.json
+equal tcga_kirc_mirna/gdc_manifest_mirna.txt.query.json
+equal tcga_kirc_isoform/gdc_files_isoform.tsv.query.json
+equal tcga_kirc_isoform/gdc_manifest_isoform.txt.query.json
