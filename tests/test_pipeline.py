@@ -4,6 +4,7 @@ Datasets are written at test time over the metadata-only fetchngs fixture with a
 (tests/test_own_table.py), so no accession is typed here. Each test names its mutation.
 """
 
+import gzip
 import html
 import re
 import subprocess
@@ -358,3 +359,61 @@ def test_check_refuses_gdc_folders_gather_would_refuse(tmp_path, runs):
                            mirna_dir=tmp_path, isoform_dir=tmp_path)  # fmt: skip
     texts = [p.text for p in pipeline.check(tmp_path, two)[0]]
     assert texts == ["--mirna-dir reads one project; this dataset file names several"], texts
+
+
+def _matrix_root(tmp_path: Path) -> tuple[Path, Path, list[Path]]:
+    """A count matrix dataset with [de] and [function], and two roots holding its resources."""
+    from synth import counts as synthetic  # noqa: PLC0415 - tests/ helper
+    from test_gather_counts import DE_SPEC, matrix  # noqa: PLC0415 - its matrix dataset
+
+    made = synthetic(n_genes=400)
+    ids = [f"ENSG{i + 1:011d}.1" for i in range(made.counts.height)]
+    up = made.truth.with_row_index().filter(pl.col("lfc_condition_type_a") > 0)["index"]
+    gmt = [("UP_SET", [f"N{i}" for i in up][:100])]
+    gmt += [(f"RANDOM_{j}", [f"N{i}" for i in range(200 + 10 * j, 230 + 10 * j)]) for j in range(4)]
+    conf = tmp_path / "conf"
+    conf.mkdir()
+    made.samples.select("sample", "donor", "cell_type", "condition").write_csv(
+        conf / "matde.tsv", separator="\t"
+    )
+    sets = ('\n[[resources]]\nname = "sets"\nurls = ["http://127.0.0.1/s.gmt"]\nbytes = 0\n'
+            'sha256 = "' + "0" * 64 + '"\ndest = "resources/sets.gmt"\n')  # fmt: skip
+    function = ('\n[function]\ngene_sets = "sets"\nlicence = "Synthetic; none."\n'
+                'featured_set = "UP_SET"\nrunning = ["a_case", "UP_SET"]\n')  # fmt: skip
+    head, rest = DE_SPEC.split("[counts]", 1)
+    (conf / "matde.toml").write_text(head + sets + "\n[counts]" + rest + function)
+    path = matrix(tmp_path / "m.csv", ids, made.counts.drop("gene_id").to_numpy().astype(float),
+                  sep=",", samples=made.counts.columns[1:])  # fmt: skip
+    gtf = [f'chr1\tt\tgene\t{i + 1}\t{i + 9}\t.\t+\t.\tgene_id "{g}"; gene_type "protein_coding";'
+           f' gene_name "N{i}";' for i, g in enumerate(ids)]  # fmt: skip
+    roots = [tmp_path / "one", tmp_path / "many"]
+    for root in roots:
+        (root / "resources").mkdir(parents=True)
+        (root / "resources" / "a.gtf.gz").write_bytes(
+            gzip.compress(("\n".join(gtf) + "\n").encode())
+        )
+        (root / "resources" / "sets.gmt").write_text(
+            "".join(f"{n}\tsynthetic\t" + "\t".join(g) + "\n" for n, g in gmt)
+        )
+    return conf / "matde.toml", path, roots
+
+
+def test_run_matches_the_module_commands_through_de_and_function(tmp_path):
+    """650, 738: on a count matrix with [de] and [function], `ctx run` writes every table and
+    figure data file the module commands write one by one, gather, qc, de, function and report,
+    byte for byte. Catches de or function run by ctx run with options their own command would
+    not take, which the gather, qc and report proof above cannot see."""
+    spec, path, (one, many) = _matrix_root(tmp_path)
+    base = ("--dataset", "matde", "--dataset-file", str(spec))
+    done = ctx_run("--root", str(one), "run", *base, "--counts", str(path), cwd=tmp_path)
+    assert done.returncode == 0, done.stderr[-3000:]
+    printed = re.findall(r"^ctx run: \d+ of \d+: (.+)$", done.stdout, re.M)
+    modules = [c.split("--root ")[1].split()[1] for c in printed]
+    assert modules == ["gather", "qc", "de", "function", "report"], modules
+    for command in (("gather", "--counts", str(path)), ("qc",), ("de",), ("function",),
+                    ("report",)):  # fmt: skip
+        done = ctx_run("--root", str(many), command[0], *base, *command[1:], cwd=tmp_path)
+        assert done.returncode == 0, (command, done.stderr[-3000:])
+    tables = {p.relative_to(one): p.read_bytes() for p in one.rglob("*.csv")}
+    assert any("06_function" in str(p) for p in tables) and any("05_de" in str(p) for p in tables)
+    assert tables == {p.relative_to(many): p.read_bytes() for p in many.rglob("*.csv")}

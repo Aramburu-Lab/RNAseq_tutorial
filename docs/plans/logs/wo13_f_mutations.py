@@ -192,6 +192,16 @@ MUTATIONS = {
             f"{COHORTS}::test_cohort_option_names_figures_and_refuses_an_unknown_cohort",
         ),
     ],
+    "f5": [
+        (
+            "ctx run gives de another option",
+            "src/ctx/pipeline.py",
+            '        "de": base if spec.contrasts and spec.de and counts else None,\n',
+            '        "de": (*base, "--min-count", "20") if spec.contrasts and spec.de and counts'
+            " else None,\n",
+            "tests/test_pipeline.py::test_run_matches_the_module_commands_through_de_and_function",
+        ),
+    ],
 }
 
 
