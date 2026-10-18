@@ -64,6 +64,17 @@ PFI = [198, 330]
 DFI = [28, 106]
 DSS = [130, 372]
 
+# Liu et al. 2018 Table 3's Use column for HNSC, read through PubMed Central E-utilities
+# (PMC6066282) on 2026-10-18 (docs/plans/logs/wo13_v/liu_table3.log): a tick is recommended,
+# a tick with an asterisk caution, a cross not_recommended; caution is the table's
+# Explanation/Caution, verbatim. M10 prints them beside its endpoint.
+[clinical.published.table3_use]
+source = "Liu et al. 2018 Cell, Table 3, HNSC: recommended use of each endpoint"
+OS = "recommended"
+PFI = "recommended"
+DFI = "recommended"
+DSS = "recommended"
+
 # The STAR counts' own annotation: GDC's GENCODE v36, md5 c03931958d4572148650d62eb6dec41a as
 # GDC's reference-files page lists it; M8 reads gene types and positions from it.
 [[resources]]

@@ -46,8 +46,8 @@ term = "Cramér's V"
 meaning = "Association of two categorical variables, from `0`, none, to `1`, where one fixes the other."
 
 [[questions]]
-prompt = "Why does TCGA-CDR advise against [[overall survival]] as the endpoint for breast cancer?"
-answer = "Follow-up is short and few patients have died, so OS has few events and little power; TCGA-CDR recommends PFI and DFI."
+prompt = "Why can [[overall survival]] be a weak endpoint where most patients outlive TCGA's follow-up?"
+answer = "Few patients die before follow-up ends, so OS has few events and little power; a progression endpoint such as PFI counts more events sooner."
 
 [[questions]]
 prompt = "A gene's best cut-off gives a log-rank p far below that of the median split. What must you report?"
@@ -55,7 +55,7 @@ answer = "The p corrected for the scan: the maximally selected statistic's p, by
 
 [[questions]]
 prompt = "Why can expression by treatment received in TCGA not show a treatment effect?"
-answer = "Tumours were sampled before systemic therapy, and treatment followed the tumour's features: ER-positive disease leads to endocrine therapy. The association shows that selection."
+answer = "Tumours were sampled before systemic therapy, and treatment followed the tumour's features, such as its stage. The association shows that selection."
 
 # The preview's words: where its numbers come from, and what its build measured.
 [preview]
@@ -234,7 +234,23 @@ endpoints_title = "Event flags in the TCGA-CDR, beside {source}, and the patient
 endpoints_columns = ["Endpoint", "CDR events", "CDR censored", "Liu events; censored", "Analysed", "Events analysed"]
 missing_title = "Missing values and their reasons"
 missing_columns = ["Variable", "Missing", "Reasons"]
-notified = "GDC notifications, kept and flagged: {neoadjuvant} neoadjuvant therapy, {prior_malignancy} prior malignancy, {prior_treatment} unacceptable prior treatment; {any} of {n:,} patients carry one. {men} men are kept and flagged by sex."
+notified = "GDC notifications, kept and flagged: {neoadjuvant} neoadjuvant therapy, {prior_malignancy} prior malignancy, {prior_treatment} unacceptable prior treatment; {any} of {n:,} patients carry one."
+# Printed only where the dataset file does not declare sex a variable: the less frequent sex.
+sex_flag = "{count:,} {people} are kept and flagged by sex."
+people.male = "men"
+people.female = "women"
+# Why the page fits its endpoint: the dataset file's or --endpoint's choice, then the dataset
+# file's copy of Liu et al. 2018 Table 3 for the cohort's cancer type ({type}, the CDR's).
+endpoint.file = "The models below fit {endpoint}, the dataset file's endpoint."
+endpoint.option = "The models below fit {endpoint}, chosen by --endpoint over the dataset file's {default}."
+endpoint.use = "Liu et al. 2018 Table 3 marks {endpoint} {use} for {type}, with {events:,} events and {censored:,} censored."
+endpoint.caution = "Table 3 marks {endpoints} for caution on {type}: \"{why}\"."
+endpoint.against = "Table 3 does not recommend {endpoints} for {type}."
+endpoint.all = "Table 3 recommends every endpoint for {type}."
+endpoint.uncopied = "The dataset file holds no copy of Liu et al. 2018 Table 3's use marks for {type}."
+use.recommended = "recommended"
+use.caution = "recommended with caution"
+use.not_recommended = "not recommended"
 
 [patients.variables]
 age = "Age"
@@ -254,7 +270,7 @@ site = "Tissue source site"
 
 [er]
 title = "The endpoints check: ER status"
-lead = "ER-negative breast cancer progresses sooner; this checks that each endpoint shows it, as Liu et al. 2018 did."
+lead = "ER-negative tumours progress sooner than ER-positive ones in Liu et al. 2018; this checks that each endpoint shows it."
 table_group = "ER status under each endpoint, beside Liu et al. 2018"
 table_title = "Log-rank p and Cox HR, ER-negative against ER-positive; {source}"
 columns = ["Endpoint", "Patients, ER+; ER-", "Events, ER+; ER-", "Log-rank p", "Liu et al. p", "HR, ER- against ER+"]

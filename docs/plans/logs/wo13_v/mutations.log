@@ -1,0 +1,13 @@
+caught   Question names breast again: 1 failed, 8 deselected in 1.13s
+caught   ER lead names breast again: 1 failed, 8 deselected in 1.14s
+caught   counts of the dataset file's endpoint, not the fitted one: 1 failed, 1 passed, 8 deselected in 1.23s
+caught   --endpoint called the dataset file's: 1 failed, 1 passed, 8 deselected in 1.21s
+caught   refusals left out: 1 failed, 1 passed, 8 deselected in 1.15s
+caught   cautions left out: 1 failed, 1 passed, 8 deselected in 1.22s
+caught   a misspelt mark passes: 1 failed, 1 passed, 8 deselected in 1.20s
+caught   an empty mark read as copied: 1 failed, 1 passed, 8 deselected in 1.35s
+caught   sex sentence on a cohort that tests sex: 1 failed, 2 passed, 8 deselected in 1.24s
+caught   the frequent sex counted: 1 failed, 2 passed, 8 deselected in 1.11s
+caught   a tie printed: 1 failed, 2 passed, 8 deselected in 1.10s
+caught   the endpoint note built and dropped: 1 failed, 3 passed, 8 deselected in 21.32s
+12 of 12 caught
