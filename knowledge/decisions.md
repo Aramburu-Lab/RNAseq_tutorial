@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-088 — `[proteo.table]` reads any protein table by declaration; the CPTAC readers stay
+
+**Date:** 2026-10-18 · **Status:** decided
+
+**Context.** R3: own or public mass-spec quantification had no route into M7.
+
+**Decision.** One reader in a fixed, tested order: the adapter drops its rows (MaxQuant reverse, contaminant and only-by-site, each counted once); values parsed on their declared scale and base, a declared token missing and never zero, an undeclared zero or text a problem; for TMT a plex's reference channel, named in the sample table, turns values into log2 ratios and leaves the layer; identifiers mapped through one definition, each row counted as mapped, no_id, no_map, several, absent or shared, and a group of several genes never assigned; one row per gene. The CPTAC readers stay as they are.
+
+**Evidence.** PXD038437: 10,136 mapped, 279 several, 486 absent; median per-gene Pearson 0.3152 against Ramberger's 0.29. ccRCC through both readers: the 11,161 genes reaching per_gene equal to the bit, but the generic layer keeps 11,161 of read_tsv's 11,355. 30 planted mutations caught.
+
+**Consequence.** Converting the CPTAC readers would change recorded F1 counts and paired fold changes. No normalisation beyond the plex reference, and no imputation; the page says so.
+
+---
+
 ## D-087 — A count matrix enters through `ctx gather --counts`, checked at the door, never guessed
 
 **Date:** 2026-10-18 · **Status:** decided

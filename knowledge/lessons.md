@@ -137,3 +137,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A guide built from a template prints the template's own values as if they were the reader's: Part 1c printed SLUG=mine, which a reader keeps. Show placeholders as placeholders (R2, 2026-10-18).
 - A worktree suite without CTX_CHROMIUM skipped 155 tests where main skips 10: set it before reading the skip count (R2, 2026-10-18).
 - A detail written from memory into a registration (NCBI's aligner) is a claim to verify like any accession (R2, 2026-10-18).
+- A key built by an f-string is invisible to test_every_key_is_read_somewhere: name each key whole (R3, 2026-10-18).
+- A setup step a template declares downloads too: R3's GTF (124,650,284 B) was fetched without being stated first. List every resource a template's setup will fetch before running it (R3, 2026-10-18).
