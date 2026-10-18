@@ -1,28 +1,31 @@
-caught	declared token read as a value	1 failed in 0.35s
-caught	undeclared zero accepted	1 failed in 0.54s
-caught	text cell accepted	1 failed in 0.37s
+caught	ratio to another plex's reference	1 failed in 0.51s
+caught	plex without a reference accepted	1 failed in 0.37s
+caught	reference on a label-free design accepted	1 failed in 0.35s
+caught	declared token read as a value	1 failed in 0.38s
+caught	undeclared zero accepted	1 failed in 0.49s
+caught	text cell accepted	1 failed in 0.34s
 caught	log10 left as log10	1 failed in 0.34s
-caught	problems raised one at a time	1 failed in 0.37s
-caught	collapse keeps the first row	1 failed in 0.38s
-caught	several genes resolved to one	1 failed in 0.38s
-caught	shared symbol taken	1 failed in 0.38s
-caught	a member without a map ignored	1 failed in 0.37s
-caught	isoform suffix kept	1 failed in 0.39s
-caught	Ensembl version kept	1 failed in 0.37s
-caught	MaxQuant flags counted twice	1 failed in 0.36s
-caught	pre-1.6 Contaminant ignored	1 failed in 0.37s
-caught	flagged rows kept	1 failed in 0.35s
-caught	DIA-NN run named by its path	1 failed in 0.34s
-caught	plain table read unquoted	1 failed in 0.42s
+caught	problems raised one at a time	1 failed in 0.36s
+caught	collapse keeps the first row	1 failed in 0.33s
+caught	several genes resolved to one	1 failed in 0.35s
+caught	shared symbol taken	1 failed in 0.45s
+caught	a member without a map ignored	1 failed in 0.31s
+caught	isoform suffix kept	1 failed in 0.35s
+caught	Ensembl version kept	1 failed in 0.34s
+caught	MaxQuant flags counted twice	1 failed in 0.31s
+caught	pre-1.6 Contaminant ignored	1 failed in 0.32s
+caught	flagged rows kept	1 failed in 0.31s
+caught	DIA-NN run named by its path	1 failed in 0.32s
+caught	plain table read unquoted	1 failed in 0.46s
 caught	empty cell read as null	1 failed in 0.34s
-caught	zip read as tar	1 failed in 0.39s
-caught	sample table twin accepted	1 failed in 0.40s
-caught	RNA sample not gathered accepted	1 failed in 1.73s
-caught	unpaired protein sample correlated	1 error in 1.72s
-caught	F1 coloured by 24 runs	1 failed in 1.66s
-caught	UniProt without a map accepted	1 failed in 0.40s
-caught	table.file beside a resource accepted	1 failed in 0.34s
-caught	PRIDE FTP kept	1 failed in 0.48s
-caught	PRIDE SHA-1 ignored	1 failed in 0.48s
-caught	guide block typed, not the template's	1 failed in 0.50s
-27 of 27 caught
+caught	zip read as tar	1 failed in 0.38s
+caught	sample table twin accepted	1 failed in 0.29s
+caught	RNA sample not gathered accepted	1 failed in 2.06s
+caught	unpaired protein sample correlated	1 error in 1.58s
+caught	F1 coloured by 24 runs	1 failed in 1.63s
+caught	UniProt without a map accepted	1 failed in 0.36s
+caught	table.file beside a resource accepted	1 failed in 0.37s
+caught	PRIDE FTP kept	1 failed in 0.49s
+caught	PRIDE SHA-1 ignored	1 failed in 0.56s
+caught	guide block typed, not the template's	1 failed in 0.48s
+30 of 30 caught

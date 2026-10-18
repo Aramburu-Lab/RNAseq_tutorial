@@ -38,6 +38,7 @@ table_maxquant = "MaxQuant rows left out before any value was read, each counted
 table_mapped = "Identifiers as {kind}: {mapped:,} rows map to one RNA gene. Left out: {no_id:,} without an identifier, {no_map:,} with a member the UniProt map lacks, {absent:,} naming a gene absent from the RNA side, {shared:,} naming a symbol two RNA genes share. {several:,} protein groups name several genes and are listed in the several-genes table, never assigned to one."
 table_tmt = "TMT design: {n:,} plexes of {low:,} to {high:,} samples, listed in the batches table. Values are compared across plexes as the table gives them; no plex correction is made here."
 table_label_free = "Label-free design: {n:,} runs or run batches of {low:,} to {high:,} samples, listed in the batches table. Values are compared as the table gives them, normalised by its own software."
+table_reference = "Each value is a log2 ratio to its plex's reference channel, marked yes in the sample table's {column} column; the reference channels then leave."
 table_paired = "{n:,} of {n_columns:,} protein samples are paired with an RNA sample by the sample table; only those enter a correlation."
 unregistered = "The Krug 2020 band rule is not registered: its supplement prints the per-gene correlations only as a histogram, Figure S2G, with no median."
 sanity_title = "Sanity rules, registered before any protein value was read"

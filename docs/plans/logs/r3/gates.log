@@ -1,7 +1,7 @@
 == ruff check .
 All checks passed!
 == ruff format --check .
-477 files already formatted
+478 files already formatted
 == mypy src
 Success: no issues found in 162 source files
 == python -m interrogate -c pyproject.toml src/ctx --fail-under 100 -q

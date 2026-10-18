@@ -127,4 +127,6 @@ meaning = "Donor state, treatment or disease."
 # # EDIT: tmt, the batch column naming each sample's plex; label_free, its run.
 # acquisition = "label_free"
 # batch = "batch"
+# # For TMT intensities, a sample table column whose yes marks each plex's reference channel
+# # turns every value into a log2 ratio to it: reference = "reference". Delete for ratios.
 # samples = "{slug}_proteo.csv"

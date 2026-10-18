@@ -281,3 +281,35 @@ def test_plain_table_honours_quotes():
     its identifier column was not found."""
     found = adapters.table(b'"id"\t"a"\t"b"\n"TP53"\t"1.5"\t"NA"\n', "\t", "id", ("a",))
     assert found.frame.rows() == [("TP53", "1.5")] and found.columns == 2
+
+
+def test_tmt_reference_ratio_then_references_leave(tmp_path):
+    """Each value becomes a log2 ratio to its plex's reference, which leaves the layer.
+    Mutations caught: the reference left in the layer; a ratio to another plex's reference; a
+    plex with no reference accepted; a reference declared for a label-free design."""
+    path = tmp_path / "s.csv"
+    head = "protein_sample,rna_sample,plex,ref\n"
+    path.write_text(head + "r1,,p1,yes\na,ra,p1,\nr2,,p2,yes\nb,rb,p2,\n")
+    declared = replace(DECLARED, scale="log", missing=("NA",), reference="ref")
+    problems: list[str] = []
+    found = quantities.sample_table(path, declared, problems)
+    assert problems == [] and found is not None
+    cells = {"id": ["TP53"], "r1": ["1"], "a": ["4"], "r2": ["10"], "b": ["13"]}
+    read = quantities.read(text(cells), found, declared, RNA, "id")
+    assert read.layer.samples == ("a", "b") and list(read.layer.values[0]) == [3.0, 3.0]
+    assert read.samples is not None and read.samples.rna == ("ra", "rb")
+    path.write_text(head + "r1,,p1,yes\na,ra,p1,\nb,rb,p2,\n")
+    found = quantities.sample_table(path, declared, problems)
+    assert found is not None
+    fewer = text({k: v for k, v in cells.items() if k != "r2"})
+    with pytest.raises(ProteoError, match="plex 'p2': 0 reference channels"):
+        quantities.read(fewer, found, declared, RNA, "id")
+    spec = tmp_path / "d.toml"
+    spec.write_text(
+        '[dataset]\nslug = "d"\n[proteo]\ndesign = "across_samples"\n'
+        '[proteo.table]\nformat = "maxquant"\nfile = "t.txt"\nsamples = "s.csv"\n'
+        'scale = "linear"\nid_kind = "symbol"\nacquisition = "label_free"\n'
+        'batch = "run"\nreference = "ref"\n'
+    )
+    with pytest.raises(DatasetError, match="reference channel belongs to a TMT plex"):
+        load(spec)

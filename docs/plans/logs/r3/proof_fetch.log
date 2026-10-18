@@ -1,0 +1,6 @@
+[[resources]]
+name = "protein_table"
+urls = ["https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/07/PXD038437/proteinGroups.txt"]
+bytes = 116174443
+sha256 = "82681a643258644de52be2bbe382ea6a169045c8691c8355cfa756da33082082"
+dest = "data/raw/r3_pxd038437/proteinGroups.txt"

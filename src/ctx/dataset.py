@@ -282,6 +282,8 @@ class ProteoTable:
         id_map_columns: That table's accession and symbol columns.
         sample_column: The sample table's protein column.
         rna_column: The sample table's RNA column; an empty cell is a sample with no RNA.
+        reference: A sample table column whose ``yes`` marks each TMT plex's reference channel;
+            every value becomes a log2 ratio to its plex's reference, which then leaves.
     """
 
     format: str
@@ -299,6 +301,7 @@ class ProteoTable:
     id_map_columns: tuple[str, str] = ("", "")
     sample_column: str = "protein_sample"
     rna_column: str = "rna_sample"
+    reference: str = ""
 
 
 @dataclass(frozen=True)
@@ -715,6 +718,8 @@ def _proteo_table(raw: Mapping[str, Any], known: set[str], problems: list[str]
         problems.append("proteo.table.id_column: a plain table names its identifier column")
     if raw.get("file"):
         _plain_file(raw["file"], "proteo.table.file", problems)
+    if raw.get("reference") and acquisition != "tmt":
+        problems.append("proteo.table.reference: a reference channel belongs to a TMT plex")
     id_map, columns = raw.get("id_map", ""), tuple(raw.get("id_map_columns", ("", "")))
     if kind == "uniprot" and (id_map not in known or len(columns) != 2 or not all(columns)):  # noqa: PLR2004
         problems.append("proteo.table.id_map: UniProt identifiers need a [[resources]] map and "
@@ -726,7 +731,8 @@ def _proteo_table(raw: Mapping[str, Any], known: set[str], problems: list[str]
                        quantity=raw.get("quantity", "LFQ intensity"), id_map=id_map,
                        id_map_columns=(columns + ("", ""))[:2],
                        sample_column=raw.get("sample_column", "protein_sample"),
-                       rna_column=raw.get("rna_column", "rna_sample"))  # fmt: skip
+                       rna_column=raw.get("rna_column", "rna_sample"),
+                       reference=raw.get("reference", ""))  # fmt: skip
 
 
 def _proteo_source(raw: Mapping[str, Any], known: set[str], problems: list[str]

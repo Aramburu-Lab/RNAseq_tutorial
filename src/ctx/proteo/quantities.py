@@ -55,6 +55,7 @@ class SampleTable:
         batch: Each one's plex or run.
         tracks: Every further column, for the page's strips.
         digest: SHA-256 of the file as saved.
+        reference: Per row, whether it is its plex's reference channel; empty for none.
     """
 
     protein: tuple[str, ...]
@@ -62,6 +63,18 @@ class SampleTable:
     batch: tuple[str, ...]
     tracks: pl.DataFrame
     digest: str
+    reference: tuple[bool, ...] = ()
+
+    def without_references(self) -> "SampleTable":
+        """The rows that are not a reference channel, in order."""
+        keep = [i for i in range(len(self.protein)) if not (self.reference and self.reference[i])]
+        return SampleTable(
+            tuple(self.protein[i] for i in keep),
+            tuple(self.rna[i] for i in keep),
+            tuple(self.batch[i] for i in keep),
+            self.tracks[keep],
+            self.digest,
+        )
 
 
 @dataclass(frozen=True)
@@ -75,6 +88,7 @@ class Read:
         several: (identifier cell, the genes it names) of each row naming several genes.
         tokens: Cells read as missing, per declared token.
         columns: Sample columns of the export.
+        samples: The sample table's rows the layer holds: every row but the reference channels.
     """
 
     layer: tables.Layer
@@ -83,6 +97,7 @@ class Read:
     several: tuple[tuple[str, str], ...]
     tokens: dict[str, int] = field(default_factory=dict)
     columns: int = 0
+    samples: SampleTable | None = None
 
 
 def raw_bytes(path: Path, member: str | None) -> bytes:
@@ -139,7 +154,8 @@ def sample_table(path: Path, declared: ProteoTable, problems: list[str]) -> Samp
         return None
     rows, digest = table_rows(path)
     header, body = (rows[0], rows[1:]) if rows else ([], [])
-    wanted = (declared.sample_column, declared.rna_column, declared.batch)
+    wanted = tuple(c for c in (declared.sample_column, declared.rna_column, declared.batch,
+                               declared.reference) if c)  # fmt: skip
     if missing := [c for c in wanted if c not in header]:
         problems.append(f"{path.name}: no column {missing}; its header is {header}")
         return None
@@ -160,9 +176,27 @@ def sample_table(path: Path, declared: ProteoTable, problems: list[str]) -> Samp
     if not body:
         problems.append(f"{path.name}: no sample rows")
     tracks = frame.drop(*wanted).with_columns(pl.Series("sample", protein))
+    flags = tuple(v.strip().lower() == "yes" for v in frame[declared.reference].to_list()
+                  ) if declared.reference else ()  # fmt: skip
     return SampleTable(
-        tuple(protein), tuple(rna), tuple(frame[declared.batch].to_list()), tracks, digest
+        tuple(protein), tuple(rna), tuple(frame[declared.batch].to_list()), tracks, digest, flags
     )
+
+
+def to_reference(values: np.ndarray, samples: SampleTable, problems: list[str]) -> np.ndarray:
+    """Each value as a log2 ratio to its plex's one reference channel; NaN where that is missing.
+
+    Raises nothing: a plex with no reference or several is added to ``problems``.
+    """
+    out = values.copy()
+    for batch in dict.fromkeys(samples.batch):
+        columns = [i for i, b in enumerate(samples.batch) if b == batch]
+        refs = [i for i in columns if samples.reference[i]]
+        if len(refs) != 1:
+            problems.append(f"plex {batch!r}: {len(refs)} reference channels, not one")
+            continue
+        out[:, columns] = values[:, columns] - values[:, refs]
+    return out
 
 
 def _column(cells: pl.Series, declared: ProteoTable, problems: list[str]) -> np.ndarray:
@@ -225,6 +259,11 @@ def read(
         raise ProteoError("; ".join(problems))
     values = np.column_stack([_column(frame[s], declared, problems) for s in samples.protein])
     tokens = {t: int(sum((frame[s] == t).sum() for s in samples.protein)) for t in declared.missing}
+    used = samples
+    if samples.reference:
+        values = to_reference(values, samples, problems)
+        keep = [i for i, r in enumerate(samples.reference) if not r]
+        values, used = values[:, keep], samples.without_references()
     try:
         mapped = identifiers.to_genes(frame[id_col].to_list(), declared.id_kind, genes, id_map)
     except ValueError as error:
@@ -243,8 +282,8 @@ def read(
     )
     layer = tables.Layer(
         tuple(str(mapped.genes[i]) for i in kept),
-        samples.protein,
-        values.reshape(frame.height, len(samples.protein))[kept],
+        used.protein,
+        values.reshape(frame.height, len(used.protein))[kept],
         collapse,
     )
-    return Read(layer, text.dropped, counts, mapped.several, tokens, text.columns)
+    return Read(layer, text.dropped, counts, mapped.several, tokens, text.columns, used)

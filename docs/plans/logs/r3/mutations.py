@@ -26,7 +26,29 @@ UNIT = f"{STUDY}::test_missing_never_zero_and_undeclared_zero_refused"
 MAP = f"{STUDY}::test_mapping_reasons_in_order"
 MQ = f"{STUDY}::test_maxquant_drops_each_flag_once_in_order"
 E2E = f"{STUDY}::test_study_end_to_end"
+REF = f"{STUDY}::test_tmt_reference_ratio_then_references_leave"
 MUTATIONS = [
+    (
+        "ratio to another plex's reference",
+        Q,
+        "out[:, columns] = values[:, columns] - values[:, refs]",
+        "out[:, columns] = values[:, columns] - values[:, [samples.reference.index(True)]]",
+        [REF],
+    ),
+    (
+        "plex without a reference accepted",
+        Q,
+        "        if len(refs) != 1:\n",
+        "        if len(refs) > 1:\n",
+        [REF],
+    ),
+    (
+        "reference on a label-free design accepted",
+        "src/ctx/dataset.py",
+        'if raw.get("reference") and acquisition != "tmt":',
+        "if False:",
+        [REF],
+    ),
     (
         "declared token read as a value",
         Q,

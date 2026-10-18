@@ -130,6 +130,8 @@ def across_table(settings: runtime.Settings, spec: Dataset, options: Options) ->
         text, samples, table, found["genes"], id_col, id_map(settings, spec, table)
     )
     protein = read.layer
+    assert read.samples is not None  # noqa: S101 - read() always sets it
+    samples = read.samples
     pairs = [(j, r) for j, r in enumerate(samples.rna) if r]
     if len(pairs) < 3:  # noqa: PLR2004 - a correlation needs three samples (measure.MIN_PAIRS)
         raise ProteoError(f"{table.samples}: {len(pairs)} protein samples have an RNA sample")
@@ -218,4 +220,6 @@ def _notes(
         (f"table_{table.acquisition}", {"n": len(sizes), "low": min(sizes), "high": max(sizes)}),
         ("table_paired", {"n": n[0], "n_columns": n[1]}),
     ]
+    if table.reference:
+        out.insert(-1, ("table_reference", {"column": table.reference}))
     return out
