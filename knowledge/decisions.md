@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-089 — Any TCGA project through one fetch script, its own dataset template, and a `--check` that reads the folders
+
+**Date:** 2026-10-18 · **Status:** decided
+
+**Context.** R1: a new TCGA project needed the home-folder script ~/ctx_fetch_gdc.sh and a dataset file written by hand.
+
+**Decision.** scripts/bash/fetch_gdc.sbatch replaces it, with the same layout and queries plus read groups, on a laptop or as a Slurm job. A separate GDC template, since `[sdrf]`, `[columns]` and accessions do not apply and the tumour-against-normal paired contrast is fixed. `ctx run --check` on a GDC dataset reads every counts file without MD5s and prints the lines to set: release, CDR type, each contrast's n, Table 3 against the CDR's own counts, gene and miRNA spellings. The guide's TCGA part stands alone for a [gdc] dataset and is Part 5, after the mass-spec part, otherwise.
+
+**Evidence.** The kidney folders' 9 queries byte-identical and 1,846 MD5s matched with nothing fetched; TCGA-HNSC end to end by the guide alone, Table 3 8 of 8; 20 planted mutations caught.
+
+**Consequence.** CPTAC still needs its PDC and primary-site steps (R1.3).
+
+---
+
 ## D-088 — `[proteo.table]` reads any protein table by declaration; the CPTAC readers stay
 
 **Date:** 2026-10-18 · **Status:** decided

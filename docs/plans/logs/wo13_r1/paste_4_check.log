@@ -1,0 +1,27 @@
+=== 2026-10-18T11:55:39Z paste_2_env.sh
+=== 2026-10-18T11:55:39Z paste_4_check.sh
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_environment_v1.html
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_versions_v1.parquet
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_versions_v1.csv
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_versions_v1_README.md
+- [[contrasts]] tumour_normal: n = [0, 0] declared, [43, 43] in the files; set n = [43, 43]
+- [ncrna.mirna] mirna_tumour_normal: n = [0, 0] declared, [43, 43] in the files; set n = [43, 43]
+2 problems, 2 of them stopping the run; ctx run runs: gather, de, function, ncrna, clinical, report
+      311.80 real        12.77 user         4.02 sys
+          1086717952  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              150566  page reclaims
+              140033  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                  55  messages sent
+               39436  messages received
+                   0  signals received
+                1533  voluntary context switches
+              419948  involuntary context switches
+            24912651  instructions retired
+            11678432  cycles elapsed
+             1524072  peak memory footprint

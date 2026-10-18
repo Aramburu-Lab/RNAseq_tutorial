@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# wo13-r1 proof: the guide's pixi lines without pixi, which never runs outside main's checkout.
+# install: the clone takes main's environments by a link, as a frozen install would build them.
+# run -e laptop ctx ...: main's default environment (a superset of laptop's; main's own laptop
+# copy predates openpyxl) on the clone's src, so the clone's committed code runs.
+MAIN=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial
+echo "pixi $*" >>"${PIXI_SHIM_LOG:-/dev/null}"
+case "$1" in
+install)
+    repo=$PWD
+    prev=""
+    for a in "$@"; do [[ "$prev" == --manifest-path ]] && repo=$(dirname "$a"); prev=$a; done
+    [[ -e "$repo/.pixi" ]] || ln -s "$MAIN/.pixi" "$repo/.pixi"
+    ;;
+run)
+    [[ "$2 $3 $4" == "-e laptop ctx" ]] || { echo "shim: only run -e laptop ctx" >&2; exit 2; }
+    shift 4
+    PYTHONPATH="$PWD/src" PYTHONDONTWRITEBYTECODE=1 exec "$MAIN/.pixi/envs/default/bin/python" -m ctx "$@"
+    ;;
+*) echo "shim: pixi $1 not shimmed" >&2; exit 2 ;;
+esac

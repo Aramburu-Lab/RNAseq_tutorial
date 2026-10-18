@@ -1,0 +1,81 @@
+=== 2026-10-18T10:15:37Z paste_2_env.sh
+=== 2026-10-18T10:15:37Z paste_2_download.sh
+PASTE start 2026-10-18T10:15:37Z: TCGA-HNSC star into /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc
+kept gdc_manifest_star_counts.txt from an earlier run
+kept gdc_files_star_counts.tsv from an earlier run
+kept gdc_cases_clinical.json from an earlier run
+kept gdc_annotations.json from an earlier run
+kept gdc_read_groups.json from an earlier run
+kept PanCan-General_Open_GDC-Manifest_2.txt from an earlier run
+fetching 566 data files, 2395352858 bytes, 4 at a time
+curl: (56) OpenSSL SSL_read: OpenSSL/3.6.4: error:0A000126:SSL routines::unexpected eof while reading, errno 0
+PASTE release now, of the saved metadata: Data Release 46.0 - August 10, 2026; Data Release 46.0 - August 10, 2026
+PASTE data files md5 OK, bad, missing: 566, 0, 0
+PASTE bytes on disk, in the manifest: 2395352858, 2395352858
+PASTE .part leftovers: 0
+PASTE metadata files not in the manifest: 0 of 566
+PASTE metadata files, cases: 566, 521
+PASTE sample types: Metastatic 2, Primary Tumor 520, Solid Tissue Normal 44
+PASTE pairs, cases with a primary tumour and a solid tissue normal: 43
+PASTE preservation: OCT 95, Unknown 471
+PASTE gdc_cases_clinical.json, warnings: 528 of 528; {}
+PASTE gdc_annotations.json, warnings: 2892 of 2892; {}
+PASTE gdc_read_groups.json, warnings: 1698 of 1698; {}
+PASTE CDR: TCGA-CDR-SupplementalTableS1.xlsx md5 a4591b2dcee39591f59e5e25a6ce75fa bytes 2945129
+PASTE checks: 9 of 9 pass
+PASTE start 2026-10-18T11:36:26Z: TCGA-HNSC mirna into /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_mirna
+kept gdc_manifest_mirna.txt from an earlier run
+kept gdc_files_mirna.tsv from an earlier run
+fetching 569 data files, 28625773 bytes, 4 at a time
+PASTE release now, of the saved metadata: Data Release 46.0 - August 10, 2026; Data Release 46.0 - August 10, 2026
+PASTE data files md5 OK, bad, missing: 569, 0, 0
+PASTE bytes on disk, in the manifest: 28625773, 28625773
+PASTE .part leftovers: 0
+PASTE metadata files not in the manifest: 0 of 569
+PASTE metadata files, cases: 569, 524
+PASTE sample types: Metastatic 2, Primary Tumor 523, Solid Tissue Normal 44
+PASTE pairs, cases with a primary tumour and a solid tissue normal: 43
+PASTE preservation: OCT 97, Unknown 472
+PASTE pairs also paired in STAR - Counts: 42
+PASTE checks: 5 of 5 pass
+PASTE start 2026-10-18T11:39:43Z: TCGA-HNSC isoform into /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_isoform
+kept gdc_manifest_isoform.txt from an earlier run
+kept gdc_files_isoform.tsv from an earlier run
+fetching 569 data files, 221604518 bytes, 4 at a time
+curl: (28) Connection timed out after 30002 milliseconds
+curl: (28) Connection timed out after 30003 milliseconds
+curl: (56) Recv failure: Connection reset by peer
+curl: (28) Connection timed out after 30002 milliseconds
+curl: (28) Connection timed out after 30002 milliseconds
+curl: (28) Connection timed out after 30002 milliseconds
+PASTE release now, of the saved metadata: Data Release 46.0 - August 10, 2026; Data Release 46.0 - August 10, 2026
+PASTE data files md5 OK, bad, missing: 569, 0, 0
+PASTE bytes on disk, in the manifest: 221604518, 221604518
+PASTE .part leftovers: 0
+PASTE metadata files not in the manifest: 0 of 569
+PASTE metadata files, cases: 569, 524
+PASTE sample types: Metastatic 2, Primary Tumor 523, Solid Tissue Normal 44
+PASTE pairs, cases with a primary tumour and a solid tissue normal: 43
+PASTE preservation: OCT 97, Unknown 472
+PASTE pairs also paired in STAR - Counts: 42
+PASTE checks: 5 of 5 pass
+PASTE wall time 5965 s
+PASTE TCGA-HNSC: every check passed
+     5964.63 real        79.11 user        71.15 sys
+            55918592  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             7076231  page reclaims
+                7654  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+               18790  messages sent
+              669406  messages received
+                  47  signals received
+               30246  voluntary context switches
+              958656  involuntary context switches
+            23457043  instructions retired
+            13310875  cycles elapsed
+             1507688  peak memory footprint

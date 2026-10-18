@@ -139,3 +139,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A detail written from memory into a registration (NCBI's aligner) is a claim to verify like any accession (R2, 2026-10-18).
 - A key built by an f-string is invisible to test_every_key_is_read_somewhere: name each key whole (R3, 2026-10-18).
 - A setup step a template declares downloads too: R3's GTF (124,650,284 B) was fetched without being stated first. List every resource a template's setup will fetch before running it (R3, 2026-10-18).
+- A fetch's walltime from one day's GDC speed is not a ceiling: 2.6 GB took 665 s on 2026-10-01 and 2.65 GB 5,965 s on 2026-10-18 (R1).
+- A name a page filters silently is checked where the student types it: GDC's miRBase 21 spells hsa-miR-375, and -3p dropped the miRNA with no error (R1, 2026-10-18).
+- Packages that each add a part to one list number it from the list's length and collide: R1 and R3 both made Part 4 of the guide (2026-10-18).

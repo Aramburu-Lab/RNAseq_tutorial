@@ -1,0 +1,211 @@
+# A dataset file for one TCGA project at the NCI Genomic Data Commons (GDC). The guide's TCGA part
+# copies it to conf/datasets/<slug>.toml in your clone; edit each line marked EDIT, then run
+# `ctx run --check` with the three folders scripts/bash/fetch_gdc.sbatch wrote. It lists what is
+# still missing or does not match the files, with the lines to set, and runs nothing.
+# A file of its own, not a part of conf/dataset_template.toml: a GDC project has no runs to
+# curate, so that template's [sdrf], [columns] and accessions do not apply, and its [[contrasts]]
+# are fixed here: every TCGA project with normal tissue compares tumour against normal, paired.
+# ctx reads the file through ctx.dataset, which names every problem at once.
+
+[dataset]
+# EDIT: lowercase letters, digits and underscores; it names every output file and the ctx root.
+slug = "tcga_hnsc"
+# EDIT: the name the pages show.
+label = "TCGA head and neck squamous"
+# EDIT: the project ID, as the fetch took it.
+source = "The Cancer Genome Atlas, project TCGA-HNSC, through the NCI Genomic Data Commons"
+
+[gdc]
+# EDIT: the project ID, as the fetch took it.
+project = "TCGA-HNSC"
+# The release the fetch's gdc_status.json names; `ctx run --check` prints it if this differs.
+release = "Data Release 46.0 - August 10, 2026"
+workflow = "STAR - Counts"
+gene_model = "GENCODE v36"
+# TCGA's libraries are unstranded; gather keeps the files whose strand shares say so.
+protocol = "unstranded"
+tumour = "Primary Tumor"
+normal = "Solid Tissue Normal"
+mirna_workflow = "BCGSC miRNA Profiling"
+cdr_file = "TCGA-CDR-SupplementalTableS1.xlsx"
+# EDIT: the TCGA-CDR's type, the project ID without TCGA-; `ctx run --check` lists the CDR's types.
+cdr_type = "HNSC"
+# TCGA's own attribution policy, quoted on every page beside the GDC's citation
+# (https://www.cancer.gov/ccg/research/genome-sequencing/tcga/using-tcga-data/citing, read
+# 2026-10-09; the GDC FAQ defers to each project's policy).
+attribution = "tcga"
+
+# The project's identifiers, which tests/test_repo.py keeps out of the code.
+[guard]
+# EDIT: the project ID.
+ids = ["TCGA-HNSC"]
+patterns = ['\bTCGA-[A-Z0-9]{2}-[A-Z0-9]{4}\b']
+
+# M10, survival from the TCGA-CDR (Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052).
+# EDIT the genes: a few marker genes of this cancer and MKI67, the page's static figures.
+# EDIT the endpoint: Liu 2018 Table 3 marks OS, PFI, DFI and DSS per type; take OS where its row
+# recommends it without caution, else PFI. variables are those the CDR carries for this type:
+# stage, grade, age and sex for most; er and menopause for breast alone. box splits stage I-II
+# against III-IV. therapy is a GDC treatment type the patient table counts.
+[clinical]
+genes = ["MMP1", "CRNN", "CDKN2A", "MKI67"]
+endpoint = "OS"
+variables = ["stage", "grade", "age", "sex"]
+box = "stage_group"
+therapy = "Chemotherapy"
+
+# EDIT: Liu 2018 Table 3's row for this type, events then censored per endpoint, read from the
+# paper (PubMed Central PMC6066282). The page prints them beside the CDR's own counts, which
+# `ctx run --check` prints: Table 3 is the ceiling the CDR copy must reach.
+[clinical.published.table3]
+source = "Liu et al. 2018 Cell, Table 3, HNSC: events and censored per endpoint"
+OS = [223, 305]
+PFI = [198, 330]
+DFI = [28, 106]
+DSS = [130, 372]
+
+# The STAR counts' own annotation: GDC's GENCODE v36, md5 c03931958d4572148650d62eb6dec41a as
+# GDC's reference-files page lists it; M8 reads gene types and positions from it.
+[[resources]]
+name = "annotation_gtf"
+urls = ["https://api.gdc.cancer.gov/data/be002a2c-3b27-43f3-9e0f-fd47db92a6b5"]
+bytes = 44507458
+sha256 = "81359865bab048361cbeaf91c9441aac4c700b63978e6691d579d78bf2322d30"
+dest = "data/raw/gdc_gencode_v36/gencode.v36.annotation.gtf.gz"
+
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+# TargetScan 8.0 (McGeary et al. 2019 Science, doi:10.1126/science.aav1741), for M8's miRNA
+# targets; no terms are published on its home or download page, so a kit links these files.
+[[resources]]
+name = "targetscan_predictions"
+urls = ["https://www.targetscan.org/vert_80/vert_80_data_download/Predicted_Targets_Context_Scores.default_predictions.txt.zip"]
+bytes = 17673917
+sha256 = "73411a01b2745d7098c3e4d36d5887b231ce765e7282013d15df78d736711aee"
+dest = "data/raw/mirna_targets/Predicted_Targets_Context_Scores.default_predictions.txt.zip"
+
+[[resources]]
+name = "targetscan_families"
+urls = ["https://www.targetscan.org/vert_80/vert_80_data_download/miR_Family_Info.txt.zip"]
+bytes = 162636
+sha256 = "d91827b9c9524f2b970d85f61050ecfa9b8cb7ca395c5f7952b9c21cb3dc3b7a"
+dest = "data/raw/mirna_targets/miR_Family_Info.txt.zip"
+
+[[resources]]
+name = "targetscan_genes"
+urls = ["https://www.targetscan.org/vert_80/vert_80_data_download/Gene_info.txt.zip"]
+bytes = 622317
+sha256 = "482e1b2786d9a4f7b2dfd1364ac1c5132f1015d546dc963e0db405c65ca3fa08"
+dest = "data/raw/mirna_targets/Gene_info.txt.zip"
+
+# miRTarBase 10.0 strong evidence: reporter assay or Western blot (Cui et al. 2025 NAR,
+# doi:10.1093/nar/gkae1072). Its LICENSE calls it provided at no cost in the public domain.
+[[resources]]
+name = "mirtarbase_strong"
+urls = ["https://awi.cuhk.edu.cn/miRTarBase/downloads/files/10.0/miRTarBase_SE_WR.csv"]
+bytes = 3348778
+sha256 = "77a862a5f2f98f52c7a130649803b05e1468f9759b3c0bf8d03a99f75d992e46"
+dest = "data/raw/mirna_targets/miRTarBase_SE_WR.csv"
+# Its server speaks TLS 1.2 with RSA key exchange only (AES128-GCM-SHA256, AES256-GCM-SHA384;
+# every ECDHE and DHE suite refused, 2026-10-08), which Python's default list omits.
+tls_ciphers = "AES256-GCM-SHA384:AES128-GCM-SHA256"
+
+# M5: each patient's chosen tumour against their chosen normal (ctx.gather.gdc.chosen), paired.
+# EDIT n: `ctx run --check` prints the pairs the files give; set both numbers to it.
+[[contrasts]]
+name = "tumour_normal"
+variable = "condition"
+reference = "normal"
+tested = "tumour"
+design = "~donor + group"
+paired = true
+n = [43, 43]
+
+[de]
+featured = "tumour_normal"
+
+# M6 on MSigDB Hallmark. EDIT featured_set: a hallmark set this cancer is known for.
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_E2F_TARGETS"
+running = ["tumour_normal", "HALLMARK_E2F_TARGETS"]
+
+# M8: M5's results by biotype, and the mature miRNAs of the small-RNA libraries, paired the same
+# way. EDIT mirnas: two or three mature miRNAs, by miRBase name, whose targets the page tests.
+[ncrna]
+featured = "tumour_normal"
+pairs = 50
+mirnas = ["hsa-miR-221-3p", "hsa-miR-375"]
+
+# EDIT n: `ctx run --check` prints the miRNA pairs the files give.
+[ncrna.mirna]
+name = "mirna_tumour_normal"
+variable = "condition"
+reference = "normal"
+tested = "tumour"
+design = "~donor + group"
+paired = true
+n = [43, 43]
+
+[ncrna.sanity]
+# Registered before the first ctx run on this project; the miRNA names are GDC's miRBase 21 spellings.
+registered_on = "2026-10-18 12:16"
+
+[[ncrna.sanity.rules]]
+id = "HNSC.mir375"
+text = "hsa-miR-375 falls in tumours against their paired normals."
+source = "Avissar et al. 2009 Clin Cancer Res, doi:10.1158/1078-0432.CCR-08-3131 (PMC2669849, read in full 2026-10-18): qRT-PCR on 99 HNSCC tumours against 14 non-diseased head and neck epithelia, normals unpaired; miR-375 the one miRNA down in tumours, about 22-fold on the array, and down in the qRT-PCR series. Registered blind: no ctx module had run on these files"
+conditions = [{ metric = "mirna.hsa-miR-375.lfc", op = "<=", value = -1.0 }, { metric = "mirna.hsa-miR-375.padj", op = "<", value = 0.05 }]
+
+[[ncrna.sanity.rules]]
+id = "HNSC.mir221"
+text = "hsa-miR-221-3p rises in tumours against their paired normals."
+source = "Avissar et al. 2009 Clin Cancer Res, doi:10.1158/1078-0432.CCR-08-3131 (PMC2669849, read in full 2026-10-18): qRT-PCR on 99 HNSCC tumours against 14 non-diseased head and neck epithelia, normals unpaired; miR-221 up in tumours, the numerator of the miR-221:miR-375 ratio. Registered blind: no ctx module had run on these files"
+conditions = [{ metric = "mirna.hsa-miR-221-3p.lfc", op = ">=", value = 1.0 }, { metric = "mirna.hsa-miR-221-3p.padj", op = "<", value = 0.05 }]
+
+# The hub's rules, decided once M5 and M6 have run. EDIT registered_on to the time you add the
+# rules, before the first `ctx run`, as "YYYY-MM-DD HH:MM"; a rule added after a fit says so in
+# its source. Each rule names its source, read in full; M5 records gene.<contrast>.<symbol>.lfc
+# and .padj, M6 gsea.<contrast>.<SET>.nes and .fdr, for every gene and set a rule names.
+# Thresholds are M5's ALPHA 0.05 and LFC_MIN 1 (ctx.de.stats). One rule, as conf/datasets
+# tcga_kirc.toml writes them:
+#
+# [[sanity.rules]]
+# id = "XXXX.gene"
+# text = "GENE rises in tumours against their paired normals."
+# source = "Author et al. Year Journal, doi:...: what the paper measured"
+# conditions = [{ metric = "gene.tumour_normal.GENE.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.GENE.padj", op = "<", value = 0.05 }]
+[sanity]
+registered_on = "2026-10-18 12:16"
+
+[[sanity.rules]]
+id = "HNSC.mmp1"
+text = "MMP1 rises in tumours against their paired normals."
+source = "Ye et al. 2008 BMC Genomics, doi:10.1186/1471-2164-9-69 (PMC2262071, read in full 2026-10-18): 53 oral tongue squamous carcinomas against 22 matching normal tissues; MMP1 up 57.6-fold, FDR 0 (Table 3), in the 35-gene signature at fold change over 4 and FDR under 0.0001 (Table 1); that cohort is the tongue alone, while TCGA-HNSC spans oral cavity, pharynx and larynx. Registered blind: no ctx module had run on these files"
+conditions = [{ metric = "gene.tumour_normal.MMP1.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.MMP1.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "HNSC.mmp9"
+text = "MMP9 rises in tumours against their paired normals."
+source = "Ye et al. 2008 BMC Genomics, doi:10.1186/1471-2164-9-69 (PMC2262071, read in full 2026-10-18): 53 oral tongue squamous carcinomas against 22 matching normal tissues; MMP9 up 4.08-fold, FDR 5.85e-05 (Table 3), confirmed by qRT-PCR on 25 tumours and 12 normals (Figure 4); that cohort is the tongue alone, while TCGA-HNSC spans oral cavity, pharynx and larynx. Registered blind: no ctx module had run on these files"
+conditions = [{ metric = "gene.tumour_normal.MMP9.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.MMP9.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "HNSC.krt4"
+text = "KRT4 falls in tumours against their paired normals."
+source = "Ye et al. 2008 BMC Genomics, doi:10.1186/1471-2164-9-69 (PMC2262071, read in full 2026-10-18): 53 oral tongue squamous carcinomas against 22 matching normal tissues; KRT4 among the signature's down-regulated genes at fold change over 4 and FDR under 0.0001 (Table 1); that cohort is the tongue alone, while TCGA-HNSC spans oral cavity, pharynx and larynx. Registered blind: no ctx module had run on these files"
+conditions = [{ metric = "gene.tumour_normal.KRT4.lfc", op = "<=", value = -1.0 }, { metric = "gene.tumour_normal.KRT4.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "HNSC.crnn"
+text = "CRNN falls in tumours against their paired normals."
+source = "Ye et al. 2008 BMC Genomics, doi:10.1186/1471-2164-9-69 (PMC2262071, read in full 2026-10-18): 53 oral tongue squamous carcinomas against 22 matching normal tissues; CRNN among the signature's down-regulated genes at fold change over 4 and FDR under 0.0001 (Table 1); that cohort is the tongue alone, while TCGA-HNSC spans oral cavity, pharynx and larynx. Registered blind: no ctx module had run on these files"
+conditions = [{ metric = "gene.tumour_normal.CRNN.lfc", op = "<=", value = -1.0 }, { metric = "gene.tumour_normal.CRNN.padj", op = "<", value = 0.05 }]

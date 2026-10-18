@@ -1,0 +1,11 @@
+=== 2026-10-18T10:13:09Z paste_1_size.sh
+Cloning into '/Users/rytis/ctx_r1_clone'...
+done.
+PASTE start 2026-10-18T10:13:10Z: TCGA-HNSC star into /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc
+PASTE bytes of GDC files, star: 566 files, 2395352858 bytes
+PASTE start 2026-10-18T10:14:39Z: TCGA-HNSC mirna into /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_mirna
+PASTE bytes of GDC files, mirna: 569 files, 28625773 bytes
+PASTE start 2026-10-18T10:14:43Z: TCGA-HNSC isoform into /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_isoform
+PASTE bytes of GDC files, isoform: 569 files, 221604518 bytes
+PASTE wall time 97 s
+PASTE bytes of GDC files, star mirna isoform: 2645583149 bytes

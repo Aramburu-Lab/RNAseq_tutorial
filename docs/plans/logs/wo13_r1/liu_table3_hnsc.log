@@ -1,0 +1,7 @@
+# Liu et al. 2018 Cell, Table 3, read 2026-10-18 from PubMed Central E-utilities efetch db=pmc id=PMC6066282
+# (no email or tool parameter sent). Parsed rows, as the XML gives them:
+['Type', 'N', 'OS (Accurately Defined)', 'PFI (Accurately Defined)', 'DFI (Accurately Defined)', 'DSS (Approximately Defined)', 'Explanation/Caution']
+['Use', 'Event', 'Censored', 'Use', 'Event', 'Censored', 'Use', 'Event', 'Censored', 'Use', 'Event', 'Censored']
+['HNSC', '528', '✓', '223', '305', '✓', '198', '330', '✓', '28', '106', '✓ app.', '130', '372']
+['KIRC', '537', '✓', '177', '360', '✓', '162', '375', '✓*', '15', '102', '✓ app.', '110', '415', 'number of events is small']
+# KIRC's row equals conf/datasets/tcga_kirc.toml's [clinical.published.table3], so the parse is read right.

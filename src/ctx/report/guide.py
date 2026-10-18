@@ -24,7 +24,7 @@ from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 from ctx.io.naming import MODULES, stem
 from ctx.proteo import guide as mass_spec
-from ctx.report import text
+from ctx.report import guide_gdc, text
 from ctx.report.builder import (
     Code,
     Group,
@@ -310,7 +310,12 @@ def kit_lines(slug: str) -> tuple[str, ...]:
 
 
 def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
-    """The accession, then the three parts, each a group of code blocks under its lead."""
+    """The accession, then the three parts, each a group of code blocks under its lead.
+
+    The TCGA part follows them; a dataset file with ``[gdc]`` gets that part alone, filled.
+    """
+    if spec.gdc is not None:
+        return (guide_gdc.group(spec, 1),)
     word = functools.partial(text.word, PAGE)
 
     def code(key: str, lines: tuple[str, ...]) -> Code:
@@ -364,7 +369,9 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
         word("part1c.other"),
     ), lead=word("part1c.lead"))  # fmt: skip
     protein = mass_spec.part(spec, given, len(numbered) + 1)
-    return (find(), numbered[0], own, matrix, *numbered[1:], protein)
+    # The TCGA part follows the mass-spec part, so their numbers never meet.
+    tcga = guide_gdc.group(spec, len(numbered) + 2)
+    return (find(), numbered[0], own, matrix, *numbered[1:], protein, tcga)
 
 
 def find() -> Group:
@@ -402,6 +409,9 @@ def release() -> str:
 def _keys(spec: Dataset) -> tuple[KeyNumber, ...]:
     """Accessions, the two pinned releases and the reference release the Usage downloads."""
     word = functools.partial(text.word, PAGE)
+    if spec.gdc is not None:
+        return (KeyNumber(word("keys.project"), spec.gdc.project),
+                KeyNumber(word("keys.release"), spec.gdc.release))  # fmt: skip
     return (
         KeyNumber(word("keys.runs"), f"{len(spec.accessions):,}"),
         KeyNumber(word("keys.fetchngs"), FETCHNGS_VERSION),

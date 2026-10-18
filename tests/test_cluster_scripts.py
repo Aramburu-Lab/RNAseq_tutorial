@@ -26,7 +26,7 @@ from ctx.tools import locate
 ROOT = Path(__file__).resolve().parents[1]
 BASH = ROOT / "scripts" / "bash"
 SCRIPTS = ("kebnekaise_env.sh", "fetchngs.sbatch", "rnaseq.sbatch", "subsample.sbatch",
-           "site_kebnekaise.sh", "site_laptop.sh")  # fmt: skip
+           "site_kebnekaise.sh", "site_laptop.sh", "fetch_gdc.sbatch")  # fmt: skip
 JOBS = tuple(name for name in SCRIPTS if name.endswith(".sbatch"))
 FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs"
 SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
@@ -227,6 +227,9 @@ RESOURCES = {
     "fetchngs.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
     "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "12G", "-t": "1-00:00:00"},
     "subsample.sbatch": {"-n": "1", "-c": "2", "--mem": "8G", "-t": "0-04:00:00"},
+    # R1: one core for curl and the end check; six hours, 3.6 times the slowest laptop fetch,
+    # 5,965 s for 2.65 GB on 2026-10-18 (GDC served 665 s for 2.6 GB on 2026-10-01).
+    "fetch_gdc.sbatch": {"-n": "1", "-c": "1", "--mem": "2G", "-t": "0-06:00:00"},
 }
 
 

@@ -1,0 +1,19 @@
+# wo13-r1 proof log: TCGA-HNSC through the guide's TCGA part.
+2026-10-18 before any download: accession TCGA-HNSC (GDC project), Data Release 46.0 - August 10, 2026.
+GDC API /files (gdc_sizes.log, 2026-10-18): STAR - Counts 566 files 2,395,352,858 B; miRNA 569 files 28,625,773 B;
+isoform 569 files 221,604,518 B; data files 1,704, 2,645,583,149 B. Plus the CDR (2,945,129 B per GDC's PanCan
+manifest), ctx setup's six resources (66,363,792 B by the template), and the metadata records. Under the 3 GB approval.
+Substitutions, every other line as the guide prints it: git clone of this worktree's branch; pixi by
+docs/plans/logs/wo13_r1/shim/pixi (main's environments; the default one for ctx, main's laptop copy lacking openpyxl).
+size read 2026-10-18: 2,645,583,149 B in 1,704 files, equal to the API's; downloading
+dataset file edited and rules registered 2026-10-18 12:16 (local), before any ctx command read it
+edited n = [43, 43] in [[contrasts]] and [ncrna.mirna], as the first check printed
+ctx run started 2026-10-18 14:01 local, after the 12:16 registration
+download: 5,965 s wall, every check passed (paste_2_download.log): STAR 566 files, 521 cases, 43 tumour-normal pairs;
+miRNA and isoform 569 files each, 43 pairs, 42 of them also paired in STAR; clinical 528 of 528 cases; CDR md5 equal.
+first check (paste_4_check.log, 312 s with setup's downloads): 2 problems, n = [43, 43] for both contrasts; Table 3 equal
+to the CDR's counts, so no Table 3 problem. second check (paste_4_check2.log, 9 s): 0 problems.
+ctx run (paste_5_run.log): 6 of 6 modules, 130 s wall, 2,071,379,968 B max RSS of the whole run; per module in measure.log.
+sanity: hub 4 of 4 PASS (MMP1 5.93, MMP9 4.30, KRT4 -7.66, CRNN -8.54 log2 FC); M8 mir375 PASS (-4.57), mir221 FAIL
+(log2 FC 0.40 against the 1.0 registered, padj 0.0034), standing as registered.
+M10 Table 3 on the page: CDR 8 of 8 equal to Liu's HNSC row; analysed OS 519 patients, 220 of Liu's 223 events.
