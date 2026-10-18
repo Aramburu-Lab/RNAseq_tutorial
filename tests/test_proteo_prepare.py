@@ -136,4 +136,8 @@ def test_guide_part_lines_parse():
     assert {parse(line).info_name for line in found["run"][1:]} == {"setup", "proteo"}
     assert "\n".join(found["block"]) + "\n" == pipeline.block("[proteo]", slug=spec.slug)
     groups = page.blocks(spec, FOUR)
-    assert groups[-1].title.endswith("protein of the same samples, for M7")
+    # Part 4, before the TCGA part (Part 5), which the guide ends on.
+    assert [g.title for g in groups][-2:] == [
+        "Part 4: protein of the same samples, for M7",
+        "Part 5: any TCGA project",
+    ]
