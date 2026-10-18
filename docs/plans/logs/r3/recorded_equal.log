@@ -1,0 +1,6 @@
+cptac_ccrcc metrics 35 35 equal 35
+cptac_ccrcc verdicts ['PASS', 'RECORDED']
+cptac_brca metrics 37 37 equal 37
+cptac_brca verdicts ['PASS', 'RECORDED']
+tier1 metrics 6 6 equal 6
+tier1 verdicts ['FAIL', 'PASS']
