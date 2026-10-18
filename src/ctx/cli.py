@@ -506,10 +506,16 @@ def report(
     dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
 ) -> None:
     """Write the hub linking every module's newest page, and decide the sanity rules."""
+    from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
     from ctx.report import hub  # noqa: PLC0415 - imported after the runtime profile
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
-    for path in hub.run(ctx.obj["settings"], cards, dataset, dataset_file):
+    try:
+        written = hub.run(ctx.obj["settings"], cards, dataset, dataset_file)
+    except DatasetError as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(1) from error
+    for path in written:
         typer.echo(path)
 
 

@@ -864,7 +864,11 @@ def load(path: Path) -> Dataset:
     Raises:
         DatasetError: Listing every problem found, not only the first.
     """
-    raw = tomllib.loads(path.read_text())
+    try:
+        raw = tomllib.loads(path.read_text())
+    except tomllib.TOMLDecodeError as error:
+        # tomllib's message ends "(at line L, column C)"; no other check can run on the file.
+        raise DatasetError(f"{path}:\n  not valid TOML: {error}") from None
     problems = [f"unknown table [{name}]" for name in sorted(set(raw) - TABLES)]
     info = raw.get("dataset", {})
     slug = _need(info, "slug", str, "dataset", problems)
