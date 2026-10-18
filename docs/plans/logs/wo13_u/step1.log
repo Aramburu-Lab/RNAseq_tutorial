@@ -1,0 +1,4 @@
+gather: exit 0
+de: exit 0
+function: exit 0
+recorded 92; equal 92; differ 0; missing 0; details equal 92
