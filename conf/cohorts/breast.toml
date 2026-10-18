@@ -1,0 +1,41 @@
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in blood.toml.
+
+[cohort]
+name = "breast"
+label = "Breast"
+notes = "PAM50 subtypes as hidden structure. Adipocyte genes can read lower in tumour partly through tissue composition, so 'down in tumour' is checked on our own run before it is taught."
+
+[[datasets]]
+slug = "tcga_brca"
+step = 3
+modules = ["gather", "de", "function", "ncrna", "genecard", "clinical"]
+laptop_cap = "all"
+note = "TCGA-BRCA tumour against adjacent normal through GDC counts; TCGA-CDR endpoints for M10."
+
+[[datasets]]
+slug = "cptac_brca"
+step = 3
+modules = ["gather", "de", "proteo"]
+laptop_cap = "all"
+note = "CPTAC breast: treatment-naive tumours, RNA against protein per gene; no normals."
+
+[[datasets]]
+slug = "breast_mono"
+step = 1
+modules = ["gather", "qc", "de", "function"]
+laptop_cap = "all"
+note = "Cassetta 2019 monocytes of patients against healthy women; rules registered, not yet run."
+
+[[datasets]]
+slug = "breast_mac"
+step = 1
+modules = ["gather", "qc", "de", "function"]
+laptop_cap = "all"
+note = "Cassetta 2019 tumour-associated against tissue-resident macrophages; not yet run."
+
+[[datasets]]
+slug = "breast_tissue"
+step = 3
+modules = ["gather", "qc", "de", "function"]
+laptop_cap = "all"
+note = "Tumour against adjacent tissue, the course's own comparison, not the paper's; not yet run."

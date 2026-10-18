@@ -1,0 +1,27 @@
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in blood.toml.
+
+[cohort]
+name = "lung"
+label = "Lung (adenocarcinoma and squamous cell carcinoma)"
+notes = "Two histologies with different programmes; smoking as a covariate. Adjacent normal is not healthy tissue."
+
+[[datasets]]
+slug = "tcga_luad"
+step = 3
+modules = ["gather", "de", "ncrna", "genecard", "clinical"]
+laptop_cap = "all"
+note = "TCGA-LUAD tumour against adjacent normal through GDC counts; OS as M10's endpoint."
+
+[[datasets]]
+slug = "tcga_lusc"
+step = 3
+modules = ["gather", "de", "ncrna", "genecard", "clinical"]
+laptop_cap = "all"
+note = "TCGA-LUSC tumour against adjacent normal through GDC counts; OS as M10's endpoint."
+
+[[datasets]]
+slug = "tcga_lung"
+step = 3
+modules = ["gather", "qc", "de"]
+laptop_cap = "all"
+note = "Squamous against adenocarcinoma tumours across the two projects, a cross-project contrast."

@@ -1,0 +1,20 @@
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in blood.toml.
+
+[cohort]
+name = "headneck"
+label = "Head and neck squamous cell carcinoma"
+notes = "Two routes into one cancer: GDC counts of a TCGA project, and an authors' count matrix from GEO with paired normal mucosa."
+
+[[datasets]]
+slug = "tcga_hnsc"
+step = 3
+modules = ["gather", "de", "function", "ncrna", "clinical"]
+laptop_cap = "all"
+note = "TCGA-HNSC through fetch_gdc.sbatch and the guide's TCGA part, the R1 proof."
+
+[[datasets]]
+slug = "r2_gse130605"
+step = 3
+modules = ["gather", "qc", "de", "function"]
+laptop_cap = "all"
+note = "Laryngeal squamous carcinoma against paired mucosa, a GEO count matrix through gather --counts, the R2 proof."

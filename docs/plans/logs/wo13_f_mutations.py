@@ -12,6 +12,7 @@ W = Path(__file__).resolve().parents[3]
 FIG = "tests/test_figures.py"
 PANEL = "tests/test_figure_panel.py"
 BYTES = "tests/test_figure_bytes.py"
+COHORTS = "tests/test_cohorts.py"
 MUTATIONS = {
     "f1": [
         (
@@ -151,6 +152,44 @@ MUTATIONS = {
             '    with mpl.rc_context({"svg.hashsalt": SVG_SALT}):\n',
             "    with mpl.rc_context({}):\n",
             BYTES,
+        ),
+    ],
+    "f4": [
+        (
+            "bundle loader stops at the first problem",
+            "src/ctx/cohorts.py",
+            "    slugs = [e.slug for e in entries if e.slug]\n",
+            "    if problems:\n        raise CohortError(problems[0])\n"
+            "    slugs = [e.slug for e in entries if e.slug]\n",
+            f"{COHORTS}::test_a_bad_bundle_lists_every_problem",
+        ),
+        (
+            "a doubled module passes",
+            "src/ctx/cohorts.py",
+            "    if len(set(value)) != len(value):\n",
+            "    if False:\n",
+            f"{COHORTS}::test_a_bad_bundle_lists_every_problem",
+        ),
+        (
+            "a zero cap passes",
+            "src/ctx/cohorts.py",
+            "isinstance(value, int) and not isinstance(value, bool) and value > 0",
+            "isinstance(value, int) and not isinstance(value, bool)",
+            f"{COHORTS}::test_a_bad_bundle_lists_every_problem",
+        ),
+        (
+            "the listing preferred over the choice",
+            "src/ctx/cohorts.py",
+            "    if chosen := active():\n",
+            "    if (chosen := active()) and False:\n",
+            f"{COHORTS}::test_cohort_of_takes_the_choice_then_the_listing_then_own",
+        ),
+        (
+            "the option not passed to the figures",
+            "src/ctx/cohorts.py",
+            "    os.environ[COHORT_ENV] = name\n",
+            "    os.environ.get(COHORT_ENV)\n",
+            f"{COHORTS}::test_cohort_option_names_figures_and_refuses_an_unknown_cohort",
         ),
     ],
 }

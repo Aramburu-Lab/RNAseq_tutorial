@@ -1,0 +1,20 @@
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in blood.toml.
+
+[cohort]
+name = "kidney"
+label = "Kidney (clear-cell renal cell carcinoma)"
+notes = "Clean tumour against normal separation; VHL loss drives HIF and the hypoxia programme. Worked examples CA9 and NPTX2."
+
+[[datasets]]
+slug = "tcga_kirc"
+step = 3
+modules = ["gather", "de", "function", "ncrna", "genecard", "clinical"]
+laptop_cap = "all"
+note = "TCGA-KIRC tumour against adjacent normal through GDC counts; OS as M10's endpoint."
+
+[[datasets]]
+slug = "cptac_ccrcc"
+step = 3
+modules = ["gather", "de", "proteo"]
+laptop_cap = "all"
+note = "CPTAC ccRCC tumours and paired normals at RNA and protein; M7 excludes the non-clear-cell cases."
