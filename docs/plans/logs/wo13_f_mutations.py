@@ -11,6 +11,7 @@ from pathlib import Path
 W = Path(__file__).resolve().parents[3]
 FIG = "tests/test_figures.py"
 PANEL = "tests/test_figure_panel.py"
+BYTES = "tests/test_figure_bytes.py"
 MUTATIONS = {
     "f1": [
         (
@@ -127,6 +128,29 @@ MUTATIONS = {
             'f"git -C {CLONE} checkout {commit}",',
             'f"git -C {CLONE} checkout main",',
             f"{PANEL}::test_environment_follows_where_ctx_came_from",
+        ),
+    ],
+    "f3": [
+        (
+            "PDF keeps its CreationDate",
+            "src/ctx/viz/save.py",
+            'NO_DATE = {"pdf": {"CreationDate": None}, "svg": {"Date": None}}',
+            'NO_DATE = {"pdf": {}, "svg": {"Date": None}}',
+            BYTES,
+        ),
+        (
+            "SVG keeps its dc:date",
+            "src/ctx/viz/save.py",
+            'NO_DATE = {"pdf": {"CreationDate": None}, "svg": {"Date": None}}',
+            'NO_DATE = {"pdf": {"CreationDate": None}, "svg": {}}',
+            BYTES,
+        ),
+        (
+            "SVG ids salted at random",
+            "src/ctx/viz/save.py",
+            '    with mpl.rc_context({"svg.hashsalt": SVG_SALT}):\n',
+            "    with mpl.rc_context({}):\n",
+            BYTES,
         ),
     ],
 }

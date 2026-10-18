@@ -141,6 +141,21 @@ def layout_problems(fig: Any) -> list[str]:
     return problems
 
 
+# What makes two renders of one figure differ though nothing drawn did (656, Phase 2D): the
+# PDF's CreationDate and the SVG's dc:date, set from the clock, and the SVG's clip-path and
+# glyph ids, hashed with a random salt unless svg.hashsalt is set.
+NO_DATE = {"pdf": {"CreationDate": None}, "svg": {"Date": None}}
+SVG_SALT = "ctx"
+
+
+def save_reproducibly(fig: Any, path: Path) -> None:
+    """Save a PDF or SVG with no creation time and fixed ids, so a rerun is byte-equal."""
+    import matplotlib as mpl  # noqa: PLC0415 - heavy; imported after the profile
+
+    with mpl.rc_context({"svg.hashsalt": SVG_SALT}):
+        fig.savefig(path, metadata=NO_DATE[path.suffix.lstrip(".")])
+
+
 def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> FigureBlock:
     """The interactive figure, caption, data rows and words, for a figure or a module page.
 
@@ -238,7 +253,7 @@ def write_figure(
     for name, fig in figures.items():
         for ext in ("pdf", "svg"):
             rendered[(name, ext)] = directory / f"{figure_stem}_{name}.{ext}"
-            fig.savefig(rendered[(name, ext)])
+            save_reproducibly(fig, rendered[(name, ext)])
     table = write_table(
         rows, directory, figure_stem, columns=columns, data_releases=data_releases, formats=("csv",)
     )
