@@ -90,6 +90,7 @@ edit = "Edit each line marked EDIT in the dataset file: its slug, the same as SL
 run = "The annotation and gene sets, the check, then every module the dataset file declares"
 paired = "Paste each block the check prints. Where every donor has a sample at both levels, add `paired = true` and `design = \"~donor + group\"` to the contrast: the test then compares each patient with itself."
 other = "A matrix from ArrayExpress, recount3 or your own pipeline enters the same way: save it under the root's data/raw folder, write the table by hand, and run the last block."
+rsem = "RSEM's expected counts enter with `kind = \"rsem_expected\"` in `[counts]`, as a matrix or a folder of `.genes.results` files given to `--counts`. gather rounds each value to an integer and states how many changed; RSEM's TPM and FPKM columns are never read."
 
 [part2]
 group = "Part {n}: count with nf-core/rnaseq"

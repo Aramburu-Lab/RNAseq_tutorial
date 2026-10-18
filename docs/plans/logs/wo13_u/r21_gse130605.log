@@ -1,0 +1,28 @@
+/Users/rytis/ctx_u_gse130605/outputs/00_setup/2026-10-18_setup_versions_v1.parquet
+/Users/rytis/ctx_u_gse130605/outputs/00_setup/2026-10-18_setup_versions_v1.csv
+/Users/rytis/ctx_u_gse130605/outputs/00_setup/2026-10-18_setup_versions_v1_README.md
+0 problems, 0 of them stopping the run; ctx run runs: gather, qc, de, function, report
+0 problems, 0 of them stopping the run; ctx run runs: gather, qc, de, function, report
+ctx run: 1 of 5: pixi run -e default ctx --root ~/ctx_u_gse130605 gather --dataset r2_gse130605 --dataset-file ~/ctx_u_gse130605/r2_gse130605.toml --counts ~/ctx_u_gse130605/data/raw/r2_gse130605/GSE130605_raw_counts_GRCh38.p13_NCBI.tsv.gz
+ctx run: 2 of 5: pixi run -e default ctx --root ~/ctx_u_gse130605 qc --dataset r2_gse130605 --dataset-file ~/ctx_u_gse130605/r2_gse130605.toml
+ctx run: 3 of 5: pixi run -e default ctx --root ~/ctx_u_gse130605 de --dataset r2_gse130605 --dataset-file ~/ctx_u_gse130605/r2_gse130605.toml
+ctx run: 4 of 5: pixi run -e default ctx --root ~/ctx_u_gse130605 function --dataset r2_gse130605 --dataset-file ~/ctx_u_gse130605/r2_gse130605.toml
+ctx run: 5 of 5: pixi run -e default ctx --root ~/ctx_u_gse130605 report --dataset r2_gse130605 --dataset-file ~/ctx_u_gse130605/r2_gse130605.toml
+      118.02 real       191.37 user        12.94 sys
+           888766464  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             1557570  page reclaims
+                 808  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               13313  voluntary context switches
+              142691  involuntary context switches
+            17186221  instructions retired
+             7637909  cycles elapsed
+             1474920  peak memory footprint

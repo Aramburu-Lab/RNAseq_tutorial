@@ -19,6 +19,7 @@ from pathlib import Path
 import numpy as np
 import polars as pl
 
+from ctx.dataset import COUNT_KINDS
 from ctx.gather.curation import Problem
 
 # The column only this route writes, so a module can tell the sheet from its columns alone.
@@ -39,6 +40,14 @@ SCALED_TOLERANCE = 0.01
 LOG_CEILING = 30
 INT32_MAX = 2**31 - 1
 ENTREZ_RESOURCE = "gencode_entrez"
+# HGNC's complete set at a dated monthly archive: its entrez_id and ensembl_gene_id columns place
+# an NCBI Gene ID that GENCODE's table does not link (D-087's R2.1).
+HGNC_RESOURCE = "hgnc_complete"
+HGNC_COLUMNS = ("entrez_id", "ensembl_gene_id")
+# What a placed row's detail says when HGNC, not GENCODE's table, placed it.
+THROUGH_HGNC = "through HGNC"
+# The value kinds a dataset file's [counts] declares, defined once in ctx.dataset.
+RAW, RSEM_EXPECTED = COUNT_KINDS
 TRANSCRIPT = re.compile(r'transcript_id "([^"]*)"')
 GENE = re.compile(r'gene_id "([^"]*)"')
 
@@ -87,6 +96,7 @@ class Mapped:
             ``total``, the counts the row held over every sample.
         kinds: Rows per ID kind: ensembl, entrez, symbol.
         versions: Ensembl rows whose version equals, differs from, or is absent in the GTF's.
+        through_hgnc: NCBI Gene ID rows placed through HGNC, as GENCODE's table links none.
     """
 
     counts: pl.DataFrame
@@ -94,6 +104,7 @@ class Mapped:
     left_out: pl.DataFrame
     kinds: Mapping[str, int]
     versions: Mapping[str, int]
+    through_hgnc: int = 0
 
 
 def is_sheet(sheet: pl.DataFrame) -> bool:
@@ -109,7 +120,7 @@ def refuse_sheet(sheet: pl.DataFrame, path: Path, command: str) -> list[str]:
             "count matrix holds none; ctx qc, de, function and report read its counts"]  # fmt: skip
 
 
-def _text(path: Path) -> str:
+def file_text(path: Path) -> str:
     """The file as text, gunzipped when its first bytes say gzip, whatever its name."""
     data = path.read_bytes()
     if data[:2] == b"\x1f\x8b":
@@ -139,7 +150,7 @@ def _columns(header: list[str]) -> tuple[list[str], tuple[str, ...], str]:
     return names, (), "table"
 
 
-def _numeric(frame: pl.DataFrame) -> tuple[np.ndarray, list[Problem]]:
+def numeric_columns(frame: pl.DataFrame) -> tuple[np.ndarray, list[Problem]]:
     """Every sample column as float64, and a problem per column holding a non-number."""
     values, problems = [], []
     for column in frame.columns:
@@ -166,7 +177,7 @@ def read(path: Path) -> Raw:
         CountsError: If the file holds no header or no sample column.
     """
     delimiter = _delimiter(path)
-    line, body = _body(_text(path))
+    line, body = _body(file_text(path))
     names, dropped, kind = _columns(next(csv.reader([line], delimiter=delimiter), []))
     if len(names) < 2:  # noqa: PLR2004 - the gene IDs, then at least one sample
         read_as = "commas" if delimiter == "," else "tabs, as its name does not end in .csv"
@@ -177,7 +188,7 @@ def read(path: Path) -> Raw:
                         new_columns=positional, infer_schema=False)  # fmt: skip
     ids = frame["c0"].fill_null("").str.strip_chars()
     keep = [c for c, n in zip(positional[1:], names[1:], strict=True) if n not in dropped]
-    values, found = _numeric(frame.select(keep))
+    values, found = numeric_columns(frame.select(keep))
     problems = tuple((c, names[int(k[1:])], d) for c, k, d in found)
     summary = ids.str.starts_with(HTSEQ_PREFIX) | ids.is_in(list(STAR_ROWS))
     totals = np.nansum(values[summary.to_numpy()], axis=1)
@@ -194,11 +205,13 @@ def _scaled(sums: np.ndarray) -> bool:
     )
 
 
-def value_problems(raw: Raw) -> list[Problem]:
+def value_problems(raw: Raw, kind: str = RAW) -> list[Problem]:
     """Why the values are not raw counts, each with how it was told, or nothing.
 
     Raw counts are whole numbers of reads, none below 0. A fraction, a negative, a sum of a
     million in every sample or a ceiling of log scale each name the scale they point to.
+    Declared RSEM expected counts may hold fractions, which ``rounded`` takes to integers
+    after this check, never before it: rounded log2 values would pass as whole numbers.
     """
     v = raw.values
     finite = np.isfinite(v)
@@ -212,7 +225,9 @@ def value_problems(raw: Raw) -> list[Problem]:
         problems.append(("values", "negative", f"{said}; log2 or centred values are"))
     fractional = seen != np.rint(seen)
     sums = np.nansum(v, axis=0)
-    if fractional.any():
+    # Declared expected counts may be fractional, but never on a TPM or a log2 scale.
+    expected = kind == RSEM_EXPECTED and not _scaled(sums) and seen.max(initial=0) > LOG_CEILING
+    if fractional.any() and not expected:
         scale = "FPKM, RPKM or estimated counts"
         if _scaled(sums):
             scale = "TPM or CPM"
@@ -220,7 +235,10 @@ def value_problems(raw: Raw) -> list[Problem]:
             scale = "log2 values"
         said = f"{int(fractional.sum()):,} of {seen.size:,} values are not whole numbers"
         shown = f"e.g. {seen[fractional][0]:g}; the largest is {seen.max():g}"
-        problems.append(("values", "fractional", f"{said}, {shown}: {scale}, not raw counts"))
+        hint = f'; RSEM\'s expected_count enters with [counts] kind = "{RSEM_EXPECTED}"'
+        hint = hint if kind == RAW else ""
+        problems.append(("values", "fractional",
+                         f"{said}, {shown}: {scale}, not raw counts{hint}"))  # fmt: skip
     elif _scaled(sums):
         said = f"every sample sums to {PER_MILLION:,} within {SCALED_TOLERANCE:.0%}"
         problems.append(("values", "scaled", f"{said}: rounded TPM or CPM, not raw counts"))
@@ -270,9 +288,34 @@ def entrez_genes(path: Path, gtf: Path) -> dict[str, set[str]]:
     return dict(found)
 
 
-def _targets(annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | None
+def hgnc_ensembl(path: Path) -> dict[str, set[str]]:
+    """Each NCBI Gene ID's stable Ensembl IDs in HGNC's complete set, read by column name.
+
+    Raises:
+        CountsError: If the file lacks the ``entrez_id`` or ``ensembl_gene_id`` column.
+    """
+    found: dict[str, set[str]] = defaultdict(set)
+    with gzip.open(path, "rt") if path.suffix == ".gz" else path.open() as handle:
+        header = handle.readline().rstrip("\n").split("\t")
+        if missing := [c for c in HGNC_COLUMNS if c not in header]:
+            raise CountsError([("gene ids", HGNC_RESOURCE, f"{path.name} has no {missing} "
+                                "column; not HGNC's complete set")])  # fmt: skip
+        entrez, ensembl = (header.index(c) for c in HGNC_COLUMNS)
+        for line in handle:
+            fields = line.rstrip("\n").split("\t")
+            if len(fields) > max(entrez, ensembl) and fields[entrez] and fields[ensembl]:
+                found[fields[entrez]].add(fields[ensembl])
+    return dict(found)
+
+
+def _targets(annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | None,
+             hgnc: Mapping[str, set[str]] | None = None
              ) -> dict[str, dict[str, set[str]]]:  # fmt: skip
-    """Per kind, each key's set of annotation genes: stable Ensembl ID, symbol, Entrez ID."""
+    """Per kind, each key's set of annotation genes: stable Ensembl ID, symbol, Entrez ID.
+
+    ``hgnc`` holds HGNC's stable Ensembl IDs per NCBI Gene ID, turned here into the
+    annotation's genes; an Ensembl ID the annotation lacks places nothing.
+    """
     by: dict[str, dict[str, set[str]]] = {"ensembl": defaultdict(set), "symbol": defaultdict(set)}
     for gene_id, name in annotation.select("gene_id", "gene_name").rows():
         stable = ENSEMBL.fullmatch(gene_id)
@@ -280,6 +323,8 @@ def _targets(annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | None
         if name:
             by["symbol"][name].add(gene_id)
     by["entrez"] = dict(entrez or {})
+    by["hgnc"] = {key: {g for e in stable for g in by["ensembl"].get(e, set())}
+                  for key, stable in (hgnc or {}).items()}  # fmt: skip
     return by
 
 
@@ -296,10 +341,14 @@ def _place(ids: Iterable[str], targets: Mapping[str, Mapping[str, set[str]]],
         kind = kind_of(source_id)
         key = m[1] if (m := ENSEMBL.fullmatch(source_id)) else source_id
         genes = sorted(targets[kind].get(key, set()))
+        # HGNC only where GENCODE's own table links the ID to no gene at all.
+        through = kind == "entrez" and key not in targets[kind] and key in targets["hgnc"]
+        if through:
+            genes = sorted(targets["hgnc"][key])
         if kind == "entrez" and not has_entrez:
             placed.append((kind, "", "no_entrez_table", f"no {ENTREZ_RESOURCE} resource"))
         elif len(genes) == 1:
-            placed.append((kind, genes[0], "", ""))
+            placed.append((kind, genes[0], "", THROUGH_HGNC if through else ""))
         elif genes:
             placed.append((kind, "", "ambiguous", f"{len(genes)} genes: {', '.join(genes[:3])}"))
         else:
@@ -335,27 +384,36 @@ def to_integers(values: np.ndarray) -> np.ndarray:
 
 
 def _shared(placed: list[Placed], ids: tuple[str, ...]) -> None:
-    """Rows placed on one gene leave together: summing them would be a guess."""
+    """Rows placed on one gene leave together: summing them would be a guess.
+
+    HGNC is a fallback and never unseats a row placed by its own kind's map: where one such
+    row holds the gene, only the rows HGNC placed there leave.
+    """
     hits: dict[str, list[int]] = defaultdict(list)
     for i, (_, gene_id, _, _) in enumerate(placed):
         if gene_id:
             hits[gene_id].append(i)
     for gene_id, rows in hits.items():
-        if len(rows) > 1:
-            detail = f"{gene_id}, with {', '.join(ids[r] for r in rows)}"
-            for r in rows:
-                placed[r] = (placed[r][0], "", "shared_gene", detail)
+        if len(rows) < 2:  # noqa: PLR2004 - a gene shared needs two rows
+            continue
+        own = [r for r in rows if placed[r][3] != THROUGH_HGNC]
+        leave = [r for r in rows if r not in own] if len(own) == 1 else rows
+        detail = f"{gene_id}, with {', '.join(ids[r] for r in rows)}"
+        for r in leave:
+            placed[r] = (placed[r][0], "", "shared_gene", detail)
 
 
-def place(raw: Raw, annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | None) -> Mapped:
+def place(raw: Raw, annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | None,
+          hgnc: Mapping[str, set[str]] | None = None) -> Mapped:  # fmt: skip
     """Each row on one annotation gene, or left out with why; two rows on one gene both leave.
 
     Order: each ID by its own kind (Ensembl by its stable part, Entrez through GENCODE's
-    table, a symbol by the annotation's gene name); a key matching several genes is ambiguous;
-    then rows sharing a gene are left out together.
+    table, else through HGNC where GENCODE's table links it to nothing, a symbol by the
+    annotation's gene name); a key matching several genes is ambiguous; then rows sharing a
+    gene are left out together, whichever map placed them.
     """
     names = dict(annotation.select("gene_id", "gene_name").rows())
-    placed = _place(raw.ids, _targets(annotation, entrez), entrez is not None)
+    placed = _place(raw.ids, _targets(annotation, entrez, hgnc), entrez is not None)
     _shared(placed, raw.ids)
     kept = [i for i, (_, g, _, _) in enumerate(placed) if g]
     totals = np.nansum(raw.values, axis=1)
@@ -375,4 +433,5 @@ def place(raw: Raw, annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | N
     kinds: dict[str, int] = defaultdict(int)
     for kind, *_ in placed:
         kinds[kind] += 1
-    return Mapped(counts, genes, left_out, dict(kinds), _versions(raw.ids, placed))
+    through = sum(1 for _, g, _, detail in placed if g and detail == THROUGH_HGNC)
+    return Mapped(counts, genes, left_out, dict(kinds), _versions(raw.ids, placed), through)

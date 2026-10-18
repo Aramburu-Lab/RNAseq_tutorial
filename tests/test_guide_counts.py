@@ -153,12 +153,16 @@ def test_counts_template_curates_a_geo_table(tmp_path):
     gtf.write_bytes(gzip.compress(gtf_text().encode()))
     entrez = root / spec.resource("gencode_entrez").dest
     entrez.write_bytes(gzip.compress(b"ENST00000000011.1\t101\n"))
+    hgnc = root / spec.resource("hgnc_complete").dest
+    hgnc.parent.mkdir(parents=True)
+    hgnc.write_text("hgnc_id\tentrez_id\tensembl_gene_id\nHGNC:1\t102\tENSG00000000002\n")
     path = matrix(
-        tmp_path / "m.tsv", ["101", "BETA"], whole(2), samples=["X01", "X02", "X03", "X04"]
+        tmp_path / "m.tsv", ["101", "102"], whole(2), samples=["X01", "X02", "X03", "X04"]
     )
     found = counts_run.check(root, spec, path)
     assert found.sheet["condition"].to_list() == ["tumour", "tumour", "normal", "normal"]
     assert found.mapped.genes["gene_name"].to_list() == ["ALPHA", "BETA"]
+    assert found.mapped.through_hgnc == 1
 
 
 def test_template_guide_keeps_the_slug_a_placeholder():

@@ -8,7 +8,9 @@ purpose = "Check a [[raw counts|count matrix]] from a repository or your own pip
 input = "A genes by samples table of raw counts, gene IDs in the first column, as TSV or CSV, gzipped or not. Beside it, the dataset file and your sample table, one row per sample column."
 method = """Raw counts are whole numbers, never below zero. A fraction, a negative value or a sample sum of one million each name the scale the file holds instead, and gather stops.
 
-Each [[ensembl_id|Ensembl gene ID]] is matched without its version, a [[ncbi_gene_id|NCBI Gene ID]] through GENCODE's own table, a symbol by the annotation's gene name. An ID that matches no gene or several is left out and listed with its counts, never matched by a similar name."""
+Declared RSEM expected counts are checked as read, then rounded to integers.
+
+Each [[ensembl_id|Ensembl gene ID]] is matched without its version, a symbol by gene name. A [[ncbi_gene_id|NCBI Gene ID]] goes through GENCODE's table, else HGNC's. An ID that matches no gene or several is left out and listed with its counts, never matched by a similar name."""
 interpretation = """From here on the sample sheet and the counts table are the only record, as for a download counted by the course. Modules that read FASTQ files refuse this sheet: the matrix holds no reads.
 
 Read the rows left out before any analysis. A large share points to another organism or another annotation; a few ambiguous symbols are expected. The version row shows how far the source's annotation is from the course's."""
@@ -57,6 +59,12 @@ matrix = "Matrix"
 matrix_value = "{rows:,} gene rows by {samples:,} samples, read as {format}"
 values = "Values"
 values_value = "{values:,} values, every one a whole number, none below zero, no sample summing to one million"
+values_rsem = "{values:,} values of RSEM's expected_count, none below zero, no sample summing to one million"
+rounding = "Rounding"
+rounding_none = "None: whole counts, written unchanged"
+rounding_value = "To the nearest integer, halves to even: {fractional:,} of {values:,} values were fractional, the largest change {largest:g}"
+hgnc = "Placed through HGNC"
+hgnc_value = "{rows:,} NCBI Gene ID rows that GENCODE's table links to no gene, each on one Ensembl gene"
 summary = "Read-summary rows removed"
 kinds = "Gene ID kinds"
 mapped = "Placed on the annotation"
@@ -73,8 +81,16 @@ title = "Rows left out, by reason"
 columns = ["ID kind", "Reason", "Rows", "Counts held"]
 none = "none"
 
+[largest]
+title = "The {n} rows left out holding the most counts"
+columns = ["ID", "ID kind", "Reason", "Counts held"]
+
+[rounding]
+readme = "RSEM expected_count, rounded to the nearest integer, halves to even: {fractional:,} of {values:,} values were fractional, the largest change {largest:g}"
+
 [count]
 meaning = "Raw count for sample {sample}, from the matrix, unchanged."
+meaning_rsem = "RSEM expected count for sample {sample}, rounded to the nearest integer."
 
 [columns.genes]
 gene_id = ["none", "Gene ID of the course annotation, with its version."]

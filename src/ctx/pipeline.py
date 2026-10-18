@@ -221,8 +221,8 @@ def _inputs(root: Path, spec: Dataset, options: Options) -> list[Problem]:
     for flag, folder in given:
         if folder is not None and not folder.is_dir():
             problems.append(Problem(f"{flag} {folder} is not a folder"))
-    if options.counts is not None and not options.counts.is_file():
-        problems.append(Problem(f"--counts {options.counts} is not a file"))
+    if options.counts is not None and not options.counts.exists():
+        problems.append(Problem(f"--counts {options.counts} is not a file or a folder"))
     problems += _pairing(options) + _projects(spec, options)
     counts = options.rnaseq_dir
     if counts is not None and counts.is_dir() and not (matrix := counts / MATRIX_FILE).is_file():
@@ -281,7 +281,7 @@ def _curatable(root: Path, spec: Dataset, options: Options) -> bool:
         return False
     table = spec.table() or root / spec.resource(spec.sdrf.resource).dest
     if options.counts is not None:
-        return table.is_file() and options.counts.is_file() and spec.counts is not None
+        return table.is_file() and options.counts.exists() and spec.counts is not None
     source = options.fetchngs_dir or options.dataset_root(root)
     return table.is_file() and source.is_dir()
 
