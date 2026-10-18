@@ -1,0 +1,22 @@
+/Users/rytis/ctx_r2_gse130605/outputs/00_setup/2026-10-18_setup_environment_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/00_setup/2026-10-18_setup_versions_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/00_setup/2026-10-18_setup_versions_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/00_setup/2026-10-18_setup_versions_v1_README.md
+      181.76 real         1.32 user         1.54 sys
+           195297280  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               21930  page reclaims
+                  17  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                  28  messages sent
+               82254  messages received
+                   0  signals received
+                  34  voluntary context switches
+               52305  involuntary context switches
+         16594452328  instructions retired
+          8044990256  cycles elapsed
+           128468264  peak memory footprint

@@ -20,7 +20,7 @@ import polars as pl
 from ctx import runtime, tools
 from ctx.dataset import Contrast, Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
-from ctx.gather import gdc, rnaseq
+from ctx.gather import counts, gdc, rnaseq
 from ctx.io.naming import MODULES, stem
 from ctx.process.reference import Reference, prepare
 from ctx.process.run import annotation
@@ -143,7 +143,7 @@ def _sheet(root: Path, dataset: str) -> tuple[Path | None, pl.DataFrame | None, 
     except DatasetError as error:
         return None, None, [str(error)]
     sheet = pl.read_parquet(path)
-    if refused := gdc.refuse_sheet(sheet, path, MODULE):
+    if refused := gdc.refuse_sheet(sheet, path, MODULE) or counts.refuse_sheet(sheet, path, MODULE):
         return path, None, refused
     return path, gdc.chosen(sheet), []
 

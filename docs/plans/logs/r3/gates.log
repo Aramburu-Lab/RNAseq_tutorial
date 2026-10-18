@@ -1,9 +1,9 @@
 == ruff check .
 All checks passed!
 == ruff format --check .
-481 files already formatted
+487 files already formatted
 == mypy src
-Success: no issues found in 162 source files
+Success: no issues found in 165 source files
 == python -m interrogate -c pyproject.toml src/ctx --fail-under 100 -q
 == labdocs lint
 == labdocs render --check
@@ -51,7 +51,7 @@ warning: cards: parameters: 'filterByExpr' is expression_filter, unmarked
 warning: cards: parameters: 'apeGLM' is lfc_shrinkage, unmarked
 warning: cards: parameters: 'MA plot' is ma_plot, unmarked
 warning: cards: parameters: 'Salmon' is salmon, unmarked
-warning: cards: parameters: 'counts' is raw_counts, unmarked
+warning: cards: parameters: 'counts' is raw_counts, marked only at a later mention
 warning: cards: parameters: 'GDC' is tcga, unmarked
 warning: cards: parameters: 'STAR' is star, marked only at a later mention
 warning: cards: parameters: 'miRNA' is mirna, unmarked
@@ -157,6 +157,22 @@ warning: gather: results: 'batch' is batch_effect, unmarked
 warning: gather: results: 'counts' is raw_counts, unmarked
 warning: gather: results: 'Reads' is read, unmarked
 warning: gather: results: 'alignment' is aligner, unmarked
+warning: gather_counts: purpose: 'annotation' is annotation, unmarked
+warning: gather_counts: purpose: 'reads' is read, unmarked
+warning: gather_counts: input: 'raw counts' is raw_counts, unmarked
+warning: gather_counts: method: 'Raw counts' is raw_counts, unmarked
+warning: gather_counts: method: 'GENCODE' is gencode, unmarked
+warning: gather_counts: method: 'annotation' is annotation, unmarked
+warning: gather_counts: interpretation: 'FASTQ' is fastq, unmarked
+warning: gather_counts: interpretation: 'counts' is raw_counts, unmarked
+warning: gather_counts: interpretation: 'read' is read, unmarked
+warning: gather_counts: interpretation: 'annotation' is annotation, unmarked
+warning: gather_counts: pitfalls: 'FPKM' is tpm, unmarked
+warning: gather_counts: pitfalls: 'counts' is raw_counts, unmarked
+warning: gather_counts: questions: 'FPKM' is tpm, unmarked
+warning: gather_counts: questions: 'depth' is sequencing_depth, unmarked
+warning: gather_counts: questions: 'counts' is raw_counts, unmarked
+warning: gather_counts: questions: 'reads' is read, unmarked
 warning: gather_gdc: method: 'counts' is raw_counts, unmarked
 warning: gather_gdc: method: 'GDC' is tcga, unmarked
 warning: gather_gdc: interpretation: 'reads' is read, unmarked

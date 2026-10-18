@@ -1,0 +1,99 @@
+# The M1 Gather page of a count matrix from any repository (ctx gather --counts). Placeholders
+# in {braces} are filled by the code; keep their names.
+
+title = "M1 Gather: {dataset}"
+budget = "Track B: under {minutes} min and {ram_gb} GB"
+inputs = "the count matrix, the sample table, the dataset file and the annotation"
+purpose = "Check a [[raw counts|count matrix]] from a repository or your own pipeline, and place its genes on the course annotation. Then build the sample sheet every later module reads."
+input = "A genes by samples table of raw counts, gene IDs in the first column, as TSV or CSV, gzipped or not. Beside it, the dataset file and your sample table, one row per sample column."
+method = """Raw counts are whole numbers, never below zero. A fraction, a negative value or a sample sum of one million each name the scale the file holds instead, and gather stops.
+
+Each [[ensembl_id|Ensembl gene ID]] is matched without its version, a [[ncbi_gene_id|NCBI Gene ID]] through GENCODE's own table, a symbol by the annotation's gene name. An ID that matches no gene or several is left out and listed with its counts, never matched by a similar name."""
+interpretation = """From here on the sample sheet and the counts table are the only record, as for a download counted by the course. Modules that read FASTQ files refuse this sheet: the matrix holds no reads.
+
+Read the rows left out before any analysis. A large share points to another organism or another annotation; a few ambiguous symbols are expected. The version row shows how far the source's annotation is from the course's."""
+# "Term: rest" in a mistake prints Term in bold.
+pitfalls = [
+    "Taking FPKM or TPM: DESeq2 models counts, and gather refuses scaled values.",
+    "Summing two rows that share a gene: the source counted them apart, so the sum is a guess.",
+    "Reading the series title as the samples: tally each sample's own fields in the table.",
+]
+
+[[terms]]
+term = "Count matrix"
+meaning = "A table of raw counts: one row per gene, one column per sample."
+
+[[terms]]
+term = "Left out"
+meaning = "A row whose ID places on no single annotation gene; its counts are listed, not used."
+
+[[terms]]
+term = "Version"
+meaning = "The number after the dot of an Ensembl ID; it changes between annotation releases."
+
+[[questions]]
+prompt = "Why does gather refuse a matrix of FPKM values rather than round them?"
+answer = "FPKM divides each count by gene length and depth. Rounding gives whole numbers that are not counts, and DESeq2's model would be wrong."
+
+[[questions]]
+prompt = "Why are two rows that map to one gene both left out?"
+answer = "The source counted them as two features. Which one the gene's reads belong to is not in the file."
+
+[[questions]]
+prompt = "Why can qc still run on this sheet when process cannot?"
+answer = "qc's count checks read the counts table. process aligns reads, and a matrix holds none."
+
+[keys]
+samples = "Samples"
+genes = "Genes kept"
+left_out = "Rows left out"
+left_out_detail = "listed with their counts"
+
+[checks]
+title = "Matrix checks"
+columns = ["Check", "Result"]
+none = "none"
+matrix = "Matrix"
+matrix_value = "{rows:,} gene rows by {samples:,} samples, read as {format}"
+values = "Values"
+values_value = "{values:,} values, every one a whole number, none below zero, no sample summing to one million"
+summary = "Read-summary rows removed"
+kinds = "Gene ID kinds"
+mapped = "Placed on the annotation"
+mapped_value = "{genes:,} rows on one gene each; {left:,} rows left out, holding {share:.2f} % of all counts"
+versions = "Ensembl versions"
+versions_value = "{equal:,} equal the annotation's, {differ:,} differ, {unversioned:,} without a version"
+annotation = "Annotation"
+annotation_value = "Course annotation: {gtf}. The source names: {named}."
+library = "Library size"
+library_value = "Sum over the genes kept: median {median:,.0f}, {low:,} to {high:,}"
+
+[left]
+title = "Rows left out, by reason"
+columns = ["ID kind", "Reason", "Rows", "Counts held"]
+none = "none"
+
+[count]
+meaning = "Raw count for sample {sample}, from the matrix, unchanged."
+
+[columns.genes]
+gene_id = ["none", "Gene ID of the course annotation, with its version."]
+gene_name = ["none", "Gene symbol from the same annotation."]
+source_id = ["none", "The row's own gene ID in the matrix."]
+
+[columns.left_out]
+source_id = ["none", "The row's own gene ID in the matrix."]
+kind = ["none", "ensembl, entrez or symbol, by the ID's form."]
+reason = ["none", "not_in_annotation, ambiguous, shared_gene or no_entrez_table."]
+detail = ["none", "The genes an ambiguous or shared ID matches, else empty."]
+total = ["reads", "The row's counts summed over every sample."]
+
+[columns.samplesheet]
+sample = ["none", "Sample: the matrix's column name."]
+run_accession = ["none", "The same name; a matrix sample is one run."]
+counts_file = ["none", "The count matrix's file name; only this route writes this column."]
+donor = ["none", "Individual, from the sample table."]
+cell_type = ["none", "Cell type or tissue, from the sample table."]
+condition = ["none", "Condition, from the sample table."]
+batch = ["none", "Empty: a matrix holds no read lengths to derive a batch from."]
+replicate = ["none", "Order of the sample among those of one donor, cell type and condition, from 1."]

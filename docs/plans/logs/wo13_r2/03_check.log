@@ -1,0 +1,14 @@
+- no [de]: de names no featured contrast
+  add these lines to the dataset file:
+[de]
+featured = "tumour_normal"
+
+- no [function]: function tests no gene sets
+  add these lines to the dataset file:
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+running = ["tumour_normal", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
+
+2 problems, 0 of them stopping the run; ctx run runs: gather, qc, report
