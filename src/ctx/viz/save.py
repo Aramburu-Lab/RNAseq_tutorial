@@ -7,6 +7,7 @@ from typing import Any, Protocol
 
 import polars as pl
 
+from ctx.figures import record
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
 from ctx.report import export, glossary
@@ -235,8 +236,12 @@ def write_figure(
         for ext in ("pdf", "svg"):
             rendered[(name, ext)] = directory / f"{figure_stem}_{name}.{ext}"
             fig.savefig(rendered[(name, ext)])
-    page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     table = write_table(
         rows, directory, figure_stem, columns=columns, data_releases=data_releases, formats=("csv",)
     )
+    # The spec hashes the data table, so it is found once the table is written (Phase 2D).
+    if (spec := record.describe(figure_stem, directory, table[0])) is not None:
+        with table[-1].open("a") as readme:
+            readme.write("\n" + record.readme(spec))
+    page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     return [*(rendered[(t, ext)] for ext in ("pdf", "svg") for t in THEMES), page, *table]

@@ -12,7 +12,7 @@ from typing import Annotated, Any
 
 import typer
 
-from ctx import __version__, runtime
+from ctx import __version__, cohorts, runtime
 from ctx.gather import own_fastq
 from ctx.genecard.hpa import RELEASE as HPA_RELEASE
 from ctx.process import DEFAULT_SETTINGS, Aligner, Strandedness
@@ -46,6 +46,7 @@ def main(
     ctx: typer.Context,
     profile: Annotated[str | None, typer.Option(help=HELP["--profile"])] = None,
     root: Annotated[Path | None, typer.Option(help=HELP["--root"])] = None,
+    cohort: Annotated[str | None, typer.Option(help=HELP["--cohort"])] = None,
     _version: Annotated[
         bool,
         typer.Option(
@@ -56,7 +57,7 @@ def main(
     """Cancer Transcriptomics Teaching Suite."""
     # Only stored here: click runs this before a subcommand's --help, so resolving the
     # profile now would make `ctx setup --help` fail on a login node.
-    ctx.obj = {"profile": profile, "root": root}
+    ctx.obj = {"profile": profile, "root": root, "cohort": cohort}
 
 
 def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
@@ -73,6 +74,11 @@ def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
     def wrapper(ctx: typer.Context, *args: Any, **kwargs: Any) -> Any:
         """Store the resolved settings in the context, then run the command."""
         options = ctx.find_root().obj or {}
+        try:
+            cohorts.choose(options.get("cohort"))
+        except cohorts.CohortError as error:
+            typer.echo(str(error), err=True)
+            raise typer.Exit(1) from error
         ctx.obj = {
             **options,
             "settings": runtime.start(options.get("profile"), options.get("root")),
@@ -569,3 +575,17 @@ def guide(
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     typer.echo(module.run(ctx.obj["settings"], cards, runtime.retypable(sys.argv[1:]), spec))
+
+
+@app.command()
+@profiled
+def figure(
+    ctx: typer.Context,  # noqa: ARG001 - profiled resolves the profile through it
+    figure_id: Annotated[str, typer.Argument(help=HELP["figure_id"])],
+    params: Annotated[Path, typer.Option(help=HELP["--params"])],
+    out: Annotated[Path | None, typer.Option(help=HELP["--out"])] = None,
+) -> None:
+    """Redraw one figure from its params file and inputs, in a folder outside any ctx root."""
+    from ctx.figures import command  # noqa: PLC0415 - heavy; imported after the runtime profile
+
+    command.main(figure_id, params, out or Path.cwd())

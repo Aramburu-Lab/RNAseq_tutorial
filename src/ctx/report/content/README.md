@@ -17,6 +17,7 @@ code only names a key and fills in the numbers. Rebuild a page by running its co
 | The M6 Function page | `function.toml` | the same skeleton, `[questions.*]` by the background's direction, a gene set in words (`[gene_sets]`), then the groups, the key numbers and each figure's words |
 | The course hub (`ctx report`) | `hub.toml` | its title and lead, each module's name, the key numbers |
 | The statistics every figure's caption shares | `annotate.toml` | the test names, the box figure's caption and labels, PERMANOVA's sentence |
+| A figure's params file and the figure rows of its README (`ctx figure`) | `figure.toml` | one comment per parameter and per input, then the README's rows |
 
 A contrast reads by the `label` its dataset file gives it; without one, by its two levels as
 the SDRF spells them.

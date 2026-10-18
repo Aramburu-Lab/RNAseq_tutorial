@@ -52,6 +52,16 @@ class DatasetError(ValueError):
     """A dataset file that cannot be used; the message lists every problem."""
 
 
+# The dataset file this process read for each slug: a figure's spec names it as an input
+# (ctx.figures.record), and the modules that draw do not pass it on to ctx.viz.save.
+_LOADED: dict[str, Path] = {}
+
+
+def loaded() -> dict[str, Path]:
+    """The dataset file ``load`` last read for each slug in this process."""
+    return dict(_LOADED)
+
+
 @dataclass(frozen=True)
 class Resource:
     """A file ``ctx setup`` fetches: its mirrors, size, checksum and place under the root.
@@ -908,6 +918,7 @@ def load(path: Path) -> Dataset:
                         "gather reads for each aliquot's case and sample type")  # fmt: skip
     if problems:
         raise DatasetError(f"{path}:\n  " + "\n  ".join(problems))
+    _LOADED[slug] = path
     return Dataset(
         path=path,
         slug=slug,
