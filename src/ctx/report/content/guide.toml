@@ -82,14 +82,16 @@ lead = "A study's raw counts replace the download and the count: gather checks t
 what = "The matrix holds genes as rows and samples as columns, gene IDs in the first column, as TSV or CSV, gzipped or not. Its values are raw counts, whole numbers: gather refuses FPKM, TPM, CPM and log values and names the scale it found."
 where = "On a GEO series page, Supplementary file lists the authors' own files; many hold FPKM. For a human RNA-seq series GEO also offers raw counts it computed itself, under Download RNA-seq counts. Their genes are NCBI Gene IDs, which GENCODE's own table places; that download page names the annotation release, for the dataset file's `annotation` line."
 find = "On a laptop with pixi installed: the clone, then the files the series offers, NCBI's and the authors'"
-size = "The size of NCBI's raw counts, read before the download; for an authors' file set FILE to its name and URL to the suppl folder's address"
+size = "The size of NCBI's raw counts, read before the download; for an authors' file set FILE to its name and URL to the suppl folder's address with the name appended"
 download = "Once the size is read: the matrix and the series matrix, which lists every sample's title, source and characteristics"
 table_note = "The table is one row per sample, named as the matrix's columns, and each column's values are printed with their counts. Where the titles name the individual, as `LSCC_12` and `ANM_12` do, run it again with `--donor-pattern '_(\\d+)$'`: paired samples then share a donor."
+authors = "An authors' matrix names its columns in their own words, which the table lists from GEO's descriptions, often as `library_name`: then set `join = [\"library_name\", \"sample\"]` in `[sdrf]`. Where a column such as `subject_id` names the individual, make it the donor's `source`."
 table = "The sample table from the series matrix, and the dataset file to edit"
 edit = "Edit each line marked EDIT in the dataset file: its slug, the same as SLUG above, and the table's file name, `$SLUG.csv`. Then the source of the matrix, and which table columns hold the tissue and the condition, with `values` to name each level."
 run = "The annotation and gene sets, the check, then every module the dataset file declares"
 paired = "Paste each block the check prints. Where every donor has a sample at both levels, add `paired = true` and `design = \"~donor + group\"` to the contrast: the test then compares each patient with itself."
 other = "A matrix from ArrayExpress, recount3 or your own pipeline enters the same way: save it under the root's data/raw folder, write the table by hand, and run the last block."
+rsem = "RSEM's expected counts enter with `kind = \"rsem_expected\"` in `[counts]`, as a matrix or a folder of `.genes.results` files given to `--counts`. gather rounds each value to an integer and states how many changed; RSEM's TPM and FPKM columns are never read."
 
 [part2]
 group = "Part {n}: count with nf-core/rnaseq"

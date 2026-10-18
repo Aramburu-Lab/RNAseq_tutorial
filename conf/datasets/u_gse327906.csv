@@ -1,0 +1,26 @@
+sample,donor,title,source_name,tissue,tissue_type,genotype,library_name,column_name_in_hgsoc_all_samples_featurecounts_txt
+GSM9668291,GSM9668291,"high grade serous ovarian cancer, HR, Patient_15",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR1,HR1
+GSM9668292,GSM9668292,"high grade serous ovarian cancer, HR, Patient_16",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR2,HR2
+GSM9668293,GSM9668293,"high grade serous ovarian cancer, HR, Patient_9",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR3,HR3
+GSM9668294,GSM9668294,"high grade serous ovarian cancer, HR, Patient_10",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR5,HR5
+GSM9668295,GSM9668295,"high grade serous ovarian cancer, HR, Patient_11",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR7,HR7
+GSM9668296,GSM9668296,"high grade serous ovarian cancer, HR, Patient_12",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR8,HR8
+GSM9668297,GSM9668297,"high grade serous ovarian cancer, HR, Patient_13",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR9,HR9
+GSM9668298,GSM9668298,"high grade serous ovarian cancer, HR, Patient_14",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR10,HR10
+GSM9668299,GSM9668299,"high grade serous ovarian cancer, HR, Patient_1",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR11,HR11
+GSM9668300,GSM9668300,"high grade serous ovarian cancer, HR, Patient_2",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR12,HR12
+GSM9668301,GSM9668301,"high grade serous ovarian cancer, HR, Patient_8",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR18,HR18
+GSM9668302,GSM9668302,"high grade serous ovarian cancer, HR, Patient_3",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR23,HR23
+GSM9668303,GSM9668303,"high grade serous ovarian cancer, HR, Patient_4",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR25,HR25
+GSM9668304,GSM9668304,"high grade serous ovarian cancer, HR, Patient_6",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR27,HR27
+GSM9668305,GSM9668305,"high grade serous ovarian cancer, HR, Patient_5",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR28,HR28
+GSM9668306,GSM9668306,"high grade serous ovarian cancer, HR, Patient_23",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR29,HR29
+GSM9668307,GSM9668307,"high grade serous ovarian cancer, HR, Patient_18",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),BRCA-mutant (BRCA-MT),HR30,HR30
+GSM9668308,GSM9668308,"high grade serous ovarian cancer, NEG, Patient_22",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG1,NEG1
+GSM9668309,GSM9668309,"high grade serous ovarian cancer, NEG, Patient_24",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG4,NEG4
+GSM9668310,GSM9668310,"high grade serous ovarian cancer, NEG, Patient_17",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG5,NEG5
+GSM9668311,GSM9668311,"high grade serous ovarian cancer, NEG, Patient_19",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG8,NEG8
+GSM9668312,GSM9668312,"high grade serous ovarian cancer, NEG, Patient_20",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG10,NEG10
+GSM9668313,GSM9668313,"high grade serous ovarian cancer, NEG, Patient_7",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG11,NEG11
+GSM9668314,GSM9668314,"high grade serous ovarian cancer, NEG, Patient_21",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG12,NEG12
+GSM9668315,GSM9668315,"high grade serous ovarian cancer, NEG, Patient_25",ovarian tumor tissue,ovarian tumor tissue,High grade serous ovarian cancer (HGSOC),non-BRCA-mutated (BRCA-WT),NEG13,NEG13

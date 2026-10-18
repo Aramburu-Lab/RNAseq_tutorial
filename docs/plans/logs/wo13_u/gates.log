@@ -1,0 +1,22 @@
+== ruff check
+All checks passed!
+exit 0
+== ruff format
+507 files already formatted
+exit 0
+== mypy
+Success: no issues found in 168 source files
+exit 0
+== interrogate
+RESULT: PASSED (minimum: 100.0%, actual: 100.0%)
+exit 0
+== labdocs lint
+exit 0
+== labdocs render --check
+exit 0
+== prose
+prose lint: no violations
+exit 0
+== glossary
+glossary lint: no errors
+exit 0

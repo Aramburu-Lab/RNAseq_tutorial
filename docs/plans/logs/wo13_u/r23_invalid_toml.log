@@ -1,0 +1,46 @@
+== ctx run --dataset x --dataset-file SCRATCH/bad.toml --check: exit 1, traceback lines 0
+- SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+1 problems, 1 of them stopping the run; ctx run runs: nothing
+== ctx gather --dataset x --counts SCRATCH/bad.toml --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx qc --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx de --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx function --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx ncrna --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+  not valid TOML: Invalid value (at line 3, column 9)
+  no x samplesheet table in SCRATCH/root/outputs/01_gather; run the earlier module first
+  no x counts table in SCRATCH/root/outputs/01_gather; run the earlier module first
+== ctx clinical --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx proteo --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx genecard --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx process --dataset x --dataset-file SCRATCH/bad.toml --genome SCRATCH: exit 1, traceback lines 0
+2: No such file or directory
+
+Oct 18 23:43:43 ...... FATAL ERROR, exiting
+== ctx quant --dataset x --dataset-file SCRATCH/bad.toml --rnaseq-dir SCRATCH: exit 1, traceback lines 0
+  SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+  no x samplesheet table in SCRATCH/root/outputs/01_gather; run the earlier module first
+== ctx report --dataset x --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx setup --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)
+== ctx guide --dataset-file SCRATCH/bad.toml: exit 1, traceback lines 0
+SCRATCH/bad.toml:
+  not valid TOML: Invalid value (at line 3, column 9)

@@ -153,12 +153,16 @@ def test_counts_template_curates_a_geo_table(tmp_path):
     gtf.write_bytes(gzip.compress(gtf_text().encode()))
     entrez = root / spec.resource("gencode_entrez").dest
     entrez.write_bytes(gzip.compress(b"ENST00000000011.1\t101\n"))
+    hgnc = root / spec.resource("hgnc_complete").dest
+    hgnc.parent.mkdir(parents=True)
+    hgnc.write_text("hgnc_id\tentrez_id\tensembl_gene_id\nHGNC:1\t102\tENSG00000000002\n")
     path = matrix(
-        tmp_path / "m.tsv", ["101", "BETA"], whole(2), samples=["X01", "X02", "X03", "X04"]
+        tmp_path / "m.tsv", ["101", "102"], whole(2), samples=["X01", "X02", "X03", "X04"]
     )
     found = counts_run.check(root, spec, path)
     assert found.sheet["condition"].to_list() == ["tumour", "tumour", "normal", "normal"]
     assert found.mapped.genes["gene_name"].to_list() == ["ALPHA", "BETA"]
+    assert found.mapped.through_hgnc == 1
 
 
 def test_template_guide_keeps_the_slug_a_placeholder():
@@ -179,3 +183,40 @@ def test_part1c_notes_name_what_the_proof_lacked():
     assert "`$SLUG.csv`" in edit and "same as SLUG" in edit
     paired = text.word("guide", "part1c.paired")
     assert "`paired = true`" in paired and '`design = "~donor + group"`' in paired
+
+
+def test_geo_table_reads_descriptions(tmp_path):
+    """GEO's sample descriptions become columns as characteristics do, so an authors' matrix
+    can join on library_name; a description with no key goes to one description column.
+    Catches the descriptions skipped (R2.2's featureCounts proof could not join), and a
+    keyless line written as an empty column named after its text."""
+    lines = ('!Sample_description\t"Library name: T1"\t"Library name: T2"\t"Library name: N1"'
+             '\t"Library name: N2"\n!Sample_description\t"free text"\t""\t"x"\t"y"\n')  # fmt: skip
+    series = tmp_path / "s.txt"
+    series.write_text(SERIES.replace("!series_matrix_table_begin\n", lines))
+    assert geo_table.main([str(series), str(tmp_path / "t.csv")]) == 0
+    header, first, second = (tmp_path / "t.csv").read_text().splitlines()[:3]
+    assert header.split(",")[-2:] == ["library_name", "description"]
+    assert first.endswith(",T1,free text")
+    assert second.endswith(",T2,")
+
+
+def test_part1c_names_the_authors_join():
+    """The proof's gaps on an authors' matrix, now on the page and in the template: the join
+    on library_name and a donor from a subject column. Catches the note dropped."""
+    note = text.word("guide", "part1c.authors")
+    assert '`join = ["library_name", "sample"]`' in note and "`subject_id`" in note
+    groups = guide.blocks(load(FOUR), FOUR)
+    (part1c,) = [g for g in groups if g.title == text.fill("guide", "part1c.group", n=1)]
+    assert note in part1c.items
+    assert '["library_name", "sample"]' in TEMPLATE.read_text()
+
+
+def test_part1c_rsem_note():
+    """Part 1c says how RSEM's expected counts enter and that they are rounded. Catches the
+    note left off the page."""
+    note = text.word("guide", "part1c.rsem")
+    assert '`kind = "rsem_expected"`' in note and "rounds" in note
+    groups = guide.blocks(load(FOUR), FOUR)
+    (part1c,) = [g for g in groups if g.title == text.fill("guide", "part1c.group", n=1)]
+    assert note in part1c.items

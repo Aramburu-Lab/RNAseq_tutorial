@@ -364,9 +364,9 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
     matrix = Group(text.fill(PAGE, "part1c.group", n=1), (
         word("part1c.what"), word("part1c.where"), code("part1c.find", lines["find"]),
         code("part1c.size", lines["size"]), code("part1c.download", lines["download"]),
-        word("part1c.table_note"), code("part1c.table", lines["table"]),
+        word("part1c.table_note"), word("part1c.authors"), code("part1c.table", lines["table"]),
         word("part1c.edit"), code("part1c.run", lines["run"]), word("part1c.paired"),
-        word("part1c.other"),
+        word("part1c.other"), word("part1c.rsem"),
     ), lead=word("part1c.lead"))  # fmt: skip
     protein = mass_spec.part(spec, given, len(numbered) + 1)
     # The TCGA part follows the mass-spec part, so their numbers never meet.

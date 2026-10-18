@@ -1,0 +1,126 @@
+GSE327906	n=25	Transcriptomic profiling of high grade serous ovarian cancers
+    GSE327906_HGSOC_All_Samples_featureCounts.txt.gz	6.0M
+GSE329232	n=72	Biomarker driven and gene-enhanced virotherapy for malignant peripheral nerve sheath tumor
+    GSE329232_featureCounts.xlsx	27M
+GSE348945	n=20	Bulk RNA-seq profiling of paired colorectal cancer and adjacent tissues
+GSE349035	n=6	RNA-seq of NB4 cells treated with the PKM2 inhibitor PKM2-IN-1
+GSE348126	n=6	Bulk RNA sequencing of THP-1-derived macrophage-like cells with stable PGK1 overexpression
+    GSE348126_Gene_COUNT.txt.gz	555K
+GSE316125	n=4	RNA-seq profiling of TGF-beta induction and TXNRD1 loss in A549 lung cancer cells.
+    GSE316125_RAW.tar	4.1M
+    GSE316125_raw_counts.txt.gz	383K
+GSE327275	n=24	Immune activation and biomarkers of response to EGFR-targeted antibody-toxin therapy in a 
+    GSE327275_D2C7_monotherapy_counts_matrix_s0.txt.gz	3.5M
+GSE337019	n=9	Pseudopodia couple microenvironmental sensing to adaptive transcriptional reprogramming
+    GSE337019_RAW.tar	4.7M
+    GSE337019_all_samples_featureCounts.txt.gz	672K
+GSE337675	n=28	Truncating ASXL1 variants rewire cellular metabolism via mitochondrial pyruvate carrier re
+    GSE337675_CACO2_star_featureCounts_GeneTable_final.csv.gz	967K
+    GSE337675_HEK293T_star_featureCounts_GeneTable_final.csv.gz	935K
+GSE289055	n=18	P2RY2 fuelled by eATP drives cancer immune evasion and therapy resistance
+    GSE289055_RAW.tar	91M
+    GSE289055_all_cnt_FeatureCounts.tsv.gz	1.0M
+GSE324929	n=12	RNA-seq analysis of FDX2-inducible knockout (FDX2-iKO) ES2 ovarian carcinoma cells under n
+    GSE324929_gene_counts.tsv.gz	595K
+GSE282870	n=24	microRNA-497-5p-based Screening Identifies a Novel Synthetic Lethal-type Interaction via P
+    GSE282870_RAW.tar	104M
+GSE336019	n=8	Gene expression profiling of NAT10 knockdown in HepG2 hepatocellular carcinoma cells by Qu
+    GSE336019_Count_matrix_fc.tsv.gz	618K
+GSE336266	n=6	RNA-seq of THP1 cells with SRSF10 knockdown
+GSE334973	n=6	Genome-wide characterization of extrachromosomal circular DNA and its functional role in c
+GSE311189	n=24	Integrated Transcriptomic and Functional Analysis Reveals Selective Cytotoxicity and Oncog
+    GSE311189_RAW.tar	7.3M
+GSE301056	n=8	Chromatin Isolation by RNA purification (ChIRP)-followed RNA sequencing of human leukemia 
+    GSE301056_chirpRNAseq_featureCounts_all.txt.gz	5.4M
+GSE301055	n=12	Transcriptomic profiling of human CD34⁺/CD45RA-/CD90+ HSCs folowing lncRNA CRISPR/Cas9 edi
+    GSE301055_featurecounts_output.txt.gz	556K
+GSE305655	n=18	RNA-seq data of MV4-11, Kasumi-1, and KG-1 cells treated with HDAC8 inhibitor 22d 10 μM an
+    GSE305655_read_counts.txt.gz	1.1M
+GSE298810	n=12	Transcriptomic profiles of Huh7 and HLF hepatocellular carcinoma cells under 2D and 3D cul
+    GSE298810_gene_count_Huh7_HLF_2D_Inject_Embed.csv.gz	2.5M
+GSE322773	n=12	SGI-7079 as a novel type I FLT3 inhibitor overcomes resistance to gilteritinib and quizart
+GSE295999	n=8	A549 cells with glucocorticoid treatment
+    GSE295999_RAW.tar	5.6M
+GSE317136	n=66	EWSR1::FLI1 Suppresses Ribosome Biogenesis and Creates a Targetable Vulnerability in Ewing
+    GSE317136_featureCounts_CellLines.tsv.gz	6.1M
+    GSE317136_featureCounts_NTDOX.tsv.gz	4.1M
+GSE312881	n=71	Time‑resolved multi-omic analysis of paclitaxel exposure in human iPSC‑derived sensory neu
+    GSE312881_export_raw_counts.00_202501_All_lines_contrasts_full.PTX_vs_DMSO_ID0.all.csv.gz	1.4M
+    GSE312881_export_raw_counts.all_Timecourse.csv.gz	1.7M
+GSE317098	n=30	Comparative analysis of the transcriptomic response to cisplatin in drug-sensitive and dru
+GSE300385	n=12	Discovery and Evaluation of Biomarkers for Triple-Negative Breast Cancer Subtypes Uncovers
+    GSE300385_raw_counts.txt.gz	835K
+GSE293106	n=12	Selective inhibition of ALDH1A3 impedes breast cancer growth and metastasis by blocking AL
+    GSE293106_RAW.tar	4.4M
+    GSE293106_featurecounts.csv.gz	1.0M
+GSE295408	n=47	Targeting serotonin-driven histone serotonylation suppresses lineage plasticity and progre
+    GSE295408_FeatureCounts.H3Q5region.txt.gz	1.1M
+    GSE295408_RAW.tar	6.6G
+GSE280899	n=112	PUF60-Mediated Splicing Is a Key Driver of Triple Negative Breast Cancer
+GSE280897	n=40	PUF60-Mediated Splicing Is a Key Driver of Triple Negative Breast Cancer [RNA-seq]
+    GSE280897_L140P_featurecounts_unfiltered.csv.gz	576K
+    GSE280897_PUF60_KD_featurecounts_unfiltered.csv.gz	1.8M
+GSE307942	n=9	Somatic deficiency of human CBL in leukocytes impairs B cell but not T cell development an
+    GSE307942_featureCounts_CBL.csv.gz	3.8M
+GSE286298	n=48	Heterochromatin fidelity is a therapeutic vulnerability in lymphoma and other human cancer
+    GSE286298_RAW.tar	4.5G
+GSE270116	n=60	Lymphotoxin alpha eradicates acute myeloid leukemia and simultaneously promotes healthy he
+    GSE270116_RAW.tar	16M
+GSE310789	n=4	Splicing factor CWC22 prevents tetraploidy formation and mitotic slippage through maintena
+    GSE310789_FeatureCounts.txt.gz	312K
+GSE309935	n=8	Multi-omic integration identifies mechanisms of Broad Drug Resistance and opportunities fo
+    GSE309935_DESeq2_normalized_counts_all.txt.gz	875K
+GSE248519	n=6	ZKSCAN3 promotes ovarian cancer cell proliferation through upregulating HSPB1
+    GSE248519_RAW.tar	454M
+    GSE248519_ZKSCAN3-KD_featureCounts_raw_reads.txt.gz	447K
+GSE304666	n=14	Transcriptomic profiling of meningiomas reveals SMARCB1 mutation-driven immunosuppression 
+GSE303862	n=12	A Microcavity-Based Sarcoma Spheroid Model for Drug Efficacy and Mechanism Analysis Using 
+    GSE303862_RAW.tar	46M
+GSE221019	n=6	mRNA-seq study performed on MCF-7 breast cancer cells treated with a combination of vitami
+    GSE221019_rna_counts.txt.gz	418K
+GSE302922	n=12	Phase I/II trial of encorafenib, cetuximab, and nivolumab in microsatellite stable, BRAFV6
+    GSE302922_Tissue_count_coding.csv.gz	602K
+GSE276660	n=8	Clinical Data Investigation Identifies MARK3 as an Oncogenic Driver in Castration-Resistan
+    GSE276660_RAW.tar	1.9M
+GSE275019	n=6	An endothelial SOX18-mevalonate pathway axis enables repurposing of statins for infantile 
+    GSE275019_counts_p112_6samples_1_.csv.gz	541K
+GSE274946	n=12	An endothelial SOX18-mevalonate pathway axis enables repurposing of statins for infantile 
+    GSE274946_counts_p89_12_samples.csv.gz	866K
+GSE289452	n=6	ABL Kinase Inactivation Promotes Transcription-Replication Conflicts and Compromises Repli
+    GSE289452_RAW.tar	29M
+GSE255649	n=73	Humanized mouse tumor models for evaluation of ILT2 and ILT4 antagonist antibodies
+    GSE255649_AllSamples_Genes_ReadCounts.txt.gz	2.3M
+GSE160109	n=12	Transcriptomic and miRNA analysis of control versus treated HCT-116 cells with vitamins A 
+    GSE160109_mature_counts.txt.gz	20K
+    GSE160109_rna_counts.txt.gz	427K
+GSE277516	n=8	Extracellular vesicles from lung adenocarcinoma cells induce activation of fibroblasts int
+    GSE277516_Finalcounts.240312.txt.gz	735K
+GSE186732	n=6	Next Generation Sequencing Facilitates Quantitative Analysis of shControl and shLINC00205 
+    GSE186732_FPKM_Matrix.txt.gz	865K
+    GSE186732_Raw_Gene_Counts_Matrix.txt.gz	421K
+GSE268607	n=8	Insights into Molecular Mechanisms and Therapeutic Potential of Arborvitae Essential Oil (
+    GSE268607_RAW.tar	2.4M
+GSE248441	n=3	MCF7 wild-type RNA profiling for i-motif DNA studies
+    GSE248441_MCF7_WT_counts.txt.gz	3.3M
+GSE275048	n=16	The CoREST complex is a therapeutic vulnerability in malignant peripheral nerve sheath tum
+    GSE275048_RAW.tar	70M
+GSE271368	n=18	RNA-seq of live cell 3-D models with engineered genetic sub-types of lung cancer
+    GSE271368_RGI11718_CountMerged.txt.gz	702K
+GSE272410	n=73	Molecular and spatial analysis unveils the functional basis of tertiary lymphoid structure
+    GSE272410_counts.txt.gz	7.2M
+GSE261277	n=115	Inflammation of the Nasal Mucosa is Associated with Susceptibility to Experimental Pneumoc
+    GSE261277_raw_expression_elderly.tsv.gz	3.0M
+GSE198157	n=31	Direct Inhibition of Tumor Hypoxia Response with Synthetic Transcriptional Repressors
+    GSE198157_4T1_raw_counts.csv.gz	658K
+    GSE198157_RNA_seq_raw_counts_matrix.txt.gz	561K
+GSE267754	n=8	Transcriptome profiling of ANXA4 KO in A498 cells
+    GSE267754_Normalized_counts_file.tabular.txt.gz	739K
+GSE243795	n=21	Multiomic profiling of medulloblastoma reveals subtype-specific targetable alterations at 
+GSE243796	n=90	Multiomic profiling of medulloblastoma reveals subtype-specific targetable alterations at 
+    GSE243796_RAW.tar	1.1G
+GSE248167	n=51	Tumor immune dysfunction and exclusion subtypes in bladder cancer and pan-cancer: a novel 
+    GSE248167_gene_count1.txt.gz	3.8M
+    GSE248167_gene_count2.txt.gz	4.4M
+    GSE248167_gene_count3.txt.gz	4.3M
+GSE230602	n=51	ZNF397 Deficiency Triggers TET2-Driven Lineage Plasticity and AR-Targeted Therapy Resistan
+    GSE230602_RAW.tar	1.2G

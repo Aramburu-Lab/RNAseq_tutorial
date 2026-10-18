@@ -1,0 +1,12 @@
+[
+  ["slug = \"mine\"", "slug = \"u_gse327906\""],
+  ["label = \"My study\"", "label = \"High-grade serous ovarian cancer, BRCA-mutant against BRCA-wild-type (GEO)\""],
+  ["accessions = []", "accessions = [\"GSE327906\"]"],
+  ["ids = []", "ids = [\"GSE327906\", \"PRJNA1452974\"]"],
+  ["patterns = []", "patterns = ['\\bGSM96682(9[1-9])\\b', '\\bGSM96683(0\\d|1[0-5])\\b']"],
+  ["source = \"EDIT: e.g. GEO <series>, NCBI-generated raw counts, <file name>\"", "source = \"GEO GSE327906, the authors' featureCounts file, GSE327906_HGSOC_All_Samples_featureCounts.txt.gz\""],
+  ["url = \"\"", "url = \"https://ftp.ncbi.nlm.nih.gov/geo/series/GSE327nnn/GSE327906/suppl/GSE327906_HGSOC_All_Samples_featureCounts.txt.gz\""],
+  ["annotation = \"\"", "annotation = \"GRCh38 (Ensembl), STAR v2.6.1d; no annotation release named (series matrix, data processing)\""],
+  ["file = \"mine.csv\"\njoin = [\"sample\", \"sample\"]", "file = \"u_gse327906.csv\"\njoin = [\"library_name\", \"sample\"]"],
+  ["[columns.condition]\nsource = \"source_name\"\nmeaning = \"Donor state, treatment or disease.\"", "[columns.condition]\nsource = \"genotype\"\nmeaning = \"BRCA status of the tumour.\"\nvalues = { \"BRCA-mutant (BRCA-MT)\" = \"brca_mt\", \"non-BRCA-mutated (BRCA-WT)\" = \"brca_wt\" }"]
+]

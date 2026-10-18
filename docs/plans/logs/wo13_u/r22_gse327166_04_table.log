@@ -1,0 +1,15 @@
+## table GSE327166 u_gse327166 2026-10-19 00:15:17
+/Users/rytis/ctx_u_gse327166/u_gse327166.csv: 89 samples
+sample: 89 distinct values
+donor: 89 distinct values
+title: 89 distinct values
+source_name: 'Pleura' 2; 'Tumor' 87
+tissue: 'Pleura' 2; 'Tumor' 87
+diagnosis: 'Atypical Carcinoid' 1; 'NSCLC-Adenocarcinoma' 1; 'Pleural Mesothelioma' 87
+histology: 'B' 39; 'E' 39; 'NM' 1; 'NP' 2; 'S' 8
+age_at_surgery: 24 distinct values
+tumor_status: 'No' 2; 'Yes' 87
+subject_id: 38 distinct values
+library_name: 89 distinct values
+column_name_in_bulkrna_tpm_matrix_tsv_gz: 89 distinct values
+## exit 0

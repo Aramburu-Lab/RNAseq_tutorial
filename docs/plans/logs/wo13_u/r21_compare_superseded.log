@@ -1,0 +1,101 @@
+{
+ "before": {
+  "rows placed": 26196,
+  "rows left out": 13180,
+  "left-out share %": 10.5228,
+  "left out by reason": {
+   "ambiguous": 83,
+   "not_in_annotation": 13079,
+   "shared_gene": 18
+  },
+  "genes tested": 18491,
+  "genes called": 3751,
+  "called up": 1272,
+  "sanity verdicts": {
+   "LSCC.barx1_dt": "NOT MEASURED",
+   "LSCC.ensg00000233397": "NOT MEASURED",
+   "LSCC.hoxb_as4": "NOT MEASURED",
+   "LSCC.linc01385": "NOT MEASURED",
+   "LSCC.linc02893": "PASS",
+   "LSCC.lsamp_as1": "FAIL",
+   "LSCC.mnx1_as1": "NOT MEASURED"
+  },
+  "named genes": [
+   [
+    "MT-CO1",
+    -0.3016846555128995,
+    0.00025344561021166704,
+    "ns"
+   ]
+  ]
+ },
+ "after": {
+  "rows placed": 29645,
+  "rows left out": 9731,
+  "left-out share %": 6.8952,
+  "left out by reason": {
+   "ambiguous": 83,
+   "not_in_annotation": 9520,
+   "shared_gene": 128
+  },
+  "genes tested": 20037,
+  "genes called": 4104,
+  "called up": 1392,
+  "sanity verdicts": {
+   "LSCC.barx1_dt": "NOT MEASURED",
+   "LSCC.ensg00000233397": "NOT MEASURED",
+   "LSCC.hoxb_as4": "NOT MEASURED",
+   "LSCC.linc01385": "NOT MEASURED",
+   "LSCC.linc02893": "PASS",
+   "LSCC.lsamp_as1": "FAIL",
+   "LSCC.mnx1_as1": "NOT MEASURED"
+  },
+  "named genes": [
+   [
+    "IGHA1",
+    -1.8451173619194738,
+    3.6258098313500462e-09,
+    "down"
+   ],
+   [
+    "IGHG1",
+    0.1689438596398515,
+    0.6712180177462217,
+    "ns"
+   ],
+   [
+    "IGKC",
+    -0.5433790816486807,
+    0.12592375565524766,
+    "ns"
+   ],
+   [
+    "MT-CO1",
+    -0.2901782108928669,
+    0.00044338945000358483,
+    "ns"
+   ],
+   [
+    "MT-RNR2",
+    -0.4550096700575985,
+    0.01157363422785963,
+    "ns"
+   ],
+   [
+    "RPPH1",
+    0.19052245680975777,
+    0.09023819344463847,
+    "ns"
+   ],
+   [
+    "SNORD3A",
+    0.6300849216389066,
+    0.0014860951801729156,
+    "ns"
+   ]
+  ]
+ }
+}
+placed before and not after: 54 [('ENSG00000210151.2', 'MT-TS1', '113219467'), ('ENSG00000237950.4', 'LINC02918', '101929609'), ('ENSG00000285462.2', 'LINC02792', '105378810'), ('ENSG00000225342.3', 'LRRK2-DT', '107985190'), ('ENSG00000232679.4', 'LINC01705', '105372950'), ('ENSG00000236975.3', 'LINC02814', '105373158'), ('ENSG00000236172.8', 'LINC03156', '102800315'), ('ENSG00000228262.12', 'LINC01320', '104355287'), ('ENSG00000235009.2', 'LINC01883', '105374468'), ('ENSG00000230587.6', 'LINC02580', '107985876')]
+placed after and not before: 3503
+largest left out after: [('107987206', 'entrez', 'not_in_annotation', '', 53108105.0), ('105378179', 'entrez', 'not_in_annotation', '', 51526391.0), ('109864271', 'entrez', 'not_in_annotation', '', 3996536.0), ('109910379', 'entrez', 'not_in_annotation', '', 3841750.0), ('106631777', 'entrez', 'not_in_annotation', '', 3832993.0), ('109864279', 'entrez', 'not_in_annotation', '', 3674474.0), ('100533464', 'entrez', 'not_in_annotation', '', 3311246.0), ('100861532', 'entrez', 'not_in_annotation', '', 2089488.0), ('112268313', 'entrez', 'not_in_annotation', '', 1291215.0), ('100528016', 'entrez', 'not_in_annotation', '', 584855.0)]

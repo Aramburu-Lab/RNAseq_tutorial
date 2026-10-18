@@ -17,7 +17,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
-from ctx.gather import counts
+from ctx.gather import counts, counts_rsem
 from ctx.gather.curation import PROBLEM_COLUMNS, CurationError, Problem, curate, read_table
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
@@ -31,6 +31,8 @@ PAGE = "gather_counts"
 GTF_RESOURCE = "annotation_gtf"
 # The sheet columns this route writes before the curated ones, in order.
 FIXED = ("sample", "run_accession", counts.SOURCE_COLUMN)
+# Rows left out shown by name on the page, the most counts first; the table lists them all.
+LARGEST = 10
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,7 @@ class Checked:
     mapped: counts.Mapped
     sheet: pl.DataFrame
     releases: dict[str, str]
+    rounding: counts_rsem.Rounding | None = None
 
 
 def _resource_path(root: Path, spec: Dataset, name: str) -> Path | None:
@@ -125,6 +128,24 @@ def _entrez(raw: counts.Raw, root: Path, spec: Dataset, gtf: Path
     return (counts.entrez_genes(path, gtf) if n and path else None), []
 
 
+def _hgnc(raw: counts.Raw, root: Path, spec: Dataset, releases: dict[str, str]
+          ) -> dict[str, set[str]] | None:  # fmt: skip
+    """HGNC's Ensembl IDs per NCBI Gene ID, where the matrix holds them and the file is declared."""
+    path = _resource_path(root, spec, counts.HGNC_RESOURCE)
+    if path is None or not any(counts.kind_of(i) == "entrez" for i in raw.ids):
+        return None
+    releases["NCBI Gene IDs GENCODE does not link"] = f"HGNC, {path.name}"
+    return counts.hgnc_ensembl(path)
+
+
+def _digest(path: Path) -> str:
+    """SHA-256 of a file, or of a folder's ``sha256sum`` lines for its files, sorted by name."""
+    if not path.is_dir():
+        return _sha256(path)
+    lines = "".join(f"{_sha256(f)}  {f.name}\n" for f in sorted(path.iterdir()) if f.is_file())
+    return hashlib.sha256(lines.encode()).hexdigest()
+
+
 def check(root: Path, spec: Dataset, matrix: Path) -> Checked:
     """Read and check the matrix, map its genes and curate its samples; nothing is written.
 
@@ -140,16 +161,23 @@ def check(root: Path, spec: Dataset, matrix: Path) -> Checked:
     if gtf is None:
         raise DatasetError(f"{spec.path}: no {GTF_RESOURCE} resource; gene IDs map through it")
     releases = {
-        "count matrix": matrix.name, f"sha256:{matrix.name}": _sha256(matrix),
+        "count matrix": matrix.name, f"sha256:{matrix.name}": _digest(matrix),
         "counts source": spec.counts.source, "counts url": spec.counts.url or "not given",
         "annotation the source names": spec.counts.annotation or "not given",
         "annotation": gtf_release(gtf),
         "dataset file": str(spec.path), f"sha256:{spec.path.name}": _sha256(spec.path),
     }  # fmt: skip
-    raw = counts.read(matrix)
-    problems = [*raw.problems, *counts.value_problems(raw), *counts.duplicate_problems(raw)]
+    kind = spec.counts.kind
+    raw = counts_rsem.read(matrix, spec.counts)
+    problems = [*raw.problems, *counts_rsem.kind_problems(raw, kind),
+                *counts.value_problems(raw, kind), *counts.duplicate_problems(raw)]  # fmt: skip
+    # Rounded only after the values passed as read: rounded log2 values would look whole.
+    rounding = None
+    if kind == counts.RSEM_EXPECTED:
+        raw, rounding = counts_rsem.rounded(raw)
+        releases["values"] = text.fill(PAGE, "rounding.readme", **vars(rounding))
     entrez, missing = _entrez(raw, root, spec, gtf)
-    mapped = counts.place(raw, gene_types(gtf), entrez)
+    mapped = counts.place(raw, gene_types(gtf), entrez, _hgnc(raw, root, spec, releases))
     if mapped.counts.height == 0:
         missing.append(("gene ids", "all", "no row maps to one gene of the annotation"))
     curated, curation = _curated(raw, _table_text(root, spec, releases), spec)
@@ -159,7 +187,7 @@ def check(root: Path, spec: Dataset, matrix: Path) -> Checked:
     sheet = curated.with_columns(sample=pl.col("run_accession"),
                                  **{counts.SOURCE_COLUMN: pl.lit(matrix.name)})  # fmt: skip
     rest = [c for c in sheet.columns if c not in FIXED]
-    return Checked(raw, mapped, sheet.select(*FIXED, *rest), releases)
+    return Checked(raw, mapped, sheet.select(*FIXED, *rest), releases, rounding)
 
 
 def _sha256(path: Path) -> str:
@@ -176,7 +204,8 @@ def _tables(
     found: Checked, spec: Dataset
 ) -> list[tuple[str, pl.DataFrame, dict[str, tuple[str, str]]]]:
     """(description, frame, column dictionary) of every table this route writes."""
-    per_sample = {s: ("reads", text.fill(PAGE, "count.meaning", sample=s))
+    meaning = "count.meaning" if found.rounding is None else "count.meaning_rsem"
+    per_sample = {s: ("reads", text.fill(PAGE, meaning, sample=s))
                   for s in found.mapped.counts.columns[1:]}  # fmt: skip
     genes = columns("columns.genes")
     sheet = columns("columns.samplesheet") | {c.name: (c.unit, c.meaning) for c in spec.columns}
@@ -201,11 +230,15 @@ def _checks(found: Checked) -> ResultTable:
     rows = (
         (word("checks.matrix"), fill("checks.matrix_value", rows=len(raw.ids),
                                      samples=len(raw.samples), format=raw.format)),
-        (word("checks.values"), fill("checks.values_value", values=raw.values.size)),
+        (word("checks.values"), fill("checks.values_value", values=raw.values.size)
+         if found.rounding is None else fill("checks.values_rsem", values=raw.values.size)),
+        (word("checks.rounding"), word("checks.rounding_none") if found.rounding is None
+         else fill("checks.rounding_value", **vars(found.rounding))),
         (word("checks.summary"), summary),
         (word("checks.kinds"), kinds),
         (word("checks.mapped"), fill("checks.mapped_value", genes=mapped.counts.height,
                                      left=left.height, share=share)),
+        (word("checks.hgnc"), fill("checks.hgnc_value", rows=mapped.through_hgnc)),
         (word("checks.versions"), fill("checks.versions_value", **v)),
         (word("checks.annotation"), fill("checks.annotation_value",
                                          gtf=found.releases["annotation"],
@@ -225,6 +258,17 @@ def _reasons(left: pl.DataFrame) -> ResultTable:
     empty = ((word("left.none"), "", "", ""),)
     return ResultTable(word("left.title"), text.words(PAGE, "left.columns"), rows or empty,
                        numeric=(2, 3))  # fmt: skip
+
+
+def _largest(left: pl.DataFrame) -> ResultTable:
+    """The rows left out that held the most counts, so a reader sees which genes are lost."""
+    word = functools.partial(text.word, PAGE)
+    top = left.sort("total", "source_id", descending=[True, False]).head(LARGEST)
+    rows = tuple((i, k, w, f"{t:,.0f}") for i, k, w, t in
+                 top.select("source_id", "kind", "reason", "total").rows())  # fmt: skip
+    empty = ((word("left.none"), "", "", ""),)
+    title = text.fill(PAGE, "largest.title", n=LARGEST)
+    return ResultTable(title, text.words(PAGE, "largest.columns"), rows or empty, numeric=(3,))
 
 
 def _write_problems(error: counts.CountsError, out: Path, dataset: str) -> None:
@@ -268,8 +312,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     if spec.counts is None:
         raise DatasetError(f"{dataset_file}: no [counts] table naming the matrix's source")
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
-    if not matrix.is_file():
-        raise DatasetError(f"--counts {matrix} is not a file")
+    if not matrix.is_file() and not matrix.is_dir():
+        raise DatasetError(f"--counts {matrix} is not a file or a folder of RSEM files")
     try:
         found = check(settings.root, spec, matrix.absolute())
     except counts.CountsError as error:
@@ -283,7 +327,8 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     word = functools.partial(text.word, PAGE)
     page = ModulePage(
         title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE),
-        parameters=cards, results=(_checks(found), _reasons(found.mapped.left_out)),
+        parameters=cards, results=(_checks(found), _reasons(found.mapped.left_out),
+                 _largest(found.mapped.left_out)),
         key_numbers=(
             KeyNumber(word("keys.samples"), f"{len(found.raw.samples):,}"),
             KeyNumber(word("keys.genes"), f"{found.mapped.counts.height:,}"),

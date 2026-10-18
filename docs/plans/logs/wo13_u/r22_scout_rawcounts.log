@@ -1,0 +1,188 @@
+GSE334028	n=6	B7-H3 mediates immune escape and metastasis in SCLC through CXCL11/CXCR7/NFIB axis
+    GSE334028_counts_H82_KO_samples_raw.csv.gz	569K
+GSE328985	n=30	CASP10-mediated suppression of GSDME-dependent pyroptosis shapes the tumor immune microenv
+    GSE328985_raw_counts_matrix.txt.gz	1.6M
+GSE327275	n=24	Immune activation and biomarkers of response to EGFR-targeted antibody-toxin therapy in a 
+    GSE327275_D2C7_monotherapy_counts_matrix_s0.txt.gz	3.5M
+GSE319793	n=1	Drug-seq analysis of adult T-cell leukemia cells treated with fluorouracil and bleomycin
+    GSE319793_RAW.tar	1.6M
+GSE344104	n=12	Epithelial Tissue Architecture Acts as a Barrier to Carcinoma Initiation
+    GSE344104_raw_counts_All_Samples.txt.gz	900K
+GSE324721	n=24	Neoadjuvant Palbociclib Treatment Impacts Cell Cycle Progression of DCIS
+GSE337215	n=18	Gene expression profiling study by RNA-sequencing in lung cancer
+    GSE337215_gene_count_matrix.csv.gz	2.1M
+    GSE337215_gene_tpm_matrix.csv.gz	8.2M
+GSE274468	n=13	ZMYM3 mutations modulate histone acetylation and cooperate with NOTCH1 mutations in chroni
+    GSE274468_a_Raw_Counts_RNAseq_ZMYM_project.txt.gz	660K
+    GSE274468_b_NormCounts_DESeq2_RNAseq_ZMYM_project.txt.gz	1.4M
+GSE343732	n=345	Native American ancestry-enriched eQTLs regulate HER2 amplicon genes and are associated wi
+    GSE343732_RAW.tar	63M
+GSE315177	n=9	M2 type tumor associated macrophage-derived CCL-18 promotes glioma cell proliferation but 
+    GSE315177_RAW.tar	29M
+    GSE315177_raw_counts.txt.gz	3.4M
+GSE342462	n=12	Integrated transcriptomic and bioelectrical profiling of stem-like cellular states in a co
+    GSE342462_Raw_Counts_All_Samples.txt.gz	390K
+GSE329207	n=12	Targeting phosphatidylserine for tumor cell suppression [RNA-seq]
+    GSE329207_raw_counts_KYSE30.txt.gz	467K
+    GSE329207_raw_counts_U138MG.txt.gz	1.0M
+GSE305720	n=20	Multi-omics unveils GTSE1 promotes esophageal squamous cell carcinoma stemness via Hippo s
+    GSE305720_raw_counts_All_Samples.txt.gz	2.9M
+GSE294135	n=18	RAD21 reshapes H3K4me3 modification to drive lung adenocarcinoma progression by activating
+    GSE294135_raw_counts_RAD21OE_EV_samples.txt.gz	2.2M
+    GSE294135_raw_counts_shRAD21_shNC_samples.txt.gz	2.5M
+GSE312474	n=14	MODULATION OF VIRUS–TUMOR-STROMAL INTERACTIONS BY MINNELIDE ENHANCES SYSTEMIC DUAL TARGETE
+    GSE312474_HT29_xenograft_gene_counts_matrix.txt.gz	873K
+GSE312205	n=12	Splicing inhibition hampers pancreatic cancer cell viability by disrupting DNA repair prof
+    GSE312205_raw_counts.txt.gz	838K
+GSE302052	n=257	IRF2 is an Essential Transcription Factor with Pathogenic and Prognostic Impact in Multipl
+    GSE302052_Counts_IRF.csv.gz	2.0M
+    GSE302052_Counts_RINEY.csv.gz	7.6M
+    GSE302052_raw_counts_all_samples.txt.gz	4.3M
+GSE337619	n=8	Differential Transcriptomic Responses to MRQ 74 and MRQ 76 Rice Extracts in HT-29 Cells; I
+    GSE337619_raw_counts_all.xlsx	10K
+GSE273400	n=4	G9a/DNMT1 co-targeting inhibits non-small cell lung cancer growth and reprograms tumor cel
+    GSE273400_Raw_counts.txt.gz	1.6M
+GSE337536	n=8	Decitabine induces innate immune gene expression in rare melanoma models
+    GSE337536_RAW.tar	4.3M
+    GSE337536_Raw_Counts_All_Samples.csv.gz	802K
+GSE336901	n=10	RNA-seq profiling of FFPE samples from treatment-sensitive and treatment-resistant breast 
+    GSE336901_Fig3_FFPE_raw_counts_matrix_GEO.csv.gz	709K
+GSE338238	n=48	Menin inhibition impairs metastatic colonization of Ewing sarcoma
+    GSE338238_Raw_counts_batch1_2_4.tsv.gz	1.5M
+    GSE338238_Raw_counts_batch3.tsv.gz	1.0M
+GSE330047	n=13	CRISPR/Cas9-MEDIATED PHOX2B FUNCTIONAL KNOCK-OUT IN IMR32 NEUROBLASTOMA CELLS IMPAIRS NEUR
+    GSE330047_raw_counts_All_Samples.txt.gz	441K
+GSE313660	n=16	Single-cell analysis of follicular fluid reveals dysregulation of ovulatory immune functio
+    GSE313660_raw_adt_matrix.tsv.gz	2.9M
+    GSE313660_raw_counts_matrix.tsv.gz	188M
+GSE336733	n=16	Human tubuloids from cryopreserved adult tissue: building a biobank for 3D modeling and pr
+    GSE336733_TPMs_matrix.txt.gz	1.3M
+    GSE336733_raw_counts.txt.gz	1.2M
+GSE336720	n=68	DNMT3B plays antagonistic roles with SMARCB1 and is a targetable vulnerability in rhabdoid
+    GSE336720_raw_counts_G401i_RNAseq.txt.gz	546K
+    GSE336720_raw_counts_I2A_RNAseq.txt.gz	964K
+    GSE336720_raw_counts_I2A_kinetic_RNAseq.txt.gz	447K
+    GSE336720_raw_counts_RT_MAM_RNAseq.txt.gz	3.5M
+GSE313917	n=6	Complement Protease C1s Drives Immunosuppression in Mesenchymal Glioblastoma by Rewiring M
+    GSE313917_raw_counts_all_samples_and_degs.csv.gz	172K
+GSE334033	n=105	A Patient-Derived Xenograft Model Identifies AK1 as a Key Regulator of Metastatic Potentia
+    GSE334033_RAW.tar	241M
+GSE311121	n=14	Cytokine-induced Expandable Memory NK Cells with Significant Metabolic, Epigenetic Remodel
+    GSE311121_raw_counts.csv.gz	1.1M
+GSE303170	n=12	Rewiring of the transcriptome of breast cancer cells in 3D organotypic cultures promotes c
+    GSE303170_miRNA_Readcount_TPM.csv.gz	36K
+    GSE303170_transcripts.readcount.annot.csv.gz	6.7M
+GSE292601	n=62	Epithelial interferon-stimulated gene programs modulate chemotherapy sensitivity in colore
+    GSE292601_raw_counts_pdtos.txt.gz	5.5M
+GSE308536	n=6	Identification of highly potent inhibitors capable of blocking VprBP kinase activity and s
+    GSE308536_raw_counts_all_samples.txt.gz	726K
+GSE326132	n=51	USP18 impacts on platinum-resistance in ovarian cancer cells by modulating DNA repair
+    GSE326132_raw_counts.txt.gz	2.6M
+GSE308563	n=18	Covalent inhibitors of human papillomavirus type 16 E6 protein restore p53 function and su
+    GSE308563_Raw_counts_all_samples.xlsx	6.9M
+GSE304335	n=4	Mitochondrial targeted metformin stimulates ER stress-mediated apoptosis in human and mous
+    GSE304335_rawcounts.csv.gz	117K
+GSE301181	n=43	Identification of IPF Specific Genes Expressed by Lung Tissue - Derived Fibroblasts Using 
+    GSE301181_raw_counts_All_Samples.txt.gz	3.8M
+GSE326004	n=6	Angiotensin II Type 1 Receptor Blockade Inhibits Gastric Cancer Metastasis Through Tight J
+    GSE326004_gene_count.txt.gz	2.3M
+GSE298146	n=34	SOX4 Mediated Differentiation of Specific T Lymphocyte Subsets at the Maternal-Fetal Inter
+    GSE298146_raw_counts_ALL_WISH+CD3-T.csv.gz	592K
+    GSE298146_raw_counts_ALL_hUSMCs.csv.gz	575K
+    GSE298146_raw_counts_ALL_samples.csv.gz	844K
+GSE317808	n=6	Effect of grape pomace skin colonic ferments on  differentiated monolayers of Caco-2 cells
+    GSE317808_raw_counts_All_samples.txt.gz	520K
+GSE299125	n=35	Paracrine Signals from HIV-1 Infected Immune Cells Reprogram Cervical Cancer Pathways
+    GSE299125_raw_counts.txt.gz	10M
+GSE294071	n=12	PCSK9 promotes prostate cancer via facilitating intratumoral cholesterol accumulation and 
+    GSE294071_raw_counts_All_samples.txt.gz	1.2M
+GSE327188	n=18	Dynamic acetylation/deacetylation dictates TRIM27 nuclear-cytoplasmic localization for can
+GSE316442	n=8	Novel driver gene MDC1 confers homologous recombination repair deficiency and genomic inst
+GSE305549	n=17	Deciphering hypoxia related glioblastoma-associated macrophages and predicting prognostic 
+    GSE305549_RAW.tar	222M
+    GSE305549_raw_counts.txt.gz	965K
+GSE327167	n=113	Single-cell RNA-seq profiling of pleural mesothelioma and comparator pleural specimens
+    GSE327167_initial_scRNA_counts_matrix.mtx.gz	654M
+    GSE327167_stringent_scRNA_counts_matrix.mtx.gz	398M
+GSE327166	n=89	Bulk RNA-seq profiling of pleural mesothelioma and comparator pleural specimens
+    GSE327166_bulkRNA_TPM_matrix.tsv.gz	22M
+    GSE327166_bulkRNA_rawcounts_matrix.tsv.gz	4.2M
+GSE282495	n=20	Compressive Force Induces Differential Gene Expression in Uterine Fibroids
+    GSE282495_raw_counts_all_samples.csv.gz	391K
+    GSE282495_raw_counts_compression_samples.csv.gz	389K
+GSE313802	n=28	Identification of  Therapeutic Targets for Low-Grade Serous Ovarian Carcinoma
+    GSE313802_raw_counts_All_Samples.csv.gz	1.2M
+GSE291920	n=4	Multi-omics analysis of brain metastasis elucidates obesity induced prostaglandin crosstal
+GSE277540	n=8	GSK3β-Mediated Phosphorylation of SOX4 and Its Interaction with STAT6 to Regulate MTHFD2 E
+    GSE277540_raw_counts-1.txt.gz	877K
+    GSE277540_raw_counts-2.txt.gz	811K
+GSE320213	n=4	Unraveling linc00645: A Wnt-regulated lncRNA driving epithelial-mesenchymal transition thr
+    GSE320213_raw_counts.txt.txt.gz	427K
+GSE309233	n=12	PI3K and MAPK signaling nodes as divergent drivers of phenotypic plasticity in cancer-asso
+    GSE309233_RAW.tar	2.8M
+GSE283458	n=6	Targeting PKMYT1 enhances antitumor immune responses in castration-resistant prostate canc
+    GSE283458_RAW.tar	790K
+    GSE283458_raw_counts_All_Samples.txt.gz	483K
+GSE289583	n=14	Baseline tumor features and peripheral blood immune dynamics that underlie efficacy in MSS
+    GSE289583_raw_counts_All_samples_RIN_Biopsy.txt.gz	2.1M
+GSE316867	n=6	Metabolic licensing of quiescent glioblastoma activation and immune evasion via astrocyte-
+    GSE316867_RAW.tar	1.5M
+GSE281561	n=40	QKI dysregulation induces extensive splicing changes in T-Cell Acute Lymphoblastic Leukemi
+    GSE281561_raw_counts_cell_lines.txt.gz	1.3M
+    GSE281561_raw_counts_hpb-all_KD.txt.gz	678K
+    GSE281561_raw_counts_jurkat_KD.txt.gz	716K
+GSE287028	n=6	PDGFC facilitates enzalutamide resistance in prostate cancer through autocrine activation 
+GSE288138	n=24	Dysregulation of microtubule dynamics caused by LOXL3 knockout triggers mitosis catastroph
+    GSE288138_raw_counts_U251_Samples.txt.gz	2.1M
+    GSE288138_raw_counts_U87MG_Samples.txt.gz	2.1M
+GSE316455	n=4	Hypoxia-induced CD147-enriched migrasomes promote sorafenib resistance in HCC by inducing 
+    GSE316455_raw_counts_allSamples.txt.gz	2.2M
+GSE294865	n=6	Coexpression of MYCN and ALK Induces Neuroblastoma-Like Tumors From Human iPS Cell-Derived
+    GSE294865_Read_counts_and_TPM_All_Samples.csv.gz	17M
+GSE309070	n=6	FBXO3-mediated DUSP9 ubiquitination reprograms MAPK signaling to eradicate tyrosine kinase
+    GSE309070_raw_counts_all_samples.csv.gz	294K
+GSE274640	n=80	MYOD1L122R induces cancer stem cell pathways to impart chemotherapy and radiation-resistan
+    GSE274640_RAW.tar	9.7G
+GSE274636	n=15	MYOD1L122R induces cancer stem cell pathways to impart chemotherapy and radiation-resistan
+    GSE274636_Normalized_Counts_Ruch2_all_samples.txt.gz	1.6M
+    GSE274636_Normalized_counts_RUCHoe_vs_PLAIN.txt.gz	1.0M
+    GSE274636_Raw_Counts_Ruch2_all_samples.txt.gz	725K
+GSE274635	n=15	MYOD1L122R induces cancer stem cell pathways to impart chemotherapy and radiation-resistan
+    GSE274635_Normalized_counts_RDoe.txt.gz	1.3M
+    GSE274635_Normalized_counts_RDoe_vs_PLAIN.txt.gz	1.2M
+    GSE274635_Raw_counts_RDoe_All_Samples.txt.gz	759K
+GSE274634	n=11	MYOD1L122R induces cancer stem cell pathways to impart chemotherapy and radiation-resistan
+    GSE274634_Normalized_counts_HDR.txt.gz	1.2M
+    GSE274634_Raw_counts_HDR.txt.gz	590K
+GSE286115	n=6	DHODH as a Targetable Metabolic Achilles' Heel for chemo-resistant B-ALL
+    GSE286115_Raw_counts_DDPR_samples.csv.gz	476K
+GSE315653	n=7	A patient-derived ccRCC model that retains native stromal features to assess fibrosis-driv
+    GSE315653_raw_counts_All_Samples.txt.gz	360K
+GSE309341	n=6	KRAS-ERK Signaling Drives Metastasis in Colorectal Cancer via Phosphorylation Dependent Ac
+    GSE309341_counts_anno.txt.gz	2.1M
+GSE300055	n=12	Histamine H4 receptor antagonists prevent receptor-mediated and EBV-induced B cell prolife
+    GSE300055_RAW.tar	2.5M
+GSE313525	n=6	TAK1 is a key regulator of oncogenic signaling and differentiation blockade in rhabdomyosa
+    GSE313525_Raw_counts_All_samples.csv.gz	441K
+GSE312078	n=6	The effect of ALKBH5 overexpression on gene expression in the Huh-7 cell line
+    GSE312078_raw_counts_all_Samples.txt.gz	1.9M
+GSE309752	n=6	ATP6V0D2 drives triple-negative breast cancer progression and inhibits cisplatin sensitivi
+GSE311243	n=16	AKAP2 coordinates a focal adhesion signaling scaffold to promote growth and metastasis in 
+    GSE311243_raw_counts.csv.gz	1.1M
+GSE282705	n=90	BLU-222, a Potent CDK2 Inhibitor, Synergizes with CDK4/6 Inhibitors to Overcome Drug Resis
+    GSE282705_Raw_counts_human_Linjie_PDX_GEO.csv.gz	3.3M
+    GSE282705_Raw_counts_human_n17.csv.gz	1.2M
+GSE304029	n=56	BRD2 Bromodomain-Mediated Regulation of Cell State Plasticity Modulates Therapy Response i
+    GSE304029_raw_counts_1.txt.gz	1.5M
+    GSE304029_raw_counts_2.txt.gz	493K
+    GSE304029_raw_counts_3.txt.gz	439K
+    GSE304029_raw_counts_4.txt.gz	200K
+GSE304295	n=24	Effect of adenoviral E1A on oxaliplatin response in oxaliplatin-sensitive and resistant hu
+    GSE304295_raw_counts_all_samples.txt.gz	1.0M
+GSE303125	n=12	Inhibition of heme biosynthesis triggers cuproptosis in acute myeloid leukemia [RNA-Seq OC
+    GSE303125_raw_counts.txt.gz	601K
+GSE303126	n=30	Inhibition of heme biosynthesis triggers cuproptosis in acute myeloid leukemia
+GSE308705	n=16	Non-Invasive Detection of Bone Marrow Fibrosis in Myeloproliferative Neoplasms Using Cell-
+    GSE308705_raw_counts_All_samples.txt.gz	467K
+GSE294827	n=81	A plastic EMP1⁺ to LGR5⁺ cell state conversion as a therapeutic bypass to KRAS-G12D inhibi
+    GSE294827_RAW.tar	262M

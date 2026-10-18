@@ -1,8 +1,10 @@
 r"""A sample table from a GEO series matrix, one row per sample, for ``ctx gather --counts``.
 
 GEO's ``<GSE>_series_matrix.txt.gz`` lists each sample's accession, title, source and
-``key: value`` characteristics. This writes them as a CSV the dataset file's ``[sdrf]`` joins
-on ``sample``, the column names GEO's own count tables use. Each value is written as GEO
+``key: value`` characteristics and descriptions; an authors' matrix names its columns in a
+description, often ``Library name: <column>``, which becomes the ``library_name`` column.
+This writes them as a CSV the dataset file's ``[sdrf]`` joins on ``sample``, the column
+names GEO's own count tables use, or on ``library_name``. Each value is written as GEO
 gives it; the dataset file's ``[columns]`` map them to the course's levels. Standard library
 only. Usage::
 
@@ -25,6 +27,9 @@ from pathlib import Path
 FIELDS = {"!Sample_geo_accession": "sample", "!Sample_title": "title",
           "!Sample_source_name_ch1": "source_name"}  # fmt: skip
 CHARACTERISTICS = "!Sample_characteristics_ch1"
+# Read as characteristics are; a line with no "key:" goes to the column DESCRIPTION.
+DESCRIPTIONS = "!Sample_description"
+DESCRIPTION = "description"
 # Values tallied on screen per column; a column with more distinct values is named only.
 SHOWN_LEVELS = 8
 
@@ -50,7 +55,7 @@ def read_series(path: Path) -> list[dict[str, str]]:
         for row in csv.reader(h, delimiter="\t"):
             if row and row[0] in FIELDS:
                 fields[FIELDS[row[0]]] = row[1:]
-            elif row and row[0] == CHARACTERISTICS:
+            elif row and row[0] in (CHARACTERISTICS, DESCRIPTIONS):
                 traits.append(row[1:])
     samples = fields.get("sample", [])
     if not samples:
@@ -61,8 +66,11 @@ def read_series(path: Path) -> list[dict[str, str]]:
     for i in range(len(samples)):
         record = {name: values[i] for name, values in fields.items()}
         for line in traits:
-            key, _, value = line[i].partition(":")
-            if value or key:
+            key, colon, value = line[i].partition(":")
+            if not colon and key.strip():
+                given = (record.get(DESCRIPTION), key.strip())
+                record[DESCRIPTION] = "; ".join(filter(None, given))
+            elif value or key:
                 record[_key(key)] = value.strip()
         records.append(record)
     return records

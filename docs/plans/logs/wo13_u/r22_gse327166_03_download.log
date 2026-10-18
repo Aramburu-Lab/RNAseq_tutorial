@@ -1,0 +1,5 @@
+## download GSE327166 u_gse327166 2026-10-19 00:15:12
+total 10384
+-rw-r--r--@ 1 rytis  staff  4413968 Oct 19 00:15 GSE327166_bulkRNA_rawcounts_matrix.tsv.gz
+-rw-r--r--@ 1 rytis  staff     6061 Oct 19 00:15 GSE327166_series_matrix.txt.gz
+## exit 0

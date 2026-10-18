@@ -1,0 +1,13 @@
+[
+  ["slug = \"mine\"", "slug = \"u_gse327166\""],
+  ["label = \"My study\"", "label = \"Pleural mesothelioma, epithelioid against biphasic (GEO)\""],
+  ["accessions = []", "accessions = [\"GSE327166\"]"],
+  ["ids = []", "ids = [\"GSE327166\", \"GSE327167\", \"PRJNA1449561\", \"phs004285\"]"],
+  ["patterns = []", "patterns = ['\\bGSM96502(3[89]|[4-9]\\d)\\b', '\\bGSM96503([01]\\d|2[0-6])\\b', '\\bBULKRNA\\d{6}-\\w+\\b']"],
+  ["source = \"EDIT: e.g. GEO <series>, NCBI-generated raw counts, <file name>\"", "source = \"GEO GSE327166, the authors' raw counts, GSE327166_bulkRNA_rawcounts_matrix.tsv.gz\""],
+  ["url = \"\"", "url = \"https://ftp.ncbi.nlm.nih.gov/geo/series/GSE327nnn/GSE327166/suppl/GSE327166_bulkRNA_rawcounts_matrix.tsv.gz\""],
+  ["annotation = \"\"", "annotation = \"GENCODE v28, STAR on hg38 (series matrix, data processing)\""],
+  ["file = \"mine.csv\"\njoin = [\"sample\", \"sample\"]", "file = \"u_gse327166.csv\"\njoin = [\"library_name\", \"sample\"]"],
+  ["[columns.donor]\nsource = \"donor\"", "[columns.donor]\nsource = \"subject_id\""],
+  ["[columns.condition]\nsource = \"source_name\"\nmeaning = \"Donor state, treatment or disease.\"", "[columns.condition]\nsource = \"histology\"\nmeaning = \"Histological subtype of the specimen.\"\nvalues = { \"E\" = \"epithelioid\", \"B\" = \"biphasic\", \"S\" = \"sarcomatoid\", \"NP\" = \"pleura_np\", \"NM\" = \"pleura_nm\" }"]
+]
