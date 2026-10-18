@@ -1,0 +1,16 @@
+## check GSE327166 u_gse327166 2026-10-19 00:15:42
+/Users/rytis/ctx_u_gse327166/outputs/00_setup/2026-10-19_setup_environment_v1.html
+/Users/rytis/ctx_u_gse327166/outputs/00_setup/2026-10-19_setup_versions_v1.parquet
+/Users/rytis/ctx_u_gse327166/outputs/00_setup/2026-10-19_setup_versions_v1.csv
+/Users/rytis/ctx_u_gse327166/outputs/00_setup/2026-10-19_setup_versions_v1_README.md
+- no [[contrasts]]: de and function have nothing to compare
+  add these lines to the dataset file:
+[[contrasts]]
+name = "epithelioid_biphasic"
+variable = "condition"
+reference = "biphasic"
+tested = "epithelioid"
+n = [13, 19]
+
+1 problems, 0 of them stopping the run; ctx run runs: gather, qc, report
+## exit 1

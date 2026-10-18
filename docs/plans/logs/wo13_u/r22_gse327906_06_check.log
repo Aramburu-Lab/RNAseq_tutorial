@@ -1,0 +1,20 @@
+## check GSE327906 u_gse327906 2026-10-19 00:12:08
+/Users/rytis/ctx_u_gse327906/outputs/00_setup/2026-10-19_setup_environment_v1.html
+/Users/rytis/ctx_u_gse327906/outputs/00_setup/2026-10-19_setup_versions_v1.parquet
+/Users/rytis/ctx_u_gse327906/outputs/00_setup/2026-10-19_setup_versions_v1.csv
+/Users/rytis/ctx_u_gse327906/outputs/00_setup/2026-10-19_setup_versions_v1_README.md
+- no [de]: de names no featured contrast
+  add these lines to the dataset file:
+[de]
+featured = "brca_wt_brca_mt"
+
+- no [function]: function tests no gene sets
+  add these lines to the dataset file:
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+running = ["brca_wt_brca_mt", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
+
+2 problems, 0 of them stopping the run; ctx run runs: gather, qc, report
+## exit 1
