@@ -115,7 +115,7 @@ meaning = "Donor state, treatment or disease."
 # [proteo.table]
 # # EDIT: maxquant, diann, or table for any other; a table names its id_column.
 # format = "maxquant"
-# # MaxQuant's sample columns: LFQ intensity, Intensity, iBAQ or Reporter intensity corrected.
+# # EDIT: MaxQuant's columns: LFQ intensity, Intensity, iBAQ or Reporter intensity corrected.
 # quantity = "LFQ intensity"
 # # EDIT: linear for intensities; log for logarithms, with log_base = 2, 10 or "e".
 # scale = "linear"
