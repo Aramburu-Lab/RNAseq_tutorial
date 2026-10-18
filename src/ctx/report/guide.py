@@ -263,7 +263,8 @@ def matrix_lines(spec: Dataset) -> dict[str, tuple[str, ...]]:
     the matrix with ``--counts`` and runs every module that reads counts.
     """
     series = next((a for a in spec.accessions if a.startswith("GSE")), SERIES)
-    slug = spec.slug if spec.counts is not None else SLUG
+    # The template's own slug is a placeholder too: the export names the student's study.
+    slug = spec.slug if spec.counts is not None and spec.slug != MINE else SLUG
     root, file = "~/ctx_$SLUG", "~/ctx_$SLUG/$SLUG.toml"
     run = ("--dataset", "$SLUG", "--dataset-file", file, "--counts", '"$RAW/$FILE"')
     return {
@@ -358,7 +359,8 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
         word("part1c.what"), word("part1c.where"), code("part1c.find", lines["find"]),
         code("part1c.size", lines["size"]), code("part1c.download", lines["download"]),
         word("part1c.table_note"), code("part1c.table", lines["table"]),
-        word("part1c.edit"), code("part1c.run", lines["run"]), word("part1c.other"),
+        word("part1c.edit"), code("part1c.run", lines["run"]), word("part1c.paired"),
+        word("part1c.other"),
     ), lead=word("part1c.lead"))  # fmt: skip
     return (find(), numbered[0], own, matrix, *numbered[1:])
 

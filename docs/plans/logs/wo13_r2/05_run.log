@@ -1,0 +1,234 @@
+0 problems, 0 of them stopping the run; ctx run runs: gather, qc, de, function, report
+ctx run: 1 of 5: pixi run -e default ctx --root ~/ctx_r2_gse130605 gather --dataset r2_gse130605 --dataset-file ~/ctx_r2_gse130605/r2_gse130605.toml --counts ~/ctx_r2_gse130605/data/raw/r2_gse130605/GSE130605_raw_counts_GRCh38.p13_NCBI.tsv.gz
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_overview_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_samplesheet_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_samplesheet_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_samplesheet_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_counts_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_counts_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_counts_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_genes_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_genes_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_genes_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_genes_left_out_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_genes_left_out_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/01_gather/2026-10-18_gather_r2_gse130605_genes_left_out_v1_README.md
+ctx run: 2 of 5: pixi run -e default ctx --root ~/ctx_r2_gse130605 qc --dataset r2_gse130605 --dataset-file ~/ctx_r2_gse130605/r2_gse130605.toml
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_overview_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_metrics_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_metrics_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_metrics_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_bands_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_bands_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_bands_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_flags_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_flags_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_flags_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_status_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_status_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_status_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_confounding_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_confounding_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_confounding_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_linked_pca_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_linked_pca_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_linked_pca_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_linked_pca_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_linked_pca_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_linked_pca_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_linked_pca_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_size_genes_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_size_genes_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_size_genes_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_size_genes_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_size_genes_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_size_genes_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_size_genes_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_composition_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_composition_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_composition_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_composition_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_composition_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_composition_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_composition_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_library_size_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_library_size_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_library_size_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_library_size_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_library_size_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_library_size_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_library_size_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_genes_detected_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_genes_detected_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_genes_detected_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_genes_detected_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_genes_detected_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_genes_detected_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_genes_detected_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_top_gene_share_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_top_gene_share_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_top_gene_share_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_top_gene_share_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_top_gene_share_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_top_gene_share_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_top_gene_share_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_fraction_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_fraction_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_fraction_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_fraction_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_fraction_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_fraction_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_fraction_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_rrna_fraction_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_rrna_fraction_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_rrna_fraction_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_rrna_fraction_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_rrna_fraction_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_rrna_fraction_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_mt_rrna_fraction_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_rrna_fraction_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_rrna_fraction_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_rrna_fraction_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_rrna_fraction_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_rrna_fraction_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_rrna_fraction_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_rrna_fraction_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_globin_fraction_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_globin_fraction_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_globin_fraction_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_globin_fraction_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_globin_fraction_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_globin_fraction_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_globin_fraction_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_replicate_spearman_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_replicate_spearman_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_replicate_spearman_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_replicate_spearman_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_replicate_spearman_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_replicate_spearman_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_replicate_spearman_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_pca_distance_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_pca_distance_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_pca_distance_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_pca_distance_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_pca_distance_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_pca_distance_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/02_qc/2026-10-18_qc_r2_gse130605_strip_pca_distance_v1_README.md
+ctx run: 3 of 5: pixi run -e default ctx --root ~/ctx_r2_gse130605 de --dataset r2_gse130605 --dataset-file ~/ctx_r2_gse130605/r2_gse130605.toml
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_overview_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_contrasts_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_contrasts_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_contrasts_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_size_factors_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_size_factors_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_size_factors_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_tumour_normal_results_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_tumour_normal_results_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_tumour_normal_results_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_volcano_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_volcano_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_volcano_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_volcano_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_volcano_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_volcano_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_volcano_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_ma_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_ma_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_ma_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_ma_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_ma_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_ma_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_ma_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_contrasts_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_contrasts_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_contrasts_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_phist_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_dispersion_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_dispersion_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_dispersion_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_dispersion_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_dispersion_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_dispersion_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_dispersion_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_metrics_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_metrics_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/05_de/2026-10-18_de_r2_gse130605_metrics_v1_README.md
+ctx run: 4 of 5: pixi run -e default ctx --root ~/ctx_r2_gse130605 function --dataset r2_gse130605 --dataset-file ~/ctx_r2_gse130605/r2_gse130605.toml
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_overview_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/index.html
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_tumour_normal_gsea_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_tumour_normal_gsea_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_tumour_normal_gsea_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_tumour_normal_ora_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_tumour_normal_ora_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_tumour_normal_ora_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_ora_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_ora_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_ora_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_ora_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_ora_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_ora_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_ora_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_gsea_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_gsea_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_gsea_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_gsea_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_gsea_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_gsea_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_gsea_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_nes_hallmark_interferon_alpha_response_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_nes_hallmark_interferon_alpha_response_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_nes_hallmark_interferon_alpha_response_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_nes_hallmark_interferon_alpha_response_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_nes_hallmark_interferon_alpha_response_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_nes_hallmark_interferon_alpha_response_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_nes_hallmark_interferon_alpha_response_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_running_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_running_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_running_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_running_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_running_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_running_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_running_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_views_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_views_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_views_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_v1_white.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_v1_black.pdf
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_v1_white.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_v1_black.svg
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_background_tumour_normal_v1_README.md
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_metrics_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_metrics_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/06_function/2026-10-18_function_r2_gse130605_metrics_v1_README.md
+ctx run: 5 of 5: pixi run -e default ctx --root ~/ctx_r2_gse130605 report --dataset r2_gse130605 --dataset-file ~/ctx_r2_gse130605/r2_gse130605.toml
+/Users/rytis/ctx_r2_gse130605/outputs/09_report/2026-10-18_report_r2_gse130605_hub_v1.html
+/Users/rytis/ctx_r2_gse130605/outputs/09_report/2026-10-18_report_r2_gse130605_sanity_v1.parquet
+/Users/rytis/ctx_r2_gse130605/outputs/09_report/2026-10-18_report_r2_gse130605_sanity_v1.csv
+/Users/rytis/ctx_r2_gse130605/outputs/09_report/2026-10-18_report_r2_gse130605_sanity_v1_README.md
+      118.32 real       177.28 user        11.16 sys
+           867205120  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             1522583  page reclaims
+                 870  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               10857  voluntary context switches
+              112808  involuntary context switches
+        185956916481  instructions retired
+         53150046175  cycles elapsed
+           430802408  peak memory footprint

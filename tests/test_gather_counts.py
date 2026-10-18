@@ -435,3 +435,31 @@ def test_gather_qc_de_run_on_a_matrix(tmp_path):
         pl.col("lfc_condition_type_a") != 0
     )["gene_id"]
     assert len(set(called) & set(planted)) >= 0.8 * planted.len()
+
+
+def test_ctx_run_plans_the_matrix_route(tmp_path):
+    """ctx run --counts gives gather the matrix and no fetchngs outdir, runs qc and de on its
+    counts, never quant, and --check lists a matrix problem with the others. Catches the
+    matrix dropped from gather's arguments, and de left out as if no counts existed."""
+    from ctx import pipeline  # noqa: PLC0415 - the module under test
+
+    root, spec = root_with(tmp_path)
+    contrast = (
+        '\n[[contrasts]]\nname = "tumour_normal"\nvariable = "condition"\nreference = "normal"\n'
+        'tested = "tumour"\nn = [2, 2]\n\n[de]\nfeatured = "tumour_normal"\n'
+    )
+    spec.write_text(spec.read_text() + contrast)
+    path = matrix(tmp_path / "m.tsv", ["ALPHA", "BETA"], whole(2))
+    options = pipeline.Options("mat", spec, counts=path)
+    planned = dict(pipeline.steps(load(spec), options))
+    assert planned["gather"][-2:] == ("--counts", str(path))
+    assert "--fetchngs-dir" not in planned["gather"]
+    assert {"gather", "qc", "de", "report"} <= set(planned)
+    assert "quant" not in planned
+    problems, _ = pipeline.check(root, options)
+    assert [p.text for p in problems if p.blocks] == []
+    values = whole(2).copy()
+    values[0, 0] = 0.5
+    bad = matrix(tmp_path / "bad.tsv", ["ALPHA", "BETA"], values)
+    problems, _ = pipeline.check(root, pipeline.Options("mat", spec, counts=bad))
+    assert any(p.text.startswith("counts: values: fractional") for p in problems)

@@ -57,15 +57,15 @@ def read_series(path: Path) -> list[dict[str, str]]:
         raise TableError(f"{path.name}: no !Sample_geo_accession line; not a series matrix")
     if any(len(v) != len(samples) for v in [*fields.values(), *traits]):
         raise TableError(f"{path.name}: the sample lines differ in length")
-    rows = []
+    records: list[dict[str, str]] = []
     for i in range(len(samples)):
-        row = {name: values[i] for name, values in fields.items()}
+        record = {name: values[i] for name, values in fields.items()}
         for line in traits:
             key, _, value = line[i].partition(":")
             if value or key:
-                row[_key(key)] = value.strip()
-        rows.append(row)
-    return rows
+                record[_key(key)] = value.strip()
+        records.append(record)
+    return records
 
 
 def add_donor(rows: list[dict[str, str]], pattern: str | None) -> list[str]:

@@ -7,6 +7,7 @@ catches.
 import gzip
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,7 @@ from ctx.report import guide, text
 
 ROOT = Path(__file__).resolve().parents[1]
 FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
+R2 = ROOT / "conf" / "datasets" / "r2_gse130605.toml"
 TEMPLATE = ROOT / guide.COUNTS_TEMPLATE
 # A series matrix as GEO writes it: quoted, tab-separated, one line per field.
 SERIES = """!Series_title\t"A made-up study"
@@ -78,26 +80,27 @@ def test_part1c_template_and_table_are_the_repositorys(blocks):
     assert "python -m ctx.gather.geo_table " in blocks["table"]
 
 
-def test_part1c_filled_from_a_counts_dataset(tmp_path):
-    """A dataset file with [counts] fills the series and slug; another leaves placeholders.
-    Catches the worked example's slug written into a matrix route it does not take."""
-    path = tmp_path / "geo_x.toml"
-    path.write_text('[dataset]\nslug = "geo_x"\naccessions = ["GSE0"]\n\n[counts]\nsource = "s"\n')
-    filled = part(guide.blocks(load(path), path))["find"].splitlines()[0]
-    assert "GSE=GSE0 SLUG=geo_x" in filled
+def test_part1c_filled_from_a_counts_dataset():
+    """The proof's dataset file, which has [counts], fills the series and slug; the worked
+    example leaves placeholders. Catches the worked example's slug written into a matrix route
+    it does not take."""
+    spec = load(R2)
+    filled = part(guide.blocks(spec, R2))["find"].splitlines()[0]
+    assert f"GSE={spec.accessions[0]} SLUG={spec.slug}" in filled
     four = part(guide.blocks(load(FOUR), FOUR))["find"].splitlines()[0]
     assert f"GSE={guide.SERIES} SLUG={guide.SLUG}" in four
 
 
 def test_geo_folder_rule():
-    """The series folder replaces the last three digits with nnn, as GEO's FTP names it
-    (GSE987nnn holds GSE987654), for a six- and a four-digit series. Catches a fixed-length
-    cut from the front."""
-    rule = re.search(r"\$\{GSE%(\?+)\}nnn", guide.GEO_FTP)
+    """The series folder is the accession with its last three digits as nnn, the folder the
+    proof downloaded the proof's series matrix from; bash expands the page's rule to it.
+    Catches a cut of another length, and a rule bash does not expand."""
+    series = load(R2).accessions[0]
+    rule = re.search(r"\$\{GSE%\?+\}nnn", guide.GEO_FTP)
     assert rule is not None
-    cut = len(rule.group(1))
-    assert "GSE987654"[:-cut] + "nnn" == "GSE987nnn"
-    assert "GSE1234"[:-cut] + "nnn" == "GSE1nnn"
+    done = subprocess.run(["bash", "-c", f"GSE={series}; echo {rule.group()}"],
+                          capture_output=True, text=True, check=True)  # fmt: skip
+    assert done.stdout.strip() == series[:-3] + "nnn"
 
 
 def test_geo_table_writes_samples(tmp_path):
@@ -156,3 +159,23 @@ def test_counts_template_curates_a_geo_table(tmp_path):
     found = counts_run.check(root, spec, path)
     assert found.sheet["condition"].to_list() == ["tumour", "tumour", "normal", "normal"]
     assert found.mapped.genes["gene_name"].to_list() == ["ALPHA", "BETA"]
+
+
+def test_template_guide_keeps_the_slug_a_placeholder():
+    """The guide made from the counts template names SLUG as a placeholder, not the template's
+    own slug. Catches the proof's first gap: SLUG=mine, kept by a reader, named every folder
+    after the template while the edited dataset file named another slug."""
+    filled = part(guide.blocks(load(TEMPLATE), TEMPLATE))["find"].splitlines()[0]
+    assert f"SLUG={guide.SLUG}" in filled
+
+
+def test_part1c_notes_name_what_the_proof_lacked():
+    """The proof's other gaps, each now on the page: an example donor pattern, where the
+    annotation release is named, and the table's file name in the dataset file. Catches any
+    note cut back to its first version."""
+    note, where, edit = (text.word("guide", f"part1c.{k}") for k in ("table_note", "where", "edit"))
+    assert "--donor-pattern '_(\\d+)$'" in note
+    assert "annotation release" in where and "`annotation`" in where
+    assert "`$SLUG.csv`" in edit and "same as SLUG" in edit
+    paired = text.word("guide", "part1c.paired")
+    assert "`paired = true`" in paired and '`design = "~donor + group"`' in paired

@@ -1,0 +1,101 @@
+sample,donor,title,source_name,tumor_stage,tobacco_smoking,alcohol_consumption
+GSM3744631,78,LSCC_78,LSCC tissue,4,Yes,Yes
+GSM3744632,79,LSCC_79,LSCC tissue,1,No,No
+GSM3744633,80,LSCC_80,LSCC tissue,4,Yes,No
+GSM3744634,81,LSCC_81,LSCC tissue,4,Yes,No
+GSM3744635,82,LSCC_82,LSCC tissue,3,Yes,No
+GSM3744636,83,LSCC_83,LSCC tissue,2,Yes,Yes
+GSM3744637,84,LSCC_84,LSCC tissue,2,Yes,Yes
+GSM3744638,85,LSCC_85,LSCC tissue,2,Yes,No
+GSM3744639,86,LSCC_86,LSCC tissue,1,Yes,Yes
+GSM3744640,87,LSCC_87,LSCC tissue,1,Yes,Yes
+GSM3744641,88,LSCC_88,LSCC tissue,1,Yes,Yes
+GSM3744642,89,LSCC_89,LSCC tissue,1,Yes,No
+GSM3744643,90,LSCC_90,LSCC tissue,2,Yes,Yes
+GSM3744644,91,LSCC_91,LSCC tissue,4,Yes,No
+GSM3744645,92,LSCC_92,LSCC tissue,2,Yes,Yes
+GSM3744646,93,LSCC_93,LSCC tissue,4,Yes,Yes
+GSM3744647,94,LSCC_94,LSCC tissue,2,No,No
+GSM3744648,95,LSCC_95,LSCC tissue,4,Yes,Yes
+GSM3744649,96,LSCC_96,LSCC tissue,4,Yes,No
+GSM3744650,97,LSCC_97,LSCC tissue,1,No,No
+GSM3744651,98,LSCC_98,LSCC tissue,4,Yes,Yes
+GSM3744652,99,LSCC_99,LSCC tissue,1,Yes,Yes
+GSM3744653,100,LSCC_100,LSCC tissue,4,No,No
+GSM3744654,101,LSCC_101,LSCC tissue,4,Yes,Yes
+GSM3744655,102,LSCC_102,LSCC tissue,2,No,No
+GSM3744656,103,LSCC_103,LSCC tissue,2,No,No
+GSM3744657,104,LSCC_104,LSCC tissue,3,Yes,No
+GSM3744658,105,LSCC_105,LSCC tissue,1,Yes,Yes
+GSM3744659,106,LSCC_106,LSCC tissue,3,Yes,Yes
+GSM3744660,107,LSCC_107,LSCC tissue,4,No,No
+GSM3744661,108,LSCC_108,LSCC tissue,4,Yes,Yes
+GSM3744662,109,LSCC_109,LSCC tissue,4,Yes,Yes
+GSM3744663,110,LSCC_110,LSCC tissue,3,Yes,Yes
+GSM3744664,111,LSCC_111,LSCC tissue,2,No,No
+GSM3744665,112,LSCC_112,LSCC tissue,3,Yes,Yes
+GSM3744666,113,LSCC_113,LSCC tissue,2,Yes,Yes
+GSM3744667,114,LSCC_114,LSCC tissue,4,Yes,Yes
+GSM3744668,115,LSCC_115,LSCC tissue,2,Yes,Yes
+GSM3744669,116,LSCC_116,LSCC tissue,4,Yes,No
+GSM3744670,117,LSCC_117,LSCC tissue,4,No,No
+GSM3744671,118,LSCC_118,LSCC tissue,3,Yes,Yes
+GSM3744672,119,LSCC_119,LSCC tissue,1,Yes,No
+GSM3744673,120,LSCC_120,LSCC tissue,4,No,No
+GSM3744674,121,LSCC_121,LSCC tissue,3,Yes,Yes
+GSM3744675,122,LSCC_122,LSCC tissue,2,Yes,Yes
+GSM3744676,123,LSCC_123,LSCC tissue,4,Yes,No
+GSM3744677,124,LSCC_124,LSCC tissue,2,Yes,No
+GSM3744678,125,LSCC_125,LSCC tissue,3,No,No
+GSM3744679,126,LSCC_126,LSCC tissue,3,Yes,No
+GSM3744680,127,LSCC_127,LSCC tissue,2,No,No
+GSM3744681,78,ANM_78,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744682,79,ANM_79,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744683,80,ANM_80,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744684,81,ANM_81,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744685,82,ANM_82,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744686,83,ANM_83,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744687,84,ANM_84,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744688,85,ANM_85,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744689,86,ANM_86,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744690,87,ANM_87,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744691,88,ANM_88,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744692,89,ANM_89,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744693,90,ANM_90,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744694,91,ANM_91,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744695,92,ANM_92,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744696,93,ANM_93,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744697,94,ANM_94,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744698,95,ANM_95,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744699,96,ANM_96,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744700,97,ANM_97,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744701,98,ANM_98,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744702,99,ANM_99,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744703,100,ANM_100,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744704,101,ANM_101,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744705,102,ANM_102,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744706,103,ANM_103,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744707,104,ANM_104,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744708,105,ANM_105,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744709,106,ANM_106,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744710,107,ANM_107,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744711,108,ANM_108,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744712,109,ANM_109,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744713,110,ANM_110,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744714,111,ANM_111,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744715,112,ANM_112,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744716,113,ANM_113,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744717,114,ANM_114,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744718,115,ANM_115,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744719,116,ANM_116,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744720,117,ANM_117,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744721,118,ANM_118,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744722,119,ANM_119,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744723,120,ANM_120,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744724,121,ANM_121,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744725,122,ANM_122,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744726,123,ANM_123,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744727,124,ANM_124,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744728,125,ANM_125,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744729,126,ANM_126,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable
+GSM3744730,127,ANM_127,adjacent normal mucosa tissue,Not Applicable,Not Applicable,Not Applicable

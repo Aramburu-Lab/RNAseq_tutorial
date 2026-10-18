@@ -1,0 +1,202 @@
+201 count matrix problems:
+  values: fractional: 1,199,165 of 1,526,000 values are not whole numbers, e.g. 0.130771; the largest is 272480: FPKM, RPKM or estimated counts, not raw counts
+  join: GSM3744631: SDRF row matches no sample
+  join: GSM3744632: SDRF row matches no sample
+  join: GSM3744633: SDRF row matches no sample
+  join: GSM3744634: SDRF row matches no sample
+  join: GSM3744635: SDRF row matches no sample
+  join: GSM3744636: SDRF row matches no sample
+  join: GSM3744637: SDRF row matches no sample
+  join: GSM3744638: SDRF row matches no sample
+  join: GSM3744639: SDRF row matches no sample
+  join: GSM3744640: SDRF row matches no sample
+  join: GSM3744641: SDRF row matches no sample
+  join: GSM3744642: SDRF row matches no sample
+  join: GSM3744643: SDRF row matches no sample
+  join: GSM3744644: SDRF row matches no sample
+  join: GSM3744645: SDRF row matches no sample
+  join: GSM3744646: SDRF row matches no sample
+  join: GSM3744647: SDRF row matches no sample
+  join: GSM3744648: SDRF row matches no sample
+  join: GSM3744649: SDRF row matches no sample
+  join: GSM3744650: SDRF row matches no sample
+  join: GSM3744651: SDRF row matches no sample
+  join: GSM3744652: SDRF row matches no sample
+  join: GSM3744653: SDRF row matches no sample
+  join: GSM3744654: SDRF row matches no sample
+  join: GSM3744655: SDRF row matches no sample
+  join: GSM3744656: SDRF row matches no sample
+  join: GSM3744657: SDRF row matches no sample
+  join: GSM3744658: SDRF row matches no sample
+  join: GSM3744659: SDRF row matches no sample
+  join: GSM3744660: SDRF row matches no sample
+  join: GSM3744661: SDRF row matches no sample
+  join: GSM3744662: SDRF row matches no sample
+  join: GSM3744663: SDRF row matches no sample
+  join: GSM3744664: SDRF row matches no sample
+  join: GSM3744665: SDRF row matches no sample
+  join: GSM3744666: SDRF row matches no sample
+  join: GSM3744667: SDRF row matches no sample
+  join: GSM3744668: SDRF row matches no sample
+  join: GSM3744669: SDRF row matches no sample
+  join: GSM3744670: SDRF row matches no sample
+  join: GSM3744671: SDRF row matches no sample
+  join: GSM3744672: SDRF row matches no sample
+  join: GSM3744673: SDRF row matches no sample
+  join: GSM3744674: SDRF row matches no sample
+  join: GSM3744675: SDRF row matches no sample
+  join: GSM3744676: SDRF row matches no sample
+  join: GSM3744677: SDRF row matches no sample
+  join: GSM3744678: SDRF row matches no sample
+  join: GSM3744679: SDRF row matches no sample
+  join: GSM3744680: SDRF row matches no sample
+  join: GSM3744681: SDRF row matches no sample
+  join: GSM3744682: SDRF row matches no sample
+  join: GSM3744683: SDRF row matches no sample
+  join: GSM3744684: SDRF row matches no sample
+  join: GSM3744685: SDRF row matches no sample
+  join: GSM3744686: SDRF row matches no sample
+  join: GSM3744687: SDRF row matches no sample
+  join: GSM3744688: SDRF row matches no sample
+  join: GSM3744689: SDRF row matches no sample
+  join: GSM3744690: SDRF row matches no sample
+  join: GSM3744691: SDRF row matches no sample
+  join: GSM3744692: SDRF row matches no sample
+  join: GSM3744693: SDRF row matches no sample
+  join: GSM3744694: SDRF row matches no sample
+  join: GSM3744695: SDRF row matches no sample
+  join: GSM3744696: SDRF row matches no sample
+  join: GSM3744697: SDRF row matches no sample
+  join: GSM3744698: SDRF row matches no sample
+  join: GSM3744699: SDRF row matches no sample
+  join: GSM3744700: SDRF row matches no sample
+  join: GSM3744701: SDRF row matches no sample
+  join: GSM3744702: SDRF row matches no sample
+  join: GSM3744703: SDRF row matches no sample
+  join: GSM3744704: SDRF row matches no sample
+  join: GSM3744705: SDRF row matches no sample
+  join: GSM3744706: SDRF row matches no sample
+  join: GSM3744707: SDRF row matches no sample
+  join: GSM3744708: SDRF row matches no sample
+  join: GSM3744709: SDRF row matches no sample
+  join: GSM3744710: SDRF row matches no sample
+  join: GSM3744711: SDRF row matches no sample
+  join: GSM3744712: SDRF row matches no sample
+  join: GSM3744713: SDRF row matches no sample
+  join: GSM3744714: SDRF row matches no sample
+  join: GSM3744715: SDRF row matches no sample
+  join: GSM3744716: SDRF row matches no sample
+  join: GSM3744717: SDRF row matches no sample
+  join: GSM3744718: SDRF row matches no sample
+  join: GSM3744719: SDRF row matches no sample
+  join: GSM3744720: SDRF row matches no sample
+  join: GSM3744721: SDRF row matches no sample
+  join: GSM3744722: SDRF row matches no sample
+  join: GSM3744723: SDRF row matches no sample
+  join: GSM3744724: SDRF row matches no sample
+  join: GSM3744725: SDRF row matches no sample
+  join: GSM3744726: SDRF row matches no sample
+  join: GSM3744727: SDRF row matches no sample
+  join: GSM3744728: SDRF row matches no sample
+  join: GSM3744729: SDRF row matches no sample
+  join: GSM3744730: SDRF row matches no sample
+  join: C100: run has no SDRF row (sample)
+  join: C101: run has no SDRF row (sample)
+  join: C102: run has no SDRF row (sample)
+  join: C103: run has no SDRF row (sample)
+  join: C104: run has no SDRF row (sample)
+  join: C105: run has no SDRF row (sample)
+  join: C106: run has no SDRF row (sample)
+  join: C107: run has no SDRF row (sample)
+  join: C108: run has no SDRF row (sample)
+  join: C109: run has no SDRF row (sample)
+  join: C110: run has no SDRF row (sample)
+  join: C111: run has no SDRF row (sample)
+  join: C112: run has no SDRF row (sample)
+  join: C113: run has no SDRF row (sample)
+  join: C114: run has no SDRF row (sample)
+  join: C115: run has no SDRF row (sample)
+  join: C116: run has no SDRF row (sample)
+  join: C117: run has no SDRF row (sample)
+  join: C118: run has no SDRF row (sample)
+  join: C119: run has no SDRF row (sample)
+  join: C120: run has no SDRF row (sample)
+  join: C121: run has no SDRF row (sample)
+  join: C122: run has no SDRF row (sample)
+  join: C123: run has no SDRF row (sample)
+  join: C124: run has no SDRF row (sample)
+  join: C125: run has no SDRF row (sample)
+  join: C126: run has no SDRF row (sample)
+  join: C127: run has no SDRF row (sample)
+  join: C78: run has no SDRF row (sample)
+  join: C79: run has no SDRF row (sample)
+  join: C80: run has no SDRF row (sample)
+  join: C81: run has no SDRF row (sample)
+  join: C82: run has no SDRF row (sample)
+  join: C83: run has no SDRF row (sample)
+  join: C84: run has no SDRF row (sample)
+  join: C85: run has no SDRF row (sample)
+  join: C86: run has no SDRF row (sample)
+  join: C87: run has no SDRF row (sample)
+  join: C88: run has no SDRF row (sample)
+  join: C89: run has no SDRF row (sample)
+  join: C90: run has no SDRF row (sample)
+  join: C91: run has no SDRF row (sample)
+  join: C92: run has no SDRF row (sample)
+  join: C93: run has no SDRF row (sample)
+  join: C94: run has no SDRF row (sample)
+  join: C95: run has no SDRF row (sample)
+  join: C96: run has no SDRF row (sample)
+  join: C97: run has no SDRF row (sample)
+  join: C98: run has no SDRF row (sample)
+  join: C99: run has no SDRF row (sample)
+  join: P100: run has no SDRF row (sample)
+  join: P101: run has no SDRF row (sample)
+  join: P102: run has no SDRF row (sample)
+  join: P103: run has no SDRF row (sample)
+  join: P104: run has no SDRF row (sample)
+  join: P105: run has no SDRF row (sample)
+  join: P106: run has no SDRF row (sample)
+  join: P107: run has no SDRF row (sample)
+  join: P108: run has no SDRF row (sample)
+  join: P109: run has no SDRF row (sample)
+  join: P110: run has no SDRF row (sample)
+  join: P111: run has no SDRF row (sample)
+  join: P112: run has no SDRF row (sample)
+  join: P113: run has no SDRF row (sample)
+  join: P114: run has no SDRF row (sample)
+  join: P115: run has no SDRF row (sample)
+  join: P116: run has no SDRF row (sample)
+  join: P117: run has no SDRF row (sample)
+  join: P118: run has no SDRF row (sample)
+  join: P119: run has no SDRF row (sample)
+  join: P120: run has no SDRF row (sample)
+  join: P121: run has no SDRF row (sample)
+  join: P122: run has no SDRF row (sample)
+  join: P123: run has no SDRF row (sample)
+  join: P124: run has no SDRF row (sample)
+  join: P125: run has no SDRF row (sample)
+  join: P126: run has no SDRF row (sample)
+  join: P127: run has no SDRF row (sample)
+  join: P78: run has no SDRF row (sample)
+  join: P79: run has no SDRF row (sample)
+  join: P80: run has no SDRF row (sample)
+  join: P81: run has no SDRF row (sample)
+  join: P82: run has no SDRF row (sample)
+  join: P83: run has no SDRF row (sample)
+  join: P84: run has no SDRF row (sample)
+  join: P85: run has no SDRF row (sample)
+  join: P86: run has no SDRF row (sample)
+  join: P87: run has no SDRF row (sample)
+  join: P88: run has no SDRF row (sample)
+  join: P89: run has no SDRF row (sample)
+  join: P90: run has no SDRF row (sample)
+  join: P91: run has no SDRF row (sample)
+  join: P92: run has no SDRF row (sample)
+  join: P93: run has no SDRF row (sample)
+  join: P94: run has no SDRF row (sample)
+  join: P95: run has no SDRF row (sample)
+  join: P96: run has no SDRF row (sample)
+  join: P97: run has no SDRF row (sample)
+  join: P98: run has no SDRF row (sample)
+  join: P99: run has no SDRF row (sample)
