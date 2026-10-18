@@ -71,6 +71,21 @@ links = "The files stay where they are: the outdir links each one, and the sampl
 laptop = "On a laptop: the clone, then your files, laid out in the run folder the count reads"
 cluster = "On Kebnekaise, after the download part's once-per-login block: your files on the storage project"
 
+# Part 1c: a count matrix from a repository in place of Parts 1 to 3 (ctx gather --counts).
+[part1c]
+group = "Part {n}c: a count matrix instead"
+lead = "A study's raw counts replace the download and the count: gather checks the matrix, places its genes on GENCODE, and every module that reads counts runs."
+what = "The matrix holds genes as rows and samples as columns, gene IDs in the first column, as TSV or CSV, gzipped or not. Its values are raw counts, whole numbers: gather refuses FPKM, TPM, CPM and log values and names the scale it found."
+where = "On a GEO series page, Supplementary file lists the authors' own files; many hold FPKM. For a human RNA-seq series GEO also offers raw counts it computed itself, under Download RNA-seq counts. Their genes are NCBI Gene IDs, which GENCODE's own table places."
+find = "On a laptop with pixi installed: the clone, then the files the series offers, NCBI's and the authors'"
+size = "The size of NCBI's raw counts, read before the download; for an authors' file set FILE to its name and URL to the suppl folder's address"
+download = "Once the size is read: the matrix and the series matrix, which lists every sample's title, source and characteristics"
+table_note = "The table is one row per sample, named as the matrix's columns. Each column's values are printed with their counts; add `--donor-pattern` with a regular expression when the titles name the individual, so paired samples share a donor."
+table = "The sample table from the series matrix, and the dataset file to edit"
+edit = "Edit each line marked EDIT in the dataset file: its slug, the source of the matrix, and which table columns hold the tissue and the condition, with `values` to name each level."
+run = "The annotation and gene sets, the check, then every module the dataset file declares"
+other = "A matrix from ArrayExpress, recount3 or your own pipeline enters the same way: save it under the root's data/raw folder, write the table by hand, and run the last block."
+
 [part2]
 group = "Part {n}: count with nf-core/rnaseq"
 lead = "The references are checked against the publisher's MD5SUMS before nf-core/rnaseq starts."

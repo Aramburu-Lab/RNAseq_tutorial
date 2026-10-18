@@ -53,6 +53,10 @@ effect = "Set: gather checks release and samples, then writes rounded length-sca
 meaning = "A GDC project folder of STAR counts, clinical records and annotations."
 effect = "Set: gather checks it and takes one file per patient."
 
+[options."--counts"]
+meaning = "A genes by samples matrix of [[raw counts]], from any repository."
+effect = "Set: gather checks it, maps its genes and writes the counts."
+
 [options."--mirna-dir"]
 meaning = "A GDC folder of the project's miRNA files. Unset: none is read."
 effect = "Set with --isoform-dir: gather checks both and writes miRNA tables."
@@ -244,6 +248,7 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 "--dataset-file" = "Set: curates each run from the SDRF; any problem stops gather."
 "--dataset" = "Renames every output. Unless --fetchngs-dir is set, gather reads <root>/data/raw/<dataset>."
 "--gdc-dir" = "Set: gather checks each folder; one per project the dataset file names."
+"--counts" = "Set with --dataset-file: gather checks values, gene IDs and samples first."
 
 [effects.report]
 "--dataset-file" = "Set: the hub also shows the verdict of each sanity rule."
@@ -253,6 +258,7 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 "--mirna-dir" = "Carried to gather; needs --gdc-dir and --isoform-dir."
 "--isoform-dir" = "Carried to gather; needs --gdc-dir and --mirna-dir."
 "--gdc-dir" = "Carried to gather, once per project the dataset file names."
+"--counts" = "Carried to gather; quant and the read stages are not run."
 
 [effects.qc]
 "--fetchngs-dir" = "With --reads: FASTQ paths resolve against it; nothing else there is read."

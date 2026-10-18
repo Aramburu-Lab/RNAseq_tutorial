@@ -114,10 +114,12 @@ def gather(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     gdc_dir: Annotated[list[Path] | None, typer.Option(help=HELP["--gdc-dir"])] = None,
     mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
     isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
+    counts: Annotated[Path | None, typer.Option(help=HELP["--counts"])] = None,
 ) -> None:
-    """Check one nf-core/fetchngs outdir or GDC folders and write the sample sheet (M1c)."""
+    """Check a fetchngs outdir, GDC folders or a count matrix; write the sample sheet (M1c)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
-    from ctx.gather import gdc_run, harmonise  # noqa: PLC0415 - heavy; after the runtime profile
+    from ctx.gather import counts_run, gdc_run, harmonise  # noqa: PLC0415 - after the profile
+    from ctx.gather.counts import CountsError  # noqa: PLC0415 - same reason
     from ctx.gather.curation import CurationError  # noqa: PLC0415 - same reason
     from ctx.gather.fetchngs import FetchngsError  # noqa: PLC0415 - same module, same reason
     from ctx.gather.gdc import GdcError  # noqa: PLC0415 - same reason
@@ -128,7 +130,14 @@ def gather(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
     try:
-        if gdc_dir:
+        if counts is not None:
+            if fetchngs_dir or rnaseq_dir or gdc_dir or mirna_dir or isoform_dir:
+                raise DatasetError("--counts is a route of its own: no other input folder")
+            if dataset_file is None:
+                raise DatasetError("--counts takes --dataset-file: the sample table and [counts]")
+            written = counts_run.run(ctx.obj["settings"], cards, command, dataset,
+                                     matrix=counts, dataset_file=dataset_file)  # fmt: skip
+        elif gdc_dir:
             if fetchngs_dir or rnaseq_dir or dataset_file is None:
                 raise DatasetError("--gdc-dir takes --dataset-file, and neither --fetchngs-dir "
                                    "nor --rnaseq-dir")  # fmt: skip
@@ -143,7 +152,7 @@ def gather(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
                 dataset_file=dataset_file, rnaseq_dir=rnaseq_dir,
             )  # fmt: skip
     except (FetchngsError, DatasetError, CurationError, RnaseqError, RegistryError,
-            GdcError, TraceError) as error:  # fmt: skip
+            GdcError, TraceError, CountsError) as error:  # fmt: skip
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
     for path in written:
@@ -516,6 +525,7 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     salmon_dir: Annotated[Path | None, typer.Option(help=HELP["--salmon-dir"])] = None,
     mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
     isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
+    counts: Annotated[Path | None, typer.Option(help=HELP["--counts"])] = None,
     check: Annotated[bool, typer.Option("--check/--no-check", help=HELP["--check"])] = False,
 ) -> None:
     """Run every module the dataset file declares, in course order, each as its own command."""
@@ -524,7 +534,7 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     settings = ctx.obj["settings"]
     gdc_dirs = tuple(gdc_dir or ())
     options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dirs,
-                               salmon_dir, mirna_dir, isoform_dir)  # fmt: skip
+                               salmon_dir, mirna_dir, isoform_dir, counts)  # fmt: skip
     problems, planned = pipeline.check(settings.root, options)
     for problem in problems:
         typer.echo(f"- {problem.text}", err=True)

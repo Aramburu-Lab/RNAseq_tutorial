@@ -43,6 +43,7 @@ class Options:
     salmon_dir: Path | None = None
     mirna_dir: Path | None = None
     isoform_dir: Path | None = None
+    counts: Path | None = None
 
     def dataset_root(self, root: Path) -> Path:
         """Where gather reads the fetchngs outdir when ``--fetchngs-dir`` is not given."""
@@ -70,7 +71,8 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
     ``--gdc-dir``, one per project, and the miRNA and isoform folders when given; de with
     contrasts, ``[de]`` and counts; function with ``[function]`` too; proteo with ``[proteo]``
     and counts, and de's tables when it compares fold changes; ncrna with ``[ncrna]`` and de's
-    tables; clinical with ``[clinical]``.
+    tables; clinical with ``[clinical]``. A count matrix (``--counts``) goes to gather alone;
+    qc then judges its counts, and quant, which reads an rnaseq outdir, does not run.
     """
     base = ("--dataset", options.dataset, "--dataset-file", str(options.dataset_file))
     rnaseq = ("--rnaseq-dir", str(options.rnaseq_dir)) if options.rnaseq_dir else ()
@@ -81,13 +83,14 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
                                            ("--isoform-dir", options.isoform_dir))
                   if folder is not None for arg in (flag, str(folder)))  # fmt: skip
     gdc_args = (*(a for folder in options.gdc_dirs for a in ("--gdc-dir", str(folder))), *mirna)
-    counts = gdc or options.rnaseq_dir is not None
+    matrix = ("--counts", str(options.counts)) if options.counts else ()
+    counts = gdc or options.rnaseq_dir is not None or bool(matrix)
     has_gtf = any(r.name == "annotation_gtf" for r in spec.resources)
     # Across studies M7 reads M5's fold changes; across samples, gather's counts alone.
     fold_changes = bool(spec.contrasts and spec.de)
     proteo = spec.proteo and counts and (spec.proteo.design == "across_samples" or fold_changes)
     planned: dict[str, tuple[str, ...] | None] = {
-        "gather": base + (gdc_args if gdc else fetchngs + rnaseq),
+        "gather": base + (gdc_args if gdc else matrix or fetchngs + rnaseq),
         "qc": None if gdc else base + rnaseq,
         "quant": base + rnaseq + salmon if rnaseq and has_gtf else None,
         "de": base if spec.contrasts and spec.de and counts else None,
@@ -209,7 +212,7 @@ def _resource(name: str) -> str:
 def _inputs(root: Path, spec: Dataset, options: Options) -> list[Problem]:
     """Outdirs that are not folders, and resources not fetched under the root."""
     problems = []
-    default = None if options.gdc_dirs or spec.gdc else options.dataset_root(root)
+    default = None if options.gdc_dirs or spec.gdc or options.counts else options.dataset_root(root)
     given = (("--fetchngs-dir", options.fetchngs_dir or default),
              ("--rnaseq-dir", options.rnaseq_dir),
              *(("--gdc-dir", folder) for folder in options.gdc_dirs),
@@ -218,6 +221,8 @@ def _inputs(root: Path, spec: Dataset, options: Options) -> list[Problem]:
     for flag, folder in given:
         if folder is not None and not folder.is_dir():
             problems.append(Problem(f"{flag} {folder} is not a folder"))
+    if options.counts is not None and not options.counts.is_file():
+        problems.append(Problem(f"--counts {options.counts} is not a file"))
     problems += _pairing(options) + _projects(spec, options)
     counts = options.rnaseq_dir
     if counts is not None and counts.is_dir() and not (matrix := counts / MATRIX_FILE).is_file():
@@ -245,6 +250,9 @@ def _pairing(options: Options) -> list[Problem]:
         problems.append(Problem("--mirna-dir and --isoform-dir take --gdc-dir"))
     if options.salmon_dir is not None and options.rnaseq_dir is None:
         problems.append(Problem("--salmon-dir takes --rnaseq-dir: quant reads both"))
+    others = (options.fetchngs_dir, options.rnaseq_dir, *options.gdc_dirs, options.salmon_dir)
+    if options.counts is not None and any(f is not None for f in others):
+        problems.append(Problem("--counts is a route of its own: no other input folder"))
     return problems
 
 
@@ -272,6 +280,8 @@ def _curatable(root: Path, spec: Dataset, options: Options) -> bool:
     if spec.sdrf is None or spec.gdc is not None:
         return False
     table = spec.table() or root / spec.resource(spec.sdrf.resource).dest
+    if options.counts is not None:
+        return table.is_file() and options.counts.is_file() and spec.counts is not None
     source = options.fetchngs_dir or options.dataset_root(root)
     return table.is_file() and source.is_dir()
 
@@ -280,9 +290,17 @@ def _curated(
     root: Path, spec: Dataset, options: Options
 ) -> tuple[pl.DataFrame | None, list[Problem]]:
     """The sheet as gather would write it, curated in memory, or every reason it is not."""
-    from ctx.gather import fetchngs, harmonise  # noqa: PLC0415 - heavy; after the runtime profile
+    from ctx.gather import counts_run, fetchngs, harmonise  # noqa: PLC0415 - after the profile
+    from ctx.gather.counts import CountsError  # noqa: PLC0415 - same reason
     from ctx.gather.curation import CurationError  # noqa: PLC0415 - same reason
 
+    if options.counts is not None:
+        try:
+            return counts_run.check(root, spec, options.counts.absolute()).sheet, []
+        except CountsError as error:
+            return None, [Problem(f"counts: {c}: {k}: {d}") for c, k, d in error.problems]
+        except DatasetError as error:
+            return None, [Problem(str(error))]
     source = (options.fetchngs_dir or options.dataset_root(root)).resolve()
     try:
         checked = fetchngs.read(source)

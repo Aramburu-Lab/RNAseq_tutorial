@@ -5,7 +5,9 @@ lines are their Usage blocks' (``USAGE``, filled with the dataset's accessions a
 ``ctx`` lines are built here from option names the CLI parses, and the copy's includes are
 ``rnaseq.COPIED_FILES``. The dataset file fills Parts 1 and 2; the page text is in
 ``content/guide.toml``. Part 1b lays out a student's own FASTQ files where Parts 2 and 3 read a
-download, with ``ctx reads`` on a laptop and the same code run as a file on Kebnekaise.
+download, with ``ctx reads`` on a laptop and the same code run as a file on Kebnekaise. Part 1c
+takes a count matrix from GEO in place of Parts 1 to 3: the download, the sample table from the
+series matrix (``ctx.gather.geo_table``), and ``ctx run --counts``.
 """
 
 import functools
@@ -138,6 +140,17 @@ def needs() -> dict[str, object]:
                             "disk_gb": f"{disk / 1e9:.1f}"}  # fmt: skip
 
 
+# Part 1c: a count matrix from GEO. GEO's series folders group a thousand series under the
+# accession with its last three digits as nnn, as ftp.ncbi.nlm.nih.gov/geo/series/ names them.
+GEO_FTP = "https://ftp.ncbi.nlm.nih.gov/geo/series/${GSE%???}nnn/$GSE"
+GEO_DOWNLOAD = "https://www.ncbi.nlm.nih.gov/geo/download/"
+# NCBI's own raw counts of a human series, as the series' download page names the file.
+NCBI_COUNTS = "${GSE}_raw_counts_GRCh38.p13_NCBI.tsv.gz"
+COUNTS_TEMPLATE = "conf/dataset_template_counts.toml"
+SERIES = "<GEO series, GSE and digits>"
+CLONE = "<your clone of the course repository>"
+SLUG = "<your study's slug>"
+
 # Part 1b: ctx reads as a file on Kebnekaise, whose fetch environment has Python and no ctx.
 OWN_SCRIPT = "src/ctx/gather/own_fastq.py"
 FASTQ_DIR = "<your_fastq_folder>"
@@ -242,6 +255,49 @@ def mine_lines() -> tuple[str, ...]:
     )
 
 
+def matrix_lines(spec: Dataset) -> dict[str, tuple[str, ...]]:
+    """Part 1c's blocks: what the series holds, the size, the download, the table, the run.
+
+    The series and slug are the dataset file's where it is a count matrix's, else placeholders.
+    The size is its own block, so pasting one block never downloads unread; ``ctx run`` takes
+    the matrix with ``--counts`` and runs every module that reads counts.
+    """
+    series = next((a for a in spec.accessions if a.startswith("GSE")), SERIES)
+    slug = spec.slug if spec.counts is not None else SLUG
+    root, file = "~/ctx_$SLUG", "~/ctx_$SLUG/$SLUG.toml"
+    run = ("--dataset", "$SLUG", "--dataset-file", file, "--counts", '"$RAW/$FILE"')
+    return {
+        "find": (
+            f"export CTX_REPO={CLONE} GSE={series} SLUG={slug}",
+            USAGE["fetch_laptop"][1][1],
+            'RAW="$HOME/ctx_$SLUG/data/raw/$SLUG" && mkdir -p "$RAW" && cd "$RAW"',
+            f'curl -fsS "{GEO_DOWNLOAD}?acc=$GSE" | grep -o \'file=[^"&]*\' | sort -u',
+            f'curl -fsS "{GEO_FTP}/suppl/" | grep -o \'href="[^"?/]*"\' | sort -u',
+        ),
+        "size": (
+            f'FILE="{NCBI_COUNTS}"',
+            f'URL="{GEO_DOWNLOAD}?type=rnaseq_counts&acc=$GSE&format=file&file=$FILE"',
+            'curl -fsSIL "$URL" | grep -i content-length',
+        ),
+        "download": (
+            'cd "$RAW" && curl -fL -o "$FILE" "$URL"',
+            f'curl -fL -O "{GEO_FTP}/matrix/${{GSE}}_series_matrix.txt.gz"',
+        ),
+        "table": (
+            'cd "$CTX_REPO" && pixi install -e laptop --frozen',
+            'pixi run -e laptop python -m ctx.gather.geo_table "$RAW/${GSE}_series_matrix.txt.gz" '
+            f"{root}/$SLUG.csv",
+            f"cp {COUNTS_TEMPLATE} {file}",
+        ),
+        "run": (
+            'cd "$CTX_REPO"',
+            ctx_line(root, "setup", "--dataset-file", file),
+            ctx_line(root, "run", *run, "--check"),
+            ctx_line(root, "run", *run),
+        ),
+    }
+
+
 def kit_lines(slug: str) -> tuple[str, ...]:
     """The kit builder on the study's own root (U.7)."""
     return (
@@ -297,7 +353,14 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
     own = Group(text.fill(PAGE, "part1b.group", n=1),
                 (word("part1b.names"), word("part1b.links"), code("part1b.laptop", laptop),
                  code("part1b.cluster", cluster)), lead=word("part1b.lead"))  # fmt: skip
-    return (find(), numbered[0], own, *numbered[1:])
+    lines = matrix_lines(spec)
+    matrix = Group(text.fill(PAGE, "part1c.group", n=1), (
+        word("part1c.what"), word("part1c.where"), code("part1c.find", lines["find"]),
+        code("part1c.size", lines["size"]), code("part1c.download", lines["download"]),
+        word("part1c.table_note"), code("part1c.table", lines["table"]),
+        word("part1c.edit"), code("part1c.run", lines["run"]), word("part1c.other"),
+    ), lead=word("part1c.lead"))  # fmt: skip
+    return (find(), numbered[0], own, matrix, *numbered[1:])
 
 
 def find() -> Group:

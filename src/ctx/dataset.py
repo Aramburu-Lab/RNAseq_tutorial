@@ -15,7 +15,7 @@ from typing import Any
 REQUIRED_COLUMNS = ("donor", "cell_type", "condition")
 TABLES = {
     "dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect",
-    "contrasts", "de", "function", "sanity", "gdc", "clinical", "proteo", "ncrna",
+    "contrasts", "de", "function", "sanity", "gdc", "clinical", "proteo", "ncrna", "counts",
 }  # fmt: skip
 # The count column a GDC STAR - Counts file holds per library protocol (ctx.gather.gdc).
 PROTOCOLS = ("unstranded", "stranded_first", "stranded_second")
@@ -222,6 +222,22 @@ class GdcSpec:
 
 
 @dataclass(frozen=True)
+class CountsSpec:
+    """Where a count matrix from a repository comes from, for ``ctx gather --counts``.
+
+    Attributes:
+        source: The repository, accession and file, as the outputs' READMEs name them.
+        url: Where the file was downloaded from; empty when it is the student's own.
+        annotation: The annotation release the source says its gene IDs come from, quoted
+            from the source; empty where it names none.
+    """
+
+    source: str
+    url: str = ""
+    annotation: str = ""
+
+
+@dataclass(frozen=True)
 class ClinicalSpec:
     """What M10 builds for a GDC dataset: the build list, the endpoint and published numbers.
 
@@ -348,6 +364,7 @@ class Dataset:
     clinical: ClinicalSpec | None = None
     proteo: ProteoSpec | None = None
     ncrna: NcrnaSpec | None = None
+    counts: CountsSpec | None = None
 
     @property
     def name(self) -> str:
@@ -600,6 +617,18 @@ def _gdc(raw: Mapping[str, Any], problems: list[str]) -> GdcSpec | None:
                    biospecimens=optional["biospecimens"])  # fmt: skip
 
 
+def _counts(raw: Mapping[str, Any], problems: list[str]) -> CountsSpec | None:
+    """Parse [counts]: the matrix's source is required, its URL and annotation are not."""
+    source = _need(raw, "source", str, "counts", problems)
+    optional = {k: raw.get(k, "") for k in ("url", "annotation")}
+    problems += [f"counts.{k}: expected str, found {v!r}" for k, v in optional.items()
+                 if not isinstance(v, str)]  # fmt: skip
+    problems += [f"counts.{k}: unknown key" for k in sorted(set(raw) - {"source", *optional})]
+    if source is None or not all(isinstance(v, str) for v in optional.values()):
+        return None
+    return CountsSpec(source, str(optional["url"]), str(optional["annotation"]))
+
+
 def _clinical(raw: Mapping[str, Any], problems: list[str]) -> ClinicalSpec | None:
     """Parse [clinical]."""
     genes = _need(raw, "genes", list, "clinical", problems)
@@ -744,6 +773,9 @@ def load(path: Path) -> Dataset:
     clinical = _clinical(raw["clinical"], problems) if "clinical" in raw else None
     proteo = _proteo(raw["proteo"], names, resources, problems) if "proteo" in raw else None
     ncrna = _ncrna(raw["ncrna"], names, problems) if "ncrna" in raw else None
+    counts_spec = _counts(raw["counts"], problems) if "counts" in raw else None
+    if counts_spec and gdc:
+        problems.append("[counts] and [gdc] are two routes into gather; keep one")
     if "clinical" in raw and "gdc" not in raw:
         problems.append("[clinical] needs [gdc]: M10 reads a GDC project's gather outputs")
     if proteo and proteo.design == "tumour_normal" and not (gdc and gdc.biospecimens):
@@ -770,4 +802,5 @@ def load(path: Path) -> Dataset:
         clinical=clinical,
         proteo=proteo,
         ncrna=ncrna,
+        counts=counts_spec,
     )
