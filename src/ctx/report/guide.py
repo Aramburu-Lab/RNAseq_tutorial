@@ -21,6 +21,7 @@ from ctx.gather import own_fastq
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 from ctx.io.naming import MODULES, stem
+from ctx.proteo import guide as mass_spec
 from ctx.report import text
 from ctx.report.builder import (
     Code,
@@ -297,7 +298,8 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
     own = Group(text.fill(PAGE, "part1b.group", n=1),
                 (word("part1b.names"), word("part1b.links"), code("part1b.laptop", laptop),
                  code("part1b.cluster", cluster)), lead=word("part1b.lead"))  # fmt: skip
-    return (find(), numbered[0], own, *numbered[1:])
+    protein = mass_spec.part(spec, given, len(numbered) + 1)
+    return (find(), numbered[0], own, *numbered[1:], protein)
 
 
 def find() -> Group:
