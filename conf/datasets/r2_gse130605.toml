@@ -66,6 +66,17 @@ bytes = 2235757
 sha256 = "686c10607c94b1727422beca53ac6e669cf49e0791bd59b38fd765a9c5669bd0"
 dest = "resources/gencode/gencode.v50.metadata.EntrezGene.gz"
 
+# HGNC's dated complete set places an NCBI Gene ID that GENCODE's table links to no gene, where it
+# names one annotated gene, never unseating a GENCODE row (D-091; R2.1a, 2026-10-19).
+[[resources]]
+name = "hgnc_complete"
+urls = [
+    "https://storage.googleapis.com/public-download-files/hgnc/archive/archive/monthly/tsv/hgnc_complete_set_2026-10-06.txt",
+]
+bytes = 16973125
+sha256 = "8bf6f686e640dbc864a346484626953621b0500d900d26cd085a35c2782d725d"
+dest = "resources/hgnc/hgnc_complete_set_2026-10-06.txt"
+
 # EDIT: your table's file name, beside this file: one row per sample column of the matrix, its
 # `sample` column holding the matrix's column names.
 [sdrf]

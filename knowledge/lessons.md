@@ -144,3 +144,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Packages that each add a part to one list number it from the list's length and collide: R1 and R3 both made Part 4 of the guide (2026-10-18).
 - A sentence written for the first cohort reads as true on every later one: "N men are kept and flagged by sex" printed 384 men on HNSC. Grep shared content keys for one cohort's words whenever a cohort is added (V, 2026-10-19).
 - A script that inserts text after an anchor runs twice without error when the anchor stays: assert the inserted text is absent first (V, 2026-10-19).
+- A fallback map yields to the primary on conflict: HGNC's rows, put through the shared-gene rule, took 54 GENCODE-placed genes out with them (U, 2026-10-19).
+- An authors' matrix names its columns only in GEO's sample descriptions; a table writer that reads characteristics alone cannot join it (U, 2026-10-19).
+- A search of public files can surface personal data: PXD053789's public spreadsheet appeared to hold names and personal identity numbers. Copy nothing, and report it to the owner (U, 2026-10-19).

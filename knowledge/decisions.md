@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-091 — RSEM expected counts enter when declared, rounded and stated; HGNC's dated set is the fallback map for NCBI Gene IDs
+
+**Date:** 2026-10-19 · **Status:** decided (Rytis 2026-10-18 approved accepting RSEM expected counts rounded)
+
+**Context.** R3.1 met RSEM expected counts, which `--counts` refused; R2.1 left 10.52 % of GSE130605's counts out for want of a map.
+
+**Decision.** `[counts] kind = "rsem_expected"` admits a matrix, one `.genes.results` file or a folder of them, joined on gene ID; only expected_count is read, never TPM or FPKM; values are checked as read, then rounded halves to even, and the page and every README state how many were fractional and the largest change. An undeclared fractional matrix is refused with a hint naming the declaration. HGNC's dated complete set places an NCBI Gene ID only where GENCODE's table links none and it names one annotated gene; it never unseats a GENCODE row.
+
+**Evidence.** GSE130605: 3,503 rows gained, 0 lost. GSE327906 and GSE327166 end to end. 35 planted mutations caught; Step-1's 92 of 92 metrics equal.
+
+**Consequence.** Rejected: NCBI's gene2ensembl (modified the day it was read, no dated archive), and letting HGNC rows share a gene with GENCODE rows, which lost 54 genes in a first version.
+
+---
+
 ## D-090 — M10 states its endpoint from the dataset file and Liu 2018 Table 3's marks; shared page text names no cancer type
 
 **Date:** 2026-10-19 · **Status:** decided
