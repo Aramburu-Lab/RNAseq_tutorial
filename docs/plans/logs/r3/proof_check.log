@@ -1,0 +1,5 @@
+Table S2: 41,071 genes, 123 columns, 60 use_for_correlation
+MaxQuant drops (('reverse', 541), ('contaminant', 93), ('only_by_site', 1417)); mapping {'mapped': 10136, 'no_id': 143, 'no_map': 0, 'several': 279, 'absent': 486, 'shared': 3}; tokens {'0': 480342}
+layer: 9,205 genes by 165 channels (references out)
+channels with both layers: 60 of 60 use_for_correlation columns
+R3-1: median per-gene Pearson 0.3152 over 8,105 genes with at least 10 pairs; Ramberger 2024: 0.29; band 0.05: PASS

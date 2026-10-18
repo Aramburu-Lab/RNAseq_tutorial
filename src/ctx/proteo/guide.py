@@ -39,6 +39,8 @@ def lines(spec: Dataset, given: str) -> dict[str, tuple[str, ...]]:
             'cd "$CTX_REPO"',
             f"{PREPARE} samples --format maxquant --table {EXPORT} "
             f"--member proteinGroups.txt --out {beside}",
+            f"{PREPARE} samples --format maxquant --table {EXPORT} "
+            f'--quantity "Reporter intensity corrected" --out {beside}',
             f"{PREPARE} samples --format diann --table {EXPORT} --out {beside}",
         ),
         "block": tuple(pipeline.block("[proteo]", slug=spec.slug).splitlines()),
@@ -57,5 +59,5 @@ def part(spec: Dataset, given: str, n: int) -> Group:
     items: list[Code | str] = [word("mass_spec.formats"), word("mass_spec.missing")]
     for key in ("list", "fetch", "samples", "block", "run"):
         items.append(Code(word(f"mass_spec.{key}"), "\n".join(found[key]) + "\n"))
-    items.append(word("mass_spec.check"))
+    items += [word("mass_spec.rows"), word("mass_spec.check")]
     return Group(text.fill(PAGE, "mass_spec.group", n=n), tuple(items), lead=word("mass_spec.lead"))
