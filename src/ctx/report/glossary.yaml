@@ -516,6 +516,18 @@
     symbols map to several IDs and vice versa.
   see_also: [gencode, annotation]
 
+- id: ncbi_gene_id
+  term: NCBI Gene ID
+  aliases: [Entrez gene ID, Entrez ID, GeneID]
+  category: genome
+  short: NCBI's number for a gene, such as 7157 for TP53; GEO's own count tables use it.
+  long: >-
+    NCBI Gene gives each gene one number, used by GEO's generated count tables. GENCODE lists the
+    NCBI Gene ID of each of its transcripts, so a table keyed by it maps onto Ensembl IDs
+    through that list. An ID matching several Ensembl genes, or none, is not placed.
+  source: NCBI Gene record 7157 (TP53), ncbi.nlm.nih.gov/gene/7157
+  see_also: [ensembl_id, gencode]
+
 - id: gene_model
   term: gene model
   aliases: [collapsed gene model, transcript model]

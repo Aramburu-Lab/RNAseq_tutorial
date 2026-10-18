@@ -18,7 +18,7 @@ import polars as pl
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
-from ctx.gather import gdc
+from ctx.gather import counts, gdc
 from ctx.io.naming import MODULES, stem
 from ctx.qc import Fastp, QcError, checkpoint, fastqc, fates, multiqc_io, reads
 from ctx.qc import registry as reg
@@ -406,6 +406,10 @@ def run(
     inputs = gathered_tables(settings.root, dataset)
     gathered = read_gathered(inputs)
     sheet = checkpoint.length_groups(gathered["samplesheet"], bool(spec.batch_bins))
+    if options.reads and (
+        refused := counts.refuse_sheet(sheet, inputs["samplesheet"], "qc --reads")
+    ):
+        raise QcError(refused[0])
     if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
         raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
     measured, notes = counts_stage(settings, spec, gathered, options)

@@ -1,0 +1,173 @@
+# R2's proof (wo13-r2, 2026-10-18): GEO GSE130605 through the guide's Part 1c, every line
+# below written by its commands or by the EDIT lines of conf/dataset_template_counts.toml.
+# Its table, r2_gse130605.csv, is ctx.gather.geo_table's from the series matrix, donors by
+# --donor-pattern '_(\d+)$'. The [sanity] block is docs/plans/logs/wo13_r2/registration.toml's.
+
+# A dataset file for a count matrix from a repository (GEO, ArrayExpress, recount3) or from your
+# own pipeline, read by `ctx gather --counts <matrix>`. Copy it beside your sample table, give
+# both your study's name, and edit each line marked EDIT; `ctx run --check --counts <matrix>`
+# then lists what is still missing. The guide's Part 1c writes the table from a GEO series.
+#
+# The matrix: genes by samples, gene IDs in the first column, one column per sample, raw
+# counts (whole numbers). gather refuses FPKM, TPM, CPM and log values, and says how it told.
+# Gene IDs may be Ensembl (with or without a version), NCBI Gene IDs, or symbols; each is
+# placed on the annotation below, and what does not place is listed with its counts.
+
+[dataset]
+# EDIT: lowercase letters, digits and underscores; it names every output file.
+slug = "r2_gse130605"
+# EDIT: the name the pages show.
+label = "Laryngeal squamous carcinoma and paired mucosa (GEO)"
+# EDIT: the study's accession, e.g. its GEO series; `ctx guide` fills Part 1c with the first.
+accessions = ["GSE130605"]
+
+# The study's own accessions, which tests/test_repo.py keeps out of the code.
+[guard]
+ids = ["GSE130605", "PRJNA540754", "SRP194501"]
+patterns = ['\bGSM37446[3-9]\d\b', '\bGSM37447[0-3]\d\b']
+
+# EDIT: where the matrix comes from, as every table's README names it.
+[counts]
+# The repository, the accession and the file.
+source = "GEO GSE130605, NCBI-generated raw counts, GSE130605_raw_counts_GRCh38.p13_NCBI.tsv.gz"
+# The address it was downloaded from; empty for your own pipeline's file.
+url = "https://www.ncbi.nlm.nih.gov/geo/download/?type=rnaseq_counts&acc=GSE130605&format=file&file=GSE130605_raw_counts_GRCh38.p13_NCBI.tsv.gz"
+# The annotation release the source names for its gene IDs, quoted from its page.
+annotation = "NCBI GRCh38.p13, Annotation Release 109.20190905 (GEO download page)"
+
+# Gene sets for `ctx function` and the annotation the gene IDs are placed on: Step-1's.
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# GENCODE's NCBI Gene ID of each transcript, of the same release: GEO's own count tables are
+# keyed by NCBI Gene IDs, which reach the annotation through it. Delete it for Ensembl IDs or
+# symbols; gather asks for it when the matrix holds NCBI Gene IDs.
+[[resources]]
+name = "gencode_entrez"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.metadata.EntrezGene.gz",
+]
+bytes = 2235757
+sha256 = "686c10607c94b1727422beca53ac6e669cf49e0791bd59b38fd765a9c5669bd0"
+dest = "resources/gencode/gencode.v50.metadata.EntrezGene.gz"
+
+# EDIT: your table's file name, beside this file: one row per sample column of the matrix, its
+# `sample` column holding the matrix's column names.
+[sdrf]
+file = "r2_gse130605.csv"
+join = ["sample", "sample"]
+
+# A matrix sample is one library of one individual. Without a donor column of your own, the
+# Part 1c table sets each sample as its own donor.
+[columns.donor]
+source = "donor"
+meaning = "Individual the sample came from."
+
+# EDIT: the table's column for the tissue or cell type, and its values in your words.
+[columns.cell_type]
+source = "source_name"
+meaning = "Cell type or tissue sampled."
+values = { "LSCC tissue" = "larynx", "adjacent normal mucosa tissue" = "larynx" }
+
+# EDIT: the table's column for the condition; `values` maps each value as the table spells it.
+[columns.condition]
+source = "source_name"
+meaning = "Donor state, treatment or disease."
+values = { "LSCC tissue" = "tumour", "adjacent normal mucosa tissue" = "normal" }
+
+# ctx run --check prints the [[contrasts]], [de] and [function] lines to paste here, filled
+# from your samples (conf/dataset_template.toml holds their blocks).
+
+[[contrasts]]
+name = "tumour_normal"
+variable = "condition"
+reference = "normal"
+tested = "tumour"
+n = [50, 50]
+paired = true
+design = "~donor + group"
+
+[de]
+featured = "tumour_normal"
+
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+running = ["tumour_normal", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
+
+#
+# Source, read in full on 2026-10-18 through PubMed Central (PMC10188209): Zheng et al. 2023,
+# Front Oncol 13:1106249, doi:10.3389/fonc.2023.1106249, Results, "Construction and validation
+# of a seven-lncRNAs panel": the seven lncRNAs "were significantly upregulated in LSCC tissues
+# compared to normal counterparts in both the Shanxi and TCGA cohorts". The Shanxi cohort is
+# 107 LSCC and paired adjacent normal mucosa; GEO's series holds 50 of those pairs (titles 78
+# to 127), the paper's differential test was DESeq2 at p < 0.05 and |fold change| >= 2 on
+# TopHat/Cufflinks GRCh37 quantification. This run counts NCBI's own raw counts on GRCh38.p13,
+# Annotation Release 109.20190905 (GEO's download page), so the conditions are the course's:
+# raw log2 FC >= 1 and BH padj < 0.05, tumour over normal, paired by patient.
+# Corrected 12:20, after registration and before any run, conditions unchanged: the first
+# text named HISAT2 as NCBI's aligner from memory; NCBI's pipeline page answered with a
+# CAPTCHA, which was not attempted, so the aligner is not stated. Thresholds are M5's ALPHA 0.05 and LFC_MIN 1, not tuned.
+# Not blind in one respect: the seven names were checked present in GENCODE 50 (gene_name),
+# no expression value of the study was read. A gene absent from NCBI's counts, or left out by
+# gather's mapping, is NOT MEASURED, never PASS.
+[sanity]
+registered_on = "2026-10-18 12:14"
+
+[[sanity.rules]]
+id = "LSCC.ensg00000233397"
+text = "ENSG00000233397 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.ENSG00000233397.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.ENSG00000233397.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.barx1_dt"
+text = "BARX1-DT is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.BARX1-DT.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.BARX1-DT.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.lsamp_as1"
+text = "LSAMP-AS1 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.LSAMP-AS1.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.LSAMP-AS1.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.hoxb_as4"
+text = "HOXB-AS4 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.HOXB-AS4.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.HOXB-AS4.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.mnx1_as1"
+text = "MNX1-AS1 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.MNX1-AS1.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.MNX1-AS1.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.linc01385"
+text = "LINC01385 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.LINC01385.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.LINC01385.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.linc02893"
+text = "LINC02893 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.LINC02893.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.LINC02893.padj", op = "<", value = 0.05 }]

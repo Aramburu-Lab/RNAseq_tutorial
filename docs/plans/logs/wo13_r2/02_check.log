@@ -1,0 +1,10 @@
+- no [[contrasts]]: de and function have nothing to compare
+  add these lines to the dataset file:
+[[contrasts]]
+name = "tumour_normal"
+variable = "condition"
+reference = "normal"
+tested = "tumour"
+n = [50, 50]
+
+1 problems, 0 of them stopping the run; ctx run runs: gather, qc, report

@@ -1,0 +1,30 @@
+CAUGHT fractional refused: 1 failed, 23 deselected in 9.30s
+CAUGHT negative refused: 1 failed, 1 passed, 24 deselected in 1.76s
+CAUGHT scaled sums refused: 1 failed, 2 passed, 24 deselected in 1.60s
+CAUGHT tolerance edge <=: 1 failed, 29 deselected in 2.49s
+CAUGHT missing refused: 1 failed, 4 passed, 24 deselected in 3.27s
+CAUGHT duplicate gene by stable ID: 1 failed, 29 deselected in 2.73s
+CAUGHT duplicate sample: 1 failed, 29 deselected in 2.15s
+CAUGHT ensembl by stable part: 1 failed, 29 deselected in 4.07s
+CAUGHT ambiguous left out: 1 failed, 29 deselected in 1.77s
+CAUGHT shared gene left out: 1 failed, 29 deselected in 3.07s
+CAUGHT entrez through GTF: 1 failed, 29 deselected in 3.60s
+CAUGHT entrez needs table: 1 failed, 29 deselected in 2.04s
+CAUGHT version tally: 1 failed, 29 deselected in 8.39s
+CAUGHT featureCounts columns: 1 failed, 29 deselected in 4.14s
+CAUGHT summary rows removed: 1 failed, 29 deselected in 2.12s
+CAUGHT csv by ending: 1 failed, 29 deselected in 2.00s
+CAUGHT text cell named: 1 failed, 29 deselected in 2.35s
+CAUGHT left-out counts kept: 1 failed, 28 deselected in 8.21s
+CAUGHT matrix sheet marked: 1 failed, 27 deselected in 5.33s
+CAUGHT process refuses: 1 failed, 28 deselected in 13.63s
+CAUGHT quant refuses: 1 failed, 28 deselected in 18.09s
+CAUGHT qc --reads refuses: 1 failed, 28 deselected in 22.26s
+CAUGHT ctx run carries --counts: 1 failed, 29 deselected in 3.01s
+CAUGHT ctx run counts for de: 1 failed, 29 deselected in 1.95s
+CAUGHT --check reads the matrix: 1 failed, 29 deselected in 1.34s
+CAUGHT guide slug placeholder: 1 failed, 29 deselected in 1.58s
+CAUGHT guide size apart: 1 failed, 29 deselected in 1.35s
+CAUGHT geo donor pattern refused: 1 failed, 29 deselected in 1.55s
+CAUGHT geo key normalised: 1 failed, 29 deselected in 1.46s
+29 of 29 caught
