@@ -1,2 +1,7 @@
 pixi install --manifest-path /Users/rytis/ctx_r1_clone/pixi.toml -e fetch --frozen
 pixi install -e laptop --frozen
+pixi run -e laptop ctx --root /Users/rytis/ctx_tcga_hnsc setup --dataset-file conf/datasets/tcga_hnsc.toml
+pixi run -e laptop ctx --root /Users/rytis/ctx_tcga_hnsc run --dataset tcga_hnsc --dataset-file conf/datasets/tcga_hnsc.toml --gdc-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc --mirna-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_mirna --isoform-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_isoform --check
+pixi run -e laptop ctx --root /Users/rytis/ctx_tcga_hnsc setup --dataset-file conf/datasets/tcga_hnsc.toml
+pixi run -e laptop ctx --root /Users/rytis/ctx_tcga_hnsc run --dataset tcga_hnsc --dataset-file conf/datasets/tcga_hnsc.toml --gdc-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc --mirna-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_mirna --isoform-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_isoform --check
+pixi run -e laptop ctx --root /Users/rytis/ctx_tcga_hnsc run --dataset tcga_hnsc --dataset-file conf/datasets/tcga_hnsc.toml --gdc-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc --mirna-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_mirna --isoform-dir /Users/rytis/ctx_tcga_hnsc/data/raw/tcga_hnsc_isoform

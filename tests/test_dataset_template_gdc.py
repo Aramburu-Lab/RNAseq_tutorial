@@ -6,11 +6,12 @@ the folders are tests/gdc_fixture.py's made-up project. Each test names the muta
 
 import importlib.util
 import tomllib
+import zipfile
 from pathlib import Path
 
 import gdc_mirna_fixture as mirna_fixture
 import pytest
-from gdc_fixture import PROJECT, RELEASE, aliquot, build, write_cdr
+from gdc_fixture import GENES, PROJECT, RELEASE, aliquot, build, write_cdr
 
 from ctx import pipeline
 from ctx.dataset import load
@@ -27,6 +28,10 @@ CDR_COLUMNS = ("bcr_patient_barcode", "type", "OS", "OS.time", "PFI", "PFI.time"
 # The made-up CDR's flags, per patient of STAR, then their Table 3 count, typed apart.
 FLAGS = {"OS": (1, 0, 1), "PFI": (0, 0, 1), "DFI": (0, "#N/A", 0), "DSS": (1, 0, 0)}
 TABLE3 = {"OS": (2, 1), "PFI": (1, 2), "DFI": (0, 2), "DSS": (1, 2)}
+# TargetScan's family file as M8 reads it: human rows by taxon, the miRBase name and accession.
+FAMILIES = ("miR family\tSeed+m8\tSpecies ID\tMiRBase ID\tMature sequence\tFamily Conservation?"
+            "\tMiRBase Accession\nmiR-375\tUUGUUCG\t9606\thsa-miR-375\tUUUGUUCG\t2\tMIMAT0000728"
+            "\nmiR-375\tUUGUUCG\t10090\tmmu-miR-375-3p\tUUUGUUCG\t2\tMIMAT0000739\n")  # fmt: skip
 
 
 def _raw(path: Path) -> dict:
@@ -78,6 +83,9 @@ def _copied(tmp_path: Path, **gdc_values: str) -> Path:
     """The template copied, its placeholders replaced by the made-up project's values."""
     raw = _raw(TEMPLATE)
     text = TEMPLATE.read_text().replace(raw["gdc"]["project"], PROJECT)
+    # The made-up counts files hold genes G1 to G12, not the template's MKI67.
+    genes = ", ".join(f'"{g}"' for g in raw["clinical"]["genes"])
+    text = text.replace(f"genes = [{genes}]", f'genes = ["{GENES[0][1]}"]')
     for key, value in gdc_values.items():
         text = text.replace(f'{key} = "{raw["gdc"][key]}"', f'{key} = "{value}"')
     path = tmp_path / "mine.toml"
@@ -107,6 +115,9 @@ def _check(tmp_path, star, path):
     for resource in spec.resources:
         (tmp_path / "root" / resource.dest).parent.mkdir(parents=True, exist_ok=True)
         (tmp_path / "root" / resource.dest).touch()
+        if resource.name == "targetscan_families":
+            with zipfile.ZipFile(tmp_path / "root" / resource.dest, "w") as archive:
+                archive.writestr("miR_Family_Info.txt", FAMILIES)
     options = pipeline.Options(spec.slug, path, gdc_dirs=(star,),
                                mirna_dir=Path(f"{star}_mirna"),
                                isoform_dir=Path(f"{star}_isoform"))  # fmt: skip
@@ -165,3 +176,28 @@ def test_check_says_when_table3_differs_and_when_rules_lack_a_time(tmp_path, fol
     (differ,) = [p for p in problems if p.text.startswith("[clinical.published.table3]")]
     assert differ.text.startswith("[clinical.published.table3]: PFI differ")
     assert any(p.text.startswith("[sanity] registered_on is 'today'") for p in problems)
+
+
+@pytest.mark.skipif(not XLSX, reason="openpyxl ==3.1.5 is pinned in pixi.toml; run pixi install")
+def test_check_names_a_misspelt_gene_or_mirna(tmp_path, folders):
+    """A gene symbol the counts files lack, in [clinical] or a rule, and a miRNA name TargetScan's
+    human family rows lack, in [ncrna] or its rules, each stop the run with the closest names.
+    Catches a misspelt name left to drop out of a page, or a rule NOT MEASURED, in silence."""
+    text = _copied(tmp_path, release=RELEASE, cdr_type="BRCA").read_text()
+    text = text.replace("n = [0, 0]", "n = [2, 2]")
+    for endpoint, (events, censored) in TABLE3.items():
+        text = text.replace(f"{endpoint} = [0, 0]", f"{endpoint} = [{events}, {censored}]")
+    text = text.replace(f'genes = ["{GENES[0][1]}"]', 'genes = ["G1", "G13"]')
+    text = text.replace("mirnas = []", 'mirnas = ["hsa-miR-375-3p"]')
+    text += ('\n[[sanity.rules]]\nid = "x"\ntext = "x"\nsource = "x"\nconditions = [{ metric = '
+             '"gene.tumour_normal.G2X.lfc", op = ">", value = 0 }]\n')  # fmt: skip
+    path = tmp_path / "mine.toml"
+    path.write_text(text)
+    stops = sorted(p.text for p in _check(tmp_path, folders, path)[0] if p.blocks)
+    heads = ("[[sanity.rules]]: 'G2X' is not a gene symbol of the counts files; the closest are G2",
+             "[clinical] genes: 'G13' is not a gene symbol of the counts files; the closest are G3",
+             "[ncrna] mirnas and rules: 'hsa-miR-375-3p' is not a human miRBase name in "
+             "TargetScan's family file; the closest are hsa-miR-375")  # fmt: skip
+    assert len(stops) == len(heads) and all(
+        s.startswith(h) for s, h in zip(stops, heads, strict=True)
+    ), stops

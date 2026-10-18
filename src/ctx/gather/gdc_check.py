@@ -7,16 +7,20 @@ one ``ctx de`` will count. Each problem carries the lines that fix it, from
 counts are the CDR's own, printed so the student can hold them against Liu et al. 2018's paper.
 """
 
+import difflib
 import json
 import re
 import tomllib
+from collections.abc import Iterable, Mapping
 from pathlib import Path
+from typing import Any
 
 import polars as pl
 
 from ctx.clinical import harmonise
 from ctx.dataset import Contrast, Dataset, DatasetError, GdcSpec
 from ctx.gather import gdc, gdc_mirna, gdc_run
+from ctx.ncrna import targets
 from ctx.pipeline import TEMPLATE, Options, Problem, realised
 from ctx.qc import registry
 
@@ -26,6 +30,10 @@ REGISTERED = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}")
 ZEROS = (0, 0)
 # Table 3's column order, so the counts read as the paper prints them.
 TABLE3 = ("OS", "PFI", "DFI", "DSS")
+# The gene or miRNA a [sanity] metric names, as M5 and M8 record them.
+GENE_METRIC = re.compile(r"^gene\.[^.]+\.(.+)\.(?:lfc|padj)$")
+MIRNA_METRIC = re.compile(r"^(?:mirna\.(.+)\.(?:lfc|padj)|pair\.([^.]+)\..+)$")
+FAMILIES = "targetscan_families"
 
 
 def table(heading: str, **values: int) -> str:
@@ -53,14 +61,54 @@ def template_contrast() -> Contrast:
                     expected_n=ZEROS, design=entry["design"], paired=entry["paired"])  # fmt: skip
 
 
-def _sheet(path: Path, spec: GdcSpec) -> pl.DataFrame:
-    """The STAR sheet gather would write for one folder, every check but the MD5s run."""
+def _sheet(path: Path, spec: GdcSpec) -> tuple[pl.DataFrame, set[str]]:
+    """The STAR sheet gather would write for one folder, and its genes' symbols; no MD5s."""
     metric = registry.load(registry.resolve(None)).metrics[gdc.STRAND_METRIC]
     folder = gdc.read_folder(path, spec)
     counts = gdc.read_counts(folder, spec)
     notes = gdc.annotations(path / gdc.ANNOTATIONS, folder.files)
-    return gdc_run.build_sheet(folder, counts, notes, spec, metric,
-                               gdc.library_selection(path, spec))  # fmt: skip
+    sheet = gdc_run.build_sheet(folder, counts, notes, spec, metric,
+                                gdc.library_selection(path, spec))  # fmt: skip
+    return sheet, set(counts.genes["gene_name"].drop_nulls())
+
+
+def _metrics(rules: Iterable[Mapping[str, Any]]) -> list[str]:
+    """Every metric the conditions of a [sanity]-shaped table's rules name."""
+    return [str(c.get("metric", "")) for r in rules for c in r.get("conditions", [])]
+
+
+def _unknown(where: str, names: Iterable[str], known: set[str], what: str) -> list[Problem]:
+    """A problem per name that is not among ``known``, with the closest names that are."""
+    problems = []
+    for name in dict.fromkeys(names):
+        if name not in known:
+            close = difflib.get_close_matches(name, sorted(known), n=3)
+            hint = f"; the closest are {', '.join(close)}" if close else ""
+            problems.append(Problem(f"{where}: {name!r} is not {what}{hint}"))
+    return problems
+
+
+def _names(root: Path, spec: Dataset, genes: set[str]) -> list[Problem]:
+    """Gene symbols and miRNA names the dataset file names, against the ones the files spell.
+
+    A misspelt name is never an error later: the page leaves the gene out, and a rule on it is
+    NOT MEASURED. Genes are the counts files' own symbols; miRNAs are TargetScan's human
+    miRBase names, the ones M8 reads, once ``ctx setup`` has fetched the family file.
+    """
+    symbols = [m.group(1) for m in map(GENE_METRIC.match, _metrics(spec.sanity.get("rules", [])))
+               if m]  # fmt: skip
+    problems = _unknown("[clinical] genes", spec.clinical.genes if spec.clinical else (), genes,
+                        "a gene symbol of the counts files")  # fmt: skip
+    problems += _unknown("[[sanity.rules]]", symbols, genes, "a gene symbol of the counts files")
+    families = [r for r in spec.resources if r.name == FAMILIES]
+    if spec.ncrna is None or not families or not (root / families[0].dest).is_file():
+        return problems
+    known = set(targets.read_names(root / families[0].dest).values())
+    metrics = _metrics(spec.ncrna.sanity.get("rules", []))
+    found = [m.group(1) or m.group(2) for m in map(MIRNA_METRIC.match, metrics) if m]
+    what = "a human miRBase name in TargetScan's family file"
+    return problems + _unknown("[ncrna] mirnas and rules", [*spec.ncrna.mirnas, *found], known,
+                               what)  # fmt: skip
 
 
 def _mirna_sheet(options: Options, spec: GdcSpec, star: Path, rna: pl.DataFrame) -> pl.DataFrame:
@@ -149,7 +197,7 @@ def _missing(spec: Dataset) -> list[Problem]:
     return problems
 
 
-def check(spec: Dataset, options: Options) -> list[Problem]:
+def check(spec: Dataset, options: Options, root: Path) -> list[Problem]:
     """Every problem a GDC dataset's folders show, each with its lines where lines fix it.
 
     Folders gather would refuse for their project are ``pipeline._projects``'s to name; this
@@ -160,19 +208,22 @@ def check(spec: Dataset, options: Options) -> list[Problem]:
     if unmatched or not by:
         return []
     problems = _missing(spec)
-    sheets = []
+    sheets, genes = [], set()
     for project in spec.gdc.projects:
         one, path = spec.gdc.one(project), by[project]
         if release := _release(path, one):
             problems += release
             continue
         try:
-            sheets.append(_sheet(path, one))
+            sheet, symbols = _sheet(path, one)
+            sheets.append(sheet)
+            genes |= symbols
             problems += _cdr(path, spec, one)
         except (gdc.GdcError, DatasetError) as error:
             problems.append(Problem(str(error)))
     if len(sheets) != len(spec.gdc.projects):
         return problems
+    problems += _names(root, spec, genes)
     combined = pl.concat(sheets, how="diagonal_relaxed")
     sheet = combined.with_columns(run_accession=gdc.run_accession())
     if not spec.contrasts:

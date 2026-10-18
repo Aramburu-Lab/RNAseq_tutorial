@@ -227,8 +227,9 @@ RESOURCES = {
     "fetchngs.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
     "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "12G", "-t": "1-00:00:00"},
     "subsample.sbatch": {"-n": "1", "-c": "2", "--mem": "8G", "-t": "0-04:00:00"},
-    # R1: one core for curl and the end check; two hours, about ten times a laptop's 665 s.
-    "fetch_gdc.sbatch": {"-n": "1", "-c": "1", "--mem": "2G", "-t": "0-02:00:00"},
+    # R1: one core for curl and the end check; six hours, 3.6 times the slowest laptop fetch,
+    # 5,965 s for 2.65 GB on 2026-10-18 (GDC served 665 s for 2.6 GB on 2026-10-01).
+    "fetch_gdc.sbatch": {"-n": "1", "-c": "1", "--mem": "2G", "-t": "0-06:00:00"},
 }
 
 

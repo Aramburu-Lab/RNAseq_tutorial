@@ -3,12 +3,13 @@
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH --mem=2G
-#SBATCH -t 0-02:00:00
+#SBATCH -t 0-06:00:00
 #SBATCH -o slurm-%x-%j.out
 # /// codebase-meta
 # exempt: runs on Kebnekaise or a laptop into a ctx root's data/raw folder, never into outputs/
 # ///
-# Two hours: the kidney project's STAR files, 2.6 GB, took 665 s on a laptop (2026-10-01).
+# Six hours: one head and neck project's three kinds, 2.65 GB, took 5,965 s on a laptop
+# (2026-10-18), where the kidney project's STAR files, 2.6 GB, had taken 665 s (2026-10-01).
 # 2 GB: the end check holds one project's clinical record, 10.7 MB for breast, the largest.
 # The open-access GDC files of one project, laid out as ctx gather --gdc-dir, --mirna-dir and
 # --isoform-dir read them: STAR - Counts in <folder>, with the file metadata, manifest, clinical

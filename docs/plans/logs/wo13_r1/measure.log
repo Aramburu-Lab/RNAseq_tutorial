@@ -1,0 +1,8 @@
+folder	pages	bytes	largest page bytes	wall	peak RSS self	peak RSS children
+00_setup	1	202,703	202,703	1.300 s	79.2 MiB (83051672 bytes)	5.8 MiB (6029312 bytes)
+01_gather	1	209,261	209,261	16.128 s	1129.9 MiB (1184794616 bytes)	5.9 MiB (6160384 bytes)
+05_de	5	36,318,793	10,627,570	41.192 s	598.8 MiB (627836896 bytes)	302.7 MiB (317390848 bytes)
+06_function	7	33,787,550	6,936,209	11.308 s	390.2 MiB (409110040 bytes)	5.8 MiB (6094848 bytes)
+08_ncrna	8	54,695,931	11,089,298	28.577 s	1463.8 MiB (1534888864 bytes)	257.1 MiB (269615104 bytes)
+09_report	2	603,657	408,110	none	none	none
+12_clinical	8	52,177,674	13,037,703	19.669 s	1165.6 MiB (1222231936 bytes)	5.8 MiB (6094848 bytes)

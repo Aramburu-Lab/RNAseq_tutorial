@@ -320,5 +320,5 @@ def check(root: Path, options: Options) -> tuple[list[Problem], list[str]]:
     if spec.gdc is not None and options.gdc_dirs and not any(p.blocks for p in problems):
         from ctx.gather import gdc_check  # noqa: PLC0415 - heavy; reads the GDC folders
 
-        problems += gdc_check.check(spec, options)
+        problems += gdc_check.check(spec, options, root)
     return problems, modules

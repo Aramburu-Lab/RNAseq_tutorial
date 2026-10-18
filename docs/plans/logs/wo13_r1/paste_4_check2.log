@@ -1,0 +1,25 @@
+=== 2026-10-18T12:01:21Z paste_2_env.sh
+=== 2026-10-18T12:01:21Z paste_4_check.sh
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_environment_v1.html
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_versions_v1.parquet
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_versions_v1.csv
+/Users/rytis/ctx_tcga_hnsc/outputs/00_setup/2026-10-18_setup_versions_v1_README.md
+0 problems, 0 of them stopping the run; ctx run runs: gather, de, function, ncrna, clinical, report
+        8.95 real        10.79 user         2.06 sys
+          1084129280  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              278264  page reclaims
+                  33  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  87  voluntary context switches
+              219354  involuntary context switches
+            25210708  instructions retired
+            13592696  cycles elapsed
+             1540456  peak memory footprint
