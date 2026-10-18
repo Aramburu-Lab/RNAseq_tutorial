@@ -7,9 +7,12 @@
 # compared to normal counterparts in both the Shanxi and TCGA cohorts". The Shanxi cohort is
 # 107 LSCC and paired adjacent normal mucosa; GEO's series holds 50 of those pairs (titles 78
 # to 127), the paper's differential test was DESeq2 at p < 0.05 and |fold change| >= 2 on
-# TopHat/Cufflinks GRCh37 quantification. This run counts NCBI's own HISAT2 raw counts on
-# GRCh38.p13, so the conditions are the course's: raw log2 FC >= 1 and BH padj < 0.05, tumour
-# over normal, paired by patient. Thresholds are M5's ALPHA 0.05 and LFC_MIN 1, not tuned.
+# TopHat/Cufflinks GRCh37 quantification. This run counts NCBI's own raw counts on GRCh38.p13,
+# Annotation Release 109.20190905 (GEO's download page), so the conditions are the course's:
+# raw log2 FC >= 1 and BH padj < 0.05, tumour over normal, paired by patient.
+# Corrected 12:20, after registration and before any run, conditions unchanged: the first
+# text named HISAT2 as NCBI's aligner from memory; NCBI's pipeline page answered with a
+# CAPTCHA, which was not attempted, so the aligner is not stated. Thresholds are M5's ALPHA 0.05 and LFC_MIN 1, not tuned.
 # Not blind in one respect: the seven names were checked present in GENCODE 50 (gene_name),
 # no expression value of the study was read. A gene absent from NCBI's counts, or left out by
 # gather's mapping, is NOT MEASURED, never PASS.
