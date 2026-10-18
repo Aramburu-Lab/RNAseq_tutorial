@@ -1,0 +1,11 @@
+{# A figure's Reproduce panel (Phase 2D): commands generated from its FigureSpec, never typed;
+   the pasted block has no set -e, the downloaded script sets -euo pipefail. #}
+{% set r = f.reproduce %}
+<details class="repro">
+<summary>{{ r.summary }}</summary>
+<p>{{ r.lead }}</p>
+<div class="command"><pre><code id="ctx-repro-{{ f.index }}">{{ r.pasted }}</code></pre><button type="button" class="copy" data-copy="ctx-repro-{{ f.index }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div>
+<p><a download="{{ r.name }}" href="data:text/x-shellscript;base64,{{ r.script }}">{{ r.download }}</a></p>
+<p class="note">{{ r.note }}</p>
+<details class="repro-upstream"><summary>{{ r.upstream_title }}</summary><div class="command"><pre><code>{{ r.upstream }}</code></pre></div></details>
+</details>

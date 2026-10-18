@@ -7,7 +7,7 @@ from typing import Any, Protocol
 
 import polars as pl
 
-from ctx.figures import record
+from ctx.figures import panel, record
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
 from ctx.report import export, glossary
@@ -26,6 +26,8 @@ from ctx.viz.style import THEMES, Theme
 NO_TEXT = FigureText()
 # The contracts that can carry page controls and draw their changed view (D-033, D-051).
 CONTROLLED = (ScatterData, LinkedData, BarData, CurveData, SurfaceData, KmData)
+# The Reproduce panel of each figure this process wrote with a spec, by stem (Phase 2D).
+_PANELS: dict[str, dict[str, str]] = {}
 
 
 class Figure(Protocol):
@@ -178,6 +180,7 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
     return FigureBlock(
         figure, data.caption_text(), data.page_table().to_dicts(), f"{figure_stem}.csv",
         text=text, stem=figure_stem, controls=controls, below=below,
+        reproduce=_PANELS.get(figure_stem),
     )  # fmt: skip
 
 
@@ -243,5 +246,8 @@ def write_figure(
     if (spec := record.describe(figure_stem, directory, table[0])) is not None:
         with table[-1].open("a") as readme:
             readme.write("\n" + record.readme(spec))
+        # The module builds its page's block in a second call, figure_block, by this stem.
+        _PANELS[figure_stem] = panel.block(spec)
+        block = replace(block, reproduce=_PANELS[figure_stem])
     page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     return [*(rendered[(t, ext)] for ext in ("pdf", "svg") for t in THEMES), page, *table]

@@ -244,6 +244,7 @@ def prepare(
         "characters": carried,
         "defaults": defaults(block.controls) if block.controls else None,
         "select": controls.get("select") if controls else None,
+        "reproduce": block.reproduce,
     }
 
 

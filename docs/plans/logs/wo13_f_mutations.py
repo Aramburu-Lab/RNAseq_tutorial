@@ -10,6 +10,7 @@ from pathlib import Path
 
 W = Path(__file__).resolve().parents[3]
 FIG = "tests/test_figures.py"
+PANEL = "tests/test_figure_panel.py"
 MUTATIONS = {
     "f1": [
         (
@@ -77,6 +78,57 @@ MUTATIONS = {
             f"{FIG}::test_ids_round_trip",
         ),
     ],
+    "f2": [
+        (
+            "pasted block stops the shell",
+            "src/ctx/figures/panel.py",
+            '        *_environment(spec), "",\n',
+            '        "set -e", *_environment(spec), "",\n',
+            f"{PANEL}::test_pasted_block_never_stops_the_shell_and_the_script_does",
+        ),
+        (
+            "script without pipefail",
+            "src/ctx/figures/panel.py",
+            'SCRIPT_HEAD = "#!/usr/bin/env bash\\nset -euo pipefail\\n"',
+            'SCRIPT_HEAD = "#!/usr/bin/env bash\\n"',
+            f"{PANEL}::test_pasted_block_never_stops_the_shell_and_the_script_does",
+        ),
+        (
+            "data hash of another file",
+            "src/ctx/figures/record.py",
+            "data_sha256=sha256(data_csv)",
+            "data_sha256=sha256(paths['dataset_file'])",
+            f"{PANEL}::test_the_downloaded_script_redraws_the_data_byte_for_byte",
+        ),
+        (
+            "copy line under the wrong base",
+            "src/ctx/figures/panel.py",
+            "        return f'cp \"$ROOT/{item.source}\" .'\n",
+            "        return f'cp \"$ROOT/outputs/{item.source}\" .'\n",
+            f"{PANEL}::test_the_downloaded_script_redraws_the_data_byte_for_byte",
+        ),
+        (
+            "an input left out",
+            "src/ctx/figures/panel.py",
+            "        *(_copy(i) for i in spec.inputs),\n",
+            "        *(_copy(i) for i in spec.inputs[1:]),\n",
+            f"{PANEL}::test_the_downloaded_script_redraws_the_data_byte_for_byte",
+        ),
+        (
+            "module page without the panel",
+            "src/ctx/viz/save.py",
+            "        reproduce=_PANELS.get(figure_stem),\n",
+            "        reproduce=None,\n",
+            f"{PANEL}::test_every_spec_has_its_panel_on_the_module_page",
+        ),
+        (
+            "commit typed",
+            "src/ctx/figures/panel.py",
+            'f"git -C {CLONE} checkout {commit}",',
+            'f"git -C {CLONE} checkout main",',
+            f"{PANEL}::test_environment_follows_where_ctx_came_from",
+        ),
+    ],
 }
 
 
@@ -97,8 +149,10 @@ def run(piece: str, names: list[str]) -> int:
             file.write_text(original)
         caught = done.returncode != 0
         survived += not caught
-        last = done.stdout.strip().splitlines()[-1] if done.stdout.strip() else ""
-        print(f"{'CAUGHT ' if caught else 'SURVIVED'} {name}: {last}", flush=True)
+        lines = done.stdout.strip().splitlines()
+        last = lines[-1] if lines else ""
+        why = next((x.strip() for x in lines if x.startswith("E ")), "")[:160]
+        print(f"{'CAUGHT ' if caught else 'SURVIVED'} {name}: {last} | {why}", flush=True)
     return survived
 
 

@@ -1,4 +1,23 @@
-# A figure's params file and the README's figure rows (Phase 2D, D-020).
+# The Reproduce panel under each figure that has a spec, its params file and the README's
+# figure rows (Phase 2D, D-020). Every comment of the panel's commands comes from here.
+
+[panel]
+summary = "Reproduce"
+lead = "Figure {figure_id}: paste these lines into bash on Linux, macOS or WSL2, or download them as a script."
+download = "Download {name}"
+upstream = "Upstream: the command that wrote these inputs and drew the figure"
+no_container = "Docker and Apptainer tabs follow once the figures image is published; pixi runs it now."
+
+[steps]
+environment = "{step}. Environment: ctx {version} at commit {commit}, through pixi, then a clean folder."
+environment_dirty = "{step}. Environment: ctx {version} from commit {commit} with uncommitted changes, which a clone does not hold."
+environment_wheel = "{step}. Environment: an installed ctx {version}; install the same version, then a clean folder."
+check_tool = "sha256sum on Linux and WSL2, shasum on macOS."
+inputs = "{step}. Inputs: copy each file from the ctx root that drew this figure, then check its bytes."
+root = "The ctx root these files sit in; change it if the folder moved."
+params = "{step}. Figure parameters: the params file ctx figure reads, one comment per parameter."
+generate = "{step}. Generate: ctx figure draws it with {plotting}, in {file}, read from the inputs alone."
+check = "{step}. Check: the files written, then the data table against the page's."
 
 # One comment per parameter of the params file.
 [params]

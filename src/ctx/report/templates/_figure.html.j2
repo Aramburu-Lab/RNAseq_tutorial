@@ -145,6 +145,7 @@
 {% endif %}
 <figcaption>{{ f.caption | explain_terms("results") }}</figcaption>
 <p class="fig-files">{% if f.page and not standalone %}<a href="{{ f.page }}">{{ ui.figures.open }}</a>{% endif %}{% for label, theme, href in f.files %}<a{% if theme %} class="only-{{ theme }}"{% endif %} href="{{ href }}"{% if f.export and theme %} title="{{ ui.export.reference }}" data-export="{{ href.rsplit('.', 1)[1] }}" data-view="{{ ui.export.view.format(kind=label) }}" data-view-title="{{ ui.export.view_title }}"{% endif %}>{{ label }}</a>{% endfor %}</p>
+{% if f.reproduce %}{% include "_reproduce.html.j2" %}{% endif %}
 {% if f.controls %}<script type="application/json" id="ctx-controls-{{ f.index }}">{{ f.controls }}</script>
 {% endif %}
 <script type="application/json" id="ctx-data-{{ f.index }}">{{ f.rows }}</script>
