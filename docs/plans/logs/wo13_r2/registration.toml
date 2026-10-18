@@ -1,0 +1,59 @@
+# R2 proof: the external check, registered before any ctx command ran on the held-out study.
+# Pasted unchanged as the [sanity] block of the proof's dataset file; the proof compares them.
+#
+# Source, read in full on 2026-10-18 through PubMed Central (PMC10188209): Zheng et al. 2023,
+# Front Oncol 13:1106249, doi:10.3389/fonc.2023.1106249, Results, "Construction and validation
+# of a seven-lncRNAs panel": the seven lncRNAs "were significantly upregulated in LSCC tissues
+# compared to normal counterparts in both the Shanxi and TCGA cohorts". The Shanxi cohort is
+# 107 LSCC and paired adjacent normal mucosa; GEO's series holds 50 of those pairs (titles 78
+# to 127), the paper's differential test was DESeq2 at p < 0.05 and |fold change| >= 2 on
+# TopHat/Cufflinks GRCh37 quantification. This run counts NCBI's own HISAT2 raw counts on
+# GRCh38.p13, so the conditions are the course's: raw log2 FC >= 1 and BH padj < 0.05, tumour
+# over normal, paired by patient. Thresholds are M5's ALPHA 0.05 and LFC_MIN 1, not tuned.
+# Not blind in one respect: the seven names were checked present in GENCODE 50 (gene_name),
+# no expression value of the study was read. A gene absent from NCBI's counts, or left out by
+# gather's mapping, is NOT MEASURED, never PASS.
+[sanity]
+registered_on = "2026-10-18 12:14"
+
+[[sanity.rules]]
+id = "LSCC.ensg00000233397"
+text = "ENSG00000233397 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.ENSG00000233397.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.ENSG00000233397.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.barx1_dt"
+text = "BARX1-DT is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.BARX1-DT.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.BARX1-DT.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.lsamp_as1"
+text = "LSAMP-AS1 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.LSAMP-AS1.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.LSAMP-AS1.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.hoxb_as4"
+text = "HOXB-AS4 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.HOXB-AS4.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.HOXB-AS4.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.mnx1_as1"
+text = "MNX1-AS1 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.MNX1-AS1.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.MNX1-AS1.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.linc01385"
+text = "LINC01385 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.LINC01385.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.LINC01385.padj", op = "<", value = 0.05 }]
+
+[[sanity.rules]]
+id = "LSCC.linc02893"
+text = "LINC02893 is higher in laryngeal squamous cell carcinoma than in paired adjacent normal mucosa."
+source = "Zheng et al. 2023 Front Oncol, doi:10.3389/fonc.2023.1106249, Results (seven-lncRNAs panel), read in full 2026-10-18"
+conditions = [{ metric = "gene.tumour_normal.LINC02893.lfc", op = ">=", value = 1.0 }, { metric = "gene.tumour_normal.LINC02893.padj", op = "<", value = 0.05 }]
