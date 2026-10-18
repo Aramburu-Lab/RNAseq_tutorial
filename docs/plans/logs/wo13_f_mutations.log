@@ -1,0 +1,25 @@
+CAUGHT  fit rows reversed: 1 failed in 76.05s (0:01:16)
+CAUGHT  registry copy ignored: 1 failed in 16.36s
+CAUGHT  loader stops at the first problem: 1 failed in 70.55s (0:01:10)
+CAUGHT  hash not checked: 1 failed in 75.75s (0:01:15)
+CAUGHT  a root not recognised: 1 failed in 114.42s (0:01:54)
+CAUGHT  setting not passed: 1 failed in 73.31s (0:01:13)
+CAUGHT  README loses the ID: 1 failed in 72.71s (0:01:12)
+CAUGHT  a kind matches nothing: 1 failed in 68.57s (0:01:08)
+CAUGHT  module number from the folder: 1 failed in 1.03s
+CAUGHT  pasted block stops the shell: 1 failed in 67.99s (0:01:07) | E           AssertionError: set -e
+CAUGHT  script without pipefail: 1 failed in 68.04s (0:01:08) | E           AssertionError: #!/usr/bin/env bash
+CAUGHT  data hash of another file: 1 failed in 71.23s (0:01:11) | E       AssertionError: ('de_desynth_size_factors_v1.parquet: OK
+CAUGHT  copy line under the wrong base: 1 failed in 70.48s (0:01:10) | E       AssertionError: ('', 'cp: /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2225/pipeline_6_bok93i/outputs/outputs/05_de/2
+CAUGHT  an input left out: 1 failed in 70.11s (0:01:10) | E       AssertionError: ('2026-10-19_de_desynth_size_factors_v1.parquet: OK
+CAUGHT  module page without the panel: 1 failed in 71.30s (0:01:11) | E       AssertionError: assert 0 == 9
+CAUGHT  commit typed: 1 failed in 108.04s (0:01:48) | E       AssertionError: assert 'git -C ctx_course checkout 0123456789abcdef0123456789abcdef01234567\n' in '# 1. Environment: ctx 0.1.0 at commit 0123456789abcde
+CAUGHT  PDF keeps its CreationDate: 1 failed in 10.41s | E               AssertionError: 2026-10-19_de_box_bytes_v1_white.pdf
+CAUGHT  SVG keeps its dc:date: 1 failed in 7.89s | E               AssertionError: 2026-10-19_de_box_bytes_v1_white.svg
+CAUGHT  SVG ids salted at random: 1 failed in 10.39s | E               AssertionError: 2026-10-19_de_box_bytes_v1_white.svg
+CAUGHT  bundle loader stops at the first problem: 1 failed in 1.58s | E           AssertionError: ('cohort.colour: unknown key', 'unknown table [extra]')
+CAUGHT  a doubled module passes: 1 failed in 1.40s | E           AssertionError: ('a module listed twice', ...)
+CAUGHT  a zero cap passes: 1 failed in 1.41s | E           AssertionError: ('datasets[0].laptop_cap', ...)
+CAUGHT  the listing preferred over the choice: 1 failed in 4.05s | E       AssertionError: assert 'kidney' == 'breast'
+CAUGHT  the option not passed to the figures: 1 failed in 10.75s | E       assert '`blood_m1_composition`' in "# 2026-10-19_gather_mine_composition_v1 ...
+CAUGHT  ctx run gives de another option: 1 failed in 88.30s (0:01:28) | E       assert {PosixPath('o...ns,""\n', ...} == {PosixPath('o...ns,""\n', ...}
