@@ -1,0 +1,10 @@
+# Liu et al. 2018 Cell, Table 3, read 2026-10-18 from PubMed Central E-utilities efetch db=pmc id=PMC6066282 (no email or tool parameter sent); XML SHA-256 cf553454564c275485b41213cb908b2d29adac8573dde473602a5e844a459f0d, 307,297 B.
+# caption: Assessment and Recommended Use of the Endpoints of OS, PFI, DFI, and DSS
+['Type', 'N', 'OS (Accurately Defined)', 'PFI (Accurately Defined)', 'DFI (Accurately Defined)', 'DSS (Approximately Defined)', 'Explanation/Caution']
+['Use', 'Event', 'Censored', 'Use', 'Event', 'Censored', 'Use', 'Event', 'Censored', 'Use', 'Event', 'Censored']
+['BRCA', '1097', '✓*', '151', '946', '✓', '145', '952', '✓', '84', '869', '✓ App.*', '83', '995', 'need a longer follow-up for OS and DSS']
+['HNSC', '528', '✓', '223', '305', '✓', '198', '330', '✓', '28', '106', '✓ app.', '130', '372', '']
+['KIRC', '537', '✓', '177', '360', '✓', '162', '375', '✓*', '15', '102', '✓ app.', '110', '415', 'number of events is small']
+['LUAD', '522', '✓', '188', '334', '✓', '213', '309', '✓', '92', '217', '✓ app.', '116', '370', '']
+['LUSC', '504', '✓', '219', '285', '✓', '149', '355', '✓', '63', '241', '✓ app.', '91', '361', '']
+# foot: ✓recommended for use (passed at least passed one of the 3 tests in step 1 and the supplemental checks in step 2 as described in the STAR Methods);×not recommended for use;*caution, see the explanation/caution column; app., approximate; acc., accurate.

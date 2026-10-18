@@ -1,0 +1,16 @@
+# wo13-v browser check, 2026-10-19, Claude Browser pane, pages served from the scratchpad over
+# http://localhost (file:// was refused by the pane). Measured per page: the patients group's
+# endpoint, caution and notification paragraphs; contrast of text to its background; the
+# document's scrollWidth against the viewport; each paragraph's scrollWidth within its box.
+page       viewport  theme  contrast  doc scrollW  paragraphs left..right  overflow
+tcga_brca  1280      white  6.11      1265         288..1241               none
+tcga_brca  1280      black  7.23      1265         288..1241               none
+tcga_brca  375       black  7.23      375          16..359                 none
+tcga_brca  375       white  6.11      375          16..359                 none
+tcga_kirc  1280      white  6.11      1265         288..1241               none
+tcga_kirc  1280      black  7.23      1265         288..1241               none
+tcga_kirc  375       black  7.23      375          16..359                 none
+tcga_kirc  375       white  6.11      375          16..359                 none
+# Read at both widths: BRCA prints its endpoint sentence, the OS and DSS caution with Table 3's
+# quote, and "12 men are kept and flagged by sex."; KIRC prints its endpoint sentence and the DFI
+# caution, and no sex sentence.

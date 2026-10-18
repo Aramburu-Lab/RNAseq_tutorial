@@ -8,6 +8,8 @@ import json
 import re
 import shutil
 import subprocess
+import tomllib
+import types
 from pathlib import Path
 
 import numpy as np
@@ -205,3 +207,125 @@ def test_the_block_holds_the_builds_stored_values(clinical_root):
     for sample, value in first.select("sample", "value").rows():
         assert round(value * 1000) == stored[sample]
     assert np.asarray(values).dtype == np.int16
+
+
+CONTENT = ROOT / "src" / "ctx" / "report" / "content"
+# Label words of the dataset files that name no cancer type alone ("clear" is ui.toml's button).
+NOT_A_CANCER = {"tcga", "and", "cell", "clear"}
+
+
+def cancer_words() -> set[str]:
+    """Every word naming a cancer type in a dataset file M10 builds: its CDR type and the words
+    of its label, read from conf/datasets so that no cohort identifier is typed here."""
+    words = set()
+    for path in (ROOT / "conf" / "datasets").glob("*.toml"):
+        raw = tomllib.loads(path.read_text())
+        if "clinical" in raw and raw.get("gdc", {}).get("cdr_type"):
+            words.add(raw["gdc"]["cdr_type"])
+            words |= {w for w in raw["dataset"]["label"].split() if w.lower() not in NOT_A_CANCER}
+    return words
+
+
+def strings(node) -> list[str]:
+    """Every string of a parsed content file."""
+    if isinstance(node, str):
+        return [node]
+    items = node.values() if isinstance(node, dict) else node if isinstance(node, list) else ()
+    return [s for item in items for s in strings(item)]
+
+
+def test_no_shared_page_text_names_a_cancer_type():
+    """R1.2: a content file's text prints on every cohort's page, so none names a cancer type;
+    a cohort's own words come from its dataset file. Catches the Question asking why OS is
+    advised against "for breast cancer", and any other cohort's name typed into a shared key."""
+    words = cancer_words()
+    assert len(words) >= 8  # noqa: PLR2004 - five cohorts' types and their labels' words
+    named = [(path.name, w) for path in sorted(CONTENT.glob("*.toml"))
+             for s in strings(tomllib.loads(path.read_text())) for w in words
+             if re.search(rf"(?<![\w-]){re.escape(w)}(?![\w-])", s,
+                          0 if w.isupper() else re.I)]  # fmt: skip
+    assert named == []
+
+
+def note_context(marks: dict | None, endpoint: str = "PFI", default: str = "PFI"):
+    """A page context holding only what ``endpoint_note`` reads."""
+    from ctx.dataset import ClinicalSpec  # noqa: PLC0415
+
+    published = {"table3": {"source": "s", "OS": [9, 90], "PFI": [7, 70], "DFI": [5, 50],
+                            "DSS": [3, 30]}}  # fmt: skip
+    if marks is not None:
+        published["table3_use"] = {"source": "s", **marks}
+    clinical = ClinicalSpec(("G1",), default, published)
+    gdc = types.SimpleNamespace(cdr_type="XXXX", project="FAKE-XXXX")
+    spec = types.SimpleNamespace(clinical=clinical, gdc=gdc, path=Path("fake.toml"))
+    return types.SimpleNamespace(spec=spec, endpoint=endpoint)
+
+
+MARKS = {"OS": "caution", "PFI": "recommended", "DFI": "not_recommended", "DSS": "caution",
+         "caution": "a reason"}  # fmt: skip
+
+
+def test_the_endpoint_note_is_the_dataset_files_table_3():
+    """The endpoint, who chose it, and Table 3's mark and counts for it, from the dataset file;
+    then its cautions and refusals. Catches the counts of another endpoint, a caution or
+    refusal left out, the --endpoint choice called the dataset file's, and a mark misspelt."""
+    from ctx.clinical.page import endpoint_note  # noqa: PLC0415
+
+    first, second = endpoint_note(note_context(MARKS))
+    assert first == (
+        "The models below fit PFI, the dataset file's endpoint. Liu et al. 2018 "
+        "Table 3 marks PFI recommended for XXXX, with 7 events and 70 censored."
+    )
+    assert second == ('Table 3 marks OS and DSS for caution on XXXX: "a reason". '
+                      "Table 3 does not recommend DFI for XXXX.")  # fmt: skip
+    first, _ = endpoint_note(note_context(MARKS, endpoint="OS"))
+    assert (
+        first.startswith(
+            "The models below fit OS, chosen by --endpoint over the dataset file's PFI."
+        )
+        and "OS recommended with caution" in first
+    )
+    assert first.endswith("with 9 events and 90 censored.")
+    every = {e: "recommended" for e in ("OS", "PFI", "DFI", "DSS")}
+    assert endpoint_note(note_context(every))[1] == "Table 3 recommends every endpoint for XXXX."
+    for marks in (None, {**every, "OS": ""}):
+        (only,) = endpoint_note(note_context(marks))
+        assert only.endswith("holds no copy of Liu et al. 2018 Table 3's use marks for XXXX.")
+    with pytest.raises(ClinicalError, match="'OS': 'yes'"):
+        endpoint_note(note_context({**every, "OS": "yes"}))
+    with pytest.raises(ClinicalError, match="Explanation/Caution"):
+        endpoint_note(note_context({**every, "OS": "caution"}))
+
+
+def sex_context(sexes: list, variables: tuple[str, ...]):
+    """A page context holding only what ``sex_flag`` reads."""
+    from ctx.dataset import ClinicalSpec  # noqa: PLC0415
+
+    spec = types.SimpleNamespace(clinical=ClinicalSpec(("G1",), "OS", {}, variables))
+    clinical = types.SimpleNamespace(patients=pl.DataFrame({"sex": sexes}))
+    return types.SimpleNamespace(spec=spec, clinical=clinical)
+
+
+def test_the_sex_sentence_counts_the_few_where_sex_is_no_variable():
+    """Only a cohort that does not declare sex flags the less frequent one, by its own count.
+    Catches the sentence on a cohort of both sexes, the count of the frequent sex, and men
+    counted where women are the few."""
+    from ctx.clinical.page import sex_flag  # noqa: PLC0415
+
+    few_men = ["female"] * 5 + ["male"] * 2 + [None]
+    assert sex_flag(sex_context(few_men, ("stage", "age"))) == (
+        "2 men are kept and flagged by sex.",)  # fmt: skip
+    few_women = ["male"] * 4 + ["female"]
+    assert sex_flag(sex_context(few_women, ("stage",))) == ("1 women are kept and flagged by sex.",)
+    assert sex_flag(sex_context(few_men, ("stage", "sex"))) == ()
+    assert sex_flag(sex_context(["female"] * 3, ("stage",))) == ()
+    assert sex_flag(sex_context(["female", "male"], ("stage",))) == ()
+
+
+def test_the_page_prints_the_cohorts_own_endpoint_and_no_sex_flag(clinical_root):
+    """End to end: the made-up cohort declares no Table 3 marks and has women only, so the page
+    says it holds no copy and prints no sex sentence. Catches the sentences built and dropped."""
+    html = outputs(clinical_root, "overview_v1.html").read_text().replace("&#39;", "'")
+    assert "The models below fit PFI, the dataset file's endpoint." in html
+    assert "holds no copy of Liu et al. 2018 Table 3's use marks for FAKE-BRCA." in html
+    assert "flagged by sex" not in html

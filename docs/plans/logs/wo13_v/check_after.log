@@ -1,0 +1,108 @@
+=== tcga_brca: 64 text files read
+other cohorts' cancer words: none
+breast terms on the page's visible text: {'ER-positive': 12, 'ER-negative': 21}
+  | ER status under each endpoint, beside Liu et al. 2018
+  | Endpoints, age, stage, histology and menopause are TCGA-CDR columns, Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052, Table S1, CC BY-NC-ND 4.0 by its PubMed Central record; the page computes months from their days.
+  | Event flags in the TCGA-CDR, beside Liu et al. 2018 Cell, Table 3, BRCA: events and censored per endpoint, and the patients analysedEndpoint
+  | The models below fit PFI, the dataset file's endpoint. Liu et al. 2018 Table 3 marks PFI recommended for BRCA, with 145 events and 952 censored.
+  | Table 3 marks OS and DSS for caution on BRCA: "need a longer follow-up for OS and DSS".
+  | GDC notifications, kept and flagged: 7 neoadjuvant therapy, 16 prior malignancy, 11 unacceptable prior treatment; 28 of 1,088 patients carry one. 12 men are kept and flagged by sex.
+  | ER-negative tumours progress sooner than ER-positive ones in Liu et al. 2018; this checks that each endpoint shows it.
+  | OS: ER-negative against ER-positiveDSS: ER-negative against ER-positiveDFI: ER-negative against ER-positivePFI: ER-negative against ER-positive
+  | OS: ER-negative against ER-positive
+  | Log-rank p = 0.086 here; Liu et al. 2018 report p = 0.097. HR 1.38, ER-negative against positive.
+  | 1,031 patients, 139 OS events, ER by GDC's IHC records. Log-rank chi-squared 2.94, p = 0.086; Liu et al. report p = 0.097. Cox HR, ER-negative against positive, 1.38.
+  | DSS: ER-negative against ER-positive
+  | Log-rank p = 0.0095 here; Liu et al. 2018 report p = 0.009. HR 1.86, ER-negative against positive.
+  | 1,013 patients, 75 DSS events, ER by GDC's IHC records. Log-rank chi-squared 6.72, p = 0.0095; Liu et al. report p = 0.009. Cox HR, ER-negative against positive, 1.86.
+  | DFI: ER-negative against ER-positive
+  | Log-rank p = 0.0004 here; Liu et al. 2018 report p = 0.001. HR 2.26, ER-negative against positive.
+  | 900 patients, 74 DFI events, ER by GDC's IHC records. Log-rank chi-squared 12.53, p = 0.0004; Liu et al. report p = 0.001. Cox HR, ER-negative against positive, 2.26.
+  | PFI: ER-negative against ER-positive
+  | Log-rank p = 0.0018 here; Liu et al. 2018 report p = 0.005. HR 1.77, ER-negative against positive.
+  | 1,031 patients, 131 PFI events, ER by GDC's IHC records. Log-rank chi-squared 9.72, p = 0.0018; Liu et al. report p = 0.005. Cox HR, ER-negative against positive, 1.77.
+  | ER status under each endpoint, beside Liu et al. 2018
+  | Log-rank p and Cox HR, ER-negative against ER-positive; Liu et al. 2018 Cell, Figure 2A-D: log-rank p, ER-positive against ER-negativeEndpoint
+  | Liu et al. p
+  | ESR1 has an AUC of 0.960 between ER-positive and ER-negative tumours; 0.5 is no separation.
+  | Mann-Whitney U, two-sided; p is BH-adjusted over 4 plotted features; n = 235 ER-negative, 797 ER-positive; rank-biserial r > 0 when ER-positive is higher.
+  | ER-negative
+  | AnswerFew patients die before follow-up ends, so OS has few events and little power; a progression endpoint such as PFI counts more events sooner.
+  | AnswerTumours were sampled before systemic therapy, and treatment followed the tumour's features, such as its stage. The association shows that selection.
+  Table 3 OS: CDR 151 events, 946 censored, equal to Liu: True
+  Table 3 DSS: CDR 83 events, 995 censored, equal to Liu: True
+  Table 3 DFI: CDR 84 events, 869 censored, equal to Liu: True
+  Table 3 PFI: CDR 145 events, 952 censored, equal to Liu: True
+  endpoint sentence carries PFI's Table 3 counts (with 145 events and 952 censored): True
+  patient table sex counts: {'female': 1076, 'male': 12}
+  sex is not declared; printed [('12', 'men')], the patient table gives [('12', 'men')]
+=== tcga_kirc: 44 text files read
+other cohorts' cancer words: none
+breast terms on the page's visible text: none
+  | Endpoints, age, stage, histology and menopause are TCGA-CDR columns, Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052, Table S1, CC BY-NC-ND 4.0 by its PubMed Central record; the page computes months from their days.
+  | Event flags in the TCGA-CDR, beside Liu et al. 2018 Cell, Table 3, KIRC: events and censored per endpoint, and the patients analysedEndpoint
+  | The models below fit OS, the dataset file's endpoint. Liu et al. 2018 Table 3 marks OS recommended for KIRC, with 177 events and 360 censored.
+  | Table 3 marks DFI for caution on KIRC: "number of events is small".
+  | GDC notifications, kept and flagged: 7 neoadjuvant therapy, 63 prior malignancy, 18 unacceptable prior treatment; 70 of 533 patients carry one.
+  | AnswerFew patients die before follow-up ends, so OS has few events and little power; a progression endpoint such as PFI counts more events sooner.
+  | AnswerTumours were sampled before systemic therapy, and treatment followed the tumour's features, such as its stage. The association shows that selection.
+  Table 3 OS: CDR 177 events, 360 censored, equal to Liu: True
+  Table 3 DSS: CDR 110 events, 415 censored, equal to Liu: True
+  Table 3 DFI: CDR 15 events, 102 censored, equal to Liu: True
+  Table 3 PFI: CDR 162 events, 375 censored, equal to Liu: True
+  endpoint sentence carries OS's Table 3 counts (with 177 events and 360 censored): True
+  patient table sex counts: {'female': 188, 'male': 345}
+  sex is a declared variable; sex sentences printed: none
+=== tcga_luad: 44 text files read
+other cohorts' cancer words: none
+breast terms on the page's visible text: none
+  | Endpoints, age, stage, histology and menopause are TCGA-CDR columns, Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052, Table S1, CC BY-NC-ND 4.0 by its PubMed Central record; the page computes months from their days.
+  | Event flags in the TCGA-CDR, beside Liu et al. 2018 Cell, Table 3, LUAD: events and censored per endpoint, and the patients analysedEndpoint
+  | The models below fit OS, the dataset file's endpoint. Liu et al. 2018 Table 3 marks OS recommended for LUAD, with 188 events and 334 censored.
+  | Table 3 recommends every endpoint for LUAD.
+  | GDC notifications, kept and flagged: 4 neoadjuvant therapy, 50 prior malignancy, 5 unacceptable prior treatment; 57 of 515 patients carry one.
+  | AnswerFew patients die before follow-up ends, so OS has few events and little power; a progression endpoint such as PFI counts more events sooner.
+  | AnswerTumours were sampled before systemic therapy, and treatment followed the tumour's features, such as its stage. The association shows that selection.
+  Table 3 OS: CDR 188 events, 334 censored, equal to Liu: True
+  Table 3 DSS: CDR 116 events, 370 censored, equal to Liu: True
+  Table 3 DFI: CDR 92 events, 217 censored, equal to Liu: True
+  Table 3 PFI: CDR 213 events, 309 censored, equal to Liu: True
+  endpoint sentence carries OS's Table 3 counts (with 188 events and 334 censored): True
+  patient table sex counts: {'female': 277, 'male': 238}
+  sex is a declared variable; sex sentences printed: none
+=== tcga_lusc: 44 text files read
+other cohorts' cancer words: none
+breast terms on the page's visible text: none
+  | Endpoints, age, stage, histology and menopause are TCGA-CDR columns, Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052, Table S1, CC BY-NC-ND 4.0 by its PubMed Central record; the page computes months from their days.
+  | Event flags in the TCGA-CDR, beside Liu et al. 2018 Cell, Table 3, LUSC: events and censored per endpoint, and the patients analysedEndpoint
+  | The models below fit OS, the dataset file's endpoint. Liu et al. 2018 Table 3 marks OS recommended for LUSC, with 219 events and 285 censored.
+  | Table 3 recommends every endpoint for LUSC.
+  | GDC notifications, kept and flagged: 5 neoadjuvant therapy, 43 prior malignancy, 14 unacceptable prior treatment; 51 of 501 patients carry one.
+  | AnswerFew patients die before follow-up ends, so OS has few events and little power; a progression endpoint such as PFI counts more events sooner.
+  | AnswerTumours were sampled before systemic therapy, and treatment followed the tumour's features, such as its stage. The association shows that selection.
+  Table 3 OS: CDR 219 events, 285 censored, equal to Liu: True
+  Table 3 DSS: CDR 91 events, 361 censored, equal to Liu: True
+  Table 3 DFI: CDR 63 events, 241 censored, equal to Liu: True
+  Table 3 PFI: CDR 149 events, 355 censored, equal to Liu: True
+  endpoint sentence carries OS's Table 3 counts (with 219 events and 285 censored): True
+  patient table sex counts: {'female': 130, 'male': 371}
+  sex is a declared variable; sex sentences printed: none
+=== tcga_hnsc: 44 text files read
+other cohorts' cancer words: none
+breast terms on the page's visible text: none
+  | Endpoints, age, stage, histology and menopause are TCGA-CDR columns, Liu et al. 2018 Cell, doi:10.1016/j.cell.2018.02.052, Table S1, CC BY-NC-ND 4.0 by its PubMed Central record; the page computes months from their days.
+  | Event flags in the TCGA-CDR, beside Liu et al. 2018 Cell, Table 3, HNSC: events and censored per endpoint, and the patients analysedEndpoint
+  | The models below fit OS, the dataset file's endpoint. Liu et al. 2018 Table 3 marks OS recommended for HNSC, with 223 events and 305 censored.
+  | Table 3 recommends every endpoint for HNSC.
+  | GDC notifications, kept and flagged: 7 neoadjuvant therapy, 16 prior malignancy, 5 unacceptable prior treatment; 23 of 520 patients carry one.
+  | AnswerFew patients die before follow-up ends, so OS has few events and little power; a progression endpoint such as PFI counts more events sooner.
+  | AnswerTumours were sampled before systemic therapy, and treatment followed the tumour's features, such as its stage. The association shows that selection.
+  Table 3 OS: CDR 223 events, 305 censored, equal to Liu: True
+  Table 3 DSS: CDR 130 events, 372 censored, equal to Liu: True
+  Table 3 DFI: CDR 28 events, 106 censored, equal to Liu: True
+  Table 3 PFI: CDR 198 events, 330 censored, equal to Liu: True
+  endpoint sentence carries OS's Table 3 counts (with 223 events and 305 censored): True
+  patient table sex counts: {'female': 136, 'male': 384}
+  sex is a declared variable; sex sentences printed: none
+
+PASS

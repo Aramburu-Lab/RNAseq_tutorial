@@ -64,6 +64,18 @@ PFI = [0, 0]
 DFI = [0, 0]
 DSS = [0, 0]
 
+# EDIT: Liu 2018 Table 3's Use column for this type, from the same row: a tick is
+# recommended, a tick with an asterisk caution, a cross not_recommended; caution is the
+# row's Explanation/Caution, verbatim, where any mark is caution. Left empty, M10 says the
+# dataset file holds no copy.
+[clinical.published.table3_use]
+source = "Liu et al. 2018 Cell, Table 3, XXXX: recommended use of each endpoint"
+OS = ""
+PFI = ""
+DFI = ""
+DSS = ""
+caution = ""
+
 # The STAR counts' own annotation: GDC's GENCODE v36, md5 c03931958d4572148650d62eb6dec41a as
 # GDC's reference-files page lists it; M8 reads gene types and positions from it.
 [[resources]]

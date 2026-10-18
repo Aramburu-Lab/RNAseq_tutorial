@@ -1,0 +1,115 @@
+=== tcga_brca
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_brca/outputs/12_clinical/2026-10-18_clinical_tcga_brca_confounding_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_brca/outputs/12_clinical/2026-10-18_clinical_tcga_brca_confounding_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_brca/outputs/12_clinical/2026-10-18_clinical_tcga_brca_confounding_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_brca/outputs/12_clinical/2026-10-18_clinical_tcga_brca_confounding_v1_README.md
+       42.74 real        28.15 user         6.73 sys
+          2504785920  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              686558  page reclaims
+                6154  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  42  voluntary context switches
+               35490  involuntary context switches
+            17647116  instructions retired
+             9066388  cycles elapsed
+             1474920  peak memory footprint
+=== tcga_kirc
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_kirc/outputs/12_clinical/2026-10-18_clinical_tcga_kirc_confounding_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_kirc/outputs/12_clinical/2026-10-18_clinical_tcga_kirc_confounding_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_kirc/outputs/12_clinical/2026-10-18_clinical_tcga_kirc_confounding_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_kirc/outputs/12_clinical/2026-10-18_clinical_tcga_kirc_confounding_v1_README.md
+       26.23 real        19.53 user         4.88 sys
+          1723006976  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              445105  page reclaims
+                3143  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  34  voluntary context switches
+               24325  involuntary context switches
+            17808200  instructions retired
+             8145318  cycles elapsed
+             1474920  peak memory footprint
+=== tcga_luad
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_luad/outputs/12_clinical/2026-10-18_clinical_tcga_luad_confounding_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_luad/outputs/12_clinical/2026-10-18_clinical_tcga_luad_confounding_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_luad/outputs/12_clinical/2026-10-18_clinical_tcga_luad_confounding_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_luad/outputs/12_clinical/2026-10-18_clinical_tcga_luad_confounding_v1_README.md
+       20.29 real        14.95 user         3.49 sys
+          1458438144  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              425988  page reclaims
+                2928  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  34  voluntary context switches
+               22332  involuntary context switches
+            18014114  instructions retired
+             8928787  cycles elapsed
+             1474920  peak memory footprint
+=== tcga_lusc
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_lusc/outputs/12_clinical/2026-10-18_clinical_tcga_lusc_confounding_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_lusc/outputs/12_clinical/2026-10-18_clinical_tcga_lusc_confounding_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_lusc/outputs/12_clinical/2026-10-18_clinical_tcga_lusc_confounding_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_lusc/outputs/12_clinical/2026-10-18_clinical_tcga_lusc_confounding_v1_README.md
+       28.81 real        21.05 user         5.48 sys
+          1841217536  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              446989  page reclaims
+                2897  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  37  voluntary context switches
+               23064  involuntary context switches
+            17965899  instructions retired
+             8329636  cycles elapsed
+             1474920  peak memory footprint
+=== tcga_hnsc
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_hnsc/outputs/12_clinical/2026-10-18_clinical_tcga_hnsc_confounding_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_hnsc/outputs/12_clinical/2026-10-18_clinical_tcga_hnsc_confounding_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_hnsc/outputs/12_clinical/2026-10-18_clinical_tcga_hnsc_confounding_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad2999f5c1b3365b1/.wo13v_roots/before/tcga_hnsc/outputs/12_clinical/2026-10-18_clinical_tcga_hnsc_confounding_v1_README.md
+       20.30 real        14.92 user         3.44 sys
+          1414266880  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              426299  page reclaims
+                2708  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  33  voluntary context switches
+               23459  involuntary context switches
+            17743131  instructions retired
+             8230815  cycles elapsed
+             1474920  peak memory footprint

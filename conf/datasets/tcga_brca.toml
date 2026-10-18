@@ -59,6 +59,18 @@ PFI = [145, 952]
 DFI = [84, 869]
 DSS = [83, 995]
 
+# Liu et al. 2018 Table 3's Use column for BRCA, read through PubMed Central E-utilities
+# (PMC6066282) on 2026-10-18 (docs/plans/logs/wo13_v/liu_table3.log): a tick is recommended,
+# a tick with an asterisk caution, a cross not_recommended; caution is the table's
+# Explanation/Caution, verbatim. M10 prints them beside its endpoint.
+[clinical.published.table3_use]
+source = "Liu et al. 2018 Cell, Table 3, BRCA: recommended use of each endpoint"
+OS = "caution"
+PFI = "recommended"
+DFI = "recommended"
+DSS = "caution"
+caution = "need a longer follow-up for OS and DSS"
+
 [clinical.published.er_logrank]
 source = "Liu et al. 2018 Cell, Figure 2A-D: log-rank p, ER-positive against ER-negative"
 OS = 0.097

@@ -15,7 +15,16 @@ import polars as pl
 from scipy.stats import norm
 
 from ctx import runtime
-from ctx.clinical import analyses, cutpoint, figures, harmonise, panel, score, survival
+from ctx.clinical import (
+    ClinicalError,
+    analyses,
+    cutpoint,
+    figures,
+    harmonise,
+    panel,
+    score,
+    survival,
+)
 from ctx.dataset import ENDPOINTS, Dataset
 from ctx.de.run import Writer
 from ctx.gather import gdc
@@ -41,6 +50,11 @@ ER = ("positive", "negative")
 SCREEN_ROWS = 20
 # Confounding-map columns every cohort has, after its own categorical variables.
 DESIGN = ("age_group", "plate", "site")
+# GDC's sex_at_birth values the sex sentence counts.
+SEXES = ("female", "male")
+# Liu et al. 2018 Table 3's use marks as a dataset file's [clinical.published.table3_use] copies
+# them: a tick, a tick with an asterisk, a cross.
+USES = ("recommended", "caution", "not_recommended")
 
 
 @dataclass(frozen=True)
@@ -167,6 +181,59 @@ def confounders(ctx: Context) -> tuple[str, ...]:
     return (*(v for v in variables(ctx) if v != "age"), *DESIGN)
 
 
+def endpoint_note(ctx: Context) -> tuple[str, ...]:
+    """Why the models fit their endpoint: who chose it, then Table 3's marks for the cohort.
+
+    The first paragraph names the choice and Table 3's mark and counts for it; the second the
+    endpoints Table 3 marks for caution or against, with its reason, or that it recommends all.
+
+    Raises:
+        ClinicalError: If the dataset file's copy of Table 3 holds a mark not in ``USES``.
+    """
+    assert ctx.spec.clinical and ctx.spec.gdc  # noqa: S101 - run() refuses a dataset without them
+    clinical, kind = ctx.spec.clinical, ctx.spec.gdc.cdr_type or ctx.spec.gdc.project
+    chosen = (fill("patients.endpoint.file", endpoint=ctx.endpoint)
+              if ctx.endpoint == clinical.endpoint
+              else fill("patients.endpoint.option", endpoint=ctx.endpoint,
+                        default=clinical.endpoint))  # fmt: skip
+    marks = clinical.published.get("table3_use", {})
+    counts = clinical.published.get("table3", {}).get(ctx.endpoint)
+    if not all(marks.get(e) for e in ENDPOINTS) or not counts:
+        return (f"{chosen} {fill('patients.endpoint.uncopied', type=kind)}",)
+    if bad := {e: marks[e] for e in ENDPOINTS if marks[e] not in USES}:
+        raise ClinicalError(f"{ctx.spec.path.name} [clinical.published.table3_use]: {bad}, "
+                            f"each one of {USES}")  # fmt: skip
+    use = fill("patients.endpoint.use", endpoint=ctx.endpoint, type=kind, events=counts[0],
+               censored=counts[1], use=word(f"patients.use.{marks[ctx.endpoint]}"))  # fmt: skip
+    caution = [e for e in ENDPOINTS if marks[e] == "caution"]
+    against = [e for e in ENDPOINTS if marks[e] == "not_recommended"]
+    if caution and not marks.get("caution"):
+        raise ClinicalError(f"{ctx.spec.path.name} [clinical.published.table3_use]: copy "
+                            f"Table 3's Explanation/Caution for {caution} as caution")  # fmt: skip
+    rest = [fill("patients.endpoint.caution", endpoints=listed(caution), type=kind,
+                 why=marks["caution"])] if caution else []  # fmt: skip
+    if against:
+        rest.append(fill("patients.endpoint.against", endpoints=listed(against), type=kind))
+    return (f"{chosen} {use}", " ".join(rest or [fill("patients.endpoint.all", type=kind)]))
+
+
+def sex_flag(ctx: Context) -> tuple[str, ...]:
+    """The less frequent sex, kept and flagged, where the dataset file does not declare sex.
+
+    A cohort that declares sex tests it as a variable, so its men and women are no flag; one
+    that does not, a cancer nearly all of one sex, names the few of the other. Empty without.
+    """
+    if "sex" in variables(ctx):
+        return ()
+    p = ctx.clinical.patients
+    counts = {s: p.filter(pl.col("sex") == s).height for s in SEXES}
+    fewer = min(SEXES, key=counts.__getitem__)
+    if counts[fewer] == 0 or counts[fewer] == max(counts.values()):
+        return ()
+    people = word(f"patients.people.{fewer}")
+    return (fill("patients.sex_flag", count=counts[fewer], people=people),)
+
+
 def _patients(writer: Writer, ctx: Context) -> Group:
     """The flow to the analysed patients, each endpoint beside Table 3, the missing values."""
     clinical, p = ctx.clinical, ctx.clinical.patients
@@ -193,9 +260,9 @@ def _patients(writer: Writer, ctx: Context) -> Group:
     missing = ResultTable(word("patients.missing_title"), heads, gaps, numeric=(1,))
     noted = {k: int(p[k].sum()) for k in harmonise.NOTIFICATIONS}
     notified = p.filter(pl.any_horizontal(*harmonise.NOTIFICATIONS)).height
-    note = fill("patients.notified", any=notified, n=p.height,
-                men=p.filter(pl.col("sex") == "male").height, **noted)  # fmt: skip
-    return Group(word("patients.title"), (flow, endpoints, missing, note),
+    note = " ".join((fill("patients.notified", any=notified, n=p.height, **noted),
+                     *sex_flag(ctx)))  # fmt: skip
+    return Group(word("patients.title"), (flow, endpoints, *endpoint_note(ctx), missing, note),
                  lead=fill("patients.lead", n=p.height))  # fmt: skip
 
 

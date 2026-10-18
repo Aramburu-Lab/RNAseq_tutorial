@@ -51,6 +51,17 @@ PFI = [149, 355]
 DFI = [63, 241]
 DSS = [91, 361]
 
+# Liu et al. 2018 Table 3's Use column for LUSC, read through PubMed Central E-utilities
+# (PMC6066282) on 2026-10-18 (docs/plans/logs/wo13_v/liu_table3.log): a tick is recommended,
+# a tick with an asterisk caution, a cross not_recommended; caution is the table's
+# Explanation/Caution, verbatim. M10 prints them beside its endpoint.
+[clinical.published.table3_use]
+source = "Liu et al. 2018 Cell, Table 3, LUSC: recommended use of each endpoint"
+OS = "recommended"
+PFI = "recommended"
+DFI = "recommended"
+DSS = "recommended"
+
 # M8's resources (plan docs/plans/2026-10-07_m8_real_data_plan_proposal.md, decisions 2, 3
 # and 7; downloads approved and fetched by Rytis 2026-10-08, each folder's _manifest_*.tsv
 # recording the bytes and SHA-256 measured on arrival). ctx setup registers each file already
