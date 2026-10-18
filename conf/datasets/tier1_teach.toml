@@ -9,6 +9,8 @@
 slug = "tier1_teach"
 # The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
 label = "Step-1 teaching subset"
+# tier1.toml's own, as every key but slug, label and subset_of is.
+colours = ["isolation", "sex"]
 # The outdir holds 8 of the SDRF's 210 runs: gather curates only their rows (D-042).
 subset_of = "tier1"
 ena_study = "PRJEB49000"
