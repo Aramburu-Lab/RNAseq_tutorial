@@ -134,3 +134,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A fixture with fewer units than a cap cannot test the cap: hold it on a made-up frame of cap and cap plus one (E2b, 2026-10-18).
 - A twin tested only on small counts lets a float comparison pass: include a total near 2**53, where float division rounds onto the threshold (E2b, 2026-10-18).
 - Two packages told to add to a shared file can each add the same feature: read a conflict for meaning before keeping both sides (viewing()'s export rule, 2026-10-18).
+- A guide built from a template prints the template's own values as if they were the reader's: Part 1c printed SLUG=mine, which a reader keeps. Show placeholders as placeholders (R2, 2026-10-18).
+- A worktree suite without CTX_CHROMIUM skipped 155 tests where main skips 10: set it before reading the skip count (R2, 2026-10-18).
+- A detail written from memory into a registration (NCBI's aligner) is a claim to verify like any accession (R2, 2026-10-18).

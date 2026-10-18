@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-087 — A count matrix enters through `ctx gather --counts`, checked at the door, never guessed
+
+**Date:** 2026-10-18 · **Status:** decided
+
+**Context.** R2: a matrix from GEO, ArrayExpress, recount3 or an own pipeline had no route into the course.
+
+**Decision.** The matrix is a CLI option, as `--gdc-dir` is; the sample table is the dataset file's `[sdrf] file`, joined on sample, so curation's both-ways join is reused; `[counts]` names source, url and annotation for every README. Whole non-negative counts only: fractional, negative, missing and per-million values are refused, saying how it told. Ensembl IDs by their stable part, NCBI Gene IDs through GENCODE's EntrezGene table of the GTF's release, symbols by gene name; an ID on no gene or several, and rows sharing a gene, are left out and listed with their counts. The sheet carries `counts_file`, which process, quant and qc --reads refuse.
+
+**Evidence.** GSE130605 through the guide's Part 1c alone: 26,196 of 39,376 rows placed, all modules exit 0; the authors' FPKM file refused (1,199,165 of 1,526,000 values fractional); 29 planted mutations caught.
+
+**Consequence.** Rejected: NCBI gene_info as the map (it changes daily, so no pinned checksum), and summing rows that share a gene. Genes the EntrezGene table does not link are lost (R2.1).
+
+---
+
 ## D-086 — A Writer's `marked()` is the one place a run changes how its figures are drawn; M3's strand twin decides in exact integers
 
 **Date:** 2026-10-18 · **Status:** decided
