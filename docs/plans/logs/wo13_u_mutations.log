@@ -1,0 +1,36 @@
+CAUGHT declared fractions pass: 1 failed, 50 deselected in 2.81s
+CAUGHT declared log2 refused: 1 failed, 49 deselected in 1.15s
+CAUGHT declared TPM refused: 1 failed, 1 passed, 49 deselected in 1.21s
+CAUGHT raw kind names the declaration: 1 failed, 51 deselected in 1.26s
+CAUGHT round after the value check: 1 failed, 51 deselected in 1.31s
+CAUGHT round, never truncate: 1 failed, 51 deselected in 4.48s
+CAUGHT halves to even: 1 failed, 51 deselected in 4.35s
+CAUGHT rounding in every README: 1 failed, 51 deselected in 4.25s
+CAUGHT rounding on the page: 1 failed, 51 deselected in 4.32s
+CAUGHT RSEM needs the declaration: 1 failed, 51 deselected in 1.16s
+CAUGHT expected_count, never TPM: 1 failed, 51 deselected in 1.16s
+CAUGHT joined on gene, not row: 1 failed, 51 deselected in 1.17s
+CAUGHT a gene missing is a problem: 1 failed, 51 deselected in 1.23s
+CAUGHT sample pattern used: 1 failed, 51 deselected in 1.37s
+CAUGHT unmatched name a problem: 1 failed, 51 deselected in 1.18s
+CAUGHT kind schema: 1 failed, 51 deselected in 1.11s
+CAUGHT pattern needs a group: 1 failed, 51 deselected in 1.21s
+CAUGHT ctx run takes a folder: 1 failed, 51 deselected in 1.27s
+CAUGHT gather takes a folder: 1 failed, 51 deselected in 2.29s
+CAUGHT folder digest: 1 failed, 51 deselected in 4.02s
+CAUGHT GENCODE first: 1 failed, 51 deselected in 1.21s
+CAUGHT HGNC one gene only: 1 failed, 51 deselected in 1.20s
+CAUGHT HGNC gene must be annotated: 1 failed, 51 deselected in 1.21s
+CAUGHT HGNC never unseats GENCODE: 1 failed, 51 deselected in 1.13s
+CAUGHT two HGNC rows both leave: 1 failed, 51 deselected in 1.13s
+CAUGHT HGNC by column name: 1 failed, 51 deselected in 1.10s
+CAUGHT HGNC missing column refused: 1 failed, 51 deselected in 1.11s
+CAUGHT gather reads HGNC: 1 failed, 51 deselected in 4.16s
+CAUGHT largest first: 1 failed, 51 deselected in 1.16s
+CAUGHT invalid TOML caught: 1 failed, 48 deselected in 1.30s
+CAUGHT report catches DatasetError: 1 failed, 1 passed, 49 deselected in 2.17s
+CAUGHT geo descriptions read: 1 failed, 51 deselected in 1.31s
+CAUGHT keyless description: 1 failed, 51 deselected in 1.19s
+CAUGHT guide authors note: 1 failed, 51 deselected in 1.21s
+CAUGHT guide RSEM note: 1 failed, 51 deselected in 1.30s
+35 of 35 caught

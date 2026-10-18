@@ -206,4 +206,17 @@ def test_part1c_names_the_authors_join():
     on library_name and a donor from a subject column. Catches the note dropped."""
     note = text.word("guide", "part1c.authors")
     assert '`join = ["library_name", "sample"]`' in note and "`subject_id`" in note
+    groups = guide.blocks(load(FOUR), FOUR)
+    (part1c,) = [g for g in groups if g.title == text.fill("guide", "part1c.group", n=1)]
+    assert note in part1c.items
     assert '["library_name", "sample"]' in TEMPLATE.read_text()
+
+
+def test_part1c_rsem_note():
+    """Part 1c says how RSEM's expected counts enter and that they are rounded. Catches the
+    note left off the page."""
+    note = text.word("guide", "part1c.rsem")
+    assert '`kind = "rsem_expected"`' in note and "rounds" in note
+    groups = guide.blocks(load(FOUR), FOUR)
+    (part1c,) = [g for g in groups if g.title == text.fill("guide", "part1c.group", n=1)]
+    assert note in part1c.items

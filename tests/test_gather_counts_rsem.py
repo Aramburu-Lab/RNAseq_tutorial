@@ -5,6 +5,7 @@ test names the mutation it catches.
 """
 
 import gzip
+import hashlib
 from pathlib import Path
 
 import numpy as np
@@ -79,7 +80,7 @@ def test_undeclared_fractions_still_refused():
     ("values", "said"),
     [
         (np.array([[1.25, 7.5, 12.75, 3.0], [9.5, 2.25, 6.0, 0.5]]), "log2 values"),
-        (np.array([[400_000.4] * 4, [599_999.6] * 4]), "TPM or CPM"),
+        (np.array([[400_000.4] * 4, [599_999.6] * 4]), ": TPM or CPM, not raw counts"),
         (np.array([[-1.5, 200.0, 3.0, 4.0], [10.4, 0.0, 7.0, 8.0]]), "below 0"),
     ],
 )  # fmt: skip
@@ -233,7 +234,8 @@ def test_gather_reads_the_hgnc_resource(tmp_path):
 
 
 def test_ctx_run_check_takes_an_rsem_folder(tmp_path):
-    """ctx run --check accepts a folder for --counts. Catches the file-only check."""
+    """ctx run --check and ctx gather accept a folder for --counts, and the README records the
+    folder's digest. Catches the file-only checks in pipeline and in counts_run."""
     from ctx import pipeline  # noqa: PLC0415 - the module under test
 
     root, spec = declared(tmp_path)
@@ -243,6 +245,23 @@ def test_ctx_run_check_takes_an_rsem_folder(tmp_path):
         rsem_file(folder / f"{sample}.genes.results", [(g, 55.5) for g in IDS])
     problems, _ = pipeline.check(root, pipeline.Options("mat", spec, counts=folder))
     assert not [p.text for p in problems if "--counts" in p.text or p.text.startswith("counts")]
+    done = ctx_run("--root", str(root), "gather", "--dataset", "mat", "--counts", str(folder),
+                   "--dataset-file", str(spec), cwd=tmp_path)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    lines = "".join(f"{hashlib.sha256(f.read_bytes()).hexdigest()}  {f.name}\n"
+                    for f in sorted(folder.iterdir()))  # fmt: skip
+    readme = next((root / "outputs" / "01_gather").glob("*_counts_v1_README.md")).read_text()
+    assert hashlib.sha256(lines.encode()).hexdigest() in readme
+
+
+def test_largest_rows_left_out_first():
+    """The page's table of rows left out holds the ten largest, the most counts first.
+    Catches the sort reversed, and the cap dropped."""
+    left = pl.DataFrame({"source_id": [f"G{i:02d}" for i in range(12)], "kind": ["symbol"] * 12,
+                         "reason": ["not_in_annotation"] * 12, "detail": [""] * 12,
+                         "total": [float(i) for i in range(12)]})  # fmt: skip
+    rows = counts_run._largest(left).rows
+    assert [r[0] for r in rows] == [f"G{i:02d}" for i in range(11, 1, -1)]
 
 
 def test_two_hgnc_rows_on_one_gene_both_leave():
