@@ -447,7 +447,12 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
         )
     known = classes(settings, spec)
     design = {"across_samples": across, "cross_dataset": cross, "tumour_normal": tumour_normal}
-    measured = design[spec.proteo.design](settings, spec, options)
+    if spec.proteo.table is not None:
+        from ctx.proteo.study import across_table  # noqa: PLC0415 - it imports this module
+
+        measured = across_table(settings, spec, options)
+    else:
+        measured = design[spec.proteo.design](settings, spec, options)
     measured.notes.append(("classes_note", {"twice": _labelled(measured, known)}))
     if spec.proteo.design == "across_samples":
         correlation_metrics(measured, spec.proteo, options.method)
@@ -458,7 +463,9 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     else:
         fold_metrics(measured)
     out = settings.root / "outputs" / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
-    releases = {"dataset file": str(spec.path), "protein": spec.resource(spec.proteo.protein).dest,
+    p = spec.proteo
+    protein = spec.resource(p.protein).dest if p.protein else p.table.file if p.table else ""
+    releases = {"dataset file": str(spec.path), "protein": protein,
                 **{f"sha256:{r.name}": r.sha256 for r in spec.resources},
                 **measured.extra.get("inputs", {})}  # fmt: skip
     writer = Writer(out, dataset, date.today(), releases)

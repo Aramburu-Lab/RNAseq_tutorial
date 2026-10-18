@@ -110,6 +110,20 @@ mine = "A study of your own: its sheet before curation, and a dataset file to ed
 kit = "Your pages as a kit, opened from its START.html"
 site = "Another Slurm site: copy scripts/bash/site_kebnekaise.sh to site_<name>.sh, change its profile, queue size, home rule and activation, and set CTX_SITE=<name> before each launcher."
 
+# The M7 part: a protein table of the same samples beside the counts (ctx.proteo.guide).
+[mass_spec]
+group = "Part {n}: protein of the same samples, for M7"
+lead = "A protein table meets the counts gathered into the course root through a sample table; `ctx proteo` then compares the two layers gene by gene."
+formats = "Three formats are read: MaxQuant's proteinGroups.txt, DIA-NN's pg_matrix.tsv, and any protein or gene by sample table. MaxQuant's reverse decoys, contaminants and site-only rows leave first, each counted on the page."
+missing = "A missing value stays missing, never zero: declare the texts it is written as. A protein group naming several genes is listed, never assigned to one of them."
+list = "On the laptop: a PRIDE project's tables and their bytes, read before any download"
+fetch = "Once the size is read: one file into the root, checked by PRIDE's SHA-1; paste the printed entry into the dataset file"
+samples = "A starter sample table beside the dataset file, one row per sample column: an LFQ export in an archive, a TMT export as a plain file, or DIA-NN's matrix"
+block = "The [proteo] block of conf/dataset_template.toml, filled for this dataset; paste it into the dataset file and edit each EDIT line"
+run = "Then: register the file in place, and run M7 on the gathered root"
+rows = "Fill rna_sample and batch in the starter, and for TMT intensities a reference column marking each plex's reference channel with yes. Delete the rows of channels to leave out, such as empty or booster channels: only listed columns are read."
+check = "Every problem of the dataset file, the sample table and the protein table is listed at once. An RNA sample gather never wrote is one of them."
+
 # Before Part 1: the accession a study is found by (M1a), and the class exercise (M1b). These
 # notes print as plain text, so a field or command is named without backticks.
 [find]

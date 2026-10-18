@@ -32,6 +32,14 @@ tumour_normal = "{n_tumour:,} tumour and {n_normal:,} normal columns of {n_colum
 class_shift = "{name}, {n:,} genes tested at both layers: median protein log2 FC {protein:.2f}, RNA {rna:.2f}. Protein minus RNA, one-sided Mann-Whitney against the other genes: below p = {below}, above p = {above}."
 unit_ratio = "log2 ratio to the reference"
 f4_missing = "RNA and protein calls for {contrast} are not compared: M5's results for it are absent. Run `ctx de` on a sheet with the contrast's column."
+# A protein table of any study ([proteo.table], ctx.proteo.study), each line after the reader's step.
+table_read = "Protein table {file}, read as {format}: {columns:,} sample columns of {scale} values. Cells read as missing, never as zero, per declared token: {tokens}."
+table_maxquant = "MaxQuant rows left out before any value was read, each counted once in this order: {reverse:,} reverse decoys, {contaminant:,} contaminants, {only_by_site:,} identified only by a modification site."
+table_mapped = "Identifiers as {kind}: {mapped:,} rows map to one RNA gene. Left out: {no_id:,} without an identifier, {no_map:,} with a member the UniProt map lacks, {absent:,} naming a gene absent from the RNA side, {shared:,} naming a symbol two RNA genes share. {several:,} protein groups name several genes and are listed in the several-genes table, never assigned to one."
+table_tmt = "TMT design: {n:,} plexes of {low:,} to {high:,} samples, listed in the batches table. Values are compared across plexes as the table gives them; no plex correction is made here."
+table_label_free = "Label-free design: {n:,} runs or run batches of {low:,} to {high:,} samples, listed in the batches table. Values are compared as the table gives them, normalised by its own software."
+table_reference = "Each value is a log2 ratio to its plex's reference channel, marked yes in the sample table's {column} column; the reference channels then leave."
+table_paired = "{n:,} of {n_columns:,} protein samples are paired with an RNA sample by the sample table; only those enter a correlation."
 unregistered = "The Krug 2020 band rule is not registered: its supplement prints the per-gene correlations only as a histogram, Figure S2G, with no median."
 sanity_title = "Sanity rules, registered before any protein value was read"
 sanity_columns = ["Rule", "What it checks", "Measured", "Verdict"]
@@ -82,8 +90,8 @@ missing = "Missingness first"
 correlation = "Does protein follow RNA"
 fold = "Do fold changes agree"
 worked = "Worked genes"
-paired = "RNA and protein, tumour by tumour"
-contrast = "RNA and protein calls on the same tumours"
+paired = "RNA and protein, sample by sample"
+contrast = "RNA and protein calls on the same samples"
 
 [classes]
 other = "Other"
@@ -184,17 +192,17 @@ protein = "protein only"
 neither = "neither"
 
 [figures.paired]
-title = "RNA and protein of the same genes, tumour by tumour"
-lead = "{n_genes:,} genes over {n_samples:,} tumours: each gene's RNA row sits above its protein row."
+title = "RNA and protein of the same genes, sample by sample"
+lead = "{n_genes:,} genes over {n_samples:,} samples: each gene's RNA row sits above its protein row."
 reading = [
-    "Each row is z-scored over its tumours; a gene whose two rows share a pattern has protein following RNA.",
-    "The strips above the columns give each tumour's {tracks}; a pattern that follows the plex strip is a batch effect.",
-    "A blank cell is a protein not quantified in that tumour, never a zero.",
+    "Each row is z-scored over its samples; a gene whose two rows share a pattern has protein following RNA.",
+    "The strips above the columns give each sample's {tracks}; a pattern that follows the plex strip is a batch effect.",
+    "A blank cell is a protein not quantified in that sample, never a zero.",
 ]
 caption = "The named genes, then the highest and the lowest per-gene Spearman ρ, printed at right; {missing:,} protein cells missing. Descriptive, no further test."
 row = "Gene and layer"
-column = "Tumour"
-column_title = "{n_samples:,} tumours, sorted by {sorted}"
+column = "Sample"
+column_title = "{n_samples:,} samples, sorted by {sorted}"
 rna_row = "{gene} RNA"
 protein_row = "{gene} protein"
 rho = "Spearman ρ"
@@ -256,5 +264,5 @@ rna_call = ["none", "up, down or ns by M5's padj < 0.05 and abs(rna_lfc) at leas
 called = ["none", "True when called at both layers: drawn as a point over the contours."]
 kind = ["none", "Where the gene was called: at both layers, RNA only, protein only, or neither."]
 row = ["none", "The gene and the layer of the heatmap row."]
-z = ["z-score", "The row's value centred on its mean and scaled by its standard deviation over the tumours."]
+z = ["z-score", "The row's value centred on its mean and scaled by its standard deviation over the samples."]
 level = ["none", "The z-score's colour step."]

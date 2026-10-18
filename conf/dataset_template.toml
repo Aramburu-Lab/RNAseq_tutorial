@@ -91,3 +91,42 @@ meaning = "Donor state, treatment or disease."
 # licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
 # featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
 # running = ["{contrast}", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
+
+# A protein table of the same samples, for M7 (the guide's protein part): a MaxQuant
+# proteinGroups.txt, a DIA-NN pg_matrix.tsv, or any protein (or gene) by sample table. Paste
+# the block below without its leading "# ", edit each line marked EDIT, and save the sample
+# table it names beside this file: one row per protein sample, its RNA sample as gather's
+# sheet names it (empty for none), and its TMT plex or label-free run.
+#
+# --- [proteo]
+# [proteo]
+# design = "across_samples"
+# # EDIT: the [[resources]] entry of the protein table, as `prepare fetch` prints it; for a
+# # file of your own beside this one, delete this line and set file under [proteo.table].
+# protein = "protein_table"
+# # EDIT: the table's name inside a zip or tar archive; delete the line for a plain file.
+# member = "proteinGroups.txt"
+# # EDIT: genes drawn one by one, and sample table columns drawn as strips.
+# genes = []
+# tracks = []
+# [proteo.classes.oxphos]
+# resource = "msigdb_hallmark"
+# sets = ["HALLMARK_OXIDATIVE_PHOSPHORYLATION"]
+# [proteo.table]
+# # EDIT: maxquant, diann, or table for any other; a table names its id_column.
+# format = "maxquant"
+# # EDIT: MaxQuant's columns: LFQ intensity, Intensity, iBAQ or Reporter intensity corrected.
+# quantity = "LFQ intensity"
+# # EDIT: linear for intensities; log for logarithms, with log_base = 2, 10 or "e".
+# scale = "linear"
+# # The texts a missing value is written as, never read as zero; MaxQuant writes 0 and DIA-NN
+# # an empty cell, the defaults. A plain table must name its own, such as ["NA", "NaN", ""].
+# # missing = ["0"]
+# # EDIT: symbol, ensembl, or uniprot with id_map and id_map_columns.
+# id_kind = "symbol"
+# # EDIT: tmt, the batch column naming each sample's plex; label_free, its run.
+# acquisition = "label_free"
+# batch = "batch"
+# # For TMT intensities, a sample table column whose yes marks each plex's reference channel
+# # turns every value into a log2 ratio to it: reference = "reference". Delete for ratios.
+# samples = "{slug}_proteo.csv"

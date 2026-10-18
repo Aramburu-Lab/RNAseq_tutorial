@@ -70,7 +70,7 @@ def _notes(ctx: Context) -> list[Result]:
     if p.design == "cross_dataset":
         out.append(text.fill(PAGE, "cross_study", rna=ctx.spec.name,
                              protein=p.label or p.protein))  # fmt: skip
-    elif p.design == "across_samples":
+    elif p.design == "across_samples" and p.table is None:
         out.append(text.word(PAGE, "unregistered"))
     out.append(text.fill(PAGE, "collapse", rows=c.rows, no_symbol=c.no_symbol,
                          several=c.several_genes, twice=c.genes_twice, kept=c.kept))  # fmt: skip
@@ -263,6 +263,8 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     m.metrics.append(("page.missingness_first", float(first and len(blocks) >= FIRST),
                       "the first two figures are the quantified counts and coverage"))  # fmt: skip
     writer.table(m.genes, "genes", figures.columns(*m.genes.columns))
+    for what, frame, columns in m.extra.get("tables", ()):
+        writer.table(frame, what, columns)
     writer.table(pl.DataFrame(m.metrics, schema=list(METRIC_COLUMNS), orient="row"), "metrics",
                  METRIC_COLUMNS)  # fmt: skip
     results.append(_sanity(writer, ctx))
