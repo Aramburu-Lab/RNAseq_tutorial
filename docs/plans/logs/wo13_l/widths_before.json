@@ -1,0 +1,2006 @@
+[
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    463,
+    "Download reproduce_breast_m5_volcano_cptac_brca_do"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_breast_m5_phist_cptac_brca_dock"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    463,
+    "Download reproduce_breast_m5_volcano_cptac_brca_do"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_breast_m5_phist_cptac_brca_dock"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    463,
+    "Download reproduce_breast_m5_volcano_cptac_brca_do"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_breast_m5_phist_cptac_brca_dock"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    463,
+    "Download reproduce_breast_m5_volcano_cptac_brca_do"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_breast_m5_phist_cptac_brca_dock"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    453,
+    "Download reproduce_breast_m5_volcano_tcga_brca_doc"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    429,
+    "Download reproduce_breast_m5_phist_tcga_brca_docke"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    453,
+    "Download reproduce_breast_m5_volcano_tcga_brca_doc"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    429,
+    "Download reproduce_breast_m5_phist_tcga_brca_docke"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    453,
+    "Download reproduce_breast_m5_volcano_tcga_brca_doc"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    429,
+    "Download reproduce_breast_m5_phist_tcga_brca_docke"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    453,
+    "Download reproduce_breast_m5_volcano_tcga_brca_doc"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    429,
+    "Download reproduce_breast_m5_phist_tcga_brca_docke"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    416,
+    "Download reproduce_breast_m6_ora_tcga_brca_docker."
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    418,
+    "Download reproduce_breast_m6_nes_tcga_brca_docker."
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    416,
+    "Download reproduce_breast_m6_ora_tcga_brca_docker."
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    418,
+    "Download reproduce_breast_m6_nes_tcga_brca_docker."
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    416,
+    "Download reproduce_breast_m6_ora_tcga_brca_docker."
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    418,
+    "Download reproduce_breast_m6_nes_tcga_brca_docker."
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    416,
+    "Download reproduce_breast_m6_ora_tcga_brca_docker."
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    418,
+    "Download reproduce_breast_m6_nes_tcga_brca_docker."
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 541,
+  "wide": [
+   [
+    "#text",
+    "note",
+    "",
+    16,
+    541,
+    "Gene classes from Complex subunit: GOCC_CYTOSOLIC_"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 541,
+  "wide": [
+   [
+    "#text",
+    "note",
+    "",
+    16,
+    541,
+    "Gene classes from Complex subunit: GOCC_CYTOSOLIC_"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    474,
+    "Download reproduce_kidney_m5_volcano_cptac_ccrcc_d"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    450,
+    "Download reproduce_kidney_m5_phist_cptac_ccrcc_doc"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    474,
+    "Download reproduce_kidney_m5_volcano_cptac_ccrcc_d"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    450,
+    "Download reproduce_kidney_m5_phist_cptac_ccrcc_doc"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    474,
+    "Download reproduce_kidney_m5_volcano_cptac_ccrcc_d"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    450,
+    "Download reproduce_kidney_m5_phist_cptac_ccrcc_doc"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    474,
+    "Download reproduce_kidney_m5_volcano_cptac_ccrcc_d"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    450,
+    "Download reproduce_kidney_m5_phist_cptac_ccrcc_doc"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 377,
+  "wide": [
+   [
+    "#text",
+    "note",
+    "",
+    16,
+    377,
+    "Gene classes from Oxidative phosphorylation: HALLM"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 377,
+  "wide": [
+   [
+    "#text",
+    "note",
+    "",
+    16,
+    377,
+    "Gene classes from Oxidative phosphorylation: HALLM"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    435,
+    "Download reproduce_lung_m5_volcano_tcga_lung_docke"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    412,
+    "Download reproduce_lung_m5_phist_tcga_lung_docker."
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    435,
+    "Download reproduce_lung_m5_volcano_tcga_lung_docke"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    412,
+    "Download reproduce_lung_m5_phist_tcga_lung_docker."
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    435,
+    "Download reproduce_lung_m5_volcano_tcga_lung_docke"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    412,
+    "Download reproduce_lung_m5_phist_tcga_lung_docker."
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    435,
+    "Download reproduce_lung_m5_volcano_tcga_lung_docke"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    412,
+    "Download reproduce_lung_m5_phist_tcga_lung_docker."
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_before/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    440,
+    "Download reproduce_blood_m1_composition_tier1_dock"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_blood_m1_library_sizes_tier1_do"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    440,
+    "Download reproduce_blood_m1_composition_tier1_dock"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_blood_m1_library_sizes_tier1_do"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    440,
+    "Download reproduce_blood_m1_composition_tier1_dock"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_blood_m1_library_sizes_tier1_do"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    440,
+    "Download reproduce_blood_m1_composition_tier1_dock"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    439,
+    "Download reproduce_blood_m1_library_sizes_tier1_do"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1579,
+  "wide": [
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1579,
+    "Shading, display only: FastQC 0.12.1 Graphs/Qualit"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1579,
+  "wide": [
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1579,
+    "Shading, display only: FastQC 0.12.1 Graphs/Qualit"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    931,
+    1347,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 712,
+  "wide": [
+   [
+    "#text",
+    "",
+    "",
+    64,
+    712,
+    "Shading, display only: FastQC 0.12.1 Graphs/Qualit"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 712,
+  "wide": [
+   [
+    "#text",
+    "",
+    "",
+    64,
+    712,
+    "Shading, display only: FastQC 0.12.1 Graphs/Qualit"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    64,
+    480,
+    "Shading, display only: FastQC 0.12.1 Configuration"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    404,
+    "Download reproduce_blood_m5_volcano_tier1_docker.s"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    380,
+    "Download reproduce_blood_m5_phist_tier1_docker.sh"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    404,
+    "Download reproduce_blood_m5_volcano_tier1_docker.s"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    380,
+    "Download reproduce_blood_m5_phist_tier1_docker.sh"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [
+   [
+    "A",
+    "",
+    "",
+    29,
+    404,
+    "Download reproduce_blood_m5_volcano_tier1_docker.s"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    380,
+    "Download reproduce_blood_m5_phist_tier1_docker.sh"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ],
+   [
+    "A",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    404,
+    "Download reproduce_blood_m5_volcano_tier1_docker.s"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    380,
+    "Download reproduce_blood_m5_phist_tier1_docker.sh"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ],
+   [
+    "#text",
+    "",
+    "",
+    29,
+    377,
+    "Download reproduce_blood_m5_calls_tier1_docker.sh"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 385,
+  "wide": [
+   [
+    "#text",
+    "",
+    "",
+    29,
+    384,
+    "210 samples, 78,470 genes of gencode.v50.primary_a"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 385,
+  "wide": [
+   [
+    "#text",
+    "",
+    "",
+    29,
+    384,
+    "210 samples, 78,470 genes of gencode.v50.primary_a"
+   ]
+  ],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_before/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ }
+]

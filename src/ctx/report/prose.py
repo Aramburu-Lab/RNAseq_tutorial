@@ -117,7 +117,13 @@ def check_asks(name: str, node: Any) -> Iterator[str]:
 
 
 def check_page(name: str, raw: Mapping[str, Any]) -> Iterator[str]:
-    """Violations in a page file: the sections, their lists, and the figure captions."""
+    """Violations in a page file: the sections, their lists, and the figure captions.
+
+    A table under ``variants`` replaces some of the page's sections for one design
+    (``text.skeleton``), so each is held to the same budgets as the sections it replaces.
+    """
+    for variant, sections in raw.get("variants", {}).items():
+        yield from check_page(f"{name}: variants.{variant}", sections)
     for key, budget in BUDGETS.items():
         if key in raw:
             yield from check_text(f"{name}: {key}", raw[key], budget)

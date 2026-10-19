@@ -51,6 +51,8 @@ release = "GDC release"
 
 [checks]
 title = "Download checks"
+# A dataset joining projects: one table per project, each named.
+title_project = "Download checks, {project}"
 columns = ["Check", "Result"]
 release = "Release"
 release_value = "{release}, in the status file and every retrieval row"

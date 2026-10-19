@@ -28,6 +28,8 @@ SECTIONS = {"purpose", "input", "method", "interpretation", "pitfalls", "questio
 _ANSWER = {"prompt", "answer"}
 # options."--x".meaning and effects.<command>."--x": a card's text is three keys deep.
 _CARD_DEPTH = 3
+# variants.<design>.<section>: a variant's sections start two keys deep.
+_VARIANT_DEPTH = 2
 # A name of three characters or fewer, or with two capitals (GO, OS, TPM, MultiQC), is matched
 # as written: "go" and "os" are words, not the Gene Ontology or overall survival.
 _EXACT = re.compile(r"^.{1,3}$|[A-Z].*[A-Z]")
@@ -64,6 +66,11 @@ def section(path: tuple[str, ...], page: bool) -> str | None:
         page: Whether the file is a page file (it has a ``purpose``); else the cards.
     """
     head = path[0]
+    # A variant's sections replace the page's own for one design (text.skeleton): each is
+    # its own section, so a term marked in the page's text does not cover the variant's.
+    if page and head == "variants" and len(path) > _VARIANT_DEPTH:
+        inner = section(path[_VARIANT_DEPTH:], page)
+        return None if inner is None else f"{path[1]}: {inner}"
     if page and head in SECTIONS and (head != "questions" or path[-1] in _ANSWER):
         return head
     if page and head == "figures" and path[-1] == "caption":

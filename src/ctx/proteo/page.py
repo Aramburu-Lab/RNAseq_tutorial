@@ -110,8 +110,12 @@ def _across(writer: Writer, ctx: Context) -> list[Result]:
                                      & (pl.col("rho") > 0)).height}  # fmt: skip
     values["class_test"] = text.fill(PAGE, "figures.rho.class_test", p_class=_p(below[0])
                                      ) if "complex_below" in m.extra else ""  # fmt: skip
-    figure = figures.rho_by_class(writer, tested, values)
-    out: list[Result] = [*_shifts(ctx), Group(text.word(PAGE, "groups.correlation"), (figure,))]
+    normals = "normal_class_test" in m.extra
+    drawn = [figures.rho_by_class(writer, tested, values,
+                                  "figures.rho_tumour" if normals else "figures.rho")]  # fmt: skip
+    if normals:
+        drawn.append(_normal_rho(writer, ctx))
+    out: list[Result] = [*_shifts(ctx), Group(text.word(PAGE, "groups.correlation"), tuple(drawn))]
     rna, protein = m.extra["rna"], m.extra["values"]
     annotation = m.extra["annotation"]
     rows = {g: i for i, g in enumerate(m.genes["gene"])}
@@ -150,6 +154,23 @@ def _across(writer: Writer, ctx: Context) -> list[Result]:
     if found:
         out.append(Group(text.word(PAGE, "groups.contrast"), tuple(found)))
     return out
+
+
+def _normal_rho(writer: Writer, ctx: Context) -> FigureBlock:
+    """F3 of the normals: their own per-gene rho by class, from the ``normal_`` columns."""
+    m = ctx.measured
+    own = m.genes.filter(pl.col("normal_tested")).select(
+        "gene", "gene_class", rho="normal_rho", rho_padj="normal_rho_padj"
+    )
+    tested = figures.shown(own, ctx.options.gene_class)
+    test = m.extra["normal_class_test"]
+    values = {"n_samples": m.extra["n_normal"], "n_genes": tested.height, "alpha": ALPHA,
+              "median": measure.median(tested["rho"]), "h": test.h, "p": _p(test.p),
+              "eps": test.epsilon2,
+              "n_sig": tested.filter((pl.col("rho_padj") < ALPHA)
+                                     & (pl.col("rho") > 0)).height}  # fmt: skip
+    return figures.rho_by_class(writer, tested, values, "figures.rho_normal",
+                                "rho_by_class_normal")  # fmt: skip
 
 
 def _shifts(ctx: Context) -> list[Result]:
@@ -270,8 +291,10 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     results.append(_sanity(writer, ctx))
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(MODULE)
     track = "A" if MODULE in runtime.TRACK_A_MODULES else "B"
+    paired = ctx.spec.proteo is not None and ctx.spec.proteo.design == "tumour_normal"
+    sections = text.skeleton(PAGE, "variants.tumour_normal" if paired else None)
     built = ModulePage(
-        title=text.fill(PAGE, "title", dataset=ctx.spec.name), **text.skeleton(PAGE),
+        title=text.fill(PAGE, "title", dataset=ctx.spec.name), **sections,
         parameters=ctx.cards, results=tuple(results), key_numbers=_keys(ctx),
         reproduce=Reproduction(
             command=ctx.command, wall_seconds=usage.wall_seconds,

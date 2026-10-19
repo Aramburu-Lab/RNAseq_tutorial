@@ -153,9 +153,13 @@ def shown(frame: pl.DataFrame, gene_class: str) -> pl.DataFrame:
         {c: class_name(c) for c in kept["gene_class"].unique()}))  # fmt: skip
 
 
-def rho_by_class(writer: Writer, tested: pl.DataFrame, values: Mapping[str, object]
-                 ) -> FigureBlock:  # fmt: skip
-    """F3: per-gene rho, one cumulative curve per gene class."""
+def rho_by_class(writer: Writer, tested: pl.DataFrame, values: Mapping[str, object],
+                 key: str = "figures.rho", what: str = "rho_by_class") -> FigureBlock:  # fmt: skip
+    """F3: per-gene rho, one cumulative curve per gene class.
+
+    ``key`` names the figure's words and ``what`` its files: the normals of a tumour-against-
+    normal design draw the same figure from their own columns, under ``figures.rho_normal``.
+    """
     frame = _cumulative(
         tested.select("gene", "gene_class", "rho").drop_nulls(), "gene_class", "rho"
     )
@@ -164,12 +168,12 @@ def rho_by_class(writer: Writer, tested: pl.DataFrame, values: Mapping[str, obje
         frame=frame, columns=columns(*frame.columns), series="gene_class", x="rho", y="share",
         x_label=text.word(PAGE, "figures.rho.x"), y_label=text.word(PAGE, "figures.rho.y"),
         colour="gene_class", colours=class_colours(frame), hover=("gene",),
-        caption=text.fill(PAGE, "figures.rho.caption", counts=_counts(frame), **values),
+        caption=text.fill(PAGE, f"{key}.caption", counts=_counts(frame), **values),
         thresholds=(Line(text.word(PAGE, "figures.rho.median"), ends, (0.5, 0.5), dash=True),),
     )  # fmt: skip
-    return writer.figure(data, "rho_by_class", FigureText(
-        title=text.word(PAGE, "figures.rho.title"),
-        lead=text.fill(PAGE, "figures.rho.lead", **values),
+    return writer.figure(data, what, FigureText(
+        title=text.word(PAGE, f"{key}.title"),
+        lead=text.fill(PAGE, f"{key}.lead", **values),
         reading=lines("figures.rho.reading")))  # fmt: skip
 
 

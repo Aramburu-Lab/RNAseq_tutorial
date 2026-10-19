@@ -2,6 +2,7 @@
 the dataset file, and PDC's biospecimens; each test names the mutation it catches."""
 
 import json
+import re
 from dataclasses import replace
 from pathlib import Path
 
@@ -86,6 +87,13 @@ def test_two_project_gather_writes_the_sheet_m5_fits_on(tmp_path):
     sheet = pl.read_parquet(next((root / "outputs" / "01_gather").glob("*_samplesheet_v1.parquet")))
     chosen = gdc.chosen(sheet, "Primary Tumor")
     assert chosen.group_by("project").len().sort("project").rows() == [(PROJECT, 3), (OTHER, 2)]
+    # S.4: one download-checks table per project, each named by it; two under one title read
+    # as one table printed twice. Catches: the project-blind title.
+    (page,) = (root / "outputs" / "01_gather").glob("*_overview_v1.html")
+    titles = re.findall(r"<caption>([^<]*)</caption>", page.read_text())
+    checks = [t for t in titles if t.startswith("Download checks")]
+    assert checks == [f"Download checks, {PROJECT}", f"Download checks, {OTHER}"]
+    assert len(set(titles)) == len(titles)
 
 
 def test_schema_refuses_project_and_projects_or_one_listed(tmp_path):

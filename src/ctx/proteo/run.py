@@ -416,6 +416,25 @@ def correlation_metrics(measured: Measured, spec: ProteoSpec, method: str) -> No
         measured.extra["complex_below"] = (p, r)
 
 
+def normal_metrics(measured: Measured, spec: ProteoSpec, method: str) -> None:
+    """The normals' per-gene median and class test, as ``correlation_metrics`` reads tumours'.
+
+    The normals' class figure draws from these, so a tumour-against-normal page shows whether
+    a class's protein follows its RNA in both tissues.
+    """
+    tested = measured.genes.filter(pl.col("normal_tested"))
+    short = "normal_rho" if method == "spearman" else "normal_r"
+    measured.metrics.append(("normal.pergene.spearman.median", measure.median(
+        tested["normal_rho"]), f"{tested['normal_rho'].drop_nulls().len()} genes"))  # fmt: skip
+    groups = {name: tested.filter(pl.col("gene_class") == name)[short].drop_nulls().to_numpy()
+              for name in [*spec.classes, measure.OTHER]}  # fmt: skip
+    measured.extra["normal_class_test"] = measure.class_test(groups)
+    for name, values in groups.items():
+        median = float(np.median(values)) if values.size else np.nan
+        measured.metrics.append((f"normal.class.{name}.median", median,
+                                 f"{values.size} genes, {method}"))  # fmt: skip
+
+
 def verdicts(spec: ProteoSpec, metrics: list[tuple[str, float, str]]) -> list[dict[str, object]]:
     """The registered rules decided on this run's metrics."""
     return decide({m: v for m, v, _ in metrics}, parse(spec.sanity))
@@ -459,6 +478,7 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
         contrast_metrics(settings, spec, measured, options)
     elif spec.proteo.design == "tumour_normal":
         correlation_metrics(measured, spec.proteo, options.method)
+        normal_metrics(measured, spec.proteo, options.method)
         paired_metrics(settings, spec, measured, options, known)
     else:
         fold_metrics(measured)

@@ -52,6 +52,16 @@ def test_a_table_of_question_variants_holds_each_prompt_to_its_budget():
     assert not any("items" in p for p in problems), problems
 
 
+def test_a_variants_sections_keep_the_budgets():
+    """M7's tumour-against-normal sections replace the page's own (text.skeleton), so each is
+    held to the same budgets. Mutation: the variants left unchecked (a 26-word sentence passes)."""
+    long = " ".join(["word"] * 26) + "."
+    page = {**CLEAN, "variants": {"design": {"interpretation": long, "pitfalls": ["A " * 21]}}}
+    problems = list(prose.check_page("page", page))
+    assert any("variants.design: interpretation: a sentence of 26" in p for p in problems)
+    assert any("variants.design: pitfalls[0]: 21 words" in p for p in problems), problems
+
+
 def test_a_caption_has_no_backticks():
     page = {**CLEAN, "figures": {"f": {"caption": "Made up; `fastp` kept {n} reads."}}}
     assert any("a backtick" in p for p in prose.check_page("page", page))

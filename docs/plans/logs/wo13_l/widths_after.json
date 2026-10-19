@@ -1,0 +1,1262 @@
+[
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/01_gather/2026-10-19_gather_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/05_de/2026-10-19_de_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/06_function/2026-10-19_function_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_cptac_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/09_report/2026-10-19_report_tcga_brca_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_after/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/01_gather/2026-10-19_gather_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/05_de/2026-10-19_de_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_cptac_ccrcc_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/kidney_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/01_gather/2026-10-19_gather_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/02_qc/2026-10-19_qc_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/05_de/2026-10-19_de_tcga_lung_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/lung_after/outputs/09_report/2026-10-19_report_tcga_lung_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/00_setup/2026-10-19_setup_environment_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/01_gather/2026-10-19_gather_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/05_de/2026-10-19_de_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/06_function/2026-10-19_function_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/08_ncrna/2026-10-19_ncrna_tier1_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_glossary_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/tier1_after/outputs/09_report/2026-10-19_report_tier1_hub_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ }
+]

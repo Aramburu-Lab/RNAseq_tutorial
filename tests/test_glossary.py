@@ -199,6 +199,20 @@ def test_marks_in_page_files_resolve_and_sit_where_they_render(tmp_path):
     assert not [w for w in warnings if "fastq" in w]
 
 
+def test_a_variants_sections_render_marks_as_their_own_section(tmp_path):
+    """M7's tumour-against-normal text replaces the page's sections (text.skeleton), so a mark
+    there renders, and a term the page's own section marked is still unmarked in the variant.
+
+    Mutations: section() without the variants branch (the variant's mark is an error); the
+    variant grouped with the page's own section (its bare FASTQ is not warned)."""
+    variant = {"variants.design": {"interpretation": "Read FASTQ, then [[md5]]."}}
+    folder = _content(tmp_path, purpose="Check [[FASTQ]] files.", interpretation="[[FASTQ]] read.",
+                      **variant)  # fmt: skip
+    errors, warnings = glossary_lint.page_marks(folder)
+    assert errors == []
+    assert "page: design: interpretation: 'FASTQ' is fastq, unmarked" in warnings
+
+
 def test_every_page_file_marks_only_terms_that_exist():
     """The shipped page files: every mark resolves and sits where the page renders it.
 
