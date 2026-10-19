@@ -220,15 +220,26 @@ def assets(prepared: Iterable[Mapping[str, Any]]) -> dict[str, Markup] | None:
     return page_assets(carried - package_characters())
 
 
+def file_caption(caption: Any) -> str:
+    """The caption a contract's own files print, from its ``caption`` attribute.
+
+    A text as given (a scatter's, without the page's thinning line); a caption object, as a
+    box's ``Caption`` or M9's ``OwnCaption``, as its ``text()`` on one line. The one place a
+    caption object becomes text for a view's PDF and SVG: ``views.viewed`` passed M9b's
+    ``OwnCaption`` on as text, and ``ctx genecard`` stopped on Step-1 (V2).
+    """
+    return caption if isinstance(caption, str) else str(caption.text())
+
+
 def settings(
-    inches: tuple[float, float], caption: str, stem: str, layers: Mapping[str, Any] | None = None
+    inches: tuple[float, float], caption: Any, stem: str, layers: Mapping[str, Any] | None = None
 ) -> dict[str, Any]:
     """What a figure's controls carry for its PDF and SVG of a changed view.
 
     Args:
         inches: The size the drawing takes, as the figure's own files take theirs.
-        caption: The caption the figure's own files print, not the page's: a glossary mark
-            is its display text off the page.
+        caption: The contract's caption, text or object (``file_caption``): the one its own
+            files print, not the page's; a glossary mark is its display text off the page.
         stem: The figure's file stem; the view is saved as ``<stem>_view.pdf`` and ``.svg``.
         layers: What the figure files draw that the page's plots lack, from the contract's
             ``export_layers()``: points the page thins, labels it leaves out, room it gives.
@@ -241,7 +252,7 @@ def settings(
     """
     width, height = inches
     return {
-        "width_pt": width * 72, "height_pt": height * 72, "caption": plain(caption),
+        "width_pt": width * 72, "height_pt": height * 72, "caption": plain(file_caption(caption)),
         "note": text.word("ui", "export.note"),
         "file": stem, "size": SIZES["caption"], "spacing": LINE_SPACING, "inset": CAPTION_INSET,
         "bottom": CAPTION_BOTTOM, "ink": THEMES["white"].ink, "marker": 1 / PAGE_PX_PER_PT,

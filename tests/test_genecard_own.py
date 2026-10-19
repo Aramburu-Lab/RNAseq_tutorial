@@ -206,6 +206,29 @@ def test_a_batch_view_is_offered_only_where_it_tests_two_contrasts():
     assert samples.batches(many, boxes.MAX_BATCHES) == []
 
 
+def test_each_f1_view_exports_its_own_caption():
+    # E.1e, V2. Mutations: export.settings reading a caption object as text, which stopped
+    # Step-1's `ctx genecard` in views.viewed; a later view with no PDF and SVG of its own.
+    from ctx.report.builder import FigureText  # noqa: PLC0415
+    from ctx.report.lookups import lookup  # noqa: PLC0415
+    from ctx.report.views import viewed  # noqa: PLC0415
+    from ctx.viz.save import figure_block  # noqa: PLC0415
+
+    two = {"x": ([1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]),
+           "y": ([1.0, 2.0, 3.0, 4.0], [2.0, 3.0, 9.0, 9.5])}  # fmt: skip
+    batch = {"x": ["B1", "B1", "B2", "B2", "B1", "B1", "B2", "B2"],
+             "y": ["B1", "B1", "B1", "B1", "B1", "B1", "B2", "B2"]}  # fmt: skip
+    found = boxes.views(CARD, _values(two, batch=batch), {"x": "X", "y": "Y"}, ["B1", "B2"])
+    options = [(label, data, FigureText(label)) for label, data, _ in found]
+    block = figure_block(options[0][1], "2026-10-19_genecard_demo_contrasts_v1", options[0][2])
+    built = viewed(block, options, "Samples").controls
+    assert built is not None and built["export"]["caption"] == options[0][1].caption_text()
+    shown = lookup(block, options, "Samples").controls
+    assert shown is not None and len(shown["options"]) == 2  # noqa: PLR2004 - all and B1
+    later = shown["options"][1]["export"]["caption"]
+    assert later == options[1][1].caption_text() and shown["export"]["file"] == block.stem
+
+
 def test_f1_and_the_box_join_donors_only_in_a_paired_contrast():
     # E.1e. Mutations: a line drawn for an unpaired contrast whose donors sit in both groups;
     # the paired contrast's lines left out; the box's caption silent about its lines.
@@ -265,9 +288,11 @@ def test_the_page_plot_names_each_line_and_leaves_room_for_n():
     assert low == pytest.approx(low0) and high > high0
 
 
-def test_the_page_draws_the_box_and_f1_and_ships_every_number(root):  # noqa: F811
+def test_the_page_draws_the_box_and_f1_and_ships_every_number(root, monkeypatch):  # noqa: F811
     # Mutations: the box's BH over the drawn gene alone; F1 drawn for one contrast; the values
-    # or the views' tests not written; F4's page opened alone without its tissue boxes.
+    # or the views' tests not written; F4's page opened alone without its tissue boxes; F1's
+    # views built by views.viewed, which stopped the run on a box's caption (E.1e, V2).
+    monkeypatch.setattr(boxes, "pages", lambda names: [[n] for n in names])
     folder, spec = root
     _register(folder, spec)
     own_files(folder, ("a_case", "b_case"))
@@ -284,6 +309,7 @@ def test_the_page_draws_the_box_and_f1_and_ships_every_number(root):  # noqa: F8
     names = [p.name for p in written]
     page = unpacked(written[0].read_text())
     assert "NPTX2 in every contrast of this dataset" in page
+    assert "All samples, contrasts 2 to 2 of 2" in page  # F1's second view, one per page here
     assert "No box for NPTX2 in" in page  # M5 tested ACTB and UPA in a_case, not NPTX2
     box = pl.read_csv(next(p for p in written if "_box_upa_" in p.name and p.suffix == ".csv"))
     values = samples.read(folder, load(spec), [OURS[ACTB], UPA_ID])

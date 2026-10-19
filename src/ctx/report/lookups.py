@@ -34,17 +34,11 @@ def key(choices: Sequence[int]) -> str:
     return ",".join(str(c) for c in choices)
 
 
-def file_caption(data: Any) -> str:
-    """The caption a contract's own files print: a scatter's without the page's thinning line."""
-    caption = data.caption
-    return caption if isinstance(caption, str) else str(data.caption_text())
-
-
 def _exported(data: Any, stem: str) -> dict[str, Any] | None:
     """The export settings of one option's PDF and SVG; None for a contract with no export."""
     if not hasattr(data, "export_layers"):
         return None
-    return export.settings(data.inches(), file_caption(data), stem, data.export_layers())
+    return export.settings(data.inches(), data.caption, stem, data.export_layers())
 
 
 def lookup(block: FigureBlock, options: Sequence[tuple[str, Any, FigureText]], label: str,
