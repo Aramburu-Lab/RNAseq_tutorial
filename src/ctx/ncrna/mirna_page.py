@@ -11,13 +11,13 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import polars as pl
 
-from ctx.de.deseq import RESULT_COLUMNS
+from ctx.de.deseq import RESULT_COLUMNS, Fit
 from ctx.de.run import Writer, volcano
 from ctx.de.stats import ALPHA
 from ctx.ncrna import libraries_page, mirna, targets
 from ctx.ncrna.figures import columns as figure_columns
 from ctx.report import text
-from ctx.report.builder import FigureText, Group, Result, ResultTable
+from ctx.report.builder import FigureBlock, FigureText, Group, Result, ResultTable
 from ctx.report.lookups import lookup
 from ctx.viz.curve import CurveData
 from ctx.viz.scatter import ScatterData, needed_points
@@ -108,13 +108,7 @@ def fitted(writer: Writer, ctx: "Context", tcga: "Tcga") -> tuple[Result, pl.Dat
                  {**RESULT_COLUMNS, "gene_name": COLUMNS["mirna"]})  # fmt: skip
     tested = frame.filter(pl.col("padj").is_not_null())
     c = tcga.contrast
-    shown = FigureText(title=fill("figures.mirna_volcano.title", tested=c.tested,
-                                  reference=c.reference),
-                       lead=fill("figures.mirna_volcano.lead", n_tested=tested.height,
-                                 up=int((tested["call"] == "up").sum()),
-                                 down=int((tested["call"] == "down").sum())))  # fmt: skip
-    unit = word("figures.mirna_volcano.unit")
-    block = writer.figure(volcano(result, named, unit), "mirna_volcano", shown)
+    block = mirna_volcano(writer, result, named)
     assert ctx.inputs.spec.ncrna is not None  # noqa: S101 - resolve() refuses a file without it
     metrics: Metrics = {
         "mirna.tested": (float(tested.height), f"mature miRNAs with an adjusted p in {c.name}"),
@@ -136,6 +130,19 @@ def fitted(writer: Writer, ctx: "Context", tcga: "Tcga") -> tuple[Result, pl.Dat
                         text.words(PAGE, "figures.mirna_volcano.columns"), tuple(rows),
                         numeric=(2, 3, 4))  # fmt: skip
     return Group(word("groups.mirna"), (block, table)), frame, metrics
+
+
+def mirna_volcano(writer: Writer, result: Fit, named: pl.DataFrame) -> FigureBlock:
+    """F6's volcano and its words from the fit alone, so ``ctx figure`` redraws it unrefitted."""
+    c = result.contrast
+    tested = result.results.filter(pl.col("padj").is_not_null())
+    shown = FigureText(title=fill("figures.mirna_volcano.title", tested=c.tested,
+                                  reference=c.reference),
+                       lead=fill("figures.mirna_volcano.lead", n_tested=tested.height,
+                                 up=int((tested["call"] == "up").sum()),
+                                 down=int((tested["call"] == "down").sum())))  # fmt: skip
+    unit = word("figures.mirna_volcano.unit")
+    return writer.figure(volcano(result, named, unit), "mirna_volcano", shown)
 
 
 def _tested(ctx: "Context") -> pl.DataFrame:

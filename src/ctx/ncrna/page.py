@@ -18,7 +18,7 @@ from ctx.de.sanity import decide, parse
 from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.gather import gdc as gdc_reader
 from ctx.io.naming import stem
-from ctx.ncrna import biotypes, figures, mirna_page
+from ctx.ncrna import biotypes, figure_tables, figures, mirna_page
 from ctx.report import text
 from ctx.report.builder import (
     FigureText,
@@ -315,6 +315,7 @@ def keys(ctx: Context, frame: pl.DataFrame, top: float) -> tuple[KeyNumber, ...]
 
 def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write every table and figure, then the page; the page first in the returned list."""
+    figure_tables.write(writer, ctx)
     shown, metrics = library(writer, ctx)
     tested, frame = de(writer, ctx)
     gdc = ctx.inputs.tcga is not None

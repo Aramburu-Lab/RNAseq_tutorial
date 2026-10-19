@@ -1,0 +1,12 @@
+CAUGHT  records and options written after the first figure: 1 failed in 31.40s | E           AssertionError: 2026-10-19_ncrna_ncsynth_biotype_shares_v1
+CAUGHT  gene records out of the counts' order: 1 failed in 27.75s | E           AssertionError: 2026-10-19_ncrna_ncsynth_biotype_shares_v1
+CAUGHT  default groups drawn: 1 failed in 20.23s | E           AssertionError: 2026-10-19_ncrna_ncsynth_filter_by_biotype_v1
+CAUGHT  default count drawn: 1 failed in 17.85s | E           AssertionError: 2026-10-19_ncrna_ncsynth_filter_by_biotype_v1
+CAUGHT  groups read back reversed: 1 failed in 19.09s | E           AssertionError: 2026-10-19_ncrna_ncsynth_filter_by_biotype_v1
+CAUGHT  sheet past the door: 1 failed in 38.84s | E       assert 'S999' not in {'S001', 'S002', 'S003', 'S004', 'S005', 'S006', ...}
+CAUGHT  miRNA volcano's sheet past the door: 1 failed in 47.76s | E           AssertionError: 2026-10-19_ncrna_fakegdc_mirna_volcano_v1
+CAUGHT  pairs' miRNA sheet past the door: 1 failed in 32.57s | E       AssertionError: ('own_m8_mirna_target_pairs', 'envs/default/lib/python3 │
+CAUGHT  target files unread: 1 failed in 45.13s | E       AssertionError: ('own_m8_mirna_target_pairs', '                      │
+CAUGHT  target files out of the shift's spec: 1 failed in 35.87s | E       AssertionError: assert {'mirtarbase_..._predictions'} <= {'dataset_fil...s', 'results'}
+CAUGHT  F5 handed the chosen files: 1 failed in 28.59s | E           ctx.figures.kind.NoFigureError: library_types: the module draws no such figure from these inputs
+exit=0

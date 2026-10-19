@@ -1,0 +1,13 @@
+bringing up nodes...
+bringing up nodes...
+
+.......................................                                  [100%]
+=============================== warnings summary ===============================
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+39 passed, 3 warnings in 86.00s (0:01:26)

@@ -1,0 +1,8 @@
+ruff check .: exit 0
+ruff format --check .: exit 0
+mypy src: exit 0
+interrogate src: exit 0
+labdocs lint: exit 0
+labdocs render --check: exit 0
+python -m ctx.report.prose: exit 0
+python -m ctx.report.glossary_lint: exit 0

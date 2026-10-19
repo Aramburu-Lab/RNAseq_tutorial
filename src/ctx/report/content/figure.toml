@@ -99,6 +99,15 @@ drawn_rows = "M7's RNA and protein of the genes the worked and paired figures dr
 worked_samples = "M7's tumour and normal columns of the worked figures."
 contrast_folds = "M7's genes of the contrast tested at both layers."
 contrast_summary = "M7's protein samples per group and fold-change correlation of the contrast."
+# M8
+gene_biotypes = "M8's annotation record of each count row, with its biotype group."
+mirna_results = "M8's miRNA fit: one row per mature miRNA, with its name."
+mirna_samplesheet = "M1's miRNA sample sheet: one row per small-RNA library."
+mirna_mature_counts = "M1's mature miRNA counts, one column per small-RNA library."
+targetscan_predictions = "TargetScan's default predictions, the file ctx setup fetched."
+targetscan_families = "TargetScan's miRNA family file, the file ctx setup fetched."
+targetscan_genes = "TargetScan's gene file, the file ctx setup fetched."
+mirtarbase_strong = "miRTarBase's strong-evidence targets, the file ctx setup fetched."
 
 [readme]
 title = "Figure"

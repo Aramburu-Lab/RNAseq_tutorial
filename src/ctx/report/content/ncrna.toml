@@ -275,3 +275,21 @@ composition = "Made-up data: {n_samples} samples, {n_genes:,} genes. Shares of c
 filter = "Made-up data: {n_ref} {reference} and {n_test} {tested} samples of {cell_type}; cutoff {min_count} reads at the median library size. Mann-Whitney, lncRNA against protein-coding: p = {p:.2g}, rank-biserial r = {r:.2f}."
 volcano = "Made-up data: {n_ref} {reference} and {n_test} {tested} samples; {n_tested:,} genes tested. Welch t-test on log2 CPM; BH within each biotype, over {n_protein_coding:,} protein-coding genes and {n_lncrna:,} lncRNAs."
 neighbour = "Made-up data: {n_samples} samples. Spearman rho = {rho:.2f}, p = {p:.2g}; on residuals from each cell type and condition mean, rho = {rho_within:.2f}, p = {p_within:.2g}. A single pair, so no correction."
+
+# The tables ``ctx figure`` redraws M8's figures from (ctx.ncrna.figure_tables).
+[tables.figure_options]
+units = { min_count = "reads" }
+columns.biotypes = "The biotype groups drawn and tested, comma-joined, in the run's order."
+columns.min_count = "The filter's minimum count at the median library size."
+columns.gtf = "The annotation file the gene records came from."
+
+[tables.gene_biotypes]
+units = { start = "nt", end = "nt" }
+columns.gene_id = "Gene ID of a count row, as the counts carry it."
+columns.gene_name = "GENCODE gene name."
+columns.gene_type = "GENCODE gene type."
+columns.chrom = "Chromosome of the gene."
+columns.start = "First base of the gene, 1-based, as the GTF writes it."
+columns.end = "Last base of the gene, inclusive."
+columns.strand = "Strand of the gene."
+columns.biotype = "GENCODE gene type, grouped (ctx.ncrna.biotypes)."

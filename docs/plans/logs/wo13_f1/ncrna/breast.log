@@ -1,0 +1,28 @@
+ncrna: exit 0
+       44.18 real        45.26 user         7.65 sys
+          3926097920  maximum resident set size
+             1491304  peak memory footprint
+  13,802,065 B page; 7 panels, 76,925 B; 2026-10-19_ncrna_tcga_brca_overview_v1.html
+  12,486,200 B page; 0 panels, 0 B; 2026-10-16_ncrna_tcga_brca_overview_v1.html
+80 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a84b7900e11d976d1/outputs/scratch_roots/breast_m8/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_figure_options_v1.csv
+1530 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a84b7900e11d976d1/outputs/scratch_roots/breast_m8/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_figure_options_v1.parquet
+2620 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a84b7900e11d976d1/outputs/scratch_roots/breast_m8/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_figure_options_v1_README.md
+4551054 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a84b7900e11d976d1/outputs/scratch_roots/breast_m8/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_gene_biotypes_v1.csv
+992393 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a84b7900e11d976d1/outputs/scratch_roots/breast_m8/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_gene_biotypes_v1.parquet
+2941 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a84b7900e11d976d1/outputs/scratch_roots/breast_m8/outputs/08_ncrna/2026-10-19_ncrna_tcga_brca_gene_biotypes_v1_README.md
+== breast_m8_mirna_volcano
+panels on the page: 7; for breast_m8_mirna_volcano: 1
+exit 0
+.csv         byte-equal     60,440 B
+_white.pdf   byte-equal     41,389 B
+_white.svg   byte-equal     55,915 B
+_black.pdf   byte-equal     41,396 B
+_black.svg   byte-equal     56,635 B
+== breast_m8_lncrna_neighbour
+panels on the page: 7; for breast_m8_lncrna_neighbour: 1
+exit 0
+.csv         byte-equal     16,143 B
+_white.pdf   byte-equal     29,331 B
+_white.svg   byte-equal     36,579 B
+_black.pdf   byte-equal     29,343 B
+_black.svg   byte-equal     37,134 B
