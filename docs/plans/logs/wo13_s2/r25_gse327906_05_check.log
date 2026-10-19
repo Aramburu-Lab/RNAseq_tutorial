@@ -1,0 +1,12 @@
+## check GSE327906 s2_gse327906 2026-10-19 15:37:12
+- no [[contrasts]]: de and function have nothing to compare
+  add these lines to the dataset file:
+[[contrasts]]
+name = "brca_wt_brca_mt"
+variable = "condition"
+reference = "brca_mt"
+tested = "brca_wt"
+n = [17, 8]
+
+1 problems, 0 of them stopping the run; ctx run runs: gather, qc, report
+## exit 1

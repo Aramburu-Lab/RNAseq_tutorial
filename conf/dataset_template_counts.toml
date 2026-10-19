@@ -80,6 +80,19 @@ bytes = 16973125
 sha256 = "8bf6f686e640dbc864a346484626953621b0500d900d26cd085a35c2782d725d"
 dest = "resources/hgnc/hgnc_complete_set_2026-10-06.txt"
 
+# Ensembl's stable-ID history at release 116, the Ensembl release GENCODE 50 is built from: it
+# places an Ensembl gene ID the annotation lacks, retired since the matrix's own annotation, on
+# the one current gene its history leads to; an ID it leads to no gene or several stays left out.
+# Delete it for NCBI Gene IDs or symbols.
+[[resources]]
+name = "ensembl_id_history"
+urls = [
+    "https://ftp.ensembl.org/pub/release-116/mysql/homo_sapiens_core_116_38/stable_id_event.txt.gz",
+]
+bytes = 19828790
+sha256 = "2f89533fba4d1acadf7e991641c5288a6bb35d5d0417a62c20d81400fd1cb654"
+dest = "resources/ensembl/homo_sapiens_core_116_38_stable_id_event.txt.gz"
+
 # EDIT: your table's file name, beside this file: one row per sample column of the matrix, its
 # `sample` column holding the matrix's column names. For an authors' matrix, whose columns are
 # their own names, join on the table's column that holds them: ["library_name", "sample"].

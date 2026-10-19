@@ -12,7 +12,7 @@ import gzip
 import io
 import re
 from collections import defaultdict
-from collections.abc import Iterable, Mapping
+from collections.abc import Container, Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -46,6 +46,17 @@ HGNC_RESOURCE = "hgnc_complete"
 HGNC_COLUMNS = ("entrez_id", "ensembl_gene_id")
 # What a placed row's detail says when HGNC, not GENCODE's table, placed it.
 THROUGH_HGNC = "through HGNC"
+# Ensembl's stable_id_event table of a fixed release: it places an Ensembl gene ID the annotation
+# no longer holds on the one current gene its history leads to (R2.5). Its columns, in order, as
+# that release's homo_sapiens_core schema defines them; the dump has no header line.
+HISTORY_RESOURCE = "ensembl_id_history"
+HISTORY_COLUMNS = ("old_stable_id", "old_version", "new_stable_id", "new_version",
+                   "mapping_session_id", "type", "score")  # fmt: skip
+# The dump's NULL, which marks a gene created or retired.
+HISTORY_NULL = "\\N"
+THROUGH_HISTORY = "through Ensembl's ID history"
+# A placed row's detail when a fallback map placed it: such a row never unseats another.
+FALLBACKS = (THROUGH_HGNC, THROUGH_HISTORY)
 # The value kinds a dataset file's [counts] declares, defined once in ctx.dataset.
 RAW, RSEM_EXPECTED = COUNT_KINDS
 TRANSCRIPT = re.compile(r'transcript_id "([^"]*)"')
@@ -97,6 +108,8 @@ class Mapped:
         kinds: Rows per ID kind: ensembl, entrez, symbol.
         versions: Ensembl rows whose version equals, differs from, or is absent in the GTF's.
         through_hgnc: NCBI Gene ID rows placed through HGNC, as GENCODE's table links none.
+        through_history: Ensembl rows the annotation lacks, placed through Ensembl's ID history.
+        lacked: Ensembl rows whose stable ID the annotation lacks, placed or not.
     """
 
     counts: pl.DataFrame
@@ -105,6 +118,8 @@ class Mapped:
     kinds: Mapping[str, int]
     versions: Mapping[str, int]
     through_hgnc: int = 0
+    through_history: int = 0
+    lacked: int = 0
 
 
 def is_sheet(sheet: pl.DataFrame) -> bool:
@@ -308,6 +323,57 @@ def hgnc_ensembl(path: Path) -> dict[str, set[str]]:
     return dict(found)
 
 
+def id_history(path: Path) -> dict[str, set[str]]:
+    """Each stable gene ID's successors in Ensembl's ``stable_id_event`` dump, read by position.
+
+    Only gene events that change the ID are kept: a version step leaves the stable ID as it
+    was, and an event with no old or no new ID (``HISTORY_NULL``) creates or retires a gene.
+
+    Raises:
+        CountsError: If a line does not hold the table's seven columns.
+    """
+    try:
+        frame = pl.read_csv(path, separator="\t", has_header=False, quote_char=None,
+                            new_columns=list(HISTORY_COLUMNS), null_values=HISTORY_NULL,
+                            infer_schema=False)  # fmt: skip
+    except (pl.exceptions.ComputeError, pl.exceptions.ShapeError) as error:
+        raise CountsError(
+            [
+                (
+                    "gene ids",
+                    HISTORY_RESOURCE,
+                    f"{path.name} is not Ensembl's "
+                    f"stable_id_event table: {str(error).splitlines()[0]}",
+                )
+            ]
+        ) from error
+    if frame.width != len(HISTORY_COLUMNS):
+        raise CountsError([("gene ids", HISTORY_RESOURCE, f"{path.name} has {frame.width} "
+                            f"columns; stable_id_event has {len(HISTORY_COLUMNS)}")])  # fmt: skip
+    old, new = pl.col("old_stable_id"), pl.col("new_stable_id")
+    events = frame.filter((pl.col("type") == "gene") & old.is_not_null() & new.is_not_null()
+                          & (old != new))  # fmt: skip
+    found: dict[str, set[str]] = defaultdict(set)
+    for before, after in events.select("old_stable_id", "new_stable_id").rows():
+        found[before].add(after)
+    return dict(found)
+
+
+def current(history: Mapping[str, set[str]], start: str, held: Container[str]) -> set[str]:
+    """The IDs of ``held`` that a stable ID's history reaches, through every later event.
+
+    The walk does not stop at a held ID: a gene split after the ID was retired leads to two
+    current genes, and the row is then ambiguous, never given to one of them.
+    """
+    seen, frontier = {start}, [start]
+    while frontier:
+        for after in history.get(frontier.pop(), ()):
+            if after not in seen:
+                seen.add(after)
+                frontier.append(after)
+    return {i for i in seen - {start} if i in held}
+
+
 def _targets(annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | None,
              hgnc: Mapping[str, set[str]] | None = None
              ) -> dict[str, dict[str, set[str]]]:  # fmt: skip
@@ -333,26 +399,45 @@ Placed = tuple[str, str, str, str]
 REASONS = ("not_in_annotation", "ambiguous", "shared_gene", "no_entrez_table")
 
 
+def _fallback(kind: str, key: str, targets: Mapping[str, Mapping[str, set[str]]],
+              history: Mapping[str, set[str]] | None) -> tuple[list[str], str, str]:  # fmt: skip
+    """A fallback map's genes for a key its own kind's map does not hold, its name, and a note.
+
+    HGNC for an NCBI Gene ID GENCODE's table links to nothing; Ensembl's history for an
+    Ensembl ID the annotation lacks. The note says what the history found where it placed none.
+    """
+    if kind == "entrez" and key in targets["hgnc"]:
+        return sorted(targets["hgnc"][key]), THROUGH_HGNC, ""
+    if kind != "ensembl" or history is None:
+        return [], "", ""
+    reached = sorted(current(history, key, targets["ensembl"]))
+    genes = sorted({g for i in reached for g in targets["ensembl"][i]})
+    if len(genes) == 1:
+        return genes, THROUGH_HISTORY, ""
+    shown = f", {', '.join(reached[:3])}" if reached else ""
+    return [], "", f"ID history: {len(reached)} current genes{shown}"
+
+
 def _place(ids: Iterable[str], targets: Mapping[str, Mapping[str, set[str]]],
-           has_entrez: bool) -> list[Placed]:  # fmt: skip
+           has_entrez: bool, history: Mapping[str, set[str]] | None = None
+           ) -> list[Placed]:  # fmt: skip
     """Each row's one gene, or why it has none, with the genes or table it concerns."""
     placed: list[Placed] = []
     for source_id in ids:
         kind = kind_of(source_id)
         key = m[1] if (m := ENSEMBL.fullmatch(source_id)) else source_id
-        genes = sorted(targets[kind].get(key, set()))
-        # HGNC only where GENCODE's own table links the ID to no gene at all.
-        through = kind == "entrez" and key not in targets[kind] and key in targets["hgnc"]
-        if through:
-            genes = sorted(targets["hgnc"][key])
+        genes, through, note = sorted(targets[kind].get(key, set())), "", ""
+        # A fallback only where the kind's own map holds the key to no gene at all.
+        if key not in targets[kind]:
+            genes, through, note = _fallback(kind, key, targets, history)
         if kind == "entrez" and not has_entrez:
             placed.append((kind, "", "no_entrez_table", f"no {ENTREZ_RESOURCE} resource"))
         elif len(genes) == 1:
-            placed.append((kind, genes[0], "", THROUGH_HGNC if through else ""))
+            placed.append((kind, genes[0], "", through))
         elif genes:
             placed.append((kind, "", "ambiguous", f"{len(genes)} genes: {', '.join(genes[:3])}"))
         else:
-            placed.append((kind, "", "not_in_annotation", ""))
+            placed.append((kind, "", "not_in_annotation", note))
     return placed
 
 
@@ -386,8 +471,8 @@ def to_integers(values: np.ndarray) -> np.ndarray:
 def _shared(placed: list[Placed], ids: tuple[str, ...]) -> None:
     """Rows placed on one gene leave together: summing them would be a guess.
 
-    HGNC is a fallback and never unseats a row placed by its own kind's map: where one such
-    row holds the gene, only the rows HGNC placed there leave.
+    HGNC and Ensembl's history are fallbacks and never unseat a row placed by its own kind's
+    map: where one such row holds the gene, only the rows a fallback placed there leave.
     """
     hits: dict[str, list[int]] = defaultdict(list)
     for i, (_, gene_id, _, _) in enumerate(placed):
@@ -396,7 +481,7 @@ def _shared(placed: list[Placed], ids: tuple[str, ...]) -> None:
     for gene_id, rows in hits.items():
         if len(rows) < 2:  # noqa: PLR2004 - a gene shared needs two rows
             continue
-        own = [r for r in rows if placed[r][3] != THROUGH_HGNC]
+        own = [r for r in rows if placed[r][3] not in FALLBACKS]
         leave = [r for r in rows if r not in own] if len(own) == 1 else rows
         detail = f"{gene_id}, with {', '.join(ids[r] for r in rows)}"
         for r in leave:
@@ -404,16 +489,22 @@ def _shared(placed: list[Placed], ids: tuple[str, ...]) -> None:
 
 
 def place(raw: Raw, annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | None,
-          hgnc: Mapping[str, set[str]] | None = None) -> Mapped:  # fmt: skip
+          hgnc: Mapping[str, set[str]] | None = None,
+          history: Mapping[str, set[str]] | None = None) -> Mapped:  # fmt: skip
     """Each row on one annotation gene, or left out with why; two rows on one gene both leave.
 
-    Order: each ID by its own kind (Ensembl by its stable part, Entrez through GENCODE's
-    table, else through HGNC where GENCODE's table links it to nothing, a symbol by the
-    annotation's gene name); a key matching several genes is ambiguous; then rows sharing a
-    gene are left out together, whichever map placed them.
+    Order: each ID by its own kind (Ensembl by its stable part, else through Ensembl's ID
+    history where the annotation lacks it and the history leads to one current gene; Entrez
+    through GENCODE's table, else through HGNC where GENCODE's table links it to nothing; a
+    symbol by the annotation's gene name); a key matching several genes is ambiguous; then
+    rows sharing a gene leave together, except that a fallback never unseats its own map's row.
     """
     names = dict(annotation.select("gene_id", "gene_name").rows())
-    placed = _place(raw.ids, _targets(annotation, entrez, hgnc), entrez is not None)
+    targets = _targets(annotation, entrez, hgnc)
+    placed = _place(raw.ids, targets, entrez is not None, history)
+    lacked = sum(
+        1 for i in raw.ids if (m := ENSEMBL.fullmatch(i)) and m[1] not in targets["ensembl"]
+    )
     _shared(placed, raw.ids)
     kept = [i for i, (_, g, _, _) in enumerate(placed) if g]
     totals = np.nansum(raw.values, axis=1)
@@ -433,5 +524,14 @@ def place(raw: Raw, annotation: pl.DataFrame, entrez: Mapping[str, set[str]] | N
     kinds: dict[str, int] = defaultdict(int)
     for kind, *_ in placed:
         kinds[kind] += 1
-    through = sum(1 for _, g, _, detail in placed if g and detail == THROUGH_HGNC)
-    return Mapped(counts, genes, left_out, dict(kinds), _versions(raw.ids, placed), through)
+    through = {f: sum(1 for _, g, _, d in placed if g and d == f) for f in FALLBACKS}
+    return Mapped(
+        counts,
+        genes,
+        left_out,
+        dict(kinds),
+        _versions(raw.ids, placed),
+        through[THROUGH_HGNC],
+        through[THROUGH_HISTORY],
+        lacked,
+    )

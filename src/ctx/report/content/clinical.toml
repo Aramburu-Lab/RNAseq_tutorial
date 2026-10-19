@@ -234,6 +234,8 @@ endpoints_title = "Event flags in the TCGA-CDR, beside {source}, and the patient
 endpoints_columns = ["Endpoint", "CDR events", "CDR censored", "Liu events; censored", "Analysed", "Events analysed"]
 missing_title = "Missing values and their reasons"
 missing_columns = ["Variable", "Missing", "Reasons"]
+# The Reasons cell of a variable no patient lacks.
+missing_nothing = "nothing missing"
 notified = "GDC notifications, kept and flagged: {neoadjuvant} neoadjuvant therapy, {prior_malignancy} prior malignancy, {prior_treatment} unacceptable prior treatment; {any} of {n:,} patients carry one."
 # Printed only where the dataset file does not declare sex a variable: the less frequent sex.
 sex_flag = "{count:,} {people} are kept and flagged by sex."

@@ -138,6 +138,16 @@ def _hgnc(raw: counts.Raw, root: Path, spec: Dataset, releases: dict[str, str]
     return counts.hgnc_ensembl(path)
 
 
+def _history(raw: counts.Raw, root: Path, spec: Dataset, releases: dict[str, str]
+             ) -> dict[str, set[str]] | None:  # fmt: skip
+    """Ensembl's gene ID history, where the matrix holds Ensembl IDs and the file is declared."""
+    path = _resource_path(root, spec, counts.HISTORY_RESOURCE)
+    if path is None or not any(counts.kind_of(i) == "ensembl" for i in raw.ids):
+        return None
+    releases["Ensembl IDs the annotation lacks"] = f"Ensembl stable_id_event, {path.name}"
+    return counts.id_history(path)
+
+
 def _digest(path: Path) -> str:
     """SHA-256 of a file, or of a folder's ``sha256sum`` lines for its files, sorted by name."""
     if not path.is_dir():
@@ -177,7 +187,8 @@ def check(root: Path, spec: Dataset, matrix: Path) -> Checked:
         raw, rounding = counts_rsem.rounded(raw)
         releases["values"] = text.fill(PAGE, "rounding.readme", **vars(rounding))
     entrez, missing = _entrez(raw, root, spec, gtf)
-    mapped = counts.place(raw, gene_types(gtf), entrez, _hgnc(raw, root, spec, releases))
+    mapped = counts.place(raw, gene_types(gtf), entrez, _hgnc(raw, root, spec, releases),
+                          _history(raw, root, spec, releases))  # fmt: skip
     if mapped.counts.height == 0:
         missing.append(("gene ids", "all", "no row maps to one gene of the annotation"))
     curated, curation = _curated(raw, _table_text(root, spec, releases), spec)
@@ -239,6 +250,8 @@ def _checks(found: Checked) -> ResultTable:
         (word("checks.mapped"), fill("checks.mapped_value", genes=mapped.counts.height,
                                      left=left.height, share=share)),
         (word("checks.hgnc"), fill("checks.hgnc_value", rows=mapped.through_hgnc)),
+        (word("checks.history"), fill("checks.history_value", rows=mapped.through_history,
+                                      of=mapped.lacked)),
         (word("checks.versions"), fill("checks.versions_value", **v)),
         (word("checks.annotation"), fill("checks.annotation_value",
                                          gtf=found.releases["annotation"],

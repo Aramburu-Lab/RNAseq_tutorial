@@ -1,0 +1,40 @@
+== ctx_u_gse327166: 56,843 of 58,336 rows placed, 1,493 left out, 6,180,114 of 3,909,801,314 counts left out = 0.1581 %
+left out by reason: [('ensembl', 'not_in_annotation', 1493)]
+left out with an ID-history note: []
+Placed on the annotation Placed on the annotation</td><td>56,843 rows on one gene each; 1,493 rows left out, holding 0.16 % of all counts</td></tr> <tr><td>Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr
+Placed through Ensembl not on page
+Placed through HGNC Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr><td>Ensembl versions</td><td>0 equal the annotation&#39;s, 0 differ, 56,843 without a version</td></tr> <tr><td>Annotation</td><td
+largest left out:
+   ('ENSG00000112096', 'not_in_annotation', '', 2140070.0)
+   ('ENSG00000130723', 'not_in_annotation', '', 815675.0)
+   ('ENSG00000148362', 'not_in_annotation', '', 91150.0)
+   ('ENSG00000259972', 'not_in_annotation', '', 79678.0)
+   ('ENSG00000275216', 'not_in_annotation', '', 73889.0)
+   ('ENSG00000260822', 'not_in_annotation', '', 72432.0)
+   ('ENSG00000239665', 'not_in_annotation', '', 68696.0)
+   ('ENSG00000280237', 'not_in_annotation', '', 62116.0)
+   ('ENSG00000258297', 'not_in_annotation', '', 57271.0)
+   ('ENSG00000259820', 'not_in_annotation', '', 55538.0)
+2026-10-19_de_u_gse327166_epithelioid_biphasic_results_v1.parquet tested 20659 calls [('down', 266), ('ns', 20106), ('up', 287)]
+== ctx_s2_gse327166: 56,933 of 58,336 rows placed, 1,403 left out, 3,696,166 of 3,909,801,314 counts left out = 0.0945 %
+left out by reason: [('ensembl', 'not_in_annotation', 664), ('ensembl', 'shared_gene', 739)]
+left out with an ID-history note: [('ID history: 0 current genes', 648), ('ID history: 2 current genes, ENSG00000286522, ENSG00000287080', 2), ('ID history: 2 current genes, ENSG00000288709, ENSG00000288722', 2), ('ID history: 2 current genes, ENSG00000288784, ENSG00000289604', 2), ('ID history: 2 current genes, ENSG00000288702, ENSG00000288705', 2)]
+Placed on the annotation Placed on the annotation</td><td>56,933 rows on one gene each; 1,403 rows left out, holding 0.09 % of all counts</td></tr> <tr><td>Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr
+Placed through Ensembl Placed through Ensembl&#39;s ID history</td><td>90 of 1,493 Ensembl rows whose ID the annotation lacks, each on the one current gene its history names</td></tr> <tr><td>Ensembl versions</td><td>0 equal the annotation&#39;s, 0 differ, 56,933 without a version</
+Placed through HGNC Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr><td>Placed through Ensembl&#39;s ID history</td><td>90 of 1,493 Ensembl rows whose ID the annotation lacks, each on the one curren
+largest left out:
+   ('ENSG00000130723', 'not_in_annotation', 'ID history: 0 current genes', 815675.0)
+   ('ENSG00000275216', 'shared_gene', 'ENSG00000223617.4, with ENSG00000223617, ENSG00000275216', 73889.0)
+   ('ENSG00000260822', 'not_in_annotation', 'ID history: 0 current genes', 72432.0)
+   ('ENSG00000239665', 'shared_gene', 'ENSG00000165630.17, with ENSG00000165630, ENSG00000239665, ENSG00000282246', 68696.0)
+   ('ENSG00000280237', 'not_in_annotation', 'ID history: 0 current genes', 62116.0)
+   ('ENSG00000258297', 'not_in_annotation', 'ID history: 0 current genes', 57271.0)
+   ('ENSG00000270055', 'not_in_annotation', 'ID history: 0 current genes', 52916.0)
+   ('ENSG00000233937', 'not_in_annotation', 'ID history: 0 current genes', 50463.0)
+   ('ENSG00000277203', 'not_in_annotation', 'ID history: 2 current genes, ENSG00000288709, ENSG00000288722', 49629.0)
+   ('ENSG00000257151', 'not_in_annotation', 'ID history: 0 current genes', 48419.0)
+2026-10-19_de_s2_gse327166_epithelioid_biphasic_results_v1.parquet tested 20682 calls [('down', 267), ('ns', 20128), ('up', 287)]
+rows gained 90, rows lost 0
+rows placed on another gene than before: 0
+gained, first 10 by source ID: [('ENSG00000291237.3', 'SOD2', 'ENSG00000112096'), ('ENSG00000290203.13', 'SPESP1-NOX5', 'ENSG00000137808'), ('ENSG00000310560.3', 'PAXX', 'ENSG00000148362'), ('ENSG00000289033.3', 'ENSG00000289033', 'ENSG00000188525'), ('ENSG00000290292.11', 'HOMEZ', 'ENSG00000215271'), ('ENSG00000285838.3', 'ENSG00000285838', 'ENSG00000223504'), ('ENSG00000293271.2', 'SLC44A3-AS1', 'ENSG00000223675'), ('ENSG00000289961.2', 'ENSG00000289961', 'ENSG00000223811'), ('ENSG00000291075.2', 'FRG1HP', 'ENSG00000225655'), ('ENSG00000290726.3', 'FAM41AY2', 'ENSG00000226362')]
+ENSG00000112096 now: [('ENSG00000291237.3', 'SOD2', 'ENSG00000112096')]

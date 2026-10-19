@@ -1,0 +1,16 @@
+=== tcga_kirc_as_is.toml
+0 problems, 0 of them stopping the run; ctx run runs: gather, de, function, ncrna, clinical, report
+exit 0
+=== tcga_kirc_without.toml
+- [clinical.published.table3_use]: OS, DSS, DFI, PFI blank; copy Liu et al. 2018 Table 3's Use marks for KIRC from the paper, or M10 says the dataset file holds no copy
+  add these lines to the dataset file:
+[clinical.published.table3_use]
+source = "Liu et al. 2018 Cell, Table 3, KIRC: recommended use of each endpoint"
+OS = ""
+PFI = ""
+DFI = ""
+DSS = ""
+caution = ""
+
+1 problems, 1 of them stopping the run; ctx run runs: gather, de, function, ncrna, clinical, report
+exit 1

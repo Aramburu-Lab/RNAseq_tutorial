@@ -1,0 +1,21 @@
+CAUGHT check never reads table3_use: 1 failed, 19 deselected in 5.08s
+CAUGHT one blank endpoint passes: 1 failed, 18 deselected in 2.86s
+CAUGHT a mark the page refuses passes the check: 1 failed, 19 deselected in 6.22s
+CAUGHT lines printed for the template's type: 1 failed, 19 deselected in 2.39s
+CAUGHT a blank copy does not stop the run: 1 failed, 19 deselected in 4.50s
+CAUGHT a caution mark without its reason passes: 1 failed, 18 deselected in 8.28s
+CAUGHT a file without [clinical] asked for marks: 1 failed, 19 deselected in 5.56s
+CAUGHT nothing missing printed as not estimable: 1 failed, 12 deselected in 5.01s
+CAUGHT a gap with no reason passes: 1 failed, 12 deselected in 2.77s
+CAUGHT history never consulted: 1 failed, 14 deselected in 4.65s
+CAUGHT walk stops after one event: 1 failed, 16 deselected in 5.67s
+CAUGHT walk stops at a current gene: 1 failed, 16 deselected in 3.50s
+CAUGHT version steps read as successors: 1 failed, 16 deselected in 5.19s
+CAUGHT transcript events read: 1 failed, 16 deselected in 4.84s
+CAUGHT a history row unseats the matrix's own: 1 failed, 16 deselected in 2.02s
+CAUGHT a split given to one side: 1 failed, 16 deselected in 2.83s
+CAUGHT fallback where the own map holds the key: 1 failed, 16 deselected in 3.45s
+CAUGHT resource declared, never read: 1 failed, 12 deselected in 9.83s
+CAUGHT rows the annotation lacks miscounted: 1 failed, 16 deselected in 5.27s
+CAUGHT a wider file read by position: 1 failed, 16 deselected in 2.36s
+20 of 20 caught

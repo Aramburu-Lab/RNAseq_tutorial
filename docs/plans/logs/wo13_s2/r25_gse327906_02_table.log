@@ -1,0 +1,12 @@
+## table GSE327906 s2_gse327906 2026-10-19 15:36:39
+/Users/rytis/ctx_s2_gse327906/s2_gse327906.csv: 25 samples
+sample: 25 distinct values
+donor: 25 distinct values
+title: 25 distinct values
+source_name: 'ovarian tumor tissue' 25
+tissue: 'ovarian tumor tissue' 25
+tissue_type: 'High grade serous ovarian cancer (HGSOC)' 25
+genotype: 'BRCA-mutant (BRCA-MT)' 17; 'non-BRCA-mutated (BRCA-WT)' 8
+library_name: 25 distinct values
+column_name_in_hgsoc_all_samples_featurecounts_txt: 25 distinct values
+## exit 0

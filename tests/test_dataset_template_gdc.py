@@ -28,6 +28,7 @@ CDR_COLUMNS = ("bcr_patient_barcode", "type", "OS", "OS.time", "PFI", "PFI.time"
 # The made-up CDR's flags, per patient of STAR, then their Table 3 count, typed apart.
 FLAGS = {"OS": (1, 0, 1), "PFI": (0, 0, 1), "DFI": (0, "#N/A", 0), "DSS": (1, 0, 0)}
 TABLE3 = {"OS": (2, 1), "PFI": (1, 2), "DFI": (0, 2), "DSS": (1, 2)}
+USE = "recommended"
 # TargetScan's family file as M8 reads it: human rows by taxon, the miRBase name and accession.
 FAMILIES = ("miR family\tSeed+m8\tSpecies ID\tMiRBase ID\tMature sequence\tFamily Conservation?"
             "\tMiRBase Accession\nmiR-375\tUUGUUCG\t9606\thsa-miR-375\tUUUGUUCG\t2\tMIMAT0000728"
@@ -36,6 +37,13 @@ FAMILIES = ("miR family\tSeed+m8\tSpecies ID\tMiRBase ID\tMature sequence\tFamil
 
 def _raw(path: Path) -> dict:
     return tomllib.loads(path.read_text())
+
+
+def _marked(text: str, **marks: str) -> str:
+    """The template's Table 3 Use marks set: every endpoint recommended unless ``marks`` says."""
+    for endpoint in TABLE3:
+        text = text.replace(f'{endpoint} = ""', f'{endpoint} = "{marks.get(endpoint, USE)}"')
+    return text
 
 
 def test_template_loads_with_every_module_m10_needs():
@@ -139,19 +147,21 @@ def test_check_names_each_edit_the_copy_needs(tmp_path, folders):
     path = _copied(tmp_path, release=RELEASE)
     second = [p for p in _check(tmp_path, folders, path)[0] if p.blocks]
     texts = "\n".join(p.text for p in second)
-    assert [p.lines for p in second if p.lines] == ['cdr_type = "BRCA"'], texts
+    named = [p.lines for p in second if p.lines and "table3_use" not in p.text]
+    assert named == ['cdr_type = "BRCA"'], texts
     assert "[[contrasts]] tumour_normal: n = [0, 0] declared, [2, 2] in the files" in texts
     assert "[ncrna.mirna] mirna_tumour_normal: n = [0, 0] declared, [2, 2] in the files" in texts
     text = _copied(tmp_path, release=RELEASE, cdr_type="BRCA").read_text()
     text = text.replace("n = [0, 0]", "n = [2, 2]")
     path.write_text(text)
     third = [p for p in _check(tmp_path, folders, path)[0] if p.blocks]
-    (table3,) = third
+    table3, uses = sorted(third, key=lambda p: p.text)
     shown = "; ".join(f"{e} {n[0]} events, {n[1]} censored" for e, n in TABLE3.items())
     assert table3.text.endswith(shown) and "Table 3" in table3.text
+    assert uses.text.startswith("[clinical.published.table3_use]: OS, DSS, DFI, PFI blank")
     for endpoint, (events, censored) in TABLE3.items():
         text = text.replace(f"{endpoint} = [0, 0]", f"{endpoint} = [{events}, {censored}]")
-    path.write_text(text)
+    path.write_text(_marked(text))
     last = _check(tmp_path, folders, path)[0]
     assert [p for p in last if p.blocks] == [], [p.text for p in last if p.blocks]
     assert {p.text.split(":")[0] for p in last} == {"[ncrna] mirnas is empty",
@@ -166,7 +176,7 @@ def test_check_says_when_table3_differs_and_when_rules_lack_a_time(tmp_path, fol
     text = _copied(tmp_path, release=RELEASE, cdr_type="BRCA").read_text()
     text = text.replace("n = [0, 0]", "n = [2, 2]").replace("OS = [0, 0]", "OS = [2, 1]")
     text = text.replace("PFI = [0, 0]", "PFI = [1, 3]").replace("DFI = [0, 0]", "DFI = [0, 2]")
-    text = text.replace("DSS = [0, 0]", "DSS = [1, 2]")
+    text = _marked(text.replace("DSS = [0, 0]", "DSS = [1, 2]"))
     text = text.replace('registered_on = ""', 'registered_on = "today"\n\n[[sanity.rules]]\n'
                         'id = "x"\ntext = "x"\nsource = "x"\nconditions = []')  # fmt: skip
     path = tmp_path / "mine.toml"
@@ -187,7 +197,7 @@ def test_check_names_a_misspelt_gene_or_mirna(tmp_path, folders):
     text = text.replace("n = [0, 0]", "n = [2, 2]")
     for endpoint, (events, censored) in TABLE3.items():
         text = text.replace(f"{endpoint} = [0, 0]", f"{endpoint} = [{events}, {censored}]")
-    text = text.replace(f'genes = ["{GENES[0][1]}"]', 'genes = ["G1", "G13"]')
+    text = _marked(text.replace(f'genes = ["{GENES[0][1]}"]', 'genes = ["G1", "G13"]'))
     text = text.replace("mirnas = []", 'mirnas = ["hsa-miR-375-3p"]')
     text += ('\n[[sanity.rules]]\nid = "x"\ntext = "x"\nsource = "x"\nconditions = [{ metric = '
              '"gene.tumour_normal.G2X.lfc", op = ">", value = 0 }]\n')  # fmt: skip
@@ -201,3 +211,36 @@ def test_check_names_a_misspelt_gene_or_mirna(tmp_path, folders):
     assert len(stops) == len(heads) and all(
         s.startswith(h) for s, h in zip(stops, heads, strict=True)
     ), stops
+
+
+def test_check_names_table3_use_blank_or_unreadable(tmp_path):
+    """A missing or blank [clinical.published.table3_use] stops the run with the template's
+    table, the CDR type in its source; a mark M10 refuses, or a caution mark without its
+    reason, stops it as M10 would; read marks pass, and a file with no [clinical] is not asked.
+    Catches the table's absence passed in silence, one blank endpoint passed, the lines
+    printed for another type, and a mark --check accepts that the page then refuses."""
+    text = _copied(tmp_path, release=RELEASE, cdr_type="BRCA").read_text()
+    path = tmp_path / "mine.toml"
+    (blank,) = gdc_check._uses(load(path))
+    assert blank.blocks and blank.text.startswith(
+        "[clinical.published.table3_use]: OS, DSS, DFI, PFI blank; copy Liu et al. 2018 Table "
+        "3's Use marks for BRCA"
+    )
+    assert tomllib.loads(blank.lines)["clinical"]["published"]["table3_use"]["source"] == (
+        "Liu et al. 2018 Cell, Table 3, BRCA: recommended use of each endpoint"
+    )
+    start = text.index("[clinical.published.table3_use]")
+    path.write_text(text[:start] + text[text.index("\n\n", start) + 2 :])
+    (gone,) = gdc_check._uses(load(path))
+    assert gone.text == blank.text and gone.lines == blank.lines
+    cases = {"DFI": ({"DFI": ""}, "DFI blank"), "yes": ({"OS": "yes"}, "'OS': 'yes'"),
+             "reason": ({"PFI": "caution"}, "Explanation/Caution for ['PFI']")}  # fmt: skip
+    for marks, said in cases.values():
+        path.write_text(_marked(text, **marks))
+        (problem,) = gdc_check._uses(load(path))
+        assert problem.blocks and said in problem.text, problem.text
+    path.write_text(_marked(text, PFI="caution").replace('caution = ""', 'caution = "few"'))
+    assert gdc_check._uses(load(path)) == []
+    start = text.index("[clinical]\n")
+    path.write_text(text[:start] + text[text.index("\n[[resources]]", start) :])
+    assert load(path).clinical is None and gdc_check._uses(load(path)) == []

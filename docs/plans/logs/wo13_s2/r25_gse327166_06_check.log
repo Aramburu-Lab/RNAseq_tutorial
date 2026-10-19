@@ -1,0 +1,16 @@
+## check GSE327166 s2_gse327166 2026-10-19 15:40:09
+- no [de]: de names no featured contrast
+  add these lines to the dataset file:
+[de]
+featured = "epithelioid_biphasic"
+
+- no [function]: function tests no gene sets
+  add these lines to the dataset file:
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+running = ["epithelioid_biphasic", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]
+
+2 problems, 0 of them stopping the run; ctx run runs: gather, qc, report
+## exit 1

@@ -6,11 +6,11 @@ budget = "Track B: under {minutes} min and {ram_gb} GB"
 inputs = "the count matrix, the sample table, the dataset file and the annotation"
 purpose = "Check a [[raw counts|count matrix]] from a repository or your own pipeline, and place its genes on the course annotation. Then build the sample sheet every later module reads."
 input = "A genes by samples table of raw counts, gene IDs in the first column, as TSV or CSV, gzipped or not. Beside it, the dataset file and your sample table, one row per sample column."
-method = """Raw counts are whole numbers, never below zero. A fraction, a negative value or a sample sum of one million each name the scale the file holds instead, and gather stops.
+method = """Raw counts are whole numbers, never below zero. A fraction, a negative value or a sample sum of one million names the scale the file holds, and gather stops.
 
 Declared RSEM expected counts are checked as read, then rounded to integers.
 
-Each [[ensembl_id|Ensembl gene ID]] is matched without its version, a symbol by gene name. A [[ncbi_gene_id|NCBI Gene ID]] goes through GENCODE's table, else HGNC's. An ID that matches no gene or several is left out and listed with its counts, never matched by a similar name."""
+Each [[ensembl_id|Ensembl gene ID]] is matched without its version, else through Ensembl's ID history; a symbol by gene name. A [[ncbi_gene_id|NCBI Gene ID]] goes through GENCODE's table, else HGNC's. An ID matching no gene or several is left out and listed with its counts, never by a similar name."""
 interpretation = """From here on the sample sheet and the counts table are the only record, as for a download counted by the course. Modules that read FASTQ files refuse this sheet: the matrix holds no reads.
 
 Read the rows left out before any analysis. A large share points to another organism or another annotation; a few ambiguous symbols are expected. The version row shows how far the source's annotation is from the course's."""
@@ -65,6 +65,8 @@ rounding_none = "None: whole counts, written unchanged"
 rounding_value = "To the nearest integer, halves to even: {fractional:,} of {values:,} values were fractional, the largest change {largest:g}"
 hgnc = "Placed through HGNC"
 hgnc_value = "{rows:,} NCBI Gene ID rows that GENCODE's table links to no gene, each on one Ensembl gene"
+history = "Placed through Ensembl's ID history"
+history_value = "{rows:,} of {of:,} Ensembl rows whose ID the annotation lacks, each on the one current gene its history names"
 summary = "Read-summary rows removed"
 kinds = "Gene ID kinds"
 mapped = "Placed on the annotation"

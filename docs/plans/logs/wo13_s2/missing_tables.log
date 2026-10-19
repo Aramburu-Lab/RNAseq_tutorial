@@ -1,0 +1,34 @@
+== before/tcga_kirc
+Variable | Missing | Reasons
+Stage | 3 | discrepancy 3
+Grade | 8 | GX 5; not available 3
+Age | 0 | not estimable
+Sex | 0 | not estimable
+Treatment of the cohort's type | 489 | not recorded 489
+== after/tcga_kirc
+Variable | Missing | Reasons
+Stage | 3 | discrepancy 3
+Grade | 8 | GX 5; not available 3
+Age | 0 | nothing missing
+Sex | 0 | nothing missing
+Treatment of the cohort's type | 489 | not recorded 489
+== before/tcga_brca
+Variable | Missing | Reasons
+ER status | 56 | not tested 46; conflicting 8; equivocal 2
+Stage | 24 | Stage X 13; discrepancy 6; not available 5
+Histology | 1 | not available 1
+Menopause | 89 | not available 66; unknown 17; not evaluated 6
+Age | 1 | #N/A 1
+PR status | 56 | not tested 47; conflicting 5; equivocal 4
+HER2 status | 146 | not tested 111; equivocal 24; conflicting 11
+Treatment of the cohort's type | 571 | not recorded 571
+== after/tcga_brca
+Variable | Missing | Reasons
+ER status | 56 | not tested 46; conflicting 8; equivocal 2
+Stage | 24 | Stage X 13; discrepancy 6; not available 5
+Histology | 1 | not available 1
+Menopause | 89 | not available 66; unknown 17; not evaluated 6
+Age | 1 | #N/A 1
+PR status | 56 | not tested 47; conflicting 5; equivocal 4
+HER2 status | 146 | not tested 111; equivocal 24; conflicting 11
+Treatment of the cohort's type | 571 | not recorded 571
