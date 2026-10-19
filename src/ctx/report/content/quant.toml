@@ -211,6 +211,17 @@ caption = "[[Spearman]] rho of {n} samples over {genes:,} genes with a mean of {
 lead_untested = "One cell type only: no pair of samples lies between cell types."
 caption_untested = "Spearman rho of {n} samples over {genes:,} genes with a mean of {min_reads} length-scaled counts; average linkage on one minus rho. One cell type: no test."
 axis = "Sample"
+# The samples ordered by a sheet column, a view (the controls plan, M4: "Group samples by").
+view = "Order samples by"
+view_clustered = "clustering, as built"
+view_grouped = "{label}, then clustering"
+lead_grouped = "Median rho is {within:.3f} within {label} groups and {between:.3f} between them."
+reading_grouped = [
+    "Each cell is the Spearman rho of two samples; its colour is the bin in the legend, dark for low.",
+    "Samples stand grouped by the column the select names, in the clustering's order within each group.",
+]
+caption_grouped = "Spearman rho of {n} samples over {genes:,} genes, grouped by {label}, then in the clustering's order. Mean rho within {label} groups less between: {diff:.3f}; permutation p = {p:.2g}, {perms:,} permutations within {strata} donors."
+caption_grouped_fixed = "Spearman rho of {n} samples over {genes:,} genes, grouped by {label}, then in the clustering's order. Mean rho within {label} groups less between: {diff:.3f}; no permutation: every donor's samples share one {label}."
 
 [figures.correlation.bins]
 below = "rho < {edge:.3f}"

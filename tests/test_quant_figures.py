@@ -144,3 +144,50 @@ def test_strip_colours_refuse_what_greys_cannot_tell_apart():
     with pytest.raises(ValueError, match="3 strip levels; 0 data colours left"):
         strip_colours([list("abcdefg"), ["x", "y", "z"]])
     assert contrast(*SPENT_GREYS) >= 3  # the 3:1 graphics threshold, between the two levels
+
+
+def test_a_grouping_view_keeps_each_level_together_in_the_clusterings_order():
+    """F3's grouping view (V2): samples by the column's levels in sheet order, the clustering's
+    order within each; the column's strip first, strips the colours cannot hold dropped.
+
+    Mutations caught: the clustering's order kept; the levels in sorted order, not the sheet's;
+    the within-level order lost; the grouping's strip left out or put last."""
+    n = 24
+    rng = np.random.default_rng(5)
+    noise = rng.normal(0, 0.05, (n, n))
+    rho = np.clip(0.8 + (noise + noise.T) / 2, -1, 1)
+    np.fill_diagonal(rho, 1.0)
+    frame = sheet(n).with_columns(
+        batch=pl.Series(["z", "y", "x"] * (n // 3)),
+        condition=pl.Series([f"c{i % 7}" for i in range(n)]))  # fmt: skip
+    built = fig.correlation_heatmap(rho, frame, "caption")
+    grouped = fig.correlation_heatmap(rho, frame, "caption", by="batch")
+    level = dict(zip(frame["sample"], frame["batch"], strict=True))
+    order = grouped.row_order
+    assert [level[s] for s in order] == ["z"] * 8 + ["y"] * 8 + ["x"] * 8
+    for value in "zyx":
+        assert [s for s in order if level[s] == value] == [
+            s for s in built.row_order if level[s] == value]  # fmt: skip
+    assert [t.name for t in grouped.tracks] == ["Cell type", "Batch"]
+    # Seven conditions take every data colour: two cell types take the greys, three batches go.
+    assert fig.strips_for(frame, "condition") == ("condition", "cell_type")
+    assert fig.strips_for(frame, "cell_type") == fig.STRIPS
+
+
+def test_a_thinned_heatmap_exports_the_pages_caption_and_its_files_colours():
+    """HeatmapData.export_layers (V2): each heatmap trace's colours by z, white theme, and the
+    page's caption where it thins the units, since the export draws the page's cells.
+
+    Mutations caught: a track painted in the cells' colours; the files' caption kept under
+    the page's thinned cells; the colours read from the page's tints."""
+    from ctx.report.marks import plain  # noqa: PLC0415
+
+    data = heatmap(120)
+    layers = data.export_layers()
+    assert len(layers["cells"]) == 1 + len(data.tracks)
+    assert layers["cells"][0] == [str(s.colour).lower() for s in data.swatches]
+    for colours, track in zip(layers["cells"][1:], data.tracks, strict=True):
+        assert colours == [c.lower() for c in track.colours.values()]
+    assert layers["caption"] == plain(data.caption_text()) != data.caption
+    assert "caption" not in heatmap(20).export_layers()
+    assert data.inches() == data._inches()  # noqa: SLF001

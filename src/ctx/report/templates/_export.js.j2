@@ -75,6 +75,42 @@ var ctxExport = {
     line.width = ctxExport.scale(line.width, lines);
     if (typeof line.dash === "string") line.dash = ctxExport.dash(line.dash, line.width, dashes);
   },
+  /* Band edges from a heatmap axis's values: as given where there is one more value than
+     cells (the rows' edges), else midway between centres, the ends half a step out. */
+  edges: function (values, n) {
+    var v = Array.prototype.slice.call(values || []);
+    if (!v.length) v = Array.from({ length: n }, function (_, i) { return i; });
+    if (v.length === n + 1) return v;
+    var out = [v[0] - (v.length > 1 ? (v[1] - v[0]) / 2 : 0.5)];
+    for (var i = 0; i + 1 < v.length; i++) out.push((v[i] + v[i + 1]) / 2);
+    out.push(v[v.length - 1] + (v.length > 1 ? (v[v.length - 1] - v[v.length - 2]) / 2 : 0.5));
+    return out;
+  },
+  /* A heatmap trace as vector cells (HeatmapData.export_layers): each run of equal z along a
+     row one filled rectangle, the rectangles of one z one scatter trace in colours[z], none
+     for a missing z. plotly's SVG draws a heatmap as one raster image; the figure files draw
+     vector cells. */
+  cells: function (trace, colours) {
+    var z = trace.z || [], rows = z.length, cols = rows ? z[0].length : 0;
+    var xe = ctxExport.edges(trace.x, cols), ye = ctxExport.edges(trace.y, rows), by = {};
+    for (var r = 0; r < rows; r++) {
+      for (var c = 0; c < cols;) {
+        var v = z[r][c], end = c + 1;
+        while (end < cols && z[r][end] === v) end++;
+        if (v !== null && v !== undefined && colours[v] !== undefined) {
+          var p = by[v] || (by[v] = { x: [], y: [] });
+          p.x.push(xe[c], xe[end], xe[end], xe[c], xe[c], null);
+          p.y.push(ye[r], ye[r], ye[r + 1], ye[r + 1], ye[r], null);
+        }
+        c = end;
+      }
+    }
+    return Object.keys(by).map(Number).sort(function (a, b) { return a - b; }).map(function (v) {
+      return { type: "scatter", mode: "none", fill: "toself", fillcolor: colours[v],
+               x: by[v].x, y: by[v].y, xaxis: trace.xaxis, yaxis: trace.yaxis,
+               showlegend: false, hoverinfo: "skip" };
+    });
+  },
   /* A label as the figure files place it: on its point, offset in pt, a leader line to it. */
   label: function (l, ex, layout) {
     function at(value, axis) { return (layout[axis] || {}).type === "log" ? Math.log10(value) : value; }
@@ -104,9 +140,14 @@ var ctxExport = {
     if (typeof built === "string" && layout.xaxis && layout.xaxis.title) {
       layout.xaxis.title.text = built;
     }
+    var heat = 0;
     parts.forEach(function (part, i) {
       var zoom = zoomOf(part), marks = ex.marker / zoom, widths = 1 / zoom;
       part.data.forEach(function (trace, k) {
+        if (i === 0 && ex.cells && trace.type === "heatmap" && ex.cells[heat]) {
+          ctxExport.cells(trace, ex.cells[heat++]).forEach(function (f) { data.push(f); });
+          return;
+        }
         var t = ctxExport.plain(trace), more = i === 0 && (ex.thinned || {})[k];
         if (more) {
           var xy = ctxExport.points(more);

@@ -5,8 +5,9 @@ Above the point budget the page thins F4 and F6 by ``ScatterData.keep`` and F3 b
 F1 Salmon's fragment fates per sample, F2 genes detected against depth, F3 Spearman between
 samples, F4 reads against TPM, F6 the featured contrast's fold change from estimated and from
 length-scaled counts, F7 isoforms expressed against annotated. F1 and F7 filter by sheet
-column and gene type (D-051); F2, F3, F4 and F6 have no control yet, as a curve, heatmap or
-scatter takes none (M4.14 in the M4 plan). F5 and F8 need runs that do not exist yet.
+column and gene type (D-051); F2, F4 and F6 look views up (M4.14), and F3 orders its samples by
+a sheet column as a view (``correlation_heatmap``'s ``by``). F5 and F8 need runs that do not
+exist yet.
 """
 
 from collections.abc import Mapping, Sequence
@@ -109,15 +110,49 @@ def leaf_order(rho: np.ndarray, samples: Sequence[str]) -> tuple[str, ...]:
     return tuple(samples[i] for i in leaves_list(tree))
 
 
+# F3's strips as built: cell type, then batch.
+STRIPS = ("cell_type", "batch")
+
+
+def grouped_order(order: Sequence[str], sheet: pl.DataFrame, by: str) -> tuple[str, ...]:
+    """Samples grouped by ``by``'s levels in sheet order, the clustering's order within each.
+
+    F3's grouping view.
+    """
+    level = dict(zip(sheet["sample"], sheet[by].cast(pl.String), strict=True))
+    first = {v: i for i, v in enumerate(dict.fromkeys(sheet[by].cast(pl.String)))}
+    at = {s: i for i, s in enumerate(order)}
+    return tuple(sorted(order, key=lambda s: (first[level[s]], at[s])))
+
+
+def strips_for(sheet: pl.DataFrame, by: str | None) -> tuple[str, ...]:
+    """F3's strips: the build's, the grouping's column first where it is another.
+
+    Strips are dropped from the end until the data colours hold them (``strip_colours``).
+    """
+    wanted = list(dict.fromkeys([by, *STRIPS] if by and by not in STRIPS else STRIPS))
+    while wanted:
+        try:
+            strip_colours([list(dict.fromkeys(sheet[c].cast(pl.String))) for c in wanted])
+        except ValueError:
+            wanted.pop()
+            continue
+        return tuple(wanted)
+    return ()
+
+
 def correlation_heatmap(rho: np.ndarray, sheet: pl.DataFrame,
-                        caption: str) -> HeatmapData:  # fmt: skip
+                        caption: str, by: str | None = None) -> HeatmapData:  # fmt: skip
     """F3: the samples' Spearman rho, clustered, with cell type and batch strips on top.
 
     Only the lower triangle in drawn order is kept: rho is symmetric, and the full 210 by 210
     matrix drew an 18,579,509-byte figure page against the 15 MB cap (Step-1, 2026-10-08).
+    With ``by``, a sheet column, the samples stand grouped by its levels (``grouped_order``).
     """
     samples = sheet["sample"].to_list()
     order = leaf_order(rho, samples)
+    if by is not None:
+        order = grouped_order(order, sheet, by)
     levels, swatches = rho_levels(rho)
     position = {s: i for i, s in enumerate(order)}
     frame = pl.DataFrame({"sample_row": [s for s in samples for _ in samples],
@@ -125,7 +160,7 @@ def correlation_heatmap(rho: np.ndarray, sheet: pl.DataFrame,
                           "rho": rho.ravel().round(4), "level": levels}).filter(
         pl.col("sample_row").replace_strict(position, return_dtype=pl.Int64)
         > pl.col("sample_column").replace_strict(position, return_dtype=pl.Int64))  # fmt: skip
-    strips = ("cell_type", "batch")
+    strips = STRIPS if by is None else strips_for(sheet, by)
     values = {c: dict(zip(samples, sheet[c].cast(pl.String), strict=True)) for c in strips}
     colours = strip_colours([list(dict.fromkeys(values[c].values())) for c in strips])
     tracks = [Track(text.word(PAGE, f"labels.{c}"), values[c], colours[i])
