@@ -121,8 +121,10 @@ def fates_figure(writer: Writer, fates: pl.DataFrame, shown: Shown
 def correlation_figure(writer: Writer, matrix: np.ndarray, shown: Shown) -> FigureBlock:
     """F3: Spearman between samples; cell-type labels permuted within each donor.
 
-    A view orders the samples by each sheet column the bars filter by (the controls plan, M4:
-    "Group samples by"), its within-less-between test of that column's labels looked up.
+    A view orders the samples by each sheet column the bars filter by but cell type (the
+    controls plan, M4: "Group samples by"), its within-less-between test of that column's labels
+    looked up. The build tests cell type already; with a cell-type view too, Step-1's page was
+    14,997,102 B, 2,898 B under the cap, each view about 1.27 MB.
     """
     rho, genes = tab.spearman(matrix)
     sheet = shown.sheet
@@ -130,9 +132,8 @@ def correlation_figure(writer: Writer, matrix: np.ndarray, shown: Shown) -> Figu
     found = tab.within_minus_between(rho, sheet["cell_type"].to_list(), strata)
     built = _correlation_built(rho, genes, sheet, found)
     options = [(text.word(PAGE, "figures.correlation.view_clustered"), *built)]
-    for column in shown.groups.columns[1:]:
-        tested = found if column == "cell_type" else tab.within_minus_between(
-            rho, sheet[column].to_list(), strata)  # fmt: skip
+    for column in (c for c in shown.groups.columns[1:] if c != "cell_type"):
+        tested = tab.within_minus_between(rho, sheet[column].to_list(), strata)
         if tested is not None:
             options.append(_correlation_grouped(rho, genes, sheet, column, tested))
     return _viewed(writer, "correlation", options)
