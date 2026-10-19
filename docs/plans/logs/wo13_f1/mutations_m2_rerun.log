@@ -1,0 +1,2 @@
+CAUGHT  pca shares swapped: 1 failed in 24.87s | E           AssertionError: 2026-10-19_qc_desynth_linked_pca_v1
+CAUGHT  theoretical GC curve dropped: 1 failed in 67.89s (0:01:07) | E           AssertionError: 2026-10-19_qc_desynth_gc_distribution_v1

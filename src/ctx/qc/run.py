@@ -20,7 +20,7 @@ from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
 from ctx.gather import counts, gdc
 from ctx.io.naming import MODULES, stem
-from ctx.qc import Fastp, QcError, checkpoint, fastqc, fates, multiqc_io, reads
+from ctx.qc import Fastp, QcError, checkpoint, fastqc, fates, figure_tables, multiqc_io, reads
 from ctx.qc import registry as reg
 from ctx.qc.blocks import (
     Reads,
@@ -438,6 +438,9 @@ def run(
     frames = {"bands": stage.bands, "flags": stage.flags, "status": status, "confounding": tests}
     frames |= {"sex_check": sexes} if sexes is not None else {}
     frames |= {"fates": fate} if fate is not None else {}
+    # What the figures draw that no table above holds, so ctx figure redraws them (F.1).
+    frames |= figure_tables.inputs(registry, options, measured, plots,
+                                   seen.grid_run if seen is not None else None)  # fmt: skip
     if seen is not None and stage.run_flags is not None:
         frames |= {"read_flags": stage.run_flags.rename({"sample": "run_accession"}),
                    "skipped": seen.skipped, "grid": seen.grid}  # fmt: skip

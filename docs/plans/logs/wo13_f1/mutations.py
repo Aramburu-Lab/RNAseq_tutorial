@@ -11,6 +11,7 @@ from pathlib import Path
 W = Path(__file__).resolve().parents[4]
 FIG = "tests/test_figures.py"
 EVERY = f"{FIG}::test_every_spec_redraws_its_data_byte_for_byte"
+M2 = "tests/test_figures_m2.py"
 MUTATIONS = {
     "m5m6": [
         ("dispersions not read back", "src/ctx/figures/draw_m5.py",
@@ -40,6 +41,32 @@ MUTATIONS = {
         ("resource found under the working folder", "src/ctx/figures/record.py",
          "path = root / found[0] if found else None", "path = Path(found[0]) if found else None",
          EVERY),
+    ],
+    "m2": [
+        ("pca shares swapped", "src/ctx/figures/draw_m2.py", "(share[0], share[1])",
+         "(share[1], share[0])", f"{M2}::test_every_count_figure_redraws_byte_for_byte"),
+        ("k from the registry file", "src/ctx/figures/draw_m2.py",
+         'registry = replace(reg.load(inputs["registry"]), mad_multiplier=row["mad"])',
+         'registry = reg.load(inputs["registry"])',
+         f"{M2}::test_the_registry_named_by_the_run_is_the_one_copied"),
+        ("sheet without read-length groups", "src/ctx/figures/draw_m2.py",
+         'sheet = checkpoint.length_groups(gdc.chosen(pl.read_parquet(inputs["samplesheet"])),',
+         'sheet = (gdc.chosen(pl.read_parquet(inputs["samplesheet"])),',
+         f"{M2}::test_every_count_figure_redraws_byte_for_byte"),
+        ("strip spec where reads take its stem", "src/ctx/figures/kinds_m2.py",
+         '_with("metrics", "bands", "flags"), unless=READS),',
+         '_with("metrics", "bands", "flags")),',
+         f"{M2}::test_reads_figures_redraw_and_shared_stems_have_no_spec"),
+        ("theoretical GC curve dropped", "src/ctx/qc/figure_tables.py",
+         "None if theoretical.is_empty() else theoretical", "None",
+         f"{M2}::test_fastqc_plots_redraw_from_their_tables"),
+        ("registry resolved afresh", "src/ctx/figures/record.py",
+         '            found[name] = Path(pl.read_parquet(options)["registry"][0])\n',
+         "            found[name] = registry.resolve(None)\n",
+         f"{M2}::test_a_run_with_its_own_registry_names_that_registry"),
+        ("grid run not recorded", "src/ctx/qc/run.py",
+         "seen.grid_run if seen is not None else None", "None",
+         f"{M2}::test_reads_figures_redraw_and_shared_stems_have_no_spec"),
     ],
 }  # fmt: skip
 
