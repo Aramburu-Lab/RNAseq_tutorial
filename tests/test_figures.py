@@ -69,15 +69,20 @@ def redrawn(folder: Path, spec) -> Path:
 
 
 def drawn_alike(redrawn_csv: Path, module_csv: Path) -> list[str]:
-    """The data table, and the PDF and SVG of each theme, that differ from the module's.
+    """The data table, and the PDF and SVG of each theme, that differ from the module's; and
+    ``panel`` where the module's own figure page carries no Reproduce panel.
 
     Both sets are named by the same stem; a redraw dated another day differs in name alone.
+    A spec found after the run, as ``specs`` finds it, can see a table the module wrote after
+    the figure; the panel on the module's page was made when the figure was written.
     """
     tail = (".csv", *(f"_{t}.{e}" for t in ("white", "black") for e in ("pdf", "svg")))
     new, old = redrawn_csv.name[: -len(".csv")], module_csv.name[: -len(".csv")]
-    return [end for end in tail
-            if (redrawn_csv.parent / f"{new}{end}").read_bytes()
-            != (module_csv.parent / f"{old}{end}").read_bytes()]  # fmt: skip
+    differ = [end for end in tail
+              if (redrawn_csv.parent / f"{new}{end}").read_bytes()
+              != (module_csv.parent / f"{old}{end}").read_bytes()]  # fmt: skip
+    page = (module_csv.parent / f"{old}.html").read_text()
+    return differ if 'id="ctx-repro-' in page else [*differ, "panel"]
 
 
 def test_every_spec_redraws_its_data_byte_for_byte(pipeline, tmp_path):
