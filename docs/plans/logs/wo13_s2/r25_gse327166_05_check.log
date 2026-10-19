@@ -1,0 +1,12 @@
+## check GSE327166 s2_gse327166 2026-10-19 15:39:50
+- no [[contrasts]]: de and function have nothing to compare
+  add these lines to the dataset file:
+[[contrasts]]
+name = "epithelioid_biphasic"
+variable = "condition"
+reference = "biphasic"
+tested = "epithelioid"
+n = [13, 19]
+
+1 problems, 0 of them stopping the run; ctx run runs: gather, qc, report
+## exit 1

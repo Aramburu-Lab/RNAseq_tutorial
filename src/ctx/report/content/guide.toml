@@ -90,6 +90,7 @@ table = "The sample table from the series matrix, and the dataset file to edit"
 edit = "Edit each line marked EDIT in the dataset file: its slug, the same as SLUG above, and the table's file name, `$SLUG.csv`. Then the source of the matrix, and which table columns hold the tissue and the condition, with `values` to name each level."
 run = "The annotation and gene sets, the check, then every module the dataset file declares"
 paired = "Paste each block the check prints. Where every donor has a sample at both levels, add `paired = true` and `design = \"~donor + group\"` to the contrast: the test then compares each patient with itself."
+history = "An older matrix holds Ensembl IDs retired since its annotation. The template's `ensembl_id_history` resource, Ensembl release 116's ID history, places each on the one current gene it names; the gather page counts them."
 other = "A matrix from ArrayExpress, recount3 or your own pipeline enters the same way: save it under the root's data/raw folder, write the table by hand, and run the last block."
 rsem = "RSEM's expected counts enter with `kind = \"rsem_expected\"` in `[counts]`, as a matrix or a folder of `.genes.results` files given to `--counts`. gather rounds each value to an integer and states how many changed; RSEM's TPM and FPKM columns are never read."
 

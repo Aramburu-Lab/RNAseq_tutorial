@@ -1,0 +1,7 @@
+wo13-s2 fetch, stated before fetching (2026-10-19), Ensembl release 116 human core MySQL dump:
+https://ftp.ensembl.org/pub/release-116/mysql/homo_sapiens_core_116_38/stable_id_event.txt.gz 19828790 B (HEAD Content-Length)
+https://ftp.ensembl.org/pub/release-116/mysql/homo_sapiens_core_116_38/mapping_session.txt.gz 1867 B
+https://ftp.ensembl.org/pub/release-116/mysql/homo_sapiens_core_116_38/CHECKSUMS 2475 B
+https://ftp.ensembl.org/pub/release-116/mysql/homo_sapiens_core_116_38/homo_sapiens_core_116_38.sql.gz 7122 B
+total 19840254 B
+ctx setup in ~/ctx_s2_gse327906 and ~/ctx_s2_gse327166 fetches the same stable_id_event.txt.gz once per root, 19828790 B each, 39657580 B in all; the GTF, EntrezGene, HGNC and MSigDB files are copied from the R2.2 roots and checked by SHA-256.

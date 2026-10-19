@@ -1,0 +1,138 @@
+# A dataset file for a count matrix from a repository (GEO, ArrayExpress, recount3) or from your
+# own pipeline, read by `ctx gather --counts <matrix>`. Copy it beside your sample table, give
+# both your study's name, and edit each line marked EDIT; `ctx run --check --counts <matrix>`
+# then lists what is still missing. The guide's Part 1c writes the table from a GEO series.
+#
+# The matrix: genes by samples, gene IDs in the first column, one column per sample, raw
+# counts (whole numbers). gather refuses FPKM, TPM, CPM and log values, and says how it told.
+# RSEM's expected_count, as a matrix or a folder of its .genes.results files, enters with
+# kind = "rsem_expected" below; gather rounds it to integers and states the rounding.
+# Gene IDs may be Ensembl (with or without a version), NCBI Gene IDs, or symbols; each is
+# placed on the annotation below, and what does not place is listed with its counts.
+
+[dataset]
+# EDIT: lowercase letters, digits and underscores; it names every output file.
+slug = "s2_gse327906"
+# EDIT: the name the pages show.
+label = "High-grade serous ovarian cancer, BRCA-mutant against BRCA-wild-type (GEO)"
+# EDIT: the study's accession, e.g. its GEO series; `ctx guide` fills Part 1c with the first.
+accessions = ["GSE327906"]
+
+# The study's own accessions, which tests/test_repo.py keeps out of the code.
+[guard]
+ids = ["GSE327906", "PRJNA1452974"]
+patterns = ['\bGSM96682(9[1-9])\b', '\bGSM96683(0\d|1[0-5])\b']
+
+# EDIT: where the matrix comes from, as every table's README names it.
+[counts]
+# The repository, the accession and the file.
+source = "GEO GSE327906, the authors' featureCounts file, GSE327906_HGSOC_All_Samples_featureCounts.txt.gz"
+# The address it was downloaded from; empty for your own pipeline's file.
+url = "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE327nnn/GSE327906/suppl/GSE327906_HGSOC_All_Samples_featureCounts.txt.gz"
+# The annotation release the source names for its gene IDs, quoted from its page.
+annotation = "GRCh38 (Ensembl), STAR v2.6.1d; no annotation release named (series matrix, data processing)"
+# "raw" for whole counts; "rsem_expected" for RSEM's expected_count, rounded to integers.
+kind = "raw"
+# For a folder of RSEM files: a regular expression with one group, matched against each file
+# name, whose group is the sample, e.g. "^(GSM\\d+)_". Empty takes the name less its ending.
+sample_pattern = ""
+
+# Gene sets for `ctx function` and the annotation the gene IDs are placed on: Step-1's.
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# GENCODE's NCBI Gene ID of each transcript, of the same release: GEO's own count tables are
+# keyed by NCBI Gene IDs, which reach the annotation through it. Delete it for Ensembl IDs or
+# symbols; gather asks for it when the matrix holds NCBI Gene IDs.
+[[resources]]
+name = "gencode_entrez"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.metadata.EntrezGene.gz",
+]
+bytes = 2235757
+sha256 = "686c10607c94b1727422beca53ac6e669cf49e0791bd59b38fd765a9c5669bd0"
+dest = "resources/gencode/gencode.v50.metadata.EntrezGene.gz"
+
+# HGNC's complete set at a dated monthly archive: it places an NCBI Gene ID that GENCODE's
+# table links to no gene (rRNA, snoRNA, mitochondrial and immunoglobulin genes) when it names
+# one Ensembl gene of the annotation. Delete it with gencode_entrez.
+[[resources]]
+name = "hgnc_complete"
+urls = [
+    "https://storage.googleapis.com/public-download-files/hgnc/archive/archive/monthly/tsv/hgnc_complete_set_2026-10-06.txt",
+]
+bytes = 16973125
+sha256 = "8bf6f686e640dbc864a346484626953621b0500d900d26cd085a35c2782d725d"
+dest = "resources/hgnc/hgnc_complete_set_2026-10-06.txt"
+
+# Ensembl's stable-ID history at release 116, the Ensembl release GENCODE 50 is built from: it
+# places an Ensembl gene ID the annotation lacks, retired since the matrix's own annotation, on
+# the one current gene its history leads to; an ID it leads to no gene or several stays left out.
+# Delete it for NCBI Gene IDs or symbols.
+[[resources]]
+name = "ensembl_id_history"
+urls = [
+    "https://ftp.ensembl.org/pub/release-116/mysql/homo_sapiens_core_116_38/stable_id_event.txt.gz",
+]
+bytes = 19828790
+sha256 = "2f89533fba4d1acadf7e991641c5288a6bb35d5d0417a62c20d81400fd1cb654"
+dest = "resources/ensembl/homo_sapiens_core_116_38_stable_id_event.txt.gz"
+
+# EDIT: your table's file name, beside this file: one row per sample column of the matrix, its
+# `sample` column holding the matrix's column names. For an authors' matrix, whose columns are
+# their own names, join on the table's column that holds them: ["library_name", "sample"].
+[sdrf]
+file = "s2_gse327906.csv"
+join = ["library_name", "sample"]
+
+# A matrix sample is one library of one individual. Without a donor column of your own, the
+# Part 1c table sets each sample as its own donor. EDIT where a column names the individual,
+# such as subject_id: several samples of one person are then one donor.
+[columns.donor]
+source = "donor"
+meaning = "Individual the sample came from."
+
+# EDIT: the table's column for the tissue or cell type, and its values in your words.
+[columns.cell_type]
+source = "source_name"
+meaning = "Cell type or tissue sampled."
+
+# EDIT: the table's column for the condition; `values` maps each value as the table spells it.
+[columns.condition]
+source = "genotype"
+meaning = "BRCA status of the tumour."
+values = { "BRCA-mutant (BRCA-MT)" = "brca_mt", "non-BRCA-mutated (BRCA-WT)" = "brca_wt" }
+
+# ctx run --check prints the [[contrasts]], [de] and [function] lines to paste here, filled
+# from your samples (conf/dataset_template.toml holds their blocks).
+
+[[contrasts]]
+name = "brca_wt_brca_mt"
+variable = "condition"
+reference = "brca_mt"
+tested = "brca_wt"
+n = [17, 8]
+
+[de]
+featured = "brca_wt_brca_mt"
+
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_INTERFERON_ALPHA_RESPONSE"
+running = ["brca_wt_brca_mt", "HALLMARK_INTERFERON_ALPHA_RESPONSE"]

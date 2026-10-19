@@ -1,0 +1,40 @@
+== ctx_u_gse327906: 57,328 of 58,780 rows placed, 1,452 left out, 1,578,944 of 1,134,999,096 counts left out = 0.1391 %
+left out by reason: [('ensembl', 'not_in_annotation', 1407), ('symbol', 'not_in_annotation', 45)]
+left out with an ID-history note: []
+Placed on the annotation Placed on the annotation</td><td>57,328 rows on one gene each; 1,452 rows left out, holding 0.14 % of all counts</td></tr> <tr><td>Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr
+Placed through Ensembl not on page
+Placed through HGNC Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr><td>Ensembl versions</td><td>29,481 equal the annotation&#39;s, 27,847 differ, 0 without a version</td></tr> <tr><td>Annotation</t
+largest left out:
+   ('ENSG00000112096.17', 'not_in_annotation', '', 328870.0)
+   ('ENSG00000130723.19', 'not_in_annotation', '', 269561.0)
+   ('ENSG00000274267.1', 'not_in_annotation', '', 185803.0)
+   ('ENSG00000278272.1', 'not_in_annotation', '', 107606.0)
+   ('ENSG00000269028.3', 'not_in_annotation', '', 80459.0)
+   ('ENSG00000255823.4', 'not_in_annotation', '', 60648.0)
+   ('ENSG00000225178.5', 'not_in_annotation', '', 38314.0)
+   ('ENSG00000215271.7', 'not_in_annotation', '', 20657.0)
+   ('ENSG00000256045.2', 'not_in_annotation', '', 16127.0)
+   ('ENSG00000235217.6', 'not_in_annotation', '', 11999.0)
+2026-10-19_de_u_gse327906_brca_wt_brca_mt_results_v1.parquet tested 21715 calls [('down', 383), ('ns', 20970), ('up', 362)]
+== ctx_s2_gse327906: 57,416 of 58,780 rows placed, 1,364 left out, 1,199,694 of 1,134,999,096 counts left out = 0.1057 %
+left out by reason: [('ensembl', 'not_in_annotation', 556), ('ensembl', 'shared_gene', 763), ('symbol', 'not_in_annotation', 45)]
+left out with an ID-history note: [('ID history: 0 current genes', 539), ('ID history: 2 current genes, ENSG00000288709, ENSG00000288722', 2), ('ID history: 2 current genes, ENSG00000288867, ENSG00000289549', 2), ('ID history: 2 current genes, ENSG00000288825, ENSG00000288859', 2), ('ID history: 2 current genes, ENSG00000288784, ENSG00000289604', 2)]
+Placed on the annotation Placed on the annotation</td><td>57,416 rows on one gene each; 1,364 rows left out, holding 0.11 % of all counts</td></tr> <tr><td>Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr
+Placed through Ensembl Placed through Ensembl&#39;s ID history</td><td>88 of 1,407 Ensembl rows whose ID the annotation lacks, each on the one current gene its history names</td></tr> <tr><td>Ensembl versions</td><td>29,487 equal the annotation&#39;s, 27,929 differ, 0 without a vers
+Placed through HGNC Placed through HGNC</td><td>0 NCBI Gene ID rows that GENCODE&#39;s table links to no gene, each on one Ensembl gene</td></tr> <tr><td>Placed through Ensembl&#39;s ID history</td><td>88 of 1,407 Ensembl rows whose ID the annotation lacks, each on the one curren
+largest left out:
+   ('ENSG00000130723.19', 'not_in_annotation', 'ID history: 0 current genes', 269561.0)
+   ('ENSG00000274267.1', 'not_in_annotation', 'ID history: 2 current genes, ENSG00000286522, ENSG00000287080', 185803.0)
+   ('ENSG00000278272.1', 'not_in_annotation', 'ID history: 2 current genes, ENSG00000286522, ENSG00000287080', 107606.0)
+   ('ENSG00000269028.3', 'not_in_annotation', 'ID history: 0 current genes', 80459.0)
+   ('ENSG00000255823.4', 'not_in_annotation', 'ID history: 0 current genes', 60648.0)
+   ('ENSG00000225178.5', 'not_in_annotation', 'ID history: 0 current genes', 38314.0)
+   ('ENSG00000256045.2', 'not_in_annotation', 'ID history: 0 current genes', 16127.0)
+   ('ENSG00000235217.6', 'not_in_annotation', 'ID history: 0 current genes', 11999.0)
+   ('ENSG00000239407.5', 'shared_gene', 'ENSG00000223546.10, with ENSG00000223546.6, ENSG00000239407.5', 11925.0)
+   ('ENSG00000260822.1', 'not_in_annotation', 'ID history: 0 current genes', 10448.0)
+2026-10-19_de_s2_gse327906_brca_wt_brca_mt_results_v1.parquet tested 21738 calls [('down', 384), ('ns', 20992), ('up', 362)]
+rows gained 88, rows lost 0
+rows placed on another gene than before: 0
+gained, first 10 by source ID: [('ENSG00000291237.3', 'SOD2', 'ENSG00000112096.17'), ('ENSG00000290203.13', 'SPESP1-NOX5', 'ENSG00000137808.12'), ('ENSG00000310560.3', 'PAXX', 'ENSG00000148362.10'), ('ENSG00000289033.3', 'ENSG00000289033', 'ENSG00000188525.3'), ('ENSG00000290292.11', 'HOMEZ', 'ENSG00000215271.7'), ('ENSG00000293271.2', 'SLC44A3-AS1', 'ENSG00000223675.1'), ('ENSG00000289961.2', 'ENSG00000289961', 'ENSG00000223811.1'), ('ENSG00000291075.2', 'FRG1HP', 'ENSG00000225655.5'), ('ENSG00000290726.3', 'FAM41AY2', 'ENSG00000226362.2'), ('ENSG00000293683.2', 'TMEM269-DT', 'ENSG00000228452.1')]
+ENSG00000112096 now: [('ENSG00000291237.3', 'SOD2', 'ENSG00000112096.17')]
