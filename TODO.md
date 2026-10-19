@@ -543,7 +543,8 @@ Rytis 2026-10-18: "It has to be a reusable tool. This is important." Measured 20
 - [ ] F.2 The containers' `figures` target, then Docker and Apptainer tabs on the panel, then CI running a panel (needs the GHCR dispatch).
 - [ ] F.3 Contour templates (655); lite-build and notebooks (711); P2C.4; `ctx source` and `verify-figure`; the volcano's x axis raw or shrunk; the hub's cohort by module grid; laptop caps applied (every bundle says `all`); `--cohort` filling `--dataset-file`; a 375 px and theme check of a panel.
 - [ ] F.4 For Rytis: TODO's cohort table names Step-1's cohort "pancreas", F's bundle calls it "blood". Choose one.
-- [ ] F.5 src/ctx/dataset.py is 942 lines against the 600 limit (931 before F): split it.
+- [x] F.5 src/ctx/dataset.py (967 lines, not the 942 the item quoted) split into the package src/ctx/dataset/: checks, sources, analyses, gdc, proteo, counts, loader, at most 245 lines each; 16 names re-exported, no import elsewhere changed; 22 dataset files and 7,740 broken variants dump byte-equal before and after (SHA-256 9a970c99...1b84) with the old file made unreachable (wo13-f5 275bfa7). test_sanity_record's FROZEN now names both paths.
+- [ ] F.6 ctx.dataset.load raises AttributeError, TypeError, ValueError or KeyError on 407 of F.5's 7,740 broken variants (222, 107, 54, 24), the same before and after the split, where it should list every problem as one DatasetError: a student's typo prints a traceback.
 - [ ] H.5 The round preflight of 2026-10-18 hung 10 h on an idle hisat2 under xdist (25 errors after it); a serial and a parallel rerun passed. Find the cause if it recurs: record the process tree before killing it.
 
 - [x] U.15 (M) Own FASTQ route: `ctx reads`, the guide's Part 1b, the template route, CONVENTIONS' Stack line; proved both ways on the worked example (D-059, local-fastq 06945f7).

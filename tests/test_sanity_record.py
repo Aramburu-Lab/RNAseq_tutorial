@@ -99,11 +99,12 @@ ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "conf" / "datasets" / "tier1.toml"
 # Everything a verdict depends on: the rules, how samples are curated and counted, the
 # models, the enrichment, the PERMANOVA, and the step that decides. None may change between
-# the rule commit and the record commit (critique M4).
+# the rule commit and the record commit (critique M4). dataset.py became the package
+# src/ctx/dataset on 2026-10-19 (F.5); both paths stand, one per side of the split.
 FROZEN = (
-    "conf/datasets/tier1.toml", "src/ctx/dataset.py", "src/ctx/gather/curation.py",
-    "src/ctx/gather/rnaseq.py", "src/ctx/de", "src/ctx/function", "src/ctx/viz/annotate.py",
-    "src/ctx/report/hub.py",
+    "conf/datasets/tier1.toml", "src/ctx/dataset.py", "src/ctx/dataset",
+    "src/ctx/gather/curation.py", "src/ctx/gather/rnaseq.py", "src/ctx/de", "src/ctx/function",
+    "src/ctx/viz/annotate.py", "src/ctx/report/hub.py",
 )  # fmt: skip
 
 
