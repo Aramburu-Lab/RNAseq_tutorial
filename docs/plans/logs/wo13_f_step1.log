@@ -1,0 +1,8 @@
+metrics: 78 new, 78 recorded, 78 equal
+CSV files: 27 byte-equal, 0 differ: []
+only new: ['_de_tier1_calls_grid_batch_v1.csv', '_de_tier1_calls_grid_pairing_v1.csv', '_de_tier1_lfc_ndn_hsct_early_vs_mono_hsct_early_agreement_v1.csv', '_de_tier1_lfc_ndn_pdac_naive_vs_ndn_pdac_adjusted_agreement_v1.csv', '_de_tier1_size_factors_v1.csv']; only recorded: []
+figures with a spec: 7: ['de_tier1_calls_batch_v1', 'de_tier1_calls_pairing_v1', 'de_tier1_lfc_ndn_hsct_early_vs_mono_hsct_early_v1', 'de_tier1_lfc_ndn_pdac_naive_vs_ndn_pdac_adjusted_v1', 'de_tier1_ma_ndn_gcsf_v1', 'de_tier1_phist_ndn_gcsf_v1', 'de_tier1_volcano_ndn_gcsf_v1']
+metrics: 22 new, 22 recorded, 22 equal
+CSV files: 28 byte-equal, 0 differ: []
+only new: ['_function_tier1_background_ndn_gcsf_views_v1.csv']; only recorded: []
+figures with a spec: 3: ['function_tier1_gsea_ndn_gcsf_v1', 'function_tier1_nes_hallmark_interferon_alpha_response_v1', 'function_tier1_ora_ndn_gcsf_v1']

@@ -1,0 +1,57 @@
+# The Reproduce panel under each figure that has a spec, its params file and the README's
+# figure rows (Phase 2D, D-020). Every comment of the panel's commands comes from here.
+
+[panel]
+summary = "Reproduce"
+lead = "Figure {figure_id}: paste these lines into bash on Linux, macOS or WSL2, or download them as a script."
+download = "Download {name}"
+upstream = "Upstream: the command that wrote these inputs and drew the figure"
+no_container = "Docker and Apptainer tabs follow once the figures image is published; pixi runs it now."
+
+[steps]
+environment = "{step}. Environment: ctx {version} at commit {commit}, through pixi, then a clean folder."
+environment_dirty = "{step}. Environment: ctx {version} from commit {commit} with uncommitted changes, which a clone does not hold."
+environment_wheel = "{step}. Environment: an installed ctx {version}; install the same version, then a clean folder."
+check_tool = "sha256sum on Linux and WSL2, shasum on macOS."
+inputs = "{step}. Inputs: copy each file from the ctx root that drew this figure, then check its bytes."
+root = "The ctx root these files sit in; change it if the folder moved."
+params = "{step}. Figure parameters: the params file ctx figure reads, one comment per parameter."
+generate = "{step}. Generate: ctx figure draws it with {plotting}, in {file}, read from the inputs alone."
+check = "{step}. Check: the files written, then the data table against the page's."
+
+# One comment per parameter of the params file.
+[params]
+figure = "The figure: cohort, module number and figure kind."
+dataset = "The dataset slug in every output name."
+contrast = "The contrast, by its name in the dataset file."
+x = "The contrast on the horizontal axis."
+y = "The contrast on the vertical axis."
+lesson = "The lesson, by its title in the dataset file's de lessons."
+basis = "The p the call rule reads: padj, padj_by, padj_holm, padj_bonferroni or pvalue."
+alpha = "The cutoff on that p, strict."
+lfc_min = "The smallest absolute raw log2 fold change called."
+gene_set = "The gene set, as the gene-set file names it."
+inputs = "Each input file, in this folder."
+sha256 = "Each input's SHA-256; ctx figure refuses a file whose bytes differ."
+
+# One comment per input; a name ending in a contrast takes the `_each` line.
+[inputs]
+samplesheet = "M1's curated sample sheet."
+dataset_file = "The dataset file the module read."
+qc_registry = "The QC registry, which holds ENCODE's depth standard."
+results = "M5's results table of the contrast."
+results_x = "M5's results table of the horizontal contrast."
+results_y = "M5's results table of the vertical contrast."
+results_each = "M5's results table of one contrast of the lesson."
+size_factors = "M5's size factors: each fit's samples, donors and groups."
+gsea = "M6's GSEA table of the contrast."
+gsea_each = "M6's GSEA table of one contrast."
+ora = "M6's over-representation table of the contrast."
+
+[readme]
+title = "Figure"
+id = "Figure ID"
+drawn = "Drawn by"
+drawn_value = "`{plotting}` in `{file}`"
+redraw = "Redraw"
+redraw_value = "`ctx figure {figure_id} --params <params file>`, the params file in the page's Reproduce panel"

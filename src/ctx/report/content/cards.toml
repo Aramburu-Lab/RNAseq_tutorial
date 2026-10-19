@@ -241,6 +241,22 @@ effect = "Each added group is one more stratum, adjusted on its own."
 meaning = "List each problem a run meets, with lines to add; run nothing."
 effect = "On: nothing runs or is written; problems give a failing exit status."
 
+[options."--cohort"]
+meaning = "Cancer bundle, conf/cohorts/<name>.toml, whose name starts every figure ID. Unset: CTX_COHORT."
+effect = "Renames figure IDs; a name no bundle has stops the command."
+
+[options.figure_id]
+meaning = "Figure ID, <cohort>_m<module>_<figure>, as its Reproduce panel and README print it."
+effect = "Draws another figure kind; the params file must name the same."
+
+[options."--params"]
+meaning = "Params file: the figure's parameters, input files and their SHA-256."
+effect = "Draws another contrast, lesson or setting; a changed input is refused."
+
+[options."--out"]
+meaning = "Folder ctx figure writes into, outside any ctx root. Unset: working directory."
+effect = "Moves the redrawn files; a folder inside a ctx root is refused."
+
 [effects.setup]
 "--dataset-file" = "Set: fetches each resource, keeping it only if size and SHA-256 match."
 

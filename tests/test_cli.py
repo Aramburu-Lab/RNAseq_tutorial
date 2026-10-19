@@ -41,9 +41,10 @@ COMMANDS = ["setup", "gather", "qc", "process", "quant", "de", "function", "repo
 # Commands whose page shows another command's cards beside their own (cli.guide).
 SHARED_CARDS = {"run": ("run", "guide"), "guide": ("run", "guide")}
 # Commands that run modules or write a page of the report folder, not a module of their own;
-# reads writes no page at all, and its cards are tested in test_own_fastq.py.
-NOT_MODULES = {"run", "guide", "reads"}
-PAGELESS = {"reads"}
+# reads writes no page at all, and its cards are tested in test_own_fastq.py; figure writes one
+# figure's page, which shows no cards, outside any ctx root (test_figures.py).
+NOT_MODULES = {"run", "guide", "reads", "figure"}
+PAGELESS = {"reads", "figure"}
 
 
 def test_every_subcommand_has_a_card_test():

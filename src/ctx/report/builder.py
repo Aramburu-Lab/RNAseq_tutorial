@@ -118,6 +118,8 @@ class FigureBlock:
             ``export`` entry draws the PDF and SVG of a changed view (``ctx.report.export``).
         below: A second plotly figure, drawn under the plot and its reading guide across the
             card: a linked view's parallel sets; or None.
+        reproduce: The Reproduce panel's words and commands, generated from the figure's
+            ``FigureSpec`` (``ctx.figures.panel.block``); None for a figure with no spec.
     """
 
     figure: Any
@@ -128,6 +130,7 @@ class FigureBlock:
     stem: str = ""
     controls: Mapping[str, Any] | None = None
     below: Any = None
+    reproduce: Mapping[str, str] | None = None
 
 
 @dataclass(frozen=True)

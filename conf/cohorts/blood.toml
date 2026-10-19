@@ -1,0 +1,33 @@
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts). Contrasts, covariates, sanity
+# rules and worked-example genes stay in each dataset file. `modules` lists the modules each
+# dataset is run through, as its real ctx root holds their pages (2026-10-18), or, for a file
+# not yet run, as its tables declare. `laptop_cap` is "all": no module subsamples on the
+# laptop profile yet, so every sample is used there.
+# Step-1's cohort: TODO.md's cohort table files it under pancreas (PDAC is one of its
+# conditions); its samples are blood immune cells of several conditions, hence "blood".
+
+[cohort]
+name = "blood"
+label = "Blood immune cells (Step-1)"
+notes = "Emergency myelopoiesis: low-density against normal-density neutrophils, monocytes, PDAC, IPMN, G-CSF and HSCT against healthy donors. Read length is confounded with the cancer groups and is taught as a batch lesson."
+
+[[datasets]]
+slug = "tier1"
+step = 1
+modules = ["gather", "qc", "quant", "de", "function", "proteo", "ncrna", "genecard"]
+laptop_cap = "all"
+note = "Track B: all 210 runs, counted on the cluster by nf-core/rnaseq."
+
+[[datasets]]
+slug = "tier1_teach"
+step = 1
+modules = ["gather", "qc", "process"]
+laptop_cap = "all"
+note = "Track A teaching subset: 8 runs, trimmed, aligned and counted by M3."
+
+[[datasets]]
+slug = "four_runs"
+step = 1
+modules = ["gather", "qc", "de", "function"]
+laptop_cap = "all"
+note = "Four Step-1 runs, the laptop proof of the custom-data guide (U.10)."

@@ -7,6 +7,7 @@ from typing import Any, Protocol
 
 import polars as pl
 
+from ctx.figures import panel, record
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
 from ctx.report import export, glossary
@@ -25,6 +26,8 @@ from ctx.viz.style import THEMES, Theme
 NO_TEXT = FigureText()
 # The contracts that can carry page controls and draw their changed view (D-033, D-051).
 CONTROLLED = (ScatterData, LinkedData, BarData, CurveData, SurfaceData, KmData)
+# The Reproduce panel of each figure this process wrote with a spec, by stem (Phase 2D).
+_PANELS: dict[str, dict[str, str]] = {}
 
 
 class Figure(Protocol):
@@ -138,6 +141,21 @@ def layout_problems(fig: Any) -> list[str]:
     return problems
 
 
+# What makes two renders of one figure differ though nothing drawn did (656, Phase 2D): the
+# PDF's CreationDate and the SVG's dc:date, set from the clock, and the SVG's clip-path and
+# glyph ids, hashed with a random salt unless svg.hashsalt is set.
+NO_DATE = {"pdf": {"CreationDate": None}, "svg": {"Date": None}}
+SVG_SALT = "ctx"
+
+
+def save_reproducibly(fig: Any, path: Path) -> None:
+    """Save a PDF or SVG with no creation time and fixed ids, so a rerun is byte-equal."""
+    import matplotlib as mpl  # noqa: PLC0415 - heavy; imported after the profile
+
+    with mpl.rc_context({"svg.hashsalt": SVG_SALT}):
+        fig.savefig(path, metadata=NO_DATE[path.suffix.lstrip(".")])
+
+
 def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> FigureBlock:
     """The interactive figure, caption, data rows and words, for a figure or a module page.
 
@@ -177,6 +195,7 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
     return FigureBlock(
         figure, data.caption_text(), data.page_table().to_dicts(), f"{figure_stem}.csv",
         text=text, stem=figure_stem, controls=controls, below=below,
+        reproduce=_PANELS.get(figure_stem),
     )  # fmt: skip
 
 
@@ -234,9 +253,16 @@ def write_figure(
     for name, fig in figures.items():
         for ext in ("pdf", "svg"):
             rendered[(name, ext)] = directory / f"{figure_stem}_{name}.{ext}"
-            fig.savefig(rendered[(name, ext)])
-    page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
+            save_reproducibly(fig, rendered[(name, ext)])
     table = write_table(
         rows, directory, figure_stem, columns=columns, data_releases=data_releases, formats=("csv",)
     )
+    # The spec hashes the data table, so it is found once the table is written (Phase 2D).
+    if (spec := record.describe(figure_stem, directory, table[0])) is not None:
+        with table[-1].open("a") as readme:
+            readme.write("\n" + record.readme(spec))
+        # The module builds its page's block in a second call, figure_block, by this stem.
+        _PANELS[figure_stem] = panel.block(spec)
+        block = replace(block, reproduce=_PANELS[figure_stem])
+    page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     return [*(rendered[(t, ext)] for ext in ("pdf", "svg") for t in THEMES), page, *table]
