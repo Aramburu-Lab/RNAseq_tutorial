@@ -1,0 +1,38 @@
+[
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "light",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 1280,
+  "scheme": "dark",
+  "box": 1265,
+  "scroll": 1265,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "light",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ },
+ {
+  "page": "outputs/scratch_roots/breast_before/outputs/11_genecard/2026-10-19_genecard_tcga_brca_overview_v1.html",
+  "width": 375,
+  "scheme": "dark",
+  "box": 375,
+  "scroll": 375,
+  "wide": [],
+  "errors": []
+ }
+]

@@ -1,0 +1,14 @@
+breast de_cptac_brca_metrics_v1.csv: 13 of 13 equal; only after []; only before []
+breast de_tcga_brca_metrics_v1.csv: 7 of 7 equal; only after []; only before []
+breast function_tcga_brca_metrics_v1.csv: 12 of 12 equal; only after []; only before []
+breast proteo_cptac_brca_metrics_v1.csv: 37 of 37 equal; only after []; only before []
+breast ncrna_tcga_brca_metrics_v1.csv: 1733 of 1733 equal; only after []; only before []
+kidney de_cptac_ccrcc_metrics_v1.csv: 7 of 7 equal; only after []; only before []
+kidney proteo_cptac_ccrcc_metrics_v1.csv: 35 of 35 equal; only after ['normal.class.glycolysis.median', 'normal.class.other.median', 'normal.class.oxphos.median', 'normal.pergene.spearman.median']; only before []
+not a metric table: 2026-10-19_qc_tcga_lung_metrics_v1.csv
+lung de_tcga_lung_metrics_v1.csv: 19 of 19 equal; only after []; only before []
+not a metric table: 2026-10-19_qc_tier1_metrics_v1.csv
+tier1 de_tier1_metrics_v1.csv: 78 of 78 equal; only after []; only before []
+tier1 function_tier1_metrics_v1.csv: 22 of 22 equal; only after []; only before []
+tier1 proteo_tier1_metrics_v1.csv: 6 of 6 equal; only after []; only before []
+tier1 ncrna_tier1_metrics_v1.csv: 4 of 4 equal; only after []; only before []
