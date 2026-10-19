@@ -155,3 +155,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - An old ID's successor can itself be split later: follow the history past the first current gene, or a split is given to one side (S2, 2026-10-19).
 - The pixi base image ships no git, and a git pypi dependency stops the build at "Git executable not found": the template's analysis target never built. Build an image locally before a workflow is dispatched to publish it (F2, 2026-10-19).
 - `docker image inspect .Size` meant two things on one daemon (801 MB beside an 801 MB docker save; 3.07 GB beside a 703 MB save): measure by docker save and du in the container, and name which (F2, 2026-10-19).
+- A sample of every third variant missed the one scatters line and the one bins line, and their mutations survived: sample by kind of change, not by position (G6, 2026-10-19).
+- A check written to replace a crash can also refuse inputs that parsed before: compare every parsed variant before and after a new check (G6, 2026-10-19).
+- Count an agent's mutations from its log, not its summary: G6's draft line said 15, its log 18 (2026-10-19).
