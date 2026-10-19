@@ -1,0 +1,37 @@
+data, pdf and svg files: 38 byte-equal, 0 differ
+page proteo_cptac_ccrcc_contrast_tumour_normal_v1.html: real 6,704,401 B, scratch 6,718,064 B
+page proteo_cptac_ccrcc_coverage_v1.html: real 6,309,389 B, scratch 6,320,593 B
+page proteo_cptac_ccrcc_overview_v1.html: real 11,406,013 B, scratch 11,476,064 B
+page proteo_cptac_ccrcc_paired_zscores_v1.html: real 5,881,997 B, scratch 5,893,284 B
+page proteo_cptac_ccrcc_quantified_v1.html: real 5,059,647 B, scratch 5,070,885 B
+page proteo_cptac_ccrcc_rho_by_class_v1.html: real 6,037,190 B, scratch 6,048,463 B
+page proteo_cptac_ccrcc_worked_ca9_v1.html: real 5,053,944 B, scratch 5,065,329 B
+new proteo_cptac_ccrcc_abundance_v1.csv: 273,241 B
+new proteo_cptac_ccrcc_abundance_v1.parquet: 122,344 B
+new proteo_cptac_ccrcc_abundance_v1_README.md: 2,772 B
+new proteo_cptac_ccrcc_drawn_rows_v1.csv: 241,086 B
+new proteo_cptac_ccrcc_drawn_rows_v1.parquet: 46,689 B
+new proteo_cptac_ccrcc_drawn_rows_v1_README.md: 3,084 B
+new proteo_cptac_ccrcc_f4_tumour_normal_folds_v1.csv: 1,168,182 B
+new proteo_cptac_ccrcc_f4_tumour_normal_folds_v1.parquet: 367,405 B
+new proteo_cptac_ccrcc_f4_tumour_normal_folds_v1_README.md: 3,930 B
+new proteo_cptac_ccrcc_f4_tumour_normal_summary_v1.csv: 131 B
+new proteo_cptac_ccrcc_f4_tumour_normal_summary_v1.parquet: 2,132 B
+new proteo_cptac_ccrcc_f4_tumour_normal_summary_v1_README.md: 3,371 B
+new proteo_cptac_ccrcc_figure_options_v1.csv: 63 B
+new proteo_cptac_ccrcc_figure_options_v1.parquet: 1,487 B
+new proteo_cptac_ccrcc_figure_options_v1_README.md: 3,064 B
+new proteo_cptac_ccrcc_paired_annotation_v1.csv: 5,162 B
+new proteo_cptac_ccrcc_paired_annotation_v1.parquet: 1,774 B
+new proteo_cptac_ccrcc_paired_annotation_v1_README.md: 2,851 B
+new proteo_cptac_ccrcc_protein_present_v1.csv: 4,071,029 B
+new proteo_cptac_ccrcc_protein_present_v1.parquet: 345,896 B
+new proteo_cptac_ccrcc_protein_present_v1_README.md: 26,414 B
+new proteo_cptac_ccrcc_protein_samples_v1.csv: 10,052 B
+new proteo_cptac_ccrcc_protein_samples_v1.parquet: 2,269 B
+new proteo_cptac_ccrcc_protein_samples_v1_README.md: 2,852 B
+new proteo_cptac_ccrcc_worked_samples_v1.csv: 3,710 B
+new proteo_cptac_ccrcc_worked_samples_v1.parquet: 1,451 B
+new proteo_cptac_ccrcc_worked_samples_v1_README.md: 2,745 B
+new files: 27, 6,715,186 B
+only in the real run: []

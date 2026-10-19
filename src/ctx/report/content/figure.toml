@@ -39,6 +39,8 @@ plot = "The FastQC plot, by its figure's name."
 comparison = "The comparison of two counters, by its name in M3's tables."
 inputs = "Each input file, in this folder."
 sha256 = "Each input's SHA-256; ctx figure refuses a file whose bytes differ."
+# M7
+gene = "The worked gene, by its symbol in the dataset file's proteo genes."
 
 # One comment per input; a name ending in a contrast takes the `_each` line.
 [inputs]
@@ -86,6 +88,17 @@ groups = "M3's sheet groups the bars filter by."
 figure_sheet = "M4's sheet as its figures name it."
 contrast_samples = "M4's copy of the featured contrast's samples and levels."
 fold_changes = "M4's fold changes from both counts of each gene."
+# M7
+proteo_options = "M7's options as the run was given them."
+proteo_genes = "M7's genes in both layers, with every per-gene number and class."
+abundance = "M7's RNA abundance per gene, which the tertiles are cut on."
+protein_samples = "M7's protein samples, each with its bar colour and group."
+protein_present = "M7's protein layer as presence: 1 where a cell holds a value."
+paired_annotation = "M7's annotation of the samples in both layers."
+drawn_rows = "M7's RNA and protein of the genes the worked and paired figures draw."
+worked_samples = "M7's tumour and normal columns of the worked figures."
+contrast_folds = "M7's genes of the contrast tested at both layers."
+contrast_summary = "M7's protein samples per group and fold-change correlation of the contrast."
 
 [readme]
 title = "Figure"

@@ -1,0 +1,43 @@
+data, pdf and svg files: 55 byte-equal, 0 differ
+page proteo_cptac_brca_contrast_basal_vs_luma_v1.html: real 6,738,562 B, scratch 6,751,144 B
+page proteo_cptac_brca_contrast_erneg_vs_erpos_v1.html: real 6,673,948 B, scratch 6,686,550 B
+page proteo_cptac_brca_coverage_v1.html: real 6,068,585 B, scratch 6,079,731 B
+page proteo_cptac_brca_overview_v1.html: real 13,909,411 B, scratch 14,008,334 B
+page proteo_cptac_brca_paired_zscores_v1.html: real 6,138,643 B, scratch 6,148,867 B
+page proteo_cptac_brca_quantified_v1.html: real 5,042,214 B, scratch 5,053,394 B
+page proteo_cptac_brca_rho_by_class_v1.html: real 6,062,310 B, scratch 6,072,516 B
+page proteo_cptac_brca_worked_erbb2_v1.html: real 5,043,360 B, scratch 5,053,686 B
+page proteo_cptac_brca_worked_grb7_v1.html: real 5,043,361 B, scratch 5,053,685 B
+page proteo_cptac_brca_worked_stard3_v1.html: real 5,042,655 B, scratch 5,052,987 B
+new proteo_cptac_brca_abundance_v1.csv: 230,171 B
+new proteo_cptac_brca_abundance_v1.parquet: 109,829 B
+new proteo_cptac_brca_abundance_v1_README.md: 2,697 B
+new proteo_cptac_brca_drawn_rows_v1.csv: 108,649 B
+new proteo_cptac_brca_drawn_rows_v1.parquet: 34,113 B
+new proteo_cptac_brca_drawn_rows_v1_README.md: 3,009 B
+new proteo_cptac_brca_f4_basal_vs_luma_folds_v1.csv: 1,155,595 B
+new proteo_cptac_brca_f4_basal_vs_luma_folds_v1.parquet: 372,124 B
+new proteo_cptac_brca_f4_basal_vs_luma_folds_v1_README.md: 3,856 B
+new proteo_cptac_brca_f4_basal_vs_luma_summary_v1.csv: 133 B
+new proteo_cptac_brca_f4_basal_vs_luma_summary_v1.parquet: 2,132 B
+new proteo_cptac_brca_f4_basal_vs_luma_summary_v1_README.md: 3,297 B
+new proteo_cptac_brca_f4_erneg_vs_erpos_folds_v1.csv: 1,160,209 B
+new proteo_cptac_brca_f4_erneg_vs_erpos_folds_v1.parquet: 363,149 B
+new proteo_cptac_brca_f4_erneg_vs_erpos_folds_v1_README.md: 3,859 B
+new proteo_cptac_brca_f4_erneg_vs_erpos_summary_v1.csv: 133 B
+new proteo_cptac_brca_f4_erneg_vs_erpos_summary_v1.parquet: 2,132 B
+new proteo_cptac_brca_f4_erneg_vs_erpos_summary_v1_README.md: 3,300 B
+new proteo_cptac_brca_figure_options_v1.csv: 63 B
+new proteo_cptac_brca_figure_options_v1.parquet: 1,487 B
+new proteo_cptac_brca_figure_options_v1_README.md: 2,990 B
+new proteo_cptac_brca_paired_annotation_v1.csv: 37,269 B
+new proteo_cptac_brca_paired_annotation_v1.parquet: 30,989 B
+new proteo_cptac_brca_paired_annotation_v1_README.md: 11,604 B
+new proteo_cptac_brca_protein_present_v1.csv: 2,446,695 B
+new proteo_cptac_brca_protein_present_v1.parquet: 152,461 B
+new proteo_cptac_brca_protein_present_v1_README.md: 17,833 B
+new proteo_cptac_brca_protein_samples_v1.csv: 2,105 B
+new proteo_cptac_brca_protein_samples_v1.parquet: 1,878 B
+new proteo_cptac_brca_protein_samples_v1_README.md: 2,777 B
+new files: 30, 6,266,538 B
+only in the real run: []

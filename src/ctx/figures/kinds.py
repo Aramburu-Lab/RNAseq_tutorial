@@ -9,7 +9,7 @@ used, since the modules that draw import ``ctx.viz.save``, which imports this fi
 from typing import Any
 
 from ctx.dataset import Dataset
-from ctx.figures import kinds_m1, kinds_m2, kinds_m3, kinds_m4, kinds_m5, kinds_m6
+from ctx.figures import kinds_m1, kinds_m2, kinds_m3, kinds_m4, kinds_m5, kinds_m6, kinds_m7
 from ctx.figures.kind import Kind
 
 KINDS: tuple[Kind, ...] = (
@@ -19,6 +19,7 @@ KINDS: tuple[Kind, ...] = (
     *kinds_m4.KINDS,
     *kinds_m5.KINDS,
     *kinds_m6.KINDS,
+    *kinds_m7.KINDS,
 )
 
 

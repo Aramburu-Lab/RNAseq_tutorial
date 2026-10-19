@@ -266,3 +266,23 @@ kind = ["none", "Where the gene was called: at both layers, RNA only, protein on
 row = ["none", "The gene and the layer of the heatmap row."]
 z = ["z-score", "The row's value centred on its mean and scaled by its standard deviation over the samples."]
 level = ["none", "The z-score's colour step."]
+method = ["none", "The per-gene correlation the class figure and its test use, --method."]
+min_quantified = ["fraction", "Share of samples a protein needs a value in to be tested, --min-quantified."]
+lfc_min = ["log2 fold change", "Smallest absolute log2 fold change a protein call needs, --lfc-min."]
+shown_class = ["none", "The class drawn alone against Other on the class figures, or all, --gene-class."]
+colour = ["none", "The group the sample's bar is coloured by on the quantified figure."]
+abundance = ["log2", "The RNA abundance the gene's tertile is cut on: mean log2(CPM + 1), or log2(baseMean + 1)."]
+view = ["none", "Which matrix the row belongs to: paired, the correlation's samples; worked, both tissues."]
+column = ["none", "The sample's column in that matrix, counted from 0."]
+tissue = ["none", "Tumour or normal: the tissue of the sample's column."]
+n_reference = ["samples", "Reference samples with a protein column in the comparison; paired: the pairs."]
+n_tested = ["samples", "Tested samples with a protein column in the comparison; paired: the pairs."]
+fold_rho = ["Spearman ρ", "Spearman correlation of RNA and protein fold change over the genes tested at both layers."]
+fold_rho_low = ["Spearman ρ", "Lower end of fold_rho's 95 % bootstrap interval, 1000 resamples, seed 42."]
+fold_rho_high = ["Spearman ρ", "Upper end of fold_rho's 95 % bootstrap interval, 1000 resamples, seed 42."]
+paired = ["none", "True when the protein test was the paired t on each case's two columns."]
+
+# The README words of the tables M7's figures are redrawn from (ctx.proteo.figure_tables).
+[figure_tables]
+present = "1 where sample {sample} has a protein value for the gene, 0 where it is missing."
+annotation = "Column {column} of the paired samples' annotation, as the protein table or sample table gives it."

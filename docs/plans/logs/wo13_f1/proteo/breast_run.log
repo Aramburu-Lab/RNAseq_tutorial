@@ -1,0 +1,129 @@
+17:53  up 6 days,  1:33, 4 users, load averages: 6.56 10.11 13.52
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_figure_options_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_figure_options_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_figure_options_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_protein_samples_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_protein_samples_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_protein_samples_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_protein_present_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_protein_present_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_protein_present_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_abundance_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_abundance_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_abundance_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_annotation_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_annotation_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_annotation_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_drawn_rows_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_drawn_rows_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_drawn_rows_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_basal_vs_luma_folds_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_basal_vs_luma_folds_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_basal_vs_luma_folds_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_basal_vs_luma_summary_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_basal_vs_luma_summary_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_basal_vs_luma_summary_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_erneg_vs_erpos_folds_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_erneg_vs_erpos_folds_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_erneg_vs_erpos_folds_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_erneg_vs_erpos_summary_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_erneg_vs_erpos_summary_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_f4_erneg_vs_erpos_summary_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_quantified_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_quantified_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_quantified_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_quantified_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_quantified_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_quantified_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_quantified_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_coverage_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_coverage_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_coverage_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_coverage_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_coverage_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_coverage_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_coverage_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_rho_by_class_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_rho_by_class_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_rho_by_class_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_rho_by_class_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_rho_by_class_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_rho_by_class_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_rho_by_class_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_erbb2_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_erbb2_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_erbb2_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_erbb2_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_erbb2_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_erbb2_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_erbb2_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_grb7_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_grb7_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_grb7_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_grb7_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_grb7_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_grb7_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_grb7_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_stard3_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_stard3_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_stard3_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_stard3_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_stard3_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_stard3_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_worked_stard3_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_zscores_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_zscores_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_zscores_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_zscores_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_zscores_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_zscores_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_paired_zscores_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_calls_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_calls_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_calls_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_basal_vs_luma_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_calls_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_calls_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_calls_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_contrast_erneg_vs_erpos_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_metrics_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_metrics_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_metrics_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_sanity_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_sanity_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/breast/outputs/07_proteo/2026-10-19_proteo_cptac_brca_sanity_v1_README.md
+       27.39 real        21.74 user         3.88 sys
+          1658191872  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              557626  page reclaims
+                 676  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                1318  voluntary context switches
+               22383  involuntary context switches
+            16589593  instructions retired
+             8131670  cycles elapsed
+             1442152  peak memory footprint
+exit 0
