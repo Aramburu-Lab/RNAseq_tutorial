@@ -220,6 +220,7 @@ licence = "Endpoints, age, stage, histology and menopause are TCGA-CDR columns, 
 
 [panel]
 note = "Expression: {kept:,} genes have a median log2 CPM of at least {minimum:g} and vary; {below:,} fall below and {flat:,} do not vary. The page carries the {carried:,} most variable protein-coding genes for live scoring."
+sample_column = ["log2 CPM x 1000", "The stored log2 CPM of the sample, times 1000 as int16, as the page scores it."]
 
 [patients]
 title = "Patients and endpoints"
@@ -602,3 +603,16 @@ column_variable = ["none", "Patient-table column of the column."]
 v = ["dimensionless", "Cramér's V, empty on the diagonal and for a constant column."]
 level = ["none", "The bin of V the cell is drawn in."]
 n = ["patients", "Patients with a value in both columns."]
+
+[columns.figure_options]
+endpoint = ["none", "The endpoint the models fit: --endpoint, else the dataset file's."]
+split = ["none", "--split: median or tertiles."]
+horizon = ["months", "--horizon: the months up to which RMST is compared."]
+covariates = ["none", "--covariates, comma-separated, in order."]
+strata = ["none", "--cox-strata, comma-separated, in order; empty for none."]
+source = ["none", "Where the build list came from: the dataset file, or the --genes-from file's name."]
+
+[columns.panel_values]
+gene_id = ["none", "Ensembl gene ID, unversioned."]
+gene_name = ["none", "Gene symbol."]
+build = ["none", "Whether the gene is in the build list the page scores by default."]

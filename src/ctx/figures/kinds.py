@@ -19,6 +19,7 @@ from ctx.figures import (
     kinds_m7,
     kinds_m8,
     kinds_m9,
+    kinds_m10,
 )
 from ctx.figures.kind import Kind
 
@@ -32,6 +33,7 @@ KINDS: tuple[Kind, ...] = (
     *kinds_m7.KINDS,
     *kinds_m8.KINDS,
     *kinds_m9.KINDS,
+    *kinds_m10.KINDS,
 )
 
 

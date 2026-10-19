@@ -1,0 +1,12 @@
+clinical (head): exit 0
+       32.57 real        22.35 user         6.72 sys
+          1662156800  maximum resident set size
+          1273972680  peak memory footprint
+13214034 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/kirc_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_kirc_overview_v1.html
+13096495 /Users/rytis/ctx_kidney/outputs/12_clinical/2026-10-16_clinical_tcga_kirc_overview_v1.html
+93 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/kirc_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_kirc_figure_options_v1.csv
+2143 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/kirc_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_kirc_figure_options_v1.parquet
+2658 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/kirc_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_kirc_figure_options_v1_README.md
+12889486 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/kirc_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_kirc_panel_values_v1.csv
+7327601 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/kirc_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_kirc_panel_values_v1.parquet
+84397 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/kirc_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_kirc_panel_values_v1_README.md

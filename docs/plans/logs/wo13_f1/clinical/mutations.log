@@ -1,0 +1,15 @@
+CAUGHT  panel values not written: 1 failed in 68.93s (0:01:08) | E       AssertionError: assert {'competing',...OS', 'er:PFI'} == {'competing',...'er:PFI', ...}
+CAUGHT  build genes not marked: 1 failed in 122.51s (0:02:02) | E           AssertionError: 2026-10-19_clinical_fake_brca_expression_er_v1
+CAUGHT  values matched by position: 1 failed in 100.85s (0:01:40) | E       AssertionError: assert 0 != 0
+CAUGHT  values read as floats: 1 failed in 74.18s (0:01:14) | E           AssertionError: 2026-10-19_clinical_fake_brca_expression_er_v1
+CAUGHT  live block of the build genes alone: 1 failed in 77.32s (0:01:17) | E               AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  screen left out of the live panel: 1 failed in 64.85s (0:01:04) | E               AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  split taken as the default: 1 failed in 31.94s | E           AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  horizon taken as the default: 1 failed in 54.29s | E           AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  covariates taken as the default: 1 failed in 54.15s | E               AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  strata taken as none: 1 failed in 74.76s (0:01:14) | E               AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  endpoint of the dataset file: 1 failed in 53.59s | E           AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  source of the dataset file: 1 failed in 44.00s | E               AssertionError: 2026-10-19_clinical_fake_brca_km_score_v1
+CAUGHT  endpoint not checked: 1 failed in 32.42s | E           Failed: DID NOT RAISE ParamsError
+CAUGHT  box not checked: 1 failed in 35.66s | E           Failed: DID NOT RAISE ParamsError
+CAUGHT  cramers v in hashed order: 1 failed in 26.86s | E               AssertionError: ('er', 'menopause', {0.055467999886882044, 0.05546799988688205})

@@ -39,6 +39,9 @@ plot = "The FastQC plot, by its figure's name."
 comparison = "The comparison of two counters, by its name in M3's tables."
 # M7, M9
 gene = "The gene: an M7 worked gene by its proteo symbol, or an M9 card as its files name it."
+# M10
+endpoint = "The endpoint of the ER curves: OS, DSS, DFI or PFI."
+box = "The two-level variable of the expression box, as the dataset file declares it."
 inputs = "Each input file, in this folder."
 sha256 = "Each input's SHA-256; ctx figure refuses a file whose bytes differ."
 
@@ -120,6 +123,10 @@ junctions = "M9's GTEx V10 junction medians of the genes on the page."
 mane = "M9's MANE Select exons, from the GTF and from Ensembl REST."
 immune = "M9's HPA immune cell nTPM of the genes on the page."
 genecard_options = "M9's options as the run was given them: the HPA release."
+# M10
+patients = "M10's patient table: one row per analysed patient."
+run_options = "M10's options as the run resolved them."
+panel_values = "M10's stored log2 CPM of the genes the page carries, the build list's marked."
 
 [readme]
 title = "Figure"
