@@ -1,8 +1,8 @@
 """A paired contrast's box draws one line per donor between its groups, both renderers (E.1e).
 
-TCGA-BRCA's tumour against normal pairs 113 donors; here four donors, one with a second sample
-in one group and one with a missing value, which no single line can stand for. Each test names
-the mutations it catches.
+The breast cohort's tumour against normal pairs 113 donors; here five donors, one with a second
+sample in one group and two with no value in the other, which no line can stand for. Each test
+names the mutations it catches.
 """
 
 from dataclasses import replace
