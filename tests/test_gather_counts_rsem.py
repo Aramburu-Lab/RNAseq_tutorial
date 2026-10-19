@@ -255,13 +255,17 @@ def test_ctx_run_check_takes_an_rsem_folder(tmp_path):
 
 
 def test_largest_rows_left_out_first():
-    """The page's table of rows left out holds the ten largest, the most counts first.
-    Catches the sort reversed, and the cap dropped."""
+    """The page's table of rows left out holds the ten largest, the most counts first, each
+    with its detail (R2.5b). Catches the sort reversed, the cap dropped, and the detail
+    column dropped or read from another row."""
     left = pl.DataFrame({"source_id": [f"G{i:02d}" for i in range(12)], "kind": ["symbol"] * 12,
-                         "reason": ["not_in_annotation"] * 12, "detail": [""] * 12,
+                         "reason": ["not_in_annotation"] * 12,
+                         "detail": [f"note {i}" for i in range(12)],
                          "total": [float(i) for i in range(12)]})  # fmt: skip
-    rows = counts_run._largest(left).rows
-    assert [r[0] for r in rows] == [f"G{i:02d}" for i in range(11, 1, -1)]
+    table = counts_run._largest(left)
+    assert [r[0] for r in table.rows] == [f"G{i:02d}" for i in range(11, 1, -1)]
+    assert [r[3] for r in table.rows] == [f"note {i}" for i in range(11, 1, -1)]
+    assert table.columns[3] == "Detail"
 
 
 def test_two_hgnc_rows_on_one_gene_both_leave():

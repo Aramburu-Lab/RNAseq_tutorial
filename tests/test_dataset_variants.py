@@ -7,13 +7,15 @@ TypeError, ValueError or KeyError (docs/plans/logs/2026-10-19_g6_classification.
 from pathlib import Path
 
 import pytest
-from dataset_variants import sources, variants
+from dataset_variants import SWAPS, sources, variants
 
 from ctx.dataset import DatasetError, load, loader
 
-# Every third variant, and every file's all-lines-retyped variants: about 2,600 of 7,800,
-# under 2 s; the full run is docs/plans/logs/g6_classify.py.
-EVERY = 3
+# Each key line retyped to an integer and to a string (SWAPS 1 and 3), and every file's
+# all-lines-retyped variants: half of the 7,800, about 2 s; deleting a line and retyping it
+# to a boolean are the full run's (docs/plans/logs/g6_classify.py). Every third variant
+# missed the one scatters and one bins line, and their mutations survived.
+KEPT = (1, 3)
 SYNTHETIC = Path(__file__).parent / "fixtures" / "datasets" / "synthetic.toml"
 
 
@@ -49,23 +51,25 @@ def test_every_sampled_variant_parses_or_lists(in_memory):
     for source in sources():
         texts = variants(source.read_text())
         for j, text in enumerate(texts):
-            if j % EVERY and j < len(texts) - 4:
+            if j % len(SWAPS) not in KEPT and j < len(texts) - 4:
                 continue
             found += 1
             if (result := in_memory(text)) not in ("parsed", "listed"):
                 failures.append(f"{source.name}#{j}: {result[:200]}")
     assert len(sources()) >= 22
-    assert found > 2000
+    assert found > 3500
     assert not failures, f"{len(failures)} of {found}:\n" + "\n".join(failures[:20])
 
 
 def test_crashing_kinds_listed_together(tmp_path):
-    """Three values the old parsers crashed on, in one file, are three lines of one error.
+    """Four values the old parsers crashed on, in one file, are four lines of one error.
     Catches a fix that raises on the first instead of listing every problem."""
     text = SYNTHETIC.read_text()
     text = text.replace('values = { "Control" = "control", "Case" = "case" }', "values = 7")
     text = text.replace('time_point = ["", "fu2", "fu10"]', "time_point = true")
     text = text.replace("control = 7", 'control = "x"')
+    text += ('[[contrasts]]\nname = "c"\nvariable = "condition"\nreference = "control"\n'
+             'tested = "case"\nn = [7, 7]\nfilters = { condition = 7 }\n')
     path = tmp_path / "broken.toml"
     path.write_text(text)
     with pytest.raises(DatasetError) as caught:
@@ -75,4 +79,27 @@ def test_crashing_kinds_listed_together(tmp_path):
         "  columns.condition.values: expected a table, found 7",
         "  order.time_point: expected a list, found True",
         "  expect.counts.condition.control: expected int, found 'x'",
+        "  contrasts[0].filters.condition: expected a list, found 7",
     ]
+
+
+CONTRAST = ('[[contrasts]]\nname = "c"\nvariable = "condition"\nreference = "control"\n'
+            'tested = "case"\nn = [7, 7]\n')
+
+
+@pytest.mark.parametrize(("snippet", "problem"), [
+    ('[de]\nfeatured = "c"\nscatters = [["c"]]\n',
+     "de.scatters: expected [[contrast, contrast], ...], found [['c']]"),
+    ('[de]\nfeatured = "c"\n[[de.pca]]\nfactors = ["condition"]\n',
+     "de.pca[0].name: expected str, found None"),
+    ("[derived.batch]\nbins = { short = 50 }\n",
+     "derived.batch.bins.short: expected a list, found 50"),
+])  # fmt: skip
+def test_nested_values_listed(tmp_path, snippet, problem):
+    """A value inside a table that the variants retype only whole is checked too. Catches a
+    one-item scatter, a PCA with no name and a bin of one length crashing the parser."""
+    path = tmp_path / "broken.toml"
+    path.write_text(SYNTHETIC.read_text() + CONTRAST + snippet)
+    with pytest.raises(DatasetError) as caught:
+        load(path)
+    assert str(caught.value).splitlines() == [f"{path}:", f"  {problem}"]

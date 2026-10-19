@@ -120,5 +120,7 @@ def test_gather_reads_the_history_resource(tmp_path):
     assert pl.read_parquet(genes)["source_id"].to_list() == ids[:2]
     page = next(out.glob("*_gather_mat_overview_v1.html")).read_text()
     assert "1 of 2 Ensembl rows whose ID the annotation lacks" in page
+    # R2.5b: the largest rows left out show why, here a retired ID with no successor.
+    assert "<td>ID history: 0 current genes</td>" in page
     readme = next(out.glob("*_counts_v1_README.md")).read_text()
     assert "Ensembl stable_id_event, h.txt" in readme
