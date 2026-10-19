@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
-from ctx.dataset.checks import _need, _values
+from ctx.dataset.checks import _list, _need, _sequence, _table, _values
 from ctx.dataset.sources import Resource
 
 
@@ -112,6 +112,16 @@ class NcrnaSpec:
     mirnas: tuple[str, ...] = ()
 
 
+def _split(raw: Any, where: str, problems: list[str]) -> Split | None:
+    """A contrast's split table, seed and strata; absent or empty is no split."""
+    if not raw:
+        return None
+    table = _table(raw, f"{where}.split", problems)
+    seed = _need(table, "seed", int, f"{where}.split", problems) if table else None
+    strata = _need(table, "strata", str, f"{where}.split", problems) if table else None
+    return Split(seed, strata) if seed is not None and strata is not None else None
+
+
 def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
     """Parse [[contrasts]]."""
     out = []
@@ -120,7 +130,8 @@ def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
         fields = [_need(entry, key, str, where, problems)
                   for key in ("name", "variable", "reference", "tested")]  # fmt: skip
         n = _need(entry, "n", list, where, problems)
-        split = entry.get("split")
+        filters = _values(entry.get("filters", {}), f"{where}.filters", problems)
+        split = _split(entry.get("split"), where, problems)
         if n is not None and (len(n) != 2 or not all(isinstance(x, int) for x in n)):  # noqa: PLR2004 - a pair
             problems.append(f"{where}.n: expected [reference n, tested n], found {n!r}")
         if None in fields or n is None:
@@ -128,9 +139,8 @@ def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
         name, variable, reference, tested = (str(f) for f in fields)
         out.append(Contrast(
             name, variable, reference, tested, expected_n=(n[0], n[-1]),
-            design=entry.get("design", "~group"),
-            filters=_values(entry.get("filters", {})), paired=bool(entry.get("paired", False)),
-            split=Split(int(split["seed"]), str(split["strata"])) if split else None,
+            design=entry.get("design", "~group"), filters=filters,
+            paired=bool(entry.get("paired", False)), split=split,
             label=str(entry.get("label", "")),
         ))  # fmt: skip
     names = [c.name for c in out]
@@ -140,26 +150,38 @@ def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
     return tuple(out)
 
 
+def _pcas(raw: list[Any], problems: list[str]) -> tuple[PcaSpec, ...]:
+    """Parse [[de.pca]]: a name and factors each, the rest optional."""
+    out = []
+    for i, entry in enumerate(raw):
+        where = f"de.pca[{i}]"
+        found = len(problems)
+        p = _table(entry, where, problems)
+        filters = _values(p.get("filters", {}), f"{where}.filters", problems)
+        if "name" not in p:
+            problems.append(f"{where}.name: expected str, found None")
+        factors = _sequence(p.get("factors"), f"{where}.factors", problems)
+        # Any problem refuses the file, so a broken entry need not be built.
+        if len(problems) == found:
+            out.append(PcaSpec(p["name"], filters, tuple(factors), p.get("symbol"),
+                               p.get("strata"), p.get("one_per")))  # fmt: skip
+    return tuple(out)
+
+
 def _de(raw: Mapping[str, Any], names: set[str], problems: list[str]) -> DeSpec:
     """Parse [de] and check it names only declared contrasts."""
-    pca = tuple(
-        PcaSpec(
-            p["name"],
-            _values(p.get("filters", {})),
-            tuple(p["factors"]),
-            p.get("symbol"),
-            p.get("strata"),
-            p.get("one_per"),
-        )  # fmt: skip
-        for p in raw.get("pca", [])
-    )
+    lessons = _table(raw.get("lessons", {}), "de.lessons", problems)
+    scatters = _list(raw.get("scatters", []), "de.scatters", problems)
+    if not all(isinstance(pair, list) and len(pair) == 2 for pair in scatters):  # noqa: PLR2004 - pairs
+        problems.append(f"de.scatters: expected [[contrast, contrast], ...], found {scatters!r}")
+        scatters = []
     spec = DeSpec(
         featured=raw.get("featured", ""),
-        pca=pca,
-        lessons={k: tuple(v) for k, v in raw.get("lessons", {}).items()},
-        scatters=tuple((a, b) for a, b in raw.get("scatters", [])),
+        pca=_pcas(_list(raw.get("pca", []), "de.pca", problems), problems),
+        lessons={k: tuple(_list(v, f"de.lessons.{k}", problems)) for k, v in lessons.items()},
+        scatters=tuple((a, b) for a, b in scatters),
         box_contrast=raw.get("box_contrast"),
-        box_genes=tuple(raw.get("box_genes", [])),
+        box_genes=tuple(_sequence(raw.get("box_genes", []), "de.box_genes", problems)),
     )
     used = [spec.featured, *(c for v in spec.lessons.values() for c in v)]
     used += [c for pair in spec.scatters for c in pair] + (
@@ -177,7 +199,7 @@ def _function(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource
     fields = [_need(raw, k, str, "function", problems)
               for k in ("gene_sets", "licence", "featured_set")]  # fmt: skip
     running = raw.get("running", [])
-    if len(running) != 2:  # noqa: PLR2004 - a pair
+    if not isinstance(running, list) or len(running) != 2:  # noqa: PLR2004 - a pair
         problems.append("function.running: expected [contrast, gene set]")
         return None
     if fields[0] is not None and fields[0] not in {r.name for r in resources}:

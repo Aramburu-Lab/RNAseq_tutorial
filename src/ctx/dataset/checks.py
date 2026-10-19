@@ -21,6 +21,32 @@ def _need(table: Mapping[str, Any], key: str, kind: type, where: str, problems: 
     return value
 
 
-def _values(raw: Mapping[str, Any]) -> dict[str, tuple[str, ...]]:
-    """A filter table: column to allowed values."""
-    return {k: tuple(str(x) for x in v) for k, v in raw.items()}
+def _table(value: Any, where: str, problems: list[str]) -> Mapping[str, Any]:
+    """A value that must be a TOML table; anything else is a problem and reads as empty."""
+    if isinstance(value, Mapping):
+        return value
+    problems.append(f"{where}: expected a table, found {value!r}")
+    return {}
+
+
+def _list(value: Any, where: str, problems: list[str]) -> list[Any]:
+    """A value that must be a TOML array; anything else is a problem and reads as empty."""
+    if isinstance(value, list):
+        return value
+    problems.append(f"{where}: expected a list, found {value!r}")
+    return []
+
+
+def _sequence(value: Any, where: str, problems: list[str]) -> list[Any]:
+    """A list of names, where a string still reads as its characters, as it did before F.6.
+
+    TODO(rytis): F.6a, refuse the string: ``factors = "condition"`` reads as its 9 letters.
+    F.6 kept it, because 27 of the variants that loaded before F.6 hold one.
+    """
+    return list(value) if isinstance(value, str) else _list(value, where, problems)
+
+
+def _values(raw: Any, where: str, problems: list[str]) -> dict[str, tuple[str, ...]]:
+    """A filter table: column to allowed values, each a list."""
+    table = _table(raw, where, problems)
+    return {k: tuple(str(x) for x in _list(v, f"{where}.{k}", problems)) for k, v in table.items()}

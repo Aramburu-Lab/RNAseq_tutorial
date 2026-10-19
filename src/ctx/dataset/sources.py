@@ -89,7 +89,10 @@ def _columns(raw: Mapping[str, Any], problems: list[str]) -> tuple[Column, ...]:
         source = _need(entry, "source", str, where, problems)
         meaning = _need(entry, "meaning", str, where, problems)
         values = entry.get("values")
-        if values is not None and not all(isinstance(v, str) for v in values.values()):
+        if values is not None and not isinstance(values, Mapping):
+            problems.append(f"{where}.values: expected a table, found {values!r}")
+            values = None
+        elif values is not None and not all(isinstance(v, str) for v in values.values()):
             problems.append(f"{where}.values: every mapped value must be a string")
         if source is not None and meaning is not None:
             out.append(Column(name, source, entry.get("unit", "none"), meaning, values))
@@ -104,11 +107,13 @@ def _sdrf(raw: Mapping[str, Any], resources: tuple[Resource, ...], problems: lis
     named = _need(raw, key, str, "sdrf", problems)
     join = _need(raw, "join", list, "sdrf", problems) or ["", ""]
     pairs = raw.get("cross_check", [])
+    paired = isinstance(pairs, list) and all(isinstance(p, list) and len(p) == 2 for p in pairs)  # noqa: PLR2004 - pairs
     if key == "resource" and named is not None and named not in {r.name for r in resources}:
         problems.append(f"sdrf.resource: no [[resources]] entry named {named!r}")
     if key == "file" and named is not None and not named.endswith(TABLE_SUFFIXES):
         problems.append(f"sdrf.file: {named!r} is read by its ending, one of {TABLE_SUFFIXES}")
-    if len(join) != 2 or any(len(p) != 2 for p in pairs):  # noqa: PLR2004 - pairs
+    if len(join) != 2 or not paired:  # noqa: PLR2004 - pairs
         problems.append("sdrf.join and each sdrf.cross_check entry must be [sdrf header, column]")
     resource, file = (named or "", "") if key == "resource" else ("", named or "")
+    pairs = pairs if paired else []
     return Sdrf(resource, (join[0], join[-1]), tuple((a, b) for a, b in pairs), file)
