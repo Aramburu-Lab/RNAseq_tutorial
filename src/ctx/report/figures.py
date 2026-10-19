@@ -270,8 +270,11 @@ _SHAPED = {
                           "colours": list(c["colours"]),
                           "summary": c["all"] + " " + c["words"]["shown"].format(
                               count=c["words"]["counts"]["runs"], colour="batch")},
-    # M6's running score for any tested set (WO7): the select's label and its sets in words.
-    "running": lambda c: {"label": c["label"], "options": [s["label"] for s in c["sets"]]},
+    # M6's running score for any tested set (WO7): the select's label and its sets in words;
+    # with V2, the contrast select's label and its contrasts in words, the build's first.
+    "running": lambda c: {"label": c["label"], "options": [s["label"] for s in c["sets"]],
+                          "contrast_label": c.get("contrast_label", ""),
+                          "contrasts": [x["label"] for x in c.get("contrasts", [])]},
     # M3's strand calls at the reader's thresholds (WO8): the boxes' words and ranges.
     "strand": lambda c: {"words": c["words"], "stranded": c["stranded"],
                          "unstranded": c["unstranded"], "ranges": c["ranges"],

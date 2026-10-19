@@ -27,7 +27,7 @@ from synth import (
 )
 
 from ctx.de.page import Words
-from ctx.function import lite
+from ctx.function import lite, running
 from ctx.function import run as m6
 from ctx.viz.axes import FLOAT_HOVER, INT_HOVER, hover_format, hover_value
 
@@ -59,7 +59,7 @@ def _running():
     positions = (10, 2_000, 12_345)
     result = lite.Enriched("SET", 3, 0.5, 2.0, 0.01, 0.0, positions,
                            tuple(0.001 * i for i in range(15_000)))  # fmt: skip
-    return m6._running(Words("contrast", "b", "a"), result)
+    return running.scatter(Words("contrast", "b", "a"), result)
 
 
 def _gsea():

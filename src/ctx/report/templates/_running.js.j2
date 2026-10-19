@@ -22,6 +22,17 @@ var ctxRunning = {
     for (var i = 0; i < n; i++) { sum += tags[i] - (member[i] ? 0 : miss); out[i] = sum; }
     return out;
   },
+  /* ctx.function.running.keep: the set a contrast change shows, as an index into that
+     contrast's names: the set shown where it was tested there, else the dataset's running
+     set, else the first. */
+  keep: function (names, current, build) {
+    var wanted = [current, build];
+    for (var w = 0; w < wanted.length; w++) {
+      var at = names.indexOf(wanted[w]);
+      if (at >= 0) return at;
+    }
+    return 0;
+  },
   /* The enrichment score: the running sum's extreme of larger magnitude, 0 counting as a
      value it takes; the minimum on a tie, as lite._pick takes it. */
   score: function (running) {

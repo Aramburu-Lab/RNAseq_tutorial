@@ -61,6 +61,20 @@ var ctxOra = {
     var fdr = ctxOra.bh(rows.map(function (r) { return r.p; }));
     rows.forEach(function (r, i) { r.fdr = fdr[i]; });
     return rows;
+  },
+  /* ctx.function.live.by_contrast: a contrast's own up and down calls and its own tested
+     symbols, from the panel's data (live.panel). Its own state: the GSEA bars' contrast view
+     does not move it. Null for a contrast the panel does not carry. */
+  contrast: function (cfg, name) {
+    var found = null, background = null;
+    (cfg.contrasts || []).forEach(function (c) { if (c[0] === name) found = c; });
+    cfg.backgrounds.forEach(function (b) { if (b[0] === name) background = b; });
+    if (!found || !background) return null;
+    var bits = Uint8Array.from(atob(background[2]), function (c) { return c.charCodeAt(0); });
+    var tested = [];
+    for (var i = 0; i < cfg.symbols.length; i++) if (bits[i >> 3] >> (i & 7) & 1) tested.push(cfg.symbols[i]);
+    function names(list) { return list.map(function (i) { return cfg.symbols[i]; }); }
+    return { up: names(found[2]), down: names(found[3]), background: tested };
   }
 };
 {% endraw %}

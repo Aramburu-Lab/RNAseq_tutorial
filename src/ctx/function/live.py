@@ -46,6 +46,25 @@ def symbols(results: pl.DataFrame, call: str | None = None) -> list[str]:
     return sorted({s for s in rows["gene_name"].drop_nulls() if s})
 
 
+def by_contrast(results: pl.DataFrame, sets: Mapping[str, Sequence[str]]) -> pl.DataFrame:
+    """ORA of one contrast's own calls, the live panel's contrast select (WO7, V2).
+
+    The one definition the page's choice follows, ``ctxOra.contrast`` its twin: the contrast's
+    up and down calls, each its own family, against its own tested symbols. It does not move
+    with the GSEA bars' contrast view, a lookup of its own (D-073); each select is its own
+    state.
+
+    Returns:
+        One row per kept set and direction, in ``run.ORA_COLUMNS``'s order.
+    """
+    tested = symbols(results)
+    rows = [(d, r.name, r.size, r.hits, r.expected, r.p, r.fdr, ";".join(r.genes))
+            for d in ("up", "down")
+            for r in lite.ora(symbols(results, d), tested, sets)]  # fmt: skip
+    schema = ["direction", "gene_set", "size", "hits", "expected", "p", "fdr", "genes"]
+    return pl.DataFrame(rows, schema=schema, orient="row")
+
+
 def listed(path: Path, results: pl.DataFrame, sets: Mapping[str, Sequence[str]]) -> pl.DataFrame:
     """ORA of a saved list, as the page's live panel tests one from a link (GS.5).
 

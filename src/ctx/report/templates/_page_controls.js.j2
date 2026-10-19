@@ -23,11 +23,13 @@
     var build = { up: names(cfg.calls.up), down: names(cfg.calls.down), source: words.build };
     var list = build, tries = 0, drawn = false;
     /* Another contrast's calls, tested against its own tested genes (WO7): picking one sets the
-       background with it; the build's contrast gives the build's list back. */
+       background with it; the build's contrast gives the build's list back. ctxOra.contrast,
+       the twin of live.by_contrast, reads them; the GSEA bars' view is another state. */
     var contrast = form.elements.contrast, setsShown = form.elements.sets;
     var calls = Object.create(null);
     (cfg.contrasts || []).forEach(function (c) {
-      calls[c[0]] = { up: names(c[2]), down: names(c[3]),
+      var chosen = ctxOra.contrast(cfg, c[0]);
+      calls[c[0]] = { up: chosen.up, down: chosen.down,
                       source: ctxPick.fill(words.contrast_calls, { label: c[1] }) };
     });
     if (contrast) contrast.addEventListener("change", function () {
