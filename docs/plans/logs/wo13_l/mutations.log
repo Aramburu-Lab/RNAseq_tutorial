@@ -1,0 +1,11 @@
+CAUGHT  css break-word removed: 1 failed in 15.39s
+CAUGHT  no narrow bar labels: 1 failed in 2.18s
+CAUGHT  bar labels wrapped to the whole phone plot: 1 failed in 16.82s
+CAUGHT  built labels left out of meta: 1 failed in 3.72s
+CAUGHT  checks titled blind to the project: 1 failed, 2 passed in 8.95s
+CAUGHT  M7 variant text not used: 1 failed in 28.79s
+CAUGHT  normals' figure drawn from tumour rho: 1 failed in 21.47s
+CAUGHT  normals' class medians over tumour-tested genes: 1 failed in 1.27s
+CAUGHT  variants left out of the prose lint: 1 failed in 1.00s
+CAUGHT  variants left out of the glossary sections: 1 failed in 1.52s
+CAUGHT  variant grouped with the page's own section: 1 failed in 1.51s

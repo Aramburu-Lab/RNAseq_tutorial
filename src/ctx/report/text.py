@@ -132,11 +132,15 @@ def _filled(page: str, key: str, template: str, values: dict[str, Any]) -> str:
     return template.format_map(values)
 
 
-def skeleton(page: str, **values: Any) -> dict[str, Any]:
+def skeleton(page: str, variant: str | None = None, /, **values: Any) -> dict[str, Any]:
     """The fixed parts of a module page, as ``ModulePage`` takes them, numbers filled.
 
     Args:
         page: The content file's stem.
+        variant: The dotted key of a table whose sections replace the page's own, for a
+            design the page's text was not written for (M7's ``variants.tumour_normal``),
+            named whole so the key test sees it read; None, or a section the table lacks,
+            keeps the page's own.
         values: One value per placeholder in the sections, terms, questions and pitfalls.
 
     Returns:
@@ -151,14 +155,20 @@ def skeleton(page: str, **values: Any) -> dict[str, Any]:
         """One text of the section at ``key``, filled when the caller gave values."""
         return _filled(page, key, template, values) if values else template
 
-    asked = raw(page, "questions")
+    own = raw(page, variant) if variant else {}
+
+    def section(key: str) -> Any:
+        """The variant's text of a section where it has one, else the page's."""
+        return own[key] if key in own else raw(page, key)
+
+    asked = section("questions")
     return {
-        **{k: one(k, raw(page, k)) for k in ("purpose", "input", "method", "interpretation")},
+        **{k: one(k, section(k)) for k in ("purpose", "input", "method", "interpretation")},
         "terms": tuple((t["term"], one("terms", t["meaning"])) for t in raw(page, "terms")),
         "questions": tuple(
             SelfCheck(one("questions", t["prompt"]), one("questions", t["answer"])) for t in asked
         )
         if isinstance(asked, list)
         else (),  # fmt: skip
-        "pitfalls": tuple(one("pitfalls", m) for m in raw(page, "pitfalls")),
+        "pitfalls": tuple(one("pitfalls", m) for m in section("pitfalls")),
     }

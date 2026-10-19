@@ -23,6 +23,7 @@ from ctx.viz.style import (
     BAR_ROW_MM,
     DASHES,
     FIGURE_WIDTH,
+    LINE_SPACING,
     LINE_WIDTHS,
     MAX_CATEGORIES,
     MM_PER_INCH,
@@ -32,6 +33,7 @@ from ctx.viz.style import (
     PLOTLY_HEIGHT_PX,
     PLOTLY_LEGEND_SYMBOL_PX,
     PLOTLY_MARGIN_PX,
+    PLOTLY_TICK_PX,
     SIZES,
     THEMES,
     THRESHOLD_DASH,
@@ -357,9 +359,52 @@ class BarData:
             xaxis=value_axis if self.horizontal else category_axis,
             yaxis=category_axis if self.horizontal else value_axis,
         )  # fmt: skip
-        if (narrow := phone_legend(fig)) is not None:
-            fig.update_layout(meta={**(fig.layout.meta or {}), "narrow": narrow})
+        legend = phone_legend(fig)
+        # A live redraw (M1's recount, M6's over-representation) draws categories of its own,
+        # so only bars whose categories are fixed when built wrap them.
+        fixed = self.horizontal and self.live is None and category_axis["showticklabels"]
+        labels = narrow_categories(categories, fig.layout.height) if fixed else None
+        if labels is not None:
+            # Named as ticks, so the narrow layout swaps wrapped ones in and these back.
+            fig.update_layout(yaxis={"tickmode": "array", "tickvals": categories,
+                                     "ticktext": categories})  # fmt: skip
+        if legend is not None or labels is not None:
+            found = [n for n in (legend, labels) if n is not None]
+            narrow = {"below": max(n["below"] for n in found),
+                      "relayout": {k: v for n in found for k, v in n["relayout"].items()},
+                      "restyle": [pair for n in found for pair in n["restyle"]]}  # fmt: skip
+            # The labels as built, which a PDF or SVG of the view draws whatever the screen.
+            built = {"yticktext": categories} if labels is not None else {}
+            fig.update_layout(meta={**(fig.layout.meta or {}), "narrow": narrow, **built})
         return fig
+
+
+def narrow_categories(categories: list[str], height: float) -> dict[str, Any] | None:
+    """Horizontal bars' category labels wrapped to half a phone's plot, where one is wider.
+
+    At 375 px M5's genes-called bars set "Neutrophils, PDAC against steady state, batch in the
+    design" (530 px) left of a 317 px plot, and plotly's margin could not hold it: every label
+    ran off the plot's left edge (E2b). The page script swaps the wrapped labels in where the
+    plot is narrower than twice the widest label, so the bars keep half the plot, and each row
+    takes the height its lines need.
+
+    Returns:
+        The narrow layout, or None when every label fits half a phone's plot.
+    """
+    size = on_page(SIZES["tick"])
+    room = PHONE_PLOT_PX / 2
+    widest = max((text_width(c, size) for c in categories), default=0.0)
+    if widest <= room:
+        return None
+    wrapped = ["<br>".join(wrap_to(c, room, size)) for c in categories]
+    lines = max(w.count("<br>") + 1 for w in wrapped)
+    row = max(PLOTLY_BAR_ROW_PX, lines * size * LINE_SPACING + PLOTLY_TICK_PX)
+    return {
+        "below": 2 * widest + PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"],
+        "relayout": {"yaxis.ticktext": wrapped,
+                     "height": max(height, PLOTLY_BAR_BASE_PX + row * len(categories))},
+        "restyle": [],
+    }  # fmt: skip
 
 
 def phone_legend(fig: Any) -> dict[str, Any] | None:

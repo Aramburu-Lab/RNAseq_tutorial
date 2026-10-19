@@ -93,8 +93,8 @@ var ctxExport = {
      points the page thinned, the labels it leaves out, the parallel sets' outer margins. A
      second plot, a linked view's parallel sets, goes under the first at cfg.above and
      cfg.below. Legend keys are opaque, as the figure files draw them, whatever their points'
-     opacity. An x-axis title the page wrapped for a narrow screen is drawn as built
-     (layout.meta.xtitle). */
+     opacity. An x-axis title and bar labels the page wrapped for a narrow screen are drawn
+     as built (layout.meta.xtitle, layout.meta.yticktext). */
   figure: function (parts, cfg, template, height, dashes) {
     var ex = cfg.export, data = [];
     function zoomOf(part) { return (part.layout.meta && part.layout.meta.zoom) || 1; }
@@ -104,6 +104,8 @@ var ctxExport = {
     if (typeof built === "string" && layout.xaxis && layout.xaxis.title) {
       layout.xaxis.title.text = built;
     }
+    var ticks = layout.meta && layout.meta.yticktext;
+    if (Array.isArray(ticks) && layout.yaxis) layout.yaxis.ticktext = ticks;
     parts.forEach(function (part, i) {
       var zoom = zoomOf(part), marks = ex.marker / zoom, widths = 1 / zoom;
       part.data.forEach(function (trace, k) {

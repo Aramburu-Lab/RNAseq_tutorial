@@ -25,6 +25,7 @@ from scipy import stats
 
 from ctx.dataset import DatasetError, load
 from ctx.proteo import ProteoError, folds, measure, tables
+from ctx.report import text
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = 8
@@ -202,6 +203,56 @@ def test_both_correlations_on_their_own_samples(made):
     assert not genes["rho"].equals(genes["normal_rho"])
     metrics = dict(out(root, "metrics").select("metric", "value").rows())
     assert {"pergene.tumour.positive_share", "pergene.normal.positive_share"} <= set(metrics)
+
+
+def test_normals_draw_their_own_class_figure(made):
+    """S.4: the normals' per-gene rho by class is drawn from the normal_ columns.
+
+    Catches: the normals' figure drawn from the tumours' rho; the normals' class medians
+    taken over every gene rather than those tested in normals; the figure left out."""
+    root, _ = made
+    genes = out(root, "genes").filter(pl.col("normal_tested") & (pl.col("gene_class") != ""))
+    (data,) = (root / "outputs" / "07_proteo").glob("*_rho_by_class_normal_v1.csv")
+    drawn = pl.read_csv(data).sort("gene")
+    expected = genes.select("gene", rho="normal_rho").drop_nulls().sort("gene")
+    assert drawn["gene"].to_list() == expected["gene"].to_list()
+    assert np.allclose(drawn["rho"].to_numpy(), expected["rho"].to_numpy())
+    metrics = dict(out(root, "metrics").select("metric", "value").rows())
+    oxphos = genes.filter(pl.col("gene_class") == "oxphos")["normal_rho"].drop_nulls()
+    assert metrics["normal.class.oxphos.median"] == pytest.approx(float(np.median(oxphos)))
+
+
+def test_normal_class_medians_read_the_genes_tested_in_normals():
+    """Catches: the normals' class medians taken over the genes tested in tumours (the fixture
+    above tests the same genes in both, so it cannot tell them apart)."""
+    from types import SimpleNamespace  # noqa: PLC0415 - this test alone fakes a spec
+
+    from ctx.proteo import run  # noqa: PLC0415
+
+    genes = pl.DataFrame({
+        "gene": [f"G{i}" for i in range(8)], "gene_class": ["oxphos"] * 4 + [measure.OTHER] * 4,
+        "tested": [True, True, False, False] * 2, "normal_tested": [False, False, True, True] * 2,
+        "normal_rho": [0.9, 0.8, 0.1, 0.2, 0.5, 0.4, 0.3, 0.6], "normal_r": [0.0] * 8,
+    })  # fmt: skip
+    measured = run.Measured(None, [], genes, np.zeros(8))  # type: ignore[arg-type]
+    run.normal_metrics(measured, SimpleNamespace(classes={"oxphos": None}), "spearman")  # type: ignore[arg-type]
+    metrics = {m: v for m, v, _ in measured.metrics}
+    assert metrics["normal.class.oxphos.median"] == pytest.approx(0.15)
+    assert metrics["normal.pergene.spearman.median"] == pytest.approx(0.25)
+
+
+def test_page_text_is_written_for_tumour_against_normal(made):
+    """S.4: the Interpretation, Questions and Pitfalls are the design's, not M7's generic text.
+
+    Catches: the page built from the generic sections (granules, complexes)."""
+    root, _ = made
+    (page,) = (root / "outputs" / "07_proteo").glob("*_overview_v1.html")
+    html = page.read_text()
+    own = text.raw("proteo", "variants.tumour_normal")
+    assert own["pitfalls"][1].split(":")[0] in html
+    assert own["questions"][1]["prompt"].split(" the same")[0] in html
+    assert "granule" not in html.lower()
+    assert "Per-gene RNA-protein correlation in normals" in html
 
 
 def test_paired_calls_leave_a_missing_value_out_never_zero():

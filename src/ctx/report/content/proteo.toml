@@ -72,6 +72,33 @@ answer = "No peptide of it was identified in that run; it may be present below d
 prompt = "A gene sits far above the diagonal of neutrophil over monocyte fold changes. Which timing of synthesis explains it?"
 answer = "Granule proteins are made in the bone marrow and stored; mature neutrophils keep the protein after the mRNA has gone. Check the class figure before generalising."
 
+
+# A tumour against normal design (ctx.proteo.run.tumour_normal) reads these sections in place of
+# the page's own, which were written for cell types compared across studies.
+[variants.tumour_normal]
+interpretation = """Read the [[missingness]] figures first: a protein missing in a [[TMT]] plex is untested, not unchanged.
+
+Per-gene [[Spearman|ρ]] is computed within tumours and within [[normal adjacent tissue|normals]], never over both. Across tumours it follows differences between patients, such as [[tumour purity|purity]]; across normals RNA spreads less, which lowers ρ with no change in regulation.
+
+The [[log2 fold change|fold changes]] compare each patient's tumour with the same patient's normal, so patient effects cancel. A class whose protein moves further than its RNA in the class lines above points to control after transcription, such as fewer mitochondria. [[ratio compression|Ratio compression]] shrinks protein changes, so ranks agree more than sizes."""
+pitfalls = [
+    "Reading [[normal adjacent tissue]] as healthy tissue: it sits beside the tumour and can hold tumour cells.",
+    "Pooling tumours and normals into one correlation: the tissue difference alone makes RNA and protein agree.",
+    "Treating every normal as a control: only patients with both tissues enter the paired fold changes.",
+]
+
+[[variants.tumour_normal.questions]]
+prompt = "A gene's [[Spearman|ρ]] is high across tumours and near zero across normals. Name a reason other than regulation."
+answer = "Normals vary less. With a narrow spread of RNA and protein, measurement noise dominates both layers, and ρ falls even where protein follows RNA."
+
+[[variants.tumour_normal.questions]]
+prompt = "Why compare each tumour with the same patient's normal instead of the pooled normals?"
+answer = "Patient effects such as genotype, age and sampling cancel within a pair, so the [[paired design|paired]] [[log2 fold change|fold change]] reflects the tissue, and the test gains [[power]]."
+
+[[variants.tumour_normal.questions]]
+prompt = "If oxidative phosphorylation proteins fall further than their RNA in tumours, which change in the cell explains it?"
+answer = "Fewer mitochondria, or subunits left unassembled and degraded: protein then drops below what the RNA predicts. Check the class lines before generalising."
+
 [abundance]
 across_samples = "log2(CPM + 1), mean over samples"
 tumour_normal = "log2(CPM + 1), mean over tumours"
@@ -138,6 +165,18 @@ class_test = "; complex below metabolic, one-sided Mann-Whitney p = {p_class}"
 x = "RNA-protein Spearman ρ"
 y = "Cumulative share of genes"
 median = "median"
+
+# A tumour-against-normal design draws F3 twice, over the tumours and over the normals; the
+# axes and reading guide stay figures.rho's.
+[figures.rho_tumour]
+title = "Per-gene RNA-protein correlation in tumours, by gene class"
+lead = "Median ρ over the tumours is {median:.2f} for {n_genes:,} tested genes; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
+caption = "Spearman ρ per gene over {n_samples} tumours, BH over {n_genes:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}{class_test}."
+
+[figures.rho_normal]
+title = "Per-gene RNA-protein correlation in normals, by gene class"
+lead = "Median ρ over the normals is {median:.2f} for {n_genes:,} genes tested in them; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
+caption = "Spearman ρ per gene over {n_samples} normals, BH over {n_genes:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}."
 
 [figures.worked]
 title = "{gene}: RNA against protein per sample"

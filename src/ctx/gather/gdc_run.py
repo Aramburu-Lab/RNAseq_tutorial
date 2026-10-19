@@ -292,8 +292,12 @@ def _no_feature(sheet: pl.DataFrame) -> str | None:
                      n=ffpe.height, kept=kept.select(share.median()).item())  # fmt: skip
 
 
-def _checks(found: Read, spec: GdcSpec) -> ResultTable:
-    """What the folder holds, checked, one row per check."""
+def _checks(found: Read, spec: GdcSpec, several: bool = False) -> ResultTable:
+    """What the folder holds, checked, one row per check; titled by project when ``several``.
+
+    A dataset joining projects shows one table per project, and two tables under one title
+    read as one table printed twice (S.4, the lung page).
+    """
     fill, word = functools.partial(text.fill, PAGE), functools.partial(text.word, PAGE)
     files, genes = found.sheet.height, found.counts.genes.height
     sizes = found.sheet["library_size"]
@@ -323,7 +327,8 @@ def _checks(found: Read, spec: GdcSpec) -> ResultTable:
     if found.cdr is not None:
         clinical += fill("checks.cdr_value", rows=found.cdr.height, type=spec.cdr_type)
     rows.append((word("checks.clinical"), clinical))
-    return ResultTable(word("checks.title"), text.words(PAGE, "checks.columns"), tuple(rows))
+    title = fill("checks.title_project", project=spec.project) if several else word("checks.title")
+    return ResultTable(title, text.words(PAGE, "checks.columns"), tuple(rows))
 
 
 def _pairs(sheet: pl.DataFrame) -> str:
@@ -497,7 +502,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         releases |= _mirna_releases(mirna)
     files = _write(found, out, dataset, day, spec, releases, mirna=mirna)
     word = functools.partial(text.word, PAGE)
-    results: tuple[ResultTable | str, ...] = (*(_checks(r, one) for one, r in projects),
+    results: tuple[ResultTable | str, ...] = (*(_checks(r, one, several) for one, r in projects),
                                               _flow(found.sheet), _pairs(found.sheet),
                                               _annotations(found.annotations))  # fmt: skip
     if mirna is not None:
