@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-095 — Text never widens a page; bars built with fixed categories wrap their labels on a phone; a page text variant per design
+
+**Date:** 2026-10-19 · **Status:** decided
+
+**Context.** E2a.1, S.4 and E2b's notes: five pages were wider than the window.
+
+**Decision.** `overflow-wrap: break-word` on body, not `anywhere`, so tables keep their columns and scroll inside their wrap. Horizontal bars whose categories are fixed when built wrap their labels to half a phone's plot below twice the widest label, each row taking the height its lines need; live bars (M1 recount, M6 ORA) are left out, since the page redraw replaces their categories. A design the page text was not written for reads `variants.<design>` through `text.skeleton`, held to the same prose and glossary lints.
+
+**Evidence.** 35 pages of 5 datasets: 10 of 140 measurements wider than the window before, 0 after; all metrics tables equal to main's; 11 planted mutations caught.
+
+**Consequence.** The test of every fixture page at 375 px in both themes fails any page that widens again.
+
+---
+
 ## D-094 — The Reproduce panel's container tabs run the figures image, pinned by digest once recorded
 
 **Date:** 2026-10-19 · **Status:** decided; the font chain across machines awaits Rytis (F.2c)

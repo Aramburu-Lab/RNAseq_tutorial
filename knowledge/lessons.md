@@ -158,3 +158,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A sample of every third variant missed the one scatters line and the one bins line, and their mutations survived: sample by kind of change, not by position (G6, 2026-10-19).
 - A check written to replace a crash can also refuse inputs that parsed before: compare every parsed variant before and after a new check (G6, 2026-10-19).
 - Count an agent's mutations from its log, not its summary: G6's draft line said 15, its log 18 (2026-10-19).
+- An overflow no element's box shows is text: an unbroken path in a reading guide widened M2 to 1,579 px while every element ended inside the window. Measure text runs with a Range, not only element boxes (L, 2026-10-19).
+- A fixture where two masks select the same rows cannot tell them apart: make them differ in a unit test (L, 2026-10-19).
