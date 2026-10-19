@@ -9,6 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+# fmt: off
 D = "src/ctx/dataset/"
 F6 = ["tests/test_dataset_variants.py"]
 R25B = ["tests/test_gather_counts_rsem.py::test_largest_rows_left_out_first",
@@ -58,6 +59,7 @@ MUTATIONS = [
     ("left-out header key reverted", "src/ctx/report/content/gather_counts.toml", R25B,
      '"Reason", "Detail", "Counts held"]', '"Reason", "Note", "Counts held"]'),
 ]
+# fmt: on
 
 
 def run(name: str, path: str, tests: list[str], old: str, new: str) -> str:
@@ -67,8 +69,8 @@ def run(name: str, path: str, tests: list[str], old: str, new: str) -> str:
     assert text.count(old) == 1, f"{name}: the text to mutate is not in {path} once"
     file.write_text(text.replace(old, new))
     try:
-        done = subprocess.run([sys.executable, "-m", "pytest", "-q", "-x", "-p",
-                               "no:cacheprovider", *tests], capture_output=True, text=True)  # fmt: skip
+        command = [sys.executable, "-m", "pytest", "-q", "-x", "-p", "no:cacheprovider", *tests]
+        done = subprocess.run(command, capture_output=True, text=True, check=False)
     finally:
         subprocess.run(["git", "checkout", "--", path], check=True)
     return "CAUGHT" if done.returncode else "SURVIVED"

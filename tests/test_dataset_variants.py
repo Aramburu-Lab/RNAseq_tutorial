@@ -17,6 +17,10 @@ from ctx.dataset import DatasetError, load, loader
 # missed the one scatters and one bins line, and their mutations survived.
 KEPT = (1, 3)
 SYNTHETIC = Path(__file__).parent / "fixtures" / "datasets" / "synthetic.toml"
+CONTRAST = (
+    '[[contrasts]]\nname = "c"\nvariable = "condition"\nreference = "control"\n'
+    'tested = "case"\nn = [7, 7]\n'
+)
 
 
 @pytest.fixture
@@ -68,8 +72,7 @@ def test_crashing_kinds_listed_together(tmp_path):
     text = text.replace('values = { "Control" = "control", "Case" = "case" }', "values = 7")
     text = text.replace('time_point = ["", "fu2", "fu10"]', "time_point = true")
     text = text.replace("control = 7", 'control = "x"')
-    text += ('[[contrasts]]\nname = "c"\nvariable = "condition"\nreference = "control"\n'
-             'tested = "case"\nn = [7, 7]\nfilters = { condition = 7 }\n')
+    text += CONTRAST + "filters = { condition = 7 }\n"
     path = tmp_path / "broken.toml"
     path.write_text(text)
     with pytest.raises(DatasetError) as caught:
@@ -81,10 +84,6 @@ def test_crashing_kinds_listed_together(tmp_path):
         "  expect.counts.condition.control: expected int, found 'x'",
         "  contrasts[0].filters.condition: expected a list, found 7",
     ]
-
-
-CONTRAST = ('[[contrasts]]\nname = "c"\nvariable = "condition"\nreference = "control"\n'
-            'tested = "case"\nn = [7, 7]\n')
 
 
 @pytest.mark.parametrize(("snippet", "problem"), [
