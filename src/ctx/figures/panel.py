@@ -2,15 +2,20 @@
 
 Five steps, each commented from ``content/figure.toml``: the environment, the inputs copied
 and checked, the params file as a heredoc, ``ctx figure``, and the check of the redrawn data
-table against the page's. The pasted block has no ``set -e``, which would close the reader's
-shell on the first error; the downloaded script starts with ``set -euo pipefail``.
+table against the page's. Three tabs differ in the environment step alone: Docker and
+Apptainer run the figures image (``containers/analysis.Dockerfile``, target ``figures``) behind
+a shell function named ``ctx``; pixi builds the environment from a clone. The pasted block has
+no ``set -e``, which would close the reader's shell on the first error; the downloaded script
+starts with ``set -euo pipefail``.
 """
 
 import base64
 import shlex
+from pathlib import Path
 from typing import Any
 
 from ctx.figures.params import params_file
+from ctx.figures.record import checkout
 from ctx.figures.spec import FigureSpec, Input
 from ctx.report import text
 
@@ -21,6 +26,13 @@ REPOSITORY = "https://github.com/Aramburu-Lab/RNAseq_tutorial.git"
 CLONE = "ctx_course"
 PARAMS = "params.toml"
 SCRIPT_HEAD = "#!/usr/bin/env bash\nset -euo pipefail\n"
+# The figures image as .github/workflows/containers.yml publishes it, tagged with ctx's
+# version; its digest comes from the lock that workflow commits.
+IMAGE = "ghcr.io/aramburu-lab/cancer_transcriptomics_teaching-figures"
+DIGESTS = Path("containers") / "digests.lock"
+# pixi.lock solves linux-64 alone, so the image has no arm64 variant.
+PLATFORM = "linux/amd64"
+TABS = ("docker", "apptainer", "pixi")
 
 
 def _comment(key: str, **values: Any) -> str:
@@ -45,10 +57,79 @@ def _copy(item: Input) -> str:
     return f"cp {_quoted(item.source)} ."
 
 
-def _environment(spec: FigureSpec) -> list[str]:
-    """Step 1: ctx at the drawing commit through pixi, or an installed ctx; a clean folder."""
+def image(version: str, lock: Path | None) -> tuple[str, bool]:
+    """The figures image of one ctx version, and whether it is pinned by digest.
+
+    Args:
+        version: ctx's version, which is the image's tag.
+        lock: ``containers/digests.lock``; None or a missing file names the tag alone.
+
+    Returns:
+        ``<repository>:<version>@sha256:<digest>`` and True when the lock has an ``oci`` row of
+        the image at that version; else ``<repository>:<version>`` and False.
+    """
+    tagged = f"{IMAGE}:{version}"
+    rows = lock.read_text().splitlines() if lock is not None and lock.is_file() else []
+    for row in rows:
+        kind, row_version, reference, digest = [*row.split("\t"), "", "", ""][:4]
+        if (kind, row_version, reference) == ("oci", version, IMAGE) and digest[:7] == "sha256:":
+            return f"{tagged}@{digest}", True
+    return tagged, False
+
+
+def _lock() -> Path | None:
+    """The digests lock of the checkout ctx runs from; None for an installed ctx."""
+    repo = checkout()
+    return None if repo is None else repo / DIGESTS
+
+
+def _clone(spec: FigureSpec) -> list[str]:
+    """A clone at the drawing commit, for a container tab with an input in the repository."""
+    if not spec.commit.startswith("git ") or all(i.base != "repo" for i in spec.inputs):
+        return []
+    commit = spec.commit.split()[1]
+    return [
+        _comment("steps.repository", commit=commit),
+        f"git clone {REPOSITORY} {CLONE}",
+        f"git -C {CLONE} checkout {commit}",
+        f'CTX_REPO="$PWD/{CLONE}"',
+    ]
+
+
+def _container(spec: FigureSpec, tab: str) -> list[str]:
+    """Step 1 of the Docker or the Apptainer tab: the image, and ``ctx`` run inside it."""
+    ref, pinned = image(spec.version, _lock())
+    lines = [
+        _comment(f"steps.environment_{tab}", step=1, version=spec.version),
+        _comment("steps.image_digest" if pinned else "steps.image_tag"),
+        _comment("steps.image_platform"),
+        f'IMG="${{CTX_FIGURES_IMAGE:-{ref}}}"',
+    ]
+    if tab == "docker":
+        # -u: the redrawn files belong to the reader, not to root.
+        lines += [
+            f'docker image inspect "$IMG" >/dev/null 2>&1 || docker pull --platform {PLATFORM} '
+            '"$IMG"',
+            f'ctx() {{ docker run --rm --platform {PLATFORM} -u "$(id -u):$(id -g)" '
+            '-v "$PWD":/work -w /work "$IMG" ctx "$@"; }',
+        ]
+    else:
+        # run, not exec: the image's entrypoint is what puts ctx on the PATH.
+        lines += [
+            _comment("steps.image_login"),
+            f'SIF="$PWD/ctx_figures_{spec.version}.sif"',
+            '[ -f "$SIF" ] || apptainer pull "$SIF" "docker://$IMG"',
+            'ctx() { apptainer run --cleanenv "$SIF" ctx "$@"; }',
+        ]
+    return [*lines, *_clone(spec)]
+
+
+def _environment(spec: FigureSpec, tab: str) -> list[str]:
+    """Step 1: the image, ctx at the drawing commit through pixi, or an installed ctx."""
     folder = f"repro_{spec.figure_id}_{spec.dataset}"
     clean = [f"mkdir -p {folder} && cd {folder}"]
+    if tab != "pixi":
+        return [*_container(spec, tab), *clean]
     if not spec.commit.startswith("git "):
         return [_comment("steps.environment_wheel", step=1, version=spec.version), *clean]
     commit = spec.commit.split()[1]
@@ -64,11 +145,11 @@ def _environment(spec: FigureSpec) -> list[str]:
     ]
 
 
-def body(spec: FigureSpec) -> str:
-    """The five steps, as the pasted block holds them."""
+def body(spec: FigureSpec, tab: str = "pixi") -> str:
+    """The five steps of one tab, as the pasted block holds them."""
     csv = f"????-??-??_{spec.stem[11:]}.csv"
     lines = [
-        *_environment(spec), "",
+        *_environment(spec, tab), "",
         _comment("steps.inputs", step=2), _comment("steps.root"), f"ROOT={_quoted(spec.root)}",
         *(_copy(i) for i in spec.inputs),
         _comment("steps.check_tool"),
@@ -86,22 +167,31 @@ def body(spec: FigureSpec) -> str:
     return "\n".join(lines) + "\n"
 
 
-def script(spec: FigureSpec) -> str:
-    """The downloadable script: the same steps under ``set -euo pipefail``."""
-    return f"{SCRIPT_HEAD}\n{body(spec)}"
+def script(spec: FigureSpec, tab: str = "pixi") -> str:
+    """The downloadable script of one tab: the same steps under ``set -euo pipefail``."""
+    return f"{SCRIPT_HEAD}\n{body(spec, tab)}"
 
 
-def block(spec: FigureSpec) -> dict[str, str]:
-    """What the page's Reproduce panel prints for one figure."""
-    name = f"reproduce_{spec.figure_id}_{spec.dataset}.sh"
+def _tab(spec: FigureSpec, tab: str) -> dict[str, str]:
+    """One tab of the panel: its label, its pasted block and its downloadable script."""
+    name = f"reproduce_{spec.figure_id}_{spec.dataset}_{tab}.sh"
+    return {
+        "key": tab,
+        "label": text.word(PAGE, f"tabs.{tab}"),
+        "pasted": body(spec, tab),
+        "script": base64.b64encode(script(spec, tab).encode()).decode(),
+        "name": name,
+        "download": text.fill(PAGE, "panel.download", name=name),
+    }
+
+
+def block(spec: FigureSpec) -> dict[str, Any]:
+    """What the page's Reproduce panel prints for one figure, its tabs in ``TABS`` order."""
     return {
         "summary": text.word(PAGE, "panel.summary"),
         "lead": text.fill(PAGE, "panel.lead", figure_id=spec.figure_id),
-        "note": text.word(PAGE, "panel.no_container"),
-        "pasted": body(spec),
-        "script": base64.b64encode(script(spec).encode()).decode(),
-        "name": name,
-        "download": text.fill(PAGE, "panel.download", name=name),
+        "note": text.word(PAGE, "panel.note"),
+        "tabs": [_tab(spec, tab) for tab in TABS],
         "upstream_title": text.word(PAGE, "panel.upstream"),
         "upstream": spec.upstream,
     }

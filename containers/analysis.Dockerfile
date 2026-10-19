@@ -5,7 +5,16 @@
 #     docker buildx build --platform linux/amd64 -f containers/analysis.Dockerfile -t <img> .
 # containers/build.sh does this for you and is the supported entry point.
 
-FROM ghcr.io/prefix-dev/pixi:0.76.2 AS build
+FROM ghcr.io/prefix-dev/pixi:0.76.2 AS pixi-git
+
+# The pixi image ships no git, and pixi clones labcore with it: without this every build stopped
+# at "Git executable not found" (2026-10-19, the figures target's first build).
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends git ca-certificates openssh-client \
+ && rm -rf /var/lib/apt/lists/*
+
+
+FROM pixi-git AS build
 
 WORKDIR /app
 COPY pixi.toml pixi.lock ./
@@ -35,6 +44,54 @@ RUN pixi shell-hook -e prod -s bash > /shell-hook
 RUN printf '#!/bin/bash\n' > /app/entrypoint.sh \
  && cat /shell-hook >> /app/entrypoint.sh \
  && echo 'exec "$@"' >> /app/entrypoint.sh
+
+
+# The figures target (TODO.md F.2): what `ctx figure` runs in, so a reader redraws a figure from
+# its Reproduce panel with no pixi. Build it with --target figures; the default target stays
+# `production`, the last stage. Its environment is pixi.lock's `laptop` (analysis + ctx), the
+# smallest locked environment that holds ctx; a slimmer one would be a new pixi environment and
+# a new lock. linux/amd64 only: pixi.lock solves no linux-aarch64, so Apple silicon emulates it.
+FROM pixi-git AS figures-build
+
+WORKDIR /app
+COPY pixi.toml pixi.lock pyproject.toml README.md LICENSE ./
+# ctx is an editable install of src/ (pixi.toml, feature ctx), which needs only its metadata and
+# a package folder to exist here. The real src/ is copied into the final stage, so a change to
+# the code rebuilds one small layer rather than the whole environment.
+RUN mkdir -p src/ctx && touch src/ctx/__init__.py \
+ && pixi install --locked -e laptop \
+ && pixi shell-hook -e laptop -s bash > /shell-hook \
+ && printf '#!/bin/bash\n' > /app/entrypoint.sh \
+ && cat /shell-hook >> /app/entrypoint.sh \
+ && echo 'exec "$@"' >> /app/entrypoint.sh
+
+
+FROM ubuntu:24.04 AS figures
+
+# No apt packages: bash is in the base, and Liberation Sans is ctx's vendored copy
+# (src/ctx/report/vendor), registered with matplotlib by ctx.viz.metrics. A system copy beside it
+# could be another version under the same name, and a figure's bytes would follow whichever won.
+WORKDIR /app
+COPY --from=figures-build /app/.pixi/envs/laptop /app/.pixi/envs/laptop
+COPY --from=figures-build --chmod=0755 /app/entrypoint.sh /app/entrypoint.sh
+COPY src /app/src
+# matplotlib and fontconfig (matplotlib runs fc-list) write their caches here: /tmp is writable
+# under docker -u and under Apptainer, whose image is read-only. Without the second, every run
+# printed "Fontconfig error: No writable cache directories".
+ENV MPLCONFIGDIR=/tmp/ctx-matplotlib \
+    XDG_CACHE_HOME=/tmp/ctx-cache
+
+ARG VCS_REF=unknown
+ARG IMAGE_VERSION=dev
+LABEL org.opencontainers.image.title="cancer_transcriptomics_teaching-figures" \
+      org.opencontainers.image.description="Cancer Transcriptomics Teaching Suite: ctx figure, for the Reproduce panels" \
+      org.opencontainers.image.source="https://github.com/aramburu-lab/cancer_transcriptomics_teaching" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.licenses="MIT"
+
+ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["ctx", "--help"]
 
 
 FROM ubuntu:24.04 AS production

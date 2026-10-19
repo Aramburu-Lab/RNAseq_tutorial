@@ -1,11 +1,15 @@
 {# A figure's Reproduce panel (Phase 2D): commands generated from its FigureSpec, never typed;
-   the pasted block has no set -e, the downloaded script sets -euo pipefail. #}
+   the pasted blocks hold no set -e, the downloaded scripts set -euo pipefail. One tab per
+   environment, Docker first; without JavaScript the tab row hides and every tab shows. #}
 {% set r = f.reproduce %}
 <details class="repro">
 <summary>{{ r.summary }}</summary>
 <p>{{ r.lead }}</p>
-<div class="command"><pre><code id="ctx-repro-{{ f.index }}">{{ r.pasted }}</code></pre><button type="button" class="copy" data-copy="ctx-repro-{{ f.index }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div>
-<p><a download="{{ r.name }}" href="data:text/x-shellscript;base64,{{ r.script }}">{{ r.download }}</a></p>
-<p class="note">{{ r.note }}</p>
+<div class="tabs" role="tablist" aria-label="{{ r.summary }}">{% for t in r.tabs %}<button type="button" role="tab" id="ctx-repro-tab-{{ f.index }}-{{ t.key }}" aria-controls="ctx-repro-panel-{{ f.index }}-{{ t.key }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ t.label }}</button>{% endfor %}</div>
+{% for t in r.tabs %}<div class="repro-tab" id="ctx-repro-panel-{{ f.index }}-{{ t.key }}" role="tabpanel" aria-labelledby="ctx-repro-tab-{{ f.index }}-{{ t.key }}" data-tab="{{ t.key }}">
+<div class="command"><pre><code id="ctx-repro-{{ f.index }}-{{ t.key }}">{{ t.pasted }}</code></pre><button type="button" class="copy" data-copy="ctx-repro-{{ f.index }}-{{ t.key }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div>
+<p><a download="{{ t.name }}" href="data:text/x-shellscript;base64,{{ t.script }}">{{ t.download }}</a></p>
+</div>
+{% endfor %}<p class="note">{{ r.note }}</p>
 <details class="repro-upstream"><summary>{{ r.upstream_title }}</summary><div class="command"><pre><code>{{ r.upstream }}</code></pre></div></details>
 </details>

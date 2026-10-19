@@ -1,0 +1,265 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from analysis.Dockerfile
+#1 transferring dockerfile: 7.20kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/prefix-dev/pixi:0.76.2
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/ubuntu:24.04
+#3 DONE 0.5s
+
+#4 [internal] load build context
+#4 transferring context: 17.45kB done
+#4 DONE 0.0s
+
+#5 [figures 1/5] FROM docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
+#5 resolve docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac 0.0s done
+#5 DONE 0.0s
+
+#6 [pixi-git 1/2] FROM ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4
+#6 resolve ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4 0.0s done
+#6 CACHED
+
+#7 [figures 2/5] WORKDIR /app
+#7 CACHED
+
+#8 [pixi-git 2/2] RUN apt-get update  && apt-get install -y --no-install-recommends git ca-certificates openssh-client  && rm -rf /var/lib/apt/lists/*
+#8 0.375 Get:1 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+#8 0.375 Get:2 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+#8 0.582 Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+#8 0.635 Get:4 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+#8 0.980 Get:5 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [55.6 kB]
+#8 1.063 Get:6 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2122 kB]
+#8 1.328 Get:7 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1409 kB]
+#8 1.416 Get:8 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+#8 1.480 Get:9 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1549 kB]
+#8 1.560 Get:10 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+#8 1.579 Get:11 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+#8 3.246 Get:12 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+#8 3.398 Get:13 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [61.7 kB]
+#8 3.402 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2168 kB]
+#8 3.614 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1729 kB]
+#8 3.735 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2231 kB]
+#8 3.924 Get:17 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [36.0 kB]
+#8 3.927 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.0 kB]
+#8 3.931 Get:19 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [669 B]
+#8 4.176 Fetched 33.6 MB in 4s (8495 kB/s)
+#8 4.176 Reading package lists...
+#8 4.903 Reading package lists...
+#8 5.571 Building dependency tree...
+#8 5.748 Reading state information...
+#8 5.926 ca-certificates is already the newest version (20260601~24.04.1).
+#8 5.926 The following additional packages will be installed:
+#8 5.926   adduser git-man libbrotli1 libbsd0 libcbor0.10 libcurl3t64-gnutls libedit2
+#8 5.926   liberror-perl libexpat1 libfido2-1 libgdbm-compat4t64 libgdbm6t64
+#8 5.926   libgssapi-krb5-2 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
+#8 5.926   libldap2 libnghttp2-14 libperl5.38t64 libpsl5t64 librtmp1 libsasl2-2
+#8 5.927   libsasl2-modules-db libssh-4 perl perl-base perl-modules-5.38
+#8 5.928 Suggested packages:
+#8 5.928   liblocale-gettext-perl cron quota ecryptfs-utils gettext-base git-daemon-run
+#8 5.928   | git-daemon-sysvinit git-doc git-email git-gui gitk gitweb git-cvs
+#8 5.928   git-mediawiki git-svn gdbm-l10n krb5-doc krb5-user keychain libpam-ssh
+#8 5.928   monkeysphere ssh-askpass perl-doc libterm-readline-gnu-perl
+#8 5.928   | libterm-readline-perl-perl make libtap-harness-archive-perl
+#8 5.928 Recommended packages:
+#8 5.928   patch less krb5-locales libldap-common publicsuffix libsasl2-modules xauth
+#8 5.928   netbase
+#8 5.990 The following NEW packages will be installed:
+#8 5.990   adduser git git-man libbrotli1 libbsd0 libcbor0.10 libcurl3t64-gnutls
+#8 5.990   libedit2 liberror-perl libexpat1 libfido2-1 libgdbm-compat4t64 libgdbm6t64
+#8 5.990   libgssapi-krb5-2 libk5crypto3 libkeyutils1 libkrb5-3 libkrb5support0
+#8 5.990   libldap2 libnghttp2-14 libperl5.38t64 libpsl5t64 librtmp1 libsasl2-2
+#8 5.990   libsasl2-modules-db libssh-4 openssh-client perl perl-modules-5.38
+#8 5.991 The following packages will be upgraded:
+#8 5.991   perl-base
+#8 6.164 1 upgraded, 29 newly installed, 0 to remove and 34 not upgraded.
+#8 6.164 Need to get 18.2 MB of archives.
+#8 6.164 After this operation, 85.7 MB of additional disk space will be used.
+#8 6.164 Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 perl-base amd64 5.38.2-3.2ubuntu0.6 [1826 kB]
+#8 6.168 Get:2 http://security.ubuntu.com/ubuntu noble-security/main amd64 openssh-client amd64 1:9.6p1-3ubuntu13.20 [909 kB]
+#8 6.538 Get:3 http://security.ubuntu.com/ubuntu noble-security/main amd64 libcurl3t64-gnutls amd64 8.5.0-2ubuntu10.16 [337 kB]
+#8 6.566 Get:4 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 perl-modules-5.38 all 5.38.2-3.2ubuntu0.6 [3110 kB]
+#8 6.835 Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libgdbm6t64 amd64 1.23-5.1build1 [34.4 kB]
+#8 6.836 Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 libgdbm-compat4t64 amd64 1.23-5.1build1 [6710 B]
+#8 6.837 Get:7 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libperl5.38t64 amd64 5.38.2-3.2ubuntu0.6 [4864 kB]
+#8 7.260 Get:8 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 perl amd64 5.38.2-3.2ubuntu0.6 [231 kB]
+#8 7.279 Get:9 http://archive.ubuntu.com/ubuntu noble/main amd64 adduser all 3.137ubuntu1 [101 kB]
+#8 7.288 Get:10 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libbsd0 amd64 0.12.1-1build1.1 [41.2 kB]
+#8 7.291 Get:11 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libexpat1 amd64 2.6.1-2ubuntu0.6 [98.9 kB]
+#8 7.300 Get:12 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libkrb5support0 amd64 1.20.1-6ubuntu2.10 [34.9 kB]
+#8 7.303 Get:13 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libk5crypto3 amd64 1.20.1-6ubuntu2.10 [81.9 kB]
+#8 7.310 Get:14 http://archive.ubuntu.com/ubuntu noble/main amd64 libkeyutils1 amd64 1.6.3-3build1 [9490 B]
+#8 7.310 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libkrb5-3 amd64 1.20.1-6ubuntu2.10 [348 kB]
+#8 7.340 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libgssapi-krb5-2 amd64 1.20.1-6ubuntu2.10 [143 kB]
+#8 7.352 Get:17 http://archive.ubuntu.com/ubuntu noble/main amd64 libcbor0.10 amd64 0.10.2-1.2ubuntu2 [25.8 kB]
+#8 7.354 Get:18 http://archive.ubuntu.com/ubuntu noble/main amd64 libedit2 amd64 3.1-20230828-1build1 [97.6 kB]
+#8 7.363 Get:19 http://archive.ubuntu.com/ubuntu noble/main amd64 libfido2-1 amd64 1.14.0-1build3 [83.5 kB]
+#8 7.370 Get:20 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libnghttp2-14 amd64 1.59.0-1ubuntu0.4 [74.6 kB]
+#8 7.377 Get:21 http://archive.ubuntu.com/ubuntu noble/main amd64 libpsl5t64 amd64 0.21.2-1.1build1 [57.1 kB]
+#8 7.381 Get:22 http://archive.ubuntu.com/ubuntu noble/main amd64 libbrotli1 amd64 1.1.0-2build2 [331 kB]
+#8 7.410 Get:23 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsasl2-modules-db amd64 2.1.28+dfsg1-5ubuntu3.1 [20.4 kB]
+#8 7.411 Get:24 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libsasl2-2 amd64 2.1.28+dfsg1-5ubuntu3.1 [53.2 kB]
+#8 7.415 Get:25 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libldap2 amd64 2.6.10+dfsg-0ubuntu0.24.04.1 [198 kB]
+#8 7.433 Get:26 http://archive.ubuntu.com/ubuntu noble/main amd64 librtmp1 amd64 2.4+20151223.gitfa8646d.1-2build7 [56.3 kB]
+#8 7.438 Get:27 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libssh-4 amd64 0.10.6-2ubuntu0.5 [191 kB]
+#8 7.454 Get:28 http://archive.ubuntu.com/ubuntu noble/main amd64 liberror-perl all 0.17029-2 [25.6 kB]
+#8 7.456 Get:29 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 git-man all 1:2.43.0-1ubuntu7.3 [1100 kB]
+#8 7.550 Get:30 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 git amd64 1:2.43.0-1ubuntu7.3 [3680 kB]
+#8 8.070 debconf: delaying package configuration, since apt-utils is not installed
+#8 8.124 Fetched 18.2 MB in 2s (9802 kB/s)
+#8 8.204 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 4837 files and directories currently installed.)
+#8 8.215 Preparing to unpack .../perl-base_5.38.2-3.2ubuntu0.6_amd64.deb ...
+#8 8.335 Unpacking perl-base (5.38.2-3.2ubuntu0.6) over (5.38.2-3.2ubuntu0.3) ...
+#8 8.959 Setting up perl-base (5.38.2-3.2ubuntu0.6) ...
+#8 9.101 Selecting previously unselected package perl-modules-5.38.
+#8 9.102 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 4837 files and directories currently installed.)
+#8 9.105 Preparing to unpack .../0-perl-modules-5.38_5.38.2-3.2ubuntu0.6_all.deb ...
+#8 9.108 Unpacking perl-modules-5.38 (5.38.2-3.2ubuntu0.6) ...
+#8 9.325 Selecting previously unselected package libgdbm6t64:amd64.
+#8 9.325 Preparing to unpack .../1-libgdbm6t64_1.23-5.1build1_amd64.deb ...
+#8 9.327 Unpacking libgdbm6t64:amd64 (1.23-5.1build1) ...
+#8 9.408 Selecting previously unselected package libgdbm-compat4t64:amd64.
+#8 9.408 Preparing to unpack .../2-libgdbm-compat4t64_1.23-5.1build1_amd64.deb ...
+#8 9.410 Unpacking libgdbm-compat4t64:amd64 (1.23-5.1build1) ...
+#8 9.491 Selecting previously unselected package libperl5.38t64:amd64.
+#8 9.492 Preparing to unpack .../3-libperl5.38t64_5.38.2-3.2ubuntu0.6_amd64.deb ...
+#8 9.493 Unpacking libperl5.38t64:amd64 (5.38.2-3.2ubuntu0.6) ...
+#8 9.689 Selecting previously unselected package perl.
+#8 9.690 Preparing to unpack .../4-perl_5.38.2-3.2ubuntu0.6_amd64.deb ...
+#8 9.748 Unpacking perl (5.38.2-3.2ubuntu0.6) ...
+#8 9.837 Selecting previously unselected package adduser.
+#8 9.837 Preparing to unpack .../5-adduser_3.137ubuntu1_all.deb ...
+#8 9.852 Unpacking adduser (3.137ubuntu1) ...
+#8 9.916 Setting up adduser (3.137ubuntu1) ...
+#8 10.00 Selecting previously unselected package libbsd0:amd64.
+#8 10.00 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 6897 files and directories currently installed.)
+#8 10.01 Preparing to unpack .../00-libbsd0_0.12.1-1build1.1_amd64.deb ...
+#8 10.01 Unpacking libbsd0:amd64 (0.12.1-1build1.1) ...
+#8 10.10 Selecting previously unselected package libexpat1:amd64.
+#8 10.10 Preparing to unpack .../01-libexpat1_2.6.1-2ubuntu0.6_amd64.deb ...
+#8 10.10 Unpacking libexpat1:amd64 (2.6.1-2ubuntu0.6) ...
+#8 10.18 Selecting previously unselected package libkrb5support0:amd64.
+#8 10.18 Preparing to unpack .../02-libkrb5support0_1.20.1-6ubuntu2.10_amd64.deb ...
+#8 10.18 Unpacking libkrb5support0:amd64 (1.20.1-6ubuntu2.10) ...
+#8 10.27 Selecting previously unselected package libk5crypto3:amd64.
+#8 10.27 Preparing to unpack .../03-libk5crypto3_1.20.1-6ubuntu2.10_amd64.deb ...
+#8 10.27 Unpacking libk5crypto3:amd64 (1.20.1-6ubuntu2.10) ...
+#8 10.36 Selecting previously unselected package libkeyutils1:amd64.
+#8 10.36 Preparing to unpack .../04-libkeyutils1_1.6.3-3build1_amd64.deb ...
+#8 10.37 Unpacking libkeyutils1:amd64 (1.6.3-3build1) ...
+#8 10.45 Selecting previously unselected package libkrb5-3:amd64.
+#8 10.45 Preparing to unpack .../05-libkrb5-3_1.20.1-6ubuntu2.10_amd64.deb ...
+#8 10.45 Unpacking libkrb5-3:amd64 (1.20.1-6ubuntu2.10) ...
+#8 10.55 Selecting previously unselected package libgssapi-krb5-2:amd64.
+#8 10.55 Preparing to unpack .../06-libgssapi-krb5-2_1.20.1-6ubuntu2.10_amd64.deb ...
+#8 10.55 Unpacking libgssapi-krb5-2:amd64 (1.20.1-6ubuntu2.10) ...
+#8 10.64 Selecting previously unselected package libcbor0.10:amd64.
+#8 10.64 Preparing to unpack .../07-libcbor0.10_0.10.2-1.2ubuntu2_amd64.deb ...
+#8 10.64 Unpacking libcbor0.10:amd64 (0.10.2-1.2ubuntu2) ...
+#8 10.72 Selecting previously unselected package libedit2:amd64.
+#8 10.72 Preparing to unpack .../08-libedit2_3.1-20230828-1build1_amd64.deb ...
+#8 10.72 Unpacking libedit2:amd64 (3.1-20230828-1build1) ...
+#8 10.81 Selecting previously unselected package libfido2-1:amd64.
+#8 10.81 Preparing to unpack .../09-libfido2-1_1.14.0-1build3_amd64.deb ...
+#8 10.81 Unpacking libfido2-1:amd64 (1.14.0-1build3) ...
+#8 10.89 Selecting previously unselected package libnghttp2-14:amd64.
+#8 10.89 Preparing to unpack .../10-libnghttp2-14_1.59.0-1ubuntu0.4_amd64.deb ...
+#8 10.89 Unpacking libnghttp2-14:amd64 (1.59.0-1ubuntu0.4) ...
+#8 10.97 Selecting previously unselected package libpsl5t64:amd64.
+#8 10.98 Preparing to unpack .../11-libpsl5t64_0.21.2-1.1build1_amd64.deb ...
+#8 10.98 Unpacking libpsl5t64:amd64 (0.21.2-1.1build1) ...
+#8 11.06 Selecting previously unselected package openssh-client.
+#8 11.06 Preparing to unpack .../12-openssh-client_1%3a9.6p1-3ubuntu13.20_amd64.deb ...
+#8 11.11 Unpacking openssh-client (1:9.6p1-3ubuntu13.20) ...
+#8 11.21 Selecting previously unselected package libbrotli1:amd64.
+#8 11.21 Preparing to unpack .../13-libbrotli1_1.1.0-2build2_amd64.deb ...
+#8 11.21 Unpacking libbrotli1:amd64 (1.1.0-2build2) ...
+#8 11.29 Selecting previously unselected package libsasl2-modules-db:amd64.
+#8 11.30 Preparing to unpack .../14-libsasl2-modules-db_2.1.28+dfsg1-5ubuntu3.1_amd64.deb ...
+#8 11.30 Unpacking libsasl2-modules-db:amd64 (2.1.28+dfsg1-5ubuntu3.1) ...
+#8 11.38 Selecting previously unselected package libsasl2-2:amd64.
+#8 11.38 Preparing to unpack .../15-libsasl2-2_2.1.28+dfsg1-5ubuntu3.1_amd64.deb ...
+#8 11.38 Unpacking libsasl2-2:amd64 (2.1.28+dfsg1-5ubuntu3.1) ...
+#8 11.46 Selecting previously unselected package libldap2:amd64.
+#8 11.46 Preparing to unpack .../16-libldap2_2.6.10+dfsg-0ubuntu0.24.04.1_amd64.deb ...
+#8 11.46 Unpacking libldap2:amd64 (2.6.10+dfsg-0ubuntu0.24.04.1) ...
+#8 11.55 Selecting previously unselected package librtmp1:amd64.
+#8 11.55 Preparing to unpack .../17-librtmp1_2.4+20151223.gitfa8646d.1-2build7_amd64.deb ...
+#8 11.55 Unpacking librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2build7) ...
+#8 11.63 Selecting previously unselected package libssh-4:amd64.
+#8 11.63 Preparing to unpack .../18-libssh-4_0.10.6-2ubuntu0.5_amd64.deb ...
+#8 11.63 Unpacking libssh-4:amd64 (0.10.6-2ubuntu0.5) ...
+#8 11.72 Selecting previously unselected package libcurl3t64-gnutls:amd64.
+#8 11.72 Preparing to unpack .../19-libcurl3t64-gnutls_8.5.0-2ubuntu10.16_amd64.deb ...
+#8 11.72 Unpacking libcurl3t64-gnutls:amd64 (8.5.0-2ubuntu10.16) ...
+#8 11.80 Selecting previously unselected package liberror-perl.
+#8 11.80 Preparing to unpack .../20-liberror-perl_0.17029-2_all.deb ...
+#8 11.81 Unpacking liberror-perl (0.17029-2) ...
+#8 11.88 Selecting previously unselected package git-man.
+#8 11.89 Preparing to unpack .../21-git-man_1%3a2.43.0-1ubuntu7.3_all.deb ...
+#8 11.89 Unpacking git-man (1:2.43.0-1ubuntu7.3) ...
+#8 11.97 Selecting previously unselected package git.
+#8 11.97 Preparing to unpack .../22-git_1%3a2.43.0-1ubuntu7.3_amd64.deb ...
+#8 12.03 Unpacking git (1:2.43.0-1ubuntu7.3) ...
+#8 12.16 Setting up libexpat1:amd64 (2.6.1-2ubuntu0.6) ...
+#8 12.17 Setting up libkeyutils1:amd64 (1.6.3-3build1) ...
+#8 12.17 Setting up libgdbm6t64:amd64 (1.23-5.1build1) ...
+#8 12.18 Setting up libgdbm-compat4t64:amd64 (1.23-5.1build1) ...
+#8 12.18 Setting up libcbor0.10:amd64 (0.10.2-1.2ubuntu2) ...
+#8 12.18 Setting up libbrotli1:amd64 (1.1.0-2build2) ...
+#8 12.18 Setting up libpsl5t64:amd64 (0.21.2-1.1build1) ...
+#8 12.19 Setting up libnghttp2-14:amd64 (1.59.0-1ubuntu0.4) ...
+#8 12.19 Setting up libkrb5support0:amd64 (1.20.1-6ubuntu2.10) ...
+#8 12.19 Setting up libsasl2-modules-db:amd64 (2.1.28+dfsg1-5ubuntu3.1) ...
+#8 12.19 Setting up librtmp1:amd64 (2.4+20151223.gitfa8646d.1-2build7) ...
+#8 12.20 Setting up perl-modules-5.38 (5.38.2-3.2ubuntu0.6) ...
+#8 12.20 Setting up libk5crypto3:amd64 (1.20.1-6ubuntu2.10) ...
+#8 12.20 Setting up libsasl2-2:amd64 (2.1.28+dfsg1-5ubuntu3.1) ...
+#8 12.21 Setting up git-man (1:2.43.0-1ubuntu7.3) ...
+#8 12.21 Setting up libkrb5-3:amd64 (1.20.1-6ubuntu2.10) ...
+#8 12.21 Setting up libperl5.38t64:amd64 (5.38.2-3.2ubuntu0.6) ...
+#8 12.22 Setting up libfido2-1:amd64 (1.14.0-1build3) ...
+#8 12.22 Setting up libbsd0:amd64 (0.12.1-1build1.1) ...
+#8 12.22 Setting up libldap2:amd64 (2.6.10+dfsg-0ubuntu0.24.04.1) ...
+#8 12.23 Setting up libedit2:amd64 (3.1-20230828-1build1) ...
+#8 12.23 Setting up perl (5.38.2-3.2ubuntu0.6) ...
+#8 12.32 Setting up libgssapi-krb5-2:amd64 (1.20.1-6ubuntu2.10) ...
+#8 12.34 Setting up libssh-4:amd64 (0.10.6-2ubuntu0.5) ...
+#8 12.34 Setting up openssh-client (1:9.6p1-3ubuntu13.20) ...
+#8 12.66 Setting up libcurl3t64-gnutls:amd64 (8.5.0-2ubuntu10.16) ...
+#8 12.66 Setting up liberror-perl (0.17029-2) ...
+#8 12.66 Setting up git (1:2.43.0-1ubuntu7.3) ...
+#8 12.72 Processing triggers for libc-bin (2.39-0ubuntu8.8) ...
+#8 DONE 12.9s
+
+#9 [figures-build 1/3] WORKDIR /app
+#9 DONE 0.0s
+
+#10 [figures-build 2/3] COPY pixi.toml pixi.lock pyproject.toml README.md LICENSE ./
+#10 DONE 0.0s
+
+#11 [figures-build 3/3] RUN mkdir -p src/ctx && touch src/ctx/__init__.py  && pixi install --locked -e laptop  && pixi shell-hook -e laptop -s bash > /shell-hook  && printf '#!/bin/bash\n' > /app/entrypoint.sh  && cat /shell-hook >> /app/entrypoint.sh  && echo 'exec "$@"' >> /app/entrypoint.sh
+#11 56.02 The laptop environment has been installed.
+#11 DONE 58.8s
+
+#12 [figures 3/5] COPY --from=figures-build /app/.pixi/envs/laptop /app/.pixi/envs/laptop
+#12 DONE 10.5s
+
+#13 [figures 4/5] COPY --from=figures-build --chmod=0755 /app/entrypoint.sh /app/entrypoint.sh
+#13 DONE 0.3s
+
+#14 [figures 5/5] COPY src /app/src
+#14 DONE 0.1s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 60.3s done
+#15 exporting manifest sha256:83681ff32d158714a3cc6e84d355ea335bb7c8caebfd8fe49a1ab8c353ae27b6 done
+#15 exporting config sha256:295ee917268184d61f859de43d3ec70e6798b2c1f97cd3f37d879fc507b4f4e4 done
+#15 exporting attestation manifest sha256:c6115b9ae83d84ff6b6d7b56bafd9b146b5ff4934dbf80764fcab17cf6584c0c done
+#15 exporting manifest list sha256:6abcb8885589560901fa5bc925eda46e3e3b1dae121e3bf6f1329d9fd5487644 done
+#15 naming to docker.io/library/ctx-figures:f2 done
+#15 DONE 60.4s
+docker buildx build --builder desktop-linux --platform linux/amd64 --target    0.15s user 0.29s system 0% cpu 2:28.37 total

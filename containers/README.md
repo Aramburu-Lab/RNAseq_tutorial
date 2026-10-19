@@ -128,6 +128,36 @@ of the published image.
   reaching for anything clever — several small images beat one large one both for pull time and for
   Nextflow, which pulls per process.
 
+## The figures target
+
+`--target figures` builds the image every figure's Reproduce panel names in its Docker and
+Apptainer tabs (TODO.md F.2): pixi.lock's `laptop` environment (analysis + ctx) and ctx's own
+`src/`, with Liberation Sans from ctx's vendored copy and no apt packages. The default target is
+still `production`, the last stage.
+
+```bash
+docker buildx build --platform linux/amd64 --target figures \
+  -f containers/analysis.Dockerfile -t ctx-figures:dev --load .
+python3 containers/prove_figures.py --image ctx-figures:dev --work /tmp/figures_proof
+```
+
+`prove_figures.py` (standard library only) draws a fixture root inside the image
+(`figures_root.py`), runs the volcano's Docker tab from M5's page in a clean folder, and compares
+the redrawn PDF, SVG and CSV with the module's byte for byte; `containers.yml` runs it before it
+pushes `ghcr.io/aramburu-lab/cancer_transcriptomics_teaching-figures:<version>` and writes its
+`oci` row into `digests.lock`. A panel names the image by that row's digest once it exists, by
+the tag until then (`ctx.figures.panel.image`).
+
+- linux/amd64 only: pixi.lock solves no linux-aarch64, so Apple silicon runs it emulated.
+- Measured 2026-10-19 on this Mac: 801,066,161 B compressed (`docker image inspect .Size`),
+  2,573,327,573 B unpacked (`du -sxb /` in the container).
+- The `laptop` environment is more than `ctx figure` needs: 364 conda packages, of which the
+  volcano's redraw imported 37 distributions; PySide6, LLVM, jupyterlab, scikit-learn and duckdb
+  ride along. A slimmer image needs its own pixi environment, which is a change to pixi.lock.
+- A figure drawn on a machine with Arial embeds Arial in its PDF; the image has none and embeds
+  Liberation Sans, so that PDF is redrawn with the same data but not the same bytes.
+- `build.sh release` does not build this target and rewrites `digests.lock` without its row.
+
 ## On Kebnekaise
 
 `apptainer` is on the login node with no `module load`; `singularity` is a symlink to it. Compute

@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-094 — The Reproduce panel's container tabs run the figures image, pinned by digest once recorded
+
+**Date:** 2026-10-19 · **Status:** decided; the font chain across machines awaits Rytis (F.2c)
+
+**Context.** F.2: a reader without pixi redraws a figure from its panel.
+
+**Decision.** Target `figures` in containers/analysis.Dockerfile: pixi.lock's laptop environment plus ctx's src, linux/amd64 only, no apt packages, Liberation Sans from ctx's vendored copy. Tabs Docker, Apptainer and pixi differ in step 1 alone; `ctx` is a shell function over `docker run -u` or `apptainer run --cleanenv`; the image is named by tag until digests.lock holds its oci row at ctx's version. A `pixi-git` stage gives pixi the git it needs to fetch labcore.
+
+**Evidence.** The volcano's Docker tab in a clean folder: 5 of 5 files byte-equal inside the image. Across machines the CSV is equal and the PDF and SVG are not, from Arial against Liberation Sans. Main's own analysis target could not build before the git stage.
+
+**Consequence.** A slimmer image needs its own pixi environment (F.2a); arm64 needs a linux-aarch64 lock.
+
+---
+
 ## D-093 — Ensembl's stable-ID history at the annotation's own release places a retired Ensembl ID, only on one current gene
 
 **Date:** 2026-10-19 · **Status:** decided

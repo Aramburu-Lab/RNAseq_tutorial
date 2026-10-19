@@ -153,3 +153,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A line count in a TODO item is a snapshot: F.5 said 942 lines and the file held 967 when the split began. Measure before quoting (F.5, 2026-10-19).
 - A fallback reading "no reasons" as a missing number printed "not estimable" for variables with nothing missing: an empty list and a missing value need their own words (S2, 2026-10-19).
 - An old ID's successor can itself be split later: follow the history past the first current gene, or a split is given to one side (S2, 2026-10-19).
+- The pixi base image ships no git, and a git pypi dependency stops the build at "Git executable not found": the template's analysis target never built. Build an image locally before a workflow is dispatched to publish it (F2, 2026-10-19).
+- `docker image inspect .Size` meant two things on one daemon (801 MB beside an 801 MB docker save; 3.07 GB beside a 703 MB save): measure by docker save and du in the container, and name which (F2, 2026-10-19).
