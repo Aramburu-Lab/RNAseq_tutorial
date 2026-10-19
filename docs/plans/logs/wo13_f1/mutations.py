@@ -13,6 +13,7 @@ FIG = "tests/test_figures.py"
 EVERY = f"{FIG}::test_every_spec_redraws_its_data_byte_for_byte"
 M2 = "tests/test_figures_m2.py"
 M3 = "tests/test_figures_m3.py::test_every_figure_redraws_byte_for_byte"
+M4 = "tests/test_figures_m4.py::test_fates_and_estimates_redraw_byte_for_byte"
 MUTATIONS = {
     "m5m6": [
         ("dispersions not read back", "src/ctx/figures/draw_m5.py",
@@ -64,6 +65,24 @@ MUTATIONS = {
         ("registry always qc's", "src/ctx/figures/record.py",
          'options = newest(root / "outputs" / FOLDERS[what], spec.slug, "figure_options")',
          'options = newest(root / "outputs" / FOLDERS["qc"], spec.slug, "figure_options")', M3),
+    ],
+    "m4": [
+        ("contrast levels the other way round", "src/ctx/figures/draw_m4.py",
+         "(used.height - tested, tested)", "(tested, used.height - tested)", M4),
+        ("fold changes written after the figure", "src/ctx/quant/page.py",
+         '                                        lambda f: writer.table(f, "fold_changes", '
+         "described(f)))\n",
+         "                                        None)\n"
+         '        writer.table(_, "fold_changes", described(_))\n', M4),
+        ("the whole sheet as the contrast's samples", "src/ctx/quant/figure_tables.py",
+         'named["contrast_samples"] = blk.contrast_samples(ctx.inputs)',
+         "import polars as pl  # noqa: PLC0415\n"
+         '        named["contrast_samples"] = ctx.inputs.samples.select("sample", '
+         'group=pl.lit("tested"))',
+         "tests/test_figures_m4.py::test_the_contrast_samples_are_m5s"),
+        ("sheet table without its groups", "src/ctx/quant/figure_tables.py",
+         'named = {"figure_sheet": found.sheet}',
+         'named = {"figure_sheet": found.sheet.select("sample")}', M4),
     ],
     "m2": [
         ("pca shares swapped", "src/ctx/figures/draw_m2.py", "(share[0], share[1])",

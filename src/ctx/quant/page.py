@@ -12,7 +12,7 @@ import polars as pl
 
 from ctx import runtime, tools
 from ctx.de.run import Writer
-from ctx.quant import NUM_READS_DECIMALS
+from ctx.quant import NUM_READS_DECIMALS, figure_tables
 from ctx.quant import blocks as blk
 from ctx.quant import tables as tab
 from ctx.quant.figures import UNITS
@@ -139,8 +139,14 @@ def q1_groups(ctx: Context, found: blk.Shown) -> list[Group]:
     gene_items: list[FigureBlock | ResultTable | str] = [detection, units]
     if ctx.inputs.contrast is not None:
         used = blk.contrast_samples(ctx.inputs)
-        block, frame = blk.estimates_figure(writer, port, used, genes, ctx.inputs.contrast.name)
-        writer.table(frame, "fold_changes", described(frame))
+        block, _ = blk.estimates_figure(
+            writer,
+            port,
+            used,
+            genes,
+            ctx.inputs.contrast.name,
+            lambda f: writer.table(f, "fold_changes", described(f)),
+        )
         gene_items.append(block)
     out = [Group(text.word(PAGE, "groups.genes"), tuple(gene_items))]
     isoforms = blk.isoforms_figure(writer, folder, port.samples, genes)
@@ -223,6 +229,8 @@ def build(ctx: Context) -> ModulePage:
     """Write every table and figure, and return the page."""
     found = shown(ctx.inputs.samples)
     write_tables(ctx)
+    # What the figures draw that no table above holds, so ctx figure redraws them (F.1).
+    figure_tables.write(ctx, found)
     salmon = salmon_group(ctx, found)
     body: Sequence[Result] = (*notes(ctx), salmon, *q1_groups(ctx, found))
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(MODULE)

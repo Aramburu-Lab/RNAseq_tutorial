@@ -5,7 +5,7 @@ through ctx's port of tximport, which ``ctx.quant.checks`` has held equal to nf-
 Every word is ``content/quant.toml``'s.
 """
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, replace
 from typing import Any
 
@@ -216,8 +216,12 @@ def contrast_samples(inputs: Any) -> pl.DataFrame:
 
 
 def estimates_figure(writer: Writer, port: GeneTables, used: pl.DataFrame, genes: pl.DataFrame,
-                     name: str) -> tuple[FigureBlock, pl.DataFrame]:  # fmt: skip
-    """F6: the contrast's fold change from estimated and from length-scaled counts, per gene."""
+                     name: str, table: Callable[[pl.DataFrame], None] | None = None,
+                     ) -> tuple[FigureBlock, pl.DataFrame]:  # fmt: skip
+    """F6: the contrast's fold change from estimated and from length-scaled counts, per gene.
+
+    ``table`` writes the fold changes before the figure, so the figure's spec finds them.
+    """
     columns = [port.samples.index(s) for s in used["sample"]]
     tested = (used["group"] == "tested").to_numpy()
     scaled = port.counts_from(CountsFrom.LENGTH_SCALED_TPM)[:, columns]
@@ -241,6 +245,8 @@ def estimates_figure(writer: Writer, port: GeneTables, used: pl.DataFrame, genes
         label = shown_type or text.word(PAGE, "figures.estimates.every_type")
         options.append((label, data, figure_text("estimates", lead)))
     shown = options if len(options) > 2 else options[:1]  # noqa: PLR2004 - one type repeats all
+    if table is not None:
+        table(frame)
     return _viewed(writer, "estimates", shown), frame
 
 
