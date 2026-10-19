@@ -1,0 +1,13 @@
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in blood.toml.
+
+[cohort]
+name = "pleura"
+label = "Pleural mesothelioma"
+notes = "An authors' Ensembl-keyed count matrix from GEO through gather --counts, the R2.2 proof."
+
+[[datasets]]
+slug = "u_gse327166"
+step = 3
+modules = ["gather", "qc", "de", "function"]
+laptop_cap = "all"
+note = "Epithelioid against biphasic tumours, one sample per donor, the authors' Ensembl-keyed matrix, the R2.2 proof."

@@ -114,7 +114,9 @@ def test_help_without_slurm(tmp_path):
 
 
 def _snapshot(directory: Path) -> dict[str, float]:
-    return {str(p): p.stat().st_mtime for p in directory.rglob("*") if p.is_file()}
+    # Bytecode caches are not data: other xdist workers importing ctx rewrite them mid-test.
+    return {str(p): p.stat().st_mtime for p in directory.rglob("*")
+            if p.is_file() and "__pycache__" not in p.parts}  # fmt: skip
 
 
 def test_code_is_not_data(tmp_path):

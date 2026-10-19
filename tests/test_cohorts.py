@@ -22,7 +22,8 @@ def test_every_bundle_loads_and_each_dataset_file_has_one_cohort():
     Catches a dataset file added with no cohort, and one listed twice, which would make its
     figures' IDs depend on which bundle is read first."""
     found = cohorts.bundles()
-    assert set(found) == {"blood", "breast", "kidney", "lung", "headneck"}
+    # ovary and pleura hold the R2.2 proofs (wo13-u), merged after the bundles were written.
+    assert set(found) == {"blood", "breast", "kidney", "lung", "headneck", "ovary", "pleura"}
     listed = [e.slug for c in found.values() for e in c.datasets]
     assert sorted(listed) == sorted(p.stem for p in DATASETS.glob("*.toml"))
     assert len(listed) == len(set(listed))
