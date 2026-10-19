@@ -1,0 +1,7 @@
+CAUGHT  evidence view of the kept cards: 1 failed in 50.59s | E       assert (1, 1) == (1, 3)
+CAUGHT  page laid out before the panels: 1 failed in 51.03s | E       AssertionError: assert ['ctx figure ...iew --params'] == ['ctx figure ...-params', ...]
+EXIT 0
+CAUGHT  evidence view drawn over the first card: 1 failed in 31.90s | E           AssertionError: 2026-10-19_genecard_gcsynth_evidence_view_v1
+EXIT 0
+CAUGHT  box family of the kept cards: 1 failed in 20.98s | E       AssertionError: assert ['UPA'] == ['UPA', 'ACTB']
+EXIT 0

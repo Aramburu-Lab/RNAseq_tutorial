@@ -1,0 +1,11 @@
+CAUGHT  figure tables not written: 1 failed in 25.23s | E       AssertionError: assert {('contrasts'...ptx2_106236')} == {('box', 'act...ew', ''), ...}
+CAUGHT  evidence view of the kept cards: 1 failed in 8.58s | E       KeyError: 'ENSG00000075624.19'
+CAUGHT  box family of the kept cards: 1 failed in 17.40s | E       AssertionError: assert ['UPA'] == ['UPA', 'ACTB']
+CAUGHT  dropped samples read as none: 1 failed in 62.69s (0:01:02) | E           AssertionError: 2026-10-19_genecard_gcsynth_exons_nptx2_106236_v1
+CAUGHT  MANE exons left out: 1 failed in 110.03s (0:01:50) | E           AssertionError: 2026-10-19_genecard_gcsynth_junctions_nptx2_106236_v1
+CAUGHT  every contrast unpaired: 1 failed in 40.37s | E           AssertionError: 2026-10-19_genecard_gcsynth_contrasts_actb_75624_v1
+CAUGHT  another card's rows: 1 failed in 33.89s | E       AssertionError: ('own_m9_box', "actb_75624: M9's tables name this gene nptx2_75624
+CAUGHT  HPA release from the constant: 1 failed in 42.08s | E       assert ('HPA v99' in '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,...     if (w
+CAUGHT  card pattern not checked: 1 failed in 80.46s (0:01:20) | E           AssertionError: tissues_nptx2
+CAUGHT  words check left out: 1 failed in 81.95s (0:01:21) | E           AssertionError: box
+EXIT 0

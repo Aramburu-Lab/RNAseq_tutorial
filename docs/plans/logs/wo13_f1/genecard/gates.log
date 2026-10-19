@@ -1,0 +1,15 @@
+ruff check .: exit 0
+ruff format --check .: exit 0
+mypy src: exit 0
+interrogate src: exit 0
+labdocs lint: exit 0
+labdocs render --check: exit 0
+python -m ctx.report.prose: exit 0
+python -m ctx.report.glossary_lint: exit 0
+     101 src/ctx/figures/kinds_m9.py
+     180 src/ctx/figures/draw_m9.py
+     101 src/ctx/genecard/figure_tables.py
+     590 src/ctx/genecard/page.py
+     173 tests/test_figures_m9.py
+      82 docs/plans/logs/wo13_f1/genecard/mutations.py
+    1227 total

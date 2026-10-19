@@ -18,7 +18,17 @@ from ctx.dataset import Dataset
 from ctx.de.page import every
 from ctx.de.run import Writer
 from ctx.de.stats import ALPHA, LFC_MIN
-from ctx.genecard import annotation, boxes, figures, gtex, hpa, junctions, listing, samples
+from ctx.genecard import (
+    annotation,
+    boxes,
+    figure_tables,
+    figures,
+    gtex,
+    hpa,
+    junctions,
+    listing,
+    samples,
+)
 from ctx.genecard.cards import Card
 from ctx.genecard.summary import DETECTED, spread, tau
 from ctx.io.naming import stem
@@ -562,6 +572,8 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     _tables(writer, shown)
     if shown.own is not None:
         boxes.write_tables(writer, shown.own, shown.spec, shown.chosen)
+    figure_tables.write(writer, ctx.chosen, ctx.evidence, shown.chosen, ctx.family,
+                        ctx.options.hpa_release)  # fmt: skip
     figures_kept = [f for d in drawn[:kept] for f in d.figures]
     shown_view = [(*view.figure, None)] if view is not None else []
     for data, what, words, controls in shown_view + figures_kept:
@@ -571,5 +583,8 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
             # Opened alone, the figure keeps the control its contract does not carry (E.1d).
             block = replace(figure_block(data, writer.stem(what), words), controls=controls)
             write(FigurePage(words.title, block), writer.out / f"{writer.stem(what)}.html")
-    built = _module_page(ctx, drawn[:kept], [d.card for d in drawn[kept:]], view)
+    # Laid out again once the files are written: a block finds its Reproduce panel by its stem,
+    # and the panel exists only after write_figure found the figure's spec (F.1).
+    again = [_card(writer, d.card, ctx) for d in drawn[:kept]]
+    built = _module_page(ctx, again, [d.card for d in drawn[kept:]], evidence_view(writer, ctx))
     return [write(built, page), write_entry(writer.out, "genecard"), *writer.files]
