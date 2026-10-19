@@ -52,9 +52,6 @@ SCREEN_ROWS = 20
 DESIGN = ("age_group", "plate", "site")
 # GDC's sex_at_birth values the sex sentence counts.
 SEXES = ("female", "male")
-# Liu et al. 2018 Table 3's use marks as a dataset file's [clinical.published.table3_use] copies
-# them: a tick, a tick with an asterisk, a cross.
-USES = ("recommended", "caution", "not_recommended")
 
 
 @dataclass(frozen=True)
@@ -176,6 +173,20 @@ def missing_columns(ctx: Context) -> tuple[str, ...]:
     return (*variables(ctx), *receptors, "therapy")
 
 
+def reasons(patients: pl.DataFrame, column: str) -> str:
+    """A variable's Reasons cell: each reason with its patients, or that nothing is missing.
+
+    Raises:
+        ClinicalError: If the reasons do not count every missing value, which the patient
+            table records one reason each for.
+    """
+    counted = harmonise.reasons(patients, column)
+    if sum(n for _, n in counted) != patients[column].null_count():
+        raise ClinicalError(f"{column}: {patients[column].null_count()} missing, reasons for "
+                            f"{sum(n for _, n in counted)}")  # fmt: skip
+    return "; ".join(f"{r} {n:,}" for r, n in counted) or word("patients.missing_nothing")
+
+
 def confounders(ctx: Context) -> tuple[str, ...]:
     """The confounding map's variables: the declared categorical ones, then ``DESIGN``."""
     return (*(v for v in variables(ctx) if v != "age"), *DESIGN)
@@ -188,7 +199,8 @@ def endpoint_note(ctx: Context) -> tuple[str, ...]:
     endpoints Table 3 marks for caution or against, with its reason, or that it recommends all.
 
     Raises:
-        ClinicalError: If the dataset file's copy of Table 3 holds a mark not in ``USES``.
+        ClinicalError: If the dataset file's copy of Table 3 holds a mark not in
+            ``harmonise.USES``, or a caution mark without its reason.
     """
     assert ctx.spec.clinical and ctx.spec.gdc  # noqa: S101 - run() refuses a dataset without them
     clinical, kind = ctx.spec.clinical, ctx.spec.gdc.cdr_type or ctx.spec.gdc.project
@@ -198,18 +210,15 @@ def endpoint_note(ctx: Context) -> tuple[str, ...]:
                         default=clinical.endpoint))  # fmt: skip
     marks = clinical.published.get("table3_use", {})
     counts = clinical.published.get("table3", {}).get(ctx.endpoint)
-    if not all(marks.get(e) for e in ENDPOINTS) or not counts:
+    blank, fault = harmonise.unread_uses(marks)
+    if blank or not counts:
         return (f"{chosen} {fill('patients.endpoint.uncopied', type=kind)}",)
-    if bad := {e: marks[e] for e in ENDPOINTS if marks[e] not in USES}:
-        raise ClinicalError(f"{ctx.spec.path.name} [clinical.published.table3_use]: {bad}, "
-                            f"each one of {USES}")  # fmt: skip
+    if fault:
+        raise ClinicalError(f"{ctx.spec.path.name} [clinical.published.table3_use]: {fault}")
     use = fill("patients.endpoint.use", endpoint=ctx.endpoint, type=kind, events=counts[0],
                censored=counts[1], use=word(f"patients.use.{marks[ctx.endpoint]}"))  # fmt: skip
     caution = [e for e in ENDPOINTS if marks[e] == "caution"]
     against = [e for e in ENDPOINTS if marks[e] == "not_recommended"]
-    if caution and not marks.get("caution"):
-        raise ClinicalError(f"{ctx.spec.path.name} [clinical.published.table3_use]: copy "
-                            f"Table 3's Explanation/Caution for {caution} as caution")  # fmt: skip
     rest = [fill("patients.endpoint.caution", endpoints=listed(caution), type=kind,
                  why=marks["caution"])] if caution else []  # fmt: skip
     if against:
@@ -253,8 +262,7 @@ def _patients(writer: Writer, ctx: Context) -> Group:
     endpoints = ResultTable(fill("patients.endpoints_title", source=table3.get("source", "")),
                             text.words(PAGE, "patients.endpoints_columns"), tuple(rows),
                             numeric=(1, 2, 4, 5))  # fmt: skip
-    gaps = tuple((word(f"patients.variables.{c}"), f"{p[c].null_count():,}",
-                  "; ".join(f"{r} {n:,}" for r, n in harmonise.reasons(p, c)) or word("none"))
+    gaps = tuple((word(f"patients.variables.{c}"), f"{p[c].null_count():,}", reasons(p, c))
                  for c in missing_columns(ctx))  # fmt: skip
     heads = text.words(PAGE, "patients.missing_columns")
     missing = ResultTable(word("patients.missing_title"), heads, gaps, numeric=(1,))

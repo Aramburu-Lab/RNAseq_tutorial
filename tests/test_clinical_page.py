@@ -329,3 +329,21 @@ def test_the_page_prints_the_cohorts_own_endpoint_and_no_sex_flag(clinical_root)
     assert "The models below fit PFI, the dataset file's endpoint." in html
     assert "holds no copy of Liu et al. 2018 Table 3's use marks for FAKE-BRCA." in html
     assert "flagged by sex" not in html
+
+
+def test_a_variable_with_nothing_missing_says_so():
+    """The missing-values table's Reasons cell: a variable no patient lacks reads "nothing
+    missing", one with gaps lists each reason most first, and reasons that do not count every
+    gap stop the page. Catches the page's word for a number that does not exist ("not
+    estimable") printed as a reason, and a gap with no reason passed in silence."""
+    from ctx.clinical.page import reasons  # noqa: PLC0415
+
+    patients = pl.DataFrame({
+        "age": [61, 70, 55], "age_missing": [None, None, None],
+        "stage": [1, None, None], "stage_missing": [None, "Stage X", "discrepancy"],
+        "sex": ["female", None, None], "sex_missing": [None, "not reported", None],
+    })  # fmt: skip
+    assert reasons(patients, "age") == "nothing missing"
+    assert reasons(patients, "stage") == "Stage X 1; discrepancy 1"
+    with pytest.raises(ClinicalError, match="sex: 2 missing, reasons for 1"):
+        reasons(patients, "sex")

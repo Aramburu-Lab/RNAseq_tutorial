@@ -45,6 +45,9 @@ NOTIFICATIONS = {
                         "malignancy"),
 }  # fmt: skip
 REDACTED = "Redacted"
+# Liu et al. 2018 Table 3's use marks as a dataset file's [clinical.published.table3_use] copies
+# them: a tick, a tick with an asterisk, a cross.
+USES = ("recommended", "caution", "not_recommended")
 CDR_COLUMNS = ("bcr_patient_barcode", "age_at_initial_pathologic_diagnosis",
                "ajcc_pathologic_tumor_stage", "histological_type", "histological_grade",
                "menopause_status",
@@ -272,3 +275,21 @@ def reasons(patients: pl.DataFrame, column: str) -> list[tuple[str, int]]:
     """(reason, patients) a column is missing for, most first, then by reason."""
     counted = patients[f"{column}_missing"].drop_nulls().value_counts()
     return sorted(counted.rows(), key=lambda r: (-r[1], r[0]))
+
+
+def unread_uses(marks: Mapping[str, Any]) -> tuple[tuple[str, ...], str]:
+    """The endpoints a copy of Table 3's Use marks leaves blank, then why M10 cannot read it.
+
+    One reading for M10's page and for ``ctx run --check``: while any endpoint is blank the page
+    says the dataset file holds no copy; a mark not in ``USES``, or a caution mark without the
+    row's Explanation/Caution, stops the page.
+    """
+    blank = tuple(e for e in ENDPOINTS if not marks.get(e))
+    if blank:
+        return blank, ""
+    if bad := {e: marks[e] for e in ENDPOINTS if marks[e] not in USES}:
+        return (), f"{bad}, each one of {USES}"
+    caution = [e for e in ENDPOINTS if marks[e] == "caution"]
+    if caution and not marks.get("caution"):
+        return (), f"copy Table 3's Explanation/Caution for {caution} as caution"
+    return (), ""

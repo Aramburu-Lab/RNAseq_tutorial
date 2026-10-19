@@ -30,6 +30,8 @@ REGISTERED = re.compile(r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}")
 ZEROS = (0, 0)
 # Table 3's column order, so the counts read as the paper prints them.
 TABLE3 = ("OS", "PFI", "DFI", "DSS")
+# The table M10's endpoint sentence reads Table 3's Use marks from.
+TABLE3_USE = "table3_use"
 # The gene or miRNA a [sanity] metric names, as M5 and M8 record them.
 GENE_METRIC = re.compile(r"^gene\.[^.]+\.(.+)\.(?:lfc|padj)$")
 MIRNA_METRIC = re.compile(r"^(?:mirna\.(.+)\.(?:lfc|padj)|pair\.([^.]+)\..+)$")
@@ -161,6 +163,25 @@ def _cdr(path: Path, spec: Dataset, gdc_spec: GdcSpec) -> list[Problem]:
                     blocks=False)]  # fmt: skip
 
 
+def _uses(spec: Dataset) -> list[Problem]:
+    """Table 3's Use marks as M10 reads them, with the template's lines where any is blank.
+
+    Blank, M10 still runs and says the dataset file holds no copy; a mark M10 cannot read
+    stops its page. Either stops the run here, as Table 3's zeros do.
+    """
+    assert spec.gdc is not None  # noqa: S101 - check() calls this for [gdc] alone
+    if spec.clinical is None or not spec.gdc.cdr_file:
+        return []
+    kind = spec.gdc.cdr_type or spec.gdc.project
+    blank, fault = harmonise.unread_uses(spec.clinical.published.get(TABLE3_USE, {}))
+    if blank:
+        lines = table(f"[clinical.published.{TABLE3_USE}]").replace("XXXX", kind)
+        return [Problem(f"[clinical.published.{TABLE3_USE}]: {', '.join(blank)} blank; copy Liu "
+                        f"et al. 2018 Table 3's Use marks for {kind} from the paper, or M10 says "
+                        "the dataset file holds no copy", lines)]  # fmt: skip
+    return [Problem(f"[clinical.published.{TABLE3_USE}]: {fault}")] if fault else []
+
+
 def _n(sheet: pl.DataFrame, spec: Dataset, contrasts: list[Contrast], where: str) -> list[Problem]:
     """Each contrast's declared n against the pairs the chosen files give."""
     problems = []
@@ -207,7 +228,7 @@ def check(spec: Dataset, options: Options, root: Path) -> list[Problem]:
     by, unmatched = gdc.by_project([f for f in options.gdc_dirs if f.is_dir()], spec.gdc.projects)
     if unmatched or not by:
         return []
-    problems = _missing(spec)
+    problems = _missing(spec) + _uses(spec)
     sheets, genes = [], set()
     for project in spec.gdc.projects:
         one, path = spec.gdc.one(project), by[project]
