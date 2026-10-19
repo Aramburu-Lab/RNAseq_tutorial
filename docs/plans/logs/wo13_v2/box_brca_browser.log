@@ -1,0 +1,5 @@
+page 2026-10-19_genecard_tcga_brca_overview_v1.html 11,684,856 B
+1280_light: theme white, 50 plots with donor lines, 5650 lines, 5650 matched to own_values, colours ['#8C8C8C'], box 1265 scroll 1265, errors []
+1280_dark: theme black, 50 plots with donor lines, 5650 lines, 5650 matched to own_values, colours ['#8C8C8C'], box 1265 scroll 1265, errors []
+375_light: theme white, 50 plots with donor lines, 5650 lines, 5650 matched to own_values, colours ['#8C8C8C'], box 375 scroll 375, errors []
+375_dark: theme black, 50 plots with donor lines, 5650 lines, 5650 matched to own_values, colours ['#8C8C8C'], box 375 scroll 375, errors []

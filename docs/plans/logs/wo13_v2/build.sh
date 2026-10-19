@@ -3,10 +3,11 @@
 #   bash build.sh <label> <tier1|breast> <steps: qc quant de function genecard ...>
 # The root links the real root's data, each entry of its resources and its gather folder, all
 # read only by the steps run here, and holds its own outputs; with DE_FROM=<label>, M5's folder
-# is linked from that scratch root. genecard runs --offline: the cache is read, never written.
+# is linked from that scratch root; with SRC=<a src folder>, that code runs (main's, to compare).
+# genecard runs --offline: the cache is read, never written.
 WT=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a714b9eb1c983
 BIN=/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin
-export PATH=$BIN:/usr/bin:/bin:/usr/sbin:/sbin PYTHONPATH=$WT/src PYTHONDONTWRITEBYTECODE=1
+export PATH=$BIN:/usr/bin:/bin:/usr/sbin:/sbin PYTHONPATH=${SRC:-$WT/src} PYTHONDONTWRITEBYTECODE=1
 cd "$WT" || exit 1
 label=$1 which=$2
 shift 2

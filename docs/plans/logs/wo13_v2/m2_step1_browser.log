@@ -1,0 +1,8 @@
+page 2026-10-19_qc_tier1_overview_v1.html 14,902,643 B; flags table 282 rows, 282 sample-metric pairs
+1280_light: theme white, options 2, title 'Flags of the run, every judged metric', moved [False, True], back unmoved True, widest plot 567 px, box 1265 scroll 1579, errors []
+1280_dark: theme black, options 2, title 'Flags of the run, every judged metric', moved [False, True], back unmoved True, widest plot 567 px, box 1265 scroll 1579, errors []
+375_light: theme white, options 2, title 'Flags of the run, every judged metric', moved [False, True], back unmoved True, widest plot 317 px, box 375 scroll 712, errors []
+375_dark: theme black, options 2, title 'Flags of the run, every judged metric', moved [False, True], back unmoved True, widest plot 317 px, box 375 scroll 712, errors []
+cells by level {'flagged': 282, 'passed': 4752, 'unjudged': 4, 'none': 2}; flagged equals the table's pairs: True
+export 1280_light: <image> 0, filled paths 4, svg 39,078 B, pdf 22,041 B, pdf images 0, line 'This view shows every flag of the run; the figure files and ', errors []
+export 375_dark: <image> 0, filled paths 4, svg 43,910 B, pdf 23,441 B, pdf images 0, line 'This view shows every flag of the run; the figure files and ', errors []
