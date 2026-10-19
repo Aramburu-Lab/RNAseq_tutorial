@@ -1,0 +1,11 @@
+# BuildKit reads this file for containers/analysis.Dockerfile in place of a root .dockerignore.
+# An allowlist: the context is the repo root, and a checkout's .pixi/, outputs/ and data/ are
+# gigabytes no stage copies.
+*
+!pixi.toml
+!pixi.lock
+!pyproject.toml
+!README.md
+!LICENSE
+!src/
+**/__pycache__

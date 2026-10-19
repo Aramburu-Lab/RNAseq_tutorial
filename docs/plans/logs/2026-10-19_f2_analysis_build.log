@@ -1,0 +1,115 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from analysis.Dockerfile
+#1 transferring dockerfile: 7.37kB done
+#1 DONE 0.0s
+
+#2 [auth] library/ubuntu:pull token for registry-1.docker.io
+#2 DONE 0.0s
+
+#3 [internal] load metadata for ghcr.io/prefix-dev/pixi:0.76.2
+#3 DONE 0.6s
+
+#4 [internal] load metadata for docker.io/library/ubuntu:24.04
+#4 DONE 0.7s
+
+#5 [pixi-git 1/2] FROM ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4
+#5 resolve ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4 0.0s done
+#5 DONE 0.0s
+
+#6 [pixi-git 2/2] RUN apt-get update  && apt-get install -y --no-install-recommends git ca-certificates openssh-client  && rm -rf /var/lib/apt/lists/*
+#6 CACHED
+
+#7 [production 1/5] FROM docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
+#7 resolve docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac 0.0s done
+#7 CACHED
+
+#8 [build 1/5] WORKDIR /app
+#8 CACHED
+
+#9 [internal] load build context
+#9 transferring context: 61B done
+#9 DONE 0.0s
+
+#10 [build 2/5] COPY pixi.toml pixi.lock ./
+#10 DONE 0.0s
+
+#11 [build 3/5] RUN --mount=type=ssh set -eu;     if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then         git config --global core.sshCommand "ssh -o StrictHostKeyChecking=accept-new";         git config --global url."git@github.com:".insteadOf "https://github.com/";     fi;     pixi install --locked -e prod
+#11 ...
+
+#12 [production 2/5] RUN apt-get update  && apt-get install -y --no-install-recommends bash procps fonts-liberation  && rm -rf /var/lib/apt/lists/*
+#12 0.652 Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]
+#12 0.689 Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]
+#12 1.412 Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]
+#12 1.684 Get:4 http://security.ubuntu.com/ubuntu noble-security/multiverse amd64 Packages [55.6 kB]
+#12 1.743 Get:5 http://archive.ubuntu.com/ubuntu noble-backports InRelease [126 kB]
+#12 2.032 Get:6 http://security.ubuntu.com/ubuntu noble-security/restricted amd64 Packages [2122 kB]
+#12 2.126 Get:7 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages [1808 kB]
+#12 3.246 Get:8 http://security.ubuntu.com/ubuntu noble-security/main amd64 Packages [1409 kB]
+#12 3.532 Get:9 http://security.ubuntu.com/ubuntu noble-security/universe amd64 Packages [1549 kB]
+#12 4.507 Get:10 http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages [117 kB]
+#12 4.627 Get:11 http://archive.ubuntu.com/ubuntu noble/universe amd64 Packages [19.3 MB]
+#12 12.92 Get:12 http://archive.ubuntu.com/ubuntu noble/multiverse amd64 Packages [331 kB]
+#12 12.99 Get:13 http://archive.ubuntu.com/ubuntu noble-updates/restricted amd64 Packages [2231 kB]
+#12 13.43 Get:14 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages [1729 kB]
+#12 14.00 Get:15 http://archive.ubuntu.com/ubuntu noble-updates/multiverse amd64 Packages [61.7 kB]
+#12 14.01 Get:16 http://archive.ubuntu.com/ubuntu noble-updates/universe amd64 Packages [2168 kB]
+#12 14.41 Get:17 http://archive.ubuntu.com/ubuntu noble-backports/universe amd64 Packages [36.0 kB]
+#12 14.41 Get:18 http://archive.ubuntu.com/ubuntu noble-backports/multiverse amd64 Packages [669 B]
+#12 14.41 Get:19 http://archive.ubuntu.com/ubuntu noble-backports/main amd64 Packages [49.0 kB]
+#12 14.54 Fetched 33.6 MB in 14s (2376 kB/s)
+#12 14.54 Reading package lists...
+#12 15.33 Reading package lists...
+#12 16.19 Building dependency tree...
+#12 16.38 Reading state information...
+#12 16.79 bash is already the newest version (5.2.21-2ubuntu4).
+#12 16.79 procps is already the newest version (2:4.0.4-4ubuntu3.3).
+#12 16.79 Recommended packages:
+#12 16.79   fonts-liberation-sans-narrow
+#12 16.92 The following NEW packages will be installed:
+#12 16.92   fonts-liberation
+#12 17.27 0 upgraded, 1 newly installed, 0 to remove and 2 not upgraded.
+#12 17.27 Need to get 1603 kB of archives.
+#12 17.27 After this operation, 4388 kB of additional disk space will be used.
+#12 17.27 Get:1 http://archive.ubuntu.com/ubuntu noble/main amd64 fonts-liberation all 1:2.1.5-3 [1603 kB]
+#12 18.57 debconf: delaying package configuration, since apt-utils is not installed
+#12 18.63 Fetched 1603 kB in 1s (1233 kB/s)
+#12 18.72 Selecting previously unselected package fonts-liberation.
+#12 18.72 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 4381 files and directories currently installed.)
+#12 18.74 Preparing to unpack .../fonts-liberation_1%3a2.1.5-3_all.deb ...
+#12 18.74 Unpacking fonts-liberation (1:2.1.5-3) ...
+#12 18.83 Setting up fonts-liberation (1:2.1.5-3) ...
+#12 DONE 19.5s
+
+#11 [build 3/5] RUN --mount=type=ssh set -eu;     if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then         git config --global core.sshCommand "ssh -o StrictHostKeyChecking=accept-new";         git config --global url."git@github.com:".insteadOf "https://github.com/";     fi;     pixi install --locked -e prod
+#11 ...
+
+#13 [production 3/5] WORKDIR /app
+#13 DONE 0.1s
+
+#11 [build 3/5] RUN --mount=type=ssh set -eu;     if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then         git config --global core.sshCommand "ssh -o StrictHostKeyChecking=accept-new";         git config --global url."git@github.com:".insteadOf "https://github.com/";     fi;     pixi install --locked -e prod
+#11 53.96 The prod environment has been installed.
+#11 DONE 55.1s
+
+#14 [build 4/5] RUN pixi shell-hook -e prod -s bash > /shell-hook
+#14 DONE 0.7s
+
+#15 [build 5/5] RUN printf '#!/bin/bash\n' > /app/entrypoint.sh  && cat /shell-hook >> /app/entrypoint.sh  && echo 'exec "$@"' >> /app/entrypoint.sh
+#15 DONE 0.4s
+
+#16 [production 4/5] COPY --from=build /app/.pixi/envs/prod /app/.pixi/envs/prod
+#16 DONE 5.4s
+
+#17 [production 5/5] COPY --from=build --chmod=0755 /app/entrypoint.sh /app/entrypoint.sh
+#17 DONE 0.1s
+
+#18 exporting to image
+#18 exporting layers
+#18 exporting layers 42.3s done
+#18 exporting manifest sha256:503eb7feb109c9bd07d36ef15c76f96e9567058ebec2dfa83a2fc803517c9d05 done
+#18 exporting config sha256:d4687ee7720ef8bacc3125a9fb97c954dc5eec503585b17193fb93a566d7ab48 done
+#18 exporting attestation manifest sha256:6c8e49706affdbcec7013e1e3bcdb86357099ad86c7052ab5044d0efd49ec330 done
+#18 exporting manifest list sha256:5a63dd0856e0bd8e81f59a8d33bda9884d4de8a4d259df4897715fffe11b7a75 done
+#18 naming to docker.io/library/ctx-analysis:f2 done
+#18 DONE 42.4s
+docker buildx build --builder desktop-linux --platform linux/amd64 -f  -t      0.12s user 0.20s system 0% cpu 1:48.09 total

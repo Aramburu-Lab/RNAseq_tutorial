@@ -5,7 +5,8 @@ name: containers
 # cited in a manuscript.
 #
 # build -> push OCI to GHCR -> apptainer build --reproducible -> apptainer push oras:// -> verify
-# the ORAS artefact is byte-stable -> commit containers/digests.lock.
+# the ORAS artefact is byte-stable -> commit containers/digests.lock. Beside it, the figures
+# target: build, run one Reproduce panel inside it, push, and record its digest in the same lock.
 on:
   push:
     tags: ["v*"]
@@ -23,6 +24,8 @@ env:
   IMAGE_NAME: cancer_transcriptomics_teaching-analysis
   GHCR_REPO: ghcr.io/aramburu-lab/cancer_transcriptomics_teaching-analysis
   SIF_REPO: ghcr.io/aramburu-lab/cancer_transcriptomics_teaching-analysis-sif
+  # The figures target; ctx.figures.panel.IMAGE names the same repository.
+  FIGURES_REPO: ghcr.io/aramburu-lab/cancer_transcriptomics_teaching-figures
   # knowledge/versions.md. Nothing else in this file hardcodes a version.
   APPTAINER_VERSION: "1.5.3"
 
@@ -134,6 +137,53 @@ jobs:
           apptainer push "$sif" "oras://${SIF_REPO}:${{ needs.oci.outputs.version }}"
           echo "sha256=sha256:$(sha256sum "$sif" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
 
+  # The figures target (TODO.md F.2): the image every Reproduce panel's Docker and Apptainer tabs
+  # name. Before anything is pushed, the proof runs one panel inside it: the fixture root is
+  # drawn in the image, the volcano's Docker tab, as a reader downloads it, redraws in a clean
+  # folder, and the PDF, SVG and CSV files must equal the module's byte for byte.
+  figures:
+    needs: oci
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Log in to GHCR
+        run: echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Builder
+        run: docker buildx create --use --name ci --driver docker-container
+
+      - name: Build
+        run: |
+          docker buildx build --load --target figures \
+            -f containers/analysis.Dockerfile \
+            -t "$FIGURES_REPO:${{ needs.oci.outputs.version }}" \
+            --build-arg "VCS_REF=$(git rev-parse --short HEAD)" \
+            --build-arg "IMAGE_VERSION=${{ needs.oci.outputs.version }}" \
+            .
+
+      - name: Run one Reproduce panel inside it
+        run: |
+          ref="$FIGURES_REPO:${{ needs.oci.outputs.version }}"
+          python3 containers/prove_figures.py --image "$ref" --work "$RUNNER_TEMP/figures_proof"
+          size=$(docker image inspect --format '{{.Size}}' "$ref")
+          echo "figures image: $size bytes" >> "$GITHUB_STEP_SUMMARY"
+
+      - id: push
+        name: Push the figures image
+        run: |
+          ref="$FIGURES_REPO:${{ needs.oci.outputs.version }}"
+          docker buildx build --push --target figures \
+            -f containers/analysis.Dockerfile -t "$ref" \
+            --build-arg "VCS_REF=$(git rev-parse --short HEAD)" \
+            --build-arg "IMAGE_VERSION=${{ needs.oci.outputs.version }}" \
+            .
+          digest=$(docker buildx imagetools inspect "$ref" --format '{{.Manifest.Digest}}')
+          case "$digest" in sha256:*) ;; *) echo "::error::no manifest digest for $ref"; exit 1 ;; esac
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
   # ADR-7's central claim, and the entire reason this is a workflow rather than a local script:
   # `apptainer pull oras://` returns the same bytes every time, so a .sif can be pinned by checksum
   # in a methods section. It has never been verified, and it CANNOT be verified on macOS, where
@@ -180,7 +230,7 @@ jobs:
           echo "byte-identical across pulls: sha256:$a" >> "$GITHUB_STEP_SUMMARY"
 
   lock:
-    needs: [oci, sif, verify-byte-identity]
+    needs: [oci, sif, verify-byte-identity, figures]
     runs-on: ubuntu-latest
     steps:
       # The tag is a detached HEAD; a commit made there would be unreachable. The lockfile belongs
@@ -205,6 +255,8 @@ jobs:
             printf '# kind\tversion\treference\tdigest\tbuilt_utc\tvcs_ref\n'
             printf 'oci\t%s\t%s\t%s\t%s\t%s\n' "$v" "$GHCR_REPO" "${{ needs.oci.outputs.digest }}" "$now" "$ref"
             printf 'sif\t%s\t%s\t%s\t%s\t%s\n' "$v" "oras://$SIF_REPO" "${{ needs.sif.outputs.sha256 }}" "$now" "$ref"
+            # The row the Reproduce panels pin by (ctx.figures.panel.image).
+            printf 'oci\t%s\t%s\t%s\t%s\t%s\n' "$v" "$FIGURES_REPO" "${{ needs.figures.outputs.digest }}" "$now" "$ref"
           } > containers/digests.lock
 
       - name: Commit it

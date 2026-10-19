@@ -1,0 +1,154 @@
++ docker run --rm --platform linux/amd64 -u 505:20 -e HOME=/tmp -v /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad214d746812b3316:/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad214d746812b3316:ro -v /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1:/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1 -w /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1 ctx-figures:f2 python /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-ad214d746812b3316/containers/figures_root.py /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_overview_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_contrasts_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_contrasts_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_contrasts_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_size_factors_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_size_factors_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_size_factors_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_case_results_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_case_results_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_case_results_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_b_case_results_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_b_case_results_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_b_case_results_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_naive_results_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_naive_results_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_naive_results_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_adjusted_results_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_adjusted_results_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_adjusted_results_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_within_results_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_within_results_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_within_results_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_null_results_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_null_results_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_a_null_results_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_all_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_all_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_all_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_all_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_all_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_all_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_all_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_control_a_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_control_a_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_control_a_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_control_a_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_control_a_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_control_a_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_pca_control_a_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_volcano_a_case_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_volcano_a_case_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_volcano_a_case_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_volcano_a_case_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_volcano_a_case_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_volcano_a_case_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_volcano_a_case_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_ma_a_case_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_ma_a_case_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_ma_a_case_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_ma_a_case_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_ma_a_case_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_ma_a_case_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_ma_a_case_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_contrasts_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_contrasts_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_contrasts_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_a_case_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_a_case_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_a_case_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_a_case_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_a_case_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_a_case_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_phist_a_case_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_dispersion_a_case_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_dispersion_a_case_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_dispersion_a_case_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_dispersion_a_case_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_dispersion_a_case_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_dispersion_a_case_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_dispersion_a_case_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_agreement_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_agreement_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_naive_vs_a_adjusted_agreement_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_agreement_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_agreement_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_lfc_a_case_vs_b_case_agreement_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_grid_batch_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_grid_batch_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_grid_batch_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_batch_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_batch_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_batch_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_batch_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_batch_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_batch_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_calls_batch_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_box_a_case_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_box_a_case_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_box_a_case_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_box_a_case_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_box_a_case_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_box_a_case_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_box_a_case_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_sex_check_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_sex_check_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_sex_check_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_metrics_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_metrics_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/f2_proof1/root/outputs/05_de/2026-10-19_de_desynth_metrics_v1_README.md
++ bash reproduce.sh
+2026-10-19_de_desynth_a_case_results_v1.parquet: OK
+2026-10-19_de_desynth_size_factors_v1.parquet: OK
+de_synthetic.toml: OK
+
+Fontconfig error: No writable cache directories
+	/app/.pixi/envs/laptop/var/cache/fontconfig
+	/.cache/fontconfig
+	/.fontconfig
+/work/2026-10-19_de_desynth_volcano_a_case_v1_white.pdf
+/work/2026-10-19_de_desynth_volcano_a_case_v1_black.pdf
+/work/2026-10-19_de_desynth_volcano_a_case_v1_white.svg
+/work/2026-10-19_de_desynth_volcano_a_case_v1_black.svg
+/work/2026-10-19_de_desynth_volcano_a_case_v1.html
+/work/2026-10-19_de_desynth_volcano_a_case_v1.csv
+/work/2026-10-19_de_desynth_volcano_a_case_v1_README.md
+2026-10-19_de_desynth_a_case_results_v1.parquet
+2026-10-19_de_desynth_size_factors_v1.parquet
+2026-10-19_de_desynth_volcano_a_case_v1.csv
+2026-10-19_de_desynth_volcano_a_case_v1.html
+2026-10-19_de_desynth_volcano_a_case_v1_README.md
+2026-10-19_de_desynth_volcano_a_case_v1_black.pdf
+2026-10-19_de_desynth_volcano_a_case_v1_black.svg
+2026-10-19_de_desynth_volcano_a_case_v1_white.pdf
+2026-10-19_de_desynth_volcano_a_case_v1_white.svg
+de_synthetic.toml
+inputs.sha256
+params.toml
+2026-10-19_de_desynth_volcano_a_case_v1.csv: OK
+EQUAL  _de_desynth_volcano_a_case_v1.csv: 115810 B and 115810 B
+EQUAL  _de_desynth_volcano_a_case_v1_black.pdf: 37109 B and 37109 B
+         fonts, module: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']; redraw: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']
+EQUAL  _de_desynth_volcano_a_case_v1_black.svg: 125650 B and 125650 B
+         fonts, module: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]; redraw: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]
+EQUAL  _de_desynth_volcano_a_case_v1_white.pdf: 37101 B and 37101 B
+         fonts, module: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']; redraw: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']
+EQUAL  _de_desynth_volcano_a_case_v1_white.svg: 125005 B and 125005 B
+         fonts, module: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]; redraw: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]
+every compared file is byte-equal
+python3 containers/prove_figures.py --image ctx-figures:f2 --work   0.07s user 0.10s system 0% cpu 1:52.94 total

@@ -1,0 +1,58 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from f2_main.Dockerfile
+#1 transferring dockerfile: 4.15kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/prefix-dev/pixi:0.76.2
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [build 1/6] FROM ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4
+#4 resolve ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4 done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 61B done
+#5 DONE 0.0s
+
+#6 [build 2/6] WORKDIR /app
+#6 CACHED
+
+#7 [build 3/6] COPY pixi.toml pixi.lock ./
+#7 DONE 0.0s
+
+#8 [build 4/6] RUN --mount=type=ssh set -eu;     if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then         git config --global core.sshCommand "ssh -o StrictHostKeyChecking=accept-new";         git config --global url."git@github.com:".insteadOf "https://github.com/";     fi;     pixi install --locked -e prod
+#8 45.56 Error:   × Failed to update PyPI packages for environment 'prod'
+#8 45.57   ├─▶ Failed to prepare distributions
+#8 45.57   ├─▶ Failed to download and build `labcore @ git+https://github.com/aramburu-
+#8 45.57   │   lab/labcore.git?tag=v0.6.5#8e927346a4af70b257319c9ecd2d917f2d421d85`
+#8 45.57   ├─▶ Git operation failed
+#8 45.57   ╰─▶ Git executable not found. Ensure that Git is installed and available.
+#8 45.57 
+#8 ERROR: process "/bin/sh -c set -eu;     if [ -n \"${SSH_AUTH_SOCK:-}\" ] && [ -S \"${SSH_AUTH_SOCK}\" ]; then         git config --global core.sshCommand \"ssh -o StrictHostKeyChecking=accept-new\";         git config --global url.\"git@github.com:\".insteadOf \"https://github.com/\";     fi;     pixi install --locked -e prod" did not complete successfully: exit code: 1
+------
+ > [build 4/6] RUN --mount=type=ssh set -eu;     if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then         git config --global core.sshCommand "ssh -o StrictHostKeyChecking=accept-new";         git config --global url."git@github.com:".insteadOf "https://github.com/";     fi;     pixi install --locked -e prod:
+  × Failed to update PyPI packages for environment 'prod'
+45.57   ├─▶ Failed to prepare distributions
+45.57   ├─▶ Failed to download and build `labcore @ git+https://github.com/aramburu-
+45.57   │   lab/labcore.git?tag=v0.6.5#8e927346a4af70b257319c9ecd2d917f2d421d85`
+45.57   ├─▶ Git operation failed
+45.57   ╰─▶ Git executable not found. Ensure that Git is installed and available.
+45.57 
+------
+f2_main.Dockerfile:20
+--------------------
+  19 |     # for. accept-new avoids baking a known_hosts file that expires when GitHub rotates its host key.
+  20 | >>> RUN --mount=type=ssh set -eu; \
+  21 | >>>     if [ -n "${SSH_AUTH_SOCK:-}" ] && [ -S "${SSH_AUTH_SOCK}" ]; then \
+  22 | >>>         git config --global core.sshCommand "ssh -o StrictHostKeyChecking=accept-new"; \
+  23 | >>>         git config --global url."git@github.com:".insteadOf "https://github.com/"; \
+  24 | >>>     fi; \
+  25 | >>>     pixi install --locked -e prod
+  26 |     
+--------------------
+ERROR: failed to build: failed to solve: process "/bin/sh -c set -eu;     if [ -n \"${SSH_AUTH_SOCK:-}\" ] && [ -S \"${SSH_AUTH_SOCK}\" ]; then         git config --global core.sshCommand \"ssh -o StrictHostKeyChecking=accept-new\";         git config --global url.\"git@github.com:\".insteadOf \"https://github.com/\";     fi;     pixi install --locked -e prod" did not complete successfully: exit code: 1

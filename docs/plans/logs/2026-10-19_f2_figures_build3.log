@@ -1,0 +1,61 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from analysis.Dockerfile
+#1 transferring dockerfile: 7.20kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/prefix-dev/pixi:0.76.2
+#2 DONE 0.0s
+
+#3 [auth] library/ubuntu:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [internal] load metadata for docker.io/library/ubuntu:24.04
+#4 DONE 0.8s
+
+#5 [figures 1/5] FROM docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
+#5 resolve docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac 0.0s done
+#5 DONE 0.0s
+
+#6 [pixi-git 1/2] FROM ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4
+#6 resolve ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 23.42kB 0.0s done
+#7 DONE 0.0s
+
+#8 [figures 2/5] WORKDIR /app
+#8 CACHED
+
+#9 [pixi-git 2/2] RUN apt-get update  && apt-get install -y --no-install-recommends git ca-certificates openssh-client  && rm -rf /var/lib/apt/lists/*
+#9 CACHED
+
+#10 [figures-build 1/3] WORKDIR /app
+#10 CACHED
+
+#11 [figures-build 3/3] RUN mkdir -p src/ctx && touch src/ctx/__init__.py  && pixi install --locked -e laptop  && pixi shell-hook -e laptop -s bash > /shell-hook  && printf '#!/bin/bash\n' > /app/entrypoint.sh  && cat /shell-hook >> /app/entrypoint.sh  && echo 'exec "$@"' >> /app/entrypoint.sh
+#11 CACHED
+
+#12 [figures-build 2/3] COPY pixi.toml pixi.lock pyproject.toml README.md LICENSE ./
+#12 CACHED
+
+#13 [figures 3/5] COPY --from=figures-build /app/.pixi/envs/laptop /app/.pixi/envs/laptop
+#13 CACHED
+
+#14 [figures 4/5] COPY --from=figures-build --chmod=0755 /app/entrypoint.sh /app/entrypoint.sh
+#14 CACHED
+
+#15 [figures 5/5] COPY src /app/src
+#15 DONE 0.1s
+
+#16 exporting to image
+#16 exporting layers
+#16 exporting layers 0.2s done
+#16 exporting manifest sha256:afc47c41cc03be32141385003c428190fb41e16e1a0e07c7aa191acb8859aff8 0.0s done
+#16 exporting config sha256:cf88b449b0cfe61a42eab3e553210f869756deaba04dc595895f4dc55e0ed0e4 done
+#16 exporting attestation manifest sha256:70faf50b4e7692d3cfc3d171e4ebddf9140ca11dd824912931455ce07b854ce0 done
+#16 exporting manifest list sha256:4249e8eaf42c4a4005b3f5c7c35aaac3dfe8973776e340a04c71ba2bc2f57130 0.0s done
+#16 naming to docker.io/library/ctx-figures:f2 done
+#16 DONE 0.2s
+docker buildx build --builder desktop-linux --platform linux/amd64 --target    0.12s user 0.17s system 16% cpu 1.821 total

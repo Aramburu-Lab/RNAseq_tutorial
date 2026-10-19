@@ -6,12 +6,25 @@ summary = "Reproduce"
 lead = "Figure {figure_id}: paste these lines into bash on Linux, macOS or WSL2, or download them as a script."
 download = "Download {name}"
 upstream = "Upstream: the command that wrote these inputs and drew the figure"
-no_container = "Docker and Apptainer tabs follow once the figures image is published; pixi runs it now."
+note = "Docker runs on a laptop, Apptainer on a cluster, and pixi builds the environment from a clone of the repository."
+
+# The panel's tabs, in this order; Docker is shown first.
+[tabs]
+docker = "Docker"
+apptainer = "Apptainer"
+pixi = "pixi"
 
 [steps]
 environment = "{step}. Environment: ctx {version} at commit {commit}, through pixi, then a clean folder."
 environment_dirty = "{step}. Environment: ctx {version} from commit {commit} with uncommitted changes, which a clone does not hold."
 environment_wheel = "{step}. Environment: an installed ctx {version}; install the same version, then a clean folder."
+environment_docker = "{step}. Environment: the figures image of ctx {version} through Docker, then a clean folder."
+environment_apptainer = "{step}. Environment: the figures image of ctx {version} through Apptainer, converted once to a SIF file, then a clean folder."
+image_tag = "The image is named by its tag until `containers/digests.lock` records its digest; `CTX_FIGURES_IMAGE` names another image."
+image_digest = "The image is pinned by its digest; `CTX_FIGURES_IMAGE` names another image."
+image_platform = "The image is `linux/amd64`; Apple silicon runs it under emulation."
+image_login = "On a cluster, pull on the login node: compute nodes may have no network."
+repository = "The course repository at commit {commit}, for the inputs it holds."
 check_tool = "sha256sum on Linux and WSL2, shasum on macOS."
 inputs = "{step}. Inputs: copy each file from the ctx root that drew this figure, then check its bytes."
 root = "The ctx root these files sit in; change it if the folder moved."
