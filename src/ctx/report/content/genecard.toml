@@ -279,6 +279,8 @@ reading = [
 x = "Gene"
 y = "Expression"
 caption = "{test}. p BH-adjusted over the {family} listed genes with a box in this contrast. n = {n_reference} {reference}, {n_tested} {tested}; rank-biserial r is positive when {tested} is higher."
+# A paired contrast (E.1e): a line joins each individual's two samples.
+caption_paired = "{test}; a grey line joins an individual's two samples. p BH-adjusted over the {family} listed genes with a box in this contrast. n = {n_reference} {reference}, {n_tested} {tested}; r is positive when {tested} is higher."
 none = "No box for {symbol} in {contrast}: M5 did not test it there, or a group holds too few values to rank."
 
 [figures.box.columns]
@@ -288,6 +290,7 @@ sample = ["none", "Sample."]
 donor = ["none", "Individual."]
 value = ["log2 reads", "log2(count / M5 size factor + 1): normalised, as M5 writes it."]
 deseq2_padj = ["dimensionless", "DESeq2 padj of the gene in this contrast; empty where M5 did not test it."]
+pair = ["none", "Individual a grey line joins across the two groups, where the contrast is paired; empty otherwise."]
 
 [figures.contrasts]
 title = "{symbol} in every contrast of this dataset, M5 normalised values"
@@ -296,6 +299,7 @@ reading = [
     "A box pair is one contrast's samples, each normalised by that contrast's own M5 size factors.",
     "A sample in two contrasts has a value in each. Above each pair: n per group, p and r.",
     "A contrast with too few values in a group, or nothing to rank, is not tested; the select pages through the rest.",
+    "In a paired contrast a grey line joins each individual's two samples.",
 ]
 x = "Contrast"
 y = "Expression"
@@ -313,6 +317,7 @@ sample = ["none", "Sample."]
 donor = ["none", "Individual."]
 batch = ["none", "Batch of the sample sheet; empty where it has none."]
 value = ["log2 reads", "log2(count / the contrast's M5 size factor + 1)."]
+pair = ["none", "Individual a grey line joins across the two groups, where the contrast is paired; empty otherwise."]
 
 # Every value the own-sample panels draw (E.1c2), one row per gene, contrast and sample.
 [figures.own_values.columns]

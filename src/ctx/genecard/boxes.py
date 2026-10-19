@@ -8,7 +8,7 @@ and tests come from ``samples``.
 
 import textwrap
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from typing import Any
 
 import polars as pl
@@ -21,7 +21,7 @@ from ctx.genecard import samples
 from ctx.genecard.cards import Card
 from ctx.report import text
 from ctx.viz.annotate import Caption, FeatureTest, wrap
-from ctx.viz.box import STAT_COLUMNS, BoxData, least_width
+from ctx.viz.box import STAT_COLUMNS, BoxData
 from ctx.viz.box import interactive as box_interactive
 from ctx.viz.style import HEADROOM
 
@@ -69,13 +69,9 @@ class OwnBox(BoxData):
         return {**self.columns, **self.stats}
 
     def interactive(self) -> Any:
-        """The plotly box with each wrapped feature name on its lines, as the files draw it.
+        """The plotly box, with room over each box for F1's three label lines.
 
-        plotly prints a category's line break as nothing, and ``box.least_width`` measured the
-        name as one line: F1's six contrasts asked for a phone's layout at 1,009 px. The ticks
-        name each category with ``<br>`` between its lines, and the upright layout's least width
-        is measured on each name's widest line. The phone's layout, turned labels, is kept only
-        where it is the narrower of the two; ``box.narrow_width`` counts its lines already.
+        ``box.interactive`` draws a wrapped name on its lines and measures it line by line.
         """
         fig = box_interactive(self)
         if isinstance(self.caption, OwnCaption) and self.caption.with_n:
@@ -84,27 +80,6 @@ class OwnBox(BoxData):
             low, high = fig.layout.yaxis.range
             span = (high - low) / (1 + BELOW + HEADROOM)
             fig.update_yaxes(range=[low, high + span * HEADROOM / 2])
-        names = self.frame["feature"].unique(maintain_order=True).to_list()
-        if not any("\n" in n for n in names):
-            return fig
-        fig.update_xaxes(tickmode="array", tickvals=names,
-                         ticktext=[n.replace("\n", "<br>") for n in names])  # fmt: skip
-        meta = fig.layout.meta
-        relayout = meta["narrow"]["relayout"]
-        relayout["xaxis.ticktext"] = [t.replace("\n", "<br>") for t in relayout["xaxis.ticktext"]]
-        widest = {n: max(n.split("\n"), key=len) for n in names}
-        one_line = replace(
-            self, frame=self.frame.with_columns(pl.col("feature").replace_strict(widest)),
-            caption=replace(self.caption, tests=tuple(replace(t, feature=widest[t.feature])
-                                                      for t in self.caption.tests)),
-        )  # fmt: skip
-        upright = least_width(one_line, tuple(fig.layout.yaxis.range))
-        if sum(meta["least_width"][0]) < sum(upright[0]):
-            fig.update_layout(meta={**meta, "narrow": {**meta["narrow"], "below": sum(upright[0])}})
-        else:
-            # Turned, F1's labels need more room than upright (1,184 px against 621 for
-            # Step-1's six): the upright layout is kept at every width and scrolls below it.
-            fig.layout.meta = {"least_width": upright}
         return fig
 
 
@@ -146,11 +121,12 @@ def box(card: Card, values: samples.Values, contrast: str, said: Words,
     named = dict(zip(samples.GROUPS, (reference, tested), strict=True))
     rows = values.frame.filter((pl.col("gene_id") == card.gene_id)
                                & (pl.col("contrast") == contrast))  # fmt: skip
+    paired = values.paired.get(contrast, False)
     frame = rows.select(pl.lit(card.symbol).alias("feature"),
                         group=pl.col("group").replace_strict(named),
                         sample="sample", donor="donor", value="value",
-                        deseq2_padj=pl.lit(padj, dtype=pl.Float64))  # fmt: skip
-    paired = values.paired.get(contrast, False)
+                        deseq2_padj=pl.lit(padj, dtype=pl.Float64),
+                        pair=pl.col("donor") if paired else pl.lit(None, pl.String))  # fmt: skip
     numbers = {"symbol": card.symbol, "contrast": said.label, "reference": reference,
                "tested": tested, "n_reference": t.n_reference, "n_tested": t.n_tested,
                "family": len(tests), "test": _test_words(paired), "p": _p(t.p_adj), "r": t.r,
@@ -158,13 +134,15 @@ def box(card: Card, values: samples.Values, contrast: str, said: Words,
     caption = OwnCaption(
         (reference, tested),
         (FeatureTest(card.symbol, t.n_reference, t.n_tested, t.statistic, t.p, t.p_adj, t.r),),
-        words=text.fill(PAGE, "figures.box.caption", **numbers),
+        words=text.fill(
+            PAGE, "figures.box.caption_paired" if paired else "figures.box.caption", **numbers
+        ),  # fmt: skip
     )
     data = OwnBox(frame=frame, columns=_columns("box"),
                   feature_label=text.word(PAGE, "figures.box.x"),
                   value_label=text.word(PAGE, "figures.box.y"), unit=_columns("box")["value"][0],
                   groups=(reference, tested), hover=("sample", "donor", "deseq2_padj"),
-                  caption=caption, stats=_stats(paired, not paired))  # fmt: skip
+                  caption=caption, pairs="pair", stats=_stats(paired, not paired))  # fmt: skip
     return data, numbers
 
 
@@ -244,10 +222,12 @@ def contrasts(card: Card, values: samples.Values, labels: Mapping[str, str],
                                & pl.col("contrast").is_in(list(tests)))  # fmt: skip
     if family.batch is not None:
         rows = rows.filter(pl.col("batch") == family.batch)
+    joined = [c for c in tests if values.paired.get(c, False)]
     frame = rows.select(feature=pl.col("contrast").replace_strict(shown),
                         group=pl.col("group").replace_strict(named),
                         contrast=pl.col("contrast").replace_strict(dict(labels)),
-                        sample="sample", donor="donor", batch="batch", value="value")  # fmt: skip
+                        sample="sample", donor="donor", batch="batch", value="value",
+                        pair=pl.when(pl.col("contrast").is_in(joined)).then("donor"))  # fmt: skip
     paired = {values.paired.get(c, False) for c in tests}
     top = max(tests, key=lambda c: (abs(tests[c].r), -tests[c].p_adj))
     names = list(family.tests)
@@ -267,7 +247,7 @@ def contrasts(card: Card, values: samples.Values, labels: Mapping[str, str],
                   value_label=text.word(PAGE, "figures.contrasts.y"),
                   unit=_columns("contrasts")["value"][0], groups=(roles[0], roles[1]),
                   hover=("contrast", "sample", "donor", "batch"), caption=caption,
-                  stats=_stats(True in paired, False in paired))  # fmt: skip
+                  pairs="pair", stats=_stats(True in paired, False in paired))  # fmt: skip
     return data, numbers
 
 

@@ -25,13 +25,16 @@ from scipy.stats import false_discovery_control, mannwhitneyu, wilcoxon
 from test_genecard import _cards, _register, _settings, root  # noqa: F401 - the fixture
 
 from ctx.dataset import load
+from ctx.de.page import Words
 from ctx.de.run import newest
 from ctx.genecard import boxes, samples
 from ctx.genecard import run as module
 from ctx.genecard.cards import Card
 from ctx.report.builder import unpacked
+from ctx.viz.box import paired_lines
+from ctx.viz.metrics import text_width
 from ctx.viz.save import layout_problems, thin_tick_labels
-from ctx.viz.style import THEMES
+from ctx.viz.style import BOX_GAP_PX, SIZES, THEMES, on_page
 
 # Six contrasts in Step-1's words: the longest labels F1 draws side by side.
 LONG = ("Neutrophils, G-CSF donors against steady state",
@@ -203,6 +206,30 @@ def test_a_batch_view_is_offered_only_where_it_tests_two_contrasts():
     assert samples.batches(many, boxes.MAX_BATCHES) == []
 
 
+def test_f1_and_the_box_join_donors_only_in_a_paired_contrast():
+    # E.1e. Mutations: a line drawn for an unpaired contrast whose donors sit in both groups;
+    # the paired contrast's lines left out; the box's caption silent about its lines.
+    four = ([1.0, 2.0, 3.0, 4.0], [3.0, 4.0, 6.0, 8.0])
+    built = _values({"joined": four, "apart": four}, paired=("joined",))
+    # The unpaired contrast's donors also give one sample to each group, as Step-1's can.
+    fourth = pl.int_range(pl.len()).over("contrast") % 4
+    again = pl.when(pl.col("contrast") == "apart").then(pl.format("d{}", fourth)).otherwise("donor")
+    values = samples.Values(built.frame.with_columns(donor=again), built.paired)
+    labels = {"joined": "Joined", "apart": "Apart"}
+    (_, data, _), *_ = boxes.views(CARD, values, labels, [])
+    lines = paired_lines(data)
+    assert list(lines) == [boxes.label("Joined")]
+    assert [u for u, _, _ in lines[boxes.label("Joined")]] == ["d0", "d1", "d2", "d3"]
+    tests = {CARD.gene_id: samples.across(values, CARD.gene_id, ["joined"], None)[0]["joined"]}
+    said = Words("Joined", "tested", "reference")
+    box, _ = boxes.box(CARD, values, "joined", said, tests, None)
+    assert len(paired_lines(box)[CARD.symbol]) == 4  # noqa: PLR2004 - four donors
+    assert "a grey line joins an individual's two samples" in box.caption_text()
+    apart = {CARD.gene_id: samples.across(values, CARD.gene_id, ["apart"], None)[0]["apart"]}
+    unpaired, _ = boxes.box(CARD, values, "apart", Words("Apart", "t", "r"), apart, None)
+    assert paired_lines(unpaired) == {} and "line" not in unpaired.caption_text()
+
+
 def test_six_long_contrast_labels_draw_whole_in_the_files():
     # Mutations: PER_FIGURE raised to seven or more; LABEL_CHARS widened so a label hides its
     # neighbour's: thin_tick_labels then hides every other label, which layout_problems
@@ -219,17 +246,20 @@ def test_six_long_contrast_labels_draw_whole_in_the_files():
 
 
 def test_the_page_plot_names_each_line_and_leaves_room_for_n():
-    # Mutations: the category's line breaks left to plotly, which prints them as nothing; the
-    # least width measured on the whole name; the n line given no room; the phone's layout kept
-    # where it needs more room than upright.
+    # Mutations: the name's line breaks left to plotly, which prints them as nothing; the least
+    # width measured on the whole name; the n line given no room; the phone's layout kept where
+    # it needs more room than upright. viz.box measures and draws each line since E.1e.
     contrasts = {f"c{i}": ([1.0, 2.0, 3.0, 4.0], [3.0, 4.0, 5.0 + i, 6.0]) for i in range(6)}
     labels = dict(zip(contrasts, LONG, strict=True))
     (_, data, _), *_ = boxes.views(CARD, _values(contrasts), labels, [])
     fig = data.interactive()
     assert list(fig.layout.xaxis.ticktext) == [boxes.label(x).replace("\n", "<br>") for x in LONG]
-    plain = boxes.box_interactive(data)
-    assert sum(fig.layout.meta["least_width"][0]) < plain.layout.meta["narrow"]["below"]
+    tick = on_page(SIZES["tick"])
+    whole = max(text_width(boxes.label(x), tick) for x in LONG)
+    ((scaled, _),) = fig.layout.meta["least_width"]
+    assert scaled < len(LONG) * (whole + BOX_GAP_PX)
     assert "narrow" not in fig.layout.meta
+    plain = boxes.box_interactive(data)
     low, high = fig.layout.yaxis.range
     low0, high0 = plain.layout.yaxis.range
     assert low == pytest.approx(low0) and high > high0

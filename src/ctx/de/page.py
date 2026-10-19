@@ -241,7 +241,8 @@ def agreement_text(x: str, y: str, numbers: Mapping[str, Any]) -> FigureText:
     )
 
 
-def deseq_box_text(said: Words, n_genes: int, passing: tuple[int, int]) -> FigureText:
+def deseq_box_text(said: Words, n_genes: int, passing: tuple[int, int],
+                   paired: bool = False) -> FigureText:  # fmt: skip
     """The named-gene boxes' words with DESeq2's padj above each gene.
 
     ``passing`` counts the genes below ALPHA by DESeq2's padj and by the boxes' own test.
@@ -251,16 +252,22 @@ def deseq_box_text(said: Words, n_genes: int, passing: tuple[int, int]) -> Figur
         lead=figure(
             "box", "deseq_lead", passing=passing[0], mwu=passing[1], shown=n_genes, alpha=ALPHA
         ),  # fmt: skip
-        reading=reading("box", n_genes=n_genes, tested=said.tested),
+        reading=box_reading(said, n_genes, paired),
     )
 
 
-def box_text(said: Words, n_genes: int, passing: int) -> FigureText:
+def box_reading(said: Words, n_genes: int, paired: bool) -> tuple[str, ...]:
+    """The named-gene boxes' reading guide; a paired contrast's says what its lines join."""
+    extra = (figure("box", "reading_paired"),) if paired else ()
+    return (*reading("box", n_genes=n_genes, tested=said.tested), *extra)
+
+
+def box_text(said: Words, n_genes: int, passing: int, paired: bool = False) -> FigureText:
     """Title, lead and reading guide of the named-gene boxes; ``passing`` below ALPHA."""
     return FigureText(
         title=figure("box", "title", label=said.label),
         lead=figure("box", "lead", passing=passing, shown=n_genes, alpha=ALPHA),
-        reading=reading("box", n_genes=n_genes, tested=said.tested),
+        reading=box_reading(said, n_genes, paired),
     )
 
 

@@ -1,7 +1,10 @@
 """Box plot: one value per sample, two groups, one or more features.
 
 ``static()`` and ``interactive()`` read the same ``BoxData``, so the two renderings cannot
-disagree about the data or the statistics.
+disagree about the data or the statistics. Where a contrast is paired, ``pairs`` names the
+unit measured in both groups, a donor, and both draw a line from its reference value to its
+comparison value (``paired_lines``, E.1e). A feature's name may hold line breaks: each line is
+drawn and measured as a line (``_lines``).
 """
 
 from collections.abc import Mapping
@@ -33,6 +36,7 @@ from ctx.viz.style import (
     POINT_ALPHA,
     ROLES,
     SIZES,
+    THEMES,
     Theme,
     apply_matplotlib,
     figure_inches,
@@ -41,6 +45,10 @@ from ctx.viz.style import (
 )
 
 REQUIRED = ("feature", "group", "sample", "value")
+# Each box's centre, left of and right of its feature's position, as seaborn dodges two
+# groups; the page's boxes sit at the same places on the same numeric axis.
+OFFSETS = (-0.2, 0.2)
+BOX_WIDTH = 0.4
 # The numbers the figure prints, shipped beside the values they were computed from.
 STAT_COLUMNS = {
     "n_group": ("samples", "Non-missing values of this feature in this row's group."),
@@ -64,6 +72,8 @@ class BoxData:
         groups: (reference, comparison).
         hover: Columns shown on hover, besides feature, group and value.
         caption: The statistics, computed once.
+        pairs: The column naming the unit measured in both groups, a donor, where the
+            contrast is paired; empty draws no lines.
     """
 
     frame: pl.DataFrame
@@ -74,6 +84,12 @@ class BoxData:
     groups: tuple[str, str]
     hover: tuple[str, ...]
     caption: Caption
+    pairs: str = ""
+
+    def __post_init__(self) -> None:
+        """Refuse a pairs column the frame does not hold: no line could be drawn from it."""
+        if self.pairs and self.pairs not in self.frame.columns:
+            raise ValueError(f"missing pairs column {self.pairs!r}")
 
     def table(self) -> pl.DataFrame:
         """The values and the statistics the figure prints; see ``table()``."""
@@ -128,7 +144,8 @@ def box_data(
         hover: Extra columns to show on hover.
 
     Returns:
-        The figure's data contract.
+        The figure's data contract; a paired contrast's caller sets ``pairs`` with
+        ``dataclasses.replace``.
 
     Raises:
         ValueError: If a required or hover column is missing.
@@ -140,6 +157,35 @@ def box_data(
     caption = compare_groups(frame, feature="feature", group="group", value="value", groups=groups)
     unit = columns["value"][0]
     return BoxData(frame, columns, feature_label, value_label, unit, groups, hover, caption)
+
+
+def paired_lines(data: BoxData) -> dict[str, list[tuple[str, float, float]]]:
+    """Each feature's (unit, reference value, comparison value), one line per paired unit.
+
+    A unit is drawn where it holds exactly one measured value in each group of that feature: a
+    second sample in one group leaves no one line to draw, so it draws none. Units in the
+    order they first appear; no lines where ``pairs`` is empty.
+    """
+    if not data.pairs:
+        return {}
+    reference, comparison = data.groups
+    measured = data.frame.filter(pl.col("value").is_not_null() & pl.col("value").is_not_nan()
+                                 & pl.col(data.pairs).is_not_null())  # fmt: skip
+    once = measured.filter(pl.len().over("feature", data.pairs, "group") == 1)
+    wide = once.pivot("group", index=["feature", data.pairs], values="value",
+                      aggregate_function="first", maintain_order=True)  # fmt: skip
+    if reference not in wide.columns or comparison not in wide.columns:
+        return {}
+    both = wide.drop_nulls([reference, comparison])
+    out: dict[str, list[tuple[str, float, float]]] = {}
+    for feature, unit, a, b in both.select("feature", data.pairs, reference, comparison).rows():
+        out.setdefault(feature, []).append((str(unit), float(a), float(b)))
+    return out
+
+
+def _lines(name: str) -> list[str]:
+    """A feature's name as its tick prints it, one entry per line."""
+    return name.split("\n")
 
 
 def table(data: BoxData) -> pl.DataFrame:
@@ -186,12 +232,13 @@ def static(data: BoxData, theme: Theme) -> Any:
     # matplotlib 3.11 deprecates. Geometry as seaborn dodges two groups: boxes 0.4 wide at
     # +-0.2 around each feature, caps half a box.
     ink = {"color": theme.ink, "linewidth": LINE_WIDTHS["box"]}
-    for offset, role, group in zip((-0.2, 0.2), ("reference", "comparison"), data.groups,
+    for offset, role, group in zip(OFFSETS, ("reference", "comparison"), data.groups,
                                    strict=True):  # fmt: skip
         values = [_values(data.frame, f, group) for f in features]
         positions = [i + offset for i in range(len(features))]
         ax.boxplot(
-            values, positions=positions, widths=0.4, capwidths=0.2, orientation="vertical",
+            values, positions=positions, widths=BOX_WIDTH, capwidths=BOX_WIDTH / 2,
+            orientation="vertical",
             patch_artist=True, showfliers=False, manage_ticks=False, label=group,
             boxprops={"facecolor": ROLES[role], "edgecolor": theme.ink,
                       "linewidth": LINE_WIDTHS["box"]},
@@ -202,6 +249,7 @@ def static(data: BoxData, theme: Theme) -> Any:
         for x, v in zip(positions, values, strict=True):
             ax.scatter([x] * len(v), v, s=MARKER_SIZE**2, color=theme.ink, alpha=POINT_ALPHA,
                        linewidths=LINE_WIDTHS["marker_edge"], zorder=3)  # fmt: skip
+    _pair_lines(ax, data, features, theme)
     ax.set_xticks(range(len(features)), features)
     ax.set_xlim(-0.5, len(features) - 0.5)
     top = float(data.frame["value"].to_numpy().max())
@@ -218,6 +266,21 @@ def static(data: BoxData, theme: Theme) -> Any:
     place_caption(fig, data.caption.text(), width, height)
     refit_y_title(fig, ax, axis_title(data.value_label, data.unit))
     return fig
+
+
+def _pair_lines(ax: Any, data: BoxData, features: list[str], theme: Theme) -> None:
+    """One line per paired unit, from its reference point to its comparison point, under both.
+
+    In the reference grey, which reads on both themes; the page draws it in the same grey.
+    """
+    from matplotlib.collections import LineCollection  # noqa: PLC0415 - heavy
+
+    lines = paired_lines(data)
+    segments = [[(i + OFFSETS[0], a), (i + OFFSETS[1], b)]
+                for i, f in enumerate(features) for _, a, b in lines.get(f, [])]  # fmt: skip
+    if segments:
+        ax.add_collection(LineCollection(segments, colors=theme.reference,
+                                         linewidths=LINE_WIDTHS["line"], zorder=2))  # fmt: skip
 
 
 def _inches() -> tuple[float, float]:
@@ -244,14 +307,20 @@ def interactive(data: BoxData) -> Any:
 
     stats = {t.feature: t for t in data.caption.tests}
     schema, title = data.frame.schema, axis_title(data.value_label, data.unit)
+    features = data.frame["feature"].unique(maintain_order=True).to_list()
+    at = {f: i for i, f in enumerate(features)}
     fig = go.Figure()
-    for role, group in zip(("reference", "comparison"), data.groups, strict=True):
+    if (pairs := _pair_trace(go, data, at)) is not None:
+        fig.add_trace(pairs)
+    for offset, role, group in zip(OFFSETS, ("reference", "comparison"), data.groups,
+                                   strict=True):  # fmt: skip
         rows = data.frame.filter(pl.col("group") == group)
         extra = [
             [
                 stats[f].n_reference if role == "reference" else stats[f].n_comparison,
                 stats[f].p_adj,
                 stats[f].r,
+                " ".join(_lines(f)),
             ]
             for f in rows["feature"]
         ]
@@ -260,10 +329,13 @@ def interactive(data: BoxData) -> Any:
         k = len(data.hover)
         hover_lines = [f"{c}: {hover_field(f'customdata[{i}]', schema[c])}"
                        for i, c in enumerate(data.hover)]  # fmt: skip
+        # A numeric axis, each box at its feature's position plus its offset as the files draw
+        # it, so a donor's line (``_pair_trace``) meets its two points.
         fig.add_trace(
             go.Box(
-                x=rows["feature"].to_list(),
+                x=[at[f] + offset for f in rows["feature"]],
                 y=rows["value"].to_list(),
+                width=BOX_WIDTH,
                 name=group,
                 marker={"color": ROLES[role], "opacity": POINT_ALPHA, "size": PLOTLY_MARKER_PX},
                 boxpoints="all",
@@ -272,7 +344,7 @@ def interactive(data: BoxData) -> Any:
                 customdata=custom,
                 hovertemplate="<br>".join(
                     [
-                        f"{data.feature_label}: %{{x}}",
+                        f"{data.feature_label}: %{{customdata[{k + 3}]}}",
                         f"group: {group}",
                         *hover_lines,
                         f"{title}: {hover_field('y', schema['value'])}",
@@ -287,7 +359,7 @@ def interactive(data: BoxData) -> Any:
     top = float(data.frame["value"].to_numpy().max())
     labels = [
         {
-            "x": f,
+            "x": at[f],
             "y": top,
             "text": data.caption.label(f).replace("\n", "<br>"),
             "showarrow": False,
@@ -300,8 +372,10 @@ def interactive(data: BoxData) -> Any:
     fig.update_layout(
         template=plotly_templates()["white"],
         height=PLOTLY_HEIGHT_PX["box"],
-        boxmode="group",
-        xaxis_title=data.feature_label,
+        boxmode="overlay",
+        xaxis={"title": {"text": data.feature_label}, "tickmode": "array",
+               "tickvals": list(range(len(features))), "ticktext": [_tick(f) for f in features],
+               "range": [-0.5, len(features) - 0.5], "zeroline": False, "showgrid": False},
         # Room above the tallest box for the p and r labels, as the static figure leaves.
         yaxis={"title": {"text": page_y_title(title, files_room(lambda t: static(data, t)))},
                "range": [low - 0.05 * span, high + HEADROOM * span]},
@@ -309,9 +383,42 @@ def interactive(data: BoxData) -> Any:
     )  # fmt: skip
     y_range = (low - 0.05 * span, high + HEADROOM * span)
     wide, narrow = least_width(data, y_range), narrow_width(data, y_range)
-    fig.update_layout(meta={"least_width": narrow,
-                            "narrow": _narrow(data, sum(wide[0]), len(labels))})  # fmt: skip
+    if sum(narrow[0]) < sum(wide[0]):
+        fig.update_layout(meta={"least_width": narrow,
+                                "narrow": _narrow(data, sum(wide[0]), len(labels))})  # fmt: skip
+    else:
+        # Turned, names of several lines can need more room than upright (Step-1's six F1
+        # contrasts, 1,184 px against 621): the upright layout stays, scrolling below it.
+        fig.update_layout(meta={"least_width": wide})
     return fig
+
+
+def _tick(feature: str) -> str:
+    """A feature's tick label on the page: each line of its name on its own line."""
+    return "<br>".join(_lines(feature))
+
+
+def _pair_trace(go: Any, data: BoxData, at: Mapping[str, int]) -> Any:
+    """The paired units' lines as one trace, each from its reference point to its comparison's.
+
+    Drawn first, so under the boxes' points; in the reference grey of both themes. None where
+    nothing is paired.
+    """
+    lines = paired_lines(data)
+    if not lines:
+        return None
+    x: list[float | None] = []
+    y: list[float | None] = []
+    units: list[str | None] = []
+    for feature, pairs in lines.items():
+        for unit, a, b in pairs:
+            x += [at[feature] + OFFSETS[0], at[feature] + OFFSETS[1], None]
+            y += [a, b, None]
+            units += [unit, unit, None]
+    return go.Scatter(x=x, y=y, mode="lines", showlegend=False, name=data.pairs,
+                      line={"width": LINE_WIDTHS["line"], "color": THEMES["white"].reference},
+                      customdata=units, connectgaps=False,
+                      hovertemplate=f"{data.pairs}: %{{customdata}}<extra></extra>")  # fmt: skip
 
 
 def _narrow(data: BoxData, below: float, n_labels: int) -> dict[str, Any]:
@@ -323,9 +430,10 @@ def _narrow(data: BoxData, below: float, n_labels: int) -> dict[str, Any]:
     boxes hide; plotly's automargin gives the turned labels their room below the axis.
     """
     features = data.frame["feature"].unique(maintain_order=True).to_list()
-    ticks = [f"{f}<br>{data.caption.label(f, 'label_line')}" for f in features]
+    ticks = [f"{_tick(f)}<br>{data.caption.label(f, 'label_line')}" for f in features]
     relayout: dict[str, Any] = {"xaxis.tickangle": -90, "xaxis.tickmode": "array",
-                                "xaxis.tickvals": features, "xaxis.ticktext": ticks}  # fmt: skip
+                                "xaxis.tickvals": list(range(len(features))),
+                                "xaxis.ticktext": ticks}  # fmt: skip
     relayout |= {f"annotations[{i}].visible": False for i in range(n_labels)}
     return {"below": below, "relayout": relayout, "restyle": []}
 
@@ -342,7 +450,7 @@ def narrow_width(data: BoxData, y_range: tuple[float, float]) -> list[list[float
     """
     tick = on_page(SIZES["tick"])
     features = data.frame["feature"].unique(maintain_order=True).to_list()
-    lines = max(2 + f.count("\n") for f in features)
+    lines = max(1 + len(_lines(f)) for f in features)
     y_ticks = max(text_width(f"{v:.0f}", tick) for v in y_range)
     slot = lines * tick * LINE_SPACING + BOX_GAP_PX
     scaled = len(features) * slot + y_ticks + on_page(SIZES["axis_label"])
@@ -365,7 +473,7 @@ def least_width(data: BoxData, y_range: tuple[float, float]) -> list[list[float]
     features = data.frame["feature"].unique(maintain_order=True).to_list()
     widest = max(
         max(
-            text_width(f, tick),
+            *(text_width(line, tick) for line in _lines(f)),
             *(text_width(line, note) for line in data.caption.label(f).split("\n")),
         )
         for f in features
