@@ -1,0 +1,22 @@
+process: exit 0
+      250.95 real       369.55 user        39.05 sys
+          1236336640  maximum resident set size
+             1474920  peak memory footprint
+11237319 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/tier1_f1/outputs/03_process/2026-10-19_process_tier1_teach_overview_v1.html
+7414597 /Users/rytis/ctx_tier1/outputs/03_process/2026-10-07_process_tier1_teach_overview_v1.html
+== blood_m3_mapping
+panels on the page: 12; for blood_m3_mapping: 1
+exit 0
+.csv         byte-equal      1,629 B
+_white.pdf   byte-equal     27,114 B
+_white.svg   byte-equal     15,000 B
+_black.pdf   byte-equal     27,123 B
+_black.svg   byte-equal     15,525 B
+== blood_m3_counters
+panels on the page: 12; for blood_m3_counters: 4
+exit 0
+.csv         byte-equal     55,460 B
+_white.pdf   byte-equal     40,578 B
+_white.svg   byte-equal     90,554 B
+_black.pdf   byte-equal     40,589 B
+_black.svg   byte-equal     91,094 B

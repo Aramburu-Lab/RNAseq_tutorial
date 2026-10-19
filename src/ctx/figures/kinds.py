@@ -9,10 +9,16 @@ used, since the modules that draw import ``ctx.viz.save``, which imports this fi
 from typing import Any
 
 from ctx.dataset import Dataset
-from ctx.figures import kinds_m1, kinds_m2, kinds_m5, kinds_m6
+from ctx.figures import kinds_m1, kinds_m2, kinds_m3, kinds_m5, kinds_m6
 from ctx.figures.kind import Kind
 
-KINDS: tuple[Kind, ...] = (*kinds_m1.KINDS, *kinds_m2.KINDS, *kinds_m5.KINDS, *kinds_m6.KINDS)
+KINDS: tuple[Kind, ...] = (
+    *kinds_m1.KINDS,
+    *kinds_m2.KINDS,
+    *kinds_m3.KINDS,
+    *kinds_m5.KINDS,
+    *kinds_m6.KINDS,
+)
 
 
 def kind(module: str, figure: str) -> Kind | None:

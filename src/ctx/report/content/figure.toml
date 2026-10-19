@@ -35,6 +35,8 @@ pca = "The PCA, by its name in the dataset file's de pca list."
 # M2
 metric = "The registry metric the strip draws, by its id."
 plot = "The FastQC plot, by its figure's name."
+# M3
+comparison = "The comparison of two counters, by its name in M3's tables."
 inputs = "Each input file, in this folder."
 sha256 = "Each input's SHA-256; ctx figure refuses a file whose bytes differ."
 
@@ -57,7 +59,7 @@ dispersions = "M5's dispersions of the contrast's fit."
 gene_sets = "The gene-set file ctx setup fetched."
 # M2
 registry = "The QC registry the run read."
-figure_options = "M2's options as the run was given them."
+figure_options = "The module's options as its run was given them."
 metrics = "M2's values, one row per sample."
 bands = "M2's MAD bands per metric and stratum."
 flags = "M2's flags: each sample and the metric that flagged it."
@@ -71,6 +73,15 @@ fastqc_theoretical = "M2's copy of MultiQC's theoretical GC curve."
 fastqc_overrepresented = "M2's copy of the top overrepresented sequence's share."
 grid = "M2's fastp grid on one run."
 read_metrics = "M2's read values, one row per run."
+# M3
+alignment = "M3's alignment table, one row per sample."
+outcomes = "M3's reads per outcome of each sample's bar."
+setting_outcomes = "M3's reads per outcome of each setting's bar."
+strandedness = "M3's reads assigned at each strand setting."
+concordance = "M3's agreement of each comparison."
+sums = "M3's gene sums of each comparison."
+gene_comparison = "M3's counts of each gene by both counters."
+groups = "M3's sheet groups the bars filter by."
 
 [readme]
 title = "Figure"

@@ -14,8 +14,8 @@ from ctx.dataset import Dataset
 # The dataset file the module read, and the QC registry gather's depth standard comes from.
 DATASET_FILE = ("dataset_file", "")
 QC_REGISTRY = ("qc_registry", "")
-# The registry ``ctx qc`` read, which its figure options table names (``ctx.qc.figure_tables``).
-QC_REGISTRY_RUN = ("qc_registry_run", "")
+# The QC registry a module read, which its figure options table names: ("registry_of", module).
+REGISTRY_OF = "registry_of"
 # A file ``ctx setup`` fetched, by its resource name in the dataset file: ("resource", name).
 RESOURCE = "resource"
 
@@ -29,6 +29,15 @@ class NoFigureError(ValueError):
 def resource(name: str) -> tuple[str, str]:
     """The input that is the dataset file's resource ``name``, under the root it was fetched to."""
     return (RESOURCE, name)
+
+
+def registry_of(module: str) -> tuple[str, str]:
+    """The input that is the QC registry ``module`` read, as its ``figure_options`` names it."""
+    return (REGISTRY_OF, module)
+
+
+# The registry ``ctx qc`` read (``ctx.qc.figure_tables``).
+QC_REGISTRY_RUN = registry_of("qc")
 
 
 def _no_check(_: Any, __: Dataset) -> list[str]:

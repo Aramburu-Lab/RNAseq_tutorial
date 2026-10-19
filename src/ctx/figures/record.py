@@ -17,7 +17,7 @@ import ctx
 from ctx import cohorts, runtime
 from ctx.dataset import Dataset, DatasetError, load, loaded
 from ctx.figures import kinds
-from ctx.figures.kind import DATASET_FILE, QC_REGISTRY, QC_REGISTRY_RUN, RESOURCE, Kind
+from ctx.figures.kind import DATASET_FILE, QC_REGISTRY, REGISTRY_OF, RESOURCE, Kind
 from ctx.figures.spec import FigureSpec, Input, figure_id
 from ctx.io.naming import MODULES
 from ctx.report import text
@@ -78,8 +78,8 @@ def input_paths(kind: Kind, params: object, spec: Dataset, root: Path) -> dict[s
             found[name] = path
         elif (module, what) == QC_REGISTRY:
             found[name] = registry.resolve(None)
-        elif (module, what) == QC_REGISTRY_RUN:
-            options = newest(root / "outputs" / FOLDERS["qc"], spec.slug, "figure_options")
+        elif module == REGISTRY_OF:
+            options = newest(root / "outputs" / FOLDERS[what], spec.slug, "figure_options")
             found[name] = Path(pl.read_parquet(options)["registry"][0])
         elif module == RESOURCE:
             found[name] = _fetched(root, spec, what)

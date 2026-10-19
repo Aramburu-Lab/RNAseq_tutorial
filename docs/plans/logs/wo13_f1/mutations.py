@@ -12,6 +12,7 @@ W = Path(__file__).resolve().parents[4]
 FIG = "tests/test_figures.py"
 EVERY = f"{FIG}::test_every_spec_redraws_its_data_byte_for_byte"
 M2 = "tests/test_figures_m2.py"
+M3 = "tests/test_figures_m3.py::test_every_figure_redraws_byte_for_byte"
 MUTATIONS = {
     "m5m6": [
         ("dispersions not read back", "src/ctx/figures/draw_m5.py",
@@ -46,6 +47,23 @@ MUTATIONS = {
         ("parsed description not read back", "src/ctx/figures/kinds.py",
          "if params is not None and k.what(params) == what:", "if params is not None:",
          f"{FIG}::test_a_kind_parsed_from_its_description_must_read_back"),
+    ],
+    "m3": [
+        ("bar outcomes in reverse", "src/ctx/process/figure_tables.py",
+         "for label, r in reads.items() for k, v in r.items()]",
+         "for label, r in reversed(list(reads.items())) for k, v in r.items()]", M3),
+        ("settings from the samples' table", "src/ctx/figures/draw_m3.py",
+         'settings = _table(inputs, "setting_outcomes")', 'settings = _table(inputs, "outcomes")',
+         M3),
+        ("gene sums left out", "src/ctx/figures/draw_m3.py",
+         'EMPTY, _table(inputs, "sums")),', "EMPTY, EMPTY),", M3),
+        ("groups dropped", "src/ctx/figures/draw_m3.py", '_table(inputs, "groups"), row',
+         '_table(inputs, "groups").select("sample"), row', M3),
+        ("registry of another module", "src/ctx/figures/kinds_m3.py",
+         '"registry": registry_of("process")', '"registry": registry_of("qc")', M3),
+        ("registry always qc's", "src/ctx/figures/record.py",
+         'options = newest(root / "outputs" / FOLDERS[what], spec.slug, "figure_options")',
+         'options = newest(root / "outputs" / FOLDERS["qc"], spec.slug, "figure_options")', M3),
     ],
     "m2": [
         ("pca shares swapped", "src/ctx/figures/draw_m2.py", "(share[0], share[1])",
