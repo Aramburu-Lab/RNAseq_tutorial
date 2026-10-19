@@ -19,6 +19,7 @@ from ctx.clinical import (
     ClinicalError,
     analyses,
     cutpoint,
+    figure_tables,
     figures,
     harmonise,
     panel,
@@ -592,6 +593,7 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write every table and figure, then the page; the page first in the returned list."""
     result = scored(ctx)
     screen = screen_table(ctx, result)
+    figure_tables.write(writer, ctx)
     results: list[Result] = [
         *notes(ctx), _patients(writer, ctx),
         *(_er_check(writer, ctx) if "er" in variables(ctx) else []), _expression(writer, ctx),

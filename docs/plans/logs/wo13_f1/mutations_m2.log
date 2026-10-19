@@ -1,0 +1,7 @@
+SURVIVED pca shares swapped: 1 passed in 48.83s | 
+CAUGHT  k from the registry file: 1 failed in 25.70s | E       assert 'median ± 7 MAD' in '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,... for
+CAUGHT  sheet without read-length groups: 1 failed in 37.96s | E       AssertionError: ('own_m2_linked_pca', '                        │
+CAUGHT  strip spec where reads take its stem: 1 failed in 58.60s | E       AssertionError: {'fastp_grid', 'linked_pca', 'run_band_map', 'sex_check', 'size_genes', 'strip:fastp_passed_reads', ...}
+SURVIVED theoretical GC curve dropped: 1 passed in 100.34s (0:01:40) | 
+CAUGHT  registry resolved afresh: 1 failed in 19.74s | E       AssertionError: {'qc_metrics.toml'}
+CAUGHT  grid run not recorded: 1 failed in 49.31s | E           AssertionError: 2026-10-19_qc_desynth_fastp_grid_v1

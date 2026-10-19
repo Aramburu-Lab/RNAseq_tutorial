@@ -1,0 +1,24 @@
+All checks passed!
+ruff check: 0
+552 files already formatted
+ruff format: 0
+Success: no issues found in 190 source files
+mypy: 0
+RESULT: PASSED (minimum: 100.0%, actual: 100.0%)
+interrogate: 0
+labdocs lint: 0
+labdocs render --check: 0
+prose lint: no violations
+prose: 0
+warning: setup: questions: 'fastp' is fastp, unmarked
+glossary lint: no errors
+glossary: 0
+     143 src/ctx/figures/kinds_m7.py
+     115 src/ctx/figures/draw_m7.py
+     200 src/ctx/proteo/figure_tables.py
+     201 tests/test_figures_m7.py
+     659 total
+........................................................................ [ 78%]
+....................                                                     [100%]
+92 passed in 263.71s (0:04:23)
+pytest: 0

@@ -1,0 +1,4 @@
+CAUGHT  contrast levels the other way round: 1 failed in 90.92s (0:01:30) | E           AssertionError: 2026-10-19_quant_chrse_estimates_v1
+SURVIVED fold changes written after the figure: 1 passed in 97.33s (0:01:37) | 
+CAUGHT  the whole sheet as the contrast's samples: 1 failed in 74.63s (0:01:14) | E       AssertionError: assert False
+CAUGHT  sheet table without its groups: 1 failed in 66.07s (0:01:06) | E       AssertionError: ('own_m4_fates', '

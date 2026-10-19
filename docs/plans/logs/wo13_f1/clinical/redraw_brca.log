@@ -1,0 +1,51 @@
+== breast_m10_er
+panels on the page: 10; for breast_m10_er: 4
+exit 0
+.csv         byte-equal     78,632 B
+_white.pdf   byte-equal     42,937 B
+_white.svg   byte-equal    185,956 B
+_black.pdf   byte-equal     42,958 B
+_black.svg   byte-equal    186,721 B
+== breast_m10_expression
+panels on the page: 10; for breast_m10_expression: 1
+exit 0
+.csv         byte-equal    467,428 B
+_white.pdf   byte-equal     61,264 B
+_white.svg   byte-equal    409,035 B
+_black.pdf   byte-equal     61,283 B
+_black.svg   byte-equal    471,555 B
+== breast_m10_scan_score
+panels on the page: 10; for breast_m10_scan_score: 1
+exit 0
+.csv         byte-equal      5,486 B
+_white.pdf   byte-equal     24,693 B
+_white.svg   byte-equal     11,515 B
+_black.pdf   byte-equal     24,704 B
+_black.svg   byte-equal     11,980 B
+== breast_m10_competing
+panels on the page: 10; for breast_m10_competing: 1
+exit 0
+.csv         byte-equal    298,010 B
+_white.pdf   byte-equal     29,317 B
+_white.svg   byte-equal     22,935 B
+_black.pdf   byte-equal     29,330 B
+_black.svg   byte-equal     23,490 B
+== breast_m10_power
+panels on the page: 10; for breast_m10_power: 1
+exit 0
+.csv         byte-equal     21,599 B
+_white.pdf   byte-equal     30,063 B
+_white.svg   byte-equal     39,607 B
+_black.pdf   byte-equal     30,093 B
+_black.svg   byte-equal     40,416 B
+== breast_m10_confounding
+panels on the page: 10; for breast_m10_confounding: 1
+exit 0
+.csv         byte-equal      2,518 B
+_white.pdf   byte-equal     33,172 B
+_white.svg   byte-equal     17,791 B
+_black.pdf   byte-equal     33,206 B
+_black.svg   byte-equal     18,106 B
+== live panel of km_score
+block characters: 5,599,820 and 5,599,820; genes 2332, 2332; screen rows 2332, 2332
+survival controls equal

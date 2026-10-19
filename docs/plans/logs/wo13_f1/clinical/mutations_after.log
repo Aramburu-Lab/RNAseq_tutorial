@@ -1,0 +1,1 @@
+CAUGHT  tables written after the figures: 1 failed in 40.16s | E           AssertionError: 2026-10-19_clinical_fake_brca_competing_v1

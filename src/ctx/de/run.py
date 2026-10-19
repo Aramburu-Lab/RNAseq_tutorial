@@ -20,7 +20,7 @@ import polars as pl
 from ctx import runtime
 from ctx.dataset import Column, Dataset, DatasetError, PcaSpec, load
 from ctx.de import figures as m5_figures
-from ctx.de.deseq import RESULT_COLUMNS, TOP_GENES, Fit, fit, pca
+from ctx.de.deseq import DISPERSION_COLUMNS, RESULT_COLUMNS, TOP_GENES, Fit, fit, pca
 from ctx.de.normalised import COLUMNS as SIZE_FACTOR_COLUMNS
 from ctx.de.normalised import WHAT as SIZE_FACTORS
 from ctx.de.normalised import log2_normalised, size_factors
@@ -975,6 +975,9 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
     for name, result in fits.items():
         frame = result.results.join(genes.select("gene_id", "gene_name"), on="gene_id", how="left")
         writer.table(frame, f"{name}_results", {**RESULT_COLUMNS, "gene_name": GENE_NAME})
+    # The dispersion plot's input, written before the figure so its spec finds it (F.1).
+    writer.table(fits[spec.de.featured].dispersions, f"{spec.de.featured}_dispersions",
+                 DISPERSION_COLUMNS)  # fmt: skip
     groups, metrics = _figures(writer, spec, fits, (sheet, counts, genes), settings.threads)
     sexes, found = sex_check(sheet, counts, genes)
     if sexes is not None:

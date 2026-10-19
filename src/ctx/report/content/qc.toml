@@ -189,6 +189,49 @@ columns.expected = "The sex compared with: the donor's or the sample's own."
 columns.expression_sex = "The sex the expression says: M when chrY exceeds XIST."
 columns.agrees = "Whether they agree; empty with no recorded sex."
 
+# The tables ctx figure redraws M2's figures from, beside those above (F.1).
+[tables.figure_options]
+units = { mad = "MADs", fastp_q = "Phred", fastp_u = "percent", fastp_l = "nt", fastp_window = "nt", fastp_mean = "Phred" }
+columns.strata = "The --strata columns, comma separated."
+columns.peers = "The --peers columns, comma separated."
+columns.mad = "The MAD multiplier k the bands used."
+columns.registry = "The QC registry file the run read."
+columns.fastp_q = "fastp -q: the lowest quality a base counts as qualified."
+columns.fastp_u = "fastp -u: the most unqualified bases a read keeps, in percent."
+columns.fastp_l = "fastp -l: the shortest read kept."
+columns.fastp_cut_tail = "Whether fastp cut low-quality tails."
+columns.fastp_window = "fastp -W: the tail cut's window."
+columns.fastp_mean = "fastp -M: the tail cut's mean quality."
+columns.grid_run = "The --grid-run run, empty for the first read."
+
+[tables.pca_scores]
+units = { pc1 = "VST units", pc2 = "VST units" }
+columns.sample = "Sample."
+columns.pc1 = "Score on principal component 1 of the blind VST."
+columns.pc2 = "Score on principal component 2 of the blind VST."
+
+[tables.pca_share]
+units = { share = "dimensionless" }
+columns.component = "Principal component."
+columns.share = "Its share of the variance of the genes used."
+
+[tables.fastqc_curves]
+units = { x = "varies", y = "varies" }
+columns.metric = "Registry metric whose FastQC plot the points draw."
+columns.sample = "Sample."
+columns.x = "The plot's horizontal value: base position or GC percent."
+columns.y = "The plot's vertical value, read 1, as MultiQC wrote it."
+
+[tables.fastqc_theoretical]
+units = { x = "percent", y = "percent" }
+columns.x = "GC content of a read."
+columns.y = "Share of reads at it under MultiQC's theoretical curve; empty without one."
+
+[tables.fastqc_overrepresented]
+units = { top_pct = "percent" }
+columns.sample = "Sample."
+columns.top_pct = "Share of read 1 that is its top overrepresented sequence."
+
 # Read fates: every read of a sample, from Trim Galore's reports and then Salmon's.
 [figures.fates]
 title = "Read fates: raw against useful fragments"

@@ -438,6 +438,44 @@ columns.b = "The second counter's count."
 columns.gene_name = "Gene symbol, from the annotation."
 columns.gene_type = "GENCODE gene type."
 
+# The tables ctx figure redraws M3's figures from, beside those above (F.1).
+[tables.figure_options]
+units = { genome_genes = "genes" }
+columns.aligner = "The aligner: star or hisat2."
+columns.featured = "The sample aligned again under each setting."
+columns.genome_name = "The reference as the page names it."
+columns.genome_genes = "Genes in the whole annotation file."
+columns.partial = "Whether the genome lacks a contig the annotation names."
+columns.registry = "The QC registry file the run read."
+
+[tables.outcomes]
+units = { reads = "reads" }
+columns.label = "Sample: one bar of the mapping figure."
+columns.outcome = "The aligner's outcome for a read, or input for the reads it took in."
+columns.reads = "Reads with that outcome."
+
+[tables.setting_outcomes]
+units = { reads = "reads" }
+columns.label = "Setting: one bar of the featured sample's figure."
+columns.outcome = "The aligner's outcome for a read, or input for the reads it took in."
+columns.reads = "Reads with that outcome."
+
+[tables.sums]
+units = { a = "reads", b = "reads" }
+columns.gene_id = "Gene, from the annotation."
+columns.a = "The first counter's count, summed over the samples."
+columns.b = "The second counter's count, summed over the samples."
+columns.comparison = "tool, strand, overlap, fraction or multimap."
+columns.gene_name = "Gene symbol, from the annotation."
+columns.gene_type = "GENCODE gene type."
+columns.type_group = "protein_coding, lncRNA or other: the scatter's colours."
+
+[tables.groups]
+units = {}
+columns.sample = "Sample, from the gather sheet."
+columns.cell_type = "The sheet's cell type, a filter of the bars."
+columns.condition = "The sheet's condition, a filter of the bars."
+
 [tables.concordance]
 units = { n_genes = "genes", n_identical = "genes", resamples_dropped = "resamples", bias = "log2(count + 1)", bias_low = "log2(count + 1)", bias_high = "log2(count + 1)", sd = "log2(count + 1)", loa_low = "log2(count + 1)", loa_high = "log2(count + 1)", d_p2_5 = "log2(count + 1)", d_p97_5 = "log2(count + 1)", fold = "ratio" }
 columns.comparison = "tool, strand, overlap, fraction or multimap."

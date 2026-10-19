@@ -16,7 +16,7 @@ from ctx.de.run import Writer
 from ctx.de.sanity import VERDICT_COLUMNS
 from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.io.naming import stem
-from ctx.proteo import densities, figures, folds, measure
+from ctx.proteo import densities, figure_tables, figures, folds, measure
 from ctx.proteo.run import Measured, Options, verdicts
 from ctx.report import text
 from ctx.report.builder import (
@@ -273,6 +273,9 @@ def _keys(ctx: Context) -> tuple[KeyNumber, ...]:
 def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write every table and figure, decide the rules, then the page; the page first."""
     m = ctx.measured
+    # A figure's spec is found when it is written, so every table it reads comes first.
+    writer.table(m.genes, "genes", figures.columns(*m.genes.columns))
+    figure_tables.write(writer, m, ctx.spec, ctx.options, PAIRED_TOP)
     missing = _missingness(writer, ctx)
     across = ctx.spec.proteo is not None and ctx.spec.proteo.design != "cross_dataset"
     tests = _across(writer, ctx) if across else _cross(writer, ctx)  # fmt: skip
@@ -283,7 +286,6 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     first = all(b.stem.endswith(f"_{w}_v1") for b, w in zip(blocks, MISSINGNESS, strict=False))
     m.metrics.append(("page.missingness_first", float(first and len(blocks) >= FIRST),
                       "the first two figures are the quantified counts and coverage"))  # fmt: skip
-    writer.table(m.genes, "genes", figures.columns(*m.genes.columns))
     for what, frame, columns in m.extra.get("tables", ()):
         writer.table(frame, what, columns)
     writer.table(pl.DataFrame(m.metrics, schema=list(METRIC_COLUMNS), orient="row"), "metrics",

@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Any
 
 from ctx.dataset import Dataset, DatasetError, load
-from ctx.de.figures import BASES
 from ctx.figures import kinds
+from ctx.figures.kind import Kind, field_names, unknown
 from ctx.figures.spec import FigureSpec, parse
 from ctx.report import text
 
@@ -31,7 +31,7 @@ class Request:
     """A checked params file: the kind, its filled parameters, the inputs and the dataset file."""
 
     figure_id: str
-    kind: kinds.Kind
+    kind: Kind
     params: Any
     inputs: dict[str, Path]
     spec: Dataset
@@ -44,7 +44,7 @@ def _typed(value: Any, kind: Any) -> bool:
     return isinstance(value, kind) or (kind is float and isinstance(value, int))
 
 
-def _fields(raw: dict[str, Any], kind: kinds.Kind, problems: list[str]) -> dict[str, Any]:
+def _fields(raw: dict[str, Any], kind: Kind, problems: list[str]) -> dict[str, Any]:
     """The parameter values, each present unless it has a default, each of its field's type."""
     values = {}
     for f in dataclasses.fields(kind.params):
@@ -57,31 +57,22 @@ def _fields(raw: dict[str, Any], kind: kinds.Kind, problems: list[str]) -> dict[
                             f"found {raw[f.name]!r}")  # fmt: skip
             continue
         values[f.name] = float(raw[f.name]) if f.type is float else raw[f.name]
-    known = {*TOP, *kinds.field_names(kind.params)}
+    known = {*TOP, *field_names(kind.params)}
     problems += [f"{key}: not a parameter of {kind.figure}" for key in sorted(set(raw) - known)]
     return values
 
 
-def bounds(params: Any, spec: Dataset) -> list[str]:
+def bounds(kind: Kind, params: Any, spec: Dataset) -> list[str]:
     """Problems with parameter values the dataset file does not declare, or out of range."""
-    names = {c.name for c in spec.contrasts}
+    names = [c.name for c in spec.contrasts]
     found = []
     if params.dataset != spec.slug:
         found.append(f"dataset: {params.dataset!r}, but the dataset file is {spec.slug!r}")
     for field in ("contrast", "x", "y"):
         value = getattr(params, field, None)
-        if value is not None and value not in names:
-            found.append(f"{field}: {value!r} is not a contrast of {spec.slug}")
-    if isinstance(params, kinds.Lesson):
-        if params.lesson not in (spec.de.lessons if spec.de else {}):
-            found.append(f"lesson: {params.lesson!r} is not a lesson of {spec.slug}")
-        if params.basis not in BASES:
-            found.append(f"basis: {params.basis!r} is not one of {', '.join(BASES)}")
-        if not 0 < params.alpha <= 1:
-            found.append(f"alpha: {params.alpha}, expected above 0 and at most 1")
-        if params.lfc_min < 0:
-            found.append(f"lfc_min: {params.lfc_min}, expected 0 or more")
-    return found
+        if value is not None:
+            found += unknown(field, value, names, "a contrast", spec.slug)
+    return found + kind.check(params, spec)
 
 
 def _files(raw: dict[str, Any], folder: Path, problems: list[str]) -> dict[str, Path]:
@@ -144,7 +135,7 @@ def load_params(path: Path, figure: str) -> Request:
     params = None
     if spec is not None and not _missing(values, kind):
         params = kind.params(**values)
-        problems += bounds(params, spec)
+        problems += bounds(kind, params, spec)
         expected = set(kind.inputs(params, spec))
         given = set(raw.get("inputs", {}))
         problems += [f"inputs.{n}: missing" for n in sorted(expected - given)]
@@ -154,7 +145,7 @@ def load_params(path: Path, figure: str) -> Request:
     return Request(figure, kind, params, inputs, spec)
 
 
-def _missing(values: dict[str, Any], kind: kinds.Kind) -> bool:
+def _missing(values: dict[str, Any], kind: Kind) -> bool:
     """Whether a required parameter has no usable value, so the dataclass cannot be filled."""
     return any(f.default is dataclasses.MISSING and f.name not in values
                for f in dataclasses.fields(kind.params))  # fmt: skip

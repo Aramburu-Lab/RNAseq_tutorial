@@ -408,6 +408,31 @@ gtex_id = ["none", "The gene's GENCODE v39 ID that GTEx V10 is keyed by."]
 cell_line = ["none", "HPA cell line, as HPA spells it."]
 group = ["none", "HPA search column of the cell-line group, from the dataset file."]
 
+# The tables a figure is redrawn from that the page tables do not hold (F.1, ctx figure).
+[figure_tables.own_family]
+n_reference = ["samples", "Reference values tested; for a paired test, the pairs."]
+n_tested = ["samples", "Tested values; for a paired test, the pairs."]
+statistic = ["dimensionless", "Mann-Whitney U, or the signed-rank statistic as scipy gives it."]
+p = ["dimensionless", "Two-sided p, before adjustment."]
+r = ["dimensionless", "Rank-biserial r, matched-pairs for a paired test; positive when the tested group is higher."]
+p_adj = ["dimensionless", "BH-adjusted p over the listed genes with a test in the featured contrast."]
+
+[figure_tables.exons_dropped]
+exons_dropped = ["samples", "GTEx samples left out of the exon shares for no exon read on the gene."]
+
+[figure_tables.mane]
+source = ["none", "Where the MANE Select model comes from: gtf, the dataset file's GTF, or rest, Ensembl REST."]
+transcript = ["none", "MANE Select transcript ID with its version."]
+refseq = ["none", "Matching RefSeq transcript; empty where the source gives none."]
+chrom = ["none", "Chromosome."]
+strand = ["none", "Strand, + or -."]
+exon = ["none", "Exon number in transcription order."]
+start = ["bp", "First exon base, 1-based, GRCh38."]
+end = ["bp", "Last exon base, 1-based, GRCh38."]
+
+[figure_tables.figure_options]
+hpa_release = ["none", "HPA release every HPA request named, from --hpa-release."]
+
 [sources]
 title = "Sources, releases and citations"
 columns = ["Source", "Release", "Retrieved", "Licence and citation"]

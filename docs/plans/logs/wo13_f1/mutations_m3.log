@@ -1,0 +1,6 @@
+CAUGHT  bar outcomes in reverse: 1 failed in 214.32s (0:03:34) | E           AssertionError: 2026-10-19_process_chrse_featured_settings_v1
+CAUGHT  settings from the samples' table: 1 failed in 233.57s (0:03:53) | E       AssertionError: ('own_m3_featured_settings', '                                  │
+CAUGHT  gene sums left out: 1 failed in 222.14s (0:03:42) | E       AssertionError: ('own_m3_agreement', '          │
+CAUGHT  groups dropped: 1 failed in 331.08s (0:05:31) | E           AssertionError: 2026-10-19_process_chrse_mapping_v1
+CAUGHT  registry of another module: 1 failed in 96.33s (0:01:36) | E       AssertionError: assert set() == {'agreement:f...ultimap', ...}
+CAUGHT  registry always qc's: 1 failed in 78.76s (0:01:18) | E       AssertionError: assert set() == {'agreement:f...ultimap', ...}

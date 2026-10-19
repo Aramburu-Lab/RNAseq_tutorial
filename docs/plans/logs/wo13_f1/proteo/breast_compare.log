@@ -1,0 +1,85 @@
+DIFFERS proteo_cptac_brca_contrast_basal_vs_luma_v1_black.pdf
+DIFFERS proteo_cptac_brca_contrast_basal_vs_luma_v1_black.svg
+DIFFERS proteo_cptac_brca_contrast_basal_vs_luma_v1_white.pdf
+DIFFERS proteo_cptac_brca_contrast_basal_vs_luma_v1_white.svg
+DIFFERS proteo_cptac_brca_contrast_erneg_vs_erpos_v1_black.pdf
+DIFFERS proteo_cptac_brca_contrast_erneg_vs_erpos_v1_black.svg
+DIFFERS proteo_cptac_brca_contrast_erneg_vs_erpos_v1_white.pdf
+DIFFERS proteo_cptac_brca_contrast_erneg_vs_erpos_v1_white.svg
+DIFFERS proteo_cptac_brca_coverage_v1_black.pdf
+DIFFERS proteo_cptac_brca_coverage_v1_black.svg
+DIFFERS proteo_cptac_brca_coverage_v1_white.pdf
+DIFFERS proteo_cptac_brca_coverage_v1_white.svg
+DIFFERS proteo_cptac_brca_paired_zscores_v1_black.pdf
+DIFFERS proteo_cptac_brca_paired_zscores_v1_black.svg
+DIFFERS proteo_cptac_brca_paired_zscores_v1_white.pdf
+DIFFERS proteo_cptac_brca_paired_zscores_v1_white.svg
+DIFFERS proteo_cptac_brca_quantified_v1_black.pdf
+DIFFERS proteo_cptac_brca_quantified_v1_black.svg
+DIFFERS proteo_cptac_brca_quantified_v1_white.pdf
+DIFFERS proteo_cptac_brca_quantified_v1_white.svg
+DIFFERS proteo_cptac_brca_rho_by_class_v1_black.pdf
+DIFFERS proteo_cptac_brca_rho_by_class_v1_black.svg
+DIFFERS proteo_cptac_brca_rho_by_class_v1_white.pdf
+DIFFERS proteo_cptac_brca_rho_by_class_v1_white.svg
+DIFFERS proteo_cptac_brca_worked_erbb2_v1_black.pdf
+DIFFERS proteo_cptac_brca_worked_erbb2_v1_black.svg
+DIFFERS proteo_cptac_brca_worked_erbb2_v1_white.pdf
+DIFFERS proteo_cptac_brca_worked_erbb2_v1_white.svg
+DIFFERS proteo_cptac_brca_worked_grb7_v1_black.pdf
+DIFFERS proteo_cptac_brca_worked_grb7_v1_black.svg
+DIFFERS proteo_cptac_brca_worked_grb7_v1_white.pdf
+DIFFERS proteo_cptac_brca_worked_grb7_v1_white.svg
+DIFFERS proteo_cptac_brca_worked_stard3_v1_black.pdf
+DIFFERS proteo_cptac_brca_worked_stard3_v1_black.svg
+DIFFERS proteo_cptac_brca_worked_stard3_v1_white.pdf
+DIFFERS proteo_cptac_brca_worked_stard3_v1_white.svg
+data, pdf and svg files: 15 byte-equal, 36 differ
+page proteo_cptac_brca_contrast_basal_vs_luma_v1.html: real 6,694,627 B, scratch 6,751,228 B
+page proteo_cptac_brca_contrast_erneg_vs_erpos_v1.html: real 6,630,013 B, scratch 6,686,634 B
+page proteo_cptac_brca_coverage_v1.html: real 6,024,650 B, scratch 6,079,731 B
+page proteo_cptac_brca_overview_v1.html: real 11,630,565 B, scratch 14,008,502 B
+page proteo_cptac_brca_paired_zscores_v1.html: real 6,094,708 B, scratch 6,148,867 B
+page proteo_cptac_brca_quantified_v1.html: real 4,998,279 B, scratch 5,053,394 B
+page proteo_cptac_brca_rho_by_class_v1.html: real 6,018,375 B, scratch 6,072,516 B
+page proteo_cptac_brca_worked_erbb2_v1.html: real 4,999,425 B, scratch 5,053,686 B
+page proteo_cptac_brca_worked_grb7_v1.html: real 4,999,426 B, scratch 5,053,685 B
+page proteo_cptac_brca_worked_stard3_v1.html: real 4,998,720 B, scratch 5,052,987 B
+new proteo_cptac_brca_abundance_v1.csv: 230,171 B
+new proteo_cptac_brca_abundance_v1.parquet: 109,829 B
+new proteo_cptac_brca_abundance_v1_README.md: 2,697 B
+new proteo_cptac_brca_contrast_basal_vs_luma_calls_v1.csv: 275 B
+new proteo_cptac_brca_contrast_basal_vs_luma_calls_v1.parquet: 4,130 B
+new proteo_cptac_brca_contrast_basal_vs_luma_calls_v1_README.md: 4,053 B
+new proteo_cptac_brca_contrast_basal_vs_luma_folds_v1.csv: 1,155,595 B
+new proteo_cptac_brca_contrast_basal_vs_luma_folds_v1.parquet: 372,124 B
+new proteo_cptac_brca_contrast_basal_vs_luma_folds_v1_README.md: 3,874 B
+new proteo_cptac_brca_contrast_basal_vs_luma_summary_v1.csv: 133 B
+new proteo_cptac_brca_contrast_basal_vs_luma_summary_v1.parquet: 2,132 B
+new proteo_cptac_brca_contrast_basal_vs_luma_summary_v1_README.md: 3,315 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_calls_v1.csv: 267 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_calls_v1.parquet: 4,130 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_calls_v1_README.md: 4,078 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_folds_v1.csv: 1,160,209 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_folds_v1.parquet: 363,149 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_folds_v1_README.md: 3,877 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_summary_v1.csv: 133 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_summary_v1.parquet: 2,132 B
+new proteo_cptac_brca_contrast_erneg_vs_erpos_summary_v1_README.md: 3,318 B
+new proteo_cptac_brca_drawn_rows_v1.csv: 108,649 B
+new proteo_cptac_brca_drawn_rows_v1.parquet: 34,113 B
+new proteo_cptac_brca_drawn_rows_v1_README.md: 3,009 B
+new proteo_cptac_brca_figure_options_v1.csv: 63 B
+new proteo_cptac_brca_figure_options_v1.parquet: 1,487 B
+new proteo_cptac_brca_figure_options_v1_README.md: 2,990 B
+new proteo_cptac_brca_paired_annotation_v1.csv: 37,269 B
+new proteo_cptac_brca_paired_annotation_v1.parquet: 30,989 B
+new proteo_cptac_brca_paired_annotation_v1_README.md: 11,604 B
+new proteo_cptac_brca_protein_present_v1.csv: 2,446,695 B
+new proteo_cptac_brca_protein_present_v1.parquet: 152,461 B
+new proteo_cptac_brca_protein_present_v1_README.md: 17,833 B
+new proteo_cptac_brca_protein_samples_v1.csv: 2,105 B
+new proteo_cptac_brca_protein_samples_v1.parquet: 1,878 B
+new proteo_cptac_brca_protein_samples_v1_README.md: 2,777 B
+new files: 36, 6,283,543 B
+only in the real run: []

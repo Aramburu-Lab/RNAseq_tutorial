@@ -14,7 +14,7 @@ import polars as pl
 
 from ctx import runtime, tools
 from ctx.de.run import Writer
-from ctx.process import STRAND, Aligner, align, blocks, context, figures, reference
+from ctx.process import STRAND, Aligner, align, blocks, context, figure_tables, figures, reference
 from ctx.process import tables as tab
 from ctx.qc.checkpoint import gene_types
 from ctx.qc.registry import Metric
@@ -425,6 +425,8 @@ def build(ctx: Context) -> ModulePage:
         len(ctx.genome_genes),
         partial=partial(found),
     )
+    # What the figures draw that no table above holds, so ctx figure redraws them (F.1).
+    figure_tables.write(ctx.writer, found, shown, ctx.inputs.registry)
     body = results(ctx.writer, found, shown, notes(ctx, found))
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(MODULE)
     aligner = "STAR" if ctx.options.aligner is Aligner.STAR else "hisat2"

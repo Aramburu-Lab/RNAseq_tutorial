@@ -1,0 +1,20 @@
+data, pdf and svg files: 26 byte-equal, 0 differ
+page proteo_tier1_coverage_v1.html: real 5,819,159 B, scratch 5,830,014 B
+page proteo_tier1_fold_change_v1.html: real 5,873,564 B, scratch 5,882,525 B
+page proteo_tier1_overview_v1.html: real 8,233,474 B, scratch 8,273,178 B
+page proteo_tier1_quantified_v1.html: real 5,033,778 B, scratch 5,044,667 B
+page proteo_tier1_shift_by_class_v1.html: real 5,606,899 B, scratch 5,615,897 B
+new proteo_tier1_abundance_v1.csv: 183,887 B
+new proteo_tier1_abundance_v1.parquet: 87,740 B
+new proteo_tier1_abundance_v1_README.md: 3,092 B
+new proteo_tier1_figure_options_v1.csv: 63 B
+new proteo_tier1_figure_options_v1.parquet: 1,487 B
+new proteo_tier1_figure_options_v1_README.md: 3,387 B
+new proteo_tier1_protein_present_v1.csv: 209,711 B
+new proteo_tier1_protein_present_v1.parquet: 52,574 B
+new proteo_tier1_protein_present_v1_README.md: 4,451 B
+new proteo_tier1_protein_samples_v1.csv: 436 B
+new proteo_tier1_protein_samples_v1.parquet: 1,502 B
+new proteo_tier1_protein_samples_v1_README.md: 3,170 B
+new files: 12, 551,500 B
+only in the real run: []

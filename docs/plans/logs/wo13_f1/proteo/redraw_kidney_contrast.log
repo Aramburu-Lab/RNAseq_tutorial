@@ -1,0 +1,30 @@
+panels on the page: 6; for kidney_m7_contrast: 1
+exit 0
+026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/redraw_kidney_contrast/repro_kidney_m7_contrast_cptac_ccrcc/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/redraw_kidney_contrast/repro_kidney_m7_contrast_cptac_ccrcc/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_README.md
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1.csv
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1.html
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_README.md
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_black.pdf
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_black.svg
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_white.pdf
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_white.svg
+2026-10-19_proteo_cptac_ccrcc_drawn_rows_v1.parquet
+2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_folds_v1.parquet
+2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_summary_v1.parquet
+2026-10-19_proteo_cptac_ccrcc_figure_options_v1.parquet
+2026-10-19_proteo_cptac_ccrcc_genes_v1.parquet
+2026-10-19_proteo_cptac_ccrcc_paired_annotation_v1.parquet
+2026-10-19_proteo_cptac_ccrcc_worked_samples_v1.parquet
+cptac_ccrcc.toml
+inputs.sha256
+params.toml
+2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1.csv: OK
+
+
+.csv         byte-equal  1,018,506 B
+_white.pdf   byte-equal     50,338 B
+_white.svg   byte-equal    100,959 B
+_black.pdf   byte-equal     50,346 B
+_black.svg   byte-equal    101,461 B

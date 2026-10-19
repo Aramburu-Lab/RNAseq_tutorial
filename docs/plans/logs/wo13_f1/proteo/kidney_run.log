@@ -1,0 +1,104 @@
+17:54  up 6 days,  1:33, 4 users, load averages: 5.39 9.16 12.95
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/openpyxl/worksheet/_reader.py:329: UserWarning: Unknown extension is not supported and will be removed
+  warn(msg)
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_figure_options_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_figure_options_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_figure_options_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_protein_samples_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_protein_samples_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_protein_samples_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_protein_present_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_protein_present_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_protein_present_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_abundance_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_abundance_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_abundance_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_annotation_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_annotation_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_annotation_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_samples_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_samples_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_samples_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_drawn_rows_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_drawn_rows_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_drawn_rows_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_folds_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_folds_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_folds_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_summary_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_summary_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_f4_tumour_normal_summary_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_quantified_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_quantified_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_quantified_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_quantified_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_quantified_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_quantified_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_quantified_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_coverage_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_coverage_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_coverage_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_coverage_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_coverage_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_coverage_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_coverage_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_rho_by_class_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_rho_by_class_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_rho_by_class_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_rho_by_class_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_rho_by_class_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_rho_by_class_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_rho_by_class_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_ca9_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_ca9_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_ca9_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_ca9_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_ca9_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_ca9_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_worked_ca9_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_zscores_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_zscores_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_zscores_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_zscores_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_zscores_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_zscores_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_paired_zscores_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_calls_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_calls_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_calls_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_contrast_tumour_normal_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_metrics_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_metrics_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_metrics_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_sanity_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_sanity_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/kidney/outputs/07_proteo/2026-10-19_proteo_cptac_ccrcc_sanity_v1_README.md
+       20.36 real        15.88 user         3.03 sys
+          1514127360  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              445187  page reclaims
+                 500  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 930  voluntary context switches
+               17347  involuntary context switches
+            16768191  instructions retired
+             7935418  cycles elapsed
+             1458536  peak memory footprint
+exit 0

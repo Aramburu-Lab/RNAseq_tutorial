@@ -1,0 +1,46 @@
+      127.09 real        88.56 user        14.80 sys
+           844005376  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             1641087  page reclaims
+             1338668  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                2005  voluntary context switches
+              183805  involuntary context switches
+       1206573335880  instructions retired
+        387214919142  cycles elapsed
+           659245072  peak memory footprint
+genecard: exit 0
+-rw-r--r--@ 1 rytis  staff  7910253 Oct 19 17:26 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aafb5beef9062b91f/outputs/scratch_roots/tier1_m9/outputs/11_genecard/2026-10-19_genecard_tier1_overview_v1.html
+panels on the page: 5; for blood_m9_junctions: 1
+exit 0
+sers/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aafb5beef9062b91f/outputs/scratch_roots/redraw_tier1_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aafb5beef9062b91f/outputs/scratch_roots/redraw_tier1_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aafb5beef9062b91f/outputs/scratch_roots/redraw_tier1_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aafb5beef9062b91f/outputs/scratch_roots/redraw_tier1_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1_README.md
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1.csv
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1.html
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_README.md
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_black.pdf
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_black.svg
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_white.pdf
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_white.svg
+2026-10-19_genecard_tier1_junctions_v1.parquet
+2026-10-19_genecard_tier1_mane_v1.parquet
+inputs.sha256
+params.toml
+tier1.toml
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1.csv: OK
+
+
+.csv         byte-equal     14,517 B
+_white.pdf   byte-equal     34,952 B
+_white.svg   byte-equal     49,441 B
+_black.pdf   byte-equal     35,024 B
+_black.svg   byte-equal     49,726 B

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import typer
 
-from ctx.figures.kinds import NoFigureError
+from ctx.figures.kind import NoFigureError
 from ctx.figures.params import ParamsError, Request, load_params
 from ctx.figures.record import FOLDERS, sha256
 from ctx.io.naming import stem

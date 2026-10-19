@@ -1,0 +1,14 @@
+CAUGHT  genes table written after the figures: 1 failed in 34.75s | E           AssertionError: 2026-10-19_proteo_fake_brca_contrast_basal_vs_luma_v1
+CAUGHT  figure tables not written: 1 failed in 12.26s | E       AssertionError: set()
+SURVIVED heatmap rows one short: 1 passed in 64.22s (0:01:04) | 
+CAUGHT  annotation rows reversed: 1 failed in 57.14s | E           AssertionError: 2026-10-19_proteo_fake_brca_paired_zscores_v1
+CAUGHT  abundance reversed: 1 failed in 24.33s | E           AssertionError: 2026-10-19_proteo_fake_cells_coverage_v1
+CAUGHT  presence read inverted: 1 failed in 41.52s | E           AssertionError: 2026-10-19_proteo_fake_cells_quantified_v1
+CAUGHT  method from the default: 1 failed in 190.55s (0:03:10) | E           AssertionError: 2026-10-19_proteo_fake_brca_rho_by_class_v1
+CAUGHT  min_quantified from the default: 1 failed in 89.66s (0:01:29) | E           AssertionError: 2026-10-19_proteo_fake_brca_coverage_v1
+CAUGHT  gene class from the default: 1 failed in 68.54s (0:01:08) | E           AssertionError: 2026-10-19_proteo_fake_brca_rho_by_class_v1
+CAUGHT  contrast rho read from its low end: 1 failed in 29.26s | E           AssertionError: 2026-10-19_proteo_fake_brca_contrast_basal_vs_luma_v1
+CAUGHT  cross-study n swapped: 1 failed in 18.46s | E       assert ('5 and 3' in '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,... form on b
+CAUGHT  worked samples not an input of the paired design: 1 failed in 68.77s (0:01:08) | E           AssertionError: 2026-10-19_proteo_fake_brca_worked_g9_v1
+CAUGHT  worked gene not checked: 1 failed in 28.99s | E       Failed: DID NOT RAISE ParamsError
+CAUGHT  class test not run again: 1 failed in 67.39s (0:01:07) | E           AssertionError: 2026-10-19_proteo_fake_brca_rho_by_class_v1

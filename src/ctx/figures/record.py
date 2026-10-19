@@ -11,10 +11,13 @@ import hashlib
 import sys
 from pathlib import Path
 
+import polars as pl
+
 import ctx
 from ctx import cohorts, runtime
 from ctx.dataset import Dataset, DatasetError, load, loaded
 from ctx.figures import kinds
+from ctx.figures.kind import DATASET_FILE, QC_REGISTRY, REGISTRY_OF, RESOURCE, Kind
 from ctx.figures.spec import FigureSpec, Input, figure_id
 from ctx.io.naming import MODULES
 from ctx.report import text
@@ -57,7 +60,7 @@ def _located(path: Path, root: Path, repo: Path | None) -> tuple[str, str]:
     return runtime.shown_path(resolved), "path"
 
 
-def input_paths(kind: kinds.Kind, params: object, spec: Dataset, root: Path) -> dict[str, Path]:
+def input_paths(kind: Kind, params: object, spec: Dataset, root: Path) -> dict[str, Path]:
     """Every input of one figure, found as its module reads it.
 
     Raises:
@@ -68,16 +71,47 @@ def input_paths(kind: kinds.Kind, params: object, spec: Dataset, root: Path) -> 
 
     found = {}
     for name, (module, what) in kind.inputs(params, spec).items():
-        if (module, what) == kinds.DATASET_FILE:
+        if (module, what) == DATASET_FILE:
             path = loaded().get(spec.slug)
             if path is None:
                 raise DatasetError(f"{spec.slug}: no dataset file read in this process")
             found[name] = path
-        elif (module, what) == kinds.QC_REGISTRY:
+        elif (module, what) == QC_REGISTRY:
             found[name] = registry.resolve(None)
+        elif module == REGISTRY_OF:
+            options = newest(root / "outputs" / FOLDERS[what], spec.slug, "figure_options")
+            found[name] = Path(pl.read_parquet(options)["registry"][0])
+        elif module == RESOURCE:
+            found[name] = _fetched(root, spec, what)
         else:
             found[name] = newest(root / "outputs" / FOLDERS[module], spec.slug, what)
     return found
+
+
+def _fetched(root: Path, spec: Dataset, name: str) -> Path:
+    """A resource of the dataset file where ``ctx setup`` put it under the root.
+
+    Raises:
+        DatasetError: If the file declares no such resource, or it was not fetched.
+    """
+    found = [r.dest for r in spec.resources if r.name == name]
+    path = root / found[0] if found else None
+    if path is None or not path.is_file():
+        raise DatasetError(f"{spec.slug}: resource {name} not fetched to {path}")
+    return path
+
+
+def written(tables: tuple[tuple[str, str], ...], spec: Dataset, root: Path) -> bool:
+    """Whether the module wrote any of these tables for the dataset, on any day."""
+    from ctx.de.run import newest  # noqa: PLC0415 - de imports ctx.viz.save, which imports this
+
+    for module, what in tables:
+        try:
+            newest(root / "outputs" / FOLDERS[module], spec.slug, what)
+        except DatasetError:
+            continue
+        return True
+    return False
 
 
 def describe(figure_stem: str, directory: Path, data_csv: Path) -> FigureSpec | None:
@@ -98,6 +132,8 @@ def describe(figure_stem: str, directory: Path, data_csv: Path) -> FigureSpec | 
         if (match := kinds.matched(module, description[len(slug) + 1 :], spec)) is None:
             continue
         kind, params = match
+        if written(kind.unless, spec, root):
+            return None
         try:
             paths = input_paths(kind, params, spec, root)
         except DatasetError:

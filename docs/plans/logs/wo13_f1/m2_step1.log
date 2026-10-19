@@ -1,0 +1,27 @@
+qc: exit 0
+14542347 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/tier1_f1/outputs/02_qc/2026-10-19_qc_tier1_overview_v1.html
+13687746 /Users/rytis/ctx_tier1/outputs/02_qc/2026-10-16_qc_tier1_overview_v1.html
+== blood_m2_strip
+panels on the page: 32; for blood_m2_strip: 20
+exit 0
+.csv         byte-equal     21,109 B
+_white.pdf   byte-equal     30,137 B
+_white.svg   byte-equal     40,146 B
+_black.pdf   byte-equal     30,142 B
+_black.svg   byte-equal     40,873 B
+== blood_m2_fastqc
+panels on the page: 32; for blood_m2_fastqc: 5
+exit 0
+.csv         byte-equal    423,809 B
+_white.pdf   byte-equal     98,330 B
+_white.svg   byte-equal    299,684 B
+_black.pdf   byte-equal     98,342 B
+_black.svg   byte-equal    300,284 B
+== blood_m2_linked_pca
+panels on the page: 32; for blood_m2_linked_pca: 1
+exit 0
+.csv         byte-equal     19,736 B
+_white.pdf   byte-equal     36,325 B
+_white.svg   byte-equal     19,629 B
+_black.pdf   byte-equal     36,328 B
+_black.svg   byte-equal     19,989 B

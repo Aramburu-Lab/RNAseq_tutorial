@@ -52,7 +52,8 @@ def test_missingness_first_and_rules_pass(which, request):
     verdicts = pl.read_parquet(output(root, "sanity_v1.parquet"))
     assert set(verdicts["rule_verdict"]) == {"PASS"}, verdicts.select("rule", "left").rows()
     html = output(root, "overview_v1.html").read_text()
-    stems = re.findall(r"_proteo_fake_\w+?_(\w+?)_v1\.csv", html)
+    # A figure's Reproduce panel names its data table again, after its own link.
+    stems = list(dict.fromkeys(re.findall(r"_proteo_fake_\w+?_(\w+?)_v1\.csv", html)))
     assert stems[:2] == ["quantified", "coverage"], stems
 
 

@@ -58,6 +58,14 @@ RESULT_COLUMNS = {
         f"padj < {ALPHA} and raw LFC >= {LFC_MIN} is up, <= -{LFC_MIN} down; else ns.",
     ),
 }
+# The columns of ``Fit.dispersions``, as M5 writes the featured fit's for its dispersion plot.
+DISPERSION_COLUMNS = {
+    "gene_id": RESULT_COLUMNS["gene_id"],
+    "baseMean": RESULT_COLUMNS["baseMean"],
+    "genewise": ("dimensionless", "Gene-wise negative binomial dispersion, before shrinkage."),
+    "fitted": ("dimensionless", "The dispersion trend's value at the gene's mean."),
+    "final": ("dimensionless", "Dispersion the Wald test used: gene-wise shrunk to the trend."),
+}
 
 
 class ContrastError(ValueError):

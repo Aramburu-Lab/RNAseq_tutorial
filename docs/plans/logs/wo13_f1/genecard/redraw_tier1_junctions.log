@@ -1,0 +1,26 @@
+panels on the page: 5; for blood_m9_junctions: 1
+exit 0
+mp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/redraw_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/redraw_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/redraw_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/redraw_junctions/repro_blood_m9_junctions_tier1/2026-10-19_genecard_tier1_junctions_isg15_187608_v1_README.md
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1.csv
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1.html
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_README.md
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_black.pdf
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_black.svg
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_white.pdf
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1_white.svg
+2026-10-19_genecard_tier1_junctions_v1.parquet
+2026-10-19_genecard_tier1_mane_v1.parquet
+inputs.sha256
+params.toml
+tier1.toml
+2026-10-19_genecard_tier1_junctions_isg15_187608_v1.csv: OK
+
+
+.csv         byte-equal     14,517 B
+_white.pdf   byte-equal     34,952 B
+_white.svg   byte-equal     49,441 B
+_black.pdf   byte-equal     35,024 B
+_black.svg   byte-equal     49,726 B

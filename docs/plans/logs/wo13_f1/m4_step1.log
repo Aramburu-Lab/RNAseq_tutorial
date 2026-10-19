@@ -1,0 +1,19 @@
+quant: exit 0
+11207059 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/tier1_f1/outputs/04_quant/2026-10-19_quant_tier1_overview_v1.html
+8806392 /Users/rytis/ctx_tier1/outputs/04_quant/2026-10-16_quant_tier1_overview_v1.html
+== blood_m4_fates
+panels on the page: 2; for blood_m4_fates: 1
+exit 0
+.csv         byte-equal     79,070 B
+_white.pdf   byte-equal     59,252 B
+_white.svg   byte-equal    172,463 B
+_black.pdf   byte-equal     59,259 B
+_black.svg   byte-equal    172,778 B
+== blood_m4_estimates
+panels on the page: 2; for blood_m4_estimates: 1
+exit 0
+.csv         byte-equal  1,350,022 B
+_white.pdf   byte-equal    225,928 B
+_white.svg   byte-equal  1,403,238 B
+_black.pdf   byte-equal    225,932 B
+_black.svg   byte-equal  1,403,838 B

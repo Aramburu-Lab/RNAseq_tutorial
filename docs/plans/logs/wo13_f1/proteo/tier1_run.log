@@ -1,0 +1,70 @@
+17:05  up 6 days, 45 mins, 4 users, load averages: 13.69 19.62 18.23
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_overview_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_genes_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_genes_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_genes_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_figure_options_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_figure_options_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_figure_options_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_protein_samples_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_protein_samples_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_protein_samples_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_protein_present_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_protein_present_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_protein_present_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_abundance_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_abundance_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_abundance_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_quantified_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_quantified_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_quantified_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_quantified_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_quantified_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_quantified_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_quantified_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_coverage_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_coverage_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_coverage_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_coverage_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_coverage_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_coverage_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_coverage_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_fold_change_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_fold_change_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_fold_change_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_fold_change_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_fold_change_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_fold_change_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_fold_change_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_shift_by_class_v1_white.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_shift_by_class_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_shift_by_class_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_shift_by_class_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_shift_by_class_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_shift_by_class_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_shift_by_class_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_metrics_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_metrics_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_metrics_v1_README.md
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_sanity_v1.parquet
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_sanity_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a0cad45c60690dabd/outputs/scratch_roots/tier1/outputs/07_proteo/2026-10-19_proteo_tier1_sanity_v1_README.md
+       24.50 real        15.11 user         3.08 sys
+           910147584  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              279453  page reclaims
+                 339  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 354  voluntary context switches
+               24299  involuntary context switches
+            16568454  instructions retired
+             7386558  cycles elapsed
+             1458536  peak memory footprint
+exit 0

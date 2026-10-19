@@ -1,0 +1,12 @@
+clinical (head): exit 0
+       41.71 real        30.88 user         8.89 sys
+          2509619200  maximum resident set size
+          2450180904  peak memory footprint
+14928738 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html
+14778374 /Users/rytis/ctx_breast/outputs/12_clinical/2026-10-16_clinical_tcga_brca_overview_v1.html
+94 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_brca_figure_options_v1.csv
+2152 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_brca_figure_options_v1.parquet
+2658 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_brca_figure_options_v1_README.md
+12547378 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_brca_panel_values_v1.csv
+7851483 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_brca_panel_values_v1.parquet
+169868 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_head/outputs/12_clinical/2026-10-19_clinical_tcga_brca_panel_values_v1_README.md

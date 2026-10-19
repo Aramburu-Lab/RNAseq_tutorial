@@ -1,0 +1,6 @@
+clinical (base): exit 0
+       47.52 real        32.66 user         7.85 sys
+          2513846272  maximum resident set size
+          2454604680  peak memory footprint
+14842762 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a43de516483292309/outputs/scratch_roots/brca_f1_base/outputs/12_clinical/2026-10-19_clinical_tcga_brca_overview_v1.html
+14778374 /Users/rytis/ctx_breast/outputs/12_clinical/2026-10-16_clinical_tcga_brca_overview_v1.html

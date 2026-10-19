@@ -228,7 +228,9 @@ def expression_tests(patients: pl.DataFrame, values: Mapping[str, np.ndarray],
 def cramers_v(sheet: pl.DataFrame, a: str, b: str) -> tuple[float | None, int]:
     """Cramér's V of two columns over rows with both, uncorrected; None if one is constant."""
     both = sheet.select(a, b).drop_nulls().filter((pl.col(a) != "") & (pl.col(b) != ""))
-    counts = both.group_by(a, b).len().pivot(on=b, index=a, values="len").fill_null(0)
+    # Groups in first-seen order: a hashed order changes the chi-squared sum's last bits per call.
+    counts = (both.group_by(a, b, maintain_order=True).len()
+              .pivot(on=b, index=a, values="len").fill_null(0))  # fmt: skip
     table = counts.drop(a).to_numpy()
     if min(table.shape) < 2:  # noqa: PLR2004 - a constant column has no association
         return None, both.height
