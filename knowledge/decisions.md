@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-092 — A figure is redrawn through its module's own figure function from its tables read back, found by its stem
+
+**Date:** 2026-10-19 · **Status:** decided
+
+**Context.** F (wave 4): any figure reproducible on any dataset the routes take, from the page's Reproduce panel.
+
+**Decision.** A figure's ID is `<cohort>_m<N>_<figure>`, N the course module number. Each kind has a frozen parameter dataclass, read by one loader that lists every problem; `ctx figure <id> --params` redraws through the module's own figure function on its tables read back, refusing a changed input by SHA-256 and any folder inside a ctx root. The spec is found from the figure's stem and the dataset file the process read, since module code passes only the stem to `write_figure`. The Reproduce panel is generated from the spec. Figure files carry no creation date and a fixed SVG id salt.
+
+**Evidence.** Step-1's volcano redrawn byte-equal from its panel in a clean folder; 36 of 36 renders byte-equal; 25 planted mutations caught.
+
+**Consequence.** A figure whose inputs are not written as tables (the dispersion plot) has no spec until its module writes them.
+
+---
+
 ## D-091 — RSEM expected counts enter when declared, rounded and stated; HGNC's dated set is the fallback map for NCBI Gene IDs
 
 **Date:** 2026-10-19 · **Status:** decided (Rytis 2026-10-18 approved accepting RSEM expected counts rounded)

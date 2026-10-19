@@ -147,3 +147,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A fallback map yields to the primary on conflict: HGNC's rows, put through the shared-gene rule, took 54 GENCODE-placed genes out with them (U, 2026-10-19).
 - An authors' matrix names its columns only in GEO's sample descriptions; a table writer that reads characteristics alone cannot join it (U, 2026-10-19).
 - A search of public files can surface personal data: PXD053789's public spreadsheet appeared to hold names and personal identity numbers. Copy nothing, and report it to the owner (U, 2026-10-19).
+- A figure rerun is byte-equal only once three things are fixed: the PDF CreationDate, the SVG dc:date, and the SVG's random id salt (`svg.hashsalt`); the first two alone left the SVGs different (F, 2026-10-19).
+- A brief that names "the 92 recorded metrics" names their file too: F compared 100 metrics against a later run because the brief gave no path (2026-10-19).
