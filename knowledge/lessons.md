@@ -151,3 +151,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A brief that names "the 92 recorded metrics" names their file too: F compared 100 metrics against a later run because the brief gave no path (2026-10-19).
 - A freeze that lists files by path misses a file split into a package: test_sanity_record's FROZEN named src/ctx/dataset.py, which became src/ctx/dataset/ (F.5, 2026-10-19). Grep path lists when moving a file.
 - A line count in a TODO item is a snapshot: F.5 said 942 lines and the file held 967 when the split began. Measure before quoting (F.5, 2026-10-19).
+- A fallback reading "no reasons" as a missing number printed "not estimable" for variables with nothing missing: an empty list and a missing value need their own words (S2, 2026-10-19).
+- An old ID's successor can itself be split later: follow the history past the first current gene, or a split is given to one side (S2, 2026-10-19).

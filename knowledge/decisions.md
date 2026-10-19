@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-093 — Ensembl's stable-ID history at the annotation's own release places a retired Ensembl ID, only on one current gene
+
+**Date:** 2026-10-19 · **Status:** decided
+
+**Context.** R2.5: Ensembl IDs retired before GENCODE 50 were left out of older authors' matrices; SOD2's ENSG00000112096 was the largest left-out row in both R2.2 proofs.
+
+**Decision.** Ensembl release 116's stable_id_event dump, the release GENCODE 50 is built from, pinned by SHA-256, is the fallback for an Ensembl row the annotation lacks. Gene events that change the ID are followed through every later event; the row is placed only where that walk reaches exactly one gene of the annotation, and a history row never displaces the matrix's own row. Rejected: Ensembl REST `archive/id`, which answers from the current release with one call per ID, and matching by symbol, a guess.
+
+**Evidence.** GSE327906 88 and GSE327166 90 rows gained, 0 lost; 20 planted mutations caught.
+
+**Consequence.** A gene retired with no successor stays out (PRRC2B's ENSG00000130723).
+
+---
+
 ## D-092 — A figure is redrawn through its module's own figure function from its tables read back, found by its stem
 
 **Date:** 2026-10-19 · **Status:** decided
