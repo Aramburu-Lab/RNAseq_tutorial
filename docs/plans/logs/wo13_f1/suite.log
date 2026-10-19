@@ -1,0 +1,585 @@
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  3%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 21%]
+........................................................................ [ 25%]
+........................................................................ [ 29%]
+........................................................................ [ 32%]
+........................................................................ [ 36%]
+........................................................................ [ 40%]
+......................................s................................. [ 43%]
+........................................................................ [ 47%]
+..........ssss.......................................................... [ 51%]
+........................................................................ [ 54%]
+.............................sss........................................ [ 58%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+........................................................................ [ 69%]
+........................................................................ [ 73%]
+........................................................................ [ 76%]
+........................................................................ [ 80%]
+.............................ss......................................... [ 84%]
+........................................................................ [ 87%]
+........................................................................ [ 91%]
+........................................................................ [ 94%]
+........................................................................ [ 98%]
+...............E..F.F.E.EFE                                              [100%]
+==================================== ERRORS ====================================
+_________ ERROR at setup of test_fastqc_plots_redraw_from_their_tables _________
+[gw2] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+tmp_path_factory = TempPathFactory(_given_basetemp=PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/py.../m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw2'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def with_fastqc(tmp_path_factory):
+        """ctx qc --rnaseq-dir on a copy of the rnaseq fixture holding FastQC's raw-read reports."""
+        from synth import Synthetic, design_counts, write_gather_outputs  # noqa: PLC0415
+        from test_qc_fates import with_raw_fastqc  # noqa: PLC0415
+        from test_qc_run import RNASEQ_SAMPLES, ctx  # noqa: PLC0415
+    
+        tmp = tmp_path_factory.mktemp("qc_fastqc")
+        rnaseq, root = with_raw_fastqc(tmp), tmp / "root"
+        synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
+        names = dict(zip(synthetic.samples["sample"], RNASEQ_SAMPLES, strict=True))
+        renamed = Synthetic(synthetic.counts.rename(names),
+                            synthetic.samples.with_columns(pl.col("sample").replace_strict(names)),
+                            synthetic.truth)  # fmt: skip
+        write_gather_outputs(root, "desynth", renamed, date(2026, 9, 30))
+        done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(DE_SPEC),
+                   "--rnaseq-dir", str(rnaseq), cwd=root)  # fmt: skip
+>       assert done.returncode == 0, done.stderr[-3000:]
+E       AssertionError: torial/.claude/worktrees/agent-a00e50 │
+E         │ 34a0fa89898/src/ctx/viz/save.py:267 in write_figure                          │
+E         │                                                                              │
+E         │   264 │   │   # The module builds its page's block in a second call,         │
+E         │       figure_block, by this stem.                                            │
+E         │   265 │   │   _PANELS[figure_stem] = panel.block(spec)                       │
+E         │   266 │   │   block = replace(block, reproduce=_PANELS[figure_stem])         │
+E         │ ❱ 267 │   page = write(FigurePage(title, block), directory /                 │
+E         │       f"{figure_stem}.html")                                                 │
+E         │   268 │   return [*(rendered[(t, ext)] for ext in ("pdf", "svg") for t in    │
+E         │       THEMES), page, *table]                                                 │
+E         │   269                                                                        │
+E         │                                                                              │
+E         │ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e50 │
+E         │ 34a0fa89898/src/ctx/report/builder.py:641 in write                           │
+E         │                                                                              │
+E         │   638 │   │   if not (target.is_file() and target.read_bytes() == entries):  │
+E         │   639 │   │   │   target.parent.mkdir(parents=True, exist_ok=True)           │
+E         │   640 │   │   │   target.write_bytes(entries)                                │
+E         │ ❱ 641 │   path.write_bytes(html)                                             │
+E         │   642 │   return path                                                        │
+E         │   643                                                                        │
+E         │   644                                                                        │
+E         │                                                                              │
+E         │ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3 │
+E         │ .12/pathlib.py:1037 in write_bytes                                           │
+E         │                                                                              │
+E         │   1034 │   │   # type-check for the buffer interface before truncating the   │
+E         │        file                                                                  │
+E         │   1035 │   │   view = memoryview(data)                                       │
+E         │   1036 │   │   with self.open(mode='wb') as f:                               │
+E         │ ❱ 1037 │   │   │   return f.write(view)                                      │
+E         │   1038 │                                                                     │
+E         │   1039 │   def write_text(self, data, encoding=None, errors=None,            │
+E         │        newline=None):                                                        │
+E         │   1040 │   │   """                                                           │
+E         ╰──────────────────────────────────────────────────────────────────────────────╯
+E         OSError: [Errno 28] No space left on device
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/ctx', '--root', '/private...─────────────────────────────────────────────────────────────────────╯\nOSError: [Errno 28] No space left on device\n').returncode
+
+tests/test_figures_m2.py:41: AssertionError
+_______ ERROR at setup of test_fates_and_estimates_redraw_byte_for_byte ________
+[gw11] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+cls = <class '_pytest.runner.CallInfo'>
+func = <function call_and_report.<locals>.<lambda> at 0x7070b21e40>
+when = 'setup'
+reraise = (<class '_pytest.outcomes.Exit'>, <class 'KeyboardInterrupt'>)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: Callable[[], TResult],
+        when: Literal["collect", "setup", "call", "teardown"],
+        reraise: type[BaseException] | tuple[type[BaseException], ...] | None = None,
+    ) -> CallInfo[TResult]:
+        """Call func, wrapping the result in a CallInfo.
+    
+        :param func:
+            The function to call. Called without arguments.
+        :type func: Callable[[], _pytest.runner.TResult]
+        :param when:
+            The phase in which the function is called.
+        :param reraise:
+            Exception or exceptions that shall propagate if raised by the
+            function, instead of being wrapped in the CallInfo.
+        """
+        excinfo = None
+        instant = timing.Instant()
+        try:
+>           result: TResult | None = func()
+                                     ^^^^^^
+
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:361: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:250: in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/logging.py:858: in pytest_runtest_setup
+    yield
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/capture.py:895: in pytest_runtest_setup
+    return (yield)
+            ^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:170: in pytest_runtest_setup
+    item.session._setupstate.setup(item)
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:536: in setup
+    col.setup()
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/python.py:1710: in setup
+    self._request._fillfixtures()
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:806: in _fillfixtures
+    item.funcargs[argname] = self.getfixturevalue(argname)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:630: in getfixturevalue
+    fixturedef = self._get_active_fixturedef(argname)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:726: in _get_active_fixturedef
+    fixturedef.execute(request=subrequest)
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:1232: in execute
+    result: FixtureValue = ihook.pytest_fixture_setup(
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_callers.py:53: in run_old_style_hookwrapper
+    return result.get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_callers.py:38: in run_old_style_hookwrapper
+    res = yield
+          ^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/setuponly.py:36: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:1328: in pytest_fixture_setup
+    result = call_fixture_func(fixturefunc, request, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:998: in call_fixture_func
+    fixture_result = next(generator)
+                     ^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/tmpdir.py:300: in tmp_path
+    path = _mk_tmp(request, tmp_path_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/tmpdir.py:287: in _mk_tmp
+    return factory.mktemp(name, numbered=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/tmpdir.py:141: in mktemp
+    p = make_numbered_dir(root=self.getbasetemp(), prefix=basename, mode=0o700)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw11')
+prefix = 'test_fates_and_estimates_redra', mode = 448
+
+    def make_numbered_dir(root: Path, prefix: str, mode: int = 0o700) -> Path:
+        """Create a directory with an increased number as suffix for the given prefix."""
+        for i in range(10):
+            # try up to 10 times to create the directory
+            max_existing = max(map(parse_num, find_suffixes(root, prefix)), default=-1)
+            new_number = max_existing + 1
+            new_path = root.joinpath(f"{prefix}{new_number}")
+            try:
+                new_path.mkdir(mode=mode)
+            except Exception:
+                pass
+            else:
+                _force_symlink(root, prefix + "current", new_path)
+                return new_path
+        else:
+>           raise OSError(
+                "could not create numbered dir with prefix "
+                f"{prefix} in {root} after 10 tries"
+            )
+E           OSError: could not create numbered dir with prefix test_fates_and_estimates_redra in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw11 after 10 tries
+
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/pathlib.py:239: OSError
+__ ERROR at setup of test_reads_figures_redraw_and_shared_stems_have_no_spec ___
+[gw2] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+tmp_path_factory = TempPathFactory(_given_basetemp=PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/py.../m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw2'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def with_reads(tmp_path_factory):
+        """The chr22_se reads as a fetchngs outdir, gather outputs naming them, ctx qc --reads."""
+        import gzip  # noqa: PLC0415
+    
+        from synth import Synthetic  # noqa: PLC0415
+    
+        root = tmp_path_factory.mktemp("qc_reads")
+        fastq = root / "data" / "raw" / "desynth" / "fastq"
+        fastq.mkdir(parents=True)
+        for name in SE_SAMPLES:
+            reads = (SE / f"{name}.fq").read_bytes()
+            with gzip.open(fastq / f"{name}.fastq.gz", "wb") as dst:
+                dst.write(graded(reads) if name == GRID_SAMPLE else reads)
+        synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
+        names = dict(zip(synthetic.samples["sample"], SE_SAMPLES, strict=True))
+        samples = synthetic.samples.with_columns(pl.col("sample").replace_strict(names))
+        renamed = Synthetic(synthetic.counts.rename(names), samples, synthetic.truth)
+        write_gather_outputs(root, "desynth", renamed, date(2026, 9, 30))
+        sheet_path = next((root / "outputs" / "01_gather").glob("*_samplesheet_v1.parquet"))
+        sheet = pl.read_parquet(sheet_path).with_columns(
+            fastq_1=pl.format("fastq/{}.fastq.gz", "sample"), status_1=pl.lit("verified"),
+            fastq_2=pl.lit(""), status_2=pl.lit(""))  # fmt: skip
+        sheet.write_parquet(sheet_path)
+        runs = dict(sheet.select("sample", "run_accession").rows())
+        done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(SPEC),
+                   "--reads", "--grid-run", runs[GRID_SAMPLE], cwd=root)  # fmt: skip
+>       assert done.returncode == 0, done.stderr[-3000:]
+E       AssertionError:                      │
+E         │   129 │   │   │   │   │   │    *paths], cwd=folders[0], log=folders[0] /     │
+E         │       "fastqc.log")  # fmt: skip                                             │
+E         │   130 │   for (run,), mates in files.sort("mate").group_by("run_accession",  │
+E         │       maintain_order=True):                                                  │
+E         │   131 │   │   run_fastp(mates["path"].to_list(), folders[1], str(run),       │
+E         │       fastp, threads)                                                        │
+E         │                                                                              │
+E         │ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e50 │
+E         │ 34a0fa89898/src/ctx/tools.py:124 in run                                      │
+E         │                                                                              │
+E         │   121 │   │   │   │   │   │   │     env=_env(path), check=False)  # fmt:     │
+E         │       skip                                                                   │
+E         │   122 │   if done.returncode != 0:                                           │
+E         │   123 │   │   tail = "\n".join(log.read_text().splitlines()[-15:])           │
+E         │ ❱ 124 │   │   raise ToolError(f"{name} exited {done.returncode}; the end of  │
+E         │       {log}:\n{tail}")                                                       │
+E         │   125                                                                        │
+E         ╰──────────────────────────────────────────────────────────────────────────────╯
+E         ToolError: fastqc exited 1; the end of 
+E         /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-
+E         2613/popen-gw2/qc_reads0/outputs/02_qc/multiqc/reads/logs/fastqc/fastqc.log:
+E                 at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:179)
+E                 at 
+E         uk.ac.babraham.FastQC.Report.HTMLReportArchive.<init>(HTMLReportArchive.java:80)
+E                 at 
+E         uk.ac.babraham.FastQC.Analysis.OfflineRunner.analysisComplete(OfflineRunner.java
+E         :189)
+E                 at 
+E         uk.ac.babraham.FastQC.Analysis.AnalysisRunner.run(AnalysisRunner.java:123)
+E                 at java.base/java.lang.Thread.run(Thread.java:1583)
+E         Failed to process file se_e.fastq.gz
+E         java.io.FileNotFoundException: 
+E         /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-
+E         2613/popen-gw2/qc_reads0/outputs/02_qc/multiqc/reads/logs/fastqc/se_e_fastqc.zip
+E          (No space left on device)
+E                 at java.base/java.io.FileOutputStream.open0(Native Method)
+E                 at java.base/java.io.FileOutputStream.open(FileOutputStream.java:289)
+E                 at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:230)
+E                 at java.base/java.io.FileOutputStream.<init>(FileOutputStream.java:179)
+E                 at 
+E         uk.ac.babraham.FastQC.Report.HTMLReportArchive.<init>(HTMLReportArchive.java:80)
+E                 at 
+E         uk.ac.babraham.FastQC.Analysis.OfflineRunner.analysisComplete(OfflineRunner.java
+E         :189)
+E                 at 
+E         uk.ac.babraham.FastQC.Analysis.AnalysisRunner.run(AnalysisRunner.java:123)
+E                 at java.base/java.lang.Thread.run(Thread.java:1583)
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/ctx', '--root', '/private...C.Analysis.AnalysisRunner.run(AnalysisRunner.java:123)\n        at java.base/java.lang.Thread.run(Thread.java:1583)\n').returncode
+
+tests/test_qc_run.py:330: AssertionError
+____ ERROR at setup of test_a_run_with_its_own_registry_names_that_registry ____
+[gw2] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+cls = <class '_pytest.runner.CallInfo'>
+func = <function call_and_report.<locals>.<lambda> at 0x7060d671a0>
+when = 'setup'
+reraise = (<class '_pytest.outcomes.Exit'>, <class 'KeyboardInterrupt'>)
+
+    @classmethod
+    def from_call(
+        cls,
+        func: Callable[[], TResult],
+        when: Literal["collect", "setup", "call", "teardown"],
+        reraise: type[BaseException] | tuple[type[BaseException], ...] | None = None,
+    ) -> CallInfo[TResult]:
+        """Call func, wrapping the result in a CallInfo.
+    
+        :param func:
+            The function to call. Called without arguments.
+        :type func: Callable[[], _pytest.runner.TResult]
+        :param when:
+            The phase in which the function is called.
+        :param reraise:
+            Exception or exceptions that shall propagate if raised by the
+            function, instead of being wrapped in the CallInfo.
+        """
+        excinfo = None
+        instant = timing.Instant()
+        try:
+>           result: TResult | None = func()
+                                     ^^^^^^
+
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:361: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:250: in <lambda>
+    lambda: runtest_hook(item=item, **kwds),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/logging.py:858: in pytest_runtest_setup
+    yield
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/capture.py:895: in pytest_runtest_setup
+    return (yield)
+            ^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:170: in pytest_runtest_setup
+    item.session._setupstate.setup(item)
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/runner.py:536: in setup
+    col.setup()
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/python.py:1710: in setup
+    self._request._fillfixtures()
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:806: in _fillfixtures
+    item.funcargs[argname] = self.getfixturevalue(argname)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:630: in getfixturevalue
+    fixturedef = self._get_active_fixturedef(argname)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:726: in _get_active_fixturedef
+    fixturedef.execute(request=subrequest)
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:1232: in execute
+    result: FixtureValue = ihook.pytest_fixture_setup(
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_hooks.py:512: in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_manager.py:120: in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_callers.py:53: in run_old_style_hookwrapper
+    return result.get_result()
+           ^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/pluggy/_callers.py:38: in run_old_style_hookwrapper
+    res = yield
+          ^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/setuponly.py:36: in pytest_fixture_setup
+    return (yield)
+            ^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:1328: in pytest_fixture_setup
+    result = call_fixture_func(fixturefunc, request, kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/fixtures.py:998: in call_fixture_func
+    fixture_result = next(generator)
+                     ^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/tmpdir.py:300: in tmp_path
+    path = _mk_tmp(request, tmp_path_factory)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/tmpdir.py:287: in _mk_tmp
+    return factory.mktemp(name, numbered=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/tmpdir.py:141: in mktemp
+    p = make_numbered_dir(root=self.getbasetemp(), prefix=basename, mode=0o700)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+root = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw2')
+prefix = 'test_a_run_with_its_own_regist', mode = 448
+
+    def make_numbered_dir(root: Path, prefix: str, mode: int = 0o700) -> Path:
+        """Create a directory with an increased number as suffix for the given prefix."""
+        for i in range(10):
+            # try up to 10 times to create the directory
+            max_existing = max(map(parse_num, find_suffixes(root, prefix)), default=-1)
+            new_number = max_existing + 1
+            new_path = root.joinpath(f"{prefix}{new_number}")
+            try:
+                new_path.mkdir(mode=mode)
+            except Exception:
+                pass
+            else:
+                _force_symlink(root, prefix + "current", new_path)
+                return new_path
+        else:
+>           raise OSError(
+                "could not create numbered dir with prefix "
+                f"{prefix} in {root} after 10 tries"
+            )
+E           OSError: could not create numbered dir with prefix test_a_run_with_its_own_regist in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw2 after 10 tries
+
+../../../.pixi/envs/default/lib/python3.12/site-packages/_pytest/pathlib.py:239: OSError
+=================================== FAILURES ===================================
+____________ test_a_cross_study_n_counts_each_level_of_the_contrast ____________
+[gw6] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+cross_root = (PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw6/f1_m7_cross...e/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw6/f1_m7_cross0/fake_cells.toml'))
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw6/test_a_cross_study_n_counts_ea0')
+
+    def test_a_cross_study_n_counts_each_level_of_the_contrast(cross_root, tmp_path):
+        """The fold-change figure's n is counted per level from the protein samples' groups: with
+        one reference sample relabelled tested, the caption reads 5 and 3. Catches the two levels'
+        n swapped, which the made-up root's 4 and 4 cannot show."""
+        root, dataset_file = cross_root
+        spec = next(s for s in specs(root, M7, dataset_file) if s.stem.endswith("_fold_change_v1"))
+        folder = copied(spec, root, tmp_path / "n")
+        samples = folder / next(i.file for i in spec.inputs if i.name == "protein_samples")
+        frame = pl.read_parquet(samples)
+        assert frame["group"].to_list().count("A") == frame["group"].to_list().count("B") == 4
+        first_b = frame["group"].to_list().index("B")
+        frame.with_columns(group=pl.Series([("A" if i == first_b else g)
+                                            for i, g in enumerate(frame["group"])])
+                           ).write_parquet(samples)  # fmt: skip
+        raw = (folder / "params.toml").read_text().splitlines()
+        (folder / "params.toml").write_text(
+            "\n".join(x for x in raw if not x.startswith("protein_samples = ") or ".parquet" in x)
+            + "\n"
+        )
+>       page = redrawn(folder, spec).with_suffix(".html").read_text()
+               ^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_figures_m7.py:187: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+folder = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw6/test_a_cross_study_n_counts_ea0/n')
+spec = FigureSpec(figure_id='own_m7_fold_change', dataset='fake_cells', module='proteo', params=Plain(dataset='fake_cells'), ...ss0/root', commit='git 3ea2b2f776d29a458bc9177e84654df684a83b51', version='0.1.0', upstream='pixi run -e default ctx ')
+
+    def redrawn(folder: Path, spec) -> Path:
+        done = ctx_run("figure", spec.figure_id, "--params", "params.toml", cwd=folder)
+>       assert done.returncode == 0, (spec.figure_id, done.stderr[-3000:])
+E       AssertionError: ('own_m7_fold_change', 'torial/.claude/worktrees/agent-a00e50 │
+E         │ 34a0fa89898/src/ctx/viz/save.py:267 in write_figure...─────────────────────────────────────────────────────────────────────╯
+E         OSError: [Errno 28] No space left on device
+E         ')
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/ctx', 'figure', 'own_m7_f...─────────────────────────────────────────────────────────────────────╯\nOSError: [Errno 28] No space left on device\n').returncode
+
+tests/test_figures.py:66: AssertionError
+___________________ test_every_figure_redraws_byte_for_byte ____________________
+[gw11] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+process_root = (PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/process_6kolzrhz'), P...ytest-2613/process_6kolzrhz/outputs/03_process/2026-10-19_process_chrse_agreement_multimap_v1_README.md\n', stderr=''))
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw11/test_every_figure_redraws_byte0')
+
+    def test_every_figure_redraws_byte_for_byte(process_root, tmp_path):
+        """All 12 figures of the HISAT2 run, redrawn from M3's tables. Catches a bar's outcomes
+        read back in another order, the featured sample's settings taken from the samples' table,
+        the gene sums left out of the scatters, and the groups that filter the bars dropped."""
+        root, spec_path, _ = process_root
+        found = specs(root, PROCESS, spec_path)
+        assert _kinds(found) == DRAWN
+        for spec in found:
+            module_csv = next(root.glob(f"outputs/03_process/{spec.stem}.csv"))
+>           csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_figures_m3.py:38: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+folder = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw11/test_every_figure_redraws_byte0/2026-10-19_process_chrse_counters_overlap_v1')
+spec = FigureSpec(figure_id='own_m3_counters', dataset='chrse', module='process', params=OneComparison(dataset='chrse', compa...6kolzrhz', commit='git 3ea2b2f776d29a458bc9177e84654df684a83b51', version='0.1.0', upstream='pixi run -e default ctx ')
+
+    def redrawn(folder: Path, spec) -> Path:
+        done = ctx_run("figure", spec.figure_id, "--params", "params.toml", cwd=folder)
+>       assert done.returncode == 0, (spec.figure_id, done.stderr[-3000:])
+E       AssertionError: ('own_m3_counters', 'torial/.claude/worktrees/agent-a00e50 │
+E         │ 34a0fa89898/src/ctx/viz/save.py:267 in write_figure   ...─────────────────────────────────────────────────────────────────────╯
+E         OSError: [Errno 28] No space left on device
+E         ')
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/ctx', 'figure', 'own_m3_c...─────────────────────────────────────────────────────────────────────╯\nOSError: [Errno 28] No space left on device\n').returncode
+
+tests/test_figures.py:66: AssertionError
+_____________ test_the_registry_named_by_the_run_is_the_one_copied _____________
+[gw2] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+qc_run = (PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/qc_cli_yi585v4m'), '<...form on back-navigation sets the boxes without an event. */\n    update();\n  }\n\n})();\n</script>\n</body>\n</html>')
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw2/test_the_registry_named_by_the0')
+
+    def test_the_registry_named_by_the_run_is_the_one_copied(qc_run, tmp_path):
+        """A strip's panel copies the registry the run read, as its options table names it, and a
+        multiplier moved there moves the redrawn lead. Catches k taken from the registry file
+        instead of the run's options, which --mad overrides."""
+        root = qc_run[0]
+        spec = next(s for s in specs(root, QC, DE_SPEC)
+                    if getattr(s.params, "metric", "") == "library_size")  # fmt: skip
+>       folder = copied(spec, root, tmp_path / "k")
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_figures_m2.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_figures.py:59: in copied
+    shutil.copyfile(source, folder / item.file)
+../../../.pixi/envs/default/lib/python3.12/shutil.py:266: in copyfile
+    _fastcopy_fcopyfile(fsrc, fdst, posix._COPYFILE_DATA)
+../../../.pixi/envs/default/lib/python3.12/shutil.py:110: in _fastcopy_fcopyfile
+    raise err from None
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fsrc = <_io.BufferedReader name='/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/qc_cli_yi585v4m/outputs/01_gather/2026-09-30_gather_desynth_samplesheet_v1.parquet'>
+fdst = <_io.BufferedWriter name='/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw2/test_the_registry_named_by_the0/k/2026-09-30_gather_desynth_samplesheet_v1.parquet'>
+flags = 8
+
+    def _fastcopy_fcopyfile(fsrc, fdst, flags):
+        """Copy a regular file content or metadata by using high-performance
+        fcopyfile(3) syscall (macOS).
+        """
+        try:
+            infd = fsrc.fileno()
+            outfd = fdst.fileno()
+        except Exception as err:
+            raise _GiveupOnFastCopy(err)  # not a regular file
+    
+        try:
+>           posix._fcopyfile(infd, outfd, flags)
+E           OSError: [Errno 28] No space left on device: '/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/qc_cli_yi585v4m/outputs/01_gather/2026-09-30_gather_desynth_samplesheet_v1.parquet' -> '/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2613/popen-gw2/test_the_registry_named_by_the0/k/2026-09-30_gather_desynth_samplesheet_v1.parquet'
+
+../../../.pixi/envs/default/lib/python3.12/shutil.py:103: OSError
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_sanity_record.py:155: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_pmb4j8ks. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_pmb4j8ks/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 19 18:07:56 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_0egjren7. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_0egjren7/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 19 18:08:12 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_7iq9l6mt. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_7iq9l6mt/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 19 18:11:26 ...... FATAL ERROR, exiting
+3 failed, 1954 passed, 10 skipped, 3 warnings, 4 errors in 563.00s (0:09:22)
+./docs/plans/logs/wo13_f1_py.sh python -m pytest -q -n auto --dist loadscope   2524.41s user 819.85s system 593% cpu 9:23.53 total
