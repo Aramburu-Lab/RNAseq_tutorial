@@ -5,7 +5,9 @@ its own would miss them. Each test names the mutation it catches; each was plant
 to fail.
 """
 
+import json
 import math
+import re
 
 import numpy as np
 import polars as pl
@@ -310,6 +312,10 @@ def test_the_page_draws_the_box_and_f1_and_ships_every_number(root, monkeypatch)
     page = unpacked(written[0].read_text())
     assert "NPTX2 in every contrast of this dataset" in page
     assert "All samples, contrasts 2 to 2 of 2" in page  # F1's second view, one per page here
+    found = re.findall(r'id="ctx-controls-\d+">(.*?)</script>', page, re.S)
+    views = [c for c in map(json.loads, found) if c.get("kind") == "view"]
+    f1 = next(c for c in views if "contrasts 2 to 2" in c["options"][-1]["label"])
+    assert f1["options"][-1]["export"]["caption"].startswith("Mann-Whitney U")  # its own files
     assert "No box for NPTX2 in" in page  # M5 tested ACTB and UPA in a_case, not NPTX2
     box = pl.read_csv(next(p for p in written if "_box_upa_" in p.name and p.suffix == ".csv"))
     values = samples.read(folder, load(spec), [OURS[ACTB], UPA_ID])

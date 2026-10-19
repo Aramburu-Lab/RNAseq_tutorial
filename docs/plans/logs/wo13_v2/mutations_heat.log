@@ -1,0 +1,9 @@
+export_raster	CAUGHT	1 failed, 6 passed in 41.55s
+runs_across_levels	CAUGHT	1 failed, 6 passed in 39.81s
+tracks_in_cell_colours	CAUGHT	1 failed, 8 passed in 2.14s
+page_tints	SURVIVED	9 passed in 2.03s
+thinned_caption_files	CAUGHT	1 failed, 8 passed in 1.99s
+order_clustering_kept	CAUGHT	1 failed, 7 passed in 1.97s
+order_levels_sorted	CAUGHT	1 failed, 7 passed in 1.98s
+strip_grouping_last	CAUGHT	1 failed, 7 passed in 2.04s
+grouped_caption_build	SURVIVED	7 passed in 40.03s

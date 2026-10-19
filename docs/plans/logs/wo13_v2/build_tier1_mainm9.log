@@ -1,1 +1,155 @@
 == genecard 2026-10-19T15:48:43Z 4a3b922 load averages: 12.47 13.29 15.52
+╭───────────────────── Traceback (most recent call last) ──────────────────────╮
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/cli.py:86 in wrapper      │
+│                                                                              │
+│    83 │   │   │   **options,                                                 │
+│    84 │   │   │   "settings": runtime.start(options.get("profile"),          │
+│       options.get("root")),                                                  │
+│    85 │   │   }                                                              │
+│ ❱  86 │   │   return command(ctx, *args, **kwargs)                           │
+│    87 │                                                                      │
+│    88 │   return wrapper                                                     │
+│    89                                                                        │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/cli.py:499 in genecard    │
+│                                                                              │
+│   496 │   options = module.Options(dataset_file, _columns(genes),            │
+│       genes_from, contrast, hpa_release,                                     │
+│   497 │   │   │   │   │   │   │    offline, refresh)  # fmt: skip            │
+│   498 │   try:                                                               │
+│ ❱ 499 │   │   written = module.run(ctx.obj["settings"], cards, command,      │
+│       dataset, options)                                                      │
+│   500 │   except (DatasetError, GenecardError, GeneListError) as error:      │
+│   501 │   │   typer.echo(str(error), err=True)                               │
+│   502 │   │   raise typer.Exit(1) from error                                 │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/genecard/run.py:288 in    │
+│ run                                                                          │
+│                                                                              │
+│   285 │   context = page.Context(spec=spec, options=options, chosen=chosen,  │
+│       evidence=evidence,                                                     │
+│   286 │   │   │   │   │   │      provenance=provenance, settings=settings,   │
+│       command=command,                                                       │
+│   287 │   │   │   │   │   │      cards=cards_, tested=tested, own=own,       │
+│       family=family)  # fmt: skip                                            │
+│ ❱ 288 │   return page.build(writer, context)                                 │
+│   289                                                                        │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/genecard/page.py:547 in   │
+│ build                                                                        │
+│                                                                              │
+│   544 │   that builds them.                                                  │
+│   545 │   """                                                                │
+│   546 │   page = writer.out / f"{stem(PAGE, f'{writer.dataset}_overview', 1, │
+│       day=writer.day)}.html"                                                 │
+│ ❱ 547 │   drawn = [_card(writer, c, ctx) for c in ctx.chosen]                │
+│   548 │   view = evidence_view(writer, ctx)                                  │
+│   549 │                                                                      │
+│   550 │   def pages(k: int) -> tuple[str, list[int]]:                        │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/genecard/page.py:249 in   │
+│ _card                                                                        │
+│                                                                              │
+│   246 │   lines, own = _own(card, ctx)                                       │
+│   247 │   items += lines                                                     │
+│   248 │   for kind, data, words, choices in own:                             │
+│ ❱ 249 │   │   panel(data, kind, words, choices)                              │
+│   250 │   if card.tissues is not None:                                       │
+│   251 │   │   views = [(label, data, _words("tissues", numbers))             │
+│   252 │   │   │   │    for label, data, numbers in                           │
+│       figures.tissue_views(card)]  # fmt: skip                               │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/genecard/page.py:241 in   │
+│ panel                                                                        │
+│                                                                              │
+│   238 │   │   panels.append((data, what, words, controls))                   │
+│   239 │   │   block = figure_block(data, writer.stem(what), words)           │
+│   240 │   │   if views is not None and len(views) > 1:                       │
+│ ❱ 241 │   │   │   block = viewed(block, views, word(f"figures.{kind}.view")) │
+│   242 │   │   if controls is not None:                                       │
+│   243 │   │   │   block = replace(block, controls=controls)                  │
+│   244 │   │   items.append(block)                                            │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/report/views.py:50 in     │
+│ viewed                                                                       │
+│                                                                              │
+│   47 │   │   "moved": text.raw("ui", "view.moved"), "build": options[0][0],  │
+│   48 │   }  # fmt: skip                                                      │
+│   49 │   if hasattr(first, "export_layers"):                                 │
+│ ❱ 50 │   │   controls["export"] = export.settings(first.inches(),            │
+│      first.caption, block.stem,                                              │
+│   51 │   │   │   │   │   │   │   │   │   │   │    first.export_layers())  #  │
+│      fmt: skip                                                               │
+│   52 │   return replace(block, controls=controls)                            │
+│   53                                                                         │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/report/export.py:244 in   │
+│ settings                                                                     │
+│                                                                              │
+│   241 │   """                                                                │
+│   242 │   width, height = inches                                             │
+│   243 │   return {                                                           │
+│ ❱ 244 │   │   "width_pt": width * 72, "height_pt": height * 72, "caption":   │
+│       plain(caption),                                                        │
+│   245 │   │   "note": text.word("ui", "export.note"),                        │
+│   246 │   │   "file": stem, "size": SIZES["caption"], "spacing":             │
+│       LINE_SPACING, "inset": CAPTION_INSET,                                  │
+│   247 │   │   "bottom": CAPTION_BOTTOM, "ink": THEMES["white"].ink,          │
+│       "marker": 1 / PAGE_PX_PER_PT,                                          │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/report/marks.py:71 in     │
+│ plain                                                                        │
+│                                                                              │
+│   68                                                                         │
+│   69 def plain(text: str) -> str:                                            │
+│   70 │   """The text as a reader sees it outside a page: each mark replaced  │
+│      by its display text."""                                                 │
+│ ❱ 71 │   return "".join(p.raw if p.mark is None else p.mark.display for p in │
+│      pieces(text))                                                           │
+│   72                                                                         │
+│   73                                                                         │
+│   74 def html(text: str, term: Callable[[Mark], str | None] | None = None)   │
+│      -> Markup:                                                              │
+│                                                                              │
+│ /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af13a7 │
+│ 14b9eb1c983/outputs/scratch_roots/main_src/src/ctx/report/marks.py:58 in     │
+│ pieces                                                                       │
+│                                                                              │
+│   55 │   read it as one, neither the lint nor the tooltips a page embeds.    │
+│   56 │   """                                                                 │
+│   57 │   out, at = [], 0                                                     │
+│ ❱ 58 │   for code in _CODE.finditer(text):                                   │
+│   59 │   │   out += [*_words(text[at : code.start()]), Piece(code.group(0),  │
+│      code=True)]                                                             │
+│   60 │   │   at = code.end()                                                 │
+│   61 │   return out + _words(text[at:])                                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+TypeError: expected string or bytes-like object, got 'OwnCaption'
+       53.69 real        51.60 user         5.81 sys
+           850853888  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              541256  page reclaims
+             1336833  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 266  voluntary context switches
+              245619  involuntary context switches
+        553867720589  instructions retired
+        216500199255  cycles elapsed
+           725878728  peak memory footprint
+exit 1

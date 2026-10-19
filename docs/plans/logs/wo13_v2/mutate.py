@@ -51,7 +51,7 @@ GROUPS["heat"] = {
     "order_clustering_kept": (QF, "        order = grouped_order(order, sheet, by)", "        order = order", [T_QF]),
     "order_levels_sorted": (QF, "    first = {v: i for i, v in enumerate(dict.fromkeys(sheet[by].cast(pl.String)))}", "    first = {v: i for i, v in enumerate(sorted(set(sheet[by].cast(pl.String))))}", [T_QF]),
     "strip_grouping_last": (QF, "    wanted = list(dict.fromkeys([by, *STRIPS] if by and by not in STRIPS else STRIPS))", "    wanted = list(dict.fromkeys([*STRIPS, by] if by and by not in STRIPS else STRIPS))", [T_QF]),
-    "grouped_caption_build": (QB, "    data = fig.correlation_heatmap(rho, sheet, text.fill(PAGE, key, **values), by=column)", "    data = fig.correlation_heatmap(rho, sheet, text.fill(PAGE, key, **values))", [T_QB]),
+    "grouped_caption_build": (QB, "    data = fig.correlation_heatmap(rho, sheet, text.fill(PAGE, key, **values), by=column)", "    data = fig.correlation_heatmap(rho, sheet, text.fill(PAGE, key, **values))", [T_QF]),
 }  # fmt: skip
 RUNPY, RUNJS, PAGERUN, ORAJS, LIVE = (
     "src/ctx/function/running.py",
@@ -83,7 +83,7 @@ GROUPS["m2"] = {
     "flags_ignored": (FLAG, "            cell = level(row[m.column], (row[\"sample\"], m.id) in flagged, judged_here)", "            cell = level(row[m.column], False, judged_here)", [T_QV]),
     "fitted_never": (FLAG, "    if len(rendered(page, path).encode()) <= MAX_BYTES:", "    if True:", [T_QV]),
     "fitted_always": (FLAG, "    if len(rendered(page, path).encode()) <= MAX_BYTES:", "    if False:", [T_QV]),
-    "fitted_drops_map": (FLAG, "            items += [replace(item, controls=None),\n", "            items += [\n", [T_QV]),
+    "fitted_drops_map": (FLAG, "                replace(item, controls=None),\n", "", [T_QV]),
     "view_export_builds": (QCB, "    return exported(block, options, text.word(PAGE, \"figures.flag_map.view\"))", "    return viewed(block, options, text.word(PAGE, \"figures.flag_map.view\"))", [T_QV]),
 }  # fmt: skip
 

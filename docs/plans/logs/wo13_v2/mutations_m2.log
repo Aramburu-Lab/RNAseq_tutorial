@@ -1,0 +1,7 @@
+flag_needs_no_value	CAUGHT	1 failed, 2 passed in 66.14s (0:01:06)
+unjudged_as_passed	CAUGHT	1 failed, 2 passed in 50.92s
+flags_ignored	CAUGHT	1 error in 32.62s
+fitted_never	CAUGHT	1 error in 11.53s
+fitted_always	CAUGHT	1 failed, 3 passed in 34.35s
+fitted_drops_map	NOT PLANTED: 0 matches
+view_export_builds	CAUGHT	1 failed, 6 passed in 61.52s (0:01:01)

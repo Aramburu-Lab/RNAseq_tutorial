@@ -16,7 +16,13 @@ from ctx.viz.style import THEMES
 
 GENES = ("ESR1", "KRT5")
 # donor: (normal, tumour) per gene; d3 has two tumour samples, d4 a missing normal value.
-VALUES = {"d1": (1.0, 4.0), "d2": (2.0, 5.0), "d3": (3.0, 6.0), "d4": (None, 7.0)}
+VALUES = {
+    "d1": (1.0, 4.0),
+    "d2": (2.0, 5.0),
+    "d3": (3.0, 6.0),
+    "d4": (None, 7.0),
+    "d5": (float("nan"), 8.0),
+}  # d4 and d5: no normal value, missing or not a number
 
 
 def paired_frame() -> pl.DataFrame:

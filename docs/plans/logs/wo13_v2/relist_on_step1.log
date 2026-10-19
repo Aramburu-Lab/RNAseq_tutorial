@@ -1,0 +1,16 @@
+1
+0
+== function 2026-10-19T16:27:47Z a73aa57 load averages: 3.45 4.93 7.80
+       28.99 real        21.35 user         3.77 sys
+          1051033600  maximum resident set size
+           614500128  peak memory footprint
+exit 0
+page 2026-10-19_function_tier1_overview_v1.html 9,423,173 B
+running 1280_light: 11 contrasts; lists 4/11, kept 11/11, words 11/11; line max |page - lite| 3.54e-16; ES max |page - table| 7.27e-14; back to build True; box 1265 scroll 1265; errors []
+ora 1280_light: 11 of 11 contrasts equal live.by_contrast row for row, max relative p 2.57e-11, box None, errors []
+running 1280_dark: 11 contrasts; lists 4/11, kept 11/11, words 11/11; line max |page - lite| 3.54e-16; ES max |page - table| 7.27e-14; back to build True; box 1265 scroll 1265; errors []
+ora 1280_dark: 11 of 11 contrasts equal live.by_contrast row for row, max relative p 2.57e-11, box None, errors []
+running 375_light: 11 contrasts; lists 4/11, kept 11/11, words 11/11; line max |page - lite| 3.54e-16; ES max |page - table| 7.27e-14; back to build True; box 375 scroll 375; errors []
+ora 375_light: 11 of 11 contrasts equal live.by_contrast row for row, max relative p 2.57e-11, box None, errors []
+running 375_dark: 11 contrasts; lists 4/11, kept 11/11, words 11/11; line max |page - lite| 3.54e-16; ES max |page - table| 7.27e-14; back to build True; box 375 scroll 375; errors []
+ora 375_dark: 11 of 11 contrasts equal live.by_contrast row for row, max relative p 2.57e-11, box None, errors []

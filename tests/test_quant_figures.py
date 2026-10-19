@@ -172,6 +172,14 @@ def test_a_grouping_view_keeps_each_level_together_in_the_clusterings_order():
     # Seven conditions take every data colour: two cell types take the greys, three batches go.
     assert fig.strips_for(frame, "condition") == ("condition", "cell_type")
     assert fig.strips_for(frame, "cell_type") == fig.STRIPS
+    # The page's view: blocks builds it grouped, as its caption says.
+    from ctx.quant import blocks  # noqa: PLC0415
+    from ctx.quant import tables as tab  # noqa: PLC0415
+
+    found = tab.within_minus_between(rho, frame["batch"].to_list(), frame["sample"].to_list())
+    label, view, _ = blocks._correlation_grouped(rho, 500, frame, "batch", found)  # noqa: SLF001
+    assert view.row_order == order and "grouped by batch" in view.caption
+    assert label == "batch, then clustering"
 
 
 def test_a_thinned_heatmap_exports_the_pages_caption_and_its_files_colours():
@@ -191,3 +199,13 @@ def test_a_thinned_heatmap_exports_the_pages_caption_and_its_files_colours():
     assert layers["caption"] == plain(data.caption_text()) != data.caption
     assert "caption" not in heatmap(20).export_layers()
     assert data.inches() == data._inches()  # noqa: SLF001
+    # A level with no colour takes the white files' grid grey, not the page's tint.
+    from matplotlib.colors import to_hex  # noqa: PLC0415
+
+    from ctx.viz.heatmap import HeatmapData, Swatch  # noqa: PLC0415
+    from ctx.viz.style import THEMES  # noqa: PLC0415
+
+    bare = HeatmapData(frame=pl.DataFrame({"r": ["a"], "c": ["x"], "v": [None], "l": ["none"]}),
+                       columns={}, row="r", column="c", value="v", level="l", row_label="R",
+                       column_label="C", swatches=(Swatch("none", None),), caption="c")  # fmt: skip
+    assert bare.export_layers()["cells"] == [[to_hex(THEMES["white"].grid)]]
