@@ -31,6 +31,7 @@ basis = "The p the call rule reads: padj, padj_by, padj_holm, padj_bonferroni or
 alpha = "The cutoff on that p, strict."
 lfc_min = "The smallest absolute raw log2 fold change called."
 gene_set = "The gene set, as the gene-set file names it."
+pca = "The PCA, by its name in the dataset file's de pca list."
 inputs = "Each input file, in this folder."
 sha256 = "Each input's SHA-256; ctx figure refuses a file whose bytes differ."
 
@@ -47,6 +48,10 @@ size_factors = "M5's size factors: each fit's samples, donors and groups."
 gsea = "M6's GSEA table of the contrast."
 gsea_each = "M6's GSEA table of one contrast."
 ora = "M6's over-representation table of the contrast."
+counts = "M1's gene counts, one column per sample."
+genes = "M1's genes: identifiers and symbols, in the annotation's order."
+dispersions = "M5's dispersions of the contrast's fit."
+gene_sets = "The gene-set file ctx setup fetched."
 
 [readme]
 title = "Figure"

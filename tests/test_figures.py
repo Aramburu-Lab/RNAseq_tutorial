@@ -21,8 +21,10 @@ from ctx.gather.fetchngs import read
 
 ROOT = Path(__file__).resolve().parents[1]
 # Every kind the synthetic dataset file makes: the featured contrast's volcano, MA plot,
-# p histogram, GSEA and ORA bars; both declared scatters; the one lesson; the featured set.
-EXPECTED = {"volcano", "ma", "phist", "lfc", "calls", "gsea", "ora", "nes"}
+# p histogram, dispersions, GSEA and ORA bars and background lesson; both declared scatters;
+# the one lesson; both PCAs; the named genes' boxes; the featured set; the running score.
+EXPECTED = {"volcano", "ma", "phist", "lfc", "calls", "gsea", "ora", "nes", "pca", "box",
+            "dispersion", "background", "running"}  # fmt: skip
 
 
 def test_ids_round_trip():
@@ -36,12 +38,13 @@ def test_ids_round_trip():
         assert parse(bad) is None, bad
 
 
-def specs(root: Path) -> list:
-    """The spec of every figure M5 and M6 wrote, found as the module found it."""
-    load(DE_SPEC)  # the dataset file this process read, as the drawing process had
+def specs(root: Path, folders=("05_de", "06_function"), dataset_file: Path = DE_SPEC) -> list:
+    """The spec of every figure the modules of ``folders`` wrote, found as each module found it."""
+    load(dataset_file)  # the dataset file this process read, as the drawing process had
     found = []
-    for folder in ("05_de", "06_function"):
-        for csv in sorted((root / "outputs" / folder).glob("*_v1.csv")):
+    for folder in folders:
+        for pdf in sorted((root / "outputs" / folder).glob("*_v1_white.pdf")):
+            csv = pdf.with_name(pdf.name.replace("_white.pdf", ".csv"))
             if (spec := record.describe(csv.name[:-4], csv.parent, csv)) is not None:
                 found.append(spec)
     return found
@@ -65,6 +68,18 @@ def redrawn(folder: Path, spec) -> Path:
     return csv
 
 
+def drawn_alike(redrawn_csv: Path, module_csv: Path) -> list[str]:
+    """The data table, and the PDF and SVG of each theme, that differ from the module's.
+
+    Both sets are named by the same stem; a redraw dated another day differs in name alone.
+    """
+    tail = (".csv", *(f"_{t}.{e}" for t in ("white", "black") for e in ("pdf", "svg")))
+    new, old = redrawn_csv.name[: -len(".csv")], module_csv.name[: -len(".csv")]
+    return [end for end in tail
+            if (redrawn_csv.parent / f"{new}{end}").read_bytes()
+            != (module_csv.parent / f"{old}{end}").read_bytes()]  # fmt: skip
+
+
 def test_every_spec_redraws_its_data_byte_for_byte(pipeline, tmp_path):
     """Each figure with a spec, redrawn from its inputs alone in a clean folder, writes the
     module's data table byte for byte, and the module's README names its ID. Catches a fit read
@@ -78,7 +93,7 @@ def test_every_spec_redraws_its_data_byte_for_byte(pipeline, tmp_path):
         readme = module_csv.with_name(f"{spec.stem}_README.md").read_text()
         assert f"`{spec.figure_id}`" in readme, spec.stem
         csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
-        assert csv.read_bytes() == module_csv.read_bytes(), spec.stem
+        assert drawn_alike(csv, module_csv) == [], spec.stem
 
 
 def test_a_lesson_redrawn_at_another_setting_counts_as_the_grid(pipeline, tmp_path):
@@ -214,3 +229,37 @@ def test_figure_options_have_cards():
     figure = group.commands["figure"]  # type: ignore[attr-defined]
     names = [c.name for c in parameter_cards(group, figure)]
     assert {"--cohort", "figure_id", "--params", "--out"} <= set(names), names
+
+
+def test_a_pca_redraw_reads_the_sheet_through_the_gdc_door(pipeline, tmp_path):
+    """A GDC sheet's PCA, redrawn, holds the chosen files alone: an aliquot gather did not take,
+    its counts present, stays out as M5 keeps it out. Catches the drawer reading the sheet
+    without ``gdc.chosen``, which would draw that aliquot as one more sample."""
+    from ctx.figures import draw_m5  # noqa: PLC0415
+
+    root = pipeline[0]
+    spec = next(s for s in specs(root) if s.figure_id.endswith("_pca") and s.params.pca == "all")
+    folder = copied(spec, root, tmp_path / "gdc")
+    files = {i.name: folder / i.file for i in spec.inputs}
+    sheet = pl.read_parquet(files["samplesheet"])
+    extra = sheet.head(1).with_columns(sample=pl.lit("S_EXTRA"), chosen=pl.lit(False))
+    pl.concat([sheet.with_columns(chosen=pl.lit(True)), extra]).write_parquet(files["samplesheet"])
+    counts = pl.read_parquet(files["counts"])
+    counts.with_columns(S_EXTRA=pl.col(sheet["sample"][0])).write_parquet(files["counts"])
+    drawn, _ = draw_m5.pca(files, spec.params, load(files["dataset_file"]))
+    module = pl.read_csv(next(root.glob(f"outputs/05_de/{spec.stem}.csv")), comment_prefix="#")
+    assert sorted(drawn.frame["sample"]) == sorted(module["sample"])
+    assert "S_EXTRA" not in drawn.frame["sample"].to_list()
+
+
+def test_a_pca_the_dataset_file_does_not_declare_is_refused(pipeline, tmp_path):
+    """A params file naming a PCA the dataset file lacks is refused with the name. Catches the
+    kind's check left out, which would stop with a StopIteration inside the drawer."""
+    root = pipeline[0]
+    spec = next(s for s in specs(root) if s.figure_id.endswith("_pca"))
+    folder = copied(spec, root, tmp_path / "pca")
+    raw = (folder / "params.toml").read_text()
+    assert raw.count(f'pca = "{spec.params.pca}"') == 1
+    (folder / "params.toml").write_text(raw.replace(f'pca = "{spec.params.pca}"', 'pca = "nope"'))
+    with pytest.raises(ParamsError, match=r"pca: 'nope' is not a \[\[de.pca\]\] name"):
+        load_params(folder / "params.toml", spec.figure_id)

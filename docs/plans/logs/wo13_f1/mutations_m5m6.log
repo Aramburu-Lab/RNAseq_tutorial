@@ -1,0 +1,8 @@
+CAUGHT  dispersions not read back: 1 failed in 99.44s (0:01:39) | E       AssertionError: ('own_m5_dispersion', '         │
+CAUGHT  dispersions not written: 1 failed in 74.74s (0:01:14) | E       AssertionError: assert {'background'...c', 'ma', ...} == {'background'...', 'lfc', ...}
+CAUGHT  pca sheet past the door: 1 failed in 76.21s (0:01:16) | E       AssertionError: assert ['S001', 'S00..., 'S006', ...] == ['S001', 'S00..., 'S006', ...]
+CAUGHT  pca name not checked: 1 failed in 78.61s (0:01:18) | E       Failed: DID NOT RAISE ParamsError
+CAUGHT  box genes out of the file's order: 1 failed in 136.88s (0:02:16) | E           AssertionError: 2026-10-19_de_desynth_box_a_case_v1
+CAUGHT  running GSEA with another seed: 1 failed in 209.61s (0:03:29) | E           AssertionError: 2026-10-19_function_desynth_running_a_case_v1
+CAUGHT  background of the down calls: 1 failed in 239.35s (0:03:59) | E           AssertionError: 2026-10-19_function_desynth_background_a_case_v1
+CAUGHT  resource found under the working folder: 1 failed in 147.67s (0:02:27) | E       AssertionError: assert {'box', 'call...c', 'ma', ...} == {'background'...', 'lfc', ...}

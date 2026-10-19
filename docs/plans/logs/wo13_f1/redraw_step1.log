@@ -1,0 +1,133 @@
+== blood_m5_dispersion
+panels on the page: 12; for blood_m5_dispersion: 1
+exit 0
+te.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_dispersion/repro_blood_m5_dispersion_tier1/2026-10-19_de_tier1_dispersion_ndn_gcsf_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_dispersion/repro_blood_m5_dispersion_tier1/2026-10-19_de_tier1_dispersion_ndn_gcsf_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_dispersion/repro_blood_m5_dispersion_tier1/2026-10-19_de_tier1_dispersion_ndn_gcsf_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_dispersion/repro_blood_m5_dispersion_tier1/2026-10-19_de_tier1_dispersion_ndn_gcsf_v1_README.md
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1.csv
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1.html
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1_README.md
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1_black.pdf
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1_black.svg
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1_white.pdf
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1_white.svg
+2026-10-19_de_tier1_ndn_gcsf_dispersions_v1.parquet
+2026-10-19_de_tier1_ndn_gcsf_results_v1.parquet
+2026-10-19_de_tier1_size_factors_v1.parquet
+inputs.sha256
+params.toml
+tier1.toml
+2026-10-19_de_tier1_dispersion_ndn_gcsf_v1.csv: OK
+.csv         byte-equal  1,802,708 B
+_white.pdf   byte-equal    419,914 B
+_white.svg   byte-equal  2,799,251 B
+_black.pdf   byte-equal    419,923 B
+_black.svg   byte-equal  2,800,661 B
+== blood_m5_pca
+panels on the page: 12; for blood_m5_pca: 3
+exit 0
+_m5_pca/repro_blood_m5_pca_tier1/2026-10-19_de_tier1_pca_pb_v1_black.pdf
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_pca/repro_blood_m5_pca_tier1/2026-10-19_de_tier1_pca_pb_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_pca/repro_blood_m5_pca_tier1/2026-10-19_de_tier1_pca_pb_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_pca/repro_blood_m5_pca_tier1/2026-10-19_de_tier1_pca_pb_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_pca/repro_blood_m5_pca_tier1/2026-10-19_de_tier1_pca_pb_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_pca/repro_blood_m5_pca_tier1/2026-10-19_de_tier1_pca_pb_v1_README.md
+2026-10-19_de_tier1_pca_pb_v1.csv
+2026-10-19_de_tier1_pca_pb_v1.html
+2026-10-19_de_tier1_pca_pb_v1_README.md
+2026-10-19_de_tier1_pca_pb_v1_black.pdf
+2026-10-19_de_tier1_pca_pb_v1_black.svg
+2026-10-19_de_tier1_pca_pb_v1_white.pdf
+2026-10-19_de_tier1_pca_pb_v1_white.svg
+2026-10-19_gather_tier1_counts_v1.parquet
+2026-10-19_gather_tier1_samplesheet_v1.parquet
+inputs.sha256
+params.toml
+tier1.toml
+2026-10-19_de_tier1_pca_pb_v1.csv: OK
+.csv         byte-equal     16,165 B
+_white.pdf   byte-equal     39,165 B
+_white.svg   byte-equal     31,180 B
+_black.pdf   byte-equal     39,177 B
+_black.svg   byte-equal     31,690 B
+== blood_m5_box
+panels on the page: 12; for blood_m5_box: 1
+exit 0
+tier1_box_ndn_hsct_early_v1_white.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_box/repro_blood_m5_box_tier1/2026-10-19_de_tier1_box_ndn_hsct_early_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_box/repro_blood_m5_box_tier1/2026-10-19_de_tier1_box_ndn_hsct_early_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_box/repro_blood_m5_box_tier1/2026-10-19_de_tier1_box_ndn_hsct_early_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m5_box/repro_blood_m5_box_tier1/2026-10-19_de_tier1_box_ndn_hsct_early_v1_README.md
+2026-10-19_de_tier1_box_ndn_hsct_early_v1.csv
+2026-10-19_de_tier1_box_ndn_hsct_early_v1.html
+2026-10-19_de_tier1_box_ndn_hsct_early_v1_README.md
+2026-10-19_de_tier1_box_ndn_hsct_early_v1_black.pdf
+2026-10-19_de_tier1_box_ndn_hsct_early_v1_black.svg
+2026-10-19_de_tier1_box_ndn_hsct_early_v1_white.pdf
+2026-10-19_de_tier1_box_ndn_hsct_early_v1_white.svg
+2026-10-19_de_tier1_ndn_hsct_early_results_v1.parquet
+2026-10-19_de_tier1_size_factors_v1.parquet
+2026-10-19_gather_tier1_counts_v1.parquet
+2026-10-19_gather_tier1_genes_v1.parquet
+inputs.sha256
+params.toml
+tier1.toml
+2026-10-19_de_tier1_box_ndn_hsct_early_v1.csv: OK
+.csv         byte-equal     17,567 B
+_white.pdf   byte-equal     34,794 B
+_white.svg   byte-equal     43,222 B
+_black.pdf   byte-equal     34,806 B
+_black.svg   byte-equal     45,862 B
+== blood_m6_running
+panels on the page: 5; for blood_m6_running: 1
+exit 0
+ipts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_running/repro_blood_m6_running_tier1/2026-10-19_function_tier1_running_ndn_hsct_early_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_running/repro_blood_m6_running_tier1/2026-10-19_function_tier1_running_ndn_hsct_early_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_running/repro_blood_m6_running_tier1/2026-10-19_function_tier1_running_ndn_hsct_early_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_running/repro_blood_m6_running_tier1/2026-10-19_function_tier1_running_ndn_hsct_early_v1_README.md
+2026-10-19_de_tier1_ndn_hsct_early_results_v1.parquet
+2026-10-19_function_tier1_running_ndn_hsct_early_v1.csv
+2026-10-19_function_tier1_running_ndn_hsct_early_v1.html
+2026-10-19_function_tier1_running_ndn_hsct_early_v1_README.md
+2026-10-19_function_tier1_running_ndn_hsct_early_v1_black.pdf
+2026-10-19_function_tier1_running_ndn_hsct_early_v1_black.svg
+2026-10-19_function_tier1_running_ndn_hsct_early_v1_white.pdf
+2026-10-19_function_tier1_running_ndn_hsct_early_v1_white.svg
+h.all.v2026.1.Hs.symbols.gmt
+inputs.sha256
+params.toml
+tier1.toml
+2026-10-19_function_tier1_running_ndn_hsct_early_v1.csv: OK
+.csv         byte-equal      3,226 B
+_white.pdf   byte-equal     29,993 B
+_white.svg   byte-equal     27,195 B
+_black.pdf   byte-equal     30,006 B
+_black.svg   byte-equal     27,780 B
+== blood_m6_background
+panels on the page: 5; for blood_m6_background: 1
+exit 0
+g
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_background/repro_blood_m6_background_tier1/2026-10-19_function_tier1_background_ndn_gcsf_v1_black.svg
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_background/repro_blood_m6_background_tier1/2026-10-19_function_tier1_background_ndn_gcsf_v1.html
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_background/repro_blood_m6_background_tier1/2026-10-19_function_tier1_background_ndn_gcsf_v1.csv
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a00e5034a0fa89898/outputs/scratch_roots/redraw_step1/blood_m6_background/repro_blood_m6_background_tier1/2026-10-19_function_tier1_background_ndn_gcsf_v1_README.md
+2026-10-19_de_tier1_ndn_gcsf_results_v1.parquet
+2026-10-19_function_tier1_background_ndn_gcsf_v1.csv
+2026-10-19_function_tier1_background_ndn_gcsf_v1.html
+2026-10-19_function_tier1_background_ndn_gcsf_v1_README.md
+2026-10-19_function_tier1_background_ndn_gcsf_v1_black.pdf
+2026-10-19_function_tier1_background_ndn_gcsf_v1_black.svg
+2026-10-19_function_tier1_background_ndn_gcsf_v1_white.pdf
+2026-10-19_function_tier1_background_ndn_gcsf_v1_white.svg
+h.all.v2026.1.Hs.symbols.gmt
+inputs.sha256
+params.toml
+tier1.toml
+2026-10-19_function_tier1_background_ndn_gcsf_v1.csv: OK
+.csv         byte-equal      1,013 B
+_white.pdf   byte-equal     28,082 B
+_white.svg   byte-equal     13,502 B
+_black.pdf   byte-equal     28,087 B
+_black.svg   byte-equal     14,057 B
