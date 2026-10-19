@@ -52,6 +52,9 @@ class Kind:
         check: Problems with parameter values the dataset file does not declare.
         unless: Tables, as inputs name them, whose presence for the dataset means the module
             wrote another figure under this kind's stem: such a figure has no spec.
+        parsed: For a kind whose figures the dataset file cannot list (a gene the reader
+            named on the command line): the parameters of a description, or None for one
+            that is not this kind's. ``what`` of the result must give the description back.
     """
 
     module: str
@@ -64,6 +67,7 @@ class Kind:
     inputs: Callable[[Any, Dataset], Inputs]
     check: Callable[[Any, Dataset], list[str]] = field(default=_no_check)
     unless: tuple[tuple[str, str], ...] = ()
+    parsed: Callable[[str, Dataset], Any] | None = None
 
 
 def slug(name: str) -> str:

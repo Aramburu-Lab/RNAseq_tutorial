@@ -42,6 +42,11 @@ MUTATIONS = {
          "path = root / found[0] if found else None", "path = Path(found[0]) if found else None",
          EVERY),
     ],
+    "parsed": [
+        ("parsed description not read back", "src/ctx/figures/kinds.py",
+         "if params is not None and k.what(params) == what:", "if params is not None:",
+         f"{FIG}::test_a_kind_parsed_from_its_description_must_read_back"),
+    ],
     "m2": [
         ("pca shares swapped", "src/ctx/figures/draw_m2.py", "(share[0], share[1])",
          "(share[1], share[0])", f"{M2}::test_every_count_figure_redraws_byte_for_byte"),

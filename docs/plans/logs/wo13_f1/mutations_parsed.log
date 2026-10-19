@@ -1,0 +1,1 @@
+CAUGHT  parsed description not read back: 1 failed in 1.37s | E       AssertionError: assert (Kind(module='genecard', figure='card', params=<class 'test_figures

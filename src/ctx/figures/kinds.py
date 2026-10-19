@@ -23,8 +23,11 @@ def kind(module: str, figure: str) -> Kind | None:
 def matched(module: str, what: str, spec: Dataset) -> tuple[Kind, Any] | None:
     """The kind and parameters of a figure a module writes as ``<dataset>_<what>``, or None."""
     for k in KINDS:
-        if k.module == module:
-            for params in k.made(spec):
-                if k.what(params) == what:
-                    return k, params
+        if k.module != module:
+            continue
+        found = [k.parsed(what, spec)] if k.parsed else k.made(spec)
+        for params in found:
+            # A parsed description must read back as itself, or it names another kind's.
+            if params is not None and k.what(params) == what:
+                return k, params
     return None

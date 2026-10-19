@@ -263,3 +263,27 @@ def test_a_pca_the_dataset_file_does_not_declare_is_refused(pipeline, tmp_path):
     (folder / "params.toml").write_text(raw.replace(f'pca = "{spec.params.pca}"', 'pca = "nope"'))
     with pytest.raises(ParamsError, match=r"pca: 'nope' is not a \[\[de.pca\]\] name"):
         load_params(folder / "params.toml", spec.figure_id)
+
+
+def test_a_kind_parsed_from_its_description_must_read_back(monkeypatch):
+    """A kind the dataset file cannot list matches a description its parser reads back to the
+    same description, and no other. Catches the read-back check left out, which would give a
+    parser that strips a prefix every stem it was handed."""
+    from dataclasses import dataclass  # noqa: PLC0415
+
+    from ctx.figures.kind import Kind  # noqa: PLC0415
+
+    @dataclass(frozen=True)
+    class Card:
+        dataset: str
+        gene: str
+
+    def parsed(what: str, spec) -> Card:
+        return Card(spec.slug, what.removeprefix("card_"))
+
+    card = Kind("genecard", "card", Card, "m:f", "m:f", lambda _: [], lambda p: f"card_{p.gene}",
+                lambda p, s: {}, parsed=parsed)  # fmt: skip
+    monkeypatch.setattr(kinds, "KINDS", (card,))
+    spec = load(DE_SPEC)
+    assert kinds.matched("genecard", "card_nptx2", spec) == (card, Card("desynth", "nptx2"))
+    assert kinds.matched("genecard", "tissues_nptx2", spec) is None
