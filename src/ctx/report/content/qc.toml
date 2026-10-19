@@ -454,6 +454,24 @@ hover.run_accession = "Run"
 value = "Not used by this map."
 caption = "The absolute band of each of {n} samples or runs on each of {m} metrics with a band from a source; grey: no value. The strips judge every metric against its stratum as well. No test."
 
+# The sample map's flag view (V2): the run's judgement of every sample, looked up (D-073).
+[figures.flag_map]
+view = "Show"
+view_bands = "absolute bands"
+view_flags = "every flag of the run"
+title = "Flags of the run, every judged metric"
+lead = "{flagged} of {cells} values are flagged; {unjudged} are not judged, which is neither a flag nor a pass."
+reading = [
+    "Each column is one sample, each row one metric the run judged at its k and strata.",
+    "Red: flagged by the stratum's median ± k MAD or by the absolute band; green: judged and not flagged.",
+    "Light grey: not judged, as the stratum held too few samples for a band; grey: no value.",
+]
+caption = "{n} samples on {m} judged metrics: {flagged} values flagged by their stratum's median ± {k} MAD or absolute band. {unjudged} are not judged and {none} have no value; {kept} kept metrics, never flagged, are left out. No test."
+metric = "Registry metric the run judged."
+level = "The sample's judgement on the metric."
+levels = { flagged = "flagged", passed = "judged, not flagged", unjudged = "not judged", none = "no value" }
+left_out = "The flag view of this map is left out: with it the page would pass the {cap:,}-byte cap. The flags table holds every flag."
+
 [figures.density]
 title = "Library size against genes detected"
 lead = "{flagged} of {n} samples are flagged on library size or genes detected, drawn as triangles; {other} more are flagged only on other metrics."

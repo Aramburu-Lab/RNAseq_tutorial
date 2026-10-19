@@ -5,7 +5,9 @@ its own would miss them. Each test names the mutation it catches; each was plant
 to fail.
 """
 
+import json
 import math
+import re
 
 import numpy as np
 import polars as pl
@@ -25,13 +27,16 @@ from scipy.stats import false_discovery_control, mannwhitneyu, wilcoxon
 from test_genecard import _cards, _register, _settings, root  # noqa: F401 - the fixture
 
 from ctx.dataset import load
+from ctx.de.page import Words
 from ctx.de.run import newest
 from ctx.genecard import boxes, samples
 from ctx.genecard import run as module
 from ctx.genecard.cards import Card
 from ctx.report.builder import unpacked
+from ctx.viz.box import paired_lines
+from ctx.viz.metrics import text_width
 from ctx.viz.save import layout_problems, thin_tick_labels
-from ctx.viz.style import THEMES
+from ctx.viz.style import BOX_GAP_PX, SIZES, THEMES, on_page
 
 # Six contrasts in Step-1's words: the longest labels F1 draws side by side.
 LONG = ("Neutrophils, G-CSF donors against steady state",
@@ -203,6 +208,53 @@ def test_a_batch_view_is_offered_only_where_it_tests_two_contrasts():
     assert samples.batches(many, boxes.MAX_BATCHES) == []
 
 
+def test_each_f1_view_exports_its_own_caption():
+    # E.1e, V2. Mutations: export.settings reading a caption object as text, which stopped
+    # Step-1's `ctx genecard` in views.viewed; a later view with no PDF and SVG of its own.
+    from ctx.report.builder import FigureText  # noqa: PLC0415
+    from ctx.report.lookups import lookup  # noqa: PLC0415
+    from ctx.report.views import viewed  # noqa: PLC0415
+    from ctx.viz.save import figure_block  # noqa: PLC0415
+
+    two = {"x": ([1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]),
+           "y": ([1.0, 2.0, 3.0, 4.0], [2.0, 3.0, 9.0, 9.5])}  # fmt: skip
+    batch = {"x": ["B1", "B1", "B2", "B2", "B1", "B1", "B2", "B2"],
+             "y": ["B1", "B1", "B1", "B1", "B1", "B1", "B2", "B2"]}  # fmt: skip
+    found = boxes.views(CARD, _values(two, batch=batch), {"x": "X", "y": "Y"}, ["B1", "B2"])
+    options = [(label, data, FigureText(label)) for label, data, _ in found]
+    block = figure_block(options[0][1], "2026-10-19_genecard_demo_contrasts_v1", options[0][2])
+    built = viewed(block, options, "Samples").controls
+    assert built is not None and built["export"]["caption"] == options[0][1].caption_text()
+    shown = lookup(block, options, "Samples").controls
+    assert shown is not None and len(shown["options"]) == 2  # noqa: PLR2004 - all and B1
+    later = shown["options"][1]["export"]["caption"]
+    assert later == options[1][1].caption_text() and shown["export"]["file"] == block.stem
+
+
+def test_f1_and_the_box_join_donors_only_in_a_paired_contrast():
+    # E.1e. Mutations: a line drawn for an unpaired contrast whose donors sit in both groups;
+    # the paired contrast's lines left out; the box's caption silent about its lines.
+    four = ([1.0, 2.0, 3.0, 4.0], [3.0, 4.0, 6.0, 8.0])
+    built = _values({"joined": four, "apart": four}, paired=("joined",))
+    # The unpaired contrast's donors also give one sample to each group, as Step-1's can.
+    fourth = pl.int_range(pl.len()).over("contrast") % 4
+    again = pl.when(pl.col("contrast") == "apart").then(pl.format("d{}", fourth)).otherwise("donor")
+    values = samples.Values(built.frame.with_columns(donor=again), built.paired)
+    labels = {"joined": "Joined", "apart": "Apart"}
+    (_, data, _), *_ = boxes.views(CARD, values, labels, [])
+    lines = paired_lines(data)
+    assert list(lines) == [boxes.label("Joined")]
+    assert [u for u, _, _ in lines[boxes.label("Joined")]] == ["d0", "d1", "d2", "d3"]
+    tests = {CARD.gene_id: samples.across(values, CARD.gene_id, ["joined"], None)[0]["joined"]}
+    said = Words("Joined", "tested", "reference")
+    box, _ = boxes.box(CARD, values, "joined", said, tests, None)
+    assert len(paired_lines(box)[CARD.symbol]) == 4  # noqa: PLR2004 - four donors
+    assert "a grey line joins an individual's two samples" in box.caption_text()
+    apart = {CARD.gene_id: samples.across(values, CARD.gene_id, ["apart"], None)[0]["apart"]}
+    unpaired, _ = boxes.box(CARD, values, "apart", Words("Apart", "t", "r"), apart, None)
+    assert paired_lines(unpaired) == {} and "line" not in unpaired.caption_text()
+
+
 def test_six_long_contrast_labels_draw_whole_in_the_files():
     # Mutations: PER_FIGURE raised to seven or more; LABEL_CHARS widened so a label hides its
     # neighbour's: thin_tick_labels then hides every other label, which layout_problems
@@ -219,25 +271,30 @@ def test_six_long_contrast_labels_draw_whole_in_the_files():
 
 
 def test_the_page_plot_names_each_line_and_leaves_room_for_n():
-    # Mutations: the category's line breaks left to plotly, which prints them as nothing; the
-    # least width measured on the whole name; the n line given no room; the phone's layout kept
-    # where it needs more room than upright.
+    # Mutations: the name's line breaks left to plotly, which prints them as nothing; the least
+    # width measured on the whole name; the n line given no room; the phone's layout kept where
+    # it needs more room than upright. viz.box measures and draws each line since E.1e.
     contrasts = {f"c{i}": ([1.0, 2.0, 3.0, 4.0], [3.0, 4.0, 5.0 + i, 6.0]) for i in range(6)}
     labels = dict(zip(contrasts, LONG, strict=True))
     (_, data, _), *_ = boxes.views(CARD, _values(contrasts), labels, [])
     fig = data.interactive()
     assert list(fig.layout.xaxis.ticktext) == [boxes.label(x).replace("\n", "<br>") for x in LONG]
-    plain = boxes.box_interactive(data)
-    assert sum(fig.layout.meta["least_width"][0]) < plain.layout.meta["narrow"]["below"]
+    tick = on_page(SIZES["tick"])
+    whole = max(text_width(boxes.label(x), tick) for x in LONG)
+    ((scaled, _),) = fig.layout.meta["least_width"]
+    assert scaled < len(LONG) * (whole + BOX_GAP_PX)
     assert "narrow" not in fig.layout.meta
+    plain = boxes.box_interactive(data)
     low, high = fig.layout.yaxis.range
     low0, high0 = plain.layout.yaxis.range
     assert low == pytest.approx(low0) and high > high0
 
 
-def test_the_page_draws_the_box_and_f1_and_ships_every_number(root):  # noqa: F811
+def test_the_page_draws_the_box_and_f1_and_ships_every_number(root, monkeypatch):  # noqa: F811
     # Mutations: the box's BH over the drawn gene alone; F1 drawn for one contrast; the values
-    # or the views' tests not written; F4's page opened alone without its tissue boxes.
+    # or the views' tests not written; F4's page opened alone without its tissue boxes; F1's
+    # views built by views.viewed, which stopped the run on a box's caption (E.1e, V2).
+    monkeypatch.setattr(boxes, "pages", lambda names: [[n] for n in names])
     folder, spec = root
     _register(folder, spec)
     own_files(folder, ("a_case", "b_case"))
@@ -254,6 +311,11 @@ def test_the_page_draws_the_box_and_f1_and_ships_every_number(root):  # noqa: F8
     names = [p.name for p in written]
     page = unpacked(written[0].read_text())
     assert "NPTX2 in every contrast of this dataset" in page
+    assert "All samples, contrasts 2 to 2 of 2" in page  # F1's second view, one per page here
+    found = re.findall(r'id="ctx-controls-\d+">(.*?)</script>', page, re.S)
+    views = [c for c in map(json.loads, found) if c.get("kind") == "view"]
+    f1 = next(c for c in views if "contrasts 2 to 2" in c["options"][-1]["label"])
+    assert f1["options"][-1]["export"]["caption"].startswith("Mann-Whitney U")  # its own files
     assert "No box for NPTX2 in" in page  # M5 tested ACTB and UPA in a_case, not NPTX2
     box = pl.read_csv(next(p for p in written if "_box_upa_" in p.name and p.suffix == ".csv"))
     values = samples.read(folder, load(spec), [OURS[ACTB], UPA_ID])

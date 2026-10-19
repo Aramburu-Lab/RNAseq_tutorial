@@ -20,7 +20,7 @@ from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.run import Writer, newest
 from ctx.gather import counts, gdc
 from ctx.io.naming import MODULES, stem
-from ctx.qc import Fastp, QcError, checkpoint, fastqc, fates, multiqc_io, reads
+from ctx.qc import Fastp, QcError, checkpoint, fastqc, fates, flag_map, multiqc_io, reads
 from ctx.qc import registry as reg
 from ctx.qc.blocks import (
     Reads,
@@ -460,4 +460,4 @@ def run(
         ),
     )  # fmt: skip
     out = writer.out / f"{stem(MODULE, f'{dataset}_overview', 1, day=day)}.html"
-    return [write(page, out), *writer.files]
+    return [write(flag_map.fitted(page, out), out), *writer.files]

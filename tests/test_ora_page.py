@@ -142,3 +142,55 @@ def test_a_saved_list_is_tested_as_the_page_tests_a_link(tmp_path):
         got = table.filter(pl.col("direction") == direction)
         assert got["gene_set"].to_list() == [r.name for r in expected]
         assert got["p"].to_list() == [r.p for r in expected]
+
+
+CHOICE = r"""
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+const cfg = input.cfg, lf = ctxOra.logFactorials(cfg.symbols.length);
+const sets = cfg.sets.map(s => [s[0], s[1].map(i => cfg.symbols[i])]);
+console.log(JSON.stringify(input.names.map(name => {
+  const c = ctxOra.contrast(cfg, name);
+  return ["up", "down"].map(d => ctxOra.ora(c[d], c.background, sets, cfg.min_size,
+                                            cfg.max_size, lf));
+})));
+"""
+
+
+def _contrast(seed: int) -> pl.DataFrame:
+    """A contrast's results: symbols shared by several genes, some untested, calls at random."""
+    rng = random.Random(seed)
+    rows = [(f"ENSG{i:011d}.1", f"S{i % 700}", rng.choice([0.01, 0.5, None]),
+             rng.choice(["up", "down", "ns", "ns"]))
+            for i in range(1, 900 + 60 * seed)]  # fmt: skip
+    frame = pl.DataFrame(rows, schema=["gene_id", "gene_name", "padj", "call"], orient="row")
+    return frame.with_columns(call=pl.when(pl.col("padj").is_null()).then(pl.lit("ns"))
+                              .otherwise("call"))  # fmt: skip
+
+
+def test_a_contrast_choice_tests_its_own_calls_as_by_contrast_does():
+    """ORA's contrast select (V2): ``ctxOra.contrast`` reads a contrast's own calls and tested
+    symbols from the panel; with ``ctxOra.ora`` the rows are ``live.by_contrast``'s.
+
+    Mutations caught: the featured contrast's calls kept for another; another contrast's calls
+    tested against the featured contrast's background; up and down swapped."""
+    results = {"featured": _contrast(0), "second": _contrast(1), "third": _contrast(2)}
+    sets = {f"SET{j}": [f"S{k}" for k in range(j * 11, j * 11 + 45)] for j in range(40)}
+    panel = live.panel(results, "featured", sets,
+                       {"featured": "F", "second": "S", "third": "T", "union": "U"},
+                       {s: s for s in sets})  # fmt: skip
+    node = shutil.which("node")
+    assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
+    script = re.sub(r"\{% (end)?raw %\}", "", SCRIPT.read_text())
+    done = subprocess.run([node, "-e", script + CHOICE],
+                          input=json.dumps({"cfg": panel, "names": list(results)}),
+                          capture_output=True, text=True, check=True)  # fmt: skip
+    seen = json.loads(done.stdout)
+    for name, page in zip(results, seen, strict=True):
+        table = live.by_contrast(results[name], sets)
+        for direction, rows in zip(("up", "down"), page, strict=True):
+            built = table.filter(pl.col("direction") == direction)
+            assert [(r["name"], r["hits"]) for r in rows] == list(
+                zip(built["gene_set"], built["hits"], strict=True)
+            ), (name, direction)
+            assert [r["p"] for r in rows] == pytest.approx(built["p"].to_list(), rel=BOUND)
+    assert seen[1] != seen[2]

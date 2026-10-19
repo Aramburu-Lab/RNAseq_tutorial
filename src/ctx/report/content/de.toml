@@ -289,6 +289,8 @@ reading = [
     "Expression is log2 of the count divided by the sample's size factor, plus 1.",
     "Above each gene: the Mann-Whitney p, BH-adjusted over the {n_genes} plotted genes, and r, the rank-biserial effect, positive when {tested} is higher.",
 ]
+# A paired contrast's boxes (E.1e): the reading guide's last line.
+reading_paired = "A grey line joins each individual's two samples; the Mann-Whitney test above ignores the pairing."
 x = "Gene"
 y = "Expression"
 # The p above each gene (WO6, D-051), a view: the boxes' own test, or DESeq2's over every gene.

@@ -73,6 +73,46 @@ ORA = """(async () => {
 })()"""
 
 
+CONTRASTS = """(async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  await wait(1500);
+  const form = document.querySelector('form.running'), fig = form.closest('.fig');
+  const d = fig.querySelector('.js-plotly-plot');
+  const cfg = JSON.parse(document.getElementById(form.getAttribute('data-controls')).textContent);
+  const words = s => (fig.querySelector(s) || {}).textContent || '';
+  const read = () => ({contrast: form.elements.contrast.selectedOptions[0].textContent,
+    sets: Array.from(form.elements.set.options).map(o => o.textContent),
+    set: form.elements.set.selectedOptions[0].textContent,
+    line: Array.from(d.data.find(t => t.name === cfg.line).y),
+    dots: Array.from(d.data.find(t => t.name === cfg.member).x),
+    es: fig.ctxRunning ? fig.ctxRunning.es : null, caption: words('figcaption'),
+    line_words: words('.running-summary'),
+    moved: !!fig.querySelector('a[data-export][role=button]'),
+    export: fig.ctxRunning ? fig.ctxRunning.caption : cfg.export.caption});
+  const out = {loaded: read(), contrasts: []};
+  /* Each contrast in turn, then the build's second set kept across a contrast that tests it. */
+  for (const option of Array.from(form.elements.contrast.options)) {
+    form.elements.contrast.value = option.value;
+    form.elements.contrast.dispatchEvent(new Event('change', {bubbles: true}));
+    await wait(80); out.contrasts.push(read());
+  }
+  form.elements.contrast.value = '0';
+  form.elements.contrast.dispatchEvent(new Event('change', {bubbles: true}));
+  await wait(80); out.back = read();
+  /* Again from the build contrast's third set, which each next contrast keeps where tested. */
+  form.elements.set.value = '2';
+  form.elements.set.dispatchEvent(new Event('change', {bubbles: true}));
+  await wait(80); out.picked = [read()];
+  for (const option of Array.from(form.elements.contrast.options).slice(1)) {
+    form.elements.contrast.value = option.value;
+    form.elements.contrast.dispatchEvent(new Event('change', {bubbles: true}));
+    await wait(80); out.picked.push(read());
+  }
+  out.box = document.documentElement.clientWidth; out.scroll = document.documentElement.scrollWidth;
+  return out;
+})()"""
+
+
 @pytest.fixture(scope="module")
 def m6(pipeline, tmp_path_factory):
     """(the M6 and M5 folders, the page, and what each act read at both sizes)."""
@@ -81,7 +121,7 @@ def m6(pipeline, tmp_path_factory):
     (page,) = folder.glob("*_function_desynth_overview_v1.html")
     tasks = [{"name": f"{what}_{name}", "url": page.as_uri(), "width": width, "height": 900,
               "scheme": scheme, "act": act}
-             for what, act in (("running", RUNNING), ("ora", ORA))
+             for what, act in (("running", RUNNING), ("ora", ORA), ("contrasts", CONTRASTS))
              for name, width, scheme in SIZES]  # fmt: skip
     seen = _browse(tasks, tmp_path_factory.mktemp("downloads"))
     views = walk(page, tmp_path_factory.mktemp("walk"), SIZES)
@@ -134,6 +174,68 @@ def test_every_set_draws_lites_running_sum_and_its_own_words(m6, size):
         assert drawn["caption"].startswith(f"{drawn['label']} in ")
     assert acted["back"]["line"] == acted["sets"][0]["line"] and not acted["back"]["moved"]
     assert acted["loaded"]["caption"] == acted["sets"][0]["caption"]
+
+
+@pytest.mark.parametrize("size", ["wide_light", "phone_dark"])
+def test_every_contrast_draws_its_own_ranking_and_lists_its_own_sets(m6, size):
+    """The running score's contrast select (V2): each contrast's sets in ``running.order``,
+    the set kept by ``running.keep``, the line ``lite._running`` on that contrast's ranking.
+
+    Mutations caught: the build's ranking kept under another contrast; the build's set list
+    kept; the shown set reset to the first where the next contrast tested it; the export left
+    on the build's caption; the contrast select's return leaving another contrast's line."""
+    from conftest import DE_SPEC  # noqa: PLC0415
+
+    from ctx.dataset import load  # noqa: PLC0415
+    from ctx.de.page import every  # noqa: PLC0415
+
+    folder, de, _, seen, _ = m6
+    result = seen[f"contrasts_{size}"]
+    assert result["errors"] == []
+    acted = result["acted"]
+    assert acted["scroll"] <= acted["box"]
+    spec = load(DE_SPEC)
+    by_label = {w.label: n for n, w in every(spec.contrasts, spec.columns).items()}
+    assert by_label[acted["contrasts"][0]["contrast"]] == "a_case"
+    assert len(acted["contrasts"]) > 1
+    _walked(acted["contrasts"], "UP_SET", (folder, de), by_label)
+    assert acted["back"]["line"] == acted["contrasts"][0]["line"] and not acted["back"]["moved"]
+    # From the build contrast's third set: each contrast keeps it where it tested it.
+    first = acted["picked"][0]
+    gsea = _newest(folder, "a_case_gsea")
+    named = {set_words(n): n for n in gsea["gene_set"]}
+    assert named[first["set"]] != "UP_SET"
+    _walked(acted["picked"], named[first["set"]], (folder, de), by_label)
+
+
+def _walked(walk: list[dict], shown: str, folders: tuple, by_label: dict[str, str]) -> None:
+    """Each contrast of a walk against Python: its sets, the set kept, its line and words.
+
+    ``shown`` is the set the walk starts on, in the build's contrast.
+    """
+    folder, de = folders
+    members = _sets(folder)
+    for i, drawn in enumerate(walk):
+        name = by_label[drawn["contrast"]]
+        gsea = _newest(folder, f"{name}_gsea")
+        tested = {r["gene_set"]: r for r in gsea.iter_rows(named=True)}
+        order = running.order(tested, "UP_SET")
+        assert drawn["sets"] == [set_words(s) for s in order]
+        kept = order[running.keep(order, shown, "UP_SET")]
+        assert drawn["set"] == set_words(kept)
+        shown = kept
+        results = _newest(de, f"{name}_results")
+        weights = running.weights(results)
+        ranked, _ = lite.ranking(*running.ranking(results))
+        rank_of = {g: r for r, g in enumerate(ranked)}
+        positions = np.sort([rank_of[g] for g in members[kept] if g in rank_of])
+        assert drawn["dots"] == positions.tolist()
+        expected = lite._running(positions, weights[positions], len(weights))  # noqa: SLF001
+        assert np.allclose(drawn["line"], expected, rtol=0, atol=1e-12)
+        assert math.isclose(drawn["es"], tested[kept]["es"], rel_tol=0, abs_tol=1e-9)
+        moved = i != 0 or kept != "UP_SET"
+        assert drawn["moved"] == moved and drawn["export"].startswith(set_words(kept))
+        assert drawn["caption"].startswith(f"{set_words(kept)} in {drawn['contrast']}")
 
 
 @pytest.mark.parametrize("size", ["wide_light", "phone_dark"])

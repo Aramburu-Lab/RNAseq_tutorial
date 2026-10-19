@@ -7,13 +7,14 @@ names the mutations it catches.
 """
 
 import base64
+import dataclasses
 import math
 from pathlib import Path
 
 import numpy as np
 from test_page_script import _node
 
-from ctx.function import lite
+from ctx.function import lite, running
 
 TEMPLATES = Path(__file__).resolve().parents[1] / "src" / "ctx" / "report" / "templates"
 TWIN = TEMPLATES / "_running.js.j2"
@@ -67,3 +68,36 @@ def test_the_ranking_breaks_ties_by_name_and_weighs_the_absolute_score():
     ranked, weights = lite.ranking(["b", "a", "c", "d"], np.array([1.0, 1.0, -3.0, 2.0]))
     assert ranked == ["d", "a", "b", "c"]
     assert weights.tolist() == [2.0, 1.0, 1.0, 3.0]
+
+
+KEEP = """
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify(input.cases.map((c) => ctxRunning.keep(c.names, c.current, c.build))));
+"""
+
+
+def test_a_contrast_change_keeps_the_set_where_that_contrast_tested_it():
+    """The running score's contrast select (V2): the twin of ``running.keep`` under node.
+
+    Mutations caught: the build's set taken before the one shown; the first set taken where
+    the build's set was tested; a missing set taken as index -1."""
+    names = ["HALLMARK_A", "HALLMARK_B", "HALLMARK_C"]
+    cases = [{"names": names, "current": "HALLMARK_C", "build": "HALLMARK_A"},
+             {"names": names, "current": "HALLMARK_X", "build": "HALLMARK_B"},
+             {"names": names, "current": "HALLMARK_X", "build": "HALLMARK_Y"},
+             {"names": ["HALLMARK_B"], "current": "HALLMARK_B", "build": "HALLMARK_B"},
+             {"names": [], "current": "HALLMARK_A", "build": "HALLMARK_A"}]  # fmt: skip
+    expected = [running.keep(c["names"], c["current"], c["build"]) for c in cases]
+    assert expected == [2, 1, 0, 0, 0]
+    assert _node({"cases": cases}, KEEP, TWIN) == expected
+
+
+def test_each_contrast_lists_its_own_sets_the_running_set_first():
+    """Mutations caught: another contrast listed in the build's order; the running set left
+    first in a contrast that did not test it."""
+    hit = lite.Enriched("HALLMARK_B", 3, 0.1, 1.0, 0.5, 0.5, (0, 1, 2), (0.0,))
+    tested = {n: dataclasses.replace(hit, name=n)
+              for n in ("HALLMARK_C", "HALLMARK_B", "HALLMARK_A")}  # fmt: skip
+    assert running.order(tested, "HALLMARK_B") == ["HALLMARK_B", "HALLMARK_A", "HALLMARK_C"]
+    del tested["HALLMARK_B"]
+    assert running.order(tested, "HALLMARK_B") == ["HALLMARK_A", "HALLMARK_C"]

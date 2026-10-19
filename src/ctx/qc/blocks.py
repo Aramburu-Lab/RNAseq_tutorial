@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 import polars as pl
 
 from ctx.de.run import Writer
-from ctx.qc import checkpoint, fastqc, figures, identity, judge
+from ctx.qc import checkpoint, fastqc, figures, flag_map, identity, judge
 from ctx.qc import registry as reg
 from ctx.report import export, text
 from ctx.report.builder import FigureBlock, FigureText, Group
@@ -226,12 +226,32 @@ def figure(writer: Writer, data: Any, what: str, key: str, *extra: str, lead: st
         reading=(*lines(f"figures.{key}.reading", **values), *extra)))  # fmt: skip
 
 
-def band_map(writer: Writer, data: Any, what: str, key: str) -> FigureBlock:
-    """The band map, its lead counting the bad and usable values, one column per sample or run."""
+def band_map(writer: Writer, data: Any, what: str, key: str,
+             flags: Any = None) -> FigureBlock:  # fmt: skip
+    """The band map, its lead counting the bad and usable values, one column per sample or run.
+
+    With ``flags``, the sample map's flag view (``flag_map``), each view with its own PDF and
+    SVG (``exported``).
+    """
     bands = data.frame["band"]
-    return figure(writer, data, what, "band_map", cells=bands.len(),
-                  bad=int((bands == "bad").sum()), usable=int((bands == "usable").sum()),
-                  unit=text.word(PAGE, f"figures.band_map.unit.{key}"))  # fmt: skip
+    values = {"cells": bands.len(), "bad": int((bands == "bad").sum()),
+              "usable": int((bands == "usable").sum()),
+              "unit": text.word(PAGE, f"figures.band_map.unit.{key}")}  # fmt: skip
+    block = figure(writer, data, what, "band_map", **values)
+    if flags is None:
+        return block
+    found = flag_map.counts(flags)
+    options = [
+        (text.word(PAGE, "figures.flag_map.view_bands"), writer.marked(data), FigureText(
+            title=text.word(PAGE, "figures.band_map.title"),
+            lead=text.fill(PAGE, "figures.band_map.lead", **values),
+            reading=lines("figures.band_map.reading", **values))),
+        (text.word(PAGE, "figures.flag_map.view_flags"), writer.marked(flags), FigureText(
+            title=text.word(PAGE, "figures.flag_map.title"),
+            lead=text.fill(PAGE, "figures.flag_map.lead", **found),
+            reading=lines("figures.flag_map.reading"))),
+    ]  # fmt: skip
+    return exported(block, options, text.word(PAGE, "figures.flag_map.view"))
 
 
 def identity_figures(writer: Writer, stage: Stage, measured: checkpoint.Measured,
@@ -337,17 +357,19 @@ def overview_groups(writer: Writer, stage: Stage, measured: checkpoint.Measured 
     """The groups every run draws: the glance, every metric, composition and identity."""
     sheet, status = context
     groups, glance, identity = [], [], []
+    units = sheet.unique("sample", keep="first", maintain_order=True).select(
+        "sample", *grouping_columns(sheet, options), checkpoint.LENGTH_GROUP
+    )
     bands = figures.band_map(stage.values, registry, "sample")
     if bands is not None:
-        glance.append(band_map(writer, bands, "band_map", "sample"))
+        flags = flag_map.flag_map(stage.values, (stage.bands, stage.flags), units, registry,
+                                  tuple(options.strata))  # fmt: skip
+        glance.append(band_map(writer, bands, "band_map", "sample", flags))
     if measured is not None:
         dims = (*dict.fromkeys([*options.strata, *options.peers, "batch"]),)
         linked = figures.linked_pca(measured.scores, measured.share, sheet, status, dims)
         glance.append(figure(writer, linked, "linked_pca", "linked"))
         identity = identity_figures(writer, stage, measured, sheet, registry, options)
-    units = sheet.unique("sample", keep="first", maintain_order=True).select(
-        "sample", *grouping_columns(sheet, options), checkpoint.LENGTH_GROUP
-    )
     peered = replace(stage, by_peers=measured.by_peers) if measured is not None else stage
     metrics = strips(writer, peered, units, registry, options, "sample")
     for title, items, tabs in (("glance", glance, False), ("metrics", metrics, True),

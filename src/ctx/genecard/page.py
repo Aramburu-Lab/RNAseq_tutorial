@@ -41,7 +41,7 @@ from ctx.report.builder import (
     write,
 )
 from ctx.report.entry import write_entry
-from ctx.report.views import viewed
+from ctx.report.lookups import lookup
 from ctx.viz.save import figure_block, write_figure
 
 PAGE = "genecard"
@@ -228,7 +228,9 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         """A figure of the card: its page block now, its files once the card is kept.
 
         With ``views``, the first being the figure as built, the block carries a select
-        between them (the D-051 view kind); the files draw the first. ``controls`` are a
+        between them (the D-051 view kind, each option with its own PDF and SVG through
+        ``lookups.lookup``: ``views.viewed`` read a box's caption object as text and stopped the
+        run); the files draw the first. ``controls`` are a
         figure's page controls where its contract carries none, as F4's heatmap.
         """
         what, words = (
@@ -238,7 +240,7 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         panels.append((data, what, words, controls))
         block = figure_block(data, writer.stem(what), words)
         if views is not None and len(views) > 1:
-            block = viewed(block, views, word(f"figures.{kind}.view"))
+            block = lookup(block, views, word(f"figures.{kind}.view"))
         if controls is not None:
             block = replace(block, controls=controls)
         items.append(block)

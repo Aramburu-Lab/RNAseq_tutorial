@@ -160,6 +160,8 @@ member = "set member"
 line = "running score"
 # Any set the contrast tested, drawn by the page (WO7, D-051).
 view = "Gene set"
+# Another contrast's ranking and its tested sets (V2).
+contrast = "Contrast"
 differs = "The page's running sum gives ES = {page}; the table gives {table}."
 
 # The background lesson. Against the gene-set union a set's share of the background grows

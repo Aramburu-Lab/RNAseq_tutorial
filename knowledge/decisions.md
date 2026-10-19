@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-096 — A caption reaches every export through one definition; heatmaps export vector cells; paired boxes draw their donors
+
+**Date:** 2026-10-19 · **Status:** decided
+
+**Context.** E.1e and E.2's leftovers; and `ctx genecard` stopped on Step-1 when a caption became an object (L.3).
+
+**Decision.** `export.file_caption` is the one place a caption, text or object, becomes a file's text; `views.viewed` and `lookups` both use it, and M9's F1 views go through `lookups.lookup`, each with its own files. HeatmapData exports its cells as filled vector rectangles in the white files' colours. `viz.box` draws one line per donor of a paired contrast in both renderers. M2's band map takes the run's flags as a lookup view, dropped with a note past the page cap; M4 F3 offers batch and condition orders, not cell type, for page size. M6's running set takes a contrast, and ORA's contrast is its own state.
+
+**Evidence.** TCGA-BRCA's 5,650 box lines match own_values; M4 F3's exported rectangles equal its runs (2,114 and 1,965); M2's 282 flagged cells equal the flags table; Step-1 92 of 92 metrics; 43 of 44 planted mutations caught by tests.
+
+**Consequence.** Step-1's M2 and M4 pages sit within 1 MB of the cap (V2.2).
+
+---
+
 ## D-095 — Text never widens a page; bars built with fixed categories wrap their labels on a phone; a page text variant per design
 
 **Date:** 2026-10-19 · **Status:** decided

@@ -1,7 +1,9 @@
 {# M6's running score for any tested set (WO7): the page draws it with ctxRunning. The panel's
-   look is the calls panel's; the form is not one, so live calling never wires it. #}
+   look is the calls panel's; the form is not one, so live calling never wires it. With more
+   than one contrast, a contrast select draws that contrast's ranking and sets (V2). #}
 <div class="calls view"><form class="running" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ f.defaults.label }}" style="display:contents">
-<label>{{ f.defaults.label }}<select name="set">{% for label in f.defaults.options %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+{% if f.defaults.contrasts|length > 1 %}<label>{{ f.defaults.contrast_label }}<select name="contrast">{% for label in f.defaults.contrasts %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
+{% endif %}<label>{{ f.defaults.label }}<select name="set">{% for label in f.defaults.options %}<option value="{{ loop.index0 }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
 </form></div>
 <noscript><p class="note">{{ ui.view.noscript }}</p></noscript>
 <p class="calls-summary running-summary" aria-live="polite"></p>

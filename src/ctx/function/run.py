@@ -32,7 +32,6 @@ from ctx.function.page import (
     nes_text,
     ora_text,
     questions,
-    running_text,
     set_words,
     trap_text,
     union_direction,
@@ -40,7 +39,7 @@ from ctx.function.page import (
 from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
 from ctx.qc.run import GTF_RESOURCE, gene_types
-from ctx.report import export, text
+from ctx.report import text
 from ctx.report.builder import (
     FigureBlock,
     Group,
@@ -58,7 +57,6 @@ from ctx.report.lookups import lookup
 from ctx.report.text import fill, word
 from ctx.report.views import viewed
 from ctx.viz.bar import BarData
-from ctx.viz.scatter import Line, ScatterData
 from ctx.viz.style import DATA_COLOURS, ROLES
 
 MODULE = "function"
@@ -268,57 +266,6 @@ def _featured_bars(
     )
 
 
-def _running(said: Words, result: lite.Enriched) -> ScatterData:
-    """The running enrichment score, with the set's genes as ticks along the ranking."""
-    ranks = tuple(float(i) for i in range(len(result.running)))
-    # A rank is a whole number: as a float, the hover printed 12,345 as 1.23e+4.
-    frame = pl.DataFrame(
-        {
-            "rank": pl.Series([int(p) for p in result.positions], dtype=pl.Int64),
-            "running": [result.running[p] for p in result.positions],
-            "mark": [figure("running", "member")] * result.size,
-        }
-    )
-    columns = {
-        "rank": ("rank", "Position in the ranking, from the most positive statistic."),
-        "running": ("dimensionless", "Running enrichment score at this member."),
-        "mark": ("none", "Set member."),
-    }
-    member = figure("running", "member")
-    return ScatterData(
-        frame=frame,
-        columns=columns,
-        x="rank",
-        y="running",
-        x_label=figure("running", "x"),
-        y_label=figure("running", "y"),
-        colour="mark",
-        colours={member: ROLES["comparison"]},
-        names={member: member},
-        caption=running.caption(said, result, len(ranks)),
-        lines=(Line(figure("running", "line"), ranks, result.running),),
-        width="double",
-    )
-
-
-def _running_set(writer: Writer, name: str, said: Words, results: pl.DataFrame,
-                 enriched: Mapping[str, lite.Enriched], shown: str) -> FigureBlock:  # fmt: skip
-    """The running score of the dataset's set, and of any set the contrast tested (WO7).
-
-    The page draws another set's running sum through ctxRunning, the twin of lite._running,
-    and looks its NES, p and FDR up: the student sees what an enrichment score is for any
-    pathway, an early peak, a late trough or a flat wander (figure controls plan).
-    """
-    hit = enriched[shown]
-    data = _running(said, hit)
-    block = writer.figure(data, f"running_{name}",
-                          running_text(said, hit, len(hit.running)))  # fmt: skip
-    exported = export.settings(data.inches(), data.caption, block.stem, data.export_layers())
-    if len(enriched) < 2:  # noqa: PLR2004 - a choice needs two
-        return block
-    return replace(block, controls=running.panel(said, results, enriched, shown, exported))
-
-
 def _background_views(
     writer: Writer, name: str, said: Words, results: pl.DataFrame, e: "_Enrichment"
 ) -> tuple[FigureBlock, tuple[int, int, int, int, int]]:
@@ -443,8 +390,9 @@ def _page(
                             low=lite.MIN_SIZE, high=lite.MAX_SIZE, file=e.gmt.name))  # fmt: skip
     contrast, gene_set = fn.running
     if gene_set in e.enriched[contrast]:
-        one_set.append(_running_set(writer, contrast, said[contrast], e.results[contrast],
-                                    e.enriched[contrast], gene_set))  # fmt: skip
+        runs = {c: (said[c], e.results[c], e.enriched[c]) for c in e.results}
+        rest = [r for c, r in runs.items() if c != contrast]
+        one_set.append(running.block(writer, contrast, runs[contrast], gene_set, rest))
     else:
         one_set.append(fill(PAGE, "groups.no_running", gene_set=set_words(gene_set),
                             label=said[contrast].label))  # fmt: skip

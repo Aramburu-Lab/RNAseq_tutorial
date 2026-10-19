@@ -163,7 +163,8 @@ def test_the_boxes_carry_deseq2s_padj_over_every_tested_gene(m5, size):
         assert mwu["ticks"] and all("p=" in t and "padj" not in t for t in mwu["ticks"])
         assert deseq["hidden"] == len(genes) == mwu["hidden"]
     else:
-        assert all(o["ticks"] is None and o["hidden"] == 0 for o in view["options"])
+        # Upright, each tick names its gene alone: the p sits over its box.
+        assert all(o["ticks"] == genes and o["hidden"] == 0 for o in view["options"])
 
 
 @pytest.mark.parametrize("size", ["wide_light", "phone_dark"])

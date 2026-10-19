@@ -1,0 +1,17 @@
+two_samples_joined	CAUGHT	1 failed in 1.29s
+missing_joined	SURVIVED	4 passed in 2.38s
+groups_swapped	CAUGHT	1 failed in 0.98s
+files_from_centre	CAUGHT	1 failed, 1 passed in 1.89s
+files_over_points	CAUGHT	1 failed, 1 passed in 2.01s
+files_in_ink	CAUGHT	1 failed, 1 passed in 1.95s
+page_no_lines	CAUGHT	1 failed, 2 passed in 2.14s
+page_boxes_grouped	CAUGHT	1 failed, 2 passed in 2.19s
+wrapped_break_dropped	CAUGHT	1 failed, 3 passed in 2.75s
+wrapped_measured_whole	CAUGHT	1 failed, 3 passed in 2.74s
+phone_kept_when_wider	CAUGHT	1 failed, 13 passed in 10.94s
+m5_pairs_never_set	CAUGHT	1 failed, 1 passed in 1.05s
+m5_reading_silent	CAUGHT	1 failed, 1 passed in 1.07s
+f1_unpaired_joined	CAUGHT	1 failed, 11 passed in 10.70s
+box_caption_silent	CAUGHT	1 failed, 11 passed in 10.23s
+f1_views_viewed	SURVIVED	15 passed in 28.45s
+export_object_as_text	CAUGHT	1 failed, 10 passed in 10.40s

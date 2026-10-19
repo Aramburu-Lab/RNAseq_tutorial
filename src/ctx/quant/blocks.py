@@ -119,11 +119,29 @@ def fates_figure(writer: Writer, fates: pl.DataFrame, shown: Shown
 
 
 def correlation_figure(writer: Writer, matrix: np.ndarray, shown: Shown) -> FigureBlock:
-    """F3: Spearman between samples; cell-type labels permuted within each donor."""
+    """F3: Spearman between samples; cell-type labels permuted within each donor.
+
+    A view orders the samples by each sheet column the bars filter by but cell type (the
+    controls plan, M4: "Group samples by"), its within-less-between test of that column's labels
+    looked up. The build tests cell type already; with a cell-type view too, Step-1's page was
+    14,997,102 B, 2,898 B under the cap, each view about 1.27 MB.
+    """
     rho, genes = tab.spearman(matrix)
     sheet = shown.sheet
     strata = [d or s for d, s in zip(sheet["donor"].fill_null(""), sheet["sample"], strict=True)]
     found = tab.within_minus_between(rho, sheet["cell_type"].to_list(), strata)
+    built = _correlation_built(rho, genes, sheet, found)
+    options = [(text.word(PAGE, "figures.correlation.view_clustered"), *built)]
+    for column in (c for c in shown.groups.columns[1:] if c != "cell_type"):
+        tested = tab.within_minus_between(rho, sheet[column].to_list(), strata)
+        if tested is not None:
+            options.append(_correlation_grouped(rho, genes, sheet, column, tested))
+    return _viewed(writer, "correlation", options)
+
+
+def _correlation_built(rho: np.ndarray, genes: int, sheet: pl.DataFrame,
+                       found: Any) -> tuple[Any, FigureText]:  # fmt: skip
+    """F3 as built: the clustering's order, cell type tested."""
     if found is None:
         words = text.fill(PAGE, "figures.correlation.caption_untested", n=sheet.height,
                           genes=genes, min_reads=tab.MIN_READS)  # fmt: skip
@@ -134,8 +152,28 @@ def correlation_figure(writer: Writer, matrix: np.ndarray, shown: Shown) -> Figu
                           strata=found.strata, min_reads=tab.MIN_READS)  # fmt: skip
         lead = text.fill(PAGE, "figures.correlation.lead", within=found.within,
                          between=found.between)  # fmt: skip
-    data = fig.correlation_heatmap(rho, sheet, words)
-    return writer.figure(data, "correlation", figure_text("correlation", lead))
+    return fig.correlation_heatmap(rho, sheet, words), figure_text("correlation", lead)
+
+
+def _correlation_grouped(rho: np.ndarray, genes: int, sheet: pl.DataFrame, column: str,
+                         found: Any) -> tuple[str, Any, FigureText]:  # fmt: skip
+    """F3's view grouped by one sheet column, that column's labels tested within donors.
+
+    Where every donor's samples share one label nothing can move, and the caption says so
+    in place of a p.
+    """
+    label = text.word(PAGE, f"labels.{column}").lower()
+    values = {"n": sheet.height, "genes": genes, "label": label, "diff": found.difference,
+              "p": found.p, "perms": found.permutations, "strata": found.strata}  # fmt: skip
+    key = ("figures.correlation.caption_grouped" if found.permutations
+           else "figures.correlation.caption_grouped_fixed")  # fmt: skip
+    data = fig.correlation_heatmap(rho, sheet, text.fill(PAGE, key, **values), by=column)
+    lead = text.fill(PAGE, "figures.correlation.lead_grouped", label=label, within=found.within,
+                     between=found.between)  # fmt: skip
+    reading = tuple(text.words(PAGE, "figures.correlation.reading_grouped"))
+    words = FigureText(title=text.word(PAGE, "figures.correlation.title"), lead=lead,
+                       reading=reading)  # fmt: skip
+    return text.fill(PAGE, "figures.correlation.view_grouped", label=label), data, words
 
 
 def detection_figure(writer: Writer, port: GeneTables, shown: Shown

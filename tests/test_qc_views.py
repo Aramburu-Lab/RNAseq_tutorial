@@ -114,8 +114,67 @@ SWAP = """(async () => {
 })()"""
 
 
+BANDS = "Absolute bands, every metric that has one"
+
+
+def test_the_flag_view_marks_every_flag_of_the_run_and_no_more(page):
+    """V2, the band map's flag view: a cell is flagged where the run's flags table flags that
+    sample on that metric, and each level counted in the caption is the cells'.
+
+    Mutations caught: a flag read from the absolute band alone; a cell flagged without a
+    value; kept metrics drawn; the caption's counts not the cells'."""
+    from ctx.qc import flag_map  # noqa: PLC0415
+    from ctx.report import text  # noqa: PLC0415
+
+    _, out, _, html = page
+    flags = pl.read_csv(next(out.glob("*_desynth_flags_v1.csv")))
+    cfg = _views(html.read_text(), BANDS)
+    assert [o["label"] for o in cfg["options"]] == ["absolute bands", "every flag of the run"]
+    (cells, *_) = [t for t in cfg["options"][1]["figure"]["data"] if t["type"] == "heatmap"]
+    words = {k: text.word("qc", f"figures.flag_map.levels.{k}") for k in flag_map.LEVELS}
+    seen = {k: sum(cell.endswith(f"<br>{w}") for row in cells["text"] for cell in row)
+            for k, w in words.items()}  # fmt: skip
+    pairs = flags.select("sample", "metric").unique().height
+    assert seen["flagged"] == pairs > 0
+    assert f"{seen['flagged']} values flagged" in cfg["options"][1]["caption"]
+    assert flag_map.level(None, True, True) == "none"
+    assert flag_map.level(float("nan"), False, True) == "none"
+    assert flag_map.level(1.0, True, False) == "flagged"
+    assert flag_map.level(1.0, False, False) == "unjudged"
+
+
+def test_a_page_past_the_cap_leaves_the_flag_view_out_and_says_so(page, monkeypatch, tmp_path):
+    """Mutations caught: the view kept on a page past the cap, which stops the run; the band
+    map dropped with it; no note in its place; the view dropped on a page under the cap."""
+    import dataclasses  # noqa: PLC0415
+
+    from ctx.qc import flag_map  # noqa: PLC0415
+    from ctx.report.builder import FigureBlock, FigureText, Group  # noqa: PLC0415
+
+    @dataclasses.dataclass(frozen=True)
+    class Probe:
+        """The one field of a module page ``fitted`` reads and replaces."""
+
+        results: tuple
+
+    block = FigureBlock(figure=None, caption="c", rows=(), data_file="x.csv",
+                        text=FigureText(BANDS), stem="x_band_map",
+                        controls={"kind": "view"})  # fmt: skip
+    probe = Probe((Group("Glance", (block, "other")), "a note"))
+    monkeypatch.setattr(flag_map, "rendered", lambda p, path: "x" * 10)
+    assert flag_map.fitted(probe, tmp_path / "p.html") is probe
+    monkeypatch.setattr(flag_map, "MAX_BYTES", 5)
+    kept, note = flag_map.fitted(probe, tmp_path / "p.html").results
+    assert [type(i).__name__ for i in kept.items] == ["FigureBlock", "str", "str"]
+    assert kept.items[0].controls is None and kept.items[0].text.title == BANDS
+    assert "left out" in kept.items[1] and "5-byte cap" in kept.items[1]
+    assert kept.items[2] == "other" and note == "a note"
+
+
 @pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
-@pytest.mark.parametrize("title", ["Recorded sex against expression", "Where every read goes"])
+@pytest.mark.parametrize(
+    "title", ["Recorded sex against expression", "Where every read goes", BANDS]
+)
 def test_a_view_s_files_carry_its_own_caption(page, title, tmp_path):
     """In Chromium at 375 px: the last view shown, its SVG and PDF drawn with that view's
     caption and the live line. Mutation caught: the page exporting the build's caption."""

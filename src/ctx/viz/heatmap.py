@@ -19,6 +19,17 @@ import polars as pl
 from ctx.viz import metrics
 from ctx.viz.annotate import place_caption
 from ctx.viz.axes import axis_title
+from ctx.viz.heatmap_parts import (
+    BARE,
+    Wide,
+    Words,
+    band_centres,
+    fit_px,
+    hover_lines,
+    line_count,
+    named,
+    page_colour,
+)
 from ctx.viz.metrics import text_width, wrap_to
 from ctx.viz.style import (
     BAR_LABEL_ROTATION,
@@ -32,7 +43,6 @@ from ctx.viz.style import (
     PHONE_PX,
     PLOTLY_CAP_SHIFT,
     PLOTLY_HEAT_ROW_PX,
-    PLOTLY_HOVER_PX,
     PLOTLY_LABEL_BOX_EM,
     PLOTLY_LEGEND_GAP_PX,
     PLOTLY_LEGEND_LINE_PX,
@@ -40,7 +50,6 @@ from ctx.viz.style import (
     PLOTLY_LEGEND_SWATCH_PX,
     PLOTLY_LEGEND_SYMBOL_PX,
     PLOTLY_MARGIN_PX,
-    PLOTLY_NO_LEVEL,
     PLOTLY_PUSH_PAD_PX,
     PLOTLY_TICK_PX,
     PLOTLY_TITLE_STANDOFF_PX,
@@ -53,7 +62,6 @@ from ctx.viz.style import (
     on_page,
     plotly_steps,
     plotly_templates,
-    tint,
 )
 
 # A blank row between the tracks and the cells, so a track never reads as a data row.
@@ -463,6 +471,34 @@ class HeatmapData:
             right.set_ylabel(self.row_stats_label)
             right.spines["right"].set_visible(False)
 
+    def inches(self) -> tuple[float, float]:
+        """The figure files' size, which a page's own PDF and SVG of a moved view take too."""
+        return self._inches()
+
+    def export_layers(self) -> dict[str, Any]:
+        """What a page's own PDF and SVG of a moved view need beyond the page's plot.
+
+        ``cells``: each heatmap trace's colours by its z, in trace order (the cells, then each
+        track), as the white figure files paint them. plotly's SVG draws a heatmap as one
+        raster image; the export redraws every trace as filled vector rectangles in these
+        colours (``ctxExport.cells``), so a view's files hold no raster, as the figure files
+        hold none. Where the page thins the units, ``caption`` is the page's caption, which
+        says so: the export draws the page's cells.
+        """
+        from matplotlib.colors import to_hex  # noqa: PLC0415 - heavy
+
+        colours = [f"rgba({', '.join(str(round(255 * c)) for c in rgba[:3])}, {rgba[3]:g})"
+                   if rgba[3] < 1 else to_hex(rgba)
+                   for rgba in self._rgba(THEMES["white"])]  # fmt: skip
+        sizes = [len(self.swatches), *(len(t.colours) for t in self.tracks)]
+        starts = list(itertools.accumulate([0, *sizes]))
+        layers: dict[str, Any] = {"cells": [colours[a:b] for a, b in itertools.pairwise(starts)]}
+        if self.stride() > 1:
+            from ctx.report.marks import plain  # noqa: PLC0415 - report imports viz
+
+            layers["caption"] = plain(self.caption_text())
+        return layers
+
     def cell_aspect(self) -> float:
         """A cell's height over its width as the static draws it, read off its laid-out axes.
 
@@ -528,8 +564,8 @@ class HeatmapData:
             fig.add_trace(go.Scatter(x=[None], y=[None], yaxis="y2", showlegend=False,
                                      hoverinfo="skip"))  # fmt: skip
             fig.update_layout(yaxis2={
-                **_BARE, "matches": "y", "overlaying": "y", "side": "right", "tickmode": "array",
-                "tickvals": _centres(edges)[first:], "ticktext": [self._stat(r) for r in rows],
+                **BARE, "matches": "y", "overlaying": "y", "side": "right", "tickmode": "array",
+                "tickvals": band_centres(edges)[first:], "ticktext": [self._stat(r) for r in rows],
                 "title": {"text": self.row_stats_label},
             })  # fmt: skip
         if self.column_title:
@@ -538,7 +574,7 @@ class HeatmapData:
         fig.update_layout(meta=self._meta(wide))
         return fig
 
-    def _axes(self, edges: list[float], words: "_Words", wide: "_Wide") -> dict[str, Any]:
+    def _axes(self, edges: list[float], words: "Words", wide: "Wide") -> dict[str, Any]:
         """The column and row axes of the static's layout.
 
         Columns sit at their positions on a numeric axis, each named by its tick, as the rows
@@ -553,16 +589,16 @@ class HeatmapData:
         held = {"scaleanchor": "x", "scaleratio": wide.ratio, "constrain": "domain",
                 "constraintoward": "top"} if wide.held else {}  # fmt: skip
         return {
-            "xaxis": {**_BARE, "range": [-0.5, len(cols) - 0.5], "tickmode": "array",
+            "xaxis": {**BARE, "range": [-0.5, len(cols) - 0.5], "tickmode": "array",
                       "tickvals": list(range(len(cols))) if labelled else [],
                       "ticktext": cols if labelled else [],
                       "title": {"text": "" if self.column_title else words.title},
                       "tickangle": -BAR_LABEL_ROTATION, "showticklabels": labelled,
                       "constrain": "domain", "constraintoward": "left"},
-            "yaxis": {**_BARE, "tickmode": "array", **self._yaxis(edges, words), **held},
+            "yaxis": {**BARE, "tickmode": "array", **self._yaxis(edges, words), **held},
         }  # fmt: skip
 
-    def _meta(self, wide: "_Wide") -> dict[str, Any]:
+    def _meta(self, wide: "Wide") -> dict[str, Any]:
         """The least width the page draws the plot at, and a phone's layout where it can show.
 
         The least is what a phone's labels need, the narrowest layout's; plotly's own padding
@@ -575,23 +611,23 @@ class HeatmapData:
             meta["narrow"] = self._narrow(phone, wide, least)
         return meta
 
-    def _words(self, phone: bool) -> "_Words":
+    def _words(self, phone: bool) -> "Words":
         """The static's row labels and legend entries, or a phone's; the title is ``_title``'s.
 
         On a phone each wraps to the room it has there, a row label to half the plot, an entry
         to the plot beside its swatch.
         """
-        ticks = {i: "<br>".join(_fit(line, PHONE_PLOT_PX / 2) if phone else line
+        ticks = {i: "<br>".join(fit_px(line, PHONE_PLOT_PX / 2) if phone else line
                                 for line in label.split("\n"))
                  for i, label in enumerate(self._shown()) if label}  # fmt: skip
         legend = [s.level for s in self.swatches]
         legend += [words for t in self.tracks for words, _ in t.entries()]
         if phone:
             room = PHONE_PLOT_PX - PLOTLY_LEGEND_SYMBOL_PX
-            legend = [_fit(name, room, SIZES["legend"]) for name in legend]
-        return _Words(ticks, legend, "")
+            legend = [fit_px(name, room, SIZES["legend"]) for name in legend]
+        return Words(ticks, legend, "")
 
-    def _title(self, words: "_Words", width: float) -> str:
+    def _title(self, words: "Words", width: float) -> str:
         """The column title as a layout prints it at its narrowest, ``width`` px.
 
         ``column_title`` is right-aligned under the column labels, from the figure's left
@@ -603,12 +639,12 @@ class HeatmapData:
         right = math.ceil(self._right_px())
         if self.column_title:
             room = width - PLOTLY_MARGIN_PX["l"] - right
-            return _fit(metrics.words(self.column_title), room, SIZES["axis_label"])
+            return fit_px(metrics.words(self.column_title), room, SIZES["axis_label"])
         left = math.ceil(self._left_px(words.ticks))
-        return _fit(metrics.words(self.column_label), width - abs(left - right),
+        return fit_px(metrics.words(self.column_label), width - abs(left - right),
                     SIZES["axis_label"])  # fmt: skip
 
-    def _wide(self, words: "_Words") -> "_Wide":
+    def _wide(self, words: "Words") -> "Wide":
         """The static's layout on the page, laid out at the width a module page draws a plot at.
 
         A row's band is the static's cell height for the page's cell width there, every band
@@ -646,9 +682,9 @@ class HeatmapData:
                                for h, f in zip(heights, floors, strict=True) if f)])  # fmt: skip
             band, heights = band * grow, [h * grow for h in heights]
         edges = [0.0, *itertools.accumulate(h / band for h in heights)]
-        return _Wide(width, band, band / column, below, held, edges)
+        return Wide(width, band, band / column, below, held, edges)
 
-    def _chrome(self, words: "_Words", width: float, below: float) -> float:
+    def _chrome(self, words: "Words", width: float, below: float) -> float:
         """The figure's height outside its bands in px, at a plot ``width`` px wide.
 
         The legend as plotly flows it over the cells there, then the column labels and the
@@ -659,31 +695,31 @@ class HeatmapData:
         legend = self._legend_px(words.legend, width - self._sides(words.ticks))
         return self._top(legend) + math.ceil(self._bottom(title))
 
-    def _wide_height(self, wide: "_Wide", words: "_Words") -> float:
+    def _wide_height(self, wide: "Wide", words: "Words") -> float:
         """The figure's height in px at ``wide.width``: its legend, bands, labels and title."""
         return self._chrome(words, wide.width, wide.below) + wide.edges[-1] * wide.band
 
-    def _edges(self, words: "_Words") -> list[float]:
+    def _edges(self, words: "Words") -> list[float]:
         """A phone's band edges top down, in row pitches: each as many as its label's lines.
 
         A ``_square`` heatmap's rows are as tall as its columns are wide on a phone's plot: at
         a label's pitch, Step-1's 105 drawn samples stood 8 times as tall as wide at 375 px
         (2026-10-09).
         """
-        heights = [float(_lines(words.ticks.get(i, ""))) for i in range(len(self._grid()[1]))]
+        heights = [float(line_count(words.ticks.get(i, ""))) for i in range(len(self._grid()[1]))]
         if self._square():
             rows, columns = len(self.rows_in_order()), len(self.columns_in_order())
             plot = PHONE_PLOT_PX - self._left_px(words.ticks) - self._right_px()
             heights[len(heights) - rows :] = [plot / columns / PLOTLY_HEAT_ROW_PX] * rows
         return [0.0, *itertools.accumulate(heights)]
 
-    def _yaxis(self, edges: list[float], words: "_Words") -> dict[str, Any]:
+    def _yaxis(self, edges: list[float], words: "Words") -> dict[str, Any]:
         """The row axis's range and ticks: one tick at the middle of each labelled band."""
-        centres = _centres(edges)
+        centres = band_centres(edges)
         return {"range": [edges[-1], edges[0]], "tickvals": [centres[i] for i in words.ticks],
                 "ticktext": list(words.ticks.values())}  # fmt: skip
 
-    def _narrow(self, words: "_Words", wide: "_Wide", least: float) -> dict[str, Any]:
+    def _narrow(self, words: "Words", wide: "Wide", least: float) -> dict[str, Any]:
         """A phone's layout, which the page script swaps in narrower than ``wide.below`` px.
 
         At 375 px the band map's two-line labels started up to 132 px left of the plot and lost
@@ -700,7 +736,7 @@ class HeatmapData:
         if wide.held:
             relayout["yaxis.scaleanchor"] = None
         if self._shows_stats():
-            relayout["yaxis2.tickvals"] = _centres(edges)[first:]
+            relayout["yaxis2.tickvals"] = band_centres(edges)[first:]
         if self.column_title:
             relayout |= {"annotations[0].text": words.title, "margin.b": self._bottom(words.title)}
         else:
@@ -717,7 +753,7 @@ class HeatmapData:
         n = len(self.columns_in_order())
         return n if n <= HEAT["label_columns"] else 0
 
-    def _needs(self, words: "_Words") -> int:
+    def _needs(self, words: "Words") -> int:
         """The narrowest plot that prints ``words`` whole, in px.
 
         The row labels' margin, a label's box across for each labelled column, upright, and the
@@ -736,7 +772,7 @@ class HeatmapData:
         For a labelled band with a labelled neighbour, the box of the tallest label's lines, as
         the static gives every row the tallest label's; none for any other band.
         """
-        lines = max((_lines(t) for t in ticks.values()), default=1)
+        lines = max((line_count(t) for t in ticks.values()), default=1)
         box = ((lines - 1) * LINE_SPACING + PLOTLY_LABEL_BOX_EM) * on_page(SIZES["tick"])
         return [box if i in ticks and (i - 1 in ticks or i + 1 in ticks) else 0.0
                 for i in range(len(self._grid()[1]))]  # fmt: skip
@@ -821,9 +857,9 @@ class HeatmapData:
         """
         size = on_page(SIZES["axis_label"])
         if self.column_title:
-            title_px = _lines(title) * size * LINE_SPACING
+            title_px = line_count(title) * size * LINE_SPACING
             return PLOTLY_MARGIN_PX["b"] + self._title_drop() + title_px
-        caption = size * (PLOTLY_CAP_SHIFT + (_lines(title) - 1) * LINE_SPACING)
+        caption = size * (PLOTLY_CAP_SHIFT + (line_count(title) - 1) * LINE_SPACING)
         pushed = PLOTLY_PUSH_PAD_PX + self._labels_depth() + caption + PLOTLY_TITLE_STANDOFF_PX
         return max(PLOTLY_MARGIN_PX["b"], pushed)
 
@@ -851,7 +887,7 @@ class HeatmapData:
             tallest = max(tallest, PLOTLY_LEGEND_LINE_PX + (len(lines) - 1) * size * LINE_SPACING)
         return sum([*heights, tallest]) + PLOTLY_LEGEND_PAD_PX
 
-    def _page_height(self, edges: list[float], words: "_Words") -> float:
+    def _page_height(self, edges: list[float], words: "Words") -> float:
         """A phone's figure height in px: its rows at the label pitch, then the rest.
 
         As ``_inches`` does, the rows drawn are capped and the column labels measured. The
@@ -862,7 +898,7 @@ class HeatmapData:
         above = edges[len(edges) - 1 - rows]  # the tracks and the blank row
         whole = rows <= HEAT["max_rows_drawn"] or self._square()
         cells = edges[-1] - above if whole else HEAT["max_rows_drawn"]
-        lines = sum(_lines(name) for name in words.legend)
+        lines = sum(line_count(name) for name in words.legend)
         top = self._top(lines * PLOTLY_LEGEND_LINE_PX + PLOTLY_LEGEND_PAD_PX)
         return top + (above + cells) * PLOTLY_HEAT_ROW_PX + math.ceil(self._bottom(words.title))
 
@@ -879,14 +915,14 @@ class HeatmapData:
         return go.Heatmap(
             z=z, x=list(range(len(cols))), y=edges, text=text, showscale=False, xgap=0, ygap=0,
             hoverongaps=False, zmin=-0.5, zmax=len(self.swatches) - 0.5,
-            colorscale=plotly_steps([_page_colour(s) for s in self.swatches]),
+            colorscale=plotly_steps([page_colour(s) for s in self.swatches]),
             hovertemplate="%{text}<extra></extra>",
         )  # fmt: skip
 
     def _track_trace(self, go: Any, track: Track, cols: list[str], edges: list[float]) -> Any:
         """One track as a heatmap strip between its two ``edges``; hover names its level."""
         codes = {level: i for i, level in enumerate(track.colours)}
-        hover = [_hover_lines([_named(track.name, track.values[c]), _named(self.column_label, c)])
+        hover = [hover_lines([named(track.name, track.values[c]), named(self.column_label, c)])
                  for c in cols]  # fmt: skip
         return go.Heatmap(
             z=[[codes[track.values[c]] for c in cols]], x=list(range(len(cols))), y=edges,
@@ -901,95 +937,18 @@ class HeatmapData:
         A row is named on one line. A band map's cells carry a band and no value; their hover
         read "None" (2026-10-01).
         """
-        lines = [_named(self.row_label, row), _named(self.column_label, column)]
+        lines = [named(self.row_label, row), named(self.column_label, column)]
         if value is not None and not np.isnan(value):
             unit = self.columns[self.value][0]
-            lines.append(_named(axis_title(self.value, unit), f"{value:.3g}"))
-        return _hover_lines([*lines, *([level] if level is not None else [])])
+            lines.append(named(axis_title(self.value, unit), f"{value:.3g}"))
+        return hover_lines([*lines, *([level] if level is not None else [])])
 
     def _colours(self) -> list[str]:
         """The static legend's colours on the page, in its order."""
-        return [*(_page_colour(s) for s in self.swatches),
+        return [*(page_colour(s) for s in self.swatches),
                 *(c for t in self.tracks for _, c in t.entries())]  # fmt: skip
 
     def _stat(self, row: str) -> str:
         """A row's statistic as the figure prints it; empty where it has none."""
         value = (self.row_stats or {}).get(row)
         return "" if value is None else f"{value:{self.row_stats_format}}"
-
-
-# An axis drawn bare: no line, ticks or grid; labels clear of the cells; margins grown to hold
-# them.
-_BARE = {"showline": False, "ticks": "", "ticklabelstandoff": PLOTLY_TICK_PX, "zeroline": False,
-         "showgrid": False, "automargin": True}  # fmt: skip
-
-
-@dataclass(frozen=True)
-class _Words:
-    """What one page layout prints, each text with ``<br>`` where it breaks.
-
-    Row labels by grid row, legend entries and the column title.
-    """
-
-    ticks: Mapping[int, str]
-    legend: list[str]
-    title: str
-
-
-@dataclass(frozen=True)
-class _Wide:
-    """The static's layout on the page (``HeatmapData._wide``).
-
-    Attributes:
-        width: The plot's width it is laid out for, in px: a module page's, or the least its
-            labels need where that is more.
-        band: A row's height there, in px: the unit of ``edges``.
-        ratio: A row's height over a column's width there.
-        below: The narrowest plot it is drawn in, in px.
-        held: Whether plotly holds ``ratio`` at every width it is drawn at.
-        edges: The bands' edges top down, in rows.
-    """
-
-    width: float
-    band: float
-    ratio: float
-    below: int
-    held: bool
-    edges: list[float]
-
-
-def _page_colour(swatch: Swatch) -> str:
-    """A swatch's colour on the page; "nothing to show" is a grey that reads in both themes."""
-    colour, alpha = (swatch.colour, 1.0) if swatch.colour else PLOTLY_NO_LEVEL
-    return tint(colour, alpha * swatch.alpha)
-
-
-def _centres(edges: list[float]) -> list[float]:
-    """The middle of each band between consecutive ``edges``."""
-    return [(top + bottom) / 2 for top, bottom in itertools.pairwise(edges)]
-
-
-def _named(label: str, value: str) -> str:
-    """``label: value``; a label written as a sentence loses its full stop first."""
-    return f"{label.removesuffix('.')}: {value}"
-
-
-def _hover_lines(lines: list[str]) -> str:
-    """Hover lines, each wrapped to a phone's plot, which a wider hover box ran off."""
-    return "<br>".join(_fit(line, PLOTLY_HOVER_PX) for line in lines)
-
-
-def _fit(text: str | list[str], width_px: float, size: float = SIZES["tick"]) -> str:
-    """Text wrapped at spaces to lines of at most ``width_px`` on the page, in plotly's ``<br>``.
-
-    Measured as ``ctx.viz.metrics`` measures every wrapped text. A word longer than a line
-    stays whole: split, it would read as two words. A list is the text's words already, as
-    ``metrics.words`` holds a parenthesised unit whole.
-    """
-    lines = wrap_to(text, width_px, on_page(size))
-    return "<br>".join(lines) if lines else (text if isinstance(text, str) else "")
-
-
-def _lines(text: str) -> int:
-    """How many lines a plotly text runs to."""
-    return text.count("<br>") + 1

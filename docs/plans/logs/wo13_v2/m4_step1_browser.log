@@ -1,0 +1,9 @@
+page 2026-10-19_quant_tier1_overview_v1.html 14,044,273 B
+1280_light: theme white, options ['clustering', 'condition', 'batch'], moved [False, True, True], back unmoved True, widest plot 567 px, box 1265 scroll 1265, errors []
+1280_dark: theme black, options ['clustering', 'condition', 'batch'], moved [False, True, True], back unmoved True, widest plot 567 px, box 1265 scroll 1265, errors []
+375_light: theme white, options ['clustering', 'condition', 'batch'], moved [False, True, True], back unmoved True, widest plot 317 px, box 375 scroll 375, errors []
+375_dark: theme black, options ['clustering', 'condition', 'batch'], moved [False, True, True], back unmoved True, widest plot 317 px, box 375 scroll 375, errors []
+export condition, then clustering 1280_light: <image> 0, rectangles 2114 of 2114 runs, by colour equal True, svg 161,074 B, pdf 50,025 B, pdf images 0, errors []
+export condition, then clustering 375_dark: <image> 0, rectangles 2114 of 2114 runs, by colour equal True, svg 158,778 B, pdf 49,905 B, pdf images 0, errors []
+export batch, then clustering 1280_light: <image> 0, rectangles 1965 of 1965 runs, by colour equal True, svg 154,969 B, pdf 49,616 B, pdf images 0, errors []
+export batch, then clustering 375_dark: <image> 0, rectangles 1965 of 1965 runs, by colour equal True, svg 154,492 B, pdf 50,107 B, pdf images 0, errors []

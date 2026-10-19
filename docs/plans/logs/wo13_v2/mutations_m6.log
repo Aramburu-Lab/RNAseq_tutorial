@@ -1,0 +1,11 @@
+keep_build_first	CAUGHT	1 failed, 3 passed in 1.59s
+keep_js_build_first	CAUGHT	1 failed, 3 passed in 1.62s
+keep_js_minus_one	CAUGHT	1 failed, 3 passed in 1.67s
+order_shown_kept_untested	CAUGHT	1 failed, 4 passed in 1.65s
+page_build_ranking	CAUGHT	1 failed, 2 passed in 112.69s (0:01:52)
+page_sets_not_relisted	SURVIVED	9 passed in 125.18s (0:02:05)
+page_export_kept	CAUGHT	1 failed in 164.35s (0:02:44)
+page_set_reset_first	SURVIVED	9 passed in 185.22s (0:03:05)
+ora_featured_calls	CAUGHT	1 failed, 4 passed in 4.81s
+ora_featured_background	CAUGHT	1 failed, 4 passed in 4.20s
+ora_up_down_swapped	CAUGHT	1 failed, 4 passed in 2.61s

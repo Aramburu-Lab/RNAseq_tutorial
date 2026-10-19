@@ -160,3 +160,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Count an agent's mutations from its log, not its summary: G6's draft line said 15, its log 18 (2026-10-19).
 - An overflow no element's box shows is text: an unbroken path in a reading guide widened M2 to 1,579 px while every element ended inside the window. Measure text runs with a Range, not only element boxes (L, 2026-10-19).
 - A fixture where two masks select the same rows cannot tell them apart: make them differ in a unit test (L, 2026-10-19).
+- A method added to a contract makes every caller of `hasattr(data, "export_layers")` export it: BoxData's export stopped `ctx genecard` on Step-1 through `views.viewed`. Build every module that reads a contract after changing it (V2, 2026-10-19).
+- A fixture whose contrasts test identical sets cannot catch a list left stale on a contrast change: plant the mutation into a real page as well (V2, 2026-10-19).
+- Check free disk before a full suite: runs died with "No space left on device" while the pytest temp folder held 109 GB (V2, F1, 2026-10-19).

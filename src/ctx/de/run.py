@@ -564,7 +564,7 @@ def _box(
         groups=(said.reference, said.tested),
         hover=("sample", "donor", "deseq2_padj"),
     )
-    return data, missing
+    return (replace(data, pairs="donor") if result.contrast.paired else data), missing
 
 
 def _contrast_row(result: Fit, sheet_columns: list[str]) -> dict[str, object]:
@@ -779,12 +779,11 @@ def _box_views(writer: Writer, result: Fit, box: Figure, said: Words,
     n = len(box.caption.tests)
     mwu = sum(t.p_adj < ALPHA for t in box.caption.tests)
     passing = sum(p is not None and p < ALPHA for p in deseq.caption.padj.values())
-    built = box_text(said, n, mwu)
+    built = box_text(said, n, mwu, bool(box.pairs))
     block = writer.figure(box, f"box_{result.contrast.name}", built)
-    options = [
-        (figure("box", "view_mwu"), box, built),
-        (figure("box", "view_deseq"), deseq, deseq_box_text(said, n, (passing, mwu))),
-    ]
+    deseq_words = deseq_box_text(said, n, (passing, mwu), bool(box.pairs))
+    options = [(figure("box", "view_mwu"), box, built),
+               (figure("box", "view_deseq"), deseq, deseq_words)]  # fmt: skip
     return lookup(block, options, figure("box", "view"))
 
 
