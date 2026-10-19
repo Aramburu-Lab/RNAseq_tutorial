@@ -274,14 +274,18 @@ def _reasons(left: pl.DataFrame) -> ResultTable:
 
 
 def _largest(left: pl.DataFrame) -> ResultTable:
-    """The rows left out that held the most counts, so a reader sees which genes are lost."""
+    """The rows left out that held the most counts, so a reader sees which genes are lost.
+
+    The README's ``detail`` column rides along: why a row stayed out, such as the ID history
+    finding no current gene, which the reason alone does not say (R2.5b).
+    """
     word = functools.partial(text.word, PAGE)
     top = left.sort("total", "source_id", descending=[True, False]).head(LARGEST)
-    rows = tuple((i, k, w, f"{t:,.0f}") for i, k, w, t in
-                 top.select("source_id", "kind", "reason", "total").rows())  # fmt: skip
-    empty = ((word("left.none"), "", "", ""),)
+    rows = tuple((i, k, w, d, f"{t:,.0f}") for i, k, w, d, t in
+                 top.select("source_id", "kind", "reason", "detail", "total").rows())  # fmt: skip
+    empty = ((word("left.none"), "", "", "", ""),)
     title = text.fill(PAGE, "largest.title", n=LARGEST)
-    return ResultTable(title, text.words(PAGE, "largest.columns"), rows or empty, numeric=(3,))
+    return ResultTable(title, text.words(PAGE, "largest.columns"), rows or empty, numeric=(4,))
 
 
 def _write_problems(error: counts.CountsError, out: Path, dataset: str) -> None:

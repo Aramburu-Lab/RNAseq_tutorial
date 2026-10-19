@@ -85,7 +85,7 @@ none = "none"
 
 [largest]
 title = "The {n} rows left out holding the most counts"
-columns = ["ID", "ID kind", "Reason", "Counts held"]
+columns = ["ID", "ID kind", "Reason", "Detail", "Counts held"]
 
 [rounding]
 readme = "RSEM expected_count, rounded to the nearest integer, halves to even: {fractional:,} of {values:,} values were fractional, the largest change {largest:g}"
@@ -103,7 +103,7 @@ source_id = ["none", "The row's own gene ID in the matrix."]
 source_id = ["none", "The row's own gene ID in the matrix."]
 kind = ["none", "ensembl, entrez or symbol, by the ID's form."]
 reason = ["none", "not_in_annotation, ambiguous, shared_gene or no_entrez_table."]
-detail = ["none", "The genes an ambiguous or shared ID matches, else empty."]
+detail = ["none", "Why the row stayed out: the genes an ambiguous or shared ID matches, what the ID history found, or the table missing; else empty."]
 total = ["reads", "The row's counts summed over every sample."]
 
 [columns.samplesheet]

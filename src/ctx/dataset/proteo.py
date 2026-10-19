@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from ctx.dataset.checks import TABLE_SUFFIXES, _need
+from ctx.dataset.checks import TABLE_SUFFIXES, _need, _sequence
 from ctx.dataset.sources import Resource
 
 # M7's designs: one cohort measured at both layers, RNA and protein from two studies, or one
@@ -222,10 +222,13 @@ def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, 
         fdr = 0.05
     classes = {}
     for name, entry in raw.get("classes", {}).items():
-        if entry.get("resource") not in known or not entry.get("sets"):
+        sets = _sequence(entry.get("sets"), f"proteo.classes.{name}.sets", [])
+        if entry.get("resource") not in known or not sets:
             problems.append(f"proteo.classes.{name}: needs a known resource and a list of sets")
             continue
-        classes[name] = GeneClass(entry["resource"], tuple(entry["sets"]))
+        classes[name] = GeneClass(entry["resource"], tuple(sets))
+    lists = {k: _sequence(raw.get(k, []), f"proteo.{k}", problems)
+             for k in ("tracks", "genes", "descriptors")}  # fmt: skip
     published = raw.get("published", {})
     problems += [f"proteo.published.{k}: no source" for k, v in published.items()
                  if not isinstance(v, dict) or not isinstance(v.get("source"), str)]  # fmt: skip
@@ -235,11 +238,11 @@ def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, 
         design, protein, label=raw.get("label", ""), member=raw.get("member"),
         sample_prefix=raw.get("sample_prefix", ""),
         plex=raw.get("plex") or (table.batch if table else None),
-        tracks=tuple(raw.get("tracks", [])), amplified=raw.get("amplified"),
-        genes=tuple(raw.get("genes", [])), contrast=raw.get("contrast"),
+        tracks=tuple(lists["tracks"]), amplified=raw.get("amplified"),
+        genes=tuple(lists["genes"]), contrast=raw.get("contrast"),
         tested=raw.get("tested"), reference=raw.get("reference"), classes=classes,
         published=published, sanity=raw.get("sanity", {}),
-        descriptors=tuple(raw.get("descriptors", [])), plex_map=raw.get("plex_map"),
+        descriptors=tuple(lists["descriptors"]), plex_map=raw.get("plex_map"),
         plex_rows=raw.get("plex_rows", ""), unit=raw.get("unit", ""), positive_fdr=fdr,
         table=table,
     )  # fmt: skip

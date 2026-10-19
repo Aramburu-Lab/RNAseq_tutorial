@@ -20,7 +20,7 @@ from ctx.dataset.analyses import (
     _function,
     _ncrna,
 )
-from ctx.dataset.checks import DatasetError, _need
+from ctx.dataset.checks import DatasetError, _list, _need, _sequence, _table
 from ctx.dataset.counts import CountsSpec, _counts
 from ctx.dataset.gdc import ClinicalSpec, GdcSpec, _clinical, _gdc
 from ctx.dataset.proteo import ProteoSpec, _proteo
@@ -116,6 +116,18 @@ class Dataset:
         return found
 
 
+def _expected_counts(raw: Any, problems: list[str]) -> dict[str, dict[str, int]]:
+    """[expect.counts]: per curated column, the runs each value must have, each a whole number."""
+    out = {}
+    for column, table in _table(raw, "expect.counts", problems).items():
+        counts = _table(table, f"expect.counts.{column}", problems)
+        bad = {v: n for v, n in counts.items() if not isinstance(n, int)}
+        problems += [f"expect.counts.{column}.{v}: expected int, found {n!r}"
+                     for v, n in bad.items()]  # fmt: skip
+        out[column] = {str(v): int(n) for v, n in counts.items() if v not in bad}
+    return out
+
+
 def load(path: Path) -> Dataset:
     """Read and check a dataset file.
 
@@ -148,14 +160,17 @@ def load(path: Path) -> Dataset:
     named = {c.name for c in columns}
     if sdrf and (missing := [c for c in REQUIRED_COLUMNS if c not in named]):
         problems.append(f"columns: an SDRF dataset must define {missing}")
-    bins = raw.get("derived", {}).get("batch", {}).get("bins", {})
+    bins = _table(raw.get("derived", {}).get("batch", {}).get("bins", {}), "derived.batch.bins",
+                  problems)  # fmt: skip
+    bins = {k: _list(v, f"derived.batch.bins.{k}", problems) for k, v in bins.items()}
     lengths = [n for levels in bins.values() for n in levels]
     if len(lengths) != len(set(lengths)):
         problems.append("derived.batch.bins: a read length sits in two bins")
-    order = {k: tuple(v) for k, v in raw.get("order", {}).items()}
+    order = {k: tuple(_sequence(v, f"order.{k}", problems))
+             for k, v in raw.get("order", {}).items()}  # fmt: skip
     problems += [f"order.{k}: no [columns.{k}]" for k in order if k not in named]
     expect = raw.get("expect", {})
-    counts = expect.get("counts", {})
+    counts = _expected_counts(expect.get("counts", {}), problems)
     known = named | {"batch", "read_length"}
     problems += [f"expect.counts.{k}: not a curated column" for k in counts if k not in known]
     contrasts = _contrasts(raw.get("contrasts", []), problems)
@@ -187,7 +202,7 @@ def load(path: Path) -> Dataset:
         batch_bins={level: tuple(v) for level, v in bins.items()},
         order=order,
         expect_runs=expect.get("runs"),
-        expect_counts={k: {str(v): int(n) for v, n in c.items()} for k, c in counts.items()},
+        expect_counts=counts,
         contrasts=contrasts,
         de=de,
         function=function,

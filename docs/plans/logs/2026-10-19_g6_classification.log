@@ -1,0 +1,74 @@
+# F.6 (package G6), 2026-10-19: every F.5 variant loaded before and after the fix.
+# Generator: tests/dataset_variants.py, F.5's rule (docs/plans/logs/f5_equality.py), 22 files.
+# 7,800 variants, not F.5's 7,740: R2.5 (c62c6d2) added key lines to the dataset files after F.5.
+# Before: main f277707. After: wo13-g6 aee5d37. Both by docs/plans/logs/g6_classify.py.
+# Dumps, 26 MB each, not committed:
+#   before SHA-256 e4972bf8d81bd81c994e0938022444a11c309953defdfc948be06fd672477e9f
+#   after  SHA-256 525f60e034b0d0a8a6d4b0403de611265f5225dc2a8b7b5430be57a4931d9329
+
+## Before: outcomes, then each non-DatasetError by type and the line that raised it
+AttributeError	222
+DatasetError	4030
+KeyError	24
+OK	3363
+TypeError	107
+ValueError	54
+
+111	AttributeError	checks.py:26 return {k: tuple(str(x) for x in v) for k, v in raw.items()}
+102	AttributeError	sources.py:92 if values is not None and not all(isinstance(v, str) for v in values.values()):
+45	ValueError	loader.py:190 expect_counts={k: {str(v): int(n) for v, n in c.items()} for k, c in counts.items()},
+26	TypeError	analyses.py:180 if len(running) != 2:  # noqa: PLR2004 - a pair
+24	TypeError	analyses.py:149 tuple(p["factors"]),
+12	TypeError	sources.py:111 if len(join) != 2 or any(len(p) != 2 for p in pairs):  # noqa: PLR2004 - pairs
+12	KeyError	analyses.py:147 p["name"],
+12	KeyError	analyses.py:149 tuple(p["factors"]),
+10	TypeError	proteo.py:228 classes[name] = GeneClass(entry["resource"], tuple(entry["sets"]))
+9	TypeError	analyses.py:133 split=Split(int(split["seed"]), str(split["strata"])) if split else None,
+9	AttributeError	loader.py:152 lengths = [n for levels in bins.values() for n in levels]
+6	ValueError	sources.py:114 return Sdrf(resource, (join[0], join[-1]), tuple((a, b) for a, b in pairs), file)
+6	TypeError	analyses.py:162 box_genes=tuple(raw.get("box_genes", [])),
+6	TypeError	analyses.py:160 scatters=tuple((a, b) for a, b in raw.get("scatters", [])),
+6	TypeError	loader.py:155 order = {k: tuple(v) for k, v in raw.get("order", {}).items()}
+4	TypeError	proteo.py:239 genes=tuple(raw.get("genes", [])), contrast=raw.get("contrast"),
+3	ValueError	analyses.py:160 scatters=tuple((a, b) for a, b in raw.get("scatters", [])),
+2	TypeError	proteo.py:238 tracks=tuple(raw.get("tracks", [])), amplified=raw.get("amplified"),
+2	TypeError	proteo.py:242 descriptors=tuple(raw.get("descriptors", [])), plex_map=raw.get("plex_map"),
+
+## By cause (the 407 above)
+222	a non-table read as a table: [[contrasts]] and [[de.pca]] filters 111, [columns.*] values 102, derived.batch.bins 9
+107	a non-list given to len(), tuple() or a subscript: running 26, pca factors 24, cross_check 12, class sets 10, split 9, box_genes 6, scatters 6, order 6, proteo genes 4, tracks 2, descriptors 2
+54	a value given to int() or unpacked as a pair unchecked: expect.counts 45, cross_check 6, scatters 3
+24	a required key read without _need: [[de.pca]] name 12, factors 12
+
+## After
+DatasetError	4437
+OK	3363
+
+## docs/plans/logs/g6_compare.py before after, per variant
+222	AttributeError to DatasetError
+4030	DatasetError equal
+24	KeyError to DatasetError
+3363	OK equal
+107	TypeError to DatasetError
+54	ValueError to DatasetError
+# 0 parsed Datasets differ by repr, 0 DatasetError messages differ, 0 messages add a problem.
+
+## Planted mutations: docs/plans/logs/g6_mutations.py, 18 of 18 caught
+CAUGHT	filter table unchecked
+CAUGHT	filter values unchecked
+CAUGHT	column value map unchecked
+CAUGHT	split unchecked
+CAUGHT	pca factors unchecked
+CAUGHT	pca name read directly
+CAUGHT	scatters pairs unchecked
+CAUGHT	running type unchecked
+CAUGHT	cross_check pairs unchecked
+CAUGHT	batch bins unchecked
+CAUGHT	order values unchecked
+CAUGHT	expected counts unchecked
+CAUGHT	proteo lists unchecked
+CAUGHT	proteo class sets unchecked
+CAUGHT	problems raised one by one
+CAUGHT	left-out detail dropped
+CAUGHT	left-out detail from another row
+CAUGHT	left-out header key reverted
