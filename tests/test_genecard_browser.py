@@ -57,7 +57,10 @@ LISTED = """(async () => {
   }
   if (!panel) return {url: location.href, list: null};
   for (let i = 0; i < 100 && !panel.ctxList; i++) await new Promise(r => setTimeout(r, 100));
+  await new Promise(r => setTimeout(r, 500));
   return {url: location.href, list: panel.ctxList || null,
+          top: panel.closest(".group").getBoundingClientRect().top, window: innerHeight,
+          scrolled: scrollY,
           summary: panel.querySelector(".list-summary").textContent,
           rows: Array.from(panel.querySelectorAll("tbody tr")).map(tr =>
             Array.from(tr.children).map(td => td.textContent)),
@@ -204,6 +207,14 @@ def test_a_list_from_a_link_opens_the_page_through_its_entry_with_each_gene(ran)
     assert got["links"] == ["#group-3", "#group-2"]
     assert got["command"].endswith(" --genes ENSG00000900011") and not got["hidden"]
     assert "4 genes from a link: 2 tested by M5, 2 not; 2 with a card" in got["summary"]
+
+
+def test_a_list_from_a_link_brings_its_panel_into_view(ran):
+    """The fragment is no anchor, so the page opened at its top and the list sat screens down
+    (PK, 2026-10-20): the panel's group is in the top half of the window. Mutation caught:
+    the reveal left out."""
+    got = ran[1]["link"]["acted"]
+    assert got["scrolled"] > 0 and 0 <= got["top"] < got["window"] / 2, got
 
 
 def test_the_list_draws_its_evidence_as_the_evidence_view_does(ran):

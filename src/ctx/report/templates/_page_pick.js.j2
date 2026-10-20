@@ -53,9 +53,14 @@
         a.textContent = ctxPick.fill(ctxPick.word(words, "onward", c.n),
                                      { n: ctxSelect.group(c.n), module: a.getAttribute("data-onward") });
       });
-      if (fragment || ctxSelect.carries(location.hash)) {
-        history.replaceState(null, "", location.pathname + location.search + fragment);
-      }
+      /* A browser may refuse to rewrite a file:// address (WebKit's rules for local files):
+         the address then keeps its old list, and the links and the windows beside, which
+         carry the list, still go out. */
+      try {
+        if (fragment || ctxSelect.carries(location.hash)) {
+          history.replaceState(null, "", location.pathname + location.search + fragment);
+        }
+      } catch (err) { /* the address alone is left behind */ }
       table();
       return sel;
     }

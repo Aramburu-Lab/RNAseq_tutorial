@@ -5,8 +5,9 @@
 // set, until a loaded page's URL holds it (a page that forwards to another, as an entry page
 // does), evaluates `act` as a user gesture, then
 // for each step of `mouse` in turn evaluates its `at`, a list of [type, x, y] events, and
-// dispatches them as a real left-button mouse (a drag is pressed, moved, released) before
-// evaluating its `then`; evaluates `others` in every other page open then (a window the page
+// dispatches them as a real left-button mouse (a drag is pressed, moved, released), waits,
+// where the step's `until` is set, for a loaded page whose URL holds it (a click on a link),
+// then evaluates its `then`; evaluates `others` in every other page open then (a window the page
 // opened), presses the PDF and SVG buttons of the figure `figure` selects when `figure` is
 // set, evaluates `reset`, then, for each step of `resize` in turn, sets the window to the
 // step's `width` and evaluates its `act`; it reports the results, `moused` and `resized` in
@@ -25,8 +26,9 @@ const trace = plan.trace
   ? (step) => process.stderr.write(`trace ${((Date.now() - began) / 1000).toFixed(1)} ${step}\n`)
   : () => {};
 const profile = mkdtempSync(join(tmpdir(), "ctx-browser-"));
+// plan.headed shows the window, as a student's double-click does; the tests run headless.
 const proc = spawn(plan.chromium, [
-  "--headless=new", "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run",
+  ...(plan.headed ? [] : ["--headless=new"]), "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run",
   "--no-default-browser-check", "--disable-gpu", "--disable-background-networking",
   "--disable-component-update", "--disable-sync", "about:blank",
 ], { stdio: ["ignore", "ignore", "pipe"] });
@@ -122,14 +124,17 @@ try {
       if (out.exceptionDetails) throw new Error(`${task.name}: ${JSON.stringify(out.exceptionDetails)}`);
       return out.result.value;
     };
-    for (let waited = 0; task.until; waited += 100) {
-      // Mid-navigation the old page's context is gone and an evaluation fails: try again.
-      const at = await evaluate('document.readyState === "complete" ? location.href : ""')
-        .catch(() => "");
-      if (at.includes(task.until)) break;
-      if (waited > 60000) throw new Error(`${task.name}: no loaded page at ${task.until}`);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-    }
+    const arrived = async (until) => {
+      for (let waited = 0; until; waited += 100) {
+        // Mid-navigation the old page's context is gone and an evaluation fails: try again.
+        const at = await evaluate('document.readyState === "complete" ? location.href : ""')
+          .catch(() => "");
+        if (at.includes(until)) return;
+        if (waited > 60000) throw new Error(`${task.name}: no loaded page at ${until}`);
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+    };
+    await arrived(task.until);
     trace(`${task.name}: act`);
     const result = { name: task.name, acted: await evaluate(task.act || "null"), files: {} };
     result.moused = [];
@@ -137,17 +142,23 @@ try {
     if (task.mouse) await s("Page.bringToFront");
     for (const step of task.mouse || []) {
       for (const [type, x, y] of await evaluate(step.at)) {
-        await s("Input.dispatchMouseEvent", { type, x, y, button: "left",
-                                              buttons: type === "mouseReleased" ? 0 : 1,
-                                              clickCount: type === "mouseMoved" ? 0 : 1 });
+        const sent = s("Input.dispatchMouseEvent", { type, x, y, button: "left",
+                                                     buttons: type === "mouseReleased" ? 0 : 1,
+                                                     clickCount: type === "mouseMoved" ? 0 : 1 });
+        // A click that follows a link navigates before the release is acknowledged.
+        await (step.until ? sent.catch(() => null) : sent);
       }
+      await arrived(step.until);
       result.moused.push(await evaluate(step.then || "null"));
     }
     if (task.others) {
       result.others = {};
       const { targetInfos } = await send("Target.getTargets");
       for (const info of targetInfos.filter((t) => t.type === "page" && t.targetId !== targetId)) {
-        const other = await send("Target.attachToTarget", { targetId: info.targetId, flatten: true });
+        // A shown browser opens and closes pages of its own (a sign-in page) meanwhile.
+        const other = await send("Target.attachToTarget", { targetId: info.targetId, flatten: true })
+          .catch(() => null);
+        if (!other) continue;
         const out = await send("Runtime.evaluate", { expression: task.others, awaitPromise: true,
           returnByValue: true, userGesture: true }, other.sessionId);
         result.others[info.url] = out.exceptionDetails ? { error: out.exceptionDetails.text }

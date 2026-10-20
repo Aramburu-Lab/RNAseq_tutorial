@@ -1,0 +1,353 @@
+[
+ {
+  "name": "link_0",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/06_function/2026-10-20_function_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 3,
+    "session": [],
+    "local": [],
+    "ora": [
+     "6 genes of the list have a symbol on this page; genes left out for want of one: 0. The list: MMP8, NECAB1, PLAC8, ZDHHC19, LAIR1, CD300E."
+    ],
+    "oraSummary": [
+     "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them."
+    ],
+    "m9": [],
+    "m9Summary": [],
+    "top": 2269,
+    "window": 900,
+    "oraAt": [
+     2345.28125
+    ],
+    "bars": [
+     0
+    ],
+    "m9At": [],
+    "m9Rows": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nFeatured contrast: Neutrophils, G-CSF donors against steady state\nOne gene set: Interferon alpha response, MSigDB Hallmark\nMethod: the background\nInterpreta"
+   }
+  ],
+  "reset": null,
+  "resized": [],
+  "errors": []
+ },
+ {
+  "name": "beside_0",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/05_de/2026-10-20_de_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 2,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 5877,
+    "window": 900,
+    "oraAt": [],
+    "bars": [],
+    "m9At": [],
+    "m9Rows": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nSamples\nFeatured contrast: Neutrophils, G-CSF donors against steady state\nModel health\nLesson: Batch\nLesson: Pairing\nAcross contrasts\nNamed genes\nInterpreta"
+   }
+  ],
+  "others": {
+   "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/06_function/2026-10-20_function_tier1_overview_v1.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end": {
+    "href": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/06_function/2026-10-20_function_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": true,
+    "origin": "file://",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [
+     "6 genes of the list have a symbol on this page; genes left out for want of one: 0. The list: MMP8, NECAB1, PLAC8, ZDHHC19, LAIR1, CD300E."
+    ],
+    "oraSummary": [
+     "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them."
+    ],
+    "m9": [],
+    "m9Summary": [],
+    "top": 2612,
+    "window": 472,
+    "oraAt": [
+     2747.890625
+    ],
+    "bars": [
+     0
+    ],
+    "m9At": [],
+    "m9Rows": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\nPurpose\nInput\nMethod\nParameters\nResults\nInterpretation\nQuestions\nPitfalls\nReproduce\n\nMODULE 6\n\nFunction\n\nDataset Step-1\n\nPurpose\n\nFind the pathways whose genes move together between two groups, beyond the genes "
+   },
+   "edge://force-signin/": {
+    "href": "edge://force-signin/",
+    "hash": "",
+    "hashLength": 0,
+    "opener": false,
+    "origin": "edge://force-signin",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 600,
+    "oraAt": [],
+    "bars": [],
+    "m9At": [],
+    "m9Rows": [],
+    "body": ""
+   }
+  },
+  "reset": null,
+  "resized": [],
+  "errors": []
+ },
+ {
+  "name": "link_1",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/11_genecard/2026-10-20_genecard_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 3,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [
+     ""
+    ],
+    "m9Summary": [
+     "6 genes from a link: 6 tested by M5, 0 not; 0 with a card on this page."
+    ],
+    "top": 2243,
+    "window": 900,
+    "oraAt": [],
+    "bars": [],
+    "m9At": [
+     2424.09375
+    ],
+    "m9Rows": [
+     "LAIR1",
+     "PLAC8",
+     "NECAB1",
+     "CD300E",
+     "ZDHHC19",
+     "MMP8"
+    ],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nGenes from a link\nThe listed genes in every contrast\nISG15, ENSG00000187608\nIFI6, ENSG00000126709\nSTAT1, ENSG00000115415\nOAS2, ENSG00000111335\nCD274, ENSG00"
+   }
+  ],
+  "reset": null,
+  "resized": [],
+  "errors": []
+ },
+ {
+  "name": "beside_1",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/05_de/2026-10-20_de_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 2,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 5914,
+    "window": 900,
+    "oraAt": [],
+    "bars": [],
+    "m9At": [],
+    "m9Rows": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nSamples\nFeatured contrast: Neutrophils, G-CSF donors against steady state\nModel health\nLesson: Batch\nLesson: Pairing\nAcross contrasts\nNamed genes\nInterpreta"
+   }
+  ],
+  "others": {
+   "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/06_function/2026-10-20_function_tier1_overview_v1.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end": {
+    "href": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/06_function/2026-10-20_function_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [
+     "6 genes of the list have a symbol on this page; genes left out for want of one: 0. The list: MMP8, NECAB1, PLAC8, ZDHHC19, LAIR1, CD300E."
+    ],
+    "oraSummary": [
+     "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them."
+    ],
+    "m9": [],
+    "m9Summary": [],
+    "top": 2612,
+    "window": 472,
+    "oraAt": [
+     2747.890625
+    ],
+    "bars": [
+     0
+    ],
+    "m9At": [],
+    "m9Rows": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\nPurpose\nInput\nMethod\nParameters\nResults\nInterpretation\nQuestions\nPitfalls\nReproduce\n\nMODULE 6\n\nFunction\n\nDataset Step-1\n\nPurpose\n\nFind the pathways whose genes move together between two groups, beyond the genes "
+   },
+   "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/11_genecard/2026-10-20_genecard_tier1_overview_v1.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end": {
+    "href": "file:///Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-aa7a952e67debab5e/outputs/scratch_roots/tier1_pk2/outputs/11_genecard/2026-10-20_genecard_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": true,
+    "origin": "file://",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [
+     ""
+    ],
+    "m9Summary": [
+     "6 genes from a link: 6 tested by M5, 0 not; 0 with a card on this page."
+    ],
+    "top": 2659,
+    "window": 472,
+    "oraAt": [],
+    "bars": [],
+    "m9At": [
+     2900.390625
+    ],
+    "m9Rows": [
+     "LAIR1",
+     "PLAC8",
+     "NECAB1",
+     "CD300E",
+     "ZDHHC19",
+     "MMP8"
+    ],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\nPurpose\nInput\nMethod\nParameters\nResults\nInterpretation\nQuestions\nPitfalls\nReproduce\n\nMODULE 9\n\nGene cards\n\nDataset Step-1\n\nPurpose\n\nPlace each gene's result in this dataset beside reference data on normal tissue"
+   },
+   "edge://force-signin/": {
+    "href": "edge://force-signin/",
+    "hash": "",
+    "hashLength": 0,
+    "opener": false,
+    "origin": "edge://force-signin",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 600,
+    "oraAt": [],
+    "bars": [],
+    "m9At": [],
+    "m9Rows": [],
+    "body": ""
+   }
+  },
+  "reset": null,
+  "resized": [],
+  "errors": []
+ }
+]

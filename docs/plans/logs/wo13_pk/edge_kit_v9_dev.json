@@ -1,0 +1,309 @@
+[
+ {
+  "name": "link_0",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/06_function/2026-10-16_function_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 3,
+    "session": [],
+    "local": [],
+    "ora": [
+     "6 genes of the list have a symbol on this page; genes left out for want of one: 0."
+    ],
+    "oraSummary": [
+     "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them."
+    ],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 900,
+    "oraAt": [
+     2243.3125
+    ],
+    "bars": [
+     0
+    ],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nFeatured contrast: Neutrophils, G-CSF donors against steady state\nOne gene set: Interferon alpha response, MSigDB Hallmark\nMethod: the background\nInterpreta"
+   }
+  ],
+  "reset": null,
+  "resized": [],
+  "errors": []
+ },
+ {
+  "name": "beside_0",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/05_de/2026-10-16_de_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 2,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 5746,
+    "window": 900,
+    "oraAt": [],
+    "bars": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nSamples\nFeatured contrast: Neutrophils, G-CSF donors against steady state\nModel health\nLesson: Batch\nLesson: Pairing\nAcross contrasts\nNamed genes\nInterpreta"
+   }
+  ],
+  "others": {
+   "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/06_function/2026-10-16_function_tier1_overview_v1.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end": {
+    "href": "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/06_function/2026-10-16_function_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": true,
+    "origin": "file://",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [
+     "6 genes of the list have a symbol on this page; genes left out for want of one: 0."
+    ],
+    "oraSummary": [
+     "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them."
+    ],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 472,
+    "oraAt": [
+     2618.390625
+    ],
+    "bars": [
+     0
+    ],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\nPurpose\nInput\nMethod\nParameters\nResults\nInterpretation\nQuestions\nPitfalls\nReproduce\n\nMODULE 6\n\nFunction\n\nDataset Step-1\n\nPurpose\n\nFind the pathways whose genes move together between two groups, beyond the genes "
+   },
+   "edge://force-signin/": {
+    "href": "edge://force-signin/",
+    "hash": "",
+    "hashLength": 0,
+    "opener": false,
+    "origin": "edge://force-signin",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 600,
+    "oraAt": [],
+    "bars": [],
+    "body": ""
+   }
+  },
+  "reset": null,
+  "resized": [],
+  "errors": []
+ },
+ {
+  "name": "link_1",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/11_genecard/2026-10-16_genecard_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 3,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 900,
+    "oraAt": [],
+    "bars": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nThe listed genes in every contrast\nISG15, ENSG00000187608\nIFI6, ENSG00000126709\nSTAT1, ENSG00000115415\nOAS2, ENSG00000111335\nCD274, ENSG00000120217\nAIM2, EN"
+   }
+  ],
+  "reset": null,
+  "resized": [],
+  "errors": []
+ },
+ {
+  "name": "beside_1",
+  "acted": {
+   "count": "6 genes selected: 6 up, 0 down, 0 not called at the current cut-offs.",
+   "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+   "links": [
+    [
+     "Open these 6 genes in M6 Function",
+     "../06_function/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ],
+    [
+     "Open these 6 genes in M9 Gene cards",
+     "../11_genecard/index.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+     "",
+     ""
+    ]
+   ]
+  },
+  "files": {},
+  "moused": [
+   {
+    "href": "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/05_de/2026-10-16_de_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 2,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 5783,
+    "window": 900,
+    "oraAt": [],
+    "bars": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\n\nON THIS PAGE\n\nPurpose\nInput\nMethod\nParameters\nResults\nSamples\nFeatured contrast: Neutrophils, G-CSF donors against steady state\nModel health\nLesson: Batch\nLesson: Pairing\nAcross contrasts\nNamed genes\nInterpreta"
+   }
+  ],
+  "others": {
+   "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/06_function/2026-10-16_function_tier1_overview_v1.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end": {
+    "href": "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/06_function/2026-10-16_function_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": false,
+    "origin": "file://",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [
+     "6 genes of the list have a symbol on this page; genes left out for want of one: 0."
+    ],
+    "oraSummary": [
+     "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05. Lists tested on this page: 1; no correction runs across them."
+    ],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 472,
+    "oraAt": [
+     2618.390625
+    ],
+    "bars": [
+     0
+    ],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\nPurpose\nInput\nMethod\nParameters\nResults\nInterpretation\nQuestions\nPitfalls\nReproduce\n\nMODULE 6\n\nFunction\n\nDataset Step-1\n\nPurpose\n\nFind the pathways whose genes move together between two groups, beyond the genes "
+   },
+   "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/11_genecard/2026-10-16_genecard_tier1_overview_v1.html#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end": {
+    "href": "file:///Users/rytis/ctx_kit/2026-10-16_course_kit_v9/step1/outputs/11_genecard/2026-10-16_genecard_tier1_overview_v1.html",
+    "hash": "#v=1&src=tier1:ndn_gcsf&n=6&g=118113,123119,145287,163958,167613,186407&end",
+    "hashLength": 75,
+    "opener": true,
+    "origin": "file://",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 472,
+    "oraAt": [],
+    "bars": [],
+    "body": "Skip to the content\n\nCancer Transcriptomics Teaching Suite\nStep-1\n\nGlossary\nLight\n/\nDark\nPurpose\nInput\nMethod\nParameters\nResults\nInterpretation\nQuestions\nPitfalls\nReproduce\n\nMODULE 9\n\nGene cards\n\nDataset Step-1\n\nPurpose\n\nPlace each gene's result in this dataset beside reference data on normal tissue"
+   },
+   "edge://force-signin/": {
+    "href": "edge://force-signin/",
+    "hash": "",
+    "hashLength": 0,
+    "opener": false,
+    "origin": "edge://force-signin",
+    "history": 1,
+    "session": [],
+    "local": [],
+    "ora": [],
+    "oraSummary": [],
+    "m9": [],
+    "m9Summary": [],
+    "top": 0,
+    "window": 600,
+    "oraAt": [],
+    "bars": [],
+    "body": ""
+   }
+  },
+  "reset": null,
+  "resized": [],
+  "errors": []
+ }
+]

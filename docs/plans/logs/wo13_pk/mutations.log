@@ -1,0 +1,7 @@
+caught: M6 reveal left out: 2 failed, 2 passed in 121.30s (0:02:01)
+caught: M6 names left out: 4 failed in 117.24s (0:01:57)
+caught: M6 cap ignored: 1 failed, 3 passed in 120.13s (0:02:00)
+caught: replaceState unguarded: 1 failed, 3 passed in 115.36s (0:01:55)
+caught: entry page drops the fragment: 4 failed in 115.45s (0:01:55)
+caught: M9 reveal left out: 1 failed, 5 passed in 40.99s
+caught: M10 reveal left out: 1 failed, 3 passed in 42.79s
