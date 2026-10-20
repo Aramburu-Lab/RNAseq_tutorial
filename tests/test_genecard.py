@@ -11,6 +11,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.error
 from datetime import date
 from pathlib import Path
 
@@ -234,10 +235,13 @@ def test_cache_drift_offline_refresh(tmp_path):
 
 
 def test_failed_call_is_not_cached(tmp_path):
-    # Mutation: an error body cached, so the next online run never asks again.
-    stub = Stub({})
-    answer = Cache(tmp_path, opener=stub).get("hpa", "v25", GENE, "json", "https://x/y")
-    assert answer.body is None and "404" in answer.error
+    # Mutation: an error body cached, so the next online run never asks again; a 404 is an
+    # answer and is cached (test_genecard_absent).
+    def broken(url: str) -> None:
+        raise urllib.error.HTTPError(url, 500, "Server Error", None, None)  # type: ignore[arg-type]
+
+    answer = Cache(tmp_path, opener=broken).get("hpa", "v25", GENE, "json", "https://x/y")
+    assert answer.body is None and "500" in answer.error
     assert not (tmp_path / MANIFEST).exists()
 
 

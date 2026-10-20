@@ -1,0 +1,9 @@
+5xx cached: 4 failed tests | 4 failed, 19 passed in 38.82s
+404 not cached: 4 failed tests | 4 failed, 19 passed in 39.22s
+timeout cached: 3 failed tests | 3 failed, 20 passed in 43.30s
+offline wording differs: 2 failed tests | 2 failed, 21 passed in 43.00s
+recorded absence asked again before --refresh: 1 failed tests | 1 failed, 22 passed in 38.80s
+--refresh deletes the absence: 2 failed tests | 2 failed, 21 passed in 38.39s
+release not recorded: 1 failed tests | 1 failed, 22 passed in 37.98s
+status not recorded: 2 failed tests | 2 failed, 21 passed in 34.88s
+caught 8 of 8
