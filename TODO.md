@@ -570,8 +570,8 @@ Rytis 2026-10-18: "It has to be a reusable tool. This is important." Measured 20
 
 - [x] PK (wo13-pk 96b491d, D-099) Rytis's 6 genes reached M6 and M9 from file:// in Edge 155 and Chromium 152 (fragment intact, opener present, no storage used), but sat below the first screen (M6's panel 2,243 px down in a 900 px window) and M6 named no gene; kit v9's M9 has no receiver at all (it predates E.1a). The receiving panel now comes into view at once (`ctxLive.reveal`, an instant scroll: smooth scrolling failed 3 of 12 loaded runs) on M6, M9 and M10, and M6 names up to 25 genes; tests/test_handoff_browser.py ticks 6 genes, clicks the real links and asserts the panel is in the top half of the window. 7 planted mutations caught.
 - [ ] PK.1 The hand-off in Safari once "Allow remote automation" is enabled (needs an admin).
-- [ ] PK.2 Kit v10, so M9 carries E.1a's receiver and PK's reveal.
-- [ ] PK.3 For Rytis: M6 draws an empty ORA for a short list (0 sets pass at 6 genes); show the top sets marked as not passing FDR, or keep it empty with the sentence.
+- [ ] PK.2 Kit v10, so M9 carries E.1a's receiver and PK's reveal. Rytis 2026-10-20: start kit v10 once main is pushed, after PK3.
+- [ ] PK.3 For Rytis: M6 draws an empty ORA for a short list (0 sets pass at 6 genes); show the top sets marked as not passing FDR, or keep it empty with the sentence. Rytis 2026-10-20: show the top sets marked as not passing FDR (package PK3).
 
 - [x] U.15 (M) Own FASTQ route: `ctx reads`, the guide's Part 1b, the template route, CONVENTIONS' Stack line; proved both ways on the worked example (D-059, local-fastq 06945f7).
 - [ ] U.16 (S) Rehearse Part 1b on real own files, on a laptop and on Kebnekaise; measure counting speed on gigabyte files.
