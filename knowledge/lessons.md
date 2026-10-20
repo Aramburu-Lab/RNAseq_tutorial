@@ -170,3 +170,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A test that names a stem no real file has passes while the code never fires: flag_map looked for `_band_map` at the end, every real stem ends in `_v1`, and Step-1's flag view was never dropped. Take test stems from `naming.stem` (Z, 2026-10-20).
 - A number each module imports by name is a copy: flag_map's and genecard's MAX_BYTES ignored a patched builder.MAX_BYTES. Read a shared limit from its module when the code runs (Z, 2026-10-20).
 - A fit made before a page's last parts exist is an estimate: M9 fitted its cards before their Reproduce panels were written (Z, 2026-10-20).
+- A receiver tested by reading its text with querySelector passes when the text sits two screens below the fold: Rytis's 6 genes reached M6 and he saw none. Assert what is inside the window after a real click (PK, 2026-10-20).
+- A page with scroll-behavior: smooth turns a script's scrollIntoView into an animation that, under load, did not move in 3 of 12 runs: scroll at once for a jump on arrival (PK, 2026-10-20).
+- A mutation run that counts any non-zero pytest exit as caught counted 7 fixture errors as 7 catches: count failed tests, never errors (PK, 2026-10-20).

@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-099 — A page that takes a gene list from a link brings the panel that took it into view, and M6 names the genes
+
+**Date:** 2026-10-20 · **Status:** decided
+
+**Context.** Rytis's 6 genes reached M6 on 2026-10-20 but showed only as a count 2,243 px down; kit v9's M9 had no receiver. A `#v=...` fragment is not an anchor, so the browser opens the page at its top.
+
+**Decision.** `ctxLive.reveal` scrolls instantly to the receiving figure or group, and again at load, on M6, M9 and M10; M6's notes name up to `genes.PAGE_ROWS` (25) genes, then a count.
+
+**Evidence.** Fixed pages put M6's panel 76 px below the window top in Edge 155, shown and headless, and Chromium 152; smooth scrolling failed 3 of 12 loaded runs, instant 0 of 12; 7 planted mutations caught.
+
+**Consequence.** A reload of a page whose address carries a list scrolls to its panel again. The tests that passed before read text anywhere on the page; the new one asserts what is inside the window after a real click.
+
+---
+
 ## D-098 — A page's cap is decided on the page as written; a Reproduce panel's shared steps print once
 
 **Date:** 2026-10-20 · **Status:** decided

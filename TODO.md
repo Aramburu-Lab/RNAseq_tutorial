@@ -555,7 +555,7 @@ Rytis 2026-10-18: "It has to be a reusable tool. This is important." Measured 20
 - [x] Y.1 (wo13-z 4aa1292 to 4bfec2c, D-098) Every rebuilt page is under the cap: Step-1 M2 14,505,123 B and TCGA-BRCA M10 14,951,639 B from the checkout, `ctx qc` and `ctx clinical` exit 0 (47 pages of 8 roots rebuilt; main had M2 15,966,248 and M10 15,122,366 B). Panels print steps 2 to 5 once, shared by the tabs (1,830 of 1,830 tabs byte-equal to main's in pasted block and download); the cap lives in `ctx.report.cap`; M2's flag view, never dropped before (it matched `_band_map` against stems ending `_v1`), now drops; M9 fits its cards on the page with their panels. Step-1 92 of 92 metrics; 13 of 13 planted mutations caught.
 - [ ] Z.1 TCGA-BRCA M10 sits 48,361 B under the cap with no optional part to drop; its controls and views hold 5,900,822 B. Room for M10.G must come from there, or M10 gets an optional part.
 - [ ] Z.2 The tier1_teach pages (gather, qc, process) were not rebuilt on the merged code; nor setup, hub and glossary pages.
-- [ ] Z.3 For Rytis: when M9 drops cards at its second fit, it deletes the card files the same run wrote moments before, which no page links. Accept (they are a run's own intermediates), or move them aside.
+- [x] Z.3 Rytis 2026-10-20 accepts that M9 deletes the card files its own run wrote and no page links, when it drops cards at the second fit.
 - [ ] Z.4 `viz.save._PANELS` holds panels by stem for the whole process: a second M9 build in one process sees the first's panels (CLI runs are one process; the test resets it).
 - [ ] Y.2 TODO still names Step-1's cohort "pancreas" in several lines; the Apptainer tab is not yet run; the figures image is not pushed.
 - [ ] F.2d build.sh release rewrites digests.lock without the figures row; the Apptainer tab is not yet run anywhere; F2's planted mutations are named but not run.
@@ -567,6 +567,11 @@ Rytis 2026-10-18: "It has to be a reusable tool. This is important." Measured 20
 - [ ] H.5 The round preflight of 2026-10-18 hung 10 h on an idle hisat2 under xdist (25 errors after it); a serial and a parallel rerun passed. Find the cause if it recurs: record the process tree before killing it.
 
 - [ ] M10.G Rytis 2026-10-20: on M10's survival figure (Figure 1, OS by ER status), pick any gene and see how its expression relates to the outcome. Planned: a gene box redraws Kaplan-Meier curves above against below the gene's median (pre-specified, no corrected p needed), log-rank p, risk table and censor marks, with the gene's continuous Cox HR per SD, p and BH q from M10's screen; one bit per patient per gene embedded (about 0.7 MB raw for BRCA's screen genes by 1,088 patients, an estimate to measure), curves and log-rank computed by a JS twin of ctx.clinical.survival tested against Python and R. After package Z brings TCGA-BRCA's M10 back under the cap.
+
+- [x] PK (wo13-pk 96b491d, D-099) Rytis's 6 genes reached M6 and M9 from file:// in Edge 155 and Chromium 152 (fragment intact, opener present, no storage used), but sat below the first screen (M6's panel 2,243 px down in a 900 px window) and M6 named no gene; kit v9's M9 has no receiver at all (it predates E.1a). The receiving panel now comes into view at once (`ctxLive.reveal`, an instant scroll: smooth scrolling failed 3 of 12 loaded runs) on M6, M9 and M10, and M6 names up to 25 genes; tests/test_handoff_browser.py ticks 6 genes, clicks the real links and asserts the panel is in the top half of the window. 7 planted mutations caught.
+- [ ] PK.1 The hand-off in Safari once "Allow remote automation" is enabled (needs an admin).
+- [ ] PK.2 Kit v10, so M9 carries E.1a's receiver and PK's reveal.
+- [ ] PK.3 For Rytis: M6 draws an empty ORA for a short list (0 sets pass at 6 genes); show the top sets marked as not passing FDR, or keep it empty with the sentence.
 
 - [x] U.15 (M) Own FASTQ route: `ctx reads`, the guide's Part 1b, the template route, CONVENTIONS' Stack line; proved both ways on the worked example (D-059, local-fastq 06945f7).
 - [ ] U.16 (S) Rehearse Part 1b on real own files, on a laptop and on Kebnekaise; measure counting speed on gigabyte files.
