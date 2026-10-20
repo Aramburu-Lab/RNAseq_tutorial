@@ -415,11 +415,12 @@ def filtered_counts(synthetic: Synthetic, outlier: str = "g00500") -> pl.DataFra
 SEX_GENES = ("XIST", "RPS4Y1", "DDX3Y", "KDM5D", "UTY", "EIF1AY")
 
 
-def write_gather_outputs(root, dataset: str, synthetic: Synthetic, day) -> None:
+def write_gather_outputs(root, dataset: str, synthetic: Synthetic, day, ensembl=False) -> None:
     """Sheet, counts and genes as gather writes them, from a design_counts experiment.
 
     The last six genes become the sex genes, expressed by the sheet's sex: XIST in F, the
-    chrY genes in M.
+    chrY genes in M. With ``ensembl`` each gene's ID is a made-up Ensembl ID, ENSG00090000001
+    on, under the same symbol, so M5's picker can link it (``ctx.de.page.picking``).
     """
     from ctx.gather.harmonise import MODULE  # noqa: PLC0415 - keeps synth importable without ctx
     from ctx.io.naming import stem  # noqa: PLC0415
@@ -437,6 +438,10 @@ def write_gather_outputs(root, dataset: str, synthetic: Synthetic, day) -> None:
         .otherwise(pl.col(c)).cast(pl.Int32).alias(c)
         for c in counts.columns[1:]
     ])  # fmt: skip
+    if ensembl:
+        made_up = {g: f"ENSG{90_000_000 + i + 1:011d}" for i, g in enumerate(ids)}
+        counts = counts.with_columns(pl.col("gene_id").replace_strict(made_up))
+        ids = [made_up[g] for g in ids]
     genes = pl.DataFrame({"gene_id": ids, "gene_name": names})
     sheet = synthetic.samples.with_columns(donor_sex=pl.lit(""), replicate=pl.lit(1, pl.Int32))
     described = {c: ("none", c) for c in {*sheet.columns, *counts.columns, *genes.columns}}

@@ -255,6 +255,7 @@
       });
       if (ctxSelect.carries(location.hash)) {
         try { take(ctxSelect.decode(location.hash).genes, words.link); } catch (err) { notes.textContent = said(err); }
+        ctxLive.reveal(panel);
       }
     }, function (err) {
       summary.textContent = words.no_stream;

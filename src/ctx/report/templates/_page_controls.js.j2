@@ -92,7 +92,11 @@
       });
       tries++;
       list = { up: up, down: down, source: source };
-      notes.textContent = ctxPick.fill(words.taken, { n: up.length + down.length, missing: missing });
+      /* The genes by name: the count alone left a reader unsure the list arrived (PK). */
+      var every = up.concat(down), names = every.slice(0, cfg.named).join(", ");
+      if (every.length > cfg.named) names = ctxPick.fill(words.more, { names: names, more: every.length - cfg.named });
+      notes.textContent = ctxPick.fill(words.taken, { n: every.length, missing: missing }) +
+        (every.length ? " " + ctxPick.fill(words.named, { names: names }) : "");
       run();
     }
     form.addEventListener("change", run);
@@ -126,6 +130,7 @@
       try { take(ctxSelect.decode(location.hash), words.link); } catch (err) {
         notes.textContent = err.key ? ctxSelect.message(err, { select: cfg.errors }) : String(err.message);
       }
+      ctxLive.reveal(form);
     }
     run();
   }

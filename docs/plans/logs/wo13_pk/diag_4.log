@@ -1,0 +1,30 @@
+F...                                                                     [100%]
+=================================== FAILURES ===================================
+__________________ test_a_clicked_link_shows_the_genes_on_m6 ___________________
+
+ran = {'link': {'name': 'link', 'acted': {'names': ['G00059', 'G00063', 'G00008', 'G00083', 'G00051', 'G00093'], 'count': '6... this page; genes left out for want of one: 0. The list: G00051, G00059, G00063, G00083, G00093, G00008.', ...}], ...}}
+
+    def test_a_clicked_link_shows_the_genes_on_m6(ran):
+        """The click goes through the entry page to M6's overview with the six genes; M6 names
+        each and brings its live ORA into the top half of the window.
+    
+        Mutations caught: the reveal left out (the panel 2,000 px down, as Rytis saw it); the
+        names left out of the notes; the entry page dropping the fragment."""
+        seen = ran["link"]
+        assert seen["errors"] == []
+        picked, got = seen["acted"], seen["moused"][0]
+        assert picked["count"].startswith("6 genes selected")
+        assert got["url"].split("#")[0].endswith("_function_desynth_overview_v1.html")
+        assert genes.decode(got["hash"]).genes and "&n=6&" in got["hash"]
+        assert got["notes"].startswith("6 genes of the list have a symbol on this page")
+        assert sorted(_listed(got["notes"])) == sorted(picked["names"])
+        assert got["summary"].startswith("The list of the link: 6 genes")
+>       assert _in_view(got), (_where(got), got["log"])
+E       AssertionError: ((2212.5, 900, 0), [['go', 'undefined', True, 0, 17609], ['after', 0], ['go', 'load', True, 0, 17614], ['after', 0], ['go', '[object ResizeObserverEntry]', True, 0, 18562], ['after', 0]])
+E       assert False
+E        +  where False = _in_view({'url': 'file:///private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c...ymbol on this page; genes left out for want of one: 0. The list: G00051, G00059, G00063, G00083, G00093, G00008.', ...})
+
+tests/test_handoff_browser.py:120: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_handoff_browser.py::test_a_clicked_link_shows_the_genes_on_m6
+1 failed, 3 passed in 176.12s (0:02:56)

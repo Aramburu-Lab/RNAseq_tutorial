@@ -136,6 +136,22 @@ var ctxLive = {
     var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
     return new Response(stream).arrayBuffer().then(function (b) { return new Uint8Array(b); });
   },
+  /* A list's fragment is no anchor, so a page reached by its link opens at its top, its
+     panel a few screens down (PK, 2026-10-20): the figure or group that took the list is
+     brought into view, again at load. At once, not by the page's smooth scrolling: under
+     load a smooth scroll begun while the page loads never moved, in 2 of 8 runs. The
+     option behavior "instant" is newer than some browsers, so the style is set instead. */
+  reveal: function (el) {
+    var at = el.closest(".fig, .group") || el, html = document.documentElement;
+    function go() {
+      var was = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
+      at.scrollIntoView({ block: "start" });
+      html.style.scrollBehavior = was;
+    }
+    go();
+    if (document.readyState !== "complete") window.addEventListener("load", go, { once: true });
+  },
   survival: function (form, exporting) {
     var fig = form.closest(".fig");
     var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
@@ -281,6 +297,7 @@ var ctxLive = {
           var at = index.row[Math.abs(gene)];
           if (at !== undefined) { rows.push(at); signs.push(gene < 0 ? -1 : 1); }
         });
+        ctxLive.reveal(form);
         if (rows.length) {
           tries++;
           state = { genes: rows, signs: signs, source: sel.src, endpoint: state.endpoint, split: state.split };

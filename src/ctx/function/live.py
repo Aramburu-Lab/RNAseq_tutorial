@@ -137,5 +137,6 @@ def panel(
         "sets": [[name, [at[g] for g in gs if g in at]] for name, gs in sets.items()],
         "numbers": sorted(numbers.items()), "calls": calls,
         "min_size": lite.MIN_SIZE, "max_size": lite.MAX_SIZE, "alpha": ALPHA,
-        "words": text.raw(PAGE, "live"), "errors": text.raw("ui", "select"),
+        "named": genes.PAGE_ROWS, "words": text.raw(PAGE, "live"),
+        "errors": text.raw("ui", "select"),
     }  # fmt: skip

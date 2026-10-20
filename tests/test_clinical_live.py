@@ -17,7 +17,7 @@ from test_clinical_page import TEMPLATES, clinical_root, controls, outputs  # no
 from test_export_browser import CHROMIUM, _browse
 
 from ctx.clinical.page import screen_rows
-from ctx.report import text
+from ctx.report import genes, text
 
 ACT = """(async () => {
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -42,11 +42,35 @@ ACT = """(async () => {
 })()"""
 
 
+# A list from a link (PK): where the survival figure stands once the list is scored.
+LINKED = """(async () => {
+  await new Promise(r => setTimeout(r, 3000));
+  const fig = document.querySelector('form.survival').closest('.fig');
+  return {top: fig.getBoundingClientRect().top, window: innerHeight, scrolled: scrollY,
+          notes: fig.querySelector('.survival-notes').textContent};
+})()"""
+
+
 @pytest.fixture(scope="module")
 def ran(clinical_root, tmp_path_factory):  # noqa: F811 - the fixture
     page = outputs(clinical_root, "overview_v1.html")
-    return page, _browse([{"name": "m10", "url": page.as_uri(), "width": 1280, "height": 900,
-                           "act": ACT}], tmp_path_factory.mktemp("downloads"))  # fmt: skip
+    cfg = controls(page.read_text(), "survival")
+    linked = genes.encode(genes.Selection("fake_brca:a_case", tuple(sorted(cfg["numbers"][3:6]))))
+    tasks = [{"name": "m10", "url": page.as_uri(), "width": 1280, "height": 900, "act": ACT},
+             {"name": "linked", "url": page.as_uri() + linked, "width": 1280, "height": 900,
+              "act": LINKED}]  # fmt: skip
+    return page, _browse(tasks, tmp_path_factory.mktemp("downloads"))
+
+
+@pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
+def test_a_list_from_a_link_brings_the_survival_figure_into_view(ran):
+    """The fragment is no anchor, so the page opened at its top (PK, 2026-10-20): the scored
+    figure is in the top half of the window. Mutation caught: the reveal left out."""
+    got = ran[1]["linked"]
+    assert got["errors"] == []
+    seen = got["acted"]
+    assert seen["notes"].startswith("Scored 3 genes"), seen["notes"]
+    assert seen["scrolled"] > 0 and 0 <= seen["top"] < seen["window"] / 2, seen
 
 
 @pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
