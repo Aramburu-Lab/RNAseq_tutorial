@@ -163,3 +163,7 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A method added to a contract makes every caller of `hasattr(data, "export_layers")` export it: BoxData's export stopped `ctx genecard` on Step-1 through `views.viewed`. Build every module that reads a contract after changing it (V2, 2026-10-19).
 - A fixture whose contrasts test identical sets cannot catch a list left stale on a contrast change: plant the mutation into a real page as well (V2, 2026-10-19).
 - Check free disk before a full suite: runs died with "No space left on device" while the pytest temp folder held 109 GB (V2, F1, 2026-10-19).
+- A merge can leave main's own pages over the cap with every test green: Step-1 M2 and TCGA-BRCA M10 are refused on main's code after F1, F2 and V2 each added page weight measured alone. Build the largest real pages after merging packages that add page weight (Y, 2026-10-20).
+- Count the files before building specs for them: M9's 24 extra `ctx figure` lines were F2's two extra Reproduce tabs per panel (Y, 2026-10-20).
+- A drawer that reuses a module's words must follow that function's signature: V2 added `paired` to `box_text`, and F1's drawer dropped the donor-line sentence with no error (Y, 2026-10-20).
+- matplotlib gives a font-name tie to the earlier font-list entry, so a vendored face does not override an installed copy of the same family; remove the rival first (Y, 2026-10-20).

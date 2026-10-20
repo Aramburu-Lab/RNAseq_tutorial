@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-097 — Every figure is set in ctx's vendored Liberation Sans, on every machine
+
+**Date:** 2026-10-20 · **Status:** decided (Rytis 2026-10-20, F.2c)
+
+**Context.** F.2: a figure drawn where Arial exists embedded ArialMT, and its redraw in the figures image, which has no Arial, embedded Liberation Sans; the PDF and SVG differed and the CSV was equal. This departs from Rytis's global figure rule, which names Arial with Liberation Sans as its stand-in.
+
+**Options.** Keep Arial first and state that a redraw elsewhere is equal in data only; or set every figure in the vendored Liberation Sans.
+
+**Decision.** `FONT_CHAIN = ("Liberation Sans", "Arial", "DejaVu Sans")`. `metrics.register_fonts` removes any other Liberation Sans from matplotlib's list before adding the vendored files, since matplotlib gives a tie to the earlier entry. Arial stays second for an SVG viewer that lacks Liberation Sans; the two are metric twins, so widths and wraps do not change.
+
+**Evidence.** The volcano drawn on this Mac and redrawn in the figures image: 5 of 5 files byte-equal; with Arial first, 1 of 5. Step-1 92 of 92 metrics equal. 3 planted mutations caught.
+
+**Consequence.** Pages built before keep ArialMT until rebuilt.
+
+---
+
 ## D-096 — A caption reaches every export through one definition; heatmaps export vector cells; paired boxes draw their donors
 
 **Date:** 2026-10-19 · **Status:** decided
