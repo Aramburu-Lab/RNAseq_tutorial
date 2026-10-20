@@ -37,15 +37,6 @@ def _list(value: Any, where: str, problems: list[str]) -> list[Any]:
     return []
 
 
-def _sequence(value: Any, where: str, problems: list[str]) -> list[Any]:
-    """A list of names, where a string still reads as its characters, as it did before F.6.
-
-    TODO(rytis): F.6a, refuse the string: ``factors = "condition"`` reads as its 9 letters.
-    F.6 kept it, because 27 of the variants that loaded before F.6 hold one.
-    """
-    return list(value) if isinstance(value, str) else _list(value, where, problems)
-
-
 def _values(raw: Any, where: str, problems: list[str]) -> dict[str, tuple[str, ...]]:
     """A filter table: column to allowed values, each a list."""
     table = _table(raw, where, problems)

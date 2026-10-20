@@ -1,0 +1,53 @@
+# F.6a (package Y), 2026-10-20: every variant loaded before and after refusing a string for a list
+# and true for a count. Generator: tests/dataset_variants.py over 22 files; both runs by
+# docs/plans/logs/g6_classify.py, compared by docs/plans/logs/g6_compare.py.
+# Before: wo13-y c33b4ae (dataset code as on main 27ab29f). After: wo13-y Y.5.
+# Dumps, 26 MB each, not committed:
+#   before SHA-256 525f60e034b0d0a8a6d4b0403de611265f5225dc2a8b7b5430be57a4931d9329 (= G6's after dump)
+#   after  SHA-256 c4c97f510fb53c8bb480fb5f62b87fce2080d94b04844a2eee5de7b5e33f8c22
+
+## Before
+DatasetError	4437
+OK	3363
+
+## After
+DatasetError	4509
+OK	3291
+
+## g6_compare.py before after, per variant
+3	DatasetError adds problems
+4434	DatasetError equal
+3291	OK equal
+72	OK to DatasetError, CHANGED
+ADDS	conf/datasets/tcga_lung.toml#182	de.pca[0].factors: expected a list, found 'x'
+ADDS	tests/fixtures/datasets/synthetic.toml#109	expect.counts.condition.control: expected int, found True | expect.counts.condition.case: expected int, found True
+ADDS	tests/fixtures/datasets/synthetic.toml#110	order.time_point: expected a list, found 'x'
+
+## Problems added, by key and kind (docs/plans/logs/wo13_y/f6a_kinds.py)
+3	string	de.box_genes
+13	string	de.pca[i].factors
+4	string	order.<k>
+5	string	proteo.classes.<k>
+1	string	proteo.descriptors
+2	string	proteo.genes
+1	string	proteo.tracks
+47	true	expect.counts.<k>.<v>
+76	problems added
+# Of the 72 variants that loaded and are now refused: 27 hold a string for a list (TODO F.6a's 27),
+# 45 hold true as an expected count ([expect.counts]; F.6a's line counted only the strings).
+# Changed variants per source file:
+8	conf/datasets/breast_mac.toml
+12	conf/datasets/breast_mono.toml
+11	conf/datasets/breast_tissue.toml
+4	conf/datasets/cptac_brca.toml
+4	conf/datasets/cptac_ccrcc.toml
+2	conf/datasets/four_runs.toml
+1	conf/datasets/tcga_lung.toml
+13	conf/datasets/tier1.toml
+11	conf/datasets/tier1_teach.toml
+3	tests/fixtures/datasets/de_synthetic.toml
+3	tests/fixtures/datasets/synthetic.toml
+
+## Every real dataset file and template (docs/plans/logs/wo13_y/f6a_real_files.py)
+# Before with PYTHONPATH at an export of c33b4ae's src (ctx imported from it), after at the worktree's:
+# 22 files, 22 load, outputs byte-equal, SHA-256 e78bb4b84ea3943bc7a7c8cd3374437da6ea99b348ff824a9dba717cce8e1d97

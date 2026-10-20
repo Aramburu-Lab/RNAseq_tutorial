@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[3]
 LOG = Path(__file__).with_suffix(".log")
 M7 = "tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte"
 M7_MADE, M7_ACROSS = f"{M7}[made]", f"{M7}[across_root]"
+VARIANTS = "tests/test_dataset_variants.py"
 M9 = "tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte"
 
 # item: [(name, file, old, new, tests)]
@@ -104,6 +105,46 @@ MUTATIONS: dict[str, list[tuple[str, str, str, str, list[str]]]] = {
             'name = "myeloid"',
             'name = "blood"',
             ["tests/test_cohorts.py"],
+        ),
+    ],
+    "5": [
+        (
+            "a string passed as a list everywhere",
+            "src/ctx/dataset/checks.py",
+            '    if isinstance(value, list):\n        return value\n    problems.append(f"{where}: '
+            "expected a list",
+            "    if isinstance(value, (list, str)):\n        return list(value)\n"
+            '    problems.append(f"{where}: expected a list',
+            [VARIANTS],
+        ),
+        (
+            "PCA factors read as a string's characters",
+            "src/ctx/dataset/analyses.py",
+            'factors = _list(p.get("factors"), f"{where}.factors", problems)',
+            'factors = (list(p["factors"]) if isinstance(p.get("factors"), str)'
+            ' else _list(p.get("factors"), f"{where}.factors", problems))',
+            [VARIANTS],
+        ),
+        (
+            "an order read as a string's characters",
+            "src/ctx/dataset/loader.py",
+            'order = {k: tuple(_list(v, f"order.{k}", problems))',
+            'order = {k: tuple(v if isinstance(v, str) else _list(v, f"order.{k}", problems))',
+            [VARIANTS],
+        ),
+        (
+            "true taken as an expected count",
+            "src/ctx/dataset/loader.py",
+            "if not isinstance(n, int) or isinstance(n, bool)}",
+            "if not isinstance(n, int)}",
+            [VARIANTS],
+        ),
+        (
+            "true taken as a contrast's n",
+            "src/ctx/dataset/analyses.py",
+            "isinstance(x, int) and not isinstance(x, bool) for x in n",
+            "isinstance(x, int) for x in n",
+            [VARIANTS],
         ),
     ],
 }

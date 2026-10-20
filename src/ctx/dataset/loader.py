@@ -20,7 +20,7 @@ from ctx.dataset.analyses import (
     _function,
     _ncrna,
 )
-from ctx.dataset.checks import DatasetError, _list, _need, _sequence, _table
+from ctx.dataset.checks import DatasetError, _list, _need, _table
 from ctx.dataset.counts import CountsSpec, _counts
 from ctx.dataset.gdc import ClinicalSpec, GdcSpec, _clinical, _gdc
 from ctx.dataset.proteo import ProteoSpec, _proteo
@@ -121,7 +121,8 @@ def _expected_counts(raw: Any, problems: list[str]) -> dict[str, dict[str, int]]
     out = {}
     for column, table in _table(raw, "expect.counts", problems).items():
         counts = _table(table, f"expect.counts.{column}", problems)
-        bad = {v: n for v, n in counts.items() if not isinstance(n, int)}
+        # bool is an int to isinstance; a count written as true is still a mistake (F.6a).
+        bad = {v: n for v, n in counts.items() if not isinstance(n, int) or isinstance(n, bool)}
         problems += [f"expect.counts.{column}.{v}: expected int, found {n!r}"
                      for v, n in bad.items()]  # fmt: skip
         out[column] = {str(v): int(n) for v, n in counts.items() if v not in bad}
@@ -166,7 +167,7 @@ def load(path: Path) -> Dataset:
     lengths = [n for levels in bins.values() for n in levels]
     if len(lengths) != len(set(lengths)):
         problems.append("derived.batch.bins: a read length sits in two bins")
-    order = {k: tuple(_sequence(v, f"order.{k}", problems))
+    order = {k: tuple(_list(v, f"order.{k}", problems))
              for k, v in raw.get("order", {}).items()}  # fmt: skip
     problems += [f"order.{k}: no [columns.{k}]" for k in order if k not in named]
     expect = raw.get("expect", {})
