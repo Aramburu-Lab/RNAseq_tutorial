@@ -79,7 +79,12 @@ def page(kit: Path, roots: Sequence[tuple[Path, bool]]) -> CoursePage:
             continue
         suffix = "environment" if module == "setup" else "overview"
         tag, _, name = TITLES[module].partition(" ")
-        row = CourseRow(tag, name, tuple(_links(kit, roots, f"{number:02d}_{module}", suffix)))
+        links = _links(kit, roots, f"{number:02d}_{module}", suffix)
+        if module == "setup":
+            # One computer built every root's pages, so M0 shows its check once: the newest,
+            # by the date its file name carries (Rytis 2026-10-20).
+            links = sorted(links, key=lambda link: Path(link.href).name)[-1:]
+        row = CourseRow(tag, name, tuple(links))
         rows.append(row)
         # M0 checks the computer and holds no data, so the real-data count leaves it out.
         if module != "setup":

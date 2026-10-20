@@ -588,3 +588,18 @@ def test_a_dataset_ships_its_newest_run_not_each_names_newest_copy(tmp_path):
     shipped = {Path(f).name for f in shipped_files(kit) if "/11_genecard/" in f}
     assert f"{NEW}_genecard_study_card_c_v1.html" in shipped
     assert not {n for n in shipped if n.startswith(OLD)}, shipped
+
+
+def test_m0_shows_the_computers_check_once_across_real_roots(tmp_path):
+    """Every root's M0 page describes the one computer that built the kit, so the home page
+    lists one, the newest (Rytis 2026-10-20). Mutation caught: one link per real root."""
+    kit = tmp_path / "kit"
+    for folder, day in (("a", OLD), ("b", NEW)):
+        a_root(kit / folder, folder.upper(), folder)
+        setup = kit / folder / "outputs" / "00_setup"
+        for old in setup.glob("*.html"):
+            old.unlink()
+        page(setup / f"{day}_setup_environment_v1.html", "M0 Setup")
+    home = course.page(kit, [(kit / "a", True), (kit / "b", True)])
+    (m0,) = [r.links for r in home.rows if r.number == "M0"]
+    assert [Path(link.href).name for link in m0] == [f"{NEW}_setup_environment_v1.html"]
