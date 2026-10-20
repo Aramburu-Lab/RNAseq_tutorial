@@ -6,7 +6,10 @@ time, HTTP status, bytes and the SHA-256 of the body measured on arrival; ``ctx 
 ``resources/manifest.json`` is never touched (TODO.md M9). A cached body is checked against
 its hash on every read. A refetch whose body differs under the same key stops the run;
 ``--refresh`` first moves the gene's folder to ``resources/cache/superseded/<date>/``.
-A failed call is never cached: the card shows that panel as unavailable, naming the error.
+An HTTP 404 is the provider's answer that the entry does not exist, so it is cached like a
+body, its error body and status recorded, and reads the same online and offline until
+``--refresh`` asks again. Any other failure, a 5xx, a timeout or a network error, is never
+cached: the card shows that panel as unavailable, naming the error, and the next run asks again.
 """
 
 import gzip
@@ -29,11 +32,18 @@ SUPERSEDED = CACHE / "superseded"
 TIMEOUT = 60
 # HPA's and Ensembl's servers answer urllib's default agent; a named one says who asks.
 AGENT = "ctx-genecard (Cancer Transcriptomics Teaching Suite)"
+# Only 404 reads as "no such entry": a 400 cannot tell an unknown ID from a malformed request.
+ABSENT = 404
+
+
+def absent(status: int, retrieved: str) -> str:
+    """The one wording of a recorded absence, so an offline rerun prints the online page's."""
+    return f"no entry: HTTP {status} on {retrieved[:10]}, cached until --refresh"
 
 
 @dataclass(frozen=True)
 class Response:
-    """One cached or fetched response; ``body`` is None when the call failed or was not made."""
+    """One cached or fetched response; ``body`` is None for no entry, a failed call or none made."""
 
     url: str
     body: bytes | None
@@ -115,16 +125,23 @@ class Cache:
             body = gzip.decompress(path.read_bytes())
             if hashlib.sha256(body).hexdigest() != entry["sha256"]:
                 raise GenecardError(f"{path}: body differs from its SHA-256 in {MANIFEST}")
+            if entry["status"] == ABSENT:
+                return Response(url, None, entry["retrieved"], absent(ABSENT, entry["retrieved"]))
             return Response(url, body, entry["retrieved"])
         if self.offline:
             return Response(url, None, error="not cached, and --offline makes no request")
-        return self._fetch(key, path, url, entry)
+        return self._fetch(key, path, url, release, entry)
 
-    def _fetch(self, key: str, path: Path, url: str, entry: dict[str, Any] | None) -> Response:
+    def _fetch(self, key: str, path: Path, url: str, release: str,
+               entry: dict[str, Any] | None) -> Response:  # fmt: skip
         """Fetch one URL, check it against an earlier record of the key, and cache it."""
         try:
             with self.opener(url) as answer:
                 body, status = answer.read(), getattr(answer, "status", 200)
+        except urllib.error.HTTPError as error:
+            if error.code != ABSENT:
+                return Response(url, None, error=str(error))
+            body, status = error.read(), ABSENT
         except (urllib.error.URLError, OSError) as error:
             return Response(url, None, error=str(error))
         digest = hashlib.sha256(body).hexdigest()
@@ -135,6 +152,8 @@ class Cache:
         retrieved = datetime.now(UTC).isoformat(timespec="seconds")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(gzip.compress(body, mtime=0))
-        self._record(key, {"url": url, "retrieved": retrieved, "status": status,
-                           "bytes": len(body), "sha256": digest})  # fmt: skip
+        self._record(key, {"url": url, "release": release, "retrieved": retrieved,
+                           "status": status, "bytes": len(body), "sha256": digest})  # fmt: skip
+        if status == ABSENT:
+            return Response(url, None, retrieved, absent(ABSENT, retrieved))
         return Response(url, body, retrieved)
