@@ -23,7 +23,7 @@ def test_every_bundle_loads_and_each_dataset_file_has_one_cohort():
     figures' IDs depend on which bundle is read first."""
     found = cohorts.bundles()
     # ovary and pleura hold the R2.2 proofs (wo13-u), merged after the bundles were written.
-    assert set(found) == {"blood", "breast", "kidney", "lung", "headneck", "ovary", "pleura"}
+    assert set(found) == {"myeloid", "breast", "kidney", "lung", "headneck", "ovary", "pleura"}
     listed = [e.slug for c in found.values() for e in c.datasets]
     assert sorted(listed) == sorted(p.stem for p in DATASETS.glob("*.toml"))
     assert len(listed) == len(set(listed))
@@ -115,7 +115,7 @@ def test_cohort_of_takes_the_choice_then_the_listing_then_own(tmp_path, monkeypa
 
 
 def test_cohort_option_names_figures_and_refuses_an_unknown_cohort(tmp_path):
-    """--cohort blood puts blood in the figure IDs gather records; a cohort no bundle has stops
+    """--cohort myeloid puts myeloid in the figure IDs gather records; a cohort no bundle has stops
     the command before anything is written, naming the known ones. Catches the option read
     but not passed to the figures, and an unknown cohort silently drawn as own."""
     root, conf = tmp_path / "root", tmp_path / "conf"
@@ -125,11 +125,11 @@ def test_cohort_option_names_figures_and_refuses_an_unknown_cohort(tmp_path):
             str(FIXTURE))  # fmt: skip
     done = ctx_run("--root", str(root), "--cohort", "nope", *args, cwd=root)
     assert done.returncode == 1 and "no cohort 'nope'" in done.stderr, done.stderr
-    assert "blood" in done.stderr and not (root / "outputs").exists()
-    done = ctx_run("--root", str(root), "--cohort", "blood", *args, cwd=root)
+    assert "myeloid" in done.stderr and not (root / "outputs").exists()
+    done = ctx_run("--root", str(root), "--cohort", "myeloid", *args, cwd=root)
     assert done.returncode == 0, done.stderr[-3000:]
     (readme,) = (root / "outputs" / "01_gather").glob("*_mine_composition_v1_README.md")
-    assert "`blood_m1_composition`" in readme.read_text()
+    assert "`myeloid_m1_composition`" in readme.read_text()
 
 
 def test_bundles_declare_no_cap_the_modules_do_not_apply():

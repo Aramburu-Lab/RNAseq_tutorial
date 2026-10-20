@@ -97,6 +97,15 @@ MUTATIONS: dict[str, list[tuple[str, str, str, str, list[str]]]] = {
             [M9],
         ),
     ],
+    "4": [
+        (
+            "Step-1's bundle named blood again",
+            "conf/cohorts/myeloid.toml",
+            'name = "myeloid"',
+            'name = "blood"',
+            ["tests/test_cohorts.py"],
+        ),
+    ],
 }
 
 
