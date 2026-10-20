@@ -21,3 +21,7 @@ item 5: caught (exit 1): an order read as a string's characters [tests/test_data
 item 5: caught (exit 1): true taken as an expected count [tests/test_dataset_variants.py]
 item 5: caught (exit 1): true taken as a contrast's n [tests/test_dataset_variants.py]
 item 5: restored tree, the same tests exit 0
+item 6: caught (exit 1): Arial first in the chain again [tests/test_caption_fit.py tests/test_viz.py::test_static_files_measured]
+item 6: caught (exit 1): an installed Liberation Sans left to win the tie [tests/test_caption_fit.py]
+item 6: caught (exit 1): setup's font line read before the faces are registered [tests/test_caption_fit.py]
+item 6: restored tree, the same tests exit 0

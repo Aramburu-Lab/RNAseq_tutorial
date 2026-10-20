@@ -154,8 +154,11 @@ the tag until then (`ctx.figures.panel.image`).
 - The `laptop` environment is more than `ctx figure` needs: 364 conda packages, of which the
   volcano's redraw imported 37 distributions; PySide6, LLVM, jupyterlab, scikit-learn and duckdb
   ride along. A slimmer image needs its own pixi environment, which is a change to pixi.lock.
-- A figure drawn on a machine with Arial embeds Arial in its PDF; the image has none and embeds
-  Liberation Sans, so that PDF is redrawn with the same data but not the same bytes.
+- Every figure is set in ctx's vendored Liberation Sans, on a machine with Arial or with another
+  Liberation Sans installed too (`style.FONT_CHAIN`, `metrics.register_fonts`). Measured
+  2026-10-20: the volcano drawn on this Mac and redrawn in the image, 5 of 5 files byte-equal;
+  with Arial first, as before, 1 of 5 (the CSV), the PDFs embedding ArialMT
+  (docs/plans/logs/wo13_y/proof_mac_to_image.log, proof_control.log).
 - `build.sh release` does not build this target and rewrites `digests.lock` without its row.
 
 ## On Kebnekaise

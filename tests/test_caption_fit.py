@@ -110,6 +110,58 @@ def test_a_machine_without_arial_sets_the_files_in_the_face_measured():
         apply_matplotlib(THEMES["white"])
 
 
+def test_every_machine_sets_the_files_in_the_vendored_liberation_sans(tmp_path):
+    """The files' chain starts with Liberation Sans, set from ctx's vendored file even where
+    Arial is installed (this Mac) and where another Liberation Sans is: a rival copy registered
+    first loses (Rytis 2026-10-20, F.2c). Mutations caught: Arial first in the chain again, and
+    an installed Liberation Sans left to win the tie, which matplotlib gives the earlier entry."""
+    from matplotlib import font_manager, ft2font  # noqa: PLC0415 - heavy
+
+    from ctx.report.export import VENDOR  # noqa: PLC0415
+    from ctx.viz import metrics  # noqa: PLC0415
+
+    vendored = str(VENDOR / "LiberationSans-Regular.ttf")
+
+    def face() -> str:
+        apply_matplotlib(THEMES["white"])
+        return font_manager.findfont(font_manager.FontProperties(size=SIZES["caption"]))
+
+    assert face() == vendored
+    rival = tmp_path / "Rival.ttf"
+    rival.write_bytes((VENDOR / "LiberationSans-Regular.ttf").read_bytes())
+    manager = font_manager.fontManager
+    kept = list(manager.ttflist)
+    try:
+        manager.ttflist.insert(0, font_manager.ttfFontProperty(ft2font.FT2Font(str(rival))))
+        manager._findfont_cached.cache_clear()
+        metrics.register_fonts.cache_clear()
+        assert face() == vendored
+    finally:
+        manager.ttflist = kept
+        manager._findfont_cached.cache_clear()
+
+
+def test_setup_names_the_face_the_figures_are_set_in():
+    """ctx setup's machine line names Liberation Sans on a machine with no installed copy, as
+    every figure sets it. Mutation caught: the vendored faces not registered first, which on
+    this Mac named Arial, a face no figure uses since F.2c."""
+    from matplotlib import font_manager  # noqa: PLC0415 - heavy
+
+    from ctx import setup  # noqa: PLC0415
+    from ctx.viz import metrics  # noqa: PLC0415
+
+    manager = font_manager.fontManager
+    kept = list(manager.ttflist)
+    try:
+        manager.ttflist = [f for f in kept if f.name != "Liberation Sans"]
+        manager._findfont_cached.cache_clear()
+        metrics.register_fonts.cache_clear()
+        assert setup._resolved_font() == "Liberation Sans"
+    finally:
+        manager.ttflist = kept
+        manager._findfont_cached.cache_clear()
+
+
 @pytest.mark.parametrize("caption", [CAPTION, KERNED], ids=["running_score", "pca"])
 def test_the_measure_is_the_width_matplotlib_sets(caption):
     """ctx.viz.metrics, which the figure files, the page's wrapped labels and a page's own PDF

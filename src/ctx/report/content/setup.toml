@@ -36,8 +36,8 @@ prompt = "Why does Reproduce list the peak memory of the largest child process s
 answer = "Tools such as fastp run as child processes, and their memory is outside this process's peak. A computer runs out of memory on what both hold at once."
 
 [[questions]]
-prompt = "Why might a colleague's copy of the same figure use a different font?"
-answer = "The chain takes the first installed family. Liberation Sans keeps Arial's letter widths; DejaVu Sans changes text widths, never the data."
+prompt = "Why does a figure drawn on a computer with Arial still embed Liberation Sans?"
+answer = "ctx sets every figure in its own copy of Liberation Sans, so the same data give the same bytes everywhere."
 
 [[questions]]
 prompt = "Why are thread limits set before polars and NumPy are imported?"

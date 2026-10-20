@@ -13,8 +13,9 @@ echo "== labdocs lint"; labdocs lint
 echo "== labdocs render --check"; labdocs render --check
 echo "== prose"; python -m ctx.report.prose
 echo "== glossary"; python -m ctx.report.glossary_lint
-echo "== lengths over 600 among changed files"
-over=$(git diff --name-only main -- '*.py' '*.j2' '*.mjs' '*.js' '*.sh' | while read -r p; do
+# The prek hook's scope (.pre-commit-config.yaml check-file-length): scripts/ and bin/ only.
+echo "== lengths over 600 among changed files under scripts/ and bin/"
+over=$(git diff --name-only main -- 'scripts/*' 'bin/*' | while read -r p; do
   if [ -f "$p" ]; then n=$(wc -l < "$p"); [ "$n" -gt 600 ] && echo "$p $n"; fi
 done || true)
 [ -z "$over" ] || { echo "$over"; exit 1; }

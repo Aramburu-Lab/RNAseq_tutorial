@@ -15,6 +15,7 @@ LOG = Path(__file__).with_suffix(".log")
 M7 = "tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte"
 M7_MADE, M7_ACROSS = f"{M7}[made]", f"{M7}[across_root]"
 VARIANTS = "tests/test_dataset_variants.py"
+CAPTION_FIT = "tests/test_caption_fit.py"
 M9 = "tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte"
 
 # item: [(name, file, old, new, tests)]
@@ -145,6 +146,29 @@ MUTATIONS: dict[str, list[tuple[str, str, str, str, list[str]]]] = {
             "isinstance(x, int) and not isinstance(x, bool) for x in n",
             "isinstance(x, int) for x in n",
             [VARIANTS],
+        ),
+    ],
+    "6": [
+        (
+            "Arial first in the chain again",
+            "src/ctx/viz/style.py",
+            'FONT_CHAIN = ("Liberation Sans", "Arial", "DejaVu Sans")',
+            'FONT_CHAIN = ("Arial", "Liberation Sans", "DejaVu Sans")',
+            [CAPTION_FIT, "tests/test_viz.py::test_static_files_measured"],
+        ),
+        (
+            "an installed Liberation Sans left to win the tie",
+            "src/ctx/viz/metrics.py",
+            '    manager.ttflist = [f for f in manager.ttflist if f.name != "Liberation Sans"]\n',
+            "",
+            [CAPTION_FIT],
+        ),
+        (
+            "setup's font line read before the faces are registered",
+            "src/ctx/setup.py",
+            "    register_fonts()\n    for family in FONT_CHAIN:",
+            "    for family in FONT_CHAIN:",
+            [CAPTION_FIT],
         ),
     ],
 }

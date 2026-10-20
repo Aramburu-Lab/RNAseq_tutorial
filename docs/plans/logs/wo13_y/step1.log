@@ -1,0 +1,11 @@
+gather: exit 0
+de: exit 0
+function: exit 0
+qc: exit 1
+quant: exit 0
+recorded 92; equal 92; differ 0; missing 0; details equal 92
+stat: /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/tier1_y/outputs/02_qc/*_tier1_overview_v1.html: stat: No such file or directory
+ B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/tier1_y/outputs/02_qc/*_tier1_overview_v1.html
+14096343 B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/tier1_y/outputs/04_quant/2026-10-20_quant_tier1_overview_v1.html
+13687746 B /Users/rytis/ctx_tier1/outputs/02_qc/2026-10-16_qc_tier1_overview_v1.html
+8806392 B /Users/rytis/ctx_tier1/outputs/04_quant/2026-10-16_quant_tier1_overview_v1.html

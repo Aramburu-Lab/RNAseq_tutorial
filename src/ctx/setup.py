@@ -34,6 +34,7 @@ from ctx.report.builder import (
     ResultTable,
     write,
 )
+from ctx.viz.metrics import register_fonts
 from ctx.viz.style import DATA_COLOURS, FONT_CHAIN, PROJECTOR_UNSAFE, THEMES, contrast
 
 MODULE = "setup"
@@ -56,7 +57,12 @@ def _memory_bytes() -> int | None:
 
 
 def _resolved_font() -> str:
-    """The first family in the font chain that matplotlib can actually find here."""
+    """The first family in the font chain that matplotlib can actually find here.
+
+    The vendored faces are registered first, as every figure registers them, so the line names
+    the face the figures are set in.
+    """
+    register_fonts()
     for family in FONT_CHAIN:
         try:
             font_manager.findfont(
