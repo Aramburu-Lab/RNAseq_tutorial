@@ -189,6 +189,8 @@ def _correlation_from(paths: Mapping[str, Path], measured: Measured) -> None:
     if "worked_samples" in paths:
         shown = pl.read_parquet(paths["worked_samples"])
         measured.extra[WORKED] = (*_matrices(rows, WORKED, order, shown.height), shown)
+        # The tumours then the normals, each named by tissue: the normals' class figure's n.
+        measured.extra["n_normal"] = int((shown["tissue"] == "normal").sum())
 
 
 def folds_from(folds: Path, summary: Path, spec: Dataset, contrast: str) -> Folds:

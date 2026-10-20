@@ -12,6 +12,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
 LOG = Path(__file__).with_suffix(".log")
+M7 = "tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte"
+M7_MADE, M7_ACROSS = f"{M7}[made]", f"{M7}[across_root]"
 
 # item: [(name, file, old, new, tests)]
 MUTATIONS: dict[str, list[tuple[str, str, str, str, list[str]]]] = {
@@ -29,6 +31,45 @@ MUTATIONS: dict[str, list[tuple[str, str, str, str, list[str]]]] = {
             '"ctx.function.running:scatter"',
             '"ctx.function.run:_running"',
             ["tests/test_figures.py::test_every_kind_names_inputs_its_drawer_reads"],
+        ),
+    ],
+    "2": [
+        (
+            "the normals counted as the tumours",
+            "src/ctx/proteo/figure_tables.py",
+            '(shown["tissue"] == "normal").sum()',
+            '(shown["tissue"] == "tumour").sum()',
+            [
+                "tests/test_figures_m7.py::test_the_normals_class_figure_counts_the_normals_read_back"
+            ],
+        ),
+        (
+            "the redraw without the normals' class test",
+            "src/ctx/figures/draw_m7.py",
+            "        m7.normal_metrics(measured, spec.proteo, ctx.options.method)\n",
+            "        pass\n",
+            [M7_MADE],
+        ),
+        (
+            "the normals' kind left out",
+            "src/ctx/figures/kinds_m7.py",
+            '_normals, lambda _: "rho_by_class_normal"',
+            '(lambda _: []), lambda _: "rho_by_class_normal"',
+            [M7_MADE],
+        ),
+        (
+            "the normals' kind made for every design that correlates",
+            "src/ctx/figures/kinds_m7.py",
+            '_normals, lambda _: "rho_by_class_normal"',
+            '_across, lambda _: "rho_by_class_normal"',
+            [M7_ACROSS],
+        ),
+        (
+            "the normals' drawer keeping the tumours' figure",
+            "src/ctx/figures/draw_m7.py",
+            'return _correlation(inputs, spec, "rho_by_class_normal")',
+            'return _correlation(inputs, spec, "rho_by_class")',
+            [M7_MADE],
         ),
     ],
 }
@@ -49,11 +90,13 @@ def _clean() -> None:
 
 
 def main(items: list[str]) -> int:
-    """Plant every mutation of ``items``; return the number that survived."""
+    """Plant every mutation of ``items``, or one as ``item:index``; return how many survived."""
     survived = 0
     with LOG.open("a") as log:
-        for item in items:
-            for name, file, old, new, tests in MUTATIONS[item]:
+        for asked in items:
+            item, _, index = asked.partition(":")
+            chosen = MUTATIONS[item][int(index) : int(index) + 1] if index else MUTATIONS[item]
+            for name, file, old, new, tests in chosen:
                 path = ROOT / file
                 source = path.read_text()
                 assert source.count(old) == 1, (name, source.count(old))
@@ -68,7 +111,7 @@ def main(items: list[str]) -> int:
                 line = f"item {item}: {verdict} (exit {code}): {name} [{' '.join(tests)}]"
                 print(line)
                 log.write(line + "\n")
-            clean = _run(sorted({t for m in MUTATIONS[item] for t in m[4]}))
+            clean = _run(sorted({t for m in chosen for t in m[4]}))
             line = f"item {item}: restored tree, the same tests exit {clean}"
             print(line)
             log.write(line + "\n")

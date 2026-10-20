@@ -1,3 +1,11 @@
 item 1: caught (exit 1): the paired box redrawn without its pairing [tests/test_de_box_order.py]
 item 1: caught (exit 1): the running kind naming the function V2 moved [tests/test_figures.py::test_every_kind_names_inputs_its_drawer_reads]
 item 1: restored tree, the same tests exit 0
+item 2: SURVIVED (exit 0): the normals counted as the tumours [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: caught (exit 1): the redraw without the normals' class test [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: caught (exit 1): the normals' kind left out [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: caught (exit 1): the normals' kind made for every design that correlates [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[across_root]]
+item 2: caught (exit 1): the normals' drawer keeping the tumours' figure [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: restored tree, the same tests exit 0
+item 2: caught (exit 1): the normals counted as the tumours [tests/test_figures_m7.py::test_the_normals_class_figure_counts_the_normals_read_back]
+item 2: restored tree, the same tests exit 0

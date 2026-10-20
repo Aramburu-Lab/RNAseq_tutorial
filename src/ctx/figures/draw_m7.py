@@ -61,6 +61,8 @@ def _correlation(inputs: Mapping[str, Path], spec: Dataset, what: str,
     ctx = _context(inputs, spec, measured)
     assert spec.proteo is not None  # noqa: S101 - the kind is made only under [proteo]
     m7.correlation_metrics(measured, spec.proteo, ctx.options.method)
+    if spec.proteo.design == "tumour_normal":
+        m7.normal_metrics(measured, spec.proteo, ctx.options.method)
     measured.extra["folds"] = [] if contrast is None else [figure_tables.folds_from(
         inputs["contrast_folds"], inputs["contrast_summary"], spec, contrast)]  # fmt: skip
     recorder = Recorder(FOLDER, spec.slug)
@@ -71,6 +73,12 @@ def _correlation(inputs: Mapping[str, Path], spec: Dataset, what: str,
 def rho_by_class(inputs: Mapping[str, Path], _: Any, spec: Dataset) -> tuple[Any, FigureText]:
     """Per-gene rho, a cumulative curve per gene class."""
     return _correlation(inputs, spec, "rho_by_class")
+
+
+def rho_by_class_normal(inputs: Mapping[str, Path], _: Any,
+                        spec: Dataset) -> tuple[Any, FigureText]:  # fmt: skip
+    """The normals' per-gene rho, a cumulative curve per gene class."""
+    return _correlation(inputs, spec, "rho_by_class_normal")
 
 
 def worked(inputs: Mapping[str, Path], p: OneGene, spec: Dataset) -> tuple[Any, FigureText]:

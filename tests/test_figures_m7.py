@@ -35,7 +35,7 @@ CORRELATION = {*MISSING, "rho_by_class", "worked:G9", "paired_zscores"}
 EXPECTED = {"across_root": {*CORRELATION, "contrast:basal_vs_luma"},
             "cross_root": {*MISSING, "fold_change", "shift_by_class"},
             "study_root": CORRELATION,
-            "made": {*CORRELATION, "contrast:tumour_normal"}}  # fmt: skip
+            "made": {*CORRELATION, "rho_by_class_normal", "contrast:tumour_normal"}}  # fmt: skip
 # A figure page's words a PDF does not carry: its lead and its reading guide.
 WORDS = re.compile(r'<p class="fig-lead">.*?</p>|<aside class="reading".*?</aside>', re.S)
 
@@ -199,3 +199,21 @@ def test_a_worked_gene_the_dataset_file_does_not_name_is_refused(across_root, tm
     (folder / "params.toml").write_text(raw.replace('gene = "G9"', 'gene = "G1"'))
     with pytest.raises(ParamsError, match="gene: 'G1' is not a \\[proteo\\] gene"):
         load_params(folder / "params.toml", spec.figure_id)
+
+
+def test_the_normals_class_figure_counts_the_normals_read_back(tmp_path):
+    """The normals' n, which their class figure prints, is read back from the worked samples'
+    tissues: 3 tumours and 2 normals give 3 and 2. Catches the normals counted as the tumours,
+    which the made-up root's 4 cases with both tissues cannot show."""
+    paths = {
+        n: tmp_path / f"{n}.parquet"
+        for n in ("proteo_genes", "paired_annotation", "drawn_rows", "worked_samples")
+    }
+    pl.DataFrame({"gene": ["G1"]}).write_parquet(paths["proteo_genes"])
+    pl.DataFrame({"sample": ["t1", "t2", "t3"]}).write_parquet(paths["paired_annotation"])
+    pl.DataFrame(schema=figure_tables.ROW_SCHEMA).write_parquet(paths["drawn_rows"])
+    pl.DataFrame(
+        {"sample": ["t1", "t2", "t3", "n1", "n2"], "tissue": ["tumour"] * 3 + ["normal"] * 2}
+    ).write_parquet(paths["worked_samples"])
+    back = figure_tables.measured_from(paths)
+    assert (back.extra["n_samples"], back.extra["n_normal"]) == (3, 2)
