@@ -1,0 +1,7 @@
+checkout step1_qc gather tier1: exit 0, 7 s
+checkout step1_qc qc tier1: exit 0, 84 s
+    5,889,239 B outputs/01_gather/2026-10-20_gather_tier1_overview_v1.html
+   14,505,123 B outputs/02_qc/2026-10-20_qc_tier1_overview_v1.html
+checkout brca_clinical clinical tcga_brca: exit 0, 39 s
+      165,500 B outputs/01_gather/2026-10-16_gather_tcga_brca_overview_v1.html
+   14,951,639 B outputs/12_clinical/2026-10-20_clinical_tcga_brca_overview_v1.html
