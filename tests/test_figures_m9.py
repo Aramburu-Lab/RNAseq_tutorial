@@ -12,12 +12,14 @@ from pathlib import Path
 import polars as pl
 import pytest
 from genecard_root import SLUG, Stub, make, own_files, responses
+from test_figure_panel import panels
 from test_figures import copied, drawn_alike, redrawn, specs
 from test_genecard import _cards, _register, _settings
 
 from ctx.dataset import load
 from ctx.de.run import newest
 from ctx.figures import kinds, kinds_m9
+from ctx.figures.panel import TABS
 from ctx.figures.params import ParamsError, load_params
 from ctx.figures.spec import parse
 from ctx.genecard import boxes, page
@@ -91,10 +93,20 @@ def test_every_figure_has_a_spec_and_redraws_byte_for_byte(built, tmp_path):
 
 
 def _panels(root: Path) -> list[str]:
-    """The ``ctx figure`` line of each Reproduce panel on M9's page, packed cards opened."""
+    """The ``ctx figure`` line of each Reproduce panel on M9's page, packed cards opened.
+
+    Each panel prints the line once per tab (F2's Docker, Apptainer and pixi): the tabs must
+    list the same figures, and one tab's list is the page's.
+    """
     (path,) = (root / "outputs" / FOLDER[0]).glob("*_overview_v1.html")
-    shown = html.unescape(unpacked(path.read_text()))
-    return sorted(re.findall(r"ctx figure \S+ --params", shown))
+    shown = unpacked(path.read_text())
+    each = {tab: sorted(re.search(r"ctx figure \S+ --params", p).group(0)
+                        for p, _ in panels(shown, tab)) for tab in TABS}  # fmt: skip
+    assert len({tuple(lines) for lines in each.values()}) == 1, each
+    assert len(re.findall(r"ctx figure \S+ --params", html.unescape(shown))) == sum(
+        len(lines) for lines in each.values()
+    )
+    return each[TABS[0]]
 
 
 def test_a_page_short_of_cards_redraws_the_whole_list(tmp_path, monkeypatch):

@@ -9,3 +9,7 @@ item 2: caught (exit 1): the normals' drawer keeping the tumours' figure [tests/
 item 2: restored tree, the same tests exit 0
 item 2: caught (exit 1): the normals counted as the tumours [tests/test_figures_m7.py::test_the_normals_class_figure_counts_the_normals_read_back]
 item 2: restored tree, the same tests exit 0
+item 3: caught (exit 1): one figure's panel losing its pixi tab [tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte]
+item 3: caught (exit 1): every panel losing its pixi tab [tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte]
+item 3: caught (exit 1): the page's lines counted over every tab, as before [tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte]
+item 3: restored tree, the same tests exit 0

@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[3]
 LOG = Path(__file__).with_suffix(".log")
 M7 = "tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte"
 M7_MADE, M7_ACROSS = f"{M7}[made]", f"{M7}[across_root]"
+M9 = "tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte"
 
 # item: [(name, file, old, new, tests)]
 MUTATIONS: dict[str, list[tuple[str, str, str, str, list[str]]]] = {
@@ -70,6 +71,30 @@ MUTATIONS: dict[str, list[tuple[str, str, str, str, list[str]]]] = {
             'return _correlation(inputs, spec, "rho_by_class_normal")',
             'return _correlation(inputs, spec, "rho_by_class")',
             [M7_MADE],
+        ),
+    ],
+    "3": [
+        (
+            "one figure's panel losing its pixi tab",
+            "src/ctx/figures/panel.py",
+            '"tabs": [_tab(spec, tab) for tab in TABS],',
+            '"tabs": [_tab(spec, tab) for tab in TABS'
+            ' if not (tab == "pixi" and "immune" in spec.figure_id)],',
+            [M9],
+        ),
+        (
+            "every panel losing its pixi tab",
+            "src/ctx/figures/panel.py",
+            '"tabs": [_tab(spec, tab) for tab in TABS],',
+            '"tabs": [_tab(spec, tab) for tab in TABS[:2]],',
+            [M9],
+        ),
+        (
+            "the page's lines counted over every tab, as before",
+            "tests/test_figures_m9.py",
+            "    return each[TABS[0]]",
+            '    return sorted(re.findall(r"ctx figure \\S+ --params", html.unescape(shown)))',
+            [M9],
         ),
     ],
 }

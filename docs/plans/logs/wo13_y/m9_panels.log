@@ -1,0 +1,6 @@
+ctx figure lines: 36
+docker 12 {'own_m9_evidence_view': 1, 'own_m9_box': 2, 'own_m9_contrasts': 3, 'own_m9_tissues': 2, 'own_m9_exons': 2, 'own_m9_junctions': 1, 'own_m9_immune': 1}
+apptainer 12 {'own_m9_evidence_view': 1, 'own_m9_box': 2, 'own_m9_contrasts': 3, 'own_m9_tissues': 2, 'own_m9_exons': 2, 'own_m9_junctions': 1, 'own_m9_immune': 1}
+pixi 12 {'own_m9_evidence_view': 1, 'own_m9_box': 2, 'own_m9_contrasts': 3, 'own_m9_tissues': 2, 'own_m9_exons': 2, 'own_m9_junctions': 1, 'own_m9_immune': 1}
+white PDFs: 12
+specs: 12 ['genecard_gcsynth_box_actb_75624_v1', 'genecard_gcsynth_box_upa_900011_v1', 'genecard_gcsynth_contrasts_actb_75624_v1', 'genecard_gcsynth_contrasts_nptx2_106236_v1', 'genecard_gcsynth_contrasts_upa_900011_v1', 'genecard_gcsynth_evidence_view_v1', 'genecard_gcsynth_exons_actb_75624_v1', 'genecard_gcsynth_exons_nptx2_106236_v1', 'genecard_gcsynth_immune_nptx2_106236_v1', 'genecard_gcsynth_junctions_nptx2_106236_v1', 'genecard_gcsynth_tissues_actb_75624_v1', 'genecard_gcsynth_tissues_nptx2_106236_v1']
