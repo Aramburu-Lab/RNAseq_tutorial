@@ -23,7 +23,7 @@ from ctx.de.deseq import RESULT_COLUMNS, fit
 from ctx.gather import gdc
 from ctx.io.naming import stem
 from ctx.io.readme_companion import write_table
-from ctx.report.builder import MAX_BYTES
+from ctx.report.cap import MAX_BYTES
 from ctx.runtime import BUDGETS
 
 REPO = Path(__file__).resolve().parents[1]

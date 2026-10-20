@@ -7,7 +7,6 @@ image is containers/prove_figures.py's, which CI runs (.github/workflows/contain
 test names its mutation.
 """
 
-import base64
 import html
 import importlib.util
 import os
@@ -25,18 +24,25 @@ from ctx.figures.params import params_file
 from ctx.figures.spec import parse
 
 PANEL = re.compile(
-    r'<code id="ctx-repro-(\d+)-([a-z]+)">(.*?)</code>'
-    r'.*?href="data:text/x-shellscript;base64,([^"]+)"',
-    re.S,
+    r'<details class="repro" data-script-head="([^"]*)">(.*?)<details class="repro-upstream"', re.S
 )
+CODE = re.compile(r'<code id="ctx-repro-\d+-([a-z]+)"[^>]*>(.*?)</code>', re.S)
 TAB = re.compile(r'role="tab" id="ctx-repro-tab-(\d+)-([a-z]+)"[^>]*>([^<]*)</button>')
 DIGEST = "sha256:" + "ab" * 32
 
 
 def panels(page: str, tab: str = "pixi") -> list[tuple[str, str]]:
-    """(pasted block, downloaded script) of one tab of every Reproduce panel on a page."""
-    return [(html.unescape(p), base64.b64decode(s).decode())
-            for _, key, p, s in PANEL.findall(page) if key == tab]  # fmt: skip
+    """(pasted block, downloaded script) of one tab of every Reproduce panel on a page.
+
+    Joined as the page's script joins them, which ``test_reproduce_browser`` holds to the
+    text Chromium copies and downloads: the tab's step 1, a blank line, the shared steps.
+    """
+    found = []
+    for head, inside in PANEL.findall(page):
+        codes = {key: html.unescape(code) for key, code in CODE.findall(inside)}
+        pasted = f"{codes[tab]}\n{codes['shared']}"
+        found.append((pasted, html.unescape(head) + pasted))
+    return found
 
 
 def test_every_spec_has_its_panel_on_the_module_page(pipeline):

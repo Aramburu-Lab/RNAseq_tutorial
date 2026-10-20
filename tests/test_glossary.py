@@ -21,7 +21,6 @@ from typer.testing import CliRunner
 from ctx.io.naming import check, stem
 from ctx.report import course, glossary, glossary_lint, marks
 from ctx.report.builder import (
-    MAX_BYTES,
     FigureBlock,
     FigureText,
     GlossaryPage,
@@ -33,6 +32,7 @@ from ctx.report.builder import (
     render,
     write,
 )
+from ctx.report.cap import MAX_BYTES
 from ctx.viz.save import write_figure
 
 ROOT = Path(__file__).resolve().parents[1]

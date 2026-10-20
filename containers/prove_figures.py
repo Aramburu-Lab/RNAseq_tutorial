@@ -16,7 +16,6 @@ difference, or on a file missing from either side.
 """
 
 import argparse
-import base64
 import html
 import os
 import re
@@ -26,9 +25,12 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 PLATFORM = "linux/amd64"
+# A panel prints each tab's step 1 and the shared steps once; the page's script joins them into
+# the tab's block after a blank line and prefixes the script head for the download (Y.1).
 PANEL = re.compile(
-    r'<code id="ctx-repro-\d+-docker">(.*?)</code>'
-    r'.*?href="data:text/x-shellscript;base64,([^"]+)"',
+    r'<details class="repro" data-script-head="([^"]*)">.*?'
+    r'<code id="ctx-repro-\d+-docker"[^>]*>(.*?)</code>.*?'
+    r'<code id="ctx-repro-\d+-shared">(.*?)</code>',
     re.S,
 )
 CHECK = re.compile(r"^printf '%s  %s\\n' [0-9a-f]{64} \?{4}-\?{2}-\?{2}_(\S+)\.csv", re.M)
@@ -57,13 +59,13 @@ def build_root(image: str, root: Path) -> None:
 def volcano_tab(root: Path) -> tuple[str, str]:
     """The volcano's Docker tab on M5's page: the downloaded script and the figure's stem."""
     (page,) = (root / "outputs" / "05_de").glob("*_overview_v1.html")
-    for shown, encoded in PANEL.findall(page.read_text()):
-        pasted = html.unescape(shown)
+    for head, step_1, steps in PANEL.findall(page.read_text()):
+        pasted = f"{html.unescape(step_1)}\n{html.unescape(steps)}"
         if "_m5_volcano --params" in pasted:
             match = CHECK.search(pasted)
             if match is None:
                 sys.exit("the volcano's Docker tab has no data check line")
-            return base64.b64decode(encoded).decode(), match.group(1)
+            return html.unescape(head) + pasted, match.group(1)
     sys.exit(f"{page}: no Docker tab draws a volcano")
 
 

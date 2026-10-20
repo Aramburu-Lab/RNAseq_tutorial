@@ -11,6 +11,7 @@ flagged, so their rows are left out and the caption counts them. Every word is
 """
 
 import math
+import re
 from dataclasses import replace
 from pathlib import Path
 from typing import Any
@@ -19,8 +20,8 @@ import polars as pl
 
 from ctx.qc.checkpoint import STRATUM, _stratum_label, strata_of
 from ctx.qc.registry import Registry
-from ctx.report import text
-from ctx.report.builder import MAX_BYTES, FigureBlock, Group, ModulePage, rendered
+from ctx.report import cap, text
+from ctx.report.builder import FigureBlock, Group, ModulePage, rendered
 from ctx.viz.heatmap import HeatmapData, Swatch
 from ctx.viz.style import BAND_COLOURS
 
@@ -28,6 +29,9 @@ PAGE = "qc"
 LEVELS = ("flagged", "passed", "unjudged", "none")
 # "No value" is the band map's grey, "not judged" the same grey lighter: neither is a band.
 UNJUDGED_ALPHA = 0.45
+# A band map's stem, ``<day>_qc_<dataset>_band_map_v<N>``; of the band maps only the samples'
+# carries a view, the flags (blocks.band_map).
+BAND_MAP = re.compile(r"_band_map_v\d+$")
 
 
 def level(value: object, flagged: bool, judged: bool) -> str:
@@ -100,15 +104,14 @@ def flag_map(values: pl.DataFrame, judged: tuple[pl.DataFrame, pl.DataFrame],
 
 
 def fitted(page: ModulePage, path: Path) -> ModulePage:
-    """The page, or, where it would pass ``builder.MAX_BYTES``, its band map without the view.
+    """The page, or, where its page as written would pass the cap, its band map without the view.
 
-    A note in the view's place says so. On Step-1 the view added 709,561 B to a 14,193,047 B
-    page (2026-10-19), 97,392 B under the cap: a larger cohort can cross it, and a page over
-    the cap stops the run.
+    The view is the page's one optional part (``cap.kept``), measured on the page as ``write``
+    writes it, Reproduce panels and all; a note in the view's place says so. On Step-1 the view
+    added 709,561 B to a 14,193,047 B page (2026-10-19), and a page over the cap stops the run.
     """
-    if len(rendered(page, path).encode()) <= MAX_BYTES:
-        return page
-    return replace(page, results=tuple(_without_view(r) for r in page.results))
+    without = replace(page, results=tuple(_without_view(r) for r in page.results))
+    return page if cap.kept(lambda k: (rendered(page if k else without, path), ()), 1) else without
 
 
 def _without_view(result: Any) -> Any:
@@ -117,11 +120,13 @@ def _without_view(result: Any) -> Any:
         return result
     items: list[Any] = []
     for item in result.items:
-        if isinstance(item, FigureBlock) and item.stem.endswith("_band_map") and (
+        # A real stem ends in its version, _band_map_v1: matching "_band_map" at the end, as
+        # this did until Y.1, never found the view, and Step-1's page kept it past the cap.
+        if isinstance(item, FigureBlock) and BAND_MAP.search(item.stem) and (
                 item.controls or {}).get("kind") == "view":  # fmt: skip
             items += [
                 replace(item, controls=None),
-                text.fill(PAGE, "figures.flag_map.left_out", cap=MAX_BYTES),
+                text.fill(PAGE, "figures.flag_map.left_out", cap=cap.MAX_BYTES),
             ]
         else:
             items.append(item)

@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any
 from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
-from ctx.report import export, glossary, marks, text
+from ctx.report import cap, export, glossary, marks, text
 from ctx.report.figures import defaults, json_for_script, prepare
 from ctx.viz.style import (
     ALONE_SCALE,
@@ -35,7 +35,6 @@ from ctx.viz.style import (
 if TYPE_CHECKING:
     from ctx.viz.aggregates import Lead
 
-MAX_BYTES = 15 * 10**6
 # The report skeleton, in the order CONVENTIONS.md fixes; ids are the section anchors, and
 # the headings are in content/ui.toml.
 SECTIONS = tuple(
@@ -602,7 +601,7 @@ def render(page: Page, glossary_href: str = "") -> str:
 def rendered(page: Page, path: Path) -> str:
     """The page as ``write`` would write it to ``path``, glossary link and all; nothing written.
 
-    A builder that fits a page to ``MAX_BYTES`` measures this, then writes.
+    A module that fits a page's optional parts to the cap measures this (``cap.kept``).
     """
     target = None
     if isinstance(page, HubPage) or glossary.used(_marked(page)):
@@ -643,8 +642,9 @@ def write(page: Page, path: Path) -> Path:
 
 
 def _sized(html: str, path: Path) -> bytes:
-    """A page's bytes, refused over ``MAX_BYTES`` before anything is written."""
-    data = html.encode()
-    if len(data) > MAX_BYTES:
-        raise ValueError(f"{path.name}: {len(data)} bytes, over the {MAX_BYTES}-byte cap")
-    return data
+    """A page's bytes, refused over ``cap.MAX_BYTES`` before anything is written."""
+    if cap.over(html) > 0:
+        raise ValueError(
+            f"{path.name}: {len(html.encode())} bytes, over the {cap.MAX_BYTES}-byte cap"
+        )
+    return html.encode()

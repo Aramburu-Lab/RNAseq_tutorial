@@ -32,7 +32,6 @@ from synth import (
 
 from ctx.io.naming import figure_files, lint, stem
 from ctx.report.builder import (
-    MAX_BYTES,
     SECTIONS,
     FigureBlock,
     FigurePage,
@@ -48,6 +47,7 @@ from ctx.report.builder import (
     render,
     write,
 )
+from ctx.report.cap import MAX_BYTES
 from ctx.viz.annotate import TEST_NAME
 from ctx.viz.box import BoxData, box_data, interactive
 from ctx.viz.save import write_figure

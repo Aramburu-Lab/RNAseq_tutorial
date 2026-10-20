@@ -32,9 +32,8 @@ from ctx.genecard import (
 from ctx.genecard.cards import Card
 from ctx.genecard.summary import DETECTED, spread, tau
 from ctx.io.naming import stem
-from ctx.report import text
+from ctx.report import cap, text
 from ctx.report.builder import (
-    MAX_BYTES,
     Code,
     FigurePage,
     FigureText,
@@ -380,7 +379,7 @@ def _list_panel(ctx: Context, drawn: list["Drawn"], first: int) -> Group | None:
 def _left_out(ctx: Context, cards: list[Card]) -> Group:
     """The genes of the card list the page could not hold, and the command for their page."""
     names = ", ".join(c.symbol for c in cards)
-    lead = fill("left_out.lead", n=len(cards), listed=len(ctx.chosen), cap=MAX_BYTES / 1e6)
+    lead = fill("left_out.lead", n=len(cards), listed=len(ctx.chosen), cap=cap.MAX_BYTES / 1e6)
     return Group(word("left_out.title"), (fill("left_out.genes", genes=names),
                                           Code(word("left_out.command"),
                                                left_out_command(ctx, cards))),
@@ -527,44 +526,54 @@ def _module_page(ctx: Context, drawn: list[Drawn], left: list[Card],
     )  # fmt: skip
 
 
-def fit(pages: Callable[[int], tuple[str, list[int]]], cards: int, cap: int = MAX_BYTES) -> int:
-    """How many cards, in list order, a page holds under ``cap`` bytes: measured, never guessed.
-
-    ``pages(k)`` renders the page over the first ``k`` cards and gives its HTML and the bytes of
-    each packed card, in order. Cards leave from the end, the most packed bytes first needed to
-    cover the excess, and the page is measured again, since the lines naming the cards left out
-    grow as they leave. The first card, drawn whole, always stays.
-    """
-    kept = cards
-    while kept > 1:
-        html, packed = pages(kept)
-        over = len(html.encode()) - cap
-        if over <= 0:
-            break
-        freed = 0
-        while kept > 1 and freed < over:
-            kept -= 1
-            freed += packed[kept - 1] if kept - 1 < len(packed) else 0
-    return kept
-
-
 def build(writer: Writer, ctx: Context) -> list[Path]:
     """Write the kept cards' tables and figures, then the page; the page first in the list.
 
-    The card list is packed to the page cap (M9.8): every card is laid out without its
-    files, the page is measured, and the cards past what fits are named with the command
-    that builds them.
+    The card list is packed to the page cap (M9.8, ``cap.kept``), decided on the page as it is
+    written: a card's Reproduce panels exist only once its files are, so the cards are first
+    fitted laid out without them, which can only keep too many, their files written, and the
+    page with its panels fitted again. Cards that leave then take their files with them, and
+    the rest are written again (Y.1). The cards past what fits are named with their command.
     """
     page = writer.out / f"{stem(PAGE, f'{writer.dataset}_overview', 1, day=writer.day)}.html"
     drawn = [_card(writer, c, ctx) for c in ctx.chosen]
-    view = evidence_view(writer, ctx)
+    start = len(writer.files)
+    kept = cap.kept(_pages(ctx, drawn, evidence_view(writer, ctx), page), len(drawn), least=1)
+    while True:
+        laid = _write_cards(writer, ctx, drawn, kept)
+        pages = _pages(ctx, laid, evidence_view(writer, ctx), page, tuple(drawn[kept:]))
+        if (fits := cap.kept(pages, kept, least=1)) == kept:
+            break
+        # A card that leaves writes no files (M9.8); the kept ones are written again, since
+        # their tables, and so their panels' hashes, held the cards that left.
+        for path in dict.fromkeys(writer.files[start:]):
+            path.unlink(missing_ok=True)
+        del writer.files[start:]
+        kept = fits
+    built = _module_page(ctx, laid, [d.card for d in drawn[kept:]], evidence_view(writer, ctx))
+    return [write(built, page), write_entry(writer.out, "genecard"), *writer.files]
 
-    def pages(k: int) -> tuple[str, list[int]]:
-        """The page over the first ``k`` cards, as written, and each packed card's bytes."""
-        html = rendered(_module_page(ctx, drawn[:k], [d.card for d in drawn[k:]], view), page)
+
+def _pages(ctx: Context, cards: list[Drawn], view: Evidence | None, page: Path,
+           after: tuple[Drawn, ...] = ()) -> Callable[[int], tuple[str, list[int]]]:  # fmt: skip
+    """The page over the first ``k`` cards as written, and each packed card's bytes."""
+
+    def over(k: int) -> tuple[str, list[int]]:
+        """One candidate page, the cards from ``k`` on named as left out."""
+        left = [d.card for d in [*cards[k:], *after]]
+        html = rendered(_module_page(ctx, cards[:k], left, view), page)
         return html, packed_bytes(html)
 
-    kept = fit(pages, len(drawn), MAX_BYTES)
+    return over
+
+
+def _write_cards(writer: Writer, ctx: Context, drawn: list[Drawn], kept: int) -> list[Drawn]:
+    """The first ``kept`` cards' tables and figures written; the cards laid out again with them.
+
+    A block finds its Reproduce panel by its stem, and the panel exists only after
+    write_figure found the figure's spec (F.1), so the cards are laid out again here.
+    """
+    view = evidence_view(writer, ctx)
     numbers = [d.card.number for d in drawn[:kept]]
     shown = replace(
         ctx,
@@ -585,8 +594,4 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
             # Opened alone, the figure keeps the control its contract does not carry (E.1d).
             block = replace(figure_block(data, writer.stem(what), words), controls=controls)
             write(FigurePage(words.title, block), writer.out / f"{writer.stem(what)}.html")
-    # Laid out again once the files are written: a block finds its Reproduce panel by its stem,
-    # and the panel exists only after write_figure found the figure's spec (F.1).
-    again = [_card(writer, d.card, ctx) for d in drawn[:kept]]
-    built = _module_page(ctx, again, [d.card for d in drawn[kept:]], evidence_view(writer, ctx))
-    return [write(built, page), write_entry(writer.out, "genecard"), *writer.files]
+    return [_card(writer, d.card, ctx) for d in drawn[:kept]]

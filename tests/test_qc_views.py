@@ -149,6 +149,7 @@ def test_a_page_past_the_cap_leaves_the_flag_view_out_and_says_so(page, monkeypa
     import dataclasses  # noqa: PLC0415
 
     from ctx.qc import flag_map  # noqa: PLC0415
+    from ctx.report import cap  # noqa: PLC0415
     from ctx.report.builder import FigureBlock, FigureText, Group  # noqa: PLC0415
 
     @dataclasses.dataclass(frozen=True)
@@ -158,12 +159,12 @@ def test_a_page_past_the_cap_leaves_the_flag_view_out_and_says_so(page, monkeypa
         results: tuple
 
     block = FigureBlock(figure=None, caption="c", rows=(), data_file="x.csv",
-                        text=FigureText(BANDS), stem="x_band_map",
+                        text=FigureText(BANDS), stem="2026-10-20_qc_x_band_map_v1",
                         controls={"kind": "view"})  # fmt: skip
     probe = Probe((Group("Glance", (block, "other")), "a note"))
     monkeypatch.setattr(flag_map, "rendered", lambda p, path: "x" * 10)
     assert flag_map.fitted(probe, tmp_path / "p.html") is probe
-    monkeypatch.setattr(flag_map, "MAX_BYTES", 5)
+    monkeypatch.setattr(cap, "MAX_BYTES", 5)
     kept, note = flag_map.fitted(probe, tmp_path / "p.html").results
     assert [type(i).__name__ for i in kept.items] == ["FigureBlock", "str", "str"]
     assert kept.items[0].controls is None and kept.items[0].text.title == BANDS
