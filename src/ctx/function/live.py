@@ -19,9 +19,11 @@ from ctx.function import lite
 from ctx.report import genes, text
 
 PAGE = "function"
-# The sets drawn per family when the reader asks for the smallest FDR rather than the passing
-# ones (figure controls plan: "7 smallest FDR per direction").
+# The sets a family draws when the reader asks for the smallest p rather than the passing ones,
+# and the count a family with fewer passing sets is filled to in grey (figure controls plan:
+# "7 smallest FDR per direction"; PK.3 took this cap rather than a new number).
 TOP = 7
+HOW = ("passing", "top")
 
 
 def bitset(members: Sequence[int], size: int) -> str:
@@ -63,6 +65,61 @@ def by_contrast(results: pl.DataFrame, sets: Mapping[str, Sequence[str]]) -> pl.
             for r in lite.ora(symbols(results, d), tested, sets)]  # fmt: skip
     schema = ["direction", "gene_set", "size", "hits", "expected", "p", "fdr", "genes"]
     return pl.DataFrame(rows, schema=schema, orient="row")
+
+
+def drawn(family: pl.DataFrame, how: str = "passing", alpha: float = ALPHA,
+          top: int = TOP) -> pl.DataFrame:  # fmt: skip
+    """The sets one family's bars draw, in order, each marked by whether it passes (PK.3).
+
+    One definition, ``ctxOra.drawn`` its twin. The order: drop the sets holding none of the
+    list (p = 1 says nothing of them), sort by p, a tie by set name, mark FDR < ``alpha``;
+    then ``passing`` keeps every set that passes and, where fewer than ``top`` do, the
+    failing sets of smallest p up to ``top`` in all; ``top`` keeps the first ``top``.
+    Rytis's 6 genes on Step-1 passed none, and the panel drew an empty chart.
+
+    Args:
+        family: One family's ORA rows, with ``gene_set``, ``hits``, ``p`` and ``fdr``.
+        how: ``passing`` or ``top``, the panel's "Sets drawn".
+        alpha: The FDR a set must stay under to pass.
+        top: The count a short family is filled to, and the count ``top`` draws.
+
+    Returns:
+        The rows drawn, with ``passes``, passing sets first.
+
+    Raises:
+        ValueError: If ``how`` is neither.
+    """
+    if how not in HOW:
+        raise ValueError(f"sets drawn: {how!r}, not one of {HOW}")
+    held = family.filter(pl.col("hits") > 0).sort("p", "gene_set")
+    held = held.with_columns(passes=pl.col("fdr") < alpha)
+    if how == "top":
+        return held.head(top)
+    passing = held.filter(pl.col("passes"))
+    if passing.height >= top:
+        return passing
+    return pl.concat([passing, held.filter(~pl.col("passes")).head(top - passing.height)])
+
+
+def bars(frame: pl.DataFrame, how: str = "passing", alpha: float = ALPHA,
+         top: int = TOP) -> pl.DataFrame:  # fmt: skip
+    """Every family's drawn sets as the bars stand, ``ctxOra.blocks`` its twin (PK.3).
+
+    Each family by ``drawn``; the family whose first set has the smallest p first, a tie in
+    the frame's family order; ``series`` is the family for a set that passes and
+    ``<family>_failing`` for one that does not, the grey bars.
+
+    Returns:
+        The rows drawn, with ``passes`` and ``series``; empty when no set holds a gene.
+    """
+    families = [drawn(frame.filter(pl.col("direction") == d), how, alpha, top)
+                for d in frame["direction"].unique(maintain_order=True)]  # fmt: skip
+    families = sorted((f for f in families if f.height), key=lambda f: f["p"][0])
+    if not families:
+        return frame.clear().with_columns(passes=pl.lit(True), series=pl.lit(""))
+    return pl.concat(families).with_columns(
+        series=pl.when("passes").then("direction").otherwise(pl.col("direction") + "_failing")
+    )
 
 
 def listed(path: Path, results: pl.DataFrame, sets: Mapping[str, Sequence[str]]) -> pl.DataFrame:

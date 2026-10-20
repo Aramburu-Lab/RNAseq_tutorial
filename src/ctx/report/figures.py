@@ -256,7 +256,7 @@ _SHAPED = {
                        "axes": c.get("axes", [])},  # fmt: skip
     "ora": lambda c: {"words": c["words"], "backgrounds": c["backgrounds"],
                       "featured": c["featured"], "contrasts": c.get("contrasts", []),
-                      "top": c.get("top")},
+                      "top": c.get("top"), "alpha": c.get("alpha")},
     "subset": lambda c: {"words": c["words"], "options": c["options"],
                          "scales": c.get("scales", []), "summary": c["summary"]},
     "genelist": lambda c: {"words": c["words"], "contrasts": c["contrasts"],

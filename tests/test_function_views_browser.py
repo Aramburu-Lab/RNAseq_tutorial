@@ -259,8 +259,14 @@ def test_another_contrasts_calls_rerun_as_its_own_table(m6, size):
             assert math.isclose(float(fdr), want["fdr"], rel_tol=1.52e-10, abs_tol=0)
     assert acted["contrasts"][1][1]["moved"] and not acted["contrasts"][0][1]["moved"]
     top = acted["top"]
-    # The plan's seven smallest FDR per family, whether they pass or not.
-    assert top["moved"] and [len(y) for _, y in top["bars"]] == [7, 7]
+    # The plan's seven per family, now by p and only sets holding a call (PK.3): live.bars's.
+    featured = acted["contrasts"][0][0]
+    want = live.bars(_newest(folder, f"{featured}_ora"), "top")
+    got = [(name.split(",")[0], label) for name, y in top["bars"] for label in y]
+    assert top["moved"] and sorted(got) == sorted(
+        zip(want["direction"], map(set_words, want["gene_set"]), strict=True)
+    )
+    assert want.group_by("direction").len()["len"].max() <= live.TOP
     assert not acted["reset"]["moved"]
     assert acted["reset"]["tsv"] == acted["contrasts"][0][1]["tsv"]
 

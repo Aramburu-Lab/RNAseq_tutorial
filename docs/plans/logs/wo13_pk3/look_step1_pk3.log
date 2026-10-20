@@ -1,0 +1,54 @@
+1280_light {
+ "bars": [
+  [
+   "up, not passing FDR < 0.05",
+   "#8C8C8C",
+   [
+    "Coagulation, MSigDB Hallmark",
+    "Hypoxia, MSigDB Hallmark",
+    "Complement, MSigDB Hallmark"
+   ],
+   [
+    1.5922000621767263,
+    1.258903390371804,
+    1.2348752801506668
+   ]
+  ]
+ ],
+ "summary": "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05, BH per family. Lists tested on this page: 1; no correction runs across them. Grey bars: 3 sets of smallest p that fail FDR < 0.05, drawn to 7 per family.",
+ "notes": "6 genes of the list have a symbol on this page; genes left out for want of one: 0. The list: MMP8, NECAB1, PLAC8, ZDHHC19, LAIR1, CD300E.",
+ "top": 76.28125,
+ "window": 900,
+ "labels_left": 343.703125,
+ "plot_left": 313,
+ "box": 1265,
+ "scroll": 1265,
+ "errors": []
+}
+375_dark {
+ "bars": [
+  [
+   "up, not passing FDR < 0.05",
+   "#8C8C8C",
+   [
+    "Coagulation, MSigDB Hallmark",
+    "Hypoxia, MSigDB Hallmark",
+    "Complement, MSigDB Hallmark"
+   ],
+   [
+    1.5922000621767263,
+    1.258903390371804,
+    1.2348752801506668
+   ]
+  ]
+ ],
+ "summary": "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05, BH per family. Lists tested on this page: 1; no correction runs across them. Grey bars: 3 sets of smallest p that fail FDR < 0.05, drawn to 7 per family.",
+ "notes": "6 genes of the list have a symbol on this page; genes left out for want of one: 0. The list: MMP8, NECAB1, PLAC8, ZDHHC19, LAIR1, CD300E.",
+ "top": 136.265625,
+ "window": 812,
+ "labels_left": -18.296875,
+ "plot_left": 29,
+ "box": 375,
+ "scroll": 375,
+ "errors": []
+}
