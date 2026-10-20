@@ -151,7 +151,8 @@ def box(inputs: Mapping[str, Path], p: OneContrast, spec: Dataset) -> tuple[Any,
         raise NoFigureError(f"{p.contrast}: no named gene is in the annotation, so M5 draws none")
     assert isinstance(data, BoxData)  # noqa: S101 - _box returns one
     tests = data.caption.tests
-    return data, box_text(said, len(tests), sum(t.p_adj < ALPHA for t in tests))
+    # A paired contrast's reading guide says what the donor lines join, as M5's own words do.
+    return data, box_text(said, len(tests), sum(t.p_adj < ALPHA for t in tests), bool(data.pairs))
 
 
 def dispersion(inputs: Mapping[str, Path], p: OneContrast, spec: Dataset) -> tuple[Any, FigureText]:

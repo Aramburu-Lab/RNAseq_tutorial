@@ -1,0 +1,53 @@
+Cloning into 'ctx_course'...
+done.
+Note: switching to 'c642ab88e7f8a4c704950d176d7b3062ebbbfcef'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+HEAD is now at c642ab8 Y.5 (F.6a): a string where a list belongs and true as a count are DatasetErrors
+2026-10-20_de_desynth_a_case_results_v1.parquet: OK
+2026-10-20_de_desynth_size_factors_v1.parquet: OK
+de_synthetic.toml: OK
+/work/2026-10-20_de_desynth_volcano_a_case_v1_white.pdf
+/work/2026-10-20_de_desynth_volcano_a_case_v1_black.pdf
+/work/2026-10-20_de_desynth_volcano_a_case_v1_white.svg
+/work/2026-10-20_de_desynth_volcano_a_case_v1_black.svg
+/work/2026-10-20_de_desynth_volcano_a_case_v1.html
+/work/2026-10-20_de_desynth_volcano_a_case_v1.csv
+/work/2026-10-20_de_desynth_volcano_a_case_v1_README.md
+2026-10-20_de_desynth_a_case_results_v1.parquet
+2026-10-20_de_desynth_size_factors_v1.parquet
+2026-10-20_de_desynth_volcano_a_case_v1.csv
+2026-10-20_de_desynth_volcano_a_case_v1.html
+2026-10-20_de_desynth_volcano_a_case_v1_README.md
+2026-10-20_de_desynth_volcano_a_case_v1_black.pdf
+2026-10-20_de_desynth_volcano_a_case_v1_black.svg
+2026-10-20_de_desynth_volcano_a_case_v1_white.pdf
+2026-10-20_de_desynth_volcano_a_case_v1_white.svg
+de_synthetic.toml
+inputs.sha256
+params.toml
+2026-10-20_de_desynth_volcano_a_case_v1.csv: OK
+EQUAL  _de_desynth_volcano_a_case_v1.csv: 115801 B and 115801 B
+EQUAL  _de_desynth_volcano_a_case_v1_black.pdf: 37109 B and 37109 B
+         fonts, module: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']; redraw: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']
+EQUAL  _de_desynth_volcano_a_case_v1_black.svg: 125650 B and 125650 B
+         fonts, module: ["'Liberation Sans', 'Arial', 'DejaVu Sans', sans-serif"]; redraw: ["'Liberation Sans', 'Arial', 'DejaVu Sans', sans-serif"]
+EQUAL  _de_desynth_volcano_a_case_v1_white.pdf: 37101 B and 37101 B
+         fonts, module: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']; redraw: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']
+EQUAL  _de_desynth_volcano_a_case_v1_white.svg: 125005 B and 125005 B
+         fonts, module: ["'Liberation Sans', 'Arial', 'DejaVu Sans', sans-serif"]; redraw: ["'Liberation Sans', 'Arial', 'DejaVu Sans', sans-serif"]
+every compared file is byte-equal

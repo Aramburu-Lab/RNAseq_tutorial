@@ -73,7 +73,7 @@ KINDS = (
          featured, lambda p: f"ora_{p.contrast}", _ora_inputs),
     Kind("function", "nes", OneSet, "ctx.function.run:_featured_bars",
          "ctx.figures.draw_m6:nes", _sets, lambda p: f"nes_{set_slug(p.gene_set)}", _set_inputs),
-    Kind("function", "running", SetInContrast, "ctx.function.run:_running",
+    Kind("function", "running", SetInContrast, "ctx.function.running:scatter",
          "ctx.figures.draw_m6:running", _running, lambda p: f"running_{p.contrast}",
          _ranked_inputs),
     Kind("function", "background", OneContrast, "ctx.function.background:bars",

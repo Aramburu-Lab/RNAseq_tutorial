@@ -65,3 +65,26 @@ def test_a_paired_contrasts_boxes_join_each_donor_and_say_so():
     joined = box_text(said, 1, 0, paired=True).reading
     assert len(joined) == len(box_text(said, 1, 0).reading) + 1
     assert "line joins each individual's two samples" in joined[-1]
+
+
+def test_a_paired_box_redrawn_says_what_its_lines_join(tmp_path, monkeypatch):
+    """``ctx figure``'s box of a paired contrast reads as M5's: its reading guide names the
+    donor lines. Mutation caught: the redraw's words built without the pairing, which V2 added
+    to M5's ``box_text`` after F1 wrote the drawer."""
+    from ctx.de.page import box_text  # noqa: PLC0415
+    from ctx.figures import draw_m5  # noqa: PLC0415
+    from ctx.figures.kind import OneContrast  # noqa: PLC0415
+
+    said = Words("t", "test", "ref")
+    result = fit()
+    result.contrast.paired = True
+    monkeypatch.setattr(draw_m5, "_one", lambda *_: (result, None))
+    monkeypatch.setattr(draw_m5, "every", lambda *_: {"c": said})
+    inputs = {"genes": tmp_path / "genes.parquet", "counts": tmp_path / "counts.parquet"}
+    pl.DataFrame({"gene_id": ["g1"], "gene_name": ["A"]}).write_parquet(inputs["genes"])
+    pl.DataFrame({"gene_id": ["g1"], **{s: [float(i + 1)] for i, s in enumerate(SAMPLES)}}
+                 ).write_parquet(inputs["counts"])  # fmt: skip
+    spec = SimpleNamespace(de=SimpleNamespace(box_genes=("A",)), contrasts=(), columns=())
+    data, words = draw_m5.box(inputs, OneContrast("d", "c"), spec)
+    assert data.pairs == "donor"
+    assert words == box_text(said, 1, 0, paired=True)

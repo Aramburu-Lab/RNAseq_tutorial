@@ -33,7 +33,7 @@ def test_ids_round_trip():
     assert figure_id("breast", "de", "volcano") == "breast_m5_volcano"
     assert parse("breast_m5_volcano") == ("breast", "de", "volcano")
     assert parse("kidney_m10_km_os") == ("kidney", "clinical", "km_os")
-    assert parse("blood_m9_tissues") == ("blood", "genecard", "tissues")
+    assert parse("myeloid_m9_tissues") == ("myeloid", "genecard", "tissues")
     for bad in ("Breast_m5_volcano", "breast_m11_x", "breast_5_volcano", "breast_m5_", "m5_x"):
         assert parse(bad) is None, bad
 

@@ -90,6 +90,11 @@ def _across(spec: Dataset) -> list[Plain]:
     return [Plain(spec.slug)] if _design(spec) not in (None, CROSS) else []
 
 
+def _normals(spec: Dataset) -> list[Plain]:
+    """A figure of the tumour-against-normal design's normals, from the ``normal_`` columns."""
+    return [Plain(spec.slug)] if _design(spec) == "tumour_normal" else []
+
+
 def _studies(spec: Dataset) -> list[Plain]:
     """A figure of the cross-study design."""
     return [Plain(spec.slug)] if _design(spec) == CROSS else []
@@ -130,6 +135,8 @@ KINDS = (
          lambda _: "coverage", _missing),
     Kind(MODULE, "rho_by_class", Plain, f"{FIGURES}:rho_by_class", f"{DRAW}:rho_by_class",
          _across, lambda _: "rho_by_class", _correlation),
+    Kind(MODULE, "rho_by_class_normal", Plain, f"{FIGURES}:rho_by_class",
+         f"{DRAW}:rho_by_class_normal", _normals, lambda _: "rho_by_class_normal", _correlation),
     Kind(MODULE, "worked", OneGene, f"{FIGURES}:worked", f"{DRAW}:worked", _worked,
          lambda p: f"worked_{p.gene.lower()}", _correlation, _gene_check),
     Kind(MODULE, "paired_zscores", Plain, f"{FIGURES}:paired", f"{DRAW}:paired_zscores", _across,

@@ -1,7 +1,9 @@
 """F.6: a broken dataset file parses or raises one DatasetError, never a traceback.
 
 Before F.6, 407 of the 7,800 variants tests/dataset_variants.py makes raised AttributeError,
-TypeError, ValueError or KeyError (docs/plans/logs/2026-10-19_g6_classification.log).
+TypeError, ValueError or KeyError (docs/plans/logs/2026-10-19_g6_classification.log). F.6a
+refuses a string for a list and true for a count: 72 variants that parsed are now refused, 27
+for a string and 45 for true (docs/plans/logs/2026-10-20_y_f6a_classification.log).
 """
 
 from pathlib import Path
@@ -99,6 +101,34 @@ def test_nested_values_listed(tmp_path, snippet, problem):
     one-item scatter, a PCA with no name and a bin of one length crashing the parser."""
     path = tmp_path / "broken.toml"
     path.write_text(SYNTHETIC.read_text() + CONTRAST + snippet)
+    with pytest.raises(DatasetError) as caught:
+        load(path)
+    assert str(caught.value).splitlines() == [f"{path}:", f"  {problem}"]
+
+
+@pytest.mark.parametrize(("old", "new", "problem"), [
+    ("", '[de]\nfeatured = "c"\n[[de.pca]]\nname = "p"\nfactors = "condition"\n',
+     "de.pca[0].factors: expected a list, found 'condition'"),
+    ("", '[de]\nfeatured = "c"\nbox_genes = "ACTB"\n',
+     "de.box_genes: expected a list, found 'ACTB'"),
+    ('time_point = ["", "fu2", "fu10"]', 'time_point = "fu2"',
+     "order.time_point: expected a list, found 'fu2'"),
+    ("control = 7", "control = true", "expect.counts.condition.control: expected int, found True"),
+    ("n = [7, 7]", "n = [true, 7]",
+     "contrasts[0].n: expected [reference n, tested n], found [True, 7]"),
+])  # fmt: skip
+def test_a_string_for_a_list_and_true_for_a_count_are_refused(tmp_path, old, new, problem):
+    """F.6a (Rytis 2026-10-20): a string where a list belongs is refused, not read as its
+    characters (``factors = "condition"`` was 9 one-letter factors), and true is no count,
+    though isinstance takes a bool for an int. Catches either let through again."""
+    text = SYNTHETIC.read_text() + CONTRAST
+    if old:
+        assert text.count(old) == 1, old
+        text = text.replace(old, new)
+    else:
+        text += new
+    path = tmp_path / "broken.toml"
+    path.write_text(text)
     with pytest.raises(DatasetError) as caught:
         load(path)
     assert str(caught.value).splitlines() == [f"{path}:", f"  {problem}"]

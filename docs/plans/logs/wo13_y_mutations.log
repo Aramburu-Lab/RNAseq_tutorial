@@ -1,0 +1,27 @@
+item 1: caught (exit 1): the paired box redrawn without its pairing [tests/test_de_box_order.py]
+item 1: caught (exit 1): the running kind naming the function V2 moved [tests/test_figures.py::test_every_kind_names_inputs_its_drawer_reads]
+item 1: restored tree, the same tests exit 0
+item 2: SURVIVED (exit 0): the normals counted as the tumours [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: caught (exit 1): the redraw without the normals' class test [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: caught (exit 1): the normals' kind left out [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: caught (exit 1): the normals' kind made for every design that correlates [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[across_root]]
+item 2: caught (exit 1): the normals' drawer keeping the tumours' figure [tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]]
+item 2: restored tree, the same tests exit 0
+item 2: caught (exit 1): the normals counted as the tumours [tests/test_figures_m7.py::test_the_normals_class_figure_counts_the_normals_read_back]
+item 2: restored tree, the same tests exit 0
+item 3: caught (exit 1): one figure's panel losing its pixi tab [tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte]
+item 3: caught (exit 1): every panel losing its pixi tab [tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte]
+item 3: caught (exit 1): the page's lines counted over every tab, as before [tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte]
+item 3: restored tree, the same tests exit 0
+item 4: caught (exit 1): Step-1's bundle named blood again [tests/test_cohorts.py]
+item 4: restored tree, the same tests exit 0
+item 5: caught (exit 1): a string passed as a list everywhere [tests/test_dataset_variants.py]
+item 5: caught (exit 1): PCA factors read as a string's characters [tests/test_dataset_variants.py]
+item 5: caught (exit 1): an order read as a string's characters [tests/test_dataset_variants.py]
+item 5: caught (exit 1): true taken as an expected count [tests/test_dataset_variants.py]
+item 5: caught (exit 1): true taken as a contrast's n [tests/test_dataset_variants.py]
+item 5: restored tree, the same tests exit 0
+item 6: caught (exit 1): Arial first in the chain again [tests/test_caption_fit.py tests/test_viz.py::test_static_files_measured]
+item 6: caught (exit 1): an installed Liberation Sans left to win the tie [tests/test_caption_fit.py]
+item 6: caught (exit 1): setup's font line read before the faces are registered [tests/test_caption_fit.py]
+item 6: restored tree, the same tests exit 0

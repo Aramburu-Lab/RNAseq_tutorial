@@ -54,7 +54,6 @@ from ctx.viz.style import (
     AXIS_TITLE_SHARE,
     CIVIDIS,
     DATA_COLOURS,
-    FONT_CHAIN,
     INK_COLOUR,
     LINE_WIDTHS,
     MAX_CATEGORIES,
@@ -493,7 +492,8 @@ def test_static_files_measured(written):
     caption = re.sub(r"\s+", " ", static_caption(data))
     for theme in THEMES.values():
         pdf = out / f"{figure_stem}_{theme.name}.pdf"
-        assert _pdf_fonts(pdf) <= {f.replace(" ", "") for f in FONT_CHAIN} | {"ArialMT"}
+        # Liberation Sans everywhere (Rytis 2026-10-20, F.2c): on this Mac too, which has Arial.
+        assert "LiberationSans" in _pdf_fonts(pdf) <= {"LiberationSans", "LiberationSans-Bold"}
         colours, sizes, widths, page_fill = _painted(pdf)
         allowed = [_rgb(c) for c in (*DATA_COLOURS, *CIVIDIS, theme.ink, theme.grid,
                                      theme.reference)]  # fmt: skip
@@ -522,7 +522,7 @@ def test_static_files_measured(written):
             for element in svg.iter()
             for match in re.findall(r"font-family:\s*([^;]+)", element.get("style", ""))
         }
-        assert families == {(*FONT_CHAIN, "sans-serif")}, families
+        assert families == {("Liberation Sans", "Arial", "DejaVu Sans", "sans-serif")}, families
         assert not [e for e in svg.iter() if e.tag.endswith("image")]
 
 

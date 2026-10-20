@@ -1,0 +1,62 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from analysis.Dockerfile
+#1 transferring dockerfile: 7.37kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for ghcr.io/prefix-dev/pixi:0.76.2
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/ubuntu:24.04
+#3 ...
+
+#4 [auth] library/ubuntu:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/ubuntu:24.04
+#3 DONE 0.9s
+
+#5 [pixi-git 1/2] FROM ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4
+#5 resolve ghcr.io/prefix-dev/pixi:0.76.2@sha256:8b206ef57005a902cb53f50dbaa47893a4038ca269f0b00038b51f18b1313cd4 0.0s done
+#5 DONE 0.0s
+
+#6 [figures 1/5] FROM docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac
+#6 resolve docker.io/library/ubuntu:24.04@sha256:68ee22004a9109b44973313b02ff7b1de250f1de0f5ecb628d73f579aaff33ac 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 4.84MB 0.1s done
+#7 DONE 0.1s
+
+#8 [figures 2/5] WORKDIR /app
+#8 CACHED
+
+#9 [figures-build 1/3] WORKDIR /app
+#9 CACHED
+
+#10 [figures-build 2/3] COPY pixi.toml pixi.lock pyproject.toml README.md LICENSE ./
+#10 CACHED
+
+#11 [pixi-git 2/2] RUN apt-get update  && apt-get install -y --no-install-recommends git ca-certificates openssh-client  && rm -rf /var/lib/apt/lists/*
+#11 CACHED
+
+#12 [figures-build 3/3] RUN mkdir -p src/ctx && touch src/ctx/__init__.py  && pixi install --locked -e laptop  && pixi shell-hook -e laptop -s bash > /shell-hook  && printf '#!/bin/bash\n' > /app/entrypoint.sh  && cat /shell-hook >> /app/entrypoint.sh  && echo 'exec "$@"' >> /app/entrypoint.sh
+#12 CACHED
+
+#13 [figures 3/5] COPY --from=figures-build /app/.pixi/envs/laptop /app/.pixi/envs/laptop
+#13 CACHED
+
+#14 [figures 4/5] COPY --from=figures-build --chmod=0755 /app/entrypoint.sh /app/entrypoint.sh
+#14 CACHED
+
+#15 [figures 5/5] COPY src /app/src
+#15 DONE 0.0s
+
+#16 exporting to image
+#16 exporting layers 0.1s done
+#16 exporting manifest sha256:416f99b0199fe22f6d034820528e8e58bcad3ee712e94d61d009543054b992bb done
+#16 exporting config sha256:6ac9208cce4b3fb40a95dabfe8d7518584a152fc9ca381fd43cd5242fb3b3861 done
+#16 exporting attestation manifest sha256:6184d3711cb6800061e4d74e878e84ce2a391e92c33dd76a4e83f9ea51f22283 done
+#16 exporting manifest list sha256:48c798a33f593288dca8c96d2523826dfa7b4c68f59d15cfc07589dad2ff74b9 done
+#16 naming to docker.io/library/ctx-figures:y done
+#16 DONE 0.1s

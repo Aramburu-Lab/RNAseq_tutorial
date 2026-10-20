@@ -1,0 +1,10 @@
+main tier1: exit 0; ctx from /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/scratch_y/main_src/src/ctx/__init__.py
+  5919797 B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/tier1_cap_main/outputs/01_gather/2026-10-20_gather_tier1_overview_v1.html
+  15991808 B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/tier1_cap_main/outputs/02_qc/2026-10-20_qc_tier1_overview_v1.html
+main brca: exit 0; ctx from /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/scratch_y/main_src/src/ctx/__init__.py
+  15122852 B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/brca_cap_main/outputs/12_clinical/2026-10-20_clinical_tcga_brca_overview_v1.html
+y tier1: exit 0; ctx from /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/scratch_y/y_src/src/ctx/__init__.py
+  5919797 B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/tier1_cap_y/outputs/01_gather/2026-10-20_gather_tier1_overview_v1.html
+  15991037 B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/tier1_cap_y/outputs/02_qc/2026-10-20_qc_tier1_overview_v1.html
+y brca: exit 0; ctx from /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/scratch_y/y_src/src/ctx/__init__.py
+  15122609 B /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/outputs/scratch_roots/brca_cap_y/outputs/12_clinical/2026-10-20_clinical_tcga_brca_overview_v1.html

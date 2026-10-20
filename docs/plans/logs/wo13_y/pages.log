@@ -1,0 +1,18 @@
+# wo13-y, 2026-10-20: the pages within 200 kB of the 15,000,000 B cap, after items 1 to 6.
+# Built in scratch roots of this worktree (outputs/scratch_roots/), the real roots' data and
+# resources linked read only. B = bytes of the page as written, or as refused by the cap.
+
+## In this checkout (Reproduce panels name a git commit): step1.log, brca.log
+Step-1 M4 quant     14,096,343 B   written, 903,657 B under the cap (~/ctx_tier1's 2026-10-16: 8,806,392 B)
+Step-1 M2 qc        16,006,090 B   REFUSED by the cap, ctx qc exit 1 (~/ctx_tier1's 2026-10-16: 13,687,746 B)
+TCGA-BRCA M10       15,139,309 B   REFUSED by the cap, ctx clinical exit 1 (~/ctx_breast's 2026-10-16: 14,778,374 B)
+
+## Main's code against this package's, the cap lifted, both from src copies outside git: cap_compare.log
+page                main (c33b4ae export)   Y (worktree copy)   Y minus main
+Step-1 M2 qc        15,991,808 B            15,991,037 B        -771 B
+TCGA-BRCA M10       15,122,852 B            15,122,609 B        -243 B
+# Main's code already writes both pages over the cap (cap_baseline.log, cap_baseline_qc.log:
+# 15,990,800 B and 15,122,556 B, refused). This package does not add to either. The same code
+# wrote 15,053 B (M2) and 16,700 B (M10) more in this checkout than from a copy outside git,
+# whose panels name no commit; which panel lines make up the difference was not measured.
+# Not fixed here: no item of package Y covers it.

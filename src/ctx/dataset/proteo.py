@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from ctx.dataset.checks import TABLE_SUFFIXES, _need, _sequence
+from ctx.dataset.checks import TABLE_SUFFIXES, _list, _need
 from ctx.dataset.sources import Resource
 
 # M7's designs: one cohort measured at both layers, RNA and protein from two studies, or one
@@ -222,12 +222,12 @@ def _proteo(raw: Mapping[str, Any], names: set[str], resources: tuple[Resource, 
         fdr = 0.05
     classes = {}
     for name, entry in raw.get("classes", {}).items():
-        sets = _sequence(entry.get("sets"), f"proteo.classes.{name}.sets", [])
+        sets = _list(entry.get("sets"), f"proteo.classes.{name}.sets", [])
         if entry.get("resource") not in known or not sets:
             problems.append(f"proteo.classes.{name}: needs a known resource and a list of sets")
             continue
         classes[name] = GeneClass(entry["resource"], tuple(sets))
-    lists = {k: _sequence(raw.get(k, []), f"proteo.{k}", problems)
+    lists = {k: _list(raw.get(k, []), f"proteo.{k}", problems)
              for k in ("tracks", "genes", "descriptors")}  # fmt: skip
     published = raw.get("published", {})
     problems += [f"proteo.published.{k}: no source" for k, v in published.items()

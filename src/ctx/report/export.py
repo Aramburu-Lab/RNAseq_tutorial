@@ -41,7 +41,7 @@ from ctx.viz.style import (
 
 VENDOR = Path(__file__).parent / "vendor"
 SCRIPTS = ("jspdf.umd.min.js", "svg2pdf.umd.min.js")
-# Liberation Sans, Arial's metric twin, is the face the PDF embeds for the Arial chain, from
+# Liberation Sans, Arial's metric twin, is the face the PDF embeds, first in the chain, from
 # these vendored files. Cut to a page's characters it is a Modified Version, which the OFL
 # (condition 3) forbids to keep the Reserved Font Name Liberation, so the subset is renamed
 # (Rytis 2026-10-02): FAMILY, the family and full names; FACE, the family the drawing's text is

@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
-from ctx.dataset.checks import _list, _need, _sequence, _table, _values
+from ctx.dataset.checks import _list, _need, _table, _values
 from ctx.dataset.sources import Resource
 
 
@@ -132,7 +132,9 @@ def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
         n = _need(entry, "n", list, where, problems)
         filters = _values(entry.get("filters", {}), f"{where}.filters", problems)
         split = _split(entry.get("split"), where, problems)
-        if n is not None and (len(n) != 2 or not all(isinstance(x, int) for x in n)):  # noqa: PLR2004 - a pair
+        # A count written as true is a bool, which isinstance takes for an int (F.6a).
+        whole = all(isinstance(x, int) and not isinstance(x, bool) for x in n or ())
+        if n is not None and (len(n) != 2 or not whole):  # noqa: PLR2004 - a pair
             problems.append(f"{where}.n: expected [reference n, tested n], found {n!r}")
         if None in fields or n is None:
             continue
@@ -160,7 +162,7 @@ def _pcas(raw: list[Any], problems: list[str]) -> tuple[PcaSpec, ...]:
         filters = _values(p.get("filters", {}), f"{where}.filters", problems)
         if "name" not in p:
             problems.append(f"{where}.name: expected str, found None")
-        factors = _sequence(p.get("factors"), f"{where}.factors", problems)
+        factors = _list(p.get("factors"), f"{where}.factors", problems)
         # Any problem refuses the file, so a broken entry need not be built.
         if len(problems) == found:
             out.append(PcaSpec(p["name"], filters, tuple(factors), p.get("symbol"),
@@ -181,7 +183,7 @@ def _de(raw: Mapping[str, Any], names: set[str], problems: list[str]) -> DeSpec:
         lessons={k: tuple(_list(v, f"de.lessons.{k}", problems)) for k, v in lessons.items()},
         scatters=tuple((a, b) for a, b in scatters),
         box_contrast=raw.get("box_contrast"),
-        box_genes=tuple(_sequence(raw.get("box_genes", []), "de.box_genes", problems)),
+        box_genes=tuple(_list(raw.get("box_genes", []), "de.box_genes", problems)),
     )
     used = [spec.featured, *(c for v in spec.lessons.values() for c in v)]
     used += [c for pair in spec.scatters for c in pair] + (

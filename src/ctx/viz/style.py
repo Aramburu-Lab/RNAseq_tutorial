@@ -38,8 +38,11 @@ CIVIDIS = ("#002E6A", "#32436D", "#535A6D", "#6F7073", "#8C8878", "#ABA072", "#C
 # Opacity of a band shaded behind points: a tint, so the points drawn over it keep their colour.
 BAND_ALPHA = 0.15
 
-# Liberation Sans is Arial's metric twin, which a machine without Arial may redistribute.
-FONT_CHAIN = ("Arial", "Liberation Sans", "DejaVu Sans")
+# Liberation Sans first, from ctx's vendored copy, which ``metrics.register_fonts`` gives
+# matplotlib on every machine: a figure drawn where Arial exists then embeds the face a redraw
+# elsewhere embeds, and the files are byte-equal (Rytis 2026-10-20, F.2c). Arial, its metric
+# twin, stays second for an SVG viewer that lacks Liberation Sans.
+FONT_CHAIN = ("Liberation Sans", "Arial", "DejaVu Sans")
 SIZES = {
     "base": 9.0, "axis_label": 10.0, "tick": 9.0, "legend": 9.0, "annotation": 9.0,
     "caption": 9.0, "panel": 12.0,

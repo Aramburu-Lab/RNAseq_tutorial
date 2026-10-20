@@ -1,4 +1,4 @@
-# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in blood.toml.
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in myeloid.toml.
 
 [cohort]
 name = "ovary"

@@ -1,0 +1,32 @@
+2026-10-20_de_desynth_a_case_results_v1.parquet: OK
+2026-10-20_de_desynth_size_factors_v1.parquet: OK
+de_synthetic.toml: OK
+/work/2026-10-20_de_desynth_volcano_a_case_v1_white.pdf
+/work/2026-10-20_de_desynth_volcano_a_case_v1_black.pdf
+/work/2026-10-20_de_desynth_volcano_a_case_v1_white.svg
+/work/2026-10-20_de_desynth_volcano_a_case_v1_black.svg
+/work/2026-10-20_de_desynth_volcano_a_case_v1.html
+/work/2026-10-20_de_desynth_volcano_a_case_v1.csv
+/work/2026-10-20_de_desynth_volcano_a_case_v1_README.md
+2026-10-20_de_desynth_a_case_results_v1.parquet
+2026-10-20_de_desynth_size_factors_v1.parquet
+2026-10-20_de_desynth_volcano_a_case_v1.csv
+2026-10-20_de_desynth_volcano_a_case_v1.html
+2026-10-20_de_desynth_volcano_a_case_v1_README.md
+2026-10-20_de_desynth_volcano_a_case_v1_black.pdf
+2026-10-20_de_desynth_volcano_a_case_v1_black.svg
+2026-10-20_de_desynth_volcano_a_case_v1_white.pdf
+2026-10-20_de_desynth_volcano_a_case_v1_white.svg
+de_synthetic.toml
+inputs.sha256
+params.toml
+2026-10-20_de_desynth_volcano_a_case_v1.csv: OK
+EQUAL  _de_desynth_volcano_a_case_v1.csv: 115801 B and 115801 B
+DIFFER  _de_desynth_volcano_a_case_v1_black.pdf: 51152 B and 37109 B
+         fonts, module: ['CECFXM+ArialMT', 'ESIQTB+ArialMT']; redraw: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']
+DIFFER  _de_desynth_volcano_a_case_v1_black.svg: 125650 B and 125650 B
+         fonts, module: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]; redraw: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]
+DIFFER  _de_desynth_volcano_a_case_v1_white.pdf: 51145 B and 37101 B
+         fonts, module: ['CECFXM+ArialMT', 'ESIQTB+ArialMT']; redraw: ['BLOCZP+LiberationSans', 'CPJPGU+LiberationSans']
+DIFFER  _de_desynth_volcano_a_case_v1_white.svg: 125005 B and 125005 B
+         fonts, module: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]; redraw: ["'Arial', 'Liberation Sans', 'DejaVu Sans', sans-serif"]

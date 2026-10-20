@@ -1,0 +1,7 @@
+ctx from /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a93c44dfd6e2a237b/scratch_y/main_src/src/ctx/__init__.py
+qc (main): exit 1
+│ ❱ 649 │   │   raise ValueError(f"{path.name}: {len(data)} bytes, over the    │
+│       {MAX_BYTES}-byte cap")                                                 │
+--
+ValueError: 2026-10-20_qc_tier1_overview_v1.html: 15990800 bytes, over the 
+15000000-byte cap

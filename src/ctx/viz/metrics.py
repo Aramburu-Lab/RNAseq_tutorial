@@ -27,12 +27,16 @@ from ctx.report.export import FONTS, VENDOR, vendored
 def register_fonts() -> None:
     """Give matplotlib the vendored faces, so the files' text is set in the face measured here.
 
-    The files name Arial first (``style.FONT_CHAIN``). On a machine with neither Arial nor
-    Liberation Sans matplotlib fell back to DejaVu Sans, wider than this measure, and a caption
-    wrapped by it would cross its inset.
+    The files name Liberation Sans first (``style.FONT_CHAIN``), and only the vendored files
+    answer to that name: an installed copy of another release would set other bytes, and
+    matplotlib takes the first of two equal matches, which is the installed one. Before the
+    faces were registered, a machine with neither Arial nor Liberation Sans fell back to DejaVu
+    Sans, wider than this measure, and a caption wrapped by it would cross its inset.
     """
     from matplotlib import font_manager  # noqa: PLC0415 - heavy
 
+    manager = font_manager.fontManager
+    manager.ttflist = [f for f in manager.ttflist if f.name != "Liberation Sans"]
     for name in FONTS.values():
         vendored(name)  # refuses a file that is not the bytes its manifest names
         font_manager.fontManager.addfont(str(VENDOR / name))
