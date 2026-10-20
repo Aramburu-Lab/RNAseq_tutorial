@@ -1,0 +1,15 @@
+item panel: caught (exit 1): the page's join without the blank line [tests/test_reproduce_browser.py::test_each_tab_copies_and_downloads_its_whole_script]
+item panel: caught (exit 1): the download without the script head [tests/test_reproduce_browser.py::test_each_tab_copies_and_downloads_its_whole_script]
+item panel: caught (exit 1): the shared block left shown [tests/test_reproduce_browser.py::test_each_tab_copies_and_downloads_its_whole_script]
+item panel: caught (exit 1): every tab's download holding the first tab's block [tests/test_reproduce_browser.py::test_each_tab_copies_and_downloads_its_whole_script]
+item panel: caught (exit 1): body without the blank line after step 1 [tests/test_reproduce_browser.py::test_body_and_script_are_main_s_text]
+item panel: caught (exit 1): each tab printing the shared steps again [tests/test_reproduce_browser.py::test_the_shared_steps_are_printed_once]
+item panel: caught (exit 1): the download link shown without JavaScript [tests/test_reproduce_browser.py::test_without_javascript_every_step_reads_once]
+item panel: caught (exit 1): the image proof's join without the blank line [tests/test_figure_panel.py::test_the_image_proof_reads_the_docker_tab_the_page_prints]
+item panel: restored tree, the same tests exit 0
+item cap: caught (exit 1): M2's view found by the stem suffix as before [tests/test_page_cap.py::test_m2_drops_its_flag_view_under_a_cap_one_byte_below_its_page]
+item cap: caught (exit 1): M9's cards fitted once, before their panels [tests/test_page_cap.py::test_m9_decides_its_cards_on_the_page_with_its_panels]
+item cap: caught (exit 1): M9's refit keeping the files of a card that left [tests/test_page_cap.py::test_m9_decides_its_cards_on_the_page_with_its_panels]
+item cap: caught (exit 1): builder.write holding its own 15 MB [tests/test_page_cap.py::test_one_cap_for_every_reader]
+item cap: caught (exit 1): an unmeasured part freeing nothing [tests/test_page_cap.py::test_parts_without_sizes_leave_one_at_a_time]
+item cap: restored tree, the same tests exit 0

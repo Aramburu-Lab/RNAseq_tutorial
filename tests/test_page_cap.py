@@ -103,3 +103,12 @@ def test_one_cap_for_every_reader(monkeypatch, tmp_path):
     with pytest.raises(ValueError, match=f"over the {size - 1}-byte cap"):
         write(FigurePage("Cap", block), tmp_path / "c.html")
     assert cap.kept(lambda k: ("x" * (size - 1 + k), ()), 1) == 0
+
+
+def test_parts_without_sizes_leave_one_at_a_time(monkeypatch):
+    """Three optional parts of 100 bytes whose sizes the page does not give, under a cap that
+    holds two: one leaves, and the page is measured again before another does. Catches the
+    excess left uncovered by an unmeasured part, which took every part out at once."""
+    monkeypatch.setattr(cap, "MAX_BYTES", 1250)
+    assert cap.kept(lambda k: ("x" * (1000 + 100 * k), ()), 3) == 2  # noqa: PLR2004
+    assert cap.kept(lambda k: ("x" * (1000 + 100 * k), ()), 3, least=3) == 3  # noqa: PLR2004

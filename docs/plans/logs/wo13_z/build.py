@@ -3,7 +3,8 @@
 Run: python build.py <side> <group> [<group> ...], side ``main`` (an export of main's src, its
 write refusal lifted so a page over the cap is written and measured) or ``z`` (this
 package's src, copied outside git, run as it is). Both sides run from a copy of src outside git,
-so their panels name no commit (as Y's cap_compare did). Every write lands in
+so their panels name no commit (as Y's cap_compare did); side ``checkout`` runs this worktree's
+src in git, as a reader's checkout does. Every write lands in
 ``outputs/scratch_z/<side>/<group>``: the real root's ``data/`` and its resources other than
 ``cache/`` are linked, its ``cache/``, ``00_setup`` and gather tables copied, never written.
 """
@@ -61,6 +62,11 @@ GROUPS: dict[str, tuple[str, tuple[str, ...], list[tuple[str, str, list[str]]]]]
         *[(m, s, a) for s in ("tcga_luad", "tcga_lusc") for m, a in (
             ("de", []), ("ncrna", []), ("clinical", []), ("genecard", ["--genes", GENES[s]]))],
     ]),
+    # The two commands Y.1 named, for the checkout side: this worktree's src, as committed.
+    "step1_qc": ("ctx_tier1", (), [(m, "tier1", a) for m, a in (
+        ("gather", ["--fetchngs-dir", f"{T1}/tier1_meta", "--rnaseq-dir", f"{T1}/tier1_rnaseq"]),
+        ("qc", ["--rnaseq-dir", f"{T1}/tier1_rnaseq"]))]),
+    "brca_clinical": ("ctx_breast", ("tcga_brca",), [("clinical", "tcga_brca", [])]),
     "hnsc": ("ctx_tcga_hnsc", ("tcga_hnsc",), [
         (m, "tcga_hnsc", []) for m in ("de", "function", "ncrna", "clinical")]),
     **{slug: (root, (slug,), [(m, slug, []) for m in ("qc", "de", "function")])
@@ -103,7 +109,7 @@ def run(side: str, group: str) -> None:
     root = SCRATCH / side / group
     prepare(root, HOME / real_name, slugs)
     env = {**os.environ, "PATH": f"{BIN}:{os.environ['PATH']}", "PYTHONDONTWRITEBYTECODE": "1",
-           "PYTHONPATH": str(SCRATCH / f"{side}_src" / "src"),
+           "PYTHONPATH": str(WT / "src" if side == "checkout" else SCRATCH / f"{side}_src" / "src"),
            "CTX_QC_REGISTRY": str(WT / "conf" / "qc_metrics.toml")}  # fmt: skip
     head = ["python", "-c", LIFT] if side == "main" else ["python", "-m", "ctx"]
     for module, slug, args in steps:

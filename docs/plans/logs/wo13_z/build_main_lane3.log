@@ -1,0 +1,16 @@
+main kidney de tcga_kirc: exit 0, 80 s
+main kidney function tcga_kirc: exit 0, 15 s
+main kidney ncrna tcga_kirc: exit 0, 38 s
+main kidney clinical tcga_kirc: exit 0, 32 s
+main kidney genecard tcga_kirc: exit 0, 84 s
+main kidney de cptac_ccrcc: exit 0, 80 s
+main kidney proteo cptac_ccrcc: exit 0, 22 s
+      162,243 B outputs/01_gather/2026-10-16_gather_cptac_ccrcc_overview_v1.html
+      166,169 B outputs/01_gather/2026-10-16_gather_tcga_kirc_overview_v1.html
+   13,265,673 B outputs/05_de/2026-10-20_de_cptac_ccrcc_overview_v1.html
+   12,132,574 B outputs/05_de/2026-10-20_de_tcga_kirc_overview_v1.html
+    7,181,920 B outputs/06_function/2026-10-20_function_tcga_kirc_overview_v1.html
+   12,678,998 B outputs/07_proteo/2026-10-20_proteo_cptac_ccrcc_overview_v1.html
+   12,171,719 B outputs/08_ncrna/2026-10-20_ncrna_tcga_kirc_overview_v1.html
+    7,076,825 B outputs/11_genecard/2026-10-20_genecard_tcga_kirc_overview_v1.html
+   13,334,615 B outputs/12_clinical/2026-10-20_clinical_tcga_kirc_overview_v1.html
