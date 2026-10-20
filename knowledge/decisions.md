@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-101 — An HTTP 404 is a provider's answer and is cached like a body
+
+**Date:** 2026-10-20 · **Status:** decided
+
+**Context.** Kit v10 paused: TCGA-BRCA's M9 page needed 5 HPA answers the cache could not give offline, because `_fetch` caught HTTPError as a URLError and never stored a 404.
+
+**Decision.** A 404 is stored as an answer with its URL, status, release, retrieval date and SHA-256, and offline reads as the online page does; only 404, because a 400 cannot tell an unknown ID from a malformed request. Every other failure stays uncached and is asked again. One wording, `cache.absent()`, serves both pages; a recorded absence lasts until `--refresh`, which moves the gene's folder aside and asks again.
+
+**Evidence.** A stubbed opener and a loopback server answering 404, 5xx and a timeout; an end-to-end M9 run online and offline gives the same HPA sentence; 8 planted mutations caught.
+
+**Consequence.** Existing caches hold no recorded 404 until their next online run.
+
+---
+
 ## D-100 — M6's ORA fills a short family in grey and draws -log10 p
 
 **Date:** 2026-10-20 · **Status:** decided; the bar length awaits Rytis (PK.5)

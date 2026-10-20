@@ -175,3 +175,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A mutation run that counts any non-zero pytest exit as caught counted 7 fixture errors as 7 catches: count failed tests, never errors (PK, 2026-10-20).
 - A bar of -log10 FDR is invisible for any set that fails BH: drawn failing sets sat at FDR 0.93 to 1, lengths 0.031 and 1.6e-13. Measure the length a mark will have before choosing what it encodes (PK3, 2026-10-20).
 - A script named after a package shadows it: `six.py` beside a script that imported matplotlib broke `import six` inside dateutil (PK3, 2026-10-20).
+- An except clause for URLError also catches HTTPError, its subclass: a 404, the provider's answer that no entry exists, was treated as a network failure and never cached. Catch HTTPError first and read its code (NC, 2026-10-20).
