@@ -173,3 +173,5 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A receiver tested by reading its text with querySelector passes when the text sits two screens below the fold: Rytis's 6 genes reached M6 and he saw none. Assert what is inside the window after a real click (PK, 2026-10-20).
 - A page with scroll-behavior: smooth turns a script's scrollIntoView into an animation that, under load, did not move in 3 of 12 runs: scroll at once for a jump on arrival (PK, 2026-10-20).
 - A mutation run that counts any non-zero pytest exit as caught counted 7 fixture errors as 7 catches: count failed tests, never errors (PK, 2026-10-20).
+- A bar of -log10 FDR is invisible for any set that fails BH: drawn failing sets sat at FDR 0.93 to 1, lengths 0.031 and 1.6e-13. Measure the length a mark will have before choosing what it encodes (PK3, 2026-10-20).
+- A script named after a package shadows it: `six.py` beside a script that imported matplotlib broke `import six` inside dateutil (PK3, 2026-10-20).

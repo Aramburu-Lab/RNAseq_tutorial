@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-100 — M6's ORA fills a short family in grey and draws -log10 p
+
+**Date:** 2026-10-20 · **Status:** decided; the bar length awaits Rytis (PK.5)
+
+**Context.** PK.3: Rytis's 6 genes passed no set and the panel drew nothing; Rytis 2026-10-20: show the top sets marked as not passing FDR.
+
+**Decision.** Each family draws every set at FDR < 0.05; where fewer than `live.TOP` (7, the panel's existing cap) pass, its failing sets of smallest p that hold a gene of the list fill it, in the reference grey, named in the legend and summary; sets ordered by p, ties by name, the family of smallest p first; one definition, `live.drawn` and `live.bars`, twin `ctxOra.drawn` and `ctxOra.blocks`. The length is -log10 p and the FDR line is dropped.
+
+**Evidence.** At -log10 FDR the 6-gene sets were 0.031 long and Step-1's 5 grey down sets below 0.001; at -log10 p 1.23 to 1.59 and 0.50 to 0.89. Node twin equal on 0, 1 and 10 passing; Chromium real click with 6 genes at 1280 and 375 px in both themes; Step-1 92 metrics equal; 16 planted mutations caught.
+
+**Consequence.** Step-1's static ORA figure gains 5 grey down bars and its length becomes p.
+
+---
+
 ## D-099 — A page that takes a gene list from a link brings the panel that took it into view, and M6 names the genes
 
 **Date:** 2026-10-20 · **Status:** decided
