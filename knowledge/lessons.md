@@ -167,3 +167,6 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - Count the files before building specs for them: M9's 24 extra `ctx figure` lines were F2's two extra Reproduce tabs per panel (Y, 2026-10-20).
 - A drawer that reuses a module's words must follow that function's signature: V2 added `paired` to `box_text`, and F1's drawer dropped the donor-line sentence with no error (Y, 2026-10-20).
 - matplotlib gives a font-name tie to the earlier font-list entry, so a vendored face does not override an installed copy of the same family; remove the rival first (Y, 2026-10-20).
+- A test that names a stem no real file has passes while the code never fires: flag_map looked for `_band_map` at the end, every real stem ends in `_v1`, and Step-1's flag view was never dropped. Take test stems from `naming.stem` (Z, 2026-10-20).
+- A number each module imports by name is a copy: flag_map's and genecard's MAX_BYTES ignored a patched builder.MAX_BYTES. Read a shared limit from its module when the code runs (Z, 2026-10-20).
+- A fit made before a page's last parts exist is an estimate: M9 fitted its cards before their Reproduce panels were written (Z, 2026-10-20).

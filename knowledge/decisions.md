@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-098 — A page's cap is decided on the page as written; a Reproduce panel's shared steps print once
+
+**Date:** 2026-10-20 · **Status:** decided
+
+**Context.** Y.1: Step-1 M2 and TCGA-BRCA M10 were over the 15 MB cap on main with every test green: F2's three tabs each repeated steps 2 to 5 and a base64 download, and M2's flag view never dropped.
+
+**Decision.** `ctx.report.cap` holds `MAX_BYTES`, `over` and `kept`, and every reader looks the cap up when it runs. Optional parts leave from the end of their list, measured on the rendered page with its panels: M2's flag view, matched by `_band_map_v\d+$`; M9's cards, fitted without panels, written, then fitted again with them, the cards that leave taking that pass's files. The panel prints each tab's step 1 and the shared steps once; the page's script joins them and builds each download.
+
+**Evidence.** 47 rebuilt pages all under the cap; 1,830 of 1,830 tabs byte-equal to main's; Step-1 92 of 92 metrics; 13 planted mutations caught.
+
+**Consequence.** Without JavaScript a panel offers no download, only its visible text. TCGA-BRCA M10 has 48,361 B of room (Z.1).
+
+---
+
 ## D-097 — Every figure is set in ctx's vendored Liberation Sans, on every machine
 
 **Date:** 2026-10-20 · **Status:** decided (Rytis 2026-10-20, F.2c)
