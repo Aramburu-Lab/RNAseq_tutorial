@@ -1,0 +1,3 @@
+item 1: caught (exit 1): the paired box redrawn without its pairing [tests/test_de_box_order.py]
+item 1: caught (exit 1): the running kind naming the function V2 moved [tests/test_figures.py::test_every_kind_names_inputs_its_drawer_reads]
+item 1: restored tree, the same tests exit 0
