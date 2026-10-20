@@ -1,4 +1,5 @@
 {# M6's live ORA (WO7): another contrast's calls against its own tested genes, and the sets
-   drawn, those that pass or each family's smallest FDR; ctxOra reruns lite.ora on them. #}
+   drawn, those that pass, filled to the top count in grey (PK.3), or each family's smallest
+   p; ctxOra reruns lite.ora on them and ctxOra.drawn picks the bars. #}
 <label>{{ w.contrast }}<select name="contrast">{% for name, label, _, _ in f.defaults.contrasts %}<option value="{{ name }}"{% if loop.first %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>
-<label>{{ w.sets }}<select name="sets"><option value="passing" selected>{{ w.sets_passing }}</option><option value="top">{{ w.sets_top.format(top=f.defaults.top) }}</option></select></label>
+<label>{{ w.sets }}<select name="sets"><option value="passing" selected>{{ w.sets_passing.format(top=f.defaults.top, alpha=f.defaults.alpha) }}</option><option value="top">{{ w.sets_top.format(top=f.defaults.top) }}</option></select></label>

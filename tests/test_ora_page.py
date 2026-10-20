@@ -194,3 +194,96 @@ def test_a_contrast_choice_tests_its_own_calls_as_by_contrast_does():
             ), (name, direction)
             assert [r["p"] for r in rows] == pytest.approx(built["p"].to_list(), rel=BOUND)
     assert seen[1] != seen[2]
+
+
+BLOCKS = r"""
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify(input.cases.map(c => {
+  const families = ["up", "down"].map(d => [d, ctxOra.ora(c[d], c.background, c.sets,
+                                                          c.min, c.max)]);
+  return ctxOra.blocks(families, c.how, c.alpha, c.top).flatMap(b => b[1].map(
+    x => [b[0], x.row.name, x.passes, x.row.p]));
+})));
+"""
+
+
+def _short_lists() -> dict[str, dict]:
+    """Forty disjoint sets of 40 in 3,000 genes; lists that pass none, one or many sets.
+
+    One gene from each of several sets gives each the same p, so the tie by name is tested;
+    "down_first" puts the down family's smallest p first."""
+    sets = [[f"S{j:02d}", [f"G{j * 40 + k}" for k in range(40)]] for j in range(40)]
+    background = [f"G{i}" for i in range(3_000)]
+    one_each = [f"G{j * 40}" for j in range(31, 39)]  # S31 to S38, a hit each
+    lists = {
+        "none": ([f"G{j * 40}" for j in range(30, 36)], []),
+        "one": ([f"G{k}" for k in range(15)] + one_each, [f"G{400 + k}" for k in range(2)]),
+        "many": ([f"G{j * 40 + k}" for j in range(10) for k in range(12)],
+                 [f"G{800 + k}" for k in range(10)] + [f"G{840 + k}" for k in range(10)]
+                 + one_each),
+        "down_first": (one_each, [f"G{1200 + k}" for k in range(15)]),
+    }  # fmt: skip
+    return {name: {"up": up, "down": down, "background": background, "sets": sets,
+                   "min": lite.MIN_SIZE, "max": lite.MAX_SIZE}
+            for name, (up, down) in lists.items()}  # fmt: skip
+
+
+def _python_bars(case: dict, how: str) -> pl.DataFrame:
+    """``live.bars`` of the case's two families, as ``run._ora`` builds the frame."""
+    rows = [(d, r.name, r.size, r.hits, r.expected, r.p, r.fdr, ";".join(r.genes))
+            for d in ("up", "down")
+            for r in lite.ora(case[d], case["background"], dict(case["sets"]))]  # fmt: skip
+    schema = ["direction", "gene_set", "size", "hits", "expected", "p", "fdr", "genes"]
+    return live.bars(pl.DataFrame(rows, schema=schema, orient="row"), how)
+
+
+@pytest.mark.parametrize("how", live.HOW)
+def test_the_page_draws_the_bars_live_bars_draws(how):
+    """PK.3: ``ctxOra.blocks`` draws ``live.bars``'s sets in its order with its marks, on lists
+    passing none, one and many sets; each p within D-049's bound.
+
+    Mutations caught: the failing sets dropped where few pass (Rytis's empty chart); the
+    fill counted past ``live.TOP``; a set holding no gene drawn; the tie by name reversed;
+    the families in their given order rather than by smallest p."""
+    cases = _short_lists()
+    node = shutil.which("node")
+    assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
+    script = re.sub(r"\{% (end)?raw %\}", "", SCRIPT.read_text())
+    plan = [{**c, "how": how, "alpha": live.ALPHA, "top": live.TOP} for c in cases.values()]
+    done = subprocess.run([node, "-e", script + BLOCKS], input=json.dumps({"cases": plan}),
+                          capture_output=True, text=True, check=True)  # fmt: skip
+    seen = dict(zip(cases, json.loads(done.stdout), strict=True))
+    counts = {}
+    for name, case in cases.items():
+        python = _python_bars(case, how)
+        assert [(d, s, bool(x)) for d, s, x, _ in seen[name]] == list(
+            zip(python["direction"], python["gene_set"], python["passes"], strict=True)
+        ), name
+        assert [p for *_, p in seen[name]] == pytest.approx(python["p"].to_list(), rel=BOUND)
+        assert python["series"].to_list() == [
+            d if x else f"{d}_failing"
+            for d, x in zip(python["direction"], python["passes"], strict=True)
+        ]
+        assert (python["hits"] > 0).all()
+        per = python.group_by("direction").agg(pl.col("passes").sum(), pl.len())
+        counts[name] = {d: (int(x), n) for d, x, n in per.iter_rows()}
+    # The fixtures' premises: no set, one set and ten sets pass on the up calls.
+    if how == "passing":
+        assert counts["none"] == {"up": (0, 6)}
+        assert counts["one"]["up"] == (1, live.TOP)
+        assert counts["many"] == {"up": (10, 10), "down": (2, live.TOP)}
+    else:
+        assert all(n <= live.TOP for c in counts.values() for _, n in c.values())
+    # The family holding the smallest p first: down on these two, up on "one".
+    assert [seen[n][0][0] for n in ("down_first", "many", "one")] == ["down", "down", "up"]
+    assert all(seen[n][0][3] == min(p for *_, p in seen[n]) for n in cases)
+    # S30 to S35 hold a gene each: an equal p, drawn by name.
+    tied = [s for _, s, _, _ in seen["none"]]
+    assert tied == sorted(tied) and len(tied) == 6  # noqa: PLR2004 - the six genes
+
+
+def test_drawn_refuses_an_unknown_choice():
+    """Mutation caught: an unknown "Sets drawn" read as "passing" with no error."""
+    with pytest.raises(ValueError, match="sets drawn"):
+        live.drawn(pl.DataFrame({"gene_set": ["S"], "hits": [1], "p": [0.1], "fdr": [0.1]}),
+                   "every")  # fmt: skip

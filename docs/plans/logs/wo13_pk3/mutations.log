@@ -1,0 +1,16 @@
+caught: JS fill dropped: 1 failed, 7 passed in 1.27s
+caught: JS fill past top: 1 failed, 7 passed in 1.33s
+caught: JS set with no hit drawn: 2 failed, 6 passed in 1.32s
+caught: JS tie by name reversed: 2 failed, 6 passed in 1.30s
+caught: JS families unsorted: 2 failed, 6 passed in 1.31s
+caught: page fill dropped: 4 failed, 4 passed in 152.85s (0:02:32)
+caught: page grey in the family colour: 4 failed, 4 passed in 141.10s (0:02:21)
+caught: page length -log10 FDR: 4 failed, 4 passed in 140.33s (0:02:20)
+caught: page grey sentence left out: 4 failed, 4 passed in 140.23s (0:02:20)
+caught: Python fill dropped: 2 failed, 19 passed in 11.39s
+caught: Python set with no hit drawn: 2 failed, 6 passed in 1.64s
+caught: Python families unsorted: 2 failed, 6 passed in 1.20s
+caught: static grey in the up colour: 1 failed, 12 passed in 10.58s
+caught: static length -log10 FDR: 1 failed, 12 passed in 13.48s
+caught: static legend says passing: 1 failed, 12 passed in 15.80s
+caught: static reading line kept: 1 failed, 12 passed in 12.99s

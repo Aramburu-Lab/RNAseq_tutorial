@@ -45,22 +45,38 @@
     }
     function run() {
       var bg = backgrounds[form.elements.background.value], traces = [], rows = [], passing = 0;
-      var cats = [];
-      families().forEach(function (f) {
+      var cats = [], failing = 0, how = setsShown ? setsShown.value : "passing";
+      var tested = families().map(function (f) {
         var found = ctxOra.ora(f[1], bg.genes, sets, cfg.min_size, cfg.max_size, lf);
         found.forEach(function (r) { rows.push([f[0]].concat([r.name, r.size, r.hits, r.expected, r.p, r.fdr, r.genes.join(";")])); });
-        var top = setsShown && setsShown.value === "top";
-        var shown = found.filter(function (r) { return top || r.fdr < cfg.alpha; })
-          .sort(function (a, b) { return a.fdr - b.fdr || (a.name < b.name ? -1 : 1); });
-        if (top) shown = shown.slice(0, cfg.top);
-        passing += shown.length;
-        shown.forEach(function (r) { if (cats.indexOf(cfg.labels[r.name]) < 0) cats.push(cfg.labels[r.name]); });
-        traces.push({ type: "bar", orientation: "h", name: words.families[f[0]],
-          marker: { color: colours[f[0]] },
-          x: shown.map(function (r) { return -Math.log10(r.fdr); }),
-          y: shown.map(function (r) { return cfg.labels[r.name]; }),
-          customdata: shown.map(function (r) { return [r.name, r.fdr, r.hits, r.size]; }),
-          hovertemplate: words.hover + "<extra></extra>" });
+        passing += found.filter(function (r) { return r.fdr < cfg.alpha; }).length;
+        return [f[0], found];
+      });
+      /* The bars as live.bars draws them (PK.3): ctxOra.blocks orders the categories; the
+         traces run as the build's legend does, each family's passing sets, then each
+         family's failing sets in grey. */
+      var blocks = ctxOra.blocks(tested, how, cfg.alpha, cfg.top);
+      blocks.forEach(function (b) {
+        b[1].forEach(function (d) {
+          if (cats.indexOf(cfg.labels[d.row.name]) < 0) cats.push(cfg.labels[d.row.name]);
+          if (!d.passes) failing++;
+        });
+      });
+      [true, false].forEach(function (passes) {
+        tested.forEach(function (f) {
+          var block = blocks.filter(function (b) { return b[0] === f[0]; })[0];
+          var shown = (block ? block[1] : []).filter(function (d) { return d.passes === passes; })
+            .map(function (d) { return d.row; });
+          if (!shown.length) return;
+          traces.push({ type: "bar", orientation: "h",
+            name: ctxPick.fill(words.legend[passes ? "passing" : "failing"],
+                               { family: words.families[f[0]], alpha: cfg.alpha }),
+            marker: { color: passes ? colours[f[0]] : colours.failing },
+            x: shown.map(function (r) { return -Math.log10(r.p); }),
+            y: shown.map(function (r) { return cfg.labels[r.name]; }),
+            customdata: shown.map(function (r) { return [r.name, r.fdr, r.hits, r.size, r.p]; }),
+            hovertemplate: words.hover + "<extra></extra>" });
+        });
       });
       var moved = list !== build || form.elements.direction.value !== "each" ||
         form.elements.background.value !== cfg.featured ||
@@ -68,14 +84,18 @@
       /* At the build's settings the figure stays as built, which the PDF and SVG draw. */
       if (moved || drawn) {
         var others = div.data.filter(function (t) { return t.type !== "bar"; });
+        /* The legend names which bars pass, even where one trace is drawn (PK.3). */
         Plotly.react(div, traces.concat(others), Object.assign(div.layout,
-          { yaxis: Object.assign(div.layout.yaxis || {}, { categoryarray: cats }) }));
+          { yaxis: Object.assign(div.layout.yaxis || {}, { categoryarray: cats }),
+            showlegend: traces.length > 0 }));
         drawn = true;
       }
       var n = list.up.length + list.down.length + (list.none || []).length;
       line.textContent = ctxPick.fill(words.summary, { n: n, up: list.up.length, down: list.down.length,
         background: bg.label, size: bg.genes.length.toLocaleString("en-US"), passing: passing,
-        source: list.source, tries: tries });
+        source: list.source, tries: tries, alpha: cfg.alpha }) +
+        (failing ? " " + ctxPick.fill(words.grey, { failing: failing, alpha: cfg.alpha, top: cfg.top }) : "") +
+        (blocks.length ? "" : " " + words.empty);
       table.textContent = [words.columns].concat(rows.map(function (r) {
         return r.map(function (v) { return typeof v === "number" ? String(v) : v; }).join("\t");
       })).join("\n");

@@ -1,11 +1,13 @@
-"""M6's bars and words follow what is drawn (item 2, D9): the ORA bars only the sets that pass,
-the GSEA highlight line, the background's direction, and the calls against their symbols.
+"""M6's bars and words follow what is drawn (item 2, D9): the ORA bars the sets that pass and,
+in a short direction, the failing sets of smallest p in grey (PK.3), the GSEA highlight line,
+the background's direction, and the calls against their symbols.
 
 A planted ORA case: 3,000 tested genes, G0001 to G1200 called up (the last two sharing one
 symbol, as Step-1's CMAHP and RRN3P3 each name two called genes), G1201 to G1500 down. UP_A
 and UP_B hold up calls far above chance; ten null sets and every down call hold none.
 """
 
+import math
 from datetime import date
 from pathlib import Path
 
@@ -16,7 +18,7 @@ from ctx.dataset import load
 from ctx.de.page import words as de_words
 from ctx.de.run import Writer
 from ctx.de.stats import ALPHA
-from ctx.function import background
+from ctx.function import background, live
 from ctx.function import page as words
 from ctx.function import run as m6
 from ctx.report import text
@@ -72,26 +74,67 @@ def planted(tmp_path_factory):
     return found, checks
 
 
-def test_ora_draws_only_the_sets_that_pass_and_says_how_many(planted):
-    """Step-1's down bars sat at FDR 1, 5 of 7 (a length of 1.6e-13): only 2 of 48 down sets
-    passed. Every bar drawn passes; a direction with none draws none, and the lead counts it.
-    Mutation: the top 7 per direction drawn again."""
+def test_ora_draws_the_passing_sets_and_says_how_many(planted):
+    """The planted page: UP_A and UP_B pass, and no other set holds a call, so no grey bar is
+    drawn and the reading guide says every bar passes. Mutation: a set holding no call drawn."""
     found, _ = planted
     ora, _ = found[1].items
     assert isinstance(ora, FigureBlock)
     assert {(r["gene_set"], r["direction"]) for r in ora.rows} == {("UP_A", "up"), ("UP_B", "up")}
     assert all(r["fdr"] < ALPHA for r in ora.rows)
     assert ora.text.lead == text.fill("function", "figures.ora.lead", up=2, down=0, alpha=ALPHA)
+    # 2,999 symbols: two of the 3,000 genes share one.
+    assert ora.text.reading[-1] == text.fill("function", "figures.ora.passing", alpha=ALPHA,
+                                             background=N - 1)  # fmt: skip
 
 
-def test_no_ora_figure_where_no_set_passes(tmp_path):
-    """No passing set in either direction: a sentence in place of the figure, no empty bars."""
+def _short_frame() -> pl.DataFrame:
+    """Up: 2 sets pass and 10 fail holding a call; down: none passes, 3 hold a call, 5 none."""
+    rows = [("up", f"UP_{i:02d}", 40, 9, 2.0, 1e-6 * (i + 1), 1e-4, "") for i in range(2)]
+    rows += [("up", f"UPF_{i:02d}", 40, 2, 1.5, 0.01 * (i + 1), 0.3, "") for i in range(10)]
+    rows += [("down", f"DN_{i:02d}", 40, 1, 0.4, 0.002 * (i + 1), 0.2, "") for i in range(3)]
+    rows += [("down", f"DZ_{i:02d}", 40, 0, 0.4, 1.0, 1.0, "") for i in range(5)]
+    return pl.DataFrame(rows, schema=list(m6.ORA_COLUMNS), orient="row")
+
+
+def test_a_short_direction_is_filled_in_grey_by_p():
+    """PK.3: a direction with fewer than ``live.TOP`` passing sets adds its failing sets of
+    smallest p, grey and named so in the legend; a set holding no call is never drawn; the
+    length is -log10 p, which a failing set's FDR near 1 would hide.
+
+    Mutations caught: the fill left out; a grey bar in its direction's colour; the length
+    -log10 FDR; the direction of smaller p not first; the legend's grey left unnamed."""
+    bars = m6._ora_bars(SAID, _short_frame(), N)
+    assert bars is not None
+    frame = bars.frame
+    assert frame["gene_set"].to_list() == [
+        "UP_00",
+        "UP_01",
+        *(f"UPF_{i:02d}" for i in range(5)),
+        "DN_00",
+        "DN_01",
+        "DN_02",
+    ]
+    assert frame["series"].to_list() == ["up"] * 2 + ["up_failing"] * 5 + ["down_failing"] * 3
+    assert bars.colours["up_failing"] is None and bars.colours["down_failing"] is None
+    assert bars.colours["up"] and bars.colours["down"]
+    assert frame["neg_log10_p"].to_list() == pytest.approx([-math.log10(p) for p in frame["p"]])
+    assert bars.names["down_failing"] == text.fill("function", "live.legend.failing",
+                                                   family="down", alpha=ALPHA)  # fmt: skip
+    assert str(live.TOP) in bars.caption and "grey" in bars.caption
+    reading = words.ora_text(SAID, N, 2, 0, int((~frame["passes"]).sum())).reading[-1]
+    assert reading == text.fill("function", "figures.ora.failing", alpha=ALPHA, failing=8,
+                                top=live.TOP)  # fmt: skip
+
+
+def test_no_ora_figure_where_no_set_holds_a_call(tmp_path):
+    """No set holds an up or a down call: a sentence in place of the figure, no empty bars."""
     writer = Writer(tmp_path / "06_function", "desynth", date(2026, 10, 7), {})
     nulls = {k: v for k, v in _sets().items() if k.startswith("NULL")}
     group = m6._featured(
         writer, SPEC.contrasts[0], {SPEC.contrasts[0].name: SAID}, _enrichment(nulls, _gsea(16, 4))
     )
-    assert group.items[0] == text.fill("function", "figures.ora.none", alpha=ALPHA)
+    assert group.items[0] == text.fill("function", "figures.ora.none")
     assert not group.tabs and isinstance(group.items[1], FigureBlock)
 
 

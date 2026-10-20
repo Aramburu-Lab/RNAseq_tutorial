@@ -14,7 +14,6 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import polars as pl
 
 from ctx import runtime
@@ -57,7 +56,7 @@ from ctx.report.lookups import lookup
 from ctx.report.text import fill, word
 from ctx.report.views import viewed
 from ctx.viz.bar import BarData
-from ctx.viz.style import DATA_COLOURS, ROLES
+from ctx.viz.style import DATA_COLOURS, ROLES, THEMES
 
 MODULE = "function"
 TOP_SETS = 15
@@ -193,40 +192,57 @@ def _gsea_bars(said: Words, frame: pl.DataFrame) -> BarData:
 
 
 def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | None:
-    """-log10 FDR of every set that passes, a block per direction; None when none passes.
+    """-log10 p of the sets ``live.bars`` draws, a block per direction; None when none is.
 
-    A set that fails has no bar: drawn among the top seven per direction, 5 of Step-1's down
-    bars sat at FDR 1, a length of 1.6e-13.
+    A direction with fewer than ``live.TOP`` passing sets adds its failing sets of smallest
+    p in grey (PK.3). The length is p's: Step-1's 5 grey down sets sit at -log10 FDR below
+    0.001, a bar no reader sees, and at -log10 p 0.50 to 0.89.
     """
-    top = _labelled(
-        frame.filter(pl.col("fdr") < ALPHA)
-        # The direction holding the smallest FDR first, each direction's sets by FDR.
-        .sort(pl.col("fdr").min().over("direction"), "direction", "fdr", "gene_set")
-        .with_columns(neg_log10_fdr=-pl.col("fdr").log10())
-    ).unique(["label", "direction"], maintain_order=True)
+    top = _labelled(live.bars(frame).with_columns(neg_log10_p=-pl.col("p").log10()))
+    top = top.unique(["label", "series"], maintain_order=True)
     if top.is_empty():
         return None
     columns = {
         **ORA_COLUMNS,
-        "neg_log10_fdr": ("-log10 FDR", "Minus log10 of the FDR."),
+        "passes": ("none", f"FDR below {ALPHA} or not."),
+        "series": ("none", "The calls counted; _failing where the set does not pass, grey."),
+        "neg_log10_p": ("-log10 p", "Minus log10 of the hypergeometric p."),
         "label": ("none", "Set name in words."),
     }
+    families = text.raw(PAGE, "live.families")
+    # The page's own legend words (ctxOra.blocks names its traces from the same keys).
+    names = {}
+    for d in ("up", "down"):
+        names[d] = fill(PAGE, "live.legend.passing", family=families[d], alpha=ALPHA)
+        names[f"{d}_failing"] = fill(PAGE, "live.legend.failing", family=families[d], alpha=ALPHA)
     return BarData(
         frame=top,
         columns=columns,
         category="label",
-        value="neg_log10_fdr",
+        value="neg_log10_p",
         category_label=figure("ora", "x"),
         value_label=figure("ora", "y"),
-        series="direction",
-        colours={"up": ROLES["comparison"], "down": ROLES["reference"]},
+        series="series",
+        colours={
+            "up": ROLES["comparison"],
+            "down": ROLES["reference"],
+            "up_failing": None,
+            "down_failing": None,
+        },  # fmt: skip
         caption=figure(
-            "ora", "caption", label=said.label, calls=CALLS, background=background, alpha=ALPHA
+            "ora",
+            "caption",
+            label=said.label,
+            calls=CALLS,
+            background=background,
+            alpha=ALPHA,
+            top=live.TOP,
         ),  # fmt: skip
         horizontal=True,
-        hline=(-float(np.log10(ALPHA)), figure("ora", "line", alpha=ALPHA)),
-        hover=("gene_set", "hits", "size"),
+        hover=("gene_set", "p", "fdr", "hits", "size"),
         width="double",
+        names=names,
+        labels={"series": word(PAGE, "live.direction")},
     )
 
 
@@ -355,13 +371,17 @@ def _featured(writer: Writer, contrast: Contrast, labelled: Mapping[str, Words],
         labels["union"] = word(PAGE, "live.union")
         panel = live.panel(e.results, name, e.sets, labels,
                            {s: set_words(s) for s in e.sets})  # fmt: skip
-        # "all": the list as one family, in the palette's orange, which neither call takes.
-        panel["colours"] = {**bars.colours, "all": DATA_COLOURS[0]}
+        # "all": the list as one family, in the palette's orange, which neither call takes;
+        # "failing": the grey of a set that does not pass, whatever its family (PK.3).
+        grey = THEMES["white"].reference
+        panel["colours"] = {"up": ROLES["comparison"], "down": ROLES["reference"],
+                            "all": DATA_COLOURS[0], "failing": grey}  # fmt: skip
         bars = replace(bars, live=panel)
     items = (
-        writer.figure(bars, f"ora_{name}", ora_text(said, len(background),
-                                                    passing.get("up", 0), passing.get("down", 0)))
-        if bars else fill(PAGE, "figures.ora.none", alpha=ALPHA),
+        writer.figure(bars, f"ora_{name}", ora_text(said, len(background), passing.get("up", 0),
+                                                    passing.get("down", 0),
+                                                    int((~bars.frame["passes"]).sum())))
+        if bars else fill(PAGE, "figures.ora.none"),
         _gsea_views(writer, name, labelled, e),
     )  # fmt: skip
     # Tabs hold figures only: with no ORA figure its sentence stands above the GSEA bars.

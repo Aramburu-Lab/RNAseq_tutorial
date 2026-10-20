@@ -8,7 +8,7 @@ from typing import Any
 
 from ctx.de.page import Words
 from ctx.de.stats import ALPHA, LFC_MIN
-from ctx.function import lite
+from ctx.function import lite, live
 from ctx.report import text
 from ctx.report.builder import FigureText, SelfCheck
 
@@ -41,19 +41,19 @@ def fdr_words(fdr: float) -> str:
     return text.word(PAGE, "fdr.zero") if fdr == 0 else f"{fdr:.2g}"
 
 
-def ora_text(said: Words, background: int, up: int, down: int) -> FigureText:
-    """Title, lead and reading guide of the ORA bars, which draw only the sets that pass.
+def ora_text(said: Words, background: int, up: int, down: int, failing: int = 0) -> FigureText:
+    """Title, lead and reading guide of the ORA bars (``live.bars``).
 
     ``up`` and ``down`` count the sets passing on each direction's calls; the lead states
-    both, so a direction with no bar says it has none.
+    both, so a direction with no passing set says it has none. ``failing`` counts the grey
+    bars, which the last reading line names when there are any (PK.3).
     """
+    last = (figure("ora", "failing", alpha=ALPHA, failing=failing, top=live.TOP) if failing
+            else figure("ora", "passing", alpha=ALPHA, background=background))  # fmt: skip
     return FigureText(
         title=figure("ora", "title", label=said.label),
         lead=figure("ora", "lead", up=up, down=down, alpha=ALPHA),
-        reading=(
-            *text.lines(PAGE, "figures.ora.reading", tested=said.tested, calls=CALLS),
-            figure("ora", "passing", alpha=ALPHA, background=background),
-        ),  # fmt: skip
+        reading=(*text.lines(PAGE, "figures.ora.reading", tested=said.tested, calls=CALLS), last),
         tab=figure("ora", "tab"),
     )
 

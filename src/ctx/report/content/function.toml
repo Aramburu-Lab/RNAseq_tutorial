@@ -94,24 +94,25 @@ zero = "0 (no null score as extreme)"
 passing = "FDR < {alpha}"
 failing = "not significant"
 
-# Over-representation draws only the sets that pass, so a direction with none has no bar; the
-# lead counts both directions, 0 included.
+# Over-representation draws every set that passes, and a direction with fewer than live.TOP
+# passing adds its failing sets of smallest p in grey (PK.3); the lead counts both
+# directions, 0 included. The length is -log10 p: a grey set's FDR is near 1, no bar.
 [figures.ora]
 title = "Over-representation: {label}"
 tab = "ORA"
 lead = "{up} gene sets pass FDR < {alpha} on the up calls, {down} on the down calls."
 reading = [
-    "Each bar is one gene set; its length is -log10 of its FDR, so a longer bar is stronger evidence of over-representation.",
+    "Each bar is one gene set; its length is -log10 of its hypergeometric p, so a longer bar is a smaller p.",
     "Colour says which calls were counted: up or down in {tested} ({calls}).",
 ]
 calls = "padj below {alpha}, log2 FC at or beyond ±{lfc_min}"
-caption = "{label}: hypergeometric ORA of the up and down calls ({calls}), BH per direction. Background: the {background:,} gene symbols of the tested genes. Drawn: the sets past the dashed line, FDR = {alpha}."
-passing = "Every bar passes the dashed line, FDR = {alpha}: the set holds more calls than its share of the {background:,} tested gene symbols predicts."
-# Shown in place of the figure when no set passes in either direction.
-none = "No gene set passes FDR < {alpha} on the up or the down calls, so no bar is drawn."
+caption = "{label}: hypergeometric ORA of the up and down calls ({calls}), BH per direction, against the {background:,} tested gene symbols. Drawn: each set at FDR < {alpha}, and in grey, the smallest p to {top}."
+passing = "Every bar passes FDR < {alpha} after BH: the set holds more calls than its share of the {background:,} tested gene symbols predicts."
+failing = "Grey bars fail FDR < {alpha} after BH: {failing} sets of smallest p, drawn where fewer than {top} sets of a direction pass."
+# Shown in place of the figure when no set holds a call in either direction.
+none = "No gene set holds an up or a down call, so no bar is drawn."
 x = "Gene set"
 y = "Significance"
-line = "FDR {alpha}"
 
 # The last reading line of the GSEA bars, by how many of the bars drawn pass; the caption
 # counts the sets drawn, fewer than the fifteen where fewer were tested.
@@ -216,14 +217,17 @@ union = "gene-set union and tested genes (the background trap)"
 contrast = "Calls of"
 contrast_calls = "The calls of {label}"
 sets = "Sets drawn"
-sets_passing = "Those passing FDR < 0.05"
-sets_top = "The {top} smallest FDR of each family"
-summary = "{source}: {n} genes, {up} up and {down} down, tested against {background}, {size} symbols; {passing} set results pass FDR < 0.05. Lists tested on this page: {tries}; no correction runs across them."
+sets_passing = "Those passing FDR < {alpha}, filled to {top} by p"
+sets_top = "The {top} smallest p of each family"
+summary = "{source}: {n} genes, {up} up and {down} down, tested against {background}, {size} symbols; {passing} set results pass FDR < {alpha}, BH per family. Lists tested on this page: {tries}; no correction runs across them."
+# PK.3: the sets drawn in grey, and a list no set holds.
+grey = "Grey bars: {failing} sets of smallest p that fail FDR < {alpha}; a family draws up to {top} sets, each holding a gene of the list."
+empty = "No gene set holds a gene of the list, so no bar is drawn."
 taken = "{n} genes of the list have a symbol on this page; genes left out for want of one: {missing}."
 named = "The list: {names}."
 more = "{names} and {more} more"
 pasted_found = "{n} pasted names are symbols on this page; names matching none: {missing}."
-hover = "%{customdata[0]}<br>FDR %{customdata[1]:.2g}<br>%{customdata[2]} of %{customdata[3]} set genes in the list"
+hover = "%{customdata[0]}<br>p %{customdata[4]:.2g}<br>FDR %{customdata[1]:.2g}<br>%{customdata[2]} of %{customdata[3]} set genes in the list"
 columns = "calls\tgene_set\tsize\thits\texpected\tp\tfdr\tgenes"
 noscript = "Testing a gene list needs JavaScript; ctx function --genes-from tests a saved list."
 
@@ -237,3 +241,8 @@ down = "Down only"
 up = "up"
 down = "down"
 all = "the list"
+
+# A family's legend entries, the build's bars and the page's alike (PK.3).
+[live.legend]
+passing = "{family}, FDR < {alpha} (BH)"
+failing = "{family}, not passing FDR < {alpha}"

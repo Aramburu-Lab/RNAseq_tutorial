@@ -55,9 +55,12 @@ def test_the_live_ora_reruns_on_each_setting(ran):
     seen = results["ora"]
     assert seen["errors"] == []
     acted = seen["acted"]
-    assert not acted["start"]["moved"] and len(acted["start"]["bars"]) == 2  # noqa: PLR2004
-    assert len(acted["up"]["bars"]) == 1 and acted["up"]["moved"]
-    live = "%{customdata[0]}<br>FDR"  # the live bars' hover; the build's bars keep their own
+    # Each direction's passing set and its grey fill to live.TOP (PK.3): four traces.
+    assert not acted["start"]["moved"] and len(acted["start"]["bars"]) == 4  # noqa: PLR2004
+    assert [n for n, _ in acted["up"]["bars"]] == ["up, FDR < 0.05 (BH)",
+                                                   "up, not passing FDR < 0.05"]  # fmt: skip
+    assert acted["up"]["moved"]
+    live = "%{customdata[0]}<br>p %{customdata[4]"  # the live bars' hover; the build's its own
     assert live not in acted["start"]["hover"] and live in acted["up"]["hover"]
     assert "The featured contrast's calls" in acted["up"]["summary"]
     assert "gene-set union" in acted["union"]["summary"]
