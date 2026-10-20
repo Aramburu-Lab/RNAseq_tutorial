@@ -1,0 +1,39 @@
+z breast de tcga_brca: exit 0, 167 s
+z breast function tcga_brca: exit 0, 13 s
+z breast ncrna tcga_brca: exit 0, 45 s
+z breast clinical tcga_brca: exit 0, 44 s
+z breast genecard tcga_brca: exit 0, 429 s
+z breast de cptac_brca: exit 0, 40 s
+z breast proteo cptac_brca: exit 0, 27 s
+      161,951 B outputs/01_gather/2026-10-16_gather_cptac_brca_overview_v1.html
+      165,500 B outputs/01_gather/2026-10-16_gather_tcga_brca_overview_v1.html
+   11,605,090 B outputs/05_de/2026-10-20_de_cptac_brca_overview_v1.html
+   11,739,746 B outputs/05_de/2026-10-20_de_tcga_brca_overview_v1.html
+    7,098,766 B outputs/06_function/2026-10-20_function_tcga_brca_overview_v1.html
+   13,993,754 B outputs/07_proteo/2026-10-20_proteo_cptac_brca_overview_v1.html
+   13,792,375 B outputs/08_ncrna/2026-10-20_ncrna_tcga_brca_overview_v1.html
+   12,057,157 B outputs/11_genecard/2026-10-20_genecard_tcga_brca_overview_v1.html
+   14,942,619 B outputs/12_clinical/2026-10-20_clinical_tcga_brca_overview_v1.html
+z lung qc tcga_lung: exit 0, 40 s
+z lung de tcga_lung: exit 0, 60 s
+z lung de tcga_luad: exit 0, 48 s
+z lung ncrna tcga_luad: exit 0, 31 s
+z lung clinical tcga_luad: exit 0, 21 s
+z lung genecard tcga_luad: exit 0, 78 s
+z lung de tcga_lusc: exit 0, 45 s
+z lung ncrna tcga_lusc: exit 0, 32 s
+z lung clinical tcga_lusc: exit 0, 28 s
+z lung genecard tcga_lusc: exit 0, 76 s
+      165,562 B outputs/01_gather/2026-10-16_gather_tcga_luad_overview_v1.html
+      166,156 B outputs/01_gather/2026-10-16_gather_tcga_lung_overview_v1.html
+      165,625 B outputs/01_gather/2026-10-16_gather_tcga_lusc_overview_v1.html
+    8,160,765 B outputs/02_qc/2026-10-20_qc_tcga_lung_overview_v1.html
+   11,186,611 B outputs/05_de/2026-10-20_de_tcga_luad_overview_v1.html
+   11,388,272 B outputs/05_de/2026-10-20_de_tcga_lung_overview_v1.html
+   12,598,712 B outputs/05_de/2026-10-20_de_tcga_lusc_overview_v1.html
+   11,477,674 B outputs/08_ncrna/2026-10-20_ncrna_tcga_luad_overview_v1.html
+   12,291,216 B outputs/08_ncrna/2026-10-20_ncrna_tcga_lusc_overview_v1.html
+    6,789,365 B outputs/11_genecard/2026-10-20_genecard_tcga_luad_overview_v1.html
+    6,667,740 B outputs/11_genecard/2026-10-20_genecard_tcga_lusc_overview_v1.html
+   13,117,658 B outputs/12_clinical/2026-10-20_clinical_tcga_luad_overview_v1.html
+   13,107,151 B outputs/12_clinical/2026-10-20_clinical_tcga_lusc_overview_v1.html

@@ -10,7 +10,7 @@ import polars as pl
 import pytest
 from proteo_root import TUMOURS, across, cross
 
-from ctx.report.builder import MAX_BYTES
+from ctx.report.cap import MAX_BYTES
 
 ROOT = Path(__file__).resolve().parents[1]
 

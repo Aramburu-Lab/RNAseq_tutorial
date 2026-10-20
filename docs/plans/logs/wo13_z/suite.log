@@ -1,0 +1,113 @@
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  3%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 14%]
+........................................................................ [ 17%]
+........................................................................ [ 21%]
+........................................................................ [ 24%]
+........................................................................ [ 28%]
+........................................................................ [ 31%]
+........................................................................ [ 35%]
+........................................................................ [ 39%]
+.s...................................................................... [ 42%]
+........................................................................ [ 46%]
+......................................................................ss [ 49%]
+ss...................................................................... [ 53%]
+............................................................sss......... [ 56%]
+........................................................................ [ 60%]
+........................................................................ [ 63%]
+........................................................................ [ 67%]
+........................................................................ [ 70%]
+........................................................................ [ 74%]
+............................ss.......................................... [ 78%]
+........................................................................ [ 81%]
+........................................................................ [ 85%]
+........................................................................ [ 88%]
+........................................................................ [ 92%]
+........................................................................ [ 95%]
+........................................................................ [ 99%]
+...........F..                                                           [100%]
+=================================== FAILURES ===================================
+______________ test_the_panel_rejudges_every_strip_and_comes_back ______________
+[gw4] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python
+
+page = (PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-140/popen-gw4/qc_views0'),..._drrmf5h0000gs/T/pytest-of-rytis/pytest-140/popen-gw4/qc_views0/outputs/02_qc/2026-10-20_qc_desynth_overview_v1.html'))
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-140/popen-gw4/test_the_panel_rejudges_every_0')
+
+    @pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
+    def test_the_panel_rejudges_every_strip_and_comes_back(page, tmp_path):  # noqa: F811
+        """In Chromium at 1280 px: k 2 moves every panel of the scope, the strip's triangles are
+        the samples checkpoint.judge flags at k 2, the line names it, and k 3 draws the build.
+        Mutations caught: the panels left unsynchronised; the build not restored."""
+        _, out, sheet, html = page
+>       seen = _browse([{"name": "j", "url": html.as_uri(), "width": 1280, "height": 900,
+                         "act": PANEL, "figure": "[data-probe]"}], tmp_path)["j"]  # fmt: skip
+
+tests/test_qc_judge.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tasks = [{'name': 'j', 'url': 'file:///private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-140/popen-gw4/qc_views0/outputs/02_qc/2026-10-20_qc_desynth_overview_v1.html', 'width': 1280, 'height': 900, ...}]
+downloads = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-140/popen-gw4/test_the_panel_rejudges_every_0')
+chromium = None, timeout = 900
+
+    def _browse(tasks: list[dict], downloads: Path, chromium: str | None = None,
+                timeout: float = 900) -> dict[str, dict]:  # fmt: skip
+        """Run tasks in headless Chromium through tests/browser.mjs; results by task name.
+    
+        The driver traces each step to stderr, so one past ``timeout`` names the step it stopped
+        in. It runs in a session of its own, and past ``timeout`` the whole session is killed:
+        killing the driver alone left its Chromium running, four of them for days (K.13).
+        """
+        plan = {"chromium": chromium or CHROMIUM, "downloads": str(downloads), "tasks": tasks,
+                "trace": True}  # fmt: skip
+        node = shutil.which("node")
+        assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
+        with subprocess.Popen([node, str(ROOT / "tests" / "browser.mjs")], stdin=subprocess.PIPE,
+                              stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                              start_new_session=True) as proc:  # fmt: skip
+            try:
+                stdout, stderr = proc.communicate(json.dumps(plan), timeout=timeout)
+            except subprocess.TimeoutExpired:
+                os.killpg(proc.pid, signal.SIGKILL)
+                _, stderr = proc.communicate()
+>               raise AssertionError(f"browser driver past {timeout:g} s:\n{stderr[-2000:]}") from None
+E               AssertionError: browser driver past 900 s:
+E               trace 0.7 j: size
+E               trace 0.7 j: navigate
+E               trace 2.6 j: act
+
+tests/test_export_browser.py:523: AssertionError
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_sanity_record.py:156: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_imvc87u5. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_imvc87u5/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 20 12:25:50 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_68y4lmld. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_68y4lmld/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 20 12:26:12 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_0f_m91go. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_0f_m91go/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 20 12:29:35 ...... FATAL ERROR, exiting
+1 failed, 2019 passed, 10 skipped, 2 warnings in 1461.63s (0:24:21)

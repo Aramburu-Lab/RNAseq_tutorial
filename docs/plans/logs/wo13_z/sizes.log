@@ -1,0 +1,118 @@
+page                                       main            Z  Z minus main  status on Z
+clinical_tcga_brca                   15,122,366   14,942,619      -179,747  written
+clinical_tcga_hnsc                   13,210,565   13,099,250      -111,315  written
+clinical_tcga_kirc                   13,334,615   13,223,228      -111,387  written
+clinical_tcga_luad                   13,228,973   13,117,658      -111,315  written
+clinical_tcga_lusc                   13,218,466   13,107,151      -111,315  written
+de_cptac_brca                        11,675,251   11,605,090       -70,161  written
+de_cptac_ccrcc                       13,265,673   13,195,202       -70,471  written
+de_r2_gse130605                      11,111,273   11,042,096       -69,177  written
+de_s2_gse327166                       9,185,727    9,115,560       -70,167  written
+de_s2_gse327906                       9,342,762    9,273,281       -69,481  written
+de_tcga_brca                         11,809,597   11,739,746       -69,851  written
+de_tcga_hnsc                         10,735,005   10,665,206       -69,799  written
+de_tcga_kirc                         12,132,574   12,062,723       -69,851  written
+de_tcga_luad                         11,256,410   11,186,611       -69,799  written
+de_tcga_lung                         11,474,228   11,388,272       -85,956  written
+de_tcga_lusc                         12,668,511   12,598,712       -69,799  written
+de_tier1                             12,891,908   12,669,343      -222,565  written
+function_r2_gse130605                 7,097,617    7,018,289       -79,328  written
+function_s2_gse327166                 7,070,954    6,990,404       -80,550  written
+function_s2_gse327906                 7,106,189    7,026,483       -79,706  written
+function_tcga_brca                    7,178,906    7,098,766       -80,140  written
+function_tcga_hnsc                    7,075,134    6,995,026       -80,108  written
+function_tcga_kirc                    7,181,920    7,101,852       -80,068  written
+function_tier1                        9,511,558    9,407,158      -104,400  written
+gather_tier1                          5,916,799    5,887,480       -29,319  written
+genecard_tcga_brca                   13,283,298   12,057,157    -1,226,141  written
+genecard_tcga_kirc                    7,076,825    6,916,372      -160,453  written
+genecard_tcga_luad                    6,951,954    6,789,365      -162,589  written
+genecard_tcga_lusc                    6,811,744    6,667,740      -144,004  written
+genecard_tier1                        8,477,179    8,188,722      -288,457  written
+ncrna_tcga_brca                      13,960,401   13,792,375      -168,026  written
+ncrna_tcga_hnsc                      11,325,271   11,157,153      -168,118  written
+ncrna_tcga_kirc                      12,171,719   12,003,693      -168,026  written
+ncrna_tcga_luad                      11,645,556   11,477,674      -167,882  written
+ncrna_tcga_lusc                      12,478,287   12,291,216      -187,071  written
+ncrna_tier1                           8,783,850    8,695,721       -88,129  written
+proteo_cptac_brca                    14,211,074   13,993,754      -217,320  written
+proteo_cptac_ccrcc                   12,678,998   12,499,208      -179,790  written
+proteo_tier1                          8,357,575    8,272,330       -85,245  written
+qc_r2_gse130605                       6,761,457    6,462,336      -299,121  written
+qc_s2_gse327166                       6,739,548    6,440,367      -299,181  written
+qc_s2_gse327906                       6,457,864    6,158,683      -299,181  written
+qc_tcga_lung                          8,335,167    8,160,765      -174,402  written
+qc_tier1                             15,966,248   14,478,362    -1,487,886  written
+quant_tier1                          14,092,862   14,060,649       -32,213  written
+
+clinical_tcga_brca
+  page                                         15,122,366   14,942,619
+  packed groups                                         0            0
+    panels inside packed groups, unpacked               0            0
+  Reproduce panels                                256,823       75,949
+    panels: pasted blocks                         102,504       47,352
+    panels: base64 downloads                      128,252            0
+    panels: count                                      10           10
+  figure data                                   1,176,950    1,176,950
+  plotly figure scripts                         1,877,253    1,877,253
+  controls and views                            5,900,822    5,900,822
+  other JSON                                      238,451      238,451
+  libraries                                     5,342,432    5,342,432
+  page script                                     219,355      220,485
+  tables                                           33,800       33,800
+  css                                              34,636       34,636
+  text and markup                                  41,844       41,841
+
+proteo_cptac_brca
+  page                                         14,211,074   13,993,754
+  packed groups                                         0            0
+    panels inside packed groups, unpacked               0            0
+  Reproduce panels                                296,709       78,262
+    panels: pasted blocks                         121,242       52,372
+    panels: base64 downloads                      151,854            0
+    panels: count                                       9            9
+  figure data                                   3,974,036    3,974,036
+  plotly figure scripts                         2,658,486    2,658,486
+  controls and views                            1,485,527    1,485,527
+  other JSON                                      237,482      237,482
+  libraries                                     5,342,432    5,342,432
+  page script                                     143,099      144,229
+  tables                                            5,430        5,430
+  css                                              34,636       34,636
+  text and markup                                  33,237       33,234
+
+qc_tier1
+  page                                         15,966,248   14,478,362
+  packed groups                                         0            0
+    panels inside packed groups, unpacked               0            0
+  Reproduce panels                              1,063,140      279,092
+    panels: pasted blocks                         436,359      187,141
+    panels: base64 downloads                      542,992            0
+    panels: count                                      32           32
+  figure data                                   3,608,638    3,608,638
+  plotly figure scripts                         4,227,727    4,227,727
+  controls and views                            1,130,702      426,793
+  other JSON                                      238,614      238,614
+  libraries                                     5,342,432    5,342,432
+  page script                                     143,099      144,229
+  tables                                           48,621       48,622
+  css                                              34,636       34,636
+  text and markup                                 128,639      127,579
+
+quant_tier1
+  page                                         14,092,862   14,060,649
+  packed groups                                         0            0
+    panels inside packed groups, unpacked               0            0
+  Reproduce panels                                 48,121       14,781
+    panels: pasted blocks                          19,029        8,947
+    panels: base64 downloads                       23,764            0
+    panels: count                                       2            2
+  figure data                                   1,347,515    1,347,515
+  plotly figure scripts                         1,695,988    1,695,988
+  controls and views                            5,198,894    5,198,894
+  other JSON                                      238,169      238,169
+  libraries                                     5,342,432    5,342,432
+  page script                                     143,099      144,229
+  tables                                            8,321        8,321
+  css                                              34,636       34,636
+  text and markup                                  35,687       35,684

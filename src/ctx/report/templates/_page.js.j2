@@ -35,6 +35,25 @@
     plots(scope).forEach(function (d) { Plotly.relayout(d, { template: template(d, "black") }); });
   }
   if (scope !== document && tip && tip.bind) guard("tooltips", function () { tip.bind(scope); });
+  /* A Reproduce panel prints steps 2 to 5 once (Y.1): each tab's block takes them back after a
+     blank line, as ctx.figures.panel.body joins them, so its copy is that tab's whole block,
+     and its download is the script head and that block, as panel.script writes it. */
+  scope.querySelectorAll("details.repro").forEach(function (panel) {
+    guard("repro", function () {
+      var head = panel.getAttribute("data-script-head");
+      panel.querySelectorAll("code[data-shared]").forEach(function (code) {
+        var steps = document.getElementById(code.getAttribute("data-shared"));
+        code.textContent = code.textContent + "\n" + steps.textContent;
+        code.removeAttribute("data-shared");
+        var bytes = new TextEncoder().encode(head + code.textContent), binary = "";
+        for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        panel.querySelector('a[data-script="' + code.id + '"]').href =
+          "data:text/x-shellscript;base64," + btoa(binary);
+      });
+      panel.querySelectorAll(".repro-shared").forEach(function (box) { box.hidden = true; });
+    });
+  });
+
   /* Tabs: every panel drew visible at full width; hide the inactive ones only now, and resize
      a panel's plot when it is shown, so plotly never lays out a hidden div. */
   scope.querySelectorAll("[role=tablist]").forEach(function (list) {

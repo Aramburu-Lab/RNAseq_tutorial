@@ -11,8 +11,8 @@ import pytest
 from genecard_root import SLUG, Stub, make, responses
 from test_genecard import _cards, _register, _settings
 
-from ctx.genecard import page as card_page
 from ctx.genecard import run as module
+from ctx.report import cap as cap_module
 from ctx.report.builder import PACKED, packed_bytes, unpacked
 
 NPTX2, ACTB = "ENSG00000106236", "ENSG00000075624"
@@ -23,7 +23,7 @@ def root(tmp_path):
     return tmp_path / "root", make(tmp_path / "root")
 
 
-def test_fit_keeps_the_cards_whose_measured_page_fits():
+def test_fit_keeps_the_cards_whose_measured_page_fits(monkeypatch):
     """The page over k cards is measured, never estimated: a cap that holds the first three
     keeps three, and the names of the cards left out count too.
 
@@ -35,18 +35,24 @@ def test_fit_keeps_the_cards_whose_measured_page_fits():
         named = 7 * (len(costs) - k)  # the left-out line grows as cards leave
         return "x" * (1000 + sum(costs[:k]) + named), costs[1:k]
 
-    assert card_page.fit(pages, 5, cap=2500) == 5  # noqa: PLR2004
-    assert card_page.fit(pages, 5, cap=2499) == 4  # noqa: PLR2004
-    assert card_page.fit(pages, 5, cap=1814) == 3  # 1800 + 14 left-out bytes  # noqa: PLR2004
-    assert card_page.fit(pages, 5, cap=1813) == 2  # noqa: PLR2004
-    assert card_page.fit(pages, 5, cap=10) == 1
+    assert _kept(pages, 2500, monkeypatch) == 5  # noqa: PLR2004
+    assert _kept(pages, 2499, monkeypatch) == 4  # noqa: PLR2004
+    assert _kept(pages, 1814, monkeypatch) == 3  # 1800 + 14 left-out bytes  # noqa: PLR2004
+    assert _kept(pages, 1813, monkeypatch) == 2  # noqa: PLR2004
+    assert _kept(pages, 10, monkeypatch) == 1
+
+
+def _kept(pages, limit: int, monkeypatch) -> int:
+    """``cap.kept`` over five cards, the first always kept, under a cap of ``limit`` bytes."""
+    monkeypatch.setattr(cap_module, "MAX_BYTES", limit)
+    return cap_module.kept(pages, 5, least=1)
 
 
 def _run(root, monkeypatch, cap=None):
     folder, spec = root
     _register(folder, spec)
     if cap is not None:
-        monkeypatch.setattr(card_page, "MAX_BYTES", cap)
+        monkeypatch.setattr(cap_module, "MAX_BYTES", cap)
     options = module.Options(spec, genes=("NPTX2", "ACTB"))
     return folder, module.run(_settings(folder), _cards(), "ctx genecard", SLUG, options,
                               Stub(responses()))  # fmt: skip

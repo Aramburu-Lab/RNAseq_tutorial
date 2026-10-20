@@ -1,0 +1,46 @@
+main tier1 gather tier1: exit 0, 11 s
+main tier1 qc tier1: exit 0, 98 s
+main tier1 quant tier1: exit 0, 67 s
+main tier1 de tier1: exit 0, 188 s
+main tier1 function tier1: exit 0, 27 s
+main tier1 proteo tier1: exit 0, 15 s
+main tier1 ncrna tier1: exit 0, 18 s
+main tier1 genecard tier1: exit 0, 126 s
+    5,916,799 B outputs/01_gather/2026-10-20_gather_tier1_overview_v1.html
+   15,966,248 B outputs/02_qc/2026-10-20_qc_tier1_overview_v1.html
+   14,092,862 B outputs/04_quant/2026-10-20_quant_tier1_overview_v1.html
+   12,891,908 B outputs/05_de/2026-10-20_de_tier1_overview_v1.html
+    9,511,558 B outputs/06_function/2026-10-20_function_tier1_overview_v1.html
+    8,357,575 B outputs/07_proteo/2026-10-20_proteo_tier1_overview_v1.html
+    8,783,850 B outputs/08_ncrna/2026-10-20_ncrna_tier1_overview_v1.html
+    8,477,179 B outputs/11_genecard/2026-10-20_genecard_tier1_overview_v1.html
+main hnsc de tcga_hnsc: exit 0, 42 s
+main hnsc function tcga_hnsc: exit 0, 16 s
+main hnsc ncrna tcga_hnsc: exit 0, 37 s
+main hnsc clinical tcga_hnsc: exit 0, 24 s
+      209,261 B outputs/01_gather/2026-10-18_gather_tcga_hnsc_overview_v1.html
+   10,735,005 B outputs/05_de/2026-10-20_de_tcga_hnsc_overview_v1.html
+    7,075,134 B outputs/06_function/2026-10-20_function_tcga_hnsc_overview_v1.html
+   11,325,271 B outputs/08_ncrna/2026-10-20_ncrna_tcga_hnsc_overview_v1.html
+   13,210,565 B outputs/12_clinical/2026-10-20_clinical_tcga_hnsc_overview_v1.html
+main s2_gse327166 qc s2_gse327166: exit 0, 45 s
+main s2_gse327166 de s2_gse327166: exit 0, 34 s
+main s2_gse327166 function s2_gse327166: exit 0, 20 s
+      205,550 B outputs/01_gather/2026-10-19_gather_s2_gse327166_overview_v1.html
+    6,739,548 B outputs/02_qc/2026-10-20_qc_s2_gse327166_overview_v1.html
+    9,185,727 B outputs/05_de/2026-10-20_de_s2_gse327166_overview_v1.html
+    7,070,954 B outputs/06_function/2026-10-20_function_s2_gse327166_overview_v1.html
+main s2_gse327906 qc s2_gse327906: exit 0, 51 s
+main s2_gse327906 de s2_gse327906: exit 0, 40 s
+main s2_gse327906 function s2_gse327906: exit 0, 25 s
+      205,789 B outputs/01_gather/2026-10-19_gather_s2_gse327906_overview_v1.html
+    6,457,864 B outputs/02_qc/2026-10-20_qc_s2_gse327906_overview_v1.html
+    9,342,762 B outputs/05_de/2026-10-20_de_s2_gse327906_overview_v1.html
+    7,106,189 B outputs/06_function/2026-10-20_function_s2_gse327906_overview_v1.html
+main r2_gse130605 qc r2_gse130605: exit 0, 36 s
+main r2_gse130605 de r2_gse130605: exit 0, 48 s
+main r2_gse130605 function r2_gse130605: exit 0, 19 s
+      205,050 B outputs/01_gather/2026-10-18_gather_r2_gse130605_overview_v1.html
+    6,761,457 B outputs/02_qc/2026-10-20_qc_r2_gse130605_overview_v1.html
+   11,111,273 B outputs/05_de/2026-10-20_de_r2_gse130605_overview_v1.html
+    7,097,617 B outputs/06_function/2026-10-20_function_r2_gse130605_overview_v1.html

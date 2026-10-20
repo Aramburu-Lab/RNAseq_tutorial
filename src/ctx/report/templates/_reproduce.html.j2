@@ -1,15 +1,18 @@
 {# A figure's Reproduce panel (Phase 2D): commands generated from its FigureSpec, never typed;
    the pasted blocks hold no set -e, the downloaded scripts set -euo pipefail. One tab per
-   environment, Docker first; without JavaScript the tab row hides and every tab shows. #}
+   environment, Docker first. Each tab prints its step 1; steps 2 to 5 print once below them
+   (ctx.figures.panel, Y.1), and the page's script joins them into each tab's block and builds
+   its download. Without JavaScript the tab row and the downloads hide and every tab shows. #}
 {% set r = f.reproduce %}
-<details class="repro">
+<details class="repro" data-script-head="{{ r.script_head }}">
 <summary>{{ r.summary }}</summary>
 <p>{{ r.lead }}</p>
 <div class="tabs" role="tablist" aria-label="{{ r.summary }}">{% for t in r.tabs %}<button type="button" role="tab" id="ctx-repro-tab-{{ f.index }}-{{ t.key }}" aria-controls="ctx-repro-panel-{{ f.index }}-{{ t.key }}" aria-selected="{{ 'true' if loop.first else 'false' }}">{{ t.label }}</button>{% endfor %}</div>
 {% for t in r.tabs %}<div class="repro-tab" id="ctx-repro-panel-{{ f.index }}-{{ t.key }}" role="tabpanel" aria-labelledby="ctx-repro-tab-{{ f.index }}-{{ t.key }}" data-tab="{{ t.key }}">
-<div class="command"><pre><code id="ctx-repro-{{ f.index }}-{{ t.key }}">{{ t.pasted }}</code></pre><button type="button" class="copy" data-copy="ctx-repro-{{ f.index }}-{{ t.key }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div>
-<p><a download="{{ t.name }}" href="data:text/x-shellscript;base64,{{ t.script }}">{{ t.download }}</a></p>
+<div class="command"><pre><code id="ctx-repro-{{ f.index }}-{{ t.key }}" data-shared="ctx-repro-{{ f.index }}-shared">{{ t.head }}</code></pre><button type="button" class="copy" data-copy="ctx-repro-{{ f.index }}-{{ t.key }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div>
+<p class="js-only"><a download="{{ t.name }}" data-script="ctx-repro-{{ f.index }}-{{ t.key }}">{{ t.download }}</a></p>
 </div>
-{% endfor %}<p class="note">{{ r.note }}</p>
+{% endfor %}<div class="command repro-shared"><pre><code id="ctx-repro-{{ f.index }}-shared">{{ r.shared }}</code></pre></div>
+<p class="note">{{ r.note }}</p>
 <details class="repro-upstream"><summary>{{ r.upstream_title }}</summary><div class="command"><pre><code>{{ r.upstream }}</code></pre></div></details>
 </details>

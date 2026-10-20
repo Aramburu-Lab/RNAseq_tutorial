@@ -22,7 +22,8 @@ from ctx.clinical import ClinicalError
 from ctx.clinical.run import build_list
 from ctx.dataset import load
 from ctx.report import genes
-from ctx.report.builder import MAX_BYTES, plotly_js
+from ctx.report.builder import plotly_js
+from ctx.report.cap import MAX_BYTES
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "src" / "ctx" / "report" / "templates"

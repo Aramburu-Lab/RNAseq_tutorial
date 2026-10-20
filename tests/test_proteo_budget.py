@@ -15,7 +15,7 @@ from pathlib import Path
 import polars as pl
 import pytest
 
-from ctx.report.builder import MAX_BYTES
+from ctx.report.cap import MAX_BYTES
 from ctx.runtime import BUDGETS
 
 ROOT = Path(__file__).resolve().parents[1]

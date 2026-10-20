@@ -7,9 +7,14 @@ Apptainer run the figures image (``containers/analysis.Dockerfile``, target ``fi
 a shell function named ``ctx``; pixi builds the environment from a clone. The pasted block has
 no ``set -e``, which would close the reader's shell on the first error; the downloaded script
 starts with ``set -euo pipefail``.
+
+The page prints steps 2 to 5 once, shared by the tabs, and step 1 per tab. Its script joins them
+back into each tab's block as ``body`` joins them and builds each tab's download from that block
+as ``script`` does (Y.1: three whole tabs, each again as base64, took Step-1's M2 page past the
+cap). Without JavaScript every tab's step 1 shows above the shared steps, and the download
+links, which the script builds, are hidden.
 """
 
-import base64
 import shlex
 from pathlib import Path
 from typing import Any
@@ -145,11 +150,15 @@ def _environment(spec: FigureSpec, tab: str) -> list[str]:
     ]
 
 
-def body(spec: FigureSpec, tab: str = "pixi") -> str:
-    """The five steps of one tab, as the pasted block holds them."""
+def head(spec: FigureSpec, tab: str) -> str:
+    """Step 1 of one tab, the only step in which the tabs differ."""
+    return "\n".join(_environment(spec, tab)) + "\n"
+
+
+def shared(spec: FigureSpec) -> str:
+    """Steps 2 to 5, the same in every tab."""
     csv = f"????-??-??_{spec.stem[11:]}.csv"
     lines = [
-        *_environment(spec, tab), "",
         _comment("steps.inputs", step=2), _comment("steps.root"), f"ROOT={_quoted(spec.root)}",
         *(_copy(i) for i in spec.inputs),
         _comment("steps.check_tool"),
@@ -167,19 +176,26 @@ def body(spec: FigureSpec, tab: str = "pixi") -> str:
     return "\n".join(lines) + "\n"
 
 
+def body(spec: FigureSpec, tab: str = "pixi") -> str:
+    """The five steps of one tab, as its pasted block holds them: step 1, a blank line, the rest.
+
+    The page's script joins ``head`` and ``shared`` the same way (``_page.js.j2``, repro).
+    """
+    return f"{head(spec, tab)}\n{shared(spec)}"
+
+
 def script(spec: FigureSpec, tab: str = "pixi") -> str:
-    """The downloadable script of one tab: the same steps under ``set -euo pipefail``."""
+    """The downloadable script of one tab: ``SCRIPT_HEAD``, a blank line, the pasted block."""
     return f"{SCRIPT_HEAD}\n{body(spec, tab)}"
 
 
 def _tab(spec: FigureSpec, tab: str) -> dict[str, str]:
-    """One tab of the panel: its label, its pasted block and its downloadable script."""
+    """One tab of the panel: its label, its step 1 and its script's file name."""
     name = f"reproduce_{spec.figure_id}_{spec.dataset}_{tab}.sh"
     return {
         "key": tab,
         "label": text.word(PAGE, f"tabs.{tab}"),
-        "pasted": body(spec, tab),
-        "script": base64.b64encode(script(spec, tab).encode()).decode(),
+        "head": head(spec, tab),
         "name": name,
         "download": text.fill(PAGE, "panel.download", name=name),
     }
@@ -192,6 +208,9 @@ def block(spec: FigureSpec) -> dict[str, Any]:
         "lead": text.fill(PAGE, "panel.lead", figure_id=spec.figure_id),
         "note": text.word(PAGE, "panel.note"),
         "tabs": [_tab(spec, tab) for tab in TABS],
+        "shared": shared(spec),
+        # What a tab's downloaded script holds before its pasted block (``script``).
+        "script_head": f"{SCRIPT_HEAD}\n",
         "upstream_title": text.word(PAGE, "panel.upstream"),
         "upstream": spec.upstream,
     }
