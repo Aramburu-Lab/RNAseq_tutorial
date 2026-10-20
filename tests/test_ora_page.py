@@ -244,7 +244,7 @@ def test_the_page_draws_the_bars_live_bars_draws(how):
 
     Mutations caught: the failing sets dropped where few pass (Rytis's empty chart); the
     fill counted past ``live.TOP``; a set holding no gene drawn; the tie by name reversed;
-    the families in their given order rather than by smallest p; FDR <= alpha as passing."""
+    the families in their given order rather than by smallest p."""
     cases = _short_lists()
     node = shutil.which("node")
     assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"

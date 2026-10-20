@@ -182,8 +182,7 @@ def test_six_genes_draw_the_sets_of_smallest_p_marked_as_failing(ran, name, tmp_
     the PDF and SVG are the view. At 1,280 and 375 px, light and dark, no sideways scroll.
 
     Mutations caught: the failing sets dropped (the empty chart Rytis saw); a failing set in
-    its family's colour; the length -log10 FDR; the grey sentence left out; the families'
-    order by name rather than p; the legend hidden for one trace."""
+    its family's colour; the length -log10 FDR; the grey sentence left out."""
     m5, downloads, results = ran
     seen = results[name]
     assert seen["errors"] == []

@@ -15,7 +15,7 @@
    ]
   ]
  ],
- "summary": "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05, BH per family. Lists tested on this page: 1; no correction runs across them. Grey bars: 3 sets of smallest p that fail FDR < 0.05, drawn to 7 per family.",
+ "summary": "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05, BH per family. Lists tested on this page: 1; no correction runs across them. Grey bars: 3 sets of smallest p that fail FDR < 0.05; a family draws up to 7 sets, each holding a gene of the list.",
  "notes": "6 genes of the list have a symbol on this page; genes left out for want of one: 0. The list: MMP8, NECAB1, PLAC8, ZDHHC19, LAIR1, CD300E.",
  "top": 76.28125,
  "window": 900,
@@ -42,7 +42,7 @@
    ]
   ]
  ],
- "summary": "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05, BH per family. Lists tested on this page: 1; no correction runs across them. Grey bars: 3 sets of smallest p that fail FDR < 0.05, drawn to 7 per family.",
+ "summary": "The list of the link: 6 genes, 6 up and 0 down, tested against Neutrophils, G-CSF donors against steady state, 12,768 symbols; 0 set results pass FDR < 0.05, BH per family. Lists tested on this page: 1; no correction runs across them. Grey bars: 3 sets of smallest p that fail FDR < 0.05; a family draws up to 7 sets, each holding a gene of the list.",
  "notes": "6 genes of the list have a symbol on this page; genes left out for want of one: 0. The list: MMP8, NECAB1, PLAC8, ZDHHC19, LAIR1, CD300E.",
  "top": 136.265625,
  "window": 812,
