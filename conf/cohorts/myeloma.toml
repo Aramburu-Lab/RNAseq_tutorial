@@ -1,0 +1,18 @@
+# Cohort bundle (TODO.md Cohort bundles, read by ctx.cohorts); the rules are in myeloid.toml.
+# Step 2, "another blood cancer" (ctx.cohorts.STEPS): multiple myeloma is a plasma-cell cancer of
+# the bone marrow, so neither myeloid (Step-1's neutrophils and monocytes) nor a tissue cohort
+# covers it. `modules` is what the dataset file declares, a [proteo] block: its root,
+# ~/ctx_r3_pxd038437, holds the setup page and the glossary alone, because M7 needs a gathered
+# RNA side (R3.1).
+
+[cohort]
+name = "myeloma"
+label = "Multiple myeloma"
+notes = "A public MaxQuant TMT protein table from PRIDE through the guide's M7 protein part, the R3 proof; the RNA side waits on R3.1."
+
+[[datasets]]
+slug = "r3_pxd038437"
+step = 2
+modules = ["proteo"]
+laptop_cap = "all"
+note = "Ramberger 2024 TMTpro protein table, 11 plexes, each plex's internal standard as reference; protein side only, the R3 proof."
