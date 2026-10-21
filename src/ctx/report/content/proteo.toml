@@ -155,12 +155,12 @@ tertile = "RNA tertile {n}"
 
 [figures.rho]
 title = "Per-gene RNA-protein correlation, by gene class"
-lead = "Median ρ is {median:.2f} over {n_genes:,} tested genes; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
+lead = "Median ρ is {median:.2f} over {n_genes:,} tested genes with a ρ; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
 reading = [
     "Each curve is one gene class: the share of its genes with ρ at or below each value.",
     "A curve further right holds genes whose protein follows their RNA more.",
 ]
-caption = "Spearman ρ per gene over {n_samples} samples, BH over {n_genes:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}{class_test}."
+caption = "Spearman ρ per gene over {n_samples} samples, BH over {n_bh:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}{class_test}."
 class_test = "; complex below metabolic, one-sided Mann-Whitney p = {p_class}"
 x = "RNA-protein Spearman ρ"
 y = "Cumulative share of genes"
@@ -170,13 +170,13 @@ median = "median"
 # axes and reading guide stay figures.rho's.
 [figures.rho_tumour]
 title = "Per-gene RNA-protein correlation in tumours, by gene class"
-lead = "Median ρ over the tumours is {median:.2f} for {n_genes:,} tested genes; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
-caption = "Spearman ρ per gene over {n_samples} tumours, BH over {n_genes:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}{class_test}."
+lead = "Median ρ over the tumours is {median:.2f} for {n_genes:,} tested genes with a ρ; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
+caption = "Spearman ρ per gene over {n_samples} tumours, BH over {n_bh:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}{class_test}."
 
 [figures.rho_normal]
 title = "Per-gene RNA-protein correlation in normals, by gene class"
-lead = "Median ρ over the normals is {median:.2f} for {n_genes:,} genes tested in them; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
-caption = "Spearman ρ per gene over {n_samples} normals, BH over {n_genes:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}."
+lead = "Median ρ over the normals is {median:.2f} for {n_genes:,} genes tested in them with a ρ; {n_sig:,} have ρ above zero at BH-adjusted p < {alpha}."
+caption = "Spearman ρ per gene over {n_samples} normals, BH over {n_bh:,} genes; {counts}. [[Kruskal-Wallis]] H = {h:.1f}, p = {p}, ε² = {eps:.3f}."
 
 [figures.worked]
 title = "{gene}: RNA against protein per sample"

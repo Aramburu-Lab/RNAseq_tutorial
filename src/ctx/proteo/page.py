@@ -100,14 +100,11 @@ def _across(writer: Writer, ctx: Context) -> list[Result]:
     """F3 and the worked genes."""
     m, p = ctx.measured, ctx.spec.proteo
     assert p is not None  # noqa: S101 - run() checks
-    tested = figures.shown(m.genes.filter(pl.col("tested")), ctx.options.gene_class)
+    tested, values = correlated(m.genes.filter(pl.col("tested")), ctx.options.gene_class)
     test = m.extra["class_test"]
     below = m.extra.get("complex_below", (np.nan, np.nan))
-    values = {"n_samples": m.extra["n_samples"], "n_genes": tested.height, "alpha": ALPHA,
-              "median": measure.median(tested["rho"]), "h": test.h, "p": _p(test.p),
-              "eps": test.epsilon2, "p_class": _p(below[0]),
-              "n_sig": tested.filter((pl.col("rho_padj") < ALPHA)
-                                     & (pl.col("rho") > 0)).height}  # fmt: skip
+    values |= {"n_samples": m.extra["n_samples"], "h": test.h, "p": _p(test.p),
+               "eps": test.epsilon2, "p_class": _p(below[0])}  # fmt: skip
     values["class_test"] = text.fill(PAGE, "figures.rho.class_test", p_class=_p(below[0])
                                      ) if "complex_below" in m.extra else ""  # fmt: skip
     normals = "normal_class_test" in m.extra
@@ -162,15 +159,33 @@ def _normal_rho(writer: Writer, ctx: Context) -> FigureBlock:
     own = m.genes.filter(pl.col("normal_tested")).select(
         "gene", "gene_class", rho="normal_rho", rho_padj="normal_rho_padj"
     )
-    tested = figures.shown(own, ctx.options.gene_class)
+    tested, values = correlated(own, ctx.options.gene_class)
     test = m.extra["normal_class_test"]
-    values = {"n_samples": m.extra["n_normal"], "n_genes": tested.height, "alpha": ALPHA,
-              "median": measure.median(tested["rho"]), "h": test.h, "p": _p(test.p),
-              "eps": test.epsilon2,
-              "n_sig": tested.filter((pl.col("rho_padj") < ALPHA)
-                                     & (pl.col("rho") > 0)).height}  # fmt: skip
+    values |= {"n_samples": m.extra["n_normal"], "h": test.h, "p": _p(test.p),
+               "eps": test.epsilon2}  # fmt: skip
     return figures.rho_by_class(writer, tested, values, "figures.rho_normal",
                                 "rho_by_class_normal")  # fmt: skip
+
+
+def correlated(tested: pl.DataFrame, gene_class: str) -> tuple[pl.DataFrame, dict[str, object]]:
+    """The genes a class figure draws and its lead counts, and the numbers it states of them.
+
+    A tested gene constant in the samples has no rho, and a lead that states a correlation
+    counts genes that have one (L.4). BH ran over every tested gene with a p, the genes of two
+    classes, which the figure leaves out, among them, so the caption states that family's size.
+
+    Args:
+        tested: The layer's tested genes, with ``gene``, ``gene_class``, ``rho``, ``rho_padj``.
+        gene_class: A declared class drawn alone against the others, or ``all``.
+
+    Returns:
+        The genes drawn, and their count, median rho, positive count and the BH family's size.
+    """
+    drawn = figures.shown(tested, gene_class).filter(pl.col("rho").is_not_null())
+    positive = drawn.filter((pl.col("rho_padj") < ALPHA) & (pl.col("rho") > 0)).height
+    return drawn, {"n_genes": drawn.height, "n_bh": tested["rho_padj"].drop_nulls().len(),
+                   "median": measure.median(drawn["rho"]), "n_sig": positive,
+                   "alpha": ALPHA}  # fmt: skip
 
 
 def _shifts(ctx: Context) -> list[Result]:

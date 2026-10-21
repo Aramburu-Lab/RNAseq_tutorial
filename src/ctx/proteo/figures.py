@@ -159,10 +159,10 @@ def rho_by_class(writer: Writer, tested: pl.DataFrame, values: Mapping[str, obje
 
     ``key`` names the figure's words and ``what`` its files: the normals of a tumour-against-
     normal design draw the same figure from their own columns, under ``figures.rho_normal``.
+    ``tested`` comes from ``page.correlated``, which drops a gene without a rho, so the curves
+    draw the genes the lead counts.
     """
-    frame = _cumulative(
-        tested.select("gene", "gene_class", "rho").drop_nulls(), "gene_class", "rho"
-    )
+    frame = _cumulative(tested.select("gene", "gene_class", "rho"), "gene_class", "rho")
     ends = (float(frame["rho"].to_numpy().min()), float(frame["rho"].to_numpy().max()))
     data = CurveData(
         frame=frame, columns=columns(*frame.columns), series="gene_class", x="rho", y="share",

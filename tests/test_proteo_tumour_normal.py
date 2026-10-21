@@ -272,6 +272,52 @@ def test_paired_calls_leave_a_missing_value_out_never_zero():
     assert not folds.paired_calls(["A", "B", "C"], tumour, normal, 0.7, 1.0)["tested"][1]
 
 
+def test_class_figure_leads_count_the_genes_with_a_rho(monkeypatch):
+    """L.4: both class figures' leads count the genes they draw, those with a rho; each caption
+    counts the BH family, every tested gene with a p, the gene of two classes among them.
+
+    Catches: the lead counting every tested gene, a constant one without a rho too (7 in both
+    layers here, where the tumours draw 5 and the normals 4); the caption's BH count read from
+    the drawn genes (5, not 6) or the tested ones (7); either layer's figure left on the old
+    count. Planted: G3 and G9 have no tumour rho, G2, G5 and G9 no normal rho, G7 two classes.
+    """
+    from types import SimpleNamespace  # noqa: PLC0415 - this test alone fakes a spec
+
+    from ctx.figures.recorder import Recorder  # noqa: PLC0415
+    from ctx.proteo import page, run  # noqa: PLC0415
+
+    classes = ["oxphos"] * 3 + [measure.OTHER] * 3 + ["", measure.OTHER, measure.OTHER]
+    rho = [0.9, 0.8, None, 0.5, 0.4, 0.3, 0.6, None, None]
+    normal = [0.7, None, 0.6, 0.2, None, 0.15, 0.3, None, None]
+    genes = pl.DataFrame({
+        "gene": [f"G{i}" for i in range(1, 10)], "gene_class": classes,
+        "tested": [True] * 7 + [False, True], "normal_tested": [True] * 7 + [False, True],
+        "rho": rho, "r": rho, "rho_padj": [None if v is None else 0.01 for v in rho],
+        "normal_rho": normal, "normal_r": normal,
+        "normal_rho_padj": [None if v is None else 0.01 for v in normal],
+    })  # fmt: skip
+    spec = SimpleNamespace(classes={"oxphos": None}, published={}, genes=[], tracks=(),
+                           plex="plex", amplified=None)  # fmt: skip
+    measured = run.Measured(None, [], genes, np.zeros(9))  # type: ignore[arg-type]
+    run.correlation_metrics(measured, spec, "spearman")  # type: ignore[arg-type]
+    run.normal_metrics(measured, spec, "spearman")  # type: ignore[arg-type]
+    measured.extra |= {"n_samples": 6, "n_normal": 5, "rna": None, "values": None,
+                       "annotation": None}  # fmt: skip
+    # F5 draws from the matrices this test does not make; the class figures come first.
+    monkeypatch.setattr(page.figures, "heatmap_genes", lambda *_: [])
+    context = page.Context(SimpleNamespace(proteo=spec), SimpleNamespace(gene_class="all"),
+                           measured, None, "", ())  # type: ignore[arg-type]  # fmt: skip
+    recorder = Recorder("07_proteo", "fake")
+    page._across(recorder, context)
+    for what, drawn, family, median in (("rho_by_class", 5, 6, 0.5),
+                                        ("rho_by_class_normal", 4, 5, 0.4)):  # fmt: skip
+        data, words = recorder.one(what)
+        assert data.frame["gene"].n_unique() == drawn
+        assert re.search(r"for (\d+) ", words.lead).group(1) == str(drawn), words.lead
+        assert f"is {median:.2f}" in words.lead, "the median is unchanged"
+        assert f"BH over {family} genes" in data.caption, data.caption
+
+
 def test_positive_share_counts_defined_genes_only():
     """Catches: untested genes (null rho) in the denominator; a negative rho counted."""
     frame = pl.DataFrame({"rho": [0.5, -0.6, 0.4, None], "rho_padj": [0.001, 0.001, 0.2, None]})
