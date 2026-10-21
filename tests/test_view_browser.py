@@ -85,3 +85,26 @@ def test_a_view_needs_its_build_first_and_is_dropped_alone():
     shown = viewed(block, [("a", data, words), ("b", other, words)], "Which")
     assert prepare(shown, 0, 1, 3)["kind"] == "view"
     assert prepare(shown, 0, 1, 3, scale=2.0)["kind"] is None
+
+
+def test_views_of_one_size_carry_nothing_new(pipeline):
+    """V.4b: a view's option carries its own ``width`` only where its plot box differs from
+    the build's, and its own ``export`` wherever its files' caption differs: every view on
+    M5's and M6's fixture pages has options of one size, so none carries a width, and each
+    option of another caption carries its export. Mutations caught: every option given a
+    width; an option of the build's size left on the build's export."""
+    import json  # noqa: PLC0415
+    import re  # noqa: PLC0415
+
+    root, _, _ = pipeline
+    tag = r'<script type="application/json" id="ctx-controls-\d+">(.*?)</script>'
+    found = re.compile(tag, re.S)
+    views = [c for step in ("05_de", "06_function")
+             for page in (root / "outputs" / step).glob("*.html")
+             for c in map(json.loads, found.findall(page.read_text()))
+             if c.get("kind") == "view"]  # fmt: skip
+    assert views
+    for view in views:
+        first, *others = view["options"]
+        assert not any("width" in o for o in view["options"]) and "export" not in first
+        assert all("export" in o for o in others if o["caption"] != first["caption"])

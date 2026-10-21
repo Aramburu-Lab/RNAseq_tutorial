@@ -183,8 +183,8 @@
       var layout = Object.assign({}, o.figure.layout,
                                  { template: template(div, root.getAttribute("data-theme")) });
       Plotly.react(div, o.figure.data, layout);
-      /* The fit takes the view's own phone layout (_page_fit.js.j2). */
-      div.dispatchEvent(new Event("ctx-view"));
+      /* The fit takes the view's own phone layout and least width (_page_fit.js.j2). */
+      div.dispatchEvent(new CustomEvent("ctx-view", { detail: { width: o.width } }));
       if (lead) lead.innerHTML = i ? o.lead : built.lead;
       caption.innerHTML = i ? o.caption : built.caption;
       if (title) title.textContent = i ? o.title : built.title;

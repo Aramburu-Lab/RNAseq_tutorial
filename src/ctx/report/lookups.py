@@ -6,9 +6,10 @@ The page swaps in its own theme's template whenever it draws an option (``viewin
 histogram's 9,678 B, is dropped. Every option after the first carries the export settings its
 PDF and SVG take, ``export``: its own caption, size and thinned points, where the build's
 caption under another view's bars would state numbers the bars do not show, and the build's
-thinned points would land in another view's traces. And a grid names one option by a select per
-setting, as M5's lesson counts by adjustment, cutoff and fold change: ``axes`` lists each
-setting's label, choices and the build's choice; ``grid`` the option of each combination,
+thinned points would land in another view's traces; an option whose plot box differs from
+the build's also carries its ``width`` (``views.own_widths``). And a grid names one option by
+a select per setting, as M5's lesson counts by adjustment, cutoff and fold change: ``axes``
+lists each setting's label, choices and the build's choice; ``grid`` the option of each combination,
 keyed by ``key``, whose page twin is ``ctxGrid.key`` (``_grid.js.j2``).
 """
 
@@ -19,6 +20,7 @@ from typing import Any
 
 from ctx.report import export, marks, text
 from ctx.report.builder import FigureBlock, FigureText
+from ctx.report.views import own_widths
 
 
 def _plain(figure: Any) -> dict[str, Any]:
@@ -72,6 +74,7 @@ def lookup(block: FigureBlock, options: Sequence[tuple[str, Any, FigureText]], l
                       "lead": str(marks.html(words.lead)),
                       "caption": str(marks.html(data.caption_text())),
                       **({"export": _exported(data, block.stem)} if i else {})})  # fmt: skip
+    own_widths(shown)
     controls: dict[str, Any] = {
         "kind": "view", "label": label, "options": shown,
         "moved": text.raw("ui", "view.moved"), "build": options[0][0],

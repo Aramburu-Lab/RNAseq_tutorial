@@ -14,6 +14,7 @@ from typing import Any
 
 from ctx.report import export, marks, text
 from ctx.report.builder import FigureBlock, FigureText
+from ctx.report.figures import plot_width
 
 
 def _plain(figure: Any) -> dict[str, Any]:
@@ -24,12 +25,28 @@ def _plain(figure: Any) -> dict[str, Any]:
     return loaded
 
 
+def own_widths(shown: Sequence[dict[str, Any]]) -> None:
+    """Give each option after the first whose plot box differs from the first's its ``width``.
+
+    The page sets the shown option's (``ctx-view`` in ``_page_fit.js.j2``), and the first's
+    for an option without one: a view of 4 then 11 features kept the 4's least width and the
+    11 turned names overlapped 10 times (V.4b). Options of one width carry nothing new.
+    """
+    built = plot_width(shown[0]["figure"])
+    for option in shown[1:]:
+        if (width := plot_width(option["figure"])) != built:
+            option["width"] = width
+
+
 def viewed(block: FigureBlock, options: Sequence[tuple[str, Any, FigureText]],
            label: str) -> FigureBlock:  # fmt: skip
     """A figure block with a select between ``options``: (name, contract, words) each.
 
     The first option must be the block's own figure. Its words stay as built; another
-    option's title, lead and caption replace them while it is shown.
+    option's title, lead and caption replace them while it is shown. An option whose plot box
+    differs from the first's, as a box of 11 features against 4, carries its own width; one
+    whose files differ in caption, size or layers carries their export settings, so its PDF
+    and SVG are the view as set (V.4b). An option equal to the build in all three carries none.
 
     Raises:
         ValueError: With fewer than two options, or a first option that is not the block's.
@@ -42,11 +59,20 @@ def viewed(block: FigureBlock, options: Sequence[tuple[str, Any, FigureText]],
     shown = [{"label": name, "figure": _plain(data.interactive()), "title": words.title,
               "lead": str(marks.html(words.lead)), "caption": str(marks.html(data.caption_text()))}
              for name, data, words in options]  # fmt: skip
+    own_widths(shown)
     controls: dict[str, Any] = {
         "kind": "view", "label": label, "options": shown,
         "moved": text.raw("ui", "view.moved"), "build": options[0][0],
     }  # fmt: skip
     if hasattr(first, "export_layers"):
-        controls["export"] = export.settings(first.inches(), first.caption, block.stem,
-                                             first.export_layers())  # fmt: skip
+        controls["export"] = _settings(first, block.stem)
+        for option, (_, data, _) in zip(shown[1:], options[1:], strict=True):
+            own = _settings(data, block.stem)
+            if own != controls["export"]:
+                option["export"] = own
     return replace(block, controls=controls)
+
+
+def _settings(data: Any, stem: str) -> dict[str, Any]:
+    """One option's PDF and SVG settings, from the size and layers its own files take."""
+    return export.settings(data.inches(), data.caption, stem, data.export_layers())

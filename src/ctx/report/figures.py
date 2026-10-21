@@ -75,6 +75,16 @@ def _width(scale: float, part: str, needs: list[list[float]]) -> str:
     return f"max({width}, {least:.0f}px)" if least else width
 
 
+def plot_width(figure: Mapping[str, Any], scale: float = 1.0, part: str = "beside") -> str:
+    """The CSS width of a figure's plot box (``_width``), from its own ``meta.least_width``.
+
+    One reader for the build's box and for each view option's (``views.viewed``): a view of 4
+    then 11 features kept the 4's width, and the 11 turned names overlapped 10 times (V.4b).
+    """
+    needs = (figure["layout"].get("meta") or {}).get("least_width") or []
+    return _width(scale, part, needs)
+
+
 def _plain(node: Any) -> Any:
     """A plotly figure's JSON as the page receives it: arrays as lists, NaN as null."""
     from plotly.utils import PlotlyJSONEncoder  # noqa: PLC0415 - heavy
@@ -199,7 +209,7 @@ def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "besid
     import plotly.io as pio  # noqa: PLC0415 - heavy; imported after the runtime profile
 
     figure = figure.to_plotly_json()
-    needs = (figure["layout"].get("meta") or {}).get("least_width") or []
+    width = plot_width(figure, scale, part)
     if scale != 1:
         zoomed = zoom(figure, scale)
         meta = zoomed["layout"].get("meta") or {}
@@ -208,7 +218,7 @@ def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "besid
         figure = zoomed
     html = pio.to_html(
         figure, include_plotlyjs=False, full_html=False, div_id=div_id, config=PLOTLY_CONFIG,
-        default_width=_width(scale, part, needs),
+        default_width=width,
     )  # fmt: skip
     return Markup(_packed(html) if packed else html)
 
