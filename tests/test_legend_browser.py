@@ -63,8 +63,8 @@ def test_long_bar_labels_wrap_inside_the_plot_on_a_phone(tmp_path):
     every one ran off its edge. Each label now ends inside the plot's svg at 375 and 1,280 px,
     wrapped onto lines at 375; the figure files keep the labels as built.
 
-    Mutations caught: no narrow labels; labels wrapped wider than half a phone's plot; the
-    built labels left out of meta, so a PDF of a moved view would print the wrapped ones."""
+    Mutations caught: no narrow labels; labels wrapped wider than half a phone's plot. A PDF
+    of a moved view prints the labels as built: tests/test_phone_export_browser.py."""
     frame = pl.DataFrame({"contrast": [*LONG, *LONG], "direction": ["up"] * 2 + ["down"] * 2,
                           "n": [500, 20, 200, 10]})  # fmt: skip
     data = BarData(
@@ -74,7 +74,7 @@ def test_long_bar_labels_wrap_inside_the_plot_on_a_phone(tmp_path):
         series="direction", colours=category_colours(["up", "down"]), caption="Counts, no test.",
         horizontal=True, stacked=True)  # fmt: skip
     built = data.interactive()
-    assert list(built.layout.meta["yticktext"]) == list(LONG)
+    assert list(built.layout.yaxis.ticktext) == list(LONG)
     figure_stem = stem("de", "labels_demo", 1, day=date(2026, 10, 19))
     text = FigureText("Genes called", reading=("Each bar is one made-up contrast.",))
     write_figure(data, tmp_path, figure_stem, title="Genes called", data_releases={}, text=text)

@@ -47,6 +47,27 @@ var ctxExport = {
     }
     return value;
   },
+  /* Sets a plotly attribute path ("shapes[2].name") on a plain copy; null or undefined, as
+     plotly's relayout takes them, removes it. */
+  put: function (o, path, value) {
+    var keys = path.split(/[.[\]]+/).filter(Boolean), last = keys.pop();
+    keys.forEach(function (k, i) {
+      if (!o[k] || typeof o[k] !== "object") o[k] = /^\d+$/.test(keys[i + 1] || last) ? [] : {};
+      o = o[k];
+    });
+    if (value === null || value === undefined) delete o[last];
+    else o[last] = ctxExport.plain(value);
+  },
+  /* Each trace of a part as a plain copy, the part's built restyle pairs set on it. */
+  traces: function (part) {
+    var data = part.data.map(ctxExport.plain);
+    (part.built ? part.built.restyle : []).forEach(function (pair) {
+      pair[1].forEach(function (at, j) {
+        Object.keys(pair[0]).forEach(function (k) { ctxExport.put(data[at], k, pair[0][k][j]); });
+      });
+    });
+    return data;
+  },
   /* A length, or a list of lengths, times factor. */
   scale: function (value, factor) {
     if (typeof value === "number") return value * factor;
@@ -129,28 +150,28 @@ var ctxExport = {
      points the page thinned, the labels it leaves out, the parallel sets' outer margins. A
      second plot, a linked view's parallel sets, goes under the first at cfg.above and
      cfg.below. Legend keys are opaque, as the figure files draw them, whatever their points'
-     opacity. An x-axis title and bar labels the page wrapped for a narrow screen are drawn
-     as built (layout.meta.xtitle, layout.meta.yticktext). */
+     opacity. Names a phone's layout wrapped are drawn as built (part.built, the fit's
+     div.ctxBuilt), and an x-axis title the page wrapped (layout.meta.xtitle). */
   figure: function (parts, cfg, template, height, dashes) {
     var ex = cfg.export, data = [];
     function zoomOf(part) { return (part.layout.meta && part.layout.meta.zoom) || 1; }
     var lines = 1 / zoomOf(parts[0]);
     var layout = ctxExport.plain(parts[0].layout);
+    var relayout = (parts[0].built || {}).relayout || {};
+    Object.keys(relayout).forEach(function (k) { ctxExport.put(layout, k, relayout[k]); });
     var built = layout.meta && layout.meta.xtitle;
     if (typeof built === "string" && layout.xaxis && layout.xaxis.title) {
       layout.xaxis.title.text = built;
     }
-    var ticks = layout.meta && layout.meta.yticktext;
-    if (Array.isArray(ticks) && layout.yaxis) layout.yaxis.ticktext = ticks;
     var heat = 0;
     parts.forEach(function (part, i) {
       var zoom = zoomOf(part), marks = ex.marker / zoom, widths = 1 / zoom;
-      part.data.forEach(function (trace, k) {
-        if (i === 0 && ex.cells && trace.type === "heatmap" && ex.cells[heat]) {
-          ctxExport.cells(trace, ex.cells[heat++]).forEach(function (f) { data.push(f); });
+      ctxExport.traces(part).forEach(function (t, k) {
+        if (i === 0 && ex.cells && t.type === "heatmap" && ex.cells[heat]) {
+          ctxExport.cells(t, ex.cells[heat++]).forEach(function (f) { data.push(f); });
           return;
         }
-        var t = ctxExport.plain(trace), more = i === 0 && (ex.thinned || {})[k];
+        var more = i === 0 && (ex.thinned || {})[k];
         if (more) {
           var xy = ctxExport.points(more);
           t.x = (t.x || []).concat(xy.x); t.y = (t.y || []).concat(xy.y);
@@ -261,7 +282,9 @@ var ctxExport = {
     var lines = ctxExport.captionLines(ex, live ? live.textContent : "",
                                        ctxExport.fits(ex, setup.metrics));
     var height = ex.height_pt - ctxExport.captionHeight(lines.length, ex);
-    var spec = ctxExport.figure(plots.map(function (d) { return { data: d.data, layout: d.layout }; }),
+    var spec = ctxExport.figure(plots.map(function (d) {
+      return { data: d.data, layout: d.layout, built: d.ctxBuilt ? d.ctxBuilt() : null };
+    }),
                                 cfg, setup.template, height, setup.dashes);
     return Plotly.toImage(spec, { format: "svg", width: ex.width_pt, height: height })
       .then(function (url) {

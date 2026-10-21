@@ -41,6 +41,17 @@
       });
     });
     var state = own, resizedAt = null, swapping = false;
+    /* What turns the plot as drawn into its layout off a phone, the phone's names set back as
+       built: a PDF or SVG of a view is the figure files' width whatever the screen, and drew a
+       phone's wrapped legend entries (L.7). Read at export, so a view's own layout counts. */
+    div.ctxBuilt = function () {
+      var twin = state === phone ? own : state === smallPhone ? small : null;
+      if (!twin) return null;
+      var relayout = {};
+      Object.keys(state.relayout).forEach(function (k) { relayout[k] = wide[k]; });
+      return { relayout: Object.assign(relayout, twin.relayout),
+               restyle: state.unstyle.concat(twin.restyle) };
+    };
     var heightsAt = null, heightsSet = [], settled = false;
     /* The layout for the box as it is. Below the floor the box takes the module page's
        width first, and a phone's layout follows the plot's width there. */
