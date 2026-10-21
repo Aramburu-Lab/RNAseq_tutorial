@@ -7,7 +7,7 @@ the reader picks.
 """
 
 import math
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -31,8 +31,10 @@ from ctx.viz.style import (
     PLOTLY_BAR_BASE_PX,
     PLOTLY_BAR_ROW_PX,
     PLOTLY_HEIGHT_PX,
+    PLOTLY_LEAST_PLOT_PX,
     PLOTLY_LEGEND_SYMBOL_PX,
     PLOTLY_MARGIN_PX,
+    PLOTLY_PUSH_PAD_PX,
     PLOTLY_TICK_PX,
     SIZES,
     THEMES,
@@ -95,6 +97,9 @@ class BarData:
             settings of one category pooled.
         live: Settings of a page control that redraws the bars, with its ``kind``, such as M6's
             live over-representation (GS.5); None for none. Not with ``filters``.
+        drawable: Every category a ``live`` redraw may draw besides the built ones, such as
+            every gene set M6's panel tests. With it, horizontal bars take a phone's layout as
+            fixed ones do, and ``controls()`` carries what the redraw rebuilds it from (PK.4).
     """
 
     frame: pl.DataFrame
@@ -118,6 +123,7 @@ class BarData:
     labels: Mapping[str, str] | None = None
     summary_median: bool = True
     live: Mapping[str, Any] | None = None
+    drawable: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -199,6 +205,33 @@ class BarData:
             drawn.append((float(np.median(self.lengths())), self.median, MEDIAN_DASH))
         return drawn
 
+    def _height(self) -> float:
+        """The plotly figure's height as built, in px: horizontal bars grow by the row."""
+        if not self.horizontal:
+            return PLOTLY_HEIGHT_PX["bar"]
+        return max(PLOTLY_HEIGHT_PX["bar"],
+                   PLOTLY_BAR_BASE_PX + PLOTLY_BAR_ROW_PX * len(self._categories()))  # fmt: skip
+
+    def _labelled(self) -> bool:
+        """Whether the category axis prints its labels."""
+        return len(self._categories()) <= MAX_TICK_LABELS
+
+    def _redraws_labels(self) -> bool:
+        """Whether a live redraw rebuilds the phone's labels for categories of its own."""
+        live = self.live is not None and bool(self.drawable)
+        return self.horizontal and live and self._labelled()
+
+    def _phone(self) -> dict[str, Any]:
+        """What a live redraw rebuilds its phone's layout from, read by ``ctxOra.narrow``.
+
+        Every category it may draw as ``category_lines`` gives it, the threshold's pad, and the
+        height as built, which the redraw keeps.
+        """
+        categories = dict.fromkeys([*map(str, self._categories()), *self.drawable])
+        return {"lines": category_lines(categories), "room": PHONE_PLOT_PX / 2,
+                "base": PLOTLY_BAR_BASE_PX, "pad": HELD_PAD_PX,
+                "height": self._height()}  # fmt: skip
+
     def controls(self) -> dict[str, Any] | None:
         """What the page script needs to filter the bars, or None without ``filters``.
 
@@ -206,7 +239,9 @@ class BarData:
         the script computes for "All" (``tests/test_page_script.py`` compares the two).
         """
         if not self.filters:
-            return dict(self.live) if self.live is not None else None
+            if self.live is None:
+                return None
+            return {**self.live, **({"phone": self._phone()} if self._redraws_labels() else {})}
         unit = self.columns[self.value][0]
         unit = "" if unit == "none" else unit
         total = len(self.lengths())
@@ -342,32 +377,43 @@ class BarData:
         categories = [str(c) for c in self._categories()]
         category_axis = {"title": {"text": self.category_label}, "categoryorder": "array",
                          "categoryarray": categories,
-                         "showticklabels": len(categories) <= MAX_TICK_LABELS}  # fmt: skip
+                         "showticklabels": self._labelled()}  # fmt: skip
         if self.horizontal:
             category_axis["autorange"] = "reversed"
         # The page script rewraps an x title for the screen; the export copies a y title.
         value_title = (screen_title(self._value_title()) if self.horizontal
                        else page_y_title(self._value_title(), files_room(self.static)))  # fmt: skip
         value_axis = {"title": {"text": value_title}}
-        rows_px = PLOTLY_BAR_BASE_PX + PLOTLY_BAR_ROW_PX * len(categories)
         fig.update_layout(
             template=plotly_templates()["white"],
-            height=max(PLOTLY_HEIGHT_PX["bar"], rows_px) if self.horizontal
-            else PLOTLY_HEIGHT_PX["bar"],
+            height=self._height(),
             showlegend=len(fig.data) > 1 or bool(self.rules()),
             barmode="stack" if self.stacked else "group",
             xaxis=value_axis if self.horizontal else category_axis,
             yaxis=category_axis if self.horizontal else value_axis,
         )  # fmt: skip
+        self._phone_layout(fig, categories)
+        return fig
+
+    def _phone_layout(self, fig: Any, categories: list[str]) -> None:
+        """Give ``fig`` a phone's layout, its legend's and its labels', where either needs one.
+
+        A live redraw draws categories of its own: M1's recount, with no ``drawable``, keeps
+        its labels as built; M6's over-representation rebuilds the phone's layout from
+        ``controls()`` (PK.4), so its build keeps plotly's own ticks and the phone's names its.
+        """
         legend = phone_legend(fig)
-        # A live redraw (M1's recount, M6's over-representation) draws categories of its own,
-        # so only bars whose categories are fixed when built wrap them.
-        fixed = self.horizontal and self.live is None and category_axis["showticklabels"]
-        labels = narrow_categories(categories, fig.layout.height) if fixed else None
-        if labels is not None:
+        held = self._redraws_labels()
+        fixed = self.horizontal and self.live is None and self._labelled()
+        labels = (narrow_categories(categories, fig.layout.height, held=held)
+                  if fixed or held else None)  # fmt: skip
+        if labels is not None and fixed:
             # Named as ticks, so the narrow layout swaps wrapped ones in and these back.
             fig.update_layout(yaxis={"tickmode": "array", "tickvals": categories,
                                      "ticktext": categories})  # fmt: skip
+        elif labels is not None:
+            # Named, so leaving the phone's layout sets plotly's own ticks back.
+            fig.update_layout(yaxis={"tickmode": "auto"})
         if legend is not None or labels is not None:
             found = [n for n in (legend, labels) if n is not None]
             narrow = {"below": max(n["below"] for n in found),
@@ -376,35 +422,62 @@ class BarData:
             # The labels as built, which a PDF or SVG of the view draws whatever the screen.
             built = {"yticktext": categories} if labels is not None else {}
             fig.update_layout(meta={**(fig.layout.meta or {}), "narrow": narrow, **built})
-        return fig
 
 
-def narrow_categories(categories: list[str], height: float) -> dict[str, Any] | None:
+# What a plot needs beside its widest label to hold the label whole: plotly's push pad, half
+# the axis line, the label's standoff, the right margin and the least plot plotly draws.
+HELD_PAD_PX = (PLOTLY_PUSH_PAD_PX + LINE_WIDTHS["axes"] / 2 + PLOTLY_TICK_PX
+               + PLOTLY_MARGIN_PX["r"] + PLOTLY_LEAST_PLOT_PX)  # fmt: skip
+
+
+def category_lines(categories: Iterable[str]) -> dict[str, list[Any]]:
+    """Each label as a phone draws it: [wrapped to half a phone's plot, width, row height].
+
+    Widths and heights in px; a row is the height its lines need, at least a bar's row.
+    """
+    size, room = on_page(SIZES["tick"]), PHONE_PLOT_PX / 2
+    out: dict[str, list[Any]] = {}
+    for c in categories:
+        wrapped = "<br>".join(wrap_to(c, room, size))
+        lines = wrapped.count("<br>") + 1
+        out[c] = [wrapped, text_width(c, size),
+                  max(PLOTLY_BAR_ROW_PX, lines * size * LINE_SPACING + PLOTLY_TICK_PX)]  # fmt: skip
+    return out
+
+
+def narrow_categories(categories: list[str], height: float,
+                      lines: Mapping[str, list[Any]] | None = None,
+                      held: bool = False) -> dict[str, Any] | None:  # fmt: skip
     """Horizontal bars' category labels wrapped to half a phone's plot, where one is wider.
 
     At 375 px M5's genes-called bars set "Neutrophils, PDAC against steady state, batch in the
     design" (530 px) left of a 317 px plot, and plotly's margin could not hold it: every label
     ran off the plot's left edge (E2b). The page script swaps the wrapped labels in where the
     plot is narrower than twice the widest label, so the bars keep half the plot, and each row
-    takes the height its lines need.
+    takes the height its lines need. ``held``, a live redraw's (PK.4), keeps the build's own
+    layout down to the plot that still holds the widest label whole, ``HELD_PAD_PX`` wider,
+    and names its ticks: M6's over-representation stays as built at 1,280 px. Its twin is
+    ``ctxOra.narrow``.
+
+    Args:
+        categories: The labels, in axis order.
+        height: The figure's height as built, in px.
+        lines: ``category_lines`` of at least ``categories``; measured here when None.
+        held: The live redraw's threshold and ticks.
 
     Returns:
         The narrow layout, or None when every label fits half a phone's plot.
     """
-    size = on_page(SIZES["tick"])
-    room = PHONE_PLOT_PX / 2
-    widest = max((text_width(c, size) for c in categories), default=0.0)
-    if widest <= room:
+    lines = lines if lines is not None else category_lines(categories)
+    widest = max((lines[c][1] for c in categories), default=0.0)
+    if widest <= PHONE_PLOT_PX / 2:
         return None
-    wrapped = ["<br>".join(wrap_to(c, room, size)) for c in categories]
-    lines = max(w.count("<br>") + 1 for w in wrapped)
-    row = max(PLOTLY_BAR_ROW_PX, lines * size * LINE_SPACING + PLOTLY_TICK_PX)
-    return {
-        "below": 2 * widest + PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"],
-        "relayout": {"yaxis.ticktext": wrapped,
-                     "height": max(height, PLOTLY_BAR_BASE_PX + row * len(categories))},
-        "restyle": [],
-    }  # fmt: skip
+    row = max(lines[c][2] for c in categories)
+    ticks: dict[str, Any] = {"yaxis.tickmode": "array", "yaxis.tickvals": list(categories)}
+    relayout = {**(ticks if held else {}), "yaxis.ticktext": [lines[c][0] for c in categories],
+                "height": max(height, PLOTLY_BAR_BASE_PX + row * len(categories))}  # fmt: skip
+    wide = 2 * widest + PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"]
+    return {"below": widest + HELD_PAD_PX if held else wide, "relayout": relayout, "restyle": []}
 
 
 def phone_legend(fig: Any) -> dict[str, Any] | None:

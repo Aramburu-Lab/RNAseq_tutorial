@@ -83,10 +83,18 @@
       /* At the build's settings the figure stays as built, which the PDF and SVG draw. */
       if (moved || drawn) {
         var others = div.data.filter(function (t) { return t.type !== "bar"; });
+        /* The layout as built for these sets, plotly's own ticks at the build's height, and a
+           phone's layout of their own, which the fit swaps in (PK.4): the build's named the
+           build's sets, and its labels started left of a phone's screen. */
+        var yaxis = Object.assign({}, div.layout.yaxis, { categoryarray: cats, tickmode: "auto" });
+        delete yaxis.tickvals; delete yaxis.ticktext;
+        var meta = Object.assign({}, div.layout.meta, { yticktext: cats });
+        meta.narrow = ctxOra.narrow(cats, cfg.phone);
+        if (!meta.narrow) delete meta.narrow;
         /* The legend names which bars pass, even where one trace is drawn (PK.3). */
         Plotly.react(div, traces.concat(others), Object.assign(div.layout,
-          { yaxis: Object.assign(div.layout.yaxis || {}, { categoryarray: cats }),
-            showlegend: traces.length > 0 }));
+          { yaxis: yaxis, meta: meta, height: cfg.phone.height, showlegend: traces.length > 0 }));
+        div.dispatchEvent(new CustomEvent("ctx-view", { detail: { height: cfg.phone.height } }));
         drawn = true;
       }
       var n = list.up.length + list.down.length + (list.none || []).length;

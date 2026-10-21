@@ -376,7 +376,8 @@ def _featured(writer: Writer, contrast: Contrast, labelled: Mapping[str, Words],
         grey = THEMES["white"].reference
         panel["colours"] = {"up": ROLES["comparison"], "down": ROLES["reference"],
                             "all": DATA_COLOURS[0], "failing": grey}  # fmt: skip
-        bars = replace(bars, live=panel)
+        # The redraw may name any set: a phone's layout is rebuilt for its labels (PK.4).
+        bars = replace(bars, live=panel, drawable=tuple(panel["labels"].values()))
     items = (
         writer.figure(bars, f"ora_{name}", ora_text(said, len(background), passing.get("up", 0),
                                                     passing.get("down", 0),

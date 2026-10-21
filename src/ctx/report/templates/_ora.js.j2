@@ -86,6 +86,19 @@ var ctxOra = {
       .filter(function (f) { return f[1].length; })
       .sort(function (a, b) { return a[1][0].row.p - b[1][0].row.p; });
   },
+  /* ctx.viz.bar.narrow_categories, held (PK.4): the phone's layout of the bars the redraw
+     draws, from BarData's controls()["phone"], whose lines give each label wrapped, its width
+     and its row; null where every label fits half a phone's plot. */
+  narrow: function (cats, phone) {
+    var lines = cats.map(function (c) { return phone.lines[c]; });
+    var widest = Math.max.apply(null, [0].concat(lines.map(function (l) { return l[1]; })));
+    if (widest <= phone.room) return null;
+    var row = Math.max.apply(null, lines.map(function (l) { return l[2]; }));
+    return { below: widest + phone.pad, restyle: [],
+             relayout: { "yaxis.tickmode": "array", "yaxis.tickvals": cats.slice(),
+                         "yaxis.ticktext": lines.map(function (l) { return l[0]; }),
+                         height: Math.max(phone.height, phone.base + row * cats.length) } };
+  },
   /* ctx.function.live.by_contrast: a contrast's own up and down calls and its own tested
      symbols, from the panel's data (live.panel). Its own state: the GSEA bars' contrast view
      does not move it. Null for a contrast the panel does not carry. */

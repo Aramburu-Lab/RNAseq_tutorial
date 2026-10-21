@@ -277,6 +277,10 @@ PLOTLY_TICK_PX, PLOTLY_TITLE_STANDOFF_PX = 4, 8
 # smallest margin where one is smaller (plots.autoMargin). A pushed margin replaces the
 # template's; it never adds to it.
 PLOTLY_PUSH_PAD_PX = min(12, *PLOTLY_MARGIN_PX.values())
+# plotly.js narrows a plot no further than this however far its margins push, and shrinks the
+# margins instead (layout.minreducedwidth's default): a label wider than the rest is then drawn
+# left of the plot, off a phone's screen (PK.4).
+PLOTLY_LEAST_PLOT_PX = 64
 # plotly.js's alignment constant CAP_SHIFT, in em: an axis title with a standoff takes this much
 # of its size past its labels (axes.drawTitle), and an upright column label starts this much
 # less half an em under its axis.

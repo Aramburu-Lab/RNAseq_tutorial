@@ -152,7 +152,10 @@
        layout replaces the build's, and what a swap sets back is read from it, so a narrowed
        box plot's labels are the view's and stay the view's when the window widens again. A
        view is never drawn opened alone (figures.prepare), so the page's layouts stay. */
-    div.addEventListener("ctx-view", function () {
+    div.addEventListener("ctx-view", function (e) {
+      /* A redraw that names its height takes it on the div and its wrapper too, which keep a
+         phone's height a swap wrote: M6's six genes stood 1,298 px tall at 480 px (PK.4). */
+      if (e.detail && e.detail.height) setHeight(e.detail.height);
       var m = div.layout.meta || {};
       narrow = m.narrow;
       phone = narrow ? layout(narrow.relayout, narrow.restyle) : null;
