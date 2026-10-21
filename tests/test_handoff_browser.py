@@ -65,7 +65,11 @@ SEEN = """(async () => {
           legend: d.layout.showlegend, grey: cfg.colours.failing,
           moved: !!fig.querySelector('a[data-export][role=button]'),
           box: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth,
-          top, window: innerHeight, scrolled: scrollY};
+          ticks: Array.from(d.querySelectorAll('.yaxislayer-above .ytick text')).map(t => ({
+            text: t.textContent, lines: Math.max(1, t.querySelectorAll('tspan.line').length),
+            left: t.getBoundingClientRect().left, right: t.getBoundingClientRect().right})),
+          height: d._fullLayout.height, plot: d._fullLayout._size.h,
+          width: d.getBoundingClientRect().width, top, window: innerHeight, scrolled: scrollY};
 })()"""
 # The window beside forwards through its entry page before `others` reads it.
 WAIT = "new Promise(r => setTimeout(r, 3000)).then(() => null)"
@@ -80,6 +84,27 @@ SIZES = {
     "link_phone_light": (375, 812, "light"),
     "link_phone_dark": (375, 812, "dark"),
 }
+# M6 opened as built, no list (PK.4): name to (width, height, scheme).
+BUILT = {
+    "built_wide": (1280, 900, "light"),
+    "built_phone_light": (375, 812, "light"),
+    "built_phone_dark": (375, 812, "dark"),
+}
+# Step-1's labels are MSigDB Hallmark names, up to 51 characters in words: the fixture's other
+# sets take real Hallmark names, so its labels run as wide (PK.4). UP_SET and DOWN_SET stay,
+# the names its dataset file tests.
+HALLMARK = (
+    "INTERFERON_GAMMA_RESPONSE", "EPITHELIAL_MESENCHYMAL_TRANSITION", "INFLAMMATORY_RESPONSE",
+    "IL6_JAK_STAT3_SIGNALING", "IL2_STAT5_SIGNALING", "OXIDATIVE_PHOSPHORYLATION",
+    "UNFOLDED_PROTEIN_RESPONSE", "REACTIVE_OXYGEN_SPECIES_PATHWAY", "WNT_BETA_CATENIN_SIGNALING",
+    "TGF_BETA_SIGNALING", "PI3K_AKT_MTOR_SIGNALING", "MTORC1_SIGNALING",
+    "ESTROGEN_RESPONSE_EARLY", "ESTROGEN_RESPONSE_LATE", "ANDROGEN_RESPONSE",
+    "CHOLESTEROL_HOMEOSTASIS", "FATTY_ACID_METABOLISM", "XENOBIOTIC_METABOLISM",
+    "KRAS_SIGNALING_UP", "KRAS_SIGNALING_DN", "TNFA_SIGNALING_VIA_NFKB", "UV_RESPONSE_DN",
+    "HEDGEHOG_SIGNALING", "NOTCH_SIGNALING", "APICAL_JUNCTION", "APICAL_SURFACE",
+    "ADIPOGENESIS", "ALLOGRAFT_REJECTION", "COAGULATION", "COMPLEMENT", "HYPOXIA",
+    "G2M_CHECKPOINT",
+)  # fmt: skip
 GREY_SVG = re.compile(r"fill:\s*rgb\(140,\s*140,\s*140\)|fill=\"#8c8c8c\"", re.IGNORECASE)
 
 
@@ -109,7 +134,11 @@ def _root(root):
     filler = [f"G{i:05d}" for i in range(400, 700)]
     one = [f"ONE_{i:02d}\tsynthetic\t" + "\t".join([f"G{i + 1:05d}", *filler[i * 20:i * 20 + 30]])
            for i in range(12)]  # fmt: skip
-    gmt.write_text(gmt.read_text() + "\n".join(one) + "\n")
+    named = iter(HALLMARK)
+    sets = re.sub(r"^(?:RANDOM|ONE)_\d\d\t", lambda _: f"HALLMARK_{next(named)}\t",
+                  gmt.read_text() + "\n".join(one) + "\n", flags=re.MULTILINE)  # fmt: skip
+    assert next(named, None) is None, "one Hallmark name for each other set"
+    gmt.write_text(sets)
     for module in ("de", "function"):
         _ran(root, module, "--dataset", "desynth", "--dataset-file", str(DE_SPEC))
     (m5,) = (root / "outputs" / "05_de").glob("*_de_desynth_overview_v1.html")
@@ -121,8 +150,11 @@ def ran(tmp_path_factory):
     """Each way of sending the list, in one browser: (M5 page, downloads, results)."""
     m5 = once(tmp_path_factory, "handoff", _root)
     up = "fig.querySelector('[data-pick=up]').click();"
+    (m6,) = (m5.parents[1] / "06_function").glob("*_function_desynth_overview_v1.html")
+    built = [{"name": n, "url": m6.as_uri(), "width": w, "height": h, "scheme": c, "act": SEEN}
+             for n, (w, h, c) in BUILT.items()]  # fmt: skip
     tasks = [*(_task(name, m5) for name in SIZES), _task("beside", m5, beside=True),
-             _task("many", m5, 0, up), _task("refused", m5, before=REFUSED)]  # fmt: skip
+             _task("many", m5, 0, up), _task("refused", m5, before=REFUSED), *built]  # fmt: skip
     downloads = tmp_path_factory.mktemp("downloads")
     return m5, downloads, _browse(tasks, downloads)
 
@@ -258,3 +290,43 @@ def test_a_refused_address_still_sends_the_list(ran):
     got = seen["moused"][0]
     assert "&n=6&" in seen["acted"]["href"] and "&n=6&" in got["hash"]
     assert sorted(_listed(got["notes"])) == sorted(seen["acted"]["names"])
+
+
+def _seen(results: dict, name: str) -> dict:
+    """What a task's reader saw of M6: after the click, or as opened."""
+    seen = results[name]
+    assert seen["errors"] == []
+    return seen["moused"][0] if name in SIZES else seen["acted"]
+
+
+@pytest.mark.parametrize("name", ["built_phone_light", "built_phone_dark", "link_phone_light",
+                                  "link_phone_dark"])  # fmt: skip
+def test_a_phone_keeps_every_set_label_on_screen(ran, name):
+    """At 375 px, M6 as built and redrawn on the six genes (PK.4): every y tick label starts
+    at or right of the screen's left edge, one label per bar's set, no page scrolls sideways.
+    Before, Step-1's build view set its labels from -201 px and the six genes' from -18 px;
+    on this fixture from -52.4 px and -58.5 px.
+
+    Mutation caught: the redraw's phone layout left out (``ctxBars.narrow`` returning null),
+    the six genes' labels then from the left of the screen."""
+    got = _seen(ran[2], name)
+    assert len(got["ticks"]) == len(got["categories"]) > 0, (got["ticks"], got["categories"])
+    off = [(t["text"], round(t["left"], 1)) for t in got["ticks"] if t["left"] < 0]
+    assert off == [], off
+    assert any(t["lines"] > 1 for t in got["ticks"]), "no label wrapped: no phone layout drawn"
+    assert got["scroll"] <= got["box"], (got["scroll"], got["box"])
+
+
+@pytest.mark.parametrize("name", ["built_wide", "link", "link_wide_dark"])
+def test_a_desktop_draws_the_labels_as_built(ran, name):
+    """At 1,280 px each label stays one line, as the build's own layout draws it, at the
+    build's height: the phone's layout never reaches a desktop (PK.4). plotly's own ticks
+    stay, which on the build's 14 sets print every other label, as before PK.4.
+
+    Mutation caught: the phone's threshold twice the widest label, as fixed bars take it,
+    which wraps the labels on a desktop's 567 px plot."""
+    results = ran[2]
+    got, built = _seen(results, name), _seen(results, "built_wide")
+    assert got["ticks"] and {t["text"] for t in got["ticks"]} <= set(got["categories"])
+    assert all(t["lines"] == 1 and t["left"] >= 0 for t in got["ticks"]), got["ticks"]
+    assert got["height"] == built["height"]

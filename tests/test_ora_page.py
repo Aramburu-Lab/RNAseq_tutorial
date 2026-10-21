@@ -293,3 +293,65 @@ def test_drawn_refuses_an_unknown_choice():
     with pytest.raises(ValueError, match="sets drawn"):
         live.drawn(pl.DataFrame({"gene_set": ["S"], "hits": [1], "p": [0.1], "fdr": [0.1]}),
                    "every")  # fmt: skip
+
+
+NARROW = r"""
+const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
+console.log(JSON.stringify(input.cases.map(c => ctxOra.narrow(c, input.phone))));
+"""
+# Labels as M6 draws them: short ones, Hallmark names in words that wrap to two lines, and two
+# of the widest, which wrap to four.
+LABELS = ("Up set", "Coagulation, MSigDB Hallmark", "Hypoxia, MSigDB Hallmark",
+          "Epithelial mesenchymal transition, MSigDB Hallmark",
+          "Reactive oxygen species pathway, MSigDB Hallmark", "Down set")  # fmt: skip
+# M6's ORA plot at 1,280 px, measured in Chromium on the hand-off fixture (PK.4).
+DESKTOP_PLOT_PX = 567
+
+
+def _ora_bars(labels: tuple[str, ...]):
+    """M6's live ORA bars as ``run._featured`` builds them: horizontal, live, every label
+    ``drawable``; the build draws the first three."""
+    from ctx.viz.bar import BarData  # noqa: PLC0415
+
+    frame = pl.DataFrame({"set": list(labels[:3]), "series": ["up"] * 3, "x": [3.0, 2.0, 1.0]})
+    return BarData(frame=frame, columns={"set": ("none", "Set."), "series": ("none", "Family."),
+                                         "x": ("none", "-log10 FDR.")},
+                   category="set", value="x", category_label="Gene set", value_label="-log10 FDR",
+                   series="series", colours={"up": "#E69F00"}, caption="ORA; BH.",
+                   horizontal=True, live={"kind": "ora"}, drawable=labels)  # fmt: skip
+
+
+def test_the_page_builds_a_phones_layout_as_the_build_does():
+    """PK.4: ``ctxOra.narrow`` gives the phone's layout ``bar.narrow_categories`` gives, held,
+    on the redraw's sets in any order, and none where every label fits; the build's own layout
+    keeps plotly's ticks, so a desktop draws it unchanged, and its phone's layout is the one
+    the page builds for the same sets.
+
+    Mutations caught: the threshold twice the widest label in either twin (a desktop's 567 px
+    plot then wraps); the redraw's ticks left unnamed (plotly skips every other label); the
+    build naming its ticks, which a desktop then draws every one of."""
+    from ctx.viz.bar import HELD_PAD_PX, narrow_categories  # noqa: PLC0415
+
+    bars = _ora_bars(LABELS)
+    phone = bars.controls()["phone"]
+    assert set(phone["lines"]) == set(LABELS) and phone["pad"] == HELD_PAD_PX
+    rng = random.Random(4)
+    cases = [list(LABELS), ["Up set", "Down set"], list(LABELS[:3])]
+    cases += [rng.sample(LABELS, rng.randint(1, len(LABELS))) for _ in range(8)]
+    node = shutil.which("node")
+    assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
+    script = re.sub(r"\{% (end)?raw %\}", "", SCRIPT.read_text())
+    done = subprocess.run([node, "-e", script + NARROW],
+                          input=json.dumps({"cases": cases, "phone": phone}),
+                          capture_output=True, text=True, check=True)  # fmt: skip
+    seen = json.loads(done.stdout)
+    for cats, page in zip(cases, seen, strict=True):
+        assert page == narrow_categories(cats, phone["height"], phone["lines"], held=True), cats
+    assert seen[1] is None
+    fig = bars.interactive()
+    built = fig.layout.meta["narrow"]
+    assert fig.layout.yaxis.tickmode == "auto" and fig.layout.yaxis.tickvals is None
+    assert built == seen[2]
+    widest = max(phone["lines"][c][1] for c in LABELS[:3])
+    assert built["below"] == widest + HELD_PAD_PX < DESKTOP_PLOT_PX
+    assert fig.layout.meta["yticktext"] == list(LABELS[:3])
