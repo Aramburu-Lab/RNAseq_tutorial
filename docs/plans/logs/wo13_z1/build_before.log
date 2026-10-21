@@ -1,0 +1,12 @@
+clinical tcga_kirc: exit 0
+13235556 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_kirc/outputs/12_clinical/2026-10-21_clinical_tcga_kirc_overview_v1.html
+clinical tcga_luad: exit 0
+13130012 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad/outputs/12_clinical/2026-10-21_clinical_tcga_luad_overview_v1.html
+clinical tcga_lusc: exit 0
+13119505 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_lusc/outputs/12_clinical/2026-10-21_clinical_tcga_lusc_overview_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_hnsc exists: move it aside first
+clinical tcga_hnsc: exit 0
+13111604 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_hnsc/outputs/12_clinical/2026-10-21_clinical_tcga_hnsc_overview_v1.html
+# before_brca built alone first: 14955148 B (build.sh, HEAD 9ac06d1 src copied outside git).
+# before_hnsc was written by a first build_all run (bash 3.2 failed its root map, which
+# fell through to ctx_tcga_hnsc, the right root for HNSC alone); the second run found it there.

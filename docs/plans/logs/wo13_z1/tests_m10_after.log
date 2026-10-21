@@ -1,0 +1,9 @@
+bringing up nodes...
+bringing up nodes...
+
+...............................................................          [100%]
+the test run changed the checkout: ['?? docs/plans/logs/wo13_z1/compare.py', '?? docs/plans/logs/wo13_z1/compare_all.sh', '?? docs/plans/logs/wo13_z1/compare_brca.log', '?? docs/plans/logs/wo13_z1/compare_fixture.log', '?? docs/plans/logs/wo13_z1/compare_hnsc.log', '?? docs/plans/logs/wo13_z1/compare_kirc.log', '?? docs/plans/logs/wo13_z1/compare_luad.log', '?? docs/plans/logs/wo13_z1/compare_lusc.log', '?? docs/plans/logs/wo13_z1/fixture_page.py', '?? docs/plans/logs/wo13_z1/measure_brca_after.log', '?? docs/plans/logs/wo13_z1/measure_brca_before.log', '?? docs/plans/logs/wo13_z1/measure_brca_real_2026-10-20.log', '?? docs/plans/logs/wo13_z1/measure_hnsc_after.log', '?? docs/plans/logs/wo13_z1/measure_hnsc_before.log', '?? docs/plans/logs/wo13_z1/measure_kirc_after.log', '?? docs/plans/logs/wo13_z1/measure_kirc_before.log', '?? docs/plans/logs/wo13_z1/measure_luad_after.log', '?? docs/plans/logs/wo13_z1/measure_luad_before.log', '?? docs/plans/logs/wo13_z1/measure_lusc_after.log', '?? docs/plans/logs/wo13_z1/measure_lusc_before.log']
+
+63 passed in 710.00s (0:11:50)
+# 63 passed; pytest exited 1 only because this repo's guard saw these log files appear in the
+# checkout during the run. The full run in suite.log wrote its log outside the checkout.

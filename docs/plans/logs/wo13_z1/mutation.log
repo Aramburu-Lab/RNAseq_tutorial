@@ -1,0 +1,5 @@
+# Planted: figures._packed's argument loop range(3) to range(2), the config left raw beside the
+# packed data and layout. Caught by the Python comparison (configs unequal); Chromium draws the
+# same either way, so test_chromium_draws_... passes under it, as expected. Reverted after.
+FAILED tests/test_packed_figures.py::test_a_packed_page_carries_the_same_figures_and_rows
+1 failed, 3 passed in 41.19s

@@ -1,0 +1,52 @@
+before 13,130,012 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad/outputs/12_clinical/2026-10-21_clinical_tcga_luad_overview_v1.html
+after  12,261,079 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad/outputs/12_clinical/2026-10-21_clinical_tcga_luad_overview_v1.html
+1. figures: 6 before, 6 after, arguments equal as text: True
+   rows: 6 before, 6 after, equal as text: True
+   raw figures left on the after page: 0; raw rows left: 0
+2. page restored against before: 37 differing lines
+   -ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad
+   +ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad
+   -<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   +<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   -ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad
+   +ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad
+   -<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   +<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   -ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad
+   +ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad
+   -<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   +<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   -ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad
+   +ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad
+   -<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   +<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   -ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad
+   +ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad
+   -<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   +<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   -ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad
+   +ROOT=/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad
+   -<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   +<details class="repro-upstream"><summary>Upstream: the command that wrote these inputs and drew the figure</summary><div class="command"><pre><code>pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scr
+   -<div class="command"><pre><code id="ctx-command">pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad cli
+   +<div class="command"><pre><code id="ctx-command">pixi run -e default ctx --root /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad clin
+   -<tr><th>Wall time</th><td class="wall">99.864 s</td></tr>
+   -<tr><th>Peak memory, this process</th><td class="rss-self">1184.9 MiB (1242450008 bytes)</td></tr>
+   +<tr><th>Wall time</th><td class="wall">116.214 s</td></tr>
+   +<tr><th>Peak memory, this process</th><td class="rss-self">1181.7 MiB (1239124104 bytes)</td></tr>
+   -     (ctx.report.figures.columnar), as one object per row again. */
+   +     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+   +     ctx.report.figures.pack_json writes them. */
+   -    var t = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+   +    var held = document.getElementById(form.getAttribute("data-rows"));
+   +    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+   +                                                     : JSON.parse(held.textContent);
+3. Chromium: errors before [], after []; plots 6, 6
+   ctx-figure-0: data True (159,763 chars), layout True, full True
+   ctx-figure-1: data True (122,249 chars), layout True, full True
+   ctx-figure-2: data True (5,297 chars), layout True, full True
+   ctx-figure-3: data True (157,923 chars), layout True, full True
+   ctx-figure-4: data True (54,934 chars), layout True, full True
+   ctx-figure-5: data True (3,067 chars), layout True, full True
+   rows tables 6, equal as parsed: True
+PASS

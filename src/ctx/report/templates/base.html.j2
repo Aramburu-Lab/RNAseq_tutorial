@@ -25,6 +25,10 @@
 {% include "_page.css.j2" %}
 </style>
 <script>{{ plotly_js }}</script>
+{% if unpack %}<script>
+{% include "_unpack.js.j2" %}
+</script>
+{% endif %}
 {% if export %}<script>{{ export.script }}</script>
 <script type="application/json" id="ctx-export">{{ export.config }}</script>
 {% endif %}

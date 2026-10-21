@@ -1,0 +1,11 @@
+# files: tests/test_box_browser.py tests/test_box_stack_browser.py tests/test_calls_burst_browser.py tests/test_clinical_analyses.py tests/test_clinical_budget.py tests/test_clinical_live.py tests/test_clinical_page.py tests/test_clinical_table.py tests/test_de_views_browser.py tests/test_de_views_browser.py tests/test_export.py tests/test_export_browser.py tests/test_function_views_browser.py tests/test_function_views_browser.py tests/test_genecard_browser.py tests/test_genecard_views.py tests/test_handoff_browser.py tests/test_heatmap_browser.py tests/test_legend_browser.py tests/test_ncrna_views_browser.py tests/test_ncrna_views_browser.py tests/test_ora_browser.py tests/test_packed_browser.py tests/test_packed_figures.py tests/test_page_cap.py tests/test_page_width_browser.py tests/test_phone_export_browser.py tests/test_pick_browser.py tests/test_preview_clinical.py tests/test_process_views.py tests/test_process_views_browser.py tests/test_process_views_browser.py tests/test_proteo_views_browser.py tests/test_proteo_views_browser.py tests/test_qc_views.py tests/test_quant_views_browser.py tests/test_quant_views_browser.py tests/test_report.py tests/test_reproduce_browser.py tests/test_scatter_legend_browser.py tests/test_survival.py tests/test_view_browser.py tests/views_browser.py tests/views_browser.py 
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [ 22%]
+........................................................................ [ 44%]
+........................................................................ [ 66%]
+........................................................................ [ 88%]
+.......................................                                  [100%]
+327 passed in 2120.22s (0:35:20)
+exit 0

@@ -1,0 +1,5 @@
+E   ImportError: cannot import name 'pack_json' from 'ctx.report.figures' (/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-af769670337776f4c/src/ctx/report/figures.py)
+=========================== short test summary info ============================
+ERROR tests/test_packed_figures.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 28.12s

@@ -1,0 +1,82 @@
+wo13-z1 (TODO Z.1), 2026-10-21: what TCGA-BRCA's M10 page holds, the fix, and the room it frees.
+
+Files here
+  measure.py                 every byte of a page in exactly one part; each run checks that the
+                             parts sum to the page's size
+  measure_brca_real_2026-10-20.log  the real page, read-only:
+                             ~/ctx_breast/outputs/12_clinical/2026-10-20_clinical_tcga_brca_overview_v1.html
+  measure_<cohort>_before.log / _after.log   the scratch rebuilds, HEAD 9ac06d1 and this change
+  build.sh, build_all.sh     M10 into scratch roots under the session scratchpad: data/ and
+                             resources/ linked, gather's newest tables copied, nothing written
+                             into a real root; both sides ran from a copy of src outside git
+  build_before.log, build_after.log
+  compare.py, compare_<cohort>.log, compare_fixture.log, fixture_page.py
+  tests_before.log, tests_m10_after.log, mutation.log, suite.log
+
+1. The real page, 14,953,079 B against the 15,000,000 B cap (46,921 B free)
+   last column: gzip+base64 as builder.pack packs; for the figures and rows, the DEFLATE+base64
+   bytes the after page carries (measure_brca_after.log)
+   part                                         encoding                        bytes     packed
+   plotly.js                                    raw JS                      4,815,817  1,958,492
+   export libraries (jsPDF, svg2pdf)            raw JS                        526,581    215,968
+   export fonts and settings (ctx-export)       base64 fonts in JSON          219,314          -
+   page script                                  raw JS                        224,230     86,024
+   CSS                                          raw CSS                        34,621      9,544
+   ctx-templates, ctx-glossary, theme script    raw JSON, raw JS               19,432
+   HTML outside scripts: text, tables, tags     HTML                          158,921
+   10 figures' drawing arguments (newPlot)      raw JSON                    1,873,753    232,752
+     of which the plotly template, once in each  raw JSON                     76,510
+   10 figures' rows (ctx-data-N)                raw JSON, columnar          1,176,380    126,408
+   figure script wrappers                       inline JS                       3,330
+   survival panel (ctx-controls-5)              -                           5,900,029
+     .block, 2,332 genes by 1,088 patients      gzip+base64 int16 planes    5,599,822   (packed)
+     .screen, 2,332 rows                        raw JSON                      211,319     72,520
+     .endpoints                                 raw JSON                       37,049      5,864
+     .symbols, .numbers                         raw JSON                       39,799     21,636
+     everything else                            raw JSON                       12,040
+   scan's follow controls (ctx-controls-6)      raw JSON                          671
+   Per figure, per part, and the panel key by key: measure_brca_real_2026-10-20.log.
+   The block is filled to clinical.panel.PANEL_BYTES (5,600,000), so a better block encoding
+   carries more genes, not fewer bytes: it frees nothing until that budget is lowered.
+
+   Duplication
+   - figure 4 (expression by ER) and its rows each name every patient 4 times: 4,128 barcodes,
+     1,032 distinct, in each; gzip takes the repeats within each part.
+   - the plotly template sits in all 10 figures, 7,651 B each, beside ctx-templates.
+   - the panel's gene symbols (21,501 B) are repeated in its screen rows.
+   - the screen IS the panel: 2,332 screen rows, every one a panel gene. M10.G's
+     "one bit per patient per gene" (2,332 x 1,088 / 8 = 317,152 B, not the 0.7 MB TODO.md
+     estimated) is the median split of values the block already carries: M10.G needs its JS
+     and no new data. Same on the other cohorts: 4,839 to 5,110 screen genes, all panel genes.
+
+2. The fix: ModulePage.pack_figures (M10 sets it). Each figure's three newPlot arguments and its
+   rows travel as raw DEFLATE in base64 (figures.pack_json), as written, and the figure's own
+   inline script draws them with ctxUnpack (templates/_unpack.js.j2, a synchronous RFC 1951
+   inflate after zlib's puff.c, 5,753 B), where it drew them raw before; so every later script
+   finds each plot drawn as before. Lossless: the inflated text is the raw text byte for byte.
+   The existing Group.packed (draw when reached) was not used: M10's ER and expression groups
+   sit above the survival figure, and a linked list scrolls to it (PK), so groups drawing late
+   above it would move it.
+
+3. Rebuilt in scratch roots, M10 only (bytes; free = 15,000,000 minus the page)
+   cohort       before (HEAD)        after   saved       free before   free after
+   TCGA-BRCA      14,955,148    12,269,875   2,685,273        44,852    2,730,125
+   TCGA-KIRC      13,235,556    12,269,901     965,655     1,764,444    2,730,099
+   TCGA-LUAD      13,130,012    12,261,079     868,933     1,869,988    2,738,921
+   TCGA-LUSC      13,119,505    12,268,884     850,621     1,880,495    2,731,116
+   TCGA-HNSC      13,111,604    12,259,155     852,449     1,888,396    2,740,845
+   Every cohort lands near 12.26 MB because the panel fills its 5.6 MB budget on each.
+
+   Same figures (compare_*.log): on every cohort and on the test fixture, each figure's
+   arguments and each rows table inflate to the before page's text exactly; the after page
+   with its packed parts put back differs from the before page only in the Reproduce panel
+   (root path, wall time, memory) and the ctxRows lines this change edits; in Chromium every
+   plot's data, layout and full data, and every rows table as parsed, are equal, no errors.
+
+Not done, and the next room if it is wanted (measured above, not built)
+   - plotly.js packed the same way: 4,815,817 B to 1,958,492 B, 2.86 MB more on every page, at
+     the cost of inflating 4.8 MB at load; left alone because every page embeds it and tests
+     count it.
+   - the panel's screen rows packed: 211,319 B to 72,520 B on BRCA, 447,610 to 460,805 B raw
+     on the other cohorts; their readers parse the controls synchronously in several scripts.
+   - other module pages: pack_figures is off; only M10 was rebuilt.
