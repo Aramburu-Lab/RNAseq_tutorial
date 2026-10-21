@@ -11,8 +11,9 @@ import polars as pl
 from test_function_words import SPEC, _enrichment, _gsea, _sets
 
 from ctx.dataset import PcaSpec, load
+from ctx.de.deseq import Fit
 from ctx.de.page import every, level_words, subset_words, words
-from ctx.de.run import Writer, _pca_figure
+from ctx.de.run import Writer, _contrasts_table, _pca_figure, p_histogram
 from ctx.function import run as m6
 from ctx.gather import gdc
 from ctx.report import text
@@ -93,3 +94,24 @@ def test_m6_of_gdc_data_acknowledges_the_project_and_the_gdc(tmp_path):
     assert tuple(found[: len(said)]) == said
     plain, _, _ = m6._page(writer, SPEC, _enrichment(_sets(), _gsea(16, 4)))
     assert not set(said) & {r for r in plain if isinstance(r, str)}
+
+
+def test_cassetta_contrasts_read_by_their_labels():
+    """D1.2: breast_mac, breast_mono and breast_tissue each had two contrasts of one pair of
+    levels, which D-067 told apart by identifier. Labelled, every contrast reads by its own
+    label on the contrasts table and in a caption, and no two read alike. Mutation: ``words``
+    ignoring ``Contrast.label``: the table and caption print the levels and the identifier."""
+    results = pl.DataFrame({"pvalue": [0.01, 0.5], "padj": [0.02, 0.6], "call": ["up", "ns"]})
+    empty = pl.DataFrame()
+    for slug in ("breast_mac", "breast_mono", "breast_tissue"):
+        spec = load(ROOT / "conf" / "datasets" / f"{slug}.toml")
+        said = every(spec.contrasts, spec.columns)
+        assert all(c.label for c in spec.contrasts), slug
+        assert {n: w.label for n, w in said.items()} == {c.name: c.label for c in spec.contrasts}
+        assert len({w.label for w in said.values()}) == len(said), slug
+        fits = {c.name: Fit(c, results, empty, (), empty, empty) for c in spec.contrasts}
+        shown = [row[0] for row in _contrasts_table(fits, said).rows]
+        assert shown == [c.label for c in spec.contrasts], slug
+        for c in spec.contrasts:
+            caption = p_histogram(fits[c.name], said[c.name])[0].caption
+            assert c.label in caption and c.name not in caption, (slug, c.name)

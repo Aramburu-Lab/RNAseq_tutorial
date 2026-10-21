@@ -136,6 +136,10 @@ def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
         whole = all(isinstance(x, int) and not isinstance(x, bool) for x in n or ())
         if n is not None and (len(n) != 2 or not whole):  # noqa: PLR2004 - a pair
             problems.append(f"{where}.n: expected [reference n, tested n], found {n!r}")
+        label = entry.get("label", "")
+        # str() would print a list's brackets as a title; an empty label is a line left unedited.
+        if "label" in entry and (not isinstance(label, str) or not label.strip()):
+            problems.append(f"{where}.label: expected the contrast in words, found {label!r}")
         if None in fields or n is None:
             continue
         name, variable, reference, tested = (str(f) for f in fields)
@@ -143,7 +147,7 @@ def _contrasts(raw: list[Any], problems: list[str]) -> tuple[Contrast, ...]:
             name, variable, reference, tested, expected_n=(n[0], n[-1]),
             design=entry.get("design", "~group"), filters=filters,
             paired=bool(entry.get("paired", False)), split=split,
-            label=str(entry.get("label", "")),
+            label=label if isinstance(label, str) else "",
         ))  # fmt: skip
     names = [c.name for c in out]
     problems += [

@@ -132,3 +132,26 @@ def test_a_string_for_a_list_and_true_for_a_count_are_refused(tmp_path, old, new
     with pytest.raises(DatasetError) as caught:
         load(path)
     assert str(caught.value).splitlines() == [f"{path}:", f"  {problem}"]
+
+
+@pytest.mark.parametrize(("label", "found"), [
+    ('["Breast", "TAM"]', "['Breast', 'TAM']"), ('""', "''"), ('"  "', "'  '"), ("7", "7"),
+])  # fmt: skip
+def test_a_contrast_label_is_words(tmp_path, label, found):
+    """D1.2: a label is a string with words in it. Before it, ``str()`` read a list as its
+    brackets for a title and an empty label as no label at all. Catches the check removed."""
+    path = tmp_path / "broken.toml"
+    path.write_text(SYNTHETIC.read_text() + CONTRAST + f"label = {label}\n")
+    with pytest.raises(DatasetError) as caught:
+        load(path)
+    problem = f"contrasts[0].label: expected the contrast in words, found {found}"
+    assert str(caught.value).splitlines() == [f"{path}:", f"  {problem}"]
+
+
+def test_a_contrast_label_is_kept(tmp_path):
+    """A label given is the contrast's; one left out is empty, read as its levels."""
+    path = tmp_path / "labelled.toml"
+    path.write_text(SYNTHETIC.read_text() + CONTRAST + 'label = "Cases against controls"\n')
+    assert [c.label for c in load(path).contrasts if c.name == "c"] == ["Cases against controls"]
+    path.write_text(SYNTHETIC.read_text() + CONTRAST)
+    assert [c.label for c in load(path).contrasts if c.name == "c"] == [""]

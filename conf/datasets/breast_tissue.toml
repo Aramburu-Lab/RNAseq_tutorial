@@ -128,6 +128,7 @@ no = 53
 
 [[contrasts]]
 name = "tumour_adjacent_naive"
+label = "Tumour against adjacent normal, no batch term"
 variable = "condition"
 reference = "adjacent_normal"
 tested = "tumour"
@@ -135,6 +136,7 @@ n = [38, 51]
 
 [[contrasts]]
 name = "tumour_adjacent"
+label = "Tumour against adjacent normal, library run and read length in the design"
 variable = "condition"
 reference = "adjacent_normal"
 tested = "tumour"
