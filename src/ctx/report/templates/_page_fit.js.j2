@@ -6,7 +6,7 @@
   function fitting(div) {
     var meta = div.layout.meta || {}, narrow = meta.narrow, page = meta.page;
     var wrapper = div.parentElement, holder = div.closest(".fig-plot, .fig-below") || wrapper;
-    var built = wrapper.style.width, ratio = null;
+    var first = wrapper.style.width, built = first, ratio = null;
     /* A layout that holds its cells' aspect through plotly (yaxis.scaleanchor) has it held by
        its height here instead: with an axis shortened to the anchor, plotly's automargin
        stops counting the column labels and the statistic axis drawn inside the plot, and a
@@ -170,6 +170,9 @@
       /* A redraw that names its height takes it on the div and its wrapper too, which keep a
          phone's height a swap wrote: M6's six genes stood 1,298 px tall at 480 px (PK.4). */
       if (e.detail && e.detail.height) setHeight(e.detail.height);
+      /* The shown option's least width (views.own_widths), the build's where it names none: a
+         view of 4 then 11 features kept the 4's, and 11 turned names overlapped 10 times. */
+      built = (e.detail && e.detail.width) || first;
       var m = div.layout.meta || {};
       narrow = m.narrow;
       phone = narrow ? layout(narrow.relayout, narrow.restyle) : null;

@@ -144,3 +144,26 @@ def test_a_missing_value_leaves_the_labels_over_the_boxes():
     ys = [t.get_position()[1] for t in ax.texts if t.get_text().startswith("p=")]
     assert len(ys) == 3 and all(math.isfinite(y) for y in ys)  # noqa: PLR2004 - three genes
     assert all(math.isfinite(a.y) for a in data.interactive().layout.annotations)
+
+
+def test_a_view_option_of_another_size_carries_its_own_width_and_files():
+    """V.4b: an option of 11 features against a build of 4 carries its own least width and its
+    own files' size and rows; one of 4 features with another p carries neither, so a view of
+    one size keeps its page JSON. Mutation caught: ``viewed`` reading the first option only."""
+    from ctx.report.builder import FigureText  # noqa: PLC0415
+    from ctx.report.figures import plot_width  # noqa: PLC0415
+    from ctx.report.views import viewed  # noqa: PLC0415
+    from ctx.viz.save import figure_block  # noqa: PLC0415
+
+    text = FigureText("Boxes", reading=("Each box is one gene in one group.",))
+    built, same, more = boxes(4), boxes(4, p=1.2e-03), boxes(11)
+    block = figure_block(built, "2026-10-21_de_boxview_demo_v1", text)
+    options = viewed(block, [("4", built, text), ("4 again", same, text), ("11", more, text)],
+                     "Genes").controls["options"]  # fmt: skip
+    assert "width" not in options[1] and "export" not in options[1]
+    own, first = plot_width(options[2]["figure"]), plot_width(options[0]["figure"])
+    assert options[2]["width"] == own != first
+    width, height = more.inches()
+    assert (options[2]["export"]["width_pt"], options[2]["export"]["height_pt"]) == (
+        width * 72, height * 72)  # fmt: skip
+    assert options[2]["export"]["relayout"] == more.export_layers()["relayout"]
