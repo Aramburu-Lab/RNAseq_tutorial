@@ -253,7 +253,8 @@ def test_an_alias_with_another_meaning_on_a_page_is_no_mention():
 
 
 def test_lookup_by_id_term_or_alias_in_any_case(capsys):
-    """One entry answers to its id, its term and each alias, in any case; explain prints it.
+    """One entry answers to its id, its term and each alias, a long name in any case (D-104);
+    explain prints it.
 
     Mutation: lookup without .lower(): 'Q SCORE' raises.
     """
@@ -264,6 +265,18 @@ def test_lookup_by_id_term_or_alias_in_any_case(capsys):
     printed = capsys.readouterr().out
     assert printed.startswith("Phred quality score (Read quality)\nProbability that a base")
     assert "Source: Ewing & Green 1998" in printed and "See also: Q30," in printed
+
+
+def test_a_short_or_capitalised_name_resolves_only_as_written():
+    """L.6, D-104: a mark resolves "OS", "GO" and "rho" only as written, the rule the lint's
+    bare-word search uses, so [[os]] is no mark of overall survival; longer names keep any case.
+
+    Mutation caught: the any-case index holding every name again ([[os]] resolves)."""
+    assert glossary.lookup("OS").id == "survival_endpoints"
+    assert glossary.lookup("Overall Survival").id == "survival_endpoints"
+    for written in ("os", "Os", "go", "Rho"):
+        with pytest.raises(glossary.GlossaryError, match="not in the glossary"):
+            glossary.lookup(written)
 
 
 def test_plain_prints_the_display_text():

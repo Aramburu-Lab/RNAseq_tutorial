@@ -30,9 +30,6 @@ _ANSWER = {"prompt", "answer"}
 _CARD_DEPTH = 3
 # variants.<design>.<section>: a variant's sections start two keys deep.
 _VARIANT_DEPTH = 2
-# A name of three characters or fewer, or with two capitals (GO, OS, TPM, MultiQC), is matched
-# as written: "go" and "os" are words, not the Gene Ontology or overall survival.
-_EXACT = re.compile(r"^.{1,3}$|[A-Z].*[A-Z]")
 
 
 def definitions(raw: list[dict[str, Any]]) -> Iterator[str]:
@@ -95,8 +92,8 @@ def strings(node: Any, path: tuple[str, ...] = ()) -> Iterator[tuple[tuple[str, 
 def _names() -> tuple[re.Pattern[str], re.Pattern[str]]:
     """Every term and alias, as matched as written and as matched in any case."""
     names = [n for e in glossary.load().values() for n in (e.term, *e.aliases)]
-    exact = sorted({n for n in names if _EXACT.search(n)}, key=len, reverse=True)
-    loose = sorted({n for n in names if not _EXACT.search(n)}, key=len, reverse=True)
+    exact = sorted({n for n in names if glossary.exact(n)}, key=len, reverse=True)
+    loose = sorted({n for n in names if not glossary.exact(n)}, key=len, reverse=True)
 
     def pattern(found: list[str], flags: int) -> re.Pattern[str]:
         """One pattern for many names, each a whole word; the longest tried first."""
