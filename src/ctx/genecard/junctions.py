@@ -5,8 +5,10 @@ and gtex_v10 (openapi.json, read 2026-10-09), and no V11 junction file is on dis
 is V10's, labelled V10 wherever drawn, on V10's GENCODE v39. ``medianJunctionExpression`` takes
 a versioned ``gencodeId`` and no ``gencodeVersion``, so the v39 version is first read from
 ``reference/gene`` with ``gencodeVersion=v39``; ``datasetId`` is always named, since the
-routes' defaults differ (gtex_v10 here, gencode v26 for ``reference/gene``). Standard library
-and polars only.
+routes' defaults differ (gtex_v10 here, gencode v26 for ``reference/gene``). The panel's
+1 TPM floor reads V10's own gene medians from ``medianGeneExpression``, so the floor and the
+junctions share one release and one set of tissue IDs (D-106); V11's tissue names, which the
+exon panel's floor reads, have no table to V10's IDs. Standard library and polars only.
 """
 
 import json
@@ -43,6 +45,18 @@ def junction_url(gencode_id: str) -> str:
     query = urllib.parse.urlencode({"gencodeId": gencode_id, "datasetId": DATASET,
                                     "itemsPerPage": PAGE_ROWS})  # fmt: skip
     return f"{API}/expression/medianJunctionExpression?{query}"
+
+
+def tpm_url(gencode_id: str) -> str:
+    """``medianGeneExpression`` of one versioned v39 ID in every tissue of gtex_v10.
+
+    The route and its ``gencodeId``, ``datasetId`` and ``itemsPerPage`` are as the GTEx API v2
+    reference documents them (the gtex-database skill's ``api_reference.md``, read 2026-10-21);
+    no live response was read for this change.
+    """
+    query = urllib.parse.urlencode({"gencodeId": gencode_id, "datasetId": DATASET,
+                                    "itemsPerPage": PAGE_ROWS})  # fmt: skip
+    return f"{API}/expression/medianGeneExpression?{query}"
 
 
 def _data(body: bytes, what: str) -> list[dict[str, Any]]:
@@ -99,3 +113,24 @@ def parse(body: bytes, gencode_id: str) -> pl.DataFrame:
     schema = {"junction": pl.String, "chrom": pl.String, "start": pl.Int64, "end": pl.Int64,
               "tissue": pl.String, "median": pl.Float64}  # fmt: skip
     return pl.DataFrame(rows, schema=schema, orient="row")
+
+
+def parse_tpm(body: bytes, gencode_id: str) -> dict[str, float]:
+    """One gene's median TPM per V10 tissue ID, in the response's order.
+
+    Raises:
+        GenecardError: If a row is of another dataset or gene, is in a unit other than TPM,
+            or names a tissue twice.
+    """
+    out: dict[str, float] = {}
+    for row in _data(body, "medianGeneExpression"):
+        seen = (row.get("datasetId"), row.get("gencodeId"))
+        if seen != (DATASET, gencode_id):
+            raise GenecardError(f"GTEx median TPM: a row of {seen}, not {DATASET}, {gencode_id}")
+        if (unit := row.get("unit", "TPM")) != "TPM":
+            raise GenecardError(f"GTEx median TPM: unit {unit!r}, not TPM")
+        tissue = str(row["tissueSiteDetailId"])
+        if tissue in out:
+            raise GenecardError(f"GTEx median TPM: {tissue} twice for {gencode_id}")
+        out[tissue] = float(row["median"])
+    return out

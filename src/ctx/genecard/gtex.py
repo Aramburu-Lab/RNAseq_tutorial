@@ -18,7 +18,7 @@ import numpy as np
 import polars as pl
 
 from ctx.genecard import GenecardError
-from ctx.genecard.summary import DETECTED, spread
+from ctx.genecard.summary import spread
 
 RELEASE = "V11"
 RELEASE_DATE = "2025-08-22"
@@ -154,14 +154,15 @@ def tissue_spread(tpm: np.ndarray, samples: tuple[str, ...], who: pl.DataFrame) 
     return pl.DataFrame(rows, schema=schema, orient="row")
 
 
-def detected(spread: pl.DataFrame, floor: float = DETECTED) -> list[str]:
-    """Tissues whose all-donor median TPM reaches ``floor``, in the spread's order.
+def medians(spread: pl.DataFrame) -> dict[str, float]:
+    """Each tissue's all-donor median TPM, in the spread's order: the exon panel's floor reads it.
 
-    The exon panel reads exon use only there (H.3): a tissue that barely reads the gene gives
-    shares from a handful of reads, mostly 0, and sets every reference to 0.
+    The exon panel reads exon use only at ``summary.DETECTED`` or more (H.3,
+    ``annotation.expressed_use``): a tissue that barely reads the gene gives shares from a
+    handful of reads, mostly 0, and sets every reference to 0.
     """
-    rows = spread.filter((pl.col("sex") == ALL) & (pl.col("median") >= floor))
-    return rows["tissue"].to_list()
+    rows = spread.filter(pl.col("sex") == ALL).select("tissue", "median")
+    return dict(rows.iter_rows())
 
 
 def read_exons(path: Path, numbers: Iterable[int], samples: tuple[str, ...],

@@ -161,13 +161,21 @@ def _mane(frame: pl.DataFrame, source: str) -> annotation.Mane | None:
 
 
 def junctions(inputs: Mapping[str, Path], p: OneCard, _: Dataset) -> tuple[Any, FigureText]:
-    """GTEx V10's junctions of the gene, MANE introns marked from the model the page read."""
+    """GTEx V10's junctions of the gene, MANE introns marked from the model the page read.
+
+    Raises:
+        NoFigureError: Where too few V10 tissues express the gene, as the page then prints a line.
+    """
     card, rows = _card(_read(inputs, "junctions"), p)
     card.junction_id, card.junctions = rows["gtex_id"][0], rows.drop("gtex_id")
+    floor = _card(_read(inputs, "junction_tpm"), p)[1]
+    card.junction_tpm = dict(floor.select("tissue", "median_tpm").iter_rows())
     mane = _numbered(_read(inputs, "mane")).filter(pl.col("number") == card.number)
     card.gtf, card.rest = _mane(mane, "gtf"), _mane(mane, "rest")
-    heat, numbers = figures.junctions(card)
-    return heat, _plain(page._words("junctions", numbers))
+    if isinstance(drawn := page._junction_panel(card), str):
+        raise NoFigureError(drawn)
+    data, words = drawn
+    return data, _plain(words)
 
 
 def immune(inputs: Mapping[str, Path], p: OneCard, _: Dataset) -> tuple[Any, FigureText]:

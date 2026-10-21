@@ -69,9 +69,149 @@ def test_mane_introns_from_rest_where_the_gtf_has_none():
     rest = annotation.rest_mane(_body("ensembl_116_ENSG00000106236_lookup.json.gz"))
     table = junctions.parse(_body("gtex_v10_ENSG00000106236_junctions.json.gz"), V39)
     card = Card(106236, "ENSG00000106236.6", "NPTX2", "named", rest=rest, junctions=table,
-                junction_id=V39)  # fmt: skip
-    _, numbers = panel(card)
+                junction_id=V39, junction_tpm=_tpm())  # fmt: skip
+    drawn = panel(card)
+    assert drawn is not None
+    numbers = drawn[1]
     assert (numbers["matched"], numbers["introns"], numbers["junctions"]) == (4, 4, 4)
+
+
+TPM_FIXTURE = "gtex_v10_ENSG00000106236_median_tpm_madeup.json.gz"
+# The made-up V10 fixture's tissues below 1 TPM (tests/fixtures/genecard/README.md).
+BELOW = {"Whole_Blood", "Cells_EBV-transformed_lymphocytes", "Kidney_Cortex", "Kidney_Medulla",
+         "Liver", "Lung", "Brain_Cerebellar_Hemisphere"}  # fmt: skip
+
+
+def _tpm() -> dict[str, float]:
+    return junctions.parse_tpm(_body(TPM_FIXTURE), V39)
+
+
+def test_floor_route_names_dataset_and_its_rows_are_checked():
+    # Mutations: datasetId left to the route's default; one page of 250 rows taken as the
+    # whole gene; a row of another dataset, gene or unit accepted; a tissue read twice.
+    url = urllib.parse.urlsplit(junctions.tpm_url(V39))
+    assert url.path == "/api/v2/expression/medianGeneExpression"
+    assert urllib.parse.parse_qs(url.query) == {"gencodeId": [V39], "datasetId": ["gtex_v10"],
+                                                "itemsPerPage": ["100000"]}  # fmt: skip
+    tpm = _tpm()
+    assert len(tpm) == 54 and tpm["Pituitary"] == 240.0  # noqa: PLR2004 - the fixture's V10
+    raw = json.loads(_body(TPM_FIXTURE))
+    for field, value, message in (("datasetId", "gtex_v8", "not gtex_v10"),
+                                  ("gencodeId", "ENSG00000106236.6", "not gtex_v10"),
+                                  ("unit", "read count", "not TPM")):  # fmt: skip
+        bad = json.loads(json.dumps(raw))
+        bad["data"][0][field] = value
+        with pytest.raises(GenecardError, match=message):
+            junctions.parse_tpm(json.dumps(bad).encode(), V39)
+    raw["data"].append(raw["data"][0])
+    with pytest.raises(GenecardError, match="twice"):
+        junctions.parse_tpm(json.dumps(raw).encode(), V39)
+
+
+def _panel(table, tpm):  # noqa: ANN001, ANN202
+    from ctx.genecard.cards import Card  # noqa: PLC0415
+    from ctx.genecard.figures import junctions as panel  # noqa: PLC0415
+
+    card = Card(106236, "ENSG00000106236.6", "NPTX2", "named", junctions=table,
+                junction_id=V39, junction_tpm=tpm)  # fmt: skip
+    return panel(card)
+
+
+def test_floor_is_v10_tpm_and_comes_before_the_reference():
+    # Mutation (planted, seen to fail): the floor ignored, every tissue drawn and the
+    # reference taken over all 54 (7.5, 12.75, 15, 18.5 reads), as before D-106.
+    table = junctions.parse(_body("gtex_v10_ENSG00000106236_junctions.json.gz"), V39)
+    drawn = _panel(table, _tpm())
+    assert drawn is not None
+    heat, numbers = drawn
+    assert (numbers["tissues"], numbers["left"], numbers["release"]) == (47, 7, "V10")
+    assert not BELOW & set(heat.column_order or ())
+    assert heat.row_stats == {"chr7:98617888-98619642:+": 8.0, "chr7:98619860-98624921:+": 14.0,
+                              "chr7:98625167-98627164:+": 17.0,
+                              "chr7:98627345-98628401:+": 20.0}  # fmt: skip
+    assert "47 tissues at 1 TPM or more in GTEx V10; 7 tissues below" in heat.caption
+    # The 7 below hold every zero of the fixture, so no drawn cell lacks a ratio.
+    assert heat.frame["log2_ratio"].null_count() == 0
+
+
+def test_zero_steps_take_the_outer_levels_without_a_pseudocount():
+    # Mutation (planted, seen to fail): the junction panel's old rule, log2 null at zero with
+    # no step, so a junction read only where its median is 0 drew blank. D is below the floor.
+    import polars as pl  # noqa: PLC0415
+
+    rows = [
+        ("chr7:10-20:+", "chr7", 10, 20, t, m)
+        for t, m in (("A", 0.0), ("B", 4.0), ("C", 4.0), ("D", 90.0))
+    ]
+    rows += [("chr7:30-40:+", "chr7", 30, 40, t, m) for t, m in
+             (("A", 2.0), ("B", 0.0), ("C", 0.0), ("D", 90.0))]  # fmt: skip
+    table = pl.DataFrame(rows, schema=["junction", "chrom", "start", "end", "tissue", "median"],
+                         orient="row")  # fmt: skip
+    drawn = _panel(table, {"A": 5.0, "B": 5.0, "C": 1.0, "D": 0.99})
+    assert drawn is not None
+    frame = drawn[0].frame
+    cells = {(j, t): (lv, r) for j, t, lv, r in
+             frame.select("junction", "tissue", "level", "log2_ratio").iter_rows()}  # fmt: skip
+    assert cells[("chr7:10-20:+", "A")] == ("< -2", None)
+    assert cells[("chr7:30-40:+", "A")] == ("≥ 2", None)
+    assert cells[("chr7:30-40:+", "B")] == (None, None)
+    assert cells[("chr7:10-20:+", "B")] == ("-0.5 to 0.5", 0.0)
+    assert "D" not in frame["tissue"].to_list()
+    assert drawn[1]["unreferenced"] == 1
+
+
+def test_fewer_than_two_v10_tissues_leave_a_line_not_a_panel():
+    # Mutation: the two-tissue minimum dropped, so one tissue draws a panel of ratios of 0.
+    from ctx.genecard.cards import Card  # noqa: PLC0415
+    from ctx.genecard.page import _junction_panel  # noqa: PLC0415
+
+    table = junctions.parse(_body("gtex_v10_ENSG00000106236_junctions.json.gz"), V39)
+    one = dict.fromkeys(_tpm(), 0.5) | {"Pituitary": 240.0}
+    assert _panel(table, one) is None
+    card = Card(106236, "ENSG00000106236.6", "NPTX2", "named", junctions=table,
+                junction_id=V39, junction_tpm=one)  # fmt: skip
+    line = _junction_panel(card)
+    assert line == ("No junction panel for NPTX2: fewer than two GTEx V10 tissues reach a "
+                    "median of 1 TPM, so no junction has a median across tissues.")  # fmt: skip
+
+
+def _run(folder, spec, opener=None, offline=False):  # noqa: ANN001, ANN202
+    options = module.Options(spec, genes=("NPTX2",), offline=offline)
+    written = module.run(_settings(folder), _cards(), "ctx genecard", SLUG, options, opener)
+    return written, unpacked(written[0].read_text())
+
+
+def test_uncached_floor_says_so_and_never_draws_every_tissue(tmp_path):
+    # Mutations: the panel drawn over every tissue when the floor is missing; a 5xx on the
+    # floor cached; a 404 on it not recorded, so offline says "not cached" where online said
+    # "no entry"; the floor read from another release's request.
+    from test_genecard_absent import Failing  # noqa: PLC0415
+
+    from ctx.genecard.cache import MANIFEST  # noqa: PLC0415
+
+    folder, spec = tmp_path / "root", make(tmp_path / "root")
+    _register(folder, spec)
+    url = junctions.tpm_url(V39)
+    key = f"gtex/gtex_v10/{GENE}/median_tpm.gz"
+    written, page = _run(folder, spec, Failing(responses(), {url: 503}))
+    assert (
+        "GTEx V10 junctions unavailable for NPTX2: no GTEx V10 median TPM for its tissue "
+        "floor, HTTP Error 503: Server Error." in page
+    )
+    assert "Splice junctions of NPTX2" not in page
+    assert not any("_junctions_" in p.name for p in written)
+    assert key not in json.loads((folder / MANIFEST).read_text())
+    _, page = _run(folder, spec, offline=True)
+    assert ("no GTEx V10 median TPM for its tissue floor, not cached, and --offline makes no "
+            "request.") in page  # fmt: skip
+    assert "Splice junctions of NPTX2" not in page
+    bodies = responses()
+    del bodies[url]
+    _, page = _run(folder, spec, Stub(bodies))
+    assert json.loads((folder / MANIFEST).read_text())[key]["status"] == 404  # noqa: PLR2004
+    _, again = _run(folder, spec, offline=True)
+    said = "no GTEx V10 median TPM for its tissue floor, no entry: HTTP 404 on "
+    assert said in page and said in again and "Splice junctions of NPTX2" not in again
 
 
 def test_page_labels_v10_and_states_the_rerelease(tmp_path):

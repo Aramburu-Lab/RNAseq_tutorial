@@ -19,6 +19,7 @@ import numpy as np
 import polars as pl
 
 from ctx.genecard import GenecardError
+from ctx.genecard.summary import DETECTED
 
 ENSEMBL_RELEASE = "116"
 REST = "https://rest.ensembl.org"
@@ -120,16 +121,18 @@ class Pair:
 
 
 @dataclass(frozen=True)
-class ExonUse:
-    """An exon panel's cells over the tissues that express the gene, and each exon's CV.
+class TissueUse:
+    """A panel's cells over the tissues that express the gene, and each row's CV.
+
+    A row is an exon (value: its median share) or a junction (value: its median reads).
 
     Attributes:
-        frame: One row per exon and tissue: exon, tissue, n, share, the exon's reference share,
-            and the log2 ratio of share over reference, null where either is 0.
-        steps: Each row's ratio for the diverging scale: the log2 ratio, +inf for a share over
-            a reference of 0, -inf for no share against one above 0, NaN where both are 0.
-        cv: Each exon's CV of share across the tissues; None where it is undefined.
-        tissues: The tissues drawn, in the shares' order.
+        frame: One row per panel row and tissue: the input's columns, the row's reference,
+            and the log2 ratio of value over reference, null where either is 0.
+        steps: Each row's ratio for the diverging scale: the log2 ratio, +inf for a value over
+            a reference of 0, -inf for no value against one above 0, NaN where both are 0.
+        cv: Each panel row's CV of value across the tissues; None where it is undefined.
+        tissues: The tissues drawn, in the values' order.
         left_out: The tissues not drawn, left out before anything is computed.
     """
 
@@ -140,18 +143,19 @@ class ExonUse:
     left_out: tuple[str, ...]
 
 
-def exon_cv(shares: pl.DataFrame) -> dict[str, float | None]:
-    """Each exon's coefficient of variation of median share across tissues (SD over mean).
+def row_cv(values: pl.DataFrame, row: str = "exon",
+           value: str = "share") -> dict[str, float | None]:  # fmt: skip
+    """Each panel row's coefficient of variation of ``value`` across tissues (SD over mean).
 
-    Undefined, so None, for an exon with no reads in any tissue, and over fewer than two
+    Undefined, so None, for a row with no reads in any tissue, and over fewer than two
     tissues: a CV printed as "nan" read as a number on the figure (H.3).
     """
     out: dict[str, float | None] = {}
-    for (exon,), part in shares.group_by("exon", maintain_order=True):
-        values = part["share"].to_numpy()
-        mean = values.mean() if values.size else 0.0
-        defined = mean > 0 and values.size >= 2  # noqa: PLR2004 - an SD needs two values
-        out[str(exon)] = float(values.std(ddof=1) / mean) if defined else None
+    for (name,), part in values.group_by(row, maintain_order=True):
+        x = part[value].to_numpy()
+        mean = x.mean() if x.size else 0.0
+        defined = mean > 0 and x.size >= 2  # noqa: PLR2004 - an SD needs two values
+        out[str(name)] = float(x.std(ddof=1) / mean) if defined else None
     return out
 
 
@@ -169,26 +173,46 @@ def _step(share: float, reference: float) -> float:
     return -math.inf if reference > 0 else math.nan
 
 
-def exon_use(shares: pl.DataFrame, tissues: Iterable[str]) -> ExonUse:
-    """The exon panel over ``tissues``: the reference is each exon's median share there.
+def tissue_use(values: pl.DataFrame, tissues: Iterable[str], row: str = "exon",
+               value: str = "share") -> TissueUse:  # fmt: skip
+    """A panel over ``tissues``: the reference is each row's median ``value`` there.
 
     The order is the rule: tissues are restricted first, then the reference and the CV are
     taken over what is left. Over every GTEx tissue a gene expressed in a few has a reference
     of 0 for most exons (NKX2-1: E1, E2, E4 at 0 over 68 tissues, 0.021, 0.013, 0.072 over its
-    6 at 1 TPM), and the shares of a gene barely read in a tissue are noise.
+    6 at 1 TPM), and the shares of a gene barely read in a tissue are noise. The page's twin
+    is ``ctxM9.exonUse``, over the tissues a reader keeps.
     """
     keep = list(tissues)
-    held = shares.filter(pl.col("tissue").is_in(keep))
-    middle = held.group_by("exon").agg(reference=pl.col("share").median())
-    framed = held.join(middle, on="exon", how="left", maintain_order="left").with_columns(
-        log2_ratio=pl.when((pl.col("share") > 0) & (pl.col("reference") > 0))
-        .then((pl.col("share") / pl.col("reference")).log(2)).otherwise(None)
+    held = values.filter(pl.col("tissue").is_in(keep))
+    middle = held.group_by(row).agg(reference=pl.col(value).median())
+    framed = held.join(middle, on=row, how="left", maintain_order="left").with_columns(
+        log2_ratio=pl.when((pl.col(value) > 0) & (pl.col("reference") > 0))
+        .then((pl.col(value) / pl.col("reference")).log(2)).otherwise(None)
     )  # fmt: skip
-    steps = tuple(_step(s, r) for s, r in framed.select("share", "reference").iter_rows())
+    steps = tuple(_step(s, r) for s, r in framed.select(value, "reference").iter_rows())
     drawn = tuple(dict.fromkeys(held["tissue"].to_list()))
-    every = dict.fromkeys(shares["tissue"].to_list())
-    return ExonUse(framed, steps, exon_cv(held), drawn,
-                   tuple(t for t in every if t not in drawn))  # fmt: skip
+    every = dict.fromkeys(values["tissue"].to_list())
+    return TissueUse(framed, steps, row_cv(held, row, value), drawn,
+                     tuple(t for t in every if t not in drawn))  # fmt: skip
+
+
+def expressed(medians: Mapping[str, float], floor: float = DETECTED) -> list[str]:
+    """Tissues whose all-donor median TPM of the gene reaches ``floor``, in ``medians``' order."""
+    return [t for t, m in medians.items() if m >= floor]
+
+
+def expressed_use(values: pl.DataFrame, medians: Mapping[str, float], row: str = "exon",
+                  value: str = "share") -> TissueUse | None:  # fmt: skip
+    """D-079 for a panel: the floor first, then ``tissue_use``; None below two tissues.
+
+    ``medians`` is the gene's all-donor median TPM per tissue, from the release the panel's
+    values come from, so the floor and the values name tissues alike: V11 for the exon panel,
+    V10 for the junction panel (D-106). A tissue with no median there is not drawn. Fewer
+    than two tissues at the floor leave no reference across tissues, so no panel.
+    """
+    use = tissue_use(values, expressed(medians), row, value)
+    return use if len(use.tissues) >= 2 else None  # noqa: PLR2004 - a reference needs two
 
 
 def qpcr_pair(cv: Mapping[str, float | None]) -> Pair | None:

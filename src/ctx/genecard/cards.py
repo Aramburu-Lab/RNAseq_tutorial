@@ -50,6 +50,7 @@ class Card:
     renamed: str = ""
     junctions: pl.DataFrame | None = None
     junction_id: str = ""
+    junction_tpm: dict[str, float] | None = None
     notes: dict[str, str] = field(default_factory=dict)
 
 
