@@ -10,7 +10,6 @@ import re
 import shutil
 import subprocess
 import sys
-from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -261,18 +260,11 @@ def test_cli_defaults_are_the_module_defaults():
     assert defaults["min_count"] == MIN_COUNT
 
 
-@pytest.fixture(scope="module")
-def built(tmp_path_factory):
-    """ctx ncrna on the made-up root, once for the module's page tests."""
-    import ncrna_root  # noqa: PLC0415 - imports synth, which only tests use
-
-    tmp = tmp_path_factory.mktemp("ncrna")
-    root, spec = ncrna_root.make(tmp, date.today())
-    done = subprocess.run([str(CTX), "--root", str(root), "ncrna", "--dataset",
-                           ncrna_root.DATASET, "--dataset-file", str(spec)],
-                          capture_output=True, text=True, check=False)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root / "outputs" / "08_ncrna", done.stdout.split()
+@pytest.fixture(scope="session")
+def built(ncrna_built):
+    """ctx ncrna on the made-up root, the session's run: (output folder, paths printed)."""
+    root, _, printed = ncrna_built
+    return root / "outputs" / "08_ncrna", printed
 
 
 def table(out: Path, what: str) -> pl.DataFrame:

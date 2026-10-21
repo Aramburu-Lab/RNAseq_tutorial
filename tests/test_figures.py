@@ -68,6 +68,20 @@ def redrawn(folder: Path, spec) -> Path:
     return csv
 
 
+# Redraws run this many at once: each ``ctx figure`` is a fresh process, most of it start-up,
+# and one at a time the redraw tests were the suite's longest (M3.14).
+REDRAWS = 4
+
+
+def redrawn_each(found: list, root: Path, folder: Path) -> list[Path]:
+    """``redrawn`` of each spec, its inputs copied from ``root`` into ``folder/<stem>``,
+    ``REDRAWS`` at a time: the redrawn CSVs in ``found``'s order."""
+    from concurrent.futures import ThreadPoolExecutor  # noqa: PLC0415
+
+    with ThreadPoolExecutor(REDRAWS) as pool:
+        return list(pool.map(lambda s: redrawn(copied(s, root, folder / s.stem), s), found))
+
+
 def drawn_alike(redrawn_csv: Path, module_csv: Path) -> list[str]:
     """The data table, and the PDF and SVG of each theme, that differ from the module's; and
     ``panel`` where the module's own figure page carries no Reproduce panel.
@@ -93,11 +107,10 @@ def test_every_spec_redraws_its_data_byte_for_byte(pipeline, tmp_path):
     root = pipeline[0]
     found = specs(root)
     assert {parse(s.figure_id)[2] for s in found} == EXPECTED
-    for spec in found:
+    for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/*/{spec.stem}.csv"))
         readme = module_csv.with_name(f"{spec.stem}_README.md").read_text()
         assert f"`{spec.figure_id}`" in readme, spec.stem
-        csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
         assert drawn_alike(csv, module_csv) == [], spec.stem
 
 

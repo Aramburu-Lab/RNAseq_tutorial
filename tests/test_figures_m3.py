@@ -5,7 +5,7 @@ its mutation.
 """
 
 import polars as pl
-from test_figures import copied, drawn_alike, redrawn, specs
+from test_figures import drawn_alike, redrawn_each, specs
 
 from ctx.figures.spec import parse
 
@@ -33,9 +33,8 @@ def test_every_figure_redraws_byte_for_byte(process_root, tmp_path):
     root, spec_path, _ = process_root
     found = specs(root, PROCESS, spec_path)
     assert _kinds(found) == DRAWN
-    for spec in found:
+    for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/03_process/{spec.stem}.csv"))
-        csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
         assert drawn_alike(csv, module_csv) == [], spec.stem
 
 

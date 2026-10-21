@@ -6,7 +6,7 @@ mutation.
 """
 
 import polars as pl
-from test_figures import copied, drawn_alike, redrawn, specs
+from test_figures import drawn_alike, redrawn_each, specs
 
 from ctx.figures.spec import parse
 
@@ -20,9 +20,8 @@ def test_fates_and_estimates_redraw_byte_for_byte(quant_built, tmp_path):
     root, spec, _ = quant_built
     found = specs(root, QUANT, spec)
     assert sorted(parse(s.figure_id)[2] for s in found) == ["estimates", "fates"]
-    for one in found:
+    for one, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/04_quant/{one.stem}.csv"))
-        csv = redrawn(copied(one, root, tmp_path / one.stem), one)
         assert drawn_alike(csv, module_csv) == [], one.stem
 
 

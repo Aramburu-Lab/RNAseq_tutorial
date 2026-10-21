@@ -144,17 +144,11 @@ def test_mirnas_without_their_contrast_are_refused(tmp_path):
         load(path)
 
 
-@pytest.fixture(scope="module")
-def built(root):
-    """ctx ncrna on the made-up GDC root, once for the page tests."""
-    import ncrna_tcga_root  # noqa: PLC0415
-
-    path, spec = root
-    done = subprocess.run([str(CTX), "--root", str(path), "ncrna", "--dataset",
-                           ncrna_tcga_root.DATASET, "--dataset-file", str(spec)],
-                          capture_output=True, text=True, check=False)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return path / "outputs" / "08_ncrna", done.stdout.split()
+@pytest.fixture(scope="session")
+def built(ncrna_tcga_run):
+    """ctx ncrna on the made-up GDC root, the session's run: (output folder, paths printed)."""
+    root, _, printed = ncrna_tcga_run
+    return root / "outputs" / "08_ncrna", printed
 
 
 def table(out: Path, what: str) -> pl.DataFrame:

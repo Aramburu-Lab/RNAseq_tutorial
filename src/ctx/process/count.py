@@ -11,6 +11,7 @@ import re
 from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass
 from fractions import Fraction
+from functools import partial
 from pathlib import Path
 
 import polars as pl
@@ -180,23 +181,26 @@ def fc_genes(matrix: Path, *, fraction: bool) -> pl.DataFrame:
         raise ProcessError(f"{matrix} holds a count that is not {kind}: {error}") from error
 
 
-def summaries(counts: Counts, alignment: Alignment, dest: Path,
-              config: Path) -> dict[str, mqc_io.MultiqcRun]:  # fmt: skip
+def summaries(counts: Counts, alignment: Alignment, dest: Path, config: Path,
+              jobs: int = 1) -> dict[str, mqc_io.MultiqcRun]:  # fmt: skip
     """One MultiQC run per setting into ``dest/fc_<setting>/``, each with one row per BAM.
+
+    ``jobs`` of them run at a time (``mqc_io.at_once``).
 
     Raises:
         ProcessError: If a report's rows are not exactly the alignment's samples.
     """
-    runs = {}
-    for setting in counts.settings:
+
+    def one(setting: str) -> mqc_io.MultiqcRun:
         run = mqc_io.run([counts.summary(setting)], dest / f"fc_{setting}", config=config,
                          modules=("featurecounts",))  # fmt: skip
         names = mqc_io.table(run, "featurecounts")["Sample"].to_list()
         if sorted(names) != sorted(alignment.samples):
             raise ProcessError(f"MultiQC's featureCounts rows for {setting} are {names}, not "
                                f"one per BAM of {list(alignment.samples)}")  # fmt: skip
-        runs[setting] = run
-    return runs
+        return run
+
+    return mqc_io.at_once({s: partial(one, s) for s in counts.settings}, jobs)
 
 
 def assigned(runs: Mapping[str, mqc_io.MultiqcRun]) -> pl.DataFrame:

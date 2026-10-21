@@ -12,6 +12,7 @@ from html import unescape
 
 import polars as pl
 import pytest
+from conftest import once
 from synth import Synthetic, design_counts, write_gather_outputs
 from test_export_browser import CHROMIUM, _browse
 from test_qc_run import RNASEQ, RNASEQ_SAMPLES, SPEC, ctx
@@ -21,10 +22,14 @@ from test_qc_run import RNASEQ, RNASEQ_SAMPLES, SPEC, ctx
 TRANSPLANT = RNASEQ_SAMPLES[1]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def page(tmp_path_factory):
-    """ctx qc on the rnaseq fixture's reports, one sample given a donor of the other sex."""
-    root = tmp_path_factory.mktemp("qc_views")
+    """ctx qc on the rnaseq fixture's reports, one sample given a donor of the other sex, once
+    for this file, test_qc_judge and test_page_cap: (root, out, sheet, html)."""
+    return once(tmp_path_factory, "qc_views", _transplanted)
+
+
+def _transplanted(root):
     synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
     names = dict(zip(synthetic.samples["sample"], RNASEQ_SAMPLES, strict=True))
     renamed = Synthetic(synthetic.counts.rename(names),

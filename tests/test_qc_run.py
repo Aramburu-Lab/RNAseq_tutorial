@@ -11,6 +11,7 @@ from pathlib import Path
 
 import polars as pl
 import pytest
+from conftest import once, writable_copy
 from synth import DE_GROUPS, design_counts, write_gather_outputs
 
 from ctx.io.naming import lint
@@ -71,11 +72,19 @@ def with_annotation(root: Path, tmp: Path) -> Path:
     return spec
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def ran(tmp_path_factory):
-    root = tmp_path_factory.mktemp("qc_root")
+    """ctx qc on the planted gather outputs with a mini annotation: (root, planted, tables,
+    page)."""
+    return once(tmp_path_factory, "qc_planted", _planted_run)
+
+
+def _planted_run(folder: Path):
+    root = folder / "root"
+    root.mkdir()
     planted = plant(root)
-    spec = with_annotation(root, tmp_path_factory.mktemp("spec"))
+    (folder / "spec").mkdir()
+    spec = with_annotation(root, folder / "spec")
     done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(spec),
                cwd=root)  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
@@ -169,11 +178,9 @@ def test_a_second_run_writes_every_table_byte_for_byte(ran, tmp_path):
     table's order. Mutations caught: the unordered table and join put back in
     ``figures.linked_pca``, and in ``figures.density``; either one alone survives in density,
     where the other still holds the order."""
-    import shutil  # noqa: PLC0415
-
     root, _, _, _ = ran
     again = tmp_path / "again"
-    shutil.copytree(root / "outputs" / "01_gather", again / "outputs" / "01_gather")
+    writable_copy(root / "outputs" / "01_gather", again / "outputs" / "01_gather")
     spec = with_annotation(again, tmp_path)
     done = ctx("--root", str(again), "qc", "--dataset", "desynth", "--dataset-file", str(spec),
                cwd=again)  # fmt: skip
@@ -245,12 +252,16 @@ RNASEQ_SAMPLES = ("RAP1_IAA_30M_REP1", "RAP1_UNINDUCED_REP1", "RAP1_UNINDUCED_RE
                   "WT_REP2")  # fmt: skip
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def with_reports(tmp_path_factory):
-    """Gather outputs named after the rnaseq fixture's samples, then ctx qc on its reports."""
+    """Gather outputs named after the rnaseq fixture's samples, then ctx qc on its reports;
+    once for this file and test_figures_m2."""
+    return once(tmp_path_factory, "qc_reports", _with_reports)
+
+
+def _with_reports(root: Path):
     from synth import Synthetic  # noqa: PLC0415
 
-    root = tmp_path_factory.mktemp("qc_rnaseq")
     synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
     names = dict(zip(synthetic.samples["sample"], RNASEQ_SAMPLES, strict=True))
     renamed = Synthetic(synthetic.counts.rename(names),
@@ -300,14 +311,18 @@ def graded(fastq: bytes) -> bytes:
     return b"".join(lines)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def with_reads(tmp_path_factory):
-    """The chr22_se reads as a fetchngs outdir, gather outputs naming them, ctx qc --reads."""
+    """The chr22_se reads as a fetchngs outdir, gather outputs naming them, ctx qc --reads;
+    once for this file and test_figures_m2."""
+    return once(tmp_path_factory, "qc_reads", _with_reads)
+
+
+def _with_reads(root: Path):
     import gzip  # noqa: PLC0415
 
     from synth import Synthetic  # noqa: PLC0415
 
-    root = tmp_path_factory.mktemp("qc_reads")
     fastq = root / "data" / "raw" / "desynth" / "fastq"
     fastq.mkdir(parents=True)
     for name in SE_SAMPLES:

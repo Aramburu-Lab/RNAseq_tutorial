@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-107 — The suite schedules by shared fixture, not by module (M3.14)
+
+**Date:** 2026-10-21 · **Status:** decided; amends D-060's `--dist loadscope`
+
+**Context.** Under `--dist loadscope` a module's tests ran on one worker, so the slowest module set the floor: `test_figures_m2.py` held one worker for 1,813 s of a 3,099 s run, and the busiest worker was busy 3,031 s while the least was 1,840 s. Four module fixtures were built once per file that imported them, and seven runs were built under two or three fixture names.
+
+**Options.** Keep loadscope and split the slow files; `--dist load` or `worksteal`, which rebuild every module fixture on each worker that runs one of its tests (a Chromium session each for the browser modules); `--dist loadgroup` with a group only where a module fixture is shared.
+
+**Decision.** `pixi run test` runs `pytest -n auto --dist loadgroup`. `conftest.module_group` puts a test that reaches a module-scoped fixture in its module's xdist group and leaves every other test to the next free worker. Fixtures that more than one file reads, or that one test file's slow tests need, are session fixtures built through `once`. `ctx process` runs the MultiQC reports of one stage `threads` at a time (`multiqc_io.at_once`), and `ctx.runtime.versions` reads the installed distributions once per process.
+
+**Evidence.** [docs/plans/logs/wo13_m314/runs.md](../docs/plans/logs/wo13_m314/runs.md): 3,099 s wall and 4,673 s CPU before, 923 s and 3,182 s on the committed code, 12 workers, under loads of 20 to 56 and 22 to 54 from other work. Workers busy 1,840 to 3,031 s before, 765 to 857 s after. A worker sees `--dist` as `no`; the first loadgroup run read it, grouped nothing, and spent 644 s CPU in `test_export_browser.py` against 51 s.
+
+**Consequence.** A new module fixture keeps its module's tests together on one worker; a slow one belongs in `once`, where a test that writes into it must take `writable_copy`. CI is unchanged (serial).
+
+---
+
 ## D-106 — The junction panel's 1 TPM floor reads GTEx V10's own gene medians
 
 **Date:** 2026-10-21 · **Status:** decided (Rytis 2026-10-21: option A, E.1c); supersedes D-079's Consequence line
@@ -697,7 +713,7 @@ it were reversed.
 
 ## D-060 — The suite runs under pytest-xdist on laptops and serially on CI
 
-**Date:** 2026-10-14 · **Status:** decided
+**Date:** 2026-10-14 · **Status:** decided; its `--dist loadscope` superseded by D-107 (loadgroup)
 
 **Context.** M3.14 asks for 5 minutes; CI took 1,692 s serial.
 
