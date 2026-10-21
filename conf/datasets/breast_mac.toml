@@ -114,6 +114,7 @@ endometrium = 14
 
 [[contrasts]]
 name = "breast_tam"
+label = "Breast macrophages, tumour-associated against resident"
 variable = "condition"
 reference = "resident"
 tested = "tam"
@@ -122,6 +123,7 @@ filters = { tissue = ["breast"] }
 
 [[contrasts]]
 name = "endometrium_tam"
+label = "Endometrial macrophages, tumour-associated against resident"
 variable = "condition"
 reference = "resident"
 tested = "tam"

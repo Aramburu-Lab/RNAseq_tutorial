@@ -130,6 +130,7 @@ batch6 = 41
 
 [[contrasts]]
 name = "total_breast"
+label = "Total monocytes, breast cancer against healthy"
 variable = "condition"
 reference = "healthy"
 tested = "breast_cancer"
@@ -139,6 +140,7 @@ filters = { cell_type = ["total"] }
 
 [[contrasts]]
 name = "total_endometrial"
+label = "Total monocytes, endometrial cancer against healthy"
 variable = "condition"
 reference = "healthy"
 tested = "endometrial_cancer"
@@ -148,6 +150,7 @@ filters = { cell_type = ["total"] }
 
 [[contrasts]]
 name = "nonclassical_breast"
+label = "Non-classical monocytes, breast cancer against healthy"
 variable = "condition"
 reference = "healthy"
 tested = "breast_cancer"
@@ -157,6 +160,7 @@ filters = { cell_type = ["nonclassical"] }
 
 [[contrasts]]
 name = "nonclassical_endometrial"
+label = "Non-classical monocytes, endometrial cancer against healthy"
 variable = "condition"
 reference = "healthy"
 tested = "endometrial_cancer"
@@ -168,6 +172,7 @@ filters = { cell_type = ["nonclassical"] }
 # seed 42 within each sequencing batch.
 [[contrasts]]
 name = "healthy_null_split"
+label = "Total monocytes of healthy donors, split in two at random"
 variable = "condition"
 reference = "healthy"
 tested = "healthy"

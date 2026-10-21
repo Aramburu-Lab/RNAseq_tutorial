@@ -80,6 +80,9 @@ meaning = "Donor state, treatment or disease."
 # reference = "{reference}"
 # tested = "{tested}"
 # n = [{reference_n}, {tested_n}]
+# # EDIT: the comparison in words, as titles show it; two contrasts of one pair of levels need
+# # different labels. Delete the line to read it as its levels.
+# label = "{tested} against {reference}"
 #
 # --- [de]
 # [de]
