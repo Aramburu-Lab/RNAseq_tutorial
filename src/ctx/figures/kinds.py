@@ -22,6 +22,7 @@ from ctx.figures import (
     kinds_m10,
 )
 from ctx.figures.kind import Kind
+from ctx.pipeline import route_modules
 
 KINDS: tuple[Kind, ...] = (
     *kinds_m1.KINDS,
@@ -42,10 +43,19 @@ def kind(module: str, figure: str) -> Kind | None:
     return next((k for k in KINDS if (k.module, k.figure) == (module, figure)), None)
 
 
+def offered(k: Kind, spec: Dataset) -> bool:
+    """Whether the dataset is offered figures of ``k``: its route runs k's module, which makes one.
+
+    The route is ``pipeline.route_modules``'s alone; a kind the dataset file lists none of
+    (``made``) is offered none, unless its figures are named on the command line (``parsed``).
+    """
+    return k.module in route_modules(spec) and (k.parsed is not None or bool(k.made(spec)))
+
+
 def matched(module: str, what: str, spec: Dataset) -> tuple[Kind, Any] | None:
     """The kind and parameters of a figure a module writes as ``<dataset>_<what>``, or None."""
     for k in KINDS:
-        if k.module != module:
+        if k.module != module or not offered(k, spec):
             continue
         found = [k.parsed(what, spec)] if k.parsed else k.made(spec)
         for params in found:

@@ -51,6 +51,11 @@ def _ranked_inputs(p: OneContrast | SetInContrast, spec: Dataset) -> Inputs:
             "dataset_file": DATASET_FILE}  # fmt: skip
 
 
+def _featured(spec: Dataset) -> list[OneContrast]:
+    """The featured contrast, where ``ctx function`` runs: it needs ``[de]`` and ``[function]``."""
+    return featured(spec) if spec.function else []
+
+
 def _sets(spec: Dataset) -> list[OneSet]:
     """The featured gene set of ``[function]``."""
     return [OneSet(spec.slug, spec.function.featured_set)] if spec.function else []
@@ -68,15 +73,15 @@ def set_slug(name: str) -> str:
 
 KINDS = (
     Kind("function", "gsea", OneContrast, "ctx.function.run:_gsea_bars",
-         "ctx.figures.draw_m6:gsea", featured, lambda p: f"gsea_{p.contrast}", _gsea_inputs),
+         "ctx.figures.draw_m6:gsea", _featured, lambda p: f"gsea_{p.contrast}", _gsea_inputs),
     Kind("function", "ora", OneContrast, "ctx.function.run:_ora_bars", "ctx.figures.draw_m6:ora",
-         featured, lambda p: f"ora_{p.contrast}", _ora_inputs),
+         _featured, lambda p: f"ora_{p.contrast}", _ora_inputs),
     Kind("function", "nes", OneSet, "ctx.function.run:_featured_bars",
          "ctx.figures.draw_m6:nes", _sets, lambda p: f"nes_{set_slug(p.gene_set)}", _set_inputs),
     Kind("function", "running", SetInContrast, "ctx.function.running:scatter",
          "ctx.figures.draw_m6:running", _running, lambda p: f"running_{p.contrast}",
          _ranked_inputs),
     Kind("function", "background", OneContrast, "ctx.function.background:bars",
-         "ctx.figures.draw_m6:background", featured, lambda p: f"background_{p.contrast}",
+         "ctx.figures.draw_m6:background", _featured, lambda p: f"background_{p.contrast}",
          _ranked_inputs),
 )  # fmt: skip
