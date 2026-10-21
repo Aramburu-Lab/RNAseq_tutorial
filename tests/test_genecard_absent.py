@@ -136,9 +136,20 @@ def _unavailable(page: Path) -> dict[str, str]:
     return dict(found)
 
 
+# What a run states about itself, set aside when an offline rerun is compared with the online
+# page (K.16): its measured cost, and the --offline its follow-up commands carry so they keep
+# the run's network rule.
+_COST = re.compile(r'(<td class="(?:wall|rss-self|rss-children)">)[^<]*(</td>)')
+
+
+def _evidence(html: str) -> str:
+    return _COST.sub(r"\1\2", html).replace(" --offline", "")
+
+
 def test_offline_rerun_prints_the_online_pages_no_entry(tmp_path):
     # Mutations: the offline page saying "not cached" for HPA's 404; a 500 or a timeout
-    # shown offline as if cached.
+    # shown offline as if cached; any other word of the page differing offline, such as a
+    # "cached" beside a retrieval date (K.16); a follow-up command dropping its --offline.
     folder, spec = tmp_path / "root", make(tmp_path / "root")
     from ctx.dataset import load  # noqa: PLC0415
 
@@ -151,10 +162,10 @@ def test_offline_rerun_prints_the_online_pages_no_entry(tmp_path):
 
     online = module.run(settings, _cards(), "ctx genecard", SLUG,
                         module.Options(spec, genes=("NPTX2", "ACTB")), stub)  # fmt: skip
-    said = _unavailable(online[0])
+    said, page = _unavailable(online[0]), unpacked(online[0].read_text())
     offline = module.run(settings, _cards(), "ctx genecard", SLUG,
                          module.Options(spec, genes=("NPTX2", "ACTB"), offline=True))  # fmt: skip
-    again = _unavailable(offline[0])
+    again, rerun = _unavailable(offline[0]), unpacked(offline[0].read_text())
     no_entry = re.fullmatch(r"xml: no entry: HTTP 404 on \d{4}-\d{2}-\d{2}, cached until "
                             r"--refresh; json: no entry: HTTP 404 on \d{4}-\d{2}-\d{2}, cached "
                             r"until --refresh", said["Human Protein Atlas"])  # fmt: skip
@@ -163,3 +174,8 @@ def test_offline_rerun_prints_the_online_pages_no_entry(tmp_path):
     assert said["Ensembl REST"] == "HTTP Error 500: Server Error"
     assert "timed out" in said["GTEx V10 junctions"]
     assert again["Ensembl REST"] == again["GTEx V10 junctions"] == NOT_CACHED
+    # The rest of the rerun is the online page, but for the two failures no cache records.
+    expected = page.replace(said["Ensembl REST"], NOT_CACHED)
+    expected = expected.replace(said["GTEx V10 junctions"], NOT_CACHED)
+    assert _evidence(rerun) == _evidence(expected)
+    assert rerun.count(" --offline") > expected.count(" --offline")
