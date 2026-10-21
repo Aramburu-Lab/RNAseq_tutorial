@@ -17,6 +17,8 @@ from synth import Synthetic, design_counts, write_gather_outputs
 from test_export_browser import CHROMIUM, _browse
 from test_qc_run import RNASEQ, RNASEQ_SAMPLES, SPEC, ctx
 
+from ctx.report.builder import unpacked
+
 # The sample whose donor sex is planted as the other sex: its cells are its donor's on paper,
 # its counts its own, so the method's view flags it and the own-sex view does not.
 TRANSPLANT = RNASEQ_SAMPLES[1]
@@ -73,7 +75,7 @@ def test_the_sex_view_compares_each_sample_with_its_own_record(page):
     recorded = dict(sheet.select("sample", "sex").rows())
     called = dict(views.select("sample", "expression_sex").rows())
     assert own == {s: recorded[s] == called[s] for s in own}
-    cfg = _views(html.read_text(), "Recorded sex against expression")
+    cfg = _views(unpacked(html.read_text()), "Recorded sex against expression")
     assert [o["label"] for o in cfg["options"]] == [
         "the donor's sex for a transplanted sample",
         "each sample's own recorded sex",
@@ -90,7 +92,7 @@ def test_each_flow_view_sums_its_own_samples(page):
     _, out, sheet, html = page
     fates = pl.read_csv(next(out.glob("*_desynth_fates_v1.csv")))
     links = pl.read_csv(next(out.glob("*_flow_views_v1.csv")))
-    cfg = _views(html.read_text(), "Where every read goes")
+    cfg = _views(unpacked(html.read_text()), "Where every read goes")
     labels = [o["label"] for o in cfg["options"]]
     assert labels[0] == "all samples" and labels[1:] == list(dict.fromkeys(links["view"]))[1:]
     for condition in sheet["condition"].unique().sort():
@@ -133,7 +135,7 @@ def test_the_flag_view_marks_every_flag_of_the_run_and_no_more(page):
 
     _, out, _, html = page
     flags = pl.read_csv(next(out.glob("*_desynth_flags_v1.csv")))
-    cfg = _views(html.read_text(), BANDS)
+    cfg = _views(unpacked(html.read_text()), BANDS)
     assert [o["label"] for o in cfg["options"]] == ["absolute bands", "every flag of the run"]
     (cells, *_) = [t for t in cfg["options"][1]["figure"]["data"] if t["type"] == "heatmap"]
     words = {k: text.word("qc", f"figures.flag_map.levels.{k}") for k in flag_map.LEVELS}

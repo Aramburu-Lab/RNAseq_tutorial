@@ -18,6 +18,7 @@ from ctx.gather.fetchngs import read
 from ctx.gather.harmonise import DEPTH_FILTERS, _depth_standard
 from ctx.io.naming import figure_files, lint
 from ctx.report import text
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests" / "fixtures" / "fetchngs" / "metadata_only"
@@ -213,7 +214,7 @@ def test_cli_curated_end_to_end(runs, tmp_path):
         written = sorted(p.name for p in out.glob(f"{csv.stem}*"))
         assert written == sorted(figure_files(csv.stem)), name
     (page,) = out.glob("*_synthetic_overview_v1.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     assert "Curation from synthetic.toml" in html
     # The depth figure: a select per filter column, and ENCODE's two lines from the registry.
     assert all(f'<select data-column="{c}">' in html for c in DEPTH_FILTERS)

@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 from test_budget import CTX, GENOME, TEACH_ROOT, _measured
 
+from ctx.report.builder import unpacked
 from ctx.runtime import BUDGETS
 
 LAPTOP_INPUTS = ("outputs/01_gather", "outputs/03_process", "resources", GENOME)
@@ -42,7 +43,7 @@ def test_quant_laptop_path_keeps_track_a(tmp_path):
     )  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
     (page,) = (tmp_path / "outputs" / "04_quant").glob("*_tier1_teach_overview_v1.html")
-    wall, self_rss, children = _measured(page.read_text())
+    wall, self_rss, children = _measured(unpacked(page.read_text()))
     threads = min(4, os.cpu_count() or 1)
     bound = self_rss + threads * children
     print(f"\nquant laptop: wall {wall:.1f} s, self {self_rss:,} B, largest child {children:,} B, "

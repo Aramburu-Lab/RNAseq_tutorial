@@ -16,6 +16,7 @@ from test_gene_survival import page_patients
 from ctx.clinical import gene, panel
 from ctx.dataset import ENDPOINTS
 from ctx.report import genes, text
+from ctx.report.builder import unpacked
 
 # Every ER figure's plot after a gene is typed on the first, then the first after Reset.
 ACT = """(async () => {
@@ -82,7 +83,7 @@ def chosen(cfg: dict) -> int:
 @pytest.fixture(scope="module")
 def ran(clinical_root, tmp_path_factory):  # noqa: F811 - the fixture
     page = outputs(clinical_root, "overview_v1.html")
-    cfg = controls(page.read_text(), "survival")
+    cfg = controls(unpacked(page.read_text()), "survival")
     row = chosen(cfg)
     act = ACT.replace("SYMBOL", cfg["symbols"][row])
     tasks = [{"name": name, "url": page.as_uri(), "width": w, "height": h, "scheme": scheme,

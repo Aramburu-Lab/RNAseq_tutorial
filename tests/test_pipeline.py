@@ -25,6 +25,7 @@ from ctx.cli import app
 from ctx.dataset import load
 from ctx.gather.fetchngs import read
 from ctx.io.naming import stem
+from ctx.report.builder import unpacked
 from ctx.runtime import launcher
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -289,7 +290,9 @@ def test_run_matches_the_module_commands(tmp_path, runs):
     tables = {p.relative_to(one): p.read_bytes() for p in one.rglob("*.csv")}
     assert len(tables) > 3
     assert tables == {p.relative_to(many): p.read_bytes() for p in many.rglob("*.csv")}
-    pages = [p.read_text() for p in sorted((one / "outputs").glob("*/*_overview_v1.html"))]
+    pages = [
+        unpacked(p.read_text()) for p in sorted((one / "outputs").glob("*/*_overview_v1.html"))
+    ]
     shown = [html.unescape(re.search(r'id="ctx-command">(.*?)</code>', p, re.S).group(1))
              for p in pages]  # fmt: skip
     # gather's and qc's pages; report writes a hub, whose page shows no command.

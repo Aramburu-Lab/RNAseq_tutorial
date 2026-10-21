@@ -27,6 +27,7 @@ from ctx.process.reference import records
 from ctx.quant import CountsFrom, QuantError, SalmonOptions, outdir, salmon, tximport
 from ctx.quant.laptop import counts as laptop_counts
 from ctx.quant.run import Options, resolve, run, run_salmon
+from ctx.report.builder import unpacked
 from ctx.report.cards import parameter_cards
 
 FIXTURE = Path(__file__).resolve().parent / "fixtures"
@@ -110,7 +111,7 @@ def test_laptop_page_and_reuse(laptop):
     quant = sorted((out / "tools" / DATASET).glob("salmon_quant_*"))
     assert len(quant) == 1
     assert len(sorted((out / "tools" / "index").glob("salmon_index_*"))) == 1
-    assert "start codons read ATG" in written[0].read_text()
+    assert "start codons read ATG" in unpacked(written[0].read_text())
     _, again = run_salmon(inputs, options, out, 1)
     assert (again.folder, again.built, again.index_built) == (quant[0], False, False)
     _, other = run_salmon(inputs, replace(options, salmon=SalmonOptions(libtype="U")), out, 1)

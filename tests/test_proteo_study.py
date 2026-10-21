@@ -18,6 +18,7 @@ from proteo_study_root import SAMPLES, SLUG, build
 
 from ctx.dataset import DatasetError, ProteoTable, load
 from ctx.proteo import ProteoError, adapters, identifiers, quantities
+from ctx.report.builder import unpacked
 
 RNA = pl.DataFrame(
     {
@@ -242,7 +243,7 @@ def test_study_end_to_end(study_root):
     assert g10["n_quantified"] == SAMPLES // 2 and not g10["tested"]
     verdicts = pl.read_parquet(output(root, "sanity_v1.parquet"))
     assert set(verdicts["rule_verdict"]) == {"PASS"}, verdicts.select("rule", "left").rows()
-    html = output(root, "overview_v1.html").read_text()
+    html = unpacked(output(root, "overview_v1.html").read_text())
     assert f"{SAMPLES} of {SAMPLES + 1} protein samples are paired" in html
     assert "TMT design: 3 plexes of 8 to 9 samples" in html
     batches = pl.read_csv(output(root, "batches_v1.csv"), comment_prefix="#")

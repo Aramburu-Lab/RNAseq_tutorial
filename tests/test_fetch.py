@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from ctx.dataset import Resource, load
+from ctx.report.builder import unpacked
 from ctx.setup import MANIFEST, FetchError, fetch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -121,7 +122,7 @@ def test_cli_setup_fetches(server, tmp_path):
     assert done.returncode == 0, done.stderr
     assert (root / "resources" / "sets" / "good.gmt").read_bytes() == BODY
     (page,) = (root / "outputs" / "00_setup").glob("*.html")
-    assert f"sha256 {digest}" in page.read_text()
+    assert f"sha256 {digest}" in unpacked(page.read_text())
 
 
 @pytest.mark.network

@@ -16,6 +16,7 @@ from test_figures import copied, drawn_alike, redrawn_each, specs
 from ctx.clinical import analyses
 from ctx.figures.params import ParamsError, load_params
 from ctx.figures.spec import parse
+from ctx.report.builder import unpacked
 
 CLINICAL = ("12_clinical",)
 # Every figure the made-up root draws: ER curves under the four endpoints, the ER box, the
@@ -48,7 +49,7 @@ def _redraws_alike(root: Path, found, tmp_path: Path) -> None:
         module_csv = next(root.glob(f"outputs/12_clinical/{spec.stem}.csv"))
         assert drawn_alike(csv, module_csv) == [], spec.stem
         if spec.figure_id.endswith("_km_score"):
-            pages = (p.with_suffix(".html").read_text() for p in (module_csv, csv))
+            pages = (unpacked(p.with_suffix(".html").read_text()) for p in (module_csv, csv))
             module, again = (controls(page, "survival") for page in pages)
             assert module == again, spec.stem
 

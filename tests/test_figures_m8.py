@@ -16,6 +16,7 @@ from conftest import ctx_run, once
 from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
 
 from ctx.figures.spec import parse
+from ctx.report.builder import unpacked
 
 NCRNA = ("08_ncrna",)
 STEP1 = {"biotype_shares", "filter_by_biotype", "volcano_by_biotype", "lncrna_neighbour"}
@@ -63,7 +64,10 @@ def _redraws_alike(root: Path, found, tmp_path: Path) -> set[str]:
     for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/08_ncrna/{spec.stem}.csv"))
         assert drawn_alike(csv, module_csv) == [], spec.stem
-        shown = [CONTROLS.findall(p.with_suffix(".html").read_text()) for p in (module_csv, csv)]
+        shown = [
+            CONTROLS.findall(unpacked(p.with_suffix(".html").read_text()))
+            for p in (module_csv, csv)
+        ]
         assert shown[0] == shown[1], spec.stem
         live |= {parse(spec.figure_id)[2]} if shown[0] else set()
     return live

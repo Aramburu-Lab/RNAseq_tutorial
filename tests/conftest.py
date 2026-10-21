@@ -307,7 +307,9 @@ def process_rerun(process_root, tmp_path_factory):
                        "--reads-per-run", CAP, cwd=root)  # fmt: skip
         assert done.returncode == 0, done.stderr[-3000:]
         (page,) = (root / "outputs" / "03_process").glob(f"*_process_{DATASET}_overview_v1.html")
-        return root, page.read_text(), before
+        from ctx.report.builder import unpacked  # noqa: PLC0415 - after pytest_configure's check
+
+        return root, unpacked(page.read_text()), before
 
     return once(tmp_path_factory, "process_again", build)
 
@@ -333,7 +335,9 @@ def quant_built(tmp_path_factory):
 def quant_run(quant_built):
     """(root, overview html) of ``quant_built``: test_cli's card test reads its page."""
     root, _, written = quant_built
-    return root, written[0].read_text()
+    from ctx.report.builder import unpacked  # noqa: PLC0415 - after pytest_configure's check
+
+    return root, unpacked(written[0].read_text())
 
 
 # Every module's end-to-end run, once per session: test_cli reads their pages for the cards,
@@ -346,13 +350,17 @@ DE_SPEC = ROOT / "tests" / "fixtures" / "datasets" / "de_synthetic.toml"
 def setup_page(root: Path) -> str:
     """The environment page ``ctx setup`` wrote under ``root``."""
     (page,) = (root / "outputs" / "00_setup").glob("*_setup_environment_v1.html")
-    return page.read_text()
+    from ctx.report.builder import unpacked  # noqa: PLC0415 - after pytest_configure's check
+
+    return unpacked(page.read_text())
 
 
 def module_page(root: Path, number_module: str, what: str) -> str:
     """The one ``*_<what>_v1.html`` page in ``outputs/<number_module>``."""
     (page,) = (root / "outputs" / number_module).glob(f"*_{what}_v1.html")
-    return page.read_text()
+    from ctx.report.builder import unpacked  # noqa: PLC0415 - after pytest_configure's check
+
+    return unpacked(page.read_text())
 
 
 def _built_wheel(folder: Path) -> Path:

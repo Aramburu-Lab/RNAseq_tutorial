@@ -7,7 +7,7 @@ Each test names the mutation it catches.
 import pytest
 from test_export_browser import CHROMIUM, _browse
 
-from ctx.report.builder import FigureText
+from ctx.report.builder import FigureText, unpacked
 from ctx.report.figures import prepare
 from ctx.report.views import viewed
 
@@ -101,7 +101,7 @@ def test_views_of_one_size_carry_nothing_new(pipeline):
     found = re.compile(tag, re.S)
     views = [c for step in ("05_de", "06_function")
              for page in (root / "outputs" / step).glob("*.html")
-             for c in map(json.loads, found.findall(page.read_text()))
+             for c in map(json.loads, found.findall(unpacked(page.read_text())))
              if c.get("kind") == "view"]  # fmt: skip
     assert views
     for view in views:

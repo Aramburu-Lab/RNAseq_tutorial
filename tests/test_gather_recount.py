@@ -22,6 +22,7 @@ from ctx.dataset import DatasetError, load
 from ctx.de.deseq import select_samples
 from ctx.gather import composition
 from ctx.gather.fetchngs import read
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_qc.js.j2"
@@ -121,7 +122,7 @@ def test_a_contrast_keeps_the_runs_m5_compares(page):
     """Mutation caught: a contrast's runs taken from its filters alone, the two levels and the
     pairing ignored."""
     html, sheet, spec = page
-    cfg = _cfg(html.read_text())
+    cfg = _cfg(unpacked(html.read_text()))
     ordered = sheet.sort("cell_type", "condition", "run_accession", maintain_order=True)
     for contrast, held in zip(spec.contrasts, cfg["contrasts"], strict=True):
         used, _ = select_samples(sheet, contrast, spec.order)
@@ -178,7 +179,7 @@ def test_the_page_draws_the_recount_and_exports_it(page, tmp_path):
     start, after = seen["acted"]["start"], seen["acted"]["after"]
     assert not start["moved"] and after["moved"] and after["title"] == "Individuals"
     rows = composition.runs(sheet, composition.colours(sheet, spec))
-    keep = _cfg(html.read_text())["contrasts"][0]["runs"]
+    keep = _cfg(unpacked(html.read_text()))["contrasts"][0]["runs"]
     bars = composition.recount(rows[keep], "time_point", "individuals")
     drawn = {(name, g): x for name, ys, xs in after["traces"] for g, x in zip(ys, xs, strict=True)}
     assert drawn == {(lv, g): n for g, lv, n in bars.select("group", "level", "n").rows()}

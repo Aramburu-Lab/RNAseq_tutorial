@@ -1,7 +1,7 @@
 """Packed pages (Z.1, Z.5): every drawing page's figure JSON, rows and plotly.js as raw DEFLATE
 in base64, run and drawn by the same inline scripts, so the page draws what it drew unpacked.
 The inflate is checked against zlib under node; the packed page against itself unpacked
-(``figures.unpacked``), in Python and in Chromium. Each test names the mutation it catches."""
+(``builder.unpacked``), in Python and in Chromium. Each test names the mutation it catches."""
 
 import base64
 import hashlib
@@ -31,8 +31,9 @@ from ctx.report.builder import (
     SelfCheck,
     plotly_js,
     render,
+    unpacked,
 )
-from ctx.report.figures import pack_json, unpack_json, unpacked
+from ctx.report.figures import pack_json, unpack_json
 from ctx.viz.save import figure_block, write_figure
 
 ROOT = Path(__file__).resolve().parents[1]

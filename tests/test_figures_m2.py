@@ -15,6 +15,7 @@ from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
 from test_qc_run import with_reads, with_reports  # noqa: F401 - session fixtures used below
 
 from ctx.figures.spec import parse
+from ctx.report.builder import unpacked
 
 QC = ("02_qc",)
 # The linked PCA prints its variance shares on the page's axes alone, not in its PDF or SVG.
@@ -60,7 +61,7 @@ def _redraws_alike(root: Path, found, tmp_path: Path) -> None:
     for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/02_qc/{spec.stem}.csv"))
         assert drawn_alike(csv, module_csv) == [], spec.stem
-        shown = (p.with_suffix(".html").read_text() for p in (module_csv, csv))
+        shown = (unpacked(p.with_suffix(".html").read_text()) for p in (module_csv, csv))
         assert len({tuple(SHARES.findall(page)) for page in shown}) == 1, spec.stem
 
 
@@ -131,7 +132,7 @@ def test_the_registry_named_by_the_run_is_the_one_copied(qc_run, tmp_path):
     (folder / "params.toml").write_text(
         "\n".join(x for x in raw if not x.startswith("figure_options = ") or ".parquet" in x) + "\n"
     )
-    page = redrawn(folder, spec).with_suffix(".html").read_text()
+    page = unpacked(redrawn(folder, spec).with_suffix(".html").read_text())
     assert "median ± 7 MAD" in page
     assert f"median ± {row['mad'][0]:g} MAD" not in page
 

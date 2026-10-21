@@ -10,6 +10,7 @@ import polars as pl
 import pytest
 from proteo_root import TUMOURS
 
+from ctx.report.builder import unpacked
 from ctx.report.cap import MAX_BYTES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,7 +38,7 @@ def output(root: Path, what: str) -> Path:
 def test_page_offline_and_every_table_described(which, request):
     """Catches a page over the cap or fetching a script, and a table without its README."""
     root = request.getfixturevalue(which)
-    html = output(root, "overview_v1.html").read_text()
+    html = unpacked(output(root, "overview_v1.html").read_text())
     assert len(html.encode()) <= MAX_BYTES
     assert not re.search(r"<script[^>]+\bsrc\s*=", html, re.IGNORECASE)
     for table in (root / "outputs" / "07_proteo").glob("*.csv"):
@@ -51,7 +52,7 @@ def test_missingness_first_and_rules_pass(which, request):
     root = request.getfixturevalue(which)
     verdicts = pl.read_parquet(output(root, "sanity_v1.parquet"))
     assert set(verdicts["rule_verdict"]) == {"PASS"}, verdicts.select("rule", "left").rows()
-    html = output(root, "overview_v1.html").read_text()
+    html = unpacked(output(root, "overview_v1.html").read_text())
     # A figure's Reproduce panel names its data table again, after its own link.
     stems = list(dict.fromkeys(re.findall(r"_proteo_fake_\w+?_(\w+?)_v1\.csv", html)))
     assert stems[:2] == ["quantified", "coverage"], stems
@@ -76,7 +77,7 @@ def test_across_f4_f5_and_the_sample_id_column(across_root):
     Mutations caught: the column named by GDC sample ID left out (29 of 30 paired); F4 not
     drawn when M5's results exist; G11's planted protein shift not called (both is 0); G10,
     untested at protein, counted as an RNA-only call; F5 a gene's protein row dropped."""
-    html = output(across_root, "overview_v1.html").read_text()
+    html = unpacked(output(across_root, "overview_v1.html").read_text())
     assert f"{TUMOURS} of {TUMOURS} protein samples" in html and "1 of them are named" in html
     metrics = dict(pl.read_parquet(output(across_root, "metrics_v1.parquet"))
                    .select("metric", "value").rows())  # fmt: skip
@@ -95,7 +96,7 @@ def test_cross_untested_below_the_share(cross_root):
     genes = pl.read_parquet(output(cross_root, "genes_v1.parquet"))
     g30 = genes.filter(pl.col("gene") == "G30").row(0, named=True)
     assert g30["n_samples"] == 5 and not g30["tested"]
-    html = output(cross_root, "overview_v1.html").read_text()
+    html = unpacked(output(cross_root, "overview_v1.html").read_text())
     assert "Cross-study comparison: RNA from fake_cells" in html
 
 

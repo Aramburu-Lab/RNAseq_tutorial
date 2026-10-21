@@ -21,7 +21,7 @@ from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
 from ctx.report import cap, export, glossary, marks, text
-from ctx.report.figures import defaults, json_for_script, pack_json, prepare
+from ctx.report.figures import defaults, json_for_script, pack_json, prepare, unpack_figures
 from ctx.viz.style import (
     ALONE_SCALE,
     NARROW_PX,
@@ -417,11 +417,15 @@ def packed_bytes(html: str) -> list[int]:
 
 
 def unpacked(html: str) -> str:
-    """A page with each packed group's HTML in place of its script, as the reader sees it drawn.
+    """A page as the reader sees it drawn, every packed part raw again.
 
-    For whatever reads a page's words or links without a browser: a test, the kit's link walk.
+    Each packed group's HTML goes in place of its script, then plotly.js, every figure's
+    arguments and every rows table are inflated (``figures.unpack_figures``). The one door
+    for whatever reads a page's words, links or figure JSON without a browser: a test, the
+    kit's link walk. Groups first, since a group's figures are packed inside it.
     """
-    return PACKED.sub(lambda m: gzip.decompress(base64.b64decode(m[2])).decode(), html)
+    groups = PACKED.sub(lambda m: gzip.decompress(base64.b64decode(m[2])).decode(), html)
+    return unpack_figures(groups)
 
 
 _ENV.filters["code"] = code_spans

@@ -18,6 +18,7 @@ from ctx.figures import kinds, record
 from ctx.figures.params import ParamsError, load_params, params_file
 from ctx.figures.spec import figure_id, parse
 from ctx.gather.fetchngs import read
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 # Every kind the synthetic dataset file makes: the featured contrast's volcano, MA plot,
@@ -95,7 +96,7 @@ def drawn_alike(redrawn_csv: Path, module_csv: Path) -> list[str]:
     differ = [end for end in tail
               if (redrawn_csv.parent / f"{new}{end}").read_bytes()
               != (module_csv.parent / f"{old}{end}").read_bytes()]  # fmt: skip
-    page = (module_csv.parent / f"{old}.html").read_text()
+    page = unpacked((module_csv.parent / f"{old}.html").read_text())
     return differ if 'id="ctx-repro-' in page else [*differ, "panel"]
 
 
@@ -219,7 +220,7 @@ def test_gather_figures_redraw_from_the_sheet(tmp_path):
     # The registry's hash leaves the params file; its file name, which holds a dot, stays.
     kept = [p for p in params if not p.startswith("qc_registry = ") or "." in p]
     (folder / "params.toml").write_text("\n".join(kept) + "\n")
-    page = redrawn(folder, spec).with_suffix(".html").read_text()
+    page = unpacked(redrawn(folder, spec).with_suffix(".html").read_text())
     assert "fewer than 40 million" in page and "fewer than 30 million" not in page
 
 

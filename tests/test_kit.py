@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from ctx.report import course, text
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "python" / "build_kit.py"
@@ -112,7 +113,7 @@ def test_home_page_links_every_module_inside_the_kit(tmp_path, checker):
     assert [link.label for link in home.hubs] == ["Study", "Made-up"]
     # M0 has no data: of the ten data modules only M1 is real here.
     assert [k.value for k in home.key_numbers] == ["2 of 11", "1 of 10"]
-    html = (kit / course.INDEX).read_text()
+    html = unpacked((kit / course.INDEX).read_text())
     assert 'data-kind="made-up"' in html and "https://" not in html and "unzip" in html
 
 
@@ -193,7 +194,7 @@ def test_start_html_warns_when_copied_out_of_the_zip(tmp_path):
     """kit.js beside START.html loads; copied out alone, its failed load shows the warning."""
     kit, done = build(tmp_path)
     assert done.returncode == 0, done.stderr
-    html = (kit / "START.html").read_text()
+    html = unpacked((kit / "START.html").read_text())
     assert '<div class="zipped" id="ctx-zipped" role="alert" hidden>' in html
     assert (
         '<script src="kit.js" onerror="document.getElementById(\'ctx-zipped\').hidden = false">'

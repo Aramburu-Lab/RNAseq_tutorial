@@ -15,6 +15,7 @@ from ctx import runtime
 from ctx.io.naming import lint
 from ctx.quant import NUM_READS_DECIMALS, CountsFrom, QuantError, checks, outdir, tables, tximport
 from ctx.quant.run import Options, resolve
+from ctx.report.builder import unpacked
 
 SE = ("se_a", "se_b", "se_c", "se_d", "se_e")
 FIXTURE = Path(__file__).resolve().parent / "fixtures"
@@ -49,7 +50,7 @@ def test_end_to_end(built):
         assert any(f"_{what}_v1.parquet" in n for n in names), what
     _, problems = lint(root / "outputs" / "04_quant")
     assert problems == []
-    page = written[0].read_text()
+    page = unpacked(written[0].read_text())
     assert "Not yet drawn" in page
 
 

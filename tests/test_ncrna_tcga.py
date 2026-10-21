@@ -15,6 +15,7 @@ import pytest
 
 from ctx.dataset import DatasetError, load
 from ctx.ncrna import mirna, targets
+from ctx.report.builder import unpacked
 
 CTX = Path(sys.executable).parent / "ctx"
 
@@ -164,7 +165,7 @@ def test_the_tcga_page_end_to_end(built):
     out, written = built
     page = Path(written[0])
     assert page.stat().st_size < 15 * 10**6
-    html = page.read_text()
+    html = unpacked(page.read_text())
     assert "were retrieved from the NCI Genomic Data Commons" in html
     assert "holds no read-group record" in html
     fit = table(out, "mirna_results").filter(pl.col("gene_name") == "hsa-miR-1-3p")
@@ -218,7 +219,7 @@ def test_m5_takes_a_gdc_sheet_through_chosen(root, tmp_path):
     assert (row["n_reference"], row["n_tested"], row["dropped_runs"]) == (12, 12, "")
     # Mutation caught: the M5 page of GDC data without the GDC acknowledgement.
     (page,) = out.glob("*_de_fakegdc_overview_v1.html")
-    assert "were retrieved from the NCI Genomic Data Commons" in page.read_text()
+    assert "were retrieved from the NCI Genomic Data Commons" in unpacked(page.read_text())
 
 
 TUMOUR = "Primary Tumor"

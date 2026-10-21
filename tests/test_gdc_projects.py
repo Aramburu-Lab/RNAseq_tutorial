@@ -13,6 +13,7 @@ from gdc_fixture import PROJECT, RELEASE, SPEC, aliquot, build
 
 from ctx.dataset import DatasetError, load
 from ctx.gather import gdc, gdc_run
+from ctx.report.builder import unpacked
 
 OTHER = "FAKE-LUSC"
 
@@ -90,7 +91,7 @@ def test_two_project_gather_writes_the_sheet_m5_fits_on(tmp_path):
     # S.4: one download-checks table per project, each named by it; two under one title read
     # as one table printed twice. Catches: the project-blind title.
     (page,) = (root / "outputs" / "01_gather").glob("*_overview_v1.html")
-    titles = re.findall(r"<caption>([^<]*)</caption>", page.read_text())
+    titles = re.findall(r"<caption>([^<]*)</caption>", unpacked(page.read_text()))
     checks = [t for t in titles if t.startswith("Download checks")]
     assert checks == [f"Download checks, {PROJECT}", f"Download checks, {OTHER}"]
     assert len(set(titles)) == len(titles)

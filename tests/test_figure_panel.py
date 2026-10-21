@@ -22,6 +22,7 @@ from test_figures import specs
 from ctx.figures import panel
 from ctx.figures.params import params_file
 from ctx.figures.spec import parse
+from ctx.report.builder import unpacked
 
 PANEL = re.compile(
     r'<details class="repro" data-script-head="([^"]*)">(.*?)<details class="repro-upstream"', re.S
@@ -60,7 +61,7 @@ def test_every_spec_has_its_panel_on_the_module_page(pipeline):
         csv = f"????-??-??_{spec.stem[11:]}.csv"
         own = [params_file(spec), f"ctx figure {spec.figure_id} --params params.toml\n",
                f"printf '%s  %s\\n' {spec.data_sha256} {csv}"]  # fmt: skip
-        alone = panels((next(root.glob(f"outputs/*/{spec.stem}.html"))).read_text())
+        alone = panels(unpacked((next(root.glob(f"outputs/*/{spec.stem}.html"))).read_text()))
         assert len(alone) == 1 and alone[0] in shown, spec.stem
         assert all(line in alone[0][0] for line in own), spec.stem
 

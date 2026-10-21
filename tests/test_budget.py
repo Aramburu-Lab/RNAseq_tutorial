@@ -19,6 +19,7 @@ from synth import design_counts, write_gather_outputs, write_gene_sets
 
 from ctx.dataset import Contrast, load
 from ctx.de.deseq import fit
+from ctx.report.builder import unpacked
 from ctx.runtime import BUDGETS
 
 CTX = Path(sys.executable).parent / "ctx"
@@ -156,7 +157,7 @@ def test_track_b_at_tier1_size(tmp_path):
         )  # fmt: skip
         assert done.returncode == 0, done.stderr[-3000:]
         (page,) = (tmp_path / "outputs" / folder).glob("*_budget_overview_v1.html")
-        wall, self_rss, children = _measured(page.read_text())
+        wall, self_rss, children = _measured(unpacked(page.read_text()))
         bound = self_rss + threads * children
         size = page.stat().st_size
         print(f"\n{command}: wall {wall:.1f} s, self {self_rss:,} B, largest child {children:,} B, "
@@ -206,7 +207,7 @@ def test_track_a_on_the_teaching_subset(tmp_path):
     )  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
     (page,) = (tmp_path / "outputs" / "03_process").glob("*_tier1_teach_overview_v1.html")
-    wall, self_rss, children = _measured(page.read_text())
+    wall, self_rss, children = _measured(unpacked(page.read_text()))
     threads = min(4, os.cpu_count() or 1)
     bound = self_rss + threads * children
     print(f"\nprocess: wall {wall:.1f} s, self {self_rss:,} B, largest child {children:,} B, "
@@ -246,7 +247,7 @@ def test_quant_on_step1_keeps_track_b(tmp_path):
     )  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
     (page,) = (tmp_path / "outputs" / "04_quant").glob("*_tier1_overview_v1.html")
-    wall, self_rss, children = _measured(page.read_text())
+    wall, self_rss, children = _measured(unpacked(page.read_text()))
     bound = self_rss + children
     print(f"\nquant: wall {wall:.1f} s, self {self_rss:,} B, largest child {children:,} B, "
           f"bound {bound:,} B, page {page.stat().st_size:,} B")  # fmt: skip

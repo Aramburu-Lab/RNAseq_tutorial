@@ -16,6 +16,7 @@ from test_gather_counts import GENES, SAMPLES, matrix, raw, root_with, whole
 
 from ctx.dataset import CountsSpec, DatasetError, load
 from ctx.gather import counts, counts_rsem, counts_run
+from ctx.report.builder import unpacked
 
 RSEM_KIND = '\nkind = "rsem_expected"\n'
 # Values whose rounding is known: halves go to the even neighbour, as R's round() takes them.
@@ -60,7 +61,7 @@ def test_rsem_matrix_rounded_and_stated(tmp_path):
     assert len(readmes) == 4
     for readme in readmes:
         assert said in readme.read_text(), readme.name
-    page = next(out.glob("*_gather_mat_overview_v1.html")).read_text()
+    page = unpacked(next(out.glob("*_gather_mat_overview_v1.html")).read_text())
     assert said in page
     assert (
         "RSEM expected count for sample S01, rounded"
@@ -228,7 +229,7 @@ def test_gather_reads_the_hgnc_resource(tmp_path):
     out = root / "outputs" / "01_gather"
     (genes,) = out.glob("*_gather_mat_genes_v1.parquet")
     assert pl.read_parquet(genes)["source_id"].to_list() == ["101", "102", "104"]
-    page = next(out.glob("*_gather_mat_overview_v1.html")).read_text()
+    page = unpacked(next(out.glob("*_gather_mat_overview_v1.html")).read_text())
     assert "1 NCBI Gene ID rows that GENCODE&#39;s table links to no gene" in page
     assert "HGNC, h.txt" in next(out.glob("*_counts_v1_README.md")).read_text()
 

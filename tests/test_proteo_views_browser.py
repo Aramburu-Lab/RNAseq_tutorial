@@ -18,6 +18,7 @@ from views_browser import walk
 from ctx.de.stats import ALPHA, classify
 from ctx.proteo import densities, folds
 from ctx.report import text
+from ctx.report.builder import unpacked
 
 pytestmark = pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
 SIZES = (("wide_light", 1280, "light"), ("phone_dark", 375, "dark"))
@@ -99,7 +100,9 @@ def test_the_grids_travel_in_16_bits_with_their_levels_on_that_scale(m7):
     grids = []
     for out, _ in m7.values():
         (page,) = out.glob("*_overview_v1.html")
-        for found in re.finditer(r'id="ctx-controls-\d+">(.*?)</script>', page.read_text(), re.S):
+        for found in re.finditer(
+            r'id="ctx-controls-\d+">(.*?)</script>', unpacked(page.read_text()), re.S
+        ):
             controls = json.loads(found.group(1))
             if controls.get("kind") == "view":
                 grids += [t["z"] for o in controls["options"] for t in o["figure"]["data"]

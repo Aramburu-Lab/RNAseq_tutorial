@@ -45,10 +45,10 @@ from ctx.report.builder import (
     SelfCheck,
     plotly_js,
     render,
+    unpacked,
     write,
 )
 from ctx.report.cap import MAX_BYTES
-from ctx.report.figures import unpacked
 from ctx.viz.annotate import TEST_NAME
 from ctx.viz.box import BoxData, box_data, interactive
 from ctx.viz.save import write_figure
@@ -257,7 +257,8 @@ def test_escaping():
         FigurePage("t", FigureBlock(interactive(data), HOSTILE, frame.to_dicts(), "d.csv"))
     )
     module_page = render(_module(questions=(SelfCheck(HOSTILE, HOSTILE),), pitfalls=(HOSTILE,)))
-    for html in (figure_page, module_page):
+    # As served, and with every packed part raw: packed figure JSON hides from a page's parse.
+    for html in (figure_page, module_page, unpacked(figure_page), unpacked(module_page)):
         assert "b" not in _tags(html), "hostile text became an element"
 
 
@@ -389,7 +390,7 @@ def test_each_kind_of_control_gets_its_own_form(tmp_path):
     for name, data in (("linked", demo_linked()), ("volcano", demo_volcano(counts()))):
         figure_stem = stem("qc", f"{name}_demo", 1, day=date(2026, 9, 30))
         write_figure(data, tmp_path, figure_stem, title="Demo", data_releases={})
-        pages[name] = (tmp_path / f"{figure_stem}.html").read_text()
+        pages[name] = unpacked((tmp_path / f"{figure_stem}.html").read_text())
     linked, volcano = pages["linked"], pages["volcano"]
     assert '<form class="brush"' in linked and '<form class="calls"' not in linked
     assert len(re.findall(r'<input type="radio" name="colour"', linked)) == 7
@@ -435,7 +436,7 @@ def test_hub_links_each_modules_newest_page_and_only_pages_that_exist(tmp_path):
     (ncrna / "2026-10-20_ncrna_x_demo_overview_v1.html").write_text("<html></html>")
     settings = runtime.Settings("laptop", tmp_path, 1, None, 0.0)
     page = hub.run(settings, (), "demo")[0]
-    html = page.read_text()
+    html = unpacked(page.read_text())
     hrefs = re.findall(r'href="([^"#]+\.html)"', html)
     modules = [h for h in hrefs if h.startswith("../")]
     assert modules == ["../07_proteo/2026-10-14_proteo_demo_overview_v2.html"]
@@ -452,7 +453,7 @@ def test_round_trip_of_bars_with_lines_and_filters(tmp_path):
     data = filtered_bars()
     figure_stem = stem("gather", "filtered_demo", 1, day=date(2026, 9, 30))
     write_figure(data, tmp_path, figure_stem, title="Demo", data_releases={})
-    html = (tmp_path / f"{figure_stem}.html").read_text()
+    html = unpacked((tmp_path / f"{figure_stem}.html").read_text())
     test_round_trip((tmp_path, figure_stem, data, html))
     pdf = " ".join(PdfReader(tmp_path / f"{figure_stem}_black.pdf").pages[0].extract_text().split())
     svg = re.sub(r"<[^>]+>", " ", (tmp_path / f"{figure_stem}_white.svg").read_text())
@@ -505,5 +506,5 @@ def test_a_bar_figure_page_carries_its_filters(tmp_path):
     written = write_figure(filtered_bars(), tmp_path, "2026-09-30_gather_x_depth_v1",
                            title="Depth", data_releases={}, text=text)  # fmt: skip
     (page,) = [p for p in written if p.suffix == ".html"]
-    html = page.read_text()
+    html = unpacked(page.read_text())
     assert 'class="calls filter"' in html and 'data-column="cell_type"' in html

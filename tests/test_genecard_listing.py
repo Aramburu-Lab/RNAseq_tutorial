@@ -14,6 +14,7 @@ from test_genecard import _cards, _register, _settings
 from ctx.genecard import figures, listing
 from ctx.genecard import run as module
 from ctx.report import genes
+from ctx.report.builder import unpacked
 from ctx.viz.heatmap import diverging_levels
 
 TABLE = genes.table(["ENSG00000000001.1", "ENSG00000000002.1", "ENSG00000000003.1"],
@@ -73,8 +74,9 @@ def page(tmp_path):
     spec = make(folder)
     _register(folder, spec)
     options = module.Options(spec, genes=("NPTX2", "ACTB"))
-    return module.run(_settings(folder), _cards(), "ctx genecard", SLUG, options,
-                      Stub(responses()))[0].read_text()  # fmt: skip
+    written = module.run(_settings(folder), _cards(), "ctx genecard", SLUG, options,
+                         Stub(responses()))  # fmt: skip
+    return unpacked(written[0].read_text())
 
 
 def test_the_page_carries_the_tested_genes_and_links_each_card_to_its_group(page):
