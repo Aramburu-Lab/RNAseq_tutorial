@@ -27,6 +27,16 @@ cache unchanged (a gzipped body, mtime 0):
 | `gtex_v10_ENSG00000106236_reference_v39.json.gz` | https://gtexportal.org/api/v2/reference/gene?geneId=ENSG00000106236&gencodeVersion=v39&genomeBuild=GRCh38%2Fhg38 | 2026-10-09T07:28:49 | b5b33c3c2a0feb9053ed1a562e1cf27456ae4058fb9788533ec70782b92da76f |
 | `gtex_v10_ENSG00000106236_junctions.json.gz` | https://gtexportal.org/api/v2/expression/medianJunctionExpression?gencodeId=ENSG00000106236.4&datasetId=gtex_v10&itemsPerPage=100000 | 2026-10-09T07:28:49 | 28ebdea9ff452c8ee8f5275ab923391a019ef11dc805400b37af59eb30eef9f4 |
 
+One GTEx file here is made up, not a response: `gtex_v10_ENSG00000106236_median_tpm_madeup.json.gz`
+(E.1c, D-106), NPTX2's V10 median TPM per tissue in the shape the GTEx API v2 reference gives
+for `expression/medianGeneExpression` (no live response was read). Its 54 tissues are the
+junction response's, in its order. Pituitary 240, Uterus 3 and Whole_Blood 0.05 are the V11
+fixture's all-donor medians (`tests/genecard_root.py`, `NPTX2_TPM`); EBV-transformed
+lymphocytes is set to 0.08; every other tissue is 0.6 times its mean of the four junction
+medians, to 2 decimals. Seven tissues fall below 1 TPM. SHA-256 of the body before gzip:
+e49dd73b656b990c48ea291366b53268ec4fc0336f22b78884f0740ccaf1504b. Written by a script
+kept outside the repository; the values carry no meaning beyond the tests.
+
 The two HPA search bodies above are byte-identical (same SHA-256) to the ones `ctx genecard`
 cached at 2026-10-09T07:28:37 and 07:27:03.
 

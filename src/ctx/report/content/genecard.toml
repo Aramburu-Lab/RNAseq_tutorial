@@ -348,27 +348,33 @@ r = ["dimensionless", "Rank-biserial r, matched-pairs for a paired test; positiv
 title ="Splice junctions of {symbol} across tissues, GTEx {release}"
 lead = "{matched} of {introns} MANE Select introns match a GTEx {release} junction base for base; {junctions} junctions in all."
 reading = [
-    "A cell is one junction in one tissue: log2 of its median reads over the junction's median across tissues.",
+    "A cell is one junction in one tissue: log2 of its median reads over the junction's median across the tissues drawn.",
+    "Only tissues where the gene's GTEx V10 median reaches 1 TPM are drawn: the floor and the junctions share one release.",
+    "Reads over a median of 0 take the top step; no reads against a median above 0, the bottom. No pseudocount.",
     "Junctions J1 onwards run in genomic order; hover gives coordinates. MANE marks an intron of the MANE Select transcript.",
-    "Right of each row: the junction's median reads across tissues.",
-    "GTEx V10 on GENCODE v39, not V11: the exon panel above is V11's.",
+    "Right of each row: the junction's median reads across the tissues drawn.",
+    "GTEx V10 on GENCODE v39, its floor too, not V11: the exon panel above and its floor are V11's.",
 ]
 x = "Tissue"
 y = "Junction"
 stat = "Median reads"
 mane = "MANE"
-caption = "GTEx {release} median junction read counts from API v2, {gencode_id}: {junctions} junctions by {tissues} tissues. Exons from the dataset's MANE Select model. External data, no test."
+caption = "GTEx {release} median junction reads, API v2, {gencode_id}: {junctions} junctions by {tissues} tissues at {floor:g} TPM or more in GTEx {release}; {left} tissues below. {unreferenced} junctions have a median of zero. External data, no test."
+too_few = "No junction panel for {symbol}: fewer than two GTEx {release} tissues reach a median of {floor:g} TPM, so no junction has a median across tissues."
+no_floor = "no GTEx {release} median TPM for its tissue floor, {why}"
 
 [figures.junctions.columns]
 junction = ["none", "GTEx junction ID: chromosome, first and last intron base."]
-tissue = ["none", "GTEx tissue ID."]
+tissue = ["none", "GTEx V10 tissue ID."]
 median = ["reads", "GTEx V10 median junction read count of the tissue."]
+reference = ["reads", "The junction's median over the tissues drawn, those at 1 TPM or more in GTEx V10."]
 mane = ["none", "True where the junction is an intron of the MANE Select transcript, base for base."]
-log2_ratio = ["log2", "log2 of the tissue's median over the junction's median across tissues; empty at zero."]
-level = ["none", "The step of the diverging scale the cell is drawn in."]
+log2_ratio = ["log2", "log2 of the tissue's median over reference; empty where either is 0, with no pseudocount."]
+level = ["none", "Step of the diverging scale: reads over a reference of 0 is the top step, 0 over one above 0 the bottom."]
 
 [tables]
 junctions = "GTEx V10 median junction reads of every listed gene, per tissue."
+junction_tpm = "GTEx V10 median TPM of every listed gene with junctions, per tissue: the junction panel's floor."
 evidence = "Every listed gene's M5 row in every contrast."
 tissues = "GTEx tissue summaries of every listed gene, by sex."
 exons = "GTEx exon shares of every listed gene, per tissue."
@@ -403,6 +409,10 @@ start = ["bp", "First intron base, 1-based, GRCh38."]
 end = ["bp", "Last intron base, 1-based, GRCh38."]
 median = ["reads", "GTEx V10 median junction read count of the tissue."]
 gtex_id = ["none", "The gene's GENCODE v39 ID that GTEx V10 is keyed by."]
+
+[tables.junction_tpm_columns]
+tissue = ["none", "GTEx V10 tissue ID."]
+median_tpm = ["TPM", "GTEx V10 all-donor median TPM of the gene in the tissue, from API v2."]
 
 [tables.lines_columns]
 cell_line = ["none", "HPA cell line, as HPA spells it."]
@@ -440,7 +450,7 @@ gtex = "GTEx Portal, release files"
 gtex_cite = "The Genotype-Tissue Expression (GTEx) Project was supported by the Common Fund of the Office of the Director of the National Institutes of Health, and by NCI, NHGRI, NHLBI, NIDA, NIMH and NINDS. The data used here were obtained from the GTEx Portal on {date}. GTEx Consortium, Science 2020, doi:10.1126/science.aaz1776. Drawn as our own figures; no endorsement by GTEx is implied."
 gtex_rerelease = "GTEx re-released V11's gene tables on 2026-05-19 with the laser-capture (LCM) samples moved to separate files; these cards read the 2025-08-22 release, LCM samples included. Source: the bucket listing storage.googleapis.com/storage/v1/b/adult-gtex/o, prefix bulk-gex/v11/rna-seq/, read 2026-10-09."
 gtex_api = "GTEx Portal, API v2"
-gtex_api_release = "{release} ({dataset}), GENCODE {gencode}: junction panel only"
+gtex_api_release = "{release} ({dataset}), GENCODE {gencode}: junction panel and its 1 TPM floor only"
 gtex_current = "Newer GTEx data may exist: these figures may not reflect the most current data available from the GTEx Portal, gtexportal.org."
 hpa = "Human Protein Atlas"
 hpa_cite = "CC BY 4.0. proteinatlas.org, {versioned}. Tissue: Uhlén et al., Science 2015, doi:10.1126/science.1260419. Immune cells: Uhlen et al., Science 2019, doi:10.1126/science.aax9198. Single cell: Karlsson et al., Sci Adv 2021, doi:10.1126/sciadv.abh2169. Cell lines: Jin et al., Nat Commun 2023, doi:10.1038/s41467-023-41132-w. Subcellular: Thul et al., Science 2017, doi:10.1126/science.aal3321."

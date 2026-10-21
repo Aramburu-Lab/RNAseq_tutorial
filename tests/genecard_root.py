@@ -167,7 +167,7 @@ def make(root: Path, day: date | None = None) -> Path:
 
 
 def responses() -> dict[str, bytes]:
-    """NPTX2's real responses by URL, as a stub opener serves them."""
+    """NPTX2's responses by URL, as a stub opener serves them; the V10 median TPM is made up."""
     gene = "ENSG00000106236"
     files = {hpa.url("v25", gene, "xml"): "hpa_v25_ENSG00000106236.xml.gz",
              hpa.url("v25", gene, "json"): "hpa_v25_ENSG00000106236.json.gz",
@@ -179,7 +179,9 @@ def responses() -> dict[str, bytes]:
                  "hpa_v25_search_name_NDUFA4L2.json.gz",
              junctions.gene_url(gene): "gtex_v10_ENSG00000106236_reference_v39.json.gz",
              junctions.junction_url("ENSG00000106236.4"):
-                 "gtex_v10_ENSG00000106236_junctions.json.gz"}  # fmt: skip
+                 "gtex_v10_ENSG00000106236_junctions.json.gz",
+             junctions.tpm_url("ENSG00000106236.4"):
+                 "gtex_v10_ENSG00000106236_median_tpm_madeup.json.gz"}  # fmt: skip
     return {u: gzip.decompress((FIXTURES / f).read_bytes()) for u, f in files.items()}
 
 

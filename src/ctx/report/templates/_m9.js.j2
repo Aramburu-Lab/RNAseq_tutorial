@@ -38,7 +38,7 @@ var ctxM9 = {
     while (i < bounds.length && bounds[i] <= step) i++;
     return i;
   },
-  /* annotation.exon_cv: SD (n - 1) over mean; null without reads or over one tissue. */
+  /* annotation.row_cv: SD (n - 1) over mean; null without reads or over one tissue. */
   cv: function (values) {
     var n = values.length, mean = 0, ss = 0;
     values.forEach(function (v) { mean += v; });
@@ -68,7 +68,7 @@ var ctxM9 = {
     });
     return best;
   },
-  /* annotation.exon_use over the kept tissues: rows [exon, tissue, share] in frame order.
+  /* annotation.tissue_use over the kept tissues: rows [exon, tissue, share] in frame order.
      The tissues are restricted first, then each exon's reference and CV are taken. */
   exonUse: function (rows, tissues) {
     var held = rows.filter(function (r) { return tissues.indexOf(r[1]) >= 0; });

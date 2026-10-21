@@ -152,7 +152,7 @@ def test_f3_retakes_tau_and_the_top_cell_over_the_lineages_kept(ran):
 
 def test_f4_retakes_the_exon_panel_over_the_tissues_kept(ran):
     """With the first tissue left out, each kept cell's level and each exon's CV equal
-    ``annotation.exon_use`` over the rest, the left-out column draws nothing, and the lead
+    ``annotation.tissue_use`` over the rest, the left-out column draws nothing, and the lead
     falls back to no pair over one tissue. Mutations caught: the reference over every tissue;
     the left-out column still drawn; the CV axis left as built."""
     folder, results = ran
@@ -169,7 +169,7 @@ def test_f4_retakes_the_exon_panel_over_the_tissues_kept(ran):
         tissues = page["options"]
         assert set(tissues) < set(shares["tissue"])
         kept = [t for t in tissues if t != page["dropped"]]
-        use = annotation.exon_use(shares.select("exon", "tissue", "share"), kept)
+        use = annotation.tissue_use(shares.select("exon", "tissue", "share"), kept)
         levels, _ = diverging_levels(list(use.steps))
         want = {(e, t): lv for (e, t), lv in zip(use.frame.select("exon", "tissue").rows(),
                                                   levels, strict=True)}  # fmt: skip

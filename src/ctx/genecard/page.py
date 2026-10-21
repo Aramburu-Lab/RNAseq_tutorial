@@ -262,14 +262,15 @@ def _card(writer: Writer, card: Card, ctx: Context) -> Drawn:
         views = [(label, data, _words("tissues", numbers))
                  for label, data, numbers in figures.tissue_views(card)]  # fmt: skip
         panel(views[0][1], "tissues", views[0][2], views)
-    if card.exons is not None:
-        if isinstance(exon := _exon_panel(card), str):
-            items.append(exon)
-        else:
-            panel(exon[0], "exons", exon[1], controls=figures.exon_controls(exon[0]))
-    if card.junctions is not None:
-        heat, numbers = figures.junctions(card)
-        panel(heat, "junctions", _words("junctions", numbers))
+    # D-079's two panels: each a figure, or the line standing in below two tissues.
+    for kind, data, build in (("exons", card.exons, _exon_panel),
+                              ("junctions", card.junctions, _junction_panel)):  # fmt: skip
+        drawn = build(card) if data is not None else None
+        if isinstance(drawn, str):
+            items.append(drawn)
+        elif drawn is not None:
+            controls = figures.exon_controls(drawn[0]) if kind == "exons" else None
+            panel(drawn[0], kind, drawn[1], controls=controls)
     if card.xml is not None and card.facts is not None:
         bars, numbers = figures.immune(card, release)
         panel(bars, "immune", _words("immune", numbers))
@@ -292,6 +293,15 @@ def _exon_panel(card: Card) -> tuple[Any, FigureText] | str:
         return fill("figures.exons.too_few", symbol=card.symbol, floor=DETECTED)
     heat, numbers, pair = drawn
     return heat, _words("exons", numbers, "lead" if pair is not None else "lead_none")
+
+
+def _junction_panel(card: Card) -> tuple[Any, FigureText] | str:
+    """The junction figure and words, or the line standing in below two V10 tissues at 1 TPM."""
+    if (drawn := figures.junctions(card)) is None:
+        return fill("figures.junctions.too_few", symbol=card.symbol, release=junctions.RELEASE,
+                    floor=DETECTED)  # fmt: skip
+    heat, numbers = drawn
+    return heat, _words("junctions", numbers)
 
 
 def _own(card: Card, ctx: Context) -> tuple[list[str], list[tuple[str, Any, FigureText, Any]]]:
@@ -407,6 +417,9 @@ def _tables(writer: Writer, ctx: Context) -> None:
         "exons": [_named(c.exons, c) for c in ctx.chosen if c.exons is not None],
         "junctions": [_named(c.junctions.with_columns(gtex_id=pl.lit(c.junction_id)), c)
                       for c in ctx.chosen if c.junctions is not None],
+        "junction_tpm": [_named(pl.DataFrame(list(c.junction_tpm.items()),
+                                             schema=["tissue", "median_tpm"], orient="row"), c)
+                         for c in ctx.chosen if c.junction_tpm is not None],
         "immune": [_named(pl.DataFrame(c.xml.immune, schema=["cell_type", "lineage", "ntpm"],
                                        orient="row"), c)
                    for c in ctx.chosen if c.xml is not None],

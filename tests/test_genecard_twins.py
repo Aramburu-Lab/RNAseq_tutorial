@@ -117,7 +117,7 @@ def test_f4_exon_use_equals_python():
     for case, got in zip(cases, page, strict=True):
         shares = pl.DataFrame(case["rows"], schema=["exon", "tissue", "share"], orient="row",
                               schema_overrides={"share": pl.Float64})  # fmt: skip
-        use = annotation.exon_use(shares, case["tissues"])
+        use = annotation.tissue_use(shares, case["tissues"])
         levels, _ = diverging_levels(list(use.steps))
         want = list(zip(use.frame.iter_rows(named=True), levels, strict=True))
         assert len(got["cells"]) == len(want)
@@ -146,7 +146,7 @@ def test_f4_ties_and_bounds_are_planted():
     got = _node(cases)["exons"][0]
     assert (got["pair"]["first"], got["pair"]["second"]) == ("E1", "E2")
     shares = pl.DataFrame(rows, schema=["exon", "tissue", "share"], orient="row")
-    pair = annotation.qpcr_pair(annotation.exon_use(shares, ["A", "B"]).cv)
+    pair = annotation.qpcr_pair(annotation.tissue_use(shares, ["A", "B"]).cv)
     assert pair is not None and (pair.first, pair.second) == ("E1", "E2")
     level = {(c["exon"], c["tissue"]): c["level"] for c in got["cells"]}
     # E3: reference 0.25, A at 0.1 is log2(0.4) = -1.32; B at 0.4 is log2(1.6) = 0.678.

@@ -37,13 +37,13 @@ def _card(tpm: dict[str, float]) -> Card:
 
 def test_detected_tissues_reach_one_tpm():
     # Mutation: the floor taken as strictly above 1, which drops D at exactly 1 TPM.
-    assert gtex.detected(_spread(TPM)) == ["A", "B", "D"]
+    assert annotation.expressed(gtex.medians(_spread(TPM))) == ["A", "B", "D"]
 
 
 def test_reference_is_taken_after_the_tissues_are_restricted():
     # Mutation: the median over every tissue, then the restriction (E1's reference 0.03, not
     # 0.02); the order is the rule, so this asserts it, not only the floor.
-    use = annotation.exon_use(_shares(), gtex.detected(_spread(TPM)))
+    use = annotation.tissue_use(_shares(), annotation.expressed(gtex.medians(_spread(TPM))))
     reference = dict(use.frame.select("exon", "reference").unique().iter_rows())
     assert reference == {"E1": 0.02, "E2": 0.0, "E3": 0.0}
     assert use.tissues == ("A", "B", "D") and use.left_out == ("C",)
@@ -53,7 +53,7 @@ def test_reference_is_taken_after_the_tissues_are_restricted():
 def test_steps_take_the_outer_levels_without_a_pseudocount():
     # Mutations: a share over a reference of 0 left blank (NKX2-1's lung row) or given a
     # pseudocount; no share against a reference above 0 left blank; 0 over 0 given a step.
-    use = annotation.exon_use(_shares(), ["A", "B", "D"])
+    use = annotation.tissue_use(_shares(), ["A", "B", "D"])
     cells = {(e, t): s for (e, t), s in zip(use.frame.select("exon", "tissue").iter_rows(),
                                              use.steps, strict=True)}  # fmt: skip
     assert cells[("E1", "A")] == 1.0 and cells[("E1", "D")] == 0.0
@@ -68,9 +68,9 @@ def test_steps_take_the_outer_levels_without_a_pseudocount():
 def test_undefined_cv_is_none_and_printed_as_nothing():
     # Mutations: a CV of NaN for an exon without reads, printed "nan" beside its row; a CV
     # over one tissue; the qPCR pair taking an exon with no CV.
-    use = annotation.exon_use(_shares(), ["A", "B", "D"])
+    use = annotation.tissue_use(_shares(), ["A", "B", "D"])
     assert use.cv["E2"] is None and use.cv["E1"] is not None
-    assert annotation.exon_cv(_shares().filter(pl.col("tissue") == "A")) == dict.fromkeys(SHARES)
+    assert annotation.row_cv(_shares().filter(pl.col("tissue") == "A")) == dict.fromkeys(SHARES)
     assert annotation.qpcr_pair({"E1": 0.3, "E2": None, "E3": 0.2}) is None
     drawn = figures.exons(_card(TPM))
     assert drawn is not None

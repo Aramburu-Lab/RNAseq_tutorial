@@ -31,7 +31,7 @@ from ctx.genecard import (
 )
 from ctx.genecard.cache import Cache
 from ctx.io.naming import MODULES
-from ctx.report import genes
+from ctx.report import genes, text
 from ctx.report.builder import ParameterCard
 from ctx.setup import MANIFEST as SETUP_MANIFEST
 from ctx.viz.save import one_build
@@ -174,7 +174,17 @@ def _junctions(cache: Cache, chosen: list[cards.Card]) -> str:
         if table.is_empty():
             card.notes["junctions"] = f"no junction of {gencode_id} in {junctions.DATASET}"
             continue
+        # The floor's own release, never V11's TPM nor every tissue in its place (D-106).
+        floor = cache.get("gtex", junctions.DATASET, gene, "median_tpm",
+                          junctions.tpm_url(gencode_id))  # fmt: skip
+        if floor.body is None:
+            card.notes["junctions"] = text.fill(
+                "genecard", "figures.junctions.no_floor", release=junctions.RELEASE, why=floor.error
+            )
+            continue
+        newest = max(newest, floor.retrieved)
         card.junction_id, card.junctions = gencode_id, table
+        card.junction_tpm = junctions.parse_tpm(floor.body, gencode_id)
     return newest
 
 

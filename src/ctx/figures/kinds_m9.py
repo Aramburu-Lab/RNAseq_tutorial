@@ -96,6 +96,7 @@ KINDS = (
     _card_kind("tissues", "ctx.genecard.figures:tissues", _tables("tissues")),
     _card_kind("exons", "ctx.genecard.figures:exons",
                _tables("exons", "tissues", "exons_dropped")),
-    _card_kind("junctions", "ctx.genecard.figures:junctions", _tables("junctions", "mane")),
+    _card_kind("junctions", "ctx.genecard.figures:junctions",
+               _tables("junctions", "junction_tpm", "mane")),
     _card_kind("immune", "ctx.genecard.figures:immune", _options),
 )  # fmt: skip

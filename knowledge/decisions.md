@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-106 — The junction panel's 1 TPM floor reads GTEx V10's own gene medians
+
+**Date:** 2026-10-21 · **Status:** decided (Rytis 2026-10-21: option A, E.1c); supersedes D-079's Consequence line
+
+**Context.** E.1c: the junction panel took each junction's reference as the median over every tissue GTEx V10 returns, 54 on NPTX2, where D-079 draws the exon panel only where the gene reaches 1 TPM. The exon panel's floor reads GTEx V11's TPM under V11's tissue names; the junctions are V10 API data under V10's tissue IDs, and no table joins the two.
+
+**Options.** A: the floor from V10's own gene medians, from the same API, so floor and junctions share one release and one set of tissue IDs. A V11-to-V10 tissue-name table, which does not exist and would be written by hand. The all-tissue median kept, as D-079 left it.
+
+**Decision.** A (Rytis 2026-10-21: option A). `junctions.tpm_url` asks `expression/medianGeneExpression` for the gene's versioned v39 ID with `datasetId=gtex_v10`, cached as the junction request is (D-101: a 404 recorded, a 5xx or timeout not). The route and its three parameters come from the GTEx API v2 reference in the gtex-database skill (`references/api_reference.md`); no live response was read, so the first online run is its first check. Both panels call `annotation.expressed_use`: the floor (`summary.DETECTED`), then `tissue_use`'s reference, CV and zero steps, None below two tissues. The junction panel thus gains D-079's outer steps for zeros and its line of text below two tissues. With no V10 TPM for a gene the card says so, "no GTEx V10 median TPM for its tissue floor", and draws no junction panel; it never falls back to every tissue. M9 writes the V10 medians as the `junction_tpm` table, which `ctx figure` redraws from.
+
+**Evidence.** On the fixture, NPTX2's real V10 junctions and a made-up V10 TPM table (7 of 54 tissues below 1 TPM): references 7.5, 12.75, 15 and 18.5 reads over 54 tissues before, 8, 14, 17 and 20 over 47 after; empty ratios 5, 2, 2 and 2 before, 0 after. Pituitary's J1 log2 ratio 4.04 before, 3.95 after. The exon panel's frame, steps, CVs, numbers and caption are identical before and after on the unit cases and the made-up root. 2 planted mutations caught: the floor ignored, and the old null-at-zero levels.
+
+**Consequence.** Each card makes one more GTEx request, and a cache filled before this has none: an offline rerun of an older root shows the junction panel as unavailable until one online run. A ctx root's `junction_tpm` table is new, so `ctx figure` on a junction panel needs M9 run again. The junction panel's reference is now the median over the tissues drawn.
+
+---
+
 ## D-105 — Every bar figure takes the phone's layout below twice its widest label plus margins
 
 **Date:** 2026-10-21 · **Status:** decided (Rytis 2026-10-21: one rule for every bar figure, PK.6); supersedes PK.4's held threshold
@@ -407,7 +423,7 @@ it were reversed.
 
 ## D-079 — M9's exon panel reads exon use over the tissues where GTEx expresses the gene
 
-**Date:** 2026-10-15 · **Status:** decided
+**Date:** 2026-10-15 · **Status:** decided; the Consequence line superseded by D-106
 
 **Context.** H.3: the reference share was the median over all 68 GTEx tissues, so a gene expressed in few tissues got a reference of 0 on most exons; NKX2-1's lung signal drew as an empty row and an undefined CV printed "nan".
 
@@ -415,7 +431,7 @@ it were reversed.
 
 **Evidence.** NKX2-1: 4 of 5 exons had reference 0; over its 6 expressing tissues E1 0.021, E2 0.013, E4 0.072, E3 no reads anywhere. MKI67: 15 of 15 exon rows filled over 19 tissues, from 3. 33 planted mutations caught.
 
-**Consequence.** The junction panel keeps the all-tissue median (E.1c).
+**Consequence.** The junction panel keeps the all-tissue median (E.1c). Superseded by D-106 (Rytis 2026-10-21: option A): the junction panel takes this rule over GTEx V10's own median TPM.
 
 ---
 

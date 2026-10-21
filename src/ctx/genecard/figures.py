@@ -179,12 +179,13 @@ def least_even(cv: Mapping[str, float | None]) -> tuple[str, float] | None:
 def exons(card: Card) -> tuple[HeatmapData, dict[str, Any], annotation.Pair | None] | None:
     """Each exon's median share per tissue against its median over the tissues that express it.
 
-    Only tissues at ``DETECTED`` TPM or more are drawn (``gtex.detected``, H.3); fewer than two
-    leave no panel, and None. The CV is printed only where it is defined.
+    Only tissues at ``DETECTED`` TPM or more in GTEx V11 are drawn
+    (``annotation.expressed_use``, H.3); fewer than two leave no panel, and None. The CV is
+    printed only where it is defined.
     """
     assert card.exons is not None and card.tissues is not None  # noqa: S101 - drawn with data
-    use = annotation.exon_use(card.exons, gtex.detected(card.tissues))
-    if len(use.tissues) < 2:  # noqa: PLR2004 - a reference across tissues needs two
+    use = annotation.expressed_use(card.exons, gtex.medians(card.tissues))
+    if use is None:
         return None
     names = list(dict.fromkeys(use.frame["exon"].to_list()))
     levels, swatches = diverging_levels(list(use.steps))
@@ -316,44 +317,46 @@ def live_scale(labels: Sequence[str]) -> dict[str, Any]:
             + LIVE_SIDES_PX}  # fmt: skip
 
 
-def junctions(card: Card) -> tuple[HeatmapData, dict[str, Any]]:
-    """GTEx V10 junction medians per tissue against each junction's median over tissues.
+def junctions(card: Card) -> tuple[HeatmapData, dict[str, Any]] | None:
+    """GTEx V10 junction medians per tissue against each junction's median where V10 expresses it.
 
-    A junction is labelled by its coordinates, with a mark where it is an intron of the GTF's
-    MANE Select transcript base for base: the GTF's model, or Ensembl REST's where the GTF tags
-    none (GDC's GENCODE v36 has no MANE Select for NDUFA4L2; release 116 has).
+    D-079's rule over V10's own median TPM (D-106): fewer than two tissues at the floor leave
+    no panel, and None. A junction is labelled by its coordinates, with a mark where it is an
+    intron of the GTF's MANE Select transcript base for base: the GTF's model, or Ensembl
+    REST's where the GTF tags none (GDC's GENCODE v36 has no MANE Select for NDUFA4L2; release
+    116 has).
     """
-    assert card.junctions is not None  # noqa: S101 - the page draws this panel only with data
-    found = card.junctions
+    assert card.junctions is not None and card.junction_tpm is not None  # noqa: S101 - drawn with data
+    use = annotation.expressed_use(card.junctions, card.junction_tpm, "junction", "median")
+    if use is None:
+        return None
     model = card.gtf or card.rest
     introns = set(model.introns()) if model is not None else set()
-    order = list(dict.fromkeys(found.sort("start", "end")["junction"].to_list()))
-    tissues = list(dict.fromkeys(found["tissue"].to_list()))
-    middle = found.group_by("junction").agg(mid=pl.col("median").median())
-    framed = found.join(middle, on="junction").with_columns(
+    order = list(dict.fromkeys(use.frame.sort("start", "end")["junction"].to_list()))
+    framed = use.frame.with_columns(
         mane=pl.struct("start", "end").map_elements(lambda r: (r["start"], r["end"]) in introns,
                                                     return_dtype=pl.Boolean),
-        log2_ratio=pl.when((pl.col("median") > 0) & (pl.col("mid") > 0))
-        .then((pl.col("median") / pl.col("mid")).log(2)).otherwise(None),
     )  # fmt: skip
-    levels, swatches = diverging_levels(framed["log2_ratio"].to_list())
+    levels, swatches = diverging_levels(list(use.steps))
     frame = framed.with_columns(level=pl.Series(levels, dtype=pl.String)).select(
-        "junction", "tissue", "median", "mane", "log2_ratio", "level"
+        "junction", "tissue", "median", "reference", "mane", "log2_ratio", "level"
     )
     mane = set(framed.filter(pl.col("mane"))["junction"].to_list())
     marker = text.word(PAGE, "figures.junctions.mane")
     # Short labels in genomic order: full coordinates left 54 tissue columns 80 px at 1280 px.
     display = {j: f"J{k} {marker}" if j in mane else f"J{k}" for k, j in enumerate(order, 1)}
-    mids = dict(middle.iter_rows())
+    mids = dict(framed.select("junction", "reference").unique().iter_rows())
+    unreferenced = frame.filter(pl.col("reference") == 0)["junction"].n_unique()
     numbers = {"symbol": card.symbol, "release": RELEASE_JUNCTIONS, "junctions": len(order),
-               "tissues": len(tissues), "matched": len(mane), "introns": len(introns),
+               "tissues": len(use.tissues), "left": len(use.left_out), "floor": DETECTED,
+               "unreferenced": unreferenced, "matched": len(mane), "introns": len(introns),
                "gencode_id": card.junction_id}  # fmt: skip
     heat = HeatmapData(frame=frame, columns=columns("junctions"), row="junction", column="tissue",
                        value="log2_ratio", level="level",
                        row_label=text.word(PAGE, "figures.junctions.y"),
                        column_label=text.word(PAGE, "figures.junctions.x"), swatches=swatches,
                        caption=text.fill(PAGE, "figures.junctions.caption", **numbers),
-                       row_order=tuple(order), column_order=tuple(tissues),
+                       row_order=tuple(order), column_order=use.tissues,
                        row_stats={j: float(mids[j]) for j in order},
                        row_stats_label=text.word(PAGE, "figures.junctions.stat"),
                        row_stats_format=".3g", row_display=display)  # fmt: skip
