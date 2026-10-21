@@ -25,6 +25,12 @@ from ctx.gather.rnaseq import MATRIX_FILE
 # Not naming.MODULES, whose numbers name output folders, not the order a dataset is run in.
 # genecard is not here: it calls HPA and Ensembl, and one command runs nothing that fetches.
 ORDER = ("gather", "qc", "quant", "de", "function", "proteo", "ncrna", "clinical", "report")
+# Every module, those ``ctx run`` leaves to the reader too, and the ones each route never runs:
+# GDC and count-matrix sheets hold no reads, so quant and process refuse both
+# (``ctx.quant.run``, ``ctx.process.run``) and qc runs on a matrix's counts, not on GDC's.
+MODULES = (*ORDER, "process", "genecard")
+NOT_ON_ROUTE = {"fetchngs": frozenset(), "counts": frozenset({"quant", "process"}),
+                "gdc": frozenset({"qc", "quant", "process"})}  # fmt: skip
 TEMPLATE = Path(__file__).resolve().parents[2] / "conf" / "dataset_template.toml"
 # The curated columns a suggested contrast compares, in the order tried.
 VARIABLES = ("condition", "cell_type")
@@ -89,10 +95,11 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
     # Across studies M7 reads M5's fold changes; across samples, gather's counts alone.
     fold_changes = bool(spec.contrasts and spec.de)
     proteo = spec.proteo and counts and (spec.proteo.design == "across_samples" or fold_changes)
+    skipped = NOT_ON_ROUTE["gdc" if gdc else "counts" if matrix else "fetchngs"]
     planned: dict[str, tuple[str, ...] | None] = {
         "gather": base + (gdc_args if gdc else matrix or fetchngs + rnaseq),
-        "qc": None if gdc else base + rnaseq,
-        "quant": base + rnaseq + salmon if rnaseq and has_gtf else None,
+        "qc": None if "qc" in skipped else base + rnaseq,
+        "quant": None if "quant" in skipped or not (rnaseq and has_gtf) else base + rnaseq + salmon,
         "de": base if spec.contrasts and spec.de and counts else None,
         "function": base if spec.function and spec.contrasts and spec.de and counts else None,
         "proteo": base if proteo else None,
@@ -106,6 +113,20 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
 def planned(options: Options) -> list[tuple[str, tuple[str, ...]]]:
     """``steps`` of the dataset file the options name, read again."""
     return steps(load(options.dataset_file), options)
+
+
+def route(spec: Dataset) -> str:
+    """The route a dataset file's sheet comes by: ``gdc``, ``counts`` or ``fetchngs``."""
+    return "gdc" if spec.gdc else "counts" if spec.counts else "fetchngs"
+
+
+def route_modules(spec: Dataset) -> set[str]:
+    """Every module the dataset's route can run: all but ``NOT_ON_ROUTE``'s for that route.
+
+    Not ``steps``: it plans de, proteo and ncrna from ``[de]``, while ``ctx ncrna`` and a
+    cross-study ``ctx proteo`` run without it on a reader's own results.
+    """
+    return set(MODULES) - NOT_ON_ROUTE[route(spec)]
 
 
 def execute(root: Path, profile: str | None, planned: Sequence[tuple[str, tuple[str, ...]]]) -> int:
