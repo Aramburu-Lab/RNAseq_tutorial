@@ -12,6 +12,7 @@ found; set ``CTX_CHROMIUM`` to one.
 """
 
 import base64
+import contextlib
 import dataclasses
 import io
 import json
@@ -501,15 +502,19 @@ def _fit_tasks(page: Path, pages: dict, volcano: str, bands: str) -> list[dict]:
 
 
 def _browse(tasks: list[dict], downloads: Path, chromium: str | None = None,
-            timeout: float = 900) -> dict[str, dict]:  # fmt: skip
+            timeout: float = 900, throttle: float | None = None) -> dict[str, dict]:  # fmt: skip
     """Run tasks in headless Chromium through tests/browser.mjs; results by task name.
 
     The driver traces each step to stderr, so one past ``timeout`` names the step it stopped
     in. It runs in a session of its own, and past ``timeout`` the whole session is killed:
-    killing the driver alone left its Chromium running, four of them for days (K.13).
+    killing the driver alone left its Chromium running, four of them for days (K.13). Before
+    that kill the driver is sent SIGTERM and given 30 s to print where the page's script is
+    running, so a hang names its frame (H.6). ``throttle`` slows every page's CPU that many
+    times, or ``CTX_BROWSER_THROTTLE`` does for every call.
     """
     plan = {"chromium": chromium or CHROMIUM, "downloads": str(downloads), "tasks": tasks,
-            "trace": True}  # fmt: skip
+            "trace": True,
+            "throttle": throttle or float(os.environ.get("CTX_BROWSER_THROTTLE") or 0)}  # fmt: skip
     node = shutil.which("node")
     assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
     with subprocess.Popen([node, str(ROOT / "tests" / "browser.mjs")], stdin=subprocess.PIPE,
@@ -518,9 +523,15 @@ def _browse(tasks: list[dict], downloads: Path, chromium: str | None = None,
         try:
             stdout, stderr = proc.communicate(json.dumps(plan), timeout=timeout)
         except subprocess.TimeoutExpired:
-            os.killpg(proc.pid, signal.SIGKILL)
-            _, stderr = proc.communicate()
-            raise AssertionError(f"browser driver past {timeout:g} s:\n{stderr[-2000:]}") from None
+            proc.send_signal(signal.SIGTERM)
+            try:
+                _, stderr = proc.communicate(timeout=30)
+            except subprocess.TimeoutExpired:
+                os.killpg(proc.pid, signal.SIGKILL)
+                _, stderr = proc.communicate()
+            with contextlib.suppress(ProcessLookupError):  # the group may be gone already
+                os.killpg(proc.pid, signal.SIGKILL)
+            raise AssertionError(f"browser driver past {timeout:g} s:\n{stderr[-4000:]}") from None
     # The driver's own error, which a bare exit status hides.
     assert proc.returncode == 0, stderr[-4000:]
     return {r["name"]: r for r in json.loads(stdout)}
