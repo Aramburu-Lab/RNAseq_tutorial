@@ -1,0 +1,10 @@
+clinical tcga_brca: exit 0
+12269875 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_brca/outputs/12_clinical/2026-10-21_clinical_tcga_brca_overview_v1.html
+clinical tcga_kirc: exit 0
+12269901 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_kirc/outputs/12_clinical/2026-10-21_clinical_tcga_kirc_overview_v1.html
+clinical tcga_luad: exit 0
+12261079 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_luad/outputs/12_clinical/2026-10-21_clinical_tcga_luad_overview_v1.html
+clinical tcga_lusc: exit 0
+12268884 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_lusc/outputs/12_clinical/2026-10-21_clinical_tcga_lusc_overview_v1.html
+clinical tcga_hnsc: exit 0
+12259155 B /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/after_hnsc/outputs/12_clinical/2026-10-21_clinical_tcga_hnsc_overview_v1.html

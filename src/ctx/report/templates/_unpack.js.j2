@@ -1,0 +1,145 @@
+/* A packed figure's JSON (ctx.report.figures.pack_json): base64 of raw DEFLATE, inflated here
+   synchronously, after zlib's puff.c (RFC 1951). Each figure's own inline script unpacks its
+   arguments and draws, where it drew them unpacked before, so every later script finds each
+   plot drawn as before; DecompressionStream answers only after the page script has run. */
+var ctxUnpack = (function () {
+  "use strict";
+  var LBASE = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83,
+               99, 115, 131, 163, 195, 227, 258];
+  var LEXT = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5,
+              0];
+  var DBASE = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769,
+               1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577];
+  var DEXT = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11,
+              12, 12, 13, 13];
+  var ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
+
+  /* A canonical Huffman code from its code lengths: codes per length, symbols by code. */
+  function code(lengths, from, n) {
+    var count = new Uint16Array(16), offs = new Uint16Array(16), symbol = new Uint16Array(n), i;
+    for (i = 0; i < n; i++) count[lengths[from + i]]++;
+    for (i = 1; i < 15; i++) offs[i + 1] = offs[i] + count[i];
+    for (i = 0; i < n; i++) if (lengths[from + i]) symbol[offs[lengths[from + i]]++] = i;
+    return { count: count, symbol: symbol };
+  }
+
+  function inflate(src) {
+    var out = new Uint8Array(src.length * 8 + 1024), n = 0, at = 0, buf = 0, have = 0;
+    function bits(k) {
+      while (have < k) {
+        if (at >= src.length) throw new Error("ctxUnpack: the data end early");
+        buf |= src[at++] << have;
+        have += 8;
+      }
+      var v = buf & ((1 << k) - 1);
+      buf >>>= k;
+      have -= k;
+      return v;
+    }
+    function room(k) {
+      if (n + k <= out.length) return;
+      var grown = new Uint8Array(Math.max(out.length * 2, n + k));
+      grown.set(out);
+      out = grown;
+    }
+    function decode(h) {
+      var c = 0, first = 0, index = 0, len, count;
+      for (len = 1; len < 16; len++) {
+        c |= bits(1);
+        count = h.count[len];
+        if (c - count < first) return h.symbol[index + (c - first)];
+        index += count;
+        first = (first + count) << 1;
+        c <<= 1;
+      }
+      throw new Error("ctxUnpack: no such code");
+    }
+    function stored() {
+      buf = 0;
+      have = 0;
+      var len = src[at] | (src[at + 1] << 8), inverse = src[at + 2] | (src[at + 3] << 8);
+      if (at + 4 + len > src.length || (len ^ 0xffff) !== inverse) {
+        throw new Error("ctxUnpack: a stored block's length is damaged");
+      }
+      room(len);
+      out.set(src.subarray(at + 4, at + 4 + len), n);
+      n += len;
+      at += 4 + len;
+    }
+    function codes(lens, dists) {
+      for (;;) {
+        var sym = decode(lens);
+        if (sym < 256) {
+          room(1);
+          out[n++] = sym;
+        } else if (sym === 256) {
+          return;
+        } else {
+          sym -= 257;
+          if (sym >= 29) throw new Error("ctxUnpack: no such length");
+          var len = LBASE[sym] + bits(LEXT[sym]), d = decode(dists);
+          if (d >= 30) throw new Error("ctxUnpack: no such distance");
+          var dist = DBASE[d] + bits(DEXT[d]);
+          if (dist > n) throw new Error("ctxUnpack: a distance before the start");
+          room(len);
+          for (; len > 0; len--, n++) out[n] = out[n - dist];
+        }
+      }
+    }
+    var fixed = null;
+    function fixedCodes() {
+      if (fixed) return fixed;
+      var lengths = new Uint8Array(320), i;
+      for (i = 0; i < 144; i++) lengths[i] = 8;
+      for (; i < 256; i++) lengths[i] = 9;
+      for (; i < 280; i++) lengths[i] = 7;
+      for (; i < 288; i++) lengths[i] = 8;
+      for (; i < 320; i++) lengths[i] = 5;
+      fixed = [code(lengths, 0, 288), code(lengths, 288, 30)];
+      return fixed;
+    }
+    function dynamic() {
+      var nlen = bits(5) + 257, ndist = bits(5) + 1, ncode = bits(4) + 4, i;
+      if (nlen > 286 || ndist > 30) throw new Error("ctxUnpack: too many codes");
+      var lengths = new Uint8Array(320);
+      for (i = 0; i < ncode; i++) lengths[ORDER[i]] = bits(3);
+      var lencode = code(lengths, 0, 19);
+      lengths = new Uint8Array(320);
+      for (i = 0; i < nlen + ndist;) {
+        var sym = decode(lencode), len = 0, times;
+        if (sym < 16) { lengths[i++] = sym; continue; }
+        if (sym === 16) {
+          if (i === 0) throw new Error("ctxUnpack: a repeat with nothing before it");
+          len = lengths[i - 1];
+          times = 3 + bits(2);
+        } else if (sym === 17) {
+          times = 3 + bits(3);
+        } else {
+          times = 11 + bits(7);
+        }
+        if (i + times > nlen + ndist) throw new Error("ctxUnpack: too many lengths");
+        while (times--) lengths[i++] = len;
+      }
+      if (!lengths[256]) throw new Error("ctxUnpack: no end-of-block code");
+      return [code(lengths, 0, nlen), code(lengths, nlen, ndist)];
+    }
+    var last;
+    do {
+      last = bits(1);
+      var type = bits(2);
+      if (type === 0) stored();
+      else if (type === 1) codes.apply(null, fixedCodes());
+      else if (type === 2) codes.apply(null, dynamic());
+      else throw new Error("ctxUnpack: block type 3");
+    } while (!last);
+    return out.subarray(0, n);
+  }
+
+  function unpack(packed) {
+    var text = atob(packed), bytes = new Uint8Array(text.length);
+    for (var i = 0; i < text.length; i++) bytes[i] = text.charCodeAt(i);
+    return JSON.parse(new TextDecoder().decode(inflate(bytes)));
+  }
+  unpack.inflate = inflate;
+  return unpack;
+})();

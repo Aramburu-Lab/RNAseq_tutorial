@@ -44,9 +44,12 @@
   }
 
   /* A figure's rows, embedded as column names once and a list of values per row
-     (ctx.report.figures.columnar), as one object per row again. */
+     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+     ctx.report.figures.pack_json writes them. */
   function ctxRows(form) {
-    var t = JSON.parse(document.getElementById(form.getAttribute("data-rows")).textContent);
+    var held = document.getElementById(form.getAttribute("data-rows"));
+    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+                                                     : JSON.parse(held.textContent);
     return t.data.map(function (values) {
       var row = {};
       t.columns.forEach(function (c, i) { row[c] = values[i]; });

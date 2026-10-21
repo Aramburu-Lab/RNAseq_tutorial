@@ -1,0 +1,97 @@
+page /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/roots/before_luad/outputs/12_clinical/2026-10-21_clinical_tcga_luad_overview_v1.html
+bytes 13,130,012; rows sum 13,130,012; equal: True
+part                                                           encoding                               bytes    packed
+small inline script (script at 199)                            raw JS                                   471       412
+CSS                                                            raw CSS                               34,621      9544
+plotly.js                                                      raw JS                             4,815,817   1958492
+export libraries (jsPDF, svg2pdf)                              raw JS                               526,581    215968
+ctx-export: fonts and settings                                 base64 fonts in JSON                 219,314          
+ctx-figure-0 script wrapper                                    inline JS                                333          
+ctx-figure-0 traces (2)                                        raw JSON                             159,943          
+ctx-figure-0 layout, template apart                            raw JSON                               1,163          
+ctx-figure-0 layout template                                   raw JSON                               7,651          
+ctx-figure-0 config; packed: all three arguments               raw JSON                                  67     20644
+ctx-data-0 rows                                                raw JSON (columnar)                  253,351     19828
+ctx-figure-1 script wrapper                                    inline JS                                333          
+ctx-figure-1 traces (12)                                       raw JSON                             122,650          
+ctx-figure-1 layout, template apart                            raw JSON                                 642          
+ctx-figure-1 layout template                                   raw JSON                               7,651          
+ctx-figure-1 config; packed: all three arguments               raw JSON                                  67     24244
+ctx-controls-1 .kind                                           raw JSON                                  10        40
+ctx-controls-1 .block                                          gzip+base64 int16 byte planes      5,599,222          
+ctx-controls-1 .genes                                          raw JSON                                   4        32
+ctx-controls-1 .patients                                       raw JSON                                   3        32
+ctx-controls-1 .numbers                                        raw JSON                              39,057     21288
+ctx-controls-1 .symbols                                        raw JSON                              46,350     23976
+ctx-controls-1 .build                                          raw JSON                                  12        44
+ctx-controls-1 .endpoints                                      raw JSON                              18,043      4168
+ctx-controls-1 .covariates                                     raw JSON                               3,671      1200
+ctx-controls-1 .strata                                         raw JSON                                   4        32
+ctx-controls-1 .endpoint                                       raw JSON                                   4        32
+ctx-controls-1 .split                                          raw JSON                                   8        40
+ctx-controls-1 .horizon                                        raw JSON                                   4        32
+ctx-controls-1 .days_per_month                                 raw JSON                                   7        36
+ctx-controls-1 .z                                              raw JSON                                  17        52
+ctx-controls-1 .scan                                           raw JSON                                  57        92
+ctx-controls-1 .names                                          raw JSON                                 121       136
+ctx-controls-1 .screen                                         raw JSON                             454,791    163900
+ctx-controls-1 .screen_rows                                    raw JSON                                   2        32
+ctx-controls-1 .alpha                                          raw JSON                                   4        32
+ctx-controls-1 .captions                                       raw JSON                                 499       408
+ctx-controls-1 .risk_columns                                   raw JSON                                   1        28
+ctx-controls-1 .words                                          raw JSON                               1,530      1004
+ctx-controls-1 .source                                         raw JSON                                  16        48
+ctx-controls-1 .none                                           raw JSON                                  15        48
+ctx-controls-1 .leads                                          raw JSON                                 371       284
+ctx-controls-1 .defaults                                       raw JSON                                 682       552
+ctx-controls-1 .export                                         raw JSON                                 615       556
+ctx-controls-1 JSON keys and separators                        raw JSON                                 354          
+ctx-data-1 rows                                                raw JSON (columnar)                   33,154      7532
+ctx-figure-2 script wrapper                                    inline JS                                333          
+ctx-figure-2 traces (3)                                        raw JSON                               5,376          
+ctx-figure-2 layout, template apart                            raw JSON                                 133          
+ctx-figure-2 layout template                                   raw JSON                               7,651          
+ctx-figure-2 config; packed: all three arguments               raw JSON                                  67      5188
+ctx-controls-2                                                 raw JSON                                 669       592
+ctx-data-2 rows                                                raw JSON (columnar)                    6,192      3644
+ctx-figure-3 script wrapper                                    inline JS                                333          
+ctx-figure-3 traces (3)                                        raw JSON                             158,202          
+ctx-figure-3 layout, template apart                            raw JSON                                 146          
+ctx-figure-3 layout template                                   raw JSON                               7,651          
+ctx-figure-3 config; packed: all three arguments               raw JSON                                  67     17352
+ctx-data-3 rows                                                raw JSON (columnar)                  164,233     14056
+ctx-figure-4 script wrapper                                    inline JS                                333          
+ctx-figure-4 traces (3)                                        raw JSON                              27,929          
+ctx-figure-4 layout, template apart                            raw JSON                                 111          
+ctx-figure-4 layout template                                   raw JSON                               7,651          
+ctx-figure-4 config; packed: all three arguments               raw JSON                                  67     10416
+ctx-data-4 rows                                                raw JSON (columnar)                   26,434     11412
+ctx-figure-5 script wrapper                                    inline JS                                333          
+ctx-figure-5 traces (5)                                        raw JSON                               3,796          
+ctx-figure-5 layout, template apart                            raw JSON                               1,198          
+ctx-figure-5 layout template                                   raw JSON                               7,651          
+ctx-figure-5 config; packed: all three arguments               raw JSON                                  67      3164
+ctx-data-5 rows                                                raw JSON (columnar)                    1,605       556
+ctx-templates                                                  raw JSON                              16,398      2128
+ctx-glossary                                                   raw JSON                               2,563      1600
+page script (script at 12897871)                               raw JS                               231,976     89192
+HTML outside scripts and styles: text, tags, tags of the parts HTML                                 101,564          
+
+by encoding
+  gzip+base64 int16 byte planes      5,599,222
+  raw JS                             5,574,845
+  raw JSON                           1,113,479
+  raw JSON (columnar)                  484,969
+  base64 fonts in JSON                 219,314
+  HTML                                 101,564
+  raw CSS                               34,621
+  inline JS                              1,998
+
+duplication
+  plotly template inside the figures, all copies: 45,906 B; ctx-templates: {'white': 8188, 'black': 8188}
+  patient barcodes in ctx-figure-0: 2,028 occurrences, 507 distinct
+  patient barcodes in ctx-data-0: 2,028 occurrences, 507 distinct
+  survival panel: 4,975 genes by 515 patients in the block;
+    symbols 4,975, screen rows 4,975, 
+    screen genes that are panel genes: 4,975
+    symbols as their own list: 46,350 B, repeated in the screen rows

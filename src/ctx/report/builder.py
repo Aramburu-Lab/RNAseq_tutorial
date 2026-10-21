@@ -334,6 +334,9 @@ class ModulePage:
     key_numbers: tuple[KeyNumber, ...] = ()
     terms: tuple[tuple[str, str], ...] = ()
     kicker: str = ""
+    # Every figure's drawing arguments and rows as packed JSON, drawn at load all the same
+    # (figures.pack_json): M10's 3.0 MB of them packed to 0.36 MB on TCGA-BRCA (Z.1).
+    pack_figures: bool = False
 
     def __post_init__(self) -> None:
         """Refuse a page with an empty section; the skeleton is the teaching contract.
@@ -456,10 +459,12 @@ def plotly_js() -> str:
     return library.replace("\ufffd", "\\uFFFD")
 
 
-def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:
+def _walk(items: Iterable[Result], packed: bool = False
+          ) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:  # fmt: skip
     """Results ready for the template, the contents entries of the groups, and any figure.
 
-    Figures are numbered in page order across groups; each group gets an anchor.
+    Figures are numbered in page order across groups; each group gets an anchor. Packed, each
+    figure's drawing arguments and rows travel packed (``figures.prepare``).
     """
     out: list[tuple[str, Any]] = []
     outline: list[tuple[str, str]] = []
@@ -472,7 +477,7 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
         nonlocal counter, codes, panels
         if isinstance(item, FigureBlock):
             counter += 1
-            return "figure", prepare(item, counter - 1, counter, level)
+            return "figure", prepare(item, counter - 1, counter, level, packed=packed)
         if isinstance(item, Panel):
             panels += 1
             return "panel", {"kind": item.kind, "index": panels,
@@ -581,7 +586,7 @@ def render(page: Page, glossary_href: str = "") -> str:
                     "page_templates": context["templates"],
                     "export": export.assets([figure]), "live": _live([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
-    results, outline, draws = _walk(page.results)
+    results, outline, draws = _walk(page.results, page.pack_figures)
     if not draws:
         context["plotly_js"] = ""
     versions = page.reproduce.versions
@@ -594,6 +599,7 @@ def render(page: Page, glossary_href: str = "") -> str:
         "key_versions": [(n, versions[n]) for n in KEY_PACKAGES if n in versions],
         "export": export.assets(prepared),
         "live": _live([*prepared, *panels]),
+        "unpack": any(f["packed"] for f in prepared),
     }
     return _ENV.get_template("module.html.j2").render(**context)
 
