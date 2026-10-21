@@ -335,7 +335,7 @@ class ModulePage:
     terms: tuple[tuple[str, str], ...] = ()
     kicker: str = ""
     # Every figure's drawing arguments and rows as packed JSON, drawn at load all the same
-    # (figures.pack_json): M10's 3.0 MB of them packed to 0.36 MB on TCGA-BRCA (Z.1).
+    # (figures.pack_json): M10's 3.0 MB of them packed to 0.36 MB on the largest M10 page (Z.1).
     pack_figures: bool = False
 
     def __post_init__(self) -> None:
