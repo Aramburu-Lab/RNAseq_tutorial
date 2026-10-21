@@ -176,3 +176,4 @@ Rules written after corrections, so the same mistake is not repeated. Reviewed a
 - A bar of -log10 FDR is invisible for any set that fails BH: drawn failing sets sat at FDR 0.93 to 1, lengths 0.031 and 1.6e-13. Measure the length a mark will have before choosing what it encodes (PK3, 2026-10-20).
 - A script named after a package shadows it: `six.py` beside a script that imported matplotlib broke `import six` inside dateutil (PK3, 2026-10-20).
 - An except clause for URLError also catches HTTPError, its subclass: a 404, the provider's answer that no entry exists, was treated as a network failure and never cached. Catch HTTPError first and read its code (NC, 2026-10-20).
+- matplotlib's `get_xticklabels` returns only the visible labels, so `all(t.get_visible() ...)` over it is always true and a thinning check built on it passes with half the names hidden: count the labels it returns (V.3, 2026-10-21).

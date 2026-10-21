@@ -36,6 +36,7 @@ from ctx.viz.style import (
     POINT_ALPHA,
     ROLES,
     SIZES,
+    STACK_GAP_PT,
     THEMES,
     Theme,
     apply_matplotlib,
@@ -209,8 +210,34 @@ def table(data: BoxData) -> pl.DataFrame:
     return joined.with_columns(n_group.alias("n_group")).select(*data.frame.columns, *STAT_COLUMNS)
 
 
+@dataclass(frozen=True)
+class Stack:
+    """How many rows the p and r labels and the feature names take, when one cannot hold them.
+
+    At 170 mm, eleven features' ``p=3.7e-05`` labels ran over each other and the figure was
+    refused (V.3). Feature i's label goes to row ``i % labels``, each row ``label_pt`` above
+    the one before, and its name to row ``i % names``, each ``name_pt`` below; the page grows
+    by the extra rows, so the axes keep their height. A label in ``left`` or ``right`` would
+    cross that edge of the axes and is set flush inside it. ``Stack()``, one row of each,
+    draws exactly what the figure drew before stacking existed.
+    """
+
+    labels: int = 1
+    label_pt: float = 0.0
+    names: int = 1
+    name_pt: float = 0.0
+    left: frozenset[int] = frozenset()
+    right: frozenset[int] = frozenset()
+
+    def extra(self) -> float:
+        """The page height the extra rows add, in inches."""
+        return ((self.labels - 1) * self.label_pt + (self.names - 1) * self.name_pt) / 72
+
+
 def static(data: BoxData, theme: Theme) -> Any:
-    """Render the matplotlib figure for one theme.
+    """Render the matplotlib figure for one theme, its labels stacked where one row overlaps.
+
+    Each pass measures the drawn labels and widens ``Stack`` only, so the passes end.
 
     Args:
         data: The contract.
@@ -219,12 +246,26 @@ def static(data: BoxData, theme: Theme) -> Any:
     Returns:
         A matplotlib Figure, not attached to pyplot; the caller saves it.
     """
+    stack = Stack()
+    while True:
+        fig, ax, labels = _draw(data, theme, stack)
+        wanted = stacking(fig, ax, labels, stack)
+        if wanted == stack:
+            return fig
+        stack = wanted
+
+
+def _draw(data: BoxData, theme: Theme, stack: Stack) -> tuple[Any, Any, list[Any]]:
+    """The figure laid out with ``stack``'s rows, its axes and its p and r labels."""
+    import matplotlib as mpl  # noqa: PLC0415 - heavy; imported after the runtime profile
     import seaborn as sns  # noqa: PLC0415 - heavy; imported after the runtime profile
     from matplotlib.figure import Figure  # noqa: PLC0415 - heavy; imported after the profile
+    from matplotlib.transforms import offset_copy  # noqa: PLC0415 - heavy
 
     apply_matplotlib(theme)
     features = data.frame["feature"].unique(maintain_order=True).to_list()
     width, height = _inches()
+    height += stack.extra()
     # Figure, not pyplot: a GUI backend rounds the canvas to whole pixels (84.84 mm, not 85).
     fig = Figure(figsize=(width, height))
     ax = fig.subplots()
@@ -253,19 +294,92 @@ def static(data: BoxData, theme: Theme) -> Any:
     ax.set_xticks(range(len(features)), features)
     ax.set_xlim(-0.5, len(features) - 0.5)
     top = float(data.frame["value"].to_numpy().max())
-    for i, feature in enumerate(features):
-        label = data.caption.label(feature)
-        ax.text(i, top, label, ha="center", va="bottom", fontsize=SIZES["annotation"])
+    labels = [_label(ax, data.caption.label(f), i, top, stack, len(features))
+              for i, f in enumerate(features)]  # fmt: skip
+    for i, tick in enumerate(ax.xaxis.get_major_ticks()):
+        if i % stack.names:
+            tick.set_pad(mpl.rcParams["xtick.major.pad"] + i % stack.names * stack.name_pt)
     low, high = ax.get_ylim()
     ax.set_ylim(top=high + (high - low) * HEADROOM)
     ax.set_xlabel(data.feature_label)
     ax.set_ylabel(fit_title(axis_title(data.value_label, data.unit), height))
-    # Above the axes: inside, it collides with the p/r labels over the boxes.
-    ax.legend(title=None, loc="lower left", bbox_to_anchor=(0, 1), ncols=2, borderaxespad=0)
+    # Above the axes, and above every stacked row: inside, it collides with the p/r labels.
+    rows_pt = (stack.labels - 1) * stack.label_pt
+    over = {"bbox_transform": offset_copy(ax.transAxes, fig=fig, y=rows_pt, units="points")}
+    ax.legend(title=None, loc="lower left", bbox_to_anchor=(0, 1), ncols=2, borderaxespad=0,
+              **(over if rows_pt else {}))  # fmt: skip
     sns.despine(fig=fig)
     place_caption(fig, data.caption.text(), width, height)
     refit_y_title(fig, ax, axis_title(data.value_label, data.unit))
-    return fig
+    return fig, ax, labels
+
+
+def _label(ax: Any, text: str, i: int, top: float, stack: Stack, n: int) -> Any:
+    """One feature's p and r label over its boxes, in its row and inside the axes."""
+    row = i % stack.labels
+    # Flush with an edge, one gap inside it, off the spine.
+    x, ha, shift = ((-0.5, "left", STACK_GAP_PT) if i in stack.left
+                    else (n - 0.5, "right", -STACK_GAP_PT) if i in stack.right
+                    else (i, "center", 0.0))  # fmt: skip
+    if not row and not shift:
+        return ax.text(x, top, text, ha=ha, va="bottom", fontsize=SIZES["annotation"])
+    return ax.annotate(text, (x, top), xytext=(shift, row * stack.label_pt),
+                       textcoords="offset points", ha=ha, va="bottom",
+                       fontsize=SIZES["annotation"])  # fmt: skip
+
+
+def stacking(fig: Any, ax: Any, labels: list[Any], stack: Stack) -> Stack:
+    """The rows the drawn labels and names need, never fewer than ``stack`` already has.
+
+    Measured on the laid-out figure. While one row holds every label and name apart, the
+    figure stays as it was drawn before stacking existed; once one does not, a label that
+    would cross an edge of the axes is set flush with it, and every two in one row keep
+    ``STACK_GAP_PT`` apart.
+
+    Args:
+        fig: The laid-out figure.
+        ax: Its axes.
+        labels: The p and r labels, in feature order.
+        stack: The rows the figure was drawn with.
+
+    Returns:
+        ``stack`` itself when it holds every label and name apart, a wider one otherwise.
+    """
+    from matplotlib.backends.backend_agg import FigureCanvasAgg  # noqa: PLC0415 - heavy
+
+    renderer = FigureCanvasAgg(fig).get_renderer()  # type: ignore[no-untyped-call]
+    fig.draw(renderer)
+    to_pt = 72 / float(fig.dpi)
+    frame = ax.get_window_extent(renderer)
+    centres = [float(ax.transData.transform((i, 0))[0]) for i in range(len(labels))]
+    names = [t.get_window_extent(renderer) for t in ax.get_xticklabels()]
+    boxes = [t.get_window_extent(renderer) for t in labels]
+    spans = [(c - b.width / 2, c + b.width / 2) for c, b in zip(centres, boxes, strict=True)]
+    named = [(b.x0, b.x1) for b in names]
+    if stack == Stack() and _rows(spans, 0.0) == 1 and _rows(named, 0.0) == 1:
+        return stack
+    gap = STACK_GAP_PT / to_pt
+    left = stack.left | {i for i, (a, _) in enumerate(spans) if a < frame.x0 + gap}
+    right = stack.right | {i for i, (_, b) in enumerate(spans) if b > frame.x1 - gap}
+    flush = [((frame.x0 + gap, frame.x0 + gap + w) if i in left
+              else (frame.x1 - gap - w, frame.x1 - gap) if i in right else (a, b))
+             for i, (a, b) in enumerate(spans) for w in [b - a]]  # fmt: skip
+    return Stack(
+        labels=max(stack.labels, _rows(flush, gap)),
+        label_pt=max(stack.label_pt, max(b.height for b in boxes) * to_pt + STACK_GAP_PT),
+        names=max(stack.names, _rows(named, gap)),
+        name_pt=max(stack.name_pt, max(b.height for b in names) * to_pt + STACK_GAP_PT),
+        left=frozenset(left), right=frozenset(right),
+    )  # fmt: skip
+
+
+def _rows(spans: list[tuple[float, float]], gap: float) -> int:
+    """The fewest rows that keep every two spans of one row ``gap`` apart, span i in row i % k."""
+    for rows in range(1, len(spans) + 1):
+        if all(spans[k][0] >= spans[j][1] + gap or spans[j][0] >= spans[k][1] + gap
+               for j in range(len(spans)) for k in range(j + rows, len(spans), rows)):  # fmt: skip
+            return rows
+    return max(len(spans), 1)
 
 
 def _pair_lines(ax: Any, data: BoxData, features: list[str], theme: Theme) -> None:
