@@ -15,8 +15,11 @@
       ratio = div.layout.yaxis.scaleratio || 1;
       Plotly.relayout(div, { "yaxis.scaleanchor": null });
     }
+    /* Plotly.react deletes an empty object from layout.meta, in place: a view's phone legend
+       with no shapes to rename lost its `relayout: {}` (L.2's scatters; measured in Chromium,
+       2026-10-21), and Object.keys of it stopped the view. */
     function layout(relayout, restyle, small) {
-      return { relayout: relayout, restyle: restyle || [], small: !!small };
+      return { relayout: relayout || {}, restyle: restyle || [], small: !!small };
     }
     var own = layout({}, []);
     var phone = narrow ? layout(narrow.relayout, narrow.restyle) : null;
