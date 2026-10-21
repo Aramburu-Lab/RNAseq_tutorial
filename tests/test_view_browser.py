@@ -88,10 +88,11 @@ def test_a_view_needs_its_build_first_and_is_dropped_alone():
 
 
 def test_views_of_one_size_carry_nothing_new(pipeline):
-    """V.4b: a plain view's option carries its own ``width`` and ``export`` only where its
-    plot box or files differ from the build's; every view on M5's and M6's fixture pages has
-    options of one size, so none carries a width, and an export only where a lookup gave every
-    option after the build its own (D-073). Mutation caught: every option given its own."""
+    """V.4b: a view's option carries its own ``width`` only where its plot box differs from
+    the build's, and its own ``export`` wherever its files' caption differs: every view on
+    M5's and M6's fixture pages has options of one size, so none carries a width, and each
+    option of another caption carries its export. Mutations caught: every option given a
+    width; an option of the build's size left on the build's export."""
     import json  # noqa: PLC0415
     import re  # noqa: PLC0415
 
@@ -104,7 +105,6 @@ def test_views_of_one_size_carry_nothing_new(pipeline):
              if c.get("kind") == "view"]  # fmt: skip
     assert views
     for view in views:
-        others = view["options"][1:]
-        assert not any("width" in o for o in view["options"])
-        assert "export" not in view["options"][0]
-        assert len({"export" in o for o in others}) == 1
+        first, *others = view["options"]
+        assert not any("width" in o for o in view["options"]) and "export" not in first
+        assert all("export" in o for o in others if o["caption"] != first["caption"])

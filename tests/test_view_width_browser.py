@@ -9,6 +9,7 @@ found; set ``CTX_CHROMIUM``.
 
 from datetime import date
 
+import polars as pl
 import pytest
 from test_box_stack import boxes
 from test_box_stack_browser import FILE, _apart
@@ -24,12 +25,17 @@ from ctx.report.builder import (
     SelfCheck,
     write,
 )
+from ctx.report.export import file_caption, plain
 from ctx.report.views import viewed
+from ctx.viz.box import box_data
 from ctx.viz.save import figure_block, write_figure
 from ctx.viz.style import THEMES
 
 pytestmark = pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
 COUNTS = (4, 11, 20)
+# A last option of the build's 4 features from six samples a group: its own caption, "n = 6
+# control, 6 case", at the build's size.
+SAME = "same"
 WIDTHS = (1280, 375)
 SCHEMES = ("light", "dark")
 # Sets option AT, then every drawn text of the plot, and what the fit's ctxBuilt sets back.
@@ -53,15 +59,25 @@ SHOWN = """(async () => {
 })()"""
 
 
+def _six(data):
+    """The same boxes from the first six samples of each group."""
+    frame = data.frame.filter(
+        ~pl.col("sample").str.ends_with("6") & ~pl.col("sample").str.ends_with("7")
+    )
+    return box_data(frame, columns=data.columns, feature_label="Gene", value_label="Expression",
+                    groups=("control", "case"))  # fmt: skip
+
+
 def _page(out):
-    """A module page holding one plain box view of 4, 11 and 20 features, the 4 as built."""
+    """A module page holding one plain box view of 4, 11 and 20 features, the 4 as built, and
+    of 4 from six samples a group."""
     day = date(2026, 10, 21)
-    contracts = {n: boxes(n) for n in COUNTS}
+    contracts = {**{n: boxes(n) for n in COUNTS}, SAME: _six(boxes(4))}
     figure_stem = stem("de", "boxview_demo", 1, day=day)
     text = FigureText("Boxes", reading=("Each box is one gene in one group.",))
     write_figure(contracts[4], out, figure_stem, title="Box", data_releases={}, text=text)
     block = viewed(figure_block(contracts[4], figure_stem, text),
-                   [(str(n), contracts[n], text) for n in COUNTS], "Genes")  # fmt: skip
+                   [(str(n), contracts[n], text) for n in [*COUNTS, SAME]], "Genes")  # fmt: skip
     page = ModulePage(
         title="M5 Demo: box view", purpose="Purpose.", input="Input.", method="Method.",
         parameters=(ParameterCard("--x", "A card.", "1", "Moves it."),),
@@ -82,7 +98,7 @@ def ran(tmp_path_factory):
     tasks = [{"name": f"{n}_{w}_{s}", "url": page.as_uri(), "width": w, "height": 900,
               "scheme": s, "act": SHOWN.replace("AT", str(i)),
               **({"figure": "#figure-1"} if i else {})}
-             for i, n in enumerate(COUNTS) for w in WIDTHS for s in SCHEMES]  # fmt: skip
+             for i, n in enumerate([*COUNTS, SAME]) for w in WIDTHS for s in SCHEMES]  # fmt: skip
     seen = _browse(tasks, downloads)
     files = []
     for name, result in seen.items():
@@ -125,3 +141,18 @@ def test_each_option_exports_at_its_own_size(ran, n, width, scheme):
     assert len([t for t in texts if t[0].startswith("p=")]) == n
     assert len([t for t in texts if t[0].startswith("GENE")]) == n
     assert _apart([t[1:] for t in texts])
+
+
+@pytest.mark.parametrize("width", WIDTHS)
+@pytest.mark.parametrize("scheme", SCHEMES)
+def test_an_option_of_the_builds_size_exports_its_own_caption(ran, width, scheme):
+    """An option of the build's 4 features from six samples a group: its SVG at the build's
+    size, with that option's caption, not the build's. Mutation caught: an option of the
+    build's size left on the build's export settings, which printed "n = 8 control"."""
+    _, measured, contracts = ran
+    svg = measured[f"{SAME}_{width}_{scheme}"]
+    drawn = contracts[SAME].static(THEMES["white"]).get_size_inches()
+    assert svg["page"] == pytest.approx([x * 72 for x in drawn], abs=0.01)
+    words = " ".join(t[0] for t in svg["texts"])
+    own, built = (plain(file_caption(contracts[k].caption)) for k in (SAME, 4))
+    assert own != built and own in words and built not in words

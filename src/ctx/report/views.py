@@ -38,20 +38,15 @@ def own_widths(shown: Sequence[dict[str, Any]]) -> None:
             option["width"] = width
 
 
-def _drawing(settings: dict[str, Any]) -> dict[str, Any]:
-    """Export settings without the caption: what decides the drawing's size and layers."""
-    return {k: v for k, v in settings.items() if k != "caption"}
-
-
 def viewed(block: FigureBlock, options: Sequence[tuple[str, Any, FigureText]],
            label: str) -> FigureBlock:  # fmt: skip
     """A figure block with a select between ``options``: (name, contract, words) each.
 
     The first option must be the block's own figure. Its words stay as built; another
     option's title, lead and caption replace them while it is shown. An option whose plot box
-    or files differ from the first's in size or layers, as a box of 11 features against 4,
-    carries its own width and export settings, its caption among them (V.4b); the others
-    export with the build's.
+    differs from the first's, as a box of 11 features against 4, carries its own width; one
+    whose files differ in caption, size or layers carries their export settings, so its PDF
+    and SVG are the view as set (V.4b). An option equal to the build in all three carries none.
 
     Raises:
         ValueError: With fewer than two options, or a first option that is not the block's.
@@ -73,7 +68,7 @@ def viewed(block: FigureBlock, options: Sequence[tuple[str, Any, FigureText]],
         controls["export"] = _settings(first, block.stem)
         for option, (_, data, _) in zip(shown[1:], options[1:], strict=True):
             own = _settings(data, block.stem)
-            if _drawing(own) != _drawing(controls["export"]):
+            if own != controls["export"]:
                 option["export"] = own
     return replace(block, controls=controls)
 
