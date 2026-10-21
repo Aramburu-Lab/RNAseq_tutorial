@@ -472,9 +472,10 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
         GeneListError: If ``genes_from`` is no list file.
     """
     spec = load(dataset_file)
-    if spec.slug != dataset or spec.function is None or spec.de is None:
+    if spec.slug != dataset or spec.lacks("function"):
         raise DatasetError(f"{dataset_file}: needs slug {dataset!r}, [de] and [function]")
     fn = spec.function
+    assert fn is not None and spec.de is not None  # noqa: S101 - lacks() refused either absent
     gmt = settings.root / spec.resource(fn.gene_sets).dest
     if not gmt.is_file():
         raise DatasetError(f"{gmt} is missing; run ctx setup --dataset-file {dataset_file}")

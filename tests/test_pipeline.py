@@ -9,6 +9,7 @@ import html
 import re
 import subprocess
 from dataclasses import replace
+from datetime import date
 from pathlib import Path
 
 import polars as pl
@@ -75,9 +76,12 @@ def test_steps_in_course_order(tmp_path, runs):
     assert [m for m, _ in planned] == ["gather", "qc", "quant", "de", "function", "report"]
     gather = dict(planned)["gather"]
     assert gather[gather.index("--rnaseq-dir") + 1] == str(rnaseq)
+    # function reads M5's results, not gather's counts: they may be the reader's own.
     no_counts = pipeline.steps(full, replace(options, rnaseq_dir=None))
-    assert [m for m, _ in no_counts] == ["gather", "qc", "report"]
-    gdc = replace(full, clinical=object())  # type: ignore[arg-type]
+    assert [m for m, _ in no_counts] == ["gather", "qc", "function", "report"]
+    # ctx clinical needs [gdc] beside [clinical] (loader.NEEDS).
+    assert "clinical" not in dict(pipeline.steps(replace(full, clinical=object()), options))  # type: ignore[arg-type]
+    gdc = replace(full, clinical=object(), gdc=object())  # type: ignore[arg-type]
     planned = pipeline.steps(gdc, pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,)))
     assert [m for m, _ in planned] == ["gather", "de", "function", "clinical", "report"]
     both = replace(gdc, ncrna=object())  # type: ignore[arg-type]
@@ -90,7 +94,34 @@ def test_steps_in_course_order(tmp_path, runs):
                                        "report"]  # fmt: skip
     no_de = replace(across, de=None, proteo=replace_proteo("cross_dataset"))
     gdc_options = pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,))
-    assert "proteo" not in dict(pipeline.steps(no_de, gdc_options))
+    assert "proteo" in dict(pipeline.steps(no_de, gdc_options))
+
+
+def test_ncrna_and_cross_study_proteo_are_planned_without_de(tmp_path, monkeypatch):
+    """R1.3c: on the M8 and the cross-study M7 fixtures' dataset files, which have no [de],
+    ctx run plans ncrna when gather is given counts and proteo with or without them, as
+    `ctx ncrna` and `ctx proteo` run on those roots. Catches steps planning either from [de]
+    (both were left out before R1.3c), and ncrna planned with no counts for gather to write."""
+    import ncrna_root  # noqa: PLC0415 - the M8 fixture's dataset file
+    import proteo_root  # noqa: PLC0415 - the cross-study M7 fixture's dataset file
+
+    _, ncrna_file = ncrna_root.make(tmp_path / "ncrna", date.today())
+    monkeypatch.setattr(proteo_root, "ctx", lambda *args: None)  # its dataset file, not its run
+    (tmp_path / "proteo").mkdir()
+    proteo_root.cross(tmp_path / "proteo")
+    proteo_file = tmp_path / "proteo" / "fake_cells.toml"
+    rnaseq = tmp_path / "rnaseq"
+    expected = {
+        (ncrna_file, True): ["gather", "qc", "quant", "ncrna", "report"],
+        (ncrna_file, False): ["gather", "qc", "report"],
+        (proteo_file, True): ["gather", "qc", "proteo", "report"],
+        (proteo_file, False): ["gather", "qc", "proteo", "report"],
+    }
+    for (path, given), modules in expected.items():
+        spec = load(path)
+        assert spec.de is None, path
+        options = pipeline.Options(spec.slug, path, rnaseq_dir=rnaseq if given else None)
+        assert [m for m, _ in pipeline.steps(spec, options)] == modules, (path, given)
 
 
 def replace_proteo(design):

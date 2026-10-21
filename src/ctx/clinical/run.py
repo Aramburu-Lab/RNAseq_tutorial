@@ -127,7 +127,7 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     spec = load(options.dataset_file)
     if spec.slug != dataset:
         raise DatasetError(f"{options.dataset_file} is for {spec.slug!r}, not {dataset!r}")
-    if spec.gdc is None or spec.clinical is None:
+    if spec.lacks("clinical") or spec.gdc is None or spec.clinical is None:
         raise DatasetError(f"{options.dataset_file}: M10 needs [gdc] and [clinical]")
     endpoint = options.endpoint or spec.clinical.endpoint
     if endpoint not in ENDPOINTS:

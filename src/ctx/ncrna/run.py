@@ -117,7 +117,7 @@ def _spec(options: Options, dataset: str, problems: list[str]) -> tuple[Dataset,
         return None
     if spec.slug != dataset:
         problems.append(f"{options.dataset_file} is for {spec.slug!r}, not {dataset!r}")
-    if spec.ncrna is None:
+    if spec.lacks("ncrna") or spec.ncrna is None:
         problems.append(f"{options.dataset_file}: M8 needs [ncrna]")
         return None
     contrast = next(c for c in spec.contrasts if c.name == spec.ncrna.featured)

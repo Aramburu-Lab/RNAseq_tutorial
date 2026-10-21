@@ -454,7 +454,7 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     from ctx.proteo import page  # noqa: PLC0415 - figures pull in plotting; after the profile
 
     spec = load(options.dataset_file)
-    if spec.slug != dataset or spec.proteo is None:
+    if spec.slug != dataset or spec.lacks("proteo") or spec.proteo is None:
         raise DatasetError(f"{options.dataset_file}: needs slug {dataset!r} and [proteo]")
     if options.method not in measure.METHODS:
         raise ProteoError(f"--method {options.method!r}: one of {measure.METHODS}")

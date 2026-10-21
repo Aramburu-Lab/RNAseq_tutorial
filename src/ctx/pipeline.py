@@ -19,6 +19,7 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Contrast, Dataset, DatasetError, load
+from ctx.dataset.loader import NEEDS
 from ctx.gather.rnaseq import MATRIX_FILE
 
 # Course order, which a new module joins in its place; report reads every page, so it is last.
@@ -74,11 +75,11 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
 
     gather and report always run; qc on a fetchngs route; quant with an rnaseq outdir and an
     ``annotation_gtf``, and the salmon folder when given; gather on the GDC route takes every
-    ``--gdc-dir``, one per project, and the miRNA and isoform folders when given; de with
-    contrasts, ``[de]`` and counts; function with ``[function]`` too; proteo with ``[proteo]``
-    and counts, and de's tables when it compares fold changes; ncrna with ``[ncrna]`` and de's
-    tables; clinical with ``[clinical]``. A count matrix (``--counts``) goes to gather alone;
-    qc then judges its counts, and quant, which reads an rnaseq outdir, does not run.
+    ``--gdc-dir``, one per project, and the miRNA and isoform folders when given; de, function,
+    proteo, ncrna and clinical with the tables their own commands need (``loader.NEEDS``), and
+    de, ncrna and a proteo that is not cross-study only when gather is given counts. A count
+    matrix (``--counts``) goes to gather alone; qc then judges its counts, and quant, which
+    reads an rnaseq outdir, does not run.
     """
     base = ("--dataset", options.dataset, "--dataset-file", str(options.dataset_file))
     rnaseq = ("--rnaseq-dir", str(options.rnaseq_dir)) if options.rnaseq_dir else ()
@@ -92,19 +93,20 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
     matrix = ("--counts", str(options.counts)) if options.counts else ()
     counts = gdc or options.rnaseq_dir is not None or bool(matrix)
     has_gtf = any(r.name == "annotation_gtf" for r in spec.resources)
-    # Across studies M7 reads M5's fold changes; across samples, gather's counts alone.
-    fold_changes = bool(spec.contrasts and spec.de)
-    proteo = spec.proteo and counts and (spec.proteo.design == "across_samples" or fold_changes)
+    # These read gather's counts, which this run's gather writes only from a counts input; M5's
+    # results, which function, ncrna and cross-study M7 read, come from de or the reader's own.
+    reads_counts = {"de", "ncrna", "proteo"}
+    if spec.proteo and spec.proteo.design == "cross_dataset":
+        reads_counts.discard("proteo")
     skipped = NOT_ON_ROUTE["gdc" if gdc else "counts" if matrix else "fetchngs"]
     planned: dict[str, tuple[str, ...] | None] = {
         "gather": base + (gdc_args if gdc else matrix or fetchngs + rnaseq),
         "qc": None if "qc" in skipped else base + rnaseq,
         "quant": None if "quant" in skipped or not (rnaseq and has_gtf) else base + rnaseq + salmon,
-        "de": base if spec.contrasts and spec.de and counts else None,
-        "function": base if spec.function and spec.contrasts and spec.de and counts else None,
-        "proteo": base if proteo else None,
-        "ncrna": base if spec.ncrna and spec.contrasts and spec.de and counts else None,
-        "clinical": base if spec.clinical else None,
+        **{
+            module: None if spec.lacks(module) or (module in reads_counts and not counts) else base
+            for module in NEEDS
+        },
         "report": base,
     }
     return [(module, args) for module in ORDER if (args := planned[module]) is not None]
@@ -123,8 +125,8 @@ def route(spec: Dataset) -> str:
 def route_modules(spec: Dataset) -> set[str]:
     """Every module the dataset's route can run: all but ``NOT_ON_ROUTE``'s for that route.
 
-    Not ``steps``: it plans de, proteo and ncrna from ``[de]``, while ``ctx ncrna`` and a
-    cross-study ``ctx proteo`` run without it on a reader's own results.
+    Not ``steps``: it also leaves out a module the run's inputs cannot feed, while a figure
+    redraws from a reader's own results.
     """
     return set(MODULES) - NOT_ON_ROUTE[route(spec)]
 

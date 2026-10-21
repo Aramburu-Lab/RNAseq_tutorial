@@ -941,8 +941,9 @@ def run(  # noqa: PLR0913, PLR0915 - one call from the CLI; the page is one long
         DatasetError: If the dataset file has no contrasts, or gather has not been run.
     """
     spec = load(dataset_file)
-    if spec.slug != dataset or spec.de is None or not spec.contrasts:
+    if spec.slug != dataset or spec.lacks("de"):
         raise DatasetError(f"{dataset_file}: needs slug {dataset!r}, [[contrasts]] and [de]")
+    assert spec.de is not None  # noqa: S101 - lacks() refused a file without it
     day = date.today()
     gathered = settings.root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
     inputs = {what: newest(gathered, dataset, what) for what in ("samplesheet", "counts", "genes")}

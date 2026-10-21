@@ -38,6 +38,11 @@ TABLES = {
     "dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect",
     "contrasts", "de", "function", "sanity", "gdc", "clinical", "proteo", "ncrna", "counts",
 }  # fmt: skip
+# The tables each module's own command refuses to start without, by Dataset field: the command
+# checks them (``Dataset.lacks``) and ``ctx run`` plans the module from them, so neither restates
+# the other. ``ctx ncrna`` and a cross-study ``ctx proteo`` read M5's results, not [de].
+NEEDS = {"de": ("contrasts", "de"), "function": ("de", "function"), "proteo": ("proteo",),
+         "ncrna": ("ncrna",), "clinical": ("gdc", "clinical")}  # fmt: skip
 
 # The dataset file this process read for each slug: a figure's spec names it as an input
 # (ctx.figures.record), and the modules that draw do not pass it on to ctx.viz.save.
@@ -89,6 +94,10 @@ class Dataset:
     def table(self) -> Path | None:
         """The own table of ``[sdrf] file``, beside the dataset file, never the working folder."""
         return self.path.parent / self.sdrf.file if self.sdrf and self.sdrf.file else None
+
+    def lacks(self, module: str) -> tuple[str, ...]:
+        """The tables of ``NEEDS`` the module's command needs and this file does not declare."""
+        return tuple(table for table in NEEDS[module] if not getattr(self, table))
 
     def resource(self, name: str) -> Resource:
         """The resource with this name."""

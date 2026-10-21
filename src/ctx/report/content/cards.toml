@@ -309,7 +309,7 @@ effect = "Moves the redrawn files; a folder inside a ctx root is refused."
 [effects.guide]
 "--dataset-file" = "Writes that study's commands; unset, the worked example's."
 "--dataset" = "Names every output of every module run, and the study's ctx root."
-"--rnaseq-dir" = "Set: gather reads its counts, so quant, de and function can run."
+"--rnaseq-dir" = "Set: gather reads its counts, so quant, de and ncrna can run."
 "--gdc-dir" = "Set: gather reads one folder per GDC project; clinical runs where declared."
 
 [effects.clinical]
