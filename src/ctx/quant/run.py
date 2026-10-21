@@ -19,7 +19,8 @@ import polars as pl
 
 from ctx import runtime, tools
 from ctx.dataset import Contrast, Dataset, DatasetError, load
-from ctx.de.run import Writer, newest
+from ctx.de.results import newest
+from ctx.de.run import Writer
 from ctx.gather import counts, gdc, rnaseq
 from ctx.io.naming import MODULES, stem
 from ctx.process.reference import Reference, prepare

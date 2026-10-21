@@ -344,7 +344,7 @@ def test_hub_links_resolve_after_move(pipeline, tmp_path):
 
 
 def test_newest_by_date_then_version(tmp_path):
-    from ctx.de.run import newest  # noqa: PLC0415
+    from ctx.de.results import newest  # noqa: PLC0415
 
     for day, dataset, version in (("01", "x", 3), ("02", "x", 1), ("02", "x", 2), ("02", "y", 9)):
         (tmp_path / f"2026-09-{day}_gather_{dataset}_counts_v{version}.parquet").write_bytes(b"")

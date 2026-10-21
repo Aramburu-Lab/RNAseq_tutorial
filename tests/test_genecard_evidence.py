@@ -7,7 +7,7 @@ import polars as pl
 from genecard_root import CALLED, SLUG, TWINS
 from test_genecard import _cards, _register, _settings, root  # noqa: F401 - the fixture
 
-from ctx.de.run import newest
+from ctx.de.results import newest
 from ctx.genecard import figures
 from ctx.genecard import run as module
 from ctx.report.builder import unpacked

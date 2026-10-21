@@ -16,7 +16,8 @@ from ctx import runtime
 from ctx.clinical import ClinicalError, harmonise, page, panel, score
 from ctx.dataset import ENDPOINTS, Dataset, DatasetError, load
 from ctx.de.filters import log2cpm
-from ctx.de.run import Writer, newest
+from ctx.de.results import newest
+from ctx.de.run import Writer
 from ctx.io.naming import MODULES
 from ctx.report import genes, text
 from ctx.report.builder import ParameterCard

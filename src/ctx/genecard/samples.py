@@ -21,7 +21,7 @@ from scipy.stats import false_discovery_control, mannwhitneyu, rankdata, wilcoxo
 from ctx.dataset import Dataset, DatasetError
 from ctx.de.normalised import WHAT as SIZE_FACTORS
 from ctx.de.normalised import log2_normalised
-from ctx.de.run import newest
+from ctx.de.results import newest
 from ctx.io.naming import MODULES
 from ctx.report import text
 

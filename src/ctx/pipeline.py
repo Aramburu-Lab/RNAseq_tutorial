@@ -20,7 +20,9 @@ import polars as pl
 from ctx import runtime
 from ctx.dataset import Contrast, Dataset, DatasetError, load
 from ctx.dataset.loader import NEEDS
+from ctx.de import results as m5
 from ctx.gather.rnaseq import MATRIX_FILE
+from ctx.report.text import fill
 
 # Course order, which a new module joins in its place; report reads every page, so it is last.
 # Not naming.MODULES, whose numbers name output folders, not the order a dataset is run in.
@@ -70,16 +72,24 @@ class Problem:
     blocks: bool = True
 
 
-def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
-    """Each module the dataset declares, with its own options, in ``ORDER``.
+def steps(root: Path, spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
+    """Each module the dataset declares, with its own options, in ``ORDER``: ``plan``'s first."""
+    return plan(root, spec, options)[0]
+
+
+def plan(
+    root: Path, spec: Dataset, options: Options
+) -> tuple[list[tuple[str, tuple[str, ...]]], list[str]]:
+    """The modules to run, with their own options, in ``ORDER``, and each left out, with why.
 
     gather and report always run; qc on a fetchngs route; quant with an rnaseq outdir and an
     ``annotation_gtf``, and the salmon folder when given; gather on the GDC route takes every
     ``--gdc-dir``, one per project, and the miRNA and isoform folders when given; de, function,
     proteo, ncrna and clinical with the tables their own commands need (``loader.NEEDS``), and
-    de, ncrna and a proteo that is not cross-study only when gather is given counts. A count
-    matrix (``--counts``) goes to gather alone; qc then judges its counts, and quant, which
-    reads an rnaseq outdir, does not run.
+    de, ncrna and a proteo that is not cross-study only when gather is given counts; a module
+    that reads M5's results (``m5.required``) only when de runs too or they are under the root.
+    A count matrix (``--counts``) goes to gather alone; qc then judges its counts, and quant,
+    which reads an rnaseq outdir, does not run.
     """
     base = ("--dataset", options.dataset, "--dataset-file", str(options.dataset_file))
     rnaseq = ("--rnaseq-dir", str(options.rnaseq_dir)) if options.rnaseq_dir else ()
@@ -109,12 +119,25 @@ def steps(spec: Dataset, options: Options) -> list[tuple[str, tuple[str, ...]]]:
         },
         "report": base,
     }
-    return [(module, args) for module in ORDER if (args := planned[module]) is not None]
+    left_out = [] if planned["de"] else _without_results(root, spec, planned)
+    return [(module, args) for module in ORDER if (args := planned[module]) is not None], left_out
 
 
-def planned(options: Options) -> list[tuple[str, tuple[str, ...]]]:
+def _without_results(root: Path, spec: Dataset, planned: dict[str, tuple[str, ...] | None]
+                     ) -> list[str]:  # fmt: skip
+    """Each planned module whose M5 results are not under the root, taken out, and why."""
+    reasons = []
+    for module in ("function", "proteo", "ncrna"):
+        if planned[module] is not None and (absent := m5.absent(root, spec, module)):
+            planned[module] = None
+            reasons.append(fill("run", "left_out", module=module, slug=spec.slug,
+                                contrasts=", ".join(absent)))  # fmt: skip
+    return reasons
+
+
+def planned(root: Path, options: Options) -> list[tuple[str, tuple[str, ...]]]:
     """``steps`` of the dataset file the options name, read again."""
-    return steps(load(options.dataset_file), options)
+    return steps(root, load(options.dataset_file), options)
 
 
 def route(spec: Dataset) -> str:
@@ -348,7 +371,9 @@ def check(root: Path, options: Options) -> tuple[list[Problem], list[str]]:
         return [Problem(f"{options.dataset_file} is for {spec.slug!r}, not --dataset "
                         f"{options.dataset!r}")], []  # fmt: skip
     problems = _inputs(root, spec, options)
-    modules = [m for m, _ in steps(spec, options)]
+    scheduled, left_out = plan(root, spec, options)
+    modules = [m for m, _ in scheduled]
+    problems += [Problem(reason, blocks=False) for reason in left_out]
     if options.rnaseq_dir and options.salmon_dir and "quant" not in modules:
         problems.append(Problem("--salmon-dir is read by quant alone, which needs an "
                                 "annotation_gtf resource in the dataset file"))  # fmt: skip

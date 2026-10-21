@@ -45,6 +45,7 @@ from ctx.de.page import (
     volcano_text,
     words,
 )
+from ctx.de.results import newest
 from ctx.de.stats import ADJUSTMENTS, ALPHA, LFC_MIN, P_FLOOR, classify, p_line
 from ctx.gather import gdc
 from ctx.gather.curation import rank_replicates
@@ -111,27 +112,6 @@ CONTRAST_COLUMNS = {
     "cooks_outlier": ("genes", "No p-value: a Cook's distance outlier."),
     "independent_filter": ("genes", "A p-value but no padj: removed by independent filtering."),
 }
-
-
-def newest(directory: Path, dataset: str, what: str) -> Path:
-    """The newest ``<date>_<module>_<dataset>_<what>_v<N>.parquet`` by date, then version.
-
-    Raises:
-        DatasetError: If there is none.
-    """
-    pattern = re.compile(
-        rf"(\d{{4}}-\d{{2}}-\d{{2}})_[a-z]+_{re.escape(dataset)}_{what}_v(\d+)\.parquet"
-    )
-    found = [
-        (m.group(1), int(m.group(2)), p)
-        for p in directory.glob("*.parquet")
-        if (m := pattern.fullmatch(p.name))
-    ]
-    if not found:
-        raise DatasetError(
-            f"no {dataset} {what} table in {directory}; run the earlier module first"
-        )
-    return max(found, key=lambda x: (x[0], x[1]))[2]
 
 
 def n_tested(results: pl.DataFrame) -> int:

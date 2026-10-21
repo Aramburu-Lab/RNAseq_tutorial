@@ -19,7 +19,7 @@ from pathlib import Path
 import polars as pl
 
 from ctx.dataset import Dataset, DatasetError
-from ctx.de.run import newest
+from ctx.de.results import newest
 from ctx.genecard import GenecardError, annotation, hpa
 from ctx.genecard.cache import Cache
 from ctx.io.naming import MODULES

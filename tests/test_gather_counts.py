@@ -451,7 +451,7 @@ def test_ctx_run_plans_the_matrix_route(tmp_path):
     spec.write_text(spec.read_text() + contrast)
     path = matrix(tmp_path / "m.tsv", ["ALPHA", "BETA"], whole(2))
     options = pipeline.Options("mat", spec, counts=path)
-    planned = dict(pipeline.steps(load(spec), options))
+    planned = dict(pipeline.steps(root, load(spec), options))
     assert planned["gather"][-2:] == ("--counts", str(path))
     assert "--fetchngs-dir" not in planned["gather"]
     assert {"gather", "qc", "de", "report"} <= set(planned)

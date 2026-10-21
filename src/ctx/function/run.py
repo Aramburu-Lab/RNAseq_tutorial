@@ -18,8 +18,9 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Contrast, Dataset, DatasetError, load
+from ctx.de import results as m5
 from ctx.de.page import Words, every
-from ctx.de.run import Writer, newest
+from ctx.de.run import Writer
 from ctx.de.stats import ALPHA
 from ctx.function import background, lite, live, running
 from ctx.function.page import (
@@ -480,8 +481,7 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     if not gmt.is_file():
         raise DatasetError(f"{gmt} is missing; run ctx setup --dataset-file {dataset_file}")
     sets = lite.read_gmt(gmt)
-    de_dir = settings.root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
-    paths = {c.name: newest(de_dir, dataset, f"{c.name}_results") for c in spec.contrasts}
+    paths = {c: m5.results(settings.root, dataset, c) for c in m5.required(spec, MODULE)}
     results = {name: pl.read_parquet(path) for name, path in paths.items()}
     # The background lesson's annotation backgrounds (WO7); without the GTF, the union alone.
     types, _ = gene_types(settings.root, spec)

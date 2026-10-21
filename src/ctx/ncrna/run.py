@@ -15,9 +15,11 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Contrast, Dataset, DatasetError, load
+from ctx.de import results as m5
 from ctx.de.deseq import select_samples
 from ctx.de.filters import MIN_COUNT
-from ctx.de.run import Writer, newest
+from ctx.de.results import newest
+from ctx.de.run import Writer
 from ctx.gather import gdc
 from ctx.io.naming import MODULES
 from ctx.ncrna import NcrnaError, biotypes, page, targets
@@ -135,11 +137,14 @@ def resolve(root: Path, dataset: str, options: Options) -> Inputs:
     gtf, missing = annotation(root, found[0]) if found else (None, [])
     problems += missing
     gathered = root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
-    de_dir = root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
     sheet_path = _newest(gathered, dataset, "samplesheet", problems)
     counts_path = _newest(gathered, dataset, "counts", problems)
-    results_path = (_newest(de_dir, dataset, f"{found[1].name}_results", problems)
-                    if found else None)  # fmt: skip
+    results_path = None
+    for contrast_name in m5.required(found[0], MODULE) if found else ():
+        try:
+            results_path = m5.results(root, dataset, contrast_name)
+        except DatasetError as error:
+            problems.append(str(error))
     if problems or not found or gtf is None or sheet_path is None or counts_path is None \
             or results_path is None:  # fmt: skip
         raise NcrnaError("ctx ncrna cannot start:\n  " + "\n  ".join(problems))

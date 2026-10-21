@@ -16,8 +16,10 @@ import polars as pl
 
 from ctx import concordance, runtime
 from ctx.dataset import Dataset, DatasetError, ProteoSpec, load
+from ctx.de import results as m5
 from ctx.de.filters import log2cpm
-from ctx.de.run import Writer, newest
+from ctx.de.results import newest
+from ctx.de.run import Writer
 from ctx.de.sanity import decide, parse
 from ctx.function.lite import read_gmt
 from ctx.gather import gdc
@@ -297,8 +299,7 @@ def paired_metrics(settings: runtime.Settings, spec: Dataset, measured: Measured
                                  f"{k} of {total} genes with Spearman rho above zero at BH "
                                  f"< {p.positive_fdr}, over {n} {layer} samples"))  # fmt: skip
     contrast = next(c for c in spec.contrasts if c.name == p.contrast)
-    de_dir = settings.root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
-    path = folds.results_file(de_dir, spec.slug, contrast)
+    path = folds.results_file(settings.root, spec.slug, contrast)
     measured.extra["folds"] = []
     if path is None:
         measured.notes.append(("f4_missing", {"contrast": contrast.name}))
@@ -326,10 +327,9 @@ def paired_metrics(settings: runtime.Settings, spec: Dataset, measured: Measured
 def contrast_metrics(settings: runtime.Settings, spec: Dataset, measured: Measured,
                      options: Options) -> None:  # fmt: skip
     """F4 for every declared contrast whose M5 results exist; a missing one is noted as such."""
-    de_dir = settings.root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
     found = []
     for contrast in spec.contrasts:
-        path = folds.results_file(de_dir, spec.slug, contrast)
+        path = folds.results_file(settings.root, spec.slug, contrast)
         if path is None:
             measured.notes.append(("f4_missing", {"contrast": contrast.name}))
             continue
@@ -352,8 +352,8 @@ def cross(settings: runtime.Settings, spec: Dataset, options: Options) -> Measur
                                                         p.tested, p.reference)  # fmt: skip
     group = np.arange(protein.values.shape[1]) < n_tested
     contrast = next(c for c in spec.contrasts if c.name == p.contrast)
-    de_dir = settings.root / "outputs" / f"{dict(MODULES)['de']:02d}_de"
-    results = pl.read_parquet(newest(de_dir, spec.slug, f"{p.contrast}_results")).filter(
+    (needed,) = m5.required(spec, "proteo")
+    results = pl.read_parquet(m5.results(settings.root, spec.slug, needed)).filter(
         pl.col("log2FoldChange").is_not_null() & pl.col("gene_name").is_not_null()
     )
     single, twice = unique_symbols(results["gene_name"].to_list())

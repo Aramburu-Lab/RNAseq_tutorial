@@ -15,7 +15,7 @@ import polars as pl
 from ctx import runtime
 from ctx.dataset import Dataset, ProteoTable
 from ctx.de.filters import log2cpm
-from ctx.de.run import newest
+from ctx.de.results import newest
 from ctx.gather import gdc
 from ctx.io.naming import MODULES
 from ctx.proteo import ProteoError, adapters, identifiers, quantities

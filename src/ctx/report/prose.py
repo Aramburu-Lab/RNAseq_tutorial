@@ -175,8 +175,8 @@ def lint(content: Path = CONTENT) -> list[str]:
             problems += check_page(path.stem, raw)
         if path.stem == "cards":
             problems += check_cards(raw)
-        if path.stem == "course":
-            problems += check_all("course", raw)
+        if path.stem in {"course", "run"}:
+            problems += check_all(path.stem, raw)
         problems += check_asks(path.stem, raw)
     return problems
 
