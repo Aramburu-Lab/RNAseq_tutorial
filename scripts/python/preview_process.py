@@ -31,8 +31,9 @@ from ctx import runtime
 from ctx.cli import app
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
-from ctx.process import CATEGORIES, Aligner, figures
+from ctx.process import CATEGORIES, Aligner, ProcessError, figures
 from ctx.process import page as pages
+from ctx.process import run as process_run
 from ctx.process import tables as tab
 from ctx.qc import registry as reg
 from ctx.qc.checkpoint import gene_types
@@ -236,7 +237,10 @@ def page(root: Path, dataset: str, day: date) -> Path:
     started = time.perf_counter()
     gathered = root / "outputs" / "01_gather"
     inputs = [newest(gathered, dataset, what) for what in ("samplesheet", "counts")]
-    sheet = pl.read_parquet(inputs[0]).unique("sample", keep="first", maintain_order=True)
+    read, refused = process_run.runs_of(inputs[0])
+    if read is None:
+        raise ProcessError(refused[0])
+    sheet = read.unique("sample", keep="first", maintain_order=True)
     counts = pl.read_parquet(inputs[1])
     found = frames(root, dataset, sheet, counts)
     releases = {"input:samplesheet": inputs[0].name, "input:counts": inputs[1].name,
