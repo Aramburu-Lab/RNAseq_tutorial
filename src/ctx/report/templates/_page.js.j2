@@ -15,6 +15,7 @@
 {% include "_ora.js.j2" %}
 {% include "_surv.js.j2" %}
 {% include "_live.js.j2" %}
+{% include "_gene.js.j2" %}
 {% include "_m9.js.j2" %}{% endif %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
@@ -217,6 +218,9 @@
   scope.querySelectorAll("form.survival").forEach(function (form) {
     guard("survival", function () { ctxLive.survival(form, exporting); });
   });
+  /* M10.G: one gene's median split drawn on the ER figures, each on its own endpoint. */
+  var geneForms = Array.prototype.slice.call(scope.querySelectorAll("form.gene-km"));
+  if (geneForms.length) guard("gene", function () { ctxGene.wire(geneForms, exporting); });
 
   /* M5's gene picker (GS.4): ctxPick holds the rules, ctxSelect the list's form and its
      link; this block wires the volcano, the table, the buttons and the onward links. */

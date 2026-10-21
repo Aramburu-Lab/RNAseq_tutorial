@@ -21,6 +21,7 @@ from ctx.clinical import (
     cutpoint,
     figure_tables,
     figures,
+    gene,
     harmonise,
     panel,
     score,
@@ -295,7 +296,7 @@ def _er_check(writer: Writer, ctx: Context) -> list[Result]:
                   "p": number(p), "liu": number(liu), "hr": number(model.hr, ".2f")}  # fmt: skip
         data = figures.km(analyses.km_frame(months, event, labels, list(named.values())),
                           list(named.values()), fill("figures.er.caption", **values),
-                          ctx.options.horizon)  # fmt: skip
+                          ctx.options.horizon, live=gene.controls(e))  # fmt: skip
         blocks.append(writer.figure(data, f"er_{e.lower()}", figures.words("er", **values)))
         per = [(int((called[keep] == v).sum()), int(event[called[keep] == v].sum())) for v in ER]
         rows.append((e, f"{per[0][0]:,}; {per[1][0]:,}", f"{per[0][1]}; {per[1][1]}", number(p),
@@ -505,7 +506,9 @@ def screen_cells(row: Mapping[str, Any]) -> tuple[str, ...]:
 
 
 def screen_rows(table: pl.DataFrame) -> list[list[Any]]:
-    """The live panel's screen: panel row, adjusted q (None where refused), printed cells, sign.
+    """The live panel's screen: panel row, adjusted q, printed cells, sign, printed p values.
+
+    The p values are each model's, alone and adjusted, which the ER figures' gene box prints.
 
     In the panel's order, so a scored list's rows are read by its panel rows; the page sorts
     them by q as the table does, the refused last. The sign is the side of 1 of the adjusted
@@ -518,7 +521,8 @@ def screen_rows(table: pl.DataFrame) -> list[list[Any]]:
         q, hr = r["q_adjusted"], r["hr_adjusted"]
         kept = q is not None and np.isfinite(q) and hr is not None and np.isfinite(hr)
         out.append([i, q if kept else None, list(screen_cells(r)),
-                    (1 if hr >= 1 else -1) if kept else None])  # fmt: skip
+                    (1 if hr >= 1 else -1) if kept else None,
+                    [number(r.get("p_alone")), number(r.get("p_adjusted"))]])  # fmt: skip
     return out
 
 

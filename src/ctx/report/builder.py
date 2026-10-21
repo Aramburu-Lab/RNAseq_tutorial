@@ -499,9 +499,9 @@ def _walk(items: Iterable[Result], packed: bool = False
     return out, outline, counter > 0
 
 
-# The kinds whose page script is in the live scripts: the gene lists' (``_select``, ``_live``)
-# and M9's twins (``_m9``, E.1a).
-LIVE_KINDS = ("survival", "follow", "ora", "subset", "genelist")
+# The kinds whose page script is in the live scripts: the gene lists' (``_select``, ``_live``),
+# M10's gene box (``_gene``, M10.G) and M9's twins (``_m9``, E.1a).
+LIVE_KINDS = ("survival", "follow", "gene", "ora", "subset", "genelist")
 
 
 def _live(prepared: Iterable[Mapping[str, Any]]) -> bool:

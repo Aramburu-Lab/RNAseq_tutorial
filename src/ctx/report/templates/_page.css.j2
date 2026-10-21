@@ -185,19 +185,21 @@ table.pick th button{font:inherit;font-weight:700;color:var(--link);background:n
 .calls button:hover{border-color:var(--link)}
 .calls .pair button{padding:var(--space-1) var(--space-2)}
 .calls-summary{margin:var(--space-3) 0 0;font-size:var(--fs-md);color:var(--text)}
-.survival{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--space-3) var(--space-5);margin:var(--space-4) 0 0;padding:var(--space-3) var(--space-4);background:var(--surface-2);border:var(--rule) solid var(--line);border-radius:var(--radius-sm)}
-html:not(.js) .survival{display:none}
-.survival label{display:flex;flex-direction:column;gap:var(--space-1);font-size:var(--fs-xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
-.survival .genes{flex:1 1 16rem;min-width:0}
-.survival .hint{font-weight:400;letter-spacing:0;text-transform:none}
-.survival select,.survival textarea{font:inherit;font-size:var(--fs-sm);letter-spacing:0;text-transform:none;font-weight:400;color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-2);min-height:calc(var(--space-6) + var(--space-2))}
+.survival,.gene-km{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--space-3) var(--space-5);margin:var(--space-4) 0 0;padding:var(--space-3) var(--space-4);background:var(--surface-2);border:var(--rule) solid var(--line);border-radius:var(--radius-sm)}
+html:not(.js) .survival,html:not(.js) .gene-km{display:none}
+.survival label,.gene-km label{display:flex;flex-direction:column;gap:var(--space-1);font-size:var(--fs-xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.survival .genes,.gene-km .genes{flex:1 1 16rem;min-width:0}
+.gene-km input{width:100%;box-sizing:border-box}
+.gene-km [hidden]{display:none}
+.survival .hint,.gene-km .hint{font-weight:400;letter-spacing:0;text-transform:none}
+.survival select,.survival textarea,.gene-km select,.gene-km input{font:inherit;font-size:var(--fs-sm);letter-spacing:0;text-transform:none;font-weight:400;color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-2);min-height:calc(var(--space-6) + var(--space-2))}
 .survival textarea{width:100%;box-sizing:border-box;resize:vertical}
-.survival select:focus,.survival textarea:focus{border-color:var(--link)}
-.survival button{font-size:var(--fs-sm);color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-3);min-height:calc(var(--space-6) + var(--space-2));cursor:pointer}
-.survival button:hover{border-color:var(--link)}
-.survival button:disabled{cursor:default;opacity:.6}
-.survival-summary{margin:var(--space-3) 0 0;font-size:var(--fs-md);color:var(--text)}
-.survival-notes{margin:var(--space-2) 0 0;font-size:var(--fs-sm);color:var(--muted)}
+.survival select:focus,.survival textarea:focus,.gene-km select:focus,.gene-km input:focus{border-color:var(--link)}
+.survival button,.gene-km button{font-size:var(--fs-sm);color:var(--text);background:var(--surface);border:var(--rule) solid var(--reference);border-radius:var(--radius-xs);padding:var(--space-1) var(--space-3);min-height:calc(var(--space-6) + var(--space-2));cursor:pointer}
+.survival button:hover,.gene-km button:hover{border-color:var(--link)}
+.survival button:disabled,.gene-km button:disabled{cursor:default;opacity:.6}
+.survival-summary,.gene-summary{margin:var(--space-3) 0 0;font-size:var(--fs-md);color:var(--text)}
+.survival-notes,.gene-notes{margin:var(--space-2) 0 0;font-size:var(--fs-sm);color:var(--muted)}
 .calls-summary .up,.calls-summary .down{font-weight:700}
 
 /* In practice (a good callout), self-checks, mistakes (a warn callout) */
@@ -309,7 +311,7 @@ table.measured th{width:auto}
 @media print{
 @page{size:A4 portrait;margin:12mm}
 :root,:root[data-theme="black"]{ {{ css.white }} color-scheme:light }
-.topbar,.skip,.toc,#ctx-theme-toggle,.copy,.fig-files,.tabs,.calls,.survival,.term .info,.tip,.glossary-search{display:none}
+.topbar,.skip,.toc,#ctx-theme-toggle,.copy,.fig-files,.tabs,.calls,.survival,.gene-km,.term .info,.tip,.glossary-search{display:none}
 .term{padding-right:0}
 .js .fig[hidden]{display:block}
 .page.has-rail{display:block;max-width:none;padding:0}

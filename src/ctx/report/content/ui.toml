@@ -143,6 +143,16 @@ undo = "Undo"
 reset = "Build list"
 noscript = "This shows the build list; turn on JavaScript to score another list."
 
+# M10.G: the ER figures' gene box. Its sentences are clinical.toml's [gene].
+[gene]
+label = "Draw one gene's median split"
+gene = "Gene"
+hint = "Symbol or Ensembl ID; a patient at the median counts above it"
+listed = "From the link"
+draw = "Draw"
+reset = "ER groups"
+noscript = "This shows the ER groups; turn on JavaScript to draw a gene's split."
+
 # Pages drawing GDC data name the project and cite the GDC, as the GDC's FAQ "How do I cite the
 # NCI GDC?" asks (https://gdc.cancer.gov/about-gdc/gdc-faqs, read 2026-10-09): "Please credit
 # the NCI Genomic Data Commons (GDC) in your manuscript" by Heath et al. 2021; for a project,

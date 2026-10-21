@@ -1,0 +1,158 @@
+{% raw %}
+/* M10.G: one gene picked on the ER figures redraws each one's curves for the gene's patients at
+   or above its median against below it, on that figure's own endpoint, from ctxSurv.gene (the
+   twin of ctx.clinical.gene.split), with the screen's Cox numbers for the gene beside them. The
+   ER groups come back as built on Reset. Every ER figure draws the same gene; the survival
+   panel's settings and expression are read once for all of them (ctxLive.settings, planes). */
+var ctxGene = {
+  /* The summary's numbers, formatted as the page formats them at build (page.number). */
+  values: function (own, found, symbol) {
+    var g = ctxSurv.general, lr = found.logrank;
+    return { gene: symbol, endpoint: own.endpoint, n: found.months.length,
+             events: found.event.reduce(function (a, b) { return a + b; }, 0),
+             below: found.groups[0].patients, above: found.groups[1].patients,
+             chi2: lr ? lr.chi2.toFixed(2) : "", p: lr ? g(lr.p, 2) : "" };
+  },
+  /* The screen's line for the gene: its printed cells (page.screen_rows), the p values after. */
+  cox: function (own, cfg, row, symbol) {
+    var r = cfg.screen[row], w = own.words;
+    if (!r || r[1] === null) return ctxLive.fill(w.refused, { gene: symbol, screen: cfg.endpoint });
+    var line = ctxLive.fill(w.cox, { gene: symbol, screen: cfg.endpoint, hr: r[2][1], q: r[2][2],
+      p: r[4][0], hr_adj: r[2][3], ci: r[2][4], q_adj: r[2][5], p_adj: r[4][1] });
+    return own.endpoint === cfg.endpoint ? line
+      : line + " " + ctxLive.fill(w.other, { screen: cfg.endpoint, endpoint: own.endpoint });
+  },
+  /* One ER figure: its form, plot, words, and what it showed as built. */
+  view: function (form, exporting) {
+    var fig = form.closest(".fig");
+    var own = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var pick = function (s) { return fig.querySelector(s); };
+    var v = { form: form, fig: fig, own: own, div: pick(".fig-plot .js-plotly-plot"),
+              summary: pick(".gene-summary"), notes: pick(".gene-notes"), mark: exporting(fig, own),
+              texts: [pick(".fig-title"), pick(".fig-lead"), pick("figcaption")], built: null };
+    v.html = v.texts.map(function (el) { return el ? el.innerHTML : ""; });
+    v.caption = own.export ? own.export.caption : "";
+    return v;
+  },
+  /* The traces and axes a figure was built with, read before its first redraw. */
+  snapshot: function (div) {
+    var idx = div.data.map(function (_, i) { return i; }), keys = ["x", "y", "name", "visible", "customdata", "text"];
+    var update = {};
+    keys.forEach(function (k) {
+      update[k] = div.data.map(function (t) { return t[k] === undefined ? (k === "visible" ? true : null) : t[k]; });
+    });
+    var l = div.layout;
+    return { traces: idx, update: update, layout: { "yaxis2.categoryarray": l.yaxis2.categoryarray,
+      "yaxis2.range": l.yaxis2.range, "xaxis2.tickvals": l.xaxis2.tickvals } };
+  },
+  draw: function (v, cfg, values, row, symbol) {
+    var own = v.own, found = ctxSurv.gene(cfg, values, own.endpoint);
+    if (!v.built) v.built = ctxGene.snapshot(v.div);
+    ctxLive.paint(v.div, cfg, found.groups.map(function (g, i) {
+      return g.patients ? { name: own.names[i], curve: g.curve } : null;
+    }));
+    var shown = ctxGene.values(own, found, symbol), w = own.words;
+    var said = found.logrank ? ctxLive.fill(w.summary, shown) : ctxLive.fill(w.one_side, shown);
+    v.summary.textContent = said + " " + ctxGene.cox(own, cfg, row, symbol);
+    var filled = [w.title, w.lead, ctxLive.plain(found.logrank ? w.caption : w.one_side)].map(function (t) {
+      return ctxLive.fill(t, shown);
+    });
+    v.texts.forEach(function (el, i) { if (el) el.textContent = filled[i]; });
+    if (own.export) own.export.caption = filled[2];
+    v.form.querySelector("[data-reset]").disabled = false;
+    v.mark(true);
+    return found;
+  },
+  reset: function (v) {
+    if (v.built) {
+      Plotly.restyle(v.div, v.built.update, v.built.traces);
+      Plotly.relayout(v.div, v.built.layout);
+    }
+    v.texts.forEach(function (el, i) { if (el) el.innerHTML = v.html[i]; });
+    if (v.own.export) v.own.export.caption = v.caption;
+    v.summary.textContent = v.own.defaults.summary;
+    v.notes.textContent = "";
+    v.form.elements.gene.value = "";
+    v.form.querySelector("[data-reset]").disabled = true;
+    v.mark(false);
+  },
+  /* The names the box completes, once per page. */
+  datalist: function (cfg) {
+    var list = document.getElementById("ctx-gene-names");
+    if (list) return;
+    list = document.createElement("datalist");
+    list.id = "ctx-gene-names";
+    cfg.symbols.forEach(function (s) { var o = document.createElement("option"); o.value = s; list.appendChild(o); });
+    document.body.appendChild(list);
+  },
+  wire: function (forms, exporting) {
+    var cfg = ctxLive.settings();
+    if (!cfg) return;
+    var views = forms.map(function (form) { return ctxGene.view(form, exporting); });
+    var index = ctxSelect.index(cfg.numbers, cfg.symbols), panel = null;
+    var words = views[0].own.words;
+    function say(text) { views.forEach(function (v) { v.notes.textContent = text; }); }
+    function busy(on) {
+      views.forEach(function (v) {
+        v.form.querySelectorAll("button, input, select").forEach(function (b) { b.disabled = on; });
+        if (!on) v.form.querySelector("[data-reset]").disabled = !v.built;
+      });
+    }
+    function draw(row, note) {
+      var symbol = cfg.symbols[row], values = panel.subarray(row * cfg.patients, (row + 1) * cfg.patients);
+      views.forEach(function (v) {
+        ctxGene.draw(v, cfg, values, row, symbol);
+        v.form.elements.gene.value = symbol;
+        v.notes.textContent = note || "";
+      });
+    }
+    function typed(text) {
+      var parsed = ctxSelect.parse(text, index), named = text.trim();
+      if (!named) return say(words.empty);
+      if (parsed.found.length) return draw(index.row[parsed.found[0]]);
+      say(ctxLive.fill(parsed.ambiguous.length ? words.ambiguous : words.missing,
+                       { gene: named, genes: cfg.genes }));
+    }
+    views.forEach(function (v) {
+      v.form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (panel) typed(v.form.elements.gene.value);
+      });
+      v.form.elements.listed.addEventListener("change", function () {
+        if (panel) draw(Number(v.form.elements.listed.value));
+      });
+      v.form.querySelector("[data-reset]").addEventListener("click", function () {
+        views.forEach(ctxGene.reset);
+      });
+    });
+    ctxGene.datalist(cfg);
+    if (!window.DecompressionStream) { busy(true); return say(cfg.words.no_stream); }
+    busy(true);
+    ctxLive.planes(cfg).then(function (planes) {
+      panel = planes;
+      busy(false);
+      /* A list from another page's link (ctxSelect, D-049): its genes fill the menu and the
+         first is drawn; the survival panel scores the whole list and is the one brought into
+         view, since a page scrolls to one place. */
+      if (!ctxSelect.carries(location.hash)) return;
+      var rows = ctxSelect.decode(location.hash).genes.map(function (g) { return index.row[Math.abs(g)]; })
+        .filter(function (r) { return r !== undefined; });
+      if (!rows.length) return;
+      views.forEach(function (v) {
+        var menu = v.form.elements.listed;
+        rows.forEach(function (r) {
+          var o = document.createElement("option");
+          o.value = String(r); o.textContent = cfg.symbols[r]; menu.appendChild(o);
+        });
+        menu.closest("label").hidden = false;
+      });
+      draw(rows[0], ctxLive.fill(words.listed, { genes: rows.length, gene: cfg.symbols[rows[0]] }));
+      /* The redrawn ER figure's longer lines move the panel below it: brought into view again. */
+      ctxLive.reveal(document.querySelector("form.survival"));
+    }, function (err) {
+      say(cfg.words.no_stream);
+      if (window.console) console.error("ctx page: gene", err);
+    });
+  }
+};
+{% endraw %}

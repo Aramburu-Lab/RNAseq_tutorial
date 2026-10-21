@@ -78,50 +78,47 @@ var ctxLive = {
     });
     return { x: ox.concat(bx.reverse()), y: oy.concat(by.reverse()) };
   },
-  /* The KM figure's traces: per slot a band, a line and its censor ticks, then one at-risk row
-     per slot; a median split leaves the middle slot empty and hidden. */
-  draw: function (div, cfg, found, rule) {
-    var slots = rule === "median" ? [0, 2] : [0, 1, 2], update = { x: [], y: [], name: [], visible: [],
-      customdata: [], text: [] }, traces = [];
-    var last = 0;
-    found.groups.forEach(function (g) { last = Math.max(last, g.curve.time[g.curve.time.length - 1] || 0); });
-    var ticks = [];
+  /* The KM figure's traces from its groups by slot, null for a slot left empty and hidden: per
+     slot a band, a line and its censor ticks, then one at-risk row per slot, the order
+     KmData.interactive draws. The ER figures have two slots, the score's figure three. */
+  paint: function (div, cfg, bySlot) {
+    var n = bySlot.length, update = { x: [], y: [], name: [], visible: [], customdata: [], text: [] };
+    var traces = [], last = 0, ticks = [];
+    bySlot.forEach(function (g) { if (g) last = Math.max(last, g.curve.time[g.curve.time.length - 1] || 0); });
     var step = ctxLive.riskStep(last, cfg.risk_columns);
     for (var t = 0; t <= last; t += step) ticks.push(t);
-    [0, 1, 2].forEach(function (slot) {
-      var at = slots.indexOf(slot), g = at >= 0 ? found.groups[at] : null;
-      var x = [0], y = [1], lo = [1], hi = [1], risk = [];
+    bySlot.forEach(function (g, slot) {
+      var x = [0], y = [1], lo = [1], hi = [1];
       if (g) {
         x = x.concat(g.curve.time); y = y.concat(g.curve.survival);
         lo = lo.concat(g.curve.lower); hi = hi.concat(g.curve.upper);
-        risk = ticks.map(function (tick) {
-          for (var i = 0; i < g.curve.time.length; i++) if (g.curve.time[i] >= tick) return g.curve.at_risk[i];
-          return 0;
-        });
       }
       var band = ctxLive.band(x, hi, lo), name = g ? g.name : "";
       var cx = [], cy = [];
       if (g) g.curve.censored.forEach(function (c, i) { if (c > 0) { cx.push(g.curve.time[i]); cy.push(g.curve.survival[i]); } });
       var custom = x.map(function (_, i) { return [lo[i], hi[i], i === 0 ? (g ? g.curve.at_risk[0] : 0) : g.curve.at_risk[i - 1]]; });
-      [[band.x, band.y, null, null], [x, y, custom, null], [cx, cy, null, null]].forEach(function (d, k) {
+      [[band.x, band.y, null], [x, y, custom], [cx, cy, null]].forEach(function (d, k) {
         traces.push(3 * slot + k);
         update.x.push(d[0]); update.y.push(d[1]); update.name.push(name); update.visible.push(!!g);
         update.customdata.push(d[2]); update.text.push(null);
       });
     });
-    [0, 1, 2].forEach(function (slot) {
-      var at = slots.indexOf(slot), g = at >= 0 ? found.groups[at] : null;
-      traces.push(9 + slot);
+    bySlot.forEach(function (g, slot) {
+      traces.push(3 * n + slot);
       update.x.push(g ? ticks : []); update.y.push(g ? ticks.map(function () { return g.name; }) : []);
       update.name.push(g ? g.name : ""); update.visible.push(!!g); update.customdata.push(null);
-      update.text.push(g ? ticks.map(function (tick) {
-        for (var i = 0; i < g.curve.time.length; i++) if (g.curve.time[i] >= tick) return g.curve.at_risk[i].toLocaleString("en-US");
-        return "0";
-      }) : []);
+      update.text.push(g ? ctxSurv.atRisk(g.curve, ticks).map(function (k) { return k.toLocaleString("en-US"); }) : []);
     });
     Plotly.restyle(div, update, traces);
-    Plotly.relayout(div, { "yaxis2.categoryarray": found.groups.map(function (g) { return g.name; }).reverse(),
-                           "yaxis2.range": [-0.5, found.groups.length - 0.5], "xaxis2.tickvals": ticks });
+    var drawn = bySlot.filter(Boolean).map(function (g) { return g.name; });
+    Plotly.relayout(div, { "yaxis2.categoryarray": drawn.slice().reverse(),
+                           "yaxis2.range": [-0.5, drawn.length - 0.5], "xaxis2.tickvals": ticks });
+    return ticks;
+  },
+  /* The score's figure: a median split leaves the middle slot empty. */
+  draw: function (div, cfg, found, rule) {
+    var g = found.groups;
+    return ctxLive.paint(div, cfg, rule === "median" ? [g[0], null, g[1]] : g);
   },
   /* The scan's line, its hover and the corrected line's height. */
   drawScan: function (div, found) {
@@ -135,6 +132,25 @@ var ctxLive = {
     var bytes = Uint8Array.from(atob(block), function (c) { return c.charCodeAt(0); });
     var stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"));
     return new Response(stream).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+  },
+  /* The survival panel's settings, read once per page: the gene box on the ER figures
+     (ctxGene) reads the same object. Null on a page without the panel. */
+  settings: function () {
+    if (ctxLive.held === undefined) {
+      var form = document.querySelector("form.survival");
+      ctxLive.held = form ? JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent)
+                          : null;
+    }
+    return ctxLive.held;
+  },
+  /* The panel's int16 values, inflated once for every figure that reads them. */
+  planes: function (cfg) {
+    if (!ctxLive.inflated) {
+      ctxLive.inflated = ctxLive.inflate(cfg.block).then(function (bytes) {
+        return ctxSurv.planes(bytes, cfg.genes, cfg.patients);
+      });
+    }
+    return ctxLive.inflated;
   },
   /* A list's fragment is no anchor, so a page reached by its link opens at its top, its
      panel a few screens down (PK, 2026-10-20): the figure or group that took the list is
@@ -154,7 +170,7 @@ var ctxLive = {
   },
   survival: function (form, exporting) {
     var fig = form.closest(".fig");
-    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var cfg = ctxLive.settings();
     var words = cfg.words, div = fig.querySelector(".fig-plot .js-plotly-plot");
     var summary = fig.querySelector(".survival-summary"), notes = fig.querySelector(".survival-notes");
     var mark = exporting(fig, cfg), scanMark = function () {}, scanDiv = null, scanLead = null;
@@ -285,8 +301,8 @@ var ctxLive = {
     if (!window.DecompressionStream) { busy(true); notes.textContent = words.no_stream; return; }
     busy(true);
     notes.textContent = words.loading;
-    ctxLive.inflate(cfg.block).then(function (bytes) {
-      panel = ctxSurv.planes(bytes, cfg.genes, cfg.patients);
+    ctxLive.planes(cfg).then(function (planes) {
+      panel = planes;
       busy(false);
       form.querySelector("[data-undo]").disabled = true;
       /* A link from another page carries its list in the fragment (ctxSelect, D-049). */
