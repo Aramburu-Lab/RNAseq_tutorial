@@ -135,6 +135,9 @@ CAPTION_INSET = 0.02
 CAPTION_BOTTOM = 0.01
 # Empty space above the tallest box for the p/r labels, as a fraction of the data range.
 HEADROOM = 0.35
+# The least space between two stacked rows of a box figure's labels, and between two labels
+# of one row, in pt: rows that only touch overlap once a renderer rounds them.
+STACK_GAP_PT = 1.0
 LINE_SPACING = 1.3
 # Legend geometry in font-size units; marker handles need less than matplotlib's line default.
 # handleheight is matplotlib's own 0.7, set here so the page's swatch reads the same value.
