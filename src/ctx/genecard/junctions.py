@@ -52,7 +52,7 @@ def tpm_url(gencode_id: str) -> str:
 
     The route and its ``gencodeId``, ``datasetId`` and ``itemsPerPage`` are as the GTEx API v2
     reference documents them (the gtex-database skill's ``api_reference.md``, read 2026-10-21);
-    no live response was read for this change.
+    one live response for NPTX2 on 2026-10-21 held these fields in one page of 54 rows (D-106).
     """
     query = urllib.parse.urlencode({"gencodeId": gencode_id, "datasetId": DATASET,
                                     "itemsPerPage": PAGE_ROWS})  # fmt: skip
