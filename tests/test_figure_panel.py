@@ -67,9 +67,10 @@ def test_every_spec_has_its_panel_on_the_module_page(pipeline):
 
 def test_tabs_are_docker_apptainer_pixi_and_differ_in_the_environment_alone(pipeline):
     """Every panel shows three tabs, Docker first and selected, each with its own block and
-    script; from step 2 on the three blocks are one text. Catches a tab dropped or reordered, a
-    tab's script holding another tab's block, and a step after the environment drifting
-    between tabs."""
+    script, Docker's and Apptainer's step 1 each running ctx through its own tool alone; from
+    step 2 on the three blocks are one text. Catches a tab dropped or reordered, a tab's script
+    holding another tab's block (every tab printing Docker's step 1 survived without the tool
+    check, F.2d), and a step after the environment drifting between tabs."""
     page = module_page(pipeline[0], "05_de", "desynth_overview")
     tabs = TAB.findall(page)
     by_figure: dict[str, list[tuple[str, str]]] = {}
@@ -81,11 +82,14 @@ def test_tabs_are_docker_apptainer_pixi_and_differ_in_the_environment_alone(pipe
     assert selected == ["docker"] * len(by_figure)
     blocks = {key: panels(page, key) for key in panel.TABS}
     assert len({len(b) for b in blocks.values()}) == 1
+    runs = {"docker": "ctx() { docker run ", "apptainer": "ctx() { apptainer run "}
     for pasted_scripts in zip(*blocks.values(), strict=True):
         rests = set()
-        for pasted, script in pasted_scripts:
+        for tab, (pasted, script) in zip(panel.TABS, pasted_scripts, strict=True):
             assert script == f"{panel.SCRIPT_HEAD}\n{pasted}"
-            rests.add(pasted.split("\n# 2. ", 1)[1])
+            step_1, rest = pasted.split("\n# 2. ", 1)
+            rests.add(rest)
+            assert all((run in step_1) == (key == tab) for key, run in runs.items()), tab
         assert len(rests) == 1
 
 
