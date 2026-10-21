@@ -627,16 +627,14 @@ class ScatterData:
         A label that finds no free place is left out; the point keeps its name on hover and
         in the CSV. A leader line joins each label to its point.
         """
-        from matplotlib.text import Text  # noqa: PLC0415 - heavy; imported after the profile
+        # save imports this module; the layout check's own list, so a label gives way to
+        # exactly the texts that check sees.
+        from ctx.viz.save import drawn_texts  # noqa: PLC0415 - import cycle
 
         assert self.label is not None  # noqa: S101 - called only when a label column is set
         rows = self.frame.filter(pl.col(self.label) != "").sort(self.y, descending=True)
         fig.draw(renderer)  # the legend lays its texts out only when drawn
-        placed = [
-            text.get_window_extent(renderer)
-            for text in fig.findobj(Text)
-            if text.get_visible() and text.get_text().strip()
-        ]
+        placed = [text.get_window_extent(renderer) for text in drawn_texts(fig)]
         frame = ax.get_window_extent(renderer)
         centre = ax.get_window_extent(renderer).x0 + ax.get_window_extent(renderer).width / 2
         for name, x, y in rows.select(self.label, self.x, self.y).head(MAX_LABELS).rows():

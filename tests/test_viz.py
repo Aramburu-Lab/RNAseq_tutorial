@@ -11,6 +11,7 @@ import matplotlib as mpl
 import numpy as np
 import polars as pl
 import pytest
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from matplotlib.figure import Figure
 from pypdf import PdfReader
 from pypdf.generic import ContentStream
@@ -48,7 +49,7 @@ from ctx.viz.flow import FlowData
 from ctx.viz.heatmap import HeatmapData
 from ctx.viz.linked import LinkedData
 from ctx.viz.save import drawn_texts, figure_block, layout_problems, write_figure
-from ctx.viz.scatter import THIN_MAX, Calls, Line, ScatterData, bubble_pt
+from ctx.viz.scatter import LABEL_OFFSET, THIN_MAX, Calls, Line, ScatterData, bubble_pt
 from ctx.viz.strip import StripData
 from ctx.viz.style import (
     AXIS_TITLE_SHARE,
@@ -670,6 +671,35 @@ def test_points_drawn_equal_csv_rows():
     assert called <= on_page
     # The page embeds the rows it draws, not the table's: the CSV beside it holds all.
     assert len(figure_block(data, "x").rows) == data.on_page().height < data.table().height
+
+
+@pytest.mark.parametrize("minor", [False, True])
+def test_point_label_may_cover_an_undrawn_tick_label(minor):
+    """A label is placed over a tick label matplotlib keeps but never draws."""
+    data = ScatterData(
+        frame=pl.DataFrame({"x": [0.1], "y": [0.1], "call": ["ns"], "name": ["g1"]}),
+        columns={c: ("none", c) for c in ("x", "y", "call", "name")}, x="x", y="y",
+        x_label="x", y_label="y", colour="call", colours={"ns": None}, caption="c",
+        label="name",
+    )  # fmt: skip
+    fig = Figure(figsize=(2, 1))
+    ax = fig.add_axes((0.2, 0.3, 0.6, 0.3))
+    # One tick beyond the x limit, its label lifted into the axes and wider than them, so
+    # every spot a point label may take lies over that undrawn label.
+    ax.set_xticks([1.25], labels=["an undrawn tick label"], minor=minor)
+    ax.set(xlim=(0, 1), ylim=(0, 1), yticks=[])
+    ax.tick_params(axis="x", which="minor" if minor else "major", pad=-35, labelsize=40)
+    renderer = FigureCanvasAgg(fig).get_renderer()
+    fig.draw(renderer)
+    undrawn = (ax.xaxis.get_minor_ticks() if minor else ax.xaxis.get_major_ticks())[0].label1
+    hidden, frame = undrawn.get_window_extent(renderer), ax.get_window_extent(renderer)
+    assert undrawn not in drawn_texts(fig)
+    assert hidden.x0 <= frame.x0 and frame.x1 <= hidden.x1
+    assert hidden.y0 <= frame.y0 and frame.y1 <= hidden.y1
+    data._place_labels(fig, ax, renderer, THEMES["white"])
+    assert [t.get_text() for t in ax.texts] == ["g1"]
+    assert ax.texts[0].xyann == (LABEL_OFFSET, LABEL_OFFSET)
+    assert ax.texts[0].get_window_extent(renderer).overlaps(hidden)
 
 
 def test_empty_bars_refused():
