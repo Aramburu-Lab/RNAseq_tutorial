@@ -13,7 +13,8 @@ import numpy as np
 import polars as pl
 import pytest
 from clinical_root import CTX
-from proteo_study_root import SAMPLES, SLUG, build, run
+from conftest import proteo_study
+from proteo_study_root import SAMPLES, SLUG, build
 
 from ctx.dataset import DatasetError, ProteoTable, load
 from ctx.proteo import ProteoError, adapters, identifiers, quantities
@@ -217,10 +218,10 @@ def test_dataset_table_problems_together(tmp_path):
         load(path)
 
 
-@pytest.fixture(scope="module", params=["maxquant", "diann"])
+@pytest.fixture(scope="session", params=["maxquant", "diann"])
 def study_root(request, tmp_path_factory):
     """ctx proteo run on the made-up study, once per adapter."""
-    return request.param, run(tmp_path_factory.mktemp(f"r3_{request.param}"), request.param)
+    return request.param, proteo_study(tmp_path_factory, request.param)
 
 
 def output(root, what: str):

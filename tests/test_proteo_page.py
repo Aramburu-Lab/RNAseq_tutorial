@@ -8,23 +8,23 @@ from pathlib import Path
 
 import polars as pl
 import pytest
-from proteo_root import TUMOURS, across, cross
+from proteo_root import TUMOURS
 
 from ctx.report.cap import MAX_BYTES
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-@pytest.fixture(scope="module")
-def across_root(tmp_path_factory):
+@pytest.fixture(scope="session")
+def across_root(proteo_across):
     """The across-samples root, ctx proteo run."""
-    return across(tmp_path_factory.mktemp("m7_across"))
+    return proteo_across[0]
 
 
-@pytest.fixture(scope="module")
-def cross_root(tmp_path_factory):
+@pytest.fixture(scope="session")
+def cross_root(proteo_cross):
     """The cross-dataset root, ctx proteo run."""
-    return cross(tmp_path_factory.mktemp("m7_cross"))
+    return proteo_cross[0]
 
 
 def output(root: Path, what: str) -> Path:

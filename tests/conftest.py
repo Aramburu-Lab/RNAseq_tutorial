@@ -62,6 +62,30 @@ def pytest_xdist_auto_num_workers(config: pytest.Config) -> int:
     return max(1, (os.cpu_count() or 1) - 2)
 
 
+def module_group(item: pytest.Item) -> str | None:
+    """The xdist group of a test that reaches a module-scoped fixture: its module's name.
+
+    A module fixture is built once per module per worker, so the tests that share one stay on
+    one worker; every other test is handed to whichever worker is free. Under loadscope a whole
+    module waited on one worker: test_figures_m2's 6 tests took 1,813 s there (M3.14).
+    """
+    closure = item._fixtureinfo.name2fixturedefs.values()  # noqa: SLF001 - no public view
+    if any(defs and defs[-1].scope == "module" for defs in closure):
+        return item.module.__name__
+    return None
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    # Before xdist's own hook, which turns the mark into the group the scheduler reads. A
+    # worker's dist option reads "no"; xdist keeps loadgroup in this flag for its own hook.
+    if not getattr(config.option, "loadgroup", False):
+        return
+    for item in items:
+        if group := module_group(item):
+            item.add_marker(pytest.mark.xdist_group(group))
+
+
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int) -> None:
     # The template's `test` task maps pytest exit 5 (nothing collected) to success, so a
     # wrong path or an over-eager -k would pass CI silently. That one code fails here instead.
@@ -106,9 +130,10 @@ def _seal(folder: Path) -> None:
             path.chmod(path.stat().st_mode & ~0o222)
 
 
-def writable_copy(source: Path, target: Path) -> Path:
-    """A copy of a sealed session run that a test may change."""
-    shutil.copytree(source, target, symlinks=True)
+def writable_copy(source: Path, target: Path,
+                  ignore: Callable[[str, list[str]], set[str]] | None = None) -> Path:  # fmt: skip
+    """A copy of a sealed session run that a test may change; ``ignore`` as copytree's."""
+    shutil.copytree(source, target, symlinks=True, ignore=ignore)
     for path in [*target.rglob("*"), target]:
         if not path.is_symlink():
             path.chmod(path.stat().st_mode | 0o200)
@@ -469,6 +494,46 @@ def proteo_run(tmp_path_factory):
     return once(tmp_path_factory, "proteo_cli", _proteo)
 
 
+# M7's made-up roots, each run once for every file that reads it: test_figures_m7 reads all
+# four, test_proteo_page the first two, test_proteo_study and test_proteo_tumour_normal theirs.
+@pytest.fixture(scope="session")
+def proteo_cross(proteo_run):
+    """(root, dataset file) of ``proteo_run``'s cross-dataset root."""
+    return proteo_run[0], proteo_run[0].parent / "fake_cells.toml"
+
+
+def _across(folder: Path) -> tuple[Path, Path]:
+    from proteo_root import across  # noqa: PLC0415
+
+    return across(folder), folder / "fake_brca.toml"
+
+
+@pytest.fixture(scope="session")
+def proteo_across(tmp_path_factory):
+    """(root, dataset file) of the across-samples root, ctx proteo run."""
+    return once(tmp_path_factory, "proteo_across", _across)
+
+
+def proteo_study(factory: pytest.TempPathFactory, fmt: str) -> Path:
+    """The made-up [proteo.table] study root of adapter ``fmt``, ctx proteo run; its dataset
+    file is ``<root>/../<SLUG>.toml``."""
+    from proteo_study_root import run  # noqa: PLC0415
+
+    return once(factory, f"proteo_study_{fmt}", lambda folder: run(folder, fmt))
+
+
+def _made(folder: Path) -> tuple[Path, Path]:
+    from test_proteo_tumour_normal import made_root  # noqa: PLC0415
+
+    return made_root(folder)
+
+
+@pytest.fixture(scope="session")
+def proteo_made(tmp_path_factory):
+    """(root, dataset file) of the tumour-against-normal root, ctx proteo run."""
+    return once(tmp_path_factory, "proteo_made", _made)
+
+
 def _genecard(root: Path) -> tuple[Path, str]:
     from genecard_root import SLUG, make  # noqa: PLC0415
 
@@ -484,18 +549,44 @@ def genecard_run(tmp_path_factory):
     return once(tmp_path_factory, "genecard_cli", _genecard)
 
 
-def _ncrna(folder: Path) -> tuple[Path, str]:
+def _ncrna(folder: Path) -> tuple[Path, str, list[str]]:
     from ncrna_root import DATASET, make  # noqa: PLC0415
 
     root, spec = make(folder, date.today())
-    _ran(root, "ncrna", "--dataset", DATASET, "--dataset-file", str(spec))
-    return root, module_page(root, "08_ncrna", f"{DATASET}_overview")
+    done = ctx_run("--root", str(root), "ncrna", "--dataset", DATASET, "--dataset-file",
+                   str(spec), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, module_page(root, "08_ncrna", f"{DATASET}_overview"), done.stdout.split()
 
 
 @pytest.fixture(scope="session")
-def ncrna_run(tmp_path_factory):
-    """(root, overview page) of ``ctx ncrna`` on the made-up root of the M8 tests."""
+def ncrna_built(tmp_path_factory):
+    """``ctx ncrna`` on the made-up root of the M8 tests: (root, overview page, paths printed);
+    test_ncrna reads its outputs too."""
     return once(tmp_path_factory, "ncrna_cli", _ncrna)
+
+
+@pytest.fixture(scope="session")
+def ncrna_run(ncrna_built):
+    """(root, overview page) of ``ncrna_built``."""
+    return ncrna_built[:2]
+
+
+def _ncrna_tcga(folder: Path) -> tuple[Path, Path, list[str]]:
+    import ncrna_tcga_root  # noqa: PLC0415 - imports synth, which only tests use
+
+    root, spec = ncrna_tcga_root.make(folder, date.today())
+    done = ctx_run("--root", str(root), "ncrna", "--dataset", ncrna_tcga_root.DATASET,
+                   "--dataset-file", str(spec), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    return root, spec, done.stdout.split()
+
+
+@pytest.fixture(scope="session")
+def ncrna_tcga_run(tmp_path_factory):
+    """``ctx ncrna`` on the made-up GDC root: (root, dataset file, paths printed), for
+    test_ncrna_tcga and test_figures_m8."""
+    return once(tmp_path_factory, "ncrna_tcga", _ncrna_tcga)
 
 
 def _guide(root: Path) -> tuple[Path, str]:

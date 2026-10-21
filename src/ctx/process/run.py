@@ -14,6 +14,7 @@ import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import date
+from functools import partial
 from pathlib import Path
 
 import polars as pl
@@ -366,17 +367,21 @@ def align_all(inputs: Inputs, options: Options, indices: Mapping[str, Built],
         jobs[UNSPLICED] = (featured, align.AlignOptions(Aligner.HISAT2, indices["main"].index,
                                                         threads, spliced=False))  # fmt: skip
     done = {name: align.align(given, tools_ds, setting) for name, (given, setting) in jobs.items()}
-    return Aligned(trimmed, main, done, summaries(inputs, config, main, done, trimmed))
+    return Aligned(trimmed, main, done, summaries(inputs, config, main, done, trimmed, threads))
 
 
-def summaries(inputs: Inputs, config: Path, main: align.Alignment,
-              featured: Mapping[str, align.Alignment], trimmed: align.Trimmed
+def summaries(inputs: Inputs, config: Path, main: align.Alignment,  # noqa: PLR0913 - one each
+              featured: Mapping[str, align.Alignment], trimmed: align.Trimmed, jobs: int
               ) -> dict[str, mqc_io.MultiqcRun]:  # fmt: skip
-    """The main MultiQC run, with fastp's reports, and one per featured setting."""
+    """The main MultiQC run, with fastp's reports, and one per featured setting.
+
+    ``jobs`` of them run at a time (``mqc_io.at_once``).
+    """
     folder = config.parent / "multiqc" / inputs.spec.slug
-    runs = {"main": align.summarise(main, folder / "main", config, trimmed)}
-    runs |= {name: align.summarise(a, folder / name, config) for name, a in featured.items()}
-    return runs
+    work = {"main": partial(align.summarise, main, folder / "main", config, trimmed)}
+    work |= {name: partial(align.summarise, a, folder / name, config)
+             for name, a in featured.items()}  # fmt: skip
+    return mqc_io.at_once(work, jobs)
 
 
 def multiqc_config(writer: Writer, registry: reg.Registry) -> Path:
@@ -396,19 +401,19 @@ def count_all(inputs: Inputs, options: Options, indices: Mapping[str, Built],
     folder = config.parent / "multiqc" / inputs.spec.slug
     main, gtf = aligned.main, indices["main"].reference.gtf
     plain = count.count(main, gtf, tools_ds, count.plain_settings(main), threads)
-    runs = count.summaries(plain, main, folder, config)
+    runs = count.summaries(plain, main, folder, config, threads)
     counted = count.assigned(runs)
     calls = count.strand_calls(counted, inputs.registry.metrics[STRAND_METRIC])
     used = count.called_strands(calls, options.strandedness)
     variants = count.count(main, gtf, tools_ds, count.variant_settings(main, used), threads)
-    variant_runs = count.summaries(variants, main, folder, config)
+    variant_runs = count.summaries(variants, main, folder, config, threads)
     cut = None
     if "cut" in aligned.featured:
         half, sample = aligned.featured["cut"], inputs.featured
         options_cut = count.FcOptions((STRAND[used[sample]][1],), half.paired)
         cut = count.count(half, indices["cut"].reference.gtf, tools_ds, {"cut": options_cut},
                           threads)  # fmt: skip
-        variant_runs |= count.summaries(cut, half, folder, config)
+        variant_runs |= count.summaries(cut, half, folder, config, threads)
     counted = pl.concat([counted, count.assigned(variant_runs)])
     return Counted(plain, variants, cut, {**runs, **variant_runs}, counted, calls, used)
 

@@ -10,9 +10,9 @@ from pathlib import Path
 
 import polars as pl
 import pytest
-from conftest import DE_SPEC
-from test_figures import copied, drawn_alike, redrawn, specs
-from test_qc_run import with_reads, with_reports  # noqa: F401 - module fixtures used below
+from conftest import DE_SPEC, once
+from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
+from test_qc_run import with_reads, with_reports  # noqa: F401 - session fixtures used below
 
 from ctx.figures.spec import parse
 
@@ -21,14 +21,17 @@ QC = ("02_qc",)
 SHARES = re.compile(r"PC[12], \d+% of variance")
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def with_fastqc(tmp_path_factory):
     """ctx qc --rnaseq-dir on a copy of the rnaseq fixture holding FastQC's raw-read reports."""
+    return once(tmp_path_factory, "qc_fastqc", _with_fastqc)
+
+
+def _with_fastqc(tmp: Path) -> Path:
     from synth import Synthetic, design_counts, write_gather_outputs  # noqa: PLC0415
     from test_qc_fates import with_raw_fastqc  # noqa: PLC0415
     from test_qc_run import RNASEQ_SAMPLES, ctx  # noqa: PLC0415
 
-    tmp = tmp_path_factory.mktemp("qc_fastqc")
     rnaseq, root = with_raw_fastqc(tmp), tmp / "root"
     synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
     names = dict(zip(synthetic.samples["sample"], RNASEQ_SAMPLES, strict=True))
@@ -54,9 +57,8 @@ def _kinds(found) -> set[str]:
 
 def _redraws_alike(root: Path, found, tmp_path: Path) -> None:
     """Each spec redrawn in its own clean folder equals M2's files."""
-    for spec in found:
+    for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/02_qc/{spec.stem}.csv"))
-        csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
         assert drawn_alike(csv, module_csv) == [], spec.stem
         shown = (p.with_suffix(".html").read_text() for p in (module_csv, csv))
         assert len({tuple(SHARES.findall(page)) for page in shown}) == 1, spec.stem

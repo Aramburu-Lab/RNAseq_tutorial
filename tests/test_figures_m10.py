@@ -9,9 +9,9 @@ from pathlib import Path
 import polars as pl
 import pytest
 from clinical_root import ctx, make
-from conftest import ctx_run
+from conftest import ctx_run, once
 from test_clinical_page import controls
-from test_figures import copied, drawn_alike, redrawn, specs
+from test_figures import copied, drawn_alike, redrawn_each, specs
 
 from ctx.clinical import analyses
 from ctx.figures.params import ParamsError, load_params
@@ -44,9 +44,8 @@ def _drawn(root: Path) -> int:
 
 def _redraws_alike(root: Path, found, tmp_path: Path) -> None:
     """Each spec redrawn in its own clean folder equals M10's files; the live panel too."""
-    for spec in found:
+    for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/12_clinical/{spec.stem}.csv"))
-        csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
         assert drawn_alike(csv, module_csv) == [], spec.stem
         if spec.figure_id.endswith("_km_score"):
             pages = (p.with_suffix(".html").read_text() for p in (module_csv, csv))
@@ -66,10 +65,13 @@ def test_every_figure_redraws_byte_for_byte(clinical_run, tmp_path):
     _redraws_alike(root, found, tmp_path)
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def optioned(tmp_path_factory):
     """ctx clinical with every figure option away from its default and its own gene list."""
-    tmp = tmp_path_factory.mktemp("m10_options")
+    return once(tmp_path_factory, "m10_options", _optioned)
+
+
+def _optioned(tmp: Path) -> tuple[Path, Path]:
     root, spec = make(tmp)
     listed = tmp / "mine.txt"
     listed.write_text("# source: x:y\n# count: 2\nG2\nG7\n")

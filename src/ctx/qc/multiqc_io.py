@@ -7,7 +7,8 @@ in; a table's sample names are mapped to the course's units (runs or samples) by
 alias table, and one name that maps to nothing stops the run with every such name listed.
 """
 
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -63,6 +64,22 @@ def run(
     if not (dest / DATA).is_dir():
         raise QcError(f"MultiQC wrote no {DATA}/ in {dest}; see {dest / 'multiqc_run.log'}")
     return MultiqcRun(dest / DATA, tools.TOOLS["multiqc"].version)
+
+
+def at_once[K, V](work: Mapping[K, Callable[[], V]], jobs: int) -> dict[K, V]:
+    """Each call of ``work``, up to ``jobs`` at a time; the results in ``work``'s order.
+
+    For independent MultiQC runs: each is its own Python process, on one core and mostly in
+    its start-up, so one at a time the 11 runs of a fixture ``ctx process`` took three
+    quarters of its wall time (M3.14). A call's error is raised once every call has ended.
+
+    Args:
+        work: Name to a call taking no argument.
+        jobs: How many calls run together; 1 runs them in order.
+    """
+    with ThreadPoolExecutor(max(1, jobs)) as pool:
+        futures = {key: pool.submit(call) for key, call in work.items()}
+    return {key: future.result() for key, future in futures.items()}
 
 
 def table(run: MultiqcRun, module: str) -> pl.DataFrame:

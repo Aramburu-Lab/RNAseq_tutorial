@@ -29,12 +29,11 @@ ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "src" / "ctx" / "report" / "templates"
 
 
-@pytest.fixture(scope="module")
-def clinical_root(tmp_path_factory):
-    """A gathered made-up GDC root with ctx clinical run on it; returns the root."""
-    root, spec = make(tmp_path_factory.mktemp("m10"))
-    ctx("--root", str(root), "clinical", "--dataset", "fake_brca", "--dataset-file", str(spec))
-    return root
+@pytest.fixture(scope="session")
+def clinical_root(clinical_run):
+    """A gathered made-up GDC root with ctx clinical run on it; returns the root. The session's
+    run, which test_cli and test_outputs_contract also read."""
+    return clinical_run[0]
 
 
 def test_genes_from_replaces_the_build_list(tmp_path):

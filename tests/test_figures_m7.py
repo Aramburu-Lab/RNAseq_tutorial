@@ -12,11 +12,9 @@ import numpy as np
 import polars as pl
 import pytest
 from clinical_root import ctx
-from proteo_root import across, cross
+from conftest import proteo_study, writable_copy
 from proteo_study_root import SLUG
-from proteo_study_root import run as study
-from test_figures import copied, drawn_alike, redrawn, specs
-from test_proteo_tumour_normal import made  # noqa: F401 - module fixture used below
+from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
 
 from ctx.dataset import load
 from ctx.figures.kinds_m7 import TABLES
@@ -40,25 +38,29 @@ EXPECTED = {"across_root": {*CORRELATION, "contrast:basal_vs_luma"},
 WORDS = re.compile(r'<p class="fig-lead">.*?</p>|<aside class="reading".*?</aside>', re.S)
 
 
-@pytest.fixture(scope="module")
-def across_root(tmp_path_factory) -> tuple[Path, Path]:
+@pytest.fixture(scope="session")
+def across_root(proteo_across) -> tuple[Path, Path]:
     """The across-samples root, ctx proteo run, and its dataset file."""
-    tmp = tmp_path_factory.mktemp("f1_m7_across")
-    return across(tmp), tmp / "fake_brca.toml"
+    return proteo_across
 
 
-@pytest.fixture(scope="module")
-def cross_root(tmp_path_factory) -> tuple[Path, Path]:
+@pytest.fixture(scope="session")
+def cross_root(proteo_cross) -> tuple[Path, Path]:
     """The cross-study root, ctx proteo run, and its dataset file."""
-    tmp = tmp_path_factory.mktemp("f1_m7_cross")
-    return cross(tmp), tmp / "fake_cells.toml"
+    return proteo_cross
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def study_root(tmp_path_factory) -> tuple[Path, Path]:
     """A [proteo.table] study root, ctx proteo run, and its dataset file."""
-    tmp = tmp_path_factory.mktemp("f1_m7_study")
-    return study(tmp, "maxquant"), tmp / f"{SLUG}.toml"
+    root = proteo_study(tmp_path_factory, "maxquant")
+    return root, root.parent / f"{SLUG}.toml"
+
+
+@pytest.fixture(scope="session")
+def made(proteo_made) -> tuple[Path, Path]:
+    """The tumour-against-normal root, ctx proteo run, and its dataset file."""
+    return proteo_made
 
 
 def _kinds(found) -> set[str]:
@@ -79,12 +81,13 @@ def drawn(root: Path) -> set[str]:
 
 def _redraws_alike(root: Path, found, tmp_path: Path) -> None:
     """Each spec redrawn in its own clean folder equals M7's files and its page's words."""
-    for spec in found:
-        module_csv = next(root.glob(f"outputs/07_proteo/{spec.stem}.csv"))
+    module_csvs = [next(root.glob(f"outputs/07_proteo/{spec.stem}.csv")) for spec in found]
+    for spec, module_csv in zip(found, module_csvs, strict=True):
         # specs() runs after the module: an input written after its figure is found here too,
         # so the module's own page must carry the panel the spec was found for when drawn.
         assert 'id="ctx-repro-' in module_csv.with_suffix(".html").read_text(), spec.stem
-        csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
+    for spec, module_csv, csv in zip(found, module_csvs, redrawn_each(found, root, tmp_path),
+                                     strict=True):  # fmt: skip
         assert drawn_alike(csv, module_csv) == [], spec.stem
         said = [WORDS.findall(p.with_suffix(".html").read_text()) for p in (module_csv, csv)]
         assert said[0] and said[0] == said[1], spec.stem
@@ -112,7 +115,7 @@ def test_a_run_with_other_options_redraws_with_them(across_root, tmp_path):
     and the method of F3's class test. F4 draws D-012's lfc whatever --lfc-min says."""
     root, dataset_file = across_root
     moved = tmp_path / "root"
-    shutil.copytree(root, moved, ignore=shutil.ignore_patterns("07_proteo"))
+    writable_copy(root, moved, ignore=shutil.ignore_patterns("07_proteo"))
     ctx("--root", str(moved), "proteo", "--dataset", "fake_brca", "--dataset-file",
         str(dataset_file), "--method", "pearson", "--min-quantified", "0.5", "--lfc-min", "0.5",
         "--gene-class", "complex")  # fmt: skip

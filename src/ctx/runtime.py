@@ -12,6 +12,7 @@ import subprocess
 import sys
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from functools import cache
 from importlib import metadata
 from pathlib import Path
 from time import perf_counter
@@ -269,11 +270,28 @@ def versions() -> dict[str, str]:
         Distribution name to version, sorted by name.
     """
     found = {"python": platform.python_version(), "ctx": ctx.__version__}
-    owners = metadata.packages_distributions()
+    owners = _owners()
     for top in {name.partition(".")[0] for name in list(sys.modules)}:
         for dist in owners.get(top, []):
-            found.setdefault(dist, metadata.version(dist))
+            found.setdefault(dist, _version(dist))
     return dict(sorted(found.items()))
+
+
+@cache
+def _owners() -> Mapping[str, list[str]]:
+    """Top-level module to the distributions that install it, read once per process.
+
+    What is installed does not change while ctx runs, and reading it walks every
+    distribution's files: 1.9 to 2.8 s a call at a load average of 20, paid by each of the 45
+    READMEs of one ``ctx process`` run (M3.14). The modules ``versions`` lists stay live.
+    """
+    return metadata.packages_distributions()
+
+
+@cache
+def _version(dist: str) -> str:
+    """An installed distribution's version, read once per process."""
+    return metadata.version(dist)
 
 
 def source() -> str:

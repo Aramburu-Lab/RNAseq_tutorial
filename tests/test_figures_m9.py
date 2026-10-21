@@ -11,9 +11,10 @@ from pathlib import Path
 
 import polars as pl
 import pytest
+from conftest import once
 from genecard_root import SLUG, Stub, make, own_files, responses
 from test_figure_panel import panels
-from test_figures import copied, drawn_alike, redrawn, specs
+from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
 from test_genecard import _cards, _register, _settings
 
 from ctx.dataset import load
@@ -49,11 +50,12 @@ def _built(root: Path, genes: tuple[str, ...] = GENES) -> Path:
     return spec
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def built(tmp_path_factory):
     """Every M9 figure kind drawn on the made-up root: (root, dataset file)."""
-    root = tmp_path_factory.mktemp("m9") / "root"
-    return root, _built(root)
+    return once(
+        tmp_path_factory, "m9_figures", lambda folder: (folder / "root", _built(folder / "root"))
+    )
 
 
 def _drawn(root: Path) -> set[tuple[str, str]]:
@@ -73,9 +75,8 @@ def _named(found) -> set[tuple[str, str]]:
 
 def _redraws_alike(root: Path, found, tmp_path: Path) -> None:
     """Each spec redrawn in its own clean folder equals M9's files."""
-    for spec in found:
+    for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/11_genecard/{spec.stem}.csv"))
-        csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
         assert drawn_alike(csv, module_csv) == [], spec.stem
 
 

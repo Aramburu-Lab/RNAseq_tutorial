@@ -12,8 +12,8 @@ from pathlib import Path
 
 import polars as pl
 import pytest
-from conftest import ctx_run
-from test_figures import copied, drawn_alike, redrawn, specs
+from conftest import ctx_run, once
+from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
 
 from ctx.figures.spec import parse
 
@@ -32,22 +32,22 @@ def _run(root: Path, spec: Path, dataset: str, *options: str) -> Path:
     return root / "outputs" / "08_ncrna"
 
 
-@pytest.fixture(scope="module")
-def tcga(tmp_path_factory) -> tuple[Path, Path]:
+@pytest.fixture(scope="session")
+def tcga(ncrna_tcga_run) -> tuple[Path, Path]:
     """ctx ncrna on the made-up GDC root: the root and its dataset file."""
-    import ncrna_tcga_root  # noqa: PLC0415 - imports synth, which only tests use
-
-    root, spec = ncrna_tcga_root.make(tmp_path_factory.mktemp("tcga_m8"), date.today())
-    _run(root, spec, ncrna_tcga_root.DATASET)
-    return root, spec
+    return ncrna_tcga_run[:2]
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def optioned(tmp_path_factory) -> tuple[Path, Path]:
     """ctx ncrna on the made-up Step-1 root with three biotype groups and another count."""
+    return once(tmp_path_factory, "ncrna_options", _optioned)
+
+
+def _optioned(folder: Path) -> tuple[Path, Path]:
     from ncrna_root import DATASET, make  # noqa: PLC0415
 
-    root, spec = make(tmp_path_factory.mktemp("ncrna_options"), date.today())
+    root, spec = make(folder, date.today())
     _run(root, spec, DATASET, "--biotypes", "protein_coding,lncRNA,pseudogene",
          "--min-count", "5")  # fmt: skip
     return root, spec
@@ -60,9 +60,8 @@ def _redraws_alike(root: Path, found, tmp_path: Path) -> set[str]:
         The kinds whose page carries a live control.
     """
     live = set()
-    for spec in found:
+    for spec, csv in zip(found, redrawn_each(found, root, tmp_path), strict=True):
         module_csv = next(root.glob(f"outputs/08_ncrna/{spec.stem}.csv"))
-        csv = redrawn(copied(spec, root, tmp_path / spec.stem), spec)
         assert drawn_alike(csv, module_csv) == [], spec.stem
         shown = [CONTROLS.findall(p.with_suffix(".html").read_text()) for p in (module_csv, csv)]
         assert shown[0] == shown[1], spec.stem

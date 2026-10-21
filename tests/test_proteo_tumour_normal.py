@@ -168,10 +168,10 @@ def made_root(tmp: Path) -> tuple[Path, Path]:
     return root, spec
 
 
-@pytest.fixture(scope="module")
-def made(tmp_path_factory) -> tuple[Path, Path]:
-    """One made-up root for every end-to-end test here."""
-    return made_root(tmp_path_factory.mktemp("tn"))
+@pytest.fixture(scope="session")
+def made(proteo_made) -> tuple[Path, Path]:
+    """One made-up root for every end-to-end test here, shared with test_figures_m7."""
+    return proteo_made
 
 
 def out(root: Path, what: str) -> pl.DataFrame:

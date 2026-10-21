@@ -241,3 +241,25 @@ def test_macos_reports_the_peak_footprint_time_prints():
     assert measured >= 300_000_000
     # time reads the footprint after the child exits, a little later than measure did.
     assert abs(printed - measured) <= 2_000_000, (measured, printed)
+
+
+def test_versions_reads_the_installed_map_once_and_the_imported_modules_each_time():
+    """The map from module to distribution is read once per process (M3.14: 2 s a README), but
+    a module imported after the first call is still listed by the next.
+
+    Mutations caught: the whole of versions() cached (the later import goes unlisted); the map
+    read on every call (the count rises past one)."""
+    found = _python(
+        """
+        from importlib import metadata
+        calls = []
+        read = metadata.packages_distributions
+        metadata.packages_distributions = lambda: calls.append(1) or read()
+        from ctx import runtime
+        first = runtime.versions()
+        import jinja2
+        second = runtime.versions()
+        print(*("jinja2" in {k.lower() for k in v} for v in (first, second)), len(calls))
+        """
+    )
+    assert found.split() == ["False", "True", "1"]

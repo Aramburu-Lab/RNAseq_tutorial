@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 import pytest
+from conftest import writable_copy
 from genecard_root import SLUG
 from test_figures_m9 import FOLDER, GENES, _built
 from test_qc_run import ENV
@@ -34,7 +35,10 @@ def test_m2_drops_its_flag_view_under_a_cap_one_byte_below_its_page(page, tmp_pa
     page and stopped the run."""
     from test_qc_run import RNASEQ, SPEC  # noqa: PLC0415
 
-    root, out, _, html = page
+    shared, out, _, html = page
+    # The fixture page is shared and sealed: the rerun writes into a copy of its root.
+    root = writable_copy(shared, tmp_path / "root")
+    out, html = (root / p.relative_to(shared) for p in (out, html))
     full = html.read_text()
     assert "every flag of the run" in full and "flag view of this map is left out" not in full
     limit = html.stat().st_size - 1

@@ -236,3 +236,37 @@ def test_relative_dest_and_config_are_resolved(tmp_path, monkeypatch):
     run = multiqc_io.run([Path("in")], Path("out") / "multiqc", config=Path("config.json"))
     assert run.data == tmp_path / "out" / "multiqc" / "multiqc_data"
     assert "relative config" in (tmp_path / "out" / "multiqc" / "multiqc_report.html").read_text()
+
+
+def test_at_once_runs_the_calls_together_and_keeps_their_order():
+    """Three calls that each wait for the other two finish only if they run together; the
+    one that ends last comes first, as given; an error comes out after every call has ended.
+
+    Mutations caught: the calls run one at a time (the barrier breaks); the results in the
+    order they ended; an error swallowed, or raised before the other calls end."""
+    import threading  # noqa: PLC0415
+    import time  # noqa: PLC0415
+
+    together, ended = threading.Barrier(3, timeout=10), []
+
+    def call(name: str, wait: float) -> str:
+        together.wait()
+        time.sleep(wait)
+        ended.append(name)
+        return name.upper()
+
+    work = {"c": lambda: call("c", 0.3), "a": lambda: call("a", 0.0), "b": lambda: call("b", 0.1)}
+    assert list(multiqc_io.at_once(work, 3).items()) == [("c", "C"), ("a", "A"), ("b", "B")]
+    assert ended == ["a", "b", "c"]
+
+    def fails() -> str:
+        raise QcError("planted")
+
+    def slow() -> None:
+        time.sleep(0.2)
+        ended.append("slow")
+
+    ended.clear()
+    with pytest.raises(QcError, match="planted"):
+        multiqc_io.at_once({"fails": fails, "slow": slow}, 2)
+    assert ended == ["slow"]
