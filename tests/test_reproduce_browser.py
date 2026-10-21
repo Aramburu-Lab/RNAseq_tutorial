@@ -16,7 +16,7 @@ from panel_golden import GOLDEN, WHERE, spec
 from test_export_browser import CHROMIUM, _browse
 
 from ctx.figures import panel
-from ctx.report.builder import FigureBlock, FigurePage, write
+from ctx.report.builder import FigureBlock, FigurePage, unpacked, write
 
 # Every tab clicked, its copy button pressed with the clipboard recorded (the selection where a
 # page cannot use it), its download link read; the shared block's state and the page's width.
@@ -63,7 +63,7 @@ def test_the_shared_steps_are_printed_once(page, monkeypatch):
     script as base64. Catches a tab that prints the whole block again, as F2's three did."""
     monkeypatch.setattr(panel, "_lock", lambda: None)
     for where, path in page.items():
-        shown = path.read_text()
+        shown = unpacked(path.read_text())
         assert shown.count("ctx figure desynth_m5_volcano --params params.toml") == 1, where
         assert shown.count("# 2. ") == 1 and 'href="data:text/x-shellscript' not in shown, where
         assert len(re.findall(r'<code id="ctx-repro-0-[a-z]+" data-shared=', shown)) == 3
@@ -113,6 +113,6 @@ def test_without_javascript_every_step_reads_once(page):
     """The page as served, before any script: each tab's step 1, then the shared steps, the
     download links marked for JavaScript. Catches a no-script reader left without steps 2 to
     5, and a download link that does nothing shown to that reader."""
-    shown = page["git"].read_text()
+    shown = unpacked(page["git"].read_text())
     assert shown.index('id="ctx-repro-0-pixi"') < shown.index('id="ctx-repro-0-shared"')
     assert len(re.findall(r'<p class="js-only"><a download=', shown)) == len(panel.TABS)

@@ -65,7 +65,7 @@ def test_cards_after_the_first_travel_packed_and_read_back_whole(root, monkeypat
     Mutations caught: every card packed or none; a gzip timestamp, which makes two builds
     differ."""
     _, written = _run(root, monkeypatch)
-    html = written[0].read_text()
+    html = written[0].read_text()  # the packing itself is read here, so the page as served
     assert len(packed_bytes(html)) == 1
     (blob,) = (m[0] for m in PACKED.finditer(html))
     assert "Exon use of ACTB" not in html.replace(blob, "")

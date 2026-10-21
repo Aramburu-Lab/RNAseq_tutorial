@@ -15,6 +15,7 @@ from conftest import ctx_run
 
 from ctx.dataset import DatasetError, load
 from ctx.gather import counts, counts_run
+from ctx.report.builder import unpacked
 
 # (gene_id, gene_name, transcripts) of the made-up annotation. G5 and G6 share a name, G8
 # has two Entrez IDs, and G7 and G9 each take one Entrez ID that also maps to G8's transcript.
@@ -162,7 +163,7 @@ def test_gather_counts_end_to_end(tmp_path):
     assert hashlib.sha256(path.read_bytes()).hexdigest() in readme
     assert "made-up matrix for a test" in readme
     assert "made-up annotation, version 1 (test)" in readme
-    page = next(out.glob("*_gather_mat_overview_v1.html")).read_text()
+    page = unpacked(next(out.glob("*_gather_mat_overview_v1.html")).read_text())
     assert "1 equal the annotation&#39;s, 1 differ, 1 without a version" in page
 
 

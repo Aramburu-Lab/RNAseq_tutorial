@@ -23,6 +23,7 @@ from ctx.de.deseq import RESULT_COLUMNS, fit
 from ctx.gather import gdc
 from ctx.io.naming import stem
 from ctx.io.readme_companion import write_table
+from ctx.report.builder import unpacked
 from ctx.report.cap import MAX_BYTES
 from ctx.runtime import BUDGETS
 
@@ -90,7 +91,7 @@ def test_tcga_brca_ncrna_keeps_track_b(tmp_path):
     _m5(root)
     _run(root, "ncrna", "--dataset", NAME)
     (page,) = (root / "outputs" / "08_ncrna").glob(f"*_{NAME}_overview_v1.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', html).group(1))  # type: ignore[union-attr]
     rss = int(re.search(r'<td class="rss-self">[\d.]+ MiB \((\d+) bytes\)</td>', html).group(1))  # type: ignore[union-attr]
     print(f"\nncrna {NAME}: wall {wall:.1f} s, self {rss:,} B, page {page.stat().st_size:,} B")

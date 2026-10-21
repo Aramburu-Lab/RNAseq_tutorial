@@ -18,6 +18,7 @@ from test_export_browser import CHROMIUM, _browse
 
 from ctx.clinical.page import screen_rows
 from ctx.report import genes, text
+from ctx.report.builder import unpacked
 
 ACT = """(async () => {
   const wait = ms => new Promise(r => setTimeout(r, ms));
@@ -54,7 +55,7 @@ LINKED = """(async () => {
 @pytest.fixture(scope="module")
 def ran(clinical_root, tmp_path_factory):  # noqa: F811 - the fixture
     page = outputs(clinical_root, "overview_v1.html")
-    cfg = controls(page.read_text(), "survival")
+    cfg = controls(unpacked(page.read_text()), "survival")
     linked = genes.encode(genes.Selection("fake_brca:a_case", tuple(sorted(cfg["numbers"][3:6]))))
     tasks = [{"name": "m10", "url": page.as_uri(), "width": 1280, "height": 900, "act": ACT},
              {"name": "linked", "url": page.as_uri() + linked, "width": 1280, "height": 900,
@@ -95,7 +96,7 @@ def test_the_screen_and_the_captions_follow_the_scored_list(ran):
 def test_the_screen_rows_sort_as_the_table_does(clinical_root):  # noqa: F811 - the fixture
     """ctxLive.screen: a list's rows by adjusted q, the refused last, ties by panel row, and
     the count of its genes with no row. Mutation: ties left in the list's order."""
-    html = outputs(clinical_root, "overview_v1.html").read_text()
+    html = unpacked(outputs(clinical_root, "overview_v1.html").read_text())
     cfg = controls(html, "survival")
     rows = [[0, 0.5, ["a"]], [1, None, ["b"]], [2, 0.1, ["c"]], [3, 0.5, ["d"]]]
     script = re.sub(r"\{% (end)?raw %\}", "", (TEMPLATES / "_live.js.j2").read_text())
@@ -135,7 +136,7 @@ def test_a_screen_gene_takes_its_hazard_ratios_side_as_its_sign(clinical_root): 
     assert [r[3] for r in rows] == [1, -1, 1, None]
     assert _strongest(rows, 3) == {"genes": [1, 0, 2], "signs": [-1, 1, 1]}
     # On the built page every row's sign is its adjusted HR's side of 1, read from the table.
-    cfg = controls(outputs(clinical_root, "overview_v1.html").read_text(), "survival")
+    cfg = controls(unpacked(outputs(clinical_root, "overview_v1.html").read_text()), "survival")
     built = pl.read_csv(outputs(clinical_root, "cox_screen_v1.csv"), comment_prefix="#")
     signs = [None if q is None or hr is None else (1 if hr >= 1 else -1)
              for hr, q in zip(built["hr_adjusted"], built["q_adjusted"], strict=True)]  # fmt: skip

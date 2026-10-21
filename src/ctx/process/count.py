@@ -192,7 +192,8 @@ def summaries(counts: Counts, alignment: Alignment, dest: Path, config: Path,
     """
 
     def one(setting: str) -> mqc_io.MultiqcRun:
-        run = mqc_io.run([counts.summary(setting)], dest / f"fc_{setting}", config=config,
+        """One setting's MultiQC run, refused unless it holds one row per BAM."""
+        run =mqc_io.run([counts.summary(setting)], dest / f"fc_{setting}", config=config,
                          modules=("featurecounts",))  # fmt: skip
         names = mqc_io.table(run, "featurecounts")["Sample"].to_list()
         if sorted(names) != sorted(alignment.samples):

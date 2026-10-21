@@ -18,6 +18,7 @@ from test_packaging import run_from_wheel
 
 from ctx.cli import app
 from ctx.io.naming import MODULES, lint
+from ctx.report.builder import unpacked
 from ctx.report.cards import parameter_cards
 from ctx.runtime import BUDGETS
 
@@ -252,7 +253,6 @@ def test_gather_runs_from_wheel(tmp_path, wheel_site):
 def _offline(html: str) -> None:
     """P1.8: plotly.js inlined at most once, no external script, link or url()."""
     from ctx.report.builder import plotly_js  # noqa: PLC0415
-    from ctx.report.figures import unpacked  # noqa: PLC0415
 
     js, raw = plotly_js(), unpacked(html)
     assert raw.count(js) <= 1 and "\ufffd" not in html
@@ -273,7 +273,7 @@ def test_module_outputs_clean(pipeline, folder):
         stem = data.name.rsplit(".", 1)[0]
         assert (out / f"{stem}_README.md").is_file(), data.name
     for page in out.glob("*.html"):
-        _offline(page.read_text())
+        _offline(page.read_text())  # _offline reads it as served and unpacked
 
 
 def test_de_end_to_end(de_run):
@@ -331,14 +331,16 @@ def test_hub_links_resolve_after_move(pipeline, tmp_path):
     shutil.copytree(root / "outputs", moved)
     (hub,) = (moved / "09_report").glob("*_desynth_hub_v1.html")
     # Links off the page; the skip link stays on it.
-    hrefs = [h for h in re.findall(r'href="([^"]+)"', hub.read_text()) if not h.startswith("#")]
+    hrefs = [
+        h for h in re.findall(r'href="([^"]+)"', unpacked(hub.read_text())) if not h.startswith("#")
+    ]
     # The glossary beside the hub (D-048), then the pages: only de and function wrote pages
     # here; setup and gather are listed as not run. Mutation: the hub's glossary link dropped
     # from builder.write fails the first assertion.
     glossary, *pages = hrefs
     assert "/" not in glossary and glossary.endswith("_report_glossary_v1.html")
     assert [h.split("/")[1] for h in pages] == ["05_de", "06_function"]
-    assert "Not run yet: M0 Setup, M1 Gather" in hub.read_text()
+    assert "Not run yet: M0 Setup, M1 Gather" in unpacked(hub.read_text())
     for href in hrefs:
         assert not href.startswith(("http", "/")), href
         assert (hub.parent / href).resolve().is_file(), href
@@ -402,7 +404,7 @@ def test_report_decides_sanity(pipeline):
     verdicts = pl.read_parquet(next(out.glob("*_desynth_sanity_v1.parquet")))
     rules = dict(verdicts.select("rule", "rule_verdict").unique().rows())
     assert rules == {"S1": "PASS", "S2": "PASS", "S3": "NOT MEASURED"}
-    hub = next(out.glob("*_desynth_hub_v1.html")).read_text()
+    hub = unpacked(next(out.glob("*_desynth_hub_v1.html")).read_text())
     assert hub.count('class="verdict"') == 4  # S1, both S2 conditions, S3
 
 

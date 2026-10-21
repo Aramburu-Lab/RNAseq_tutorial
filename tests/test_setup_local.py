@@ -12,6 +12,7 @@ from pathlib import Path
 import pytest
 
 from ctx.dataset import DatasetError, Resource, load
+from ctx.report.builder import unpacked
 from ctx.setup import MANIFEST, FetchError, fetch
 
 CTX = Path(sys.executable).parent / "ctx"
@@ -144,6 +145,6 @@ def test_cli_from_dir(tmp_path):
     assert done.returncode == 0, done.stderr
     assert (root / "data" / "raw" / "s2.xlsx").read_bytes() == BODY
     (page,) = (root / "outputs" / "00_setup").glob("*.html")
-    assert "--from-dir" in page.read_text()
+    assert "--from-dir" in unpacked(page.read_text())
     alone = run_setup(root, "--from-dir", str(folder))
     assert alone.returncode == 1 and "give --dataset-file" in alone.stderr

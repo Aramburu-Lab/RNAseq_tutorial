@@ -22,9 +22,8 @@ from ctx.clinical import ClinicalError
 from ctx.clinical.run import build_list
 from ctx.dataset import load
 from ctx.report import genes
-from ctx.report.builder import plotly_js
+from ctx.report.builder import plotly_js, unpacked
 from ctx.report.cap import MAX_BYTES
-from ctx.report.figures import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "src" / "ctx" / "report" / "templates"
@@ -44,7 +43,7 @@ def test_genes_from_replaces_the_build_list(tmp_path):
     listed.write_text("# source: x:y\n# count: 2\nG2\nG7\n")
     ctx("--root", str(root), "clinical", "--dataset", "fake_brca", "--dataset-file", str(spec),
         "--genes-from", str(listed))  # fmt: skip
-    html = outputs(root, "overview_v1.html").read_text()
+    html = unpacked(outputs(root, "overview_v1.html").read_text())
     cfg = controls(html, "survival")
     assert cfg["defaults"]["genes"] == "G2\nG7" and cfg["source"] == "mine.txt"
 
@@ -84,9 +83,10 @@ def controls(html: str, kind: str) -> dict:
 def test_the_page_is_offline_under_the_cap_and_names_its_sources(clinical_root):
     """Catches a page over 15 MB, a script fetched from the network, and the GDC
     acknowledgement or the CDR's licence left out."""
-    html = outputs(clinical_root, "overview_v1.html").read_text()
-    assert len(html.encode()) <= MAX_BYTES
-    assert unpacked(html).count(plotly_js()) == 1
+    served = outputs(clinical_root, "overview_v1.html").read_text()
+    html = unpacked(served)
+    assert len(served.encode()) <= MAX_BYTES
+    assert html.count(plotly_js()) == 1
     assert not re.search(r"<script[^>]+\bsrc\s*=", html, re.IGNORECASE)
     assert "TCGA Research Network: https://www.cancer.gov/tcga." in html
     assert "CC BY-NC-ND 4.0" in html
@@ -140,7 +140,7 @@ def test_the_live_default_equals_the_builds_tables(clinical_root):
     the build's Cox and group tables and its summary line. Catches a default list, endpoint or
     split that differs from the build's, the block decoded in the wrong plane order, and the
     adjusted model fitted over rows a covariate leaves empty."""
-    html = outputs(clinical_root, "overview_v1.html").read_text()
+    html = unpacked(outputs(clinical_root, "overview_v1.html").read_text())
     page = node_default(html)
     models = pl.read_csv(outputs(clinical_root, "cox_score_v1.csv"))
     for name in ("alone", "adjusted"):
@@ -198,7 +198,7 @@ def test_the_block_holds_the_builds_stored_values(clinical_root):
     Catches values scaled twice, or the planes swapped."""
     from ctx.clinical import panel  # noqa: PLC0415
 
-    html = outputs(clinical_root, "overview_v1.html").read_text()
+    html = unpacked(outputs(clinical_root, "overview_v1.html").read_text())
     cfg = controls(html, "survival")
     values = panel.decode(cfg["block"], cfg["genes"], cfg["patients"])
     box = pl.read_csv(outputs(clinical_root, "expression_er_v1.csv"))
@@ -326,7 +326,7 @@ def test_the_sex_sentence_counts_the_few_where_sex_is_no_variable():
 def test_the_page_prints_the_cohorts_own_endpoint_and_no_sex_flag(clinical_root):
     """End to end: the made-up cohort declares no Table 3 marks and has women only, so the page
     says it holds no copy and prints no sex sentence. Catches the sentences built and dropped."""
-    html = outputs(clinical_root, "overview_v1.html").read_text().replace("&#39;", "'")
+    html = unpacked(outputs(clinical_root, "overview_v1.html").read_text()).replace("&#39;", "'")
     assert "The models below fit PFI, the dataset file's endpoint." in html
     assert "holds no copy of Liu et al. 2018 Table 3's use marks for FAKE-BRCA." in html
     assert "flagged by sex" not in html

@@ -14,6 +14,7 @@ import pytest
 from conftest import writable_copy
 
 from ctx.io.naming import NATIVE_DIRS, figure_files, lint
+from ctx.report.builder import unpacked
 
 # Session fixture of conftest.py: the output folders its commands write.
 RUNS = {
@@ -85,7 +86,7 @@ def figure_problems(folder: Path) -> dict[str, str]:
         if missing:
             problems[name] = f"missing {missing}"
             continue
-        page = (white.parent / f"{stem}.html").read_text()
+        page = unpacked((white.parent / f"{stem}.html").read_text())
         captions = re.findall(r"<figcaption>(.*?)</figcaption>", page, re.DOTALL)
         text = html.unescape(re.sub(r"<[^>]+>", "", " ".join(captions)))
         why = caption_problem(text) if captions else "has no caption"
@@ -135,7 +136,7 @@ def test_the_checks_see_a_planted_fault(tmp_path, quant_run):
     clean = sorted(p for p in folder.glob("*_white.pdf") if not any(k in p.name for k in before))
     page = clean[0].with_name(clean[0].name.replace("_white.pdf", ".html"))
     page.write_text(re.sub(r"<figcaption>.*?</figcaption>", "<figcaption>Reads.</figcaption>",
-                           page.read_text(), flags=re.DOTALL))  # fmt: skip
+                           unpacked(page.read_text()), flags=re.DOTALL))  # fmt: skip
     clean[1].with_name(clean[1].name.replace("_white.pdf", "_black.svg")).unlink()
     after = figure_problems(folder)
     assert len(after) == len(before) + 2

@@ -26,6 +26,7 @@ from scipy import stats
 from ctx.dataset import DatasetError, load
 from ctx.proteo import ProteoError, folds, measure, tables
 from ctx.report import text
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 CASES = 8
@@ -247,7 +248,7 @@ def test_page_text_is_written_for_tumour_against_normal(made):
     Catches: the page built from the generic sections (granules, complexes)."""
     root, _ = made
     (page,) = (root / "outputs" / "07_proteo").glob("*_overview_v1.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     own = text.raw("proteo", "variants.tumour_normal")
     assert own["pitfalls"][1].split(":")[0] in html
     assert own["questions"][1]["prompt"].split(" the same")[0] in html

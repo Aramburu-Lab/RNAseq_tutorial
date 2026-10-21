@@ -176,15 +176,16 @@ _PACKED_ROWS = re.compile(r'<script type="application/octet-stream" (id="ctx-dat
 
 
 def _inflated(packed: str) -> str:
+    """``pack_json`` text as the text it packed, unparsed."""
     return zlib.decompress(base64.b64decode(packed), -15).decode()
 
 
-def unpacked(html: str) -> str:
+def unpack_figures(html: str) -> str:
     """A page with plotly.js, every figure's arguments and every rows table raw again.
 
-    The inverse of what the builder packs (Z.5), and the page as it was written before
-    anything was packed, without the unpack script: what a test reads plotly.js and a figure's
-    JSON from.
+    The inverse of what ``prepare`` and the page template pack (Z.5), without the unpack
+    script. Read a page through ``builder.unpacked``, which opens its packed groups first:
+    a group's figures are packed inside it.
     """
     html = _PLOTLY.sub(lambda m: f"<script>{_inflated(m[1])}</script>\n", html, count=1)
     html = _PACKED_PLOT.sub(lambda m: m[1] + _inflated(m[2])[1:-1], html)

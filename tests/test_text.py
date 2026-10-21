@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from ctx.report import text
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 CONTENT = ROOT / "src" / "ctx" / "report" / "content"
@@ -141,7 +142,7 @@ def test_an_edited_copy_changes_the_page(tmp_path):
                           capture_output=True, text=True, check=False)  # fmt: skip
     assert done.returncode == 0, done.stderr
     (page,) = root.rglob("*_setup_environment_v1.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     assert "before class starts" in html
     assert "before any analysis runs on it" not in html
     (copy / "ui.toml").unlink()

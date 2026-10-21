@@ -19,6 +19,7 @@ from test_genecard import _cards, _register, _settings
 from ctx.genecard import annotation, figures, hpa
 from ctx.genecard import run as module
 from ctx.report import genes
+from ctx.report.builder import unpacked
 from ctx.viz.heatmap import diverging_levels
 
 pytestmark = pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
@@ -224,7 +225,9 @@ def test_the_list_draws_its_evidence_as_the_evidence_view_does(ran):
     drawn grey; the key listing steps not drawn; the rows in another order than the list's;
     the cap below the list; the least width left to plotly."""
     got = results_link = ran[1]["link"]["acted"]
-    page = next((ran[0] / "outputs" / "11_genecard").glob("*_overview_v1.html")).read_text()
+    page = unpacked(
+        next((ran[0] / "outputs" / "11_genecard").glob("*_overview_v1.html")).read_text()
+    )
     heat = json.loads(re.search(r'id="ctx-panel-1">([^<]*)</script>', page)[1])["heat"]
     assert got["least"] == f"{math.ceil(heat['least_px'])}px"
     steps = [s.level for s in diverging_levels([])[1]]

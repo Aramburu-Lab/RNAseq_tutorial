@@ -15,6 +15,7 @@ from test_kit import CHECK, NEW, SCRIPT, a_root, load, page
 
 from ctx.io.naming import ENTRY, lint
 from ctx.report import builder
+from ctx.report.builder import unpacked
 from ctx.report.entry import CONSUMERS, write_entry
 
 
@@ -36,14 +37,14 @@ def test_one_dataset_forwards_and_two_are_listed(tmp_path):
     folder = tmp_path / "outputs" / "11_genecard"
     _overview(folder, "tcga_brca", "TCGA breast", day="2026-09-01")
     _overview(folder, "tcga_brca", "TCGA breast")
-    html = write_entry(folder, "genecard").read_text()
+    html = unpacked(write_entry(folder, "genecard").read_text())
     assert re.findall(r'<a href="([^"]+)" data-entry>', html) == [
         f"{NEW}_genecard_tcga_brca_overview_v1.html"]  # fmt: skip
     assert 'location.replace(links[0].getAttribute("href"))' in html
     assert 'a.getAttribute("href") + location.hash' in html
     assert "plotly.js v" not in html and len(html.encode()) < 500_000  # noqa: PLR2004
     _overview(folder, "tcga_kirc", "TCGA kidney")
-    html = write_entry(folder, "genecard").read_text()
+    html = unpacked(write_entry(folder, "genecard").read_text())
     assert len(re.findall(r"data-entry>", html)) == 2  # noqa: PLR2004 - two datasets
     with pytest.raises(ValueError, match="reads no gene list"):
         write_entry(folder, "de")

@@ -18,6 +18,7 @@ import pytest
 from scipy.stats import false_discovery_control, spearmanr
 
 from ctx.ncrna import NcrnaError, biotypes, figures, neighbours
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_pairs.js.j2"
@@ -288,7 +289,7 @@ def test_page_end_to_end(built):
     pairs = table(out, "pairs")
     kinds = set(pairs["kind"])
     assert {"antisense", "same_strand", "near", "far", "trans"} <= kinds
-    html = page.read_text()
+    html = unpacked(page.read_text())
     blocks = re.findall(r'<script type="application/json" id="ctx-controls-\d+">(.*?)</script>',
                         html, flags=re.S)  # fmt: skip
     (controls,) = [c for c in map(json.loads, blocks) if c["kind"] == "pairs"]
@@ -303,7 +304,7 @@ def test_the_filter_figure_offers_each_preset_as_m5_counts_it(built):
     Mutations caught: the presets' kept shares all taken at the run's count; the run's count
     not the first view, so the page opens on another figure than its files."""
     out, written = built
-    html = Path(written[0]).read_text()
+    html = unpacked(Path(written[0]).read_text())
     blocks = re.findall(r'<script type="application/json" id="ctx-controls-\d+">(.*?)</script>',
                         html, flags=re.S)  # fmt: skip
     (view,) = [c for c in map(json.loads, blocks) if c["kind"] == "view"]

@@ -15,6 +15,7 @@ from pathlib import Path
 import polars as pl
 import pytest
 
+from ctx.report.builder import unpacked
 from ctx.report.cap import MAX_BYTES
 from ctx.runtime import BUDGETS
 
@@ -25,7 +26,7 @@ FREEZE = "resources/datasets/cptac_brca/S060_Breast_Cancer_data_freeze_GCTfiles_
 
 def measured(page: Path) -> tuple[float, int]:
     """Wall seconds and this process's peak RSS in bytes, as the page's Reproduce table prints."""
-    html = page.read_text()
+    html = unpacked(page.read_text())
     wall = re.search(r'<td class="wall">([\d.]+) s</td>', html)
     rss = re.search(r'<td class="rss-self">[\d.]+ MiB \((\d+) bytes\)</td>', html)
     assert wall and rss

@@ -15,6 +15,7 @@ from conftest import once, writable_copy
 from synth import DE_GROUPS, design_counts, write_gather_outputs
 
 from ctx.io.naming import lint
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 CTX = Path(sys.executable).parent / "ctx"
@@ -92,7 +93,7 @@ def _planted_run(folder: Path):
     names = ("metrics", "bands", "flags", "status", "confounding", "sex_check")
     tables = {w: pl.read_csv(next(out.glob(f"*_desynth_{w}_v1.csv"))) for w in names}
     (page,) = out.glob("*_qc_desynth_overview_v1.html")
-    return root, planted, tables, page.read_text()
+    return root, planted, tables, unpacked(page.read_text())
 
 
 def test_the_planted_problems_are_flagged(ran):
@@ -221,7 +222,7 @@ def test_the_m3_alignment_table_is_judged_on_the_align_stage(tmp_path):
     assert {"unique_pct", "forward_share"} <= set(metrics.columns)
     flags = pl.read_csv(next(out.glob("*_flags_v1.csv")))
     assert ("S003", "align_unique_pct") in set(flags.select("sample", "metric").rows())
-    assert "Reads mapped once" in next(out.glob("*_overview_v1.html")).read_text()
+    assert "Reads mapped once" in unpacked(next(out.glob("*_overview_v1.html")).read_text())
 
 
 def test_without_an_annotation_the_shares_are_left_out_and_said(tmp_path):
@@ -234,7 +235,9 @@ def test_without_an_annotation_the_shares_are_left_out_and_said(tmp_path):
     out = root / "outputs" / "02_qc"
     metrics = pl.read_csv(next(out.glob("*_metrics_v1.csv")))
     assert "mt_fraction" not in metrics.columns and "library_size" in metrics.columns
-    assert "Composition shares not measured" in next(out.glob("*_overview_v1.html")).read_text()
+    assert "Composition shares not measured" in unpacked(
+        next(out.glob("*_overview_v1.html")).read_text()
+    )
 
 
 def test_a_strata_column_the_sheet_lacks_stops_the_run(tmp_path):
@@ -286,7 +289,7 @@ def test_reports_add_fates_figures_and_the_multiqc_report(with_reports):
     assert (out / "multiqc" / "multiqc_report.html").is_file()
     assert next(out.glob("*_desynth_multiqc_config_v1.yml")).read_text().startswith("{")
     assert lint(out)[1] == []
-    page = next(out.glob("*_overview_v1.html")).read_text()
+    page = unpacked(next(out.glob("*_overview_v1.html")).read_text())
     assert "Where the reads went" in page and "built-in method" not in page
     assert not (RNASEQ / "multiqc").exists()
 
@@ -373,7 +376,7 @@ def test_reads_add_curves_the_grid_and_their_own_multiqc_report(with_reads):
     assert grid.height == 36 and grid["passed_pct"].n_unique() > 1
     assert (out / "multiqc" / "reads" / "multiqc_report.html").is_file()
     assert lint(out)[1] == []
-    page = next(out.glob("*_overview_v1.html")).read_text()
+    page = unpacked(next(out.glob("*_overview_v1.html")).read_text())
     assert "The reads themselves" in page and "built-in method" not in page
     assert "Per-base sequence content: FastQC's verdict is judged" in html.unescape(page)
 
@@ -388,7 +391,7 @@ def test_the_grid_draws_settings_that_keep_none_as_its_floor(with_reads):
     assert cells.filter(pl.col("band").is_null()).equals(none)
     kept = cells.filter(pl.col("passed_pct") > 0)
     assert (kept["band"].min(), kept["band"].max()) == (0, 7)
-    page = html.unescape(next(out.glob("*_overview_v1.html")).read_text())
+    page = html.unescape(unpacked(next(out.glob("*_overview_v1.html")).read_text()))
     assert (f"fastp keeps between {kept['passed_pct'].min():.1f} and "
             f"{kept['passed_pct'].max():.1f} % of the reads at 30 of the 36 settings; the other 6 "
             "keep none.") in page  # fmt: skip
@@ -420,7 +423,7 @@ def test_no_registry_text_claims_a_control_the_page_lacks(with_reads):
     from ctx.qc import registry  # noqa: PLC0415
 
     out, _ = with_reads
-    page = html.unescape(next(out.glob("*_overview_v1.html")).read_text())
+    page = html.unescape(unpacked(next(out.glob("*_overview_v1.html")).read_text()))
     figures = _figures(page)
     assert figures["linked_pca"] == ["brush"], "the reader of controls must see a real one"
     loaded = registry.load(ROOT / "conf" / "qc_metrics.toml")
@@ -456,7 +459,7 @@ def test_fetchngs_reads_alone_within_the_track_a_budget(tmp_path):
         done = ctx("--root", str(root), *args, cwd=root)
         assert done.returncode == 0, (args[0], done.stderr[-3000:])
     out = root / "outputs" / "02_qc"
-    page = next(out.glob("*_overview_v1.html")).read_text()
+    page = unpacked(next(out.glob("*_overview_v1.html")).read_text())
     assert "Counts not judged" in page
     metrics = pl.read_csv(next(out.glob("*_read_metrics_v1.csv")))
     assert metrics.height == 4 and (metrics["fastqc-total_sequences"] > 0).all()

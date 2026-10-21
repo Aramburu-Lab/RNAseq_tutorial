@@ -30,6 +30,7 @@ from ctx.report.builder import (
     Reproduction,
     SelfCheck,
     render,
+    unpacked,
     write,
 )
 from ctx.report.cap import MAX_BYTES
@@ -349,14 +350,14 @@ def test_writing_a_page_writes_the_glossary_it_links(tmp_path):
     """
     out = _root(tmp_path)
     page = write(_module(), out / "01_gather" / f"{TODAY}_gather_demo_overview_v1.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     (link,) = re.findall(r'class="glossary-link" href="([^"]+)"', html)
     assert link == f"../09_report/{TODAY}_report_glossary_v1.html"
     target = (page.parent / link).resolve()
     assert target.is_file() and check(target.name)
     (payload,) = re.findall(r'id="ctx-glossary">(.*?)</script>', html, re.S)
     assert json.loads(payload)["href"] == link
-    anchors = set(re.findall(r'<article class="entry" id="([^"]+)"', target.read_text()))
+    anchors = set(re.findall(r'<article class="entry" id="([^"]+)"', unpacked(target.read_text())))
     assert {"fastq", "md5"} <= anchors
 
 
@@ -369,7 +370,7 @@ def test_a_page_outside_a_ctx_root_keeps_its_tooltips_and_links_no_glossary(tmp_
     """
     (tmp_path / "work").mkdir()
     page = write(_module(), tmp_path / "work" / "page.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     (payload,) = re.findall(r'id="ctx-glossary">(.*?)</script>', html, re.S)
     assert json.loads(payload)["href"] == "" and set(json.loads(payload)["entries"]) == {
         "fastq", "md5"}  # fmt: skip
@@ -385,7 +386,7 @@ def test_the_hub_links_the_glossary(tmp_path):
     out = _root(tmp_path)
     hub = HubPage("Course hub: Demo", "Every page.", (), (), ())
     page = write(hub, out / "09_report" / f"{TODAY}_report_demo_hub_v1.html")
-    (link,) = re.findall(r'class="glossary-link" href="([^"]+)"', page.read_text())
+    (link,) = re.findall(r'class="glossary-link" href="([^"]+)"', unpacked(page.read_text()))
     assert link == f"{TODAY}_report_glossary_v1.html" and (page.parent / link).is_file()
 
 
@@ -398,8 +399,8 @@ def test_the_glossary_page(tmp_path):
     out = _root(tmp_path)
     write(_module(), out / "01_gather" / f"{TODAY}_gather_demo_overview_v1.html")
     target = out / "09_report" / f"{TODAY}_report_glossary_v1.html"
-    html = target.read_text()
-    assert len(html.encode()) < MAX_BYTES
+    html = unpacked(target.read_text())
+    assert target.stat().st_size < MAX_BYTES
     ids = re.findall(r'<article class="entry" id="([^"]+)"', html)
     assert ids == [e.id for _, entries in glossary.grouped() for e in entries]
     assert len(ids) == 189
@@ -448,7 +449,7 @@ def test_captions_print_their_display_text_in_pdf_and_svg(tmp_path):
         if path.suffix == ".pdf":
             printed = " ".join((p.extract_text() or "") for p in PdfReader(path).pages)
             assert "[[" not in printed and "FASTQ" in printed
-    page = (out / f"{figure_stem}.html").read_text()
+    page = unpacked((out / f"{figure_stem}.html").read_text())
     assert re.search(r'<figcaption>Reads per <span class="term">FASTQ<button', page)
     plot = re.search(r'<div class="fig-plot">(.*?)<figcaption>', page, re.S)[1]
     assert "FASTQ" not in plot and "Samples" in plot
@@ -522,7 +523,7 @@ def test_a_figure_outside_a_ctx_root_is_written_whole(tmp_path):
     files = write_figure(data, out, stem("qc", "marked_demo", 1, day=date.today()),
                          title="Demo", data_releases={})  # fmt: skip
     assert len(files) == 7 and all(f.is_file() for f in files)
-    page = next(f for f in files if f.suffix == ".html").read_text()
+    page = unpacked(next(f for f in files if f.suffix == ".html").read_text())
     (payload,) = re.findall(r'id="ctx-glossary">(.*?)</script>', page, re.S)
     assert json.loads(payload)["href"] == "" and 'class="glossary-link"' not in page
 

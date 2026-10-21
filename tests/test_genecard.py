@@ -315,7 +315,7 @@ def test_run_degrades_and_stamps_the_footer(root):
     assert not re.search(r"\{[a-z_]+(:[^}]*)?\}", re.sub(r"<[^>]+>", " ", shown))
     assert "same MANE Select exons" in page
     assert (folder / SETUP_MANIFEST).read_bytes() == setup_manifest
-    assert len(page.encode()) < 15_000_000  # noqa: PLR2004 - the HTML report cap
+    assert written[0].stat().st_size < 15_000_000  # noqa: PLR2004 - the HTML report cap
     written_dirs = {p.parent.relative_to(folder).as_posix() for p in written}
     assert written_dirs == {"outputs/11_genecard"}
     tissues = pl.read_parquet(next(p for p in written if p.name.endswith("_tissues_v1.parquet")))

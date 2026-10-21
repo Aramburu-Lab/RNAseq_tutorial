@@ -34,8 +34,8 @@ from ctx.report.builder import (
     Reproduction,
     SelfCheck,
     render,
+    unpacked,
 )
-from ctx.report.figures import unpacked
 from ctx.viz.metrics import text_width
 from ctx.viz.save import figure_block
 from ctx.viz.style import (

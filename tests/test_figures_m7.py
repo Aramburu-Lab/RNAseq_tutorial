@@ -25,6 +25,7 @@ from ctx.proteo import figure_tables, figures
 from ctx.proteo.page import PAIRED_TOP
 from ctx.proteo.run import Measured
 from ctx.proteo.tables import Layer
+from ctx.report.builder import unpacked
 
 M7 = ("07_proteo",)
 MISSING = {"quantified", "coverage"}
@@ -85,11 +86,13 @@ def _redraws_alike(root: Path, found, tmp_path: Path) -> None:
     for spec, module_csv in zip(found, module_csvs, strict=True):
         # specs() runs after the module: an input written after its figure is found here too,
         # so the module's own page must carry the panel the spec was found for when drawn.
-        assert 'id="ctx-repro-' in module_csv.with_suffix(".html").read_text(), spec.stem
+        assert 'id="ctx-repro-' in unpacked(module_csv.with_suffix(".html").read_text()), spec.stem
     for spec, module_csv, csv in zip(found, module_csvs, redrawn_each(found, root, tmp_path),
                                      strict=True):  # fmt: skip
         assert drawn_alike(csv, module_csv) == [], spec.stem
-        said = [WORDS.findall(p.with_suffix(".html").read_text()) for p in (module_csv, csv)]
+        said = [
+            WORDS.findall(unpacked(p.with_suffix(".html").read_text())) for p in (module_csv, csv)
+        ]
         assert said[0] and said[0] == said[1], spec.stem
 
 
@@ -133,7 +136,7 @@ def test_a_run_with_other_options_redraws_with_them(across_root, tmp_path):
 
 def _read(csv: Path) -> tuple[bytes, list[str]]:
     """A figure's data table and its page's lead and reading guide."""
-    return csv.read_bytes(), WORDS.findall(csv.with_suffix(".html").read_text())
+    return csv.read_bytes(), WORDS.findall(unpacked(csv.with_suffix(".html").read_text()))
 
 
 def test_drawn_rows_hold_every_heatmap_gene_past_the_cap(across_root, tmp_path):
@@ -187,7 +190,7 @@ def test_a_cross_study_n_counts_each_level_of_the_contrast(cross_root, tmp_path)
         "\n".join(x for x in raw if not x.startswith("protein_samples = ") or ".parquet" in x)
         + "\n"
     )
-    page = redrawn(folder, spec).with_suffix(".html").read_text()
+    page = unpacked(redrawn(folder, spec).with_suffix(".html").read_text())
     assert "5 and 3" in page and "4 and 4" not in page
 
 

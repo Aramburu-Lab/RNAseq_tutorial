@@ -28,6 +28,7 @@ from test_clinical_page import clinical_root, controls, outputs  # noqa: F401
 
 from ctx.clinical import gene, panel
 from ctx.dataset import ENDPOINTS
+from ctx.report.builder import unpacked
 from ctx.viz.style import KM
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -180,7 +181,7 @@ def test_the_twin_equals_python_on_the_page(clinical_root):  # noqa: F811 - the 
     """The made-up root's page: four of its panel genes on all four endpoints, from the
     page's own block and endpoints, so both languages read the bytes the browser reads.
     Mutations caught as above, and the twin reading another gene's plane."""
-    cfg = controls(outputs(clinical_root, "overview_v1.html").read_text(), "survival")
+    cfg = controls(unpacked(outputs(clinical_root, "overview_v1.html").read_text()), "survival")
     values = panel.decode(cfg["block"], cfg["genes"], cfg["patients"])
     raw = gzip.decompress(base64.b64decode(cfg["block"]))
     assert len(raw) == 2 * cfg["genes"] * cfg["patients"]
@@ -199,7 +200,7 @@ def test_the_twin_equals_python_on_the_page(clinical_root):  # noqa: F811 - the 
 def test_the_screen_rows_carry_the_screens_own_p_values(clinical_root):  # noqa: F811
     """The gene box prints each model's p from the screen's rows: they are the screen table's
     p values as the page prints numbers. Mutation caught: the p cells written as none."""
-    cfg = controls(outputs(clinical_root, "overview_v1.html").read_text(), "survival")
+    cfg = controls(unpacked(outputs(clinical_root, "overview_v1.html").read_text()), "survival")
     table = pl.read_csv(outputs(clinical_root, "cox_screen_v1.csv"), comment_prefix="#")
     printed = [[format(r["p_alone"], ".2g"), format(r["p_adjusted"], ".2g")]
                for r in table.iter_rows(named=True)]  # fmt: skip

@@ -169,7 +169,7 @@ def test_the_immune_panel_names_the_release_the_run_named(built, tmp_path):
         "\n".join(x for x in raw if not x.startswith("genecard_options = ") or ".parquet" in x)
         + "\n"
     )
-    html = redrawn(folder, one).with_suffix(".html").read_text()
+    html = unpacked(redrawn(folder, one).with_suffix(".html").read_text())
     assert "HPA v99" in html and "HPA v25" not in html
 
 

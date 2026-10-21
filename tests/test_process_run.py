@@ -30,6 +30,7 @@ from test_cli import _offline
 from ctx.io.naming import lint
 from ctx.qc import registry
 from ctx.report import prose, text
+from ctx.report.builder import unpacked
 from ctx.runtime import BUDGETS
 
 PAIRED = ROOT / "tests" / "fixtures" / "chr22"
@@ -54,7 +55,7 @@ def table(root: Path, what: str) -> pl.DataFrame:
 
 def page(root: Path) -> str:
     """The run's overview page."""
-    return next(out(root).glob(f"*_process_{DATASET}_overview_v1.html")).read_text()
+    return unpacked(next(out(root).glob(f"*_process_{DATASET}_overview_v1.html")).read_text())
 
 
 def visible(html: str) -> str:
@@ -575,7 +576,8 @@ def test_axis_titles_hold_a_phone_and_y_titles_are_the_files(process_root):
     for what in FIGURES:
         (html,) = out(root).glob(f"*_{DATASET}_{what}_v1.html")
         (svg,) = out(root).glob(f"*_{DATASET}_{what}_v1_white.svg")
+        drawn = unpacked(html.read_text())
         titles = {axis: json.loads(f'"{found}"').split("<br>") for axis, found in re.findall(
-            r'"([xy])axis":\{[^{}]*?"title":\{"text":"(.*?)"', html.read_text())}  # fmt: skip
+            r'"([xy])axis":\{[^{}]*?"title":\{"text":"(.*?)"', drawn)}  # fmt: skip
         assert max(len(line) for line in titles["x"]) <= SCREEN_TITLE_CHARS, (what, titles)
         assert titles["y"] == _y_label(svg), what

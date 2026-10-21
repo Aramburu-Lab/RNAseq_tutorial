@@ -12,6 +12,7 @@ from conftest import ctx_run
 
 from ctx.gather import trace
 from ctx.report import text
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 RNASEQ = ROOT / "tests" / "fixtures" / "rnaseq"
@@ -105,6 +106,6 @@ def test_gather_page_shows_the_cost(tmp_path):
                    "--fetchngs-dir", str(DOWNLOAD), cwd=tmp_path)  # fmt: skip
     assert done.returncode == 0, done.stderr
     (page,) = (tmp_path / "outputs" / "01_gather").glob("*_overview_v1.html")
-    html = page.read_text()
+    html = unpacked(page.read_text())
     # Once: the first build appended it twice, found by planting the table's removal.
     assert html.count(text.word("gather", "trace.title")) == 1 and "SRA_IDS_TO_RUNINFO" in html
