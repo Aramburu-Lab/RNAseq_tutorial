@@ -1,0 +1,24 @@
+Table S2: 41,071 genes, 123 columns, 60 use_for_correlation
+MaxQuant drops (('reverse', 541), ('contaminant', 93), ('only_by_site', 1417)); mapping {'mapped': 10136, 'no_id': 143, 'no_map': 0, 'several': 279, 'absent': 486, 'shared': 3}; tokens {'0': 480342}
+layer: 9,205 genes by 165 channels (references out)
+channels with both layers: 60 of 60 use_for_correlation columns
+R3-1: median per-gene Pearson 0.3152 over 8,105 genes with at least 10 pairs; Ramberger 2024: 0.29; band 0.05: PASS
+       15.93 real        15.53 user         0.43 sys
+           855146496  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               64861  page reclaims
+                  10  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 223  voluntary context switches
+               19070  involuntary context switches
+        306035103721  instructions retired
+         62423062132  cycles elapsed
+           568772216  peak memory footprint
+check exit 0

@@ -1,0 +1,92 @@
+# R3's proof (wo13-r3, 2026-10-18, commits 6c56cf4 and 17cad14): PRIDE PXD038437 through the
+# guide's M7 protein part, the protein side alone. Its [dataset], [proteo] and [[resources]] are
+# those of the file that run read, ~/ctx_r3_pxd038437/r3_pxd038437.toml (SHA-256 47d97e27...8708c),
+# loaded equal by ctx.dataset.load on 2026-10-21; that file was written by
+# docs/plans/logs/r3/proof_dataset_file.py from conf/dataset_template.toml and the [[resources]]
+# entry `python -m ctx.proteo.prepare fetch` printed (docs/plans/logs/r3/proof_fetch.log).
+# Left out of that file, both unread by the run: the template's [sdrf] file = "mine.csv" (no such
+# table exists) and its three [columns] blocks. The RNA side is R3.1, still open: GEO's RNA is
+# per-sample RSEM files, and no public file maps a TMT channel to a GEO sample, so `ctx proteo`
+# stops at "no r3_pxd038437 samplesheet table" (docs/plans/logs/r3/proof_proteo.log).
+#
+# Study, as docs/plans/2026-10-18_r3_pxd038437_registered_check.md records it (the PMC full text
+# read in full on 2026-10-18): Ramberger E. et al. 2024, "The proteogenomic landscape of multiple
+# myeloma reveals insights into disease biology and therapeutic opportunities", Nature Cancer,
+# doi:10.1038/s43018-024-00784-3, PMID 38942927, PMC11358022. Protein: PRIDE PXD038437,
+# proteinGroups.txt, MaxQuant 2.0.3.0, TMTpro 16-plex, 11 plexes, each with an internal standard
+# channel. RNA: GEO GSE222727, 123 per-sample RSEM genes.results files, not fetched.
+#
+# The registered check, R3-1 (docs/plans/logs/r3/proof_check.py, .log): this file's protein
+# table against the paper's Table S2 RNA on its 60 use_for_correlation columns, matched by TMT
+# channel; median per-gene Pearson 0.3152 over 8,105 genes against the paper's 0.29, PASS.
+
+[dataset]
+slug = "r3_pxd038437"
+label = "Multiple myeloma, Ramberger 2024 (R3 proof)"
+# Empty: these are the runs fetchngs downloads, and the proof fetched no reads. The protein
+# table enters through [[resources]] protein_table below.
+accessions = []
+
+# The study's own accessions, which tests/test_repo.py keeps out of the code: the PRIDE project
+# and the GEO series of its RNA. The proof's file left both lists empty.
+[guard]
+ids = ["PXD038437", "GSE222727"]
+patterns = []
+
+# Gene sets for M7's protein classes and the annotation gene names are placed on: Step-1's,
+# which tests/test_dataset_template.py holds equal to conf/datasets/tier1.toml's.
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# The template's [proteo] block, its EDIT lines answered for a TMT MaxQuant table. Its sample
+# table, r3_pxd038437_proteo.csv beside this file (SHA-256 90b8ba42...6534), was filled by
+# docs/plans/logs/r3/proof_fill_samples.py from PRIDE's sampletable.xlsx, which `prepare fetch`
+# fetched and the proof left out of the dataset file (docs/plans/logs/r3/proof_fetch_sampletable.log):
+# https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/07/PXD038437/sampletable.xlsx,
+# 15,585 B, SHA-256 a984306f9f82151948600169153a41bbe3f343a04f913765f45510ad440c60e5.
+# 176 channels: 162 samples, 11 internal standards (each plex's reference), one 70x internal
+# standard and 2 empty channels; rna_sample is the TMT ID Table S2 names (proof_fill.log).
+[proteo]
+design = "across_samples"
+protein = "protein_table"
+genes = ["CD38", "IRF4"]
+tracks = ["status"]
+[proteo.classes.oxphos]
+resource = "msigdb_hallmark"
+sets = ["HALLMARK_OXIDATIVE_PHOSPHORYLATION"]
+[proteo.table]
+format = "maxquant"
+quantity = "Reporter intensity corrected"
+scale = "linear"
+# MaxQuant writes a missing value as 0, the default, never read as zero.
+id_kind = "symbol"
+acquisition = "tmt"
+batch = "batch"
+# Each plex's internal standard, marked yes in the sample table: every value becomes a log2
+# ratio to it, and the reference channels leave the layer.
+reference = "reference"
+samples = "r3_pxd038437_proteo.csv"
+
+# As `python -m ctx.proteo.prepare fetch` printed it (docs/plans/logs/r3/proof_fetch.log); the
+# proof root's resources/manifest.json records the same size and SHA-256, retrieved 2026-10-18.
+[[resources]]
+name = "protein_table"
+urls = ["https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/07/PXD038437/proteinGroups.txt"]
+bytes = 116174443
+sha256 = "82681a643258644de52be2bbe382ea6a169045c8691c8355cfa756da33082082"
+dest = "data/raw/r3_pxd038437/proteinGroups.txt"
