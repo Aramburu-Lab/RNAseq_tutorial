@@ -72,7 +72,11 @@ def drawn_texts(fig: Any) -> list[Any]:
         for axis in (ax.xaxis, ax.yaxis):
             low, high = sorted(axis.get_view_interval())
             span = high - low
-            for tick, loc in zip(axis.get_major_ticks(), axis.get_majorticklocs(), strict=False):
+            ticks = [
+                *zip(axis.get_major_ticks(), axis.get_majorticklocs(), strict=False),
+                *zip(axis.get_minor_ticks(), axis.get_minorticklocs(), strict=False),
+            ]
+            for tick, loc in ticks:
                 if not low - 1e-9 * span <= loc <= high + 1e-9 * span:
                     hidden |= {id(tick.label1), id(tick.label2)}
     return [

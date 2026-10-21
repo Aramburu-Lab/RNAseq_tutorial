@@ -557,6 +557,7 @@ Rytis 2026-10-18: "It has to be a reusable tool. This is important." Measured 20
 - [ ] Z.2 The tier1_teach pages (gather, qc, process) were not rebuilt on the merged code; nor setup, hub and glossary pages.
 - [x] Z.3 Rytis 2026-10-20 accepts that M9 deletes the card files its own run wrote and no page links, when it drops cards at the second fit.
 - [ ] Z.4 `viz.save._PANELS` holds panels by stem for the whole process: a second M9 build in one process sees the first's panels (CLI runs are one process; the test resets it).
+- [ ] V.3 Box figure has no fallback once p/r labels run out of room: at 170 mm with p=3.7e-05 labels, 10 features pass and 11 give 10 overlaps, so write_figure refuses; the largest box_genes shipped is 7 (tier1.toml). Measured 2026-10-21.
 - [ ] Y.2 TODO still names Step-1's cohort "pancreas" in several lines; the Apptainer tab is not yet run; the figures image is not pushed.
 - [ ] F.2d build.sh release rewrites digests.lock without the figures row; the Apptainer tab is not yet run anywhere; F2's planted mutations are named but not run.
 - [ ] F.3 Contour templates (655); lite-build and notebooks (711); P2C.4; `ctx source` and `verify-figure`; the volcano's x axis raw or shrunk; the hub's cohort by module grid; laptop caps applied (every bundle says `all`); `--cohort` filling `--dataset-file`; a 375 px and theme check of a panel.
