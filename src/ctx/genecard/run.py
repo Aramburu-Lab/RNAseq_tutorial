@@ -34,6 +34,7 @@ from ctx.io.naming import MODULES
 from ctx.report import genes
 from ctx.report.builder import ParameterCard
 from ctx.setup import MANIFEST as SETUP_MANIFEST
+from ctx.viz.save import one_build
 
 MODULE = "genecard"
 GTF = "annotation_gtf"
@@ -285,4 +286,7 @@ def run(settings: runtime.Settings, cards_: tuple[ParameterCard, ...], command: 
     context = page.Context(spec=spec, options=options, chosen=chosen, evidence=evidence,
                            provenance=provenance, settings=settings, command=command,
                            cards=cards_, tested=tested, own=own, family=family)  # fmt: skip
-    return page.build(writer, context)
+    # page.build lays the cards out before it writes them, so no panel of an earlier build in
+    # this process may stand in for one not yet written (Z.4).
+    with one_build():
+        return page.build(writer, context)

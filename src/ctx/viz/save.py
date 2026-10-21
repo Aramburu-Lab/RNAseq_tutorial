@@ -1,6 +1,8 @@
 """Write every file of one figure (D16): PDF and SVG per theme, one HTML page, data and README."""
 
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Iterator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import replace
 from pathlib import Path
 from typing import Any, Protocol
@@ -26,8 +28,28 @@ from ctx.viz.style import THEMES, Theme
 NO_TEXT = FigureText()
 # The contracts that can carry page controls and draw their changed view (D-033, D-051).
 CONTROLLED = (ScatterData, LinkedData, BarData, CurveData, SurfaceData, KmData)
-# The Reproduce panel of each figure this process wrote with a spec, by stem (Phase 2D).
-_PANELS: dict[str, dict[str, str]] = {}
+# The Reproduce panel of each figure this build wrote with a spec, by stem (Phase 2D). A stem
+# names no root, so a second build in one process would find the first's panels before its
+# own files exist; ``one_build`` gives each build its own (Z.4).
+_PANELS: ContextVar[dict[str, dict[str, str]] | None] = ContextVar("panels", default=None)
+# The panels of figures written outside any ``one_build``: one CLI command is one process.
+_PROCESS: dict[str, dict[str, str]] = {}
+
+
+def _panels() -> dict[str, dict[str, str]]:
+    """The panels of the build in progress."""
+    found = _PANELS.get()
+    return _PROCESS if found is None else found
+
+
+@contextmanager
+def one_build() -> Iterator[None]:
+    """Hold the panels written inside to this build: none before, none kept after."""
+    token = _PANELS.set({})
+    try:
+        yield
+    finally:
+        _PANELS.reset(token)
 
 
 class Figure(Protocol):
@@ -199,7 +221,7 @@ def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> 
     return FigureBlock(
         figure, data.caption_text(), data.page_table().to_dicts(), f"{figure_stem}.csv",
         text=text, stem=figure_stem, controls=controls, below=below,
-        reproduce=_PANELS.get(figure_stem),
+        reproduce=_panels().get(figure_stem),
     )  # fmt: skip
 
 
@@ -266,7 +288,7 @@ def write_figure(
         with table[-1].open("a") as readme:
             readme.write("\n" + record.readme(spec))
         # The module builds its page's block in a second call, figure_block, by this stem.
-        _PANELS[figure_stem] = panel.block(spec)
-        block = replace(block, reproduce=_PANELS[figure_stem])
+        _panels()[figure_stem] = panel.block(spec)
+        block = replace(block, reproduce=_panels()[figure_stem])
     page = write(FigurePage(title, block), directory / f"{figure_stem}.html")
     return [*(rendered[(t, ext)] for ext in ("pdf", "svg") for t in THEMES), page, *table]

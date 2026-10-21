@@ -508,15 +508,18 @@ def run(  # noqa: PLR0913 - one call from the CLI, every argument is a named opt
     if mirna is not None:
         results = (*results, _mirna_checks(mirna, spec.gdc))
     usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
+    # The page's own input names the TCGA-CDR workbook; a folder read without one (CPTAC) has none.
+    variant = None if found.cdr is not None else "variants.no_cdr"
+    inputs = word(f"{variant}.inputs" if variant else "inputs")
     page = ModulePage(
-        title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE),
+        title=text.fill(PAGE, "title", dataset=spec.name), **text.skeleton(PAGE, variant),
         parameters=cards, results=results, key_numbers=_keys(found, spec.gdc),
         reproduce=Reproduction(
             command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children,
             profile=f"{settings.profile}, {settings.threads} threads",
             budget=text.fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
-            versions=runtime.versions(), inputs=(word("inputs"),),
+            versions=runtime.versions(), inputs=(inputs,),
         ),
     )  # fmt: skip
     return [write(page, out / f"{page_stem}.html"), *files]

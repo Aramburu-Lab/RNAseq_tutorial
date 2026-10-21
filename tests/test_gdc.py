@@ -17,6 +17,7 @@ from gdc_fixture import PROJECT, aliquot, build, counts_text, spec_file
 from ctx.dataset import DatasetError, load
 from ctx.gather import gdc, gdc_run
 from ctx.qc import registry
+from ctx.report.builder import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 CTX = Path(sys.executable).parent / "ctx"
@@ -248,6 +249,36 @@ def test_gather_writes_the_sheet_counts_and_clinical_tables(tmp_path):
     for table in out.glob("*.parquet"):
         assert table.with_name(table.name.replace(".parquet", "_README.md")).is_file()
     assert len(list(out.glob("*_overview_v1.html"))) == 1
+
+
+def _page_words(tmp_path: Path, cdr: str | None) -> str:
+    """The gather page of a made-up folder, with a CDR workbook named ``cdr`` or none."""
+    from gdc_fixture import write_cdr  # noqa: PLC0415
+
+    build(tmp_path / "gdc", [aliquot(1), aliquot(2)])
+    if cdr is not None:
+        columns = ["bcr_patient_barcode", "type", "OS", "OS.time"]
+        write_cdr(tmp_path / "gdc" / cdr, [dict(zip(columns, (aliquot(1).case, "BRCA", 1, 365),
+                                                     strict=True))], columns)  # fmt: skip
+    spec = spec_file(tmp_path / "fake_brca.toml", cdr=cdr)
+    done = subprocess.run([str(CTX), "--root", str(tmp_path / "root"), "gather", "--dataset",
+                           "fake_brca", "--gdc-dir", str(tmp_path / "gdc"), "--dataset-file",
+                           str(spec)], capture_output=True, text=True, check=False)  # fmt: skip
+    assert done.returncode == 0, done.stderr
+    (page,) = (tmp_path / "root" / "outputs" / "01_gather").glob("*_overview_v1.html")
+    return unpacked(page.read_text())
+
+
+@pytest.mark.skipif(not XLSX, reason=NO_XLSX)
+def test_the_page_names_a_cdr_only_for_a_folder_that_holds_one(tmp_path):
+    """H.4: a folder with no TCGA-CDR, as CPTAC's, is described without one, in Input and in
+    Reproduce's inputs; a folder with one names it. Catches the input text chosen once for
+    every folder, which named a workbook a CPTAC folder never holds."""
+    without = _page_words(tmp_path / "cptac", None)
+    assert "TCGA-CDR" not in without
+    assert "counts, cases and annotations" in without
+    held = _page_words(tmp_path / "tcga", "cdr.xlsx")
+    assert "the TCGA-CDR workbook" in held and "annotations and TCGA-CDR" in held
 
 
 @pytest.mark.skipif(not XLSX, reason=NO_XLSX)

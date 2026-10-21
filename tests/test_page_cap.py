@@ -16,7 +16,6 @@ from test_qc_views import page  # noqa: F401 - the M2 fixture page, with its fla
 
 from ctx.report import cap, text
 from ctx.report.builder import unpacked
-from ctx.viz import save
 
 # ctx qc as test_qc_views's page ran it, with the cap lowered in the process that writes it.
 LOWERED = "import sys\nfrom ctx.report import cap\ncap.MAX_BYTES = int(sys.argv[1])\n" \
@@ -70,9 +69,6 @@ def test_m9_decides_its_cards_on_the_page_with_its_panels(tmp_path, monkeypatch)
         return decided[-1]
 
     monkeypatch.setattr(cap, "kept", spy)
-    # Panels are kept by stem for the process (viz.save): the first build's would stand in the
-    # second build's cards before their files are written, as no CLI run sees.
-    monkeypatch.setattr(save, "_PANELS", {})
     lowered = tmp_path / "b" / "root"
     _built(lowered)
     folder = lowered / "outputs" / FOLDER[0]
