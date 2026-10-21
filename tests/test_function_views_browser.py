@@ -198,6 +198,9 @@ def test_every_contrast_draws_its_own_ranking_and_lists_its_own_sets(m6, size):
     by_label = {w.label: n for n, w in every(spec.contrasts, spec.columns).items()}
     assert by_label[acted["contrasts"][0]["contrast"]] == "a_case"
     assert len(acted["contrasts"]) > 1
+    # TYPE_A_SET is tested by the type_a contrasts alone; with every list alike, a list left
+    # unrefilled on a contrast change would pass (V2.1).
+    assert any(c["sets"] != acted["contrasts"][0]["sets"] for c in acted["contrasts"][1:])
     _walked(acted["contrasts"], "UP_SET", (folder, de), by_label)
     assert acted["back"]["line"] == acted["contrasts"][0]["line"] and not acted["back"]["moved"]
     # From the build contrast's third set: each contrast keeps it where it tested it.

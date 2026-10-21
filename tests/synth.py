@@ -462,9 +462,27 @@ DE_GROUPS = (
 )
 
 
-def write_gene_sets(path, n_genes: int = 1000, seed: int = 5, n_random: int = 20) -> None:
+# Mean reads under which a type_b contrast's expression filter (10 reads at the median library)
+# drops a gene, with room below it, and over which every type_a contrast keeps one.
+TYPE_B_SILENT, TYPE_A_EXPRESSED = 8.0, 20.0
+
+
+def type_a_only(synthetic: Synthetic) -> list[str]:
+    """Genes expressed in type_a and silent in type_b: a set of them is tested by the type_a
+    contrasts alone, so a contrast's set list differs from another's (TODO.md V2.1)."""
+    cell = synthetic.samples["cell_type"]
+    a, b = (synthetic.samples.filter(cell == c)["sample"].to_list() for c in CELL_TYPES)
+    mean_a, mean_b = (synthetic.counts.select(s).mean_horizontal().to_numpy() for s in (a, b))
+    keep = (mean_b < TYPE_B_SILENT) & (mean_a >= TYPE_A_EXPRESSED)
+    return [g.upper() for g, k in zip(synthetic.counts["gene_id"], keep, strict=True) if k]
+
+
+def write_gene_sets(
+    path, n_genes: int = 1000, seed: int = 5, n_random: int = 20, synthetic: Synthetic | None = None
+) -> None:
     """A GMT for design_counts genes: UP_SET and DOWN_SET hold the planted condition genes
-    (uppercase symbols, as write_gather_outputs names them); twenty random sets hold others."""
+    (uppercase symbols, as write_gather_outputs names them); twenty random sets hold others.
+    With ``synthetic``, TYPE_A_SET holds its ``type_a_only`` genes."""
     rng = np.random.default_rng(seed)
     planted = [f"G{i + 1:05d}" for i in range(int(0.1 * n_genes))]
     others = [f"G{i + 1:05d}" for i in range(int(0.3 * n_genes), n_genes - len(SEX_GENES))]
@@ -474,6 +492,8 @@ def write_gene_sets(path, n_genes: int = 1000, seed: int = 5, n_random: int = 20
         f"RANDOM_{j:02d}": list(rng.choice(others, int(rng.integers(15, 200)), replace=False))
         for j in range(n_random)
     }
+    if synthetic is not None:
+        sets["TYPE_A_SET"] = type_a_only(synthetic)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         "".join(f"{name}\tsynthetic\t" + "\t".join(genes) + "\n" for name, genes in sets.items())

@@ -394,7 +394,7 @@ def pipeline(tmp_path_factory, wheel_site):
 
         counts = design_counts(DE_GROUPS, batch_lfc=2.0)
         write_gather_outputs(root, "desynth", counts, date.today())
-        write_gene_sets(root / load(DE_SPEC).resource("sets").dest)
+        write_gene_sets(root / load(DE_SPEC).resource("sets").dest, synthetic=counts)
         gathered = {p.name: p.read_bytes() for p in (root / "outputs" / "01_gather").iterdir()}
         args = ["--root", str(root), "de", "--dataset", "desynth", "--dataset-file", str(DE_SPEC)]
         imported = run_from_wheel(wheel_site, f"""
