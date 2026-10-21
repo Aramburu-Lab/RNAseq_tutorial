@@ -11,6 +11,7 @@ import random
 import re
 import shutil
 import subprocess
+from dataclasses import replace
 from pathlib import Path
 
 import polars as pl
@@ -304,8 +305,6 @@ console.log(JSON.stringify(input.cases.map(c => ctxOra.narrow(c, input.phone))))
 LABELS = ("Up set", "Coagulation, MSigDB Hallmark", "Hypoxia, MSigDB Hallmark",
           "Epithelial mesenchymal transition, MSigDB Hallmark",
           "Reactive oxygen species pathway, MSigDB Hallmark", "Down set")  # fmt: skip
-# M6's ORA plot at 1,280 px, measured in Chromium on the hand-off fixture (PK.4).
-DESKTOP_PLOT_PX = 567
 
 
 def _ora_bars(labels: tuple[str, ...]):
@@ -322,19 +321,20 @@ def _ora_bars(labels: tuple[str, ...]):
 
 
 def test_the_page_builds_a_phones_layout_as_the_build_does():
-    """PK.4: ``ctxOra.narrow`` gives the phone's layout ``bar.narrow_categories`` gives, held,
-    on the redraw's sets in any order, and none where every label fits; the build's own layout
-    keeps plotly's ticks, so a desktop draws it unchanged, and its phone's layout is the one
-    the page builds for the same sets.
+    """PK.4, PK.6: ``ctxOra.narrow`` gives the phone's layout ``bar.narrow_categories`` gives,
+    on the redraw's sets in any order, and none where every label fits; the live build's own
+    layout is a fixed bar's of the same sets, named ticks and phone's layout alike, so every
+    bar figure switches below twice the widest label plus margins (Rytis 2026-10-21, D-105).
 
-    Mutations caught: the threshold twice the widest label in either twin (a desktop's 567 px
-    plot then wraps); the redraw's ticks left unnamed (plotly skips every other label); the
-    build naming its ticks, which a desktop then draws every one of."""
-    from ctx.viz.bar import HELD_PAD_PX, narrow_categories  # noqa: PLC0415
+    Mutations caught: PK.4's threshold, the widest label plus a pad, back in either twin; the
+    live build keeping plotly's own ticks (it drew 7 of 14 labels at 1,280 px)."""
+    from ctx.viz.bar import narrow_categories  # noqa: PLC0415
+    from ctx.viz.style import PLOTLY_MARGIN_PX  # noqa: PLC0415
 
     bars = _ora_bars(LABELS)
     phone = bars.controls()["phone"]
-    assert set(phone["lines"]) == set(LABELS) and phone["pad"] == HELD_PAD_PX
+    assert set(phone["lines"]) == set(LABELS)
+    assert phone["margins"] == PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"]
     rng = random.Random(4)
     cases = [list(LABELS), ["Up set", "Down set"], list(LABELS[:3])]
     cases += [rng.sample(LABELS, rng.randint(1, len(LABELS))) for _ in range(8)]
@@ -346,11 +346,12 @@ def test_the_page_builds_a_phones_layout_as_the_build_does():
                           capture_output=True, text=True, check=True)  # fmt: skip
     seen = json.loads(done.stdout)
     for cats, page in zip(cases, seen, strict=True):
-        assert page == narrow_categories(cats, phone["height"], phone["lines"], held=True), cats
+        assert page == narrow_categories(cats, phone["height"], phone["lines"]), cats
     assert seen[1] is None
     fig = bars.interactive()
-    built = fig.layout.meta["narrow"]
-    assert fig.layout.yaxis.tickmode == "auto" and fig.layout.yaxis.tickvals is None
-    assert built == seen[2]
+    fixed = replace(bars, live=None, drawable=()).interactive()
+    assert fig.layout.yaxis.to_plotly_json() == fixed.layout.yaxis.to_plotly_json()
+    assert fig.layout.meta["narrow"] == fixed.layout.meta["narrow"] == seen[2]
     widest = max(phone["lines"][c][1] for c in LABELS[:3])
-    assert built["below"] == widest + HELD_PAD_PX < DESKTOP_PLOT_PX
+    assert seen[2]["below"] == 2 * widest + phone["margins"]
+    assert list(fig.layout.yaxis.tickvals) == list(LABELS[:3])

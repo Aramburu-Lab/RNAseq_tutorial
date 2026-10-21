@@ -13,6 +13,7 @@ import html
 import math
 import re
 from datetime import date
+from itertools import pairwise
 
 import polars as pl
 import pytest
@@ -67,7 +68,8 @@ SEEN = """(async () => {
           box: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth,
           ticks: Array.from(d.querySelectorAll('.yaxislayer-above .ytick text')).map(t => ({
             text: t.textContent, lines: Math.max(1, t.querySelectorAll('tspan.line').length),
-            left: t.getBoundingClientRect().left, right: t.getBoundingClientRect().right})),
+            left: t.getBoundingClientRect().left, right: t.getBoundingClientRect().right,
+            top: t.getBoundingClientRect().top, bottom: t.getBoundingClientRect().bottom})),
           height: d._fullLayout.height, plot: d._fullLayout._size.h,
           width: d.getBoundingClientRect().width, top, window: innerHeight, scrolled: scrollY};
 })()"""
@@ -318,15 +320,20 @@ def test_a_phone_keeps_every_set_label_on_screen(ran, name):
 
 
 @pytest.mark.parametrize("name", ["built_wide", "link", "link_wide_dark"])
-def test_a_desktop_draws_the_labels_as_built(ran, name):
-    """At 1,280 px each label stays one line, as the build's own layout draws it, at the
-    build's height: the phone's layout never reaches a desktop (PK.4). plotly's own ticks
-    stay, which on the build's 14 sets print every other label, as before PK.4.
+def test_a_desktop_labels_every_set(ran, name):
+    """At 1,280 px every set has its own tick label, on screen, and no two overlap: the live
+    bars switch to the phone's layout below twice the widest label plus margins, as fixed bars
+    do (Rytis 2026-10-21, D-105), so M6's 567 px plot wraps its labels as the GSEA bars beside
+    it do. PK.4 asserted the opposite, one line at the build's height: its threshold, the
+    widest label plus ``HELD_PAD_PX``, kept plotly's own ticks there, which drew 7 of 14.
 
-    Mutation caught: the phone's threshold twice the widest label, as fixed bars take it,
-    which wraps the labels on a desktop's 567 px plot."""
-    results = ran[2]
-    got, built = _seen(results, name), _seen(results, "built_wide")
-    assert got["ticks"] and {t["text"] for t in got["ticks"]} <= set(got["categories"])
-    assert all(t["lines"] == 1 and t["left"] >= 0 for t in got["ticks"]), got["ticks"]
-    assert got["height"] == built["height"]
+    Mutation caught: that threshold back in either twin, every other label then skipped."""
+    got = _seen(ran[2], name)
+    squeeze = [re.sub(r"\s", "", t["text"]) for t in got["ticks"]]
+    assert sorted(squeeze) == sorted(re.sub(r"\s", "", c) for c in got["categories"]), squeeze
+    assert all(t["left"] >= 0 for t in got["ticks"]), got["ticks"]
+    assert any(t["lines"] > 1 for t in got["ticks"]), "no label wrapped: no phone layout drawn"
+    rows = sorted(got["ticks"], key=lambda t: t["top"])
+    overlaps = [(a["text"], b["text"]) for a, b in pairwise(rows) if b["top"] < a["bottom"]]
+    assert overlaps == [], overlaps
+    assert got["scroll"] <= got["box"], (got["scroll"], got["box"])
