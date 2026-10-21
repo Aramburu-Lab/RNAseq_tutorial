@@ -18,6 +18,12 @@ class Resource:
     ``tls_ciphers`` is an OpenSSL cipher string added to Python's default TLS 1.2 list for
     this resource alone, for a server that offers no cipher the default list holds;
     certificate and host checks are unchanged.
+
+    ``member`` names one file inside the zip archive the URLs give; ``bytes`` and ``sha256``
+    are then that file's, and it alone is kept at ``dest``. An archive built per request, as
+    Europe PMC's supplementary zip is, need not be the same bytes twice, so its own hash,
+    ``archive_sha256``, is recorded as information and never checked. Unlike
+    ``[proteo] member``, which reads a file inside an archive kept whole.
     """
 
     name: str
@@ -26,6 +32,8 @@ class Resource:
     sha256: str
     dest: str
     tls_ciphers: str = ""
+    member: str = ""
+    archive_sha256: str = ""
 
 
 @dataclass(frozen=True)
@@ -73,12 +81,23 @@ def _resources(raw: list[Any], problems: list[str]) -> tuple[Resource, ...]:
             name, urls, size, digest, dest = fields
             if Path(dest).is_absolute() or ".." in Path(dest).parts:
                 problems.append(f"{where}.dest: {dest!r} must stay under the root")
-            ciphers = entry.get("tls_ciphers", "")
-            if not isinstance(ciphers, str):
-                problems.append(f"{where}.tls_ciphers: expected str, found {ciphers!r}")
-                ciphers = ""
-            out.append(Resource(name, tuple(urls), size, digest, dest, ciphers))
+            text = {k: _optional_text(entry, k, where, problems) for k in OPTIONAL_TEXT}
+            if text["archive_sha256"] and not text["member"]:
+                problems.append(f"{where}.archive_sha256: describes the archive of a member")
+            out.append(Resource(name, tuple(urls), size, digest, dest, **text))
     return tuple(out)
+
+
+OPTIONAL_TEXT = ("tls_ciphers", "member", "archive_sha256")
+
+
+def _optional_text(entry: Mapping[str, Any], key: str, where: str, problems: list[str]) -> str:
+    """An optional string field of a resource, empty when absent or of another type."""
+    value = entry.get(key, "")
+    if isinstance(value, str):
+        return value
+    problems.append(f"{where}.{key}: expected str, found {value!r}")
+    return ""
 
 
 def _columns(raw: Mapping[str, Any], problems: list[str]) -> tuple[Column, ...]:

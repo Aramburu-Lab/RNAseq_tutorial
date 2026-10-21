@@ -90,3 +90,19 @@ urls = ["https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/07/PXD038437/protei
 bytes = 116174443
 sha256 = "82681a643258644de52be2bbe382ea6a169045c8691c8355cfa756da33082082"
 dest = "data/raw/r3_pxd038437/proteinGroups.txt"
+
+# The paper's Table S2, the RNA side of the registered check (docs/plans/logs/r3/proof_check.py).
+# Source, verified 2026-10-21 by Rytis's approved lookup: Europe PMC search for DOI
+# 10.1038/s43018-024-00784-3 returns PMID 38942927, PMC11358022; the URL below answers HTTP 200,
+# application/zip, content-disposition filename "PMC11358022_SupplementaryFiles.zip", with no
+# Content-Length. The zip is likely built per request, so its SHA-256 may differ between
+# downloads: the checked hash is the member's, and archive_sha256 (the 209,347,597 B zip of
+# 2026-10-18) is information only. The member was read out of that zip, its bytes equal to it.
+[[resources]]
+name = "supplement_table_s2"
+urls = ["https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11358022/supplementaryFiles"]
+member = "43018_2024_784_MOESM2_ESM.xlsx"
+bytes = 169931539
+sha256 = "895291af3169223c05adacddd33ece9a33cf332e073449c75ac0f3ee8a4d12b0"
+archive_sha256 = "ed33ccadd69f5b0528c6061e8641647a4267c5404dff898c1aca66c123d041e3"
+dest = "data/raw/r3_pxd038437/43018_2024_784_MOESM2_ESM.xlsx"

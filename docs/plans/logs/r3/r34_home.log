@@ -1,0 +1,89 @@
+r3_supp: /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r3_supp; r3_supp.hidden: absent
+from-dir /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from:
+total 802368
+-rw-r--r--@ 1 rytis  wheel  169931539 Oct 21 11:55 43018_2024_784_MOESM2_ESM.xlsx
+-rw-r--r--@ 2 rytis  staff  124650284 Oct 18 12:24 gencode.v50.primary_assembly.annotation.gtf.gz
+-rw-r--r--@ 2 rytis  staff      48686 Oct 18 12:20 h.all.v2026.1.Hs.symbols.gmt
+-rw-r--r--@ 2 rytis  staff  116174443 Oct 18 12:11 proteinGroups.txt
++ ctx --root /Users/rytis/ctx_r3_pxd038437 setup --dataset-file conf/datasets/r3_pxd038437.toml --from-dir /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from
+/Users/rytis/ctx_r3_pxd038437/outputs/00_setup/2026-10-21_setup_environment_v1.html
+/Users/rytis/ctx_r3_pxd038437/outputs/00_setup/2026-10-21_setup_versions_v1.parquet
+/Users/rytis/ctx_r3_pxd038437/outputs/00_setup/2026-10-21_setup_versions_v1.csv
+/Users/rytis/ctx_r3_pxd038437/outputs/00_setup/2026-10-21_setup_versions_v1_README.md
+        3.74 real         1.03 user         0.39 sys
+           187334656  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               21461  page reclaims
+                  17  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  28  voluntary context switches
+                2576  involuntary context switches
+         15116477503  instructions retired
+          5405702739  cycles elapsed
+           114427176  peak memory footprint
+exit 0
+manifest:
+{
+  "data/raw/r3_pxd038437/43018_2024_784_MOESM2_ESM.xlsx": {
+    "bytes": 169931539,
+    "copied_from": "/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from/43018_2024_784_MOESM2_ESM.xlsx",
+    "name": "supplement_table_s2",
+    "retrieved": "2026-10-21T09:56:29+00:00",
+    "sha256": "895291af3169223c05adacddd33ece9a33cf332e073449c75ac0f3ee8a4d12b0",
+    "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11358022/supplementaryFiles"
+  },
+  "data/raw/r3_pxd038437/proteinGroups.txt": {
+    "bytes": 116174443,
+    "found": true,
+    "name": "protein_table",
+    "retrieved": "2026-10-18T10:24:05+00:00",
+    "sha256": "82681a643258644de52be2bbe382ea6a169045c8691c8355cfa756da33082082",
+    "url": "https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/07/PXD038437/proteinGroups.txt"
+  },
+  "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz": {
+    "bytes": 124650284,
+    "name": "annotation_gtf",
+    "retrieved": "2026-10-18T10:24:05+00:00",
+    "sha256": "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4",
+    "url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz"
+  },
+  "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt": {
+    "bytes": 48686,
+    "name": "msigdb_hallmark",
+    "retrieved": "2026-10-18T10:20:57+00:00",
+    "sha256": "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596",
+    "url": "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt"
+  }
+}
++ python docs/plans/logs/r3/proof_check.py /Users/rytis/ctx_r3_pxd038437 conf/datasets/r3_pxd038437.toml
+Table S2: 41,071 genes, 123 columns, 60 use_for_correlation
+MaxQuant drops (('reverse', 541), ('contaminant', 93), ('only_by_site', 1417)); mapping {'mapped': 10136, 'no_id': 143, 'no_map': 0, 'several': 279, 'absent': 486, 'shared': 3}; tokens {'0': 480342}
+layer: 9,205 genes by 165 channels (references out)
+channels with both layers: 60 of 60 use_for_correlation columns
+R3-1: median per-gene Pearson 0.3152 over 8,105 genes with at least 10 pairs; Ramberger 2024: 0.29; band 0.05: PASS
+       16.70 real        15.58 user         0.36 sys
+           853180416  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               64775  page reclaims
+                   1  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 185  voluntary context switches
+               17163  involuntary context switches
+        305362267693  instructions retired
+         61505540817  cycles elapsed
+           568051272  peak memory footprint
+exit 0

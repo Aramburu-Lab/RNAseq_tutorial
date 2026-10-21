@@ -8,8 +8,10 @@ import hashlib
 import json
 import os
 import platform
+import shutil
 import ssl
 import urllib.request
+import zipfile
 from collections.abc import Callable, Sequence
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -235,6 +237,7 @@ def fetch(
     root: Path,
     resources: Sequence[Resource],
     opener: Callable[..., Any] = urllib.request.urlopen,
+    from_dir: Path | None = None,
 ) -> list[dict[str, Any]]:
     """Fetch each resource under the root, checked by size and SHA-256 before it is kept.
 
@@ -243,19 +246,22 @@ def fetch(
     not fetched again: one placed there by hand, as GTEx V11's 24 GB were, is registered with
     its hash measured on arrival and ``found`` true, never downloaded. The destination is
     checked against the root by its path, not its link target, so an input folder linked into
-    a scratch root counts as inside it. Every fetched or confirmed file is recorded in
-    ``resources/manifest.json``.
+    a scratch root counts as inside it. With ``from_dir``, a file there of the declared size
+    and hash is copied in instead of downloaded, and its manifest entry names it in
+    ``copied_from``. Every fetched or confirmed file is recorded in ``resources/manifest.json``.
 
     Args:
         root: The project root.
         resources: The dataset file's resources.
         opener: How to open a URL; tests pass their own.
+        from_dir: A folder searched, subfolders included, before any URL is opened.
 
     Returns:
         One manifest entry per resource.
 
     Raises:
-        FetchError: If a destination leaves the root, or no mirror gives the declared bytes.
+        FetchError: If a destination leaves the root, no mirror gives the declared bytes, or
+            ``from_dir`` holds a file of the destination's name with other bytes.
     """
     manifest_path = root / MANIFEST
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
@@ -270,7 +276,8 @@ def fetch(
         if present and not entry:
             entry = _found(resource, dest)
         elif not (present and entry):
-            entry = _fetch_one(resource, dest, opener)
+            local = _local(resource, from_dir) if from_dir else None
+            entry = _copy_in(resource, local, dest) if local else _fetch_one(resource, dest, opener)
         manifest[resource.dest] = entry
         entries.append(entry)
     manifest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -283,6 +290,72 @@ def _found(resource: Resource, dest: Path) -> dict[str, Any]:
     return {"name": resource.name, "url": resource.urls[0], "bytes": dest.stat().st_size,
             "sha256": resource.sha256, "found": True,
             "retrieved": datetime.now(UTC).isoformat(timespec="seconds")}  # fmt: skip
+
+
+def _local(resource: Resource, folder: Path) -> Path | None:
+    """The file in ``folder`` with the resource's size and SHA-256; None when there is none.
+
+    Matched by content, so a renamed copy is found. A file named as the destination but holding
+    other bytes is refused rather than passed over: it is most likely the file meant, damaged.
+    """
+    if not folder.is_dir():
+        raise FetchError(f"{resource.name}: {folder} is not a folder")
+    named = None
+    for path in sorted(p for p in folder.rglob("*") if p.is_file()):
+        if path.stat().st_size == resource.bytes and _sha256(path) == resource.sha256:
+            return path
+        if path.name == Path(resource.dest).name:
+            named = path
+    if named:
+        expected = f"{resource.bytes} bytes, sha256 {resource.sha256}"
+        found = f"{named.stat().st_size} bytes, sha256 {_sha256(named)}"
+        raise FetchError(f"{resource.name}: {named} has {found}; expected {expected}")
+    return None
+
+
+def _copy_in(resource: Resource, source: Path, dest: Path) -> dict[str, Any]:
+    """Copy a matching local file to ``dest``, never moving it, and check the copy itself."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    part = dest.with_name(dest.name + ".part")
+    try:
+        shutil.copyfile(source, part)
+        size, digest = part.stat().st_size, _sha256(part)
+        if (size, digest) != (resource.bytes, resource.sha256):
+            raise FetchError(f"{resource.name}: the copy of {source} has sha256 {digest}")
+        part.replace(dest)
+    finally:
+        part.unlink(missing_ok=True)
+    return {"name": resource.name, "url": resource.urls[0], "bytes": size, "sha256": digest,
+            "copied_from": str(source.resolve()),
+            "retrieved": datetime.now(UTC).isoformat(timespec="seconds")}  # fmt: skip
+
+
+def _unpack(resource: Resource, part: Path) -> dict[str, str]:
+    """Replace a downloaded archive at ``part`` by the member the resource's hash describes.
+
+    Returns:
+        The manifest fields of the archive: its member and its measured hash; none without one.
+
+    Raises:
+        OSError: If the download is no zip or lacks the member, so the next mirror is tried.
+    """
+    if not resource.member:
+        return {}
+    archive = _sha256(part)
+    inner = part.with_name(part.name + ".member")
+    try:
+        with (
+            zipfile.ZipFile(part) as bundle,
+            bundle.open(resource.member) as source,
+            inner.open("wb") as out,
+        ):
+            shutil.copyfileobj(source, out, CHUNK)
+        inner.replace(part)
+    except (zipfile.BadZipFile, KeyError) as error:
+        raise OSError(f"no member {resource.member!r}: {error}") from error
+    finally:
+        inner.unlink(missing_ok=True)
+    return {"member": resource.member, "archive_sha256": archive}
 
 
 def _fetch_one(resource: Resource, dest: Path, opener: Callable[..., Any]) -> dict[str, Any]:
@@ -298,16 +371,17 @@ def _fetch_one(resource: Resource, dest: Path, opener: Callable[..., Any]) -> di
                 print(text.fill(PAGE, "resources.dua", name=resource.name, url=pdc.DUA_URL))
                 signed = pdc.resolve(url, opener)
             _download(signed.url if signed else url, part, opener, resource.tls_ciphers)
-            size, digest = part.stat().st_size, _sha256(part)
             if signed and _md5(part) != signed.md5:
                 failures.append(f"{url}: MD5 {_md5(part)}, PDC lists {signed.md5}")
                 continue
+            archive = _unpack(resource, part)
+            size, digest = part.stat().st_size, _sha256(part)
             if (size, digest) == (resource.bytes, resource.sha256):
                 part.replace(dest)
                 return {
                     "name": resource.name, "url": url, "bytes": size, "sha256": digest,
                     "retrieved": datetime.now(UTC).isoformat(timespec="seconds"),
-                }  # fmt: skip
+                } | archive  # fmt: skip
             failures.append(f"{url}: {size} bytes, sha256 {digest}")
         except OSError as error:
             failures.append(f"{url}: {error}")
@@ -322,6 +396,7 @@ def run(
     cards: tuple[ParameterCard, ...],
     command: str,
     dataset_file: Path | None = None,
+    from_dir: Path | None = None,
 ) -> list[Path]:
     """Write the versions table and the environment report under ``outputs/00_setup``.
 
@@ -330,6 +405,7 @@ def run(
         cards: Parameter cards for every option of this command.
         command: The command line, as the reader should retype it.
         dataset_file: A dataset file whose resources to fetch; unset fetches nothing.
+        from_dir: A folder whose matching files are copied in instead of downloaded.
 
     Returns:
         The written files: the report, then the versions table files.
@@ -337,7 +413,10 @@ def run(
     Raises:
         FetchError: Before any output is written, if a resource cannot be fetched.
     """
-    fetched = fetch(settings.root, load(dataset_file).resources) if dataset_file else []
+    if from_dir and not dataset_file:
+        raise FetchError("--from-dir copies a dataset file's resources: give --dataset-file")
+    resources = load(dataset_file).resources if dataset_file else ()
+    fetched = fetch(settings.root, resources, from_dir=from_dir) if dataset_file else []
     day = date.today()
     number = dict(MODULES)[MODULE]
     out = settings.root / "outputs" / f"{number:02d}_{MODULE}"
