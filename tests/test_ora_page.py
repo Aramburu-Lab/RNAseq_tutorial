@@ -6,6 +6,7 @@ test names the mutation it catches; every one was planted and seen to fail.
 """
 
 import json
+import math
 import random
 import re
 import shutil
@@ -202,7 +203,7 @@ console.log(JSON.stringify(input.cases.map(c => {
   const families = ["up", "down"].map(d => [d, ctxOra.ora(c[d], c.background, c.sets,
                                                           c.min, c.max)]);
   return ctxOra.blocks(families, c.how, c.alpha, c.top).flatMap(b => b[1].map(
-    x => [b[0], x.row.name, x.passes, x.row.p]));
+    x => [b[0], x.row.name, x.passes, x.row.p, x.length]));
 })));
 """
 
@@ -240,11 +241,13 @@ def _python_bars(case: dict, how: str) -> pl.DataFrame:
 @pytest.mark.parametrize("how", live.HOW)
 def test_the_page_draws_the_bars_live_bars_draws(how):
     """PK.3: ``ctxOra.blocks`` draws ``live.bars``'s sets in its order with its marks, on lists
-    passing none, one and many sets; each p within D-049's bound.
+    passing none, one and many sets; each p within D-049's bound, each length -log10 FDR
+    (Rytis 2026-10-21, D-102) within it too.
 
-    Mutations caught: the failing sets dropped where few pass (Rytis's empty chart); the
-    fill counted past ``live.TOP``; a set holding no gene drawn; the tie by name reversed;
-    the families in their given order rather than by smallest p."""
+    Mutations caught: the length -log10 p in ``ctxOra.drawn`` or in ``live.drawn``; the
+    failing sets dropped where few pass (Rytis's empty chart); the fill counted past
+    ``live.TOP``; a set holding no gene drawn; the tie by name reversed; the families in
+    their given order rather than by smallest p."""
     cases = _short_lists()
     node = shutil.which("node")
     assert node, "nodejs is pinned in the ctx-dev environment; run tests with pixi"
@@ -256,10 +259,13 @@ def test_the_page_draws_the_bars_live_bars_draws(how):
     counts = {}
     for name, case in cases.items():
         python = _python_bars(case, how)
-        assert [(d, s, bool(x)) for d, s, x, _ in seen[name]] == list(
+        assert [(d, s, bool(x)) for d, s, x, *_ in seen[name]] == list(
             zip(python["direction"], python["gene_set"], python["passes"], strict=True)
         ), name
-        assert [p for *_, p in seen[name]] == pytest.approx(python["p"].to_list(), rel=BOUND)
+        assert [p for *_, p, _ in seen[name]] == pytest.approx(python["p"].to_list(), rel=BOUND)
+        lengths = [-math.log10(f) for f in python["fdr"]]
+        assert python[live.LENGTH].to_list() == pytest.approx(lengths, rel=BOUND)
+        assert [x for *_, x in seen[name]] == pytest.approx(lengths, rel=BOUND, abs=1e-12)
         assert python["series"].to_list() == [
             d if x else f"{d}_failing"
             for d, x in zip(python["direction"], python["passes"], strict=True)
@@ -276,9 +282,9 @@ def test_the_page_draws_the_bars_live_bars_draws(how):
         assert all(n <= live.TOP for c in counts.values() for _, n in c.values())
     # The family holding the smallest p first: down on these two, up on "one".
     assert [seen[n][0][0] for n in ("down_first", "many", "one")] == ["down", "down", "up"]
-    assert all(seen[n][0][3] == min(p for *_, p in seen[n]) for n in cases)
+    assert all(seen[n][0][3] == min(p for *_, p, _ in seen[n]) for n in cases)
     # S30 to S35 hold a gene each: an equal p, drawn by name.
-    tied = [s for _, s, _, _ in seen["none"]]
+    tied = [s for _, s, *_ in seen["none"]]
     assert tied == sorted(tied) and len(tied) == 6  # noqa: PLR2004 - the six genes
 
 

@@ -24,6 +24,8 @@ PAGE = "function"
 # "7 smallest FDR per direction"; PK.3 took this cap rather than a new number).
 TOP = 7
 HOW = ("passing", "top")
+# A bar's length, -log10 of its BH FDR (Rytis 2026-10-21, D-102); D-100 drew -log10 p.
+LENGTH = "neg_log10_fdr"
 
 
 def bitset(members: Sequence[int], size: int) -> str:
@@ -72,10 +74,11 @@ def drawn(family: pl.DataFrame, how: str = "passing", alpha: float = ALPHA,
     """The sets one family's bars draw, in order, each marked by whether it passes (PK.3).
 
     One definition, ``ctxOra.drawn`` its twin. The order: drop the sets holding none of the
-    list (p = 1 says nothing of them), sort by p, a tie by set name, mark FDR < ``alpha``;
-    then ``passing`` keeps every set that passes and, where fewer than ``top`` do, the
-    failing sets of smallest p up to ``top`` in all; ``top`` keeps the first ``top``.
-    Rytis's 6 genes on Step-1 passed none, and the panel drew an empty chart.
+    list (p = 1 says nothing of them), sort by p, a tie by set name, mark FDR < ``alpha``
+    and the length ``LENGTH``, -log10 FDR; then ``passing`` keeps every set that passes and,
+    where fewer than ``top`` do, the failing sets of smallest p up to ``top`` in all; ``top``
+    keeps the first ``top``. Rytis's 6 genes on Step-1 passed none, and the panel drew an
+    empty chart. BH keeps FDR in p's order within a family, so the lengths fall down a block.
 
     Args:
         family: One family's ORA rows, with ``gene_set``, ``hits``, ``p`` and ``fdr``.
@@ -84,7 +87,7 @@ def drawn(family: pl.DataFrame, how: str = "passing", alpha: float = ALPHA,
         top: The count a short family is filled to, and the count ``top`` draws.
 
     Returns:
-        The rows drawn, with ``passes``, passing sets first.
+        The rows drawn, with ``passes`` and ``LENGTH``, passing sets first.
 
     Raises:
         ValueError: If ``how`` is neither.
@@ -92,7 +95,7 @@ def drawn(family: pl.DataFrame, how: str = "passing", alpha: float = ALPHA,
     if how not in HOW:
         raise ValueError(f"sets drawn: {how!r}, not one of {HOW}")
     held = family.filter(pl.col("hits") > 0).sort("p", "gene_set")
-    held = held.with_columns(passes=pl.col("fdr") < alpha)
+    held = held.with_columns(passes=pl.col("fdr") < alpha, **{LENGTH: -pl.col("fdr").log10()})
     if how == "top":
         return held.head(top)
     passing = held.filter(pl.col("passes"))
@@ -110,13 +113,16 @@ def bars(frame: pl.DataFrame, how: str = "passing", alpha: float = ALPHA,
     ``<family>_failing`` for one that does not, the grey bars.
 
     Returns:
-        The rows drawn, with ``passes`` and ``series``; empty when no set holds a gene.
+        The rows drawn, with ``passes``, ``LENGTH`` and ``series``; empty when no set holds
+        a gene.
     """
     families = [drawn(frame.filter(pl.col("direction") == d), how, alpha, top)
                 for d in frame["direction"].unique(maintain_order=True)]  # fmt: skip
     families = sorted((f for f in families if f.height), key=lambda f: f["p"][0])
     if not families:
-        return frame.clear().with_columns(passes=pl.lit(True), series=pl.lit(""))
+        return frame.clear().with_columns(
+            passes=pl.lit(True), **{LENGTH: pl.lit(0.0)}, series=pl.lit("")
+        )
     return pl.concat(families).with_columns(
         series=pl.when("passes").then("direction").otherwise(pl.col("direction") + "_failing")
     )

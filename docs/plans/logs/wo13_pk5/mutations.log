@@ -1,0 +1,6 @@
+caught: JS twin length -log10 p: 2 failed, 6 passed in 1.41s
+caught: page redraw length -log10 p: 4 failed, 4 passed in 142.75s (0:02:22)
+caught: page redraw drops the line: 4 failed, 4 passed in 145.18s (0:02:25)
+caught: Python length -log10 p: 3 failed, 18 passed in 14.70s
+caught: static length -log10 p: 1 failed, 12 passed in 11.13s
+caught: static line left out: 1 failed, 12 passed in 11.16s

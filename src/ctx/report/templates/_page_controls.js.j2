@@ -65,16 +65,15 @@
       [true, false].forEach(function (passes) {
         tested.forEach(function (f) {
           var block = blocks.filter(function (b) { return b[0] === f[0]; })[0];
-          var shown = (block ? block[1] : []).filter(function (d) { return d.passes === passes; })
-            .map(function (d) { return d.row; });
+          var shown = (block ? block[1] : []).filter(function (d) { return d.passes === passes; });
           if (!shown.length) return;
           traces.push({ type: "bar", orientation: "h",
             name: ctxPick.fill(words.legend[passes ? "passing" : "failing"],
                                { family: words.families[f[0]], alpha: cfg.alpha }),
             marker: { color: passes ? colours[f[0]] : colours.failing },
-            x: shown.map(function (r) { return -Math.log10(r.p); }),
-            y: shown.map(function (r) { return cfg.labels[r.name]; }),
-            customdata: shown.map(function (r) { return [r.name, r.fdr, r.hits, r.size, r.p]; }),
+            x: shown.map(function (d) { return d.length; }),
+            y: shown.map(function (d) { return cfg.labels[d.row.name]; }),
+            customdata: shown.map(function (d) { var r = d.row; return [r.name, r.fdr, r.hits, r.size, r.p]; }),
             hovertemplate: words.hover + "<extra></extra>" });
         });
       });

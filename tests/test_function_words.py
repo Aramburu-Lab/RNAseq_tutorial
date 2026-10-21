@@ -23,6 +23,7 @@ from ctx.function import page as words
 from ctx.function import run as m6
 from ctx.report import text
 from ctx.report.builder import FigureBlock
+from ctx.viz.style import THRESHOLD_DASH
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = load(ROOT / "tests" / "fixtures" / "datasets" / "de_synthetic.toml")
@@ -100,10 +101,11 @@ def _short_frame() -> pl.DataFrame:
 def test_a_short_direction_is_filled_in_grey_by_p():
     """PK.3: a direction with fewer than ``live.TOP`` passing sets adds its failing sets of
     smallest p, grey and named so in the legend; a set holding no call is never drawn; the
-    length is -log10 p, which a failing set's FDR near 1 would hide.
+    length is -log10 FDR with a dashed line at FDR = ``ALPHA`` (Rytis 2026-10-21, D-102).
 
     Mutations caught: the fill left out; a grey bar in its direction's colour; the length
-    -log10 FDR; the direction of smaller p not first; the legend's grey left unnamed."""
+    -log10 p; the dashed line left out; the direction of smaller p not first; the legend's
+    grey left unnamed."""
     bars = m6._ora_bars(SAID, _short_frame(), N)
     assert bars is not None
     frame = bars.frame
@@ -118,7 +120,10 @@ def test_a_short_direction_is_filled_in_grey_by_p():
     assert frame["series"].to_list() == ["up"] * 2 + ["up_failing"] * 5 + ["down_failing"] * 3
     assert bars.colours["up_failing"] is None and bars.colours["down_failing"] is None
     assert bars.colours["up"] and bars.colours["down"]
-    assert frame["neg_log10_p"].to_list() == pytest.approx([-math.log10(p) for p in frame["p"]])
+    assert bars.value == live.LENGTH == "neg_log10_fdr"
+    assert frame[live.LENGTH].to_list() == pytest.approx([-math.log10(f) for f in frame["fdr"]])
+    assert bars.columns[live.LENGTH][0] == "-log10 FDR"
+    assert bars.rules() == [(pytest.approx(-math.log10(ALPHA)), f"FDR {ALPHA}", THRESHOLD_DASH)]
     assert bars.names["down_failing"] == text.fill("function", "live.legend.failing",
                                                    family="down", alpha=ALPHA)  # fmt: skip
     assert str(live.TOP) in bars.caption and "grey" in bars.caption

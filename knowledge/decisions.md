@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-102 — M6's ORA bar length is -log10 FDR, past a dashed FDR 0.05 line
+
+**Date:** 2026-10-21 · **Status:** decided (Rytis 2026-10-21, PK.5); supersedes D-100's length clause
+
+**Context.** D-100 drew every ORA bar, grey ones included, at -log10 p and dropped the FDR line, because at -log10 FDR a grey bar is near zero; it left the length to Rytis (PK.5).
+
+**Options.** -log10 p as D-100 built it, where the length and the pass mark read different numbers; or -log10 FDR, where the length is the number the pass mark tests and the dashed line parts the coloured bars from the grey.
+
+**Decision.** -log10 FDR (Rytis 2026-10-21). One definition, `live.LENGTH` (`neg_log10_fdr`) set in `live.drawn`, twin `ctxOra.drawn`'s `length`; the static bars, the page's redraw and its export draw it. The dashed line at -log10 0.05 = 1.301, "FDR 0.05" in the legend, is back on the static figure and stays in the page's redraw, which keeps the build's layout. D-100's grey filling, order by p, legend and summary are unchanged; BH keeps a family's FDR in p's order, so the lengths still fall down each block. No workaround for the short bars.
+
+**Evidence.** The stated cost, measured by `docs/plans/logs/wo13_pk5/lengths.py`: Rytis's 6 genes on Step-1 draw 3 grey up sets (Coagulation, Hypoxia, Complement) at FDR 0.932, -log10 p 1.59, 1.26 and 1.23, now 0.0308 each; Step-1's static figure's 5 grey down sets at FDR 0.9999999999996, -log10 p 0.50 to 0.89, now 1.56e-13 each, drawn and not visible; its 18 passing bars 1.38 to 12.02. Node twin equal on 0, 1 and 10 passing, lengths within 1.52e-10; Chromium real click with 6 genes at 1,280 and 375 px, light and dark: bars at -log10 FDR, the line at 1.301 in the layout and the view's SVG legend; Step-1 92 of 92 metrics equal (none reads ORA); 6 of 6 planted mutations caught.
+
+**Consequence.** A short list's grey sets show as a sliver or nothing, named by the legend, the summary and the table. The data CSV's `neg_log10_p` is now `neg_log10_fdr`. Step-1's M6 overview 9,420,365 B (9,420,242 at D-100). The background view (`ctx.function.background`) keeps -log10 p: another figure, not decided here.
+
+---
+
 ## D-101 — An HTTP 404 is a provider's answer and is cached like a body
 
 **Date:** 2026-10-20 · **Status:** decided
@@ -43,7 +59,7 @@ it were reversed.
 
 ## D-100 — M6's ORA fills a short family in grey and draws -log10 p
 
-**Date:** 2026-10-20 · **Status:** decided; the bar length awaits Rytis (PK.5)
+**Date:** 2026-10-20 · **Status:** decided; the length clause superseded by D-102 (Rytis 2026-10-21, PK.5)
 
 **Context.** PK.3: Rytis's 6 genes passed no set and the panel drew nothing; Rytis 2026-10-20: show the top sets marked as not passing FDR.
 

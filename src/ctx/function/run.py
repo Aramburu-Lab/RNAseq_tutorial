@@ -192,21 +192,20 @@ def _gsea_bars(said: Words, frame: pl.DataFrame) -> BarData:
 
 
 def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | None:
-    """-log10 p of the sets ``live.bars`` draws, a block per direction; None when none is.
+    """-log10 FDR of the sets ``live.bars`` draws, a block per direction; None when none is.
 
     A direction with fewer than ``live.TOP`` passing sets adds its failing sets of smallest
-    p in grey (PK.3). The length is p's: Step-1's 5 grey down sets sit at -log10 FDR below
-    0.001, a bar no reader sees, and at -log10 p 0.50 to 0.89.
+    p in grey (PK.3), past which the dashed line marks FDR = ``ALPHA``. The length is FDR's
+    (Rytis 2026-10-21, D-102), so a grey bar is short: Step-1's 5 grey down sets 1.6e-13.
     """
-    top = _labelled(live.bars(frame).with_columns(neg_log10_p=-pl.col("p").log10()))
-    top = top.unique(["label", "series"], maintain_order=True)
+    top = _labelled(live.bars(frame)).unique(["label", "series"], maintain_order=True)
     if top.is_empty():
         return None
     columns = {
         **ORA_COLUMNS,
         "passes": ("none", f"FDR below {ALPHA} or not."),
         "series": ("none", "The calls counted; _failing where the set does not pass, grey."),
-        "neg_log10_p": ("-log10 p", "Minus log10 of the hypergeometric p."),
+        live.LENGTH: ("-log10 FDR", "Minus log10 of the FDR, the bar's length."),
         "label": ("none", "Set name in words."),
     }
     families = text.raw(PAGE, "live.families")
@@ -219,7 +218,7 @@ def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | No
         frame=top,
         columns=columns,
         category="label",
-        value="neg_log10_p",
+        value=live.LENGTH,
         category_label=figure("ora", "x"),
         value_label=figure("ora", "y"),
         series="series",
@@ -239,6 +238,7 @@ def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | No
             top=live.TOP,
         ),  # fmt: skip
         horizontal=True,
+        hline=(-math.log10(ALPHA), figure("ora", "line", alpha=ALPHA)),
         hover=("gene_set", "p", "fdr", "hits", "size"),
         width="double",
         names=names,

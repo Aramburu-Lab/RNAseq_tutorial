@@ -1,0 +1,9 @@
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [ 35%]
+........................................................................ [ 71%]
+.........................................................                [100%]
+the test run changed the checkout: ['?? docs/plans/logs/wo13_pk5/build.sh', '?? docs/plans/logs/wo13_pk5/build_tier1_pk5.log', '?? docs/plans/logs/wo13_pk5/metrics.log']
+
+201 passed in 152.99s (0:02:32)

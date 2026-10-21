@@ -96,23 +96,25 @@ failing = "not significant"
 
 # Over-representation draws every set that passes, and a direction with fewer than live.TOP
 # passing adds its failing sets of smallest p in grey (PK.3); the lead counts both
-# directions, 0 included. The length is -log10 p: a grey set's FDR is near 1, no bar.
+# directions, 0 included. The length is -log10 FDR (Rytis 2026-10-21, D-102), so a grey bar,
+# whose FDR is near 1, is short of the dashed line and may be too short to see.
 [figures.ora]
 title = "Over-representation: {label}"
 tab = "ORA"
 lead = "{up} gene sets pass FDR < {alpha} on the up calls, {down} on the down calls."
 reading = [
-    "Each bar is one gene set; its length is -log10 of its hypergeometric p, so a longer bar is a smaller p.",
+    "Each bar is one gene set; its length is -log10 of its FDR, so a longer bar is stronger evidence of over-representation.",
     "Colour says which calls were counted: up or down in {tested} ({calls}).",
 ]
 calls = "padj below {alpha}, log2 FC at or beyond ±{lfc_min}"
-caption = "{label}: hypergeometric ORA of the up and down calls ({calls}), BH per direction, against the {background:,} tested gene symbols. Drawn: each set at FDR < {alpha}, and in grey, the smallest p to {top}."
-passing = "Every bar passes FDR < {alpha} after BH: the set holds more calls than its share of the {background:,} tested gene symbols predicts."
-failing = "Grey bars fail FDR < {alpha} after BH: {failing} sets of smallest p, drawn where fewer than {top} sets of a direction pass."
+caption = "{label}: hypergeometric ORA of the up and down calls ({calls}), BH per direction, against the {background:,} tested gene symbols. Drawn: each set past the dashed line, FDR = {alpha}, and in grey, the smallest p to {top}."
+passing = "Every bar passes the dashed line, FDR = {alpha}: the set holds more calls than its share of the {background:,} tested gene symbols predicts."
+failing = "Grey bars stop short of the dashed line, FDR = {alpha}: {failing} sets of smallest p, drawn where fewer than {top} sets of a direction pass."
 # Shown in place of the figure when no set holds a call in either direction.
 none = "No gene set holds an up or a down call, so no bar is drawn."
 x = "Gene set"
 y = "Significance"
+line = "FDR {alpha}"
 
 # The last reading line of the GSEA bars, by how many of the bars drawn pass; the caption
 # counts the sets drawn, fewer than the fifteen where fewer were tested.
