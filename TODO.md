@@ -565,7 +565,43 @@ Rytis 2026-10-18: "It has to be a reusable tool. This is important." Measured 20
 - [x] V.4 Follow-up of V.3, three gaps. (1) A page's PDF and SVG of a box view take `BoxData.inches()`, the one-row size, read by report/views.py, viz/save.py, report/lookups.py and qc/blocks.py: an exported view of 11 or more features is sized for one row. (2) The export redraws the page's plotly figure at 482 pt; measured in Chromium 2026-10-21, a module page draws a box of 11, 15 or 20 features in its phone layout at 1,280 and at 375 px (names turned, p and r under them, labels over the boxes hidden, the box scrolling 720 to 1,260 px in a 567 or 317 px card), and the export drew that layout, not the files' rows. (3) With stacked labels the legend rises by every extra row even where the headroom holds them. Done 2026-10-21: one size function, `box._inches(stack)`, read by the files and by `inches()`; `BoxData.stack`, measured once on the white figure, serves both themes and the export. The legend rises by `Stack.legend_pt`, what keeps it `STACK_GAP_PT` over the highest label as drawn, and the page grows by that alone: at p=3.7e-05, 11 and 15 features lift nothing and draw 3.68 and 3.81 in tall, 20 lifts 9.57 pt and draws 3.95 (V.3's 3.97, 4.10 and 4.38 lifted every row); the axes keep 178.22 pt. The export takes `export_layers()["relayout"]`: the files' upright names in their rows, every label shown in row i % k of the same `Stack`, its plot at the files' side margins, label pad 0, and a row pitch of plotly's label, 22 pt for two lines against the files' 20.6; `ctxExport.lift` measures the drawn export and moves its legend over the highest label where they meet. In Chromium at 11, 15 and 20 features, 1,280 and 375 px: the files' size, every label and name, no two texts over each other, the legend's box 1 to 2 pt over the highest label's. Also fixed: a NaN value set the labels at y = NaN, never drawn (`box._span`). Every figure file is byte-equal on 23 fixtures of 1 to 10 features (PDF and SVG, both themes), and the page's plotly JSON is equal on 16 of 1 to 20; the export of a view of 10 or fewer now also draws the files' layout, not the phone's, and its labels sit 2 pt lower without plotly's pad. Not done: a view whose options differ in feature count keeps the build's least width on the page (plain `viewed`, measured with 4 then 11 features: turned names overlapping 10 times), and plain `viewed` exports every option at the build's size. tests/test_box_stack.py, tests/test_box_stack_browser.py; 5 planted mutations caught.
 - [x] Y.2 TODO named Step-1's cohort "pancreas" in six lines (the Track diagram's description and node, the Step-3 proteomics row, the hub's selector, Cohort bundles, GS.8); each now says `myeloid`, the F.4 bundle. D24's resolved list in the checklist and the decisions table stays as decided; no code, config or test selects a bundle named pancreas.
 - [ ] Y.2a The Apptainer tab is not yet run; the figures image is not pushed.
-- [ ] F.2d build.sh release rewrites digests.lock without the figures row; the Apptainer tab is not yet run anywhere; F2's planted mutations are named but not run.
+- [x] F.2d build.sh release rewrote digests.lock wholesale and dropped the figures row; containers.yml's lock job did the same to every earlier release's rows. Both now call `lock_write` (containers/lock.sh), which replaces the rows of what was built, keyed on kind, version and reference, and keeps every other line; the apptainer version moves from the lock's header to the lock commit's message. tests/test_containers_lock.py runs build.sh release whole with docker and apptainer stubbed on the PATH and reads the lock back through `panel.image`; on the old build.sh both tests fail, the figures row gone. F2's planted mutations run (docs/plans/logs/2026-10-21_f2d_mutations.log): 24 on tests/test_figure_panel.py, its 23 named plus a row with no digest, 23 caught; every tab printing Docker's step 1 survived, so test_tabs now asserts each container tab's own `ctx()` line, and it is caught; 5 on the lock writer, 5 caught. The Apptainer tab is F.2e.
+- [ ] F.2e The Apptainer tab, run on Kebnekaise (Rytis: needs the cluster, and a figures image pushed where the login node can pull it, since GHCR holds none before the release, F.2b). On the Mac, from a clean main at the commit to test (a push):
+
+  ```
+  docker buildx build --platform linux/amd64 --target figures \
+    -f containers/analysis.Dockerfile \
+    -t docker.io/stakaitis/cancer_transcriptomics_teaching-figures:f2e --push .
+  ```
+
+  On the login node: the fixture root drawn inside the SIF, then the volcano's Apptainer tab from M5's page, as a reader downloads it, run in its clean folder; its step 5 checks the CSV, and `cmp` the 5 files (`ctx_figures_0.1.0.sif` is the name the tab gives ctx 0.1.0's SIF, so it is pulled once):
+
+  ```
+  export APPTAINER_CACHEDIR=$SNIC_NOBACKUP/cancer_transcriptomics_teaching/apptainer_cache
+  export CTX_FIGURES_IMAGE=docker.io/stakaitis/cancer_transcriptomics_teaching-figures:f2e
+  W=$SNIC_NOBACKUP/cancer_transcriptomics_teaching/f2e_apptainer
+  mkdir -p "$W" && cd "$W"
+  git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+  git -C ctx_course checkout <the commit the image was built from>
+  apptainer pull ctx_figures_0.1.0.sif "docker://$CTX_FIGURES_IMAGE"
+  apptainer run --cleanenv ctx_figures_0.1.0.sif python ctx_course/containers/figures_root.py "$W/root"
+  apptainer run --cleanenv ctx_figures_0.1.0.sif python - "$W/root" > reproduce_apptainer.sh <<'EOF'
+  import html, re, sys
+  from pathlib import Path
+  (page,) = Path(sys.argv[1], "outputs", "05_de").glob("*_overview_v1.html")
+  panel = re.compile(r'<details class="repro" data-script-head="([^"]*)">.*?'
+                     r'<code id="ctx-repro-\d+-apptainer"[^>]*>(.*?)</code>.*?'
+                     r'<code id="ctx-repro-\d+-shared">(.*?)</code>', re.S)
+  for head, step_1, steps in panel.findall(page.read_text()):
+      pasted = f"{html.unescape(step_1)}\n{html.unescape(steps)}"
+      if "_m5_volcano --params" in pasted:
+          print(html.unescape(head) + pasted, end="")
+  EOF
+  bash reproduce_apptainer.sh 2>&1 | tee reproduce_apptainer.log
+  for f in root/outputs/05_de/*_de_desynth_volcano_a_case_v1*.pdf root/outputs/05_de/*_de_desynth_volcano_a_case_v1*.svg root/outputs/05_de/*_de_desynth_volcano_a_case_v1.csv; do cmp "$f" repro_own_m5_volcano_desynth/"${f##*/}" && echo "equal ${f##*/}"; done
+  ```
+
+  Paste back reproduce_apptainer.log and the `equal` lines; 5 are expected. Not run anywhere yet.
 - [ ] F.3 Contour templates (655); lite-build and notebooks (711); P2C.4; `ctx source` and `verify-figure`; the volcano's x axis raw or shrunk; the hub's cohort by module grid; laptop caps applied (every bundle says `all`); `--cohort` filling `--dataset-file`; a 375 px and theme check of a panel.
 - [x] F.4 (wo13-y c33b4ae) The Step-1 bundle is `myeloid`, "Neutrophils and monocytes of blood and bone marrow, at steady state and under stress" (Rytis 2026-10-20: the name must match the data content: NDN 73, Monocyte 68, LDN 38, BM_1 to BM_4 31; blood 171, bone marrow 39). Pages built before keep `blood_` IDs until rebuilt.
 - [x] F.5 src/ctx/dataset.py (967 lines, not the 942 the item quoted) split into the package src/ctx/dataset/: checks, sources, analyses, gdc, proteo, counts, loader, at most 245 lines each; 16 names re-exported, no import elsewhere changed; 22 dataset files and 7,740 broken variants dump byte-equal before and after (SHA-256 9a970c99...1b84) with the old file made unreachable (wo13-f5 275bfa7). test_sanity_record's FROZEN now names both paths.

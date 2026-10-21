@@ -159,7 +159,9 @@ the tag until then (`ctx.figures.panel.image`).
   2026-10-20: the volcano drawn on this Mac and redrawn in the image, 5 of 5 files byte-equal;
   with Arial first, as before, 1 of 5 (the CSV), the PDFs embedding ArialMT
   (docs/plans/logs/wo13_y/proof_mac_to_image.log, proof_control.log).
-- `build.sh release` does not build this target and rewrites `digests.lock` without its row.
+- `build.sh release` does not build this target and keeps its row: both writers of
+  `digests.lock` call `lock_write` (`containers/lock.sh`), which replaces the rows of what was
+  built and keeps every other line (TODO.md F.2d, `tests/test_containers_lock.py`).
 
 ## On Kebnekaise
 
