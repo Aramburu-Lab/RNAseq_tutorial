@@ -66,6 +66,9 @@ def bounds(kind: Kind, params: Any, spec: Dataset) -> list[str]:
     """Problems with parameter values the dataset file does not declare, or out of range."""
     names = [c.name for c in spec.contrasts]
     found = []
+    # A kind its dataset file makes no figure of has inputs its module never wrote (R1.3b).
+    if kind.parsed is None and not kind.made(spec):
+        found.append(f"{kind.figure}: {spec.slug}'s dataset file makes no such figure")
     if params.dataset != spec.slug:
         found.append(f"dataset: {params.dataset!r}, but the dataset file is {spec.slug!r}")
     for field in ("contrast", "x", "y"):
