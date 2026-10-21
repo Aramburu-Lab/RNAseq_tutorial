@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-103 — A kit refuses a guide or glossary older than its root's newest module page
+
+**Date:** 2026-10-21 · **Status:** decided (K.15)
+
+**Context.** Kit v10 shipped ~/ctx_tcga_hnsc's 2026-10-18 guide, and the 2026-10-18 glossary it links, beside that root's 2026-10-20 pages. `ctx guide` is no module, so no module run writes the guide again; `current()` keeps the newest guide whatever its day, and the link walk carries its glossary.
+
+**Options.** Pick only current guides and glossaries, which drops files without a word and can leave START.html with no guide; refuse against the kit's newest module page, as K.15 first read; or refuse per root.
+
+**Decision.** `build_kit.stale_pages` refuses, per root, a guide or glossary page dated before the root's newest module page unless a module page links it, and names the file, that page, and the guide's own Reproduce command. Per root, because a module run again on a later day (K.13b's breast M9) leaves the root's other pages linking their own day's glossary (D-048), which a kit-wide rule would refuse in every root.
+
+**Evidence.** On kit v10's own folders, read-only: headneck refused on its 2026-10-18 guide and glossary, step1 passed. Tests: the refusal failed before the change; a glossary an older module page links still ships; 2 planted mutations caught (no check; no link exception).
+
+**Consequence.** A root whose guide predates its pages needs `ctx guide` run again before a kit builds. Days, not commits: a guide written earlier on the day of the pages passes.
+
+---
+
 ## D-102 — M6's ORA bar length is -log10 FDR, past a dashed FDR 0.05 line
 
 **Date:** 2026-10-21 · **Status:** decided (Rytis 2026-10-21, PK.5); supersedes D-100's length clause

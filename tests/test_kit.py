@@ -592,14 +592,63 @@ def test_a_dataset_ships_its_newest_run_not_each_names_newest_copy(tmp_path):
 
 def test_m0_shows_the_computers_check_once_across_real_roots(tmp_path):
     """Every root's M0 page describes the one computer that built the kit, so the home page
-    lists one, the newest (Rytis 2026-10-20). Mutation caught: one link per real root."""
+    lists one, the newest (Rytis 2026-10-20); on a date tie, the first real root in the kit's
+    order (K.17: kit v10 linked pleura's, the last of eight). Mutations caught: one link per
+    real root, the last root on a tie, and the first root whatever its date."""
     kit = tmp_path / "kit"
-    for folder, day in (("a", OLD), ("b", NEW)):
+    for folder, day in (("a", OLD), ("b", NEW), ("c", NEW), ("d", NEW)):
         a_root(kit / folder, folder.upper(), folder)
         setup = kit / folder / "outputs" / "00_setup"
         for old in setup.glob("*.html"):
             old.unlink()
         page(setup / f"{day}_setup_environment_v1.html", "M0 Setup")
-    home = course.page(kit, [(kit / "a", True), (kit / "b", True)])
-    (m0,) = [r.links for r in home.rows if r.number == "M0"]
-    assert [Path(link.href).name for link in m0] == [f"{NEW}_setup_environment_v1.html"]
+    roots = [(kit / "a", True), (kit / "d", False), (kit / "b", True), (kit / "c", True)]
+    (m0,) = [r.links for r in course.page(kit, roots).rows if r.number == "M0"]
+    assert [link.href for link in m0] == [f"b/outputs/00_setup/{NEW}_setup_environment_v1.html"]
+
+
+def stale_guide_root(root: Path) -> Path:
+    """K.15's ~/ctx_tcga_hnsc: module pages from NEW, a guide from OLD linking OLD's glossary."""
+    a_root(root, "Study", "study")
+    report = root / "outputs" / "09_report"
+    page(report / f"{OLD}_report_glossary_v1.html", "Glossary")
+    page(
+        report / f"{OLD}_report_guide_v1.html",
+        "Your own data: Study",
+        f"{OLD}_report_glossary_v1.html",
+        extra='<code id="ctx-command">pixi run ctx --root ~/r guide --dataset-file x.toml</code>',
+    )
+    page(report / f"{NEW}_report_glossary_v1.html", "Glossary")
+    hub = report / f"{NEW}_report_study_hub_v1.html"
+    page(hub, "Course hub: Study", f"../01_gather/{NEW}_gather_study_overview_v1.html",
+         f"{NEW}_report_glossary_v1.html")  # fmt: skip
+    return root
+
+
+def test_kit_refuses_a_guide_older_than_its_roots_module_pages(tmp_path):
+    """K.15: kit v10 shipped ~/ctx_tcga_hnsc's 2026-10-18 guide, and the glossary it links,
+    beside that root's 2026-10-20 pages, because `ctx guide` is no module and no run wrote it
+    again. The refusal names both files and the guide's own command. Mutation caught: no check."""
+    kit, done = build(tmp_path, real=stale_guide_root(tmp_path / "real"))
+    assert done.returncode != 0 and nothing_written(kit)
+    stale = [line for line in done.stderr.splitlines() if "older than" in line]
+    assert [Path(line.split(":")[0]).name for line in stale] == [
+        f"{OLD}_report_glossary_v1.html", f"{OLD}_report_guide_v1.html"]  # fmt: skip
+    assert "`pixi run ctx --root ~/r guide --dataset-file x.toml`" in stale[1]
+    assert f"{OLD}_report_guide_v1.html links it" in stale[0]
+
+
+def test_kit_ships_an_older_glossary_a_module_page_links(tmp_path):
+    """A module not run again keeps its day's glossary, its own copy (D-048): breast M9 rebuilt
+    a day after breast's other pages must still ship (K.13b). Mutation caught: every guide or
+    glossary older than the root's newest module page refused, linked or not."""
+    real = stale_guide_root(tmp_path / "real")
+    report = real / "outputs" / "09_report"
+    (report / f"{OLD}_report_guide_v1.html").unlink()
+    page(report / f"{NEW}_report_guide_v1.html", "Your own data: Study",
+         f"{NEW}_report_glossary_v1.html")  # fmt: skip
+    old_qc = real / "outputs" / "02_qc" / f"{OLD}_qc_study_overview_v1.html"
+    page(old_qc, "M2 QC: Study", f"../09_report/{OLD}_report_glossary_v1.html")
+    kit, done = build(tmp_path, real=real)
+    assert done.returncode == 0, done.stderr
+    assert (kit / "step" / "outputs" / "09_report" / f"{OLD}_report_glossary_v1.html").is_file()

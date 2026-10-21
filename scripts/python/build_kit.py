@@ -75,6 +75,7 @@ commit. The steps for the Step-1 root, kept here since a session's scratch copy 
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import re
 import shutil
@@ -93,6 +94,7 @@ from ctx.dataset import load  # noqa: E402
 from ctx.io import naming  # noqa: E402
 from ctx.report import prose, text  # noqa: E402
 from ctx.report.course import label, newest, write_home  # noqa: E402
+from ctx.report.hub import PAGE  # noqa: E402
 from ctx.runtime import shown_path  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[2]
@@ -121,6 +123,11 @@ DATASET_SHA_ROW = re.compile(r"^\| sha256:([^|/ ]+\.toml) \| ([0-9a-f]{64}) \|$"
 FILE_ROW = re.compile(r"^\| `([^`]+)` \| (\d+) \| `([0-9a-f]{64})` \|$", re.MULTILINE)
 # How a GDC folder's own fetch script is run again, into the folder it fetched.
 FETCH = "OUT={folder} bash {script}"
+# Report pages no module run writes again: `ctx guide` writes the guide, and the glossary is
+# written with the first page of each day that links it (D-048).
+NOT_MODULE = ("guide", "glossary")
+# A page's Reproduce command (module.html.j2).
+PAGE_COMMAND = re.compile(r'<code id="ctx-command">(.*?)</code>', re.S)
 
 
 def current(outputs: Path, slugs: frozenset[str] = frozenset()) -> set[Path]:
@@ -259,6 +266,7 @@ def select(
         problems += [f"{p}: its GDC folder {f} holds no manifest or fetch script"
                      for f in m["folders"] if not gdc_sources(f)]  # fmt: skip
     kept = (chosen | found) - matrices.keys()
+    problems += stale_pages(sorted(kept))
     for p in sorted(kept):
         if p.name.lower().endswith(REFUSED):
             problems.append(f"{p}: reads or alignments never ship")
@@ -267,6 +275,39 @@ def select(
         elif (named := sources.get(check_kit.sha256(p))) is not None:
             problems.append(f"{p}: the source file {named}; derived tables ship, sources never")
     return sorted(kept), matrices, problems
+
+
+def _not_module(path: Path) -> bool:
+    """Whether a file is a guide or glossary page, which no module run writes again."""
+    m = PAGE.fullmatch(path.name)
+    return bool(m) and m["module"] == "report" and m["what"] in NOT_MODULE
+
+
+def stale_pages(kept: list[Path]) -> list[str]:
+    """Each guide or glossary page no module page links, older than the root's newest module page.
+
+    Kit v10 shipped ~/ctx_tcga_hnsc's 2026-10-18 guide, and the glossary it links, beside that
+    root's 2026-10-20 pages (K.15). Per root, because a module run again on a later day leaves
+    the root's other pages linking their own day's glossary, which a module page then links.
+    """
+    pages = [p for p in kept if p.suffix == ".html" and PAGE.fullmatch(p.name)]
+    modules = [p for p in pages if not _not_module(p)]
+    latest = max((p.name for p in modules), key=lambda name: name[:10], default="")
+    old = [p for p in pages if _not_module(p) and p.name[:10] < latest[:10]]
+    if not old:
+        return []
+    links = {p: {check_kit.target(p, v) for _, _, v in check_kit.links(p)} for p in pages}
+    problems = []
+    for p in old:
+        if any(p in links[m] for m in modules):
+            continue
+        command = PAGE_COMMAND.search(p.read_text(encoding="utf-8", errors="replace"))
+        linkers = sorted(q.name for q in pages if p in links[q])
+        fix = (f"write it again with `{html.unescape(command[1])}`" if command else
+               f"{', '.join(linkers) or 'no page'} links it; write that page again")  # fmt: skip
+        problems.append(f"{p}: from {p.name[:10]}, older than {latest}, and no module page "
+                        f"links it; {fix}")  # fmt: skip
+    return problems
 
 
 def gdc_sources(folder: Path) -> list[Path]:
