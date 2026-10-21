@@ -24,6 +24,7 @@ from ctx.dataset import load
 from ctx.report import genes
 from ctx.report.builder import plotly_js
 from ctx.report.cap import MAX_BYTES
+from ctx.report.figures import unpacked
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATES = ROOT / "src" / "ctx" / "report" / "templates"
@@ -85,7 +86,7 @@ def test_the_page_is_offline_under_the_cap_and_names_its_sources(clinical_root):
     acknowledgement or the CDR's licence left out."""
     html = outputs(clinical_root, "overview_v1.html").read_text()
     assert len(html.encode()) <= MAX_BYTES
-    assert html.count(plotly_js()) == 1
+    assert unpacked(html).count(plotly_js()) == 1
     assert not re.search(r"<script[^>]+\bsrc\s*=", html, re.IGNORECASE)
     assert "TCGA Research Network: https://www.cancer.gov/tcga." in html
     assert "CC BY-NC-ND 4.0" in html

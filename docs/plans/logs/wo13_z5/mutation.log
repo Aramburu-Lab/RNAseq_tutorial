@@ -1,0 +1,14 @@
+E       assert not <re.Match object; span=(2002651, 2002730), match='Plotly.newPlot(                        "ctx-figur>
+E        +  where <re.Match object; span=(2002651, 2002730), match='Plotly.newPlot(                        "ctx-figur> = <function search at 0x104f31f80>('Plotly\\.newPlot\\(\\s*"[^"]+",\\s*\\[', '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,... form on back-navigation sets the boxes without an event. */\n    update();\n  }\n\n})();\n</script>\n</body>\n</html>')
+E        +    where <function search at 0x104f31f80> = re.search
+E       assert not <re.Match object; span=(2001181, 2001260), match='Plotly.newPlot(                        "ctx-figur>
+E        +  where <re.Match object; span=(2001181, 2001260), match='Plotly.newPlot(                        "ctx-figur> = <function search at 0x104f31f80>('Plotly\\.newPlot\\(\\s*"[^"]+",\\s*\\[', '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,... form on back-navigation sets the boxes without an event. */\n    update();\n  }\n\n})();\n</script>\n</body>\n</html>')
+E        +    where <function search at 0x104f31f80> = re.search
+E       AssertionError: assert [] == [('ctx-figure...: 'linear'}})]
+E         
+E         Right contains 3 more items, first extra item: ('ctx-figure-0', [{'fill': 'toself', 'fillcolor': 'rgba(213,94,0,0.15)', 'hoverinfo': 'skip', 'line': {'width': 0.0}, ...B / Mono', 'BM / NDN'], 'tickvals': [0, 1, 2], ...}, 'yaxis': {'title': {'text': 'Genes detected'}, 'type': 'linear'}})
+E         Use -v to get more diff
+FAILED tests/test_packed_figures.py::test_every_drawing_page_packs_plotly_js_and_its_figures[module]
+FAILED tests/test_packed_figures.py::test_every_drawing_page_packs_plotly_js_and_its_figures[alone]
+FAILED tests/test_packed_figures.py::test_a_packed_page_carries_the_same_figures_and_rows
+3 failed, 1 passed, 2 deselected in 12.14s

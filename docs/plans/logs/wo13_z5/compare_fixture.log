@@ -1,0 +1,1317 @@
+1-2. page | bytes before | bytes after | saved | text checks | differing lines
+   ok   clinical_run/outputs/01_gather/2026-10-21_gather_fake_brca_overview_v1.html | 222,609 | 222,458 | 151 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 14
+        -<tr><td>md5</td><td>85 of 85 files match, read in 0.0 s</td></tr>
+        +<tr><td>md5</td><td>85 of 85 files match, read in 0.5 s</td></tr>
+        -<tr><th>Wall time</th><td class="wall">11.488 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">131.8 MiB (138249536 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">12.642 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">127.8 MiB (133973312 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_competing_v1.html | 5,118,868 | 2,205,318 | 2,913,550 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_confounding_v1.html | 5,065,796 | 2,202,251 | 2,863,545 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_dfi_v1.html | 5,083,262 | 2,206,087 | 2,877,175 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_dss_v1.html | 5,083,695 | 2,204,751 | 2,878,944 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_os_v1.html | 5,083,052 | 2,205,711 | 2,877,341 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_pfi_v1.html | 5,082,855 | 2,206,183 | 2,876,672 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_expression_er_v1.html | 5,105,376 | 2,205,163 | 2,900,213 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_km_score_v1.html | 5,925,191 | 3,046,754 | 2,878,437 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_overview_v1.html | 6,096,470 | 3,240,681 | 2,855,789 | figures 10/10 equal True; rows 10/10 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">80.615 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">303.5 MiB (318260808 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">37.289 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">276.0 MiB (289424968 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_power_v1.html | 5,110,792 | 2,220,365 | 2,890,427 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_scan_score_v1.html | 5,895,706 | 3,034,208 | 2,861,498 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   clinical_run/outputs/12_clinical/index.html | 206,138 | 205,990 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   gather_run/outputs/01_gather/2026-10-21_gather_nfcore_test_overview_v1.html | 225,623 | 225,473 | 150 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">6.303 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">127.2 MiB (133350672 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">4.787 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">130.9 MiB (137299264 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   gather_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   genecard_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   genecard_run/outputs/11_genecard/2026-10-21_genecard_gcsynth_overview_v1.html | 313,824 | 313,672 | 152 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">21.049 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">169.5 MiB (177702136 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">13.833 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">170.8 MiB (179045720 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   genecard_run/outputs/11_genecard/index.html | 206,106 | 205,958 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   guide_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   guide_run/outputs/09_report/2026-10-21_report_guide_v1.html | 259,099 | 258,950 | 149 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">1.631 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">57.3 MiB (60081352 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">0.889 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">56.0 MiB (58754272 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_biotype_shares_v1.html | 5,817,687 | 2,954,789 | 2,862,898 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_filter_by_biotype_v1.html | 5,084,506 | 2,211,043 | 2,873,463 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_lncrna_neighbour_v1.html | 5,811,555 | 2,954,473 | 2,857,082 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_overview_v1.html | 6,171,524 | 3,222,740 | 2,948,784 | figures 4/4 equal True; rows 4/4 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">62.236 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">314.5 MiB (329827912 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">27.995 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">277.8 MiB (291325464 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_volcano_by_biotype_v1.html | 5,911,295 | 3,005,876 | 2,905,419 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   ncrna_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_box_a_case_v1.html | 5,066,781 | 2,202,369 | 2,864,412 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_calls_batch_v1.html | 5,058,238 | 2,200,860 | 2,857,378 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_dispersion_a_case_v1.html | 5,295,451 | 2,320,012 | 2,975,439 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_lfc_a_case_vs_b_case_v1.html | 5,199,309 | 2,264,831 | 2,934,478 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_lfc_a_naive_vs_a_adjusted_v1.html | 5,202,927 | 2,266,157 | 2,936,770 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_ma_a_case_v1.html | 5,400,955 | 2,354,214 | 3,046,741 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_overview_v1.html | 7,614,352 | 4,161,810 | 3,452,542 | figures 10/10 equal True; rows 10/10 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -<tr><th>Wall time</th><td class="wall">227.649 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">363.8 MiB (381486856 bytes)</td></tr>
+        -<tr><th>Peak RSS, largest child process</th><td class="rss-children">257.5 MiB (270024704 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">109.629 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">338.8 MiB (355288840 bytes)</td></tr>
+        +<tr><th>Peak RSS, largest child process</th><td class="rss-children">258.4 MiB (270909440 bytes)</td></tr>
+        -<tr><th>Budget</th><td>Track B: under 10 min and 4 GB; RAM bound self + 4 x largest child = 1,461,585,672 bytes</td></tr>
+        +<tr><th>Budget</th><td>Track B: under 10 min and 4 GB; RAM bound self + 4 x largest child = 1,438,926,600 bytes</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_pca_all_v1.html | 5,060,495 | 2,201,840 | 2,858,655 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_pca_control_a_v1.html | 5,056,912 | 2,200,165 | 2,856,747 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_phist_a_case_v1.html | 5,056,639 | 2,199,729 | 2,856,910 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_volcano_a_case_v1.html | 5,912,743 | 2,996,971 | 2,915,772 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_background_a_case_v1.html | 5,057,568 | 2,200,577 | 2,856,991 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_gsea_a_case_v1.html | 5,058,528 | 2,200,696 | 2,857,832 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_nes_up_set_v1.html | 5,059,998 | 2,201,867 | 2,858,131 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_ora_a_case_v1.html | 5,919,479 | 3,060,260 | 2,859,219 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_overview_v1.html | 6,287,601 | 3,398,118 | 2,889,483 | figures 5/5 equal True; rows 5/5 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">64.892 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">292.1 MiB (306267648 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">30.999 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">264.0 MiB (276809240 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_running_a_case_v1.html | 5,059,454 | 2,201,720 | 2,857,734 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/06_function/index.html | 206,102 | 205,954 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/09_report/2026-10-21_report_desynth_hub_v1.html | 209,736 | 209,588 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   pipeline/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_fraction_v1.html | 5,061,748 | 2,203,257 | 2,858,491 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_multimap_v1.html | 5,061,076 | 2,202,772 | 2,858,304 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_overlap_v1.html | 5,061,554 | 2,203,192 | 2,858,362 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_strand_v1.html | 5,061,334 | 2,203,048 | 2,858,286 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_fraction_v1.html | 5,062,306 | 2,204,221 | 2,858,085 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_multimap_v1.html | 5,061,902 | 2,203,830 | 2,858,072 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_overlap_v1.html | 5,062,081 | 2,204,121 | 2,857,960 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_strand_v1.html | 5,061,879 | 2,203,970 | 2,857,909 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_featured_settings_v1.html | 5,058,369 | 2,201,025 | 2,857,344 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_mapping_v1.html | 5,808,560 | 2,950,991 | 2,857,569 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_overview_v1.html | 6,383,197 | 3,436,389 | 2,946,808 | figures 12/12 equal True; rows 12/12 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 114
+        -<tr><td>Trimmed reads, every run</td><td>trim_e37518fa75e0</td><td>built</td></tr>
+        +<tr><td>Trimmed reads, every run</td><td>trim_4e9280f419e7</td><td>built</td></tr>
+        -<tr><td>Featured sample untrimmed</td><td>align_hisat2_a004479c7b53</td><td>built</td></tr>
+        +<tr><td>Featured sample untrimmed</td><td>align_hisat2_8abec04f7473</td><td>built</td></tr>
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -<tr><th>Wall time</th><td class="wall">285.379 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">279.7 MiB (293308000 bytes)</td></tr>
+        -<tr><th>Peak RSS, largest child process</th><td class="rss-children">1060.5 MiB (1111982080 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">127.185 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">265.1 MiB (277939736 bytes)</td></tr>
+        +<tr><th>Peak RSS, largest child process</th><td class="rss-children">1060.0 MiB (1111523328 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_strand_assigned_v1.html | 5,811,341 | 2,952,867 | 2,858,474 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_strand_share_v1.html | 5,809,640 | 2,951,377 | 2,858,263 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 16
+        -4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614  2026-10-21_process_chrse_figure_options_v1.parquet
+        -86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7  2026-10-21_process_chrse_groups_v1.parquet
+        +990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0  2026-10-21_process_chrse_figure_options_v1.parquet
+        +0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e  2026-10-21_process_chrse_groups_v1.parquet
+        -figure_options = &#34;4c3f90a054a9f65ea54c33f1ac162d5aa9f5da77a41ee5d31f346cb253428614&#34;
+        -groups = &#34;86f6b546d7e9ea3339e14a3a1009611f4581777cc42cd1ba1890815486dfd3b7&#34;
+        +figure_options = &#34;990923aa100f736fe87e958b80448f6127ad81dbd1204c137d4a64729047ccb0&#34;
+        +groups = &#34;0f2ab1836c755e858740af44ee2575ab69a1ca7b105bbfb35914e52c86e2815e&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   process_root/outputs/03_process/multiqc/chrse/cut/multiqc_report.html | 2,217,088 | 2,217,085 | 3 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIADve2GoA/+w9a2/buLJ/RVBRbBdH8dpJnBd6C/R0u3sOsKe3p9n74SIIBNqmHd3KkleSE/sE/u+Xw4dEitTLcV41d7tbixxS5HA4M5wZDe/dFM2zOA7Tg2mIZmmGsoMMjULsXjj3bjAh
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAJbm2GoA/+w9a2/buLJ/RVBRbBdH8dpJnBd6C/R0u3sOsKe3p9n74SIIBNqmHd3KkleSE/sE/u+Xw4dEitTLcV41d7tbixxS5HA4M5wZDe/dFM2zOA7Tg2mIZmmGsoMMjULsXjj3bjAh
+        -reportUuid = "36acc456-2485-4734-9142-616a0871ba3f";
+        +reportUuid = "45e94d20-7b5d-4d0f-a5db-d05b84c4339e";
+        -configCreationDate = "21 Oct 2026, 17:46 CEST";
+        +configCreationDate = "21 Oct 2026, 18:21 CEST";
+        -        generated on 2026-10-21, 17:46 CEST
+        +        generated on 2026-10-21, 18:21 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_M/multiqc_report.html | 2,148,931 | 2,148,930 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAMje2GoA/+waa4/bNvKvCFoEaQGvKz9kexeLAGmb9g7IBUFy/XAIFgIl0TYvsqTqsWt14f9+M0NSoh5euwmaXJFNdlficEjODIfzoh7sNWdFmfGfkjIuco/ludjEOx4XXholhX1tPdgi
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAMjm2GoA/+waa4/bNvKvCFoEaQGvKz9kexeLAGmb9g7IBUFy/XAIFgIl0TYvsqTqsWt14f9+M0NSoh5euwmaXJFNdlficEjODIfzoh7sNWdFmfGfkjIuco/ludjEOx4XXholhX1tPdgi
+        -reportUuid = "adfe9780-27f2-426e-a7b7-bb7474bc562d";
+        +reportUuid = "fcb31fc8-b1da-4c1d-ae50-af5c393ac574";
+        -configCreationDate = "21 Oct 2026, 17:48 CEST";
+        +configCreationDate = "21 Oct 2026, 18:22 CEST";
+        -        generated on 2026-10-21, 17:48 CEST
+        +        generated on 2026-10-21, 18:22 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_O/multiqc_report.html | 2,148,682 | 2,148,681 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAKPe2GoA/+waa2/bOPKvCAqK7gKO107svBAU6Hbb3QN6RdFePxyCQKAkyuZFlrR6xNYG/u83MyQlUlISN8W2XdRtEokzQ3I4HM6LunMjzsoq56/SKikLjxWFWCQrnpReFqele+HcuSKE
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIALvm2GoA/+waa2/bOPKvCAqK7gKO107svBAU6Hbb3QN6RdFePxyCQKAkyuZFlrR6xNYG/u83MyQlUlISN8W2XdRtEokzQ3I4HM6LunMjzsoq56/SKikLjxWFWCQrnpReFqele+HcuSKE
+        -reportUuid = "74c29d49-a603-4cec-a232-0e39653507f8";
+        +reportUuid = "258d65ea-5ca8-454b-be7c-8e35c7726035";
+        -configCreationDate = "21 Oct 2026, 17:47 CEST";
+        +configCreationDate = "21 Oct 2026, 18:22 CEST";
+        -        generated on 2026-10-21, 17:47 CEST
+        +        generated on 2026-10-21, 18:22 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_O_fraction/multiqc_report.html | 2,148,703 | 2,148,702 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIALfe2GoA/+waa2/bOPKvCAqK7gKO107svBAU6Hbb3QN6RdFePxyCQKAkyuZFlrR6xNYG/u83MyQlUlISN8W2XdRtEokzQ3I4HM6LunMjzsoq56/SKikLjxWFWCQrnpReFqele+HcuSKE
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAMLm2GoA/+waa2/bOPKvCAqK7gKO107svBAU6Hbb3QN6RdFePxyCQKAkyuZFlrR6xNYG/u83MyQlUlISN8W2XdRtEokzQ3I4HM6LunMjzsoq56/SKikLjxWFWCQrnpReFqele+HcuSKE
+        -reportUuid = "b7ed8561-dbb1-415f-8c93-79a4e7e3d12e";
+        +reportUuid = "c1acbd32-baf3-41f7-9171-e0437a9773e9";
+        -configCreationDate = "21 Oct 2026, 17:48 CEST";
+        +configCreationDate = "21 Oct 2026, 18:22 CEST";
+        -        generated on 2026-10-21, 17:48 CEST
+        +        generated on 2026-10-21, 18:22 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_cut/multiqc_report.html | 2,145,277 | 2,145,276 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIANPe2GoA/+waa2/bOPKvCAqK7gKOz3Js54FigW633T2gVxTt9cMhCAhKomxeZUmrR2xt4P9+M0NRoh52vCm2vUWdOLE4MySHw+G8qAc7EDwvUvEqLqI8YzzL5DJaiyhnSRjn9o31YEsf
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIANHm2GoA/+waa2/bOPKvCAqK7gKOz3Js54FigW633T2gVxTt9cMhCAhKomxeZUmrR2xt4P9+M0NRoh52vCm2vUWdOLE4MySHw+G8qAc7EDwvUvEqLqI8YzzL5DJaiyhnSRjn9o31YEsf
+        -reportUuid = "aedc33fe-30e0-4474-9c35-5122b6bd20c2";
+        +reportUuid = "af696ac6-fbdd-4c14-8e96-4b6c1429e0f8";
+        -configCreationDate = "21 Oct 2026, 17:48 CEST";
+        +configCreationDate = "21 Oct 2026, 18:22 CEST";
+        -        generated on 2026-10-21, 17:48 CEST
+        +        generated on 2026-10-21, 18:22 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_s0/multiqc_report.html | 2,148,893 | 2,148,892 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAGve2GoA/+waa2/cNvKvCDKCtMBa3ffDMAKkbdo7IBcEyeXDITAESqJ2edFKqh72qsb+95sZkhL1sHeboskVcWJb4nBIzgyH86Lu7ZCzosz4T0kZF7nL8lxs4z2PCzeNksK+su5tEcDj
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAKnm2GoA/+waa2/cNvKvCDKCtMBa3ffDMAKkbdo7IBcEyeXDITAESqJ2edFKqh72qsb+95sZkhL1sHeboskVcWJb4nBIzgyH86Lu7ZCzosz4T0kZF7nL8lxs4z2PCzeNksK+su5tEcDj
+        -reportUuid = "929d6855-8d02-4bcc-b38a-6c27b4bd918e";
+        +reportUuid = "b0db496f-20dc-4f42-9ddb-a681f8a1b125";
+        -configCreationDate = "21 Oct 2026, 17:46 CEST";
+        +configCreationDate = "21 Oct 2026, 18:21 CEST";
+        -        generated on 2026-10-21, 17:46 CEST
+        +        generated on 2026-10-21, 18:21 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_s1/multiqc_report.html | 2,148,732 | 2,148,731 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAH/e2GoA/+waa4/bNvKvCFoEaQGvavm1drAIkKZJ74BcECSXD4dgIVASbfMiS6oeu1YX/u83MyQl6uG1m6LJFdl92OJwOBwOh/Oi7u01Z0WZ8ZdJGRe5x/JcbOIdjwsvjZLCfmbd2yKE
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAK/m2GoA/+waa4/bNvKvCFoEaQGvavm1drAIkKZJ74BcECSXD4dgIVASbfMiS6oeu1YX/u83MyQl6uG1m6LJFdl92OJwOBwOh/Oi7u01Z0WZ8ZdJGRe5x/JcbOIdjwsvjZLCfmbd2yKE
+        -reportUuid = "df39c389-c7e9-464f-b40f-92712260c683";
+        +reportUuid = "02fb1afd-6766-4960-bf15-9c493f33f0a1";
+        -configCreationDate = "21 Oct 2026, 17:47 CEST";
+        +configCreationDate = "21 Oct 2026, 18:22 CEST";
+        -        generated on 2026-10-21, 17:47 CEST
+        +        generated on 2026-10-21, 18:22 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_s2/multiqc_report.html | 2,148,921 | 2,148,920 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAJDe2GoA/+waa2/bOPKvCAqK7gKO1+9HEBTodtu9A3pF0V4/HIpAoCTK5lWWtHok1gb+7zczJCXq4dhtse0tmjaJxOGQHA6H89S9HXCWFyl/ERdRnjksy8Qm2vEod5Iwzu0r694WPjxO
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIALXm2GoA/+waa2/bOPKvCAqK7gKO1+9HEBTodtu9A3pF0V4/HIpAoCTK5lWWtHok1gb+7zczJCXq4dhtse0tmjaJxOGQHA6H89S9HXCWFyl/ERdRnjksy8Qm2vEod5Iwzu0r694WPjxO
+        -reportUuid = "d4c93376-012d-4ede-96f5-08249b640bdd";
+        +reportUuid = "8bb53b6e-76df-4a0d-b191-11e56490824b";
+        -configCreationDate = "21 Oct 2026, 17:47 CEST";
+        +configCreationDate = "21 Oct 2026, 18:22 CEST";
+        -        generated on 2026-10-21, 17:47 CEST
+        +        generated on 2026-10-21, 18:22 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/main/multiqc_report.html | 2,319,343 | 2,319,315 | 28 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 12
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAC3e2GoA/+w9i47bRpK/QsgwNsFptHw/jFyAPOzsAokva+eAOxgDgpKoGV4kUaEkz2iN+ffrJ7ua7JYojTSjsTpxYpL9qO7q6qrqqurSl94ym63Kcrq8mkyzm+UqW12tsuE0772xvvSK
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAJHm2GoA/+w9i47bRpK/QsgwNsFptHw/jFyAPOzsAokva+eAOxgDgpKoGV4kUaEkz2iN+ffrJ7ua7JYojTSjsTpxYpL9qO7q6qrqqurSl94ym63Kcrq8mkyzm+UqW12tsuE0772xvvSK
+        -reportUuid = "2374d9a8-55c9-4665-a59e-df51dfc9e979";
+        +reportUuid = "37262855-c331-48b7-b2f5-ee4c3794a872";
+        -configCreationDate = "21 Oct 2026, 17:45 CEST";
+        +configCreationDate = "21 Oct 2026, 18:21 CEST";
+        -        generated on 2026-10-21, 17:45 CEST
+        +        generated on 2026-10-21, 18:21 CEST
+        -              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/t
+        +              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/t
+        -        <thead><tr><th class="rowheader">Sample Name</th><th id="header_samtools_flagstat-flagstat_total" class="samtools_flagstat-flagstat_total column-hidden" data-dmax="1000" data-dmin="0.0" data-
+        +        <thead><tr><th class="rowheader">Sample Name</th><th id="header_samtools_flagstat-flagstat_total" class="samtools_flagstat-flagstat_total column-hidden" data-dmax="1000" data-dmin="0.0" data-
+   ok   process_root/outputs/03_process/multiqc/chrse/unspliced/multiqc_report.html | 2,217,021 | 2,217,018 | 3 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAFLe2GoA/+w9a4/bOJJ/RXAQTAar9tjd7X4hFyCbycwuMJvLJnMfDkFDkG3arYsseSQ5bW/D//1YRVIiRerldvoRM/OIRRYpslisKlaVine91F9kcRymR7PQn6eZnx1l/jgkvSvnrhdM
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAKPm2GoA/+w9a4/bOJJ/RXAQTAar9tjd7X4hFyCbycwuMJvLJnMfDkFDkG3arYsseSQ5bW/D//1YRVIiRerldvoRM/OIRRYpslisKlaVine91F9kcRymR7PQn6eZnx1l/jgkvSvnrhdM
+        -reportUuid = "3fa838b1-3fe7-4cb3-a3cf-3d6842cf9b96";
+        +reportUuid = "688c3286-8fda-44ab-be39-3c5a816e9b12";
+        -configCreationDate = "21 Oct 2026, 17:46 CEST";
+        +configCreationDate = "21 Oct 2026, 18:21 CEST";
+        -        generated on 2026-10-21, 17:46 CEST
+        +        generated on 2026-10-21, 18:21 CEST
+   ok   process_root/outputs/03_process/multiqc/chrse/untrimmed/multiqc_report.html | 2,217,062 | 2,217,059 | 3 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 14
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAEXe2GoA/+w9/Y/bNrL/iqAgaIrTbu3ddfYDeQF6bdo7oJeXS/p+eAgWgmzTXr3IkivJWfsW/t8fZ0hKpEh9eZ39iNk2jUUOKXI4nBnOjIZ3bhYs8iSJsqNZFMyzPMiP8mAcEffKuXPD
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAJ/m2GoA/+w9/Y/bNrL/iqAgaIrTbu3ddfYDeQF6bdo7oJeXS/p+eAgWgmzTXr3IkivJWfsW/t8fZ0hKpEh9eZ39iNk2jUUOKXI4nBnOjIZ3bhYs8iSJsqNZFMyzPMiP8mAcEffKuXPD
+        -reportUuid = "cd955ad8-019b-49e4-a0e5-5ce433962661";
+        +reportUuid = "756eea34-3702-4edf-a3fc-c4d5c5e43c39";
+        -configCreationDate = "21 Oct 2026, 17:46 CEST";
+        +configCreationDate = "21 Oct 2026, 18:21 CEST";
+        -        generated on 2026-10-21, 17:46 CEST
+        +        generated on 2026-10-21, 18:21 CEST
+        -              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/a
+        +              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/a
+        -              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/a
+        +              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/a
+        -              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/a
+        +              <li><code class="mqc_analysis_path">/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/<scratch>/outputs/03_process/tools/chrse/a
+   ok   process_root/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_coverage_v1.html | 5,066,666 | 2,202,449 | 2,864,217 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_fold_change_v1.html | 5,170,630 | 2,248,938 | 2,921,692 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_overview_v1.html | 6,087,095 | 3,130,194 | 2,956,901 | figures 4/4 equal True; rows 4/4 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">45.128 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">285.2 MiB (299058760 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">26.999 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">274.8 MiB (288196096 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_quantified_v1.html | 5,057,650 | 2,201,091 | 2,856,559 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_shift_by_class_v1.html | 5,071,034 | 2,206,526 | 2,864,508 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   proteo_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_linked_pca_v1.html | 5,823,355 | 2,957,265 | 2,866,090 | figures 2/2 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_overview_v1.html | 6,045,840 | 3,105,785 | 2,940,055 | figures 9/9 equal True; rows 8/8 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 46
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -<tr><th>Wall time</th><td class="wall">98.145 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">338.5 MiB (354961112 bytes)</td></tr>
+        -<tr><th>Peak RSS, largest child process</th><td class="rss-children">214.6 MiB (225001472 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">46.497 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">326.8 MiB (342656680 bytes)</td></tr>
+        +<tr><th>Peak RSS, largest child process</th><td class="rss-children">229.6 MiB (240762880 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_sex_check_v1.html | 5,060,827 | 2,201,943 | 2,858,884 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_size_genes_v1.html | 5,060,478 | 2,201,903 | 2,858,575 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_genes_detected_v1.html | 5,063,319 | 2,202,557 | 2,860,762 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_library_size_v1.html | 5,065,754 | 2,204,053 | 2,861,701 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_pca_distance_v1.html | 5,064,672 | 2,203,443 | 2,861,229 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_replicate_spearman_v1.html | 5,065,201 | 2,203,735 | 2,861,466 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_top_gene_share_v1.html | 5,065,455 | 2,203,713 | 2,861,742 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 12
+        -01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86  2026-10-21_qc_desynth_figure_options_v1.parquet
+        +164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03  2026-10-21_qc_desynth_figure_options_v1.parquet
+        -figure_options = &#34;01046a8663d874eda70c045dc244587aee2cccb0a7a881fdd245c61863034f86&#34;
+        +figure_options = &#34;164067c79741d7a6fa7a35d0d68828cb910ac1eeee511e8cf5394b24cd0a3f03&#34;
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   qc_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_correlation_v1.html | 5,057,135 | 2,194,935 | 2,862,200 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_detection_v1.html | 5,056,385 | 2,192,980 | 2,863,405 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_estimates_v1.html | 5,058,702 | 2,201,094 | 2,857,608 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_fates_v1.html | 5,808,123 | 2,949,572 | 2,858,551 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_isoforms_v1.html | 5,797,196 | 2,940,734 | 2,856,462 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_overview_v1.html | 5,967,027 | 3,062,668 | 2,904,359 | figures 6/6 equal True; rows 6/6 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 14
+        -<tr><th>Wall time</th><td class="wall">49.646 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">287.8 MiB (301729328 bytes)</td></tr>
+        -<tr><th>Peak RSS, largest child process</th><td class="rss-children">243.6 MiB (255426560 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">28.491 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">276.3 MiB (289769008 bytes)</td></tr>
+        +<tr><th>Peak RSS, largest child process</th><td class="rss-children">241.6 MiB (253313024 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_units_v1.html | 5,049,716 | 2,192,680 | 2,857,036 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   quant_run/outputs/04_quant/multiqc/chrse/multiqc_report.html | 2,164,133 | 2,164,132 | 1 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -<script type="text/plain" id="mqc_compressed_plotdata">H4sIAOje2GoA/+xd+4/cNpL+VxptBNkA44kkiq/AMJDNXm4PSIJFfPnhEAQNdbd6Rpt+XT/smRjzv99XRUoqdfeMZ7NY55Llxg+KRVLF4lcvqsb7fryvlqvNerJdbg7jL0bvx80cfw16r0bj
+        +<script type="text/plain" id="mqc_compressed_plotdata">H4sIAO3m2GoA/+xd+4/cNpL+VxptBNkA44kkiq/AMJDNXm4PSIJFfPnhEAQNdbd6Rpt+XT/smRjzv99XRUoqdfeMZ7NY55Llxg+KRVLF4lcvqsb7fryvlqvNerJdbg7jL0bvx80cfw16r0bj
+        -reportUuid = "f019af16-19c9-455b-a542-1d10137098bf";
+        +reportUuid = "48dc9ca5-9fb8-47c7-8598-0ac733618d51";
+        -configCreationDate = "21 Oct 2026, 17:48 CEST";
+        +configCreationDate = "21 Oct 2026, 18:23 CEST";
+        -        generated on 2026-10-21, 17:48 CEST
+        +        generated on 2026-10-21, 18:23 CEST
+   ok   quant_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   setup_run/outputs/00_setup/2026-10-21_setup_environment_v1.html | 217,006 | 216,856 | 150 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 12
+        -<tr><th>Wall time</th><td class="wall">3.851 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">84.5 MiB (88655168 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">2.769 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">86.9 MiB (91079952 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   setup_run/outputs/09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   all 99 pages: 393,651,749 B before, 200,194,332 B after; 79 draw
+
+3. Chromium, from disk
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_competing_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_confounding_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_dfi_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_dss_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_os_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_er_pfi_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_expression_er_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_km_score_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_overview_v1.html: plots 10/10, rows 10/10, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_power_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_scan_score_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_biotype_shares_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_filter_by_biotype_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_lncrna_neighbour_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_overview_v1.html: plots 4/4, rows 4/4, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_volcano_by_biotype_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_box_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_calls_batch_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_dispersion_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_lfc_a_case_vs_b_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_lfc_a_naive_vs_a_adjusted_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_ma_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_overview_v1.html: plots 10/10, rows 10/10, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_pca_all_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_pca_control_a_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_phist_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/05_de/2026-10-21_de_desynth_volcano_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_background_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_gsea_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_nes_up_set_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_ora_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_overview_v1.html: plots 5/5, rows 5/5, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   pipeline/outputs/06_function/2026-10-21_function_desynth_running_a_case_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_fraction_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_multimap_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_overlap_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_agreement_strand_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_fraction_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_multimap_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_overlap_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_counters_strand_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_featured_settings_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_mapping_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_overview_v1.html: plots 12/12, rows 12/12, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_strand_assigned_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/2026-10-21_process_chrse_strand_share_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/cut/multiqc_report.html: plots 4/4, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_M/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_O/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_O_fraction/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_cut/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_s0/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_s1/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/fc_s2/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/main/multiqc_report.html: plots 8/8, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/unspliced/multiqc_report.html: plots 4/4, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   process_root/outputs/03_process/multiqc/chrse/untrimmed/multiqc_report.html: plots 4/4, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_coverage_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_fold_change_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_overview_v1.html: plots 4/4, rows 4/4, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_quantified_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   proteo_run/outputs/07_proteo/2026-10-21_proteo_fake_cells_shift_by_class_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_linked_pca_v1.html: plots 2/2, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_overview_v1.html: plots 9/9, rows 8/8, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_sex_check_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_size_genes_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_genes_detected_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_library_size_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_pca_distance_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_replicate_spearman_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   qc_run/outputs/02_qc/2026-10-21_qc_desynth_strip_top_gene_share_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_correlation_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_detection_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_estimates_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_fates_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_isoforms_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_overview_v1.html: plots 6/6, rows 6/6, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/2026-10-21_quant_chrse_units_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   quant_run/outputs/04_quant/multiqc/chrse/multiqc_report.html: plots 1/1, rows 0/0, data+layout+full+rows equal True, plotly 3.1.2/3.1.2, errors 0/0 []
+
+4. Time from navigation start, ms, median of 5 (min-max), each page from disk
+   page | bytes before | bytes after | first plot before | after | last plot at load before | after | load before | after
+   pipeline/outputs/05_de/2026-10-21_de_desynth_overview_v1.html | 7,614,352 | 4,161,810 | 506 (476-654) | 532 (520-552) | 926 (896-1078) | 954 (930-997) | 1099 (1050-1244) | 1126 (1102-1168)
+   process_root/outputs/03_process/2026-10-21_process_chrse_overview_v1.html | 6,383,197 | 3,436,389 | 510 (477-551) | 554 (509-574) | 723 (676-771) | 742 (694-796) | 805 (752-854) | 814 (767-881)
+   pipeline/outputs/06_function/2026-10-21_function_desynth_overview_v1.html | 6,287,601 | 3,398,118 | 481 (464-564) | 528 (510-569) | 561 (534-657) | 601 (588-666) | 601 (577-707) | 640 (630-715)
+   clinical_run/outputs/12_clinical/2026-10-21_clinical_fake_brca_overview_v1.html | 6,096,470 | 3,240,681 | 515 (481-565) | 529 (504-603) | 730 (699-807) | 747 (710-851) | 749 (717-828) | 765 (726-871)
+   ncrna_run/outputs/08_ncrna/2026-10-21_ncrna_ncsynth_overview_v1.html | 6,171,524 | 3,222,740 | 507 (490-569) | 522 (517-575) | 582 (569-656) | 603 (597-665) | 629 (609-703) | 650 (642-714)
+PASS

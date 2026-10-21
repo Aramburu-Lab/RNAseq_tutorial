@@ -1,0 +1,6 @@
+    from ctx.report.figures import pack_json, unpack_json, unpacked
+E   ImportError: cannot import name 'unpacked' from 'ctx.report.figures' (/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/fb/src/ctx/report/figures.py)
+=========================== short test summary info ============================
+ERROR tests/test_packed_figures_z5.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 7.44s

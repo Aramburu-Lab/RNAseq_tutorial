@@ -609,7 +609,6 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     built = ModulePage(
         title=fill("title", dataset=ctx.spec.name), **text.skeleton(PAGE),
         parameters=ctx.cards, results=tuple(results), key_numbers=_keys(ctx, result),
-        pack_figures=True,
         reproduce=Reproduction(
             command=ctx.command, wall_seconds=usage.wall_seconds,
             peak_rss_self=usage.peak_rss_self, peak_rss_children=usage.peak_rss_children,

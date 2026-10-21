@@ -24,10 +24,13 @@
 :root[data-theme="black"] { {{ css.black }} color-scheme: dark; }
 {% include "_page.css.j2" %}
 </style>
-<script>{{ plotly_js }}</script>
-{% if unpack %}<script>
+{% if plotly_js %}
+<script>
 {% include "_unpack.js.j2" %}
 </script>
+<script>ctxUnpack.script("{{ plotly_js }}");</script>
+{% else %}
+<script></script>
 {% endif %}
 {% if export %}<script>{{ export.script }}</script>
 <script type="application/json" id="ctx-export">{{ export.config }}</script>

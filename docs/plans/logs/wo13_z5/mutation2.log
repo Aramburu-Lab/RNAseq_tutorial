@@ -1,0 +1,6 @@
+== mutation 2: stored() without the read-ahead rewind (mut tree)
+E               subprocess.CalledProcessError: Command '['/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/node', '-e', 'const fs = require("fs"), crypto = require("crypto");\neval(fs.readFileSync(process.argv[1], "utf8") + ";globalThis.ctxUnpack = ctxUnpack;");\nconst cases = JSON.parse(fs.readFileSync(0, "utf8"));\nconsole.log(JSON.stringify(cases.map(c => crypto.createHash("sha256")\n  .update(ctxUnpack.inflate(new Uint8Array(Buffer.from(c, "base64")))).digest("hex"))));\n', '/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/mut/src/ctx/report/templates/_unpack.js.j2']' returned non-zero exit status 1.
+1 failed, 5 deselected in 6.49s
+== the same test on this worktree
+.                                                                        [100%]
+1 passed, 5 deselected in 6.11s

@@ -1,0 +1,487 @@
+1-2. page | bytes before | bytes after | saved | text checks | differing lines
+   ok   09_report/2026-10-21_report_glossary_v1.html | 424,583 | 424,435 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_competing_v1.html | 5,706,857 | 2,245,677 | 3,461,180 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1.html | 5,067,582 | 2,203,376 | 2,864,206 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1.html | 5,302,663 | 2,232,644 | 3,070,019 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1.html | 5,325,814 | 2,235,701 | 3,090,113 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1.html | 5,329,741 | 2,241,956 | 3,087,785 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1.html | 5,331,282 | 2,240,826 | 3,090,456 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1.html | 5,926,231 | 2,273,682 | 3,652,549 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1.html | 12,093,069 | 8,974,671 | 3,118,398 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_overview_v1.html | 12,270,804 | 9,423,522 | 2,847,282 | figures 10/10 equal True; rows 10/10 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 184
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-1-pixi" data-shared="ctx-repro-1-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-1-pixi" data-shared="ctx-repro-1-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-2-pixi" data-shared="ctx-repro-2-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-2-pixi" data-shared="ctx-repro-2-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-3-pixi" data-shared="ctx-repro-3-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-3-pixi" data-shared="ctx-repro-3-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-4-pixi" data-shared="ctx-repro-4-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-4-pixi" data-shared="ctx-repro-4-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-5-pixi" data-shared="ctx-repro-5-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-5-pixi" data-shared="ctx-repro-5-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-6-pixi" data-shared="ctx-repro-6-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-6-pixi" data-shared="ctx-repro-6-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-7-pixi" data-shared="ctx-repro-7-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-7-pixi" data-shared="ctx-repro-7-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-8-pixi" data-shared="ctx-repro-8-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-8-pixi" data-shared="ctx-repro-8-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-9-pixi" data-shared="ctx-repro-9-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-9-pixi" data-shared="ctx-repro-9-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -<tr><th>Wall time</th><td class="wall">69.117 s</td></tr>
+        -<tr><th>Peak memory, this process</th><td class="rss-self">2339.4 MiB (2453015480 bytes)</td></tr>
+        -<tr><th>Peak RSS, largest child process</th><td class="rss-children">0.0 MiB (0 bytes)</td></tr>
+        +<tr><th>Wall time</th><td class="wall">51.864 s</td></tr>
+        +<tr><th>Peak memory, this process</th><td class="rss-self">2343.9 MiB (2457717688 bytes)</td></tr>
+        +<tr><th>Peak RSS, largest child process</th><td class="rss-children">6.2 MiB (6520832 bytes)</td></tr>
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_power_v1.html | 5,110,690 | 2,221,114 | 2,889,576 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1.html | 5,895,541 | 3,035,754 | 2,859,787 | figures 1/1 equal True; rows 1/1 equal True; plotly.js 4,815,817 B equal True; raw left 0 | 25
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +# The course repository at commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776, for the inputs it holds.
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        -<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: an installed ctx 0.1.0; install the same version, then a clean folder.
+        +<div class="command"><pre><code id="ctx-repro-0-pixi" data-shared="ctx-repro-0-shared"># 1. Environment: ctx 0.1.0 from commit f287e07dc2ab75b01c2aa5e5bafecd8f9940c776 with uncommitted changes, which
+        +git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git ctx_course
+        +git -C ctx_course checkout f287e07dc2ab75b01c2aa5e5bafecd8f9940c776
+        +pixi install --manifest-path ctx_course/pixi.toml --frozen
+        +CTX_REPO=&#34;$PWD/ctx_course&#34;
+        +ctx() { pixi run --manifest-path &#34;$CTX_REPO/pixi.toml&#34; ctx &#34;$@&#34;; }
+        -cp &#34;$HOME/Scripts/Pipeline/RNAseq_tutorial/.claude/worktrees/agent-a6b39a2692f007e36/conf/datasets/tcga_brca.toml&#34; .
+        +cp &#34;$CTX_REPO/conf/datasets/tcga_brca.toml&#34; .
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   ok   12_clinical/index.html | 206,135 | 205,987 | 148 | figures 0/0 equal True; rows 0/0 equal True; plotly.js 0 B equal True; raw left 0 | 8
+        -     (ctx.report.figures.columnar), as one object per row again; packed (Z.1) as
+        -     ctx.report.figures.pack_json writes them. */
+        +     (ctx.report.figures.columnar), as one object per row again; packed as
+        +     ctx.report.figures.pack_json writes them (Z.5). */
+        -    var held = document.getElementById(form.getAttribute("data-rows"));
+        -    var t = held.type === "application/octet-stream" ? ctxUnpack(held.textContent)
+        -                                                     : JSON.parse(held.textContent);
+        +    var t = ctxUnpack(document.getElementById(form.getAttribute("data-rows")).textContent);
+   all 13 pages: 73,990,992 B before, 39,959,345 B after; 11 draw
+
+3. Chromium, from disk
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_competing_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_overview_v1.html: plots 10/10, rows 10/10, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_power_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+   ok   12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1.html: plots 1/1, rows 1/1, data+layout+full+rows equal True, plotly 4.1.1/4.1.1, errors 0/0 []
+
+4. Time from navigation start, ms, median of 5 (min-max), each page from disk
+   page | bytes before | bytes after | first plot before | after | last plot at load before | after | load before | after
+   12_clinical/2026-10-21_clinical_tcga_brca_overview_v1.html | 12,270,804 | 9,423,522 | 533 (508-610) | 581 (532-627) | 999 (933-1097) | 1004 (958-1091) | 1179 (1131-1312) | 1223 (1141-1300)
+   12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1.html | 12,093,069 | 8,974,671 | 513 (510-575) | 575 (546-585) | 513 (510-575) | 575 (546-585) | 730 (701-786) | 785 (746-828)
+   12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1.html | 5,895,541 | 3,035,754 | 470 (446-508) | 536 (468-604) | 470 (446-508) | 536 (468-604) | 479 (456-518) | 545 (477-612)
+   12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1.html | 5,926,231 | 2,273,682 | 550 (514-1469) | 579 (534-756) | 550 (514-1469) | 579 (534-756) | 578 (538-1494) | 604 (558-780)
+   12_clinical/2026-10-21_clinical_tcga_brca_competing_v1.html | 5,706,857 | 2,245,677 | 527 (472-1560) | 534 (462-609) | 527 (472-1560) | 534 (462-609) | 537 (483-1569) | 545 (470-619)
+PASS

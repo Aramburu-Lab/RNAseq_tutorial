@@ -252,10 +252,11 @@ def test_gather_runs_from_wheel(tmp_path, wheel_site):
 def _offline(html: str) -> None:
     """P1.8: plotly.js inlined at most once, no external script, link or url()."""
     from ctx.report.builder import plotly_js  # noqa: PLC0415
+    from ctx.report.figures import unpacked  # noqa: PLC0415
 
-    js = plotly_js()
-    assert html.count(js) <= 1 and "\ufffd" not in html
-    outside = html.replace(js, "")
+    js, raw = plotly_js(), unpacked(html)
+    assert raw.count(js) <= 1 and "\ufffd" not in html
+    outside = raw.replace(js, "")
     assert not re.search(r"<script[^>]+\bsrc\s*=", outside, re.IGNORECASE)
     assert not re.search(r"<link[^>]+\bhref\s*=", outside, re.IGNORECASE)
     assert not re.search(r"url\(\s*['\"]?(https?:)?//", outside, re.IGNORECASE)

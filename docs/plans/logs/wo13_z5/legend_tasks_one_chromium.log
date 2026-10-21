@@ -1,0 +1,31 @@
+-rw-r--r--@ 1 rytis  wheel  3065489 Oct 21 20:24 /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/hang/after/2026-10-21_de_legend_overview_v1.html
+-rw-r--r--@ 1 rytis  wheel  6078429 Oct 21 20:24 /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/hang/before/2026-10-21_de_legend_overview_v1.html
+before:375:light:0 3.2 s
+before:375:dark:0 3.3 s
+before:1280:light:0 3.2 s
+before:1280:dark:0 3.3 s
+after:375:light:0 3.2 s
+after:375:dark:0 3.2 s
+after:1280:light:0 3.2 s
+after:1280:dark:0 3.3 s
+after:375:light:1 3.1 s
+after:375:dark:1 3.2 s
+after:1280:light:1 3.2 s
+after:1280:dark:1 3.2 s
+before:375:light:1 3.1 s
+before:375:dark:1 3.2 s
+before:1280:light:1 3.2 s
+before:1280:dark:1 3.2 s
+before:375:light:2 3.1 s
+before:375:dark:2 3.1 s
+before:1280:light:2 3.1 s
+before:1280:dark:2 3.1 s
+after:375:light:2 3.1 s
+after:375:dark:2 3.2 s
+after:1280:light:2 3.2 s
+after:1280:dark:2 3.2 s
+before tasks 12 total 38.1 s
+after tasks 12 total 38.3 s
+exit 0 
+
+[exited with code 0]
