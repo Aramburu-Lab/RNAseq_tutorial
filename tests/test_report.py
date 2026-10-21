@@ -408,6 +408,39 @@ def test_hub_lists_the_course_modules_in_order():
     assert "lite_build" not in course
 
 
+def test_hub_links_each_modules_newest_page_and_only_pages_that_exist(tmp_path):
+    """C3.3: an older M7 page beside the newer one, and M8 written for another dataset only.
+
+    The hub links the newest M7 page by date, then version, links nothing for M8 and lists
+    it as not run, and every href it writes resolves to a file. Mutation: ``max`` for
+    ``min`` in ``hub._newest`` links the 2026-10-09 page.
+    """
+    from ctx import runtime  # noqa: PLC0415
+    from ctx.report import hub  # noqa: PLC0415
+
+    outputs = tmp_path / "outputs"
+    proteo, ncrna = outputs / "07_proteo", outputs / "08_ncrna"
+    proteo.mkdir(parents=True)
+    ncrna.mkdir()
+    for name in (
+        "2026-10-09_proteo_demo_overview_v1.html",
+        "2026-10-14_proteo_demo_overview_v1.html",
+        "2026-10-14_proteo_demo_overview_v2.html",
+        "2026-10-20_proteo_x_demo_overview_v1.html",
+    ):
+        (proteo / name).write_text("<html></html>")
+    (ncrna / "2026-10-20_ncrna_x_demo_overview_v1.html").write_text("<html></html>")
+    settings = runtime.Settings("laptop", tmp_path, 1, None, 0.0)
+    page = hub.run(settings, (), "demo")[0]
+    html = page.read_text()
+    hrefs = re.findall(r'href="([^"#]+\.html)"', html)
+    modules = [h for h in hrefs if h.startswith("../")]
+    assert modules == ["../07_proteo/2026-10-14_proteo_demo_overview_v2.html"]
+    assert hub.TITLES["ncrna"] in html.split('class="missing">')[1].split("</p>")[0]
+    for href in hrefs:
+        assert (page.parent / href).resolve().is_file(), href
+
+
 def test_round_trip_of_bars_with_lines_and_filters(tmp_path):
     """Bars over reference lines and a median: the round trip, and every line named in both
     halves of the static figure."""
