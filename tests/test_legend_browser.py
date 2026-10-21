@@ -16,7 +16,8 @@ from test_export_browser import CHROMIUM, _browse, _module
 
 from ctx.io.naming import stem
 from ctx.report.builder import FigureText, write
-from ctx.viz.bar import BarData, phone_legend
+from ctx.viz.axes import phone_legend
+from ctx.viz.bar import BarData
 from ctx.viz.save import figure_block, write_figure
 from ctx.viz.style import category_colours
 
