@@ -386,6 +386,34 @@ var ctxSurv = {
       : [ctxSurv.percentile(values, 100 / 3), ctxSurv.percentile(values, 200 / 3)];
     return values.map(function (v) { return cuts.filter(function (c) { return v >= c; }).length; });
   },
+  /* gene.split (M10.G): one gene's analysed patients at or above its median against below it,
+     by split's median rule, the one definition of the tie; values are the gene's stored values
+     over every patient. upper is 1 at or above, 0 below; the log-rank is null with a side
+     empty. */
+  gene: function (cfg, values, endpoint) {
+    var S = ctxSurv, data = cfg.endpoints[endpoint], keep = [];
+    for (var i = 0; i < cfg.patients; i++) if (data.event[i] !== null && data.days[i] !== null) keep.push(i);
+    var months = keep.map(function (i) { return data.days[i] / cfg.days_per_month; });
+    var event = keep.map(function (i) { return data.event[i]; });
+    var upper = S.split(keep.map(function (i) { return values[i]; }), "median");
+    var groups = [0, 1].map(function (side) {
+      var t = [], e = [];
+      upper.forEach(function (u, j) { if (u === side) { t.push(months[j]); e.push(event[j]); } });
+      return { patients: t.length, events: e.reduce(function (a, b) { return a + b; }, 0),
+               curve: S.kaplanMeier(t, e, cfg.z) };
+    });
+    var both = groups[0].patients > 0 && groups[1].patients > 0;
+    return { months: months, event: event, upper: upper, groups: groups,
+             logrank: both ? S.logrank(months, event, upper, 2) : null };
+  },
+  /* KmData.at_risk: at each tick, the at-risk count of the curve's first time at or after it,
+     since no patient leaves between two distinct times; 0 past the last. */
+  atRisk: function (curve, ticks) {
+    return ticks.map(function (tick) {
+      for (var i = 0; i < curve.time.length; i++) if (curve.time[i] >= tick) return curve.at_risk[i];
+      return 0;
+    });
+  },
   /* panel.decode after inflation: the high bytes of every value, then the low bytes, as
      int16 genes by patients, gene after gene. */
   planes: function (bytes, genes, patients) {

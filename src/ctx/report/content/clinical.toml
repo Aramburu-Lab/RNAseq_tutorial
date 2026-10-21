@@ -361,6 +361,22 @@ screen = "The screen's rows for the {genes} genes scored, by adjusted q; {absent
 screen_source = "the screen's strongest genes"
 double_dip = "These genes were chosen by this screen on these patients, so their p values here read too small: the list and its test share their data."
 
+# M10.G: one gene's median split drawn on the ER figures (ctx.clinical.gene, ctxGene). Its
+# title, lead and caption are [figures.er_gene]; below and above name the groups.
+[gene]
+below = "Below the median"
+above = "At or above the median"
+start = "Type a gene to draw its patients at or above its median against those below; a patient at the median counts above."
+summary = "{gene}, {endpoint}: {above:,} patients at or above its median, {below:,} below, {events:,} events. Log-rank chi-squared {chi2}, p = {p}, uncorrected: the split is pre-specified."
+one_side = "{gene}, {endpoint}: all {n:,} patients sit at or above its median, so there is no lower group and no test."
+cox = "The screen's Cox model of {gene} on {screen}, per SD: HR {hr} alone, p = {p}, q = {q}; HR {hr_adj} ({ci}) adjusted, p = {p_adj}, q = {q_adj}."
+other = "The screen fits {screen} and this figure draws {endpoint}, so the curves and the hazard ratios differ in endpoint."
+refused = "The screen's Cox model of {gene} on {screen} has no finite estimate; no hazard ratio is printed."
+missing = "{gene} is not among the {genes:,} genes this page carries."
+ambiguous = "{gene} names more than one gene; type its Ensembl ID."
+empty = "Type a gene symbol or Ensembl ID."
+listed = "The link carried {genes} genes: the menu lists them, and {gene}, the first, is drawn."
+
 [figures.axes]
 time = "Time since diagnosis"
 free = "Free of the event"
@@ -370,10 +386,15 @@ risk = "Number at risk"
 title = "{endpoint}: ER-negative against ER-positive"
 lead = "Log-rank p = {p} here; Liu et al. 2018 report p = {liu}. HR {hr}, ER-negative against positive."
 reading = [
-    "Each line is one ER group's Kaplan-Meier estimate of {endpoint}; the shade is its 95 % band.",
+    "Each line is one group's Kaplan-Meier estimate of {endpoint}, by ER status or by a gene drawn; the shade is its 95 % band.",
     "A short vertical tick is a censored patient; the rows below count the patients still followed.",
 ]
 caption = "{n:,} patients, {events:,} {endpoint} events, ER by GDC's IHC records. [[Log-rank test|Log-rank]] chi-squared {chi2:.2f}, p = {p}; Liu et al. report p = {liu}. Cox HR, ER-negative against positive, {hr}."
+
+[figures.er_gene]
+title = "{endpoint}: {gene} at or above its median against below"
+lead = "Log-rank p = {p} for the median split of {gene}, set before the data, so no cut was chosen and none is corrected for."
+caption = "{n:,} patients, {events:,} {endpoint} events, split at the median of {gene}: {above:,} at or above it, {below:,} below. [[Log-rank test|Log-rank]] chi-squared {chi2}, p = {p}; the split is pre-specified."
 
 [figures.expression]
 feature = "Gene"

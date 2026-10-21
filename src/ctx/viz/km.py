@@ -52,8 +52,9 @@ class KmData:
         risk_times: Times at which the patients still followed are counted.
         caption: The caption, unwrapped.
         width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
-        live: The survival panel's settings, which make this a figure with page controls; None
-            for a figure the page does not redraw.
+        live: The page controls that redraw it: the survival panel's settings, or with
+            ``kind`` "gene" an ER figure's gene box (M10.G); None for a figure the page does
+            not redraw.
     """
 
     frame: pl.DataFrame
@@ -101,7 +102,7 @@ class KmData:
         return self.caption
 
     def controls(self) -> dict[str, Any] | None:
-        """The survival panel's settings, or None for a figure the page does not redraw."""
+        """The page controls' settings, kind "survival" unless ``live`` names another."""
         return {"kind": "survival", **self.live} if self.live is not None else None
 
     def inches(self) -> tuple[float, float]:

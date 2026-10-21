@@ -133,6 +133,18 @@
 <p class="survival-summary" aria-live="polite">{{ f.defaults.summary }}</p>
 <p class="survival-notes" aria-live="polite">{{ f.defaults.notice }} {{ f.defaults.panel }}</p>
 {% endif %}
+{% if f.kind == "gene" %}
+{# M10.G: one gene's median split drawn on an ER figure (ctxGene); its summary is the first live line, which the view's PDF and SVG print. #}
+<form class="gene-km" data-controls="ctx-controls-{{ f.index }}" aria-label="{{ ui.gene.label }}">
+<label class="genes">{{ ui.gene.gene }}<input name="gene" type="text" list="ctx-gene-names" spellcheck="false" autocomplete="off" aria-describedby="ctx-gene-hint-{{ f.index }}"><span class="hint" id="ctx-gene-hint-{{ f.index }}">{{ ui.gene.hint }}</span></label>
+<label hidden>{{ ui.gene.listed }}<select name="listed"></select></label>
+<button type="submit">{{ ui.gene.draw }}</button>
+<button type="button" data-reset disabled>{{ ui.gene.reset }}</button>
+</form>
+<noscript><p class="note">{{ ui.gene.noscript }}</p></noscript>
+<p class="gene-summary" aria-live="polite">{{ f.defaults.summary }}</p>
+<p class="gene-notes" aria-live="polite"></p>
+{% endif %}
 <div class="fig-body{% if f.text.reading %} has-reading{% endif %}">
 <div class="fig-plot"><p class="scroll-hint" hidden>{{ ui.figures.scroll }}</p>{{ f.html }}</div>
 {% if f.text.reading %}
