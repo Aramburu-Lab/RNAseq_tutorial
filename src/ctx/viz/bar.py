@@ -425,9 +425,7 @@ class BarData:
             narrow = {"below": max(n["below"] for n in found),
                       "relayout": {k: v for n in found for k, v in n["relayout"].items()},
                       "restyle": [pair for n in found for pair in n["restyle"]]}  # fmt: skip
-            # The labels as built, which a PDF or SVG of the view draws whatever the screen.
-            built = {"yticktext": categories} if labels is not None else {}
-            fig.update_layout(meta={**(fig.layout.meta or {}), "narrow": narrow, **built})
+            fig.update_layout(meta={**(fig.layout.meta or {}), "narrow": narrow})
 
 
 # What a plot needs beside its widest label to hold the label whole: plotly's push pad, half

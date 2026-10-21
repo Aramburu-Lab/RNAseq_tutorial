@@ -354,4 +354,3 @@ def test_the_page_builds_a_phones_layout_as_the_build_does():
     assert built == seen[2]
     widest = max(phone["lines"][c][1] for c in LABELS[:3])
     assert built["below"] == widest + HELD_PAD_PX < DESKTOP_PLOT_PX
-    assert fig.layout.meta["yticktext"] == list(LABELS[:3])

@@ -88,7 +88,7 @@
            build's sets, and its labels started left of a phone's screen. */
         var yaxis = Object.assign({}, div.layout.yaxis, { categoryarray: cats, tickmode: "auto" });
         delete yaxis.tickvals; delete yaxis.ticktext;
-        var meta = Object.assign({}, div.layout.meta, { yticktext: cats });
+        var meta = Object.assign({}, div.layout.meta);
         meta.narrow = ctxOra.narrow(cats, cfg.phone);
         if (!meta.narrow) delete meta.narrow;
         /* The legend names which bars pass, even where one trace is drawn (PK.3). */
