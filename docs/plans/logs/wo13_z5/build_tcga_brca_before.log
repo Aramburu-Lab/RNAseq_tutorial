@@ -1,0 +1,116 @@
+== clinical before 2026-10-21T16:17:33Z
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_overview_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/index.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_figure_options_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_figure_options_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_figure_options_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_panel_values_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_panel_values_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_panel_values_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_patients_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_patients_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_patients_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_os_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dss_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_dfi_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_er_pfi_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_tests_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_tests_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_tests_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_dunn_pairs_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_dunn_pairs_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_dunn_pairs_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_expression_er_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_km_score_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_cox_score_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_cox_score_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_cox_score_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_groups_score_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_groups_score_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_groups_score_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_scan_score_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_competing_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_competing_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_competing_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_competing_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_competing_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_competing_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_competing_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_power_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_power_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_power_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_power_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_power_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_power_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_power_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_cox_screen_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_cox_screen_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_cox_screen_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tcga_brca_before/outputs/12_clinical/2026-10-21_clinical_tcga_brca_confounding_v1_README.md
+       73.53 real        34.26 user         9.73 sys
+          2142486528  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              529166  page reclaims
+                5798  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 617  voluntary context switches
+               68730  involuntary context switches
+        393044989359  instructions retired
+        162690025285  cycles elapsed
+          2453015480  peak memory footprint
+exit 0

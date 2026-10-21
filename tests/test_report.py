@@ -48,6 +48,7 @@ from ctx.report.builder import (
     write,
 )
 from ctx.report.cap import MAX_BYTES
+from ctx.report.figures import unpacked
 from ctx.viz.annotate import TEST_NAME
 from ctx.viz.box import BoxData, box_data, interactive
 from ctx.viz.save import write_figure
@@ -104,8 +105,9 @@ def _plotly_script(html: str) -> str:
 
     A linked view draws two plots, the scatter and the parallel sets under it.
     """
+    raw = unpacked(html)
     scripts = [
-        s for s in re.findall(r"<script[^>]*>(.*?)</script>", html, re.S) if "Plotly.newPlot" in s
+        s for s in re.findall(r"<script[^>]*>(.*?)</script>", raw, re.S) if "Plotly.newPlot" in s
     ]
     assert scripts
     script = " ".join(scripts)
@@ -146,7 +148,7 @@ def test_round_trip(figure):
         rows = csv.filter(pl.col("feature") == t.feature)
         assert rows["p_adj"].unique().to_list() == pytest.approx([t.p_adj])
         assert rows["r"].unique().to_list() == pytest.approx([t.r])
-    (embedded,) = re.findall(r'id="ctx-data-0">(.*?)</script>', html, re.S)
+    (embedded,) = re.findall(r'id="ctx-data-0">(.*?)</script>', unpacked(html), re.S)
     table = json.loads(embedded, parse_constant=_refuse)  # as a browser parses it
     rows = pl.DataFrame(table["data"], schema=table["columns"], orient="row")
     # The page embeds every drawn point, with the columns it calls and names points by.
@@ -160,11 +162,12 @@ def test_round_trip(figure):
 def test_html_offline(figure):
     *_, html = figure
     js, raw = plotly_js(), plotly.offline.get_plotlyjs()
-    assert html.count(js) == 1 and "\ufffd" not in html
+    # The page carries plotly.js packed (Z.5); it is checked as the page runs it, inflated.
+    assert unpacked(html).count(js) == 1 and "\ufffd" not in html
     # Only the raw character changed: each one became a six-character escape. Integers, since
     # a failed == on two 4.8 MB strings sends pytest into a diff that runs for minutes.
     assert (len(js), raw.count("\ufffd")) == (len(raw) + 5 * raw.count("\ufffd"), 1)
-    outside = html.replace(js, "")
+    outside = unpacked(html).replace(js, "")
     assert not re.search(r"<script[^>]+\bsrc\s*=", outside, re.IGNORECASE)
     assert not re.search(r"<link[^>]+\bhref\s*=", outside, re.IGNORECASE)
     assert not re.search(r"url\(\s*['\"]?(https?:)?//", outside, re.IGNORECASE)

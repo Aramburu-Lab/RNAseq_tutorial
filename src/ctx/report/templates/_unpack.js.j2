@@ -1,7 +1,8 @@
-/* A packed figure's JSON (ctx.report.figures.pack_json): base64 of raw DEFLATE, inflated here
-   synchronously, after zlib's puff.c (RFC 1951). Each figure's own inline script unpacks its
-   arguments and draws, where it drew them unpacked before, so every later script finds each
-   plot drawn as before; DecompressionStream answers only after the page script has run. */
+/* A packed figure's JSON, and plotly.js (ctx.report.figures.pack_json): base64 of raw DEFLATE,
+   inflated here synchronously, after zlib's puff.c (RFC 1951). ctxUnpack.script runs plotly.js
+   where its script ran before, and each figure's own inline script unpacks its arguments and
+   draws where it drew them unpacked, so every later script finds each plot drawn as before;
+   DecompressionStream answers only after the page script has run. */
 var ctxUnpack = (function () {
   "use strict";
   var LBASE = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83,
@@ -14,13 +15,29 @@ var ctxUnpack = (function () {
               12, 12, 13, 13];
   var ORDER = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
 
-  /* A canonical Huffman code from its code lengths: codes per length, symbols by code. */
+  var FAST = 9;
+
+  /* A canonical Huffman code from its code lengths: codes per length, symbols by code, and
+     each code of FAST bits or fewer in a table indexed by the stream's next FAST bits
+     (symbol << 4 | length; 0 where the code is longer). Read one bit at a time, as puff
+     does, plotly.js took 55 ms to inflate under node; read through the table, 28 (Z.5). */
   function code(lengths, from, n) {
     var count = new Uint16Array(16), offs = new Uint16Array(16), symbol = new Uint16Array(n), i;
     for (i = 0; i < n; i++) count[lengths[from + i]]++;
     for (i = 1; i < 15; i++) offs[i + 1] = offs[i] + count[i];
     for (i = 0; i < n; i++) if (lengths[from + i]) symbol[offs[lengths[from + i]]++] = i;
-    return { count: count, symbol: symbol };
+    var fast = new Uint16Array(1 << FAST), first = 0, index = 0, len, j, c, rev, b;
+    for (len = 1; len <= FAST; len++) {
+      for (j = 0; j < count[len]; j++) {
+        c = first + j;
+        // The stream holds a code's first bit lowest, so the table is read bit-reversed.
+        for (rev = 0, b = 0; b < len; b++) rev |= ((c >> b) & 1) << (len - 1 - b);
+        for (i = rev; i < 1 << FAST; i += 1 << len) fast[i] = (symbol[index + j] << 4) | len;
+      }
+      index += count[len];
+      first = (first + count[len]) << 1;
+    }
+    return { count: count, symbol: symbol, fast: fast };
   }
 
   function inflate(src) {
@@ -43,6 +60,16 @@ var ctxUnpack = (function () {
       out = grown;
     }
     function decode(h) {
+      while (have < FAST && at < src.length) {
+        buf |= src[at++] << have;
+        have += 8;
+      }
+      var hit = h.fast[buf & ((1 << FAST) - 1)];
+      if (hit && (hit & 15) <= have) {
+        buf >>>= hit & 15;
+        have -= hit & 15;
+        return hit >> 4;
+      }
       var c = 0, first = 0, index = 0, len, count;
       for (len = 1; len < 16; len++) {
         c |= bits(1);
@@ -55,6 +82,7 @@ var ctxUnpack = (function () {
       throw new Error("ctxUnpack: no such code");
     }
     function stored() {
+      at -= have >> 3; // whole bytes decode read ahead go back; the partial byte is dropped
       buf = 0;
       have = 0;
       var len = src[at] | (src[at + 1] << 8), inverse = src[at + 2] | (src[at + 3] << 8);
@@ -135,11 +163,21 @@ var ctxUnpack = (function () {
     return out.subarray(0, n);
   }
 
-  function unpack(packed) {
-    var text = atob(packed), bytes = new Uint8Array(text.length);
-    for (var i = 0; i < text.length; i++) bytes[i] = text.charCodeAt(i);
-    return JSON.parse(new TextDecoder().decode(inflate(bytes)));
+  function text(packed) {
+    var raw = atob(packed), bytes = new Uint8Array(raw.length);
+    for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return new TextDecoder().decode(inflate(bytes));
   }
+  function unpack(packed) { return JSON.parse(text(packed)); }
+  /* A packed library run as a classic script at once: an inline script inserted runs on
+     insertion, at global scope, as the parser's own would. Taken out after it ran, so the
+     page does not hold the library's text twice. */
+  unpack.script = function (packed) {
+    var s = document.createElement("script");
+    s.text = text(packed);
+    document.head.appendChild(s);
+    s.remove();
+  };
   unpack.inflate = inflate;
   return unpack;
 })();

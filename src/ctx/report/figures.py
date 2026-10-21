@@ -168,6 +168,31 @@ def unpack_json(packed: str) -> Any:
     return json.loads(zlib.decompress(base64.b64decode(packed), -15))
 
 
+_PLOTLY = re.compile(
+    r"<script>\n/\* A packed figure's JSON.*?</script>\n"
+    r'<script>ctxUnpack\.script\("([^"]*)"\);</script>\n', re.S)  # fmt: skip
+_PACKED_PLOT = re.compile(r'(Plotly\.newPlot\(\s*"[^"]+",\s*)\.\.\.ctxUnpack\("([^"]*)"\)')
+_PACKED_ROWS = re.compile(r'<script type="application/octet-stream" (id="ctx-data-\d+")>([^<]*)<')
+
+
+def _inflated(packed: str) -> str:
+    return zlib.decompress(base64.b64decode(packed), -15).decode()
+
+
+def unpacked(html: str) -> str:
+    """A page with plotly.js, every figure's arguments and every rows table raw again.
+
+    The inverse of what the builder packs (Z.5), and the page as it was written before
+    anything was packed, without the unpack script: what a test reads plotly.js and a figure's
+    JSON from.
+    """
+    html = _PLOTLY.sub(lambda m: f"<script>{_inflated(m[1])}</script>\n", html, count=1)
+    html = _PACKED_PLOT.sub(lambda m: m[1] + _inflated(m[2])[1:-1], html)
+    return _PACKED_ROWS.sub(
+        lambda m: f'<script type="application/json" {m[1]}>{_inflated(m[2])}<', html
+    )
+
+
 _NEWPLOT = re.compile(r'Plotly\.newPlot\(\s*"[^"]+",\s*')
 _COMMA = re.compile(r"\s*,\s*")
 
@@ -194,11 +219,10 @@ def _packed(html: str) -> str:
     return f'{html[: match.end()]}...ctxUnpack("{pack_json(args)}"){html[at:]}'
 
 
-def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "beside",
-                packed: bool = False) -> Markup:  # fmt: skip
+def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "beside") -> Markup:
     """The plotly div and its drawing script, without plotly.js itself.
 
-    Packed, the script's three arguments travel as ``pack_json`` text (``_packed``).
+    The script's three arguments travel as ``pack_json`` text (``_packed``; Z.1, Z.5).
 
     At a ``scale`` other than 1, opened alone, every length of the figure is ``scale`` times its
     page size, in a box ``_width`` caps, and plotly redraws it at its box's width as the window
@@ -220,7 +244,7 @@ def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "besid
         figure, include_plotlyjs=False, full_html=False, div_id=div_id, config=PLOTLY_CONFIG,
         default_width=width,
     )  # fmt: skip
-    return Markup(_packed(html) if packed else html)
+    return Markup(_packed(html))
 
 
 def files(block: "FigureBlock") -> list[tuple[str, str, str]]:
@@ -262,12 +286,11 @@ def lead_html(lead: Mapping[str, Any]) -> Markup:
 
 
 def prepare(
-    block: "FigureBlock", index: int, number: int, level: int, scale: float = 1.0,
-    packed: bool = False,
-) -> dict[str, Any]:  # fmt: skip
+    block: "FigureBlock", index: int, number: int, level: int, scale: float = 1.0
+) -> dict[str, Any]:
     """Everything the figure macro prints for one figure; opened alone, at ``scale``.
 
-    Packed, its drawing arguments and its rows travel as ``pack_json`` text (Z.1).
+    Its drawing arguments and its rows travel as ``pack_json`` text, on every page (Z.5).
 
     Opened alone a ``view`` select is dropped: its options are drawn at the module page's
     size, which a figure zoomed alone cannot take (D-051: a coupling a standalone page cannot
@@ -282,16 +305,14 @@ def prepare(
     carried = export.characters(*(f.to_dict() for f in drawn), controls) if exporting else None
     below = block.below
     if below is not None:
-        below = figure_html(below, f"ctx-below-{index}", scale, "across", packed)
+        below = figure_html(below, f"ctx-below-{index}", scale, "across")
     following = controls.get("lead") if controls else None
-    rows = json_for_script(columnar(block.rows))
     return {
-        "html": figure_html(block.figure, f"ctx-figure-{index}", scale, packed=packed),
+        "html": figure_html(block.figure, f"ctx-figure-{index}", scale),
         "below": below,
         "lead": lead_html(following) if following else marks.html(block.text.lead),
         "caption": block.caption,
-        "rows": pack_json(rows) if packed else rows,
-        "packed": packed,
+        "rows": pack_json(json_for_script(columnar(block.rows))),
         "data_file": block.data_file,
         "index": index,
         "number": number,

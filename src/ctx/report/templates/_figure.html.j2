@@ -148,7 +148,7 @@
 {% if f.reproduce %}{% include "_reproduce.html.j2" %}{% endif %}
 {% if f.controls %}<script type="application/json" id="ctx-controls-{{ f.index }}">{{ f.controls }}</script>
 {% endif %}
-<script type="application/{{ 'octet-stream' if f.packed else 'json' }}" id="ctx-data-{{ f.index }}">{{ f.rows }}</script>
+<script type="application/octet-stream" id="ctx-data-{{ f.index }}">{{ f.rows }}</script>
 </figure>
 {% endmacro %}
 {% macro panel_block(p) %}{% set w = p.defaults.words %}

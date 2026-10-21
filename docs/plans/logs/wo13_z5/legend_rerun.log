@@ -1,0 +1,9 @@
+== after
+......                                                                   [100%]
+the test run changed the checkout: [' M TODO.md']
+
+6 passed in 45.94s
+== before
+......                                                                   [100%]
+6 passed in 52.83s
+20:28  up 8 days,  4:08, 4 users, load averages: 5.95 16.93 22.79

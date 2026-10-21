@@ -1,0 +1,387 @@
+== qc after 2026-10-21T16:13:34Z
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overview_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_multiqc_config_v1.yml
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_metrics_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_metrics_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_metrics_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_bands_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_bands_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_bands_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_flags_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_flags_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_flags_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_status_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_status_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_status_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_confounding_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_confounding_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_confounding_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fates_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fates_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fates_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_figure_options_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_figure_options_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_figure_options_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_pca_scores_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_pca_scores_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_pca_scores_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_pca_share_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_pca_share_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_pca_share_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_curves_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_curves_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_curves_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_theoretical_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_theoretical_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_theoretical_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_overrepresented_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_overrepresented_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_overrepresented_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_band_map_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_band_map_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_band_map_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_band_map_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_band_map_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_band_map_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_band_map_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_linked_pca_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_linked_pca_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_linked_pca_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_linked_pca_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_linked_pca_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_linked_pca_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_linked_pca_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_size_genes_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_size_genes_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_size_genes_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_size_genes_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_size_genes_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_size_genes_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_size_genes_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_composition_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_composition_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_composition_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_composition_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_composition_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_composition_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_composition_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_check_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_views_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_views_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_sex_views_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_total_sequences_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_total_sequences_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_total_sequences_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_total_sequences_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_total_sequences_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_total_sequences_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_total_sequences_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_read_length_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_read_length_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_read_length_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_read_length_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_read_length_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_read_length_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_read_length_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_gc_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_gc_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_gc_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_gc_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_gc_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_gc_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_gc_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_duplicates_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_duplicates_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_duplicates_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_duplicates_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_duplicates_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_duplicates_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_percent_duplicates_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_with_adapter_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_with_adapter_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_with_adapter_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_with_adapter_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_with_adapter_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_with_adapter_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_with_adapter_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_passing_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_passing_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_passing_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_passing_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_passing_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_passing_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_passing_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_quality_trimmed_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_quality_trimmed_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_quality_trimmed_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_quality_trimmed_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_quality_trimmed_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_quality_trimmed_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_pct_quality_trimmed_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_total_reads_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_total_reads_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_total_reads_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_total_reads_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_total_reads_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_total_reads_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_tg_total_reads_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_percent_mapped_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_percent_mapped_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_percent_mapped_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_percent_mapped_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_percent_mapped_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_percent_mapped_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_percent_mapped_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_strand_bias_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_strand_bias_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_strand_bias_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_strand_bias_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_strand_bias_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_strand_bias_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_strand_bias_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_compatible_ratio_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_compatible_ratio_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_compatible_ratio_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_compatible_ratio_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_compatible_ratio_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_compatible_ratio_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_salmon_compatible_ratio_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_library_size_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_library_size_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_library_size_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_library_size_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_library_size_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_library_size_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_library_size_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_genes_detected_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_genes_detected_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_genes_detected_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_genes_detected_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_genes_detected_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_genes_detected_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_genes_detected_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_top_gene_share_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_top_gene_share_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_top_gene_share_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_top_gene_share_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_top_gene_share_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_top_gene_share_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_top_gene_share_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_fraction_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_fraction_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_fraction_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_fraction_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_fraction_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_fraction_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_fraction_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_rrna_fraction_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_rrna_fraction_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_rrna_fraction_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_rrna_fraction_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_rrna_fraction_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_rrna_fraction_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_mt_rrna_fraction_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_rrna_fraction_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_rrna_fraction_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_rrna_fraction_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_rrna_fraction_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_rrna_fraction_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_rrna_fraction_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_rrna_fraction_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_globin_fraction_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_globin_fraction_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_globin_fraction_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_globin_fraction_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_globin_fraction_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_globin_fraction_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_globin_fraction_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_replicate_spearman_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_replicate_spearman_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_replicate_spearman_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_replicate_spearman_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_replicate_spearman_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_replicate_spearman_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_replicate_spearman_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_pca_distance_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_pca_distance_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_pca_distance_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_pca_distance_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_pca_distance_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_pca_distance_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_strip_pca_distance_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_fates_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_fates_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_fates_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_fates_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_fates_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_fates_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_fates_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_flow_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_flow_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_flow_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_flow_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_flow_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_flow_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_read_flow_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_flow_views_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_flow_views_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_flow_views_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_base_quality_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_base_quality_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_base_quality_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_base_quality_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_base_quality_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_base_quality_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_base_quality_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_adapter_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_adapter_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_adapter_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_adapter_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_adapter_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_adapter_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_adapter_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_n_content_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_n_content_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_n_content_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_n_content_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_n_content_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_n_content_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_fastqc_n_content_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_gc_distribution_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_gc_distribution_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_gc_distribution_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_gc_distribution_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_gc_distribution_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_gc_distribution_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_gc_distribution_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overrepresented_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overrepresented_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overrepresented_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overrepresented_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overrepresented_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overrepresented_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/02_qc/2026-10-21_qc_tier1_overrepresented_v1_README.md
+      147.93 real       115.38 user        20.27 sys
+          1549090816  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             2062592  page reclaims
+                4740  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+               15098  voluntary context switches
+              227227  involuntary context switches
+        826144186829  instructions retired
+        250895625801  cycles elapsed
+          1147832768  peak memory footprint
+exit 0
+== quant after 2026-10-21T16:16:04Z
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_overview_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_library_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_library_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_library_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_sums_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_sums_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_sums_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_figure_sheet_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_figure_sheet_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_figure_sheet_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_contrast_samples_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_contrast_samples_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_contrast_samples_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fates_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fate_tests_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fate_tests_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fate_tests_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_correlation_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_correlation_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_correlation_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_correlation_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_correlation_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_correlation_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_correlation_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_detection_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_units_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fold_changes_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fold_changes_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_fold_changes_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_estimates_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_estimates_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_estimates_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_estimates_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_estimates_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_estimates_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_estimates_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1_white.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1_black.pdf
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1_white.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1_black.svg
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_isoforms_v1_README.md
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_gene_counts_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_gene_counts_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/z5/real/tier1_after/outputs/04_quant/2026-10-21_quant_tier1_gene_counts_v1_README.md
+       88.68 real        62.43 user        12.42 sys
+          2286321664  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+             1283170  page reclaims
+              457895  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                2877  voluntary context switches
+              405123  involuntary context switches
+        923467575246  instructions retired
+        256189647529  cycles elapsed
+          2435797048  peak memory footprint
+exit 0

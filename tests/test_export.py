@@ -35,6 +35,7 @@ from ctx.report.builder import (
     SelfCheck,
     render,
 )
+from ctx.report.figures import unpacked
 from ctx.viz.metrics import text_width
 from ctx.viz.save import figure_block
 from ctx.viz.style import (
@@ -76,7 +77,7 @@ def _widths(html: str) -> list[str]:
 
 def _drawn(html: str) -> list[tuple[str, dict, dict]]:
     """(div id, data, layout) of every Plotly.newPlot call in a page."""
-    decoder, out = json.JSONDecoder(), []
+    decoder, out, html = json.JSONDecoder(), [], unpacked(html)
     for match in re.finditer(r"Plotly\.newPlot\(\s*", html):
         values, at = [], match.end()
         for _ in range(3):

@@ -8,6 +8,7 @@ embeds the tooltips of the terms it marks, and writing it writes the glossary to
 """
 
 import base64
+import functools
 import gzip
 import hashlib
 import re
@@ -20,7 +21,7 @@ from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
 from ctx.report import cap, export, glossary, marks, text
-from ctx.report.figures import defaults, json_for_script, prepare
+from ctx.report.figures import defaults, json_for_script, pack_json, prepare
 from ctx.viz.style import (
     ALONE_SCALE,
     NARROW_PX,
@@ -334,9 +335,6 @@ class ModulePage:
     key_numbers: tuple[KeyNumber, ...] = ()
     terms: tuple[tuple[str, str], ...] = ()
     kicker: str = ""
-    # Every figure's drawing arguments and rows as packed JSON, drawn at load all the same
-    # (figures.pack_json): M10's 3.0 MB of them packed to 0.36 MB on the largest M10 page (Z.1).
-    pack_figures: bool = False
 
     def __post_init__(self) -> None:
         """Refuse a page with an empty section; the skeleton is the teaching contract.
@@ -447,6 +445,7 @@ def _marked(page: Page) -> list[str]:
     ]  # fmt: skip
 
 
+@functools.cache
 def plotly_js() -> str:
     r"""plotly.js as a page embeds it, its one raw U+FFFD written as the escape ``\\uFFFD``.
 
@@ -459,12 +458,20 @@ def plotly_js() -> str:
     return library.replace("\ufffd", "\\uFFFD")
 
 
-def _walk(items: Iterable[Result], packed: bool = False
-          ) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:  # fmt: skip
+@functools.cache
+def packed_plotly_js() -> str:
+    """``plotly_js`` as every drawing page carries it: ``pack_json`` text, 4.8 MB as 2.0 MB.
+
+    The page's ``ctxUnpack.script`` inflates and runs it where the library ran before, ahead
+    of every figure's script, so each draws as it did (Z.5).
+    """
+    return pack_json(plotly_js())
+
+
+def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:
     """Results ready for the template, the contents entries of the groups, and any figure.
 
-    Figures are numbered in page order across groups; each group gets an anchor. Packed, each
-    figure's drawing arguments and rows travel packed (``figures.prepare``).
+    Figures are numbered in page order across groups; each group gets an anchor.
     """
     out: list[tuple[str, Any]] = []
     outline: list[tuple[str, str]] = []
@@ -477,7 +484,7 @@ def _walk(items: Iterable[Result], packed: bool = False
         nonlocal counter, codes, panels
         if isinstance(item, FigureBlock):
             counter += 1
-            return "figure", prepare(item, counter - 1, counter, level, packed=packed)
+            return "figure", prepare(item, counter - 1, counter, level)
         if isinstance(item, Panel):
             panels += 1
             return "panel", {"kind": item.kind, "index": panels,
@@ -558,7 +565,7 @@ def render(page: Page, glossary_href: str = "") -> str:
         },
         "layout": {"rail_from": RAIL_FROM_PX, "narrow": NARROW_PX},
         "templates": json_for_script(plotly_templates()),
-        "plotly_js": Markup(plotly_js()),
+        "plotly_js": Markup(packed_plotly_js()),
         "terms": glossary.Terms(),
         "glossary_href": glossary_href,
         # Only the entries this page marks: a page carries its own tooltips, and no more.
@@ -586,7 +593,7 @@ def render(page: Page, glossary_href: str = "") -> str:
                     "page_templates": context["templates"],
                     "export": export.assets([figure]), "live": _live([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
-    results, outline, draws = _walk(page.results, page.pack_figures)
+    results, outline, draws = _walk(page.results)
     if not draws:
         context["plotly_js"] = ""
     versions = page.reproduce.versions
@@ -599,7 +606,6 @@ def render(page: Page, glossary_href: str = "") -> str:
         "key_versions": [(n, versions[n]) for n in KEY_PACKAGES if n in versions],
         "export": export.assets(prepared),
         "live": _live([*prepared, *panels]),
-        "unpack": any(f["packed"] for f in prepared),
     }
     return _ENV.get_template("module.html.j2").render(**context)
 
