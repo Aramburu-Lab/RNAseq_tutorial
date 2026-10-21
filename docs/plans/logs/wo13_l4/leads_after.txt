@@ -1,0 +1,8 @@
+PAGE: Median ρ over the tumours is 0.38 for 8,429 tested genes with a ρ; 6,246 have ρ above zero at BH-adjusted p < 0.
+PAGE: Median ρ over the normals is 0.31 for 8,472 genes tested in them with a ρ; 4,784 have ρ above zero at BH-adjusted p < 0.
+PAGE: Spearman ρ per gene over 103 tumours, BH over 8,437 genes; Glycolysis 137, Other 8,107, Oxidative phosphorylation 185. Kruskal-Wallis H = 141.
+PAGE: Spearman ρ per gene over 73 normals, BH over 8,480 genes; Glycolysis 138, Other 8,150, Oxidative phosphorylation 184. Kruskal-Wallis H = 16.
+tumour_tested 8445, with a rho 8429, with a padj 8429; BH set (any class) 8437
+normal_tested 8495, with a rho 8472, with a padj 8472; BH set (any class) 8480
+2026-10-21_proteo_cptac_ccrcc_rho_by_class_normal_v1.csv 8472 rows
+2026-10-21_proteo_cptac_ccrcc_rho_by_class_v1.csv 8429 rows
