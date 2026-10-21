@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-105 — Every bar figure takes the phone's layout below twice its widest label plus margins
+
+**Date:** 2026-10-21 · **Status:** decided (Rytis 2026-10-21: one rule for every bar figure, PK.6); supersedes PK.4's held threshold
+
+**Context.** PK.4 gave M6's live ORA bars the fixed bars' phone layout, but swapped it in only below the widest label plus `HELD_PAD_PX` (84.5 px), so a desktop kept the build's layout and plotly's own ticks. Fixed bars, M6's GSEA bars beside it among them, swap below twice the widest label plus the left and right margins. At 1,280 px plotly drew 7 of the 14 ORA labels, skipping every other one.
+
+**Options.** Two rules, as PK.4 left them; or one rule, the fixed bars'.
+
+**Decision.** One rule (Rytis 2026-10-21). `HELD_PAD_PX`, `PLOTLY_LEAST_PLOT_PX` and `narrow_categories(held=...)` are deleted; nothing of `held` is kept. A live bar with `drawable` is built as a fixed bar is: ticks named where a phone's layout exists, which the swap's wrapped ones replace and which come back when the window widens. Its redraw (`_page_controls.js.j2`) names the redrawn sets' ticks the same way, so the relayout that PK.4's held branch added (`yaxis.tickmode`, `yaxis.tickvals`) has nothing left to set. `ctxOra.narrow` reads the margins from `controls()["phone"]["margins"]` in place of `pad`.
+
+**Evidence.** Chromium on the hand-off fixture (`tests/test_handoff_browser.py`), M6's ORA plot 567 px wide at 1,280 px: as built, 14 of 14 labels drawn, 12 wrapped, least left 344.2 px, least gap between two labels 13.8 px, figure 1,298 px tall; after the 6-gene hand-off, 3 of 3, light and dark. Before, 7 of 14 at 1,280 px. At 375 px unchanged from PK.4: 14 of 14 and 3 of 3, least left 60.2 px, no sideways scroll, light and dark. The old threshold planted back in both twins fails 4 tests.
+
+**Consequence.** M6's ORA labels wrap on a desktop as its GSEA bars do, and its build at 1,280 px stands 1,298 px tall on the fixture, not the build's 542 px. A bar figure that needs a different threshold needs a new decision.
+
+---
+
 ## D-104 — A short or capitalised glossary name matches only as written, in a mark too
 
 **Date:** 2026-10-21 · **Status:** decided

@@ -38,9 +38,7 @@ from ctx.viz.style import (
     PLOTLY_BAR_BASE_PX,
     PLOTLY_BAR_ROW_PX,
     PLOTLY_HEIGHT_PX,
-    PLOTLY_LEAST_PLOT_PX,
     PLOTLY_MARGIN_PX,
-    PLOTLY_PUSH_PAD_PX,
     PLOTLY_TICK_PX,
     SIZES,
     THEMES,
@@ -105,7 +103,8 @@ class BarData:
             live over-representation (GS.5); None for none. Not with ``filters``.
         drawable: Every category a ``live`` redraw may draw besides the built ones, such as
             every gene set M6's panel tests. With it, horizontal bars take a phone's layout as
-            fixed ones do, and ``controls()`` carries what the redraw rebuilds it from (PK.4).
+            fixed ones do, at their threshold (D-105), and ``controls()`` carries what the
+            redraw rebuilds it from (PK.4).
     """
 
     frame: pl.DataFrame
@@ -230,13 +229,13 @@ class BarData:
     def _phone(self) -> dict[str, Any]:
         """What a live redraw rebuilds its phone's layout from, read by ``ctxOra.narrow``.
 
-        Every category it may draw as ``category_lines`` gives it, the threshold's pad, and the
-        height as built, which the redraw keeps.
+        Every category it may draw as ``category_lines`` gives it, the margins the threshold
+        adds, and the height as built, which the redraw keeps.
         """
         categories = dict.fromkeys([*map(str, self._categories()), *self.drawable])
         return {"lines": category_lines(categories), "room": PHONE_PLOT_PX / 2,
-                "base": PLOTLY_BAR_BASE_PX, "pad": HELD_PAD_PX,
-                "height": self._height()}  # fmt: skip
+                "base": PLOTLY_BAR_BASE_PX, "height": self._height(),
+                "margins": PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"]}  # fmt: skip
 
     def controls(self) -> dict[str, Any] | None:
         """What the page script needs to filter the bars, or None without ``filters``.
@@ -405,21 +404,17 @@ class BarData:
         """Give ``fig`` a phone's layout, its legend's and its labels', where either needs one.
 
         A live redraw draws categories of its own: M1's recount, with no ``drawable``, keeps
-        its labels as built; M6's over-representation rebuilds the phone's layout from
-        ``controls()`` (PK.4), so its build keeps plotly's own ticks and the phone's names its.
+        its labels as built; M6's over-representation is built as fixed bars are and rebuilds
+        the phone's layout from ``controls()`` (PK.4, D-105).
         """
         legend = phone_legend(fig)
-        held = self._redraws_labels()
         fixed = self.horizontal and self.live is None and self._labelled()
-        labels = (narrow_categories(categories, fig.layout.height, held=held)
-                  if fixed or held else None)  # fmt: skip
-        if labels is not None and fixed:
+        wraps = fixed or self._redraws_labels()
+        labels = narrow_categories(categories, fig.layout.height) if wraps else None
+        if labels is not None:
             # Named as ticks, so the narrow layout swaps wrapped ones in and these back.
             fig.update_layout(yaxis={"tickmode": "array", "tickvals": categories,
                                      "ticktext": categories})  # fmt: skip
-        elif labels is not None:
-            # Named, so leaving the phone's layout sets plotly's own ticks back.
-            fig.update_layout(yaxis={"tickmode": "auto"})
         if legend is not None or labels is not None:
             found = [n for n in (legend, labels) if n is not None]
             narrow = {"below": max(n["below"] for n in found),
@@ -428,12 +423,6 @@ class BarData:
             # The labels as built, which a PDF or SVG of the view draws whatever the screen.
             built = {"yticktext": categories} if labels is not None else {}
             fig.update_layout(meta={**(fig.layout.meta or {}), "narrow": narrow, **built})
-
-
-# What a plot needs beside its widest label to hold the label whole: plotly's push pad, half
-# the axis line, the label's standoff, the right margin and the least plot plotly draws.
-HELD_PAD_PX = (PLOTLY_PUSH_PAD_PX + LINE_WIDTHS["axes"] / 2 + PLOTLY_TICK_PX
-               + PLOTLY_MARGIN_PX["r"] + PLOTLY_LEAST_PLOT_PX)  # fmt: skip
 
 
 def category_lines(categories: Iterable[str]) -> dict[str, list[Any]]:
@@ -451,25 +440,23 @@ def category_lines(categories: Iterable[str]) -> dict[str, list[Any]]:
     return out
 
 
-def narrow_categories(categories: list[str], height: float,
-                      lines: Mapping[str, list[Any]] | None = None,
-                      held: bool = False) -> dict[str, Any] | None:  # fmt: skip
+def narrow_categories(
+    categories: list[str], height: float, lines: Mapping[str, list[Any]] | None = None
+) -> dict[str, Any] | None:
     """Horizontal bars' category labels wrapped to half a phone's plot, where one is wider.
 
     At 375 px M5's genes-called bars set "Neutrophils, PDAC against steady state, batch in the
     design" (530 px) left of a 317 px plot, and plotly's margin could not hold it: every label
     ran off the plot's left edge (E2b). The page script swaps the wrapped labels in where the
     plot is narrower than twice the widest label, so the bars keep half the plot, and each row
-    takes the height its lines need. ``held``, a live redraw's (PK.4), keeps the build's own
-    layout down to the plot that still holds the widest label whole, ``HELD_PAD_PX`` wider,
-    and names its ticks: M6's over-representation stays as built at 1,280 px. Its twin is
-    ``ctxOra.narrow``.
+    takes the height its lines need. Every bar figure takes this one threshold (Rytis
+    2026-10-21, D-105): M6's live over-representation, which PK.4 held to the widest label
+    plus a pad, wraps at 1,280 px as its GSEA bars do. Its twin is ``ctxOra.narrow``.
 
     Args:
         categories: The labels, in axis order.
         height: The figure's height as built, in px.
         lines: ``category_lines`` of at least ``categories``; measured here when None.
-        held: The live redraw's threshold and ticks.
 
     Returns:
         The narrow layout, or None when every label fits half a phone's plot.
@@ -479,8 +466,9 @@ def narrow_categories(categories: list[str], height: float,
     if widest <= PHONE_PLOT_PX / 2:
         return None
     row = max(lines[c][2] for c in categories)
-    ticks: dict[str, Any] = {"yaxis.tickmode": "array", "yaxis.tickvals": list(categories)}
-    relayout = {**(ticks if held else {}), "yaxis.ticktext": [lines[c][0] for c in categories],
-                "height": max(height, PLOTLY_BAR_BASE_PX + row * len(categories))}  # fmt: skip
-    wide = 2 * widest + PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"]
-    return {"below": widest + HELD_PAD_PX if held else wide, "relayout": relayout, "restyle": []}
+    return {
+        "below": 2 * widest + PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"],
+        "relayout": {"yaxis.ticktext": [lines[c][0] for c in categories],
+                     "height": max(height, PLOTLY_BAR_BASE_PX + row * len(categories))},
+        "restyle": [],
+    }  # fmt: skip
