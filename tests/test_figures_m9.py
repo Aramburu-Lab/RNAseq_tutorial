@@ -108,6 +108,31 @@ def _panels(root: Path) -> list[str]:
     return each[TABS[0]]
 
 
+def test_a_second_build_in_one_process_carries_no_panel_of_the_first(tmp_path, monkeypatch):
+    """Z.4: two M9 builds in one process, each in its own root. A card's block carries a
+    Reproduce panel only once its figure's files are in that build's folder. Catches panels
+    held by stem for the whole process, which gave the second build's first layout the first
+    build's panels before any file of its own was written."""
+    from ctx.genecard import page  # noqa: PLC0415
+
+    blocks = page.figure_block
+    early = []
+
+    def watched(data, figure_stem, text):
+        """``figure_block``, each block with a panel and no files of its own recorded."""
+        block = blocks(data, figure_stem, text)
+        if block.reproduce is not None and not (out / f"{figure_stem}_white.pdf").is_file():
+            early.append(figure_stem)
+        return block
+
+    monkeypatch.setattr(page, "figure_block", watched)
+    for name in ("a", "b"):
+        out = tmp_path / name / "root" / "outputs" / FOLDER[0]
+        _built(out.parents[1])
+        assert _panels(out.parents[1]), name
+    assert early == []
+
+
 def test_a_page_short_of_cards_redraws_the_whole_list(tmp_path, monkeypatch):
     """With the page cap holding one card, the evidence view still covers all three genes and
     the kept card's box its p over both tested genes, each redrawn byte for byte. Catches the

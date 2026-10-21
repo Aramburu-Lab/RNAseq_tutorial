@@ -228,3 +228,9 @@ mimats = ["none", "MIMAT accessions its mature rows name, separated by semicolon
 mimat = ["none", "miRBase mature accession."]
 hairpin = ["none", "miRBase 21 hairpin ID."]
 count = "Reads of aliquot {sample}."
+
+# A folder whose dataset file names no TCGA-CDR workbook, as CPTAC's (gdc_run.run), reads these
+# in place of the page's own, which name one.
+[variants.no_cdr]
+inputs = "the GDC folder's metadata, manifest, status, retrieval log, counts, cases and annotations"
+input = "One [[GDC]] project folder as the fetch writes it. It holds the files' metadata, manifest, release status and retrieval log, the [[STAR]] [[gene counts]], the clinical records and the annotations."
