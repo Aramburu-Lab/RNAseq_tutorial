@@ -34,8 +34,9 @@ from ctx.dataset import load
 from ctx.de.run import Writer, newest
 from ctx.io.naming import MODULES, stem
 from ctx.qc.checkpoint import gene_types
-from ctx.quant import CountsFrom, laptop, outdir, salmon, tables, tximport
+from ctx.quant import CountsFrom, QuantError, laptop, outdir, salmon, tables, tximport
 from ctx.quant import page as pages
+from ctx.quant import run as quant_run
 from ctx.quant.run import Inputs, Measured, Options, featured_contrast
 from ctx.report import text
 from ctx.report.builder import write
@@ -137,8 +138,12 @@ def page(root: Path, dataset: str, day: date) -> Path:
     started = time.perf_counter()
     rng = np.random.default_rng(SEED)
     gathered = root / "outputs" / "01_gather"
-    inputs_read = [newest(gathered, dataset, what) for what in ("samplesheet", "counts")]
-    sheet = pl.read_parquet(inputs_read[0]).unique("sample", keep="first", maintain_order=True)
+    # The module's own reader, so the preview takes the runs ctx quant would: a GDC sheet refused.
+    path, read, problems = quant_run._sheet(root, dataset)
+    if read is None or path is None:
+        raise QuantError("; ".join(problems))
+    inputs_read = [path, newest(gathered, dataset, "counts")]
+    sheet = read.unique("sample", keep="first", maintain_order=True)
     counts = pl.read_parquet(inputs_read[1]).select("gene_id", *sheet["sample"])
     spec = load(root / SPEC)
     gtf = root / spec.resource("annotation_gtf").dest

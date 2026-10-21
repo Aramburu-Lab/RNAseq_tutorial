@@ -185,6 +185,18 @@ def annotation(root: Path, spec: Dataset) -> tuple[Path | None, list[str]]:
     return path, []
 
 
+def runs_of(path: Path) -> tuple[pl.DataFrame | None, list[str]]:
+    """Gather's sheet at ``path`` as the runs ctx process aligns, or why not.
+
+    A GDC sheet or a count matrix's sheet holds no reads and is refused; any other passes
+    ``gdc.chosen``. The M3 preview reads its sheet here too, so it takes the runs this does.
+    """
+    sheet = pl.read_parquet(path)
+    if refused := gdc.refuse_sheet(sheet, path, MODULE) or refuse_matrix(sheet, path, MODULE):
+        return None, refused
+    return gdc.chosen(sheet), []
+
+
 def _sheet(root: Path, dataset: str, options: Options) -> tuple[Sheet | None, list[str]]:
     """The gather sheet and its readable runs, or why not; a mix of layouts is a problem.
 
@@ -194,10 +206,9 @@ def _sheet(root: Path, dataset: str, options: Options) -> tuple[Sheet | None, li
     folder = root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
     try:
         path = newest(folder, dataset, "samplesheet")
-        sheet = pl.read_parquet(path)
-        if refused := gdc.refuse_sheet(sheet, path, MODULE) or refuse_matrix(sheet, path, MODULE):
+        sheet, refused = runs_of(path)
+        if sheet is None:
             return None, refused
-        sheet = gdc.chosen(sheet)
         files, skipped = reads.fastq_files(sheet, options.fetchngs_dir or root / "data" / "raw"
                                            / dataset)  # fmt: skip
     except (DatasetError, QcError) as error:

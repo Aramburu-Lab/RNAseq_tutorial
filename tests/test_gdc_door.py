@@ -11,10 +11,15 @@ from types import SimpleNamespace
 
 import polars as pl
 import pytest
+from gdc_fixture import aliquot, build, spec_file
 from synth import DE_GROUPS, design_counts, write_gather_outputs
 
-from ctx.gather import gdc
+from ctx import pipeline
+from ctx.dataset import load as load_dataset
+from ctx.gather import gdc, gdc_check
+from ctx.process import ProcessError
 from ctx.process import run as process_run
+from ctx.quant import QuantError
 from ctx.quant import run as quant_run
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,3 +107,48 @@ def test_the_previews_count_the_chosen_files_alone(tmp_path, script):
     kept = sheet.filter(pl.col("chosen"))["sample"].unique()
     assert UNCHOSEN not in samples["sample"]
     assert samples.height == kept.len()
+
+
+# Cases 1 and 2 paired; case 3's normal is FFPE, which `chosen` drops, so case 3 is unpaired.
+PAIRED = (aliquot(1), aliquot(1, "11"), aliquot(2), aliquot(2, "11"), aliquot(3),
+          aliquot(3, "11", preservation="FFPE"))  # fmt: skip
+CONTRAST = """
+[[contrasts]]
+name = "tumour_normal"
+variable = "condition"
+reference = "normal"
+tested = "tumour"
+design = "~donor + group"
+paired = true
+n = [2, 2]
+"""
+
+
+@pytest.mark.parametrize("contrasts", [True, False])
+def test_gdc_check_counts_the_chosen_files_alone(tmp_path, contrasts):
+    """R1.3: `ctx run --check`'s n is the pairs of chosen files, [2, 2] here, and [3, 3] if the
+    FFPE normal is counted. Mutation caught: either `gdc.chosen()` in gdc_check dropped, the
+    declared contrast's n or the n printed into the template's lines for a file with none."""
+    build(tmp_path / "gdc", PAIRED)
+    path = spec_file(tmp_path / "fake_brca.toml")
+    if contrasts:
+        path.write_text(path.read_text() + CONTRAST)
+    spec = load_dataset(path)
+    options = pipeline.Options(spec.slug, path, gdc_dirs=(tmp_path / "gdc",))
+    problems = gdc_check.check(spec, options, tmp_path / "root")
+    named = [p for p in problems if "[[contrasts]]" in p.text]
+    if contrasts:
+        assert named == [], [p.text for p in named]
+    else:
+        (missing,) = named
+        assert missing.text.startswith("no [[contrasts]]") and "n = [2, 2]" in missing.lines
+
+
+@pytest.mark.parametrize(("script", "error"), [("preview_quant", QuantError),
+                                               ("preview_process", ProcessError)])  # fmt: skip
+def test_the_quant_and_process_previews_refuse_a_gdc_sheet(tmp_path, script, error):
+    """Both previews read gather's sheet past `gdc.chosen`, every file a run, where their modules
+    refuse a GDC sheet. Mutation caught: either preview's sheet read bypassing the module's door."""
+    gathered(tmp_path, gdc_sheet=True)
+    with pytest.raises(error, match="is a GDC sheet"):
+        load(script).page(tmp_path, DATASET, date(2026, 10, 21))
