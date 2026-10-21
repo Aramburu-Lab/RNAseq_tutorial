@@ -44,11 +44,10 @@ from ctx.viz.style import (
     PLOTLY_CAP_SHIFT,
     PLOTLY_HEAT_ROW_PX,
     PLOTLY_LABEL_BOX_EM,
-    PLOTLY_LEGEND_GAP_PX,
+    PLOTLY_LEGEND_ENTRY_PX,
     PLOTLY_LEGEND_LINE_PX,
     PLOTLY_LEGEND_PAD_PX,
     PLOTLY_LEGEND_SWATCH_PX,
-    PLOTLY_LEGEND_SYMBOL_PX,
     PLOTLY_MARGIN_PX,
     PLOTLY_PUSH_PAD_PX,
     PLOTLY_TICK_PX,
@@ -623,7 +622,7 @@ class HeatmapData:
         legend = [s.level for s in self.swatches]
         legend += [words for t in self.tracks for words, _ in t.entries()]
         if phone:
-            room = PHONE_PLOT_PX - PLOTLY_LEGEND_SYMBOL_PX
+            room = PHONE_PLOT_PX - PLOTLY_LEGEND_ENTRY_PX
             legend = [fit_px(name, room, SIZES["legend"]) for name in legend]
         return Words(ticks, legend, "")
 
@@ -764,7 +763,7 @@ class HeatmapData:
         size = on_page(SIZES["legend"])
         entries = max((text_width(line, size) for name in words.legend
                        for line in name.split("<br>")), default=0.0)  # fmt: skip
-        return math.ceil(max(self._sides(words.ticks) + columns, entries + PLOTLY_LEGEND_SYMBOL_PX))
+        return math.ceil(max(self._sides(words.ticks) + columns, entries + PLOTLY_LEGEND_ENTRY_PX))
 
     def _floors(self, ticks: Mapping[int, str]) -> list[float]:
         """Each band's least height in px: what keeps its label off a neighbour's.
@@ -878,8 +877,7 @@ class HeatmapData:
         heights, used, tallest = [], 0.0, 0.0
         for name in names:
             lines = name.split("<br>")
-            entry = (PLOTLY_LEGEND_SYMBOL_PX + max(text_width(line, size) for line in lines)
-                     + PLOTLY_LEGEND_GAP_PX)  # fmt: skip
+            entry = PLOTLY_LEGEND_ENTRY_PX + max(text_width(line, size) for line in lines)
             if used and used + entry > room:
                 heights.append(tallest)
                 used, tallest = 0.0, 0.0

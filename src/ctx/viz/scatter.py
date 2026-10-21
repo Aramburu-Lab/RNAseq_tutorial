@@ -16,7 +16,14 @@ import polars as pl
 
 from ctx.report import text
 from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
-from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title, screen_title
+from ctx.viz.axes import (
+    axis_title,
+    hover_field,
+    hover_rows,
+    page_y_title,
+    phone_legend,
+    screen_title,
+)
 from ctx.viz.style import (
     ALONE_SCALE,
     BUBBLE_KEYS,
@@ -760,4 +767,7 @@ class ScatterData:
             yaxis={"title": {"text": page_y_title(y_title, files_room(self.static))},
                    "type": "log" if self.log_y else "linear"},
         )  # fmt: skip
+        legend = phone_legend(fig)
+        if legend is not None:
+            fig.update_layout(meta={**(fig.layout.meta or {}), "narrow": legend})
         return fig

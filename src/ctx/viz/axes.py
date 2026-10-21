@@ -1,4 +1,4 @@
-"""The one definition of an axis title and a hover value, shared by both renderings."""
+"""The one definition of an axis title, a hover value and a phone's legend, shared by figures."""
 
 import math
 import re
@@ -8,6 +8,14 @@ from typing import Any
 import polars as pl
 
 from ctx.viz.annotate import wrap_title
+from ctx.viz.metrics import text_width, wrap_to
+from ctx.viz.style import (
+    PHONE_PLOT_PX,
+    PLOTLY_LEGEND_ENTRY_PX,
+    PLOTLY_MARGIN_PX,
+    SIZES,
+    on_page,
+)
 
 # Units that are no unit: the title is the label alone.
 NO_UNIT = frozenset({"none"})
@@ -132,3 +140,32 @@ def hover_field(field: str, dtype: pl.DataType) -> str:
         The field as a hover template prints it.
     """
     return f"%{{{field}{hover_format(dtype)}}}"
+
+
+def phone_legend(fig: Any) -> dict[str, Any] | None:
+    """A phone's legend, its entries wrapped to a phone's plot, where an entry is wider.
+
+    At 375 px M1's depth legend ran 38 px past its plot and off the screen: "ENCODE, older
+    projects: 20 million" is 355 px with its key (work-order item 2's leftover), and M5's PCA
+    legend reached 407 px in a 317 px svg on Step-1 (L.2), so bars and scatters both take
+    it. The page script swaps the wrapped names in below ``below`` px (``_page.js.j2``,
+    fit): traces by restyle, the lines' shapes by relayout. An entry takes its symbol and a
+    gap beside its text (``PLOTLY_LEGEND_ENTRY_PX``).
+
+    Returns:
+        The narrow layout, or None when every entry fits a phone's plot.
+    """
+    size = on_page(SIZES["legend"])
+    traces = [(i, t.name) for i, t in enumerate(fig.data) if t.name and t.showlegend is not False]
+    shapes = [(i, s.name) for i, s in enumerate(fig.layout.shapes) if s.name and s.showlegend]
+    widest = max((text_width(n, size) for _, n in traces + shapes), default=0.0)
+    room = PHONE_PLOT_PX - PLOTLY_LEGEND_ENTRY_PX
+    if widest <= room:
+        return None
+    wrapped = {n: "<br>".join(wrap_to(n, room, size)) for _, n in traces + shapes}
+    return {
+        "below": widest + PLOTLY_LEGEND_ENTRY_PX + PLOTLY_MARGIN_PX["l"] + PLOTLY_MARGIN_PX["r"],
+        "relayout": {f"shapes[{i}].name": wrapped[n] for i, n in shapes},
+        "restyle": [[{"name": [wrapped[n] for _, n in traces]}, [i for i, _ in traces]]]
+        if traces else [],
+    }  # fmt: skip

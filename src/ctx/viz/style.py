@@ -297,6 +297,9 @@ PLOTLY_LEGEND_LINE_PX = on_page(SIZES["legend"]) * LINE_SPACING + 3
 PLOTLY_LEGEND_GAP_PX = 5
 PLOTLY_LEGEND_SYMBOL_PX = PLOTLY_LEGEND_KEY_PX + 2 * PLOTLY_LEGEND_GAP_PX
 PLOTLY_LEGEND_PAD_PX = 2 * PLOTLY_LEGEND_GAP_PX
+# What an entry takes beside its text: the symbol before it and the gap after it. Chromium drew
+# an entry's toggle 42.5 px wider than its text (2026-10-21), so a phone's room counts both.
+PLOTLY_LEGEND_ENTRY_PX = PLOTLY_LEGEND_SYMBOL_PX + PLOTLY_LEGEND_GAP_PX
 # A legend swatch on the page is the static's patch height at the legend's page size:
 # plotly's default 6 px square beside a 20 px label hid the palest levels (2026-10-01).
 PLOTLY_LEGEND_SWATCH_PX = LEGEND["handleheight"] * on_page(SIZES["legend"])
