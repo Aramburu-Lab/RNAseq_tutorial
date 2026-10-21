@@ -35,11 +35,11 @@ it were reversed.
 
 **Options.** All-capital names of four letters or fewer by case, as L.6 proposed; the lint's rule already in place (three characters or fewer, or two capitals); per-page exceptions alone.
 
-**Decision.** The lint's rule, moved to `glossary.exact` and used by both the lint and `lookup`. A case rule cannot separate setup's "OS" from survival's: both are written "OS", so setup keeps its page exception (`glossary_lint.OTHER_MEANINGS`).
+**Decision.** The lint's rule, moved to `glossary.exact` and used by both the lint and `lookup`. A case rule cannot separate setup's "OS" from survival's: both are written "OS". So setup's page writes "operating system" (its Input and `keys.cores_detail`), and the per-page exception `glossary_lint.OTHER_MEANINGS` from 4ac9189 is deleted: a page means one thing by a glossary name.
 
-**Evidence.** On the shipped page files the two rules flag the same entries in the same sections, 361 warnings each; they differ only in the name matched (Spearman or rho, GSEA or preranked GSEA, MANE or MANE Select, PDC or CPTAC). Without the case rule and the exception the lint gives 364: the case rule removes process's and proteo's "go" read as MSigDB, the exception removes setup's "OS". All 254 marks in `src/ctx/report/content/*.toml` resolve; none reached its entry only through case folding of a short or capitalised name.
+**Evidence.** On the shipped page files the two rules flag the same entries in the same sections, 361 warnings each; they differ only in the name matched (Spearman or rho, GSEA or preranked GSEA, MANE or MANE Select, PDC or CPTAC). Without the case rule and the exception the lint gives 364: the case rule removes process's and proteo's "go" read as MSigDB, and the exception removed setup's "OS". With setup's text changed and the exception deleted the count stays 361 and the lint output is identical; the old "OS" text back with no exception gives 362, setup's Input warned again. All 254 marks in `src/ctx/report/content/*.toml` resolve; none reached its entry only through case folding of a short or capitalised name.
 
-**Consequence.** A mark writes a short or capitalised name as the glossary does: `[[OS]]`, never `[[os]]`. The duplicate-name check stays case-insensitive.
+**Consequence.** A mark writes a short or capitalised name as the glossary does: `[[OS]]`, never `[[os]]`. The duplicate-name check stays case-insensitive. Page text that means something else by a glossary abbreviation writes the word out; the lint has no per-page exceptions. The other "OS" in the page files (cards, clinical, figure) are survival's.
 
 ## D-102 — M6's ORA bar length is -log10 FDR, past a dashed FDR 0.05 line
 

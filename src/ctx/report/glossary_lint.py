@@ -126,27 +126,19 @@ def page_marks(content: Path = prose.CONTENT) -> tuple[list[str], list[str]]:
     return errors, list(_unmarked(groups)) if not errors else []
 
 
-# Per page file, a glossary name that means something else there (L.6). Matching by case is
-# not enough for these: setup's "OS" is the operating system, written as survival's alias is.
-OTHER_MEANINGS: dict[str, frozenset[str]] = {"setup": frozenset({"OS"})}
-
-
 def _unmarked(groups: dict[tuple[str, str], list[str]]) -> Iterator[str]:
     """Per section, each entry whose first mention in reading order carries no mark."""
     patterns = _names()
     for (stem, place), texts in groups.items():
-        found = _first_mentions(texts, patterns, OTHER_MEANINGS.get(stem, frozenset()))
+        found = _first_mentions(texts, patterns)
         yield from (f"{stem}: {place}: {w}" for w in found)
 
 
-def _first_mentions(
-    texts: list[str], patterns: tuple[re.Pattern[str], ...], other: frozenset[str] = frozenset()
-) -> Iterator[str]:
+def _first_mentions(texts: list[str], patterns: tuple[re.Pattern[str], ...]) -> Iterator[str]:
     """A section's entries whose first mention, in reading order, is bare.
 
     The icon sits on the first mark, so a bare mention before it leaves the reader's first
-    meeting with the term unexplained; an entry the section never marks is unmarked. A name
-    in ``other`` means something else on this page and is not a mention.
+    meeting with the term unexplained; an entry the section never marks is unmarked.
     """
     marked = glossary.used(texts)
     seen: set[str] = set()
@@ -156,8 +148,6 @@ def _first_mentions(
             continue
         bare = prose.outside_code(piece.raw)
         for match in (m for pattern in patterns for m in pattern.finditer(bare)):
-            if match.group(0) in other:
-                continue
             entry = glossary.lookup(match.group(0)).id
             if entry not in seen:
                 seen.add(entry)
