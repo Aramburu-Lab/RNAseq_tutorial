@@ -9,6 +9,7 @@ drawn and measured as a line (``_lines``).
 
 from collections.abc import Mapping
 from dataclasses import dataclass
+from functools import cached_property
 from typing import Any
 
 import polars as pl
@@ -58,6 +59,36 @@ STAT_COLUMNS = {
     "p_adj": ("dimensionless", "Benjamini-Hochberg adjusted p over the plotted features."),
     "r": ("dimensionless", "Rank-biserial correlation; > 0 when the comparison group is higher."),
 }
+
+
+@dataclass(frozen=True)
+class Stack:
+    """How many rows the p and r labels and the feature names take, when one cannot hold them.
+
+    At 170 mm, eleven features' ``p=3.7e-05`` labels ran over each other and the figure was
+    refused (V.3). Feature i's label goes to row ``i % labels``, each row ``label_pt`` above
+    the one before, and its name to row ``i % names``, each ``name_pt`` below; the legend
+    rises ``legend_pt`` and the page grows by that and the extra name rows, so the axes keep
+    their height. A label in ``left`` or ``right`` would
+    cross that edge of the axes and is set flush inside it. ``Stack()``, one row of each,
+    draws exactly what the figure drew before stacking existed.
+    """
+
+    labels: int = 1
+    label_pt: float = 0.0
+    names: int = 1
+    name_pt: float = 0.0
+    left: frozenset[int] = frozenset()
+    right: frozenset[int] = frozenset()
+    legend_pt: float = 0.0
+
+    def extra(self) -> float:
+        """The page height the legend's lift and the extra name rows add, in inches.
+
+        Label rows the headroom over the boxes holds lift nothing: the legend rises only by
+        ``legend_pt``, what keeps it ``STACK_GAP_PT`` over the highest label (V.4).
+        """
+        return (self.legend_pt + (self.names - 1) * self.name_pt) / 72
 
 
 @dataclass(frozen=True)
@@ -118,11 +149,23 @@ class BoxData:
 
     def inches(self) -> tuple[float, float]:
         """The figure files' size, which a page's own PDF and SVG of a changed view take too."""
-        return _inches()
+        return _inches(self.stack)
+
+    @cached_property
+    def stack(self) -> Stack:
+        """The rows the labels and names take; see ``settle()``."""
+        return settle(self)
 
     def export_layers(self) -> dict[str, Any]:
-        """Nothing: the page draws every box, point and label the figure files draw."""
-        return {}
+        """The figure files' layout for the page's PDF and SVG of a changed view.
+
+        The page draws a phone's layout wherever its box is narrower than the upright labels
+        need, as it is on a module page from 11 features (V.4); the export is drawn at the
+        files' width, so it takes the files' upright names and every label, in the rows of the
+        same ``Stack``, each ``yshift`` in pt (``relayout``), and with stacked labels its
+        legend ``lift`` pt over the highest one (``ctxExport.lift``).
+        """
+        return export_rows(self, self.stack)
 
 
 def box_data(
@@ -210,30 +253,6 @@ def table(data: BoxData) -> pl.DataFrame:
     return joined.with_columns(n_group.alias("n_group")).select(*data.frame.columns, *STAT_COLUMNS)
 
 
-@dataclass(frozen=True)
-class Stack:
-    """How many rows the p and r labels and the feature names take, when one cannot hold them.
-
-    At 170 mm, eleven features' ``p=3.7e-05`` labels ran over each other and the figure was
-    refused (V.3). Feature i's label goes to row ``i % labels``, each row ``label_pt`` above
-    the one before, and its name to row ``i % names``, each ``name_pt`` below; the page grows
-    by the extra rows, so the axes keep their height. A label in ``left`` or ``right`` would
-    cross that edge of the axes and is set flush inside it. ``Stack()``, one row of each,
-    draws exactly what the figure drew before stacking existed.
-    """
-
-    labels: int = 1
-    label_pt: float = 0.0
-    names: int = 1
-    name_pt: float = 0.0
-    left: frozenset[int] = frozenset()
-    right: frozenset[int] = frozenset()
-
-    def extra(self) -> float:
-        """The page height the extra rows add, in inches."""
-        return ((self.labels - 1) * self.label_pt + (self.names - 1) * self.name_pt) / 72
-
-
 def static(data: BoxData, theme: Theme) -> Any:
     """Render the matplotlib figure for one theme, its labels stacked where one row overlaps.
 
@@ -246,12 +265,22 @@ def static(data: BoxData, theme: Theme) -> Any:
     Returns:
         A matplotlib Figure, not attached to pyplot; the caller saves it.
     """
+    return _draw(data, theme, data.stack)[0]
+
+
+def settle(data: BoxData) -> Stack:
+    """The rows the labels and names need, measured on the white figure.
+
+    Each pass measures the drawn labels: the rows only widen, and the legend's lift, measured
+    anew, follows them, so the passes end. The themes differ in colour alone, so one measure
+    serves both and the page's export.
+    """
     stack = Stack()
     while True:
-        fig, ax, labels = _draw(data, theme, stack)
+        fig, ax, labels = _draw(data, THEMES["white"], stack)
         wanted = stacking(fig, ax, labels, stack)
         if wanted == stack:
-            return fig
+            return stack
         stack = wanted
 
 
@@ -264,8 +293,7 @@ def _draw(data: BoxData, theme: Theme, stack: Stack) -> tuple[Any, Any, list[Any
 
     apply_matplotlib(theme)
     features = data.frame["feature"].unique(maintain_order=True).to_list()
-    width, height = _inches()
-    height += stack.extra()
+    width, height = _inches(stack)
     # Figure, not pyplot: a GUI backend rounds the canvas to whole pixels (84.84 mm, not 85).
     fig = Figure(figsize=(width, height))
     ax = fig.subplots()
@@ -293,7 +321,7 @@ def _draw(data: BoxData, theme: Theme, stack: Stack) -> tuple[Any, Any, list[Any
     _pair_lines(ax, data, features, theme)
     ax.set_xticks(range(len(features)), features)
     ax.set_xlim(-0.5, len(features) - 0.5)
-    top = float(data.frame["value"].to_numpy().max())
+    top = _span(data.frame)[1]
     labels = [_label(ax, data.caption.label(f), i, top, stack, len(features))
               for i, f in enumerate(features)]  # fmt: skip
     for i, tick in enumerate(ax.xaxis.get_major_ticks()):
@@ -303,11 +331,11 @@ def _draw(data: BoxData, theme: Theme, stack: Stack) -> tuple[Any, Any, list[Any
     ax.set_ylim(top=high + (high - low) * HEADROOM)
     ax.set_xlabel(data.feature_label)
     ax.set_ylabel(fit_title(axis_title(data.value_label, data.unit), height))
-    # Above the axes, and above every stacked row: inside, it collides with the p/r labels.
-    rows_pt = (stack.labels - 1) * stack.label_pt
-    over = {"bbox_transform": offset_copy(ax.transAxes, fig=fig, y=rows_pt, units="points")}
+    # Above the axes, and above the highest stacked row: inside, it collides with the labels.
+    lift = stack.legend_pt
+    over = {"bbox_transform": offset_copy(ax.transAxes, fig=fig, y=lift, units="points")}
     ax.legend(title=None, loc="lower left", bbox_to_anchor=(0, 1), ncols=2, borderaxespad=0,
-              **(over if rows_pt else {}))  # fmt: skip
+              **(over if lift else {}))  # fmt: skip
     sns.despine(fig=fig)
     place_caption(fig, data.caption.text(), width, height)
     refit_y_title(fig, ax, axis_title(data.value_label, data.unit))
@@ -364,12 +392,18 @@ def stacking(fig: Any, ax: Any, labels: list[Any], stack: Stack) -> Stack:
     flush = [((frame.x0 + gap, frame.x0 + gap + w) if i in left
               else (frame.x1 - gap - w, frame.x1 - gap) if i in right else (a, b))
              for i, (a, b) in enumerate(spans) for w in [b - a]]  # fmt: skip
+    # The highest label as drawn: its rows sit over the axes only as far as the headroom
+    # leaves them, so the legend clears it by one gap and rises no further. Measured anew
+    # each pass, never kept from the last: drawn without the lift, the axes were shorter and
+    # the labels higher. To 0.01 pt, so float noise between two passes cannot keep them going.
+    above = round(max(b.y1 for b in boxes) * to_pt - frame.y1 * to_pt + STACK_GAP_PT, 2)
     return Stack(
         labels=max(stack.labels, _rows(flush, gap)),
         label_pt=max(stack.label_pt, max(b.height for b in boxes) * to_pt + STACK_GAP_PT),
         names=max(stack.names, _rows(named, gap)),
         name_pt=max(stack.name_pt, max(b.height for b in names) * to_pt + STACK_GAP_PT),
         left=frozenset(left), right=frozenset(right),
+        legend_pt=max(above, 0.0),
     )  # fmt: skip
 
 
@@ -397,9 +431,65 @@ def _pair_lines(ax: Any, data: BoxData, features: list[str], theme: Theme) -> No
                                          linewidths=LINE_WIDTHS["line"], zorder=2))  # fmt: skip
 
 
-def _inches() -> tuple[float, float]:
-    """The figure files' size, whose height also sets where the page breaks its y title."""
-    return figure_inches(FIGURE_WIDTH, "box")
+def _inches(stack: Stack) -> tuple[float, float]:
+    """The figure files' size with ``stack``'s rows, read by the files and the page's export.
+
+    Its height also sets where the page breaks its y title.
+    """
+    width, height = figure_inches(FIGURE_WIDTH, "box")
+    return width, height + stack.extra()
+
+
+def export_rows(data: BoxData, stack: Stack) -> dict[str, Any]:
+    """The page's export of a view in the files' layout and ``stack``'s rows, in pt.
+
+    Upright names, name i ``i % names`` lines down; every label shown, label i ``i % labels``
+    rows up, and one in ``left`` or ``right`` set flush inside that edge. A row is the
+    files' ``label_pt`` or plotly's label, whichever is taller: plotly sets a label's lines
+    ``LINE_SPACING`` em apart, matplotlib 1.2, and two-line rows at the files' 20.1 pt
+    overlapped by 1.2 pt (V.4). The plot spans the files' axes, its side margins fixed at
+    theirs, so each label sits where the files measured it: plotly's own margins hid the
+    20th of 20 names past its div, and its pushed ones narrowed ten long names' slots from
+    42.17 to 41.8 pt, two labels of one row 0.8 pt over each other. A label's box is its
+    text, as in the files: plotly's 2 pt of pad and border set a flush label 2 pt further in.
+    With rows of labels, ``lift``: the gap the export keeps between the legend and the
+    highest label.
+    """
+    features = data.frame["feature"].unique(maintain_order=True).to_list()
+    n = len(features)
+    note = SIZES["annotation"]
+    lines = max(len(data.caption.label(f).split("\n")) for f in features)
+    pitch = max(stack.label_pt, lines * note * LINE_SPACING + STACK_GAP_PT)
+    width = _inches(stack)[0] * 72
+    frame = static(data, THEMES["white"]).axes[0].get_position()
+    relayout: dict[str, Any] = {
+        "xaxis.tickangle": 0, "xaxis.tickmode": "array", "xaxis.tickvals": list(range(n)),
+        "xaxis.ticktext": ["<br>" * (i % stack.names) + _tick(f) for i, f in enumerate(features)],
+        "margin.l": frame.x0 * width, "margin.r": (1 - frame.x1) * width,
+        "xaxis.automargin": "height", "yaxis.automargin": False,
+    }  # fmt: skip
+    # interactive() writes the labels in the caption's test order, each at its feature.
+    place = {f: i for i, f in enumerate(features)}
+    for j, test in enumerate(data.caption.tests):
+        i, at = place[test.feature], f"annotations[{j}]"
+        relayout |= {f"{at}.visible": True, f"{at}.yshift": i % stack.labels * pitch,
+                     f"{at}.borderpad": 0, f"{at}.borderwidth": 0}  # fmt: skip
+        if i in stack.left or i in stack.right:
+            side = i in stack.left
+            relayout |= {f"{at}.x": -0.5 if side else n - 0.5,
+                         f"{at}.xanchor": "left" if side else "right",
+                         f"{at}.xshift": STACK_GAP_PT if side else -STACK_GAP_PT}  # fmt: skip
+    return {"relayout": relayout} | ({"lift": STACK_GAP_PT} if stack.labels > 1 else {})
+
+
+def _span(frame: pl.DataFrame) -> tuple[float, float]:
+    """The least and greatest measured value; a missing one is drawn nowhere.
+
+    numpy's max of a column holding a NaN is NaN: the p and r labels went to y = NaN and were
+    never drawn, and stacking could not measure them (V.4).
+    """
+    measured = frame["value"].drop_nulls().drop_nans()
+    return float(measured.min()), float(measured.max())  # type: ignore[arg-type]
 
 
 def _values(frame: pl.DataFrame, feature: str, group: str) -> list[float]:
@@ -470,7 +560,7 @@ def interactive(data: BoxData) -> Any:
                 + "<extra></extra>",
             )
         )
-    top = float(data.frame["value"].to_numpy().max())
+    low, top = _span(data.frame)
     labels = [
         {
             "x": at[f],
@@ -481,7 +571,7 @@ def interactive(data: BoxData) -> Any:
         }
         for f in stats
     ]
-    low, high = float(data.frame["value"].to_numpy().min()), top
+    high = top
     span = (high - low) or 1.0
     fig.update_layout(
         template=plotly_templates()["white"],

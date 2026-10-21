@@ -182,10 +182,72 @@ var ctxExport = {
         return ctxExport.label(l, ex, layout);
       }));
     }
+    /* The figure files' layout where the page draws another (a stacked box's rows, as
+       ctx.viz.box.export_rows writes them): each attribute path set as written. */
+    Object.keys(ex.relayout || {}).forEach(function (path) {
+      ctxExport.set(layout, path, ex.relayout[path]);
+    });
     layout.template = template;
     layout.width = ex.width_pt;
     layout.height = height;
     return { data: data, layout: layout };
+  },
+  /* One plotly attribute path, "annotations[3].yshift" or "xaxis.ticktext", set in o. */
+  set: function (o, path, value) {
+    var keys = path.split(/[.[\]]+/).filter(Boolean), last = keys.pop();
+    keys.forEach(function (k) {
+      if (o[k] === undefined || o[k] === null) o[k] = {};
+      o = o[k];
+    });
+    o[last] = value;
+  },
+  /* Browser only: the drawing with its legend ex.lift pt over the highest label, as the
+     figure files lift theirs (ctx.viz.box.stacking), where stacked labels rise into it. The
+     legend stays where plotly puts it while it clears them. Otherwise it goes to the top of
+     the drawing, and the plot's top margin grows by what keeps the labels clear: a label
+     anchored over the boxes moves down by (1 - a) of each pt the plot's top moves down,
+     where a is the share of the y axis over its anchor. plotly sets margins and labels at
+     whole units, which left the gap 0.75 pt once, so the drawing is measured again after
+     each move, three times at most. Measured on the drawing, as the files measure theirs,
+     so no second copy of plotly's legend or margins exists here. */
+  lift: function (spec, ex) {
+    if (!ex.lift) return Promise.resolve(spec);
+    var holder = document.createElement("div");
+    holder.setAttribute("aria-hidden", "true");
+    holder.style.cssText = "position:fixed;left:0;top:0;visibility:hidden;pointer-events:none";
+    document.body.appendChild(holder);
+    function done() { Plotly.purge(holder); holder.remove(); return spec; }
+    /* How far the highest label is short of ex.lift under a legend at the drawing's top;
+       null where the legend as it stands clears it. */
+    function short() {
+      var origin = holder.getBoundingClientRect().top, legend = holder.querySelector(".legend rect.bg");
+      var notes = Array.from(holder.querySelectorAll(".annotation text")).map(function (t) {
+        return t.getBoundingClientRect().top - origin;
+      });
+      if (!legend || !notes.length) return null;
+      var box = legend.getBoundingClientRect(), highest = Math.min.apply(null, notes);
+      if (box.bottom - origin + ex.lift <= highest) return null;
+      return box.bottom - box.top + ex.lift - highest;
+    }
+    function move(tries) {
+      var gap = short();
+      if (gap === null || !tries) return done();
+      var full = holder._fullLayout, range = full.yaxis.range;
+      var a = (range[1] - spec.layout.annotations[0].y) / (range[1] - range[0]);
+      spec.layout.legend = Object.assign({}, spec.layout.legend,
+                                         { yref: "container", y: 1, yanchor: "top" });
+      var top = Math.ceil(full._size.t + Math.max(0, gap) / (1 - a));
+      spec.layout.margin = Object.assign({}, spec.layout.margin, { t: top });
+      return Plotly.relayout(holder, { legend: ctxExport.plain(spec.layout.legend),
+                                       margin: ctxExport.plain(spec.layout.margin) })
+        .then(function () { return move(tries - 1); });
+    }
+    /* Copies: plotly writes its autoranges back into the layout it is handed. react, as
+       newPlot on an empty div: the page's readers find each figure by its newPlot call. */
+    return Plotly.react(holder, ctxExport.plain(spec.data), ctxExport.plain(spec.layout),
+                        { staticPlot: true })
+      .then(function () { return move(3); })
+      .catch(function (err) { done(); throw err; });
   },
   /* The caption under the drawing: the figure's caption, the live line naming what the
      reader set, and the note that the file is the page's drawing of that view, each closed
@@ -263,7 +325,10 @@ var ctxExport = {
     var height = ex.height_pt - ctxExport.captionHeight(lines.length, ex);
     var spec = ctxExport.figure(plots.map(function (d) { return { data: d.data, layout: d.layout }; }),
                                 cfg, setup.template, height, setup.dashes);
-    return Plotly.toImage(spec, { format: "svg", width: ex.width_pt, height: height })
+    return ctxExport.lift(spec, ex)
+      .then(function (spec) {
+        return Plotly.toImage(spec, { format: "svg", width: ex.width_pt, height: height });
+      })
       .then(function (url) {
         var svg = ctxExport.compose(decodeURIComponent(url.slice(url.indexOf(",") + 1)), lines, ex);
         if (ext === "svg") return new Blob([svg], { type: "image/svg+xml" });
