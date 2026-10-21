@@ -21,7 +21,8 @@ import polars as pl
 
 from ctx import runtime, tools
 from ctx.dataset import Dataset, DatasetError, load
-from ctx.de.run import Writer, newest
+from ctx.de.results import newest
+from ctx.de.run import Writer
 from ctx.gather import gdc
 from ctx.gather.counts import refuse_sheet as refuse_matrix
 from ctx.io.naming import MODULES, stem

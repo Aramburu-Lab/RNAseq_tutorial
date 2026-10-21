@@ -17,8 +17,8 @@ import polars as pl
 
 from ctx import concordance
 from ctx.dataset import Contrast, DatasetError
+from ctx.de import results as m5
 from ctx.de.deseq import select_samples
-from ctx.de.run import newest
 from ctx.de.stats import adjust, classify
 from ctx.proteo import ProteoError, measure
 
@@ -224,9 +224,9 @@ def paired_folds(  # noqa: PLR0913 - each a separate input of one comparison
     return Folds(contrast, joined, (len(cases), len(cases)), (rho, low, high), layer, paired=True)
 
 
-def results_file(de_dir: Path, slug: str, contrast: Contrast) -> Path | None:
+def results_file(root: Path, slug: str, contrast: Contrast) -> Path | None:
     """M5's newest results file for the contrast, or None when ``ctx de`` has not written it."""
     try:
-        return newest(de_dir, slug, f"{contrast.name}_results")
+        return m5.results(root, slug, contrast.name)
     except DatasetError:
         return None

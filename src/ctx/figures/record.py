@@ -16,6 +16,7 @@ import polars as pl
 import ctx
 from ctx import cohorts, runtime
 from ctx.dataset import Dataset, DatasetError, load, loaded
+from ctx.de.results import newest
 from ctx.figures import kinds
 from ctx.figures.kind import DATASET_FILE, QC_REGISTRY, REGISTRY_OF, RESOURCE, Kind
 from ctx.figures.spec import FigureSpec, Input, figure_id
@@ -66,8 +67,7 @@ def input_paths(kind: Kind, params: object, spec: Dataset, root: Path) -> dict[s
     Raises:
         DatasetError: If a table is missing, or the dataset file was not read here.
     """
-    from ctx.de.run import newest  # noqa: PLC0415 - de imports ctx.viz.save, which imports this
-    from ctx.qc import registry  # noqa: PLC0415 - same import order
+    from ctx.qc import registry  # noqa: PLC0415 - qc imports ctx.viz.save, which imports this
 
     found = {}
     for name, (module, what) in kind.inputs(params, spec).items():
@@ -103,8 +103,6 @@ def _fetched(root: Path, spec: Dataset, name: str) -> Path:
 
 def written(tables: tuple[tuple[str, str], ...], spec: Dataset, root: Path) -> bool:
     """Whether the module wrote any of these tables for the dataset, on any day."""
-    from ctx.de.run import newest  # noqa: PLC0415 - de imports ctx.viz.save, which imports this
-
     for module, what in tables:
         try:
             newest(root / "outputs" / FOLDERS[module], spec.slug, what)

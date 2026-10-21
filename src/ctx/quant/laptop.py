@@ -12,7 +12,7 @@ from pathlib import Path
 import polars as pl
 
 from ctx.dataset import DatasetError
-from ctx.de.run import newest
+from ctx.de.results import newest
 from ctx.gather import rnaseq
 from ctx.io.naming import MODULES
 from ctx.process import cache

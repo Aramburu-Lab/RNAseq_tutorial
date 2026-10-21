@@ -16,7 +16,8 @@ from ctx import runtime
 from ctx.clinical import ClinicalError, harmonise, page, panel, score
 from ctx.dataset import ENDPOINTS, Dataset, DatasetError, load
 from ctx.de.filters import log2cpm
-from ctx.de.run import Writer, newest
+from ctx.de.results import newest
+from ctx.de.run import Writer
 from ctx.io.naming import MODULES
 from ctx.report import genes, text
 from ctx.report.builder import ParameterCard
@@ -127,7 +128,7 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     spec = load(options.dataset_file)
     if spec.slug != dataset:
         raise DatasetError(f"{options.dataset_file} is for {spec.slug!r}, not {dataset!r}")
-    if spec.gdc is None or spec.clinical is None:
+    if spec.lacks("clinical") or spec.gdc is None or spec.clinical is None:
         raise DatasetError(f"{options.dataset_file}: M10 needs [gdc] and [clinical]")
     endpoint = options.endpoint or spec.clinical.endpoint
     if endpoint not in ENDPOINTS:

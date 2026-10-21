@@ -28,7 +28,7 @@ from test_genecard import _cards, _register, _settings, root  # noqa: F401 - the
 
 from ctx.dataset import load
 from ctx.de.page import Words
-from ctx.de.run import newest
+from ctx.de.results import newest
 from ctx.genecard import boxes, samples
 from ctx.genecard import run as module
 from ctx.genecard.cards import Card

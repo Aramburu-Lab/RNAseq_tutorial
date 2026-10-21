@@ -9,6 +9,7 @@ import html
 import re
 import subprocess
 from dataclasses import replace
+from datetime import date
 from pathlib import Path
 
 import polars as pl
@@ -23,6 +24,7 @@ from ctx import pipeline
 from ctx.cli import app
 from ctx.dataset import load
 from ctx.gather.fetchngs import read
+from ctx.io.naming import stem
 from ctx.runtime import launcher
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,36 +70,103 @@ def test_steps_in_course_order(tmp_path, runs):
     spec = load(spec_path)
     rnaseq = tmp_path / "rnaseq"
     options = pipeline.Options("mine", spec_path, FIXTURE, rnaseq)
-    assert [m for m, _ in pipeline.steps(spec, options)] == ["gather", "qc", "de", "report"]
+    assert [m for m, _ in pipeline.steps(tmp_path, spec, options)] == [
+        "gather",
+        "qc",
+        "de",
+        "report",
+    ]
     gtf = replace(spec, resources=(*spec.resources, replace_resource()))
     full = replace(gtf, function=object())  # type: ignore[arg-type]
-    planned = pipeline.steps(full, options)
+    planned = pipeline.steps(tmp_path, full, options)
     assert [m for m, _ in planned] == ["gather", "qc", "quant", "de", "function", "report"]
     gather = dict(planned)["gather"]
     assert gather[gather.index("--rnaseq-dir") + 1] == str(rnaseq)
-    no_counts = pipeline.steps(full, replace(options, rnaseq_dir=None))
+    # function reads M5's results, not gather's counts: here none, and de cannot run.
+    no_counts = pipeline.steps(tmp_path, full, replace(options, rnaseq_dir=None))
     assert [m for m, _ in no_counts] == ["gather", "qc", "report"]
-    gdc = replace(full, clinical=object())  # type: ignore[arg-type]
-    planned = pipeline.steps(gdc, pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,)))
+    # ctx clinical needs [gdc] beside [clinical] (loader.NEEDS).
+    without_gdc = replace(full, clinical=object())  # type: ignore[arg-type]
+    assert "clinical" not in dict(pipeline.steps(tmp_path, without_gdc, options))
+    gdc = replace(full, clinical=object(), gdc=object())  # type: ignore[arg-type]
+    gdc_options = pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,))
+    planned = pipeline.steps(tmp_path, gdc, gdc_options)
     assert [m for m, _ in planned] == ["gather", "de", "function", "clinical", "report"]
     both = replace(gdc, ncrna=object())  # type: ignore[arg-type]
-    planned = pipeline.steps(both, pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,)))
+    planned = pipeline.steps(tmp_path, both, gdc_options)
     assert [m for m, _ in planned] == ["gather", "de", "function", "ncrna", "clinical", "report"]
     # M7 reads gather's counts and, across studies, M5's results: after de, before ncrna.
     across = replace(both, proteo=replace_proteo("across_samples"))
-    planned = pipeline.steps(across, pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,)))
+    planned = pipeline.steps(tmp_path, across, gdc_options)
     assert [m for m, _ in planned] == ["gather", "de", "function", "proteo", "ncrna", "clinical",
                                        "report"]  # fmt: skip
-    no_de = replace(across, de=None, proteo=replace_proteo("cross_dataset"))
-    gdc_options = pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,))
-    assert "proteo" not in dict(pipeline.steps(no_de, gdc_options))
+    # Across studies without [de], M7 waits on M5 results this root does not hold.
+    no_de = replace(across, de=None, ncrna=None,
+                    proteo=replace_proteo("cross_dataset", "case_control"))  # fmt: skip
+    assert "proteo" not in dict(pipeline.steps(tmp_path, no_de, gdc_options))
 
 
-def replace_proteo(design):
-    """A stand-in [proteo]: steps reads only its design."""
+def _m5_results(root: Path, slug: str, contrast: str) -> None:
+    """An M5 results file where ``ctx de`` writes it; the plan reads its name alone."""
+    folder = root / "outputs" / "05_de"
+    folder.mkdir(parents=True, exist_ok=True)
+    name = stem("de", f"{slug}_{contrast}_results", 1, day=date.today())
+    pl.DataFrame({"gene_id": ["g1"]}).write_parquet(folder / f"{name}.parquet")
+
+
+def test_m5_readers_wait_on_m5_results(tmp_path, runs, monkeypatch):
+    """R1.3c: function, ncrna and a cross-study proteo are planned with no de in the run only
+    where M5's results for their contrasts are under the root; elsewhere --check names each left
+    out, and why. ncrna and proteo are the M8 and cross-study M7 fixtures, whose files have no
+    [de] (both were left out before R1.3c); function's has [de] but no counts for de. Catches
+    either planned from [de], a reader planned whose input will not exist, and a silent omission.
+    """
+    import ncrna_root  # noqa: PLC0415 - the M8 fixture's root and dataset file
+    import proteo_root  # noqa: PLC0415 - the cross-study M7 fixture's root and dataset file
+
+    featured = '\n[de]\nfeatured = "case_control"\n'
+    function_file = _spec(tmp_path, runs, CONTRAST.format(reference=7, tested=7, extra=featured))
+    pasted = (
+        pipeline._resource(pipeline.GENE_SETS)
+        + "\n"
+        + pipeline.block("[function]", contrast="case_control")
+    )
+    function_file.write_text(function_file.read_text() + "\n" + pasted)
+    function_root = tmp_path / "function_root"
+    _m5_results(function_root, "mine", "case_control")
+    ncrna_dir, ncrna_file = ncrna_root.make(tmp_path / "ncrna", date.today())
+    monkeypatch.setattr(proteo_root, "ctx", lambda *args: None)  # its dataset file, not its run
+    (tmp_path / "proteo").mkdir()
+    proteo_dir = proteo_root.cross(tmp_path / "proteo")
+    proteo_file = tmp_path / "proteo" / "fake_cells.toml"
+    rnaseq = tmp_path / "rnaseq"
+    rnaseq.mkdir()
+    # module: dataset file, a root holding its M5 results, the counts folder, the other modules
+    cases = {
+        "function": (function_file, function_root, None, ["gather", "qc", "report"]),
+        "ncrna": (ncrna_file, ncrna_dir, rnaseq, ["gather", "qc", "quant", "report"]),
+        "proteo": (proteo_file, proteo_dir, rnaseq, ["gather", "qc", "report"]),
+    }
+    empty = tmp_path / "empty"
+    for module, (path, root, counts, others) in cases.items():
+        spec = load(path)
+        options = pipeline.Options(spec.slug, path, rnaseq_dir=counts)
+        problems, modules = pipeline.check(root, options)
+        assert modules == sorted([*others, module], key=pipeline.ORDER.index), (module, modules)
+        assert not [p for p in problems if p.text.startswith(f"{module}: no M5")], module
+        problems, modules = pipeline.check(empty, options)
+        assert modules == others, (module, modules)
+        contrast = pipeline.m5.required(spec, module)[0]
+        reason = (f"{module}: no M5 results for {spec.slug}, contrast {contrast}, and de is not "
+                  f"planned; ctx run leaves {module} out.")  # fmt: skip
+        assert [p.text for p in problems if not p.blocks and p.text == reason] == [reason]
+
+
+def replace_proteo(design, contrast=None):
+    """A stand-in [proteo]: steps reads its design and, across studies, its contrast."""
     from ctx.dataset import ProteoSpec  # noqa: PLC0415
 
-    return ProteoSpec(design, "protein")
+    return ProteoSpec(design, "protein", contrast=contrast)
 
 
 def replace_resource():
@@ -146,6 +215,10 @@ def test_check_lists_every_problem(tmp_path, runs):
     assert planned == ["gather", "qc", "de", "report"]
 
 
+WAITS = ("function: no M5 results for mine, contrast control_case, and de is not planned; "
+         "ctx run leaves function out.")  # fmt: skip
+
+
 def test_suggested_lines_pass_once_pasted(tmp_path, runs):
     """Every line --check suggests, pasted into the file as printed, clears its problem, until
     none is left. Catches a suggested contrast whose n fails, a block that is not TOML, and a
@@ -158,12 +231,16 @@ def test_suggested_lines_pass_once_pasted(tmp_path, runs):
             (root / resource.dest).parent.mkdir(parents=True, exist_ok=True)
             (root / resource.dest).write_text("stand-in")
         problems, _ = pipeline.check(root, pipeline.Options("mine", spec_path, FIXTURE))
+        # No --rnaseq-dir, so no de: function waits on M5 results no line can supply.
+        problems = [p for p in problems if p.text != WAITS]
         lines = [p.lines for p in problems if p.lines]
         assert len(lines) == len(problems) and not any(p.blocks for p in problems), problems
         if not problems:
             break
         spec_path.write_text(spec_path.read_text() + "\n" + "\n".join(lines))
     assert problems == []
+    named, _ = pipeline.check(root, pipeline.Options("mine", spec_path, FIXTURE))
+    assert WAITS in [p.text for p in named]
     spec = load(spec_path)
     assert [c.expected_n for c in spec.contrasts] == [(7, 7)]
     assert spec.de is not None and spec.function is not None
@@ -244,13 +321,16 @@ def test_folders_carried_to_the_modules_that_take_them(tmp_path, runs):
     reads = pipeline.Options("mine", spec_path, FIXTURE, tmp_path / "rnaseq", salmon_dir=salmon)
     gdc = pipeline.Options("mine", spec_path, gdc_dirs=(tmp_path,), mirna_dir=mirna,
                            isoform_dir=isoform)  # fmt: skip
-    quant = dict(pipeline.steps(spec, reads))["quant"]
-    gather = dict(pipeline.steps(spec, gdc))["gather"]
+    quant = dict(pipeline.steps(tmp_path, spec, reads))["quant"]
+    gather = dict(pipeline.steps(tmp_path, spec, gdc))["gather"]
     assert quant[quant.index("--salmon-dir") + 1] == str(salmon)
     assert gather[gather.index("--mirna-dir") + 1] == str(mirna)
     assert gather[gather.index("--isoform-dir") + 1] == str(isoform)
     commands = typer.main.get_command(app).commands  # type: ignore[attr-defined]
-    for module, args in (*pipeline.steps(spec, reads), *pipeline.steps(spec, gdc)):
+    for module, args in (
+        *pipeline.steps(tmp_path, spec, reads),
+        *pipeline.steps(tmp_path, spec, gdc),
+    ):
         parsed = commands[module].make_context(module, list(args)).params
         for flag, value in zip(args[::2], args[1::2], strict=True):
             found = parsed[flag.lstrip("-").replace("-", "_")]
@@ -302,7 +382,7 @@ def test_two_projects_reach_gather_each_folder(tmp_path):
     a, b = folders(tmp_path)
     spec_path = two_projects(tmp_path)
     options = pipeline.Options("fake_brca", spec_path, gdc_dirs=(b, a))
-    gather = dict(pipeline.steps(load(spec_path), options))["gather"]
+    gather = dict(pipeline.steps(tmp_path, load(spec_path), options))["gather"]
     given = [v for f, v in zip(gather, gather[1:], strict=False) if f == "--gdc-dir"]
     assert given == [str(b), str(a)], gather
     commands = typer.main.get_command(app).commands  # type: ignore[attr-defined]

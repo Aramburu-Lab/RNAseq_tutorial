@@ -17,7 +17,8 @@ import polars as pl
 
 from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
-from ctx.de.run import Writer, newest
+from ctx.de.results import newest
+from ctx.de.run import Writer
 from ctx.gather import counts, gdc
 from ctx.io.naming import MODULES, stem
 from ctx.qc import (

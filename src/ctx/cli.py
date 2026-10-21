@@ -559,7 +559,9 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     if check or stops:
         raise typer.Exit(1 if (problems if check else stops) else 0)
     profile = ctx.find_root().obj.get("profile")
-    raise typer.Exit(pipeline.execute(settings.root, profile, pipeline.planned(options)))
+    raise typer.Exit(
+        pipeline.execute(settings.root, profile, pipeline.planned(settings.root, options))
+    )
 
 
 @app.command()

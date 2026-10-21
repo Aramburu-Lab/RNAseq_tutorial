@@ -18,7 +18,7 @@ from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
 from test_genecard import _cards, _register, _settings
 
 from ctx.dataset import load
-from ctx.de.run import newest
+from ctx.de.results import newest
 from ctx.figures import kinds, kinds_m9
 from ctx.figures.panel import TABS
 from ctx.figures.params import ParamsError, load_params
