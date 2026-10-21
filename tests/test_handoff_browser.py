@@ -60,6 +60,8 @@ SEEN = """(async () => {
           bars: d.data.filter(t => t.type === 'bar').map(t => ({name: t.name,
             colour: t.marker.color, y: Array.from(t.y), x: Array.from(t.x)})),
           categories: Array.from(d.layout.yaxis.categoryarray || []),
+          shapes: (d.layout.shapes || []).map(s => ({x0: s.x0, x1: s.x1, xref: s.xref,
+            dash: s.line && s.line.dash, name: s.name})),
           legend: d.layout.showlegend, grey: cfg.colours.failing,
           moved: !!fig.querySelector('a[data-export][role=button]'),
           box: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth,
@@ -179,10 +181,12 @@ def test_a_clicked_link_shows_the_genes_on_m6(ran):
 def test_six_genes_draw_the_sets_of_smallest_p_marked_as_failing(ran, name, tmp_path):
     """Rytis's 6 genes (PK.3): the panel draws the sets ``live.bars`` draws, in its order, each
     failing set grey and named so in the legend, the summary saying how many and at what FDR;
-    the PDF and SVG are the view. At 1,280 and 375 px, light and dark, no sideways scroll.
+    the PDF and SVG are the view. The length is -log10 FDR, past a dashed line at FDR 0.05
+    (Rytis 2026-10-21, D-102). At 1,280 and 375 px, light and dark, no sideways scroll.
 
     Mutations caught: the failing sets dropped (the empty chart Rytis saw); a failing set in
-    its family's colour; the length -log10 FDR; the grey sentence left out."""
+    its family's colour; the length -log10 p in the page's redraw; the dashed line left out;
+    the grey sentence left out."""
     m5, downloads, results = ran
     seen = results[name]
     assert seen["errors"] == []
@@ -196,12 +200,16 @@ def test_six_genes_draw_the_sets_of_smallest_p_marked_as_failing(ran, name, tmp_
     assert len(drawn) == want.height
     for row in want.iter_rows(named=True):
         x = drawn[(_legend(row["series"]), set_words(row["gene_set"]))]
-        assert math.isclose(x, -math.log10(row["p"]), rel_tol=1.52e-10, abs_tol=1e-12), row
+        assert math.isclose(x, -math.log10(row["fdr"]), rel_tol=1.52e-10, abs_tol=1e-12), row
     assert got["categories"] == list(dict.fromkeys(set_words(s) for s in want["gene_set"]))
     for bar in got["bars"]:
         grey = "not passing" in bar["name"]
         assert (bar["colour"] == got["grey"]) == grey, bar
     assert got["legend"] is True
+    line = f"FDR {live.ALPHA}"
+    assert got["shapes"] == [{"x0": pytest.approx(-math.log10(live.ALPHA)),
+                              "x1": pytest.approx(-math.log10(live.ALPHA)), "xref": "x",
+                              "dash": "dash", "name": line}], got["shapes"]  # fmt: skip
     passing = int(re.search(r"(\d+) set results pass FDR", got["summary"])[1])
     sentence = text.fill("function", "live.grey", failing=failing.height, alpha=live.ALPHA,
                          top=live.TOP)  # fmt: skip
@@ -214,7 +222,7 @@ def test_six_genes_draw_the_sets_of_smallest_p_marked_as_failing(ran, name, tmp_
     bars = re.findall(r'<g class="trace bars".*?</g></g>', svg, re.DOTALL)
     assert any(GREY_SVG.search(b) for b in bars), "no grey bar in the view's SVG"
     legend = [html.unescape(s) for s in re.findall(r'class="legendtext"[^>]*>([^<]*)', svg)]
-    assert legend == [b["name"] for b in got["bars"]], legend
+    assert legend == [b["name"] for b in got["bars"]] + [line], legend
     assert (downloads / files["pdf"]["guid"]).read_bytes().startswith(b"%PDF")
 
 

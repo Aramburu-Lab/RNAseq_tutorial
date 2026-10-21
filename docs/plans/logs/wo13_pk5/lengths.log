@@ -1,0 +1,29 @@
+static, featured contrast: 23 bars, 5 grey
+  up            HALLMARK_OXIDATIVE_PHOSPHORYLATION            -log10 p  13.7006  -log10 FDR 12  FDR 9.563446174146025e-13
+  up            HALLMARK_FATTY_ACID_METABOLISM                -log10 p   8.3232  -log10 FDR 6.94  FDR 1.1404040225064086e-07
+  up            HALLMARK_ADIPOGENESIS                         -log10 p   6.3330  -log10 FDR 5.13  FDR 7.432617589705655e-06
+  up            HALLMARK_IL2_STAT5_SIGNALING                  -log10 p   5.8023  -log10 FDR 4.72  FDR 1.891858024600091e-05
+  up            HALLMARK_MTORC1_SIGNALING                     -log10 p   5.6746  -log10 FDR 4.69  FDR 2.031034980416565e-05
+  up            HALLMARK_XENOBIOTIC_METABOLISM                -log10 p   5.1790  -log10 FDR 4.28  FDR 5.297711746710625e-05
+  up            HALLMARK_GLYCOLYSIS                           -log10 p   4.8401  -log10 FDR 4  FDR 9.908312718726288e-05
+  up            HALLMARK_COMPLEMENT                           -log10 p   4.5221  -log10 FDR 3.74  FDR 0.0001803049328765245
+  up            HALLMARK_CHOLESTEROL_HOMEOSTASIS              -log10 p   4.0163  -log10 FDR 3.29  FDR 0.0005137069163543021
+  up            HALLMARK_COAGULATION                          -log10 p   3.3176  -log10 FDR 2.64  FDR 0.00231009113615073
+  up            HALLMARK_PEROXISOME                           -log10 p   3.0310  -log10 FDR 2.39  FDR 0.004062964000886331
+  up            HALLMARK_HYPOXIA                              -log10 p   2.8004  -log10 FDR 2.2  FDR 0.006333354213728799
+  up            HALLMARK_EPITHELIAL_MESENCHYMAL_TRANSITION    -log10 p   2.5142  -log10 FDR 1.95  FDR 0.01130028056959773
+  up            HALLMARK_INFLAMMATORY_RESPONSE                -log10 p   2.2330  -log10 FDR 1.7  FDR 0.020050122452778475
+  up            HALLMARK_P53_PATHWAY                          -log10 p   1.9644  -log10 FDR 1.46  FDR 0.034731549994336273
+  up            HALLMARK_APOPTOSIS                            -log10 p   1.8576  -log10 FDR 1.38  FDR 0.041637512667304186
+  down          HALLMARK_INTERFERON_GAMMA_RESPONSE            -log10 p  11.7881  -log10 FDR 10.1  FDR 7.818336064647485e-11
+  down          HALLMARK_INTERFERON_ALPHA_RESPONSE            -log10 p  11.3031  -log10 FDR 9.92  FDR 1.1943320013666767e-10
+  down_failing  HALLMARK_ESTROGEN_RESPONSE_LATE               -log10 p   0.8879  -log10 FDR 1.56e-13  FDR 0.9999999999996413
+  down_failing  HALLMARK_APICAL_SURFACE                       -log10 p   0.6930  -log10 FDR 1.56e-13  FDR 0.9999999999996413
+  down_failing  HALLMARK_TNFA_SIGNALING_VIA_NFKB              -log10 p   0.5847  -log10 FDR 1.56e-13  FDR 0.9999999999996413
+  down_failing  HALLMARK_NOTCH_SIGNALING                      -log10 p   0.5838  -log10 FDR 1.56e-13  FDR 0.9999999999996413
+  down_failing  HALLMARK_KRAS_SIGNALING_DN                    -log10 p   0.4990  -log10 FDR 1.56e-13  FDR 0.9999999999996413
+live, Rytis's 6 genes: 3 bars, 3 grey
+  up_failing    HALLMARK_COAGULATION                          -log10 p   1.5922  -log10 FDR 0.0308  FDR 0.9316326544797341
+  up_failing    HALLMARK_HYPOXIA                              -log10 p   1.2589  -log10 FDR 0.0308  FDR 0.9316326544797341
+  up_failing    HALLMARK_COMPLEMENT                           -log10 p   1.2349  -log10 FDR 0.0308  FDR 0.9316326544797341
+threshold -log10(0.05) = 1.3010
