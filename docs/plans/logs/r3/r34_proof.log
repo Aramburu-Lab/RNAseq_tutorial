@@ -1,0 +1,91 @@
+r3_supp: absent; r3_supp.hidden: /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r3_supp.hidden
+from-dir /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from:
+total 802368
+-rw-r--r--@ 1 rytis  wheel  169931539 Oct 21 11:55 43018_2024_784_MOESM2_ESM.xlsx
+-rw-r--r--@ 2 rytis  staff  124650284 Oct 18 12:24 gencode.v50.primary_assembly.annotation.gtf.gz
+-rw-r--r--@ 2 rytis  staff      48686 Oct 18 12:20 h.all.v2026.1.Hs.symbols.gmt
+-rw-r--r--@ 2 rytis  staff  116174443 Oct 18 12:11 proteinGroups.txt
++ ctx --root /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_root_final setup --dataset-file conf/datasets/r3_pxd038437.toml --from-dir /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_root_final/outputs/00_setup/2026-10-21_setup_environment_v1.html
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_root_final/outputs/00_setup/2026-10-21_setup_versions_v1.parquet
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_root_final/outputs/00_setup/2026-10-21_setup_versions_v1.csv
+/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_root_final/outputs/00_setup/2026-10-21_setup_versions_v1_README.md
+        6.65 real         1.33 user         0.71 sys
+           170229760  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               25393  page reclaims
+                  33  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 126  voluntary context switches
+                6136  involuntary context switches
+         16232064647  instructions retired
+          7418538107  cycles elapsed
+           117327096  peak memory footprint
+exit 0
+manifest:
+{
+  "data/raw/r3_pxd038437/43018_2024_784_MOESM2_ESM.xlsx": {
+    "bytes": 169931539,
+    "copied_from": "/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from/43018_2024_784_MOESM2_ESM.xlsx",
+    "name": "supplement_table_s2",
+    "retrieved": "2026-10-21T10:00:25+00:00",
+    "sha256": "895291af3169223c05adacddd33ece9a33cf332e073449c75ac0f3ee8a4d12b0",
+    "url": "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC11358022/supplementaryFiles"
+  },
+  "data/raw/r3_pxd038437/proteinGroups.txt": {
+    "bytes": 116174443,
+    "copied_from": "/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from/proteinGroups.txt",
+    "name": "protein_table",
+    "retrieved": "2026-10-21T10:00:25+00:00",
+    "sha256": "82681a643258644de52be2bbe382ea6a169045c8691c8355cfa756da33082082",
+    "url": "https://ftp.pride.ebi.ac.uk/pride/data/archive/2024/07/PXD038437/proteinGroups.txt"
+  },
+  "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz": {
+    "bytes": 124650284,
+    "copied_from": "/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from/gencode.v50.primary_assembly.annotation.gtf.gz",
+    "name": "annotation_gtf",
+    "retrieved": "2026-10-21T10:00:25+00:00",
+    "sha256": "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4",
+    "url": "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz"
+  },
+  "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt": {
+    "bytes": 48686,
+    "copied_from": "/private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_from/h.all.v2026.1.Hs.symbols.gmt",
+    "name": "msigdb_hallmark",
+    "retrieved": "2026-10-21T10:00:25+00:00",
+    "sha256": "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596",
+    "url": "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt"
+  }
+}
++ python docs/plans/logs/r3/proof_check.py /private/tmp/claude-505/-Users-rytis-Scripts-Pipeline-RNAseq-tutorial/bd98644a-984e-40e7-be65-bc8c990c4492/scratchpad/r34_root_final conf/datasets/r3_pxd038437.toml
+Table S2: 41,071 genes, 123 columns, 60 use_for_correlation
+MaxQuant drops (('reverse', 541), ('contaminant', 93), ('only_by_site', 1417)); mapping {'mapped': 10136, 'no_id': 143, 'no_map': 0, 'several': 279, 'absent': 486, 'shared': 3}; tokens {'0': 480342}
+layer: 9,205 genes by 165 channels (references out)
+channels with both layers: 60 of 60 use_for_correlation columns
+R3-1: median per-gene Pearson 0.3152 over 8,105 genes with at least 10 pairs; Ramberger 2024: 0.29; band 0.05: PASS
+       23.20 real        17.36 user         0.58 sys
+           787300352  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+               66087  page reclaims
+                   3  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                  69  voluntary context switches
+               39815  involuntary context switches
+        304663892115  instructions retired
+         65864636908  cycles elapsed
+           571983576  peak memory footprint
+exit 0

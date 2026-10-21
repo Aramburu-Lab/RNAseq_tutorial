@@ -93,6 +93,7 @@ def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
 def setup(
     ctx: typer.Context,
     dataset_file: Annotated[Path | None, typer.Option(help=HELP["--dataset-file"])] = None,
+    from_dir: Annotated[Path | None, typer.Option(help=HELP["--from-dir"])] = None,
 ) -> None:
     """Report this machine: versions, hardware, profile, fonts and colour contrast."""
     from ctx import setup as module  # noqa: PLC0415 - heavy; imported after the runtime profile
@@ -101,7 +102,7 @@ def setup(
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
     try:
-        written = module.run(ctx.obj["settings"], cards, command, dataset_file)
+        written = module.run(ctx.obj["settings"], cards, command, dataset_file, from_dir)
     except (module.FetchError, DatasetError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error

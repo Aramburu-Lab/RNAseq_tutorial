@@ -3,7 +3,9 @@
 The protein table through ctx's generic reader, read as the proof's dataset file declares it,
 against the paper's Table S2 RNA on its use_for_correlation columns, matched by TMT channel;
 per-gene Pearson on genes with at least ten paired values; the median beside 0.29.
-Run through env.sh: python docs/plans/logs/r3/proof_check.py <root> <dataset file> <supplement>
+Run through env.sh: python docs/plans/logs/r3/proof_check.py <root> <dataset file>
+The supplement is the dataset file's supplement_table_s2, read from the root, where ctx setup
+placed it (R3.4); no path outside the root is read for it.
 """
 
 import sys
@@ -30,8 +32,9 @@ class Root:
         self.root = root
 
 
-root, spec_path, supplement = (Path(a) for a in sys.argv[1:4])
+root, spec_path = (Path(a) for a in sys.argv[1:3])
 spec = load(spec_path)
+supplement = root / spec.resource("supplement_table_s2").dest
 p = spec.proteo
 assert p is not None and p.table is not None
 book = openpyxl.load_workbook(supplement, read_only=True)

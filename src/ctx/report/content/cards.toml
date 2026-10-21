@@ -37,6 +37,10 @@ effect = "Matches files to another column; nf-core/rnaseq names samples by it."
 meaning = "The dataset file, conf/datasets/<slug>.toml: resources, curation, contrasts, gene sets, sanity rules."
 effect = "Changes what this command reads; each page names what it uses."
 
+[options."--from-dir"]
+meaning = "Folder searched for each resource by size and SHA-256; copied, never moved."
+effect = "Set: matching files are copied, not downloaded; a same-named mismatch stops setup."
+
 [options."--min-count"]
 meaning = "Gene filter, edgeR filterByExpr min.count: reads required at median [[library size]]."
 effect = "Higher tests fewer, better-measured genes; weakly expressed genes are not tested."
