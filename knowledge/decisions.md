@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-104 — A short or capitalised glossary name matches only as written, in a mark too
+
+**Date:** 2026-10-21 · **Status:** decided
+
+**Context.** L.6: the unmarked-term warnings read setup's "OS" (operating system) as `survival_endpoints`. The lint had matched a name of three characters or fewer, or with two capitals, as written since 4ac9189, while `glossary.lookup` resolved every mark in any case, so `[[os]]` or `[[go]]` named overall survival or the Gene Ontology. CONVENTIONS said a mark matches "in any case".
+
+**Options.** All-capital names of four letters or fewer by case, as L.6 proposed; the lint's rule already in place (three characters or fewer, or two capitals); per-page exceptions alone.
+
+**Decision.** The lint's rule, moved to `glossary.exact` and used by both the lint and `lookup`. A case rule cannot separate setup's "OS" from survival's: both are written "OS". So setup's page writes "operating system" (its Input and `keys.cores_detail`), and the per-page exception `glossary_lint.OTHER_MEANINGS` from 4ac9189 is deleted: a page means one thing by a glossary name.
+
+**Evidence.** On the shipped page files the two rules flag the same entries in the same sections, 361 warnings each; they differ only in the name matched (Spearman or rho, GSEA or preranked GSEA, MANE or MANE Select, PDC or CPTAC). Without the case rule and the exception the lint gives 364: the case rule removes process's and proteo's "go" read as MSigDB, and the exception removed setup's "OS". With setup's text changed and the exception deleted the count stays 361 and the lint output is identical; the old "OS" text back with no exception gives 362, setup's Input warned again. All 254 marks in `src/ctx/report/content/*.toml` resolve; none reached its entry only through case folding of a short or capitalised name.
+
+**Consequence.** A mark writes a short or capitalised name as the glossary does: `[[OS]]`, never `[[os]]`. The duplicate-name check stays case-insensitive. Page text that means something else by a glossary abbreviation writes the word out; the lint has no per-page exceptions. The other "OS" in the page files (cards, clinical, figure) are survival's.
+
+---
+
 ## D-103 — A kit refuses a guide or glossary older than its root's newest module page
 
 **Date:** 2026-10-21 · **Status:** decided (K.15)

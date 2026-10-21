@@ -30,6 +30,10 @@ CATEGORIES = (
 REQUIRED = {"id": str, "term": str, "aliases": list, "category": str, "short": str, "long": str}
 OPTIONAL = {"rna_vs_dna": str, "typical": str, "source": str, "see_also": list, "confirm": bool}
 _ID = re.compile(r"[a-z0-9]+(?:_[a-z0-9]+)*")
+# A name of three characters or fewer, or with two capitals (GO, OS, TPM, MultiQC), is matched
+# as written, in a mark and in the lint's search for bare mentions: "go" and "os" are words,
+# not the Gene Ontology or overall survival (L.6, D-104).
+_EXACT = re.compile(r"^.{1,3}$|[A-Z].*[A-Z]")
 # The glossary page sits beside the hub, in the report module's folder of each ctx root.
 REPORT = "report"
 # The icon: a circled "i" drawn in the text colour the button sets (the link colour).
@@ -145,19 +149,27 @@ def load() -> dict[str, Entry]:
     return entries
 
 
+def exact(name: str) -> bool:
+    """Whether a name matches only as written: three characters or fewer, or two capitals."""
+    return bool(_EXACT.search(name))
+
+
 @cache
-def _index() -> dict[str, str]:
-    """Every name, lower-cased, to its entry's id."""
-    return {name.lower(): e.id for e in load().values() for name in e.names()}
+def _index() -> tuple[dict[str, str], dict[str, str]]:
+    """Every name to its entry's id: those matched as written, and the rest lower-cased."""
+    names = [(name, e.id) for e in load().values() for name in e.names()]
+    as_written = {name: i for name, i in names if exact(name)}
+    return as_written, {name.lower(): i for name, i in names if not exact(name)}
 
 
 def lookup(name: str) -> Entry:
-    """The entry an id, term or alias names, in any case.
+    """The entry an id, term or alias names: as written if ``exact``, else in any case.
 
     Raises:
         GlossaryError: If no entry has that name.
     """
-    found = _index().get(name.strip().lower())
+    as_written, any_case = _index()
+    found = as_written.get(name.strip()) or any_case.get(name.strip().lower())
     if found is None:
         raise GlossaryError(f"{name!r} is not in the glossary")
     return load()[found]

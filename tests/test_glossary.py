@@ -238,22 +238,21 @@ def test_the_m3_page_marks_each_term_where_a_section_first_names_it():
     assert [w for w in process if not w.endswith(bare)] == []
 
 
-def test_an_alias_with_another_meaning_on_a_page_is_no_mention():
-    """L.6: setup's "OS" is the operating system, written as survival's alias; matched by case
-    already, it needs the page's exception. Elsewhere "OS" still names the survival endpoint.
+def test_setup_writes_the_operating_system_out_and_os_still_names_survival():
+    """L.6, D-104: setup's page says "operating system", so the lint finds no OS there with no
+    exception; written as survival's alias, "OS" in any section still names the endpoint.
 
-    Mutation caught: the exception's `continue` dropped (setup's 'OS' warned again)."""
+    Mutation caught: setup.toml's Input with "the OS reports" again (setup's 'OS' warned)."""
     _, warnings = glossary_lint.page_marks()
     assert not [w for w in warnings if w.startswith("setup: ") and "'OS'" in w]
-    patterns = glossary_lint._names()
     text = ["The memory the OS reports."]
-    assert list(glossary_lint._first_mentions(text, patterns)) == [
+    assert list(glossary_lint._first_mentions(text, glossary_lint._names())) == [
         "'OS' is survival_endpoints, unmarked"]  # fmt: skip
-    assert list(glossary_lint._first_mentions(text, patterns, frozenset({"OS"}))) == []
 
 
 def test_lookup_by_id_term_or_alias_in_any_case(capsys):
-    """One entry answers to its id, its term and each alias, in any case; explain prints it.
+    """One entry answers to its id, its term and each alias, a long name in any case (D-104);
+    explain prints it.
 
     Mutation: lookup without .lower(): 'Q SCORE' raises.
     """
@@ -264,6 +263,18 @@ def test_lookup_by_id_term_or_alias_in_any_case(capsys):
     printed = capsys.readouterr().out
     assert printed.startswith("Phred quality score (Read quality)\nProbability that a base")
     assert "Source: Ewing & Green 1998" in printed and "See also: Q30," in printed
+
+
+def test_a_short_or_capitalised_name_resolves_only_as_written():
+    """L.6, D-104: a mark resolves "OS", "GO" and "rho" only as written, the rule the lint's
+    bare-word search uses, so [[os]] is no mark of overall survival; longer names keep any case.
+
+    Mutation caught: the any-case index holding every name again ([[os]] resolves)."""
+    assert glossary.lookup("OS").id == "survival_endpoints"
+    assert glossary.lookup("Overall Survival").id == "survival_endpoints"
+    for written in ("os", "Os", "go", "Rho"):
+        with pytest.raises(glossary.GlossaryError, match="not in the glossary"):
+            glossary.lookup(written)
 
 
 def test_plain_prints_the_display_text():
