@@ -62,10 +62,12 @@ def test_folder_without_the_file_downloads(tmp_path):
 
 
 def zipped(member: str, body: bytes) -> bytes:
+    # A fixed entry time: a zip stores when it was written, so cases built at collection
+    # differed between xdist workers, which then refused to run (2026-10-21).
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w") as bundle:
-        bundle.writestr("other.gif", b"GIF89a")
-        bundle.writestr(member, body)
+        for name, data in (("other.gif", b"GIF89a"), (member, body)):
+            bundle.writestr(zipfile.ZipInfo(name, date_time=(2026, 10, 21, 0, 0, 0)), data)
     return buffer.getvalue()
 
 
@@ -84,6 +86,7 @@ def test_member_kept_and_checked(tmp_path):
     ("archive", "match"),
     [(zipped("elsewhere.xlsx", BODY), "no member"), (BODY, "no member"),
      (zipped("s2.xlsx", BODY + b"x"), "sha256")],
+    ids=["member missing", "not a zip", "member's hash wrong"],
 )  # fmt: skip
 def test_member_refused(tmp_path, archive, match):
     with pytest.raises(FetchError, match=match):
