@@ -160,6 +160,15 @@ licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents 
 featured_set = "HALLMARK_TNFA_SIGNALING_VIA_NFKB"
 running = ["breast_tam", "HALLMARK_TNFA_SIGNALING_VIA_NFKB"]
 
+# M8 (ED.3, Rytis 2026-10-22): the biotype half alone, from these counts. A standard
+# RNA-seq library holds no mature miRNAs, and this dataset has no small-RNA library, so no
+# [ncrna.mirna]. Featured: [de]'s featured contrast. No [ncrna.sanity]: no M8 rule is
+# registered for this dataset.
+[ncrna]
+featured = "breast_tam"
+# Pairs the lncRNA neighbour select offers, smallest residual q first.
+pairs = 50
+
 # Registered before any ctx de run on this dataset (TODO.md, work-order item 13 answers, item 8).
 # The counts were on this Mac before the rules (P4.1); no expression value, fit or enrichment was
 # read for them. A failing rule is reported, never retuned. Rytis reviews these before ctx de.

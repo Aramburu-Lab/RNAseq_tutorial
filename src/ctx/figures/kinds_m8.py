@@ -10,6 +10,7 @@ from typing import Any
 
 from ctx.dataset import Dataset
 from ctx.figures.kind import DATASET_FILE, Inputs, Kind, Plain, m5_results, resource
+from ctx.ncrna import small_rna
 
 SHEET, COUNTS = ("gather", "samplesheet"), ("gather", "counts")
 GENES, OPTIONS = ("ncrna", "gene_biotypes"), ("ncrna", "figure_options")
@@ -49,8 +50,8 @@ def _step1(spec: Dataset) -> list[Plain]:
 
 
 def _mirna(spec: Dataset) -> list[Plain]:
-    """The one figure of a kind of the miRNA half, which a GDC dataset alone draws."""
-    return [Plain(spec.slug)] if spec.ncrna and spec.ncrna.mirna and spec.gdc else []
+    """The one figure of a kind of the miRNA half, which a declared small-RNA library draws."""
+    return [Plain(spec.slug)] if small_rna(spec) else []
 
 
 DRAW = "ctx.figures.draw_m8"
