@@ -25,13 +25,26 @@ from ctx.gather.rnaseq import MATRIX_FILE
 from ctx.report.text import fill
 
 # Course order, which a new module joins in its place; report reads every page, so it is last.
-# Not naming.MODULES, whose numbers name output folders, not the order a dataset is run in.
+# Not naming.MODULES, whose numbers name output folders, not the order a dataset is run in:
+# process (M3) runs before qc (M2), whose align stage reads its tables (M3.12), and only from a
+# cluster's alignment (--align-dir), since ctx run takes no genome to align to.
 # genecard is not here: it calls HPA and Ensembl, and one command runs nothing that fetches.
-ORDER = ("gather", "qc", "quant", "de", "function", "proteo", "ncrna", "clinical", "report")
+ORDER = (
+    "gather",
+    "process",
+    "qc",
+    "quant",
+    "de",
+    "function",
+    "proteo",
+    "ncrna",
+    "clinical",
+    "report",
+)
 # Every module, those ``ctx run`` leaves to the reader too, and the ones each route never runs:
 # GDC and count-matrix sheets hold no reads, so quant and process refuse both
 # (``ctx.quant.run``, ``ctx.process.run``) and qc runs on a matrix's counts, not on GDC's.
-MODULES = (*ORDER, "process", "genecard")
+MODULES = (*ORDER, "genecard")
 NOT_ON_ROUTE = {"fetchngs": frozenset(), "counts": frozenset({"quant", "process"}),
                 "gdc": frozenset({"qc", "quant", "process"})}  # fmt: skip
 TEMPLATE = Path(__file__).resolve().parents[2] / "conf" / "dataset_template.toml"
@@ -53,6 +66,7 @@ class Options:
     mirna_dir: Path | None = None
     isoform_dir: Path | None = None
     counts: Path | None = None
+    align_dir: Path | None = None
 
     def dataset_root(self, root: Path) -> Path:
         """Where gather reads the fetchngs outdir when ``--fetchngs-dir`` is not given."""
@@ -91,6 +105,7 @@ def plan(
     A count matrix (``--counts``) goes to gather alone; qc then judges its counts, and quant,
     which reads an rnaseq outdir, does not run. A module outside the selected edition
     (``ctx.editions``) never runs, and is named among those left out.
+    process runs only on a cluster's alignment (``--align-dir``, ED.6e-8), with an annotation.
     """
     base = ("--dataset", options.dataset, "--dataset-file", str(options.dataset_file))
     rnaseq = ("--rnaseq-dir", str(options.rnaseq_dir)) if options.rnaseq_dir else ()
@@ -110,8 +125,10 @@ def plan(
     if spec.proteo and spec.proteo.design == "cross_dataset":
         reads_counts.discard("proteo")
     skipped = NOT_ON_ROUTE["gdc" if gdc else "counts" if matrix else "fetchngs"]
+    aligned = ("--align-dir", str(options.align_dir)) if options.align_dir and has_gtf else ()
     planned: dict[str, tuple[str, ...] | None] = {
         "gather": base + (gdc_args if gdc else matrix or fetchngs + rnaseq),
+        "process": None if "process" in skipped or not aligned else base + aligned,
         "qc": None if "qc" in skipped else base + rnaseq,
         "quant": None if "quant" in skipped or not (rnaseq and has_gtf) else base + rnaseq + salmon,
         **{
@@ -269,7 +286,8 @@ def _inputs(root: Path, spec: Dataset, options: Options) -> list[Problem]:
              ("--rnaseq-dir", options.rnaseq_dir),
              *(("--gdc-dir", folder) for folder in options.gdc_dirs),
              ("--salmon-dir", options.salmon_dir), ("--mirna-dir", options.mirna_dir),
-             ("--isoform-dir", options.isoform_dir))  # fmt: skip
+             ("--isoform-dir", options.isoform_dir),
+             ("--align-dir", options.align_dir))  # fmt: skip
     for flag, folder in given:
         if folder is not None and not folder.is_dir():
             problems.append(Problem(f"{flag} {folder} is not a folder"))

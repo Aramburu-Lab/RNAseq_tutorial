@@ -33,7 +33,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # genecard fetches from HPA and Ensembl, which one command must not do unasked; reads lays out
 # a student's FASTQ files before nf-core/rnaseq, outside any ctx root; figure redraws one figure
 # in the reader's own folder, from a params file a page wrote.
-NOT_RUN = {"setup", "process", "genecard", "run", "guide", "reads", "figure"}
+NOT_RUN = {"setup", "genecard", "run", "guide", "reads", "figure"}
 CONTRAST = """
 [[contrasts]]
 name = "case_control"

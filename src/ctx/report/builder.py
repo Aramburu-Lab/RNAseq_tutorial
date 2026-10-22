@@ -234,6 +234,8 @@ class Reproduction:
     budget: str
     versions: Mapping[str, str]
     inputs: tuple[str, ...] = ()
+    # Sentences on work done elsewhere, such as a cluster's alignment (ED.6e-7); none by default.
+    notes: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)

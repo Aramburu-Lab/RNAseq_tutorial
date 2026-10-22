@@ -169,6 +169,10 @@ effect = "Pick a suspect run to see which settings keep its reads."
 meaning = "Genome FASTA, plain or gzipped; its contig names select the [[annotation|GTF]] lines."
 effect = "A partial genome lowers the mapping rate; genome-wide bands stop applying."
 
+[options."--align-dir"]
+meaning = "Folder of a cluster's alignment reports, as `ED.6` block D copies them."
+effect = "Set: its reports are read; nothing is aligned or trimmed here."
+
 [options."--aligner"]
 meaning = "`star` or `hisat2`; [[HISAT2]] on Apple silicon, where pinned [[STAR]] fails."
 effect = "HISAT2 adds an unspliced alignment and drops the STAR comparison."
@@ -283,6 +287,7 @@ effect = "Moves the redrawn files; a folder inside a ctx root is refused."
 "--isoform-dir" = "Carried to gather; needs --gdc-dir and --mirna-dir."
 "--gdc-dir" = "Carried to gather, once per project the dataset file names."
 "--counts" = "Carried to gather; quant and the read stages are not run."
+"--align-dir" = "Carried to process, which then runs before qc reads its tables."
 
 [effects.qc]
 "--fetchngs-dir" = "With --reads: FASTQ paths resolve against it; nothing else there is read."
@@ -296,6 +301,7 @@ effect = "Moves the redrawn files; a folder inside a ctx root is refused."
 "--registry" = "Its strand thresholds and start-codon bands decide the calls."
 "--fastp-q" = "Higher: more unqualified bases, so fewer reads reach the aligner."
 "--fastp-l" = "Higher drops short reads, which more often align to several loci."
+"--align-dir" = "Set: the cluster's STAR, samtools and featureCounts files are read; no FASTQ."
 
 [effects.quant]
 "--rnaseq-dir" = "Its gene matrix and Salmon logs are read. Unset: give --genome."
