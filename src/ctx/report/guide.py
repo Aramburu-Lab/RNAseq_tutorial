@@ -13,11 +13,12 @@ series matrix (``ctx.gather.geo_table``), and ``ctx run --counts``.
 import functools
 import re
 import shlex
+import tomllib
 from dataclasses import asdict, dataclass
 from datetime import date
 from pathlib import Path
 
-from ctx import runtime
+from ctx import editions, runtime
 from ctx.dataset import Dataset
 from ctx.gather import own_fastq
 from ctx.gather.fetchngs import FETCHNGS_VERSION
@@ -369,10 +370,18 @@ def blocks(spec: Dataset, dataset_file: Path) -> tuple[Group, ...]:
         word("part1c.edit"), code("part1c.run", lines["run"]), word("part1c.paired"),
         word("part1c.other"), word("part1c.rsem"),
     ), lead=word("part1c.lead"))  # fmt: skip
-    protein = mass_spec.part(spec, given, len(numbered) + 1)
-    # The TCGA part follows the mass-spec part, so their numbers never meet.
-    tcga = guide_gdc.group(spec, len(numbered) + 2)
-    return (find(), numbered[0], own, matrix, *numbered[1:], protein, tcga)
+    # The M7 part, then the TCGA part, numbered on, each only where the edition holds it.
+    protein = editions.active().has_module("proteo")
+    later = [functools.partial(mass_spec.part, spec, given)] if protein else []
+    later += [functools.partial(guide_gdc.group, spec)] if has_tcga() else []
+    extra = tuple(part(n) for n, part in enumerate(later, start=len(numbered) + 1))
+    return (find(), numbered[0], own, matrix, *numbered[1:], *extra)
+
+
+def has_tcga() -> bool:
+    """Whether the selected edition holds a GDC dataset file, the kind the TCGA part teaches."""
+    files = editions.active().dataset_files()
+    return any("gdc" in tomllib.loads(path.read_text(encoding="utf-8")) for path in files)
 
 
 def find() -> Group:
@@ -436,7 +445,8 @@ def run(
     budget = runtime.budget(MODULE)
     page = ModulePage(
         title=text.fill(PAGE, "title", dataset=spec.name),
-        **text.skeleton(PAGE),
+        # The page's own method names the TCGA part, which an edition without one leaves out.
+        **text.skeleton(PAGE, None if has_tcga() else "variants.no_tcga"),
         parameters=cards,
         results=blocks(spec, spec.path),
         key_numbers=_keys(spec),

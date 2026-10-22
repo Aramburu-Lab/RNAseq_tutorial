@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-110 — An edition is its own file, conf/editions/<name>.toml, not a cohort bundle; full is the default and means "all"
+
+**Date:** 2026-10-22 · **Status:** decided (Rytis 2026-10-22, the core edition; TODO.md ED.1, ED.2)
+
+**Context.** A simplified core edition from one codebase: datasets tier1, breast_tissue, breast_mac, breast_mono and a lung dataset of PRJNA955664 still being written, the reader's own files through `ctx reads` and `ctx gather --counts`, modules M1 to M6, M8 and M9; M7 and M10 left out. The full edition must not change.
+
+**Options.** (a) A cohort bundle named core in `conf/cohorts/`. A bundle names the figure IDs of its datasets (`<cohort>_m5_volcano`), and every dataset file is in exactly one bundle (`tests/test_cohorts.py`); core crosses myeloid, breast and lung, so it would either rename those datasets' figure IDs to `core_...` or make `cohorts.cohort_of` refuse them as listed twice. (b) An edition file of its own, read by one loader, selected like a cohort.
+
+**Decision.** (b). `ctx.editions` reads `conf/editions/<name>.toml` (`[edition]` name, label, notes, modules, datasets) and reports every problem at once, as the cohort loader does, reusing its module names (`cohorts.RUN_MODULES`) and name rule. `--edition`, else `CTX_EDITION`, else `full`, set into the environment so the modules `ctx run` starts inherit it. `"all"` means every course module or every dataset file, and full uses both, so a module or dataset added to the course joins full with no second list; with no editions folder (an installed wheel away from the repository) full is that same rule and any other name is refused. The rule lives in one place: `Edition.has_module`, `holds` (an output folder), `has_dataset` and `refusal`, read by the CLI (every profiled command, `ctx figure` by its ID's module), `ctx run`'s plan, `pipeline.route_modules` (the figure kinds offered), M5's onward gene-list links, the hub, START.html, the teacher guide, `ctx guide` (the M7 part only where proteo is held, the TCGA part only where the edition holds a GDC dataset file, and then a method without the TCGA sentence) and `build_kit.py --edition`. A slug with no file in `conf/datasets` is the reader's own and every edition takes it, so the own-data routes stay open. Core also lists tier1_teach and four_runs: both are Step-1 runs (PRJEB49000), M3's laptop subset and the guide's worked example. The lung slug is not listed yet; once its file lands, core refuses it by name, pointing to `conf/editions/core.toml`, and `tests/test_editions.py::test_every_course_dataset_is_core_or_named_full_only` fails until it is listed. A core kit ships no folder outside the edition, refuses a root holding a course dataset outside it or a shipped page linking such a folder, and states the edition in README.md and MANIFEST.json. `build_kit.py` went over the 600-line ratchet (622); its raw GDC matrix group moved, verbatim, to `scripts/python/kit_matrices.py`.
+
+**Evidence.** `tests/test_editions.py`, 15 tests. Ten planted mutations, each caught: the hub, START.html, the kit's folder filter, the kit's root check, the CLI refusal, the guide's M7 part and ctx run's plan each bypassing the rule; clinical dropped from `cohorts.RUN_MODULES`; full.toml listing nine modules; the default set to core. The full edition against dc6b170 on one fixture root with a page of every module (hub, guide, START.html and a kit, 40 files, wall time, memory and hashes masked): START.html, the glossary and every module page are byte-equal; the differences are the `--edition` parameter card on the hub and guide pages (one row each, as every global option has), `"edition": "full"` in MANIFEST.json and one README line naming the edition. A core kit of the same root ships no 07_proteo or 12_clinical file.
+
+**Consequence.** Every new caller that lists modules or datasets asks `editions.active()`; a list of its own is a bypass. ED.4's lung file must be added to `conf/editions/core.toml`. A page built under one edition and shipped in another's kit is not detected beyond the folder and dataset checks: the hub of a full build lists M7 and M10 as not run, so a core kit is built from roots built under core.
+
+---
+
 ## D-109 — M6's figures that mark gene sets by FDR take the reader's FDR cutoff, from the volcano's presets
 
 **Date:** 2026-10-22 · **Status:** decided (Rytis 2026-10-01, P2S.5; D-051's controls rule)

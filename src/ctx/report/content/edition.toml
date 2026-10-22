@@ -1,0 +1,6 @@
+# What a command prints when the selected edition (ctx --edition, ctx.editions) refuses it.
+# Every string is held to the prose rules (ctx.report.prose).
+
+[refused]
+module = "ctx {module} is not in the {edition} edition, whose modules are {modules}. Run it with --edition {default}."
+dataset = "{dataset} is a course dataset outside the {edition} edition. To run it there, add its slug to datasets in {path}."

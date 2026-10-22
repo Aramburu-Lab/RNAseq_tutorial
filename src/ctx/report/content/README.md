@@ -18,6 +18,7 @@ code only names a key and fills in the numbers. Rebuild a page by running its co
 | The course hub (`ctx report`) | `hub.toml` | its title and lead, each module's name, the key numbers |
 | The statistics every figure's caption shares | `annotate.toml` | the test names, the box figure's caption and labels, PERMANOVA's sentence |
 | What `ctx run` prints when it leaves a module out | `run.toml` | one key per reason; every string is held to the prose rules |
+| What a command prints when the edition (`--edition`) refuses it | `edition.toml` | `[refused]`: one key for a module, one for a dataset |
 | A figure's Reproduce panel, its params file and the figure rows of its README (`ctx figure`) | `figure.toml` | the panel's words, a comment per step, per parameter and per input, then the README's rows |
 
 A contrast reads by the `label` its dataset file gives it; without one, by its two levels as

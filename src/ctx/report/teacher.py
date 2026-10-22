@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from time import perf_counter
 
-from ctx import runtime
+from ctx import editions, runtime
 from ctx.io.naming import MODULES
 from ctx.report import text
 from ctx.report.builder import (
@@ -64,10 +64,10 @@ def measured(module: str, page: Path) -> Measured | None:
 
 
 def gathered(roots: Sequence[Path]) -> list[tuple[str, list[Measured]]]:
-    """Each course module in order, with the newest overview page per dataset in every root."""
-    found = []
+    """Each module of the selected edition in order, with each dataset's newest overview page."""
+    found, edition = [], editions.active()
     for module, number in MODULES:
-        if module in NOT_MODULES:
+        if module in NOT_MODULES or not edition.has_module(module):
             continue
         suffix = "environment" if module == "setup" else "overview"
         pages = [p for root in roots for p in newest(root / "outputs" / f"{number:02d}_{module}",

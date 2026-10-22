@@ -1,5 +1,7 @@
 """``ctx report``: the hub page linking the newest page of each module for one dataset.
 
+Only the selected edition's modules are listed (``ctx.editions``), run or not.
+
 Links are relative, so the hub works after ``outputs/`` is copied elsewhere or opened from
 a zip; nothing points to the web. Its words are ``content/hub.toml``'s.
 """
@@ -14,7 +16,7 @@ from typing import Any
 
 import polars as pl
 
-from ctx import runtime
+from ctx import editions, runtime
 from ctx.dataset import load
 from ctx.de.sanity import VERDICT_COLUMNS, decide, parse
 from ctx.io.naming import MODULES, stem
@@ -151,9 +153,9 @@ def run(
     outputs = settings.root / "outputs"
     out = outputs / f"{dict(MODULES)[MODULE]:02d}_{MODULE}"
     out.mkdir(parents=True, exist_ok=True)
-    links, missing = [], []
+    links, missing, edition = [], [], editions.active()
     for module, number in MODULES:
-        if module in NOT_MODULES:
+        if module in NOT_MODULES or not edition.has_module(module):
             continue
         what = "environment" if module == "setup" else f"{dataset}_overview"
         page = _newest(outputs / f"{number:02d}_{module}", what)

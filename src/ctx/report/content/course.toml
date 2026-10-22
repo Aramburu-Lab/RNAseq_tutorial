@@ -62,6 +62,8 @@ The pages, figures and tables the course generated: {files} files, {size} in all
 
 {datasets}
 
+{edition}
+
 Real pages come from public data. Made-up pages come from a seeded simulation; each says so, and no number on it describes a real sample.
 
 ## Checking a copy
@@ -78,5 +80,7 @@ This kit only reads. Rerunning a module needs the course codebase and its enviro
 
 Built on {built} from codebase commit `{commit}`.
 """
+# The edition the kit was built for (build_kit.py --edition, ctx.editions), under the datasets.
+edition = "This kit is the {label} edition, `{name}`. Its modules: {modules}."
 # One line per dataset folder in the README's list; {note} is build_kit's --note, or empty.
 dataset = "- `{folder}/`: {names}; {kind} data. {note}"

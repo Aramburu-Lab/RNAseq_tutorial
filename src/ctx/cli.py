@@ -12,7 +12,8 @@ from typing import Annotated, Any
 
 import typer
 
-from ctx import __version__, cohorts, runtime
+from ctx import __version__, cohorts, editions, runtime
+from ctx.figures.spec import parse as figure_module
 from ctx.gather import own_fastq
 from ctx.genecard.hpa import RELEASE as HPA_RELEASE
 from ctx.process import DEFAULT_SETTINGS, Aligner, Strandedness
@@ -47,6 +48,7 @@ def main(
     profile: Annotated[str | None, typer.Option(help=HELP["--profile"])] = None,
     root: Annotated[Path | None, typer.Option(help=HELP["--root"])] = None,
     cohort: Annotated[str | None, typer.Option(help=HELP["--cohort"])] = None,
+    edition: Annotated[str | None, typer.Option(help=HELP["--edition"])] = None,
     _version: Annotated[
         bool,
         typer.Option(
@@ -57,7 +59,7 @@ def main(
     """Cancer Transcriptomics Teaching Suite."""
     # Only stored here: click runs this before a subcommand's --help, so resolving the
     # profile now would make `ctx setup --help` fail on a login node.
-    ctx.obj = {"profile": profile, "root": root, "cohort": cohort}
+    ctx.obj = {"profile": profile, "root": root, "cohort": cohort, "edition": edition}
 
 
 def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
@@ -76,9 +78,14 @@ def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
         options = ctx.find_root().obj or {}
         try:
             cohorts.choose(options.get("cohort"))
-        except cohorts.CohortError as error:
+            editions.choose(options.get("edition"))
+            refused = _refusal(ctx.command.name, kwargs)
+        except (cohorts.CohortError, editions.EditionError) as error:
             typer.echo(str(error), err=True)
             raise typer.Exit(1) from error
+        if refused:
+            typer.echo(refused, err=True)
+            raise typer.Exit(1)
         ctx.obj = {
             **options,
             "settings": runtime.start(options.get("profile"), options.get("root")),
@@ -86,6 +93,18 @@ def profiled(command: Callable[..., Any]) -> Callable[..., Any]:
         return command(ctx, *args, **kwargs)
 
     return wrapper
+
+
+def _refusal(command: str | None, options: dict[str, Any]) -> str | None:
+    """The selected edition's refusal of a command, its dataset or a figure's module, or None.
+
+    The module is the command's, or a figure ID's (``ctx figure``); the dataset is ``--dataset``,
+    else the slug of a course ``--dataset-file``.
+    """
+    edition = editions.active()
+    figure = figure_module(options.get("figure_id") or "")
+    slug = options.get("dataset") or edition.course_slug(options.get("dataset_file"))
+    return edition.refusal(figure[1] if figure else command, slug)
 
 
 @app.command()

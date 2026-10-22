@@ -173,3 +173,10 @@ check = "TCGA on the laptop, once edited: the resources, then the check"
 check_reads = "The check reads every counts file, as gather will, and prints each line to set: the release, the CDR's type, the pairs and the CDR's own endpoint counts."
 run = "TCGA on the laptop, once the check lists nothing that stops the run: every module"
 genecard = "ctx run leaves out ctx genecard, M9: its gene cards read GTEx's release files, which a TCGA dataset file declares apart."
+
+# The method of an edition with no GDC dataset file (ctx --edition, ctx.editions): the TCGA part
+# is left out of the page, so the method does not name it.
+[variants.no_tcga]
+method = """The download runs [[nf-core/fetchngs]] on the metadata alone first, so the size is read before any [[FASTQ]] is fetched. The count runs nf-core/rnaseq, [[Salmon]] only, against references checked with the publisher's [[md5|MD5SUMS]].
+
+One launcher per pipeline serves both computers: `CTX_SITE=laptop` runs every task here under Docker, and the default runs each as a Slurm job on Kebnekaise. The last part copies the outdirs into a ctx root and runs the modules in course order."""

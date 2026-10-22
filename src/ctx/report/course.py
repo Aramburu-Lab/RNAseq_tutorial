@@ -10,6 +10,7 @@ import re
 from collections.abc import Sequence
 from pathlib import Path
 
+from ctx import editions
 from ctx.io.naming import MODULES
 from ctx.report import text
 from ctx.report.builder import CourseLink, CoursePage, CourseRow, KeyNumber, write
@@ -71,11 +72,12 @@ def page(kit: Path, roots: Sequence[tuple[Path, bool]]) -> CoursePage:
         roots: Each dataset root inside the kit, with whether its data are real.
 
     Returns:
-        The page, one row per module in course order.
+        The page, one row per module of the selected edition (``ctx.editions``), in course
+        order.
     """
-    rows, data = [], []
+    rows, data, edition = [], [], editions.active()
     for module, number in MODULES:
-        if module in NOT_MODULES:
+        if module in NOT_MODULES or not edition.has_module(module):
             continue
         suffix = "environment" if module == "setup" else "overview"
         tag, _, name = TITLES[module].partition(" ")

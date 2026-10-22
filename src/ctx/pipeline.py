@@ -17,7 +17,7 @@ from pathlib import Path
 
 import polars as pl
 
-from ctx import runtime
+from ctx import editions, runtime
 from ctx.dataset import Contrast, Dataset, DatasetError, load
 from ctx.dataset.loader import NEEDS
 from ctx.de import results as m5
@@ -89,7 +89,8 @@ def plan(
     de, ncrna and a proteo that is not cross-study only when gather is given counts; a module
     that reads M5's results (``m5.required``) only when de runs too or they are under the root.
     A count matrix (``--counts``) goes to gather alone; qc then judges its counts, and quant,
-    which reads an rnaseq outdir, does not run.
+    which reads an rnaseq outdir, does not run. A module outside the selected edition
+    (``ctx.editions``) never runs, and is named among those left out.
     """
     base = ("--dataset", options.dataset, "--dataset-file", str(options.dataset_file))
     rnaseq = ("--rnaseq-dir", str(options.rnaseq_dir)) if options.rnaseq_dir else ()
@@ -119,7 +120,11 @@ def plan(
         },
         "report": base,
     }
+    edition = editions.active()
+    outside = [m for m, args in planned.items() if args is not None and not edition.has_module(m)]
+    planned |= dict.fromkeys(outside)
     left_out = [] if planned["de"] else _without_results(root, spec, planned)
+    left_out += [fill("run", "outside_edition", module=m, edition=edition.name) for m in outside]
     return [(module, args) for module in ORDER if (args := planned[module]) is not None], left_out
 
 
@@ -146,12 +151,13 @@ def route(spec: Dataset) -> str:
 
 
 def route_modules(spec: Dataset) -> set[str]:
-    """Every module the dataset's route can run: all but ``NOT_ON_ROUTE``'s for that route.
+    """Every module the dataset's route can run in the selected edition (``ctx.editions``).
 
-    Not ``steps``: it also leaves out a module the run's inputs cannot feed, while a figure
-    redraws from a reader's own results.
+    All but ``NOT_ON_ROUTE``'s for that route. Not ``steps``: it also leaves out a module the
+    run's inputs cannot feed, while a figure redraws from a reader's own results.
     """
-    return set(MODULES) - NOT_ON_ROUTE[route(spec)]
+    edition = editions.active()
+    return {m for m in MODULES if edition.has_module(m)} - NOT_ON_ROUTE[route(spec)]
 
 
 def execute(root: Path, profile: str | None, planned: Sequence[tuple[str, tuple[str, ...]]]) -> int:
