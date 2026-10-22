@@ -1,0 +1,15 @@
+# Edition definition (TODO.md ED.1, read by ctx.editions alone); the rules are in full.toml.
+# The core edition (Rytis 2026-10-22, D-110): one codebase, fewer modules and datasets. M7 and
+# M10 are left out. A reader's own files still enter through ctx reads and ctx gather --counts:
+# a slug with no file in conf/datasets is the reader's own, and no edition refuses it.
+
+[edition]
+name = "core"
+label = "Core course"
+notes = "Step-1 immune cells, breast tissue and blood cells, and a lung study, through M1 to M6, M8 and M9."
+modules = ["gather", "qc", "process", "quant", "de", "function", "ncrna", "genecard"]
+# Step-1 (PRJEB49000) is tier1 with its two subsets of the same runs: tier1_teach, M3's laptop
+# exercise, and four_runs, the guide's worked example. breast_mac and breast_mono are the two
+# halves of PRJNA483877. lung_gse229705 is PRJNA955664 (TODO.md ED.4).
+datasets = ["tier1", "tier1_teach", "four_runs", "breast_tissue", "breast_mac", "breast_mono",
+            "lung_gse229705"]

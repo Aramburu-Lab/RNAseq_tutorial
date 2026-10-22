@@ -249,6 +249,10 @@ effect = "On: nothing runs or is written; problems give a failing exit status."
 meaning = "Cancer bundle, conf/cohorts/<name>.toml, whose name starts every figure ID. Unset: CTX_COHORT."
 effect = "Renames figure IDs; a name no bundle has stops the command."
 
+[options."--edition"]
+meaning = "Edition, conf/editions/<name>.toml: its modules and course datasets. Unset: CTX_EDITION, else full."
+effect = "Core refuses M7, M10 and datasets outside it; pages list its modules."
+
 [options.figure_id]
 meaning = "Figure ID, <cohort>_m<module>_<figure>, as its Reproduce panel and README print it."
 effect = "Draws another figure kind; the params file must name the same."

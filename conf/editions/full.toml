@@ -1,0 +1,12 @@
+# Edition definition (TODO.md ED.1, read by ctx.editions alone); ctx --edition or CTX_EDITION
+# selects one, and this one is the default. The full course: every module, every dataset file.
+# "all" is every course module (ctx.cohorts.RUN_MODULES) and every file in conf/datasets, so a
+# module or dataset file added to the course joins this edition at once; tests/test_editions.py
+# holds the modules to the ten the course has, so none is lost here.
+
+[edition]
+name = "full"
+label = "Full course"
+notes = "Every module and every dataset file of the course."
+modules = "all"
+datasets = "all"

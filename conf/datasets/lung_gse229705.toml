@@ -165,3 +165,9 @@ gene_sets = "msigdb_hallmark"
 licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
 featured_set = "HALLMARK_E2F_TARGETS"
 running = ["tumour_normal", "HALLMARK_E2F_TARGETS"]
+
+# M8 without a small-RNA library (ED.3): the biotype half on the featured contrast.
+[ncrna]
+featured = "tumour_normal"
+# Pairs the lncRNA neighbour select offers, smallest residual q first.
+pairs = 50

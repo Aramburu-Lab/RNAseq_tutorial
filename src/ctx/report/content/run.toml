@@ -4,3 +4,6 @@
 # A module whose own command reads M5's results, when none are under the root and de is not
 # in the plan. `contrasts` is the comma-separated list of contrasts without results.
 left_out = "{module}: no M5 results for {slug}, contrast {contrasts}, and de is not planned; ctx run leaves {module} out."
+
+# A module the dataset declares that the selected edition (ctx --edition) leaves out.
+outside_edition = "{module}: not in the {edition} edition; ctx run leaves {module} out."
