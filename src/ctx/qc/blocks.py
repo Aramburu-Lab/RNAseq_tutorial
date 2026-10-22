@@ -40,13 +40,17 @@ class Stage:
 
 @dataclass(frozen=True)
 class Reads:
-    """What the reads showed: values per run, the runs left unread, FastQC's plots, the grid."""
+    """What the reads showed: values per run, the runs left unread, FastQC's plots, the grid.
+
+    ``source`` says where the tools ran when it was not here: empty for the local run.
+    """
 
     values: pl.DataFrame
     skipped: pl.DataFrame
     plots: fastqc.Plots
     grid: pl.DataFrame
     grid_run: str
+    source: str = ""
 
 
 def fastqc_figures(
@@ -95,7 +99,7 @@ def fastqc_figures(
 def read_figures(writer: Writer, seen: Reads, sheet: pl.DataFrame, registry: reg.Registry,
                  options: "Options") -> Group:  # fmt: skip
     """FastQC's plots and the fastp grid, with the runs left unread said first."""
-    items: list[FigureBlock | str] = []
+    items: list[FigureBlock | str] = [seen.source] if seen.source else []
     if seen.skipped.height:
         items.append(text.fill(PAGE, "notes.skipped", n=seen.skipped.height,
                                runs=", ".join(seen.skipped["run_accession"].head(10))))  # fmt: skip

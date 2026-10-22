@@ -234,6 +234,7 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     cut_window: Annotated[int, typer.Option(help=HELP["--cut-window"])] = Fastp.window,
     cut_mean: Annotated[int, typer.Option(help=HELP["--cut-mean"])] = Fastp.mean,
     grid_run: Annotated[str | None, typer.Option(help=HELP["--grid-run"])] = None,
+    align_dir: Annotated[Path | None, typer.Option(help=HELP["--align-dir"])] = None,
 ) -> None:
     """Judge every sample by the QC registry and test the flags for confounding (M2)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -245,7 +246,8 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     command = runtime.retypable(sys.argv[1:])
     fastp = Fastp(fastp_q, fastp_u, fastp_l, cut_tail, cut_window, cut_mean)
     options = module.Options(dataset_file, registry, _columns(strata), _columns(peers), mad,
-                             rnaseq_dir, reads, fetchngs_dir, fastp, grid_run)  # fmt: skip
+                             rnaseq_dir, reads, fetchngs_dir, fastp, grid_run,
+                             align_dir)  # fmt: skip
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, QcError, RegistryError) as error:
