@@ -3,7 +3,16 @@
 from dataclasses import dataclass
 
 from ctx.dataset import Dataset
-from ctx.figures.kind import DATASET_FILE, Inputs, Kind, OneContrast, featured, resource, slug
+from ctx.figures.kind import (
+    DATASET_FILE,
+    Inputs,
+    Kind,
+    OneContrast,
+    featured,
+    m5_results,
+    resource,
+    slug,
+)
 
 
 @dataclass(frozen=True)
@@ -35,7 +44,7 @@ def _gsea_inputs(p: OneContrast, _: Dataset) -> Inputs:
 
 def _ora_inputs(p: OneContrast, _: Dataset) -> Inputs:
     """M6's ORA table, M5's results that give its background, and the dataset file."""
-    return {"ora": ("function", f"{p.contrast}_ora"), "results": ("de", f"{p.contrast}_results"),
+    return {"ora": ("function", f"{p.contrast}_ora"), "results": m5_results(p.contrast),
             "dataset_file": DATASET_FILE}  # fmt: skip
 
 
@@ -47,7 +56,7 @@ def _set_inputs(_: OneSet, spec: Dataset) -> Inputs:
 
 def _ranked_inputs(p: OneContrast | SetInContrast, spec: Dataset) -> Inputs:
     """M5's results of the contrast, the gene sets and the dataset file: M6 ranks them again."""
-    return {"results": ("de", f"{p.contrast}_results"), **_gene_sets(spec),
+    return {"results": m5_results(p.contrast), **_gene_sets(spec),
             "dataset_file": DATASET_FILE}  # fmt: skip
 
 

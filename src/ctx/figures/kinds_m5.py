@@ -5,7 +5,16 @@ from dataclasses import dataclass
 from ctx.dataset import Dataset
 from ctx.de.figures import BASES
 from ctx.de.stats import ALPHA, LFC_MIN
-from ctx.figures.kind import DATASET_FILE, Inputs, Kind, OneContrast, featured, slug, unknown
+from ctx.figures.kind import (
+    DATASET_FILE,
+    Inputs,
+    Kind,
+    OneContrast,
+    featured,
+    m5_results,
+    slug,
+    unknown,
+)
 
 SIZE_FACTORS = ("de", "size_factors")
 
@@ -40,7 +49,7 @@ class OnePca:
 
 def _one(p: OneContrast, _: Dataset) -> Inputs:
     """One contrast's results, the size factors that name its samples, the dataset file."""
-    return {"results": ("de", f"{p.contrast}_results"), "size_factors": SIZE_FACTORS,
+    return {"results": m5_results(p.contrast), "size_factors": SIZE_FACTORS,
             "dataset_file": DATASET_FILE}  # fmt: skip
 
 
@@ -52,13 +61,13 @@ def _lesson_names(p: Lesson, spec: Dataset) -> tuple[str, ...]:
 
 def _lesson_inputs(p: Lesson, spec: Dataset) -> Inputs:
     """Every contrast of the lesson's results, the size factors and the dataset file."""
-    found = {f"results_{n}": ("de", f"{n}_results") for n in _lesson_names(p, spec)}
+    found = {f"results_{n}": m5_results(n) for n in _lesson_names(p, spec)}
     return {**found, "size_factors": SIZE_FACTORS, "dataset_file": DATASET_FILE}
 
 
 def _pair_inputs(p: TwoContrasts, _: Dataset) -> Inputs:
     """Both contrasts' results, the size factors and the dataset file."""
-    return {"results_x": ("de", f"{p.x}_results"), "results_y": ("de", f"{p.y}_results"),
+    return {"results_x": m5_results(p.x), "results_y": m5_results(p.y),
             "size_factors": SIZE_FACTORS, "dataset_file": DATASET_FILE}  # fmt: skip
 
 

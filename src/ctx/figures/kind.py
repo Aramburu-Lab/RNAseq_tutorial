@@ -18,6 +18,8 @@ QC_REGISTRY = ("qc_registry", "")
 REGISTRY_OF = "registry_of"
 # A file ``ctx setup`` fetched, by its resource name in the dataset file: ("resource", name).
 RESOURCE = "resource"
+# M5's results of one contrast, found by ``ctx.de.results`` alone: ("m5_results", contrast).
+M5_RESULTS = "m5_results"
 
 Inputs = dict[str, tuple[str, str]]
 
@@ -29,6 +31,11 @@ class NoFigureError(ValueError):
 def resource(name: str) -> tuple[str, str]:
     """The input that is the dataset file's resource ``name``, under the root it was fetched to."""
     return (RESOURCE, name)
+
+
+def m5_results(contrast: str) -> tuple[str, str]:
+    """The input that is M5's newest results of ``contrast``, as ``ctx.de.results`` finds it."""
+    return (M5_RESULTS, contrast)
 
 
 def registry_of(module: str) -> tuple[str, str]:

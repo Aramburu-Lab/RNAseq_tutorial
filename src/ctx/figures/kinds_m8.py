@@ -9,7 +9,7 @@ again: the miRNA volcano reads the fit M8 wrote.
 from typing import Any
 
 from ctx.dataset import Dataset
-from ctx.figures.kind import DATASET_FILE, Inputs, Kind, Plain, resource
+from ctx.figures.kind import DATASET_FILE, Inputs, Kind, Plain, m5_results, resource
 
 SHEET, COUNTS = ("gather", "samplesheet"), ("gather", "counts")
 GENES, OPTIONS = ("ncrna", "gene_biotypes"), ("ncrna", "figure_options")
@@ -24,7 +24,7 @@ def _target_files() -> tuple[str, ...]:
 
 def _results(spec: Dataset) -> tuple[str, str]:
     """M5's results of the contrast ``[ncrna]`` features."""
-    return ("de", f"{spec.ncrna.featured}_results") if spec.ncrna else ("de", "results")
+    return m5_results(spec.ncrna.featured if spec.ncrna else "")
 
 
 def _with(*names: str, targets: bool = False) -> Any:
