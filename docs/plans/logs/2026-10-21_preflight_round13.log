@@ -1,0 +1,90 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadgroup; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  3%]
+........................................................................ [  6%]
+........................................................................ [  9%]
+........................................................................ [ 13%]
+.............................................sss...............s........ [ 16%]
+........................................................................ [ 19%]
+........................................................................ [ 22%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 32%]
+........................................................................ [ 35%]
+........................................................................ [ 39%]
+........................................................................ [ 42%]
+........................................................................ [ 45%]
+........................................................................ [ 49%]
+........................................................................ [ 52%]
+........................................................................ [ 55%]
+........................................................................ [ 58%]
+........................................................................ [ 62%]
+..............................................sss....................... [ 65%]
+.......................................ss............................... [ 68%]
+........................................................................ [ 71%]
+........................................................................ [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+...s.................................................................... [ 84%]
+........................................................................ [ 88%]
+........................................................................ [ 91%]
+........................................................................ [ 94%]
+........................................................................ [ 98%]
+............................................                             [100%]
+=============================== warnings summary ===============================
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [3] tests/conftest.py:207: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ybsgisuf. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ybsgisuf/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 21 19:02:44 ...... FATAL ERROR, exiting
+SKIPPED [1] tests/conftest.py:207: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_onfr16b9. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_onfr16b9/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 21 19:03:01 ...... FATAL ERROR, exiting
+SKIPPED [4] tests/conftest.py:207: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe__gq5tltm. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe__gq5tltm/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 21 19:08:52 ...... FATAL ERROR, exiting
+SKIPPED [1] tests/conftest.py:207: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ackdyalk. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ackdyalk/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 21 19:08:52 ...... FATAL ERROR, exiting
+SKIPPED [1] tests/test_sanity_record.py:156: the record exists; test_rule_unchanged holds the freeze from here
+2194 passed, 10 skipped, 2 warnings in 664.65s (0:11:04)
+
+✨ Pixi task (hooks in default): prek run --all-files --show-diff-on-failure
+ruff check...............................................................Passed
+ruff format..............................................................Passed
+labdocs lint.............................................................Passed
+labdocs render (staleness check).........................................Passed
+check file length (ratchet from .labtemplate.yml)........................Passed
+mypy strict (src/).......................................................Passed
+interrogate 100 % (src/).................................................Passed
+
+✨ Pixi task (preflight in default): ruff format --check .
+683 files already formatted

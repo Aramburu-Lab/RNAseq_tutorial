@@ -1,0 +1,52 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  4%]
+........................................................................ [  8%]
+........................................................................ [ 12%]
+........................................................................ [ 16%]
+........................................................................ [ 20%]
+........................................................................ [ 24%]
+........................................................................ [ 28%]
+........................................................................ [ 32%]
+........................................................................ [ 36%]
+........................................................................ [ 40%]
+.........................................................s.............. [ 44%]
+........................................................................ [ 48%]
+........................................................................ [ 52%]
+...ssss................................................................. [ 56%]
+.................................................................sss.... [ 60%]
+........................................................................ [ 64%]
+........................................................................ [ 68%]
+........................................................................ [ 72%]
+........................................................................ [ 76%]
+........................................................................ [ 80%]
+................................................................F....... [ 84%]
+........................................................................ [ 88%]
+........................................................................ [ 92%]
+.............................EEEEEEEEEEEEEEEEEEEEEEEEE/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/_pytest/main.py:365: PluggyTeardownRaisedWarning: A plugin raised an exception during an old-style hookwrapper teardown.
+Plugin: 4359832496, Hook: pytest_sessionfinish
+OSError: cannot send (already closed?)
+For more information see https://pluggy.readthedocs.io/en/stable/api_reference.html#pluggy.PluggyTeardownRaisedWarning
+  config.hook.pytest_sessionfinish(
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/_pytest/main.py:365: PluggyTeardownRaisedWarning: A plugin raised an exception during an old-style hookwrapper teardown.
+Plugin: 4334831280, Hook: pytest_sessionfinish
+OSError: cannot send (already closed?)
+For more information see https://pluggy.readthedocs.io/en/stable/api_reference.html#pluggy.PluggyTeardownRaisedWarning
+  config.hook.pytest_sessionfinish(
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/_pytest/main.py:365: PluggyTeardownRaisedWarning: A plugin raised an exception during an old-style hookwrapper teardown.
+Plugin: 4699299696, Hook: pytest_sessionfinish
+OSError: cannot send (already closed?)
+For more information see https://pluggy.readthedocs.io/en/stable/api_reference.html#pluggy.PluggyTeardownRaisedWarning
+  config.hook.pytest_sessionfinish(
+/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/_pytest/main.py:365: PluggyTeardownRaisedWarning: A plugin raised an exception during an old-style hookwrapper teardown.
+Plugin: 4375109488, Hook: pytest_sessionfinish
+OSError: cannot send (already closed?)
+For more information see https://pluggy.readthedocs.io/en/stable/api_reference.html#pluggy.PluggyTeardownRaisedWarning
+  config.hook.pytest_sessionfinish(

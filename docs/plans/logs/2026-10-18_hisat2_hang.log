@@ -1,0 +1,20 @@
+......................................ssss..................ss.......... [ 52%]
+............sss..................................................        [100%]
+============================= slowest 15 durations =============================
+68.65s setup    tests/test_process_run.py::test_every_output_is_named_described_and_offline
+62.46s setup    tests/test_process_run.py::test_a_moved_rerun_reuses_every_tool_folder
+21.75s setup    tests/test_process_count.py::test_the_strand_is_called_from_the_forward_share
+15.22s call     tests/test_process_align.py::test_the_cap_draws_a_seeded_random_subset
+8.98s call     tests/test_process_count.py::test_a_moved_root_and_a_reordered_sheet_rerun_clean
+5.95s call     tests/test_process_align.py::test_the_aligner_reads_what_fastp_passed
+4.38s setup    tests/test_process_align.py::test_unspliced_alignment_leaves_spliced_reads_unaligned
+3.29s setup    tests/test_process_align.py::test_pairs_pass_i1_and_i6_under_hisat2
+3.15s call     tests/test_process_door.py::test_a_foreign_genome_is_refused
+3.07s call     tests/test_process_align.py::test_a_sample_of_two_runs_is_one_alignment
+3.00s call     tests/test_multiqc_io.py::test_relative_dest_and_config_are_resolved
+2.90s call     tests/test_process_align.py::test_paired_i6_sees_a_bam_without_its_unaligned_mates
+2.87s call     tests/test_multiqc_io.py::test_hisat2_summaries_are_read
+2.74s call     tests/test_multiqc_io.py::test_relative_inputs_are_read_from_the_callers_directory
+2.70s call     tests/test_process_run.py::test_the_settings_keep_their_labels_however_many_samples
+128 passed, 9 skipped, 3 deselected in 248.14s (0:04:08)
+exit 0

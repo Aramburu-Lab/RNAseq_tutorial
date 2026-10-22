@@ -1,0 +1,159 @@
+# GSE192647 pancreatic ductal adenocarcinoma and normal pancreas (ED.8, the core edition's
+# pancreas dataset; Rytis 2026-10-22): 28 paired-end runs, one per GEO sample, a tumour and a
+# normal sample of each of 14 patients. GEO's series names Kim et al. 2024 as its publication
+# (Series_pubmed_id 38741142), which takes tumour and normal tissue from 14 patients with
+# preoperative 18F-FDG PET/CT and potentially curative resection of PDAC, 7 MTV-low and 7
+# MTV-high by MTV2.5 below or at least 4.5 (Methods, PMC11092202). Not yet counted: Rytis
+# queued the download and the count on Kebnekaise 2026-10-22 (TODO.md ED.8).
+#
+# Curated from its own table, pancreas_gse192647.tsv: GEO's per-sample records (brief SOFT of
+# GSE192647's samples, acc.cgi?acc=GSE192647&targ=gsm&form=text&view=brief, retrieved
+# 2026-10-22, 67,906 B, SHA-256 1c5a48b7fca79c3531c0ab6895b9b97cb5824af2773d9cc6145d19018beb78f2),
+# values verbatim, one row per ENA run (read_run report of PRJNA792551, retrieved 2026-10-22
+# 12:41 UTC with fetchngs's accession, alias and title fields, 16,687 B, SHA-256
+# 7df40ccbb728629dbfcfd8edf4a6514c71b85db506f4e8b6d3f45e1d07791ef3), joined on the GSM, which is
+# ENA's sample_alias, and cross-checked on the title and on GEO's SRA and BioSample links against
+# ENA's experiment and sample: 28 of 28 match, none repeated. The series record (GSE192647 text,
+# 3,504 B, SHA-256 c4947f52715bf0a6d7139a5b8c9a7cb9bbaa488cef9299f483477d53c2fb1409) lists the
+# same 28 GSMs and links BioProject PRJNA792551; it names no SuperSeries. An earlier report of
+# the same runs with fewer fields (2026-10-22, SHA-256
+# 13b28031a3794ea74069c5ca80f9ca37396e62d1b2ebc8217b4763b86685b1c9) agrees on all 28.
+# No record has a patient field: `patient` is the title before "_cancer" or "_normal"
+# (MTV-low patient #1), because GEO numbers patients 1 to 7 within each MTV group.
+# `source_name` is "Pancreas cancer" on all 28, the normal samples included; `tissue` separates them.
+#
+# What the records state, tallied from them: layout PAIRED, Illumina HiSeq 2500, total RNA,
+# library selection cDNA, for all 28; read length 101 nt by ENA's counts (base_count / read_count
+# / 2, exact for every run; ENA's nominal_length is empty); 127,118,223,285 B in 56 FASTQ files,
+# every run with a fastq_ftp. Libraries: rRNA removed by Lexogen RIBO COP, then the SMARTer
+# Stranded RNA-Seq Kit (GEO's extract protocol and the paper's Methods). The kit is stranded, but
+# no record states the read orientation: fetchngs writes `auto` and Salmon infers it. The
+# authors' own counts are TopHat on hg19 and edgeR (GEO's data processing); this course counts
+# the reads itself.
+#
+# Treatment: neoadjuvant therapy is not stated. Read for it: GEO's series record and its 28
+# sample records (no word for therapy, treatment, chemotherapy or radiation in either), and the
+# paper's full text in PubMed Central (PMC11092202, retrieved 2026-10-22: abstract, Methods,
+# Results, Discussion, Conclusions and the supplementary figure legends), which names
+# preoperative PET/CT and potentially curative resection and no preoperative treatment. The
+# paper's Additional files were not read. No survival, stage or grade is recorded per sample.
+#
+# The paper's comparison on these data is MTV-high against MTV-low on the tumour-to-normal
+# ratio (t-tests on the fold changes). The contrast below is the course's, tumour against normal
+# pancreas, paired by patient, labelled so. GEO calls the normal samples "normal pancreas" and
+# the paper "normal counterparts" of the resected tumours; "adjacent" is the course's word.
+
+[dataset]
+slug = "pancreas_gse192647"
+# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+label = "Pancreatic adenocarcinoma and normal pancreas"
+# What fetchngs downloads, as `ctx guide --dataset-file` writes it into the accession list.
+accessions = ["PRJNA792551"]
+ena_study = "PRJNA792551"
+ena_secondary_study = "SRP352569"
+geo = "GSE192647"
+source = "Kim et al. 2024 J Transl Med 22:453, doi:10.1186/s12967-024-05181-z, PMID 38741142, PMC11092202"
+
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# ENA's read_run report of PRJNA792551 (2026-10-22): runs SRR17335067-094, experiments
+# SRX13510593-620, samples SAMN24437315-342, SRS11404838-865; GSMs GSM5753946-973; GEO titles
+# MTV-low or MTV-high patient #<n>_cancer or _normal.
+[guard]
+ids = ["PRJNA792551", "SRP352569", "GSE192647"]
+patterns = [
+    '\bSRR173350(?:6[7-9]|[78]\d|9[0-4])\b',
+    '\bSRX135(?:1059[3-9]|106[01]\d|10620)\b',
+    '\bSAMN244373(?:1[5-9]|[23]\d|4[0-2])\b',
+    '\bSRS114048(?:3[89]|[45]\d|6[0-5])\b',
+    '\bGSM57539(?:4[6-9]|[56]\d|7[0-3])\b',
+    '\bMTV-(?:low|high) patient #\d+',
+]
+
+[sdrf]
+file = "pancreas_gse192647.tsv"
+join = ["run_accession", "run_accession"]
+cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
+
+[columns.donor]
+source = "patient"
+meaning = "The patient, the GEO title before _cancer or _normal: one tumour and one normal sample each."
+
+[columns.cell_type]
+source = "tissue"
+meaning = "Whole pancreas tissue, tumour or normal; GEO records no cell type."
+values = { "pancreatic cancer" = "pancreas", "normal pancreas" = "pancreas" }
+
+[columns.condition]
+source = "tissue"
+meaning = "Tumour, or normal pancreas from the same resection, as GEO's tissue field records it."
+values = { "pancreatic cancer" = "tumour", "normal pancreas" = "adjacent_normal" }
+
+[columns.mtv_status]
+source = "metabolic tumor volume (mtv) status"
+meaning = "GEO's metabolic tumor volume (mtv) status, verbatim: MTV-low or MTV-high, the same on a patient's two samples."
+
+[expect]
+runs = 28
+
+[expect.counts.read_length]
+"101" = 28
+
+[expect.counts.condition]
+tumour = 14
+adjacent_normal = 14
+
+[expect.counts.mtv_status]
+MTV-low = 14
+MTV-high = 14
+
+# The course's comparison, not the paper's (header): every patient has one sample of each, so the
+# patient enters the design and each tumour is compared with its own normal pancreas.
+
+[[contrasts]]
+name = "tumour_normal"
+label = "Tumour against adjacent normal pancreas, paired by patient"
+variable = "condition"
+reference = "adjacent_normal"
+tested = "tumour"
+n = [14, 14]
+design = "~donor + group"
+paired = true
+
+[de]
+featured = "tumour_normal"
+
+[[de.pca]]
+name = "tissue"
+filters = {}
+factors = ["condition", "mtv_status"]
+
+# The featured set is the course's choice, made before any count exists and for Rytis to
+# confirm; it states no expected direction.
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_E2F_TARGETS"
+running = ["tumour_normal", "HALLMARK_E2F_TARGETS"]
+
+# M8 without a small-RNA library (ED.3): the biotype half on the featured contrast.
+[ncrna]
+featured = "tumour_normal"
+# Pairs the lncRNA neighbour select offers, smallest residual q first.
+pairs = 50

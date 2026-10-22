@@ -1,0 +1,138 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  3%]
+........................................................................ [  7%]
+........................................................................ [ 10%]
+........................................................................ [ 14%]
+........................................................................ [ 17%]
+........................................................................ [ 21%]
+........................................................................ [ 25%]
+........................................................................ [ 28%]
+........................................................................ [ 32%]
+........................................................................ [ 35%]
+........................................................................ [ 39%]
+.......................................s................................ [ 42%]
+........................................................................ [ 46%]
+........................................................................ [ 50%]
+.....................ssss.............sss............................... [ 53%]
+........................................................................ [ 57%]
+........................................................................ [ 60%]
+........................................................................ [ 64%]
+........................................................................ [ 67%]
+........................................................................ [ 71%]
+...................................................................ss... [ 75%]
+........................................................................ [ 78%]
+........................................................................ [ 82%]
+........................................................................ [ 85%]
+........................................................................ [ 89%]
+........................................................................ [ 92%]
+..F............F........................................................ [ 96%]
+..F..................................................................    [100%]
+=================================== FAILURES ===================================
+____________ test_every_figure_has_a_spec_and_redraws_byte_for_byte ____________
+[gw10] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+built = (PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-0/popen-gw10/m90/root'), P...('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-0/popen-gw10/m90/root/gcsynth.toml'))
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-0/popen-gw10/test_every_figure_has_a_spec_a0')
+
+    def test_every_figure_has_a_spec_and_redraws_byte_for_byte(built, tmp_path):
+        """Every figure M9 drew has a spec, each redrawn from M9's tables alone equals its files.
+        Catches a kind whose stem no longer parses, a card rebuilt from another gene's rows, the
+        MANE exons left out of the junction panel, the dropped samples read as none, the F1 values
+        read under the wrong contrast, and the tissue order taken from the table's rows."""
+        root, spec = built
+        found = specs(root, FOLDER, spec)
+        drawn = _drawn(root)
+        assert {k for k, _ in drawn} == EVERY, drawn
+        assert _named(found) == drawn
+>       assert _panels(root) == sorted(f"ctx figure {s.figure_id} --params" for s in found)
+E       AssertionError: assert ['ctx figure ...-params', ...] == ['ctx figure ...-params', ...]
+E         
+E         At index 2 diff: 'ctx figure own_m9_box --params' != 'ctx figure own_m9_contrasts --params'
+E         Left contains 24 more items, first extra item: 'ctx figure own_m9_contrasts --params'
+E         Use -v to get more diff
+
+tests/test_figures_m9.py:89: AssertionError
+________________ test_every_kind_names_inputs_its_drawer_reads _________________
+[gw1] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+    def test_every_kind_names_inputs_its_drawer_reads():
+        """Each kind's drawer and plotting function exist, and its parameters are a frozen dataclass.
+        Catches a kind pointing at a renamed function, which only a redraw would find."""
+        import importlib  # noqa: PLC0415
+    
+        for kind in kinds.KINDS:
+            for target in (kind.draw, kind.plotting):
+                module, function = target.split(":")
+>               assert callable(getattr(importlib.import_module(module), function)), target
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               AttributeError: module 'ctx.function.run' has no attribute '_running'. Did you mean: 'running'?
+
+tests/test_figures.py:221: AttributeError
+_________ test_every_figure_has_a_spec_and_redraws_byte_for_byte[made] _________
+[gw5] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+which = 'made'
+request = <FixtureRequest for <Function test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]>>
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-0/popen-gw5/test_every_figure_has_a_spec_a3')
+
+    @pytest.mark.parametrize("which", ["across_root", "cross_root", "study_root", "made"])
+    def test_every_figure_has_a_spec_and_redraws_byte_for_byte(which, request, tmp_path):
+        """Every figure M7 draws, on each design, has a spec and redraws byte for byte from its
+        tables, its lead and reading guide too. Catches a table written after its figure (no spec),
+        the drawn genes' rows written for another gene set (a NaN row redrawn), the annotation's
+        columns reordered, the coverage tertiles cut on another abundance, the class test run on
+        the other method, a contrast's correlation read from another column, and a cross-study n
+        counted from the wrong level."""
+        root, dataset_file = request.getfixturevalue(which)
+        found = specs(root, M7, dataset_file)
+>       assert {s.stem for s in found} == drawn(root), _kinds(found)
+E       AssertionError: {'contrast:tumour_normal', 'coverage', 'paired_zscores', 'quantified', 'rho_by_class', 'worked:G9'}
+E       assert {'2026-10-20_...worked_g9_v1'} == {'2026-10-20_...lass_v1', ...}
+E         
+E         Extra items in the right set:
+E         '2026-10-20_proteo_fake_brca_rho_by_class_normal_v1'
+E         Use -v to get more diff
+
+tests/test_figures_m7.py:103: AssertionError
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_figures_m9.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte
+FAILED tests/test_figures.py::test_every_kind_names_inputs_its_drawer_reads
+FAILED tests/test_figures_m7.py::test_every_figure_has_a_spec_and_redraws_byte_for_byte[made]
+SKIPPED [1] tests/test_sanity_record.py:156: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_xakatpw1. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_xakatpw1/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 20 09:31:45 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_jnhj513x. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_jnhj513x/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 20 09:31:48 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_n5b9qqpx. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_n5b9qqpx/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 20 09:34:42 ...... FATAL ERROR, exiting
+3 failed, 2000 passed, 10 skipped, 2 warnings in 778.40s (0:12:58)

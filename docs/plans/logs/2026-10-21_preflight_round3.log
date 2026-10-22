@@ -1,0 +1,96 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  3%]
+........................................................................ [  6%]
+........................................................................ [ 10%]
+........................................................................ [ 13%]
+........................................................................ [ 17%]
+........................................................................ [ 20%]
+........................................................................ [ 24%]
+........................................................................ [ 27%]
+........................................................................ [ 31%]
+........................................................................ [ 34%]
+........................................................................ [ 38%]
+........................................................................ [ 41%]
+..............s......................................................... [ 44%]
+........................................................................ [ 48%]
+........................................................................ [ 51%]
+...................ssss................................................. [ 55%]
+...sss.................................................................. [ 58%]
+........................................................................ [ 62%]
+........................................................................ [ 65%]
+........................................................................ [ 69%]
+....................................................................ss.. [ 72%]
+........................................................................ [ 76%]
+........................................................................ [ 79%]
+........................................................................ [ 83%]
+........................................................................ [ 86%]
+....................................................................F... [ 89%]
+........................................................................ [ 93%]
+........................................................................ [ 96%]
+.................................................................        [100%]
+=================================== FAILURES ===================================
+__ test_a_view_s_files_carry_its_own_caption[Recorded sex against expression] __
+[gw1] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+page = (PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-477/popen-gw1/qc_views0'),..._drrmf5h0000gs/T/pytest-of-rytis/pytest-477/popen-gw1/qc_views0/outputs/02_qc/2026-10-21_qc_desynth_overview_v1.html'))
+title = 'Recorded sex against expression'
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-477/popen-gw1/test_a_view_s_files_carry_its_0')
+
+    @pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
+    @pytest.mark.parametrize(
+        "title", ["Recorded sex against expression", "Where every read goes", BANDS]
+    )
+    def test_a_view_s_files_carry_its_own_caption(page, title, tmp_path):
+        """In Chromium at 375 px: the last view shown, its SVG and PDF drawn with that view's
+        caption and the live line. Mutation caught: the page exporting the build's caption."""
+        _, _, _, html = page
+        task = {"name": "v", "url": html.as_uri(), "width": 375, "height": 800,
+                "act": SWAP % json.dumps(title), "figure": "[data-probe]"}  # fmt: skip
+        seen = _browse([task], tmp_path)["v"]
+>       assert seen["errors"] == [] and seen["acted"]["line"].startswith("This view shows ")
+E       AssertionError: assert (['Uncaught'] == []
+E         
+E         Left contains one more item: 'Uncaught'
+E         Use -v to get more diff)
+
+tests/test_qc_views.py:186: AssertionError
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+tests/test_figures_m8.py::test_library_types_reads_every_file_of_the_sheet
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_qc_views.py::test_a_view_s_files_carry_its_own_caption[Recorded sex against expression]
+SKIPPED [1] tests/test_sanity_record.py:156: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_tpdskogz. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_tpdskogz/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 21 12:00:35 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_2z9x2f7o. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_2z9x2f7o/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 21 12:00:58 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_1_hukycg. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_1_hukycg/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 21 12:05:09 ...... FATAL ERROR, exiting
+1 failed, 2070 passed, 10 skipped, 2 warnings in 1213.68s (0:20:13)

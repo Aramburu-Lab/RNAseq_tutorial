@@ -5,6 +5,11 @@ included) and M3 (alignment) on their real runs. TODO.md ED.6 holds the items; t
 blocks. Block A was run by Rytis on 2026-10-22 at 12:27; its numbers are below. No other block
 has run. Every number below that was not measured is marked "estimate" with its basis.
 
+pancreas_gse192647 (PRJNA792551, TODO.md ED.8) was added on 2026-10-22, after block A had run, as
+a sixth slug: Rytis decided the core edition covers breast, lung and pancreas. Its run folder is
+`/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/pancreas_gse192647`, its download and
+count queued by Rytis that day; block A never saw it.
+
 Each login-node block writes one `set -euo pipefail` script into the run folder and runs it with
 `bash`, so a failure stops that script and never the login shell (ED.4b's pattern). The run folder
 is `/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align`, on the project storage,
@@ -24,8 +29,10 @@ Step-1 rows and all 102 breast_mono rows, read on the Mac 2026-10-22).
 | breast_mac | PRJNA483877 | 22 | 22 | paired | 2 x 100 nt | 137,937,197,084 | ENA filereport, 2026-09-30 (P4.0) |
 | breast_mono | PRJNA483877 | 102 | 94 | paired | 2 x 100 nt | 580,591,689,686 | ENA fastq_bytes, 2026-10-01 (P4.4) |
 | lung_gse229705 | PRJNA955664 | 246 | 246 | paired | 2 x 51 nt | 385,618,590,287 | ENA fastq_bytes, 2026-10-22 (ED.4b) |
+| pancreas_gse192647 | PRJNA792551 | 28 | 28 | paired | 2 x 101 nt | 127,118,223,285 | ENA fastq_bytes, 2026-10-22 (ED.8a) |
 
-Read lengths are the dataset files' `[expect.counts.read_length]`; the lung length is ED.4a's.
+Read lengths are the dataset files' `[expect.counts.read_length]`; the lung length is ED.4a's, the
+pancreas length ED.8a's.
 
 **Block A's measurements (Rytis, Kebnekaise, 2026-10-22 12:27).** The storage
 `/pfs/proj/nobackup/fs/projnb10` had 21T free of 36T. Every project's FASTQs are in
@@ -38,10 +45,15 @@ Read lengths are the dataset files' `[expect.counts.read_length]`; the lung leng
 | breast_mac | 44 (22 read 2) | 137.9 GB | paired |
 | breast_mono | 204 (102 read 2) | 580.6 GB | paired |
 | lung_gse229705 | 34 of 492, downloading | | paired |
+| pancreas_gse192647 | not checked: added after block A | | paired |
 
-The four complete projects match the table above to its rounding. The lung pilot uses a sample
-already downloaded: while `results.complete` is absent, block B1 lists only the samples whose every
-file and md5 file is present, so the lung pilot is the largest downloaded sample, not the project's.
+The four complete projects match the table above to its rounding. The lung and pancreas pilots
+use a sample already downloaded: while `results.complete` is absent, block B1 lists only the
+samples whose every file and md5 file is present, so each is the largest downloaded sample, not
+the project's. Lung's download goes through ctx's `fetchngs.sbatch`, which writes
+`results.complete` (ED.4b; the lab launcher writes none, so the four complete projects are not
+tested for it). How pancreas's was launched is not recorded here: if its folder never gets
+`results.complete`, block C1 refuses to write its full task list, and the marker is checked by hand.
 
 **The tools.** The course's `reads` pixi environment, installed from the committed `pixi.lock`
 on Kebnekaise (`pixi install -e reads --frozen`), so every tool is the build ctx itself runs and
@@ -127,7 +139,7 @@ set -euo pipefail
 S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
 df -h /proj/nobackup/hpc2n2024-150
 df -B1 --output=avail /proj/nobackup/hpc2n2024-150 | tail -n 1 | sed 's/^ */free bytes: /'
-for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705; do
+for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647; do
     R="$S/$p/nfcore_fetchngs/results"
     echo "== $p"
     if [[ ! -d "$R/fastq" ]]; then
@@ -428,11 +440,11 @@ for p in "$@"; do
 done
 squeue -u "$USER"
 SCRIPT
-bash ed6b_1_pilot.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 2>&1 | tee ed6b_1_pilot.log
+bash ed6b_1_pilot.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647 2>&1 | tee ed6b_1_pilot.log
 ```
 
-Ready to submit now: the four complete projects pilot their largest sample. Lung pilots after its
-download ends, with `bash ed6b_1_pilot.sh lung_gse229705`: a project still downloading is skipped,
+Ready to submit now: the four complete projects pilot their largest sample. Lung and pancreas pilot after
+their downloads end, with `bash ed6b_1_pilot.sh lung_gse229705 pancreas_gse192647`: a project still downloading is skipped,
 since fetchngs writes its samplesheet last.
 
 Paste back `ed6b_1_pilot.log`: the free space, the commit, `versions.txt`, `refs.txt`, the two MD5
@@ -452,7 +464,7 @@ sacct -n -P -j "$ids" --format=JobID,JobName%30,Elapsed,ElapsedRaw,MaxRSS,ReqMem
 if [[ -f logs/star_index.time ]]; then grep -e 'Elapsed (wall' -e 'Maximum resident' logs/star_index.time; fi
 . ./refs.txt
 if [[ -s "$IDX/SA" ]]; then du -sb "$IDX" "$REFS/unzipped"; wc -l "$IDX/geneInfo.tab"; fi   # geneInfo.tab: expect 78942, a count line and 78,941 genes
-for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705; do
+for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647; do
     [[ -s "$p/pilot.txt" ]] || continue
     sample=$(cat "$p/pilot.txt")
     D="$p/runs/$sample"
@@ -538,7 +550,7 @@ A=hpc2n2026-161
 C=
 MEM=
 N=
-declare -A TIME=([tier1]= [breast_tissue]= [breast_mac]= [breast_mono]= [lung_gse229705]=)
+declare -A TIME=([tier1]= [breast_tissue]= [breast_mac]= [breast_mono]= [lung_gse229705]= [pancreas_gse192647]=)
 [[ -n "$C" && -n "$MEM" && -n "$N" ]] || { echo "set C, MEM and N from the pilot first"; exit 1; }
 cd "$E"
 BIN=$(cat bin.txt)
@@ -550,7 +562,7 @@ for p in "$@"; do
     [[ -n "${TIME[$p]:-}" ]] || { echo "set TIME[$p] from its pilot first"; exit 1; }
     [[ -d "$p/runs/$(cat "$p/pilot.txt")" ]] || { echo "$p: its pilot has not passed"; exit 1; }
     if [[ ! -s "$p/tasks.tsv" ]]; then
-        # Lung, piloted mid-download: the full list once fetchngs has written its marker.
+        # Lung or pancreas, piloted mid-download: the full list once fetchngs has written its marker.
         [[ -f "$S/$p/nfcore_fetchngs/results.complete" ]] || { echo "$p: download not complete"; exit 1; }
         python3 ed6_tasks.py "$S/$p/nfcore_fetchngs/results" "$p/tasks.tsv"
     fi
@@ -563,7 +575,7 @@ for p in "$@"; do
 done
 squeue -u "$USER"
 SCRIPT
-bash ed6c_1_full.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 2>&1 | tee ed6c_1_full.log
+bash ed6c_1_full.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647 2>&1 | tee ed6c_1_full.log
 ```
 
 **M2's fastp grid**, one job per project, on the run `ctx qc --reads` grids by default: the first
@@ -576,7 +588,9 @@ python3 -c 'import csv, glob, sys; f = sorted(glob.glob(sys.argv[1]))[-1]; print
 Run on the Mac 2026-10-22, it printed ERR7425257 (tier1, `2026-10-20_gather_tier1_samplesheet_v1.csv`),
 SRR5811633 (breast_tissue), SRR7631637 (breast_mac) and SRR7631576 (breast_mono), each from its
 2026-10-22 sheet in `~/ctx_breast`; they are filled in below. Lung's waits for `~/ctx_lung_gse229705`
-(ED.4b block 6). Then on Kebnekaise:
+(ED.4b block 6), pancreas's for `~/ctx_pancreas_gse192647`. ED.8a's metadata-only gather sheet,
+in a scratch root, put SRR17335068 first; it is not filled in, because the rule is the real root's
+sheet. Then on Kebnekaise:
 
 ```
 cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
@@ -584,8 +598,8 @@ cat > ed6c_2_grid.sh <<'SCRIPT'
 set -euo pipefail
 E=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
 A=hpc2n2026-161
-# The first run of each gather sheet, printed on the Mac 2026-10-22; lung's once its root exists.
-declare -A GRID=([tier1]=ERR7425257 [breast_tissue]=SRR5811633 [breast_mac]=SRR7631637 [breast_mono]=SRR7631576 [lung_gse229705]=)
+# The first run of each gather sheet, printed on the Mac 2026-10-22; lung's and pancreas's once their roots exist.
+declare -A GRID=([tier1]=ERR7425257 [breast_tissue]=SRR5811633 [breast_mac]=SRR7631637 [breast_mono]=SRR7631576 [lung_gse229705]= [pancreas_gse192647]=)
 cd "$E"
 BIN=$(cat bin.txt)
 cat > ed6_grid.sbatch <<'EOF'
@@ -622,7 +636,7 @@ for p in "$@"; do
     echo "grid_$p $j ${GRID[$p]}" | tee -a jobs.txt
 done
 SCRIPT
-bash ed6c_2_grid.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 2>&1 | tee ed6c_2_grid.log
+bash ed6c_2_grid.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647 2>&1 | tee ed6c_2_grid.log
 ```
 
 The grid's 4 cores, 8G and 6 h are estimates: 36 fastp passes over one run, unmeasured.
@@ -647,7 +661,7 @@ for l in sys.stdin:
     elif "." not in j:
         states[st.split()[0]] += 1; cpu += int(el or 0) * int(c or 0)
 print("tasks by state", dict(states), "; core-hours", round(cpu / 3600, 1), "; largest MaxRSS bytes", int(rss))'
-for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705; do
+for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647; do
     [[ -s "$p/tasks.tsv" ]] || continue
     want=$(($(wc -l < "$p/tasks.tsv") - 1))
     done_=$(find "$p/runs" -mindepth 1 -maxdepth 1 -type d ! -name '*.part*' | wc -l)
@@ -736,6 +750,7 @@ copy breast_tissue ~/ctx_breast
 copy breast_mac ~/ctx_breast
 copy breast_mono ~/ctx_breast
 copy lung_gse229705 ~/ctx_lung_gse229705
+copy pancreas_gse192647 ~/ctx_pancreas_gse192647
 SCRIPT
 bash ~/ed6d_copy.sh 2>&1 | tee ~/ed6d_copy.log
 ```
@@ -745,9 +760,9 @@ pilots' BAMs and trimmed reads go:
 
 ```
 cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
-for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705; do s=$(cat "$p/pilot.txt"); ls -la "$p/runs/$s/star/$s.bam" "$p/runs/$s/trimmed"; done
+for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647; do s=$(cat "$p/pilot.txt"); ls -la "$p/runs/$s/star/$s.bam" "$p/runs/$s/trimmed"; done
 # after reading that list:
-for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705; do s=$(cat "$p/pilot.txt"); rm -f "$p/runs/$s/star/$s.bam" "$p/runs/$s/star/$s.bam.bai"; rm -rf "$p/runs/$s/trimmed"; done
+for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705 pancreas_gse192647; do s=$(cat "$p/pilot.txt"); rm -f "$p/runs/$s/star/$s.bam" "$p/runs/$s/star/$s.bam.bai"; rm -rf "$p/runs/$s/trimmed"; done
 ```
 
 **The ctx commands on the Mac.** `ctx qc --reads --align-dir` reads the cluster's reports in
@@ -769,12 +784,15 @@ pixi run -e laptop ctx --root ~/ctx_breast qc --dataset breast_tissue --dataset-
 ```
 
 The same three lines for breast_mac and breast_mono in `~/ctx_breast`, tier1 in `~/ctx_tier1`, and
-lung_gse229705 in `~/ctx_lung_gse229705`, each with its own dataset file and folders.
+lung_gse229705 in `~/ctx_lung_gse229705`, pancreas_gse192647 in `~/ctx_pancreas_gse192647`, each
+with its own dataset file and folders.
 
 ## What is not done here
 
 - Only block A has run (Rytis, 2026-10-22). Nothing in the cost table is measured; block B2 measures it.
-- The lung pilot is the largest sample downloaded when block B1 ran, not the project's largest.
+- The lung and pancreas pilots are the largest samples downloaded when block B1 ran, not the
+  projects' largest.
+- pancreas_gse192647 was not in block A; its folder and FASTQs are unchecked by this plan.
 - `/usr/bin/time` on Kebnekaise's compute nodes is assumed, as M3.11 assumed it; the align script
   refuses to start without it.
 - The GENCODE `MD5SUMS` line format (`<md5>  <file>`) is assumed from GENCODE's release folders and

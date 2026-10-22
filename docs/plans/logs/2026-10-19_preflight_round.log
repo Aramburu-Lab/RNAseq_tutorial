@@ -1,0 +1,110 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  3%]
+........................................................................ [  7%]
+........................................................................ [ 11%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 22%]
+........................................................................ [ 26%]
+........................................................................ [ 29%]
+........................................................................ [ 33%]
+........................................................................ [ 37%]
+........................................................................ [ 40%]
+...............................................s........................ [ 44%]
+........................................................................ [ 48%]
+........................................................................ [ 52%]
+........................................ssss............................ [ 55%]
+...............sss...................................................... [ 59%]
+........................................................................ [ 63%]
+........................................................................ [ 67%]
+........................................................................ [ 70%]
+........................................................................ [ 74%]
+........................................................................ [ 78%]
+........................................................................ [ 81%]
+................................................................ss...F.. [ 85%]
+........................................................................ [ 89%]
+......................................................................F. [ 93%]
+........................................................................ [ 96%]
+............................................................             [100%]
+=================================== FAILURES ===================================
+_________ test_every_bundle_loads_and_each_dataset_file_has_one_cohort _________
+[gw10] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+    def test_every_bundle_loads_and_each_dataset_file_has_one_cohort():
+        """The bundles in the repository load, and every dataset file is listed by exactly one.
+        Catches a dataset file added with no cohort, and one listed twice, which would make its
+        figures' IDs depend on which bundle is read first."""
+        found = cohorts.bundles()
+        assert set(found) == {"blood", "breast", "kidney", "lung", "headneck"}
+        listed = [e.slug for c in found.values() for e in c.datasets]
+>       assert sorted(listed) == sorted(p.stem for p in DATASETS.glob("*.toml"))
+E       AssertionError: assert ['breast_mac'...ur_runs', ...] == ['breast_mac'...ur_runs', ...]
+E         
+E         Right contains 2 more items, first extra item: 'u_gse327166'
+E         Use -v to get more diff
+
+tests/test_cohorts.py:27: AssertionError
+____________________________ test_code_is_not_data _____________________________
+[gw7] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-2249/popen-gw7/test_code_is_not_data0')
+
+    def test_code_is_not_data(tmp_path):
+        root, elsewhere = tmp_path / "root", tmp_path / "elsewhere"
+        elsewhere.mkdir()
+        before = _snapshot(ROOT / "src")
+        done = _ctx("setup", cwd=elsewhere, env={"CTX_ROOT": str(root)})
+        assert done.returncode == 0, done.stderr
+        written = [Path(line) for line in done.stdout.split()]
+        assert written
+        assert all(path.is_relative_to(root.resolve()) for path in written)
+        assert not list(elsewhere.iterdir())
+>       assert _snapshot(ROOT / "src") == before
+E       AssertionError: assert {'/Users/ryti....5082374, ...} == {'/Users/ryti....5082374, ...}
+E         
+E         Omitting 291 identical items, use -vv to show
+E         Differing items:
+E         {'/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/src/ctx/__pycache__/dataset.cpython-312.pyc': 1792405242.4293816} != {'/Users/rytis/Scripts/Pipeline/RNAseq_tutorial/src/ctx/__pycache__/dataset.cpython-312.pyc': 1792363632.9337466}
+E         Use -v to get more diff
+
+tests/test_cli.py:130: AssertionError
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_cohorts.py::test_every_bundle_loads_and_each_dataset_file_has_one_cohort
+FAILED tests/test_cli.py::test_code_is_not_data - AssertionError: assert {'/U...
+SKIPPED [1] tests/test_sanity_record.py:155: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ms3gffbh. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_ms3gffbh/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 19 12:16:55 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_o0pg_ew1. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_o0pg_ew1/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 19 12:16:59 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_pa85fisq. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_pa85fisq/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 19 12:19:45 ...... FATAL ERROR, exiting
+2 failed, 1920 passed, 10 skipped, 1 warning in 405.66s (0:06:45)

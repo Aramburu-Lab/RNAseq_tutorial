@@ -1,0 +1,345 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 13%]
+........................................................................ [ 18%]
+........................................................................ [ 22%]
+........................................................................ [ 27%]
+........................................................................ [ 31%]
+........................................................................ [ 36%]
+.....................................s.................................. [ 41%]
+........................................................................ [ 45%]
+........................................................................ [ 50%]
+........................................................................ [ 54%]
+........................................................................ [ 59%]
+........................................................................ [ 63%]
+........................................................................ [ 68%]
+........................................................................ [ 72%]
+...............ssss..................................................... [ 77%]
+.........................sss............................................ [ 82%]
+........................................................................ [ 86%]
+........................................................................ [ 91%]
+........................................................................ [ 95%]
+......ss...........................................................      [100%]
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_sanity_record.py:155: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:173: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_xjho1y9c. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_xjho1y9c/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 14 16:07:29 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:173: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_toao_7de. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_toao_7de/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 14 16:07:46 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:173: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_rc7stvtn. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_rc7stvtn/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 14 16:11:19 ...... FATAL ERROR, exiting
+1569 passed, 10 skipped, 1 warning in 448.24s (0:07:28)
+
+✨ Pixi task (hooks in default): prek run --all-files --show-diff-on-failure
+ruff check...............................................................Failed
+- hook id: ruff-check
+- description: Run 'ruff check' for extremely fast Python linting
+- exit code: 1
+
+  SIM115 Use a context manager for opening files
+    --> docs/plans/logs/H_ccrcc_census.py:19:17
+     |
+  17 | GDC = RAW + "cptac_ccrcc_star/"
+  18 |
+  19 | bio = json.load(open(GDC + "pdc_biospecimen_PDC000127.json"))["data"]["biospecimenPerStudy"]
+     |                 ^^^^
+  20 | print("PDC biospecimens:", len(bio), "rows")
+  21 | print("  aliquots", len({b["aliquot_submitter_id"] for b in bio}),
+     |
+
+  E501 Line too long (102 > 100)
+    --> docs/plans/logs/H_ccrcc_census.py:25:101
+     |
+  23 | by_type = Counter(b["sample_type"] for b in bio)
+  24 | print("  aliquots by sample_type", dict(by_type))
+  25 | cases_type = {t: len({b["case_submitter_id"] for b in bio if b["sample_type"] == t}) for t in by_type}
+     |                                                                                                     ^^
+  26 | print("  cases by sample_type", cases_type)
+  27 | aliquot_type = {b["aliquot_submitter_id"]: b["sample_type"] for b in bio}
+     |
+
+  SIM115 Use a context manager for opening files
+    --> docs/plans/logs/H_ccrcc_census.py:59:29
+     |
+  57 |       "with both", len(tum & nat))
+  58 |
+  59 | files = list(csv.DictReader(open(GDC + "gdc_files_star_counts.tsv"), delimiter="\t"))
+     |                             ^^^^
+  60 | print("GDC files:", len(files))
+  61 | types = Counter()
+     |
+
+  SIM115 Use a context manager for opening files
+    --> docs/plans/logs/H_ccrcc_census.py:70:32
+     |
+  68 | print("  files by sample_type", dict(types))
+  69 | print("  cases by sample_type", {k: len(v) for k, v in gcase.items()})
+  70 | manifest = list(csv.DictReader(open(GDC + "gdc_manifest_star_counts.txt"), delimiter="\t"))
+     |                                ^^^^
+  71 | print("GDC manifest:", len(manifest), "files")
+  72 | both = gcase["Primary Tumor"] & gcase["Solid Tissue Normal"]
+     |
+
+  E501 Line too long (108 > 100)
+   --> docs/plans/logs/H_ccrcc_histology.py:1:101
+    |
+  1 | """Package H: the clinical workbook's histologic types, and which cases have GDC tumour and normal files."""
+    |                                                                                                     ^^^^^^^^
+  2 |
+  3 | import csv
+    |
+
+  SIM115 Use a context manager for opening files
+    --> docs/plans/logs/H_ccrcc_histology.py:16:29
+     |
+  14 | hist = {r[head.index("case_id")]: r[head.index("histologic_type")] for r in rows[1:]}
+  15 | print("cases", len(hist), dict(Counter(hist.values())))
+  16 | files = list(csv.DictReader(open(RAW + "cptac_ccrcc_star/gdc_files_star_counts.tsv"), delimiter="\t"))
+     |                             ^^^^
+  17 | kinds: dict[str, set[str]] = {}
+  18 | for f in files:
+     |
+
+  E501 Line too long (102 > 100)
+    --> docs/plans/logs/H_ccrcc_histology.py:16:101
+     |
+  14 | hist = {r[head.index("case_id")]: r[head.index("histologic_type")] for r in rows[1:]}
+  15 | print("cases", len(hist), dict(Counter(hist.values())))
+  16 | files = list(csv.DictReader(open(RAW + "cptac_ccrcc_star/gdc_files_star_counts.tsv"), delimiter="\t"))
+     |                                                                                                     ^^
+  17 | kinds: dict[str, set[str]] = {}
+  18 | for f in files:
+     |
+
+  PLR2004 Magic value used in comparison, consider replacing `2` with a constant variable
+    --> docs/plans/logs/H_ccrcc_histology.py:22:51
+     |
+  20 |         if k.endswith("sample_type") and f[k]:
+  21 |             kinds.setdefault(f["cases.0.submitter_id"], set()).add(f[k])
+  22 | pairs = {c for c, k in kinds.items() if len(k) == 2}
+     |                                                   ^
+  23 | print("GDC cases with both", len(pairs))
+  24 | print("their histology", dict(Counter(hist.get(c, "not in workbook") for c in pairs)))
+     |
+
+  PLR2004 Magic value used in comparison, consider replacing `4` with a constant variable
+    --> docs/plans/logs/H_gtex_block.py:9:40
+     |
+   7 | start = kirc.index("# GTEx V11 for M9's gene cards")
+   8 | block = kirc[start : kirc.index("# MSigDB Hallmark for M6", start)]
+   9 | assert block.count("[[resources]]") == 4, block
+     |                                        ^
+  10 | anchor = "# TargetScan 8.0 (McGeary"
+  11 | for name in ("tcga_luad.toml", "tcga_lusc.toml"):
+     |
+
+  Found 9 errors.
+ruff format..............................................................Failed
+- hook id: ruff-format
+- description: Run 'ruff format' for extremely fast Python formatting
+- files were modified by this hook
+
+  3 files reformatted, 278 files left unchanged
+labdocs lint.............................................................Passed
+labdocs render (staleness check).........................................Passed
+check file length (ratchet from .labtemplate.yml)........................Passed
+mypy strict (src/).......................................................Passed
+interrogate 100 % (src/).................................................Passed
+All changes made by hooks:
+diff --git a/docs/plans/logs/H_ccrcc_census.py b/docs/plans/logs/H_ccrcc_census.py
+index c4bdd0a..4fc5580 100644
+--- a/docs/plans/logs/H_ccrcc_census.py
++++ b/docs/plans/logs/H_ccrcc_census.py
+@@ -18,17 +18,26 @@ GDC = RAW + "cptac_ccrcc_star/"
+ 
+ bio = json.load(open(GDC + "pdc_biospecimen_PDC000127.json"))["data"]["biospecimenPerStudy"]
+ print("PDC biospecimens:", len(bio), "rows")
+-print("  aliquots", len({b["aliquot_submitter_id"] for b in bio}),
+-      "cases", len({b["case_submitter_id"] for b in bio}))
++print(
++    "  aliquots",
++    len({b["aliquot_submitter_id"] for b in bio}),
++    "cases",
++    len({b["case_submitter_id"] for b in bio}),
++)
+ by_type = Counter(b["sample_type"] for b in bio)
+ print("  aliquots by sample_type", dict(by_type))
+-cases_type = {t: len({b["case_submitter_id"] for b in bio if b["sample_type"] == t}) for t in by_type}
++cases_type = {
++    t: len({b["case_submitter_id"] for b in bio if b["sample_type"] == t}) for t in by_type
++}
+ print("  cases by sample_type", cases_type)
+ aliquot_type = {b["aliquot_submitter_id"]: b["sample_type"] for b in bio}
+ aliquot_case = {b["aliquot_submitter_id"]: b["case_submitter_id"] for b in bio}
+ 
+-book = openpyxl.load_workbook(PDC + "S044_TMT10_Label_to_Sample_Mapping_File_CCRCC_r2_Jan2019.xlsx",
+-                              read_only=True, data_only=True)
++book = openpyxl.load_workbook(
++    PDC + "S044_TMT10_Label_to_Sample_Mapping_File_CCRCC_r2_Jan2019.xlsx",
++    read_only=True,
++    data_only=True,
++)
+ rows = list(book["TMT10_mapping_File"].iter_rows(values_only=True))
+ head = rows[0]
+ labels = [i for i, h in enumerate(head) if h and str(h).endswith("Specimen Label")]
+@@ -38,23 +47,41 @@ for r in proteome:
+     for i in labels:
+         if r[i] and r[i] != "pooled sample":
+             plex_of.setdefault(r[i], []).append(r[1])
+-print("Mapping workbook: proteome plexes", len(proteome), "labelled channels",
+-      sum(len(v) for v in plex_of.values()), "distinct labels", len(plex_of))
++print(
++    "Mapping workbook: proteome plexes",
++    len(proteome),
++    "labelled channels",
++    sum(len(v) for v in plex_of.values()),
++    "distinct labels",
++    len(plex_of),
++)
+ print("  labels in two plexes", sum(len(v) > 1 for v in plex_of.values()))
+ 
+ with tarfile.open(PDC + "Supplementary_Data_Proteome_TMT.tar.gz") as tar:
+     member = next(m for m in tar.getmembers() if m.name.endswith(".tsv"))
+     first = io.TextIOWrapper(tar.extractfile(member)).readline()
+ cols = next(csv.reader([first], delimiter="\t"))[4:]
+-print("Protein table:", member.name.split("/")[-1], len(cols), "sample columns,",
+-      len(set(cols)), "distinct")
++print(
++    "Protein table:",
++    member.name.split("/")[-1],
++    len(cols),
++    "sample columns,",
++    len(set(cols)),
++    "distinct",
++)
+ print("  by PDC sample_type", dict(Counter(aliquot_type.get(c, "not in PDC") for c in cols)))
+ print("  not in the mapping workbook", [c for c in cols if c not in plex_of])
+ print("  mapping labels not in the table", [c for c in plex_of if c not in cols])
+ tum = {aliquot_case[c] for c in cols if aliquot_type.get(c) == "Primary Tumor"}
+ nat = {aliquot_case[c] for c in cols if aliquot_type.get(c) == "Solid Tissue Normal"}
+-print("  cases with a tumour column", len(tum), "with a normal column", len(nat),
+-      "with both", len(tum & nat))
++print(
++    "  cases with a tumour column",
++    len(tum),
++    "with a normal column",
++    len(nat),
++    "with both",
++    len(tum & nat),
++)
+ 
+ files = list(csv.DictReader(open(GDC + "gdc_files_star_counts.tsv"), delimiter="\t"))
+ print("GDC files:", len(files))
+diff --git a/docs/plans/logs/H_ccrcc_histology.py b/docs/plans/logs/H_ccrcc_histology.py
+index 2349e72..9f171f9 100644
+--- a/docs/plans/logs/H_ccrcc_histology.py
++++ b/docs/plans/logs/H_ccrcc_histology.py
+@@ -8,12 +8,16 @@ import openpyxl
+ RAW = "/Users/rytis/ctx_kidney/data/raw/"
+ book = openpyxl.load_workbook(
+     RAW + "cptac_ccrcc/S050_S044_CPTAC_ccRCC_Discovery_Cohort_Clinical_Data_r4_Sept2019.xlsx",
+-    read_only=True, data_only=True)
++    read_only=True,
++    data_only=True,
++)
+ rows = list(book["Patient_Clinical_Attributes"].iter_rows(values_only=True))
+ head = rows[0]
+ hist = {r[head.index("case_id")]: r[head.index("histologic_type")] for r in rows[1:]}
+ print("cases", len(hist), dict(Counter(hist.values())))
+-files = list(csv.DictReader(open(RAW + "cptac_ccrcc_star/gdc_files_star_counts.tsv"), delimiter="\t"))
++files = list(
++    csv.DictReader(open(RAW + "cptac_ccrcc_star/gdc_files_star_counts.tsv"), delimiter="\t")
++)
+ kinds: dict[str, set[str]] = {}
+ for f in files:
+     for k in f:
+@@ -22,5 +26,7 @@ for f in files:
+ pairs = {c for c, k in kinds.items() if len(k) == 2}
+ print("GDC cases with both", len(pairs))
+ print("their histology", dict(Counter(hist.get(c, "not in workbook") for c in pairs)))
+-print("non-clear-cell cases with both:",
+-      sorted(c for c in pairs if hist.get(c) != "Clear cell renal cell carcinoma"))
++print(
++    "non-clear-cell cases with both:",
++    sorted(c for c in pairs if hist.get(c) != "Clear cell renal cell carcinoma"),
++)
+diff --git a/docs/plans/logs/H_ccrcc_sheet.py b/docs/plans/logs/H_ccrcc_sheet.py
+index 76441df..07d9560 100644
+--- a/docs/plans/logs/H_ccrcc_sheet.py
++++ b/docs/plans/logs/H_ccrcc_sheet.py
+@@ -14,13 +14,23 @@ print("drop reasons", dict(Counter(zip(sheet["condition"], sheet["drop_reason"],
+ kept = gdc.chosen(sheet)
+ print("chosen by condition", dict(Counter(kept["condition"])))
+ both = set(kept.filter(pl.col("condition") == "tumour")["case"]) & set(
+-    kept.filter(pl.col("condition") == "normal")["case"])
++    kept.filter(pl.col("condition") == "normal")["case"]
++)
+ print("pairs", len(both))
+ for c in ("C3N-00435", "C3N-01175"):
+     print(c, "in pairs", c in both)
+ counts = pl.read_parquet(D + "counts_v1.parquet")
+ print("counts", counts.height, "genes by", counts.width - 1, "files")
+-pooled = ["CPT0012900007", "CPT0089460006", "CPT0088550007", "CPT0066470007", "CPT0014370010",
+-          "CPT0025580007", "CPT0000870008", "CPT0014450014", "CPT0071150007"]
++pooled = [
++    "CPT0012900007",
++    "CPT0089460006",
++    "CPT0088550007",
++    "CPT0066470007",
++    "CPT0014370010",
++    "CPT0025580007",
++    "CPT0000870008",
++    "CPT0014450014",
++    "CPT0071150007",
++]
+ p = sheet.filter(pl.col("sample").is_in(pooled))
+ print("pooled-piece aliquots", p.height, "chosen", p.filter(pl.col("drop_reason") == "").height)
+      457.23 real      1067.04 user       318.28 sys
+          1533968384  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+            35888321  page reclaims
+               91730  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                5315  messages sent
+                4846  messages received
+                1471  signals received
+               82768  voluntary context switches
+             5074295  involuntary context switches
+           898181746  instructions retired
+           301987314  cycles elapsed
+            27738784  peak memory footprint
+exit 1

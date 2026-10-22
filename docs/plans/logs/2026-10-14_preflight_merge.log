@@ -1,0 +1,69 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  4%]
+........................................................................ [  9%]
+........................................................................ [ 14%]
+........................................................................ [ 18%]
+........................................................................ [ 23%]
+........................................................................ [ 28%]
+........................................................................ [ 32%]
+.......................s................................................ [ 37%]
+........................................................................ [ 42%]
+........................................................................ [ 47%]
+........................................................................ [ 51%]
+........................................................................ [ 56%]
+........................................................................ [ 61%]
+........................................................................ [ 65%]
+........................................................................ [ 70%]
+........................................................................ [ 75%]
+..............ssss...................................................... [ 80%]
+...................sss.................................................. [ 84%]
+........................................................................ [ 89%]
+........................................................................ [ 94%]
+.......................ss............................................... [ 98%]
+.................                                                        [100%]
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1519 passed, 10 skipped, 1 warning in 2450.89s (0:40:50)
+
+✨ Pixi task (hooks in default): prek run --all-files --show-diff-on-failure
+ruff check...............................................................Passed
+ruff format..............................................................Passed
+labdocs lint.............................................................Passed
+labdocs render (staleness check).........................................Passed
+check file length (ratchet from .labtemplate.yml)........................Passed
+mypy strict (src/).......................................................Passed
+interrogate 100 % (src/).................................................Passed
+
+✨ Pixi task (preflight in default): ruff format --check .
+317 files already formatted
+     2522.71 real      1081.92 user       369.48 sys
+          1119256576  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+            39218483  page reclaims
+              131151  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                5072  messages sent
+                4646  messages received
+                1530  signals received
+              264569  voluntary context switches
+             6333018  involuntary context switches
+           997547413  instructions retired
+           466690003  cycles elapsed
+            27673248  peak memory footprint
+exit 0

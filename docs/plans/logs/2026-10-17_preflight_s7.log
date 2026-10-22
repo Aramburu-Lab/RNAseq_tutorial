@@ -1,0 +1,103 @@
+✨ Pixi task (lint in default): ruff check scripts
+All checks passed!
+
+✨ Pixi task (check in default): labdocs lint && labdocs render --check
+
+✨ Pixi task (test in default): sh -c 'pytest -q -n auto --dist loadscope; c=$?; [ $c -eq 5 ] && exit 0; exit $c'
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  4%]
+........................................................................ [  8%]
+........................................................................ [ 12%]
+........................................................................ [ 16%]
+........................................................................ [ 21%]
+........................................................................ [ 25%]
+........................................................................ [ 29%]
+........................................................................ [ 33%]
+........................................................................ [ 38%]
+........................................................................ [ 42%]
+.............F...........................................s.............. [ 46%]
+........................................................................ [ 50%]
+........................................................................ [ 54%]
+........................................................................ [ 59%]
+........................................................................ [ 63%]
+...................ssss....sss.......................................... [ 67%]
+........................................................................ [ 71%]
+........................................................................ [ 76%]
+........................................................................ [ 80%]
+........................................................................ [ 84%]
+........................................................................ [ 88%]
+...............................................................F........ [ 92%]
+................................................ss...................... [ 97%]
+.................................................                        [100%]
+=================================== FAILURES ===================================
+______________________ test_own_peak_reads_vmhwm_in_bytes ______________________
+[gw2] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+tmp_path = PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-1614/popen-gw2/test_own_peak_reads_vmhwm_in_b0')
+
+    def test_own_peak_reads_vmhwm_in_bytes(tmp_path):
+        """Linux's own peak is VmHWM, in kibibytes, because ru_maxrss outlives execve; none where
+        the file is absent. On a Linux runner test_child_peak_attributed's ``own`` bound catches
+        the getrusage reading back (1,110,167,552 B in run 37807649888).
+    
+        Mutations caught: VmHWM returned in kibibytes; VmRSS read instead (the current, not the peak).
+        """
+        from ctx.runtime import _own_peak  # noqa: PLC0415
+    
+        status = tmp_path / "status"
+        status.write_text("Name:\tpython\nVmHWM:\t   20480 kB\nVmRSS:\t   10240 kB\n")
+>       assert _own_peak(status) == 20480 * 1024
+E       AssertionError: assert 416368560 == (20480 * 1024)
+E        +  where 416368560 = <function _own_peak at 0x173fdede0>(PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-1614/popen-gw2/test_own_peak_reads_vmhwm_in_b0/status'))
+
+tests/test_runtime.py:167: AssertionError
+_________________ test_a_part_drawn_in_the_dark_theme_takes_it _________________
+[gw4] darwin -- Python 3.12.14 /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/bin/python3.12
+
+ran = (PosixPath('/private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/pytest-of-rytis/pytest-1614/popen-gw4/packed0/out...rview_v1.html#v=1&src=tcga_brca:tumour_normal&n=2&g=-75624,106236&end', 'length': 2}, 'files': {}, 'moused': [], ...}})
+
+    def test_a_part_drawn_in_the_dark_theme_takes_it(ran):
+        """Mutation: the theme relayout left to the load, so a card drawn later is light."""
+        _, results = ran
+        (acted,) = results["dark"]["resized"]
+        fonts = {f for g in acted["groups"] for f in g["font"]}
+        assert len(fonts) == 1, fonts
+        white = {f for g in results["white"]["acted"]["groups"] for f in g["font"]}
+>       assert fonts != white
+E       AssertionError: assert {'#F2F2F2'} != {'#F2F2F2'}
+E         
+E         Both sets are equal
+
+tests/test_packed_browser.py:121: AssertionError
+=============================== warnings summary ===============================
+tests/test_ncrna_tcga.py::test_f5_reads_the_protocol_twin_and_never_an_ffpe_or_redacted_file
+  /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/default/lib/python3.12/site-packages/scipy/stats/_wilcoxon.py:192: RuntimeWarning: invalid value encountered in scalar divide
+    z = (r_plus - mn) / se
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_sanity_record.py:155: the record exists; test_rule_unchanged holds the freeze from here
+SKIPPED [4] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_zko6egip. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_zko6egip/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 17 20:29:34 ...... FATAL ERROR, exiting
+SKIPPED [3] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_h13cbwsl. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_h13cbwsl/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 17 20:29:36 ...... FATAL ERROR, exiting
+SKIPPED [2] tests/conftest.py:182: STAR cannot map on darwin-arm64 with CI unset (R6.2, D-036): /Users/rytis/Scripts/Pipeline/RNAseq_tutorial/.pixi/envs/reads/bin/STAR cannot map the probe's reads; the probe's files are kept in /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_wz3qn2qj. D-036: STAR is used only once it maps the probe's 10 reads. Run with --aligner hisat2, or set CTX_TOOLS to a folder holding a STAR 2.7.11b that maps. On darwin-arm64 this is the known fault of the pinned osx-arm64 build: it passes --version yet exits 0 reading no reads (STAR issue #2632), exits 102 spawning --readFilesCommand, and with --quantMode GeneCounts exits 109, having lost the path of geneInfo.tab.
+STAR exited 102; the end of /private/var/folders/q6/m2wk_58s7xj9g79l_drrmf5h0000gs/T/ctx_star_probe_wz3qn2qj/logs/probe.star.log:
+
+EXITING: because of fatal EXECUTION error: Failed spawning readFilesCommand
+2: No such file or directory
+
+Oct 17 20:32:15 ...... FATAL ERROR, exiting
+2 failed, 1693 passed, 10 skipped, 1 warning in 318.84s (0:05:18)
