@@ -113,6 +113,27 @@ built; block A says which. featureCounts reads the unzipped GTF the index was bu
 
 ## Costs: what is measured and what is not
 
+**The pilot's numbers (Rytis, Kebnekaise, 2026-10-22), as the coordinator relayed them.** STAR index:
+45 min, 44.7 GB MaxRSS, 30.7 GB on disk. breast_tissue pilot (3.3 GB single-end): 18 min, 41.0 GiB
+MaxRSS, STAR 4.5 min, featureCounts 12 x 30 s, peak disk 16.1 GB, strand reverse from Assigned
+(`-s 2` 45.8 M against `-s 1` 4.0 M). breast_mono pilot (10.9 GB paired, two runs): 38.7 min,
+40.1 GiB, STAR 12.4 min, featureCounts 12 x 73 s, peak disk 36.4 GB, unstranded (`-s 0` 13.4 M,
+`-s 1` 8.1 M, `-s 2` 8.0 M). The other three pilots' numbers are not in this file yet.
+
+**The featureCounts matrices.** One sample's matrix at one setting is 133 MB, 1.6 GB per sample at
+12 settings, about 1.1 TB for 683 samples to copy back. Nearly all of it is the annotation columns
+(Chr, Start, End, Strand, Length), the same in every file of one annotation, so blocks B1, C1 and E
+keep each matrix compact (`ctx.process.fc_compact`): the command line, Geneid and the count, gzipped,
+and the annotation columns once per project (and once for block E's half), and delete the original
+only after the compact file reads back equal to it, row by row and in its sum. `ctx process
+--align-dir` rebuilds featureCounts' matrix from the two. Measured on the test fixture (10 genes):
+63 compact files of 369 to 473 bytes; the annotation copy 856 bytes, 6,463 uncompressed (423 for the half). Estimated on
+GENCODE 50, not measured on a cluster file: 78,941 gene IDs from the GTF with one tier1 sample's
+gene counts (ERX6994339, the gather counts, Salmon's, standing in for featureCounts') make a compact
+file of 1,620,719 bytes, 361,462 gzipped; so about 4.3 MB per sample at 12 settings and about 3.0 GB
+for 683 samples, plus one annotation copy per project. Split counts (`-O --fraction`) print decimals
+and will be larger; the first compact pilot file replaces this estimate.
+
 Nothing in this table is measured; the pilot replaces every row.
 
 | Step | Pilot request | Basis |
@@ -275,7 +296,7 @@ cat > ed6_align.sbatch <<'EOF'
 # One sample per array task: fastp per run, FastQC and seqkit on the raw files, STAR, samtools,
 # featureCounts at 12 settings; then, unless KEEP=1, the BAM and trimmed reads are deleted.
 set -euo pipefail
-: "${E:?}" "${PROJ:?}" "${IDX:?}" "${GTF:?}" "${BIN:?}" "${KEEP:?}" "${PILOT:?}"
+: "${E:?}" "${PROJ:?}" "${IDX:?}" "${GTF:?}" "${BIN:?}" "${KEEP:?}" "${PILOT:?}" "${CTX_REPO:?}"
 T="${SLURM_CPUS_PER_TASK:?submit with sbatch -c}"
 [ -x /usr/bin/time ] || { echo "no /usr/bin/time on $(hostname)"; exit 1; }
 FQ="/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/$PROJ/nfcore_fetchngs/results/fastq"
@@ -360,6 +381,11 @@ for s in 0 1 2; do
     fc "O_fraction_s$s" -s "$s" "${pe[@]}" -O --fraction
     fc "M_s$s" -s "$s" "${pe[@]}" -M
 done
+# One BAM's matrix is 133 MB on GENCODE 50 (pilot, 2026-10-22), nearly all annotation columns.
+# ctx.process.fc_compact keeps Geneid and counts gzipped, the columns once per project, reads
+# each compact file back against its original and only then deletes the original.
+python3 "$CTX_REPO/src/ctx/process/fc_compact.py" "$OUT/featurecounts_annotation.tsv.gz" \
+    "$P"/featurecounts/*.featureCounts.txt > "$P/featurecounts/compact.log" 2>&1
 if [ "$KEEP" = 0 ]; then rm -f "$sample.bam" "$sample.bam.bai"; rm -rf "$P/trimmed"; fi
 cd "$OUT"
 kill "$SAMPLER" 2>/dev/null || true
@@ -435,7 +461,7 @@ fi
 for p in "$@"; do
     if grep -q "^pilot_$p " jobs.txt; then echo "$p: a pilot was submitted before: $(grep "^pilot_$p " jobs.txt)"; continue; fi
     j=$(sbatch --parsable -A "$A" -c 8 --mem=48G -t 0-12:00:00 --array=1 "${dep[@]}" --chdir="$E/$p" \
-        --export=ALL,E="$E",PROJ="$p",IDX="$IDX",GTF="$GTF",BIN="$BIN",KEEP=1,PILOT=1,TASKS="$(cat "$E/$p/pilot_tasks.txt")" "$E/ed6_align.sbatch")
+        --export=ALL,E="$E",PROJ="$p",IDX="$IDX",GTF="$GTF",BIN="$BIN",CTX_REPO="$CTX_REPO",KEEP=1,PILOT=1,TASKS="$(cat "$E/$p/pilot_tasks.txt")" "$E/ed6_align.sbatch")
     echo "pilot_$p $j" | tee -a jobs.txt
 done
 squeue -u "$USER"
@@ -555,7 +581,17 @@ declare -A TIME=([tier1]= [breast_tissue]= [breast_mac]= [breast_mono]= [lung_gs
 cd "$E"
 BIN=$(cat bin.txt)
 . ./refs.txt
+CTX_REPO="$S/RNAseq_tutorial"
 [[ -s "$IDX/SA" ]] || { echo "no index at $IDX"; exit 1; }
+# The pilots ran an align script that kept the 133 MB matrices; block B1 run again rewrites it
+# with fc_compact and submits nothing new (its pilots are in jobs.txt).
+grep -q fc_compact.py ed6_align.sbatch || { echo "ed6_align.sbatch predates fc_compact: run block B1 again first"; exit 1; }
+for p in "$@"; do
+    s=$(cat "$p/pilot.txt")
+    if compgen -G "$p/runs/$s/featurecounts/*.featureCounts.txt" > /dev/null; then
+        python3 "$CTX_REPO/src/ctx/process/fc_compact.py" "$p/featurecounts_annotation.tsv.gz" "$p/runs/$s/featurecounts/"*.featureCounts.txt
+    fi
+done
 df -h /proj/nobackup/hpc2n2024-150
 prev=()
 for p in "$@"; do
@@ -569,7 +605,7 @@ for p in "$@"; do
     if grep -q "^full_$p " jobs.txt; then echo "$p: submitted before: $(grep "^full_$p " jobs.txt)"; continue; fi
     n=$(($(wc -l < "$p/tasks.tsv") - 1))
     j=$(sbatch --parsable -A "$A" -c "$C" --mem="$MEM" -t "${TIME[$p]}" --array=1-"$n"%"$N" "${prev[@]}" --chdir="$E/$p" \
-        --export=ALL,E="$E",PROJ="$p",IDX="$IDX",GTF="$GTF",BIN="$BIN",KEEP=0,PILOT=0 "$E/ed6_align.sbatch")
+        --export=ALL,E="$E",PROJ="$p",IDX="$IDX",GTF="$GTF",BIN="$BIN",CTX_REPO="$CTX_REPO",KEEP=0,PILOT=0 "$E/ed6_align.sbatch")
     echo "full_$p $j $n" | tee -a jobs.txt
     prev=(--dependency=afterany:"$j")
 done
@@ -706,12 +742,234 @@ table above, `n_p` its samples, `k_p` the pilot's kept bytes, `peak` the largest
 - copied to the Mac (ED.6d): `kept_total` less the FastQC HTML, fastp HTML, STAR's `Log.out`,
   `Log.progress.out` and `SJ.out.tab` and the logs; measured by the copy itself.
 
+## Block E (ED.6e-6). The featured sample's settings and the references, after C1
+
+Rytis decided on 2026-10-22: the featured sample's M3 teaching variants run on the cluster too,
+for each project. The local route (`ctx.process.run.run` and `align_all`) runs two of them on the
+featured sample, and block E runs both exactly as it does:
+
+- `cut`: `reference.prepare(genome, gtf, parent, half=True)` (each contig's first floor(length / 2)
+  bases, the genes that end inside), `reference.star_index`'s genomeGenerate on that half
+  (`--runThreadN <n> --genomeDir <dir> --genomeFastaFiles genome.fa --sjdbGTFfile annotation.gtf
+  --sjdbOverhang 100 --genomeSAindexNbases <sa_index_bases(half length)>`, nothing else), STAR with
+  `STAR_OPTIONS` on the trimmed reads, `align.bam_stats`, then featureCounts with the half's
+  `annotation.gtf` as `count_all` counts it, `-s <k> [-p --countReadPairs]`, at all three strands,
+  since the Mac calls the strand;
+- `untrimmed`: STAR with `STAR_OPTIONS` on the raw FASTQs (`Trimmed.raw` without a cap), and
+  `align.bam_stats`.
+
+`--multimap-max` is not here. The local route applies it to every sample's main alignment and to
+both featured alignments (`AlignOptions.multimap`), so on the cluster it would be block C1 again
+with `--outFilterMultimapNmax` added, for every sample; one featured run cannot stand for it.
+`ctx process --align-dir` refuses it, as it refuses any setting the cluster did not run. Whether
+to run that second array is Rytis's call.
+
+ctx prepares both references here, the whole one too: its `reference.json` gives the Mac page the
+genome's facts and start codons (D-039's check) without the 3.1 GB genome, and the Mac rebuilds the
+annotation lines with the same code and checks their SHA-256. ctx needs its analysis environment for
+this, so the block installs `laptop` from the committed lock beside `reads`.
+
+The featured sample is the Mac's default `--featured-sample`: the sample of the gather sheet's first
+run, printed by the same one-liner as the grid's run (block C1) with `["sample"]` in place of
+`["run_accession"]`. Read on the Mac 2026-10-22 from the sheets named in block C1: ERX6994339
+(tier1), SRX2990193 (breast_tissue), SRX4495392 (breast_mac), SRX4495339 (breast_mono); lung's once
+its root exists.
+
+Resources, none measured. The reference job: 8 cores, 48G, 4 h, estimates (M3.11's index guess,
+the half smaller; ctx's Python passes over the 3.1 GB genome unmeasured). Each featured job takes
+C1's `C` and `MEM` and `3 x` the pilot's ElapsedRaw (two alignments where the pilot ran one, with
+C1's 1.5 margin), a choice like C1's; the pilot is the project's largest sample, so it bounds the
+featured one.
+
+```
+cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
+cat > ed6e_featured.sh <<'SCRIPT'
+set -euo pipefail
+S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+E="$S/ed6_align"
+A=hpc2n2026-161
+CTX_REPO="$S/RNAseq_tutorial"
+PIXI="${PIXI_HOME:-$HOME/.pixi}/bin/pixi"
+# C1's C and MEM; TIME is 3 x each pilot's ElapsedRaw, as sbatch's D-HH:MM:SS. None is guessed.
+C=
+MEM=
+declare -A TIME=([tier1]= [breast_tissue]= [breast_mac]= [breast_mono]= [lung_gse229705]=)
+# The sample of each gather sheet's first run, read on the Mac 2026-10-22; lung's once its root exists.
+declare -A FEATURED=([tier1]=ERX6994339 [breast_tissue]=SRX2990193 [breast_mac]=SRX4495392 [breast_mono]=SRX4495339 [lung_gse229705]=)
+[[ $# -ge 1 ]] || { echo "usage: bash ed6e_featured.sh <slug> [<slug> ...]"; exit 1; }
+[[ -n "$C" && -n "$MEM" ]] || { echo "set C and MEM from the pilot first"; exit 1; }
+cd "$E" && mkdir -p logs reference && touch jobs.txt
+BIN=$(cat bin.txt)
+. ./refs.txt
+git -C "$CTX_REPO" log -1 --format='%h %s'
+PIXI_CACHE_DIR="$S/pixi_cache" "$PIXI" install --manifest-path "$CTX_REPO/pixi.toml" -e laptop --frozen
+PY="$("$PIXI" run --manifest-path "$CTX_REPO/pixi.toml" -e laptop --frozen printenv CONDA_PREFIX)/bin/python"
+"$PY" -c 'import ctx.process.reference as r; print(r.__file__)'
+
+cat > ed6_reference.sbatch <<'EOF'
+#!/usr/bin/env bash
+#SBATCH -J ed6_reference
+#SBATCH -n 1
+#SBATCH -c 8
+#SBATCH --mem=48G
+#SBATCH -t 0-04:00:00
+#SBATCH -o slurm-%x-%j.out
+# ctx's reference.prepare, whole and half, on the MD5-checked GENCODE 50 files; then
+# reference.star_index's genomeGenerate on the half, its options and nothing else.
+set -euo pipefail
+: "${E:?}" "${REFS:?}" "${BIN:?}" "${PY:?}"
+FA="$REFS/GRCh38.primary_assembly.genome.fa.gz"
+GZ="$REFS/gencode.v50.primary_assembly.annotation.gtf.gz"
+(cd "$REFS" && printf '%s  %s\n' da1a11258be075cfa7af718162c894e7 "$(basename "$FA")" 289b91e5e95e8b0450d223246f10a12e "$(basename "$GZ")" | md5sum -c -)
+/usr/bin/time -v -o "$E/logs/reference_prepare.time" "$PY" - "$FA" "$GZ" "$E/reference" <<'PY'
+import shutil, sys
+from pathlib import Path
+from ctx.process import reference
+fa, gtf, out = map(Path, sys.argv[1:])
+for name, half in (("main", False), ("cut", True)):
+    ref = reference.prepare(fa, gtf, out / "prepared", half=half)
+    (out / name).mkdir(exist_ok=True)
+    for f in ("reference.json", "ctx_manifest.json"):
+        shutil.copyfile(ref.folder / f, out / name / f)
+    bases = reference.sa_index_bases(ref.genome.length)
+    print(name, ref.folder, ref.genome.length, "bases", bases, "ATG share", ref.start_codons.share)
+    if half:
+        (out / "half.txt").write_text(f"FOLDER={ref.folder}\nBASES={bases}\n")
+PY
+. "$E/reference/half.txt"
+IDX_CUT="$E/reference/star_2.7.11b_gencode50_half"
+if [ ! -s "$IDX_CUT/SA" ]; then
+    [ ! -e "$IDX_CUT.part" ] || { echo "$IDX_CUT.part exists, from a failed build: move it aside first"; exit 1; }
+    mkdir -p "$IDX_CUT.part"
+    /usr/bin/time -v -o "$E/logs/star_index_cut.time" "$BIN/STAR" --runMode genomeGenerate --runThreadN 8 \
+        --genomeDir "$IDX_CUT.part" --genomeFastaFiles "$FOLDER/genome.fa" --sjdbGTFfile "$FOLDER/annotation.gtf" \
+        --sjdbOverhang 100 --genomeSAindexNbases "$BASES" --outFileNamePrefix "$IDX_CUT.part/"
+    mv "$IDX_CUT.part" "$IDX_CUT"
+fi
+printf 'GENOME=%s\nCUT_INDEX=%s\nCUT_GTF=%s\n' "$FA" "$IDX_CUT" "$FOLDER/annotation.gtf" > "$E/reference/inputs.txt"
+du -sb "$E/reference"/* "$IDX_CUT"
+EOF
+
+cat > ed6_featured.sbatch <<'EOF'
+#!/usr/bin/env bash
+#SBATCH -J ed6_featured
+#SBATCH -n 1
+#SBATCH -o slurm-%x-%j.out
+# The featured sample: fastp again for the trimmed reads (its JSON must equal C1's, command aside),
+# STAR untrimmed on the raw reads, STAR on the half, samtools, featureCounts on the half at -s 0, 1, 2.
+set -euo pipefail
+: "${E:?}" "${PROJ:?}" "${SAMPLE:?}" "${IDX:?}" "${BIN:?}" "${KEEP:?}" "${CTX_REPO:?}"
+. "$E/reference/inputs.txt"
+T="${SLURM_CPUS_PER_TASK:?submit with sbatch -c}"
+FQ="/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/$PROJ/nfcore_fetchngs/results/fastq"
+OUT="$E/$PROJ"
+line=$(awk -F'\t' -v s="$SAMPLE" 'NR > 1 && $1 == s' "$OUT/tasks.tsv")
+[ -n "$line" ] || { echo "$SAMPLE is in no task of $OUT/tasks.tsv"; exit 1; }
+IFS=$'\t' read -r sample mates runs r1 r2 bytes <<< "$line"
+[ -d "$OUT/runs/$sample" ] || { echo "$sample: C1 has not finished it"; exit 1; }
+D="$OUT/featured/$sample"
+P="$D.part"
+if [ -e "$D" ]; then echo "$sample: $D exists; nothing run"; exit 0; fi
+if [ -e "$P" ]; then mv "$P" "$P.failed_${SLURM_JOB_ID}"; fi
+mkdir -p "$P"/{fastp,trimmed,check} "$P"/untrimmed/{star,time} "$P"/cut/{star,featurecounts,time}
+IFS=, read -ra RUN <<< "$runs"
+IFS=, read -ra F1 <<< "$r1"
+F2=()
+if [ "$mates" = 2 ]; then IFS=, read -ra F2 <<< "$r2"; fi
+(cd "$FQ" && for f in "${F1[@]}" "${F2[@]}"; do md5sum -c "md5/$f.md5"; done) | tee "$P/check/md5.txt"
+t1=(); t2=(); u1=(); u2=()
+for i in "${!RUN[@]}"; do
+    run=${RUN[$i]}
+    given=(-i "$FQ/${F1[$i]}"); u1+=("$FQ/${F1[$i]}")
+    if [ "$mates" = 2 ]; then
+        given+=(-I "$FQ/${F2[$i]}"); u2+=("$FQ/${F2[$i]}")
+        trimmed=(-o "$P/trimmed/${run}_1.fastq.gz" -O "$P/trimmed/${run}_2.fastq.gz")
+        t1+=("$P/trimmed/${run}_1.fastq.gz"); t2+=("$P/trimmed/${run}_2.fastq.gz")
+    else
+        trimmed=(-o "$P/trimmed/$run.fastq.gz"); t1+=("$P/trimmed/$run.fastq.gz")
+    fi
+    /usr/bin/time -v -o "$P/cut/time/fastp_$run.time" "$BIN/fastp" "${given[@]}" -R "$run" -j "$P/fastp/$run.fastp.json" \
+        -h /dev/null -w "$T" -q 15 -u 40 -l 15 "${trimmed[@]}" > "$P/fastp/$run.fastp.log" 2>&1
+    python3 - "$OUT/runs/$sample/fastp/$run.fastp.json" "$P/fastp/$run.fastp.json" <<'PY' | tee -a "$P/check/fastp_equal.txt"
+import json, sys
+a, b = (json.load(open(p)) for p in sys.argv[1:])
+a.pop("command", None); b.pop("command", None)
+diff = sorted(k for k in set(a) | set(b) if a.get(k) != b.get(k))
+print(f"{sys.argv[2]}: fastp JSON equal to C1's, command aside: {not diff}; differing keys {diff}")
+sys.exit(1 if diff else 0)
+PY
+done
+join() { local IFS=,; echo "$*"; }
+star() {
+    local dir=$1 index=$2; shift 2
+    (cd "$dir" && /usr/bin/time -v -o "$dir/../time/star.time" "$BIN/STAR" --runThreadN "$T" --genomeDir "$index" --readFilesIn "$@" \
+        --readFilesCommand gzip -dcf --quantMode GeneCounts --outSAMtype BAM SortedByCoordinate --outSAMunmapped Within \
+        --outFileNamePrefix "$dir/$sample." > "$dir/$sample.star.log" 2>&1)
+    for n in Log.final.out ReadsPerGene.out.tab Aligned.sortedByCoord.out.bam; do
+        test -s "$dir/$sample.$n" || { echo "STAR exited 0 and wrote no $dir/$sample.$n"; exit 1; }
+    done
+    mv "$dir/$sample.Aligned.sortedByCoord.out.bam" "$dir/$sample.bam"
+    /usr/bin/time -v -o "$dir/../time/samtools_index.time" "$BIN/samtools" index "$dir/$sample.bam"
+    "$BIN/samtools" flagstat "$dir/$sample.bam" > "$dir/$sample.flagstat"
+    "$BIN/samtools" idxstats "$dir/$sample.bam" > "$dir/$sample.idxstats"
+}
+raw=("$(join "${u1[@]}")"); cut=("$(join "${t1[@]}")")
+if [ "$mates" = 2 ]; then raw+=("$(join "${u2[@]}")"); cut+=("$(join "${t2[@]}")"); fi
+star "$P/untrimmed/star" "$IDX" "${raw[@]}"
+star "$P/cut/star" "$CUT_INDEX" "${cut[@]}"
+pe=()
+if [ "$mates" = 2 ]; then pe=(-p --countReadPairs); fi
+for s in 0 1 2; do
+    (cd "$P/cut/star" && /usr/bin/time -v -o "$P/cut/time/fc_cut_s$s.time" "$BIN/featureCounts" -T "$T" -a "$CUT_GTF" -s "$s" "${pe[@]}" \
+        -o "$P/cut/featurecounts/cut_s$s.featureCounts.txt" "$sample.bam" > "$P/cut/featurecounts/cut_s$s.featureCounts.log" 2>&1)
+done
+# The half's annotation is another one, so its columns are kept apart from the project's.
+python3 "$CTX_REPO/src/ctx/process/fc_compact.py" "$P/cut/featurecounts_annotation.tsv.gz" \
+    "$P"/cut/featurecounts/*.featureCounts.txt > "$P/cut/featurecounts/compact.log" 2>&1
+if [ "$KEEP" = 0 ]; then rm -f "$P"/{untrimmed,cut}/star/"$sample".bam*; rm -rf "$P/trimmed"; fi
+mv "$P" "$D"
+echo "done: $sample"
+EOF
+
+ref=$(awk '$1 == "reference" {print $2}' jobs.txt | tail -n 1)
+if [[ -s reference/inputs.txt ]]; then
+    ref=
+elif [[ -z "$ref" ]] || ! squeue -h -j "$ref" 2>/dev/null | grep -q .; then
+    ref=$(sbatch --parsable -A "$A" --chdir="$E" --export=ALL,E="$E",REFS="$REFS",BIN="$BIN",PY="$PY" ed6_reference.sbatch)
+    echo "reference $ref" | tee -a jobs.txt
+fi
+for p in "$@"; do
+    [[ -n "${FEATURED[$p]:-}" && -n "${TIME[$p]:-}" ]] || { echo "set FEATURED[$p] and TIME[$p] first"; exit 1; }
+    if grep -q "^featured_$p " jobs.txt; then echo "$p: submitted before: $(grep "^featured_$p " jobs.txt)"; continue; fi
+    # After the references and C1's array for the project, whose fastp JSON the job compares.
+    full=$(awk -v k="full_$p" '$1 == k {print $2}' jobs.txt | tail -n 1)
+    conds=()
+    if [[ -n "$ref" ]]; then conds+=("afterok:$ref"); fi
+    if [[ -n "$full" ]]; then conds+=("afterany:$full"); fi
+    after=()
+    if [[ ${#conds[@]} -gt 0 ]]; then after=(--dependency="$(IFS=,; echo "${conds[*]}")"); fi
+    j=$(sbatch --parsable -A "$A" -c "$C" --mem="$MEM" -t "${TIME[$p]}" "${after[@]}" --chdir="$E/$p" \
+        --export=ALL,E="$E",PROJ="$p",SAMPLE="${FEATURED[$p]}",IDX="$IDX",BIN="$BIN",CTX_REPO="$CTX_REPO",KEEP=0 "$E/ed6_featured.sbatch")
+    echo "featured_$p $j ${FEATURED[$p]}" | tee -a jobs.txt
+done
+squeue -u "$USER"
+SCRIPT
+bash ed6e_featured.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 2>&1 | tee ed6e_featured.log
+```
+
+Paste back `ed6e_featured.log`, then, once the jobs end, the reference job's printed lines (the two
+references' lengths, SAindexNbases and ATG shares) from `slurm-ed6_reference-<job>.out`, each
+`featured/<sample>/check/fastp_equal.txt`, and `logs/*.time` and `featured/*/*/time/*.time`'s
+wall time and maximum resident set size lines. A featured job that finds a fastp JSON unlike C1's
+stops before any alignment: paste its log.
+
 ## Block D (ED.6d). On the Mac: the copy back
 
 Into each ctx root's `data/raw/<slug>_align/`, beside the `<slug>_meta/` and `<slug>_rnaseq/` folders
 ED.4b's block 6 and the earlier copies use. `ctx qc --reads --align-dir <folder>` reads its
-`tasks.tsv`, fastp JSON, FastQC zips, seqkit tables and `grid/` (ED.6e-1 to ED.6e-3); `ctx process`
-does not read it yet (ED.6e-4). No command reads it unless `--align-dir` names it. The includes are the files M2's read stage and
+`tasks.tsv`, fastp JSON, FastQC zips, seqkit tables and `grid/` (ED.6e-1 to ED.6e-3), and
+`ctx process --align-dir` its STAR and featureCounts tables (ED.6e-4, ED.6e-5); block E's featured
+sample and references come with it. No command reads it unless `--align-dir` names it. The includes are the files M2's read stage and
 M3 read (fastp JSON, FastQC zips, seqkit tables, the grid's JSON, STAR's two tables, flagstat,
 idxstats, featureCounts matrices and summaries), plus `tasks.tsv`, `versions.txt` and the `time/`
 files as the run's record, which the pages' Reproduce section needs (ED.6e-7).
@@ -726,9 +984,18 @@ copy() {
         --include='/tasks.tsv' --include='runs/*/fastp/*.fastp.json' --include='runs/*/fastqc/*_fastqc.zip' \
         --include='runs/*/seqkit/*.seqkit_stats.tsv' --include='runs/*/star/*.Log.final.out' \
         --include='runs/*/star/*.ReadsPerGene.out.tab' --include='runs/*/star/*.flagstat' --include='runs/*/star/*.idxstats' \
-        --include='runs/*/featurecounts/*.featureCounts.txt' --include='runs/*/featurecounts/*.featureCounts.txt.summary' \
-        --include='grid/*.fastp.json' --include='runs/*/time/*' --exclude='*' "$K/$1/" "$2/data/raw/$1_align/"
+        --include='/featurecounts_annotation.tsv.gz' \
+        --include='runs/*/featurecounts/*.featureCounts.tsv.gz' --include='runs/*/featurecounts/*.featureCounts.txt.summary' \
+        --include='grid/*.fastp.json' --include='runs/*/time/*' \
+        --include='featured/*/*/star/*.Log.final.out' --include='featured/*/*/star/*.ReadsPerGene.out.tab' \
+        --include='featured/*/*/star/*.flagstat' --include='featured/*/*/star/*.idxstats' \
+        --include='featured/*/cut/featurecounts_annotation.tsv.gz' \
+        --include='featured/*/cut/featurecounts/*.featureCounts.tsv.gz' --include='featured/*/cut/featurecounts/*.featureCounts.txt.summary' \
+        --include='featured/*/*/time/*' --include='featured/*/check/*' --exclude='*' "$K/$1/" "$2/data/raw/$1_align/"
     /usr/bin/rsync -av "$K/versions.txt" "$K/refs.txt" "$2/data/raw/$1_align/"
+    # Block E's references: ctx's facts of the whole and the half, never the genome copies.
+    /usr/bin/rsync -avm --include='/inputs.txt' --include='/main/' --include='/main/*.json' --include='/cut/' \
+        --include='/cut/*.json' --exclude='*' "$K/reference/" "$2/data/raw/$1_align/reference/"
     python3 - "$2/data/raw/$1_align" <<'PY'
 import csv, glob, os, sys
 d = sys.argv[1]
@@ -740,7 +1007,10 @@ print(d, f"{len(tasks)} samples, {runs} runs, {files} FASTQ files expected")
 for p, want in (("runs/*/fastp/*.fastp.json", runs), ("runs/*/fastqc/*_fastqc.zip", files),
                 ("runs/*/seqkit/*.tsv", len(tasks)), ("runs/*/star/*.Log.final.out", len(tasks)),
                 ("runs/*/star/*.ReadsPerGene.out.tab", len(tasks)), ("runs/*/star/*.flagstat", len(tasks)),
-                ("runs/*/featurecounts/*.featureCounts.txt", 12 * len(tasks)), ("grid/*.fastp.json", 36)):
+                ("runs/*/featurecounts/*.featureCounts.tsv.gz", 12 * len(tasks)), ("grid/*.fastp.json", 36),
+                ("featurecounts_annotation.tsv.gz", 1), ("featured/*/*/star/*.Log.final.out", 2),
+                ("featured/*/cut/featurecounts/*.featureCounts.tsv.gz", 3),
+                ("reference/*/reference.json", 2), ("reference/inputs.txt", 1)):
     print(f"  {p}: {count(p)} of {want}")
 print(f"  {sum(os.path.getsize(f) for f in glob.glob(f'{d}/**', recursive=True) if os.path.isfile(f))} bytes")
 PY
@@ -770,15 +1040,17 @@ place of running FastQC, fastp and seqkit (ED.6e-1 to ED.6e-3). It refuses a fol
 `tasks.tsv` and gather sheet disagree on the runs or their layout, a missing or unreadable report,
 and a fastp report run on other files or at a filter other than the command's `--fastp-*`
 settings. The grid is drawn on the sheet's first run unless `--grid-run` names another, and a
-`grid/` run on other files is refused. `ctx process` still trims, aligns and counts itself from a
-genome (`--genome`); its `--align-dir` line below waits for ED.6e-4.
+`grid/` run on other files is refused. `ctx process --align-dir` reads `<slug>_align/` (ED.6e-4,
+ED.6e-5): no `--genome`, no FASTQ, the featured sample's `cut` and `untrimmed` from block E
+(`--settings`, default `cut`). `ctx run --align-dir` passes the folder to process, which then runs
+before qc (ED.6e-8).
 
 ```
 cd /Users/rytis/Scripts/Pipeline/RNAseq_tutorial
 # After ED.6e-1 to ED.6e-3: M2 with its read stage, from the cluster's reports.
 pixi run -e laptop ctx --root ~/ctx_breast qc --dataset breast_tissue --dataset-file conf/datasets/breast_tissue.toml --rnaseq-dir ~/ctx_breast/data/raw/breast_tissue_rnaseq --reads --align-dir ~/ctx_breast/data/raw/breast_tissue_align
 # After ED.6e-4 and ED.6e-5: M3 from the cluster's alignment, never the default.
-pixi run -e laptop ctx --root ~/ctx_breast process --dataset breast_tissue --dataset-file conf/datasets/breast_tissue.toml --align-dir ~/ctx_breast/data/raw/breast_tissue_align
+pixi run -e laptop ctx --root ~/ctx_breast process --dataset breast_tissue --dataset-file conf/datasets/breast_tissue.toml --align-dir ~/ctx_breast/data/raw/breast_tissue_align --settings cut,untrimmed
 # Then M2 again, for M3.12's align stage, which reads ctx process's tables.
 pixi run -e laptop ctx --root ~/ctx_breast qc --dataset breast_tissue --dataset-file conf/datasets/breast_tissue.toml --rnaseq-dir ~/ctx_breast/data/raw/breast_tissue_rnaseq --reads --align-dir ~/ctx_breast/data/raw/breast_tissue_align
 ```
@@ -797,7 +1069,12 @@ with its own dataset file and folders.
   refuses to start without it.
 - The GENCODE `MD5SUMS` line format (`<md5>  <file>`) is assumed from GENCODE's release folders and
   M3.11's sums; block B1 stops if either grep finds no line.
-- The featured sample's extra alignments (`--settings cut,untrimmed`, `--multimap-max`) are not run
-  on the cluster: ED.6e-6.
+- `--multimap-max` is not run on the cluster: locally it changes every sample's alignment, so it
+  would be block C1 again with `--outFilterMultimapNmax`; block E says why, and `ctx process
+  --align-dir` refuses it. `cut` and `untrimmed` run in block E (ED.6e-6).
+- `ctx process --align-dir` is tested on a fixture folder laid out as block D copies it
+  (tests/process_cluster.py), single-end only, with STAR's two tables written in STAR's layout from
+  HISAT2 BAMs, since the pinned osx-arm64 STAR maps nothing (D-036). No paired cluster folder and no
+  real STAR `Log.final.out` has been read by it yet.
 - nf-core's own FastQC zips on the raw reads may already sit in each rnaseq outdir (block A counts
   them); M2's read stage runs its own FastQC, so this plan runs it again rather than map nf-core's names.

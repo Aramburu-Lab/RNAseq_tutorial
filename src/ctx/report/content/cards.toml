@@ -166,8 +166,8 @@ meaning = "Run shown in fastp's -q by -l grid. Unset: first run read."
 effect = "Pick a suspect run to see which settings keep its reads."
 
 [options."--align-dir"]
-meaning = "A cluster's report folder: `tasks.tsv` and each run's fastp, FastQC, seqkit reports."
-effect = "With --reads: reports replace FASTQ files; each run checked against the sheet."
+meaning = "Folder of a cluster's read and alignment reports, laid out by block D."
+effect = "Set: its reports replace FASTQ files; nothing is trimmed or aligned here."
 
 [options."--genome"]
 meaning = "Genome FASTA, plain or gzipped; its contig names select the [[annotation|GTF]] lines."
@@ -287,6 +287,7 @@ effect = "Moves the redrawn files; a folder inside a ctx root is refused."
 "--isoform-dir" = "Carried to gather; needs --gdc-dir and --mirna-dir."
 "--gdc-dir" = "Carried to gather, once per project the dataset file names."
 "--counts" = "Carried to gather; quant and the read stages are not run."
+"--align-dir" = "Carried to process, which then runs before qc reads its tables."
 
 [effects.qc]
 "--fetchngs-dir" = "With --reads: FASTQ paths resolve against it; nothing else there is read."
@@ -300,6 +301,7 @@ effect = "Moves the redrawn files; a folder inside a ctx root is refused."
 "--registry" = "Its strand thresholds and start-codon bands decide the calls."
 "--fastp-q" = "Higher: more unqualified bases, so fewer reads reach the aligner."
 "--fastp-l" = "Higher drops short reads, which more often align to several loci."
+"--align-dir" = "Set: the cluster's STAR, samtools and featureCounts files are read; no FASTQ."
 
 [effects.quant]
 "--rnaseq-dir" = "Its gene matrix and Salmon logs are read. Unset: give --genome."

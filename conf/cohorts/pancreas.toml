@@ -8,6 +8,6 @@ notes = "Tumour against normal pancreas also reads tissue composition: a dense s
 [[datasets]]
 slug = "pancreas_gse192647"
 step = 3
-modules = ["gather", "qc", "de", "function", "ncrna"]
+modules = ["gather", "qc", "process", "de", "function", "ncrna"]
 laptop_cap = "all"
 note = "Kim 2024: 14 resected adenocarcinomas against their normal pancreas, paired by patient, 7 MTV-low and 7 MTV-high; not yet run."

@@ -16,7 +16,7 @@ notes = "Emergency myelopoiesis: low-density against normal-density neutrophils,
 [[datasets]]
 slug = "tier1"
 step = 1
-modules = ["gather", "qc", "quant", "de", "function", "proteo", "ncrna", "genecard"]
+modules = ["gather", "qc", "process", "quant", "de", "function", "proteo", "ncrna", "genecard"]
 laptop_cap = "all"
 note = "Track B: all 210 runs, counted on the cluster by nf-core/rnaseq."
 

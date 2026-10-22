@@ -263,7 +263,7 @@ def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI optio
     ctx: typer.Context,
     dataset: Annotated[str, typer.Option(help=HELP["--dataset"])],
     dataset_file: Annotated[Path, typer.Option(help=HELP["--dataset-file"])],
-    genome: Annotated[Path, typer.Option(help=HELP["--genome"])],
+    genome: Annotated[Path | None, typer.Option(help=HELP["--genome"])] = None,
     aligner: Annotated[Aligner, typer.Option(help=HELP["--aligner"])] = Aligner.STAR,
     strandedness: Annotated[
         Strandedness, typer.Option(help=HELP["--strandedness"])
@@ -283,11 +283,13 @@ def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI optio
     ] = Fastp.cut_tail,
     cut_window: Annotated[int, typer.Option(help=HELP["--cut-window"])] = Fastp.window,
     cut_mean: Annotated[int, typer.Option(help=HELP["--cut-mean"])] = Fastp.mean,
+    align_dir: Annotated[Path | None, typer.Option(help=HELP["--align-dir"])] = None,
 ) -> None:
     """Trim, align and count every sample's reads, and test the settings that move counts (M3)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
     from ctx.process import ProcessError  # noqa: PLC0415 - same reason
     from ctx.process import run as module  # noqa: PLC0415 - heavy; after the runtime profile
+    from ctx.process.stages import Options  # noqa: PLC0415 - same reason
     from ctx.qc import QcError  # noqa: PLC0415 - same reason
     from ctx.qc.registry import RegistryError  # noqa: PLC0415 - same reason
     from ctx.tools import ToolError  # noqa: PLC0415 - same reason
@@ -295,9 +297,9 @@ def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI optio
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
     fastp = Fastp(fastp_q, fastp_u, fastp_l, cut_tail, cut_window, cut_mean)
-    options = module.Options(
+    options = Options(
         dataset_file, genome, aligner, strandedness, multimap_max, _columns(settings),
-        featured_sample, reads_per_run, compare_dataset, fetchngs_dir, registry, fastp,
+        featured_sample, reads_per_run, compare_dataset, fetchngs_dir, registry, fastp, align_dir,
     )  # fmt: skip
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
@@ -560,6 +562,7 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
     isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
     counts: Annotated[Path | None, typer.Option(help=HELP["--counts"])] = None,
+    align_dir: Annotated[Path | None, typer.Option(help=HELP["--align-dir"])] = None,
     check: Annotated[bool, typer.Option("--check/--no-check", help=HELP["--check"])] = False,
 ) -> None:
     """Run every module the dataset file declares, in course order, each as its own command."""
@@ -568,7 +571,7 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     settings = ctx.obj["settings"]
     gdc_dirs = tuple(gdc_dir or ())
     options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dirs,
-                               salmon_dir, mirna_dir, isoform_dir, counts)  # fmt: skip
+                               salmon_dir, mirna_dir, isoform_dir, counts, align_dir)  # fmt: skip
     problems, planned = pipeline.check(settings.root, options)
     for problem in problems:
         typer.echo(f"- {problem.text}", err=True)
