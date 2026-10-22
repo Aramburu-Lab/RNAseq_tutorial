@@ -354,7 +354,7 @@ def agreement(writer: Writer, tcga: "Tcga", both: mirna.Layers) -> tuple[str, Me
 def build(writer: Writer, ctx: "Context") -> tuple[list[Result], Metrics, dict[str, str]]:
     """Every TCGA group, in page order, the metrics they measured, and why any is absent."""
     tcga = ctx.inputs.tcga
-    assert tcga is not None  # noqa: S101 - page.build calls this for a GDC dataset alone
+    assert tcga is not None  # noqa: S101 - page.build calls this where small_rna finds one
     fit_group, fit, metrics = fitted(writer, ctx, tcga)
     both = mirna.layers(tcga.sheet, tcga.mature, tcga.counts)
     shift_group, found = shift(writer, ctx, tcga, fit)

@@ -297,6 +297,18 @@ def test_page_end_to_end(built):
     assert len(controls["options"]) == 5
 
 
+def test_no_small_rna_library_no_mirna_panel_and_the_page_says_why(built):
+    """ED.3: a dataset file with [ncrna] and no [ncrna.mirna] names itself as declaring no
+    small-RNA library, and its run writes no miRNA table. Mutations caught: the note naming
+    Step-1 on every dataset (before ED.3), and a miRNA panel drawn without the declaration."""
+    out, written = built
+    html = unpacked(Path(written[0]).read_text())
+    assert "ncsynth declares no small-RNA library" in html
+    assert "Step-1 has no" not in html and "Step-1 declares" not in html
+    assert "Mature miRNAs from the small-RNA libraries" not in html
+    assert not [p.name for p in out.iterdir() if "mirna" in p.name or "target" in p.name]
+
+
 def test_the_filter_figure_offers_each_preset_as_m5_counts_it(built):
     """M8 F2's control: the run's minimum count first, then the plan's presets, each kept
     share M5's own filter at that count; a higher count keeps no more genes.

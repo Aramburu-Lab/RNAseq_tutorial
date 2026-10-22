@@ -22,7 +22,7 @@ from ctx.de.results import newest
 from ctx.de.run import Writer
 from ctx.gather import gdc
 from ctx.io.naming import MODULES
-from ctx.ncrna import NcrnaError, biotypes, page, targets
+from ctx.ncrna import NcrnaError, biotypes, page, small_rna, targets
 from ctx.process.run import annotation
 from ctx.qc.checkpoint import gene_types
 from ctx.report.builder import ParameterCard
@@ -86,7 +86,8 @@ class Inputs:
         results: M5's results of the featured contrast.
         gtf: The annotation file.
         read: The input files, for the READMEs.
-        tcga: The miRNA half's inputs, for a GDC dataset; None for one without.
+        tcga: The miRNA half's inputs, where ``small_rna`` finds a small-RNA library;
+            None for a dataset that declares none.
     """
 
     spec: Dataset
@@ -160,7 +161,7 @@ def resolve(root: Path, dataset: str, options: Options) -> Inputs:
     types = gene_types(gtf) if spec.gdc is None else unversioned(gene_types(gtf))
     genes = biotypes.annotate(counts["gene_id"], types)
     matrix = counts.select(sheet["sample"].to_list()).to_numpy()
-    tcga = _tcga(root, dataset, spec, counts, types) if spec.gdc is not None else None
+    tcga = _tcga(root, dataset, spec, counts, types) if small_rna(spec) else None
     return Inputs(spec, contrast, sheet, used, genes, matrix, pl.read_parquet(results_path),
                   gtf, (sheet_path, counts_path, results_path, gtf), tcga)  # fmt: skip
 
@@ -186,10 +187,8 @@ def _tcga(root: Path, dataset: str, spec: Dataset, counts: pl.DataFrame,
               "mirna_hairpins", "genes", "samplesheet")}  # fmt: skip
     files, missing = targets.located(root, spec)
     problems += missing
-    assert spec.ncrna is not None  # noqa: S101 - resolve() refuses a file without [ncrna]
-    if spec.ncrna.mirna is None:
-        problems.append(f"{spec.path.name}: a GDC dataset's M8 needs [ncrna.mirna]")
-    if problems or spec.ncrna.mirna is None:
+    contrast = small_rna(spec)
+    if problems or contrast is None:
         raise NcrnaError("ctx ncrna cannot start the miRNA half:\n  " + "\n  ".join(problems))
     read = {what: pl.read_parquet(path) for what, path in paths.items() if path is not None}
     typed = read["genes"].join(types.select("gene_id", annotated="gene_type"), on="gene_id",
@@ -198,7 +197,7 @@ def _tcga(root: Path, dataset: str, spec: Dataset, counts: pl.DataFrame,
         raise NcrnaError(f"{differ.height:,} genes' types differ between the counts and the "
                          f"annotation, e.g. {differ['gene_id'][:3].to_list()}: another "
                          "release")  # fmt: skip
-    return Tcga(spec.ncrna.mirna, gdc.chosen(read["mirna_samplesheet"]), read["samplesheet"],
+    return Tcga(contrast, gdc.chosen(read["mirna_samplesheet"]), read["samplesheet"],
                 read["mirna_mature_counts"], read["mirna_hairpin_counts"],
                 read["mirna_hairpins"], counts, types, targets.read(files))  # fmt: skip
 

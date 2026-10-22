@@ -83,7 +83,8 @@ mirna_value = "{pct:.4f} %"
 mirna_detail = "of one library's counted reads: hairpin loci, not mature miRNAs"
 
 [notes]
-tcga = "The miRNA half, with its targets, comes with the TCGA pages: Step-1 has no small-RNA-seq library."
+# A dataset file without [ncrna.mirna] (ctx.ncrna.small_rna): the page draws no miRNA panel.
+no_small_rna = "{dataset} declares no small-RNA library, so this page draws no miRNA panel and reports no miRNA quantity. Mature miRNAs are counted from small-RNA-seq alone: size selection leaves them out of standard RNA-seq libraries."
 mirna = "miRNA genes hold at most {pct:.4f} % of a library's counted reads. These are hairpin loci counted from long fragments, never mature miRNA quantities."
 budget = "Track B: under {minutes} min and {ram_gb} GB"
 

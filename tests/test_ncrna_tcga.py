@@ -145,6 +145,52 @@ def test_mirnas_without_their_contrast_are_refused(tmp_path):
         load(path)
 
 
+def test_small_rna_libraries_outside_a_gdc_project_are_refused(tmp_path):
+    """ED.3. Catches: [ncrna.mirna] accepted where gather has no route to small-RNA libraries,
+    so ``ctx figure`` would list miRNA figures no root can hold."""
+    path = tmp_path / "x.toml"
+    path.write_text('[dataset]\nslug = "x"\n\n[[contrasts]]\nname = "c"\nvariable = "v"\n'
+                    'reference = "a"\ntested = "b"\nn = [1, 1]\n\n[ncrna]\nfeatured = "c"\n'
+                    'pairs = 1\n\n[ncrna.mirna]\nname = "m"\nvariable = "v"\nreference = "a"\n'
+                    'tested = "b"\nn = [1, 1]\n')  # fmt: skip
+    with pytest.raises(DatasetError, match=r"\[ncrna.mirna\] needs \[gdc\]"):
+        load(path)
+
+
+def test_a_gdc_dataset_without_a_small_rna_library_gets_the_biotype_half_alone(tmp_path):
+    """ED.3: [ncrna] with no [ncrna.mirna], so no small-RNA library is declared. The page draws
+    the biotype half and says miRNA needs a small-RNA library; no miRNA table, figure or
+    ``ctx figure`` kind exists. Mutations caught: the miRNA half keyed on [gdc] rather than on
+    the declaration, in the run (refused before ED.3), the page or the figure kinds."""
+    import ncrna_tcga_root  # noqa: PLC0415
+
+    from ctx.figures import kinds_m8  # noqa: PLC0415
+
+    root, spec = ncrna_tcga_root.make(tmp_path, date.today())
+    text = spec.read_text()
+    kept = text.split("[ncrna.mirna]")[0].replace(
+        f'mirnas = ["{ncrna_tcga_root.MIR_UP}", "{ncrna_tcga_root.MIR_DOWN}"]\n', ""
+    )
+    assert "mirnas" not in kept and "[ncrna]" in kept
+    spec.write_text(kept)
+    done = subprocess.run([str(CTX), "--root", str(root), "ncrna", "--dataset",
+                           ncrna_tcga_root.DATASET, "--dataset-file", str(spec)], cwd=root,
+                          capture_output=True, text=True, check=False)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    out = root / "outputs" / "08_ncrna"
+    names = sorted(p.name for p in out.iterdir())
+    assert not [n for n in names if "mirna" in n or "target" in n or "librar" in n], names
+    assert any(n.endswith("_ncrna_fakegdc_volcano_by_biotype_v1.html") for n in names)
+    (page,) = out.glob("*_ncrna_fakegdc_overview_v1.html")
+    html = unpacked(page.read_text())
+    assert "were retrieved from the NCI Genomic Data Commons" in html
+    assert "Made-up GDC declares no small-RNA library" in html
+    assert "Mature miRNAs from the small-RNA libraries" not in html
+    made = [k.figure for k in kinds_m8.KINDS if k.made(load(spec))]
+    assert made == ["biotype_shares", "filter_by_biotype", "volcano_by_biotype",
+                    "lncrna_neighbour"]  # fmt: skip
+
+
 @pytest.fixture(scope="session")
 def built(ncrna_tcga_run):
     """ctx ncrna on the made-up GDC root, the session's run: (output folder, paths printed)."""

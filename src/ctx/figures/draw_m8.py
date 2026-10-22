@@ -22,7 +22,16 @@ from ctx.de.deseq import Fit, select_samples
 from ctx.de.filters import MIN_COUNT
 from ctx.figures.recorder import Recorder
 from ctx.gather import gdc
-from ctx.ncrna import biotypes, figure_tables, libraries_page, mirna, mirna_page, page, targets
+from ctx.ncrna import (
+    biotypes,
+    figure_tables,
+    libraries_page,
+    mirna,
+    mirna_page,
+    page,
+    small_rna,
+    targets,
+)
 from ctx.ncrna.run import Inputs, Tcga
 from ctx.report.builder import FigureText
 
@@ -68,11 +77,11 @@ def _context(inputs: Mapping[str, Path], spec: Dataset) -> page.Context:
 
 def _tcga(inputs: Mapping[str, Path], spec: Dataset, counts: pl.DataFrame) -> Tcga | None:
     """The miRNA half's inputs the kind reads, as ``run._tcga`` reads them."""
-    if spec.gdc is None or spec.ncrna is None or spec.ncrna.mirna is None:
+    if (contrast := small_rna(spec)) is None:
         return None
     named = {n: inputs[n] for n in targets.RESOURCES if n in inputs}
     mirnas = _table(inputs, "mirna_samplesheet")
-    return Tcga(spec.ncrna.mirna, gdc.chosen(mirnas) if mirnas.height else mirnas,
+    return Tcga(contrast, gdc.chosen(mirnas) if mirnas.height else mirnas,
                 _table(inputs, "samplesheet"), _table(inputs, "mirna_mature_counts"), EMPTY,
                 EMPTY, counts, EMPTY, targets.read(named) if named else NO_TARGETS)  # fmt: skip
 

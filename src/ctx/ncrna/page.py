@@ -18,7 +18,7 @@ from ctx.de.sanity import decide, parse
 from ctx.de.stats import ALPHA, LFC_MIN
 from ctx.gather import gdc as gdc_reader
 from ctx.io.naming import stem
-from ctx.ncrna import biotypes, figure_tables, figures, mirna_page
+from ctx.ncrna import biotypes, figure_tables, figures, mirna_page, small_rna
 from ctx.report import text
 from ctx.report.builder import (
     FigureText,
@@ -318,12 +318,14 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     figure_tables.write(writer, ctx)
     shown, metrics = library(writer, ctx)
     tested, frame = de(writer, ctx)
-    gdc = ctx.inputs.tcga is not None
-    spec = ctx.inputs.spec.gdc
-    lead = gdc_reader.acknowledgement(spec) if gdc and spec else (word("notes.tcga"),)
+    spec = ctx.inputs.spec
+    small = small_rna(spec) is not None
+    lead = gdc_reader.acknowledgement(spec.gdc) if spec.gdc else ()
+    if not small:
+        lead += (fill("notes.no_small_rna", dataset=spec.name),)
     results: list[Result] = [*lead, *shown, tested, lncrna(writer, ctx)]
     reasons: dict[str, str] = {}
-    if gdc:
+    if small:
         found, measured, reasons = mirna_page.build(writer, ctx)
         results += found
         metrics |= measured
@@ -336,7 +338,7 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
         results.append(verdicts)
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(PAGE)
     skeleton = text.skeleton(PAGE)
-    if gdc:
+    if small:
         skeleton |= {"input": word("tcga.input"), "method": word("tcga.method")}
     built = ModulePage(
         title=fill("title", dataset=ctx.inputs.spec.name), **skeleton,

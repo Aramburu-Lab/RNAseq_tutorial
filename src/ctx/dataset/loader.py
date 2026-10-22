@@ -138,6 +138,25 @@ def _expected_counts(raw: Any, problems: list[str]) -> dict[str, dict[str, int]]
     return out
 
 
+def _routes(raw: Mapping[str, Any], gdc: GdcSpec | None, proteo: ProteoSpec | None,
+            ncrna: NcrnaSpec | None, counts: CountsSpec | None) -> list[str]:  # fmt: skip
+    """Tables that need a route into gather the file does not declare, or that clash."""
+    problems = []
+    if counts and gdc:
+        problems.append("[counts] and [gdc] are two routes into gather; keep one")
+    if "clinical" in raw and "gdc" not in raw:
+        problems.append("[clinical] needs [gdc]: M10 reads a GDC project's gather outputs")
+    # gather reads small-RNA libraries from a GDC project alone (--mirna-dir), so a file that
+    # declared them elsewhere would list miRNA figures no root can hold.
+    if ncrna and ncrna.mirna and "gdc" not in raw:
+        problems.append("[ncrna.mirna] needs [gdc]: gather reads small-RNA libraries from a "
+                        "GDC project alone")  # fmt: skip
+    if proteo and proteo.design == "tumour_normal" and not (gdc and gdc.biospecimens):
+        problems.append("proteo: the tumour_normal design needs [gdc] biospecimens, which "
+                        "gather reads for each aliquot's case and sample type")  # fmt: skip
+    return problems
+
+
 def load(path: Path) -> Dataset:
     """Read and check a dataset file.
 
@@ -192,13 +211,7 @@ def load(path: Path) -> Dataset:
     proteo = _proteo(raw["proteo"], names, resources, problems) if "proteo" in raw else None
     ncrna = _ncrna(raw["ncrna"], names, problems) if "ncrna" in raw else None
     counts_spec = _counts(raw["counts"], problems) if "counts" in raw else None
-    if counts_spec and gdc:
-        problems.append("[counts] and [gdc] are two routes into gather; keep one")
-    if "clinical" in raw and "gdc" not in raw:
-        problems.append("[clinical] needs [gdc]: M10 reads a GDC project's gather outputs")
-    if proteo and proteo.design == "tumour_normal" and not (gdc and gdc.biospecimens):
-        problems.append("proteo: the tumour_normal design needs [gdc] biospecimens, which "
-                        "gather reads for each aliquot's case and sample type")  # fmt: skip
+    problems += _routes(raw, gdc, proteo, ncrna, counts_spec)
     if problems:
         raise DatasetError(f"{path}:\n  " + "\n  ".join(problems))
     _LOADED[slug] = path
