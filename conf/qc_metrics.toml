@@ -740,7 +740,9 @@ direction = "lower"
 bands = "dataset_only"
 rationale = "The antisense lncRNAs hold 18S reads only in an unstranded library, where a read lands on either strand; in a stranded one this is a lower bound. 28S is never counted. No band until one is proposed on this definition (D-052)."
 causes = ["incomplete poly-A selection or rRNA depletion"]
-action = "flag"
+# Keep, as D-052 decided until its definition counts 18S and 28S: GENCODE 50 has no 45S gene,
+# and Rytis chose no 45S re-quantification (2026-10-22), so it is shown and never flagged.
+action = "keep"
 matters_for_de = true
 read_length_tied = false
 source = "dataset only"
