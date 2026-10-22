@@ -14,17 +14,20 @@ import subprocess
 import sys
 from pathlib import Path
 
+import polars as pl
 import pytest
 from conftest import ctx_run
-from test_kit import SCRIPT, a_root, page
+from test_kit import NEW, SCRIPT, a_root, nothing_written, page
 
 from ctx import cohorts, editions, pipeline, runtime
 from ctx.dataset import load
+from ctx.io.readme_companion import write_table
 from ctx.report import course, guide, hub, text
 from ctx.report.builder import Group, unpacked
 from ctx.report.entry import onward
 
 ROOT = Path(__file__).resolve().parents[1]
+TODAY = "2026-10-22"
 DATASETS = ROOT / "conf" / "datasets"
 # The course's ten modules, typed here so a module lost from the code or from full.toml fails.
 EVERY = ("gather", "qc", "process", "quant", "de", "function", "proteo", "ncrna", "genecard",
@@ -254,22 +257,35 @@ def _kit(tmp: Path, name: str, roots: list[str], *extra: str
     return out, done
 
 
-def _every_module_root(tmp: Path) -> Path:
-    """A root with an M7 and an M10 page beside the course's, none linked from the hub."""
+def _every_module_root(tmp: Path, edition: str | None = None) -> Path:
+    """A root with an M7 and an M10 page beside the course's, none linked from the hub.
+
+    ``edition`` stamps every page as built under it; None leaves them as pages built before
+    ED.2b, recording none.
+    """
     root = a_root(tmp / "real", "Breast tissue", "breast_tissue")
     out = root / "outputs"
     page(out / "07_proteo" / "2026-09-30_proteo_breast_tissue_overview_v1.html", "M7: Breast")
     page(out / "12_clinical" / "2026-09-30_clinical_breast_tissue_overview_v1.html", "M10: B")
     # M10 reads a gene list from a link, so a kit that ships its folder needs its entry page.
     page(out / "12_clinical" / "index.html", "M10 Clinical and survival")
+    if edition is not None:
+        _stamp(out.rglob("*.html"), edition)
     return root
+
+
+def _stamp(pages, edition: str) -> None:
+    """Record ``edition`` on each page as the builder does, on its ``<html>`` tag."""
+    for p in pages:
+        html = p.read_text().replace("<html>", f'<html {editions.PAGE_ATTRIBUTE}="{edition}">', 1)
+        p.write_text(html)
 
 
 def test_a_core_kit_ships_no_m7_or_m10_page_and_records_its_edition(tmp_path):
     """build_kit --edition core leaves the M7 and M10 folders out, lists only core rows on
     START.html, and states core in MANIFEST.json and README.md. Catches select() shipping a
     folder outside the edition, and an unrecorded edition."""
-    root = _every_module_root(tmp_path)
+    root = _every_module_root(tmp_path, "core")
     kit, done = _kit(tmp_path, "kit", [f"--real=step={root}"], "--edition", "core")
     assert done.returncode == 0, done.stderr
     shipped = {p.relative_to(kit).as_posix() for p in kit.rglob("*") if p.is_file()}
@@ -296,6 +312,7 @@ def test_a_core_kit_refuses_a_root_outside_it_and_a_link_to_m7(tmp_path):
     hub_page = next((root / "outputs" / "09_report").glob("*_hub_v1.html"))
     page(hub_page, "Course hub: Breast tissue",
          "../07_proteo/2026-09-30_proteo_breast_tissue_overview_v1.html")  # fmt: skip
+    _stamp((root / "outputs").rglob("*.html"), "core")
     kit, done = _kit(tmp_path, "kit2", [f"--real=step={root}"], "--edition", "core")
     assert done.returncode != 0 and "outside the core edition" in done.stderr
     assert not kit.exists()
@@ -319,3 +336,55 @@ def test_the_full_kit_is_the_default_kit_byte_for_byte(tmp_path):
     assert any("/07_proteo/" in p for p in _hashes(plain))
     assert any("/12_clinical/" in p for p in _hashes(plain))
     assert json.loads((plain / "MANIFEST.json").read_text())["edition"] == "full"
+
+
+def test_a_page_records_the_edition_it_was_built_under(tmp_path, monkeypatch):
+    """A hub written under core records core on its <html> tag, and so do the glossary it
+    writes and a table's README; under full, full. Catches builder.render not recording the
+    edition, or recording a fixed one."""
+    root = all_module_pages(tmp_path, "study")
+    settings = runtime.Settings("laptop", root, 1, None, 0.0)
+    for name in ("core", "full"):
+        monkeypatch.setenv(editions.EDITION_ENV, name)
+        html = hub.run(settings, (), "study")[0].read_text()
+        assert editions.recorded(html) == name
+        assert f'<html lang="en" {editions.PAGE_ATTRIBUTE}="{name}">' in html
+        (glossary_page,) = (root / "outputs" / "09_report").glob("*_report_glossary_v1.html")
+        assert editions.recorded(glossary_page.read_text()) == name
+        table = write_table(pl.DataFrame({"n": [1]}), tmp_path / name, f"{TODAY}_de_x_v1",
+                            columns={"n": ("count", "One.")}, data_releases={})  # fmt: skip
+        assert f"| Edition | {name} |" in table[-1].read_text()
+    assert editions.recorded("<html><head></head></html>") is None
+
+
+def test_a_core_kit_refuses_a_page_built_under_full_naming_it(tmp_path, monkeypatch):
+    """A core root whose hub was written again under full, by the builder, stops a core kit
+    with nothing written, naming the hub and its edition; a page recording none is refused for
+    core, with the command that rebuilds it. Mutation caught: build_kit not calling
+    other_edition (the kit not reading the edition), which shipped the full hub."""
+    root = _every_module_root(tmp_path, "core")
+    monkeypatch.delenv(editions.EDITION_ENV, raising=False)
+    settings = runtime.Settings("laptop", root, 1, None, 0.0)
+    hub_page = hub.run(settings, (), "breast_tissue")[0]
+    kit, done = _kit(tmp_path, "kit", [f"--real=step={root}"], "--edition", "core")
+    assert done.returncode != 0 and nothing_written(kit)
+    assert f"{hub_page.resolve()}: built under the full edition, not core" in done.stderr
+    old = _every_module_root(tmp_path / "old")
+    kit, done = _kit(tmp_path, "kit2", [f"--real=step={old}"], "--edition", "core")
+    assert done.returncode != 0 and nothing_written(kit)
+    gather = next((old / "outputs" / "01_gather").glob(f"{NEW}_*overview_v1.html")).resolve()
+    assert f"{gather}: records no edition" in done.stderr
+    assert "rebuild it under core (ctx --edition core)" in done.stderr
+
+
+def test_a_full_kit_of_pages_built_before_ed2b_builds_and_ships_them_unchanged(tmp_path):
+    """Pages recording no edition are full's: a full kit of them builds, and ships each page
+    byte for byte. Catches the edition check refusing old full kits."""
+    root = _every_module_root(tmp_path)
+    kit, done = _kit(tmp_path, "kit", [f"--real=step={root}"])
+    assert done.returncode == 0, done.stderr
+    shipped = sorted((kit / "step" / "outputs").rglob("*.html"))
+    assert shipped and all(editions.recorded(p.read_text()) is None for p in shipped)
+    for p in shipped:
+        assert p.read_bytes() == (root / "outputs" / p.relative_to(kit / "step" / "outputs")
+                                  ).read_bytes()  # fmt: skip

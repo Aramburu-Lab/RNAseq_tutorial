@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any
 from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
+from ctx import editions
 from ctx.report import cap, export, glossary, marks, text
 from ctx.report.figures import defaults, json_for_script, pack_json, prepare, unpack_figures
 from ctx.viz.style import (
@@ -567,6 +568,8 @@ def render(page: Page, glossary_href: str = "") -> str:
     glossary_href = page.glossary if isinstance(page, CoursePage) else glossary_href
     context: dict[str, Any] = {
         "page": page,
+        # Recorded once, here, on every page, so build_kit.py can refuse one built under another.
+        "edition": editions.active().name,
         "sections": SECTIONS,
         "ui": text.load("ui"),
         "heading": _heading(page),

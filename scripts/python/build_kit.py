@@ -33,7 +33,9 @@ anything is written.
 
 ``--edition NAME`` (``CTX_EDITION``, else full; ``ctx.editions``) ships only that edition's
 module folders, refuses a root holding a course dataset outside it, and is recorded in
-README.md and MANIFEST.json; START.html lists only its modules.
+README.md and MANIFEST.json; START.html lists only its modules. Every ctx page records the
+edition it was built under (``<html data-edition>``, ED.2b); a page of another edition stops
+the build, named with its edition, and a page recording none counts as full's.
 
 A raw GDC count matrix never ships, with what rebuilds it: ``kit_matrices.py``.
 
@@ -219,6 +221,7 @@ def select(
                      for f in m["folders"] if not gdc_sources(f)]  # fmt: skip
     kept = (chosen | found) - matrices.keys()
     problems += stale_pages(sorted(kept))
+    problems += other_edition(sorted(kept), outputs, edition)
     for p in sorted(kept):
         if p.name.lower().endswith(REFUSED):
             problems.append(f"{p}: reads or alignments never ship")
@@ -227,6 +230,26 @@ def select(
         elif (named := sources.get(check_kit.sha256(p))) is not None:
             problems.append(f"{p}: the source file {named}; derived tables ship, sources never")
     return sorted(kept), matrices, problems
+
+
+def other_edition(kept: list[Path], outputs: Path, edition: editions.Edition) -> list[str]:
+    """Each ctx page built under another edition than the kit's, naming that edition.
+
+    A ctx page is a dated page or an entry page in a module folder; MultiQC's report records
+    none. A page built before pages recorded one (ED.2b) was built under full: a full kit takes
+    it, any other refuses it, since a full hub lists M7 and M10 as not run.
+    """
+    pages = [p for p in kept if p.suffix == ".html" and p.parent.parent == outputs
+             and (naming.check(p.name) or p.name == check_kit.ENTRY)]  # fmt: skip
+    fix = f"rebuild it under {edition.name} (ctx --edition {edition.name})"
+    problems = []
+    for p in pages:
+        built = editions.recorded(p.read_text(encoding="utf-8", errors="replace"))
+        if built is None and edition.name != editions.DEFAULT:
+            problems.append(f"{p}: records no edition, built before pages recorded one; {fix}")
+        elif built is not None and built != edition.name:
+            problems.append(f"{p}: built under the {built} edition, not {edition.name}; {fix}")
+    return problems
 
 
 def _not_module(path: Path) -> bool:

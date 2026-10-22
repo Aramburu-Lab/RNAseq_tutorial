@@ -38,6 +38,10 @@ ALWAYS = ("setup", "report", "lite_build")
 WORDS = "edition"
 # An output folder, ``NN_<module>``.
 FOLDER = re.compile(r"\d{2}_(?P<module>[a-z_]+)")
+# Where a page records the edition it was built under, ``<html data-edition="core">`` (ED.2b);
+# ``builder.render`` writes it on every page and ``build_kit.py`` reads it back.
+PAGE_ATTRIBUTE = "data-edition"
+_RECORDED = re.compile(rf'<html\b[^>]*\b{PAGE_ATTRIBUTE}="(?P<name>[^"]*)"')
 
 
 class EditionError(ValueError):
@@ -95,6 +99,12 @@ class Edition:
             return text.fill(WORDS, "refused.dataset", dataset=dataset, edition=self.name,
                              path=self.path)  # fmt: skip
         return None
+
+
+def recorded(page: str) -> str | None:
+    """The edition a page records it was built under; None for a page built before ED.2b."""
+    found = _RECORDED.search(page)
+    return found["name"] if found else None
 
 
 def folder() -> Path:
