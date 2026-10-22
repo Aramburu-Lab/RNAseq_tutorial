@@ -27,6 +27,20 @@ it were reversed.
 
 ---
 
+## D-112 — Step-1's display label becomes "Non-cancerous blood", the one change to a frozen file after the record
+
+**Date:** 2026-10-22 · **Status:** decided (Rytis 2026-10-22: "change Step-1's frozen label to Non-cancerous blood - yes")
+
+**Context.** `conf/datasets/tier1.toml` is frozen since the Step-1 registration (D-013, FROZEN in tests/test_sanity_record.py), and the record exists (deliverables/2026-09-30_de_tier1_metrics_v1.csv), so registering again is no longer honest. Rytis names the core edition's datasets by what they hold: Lung tissue (LUAD), Breast tissue (BRCA), BRCA immune cells, Pancreas tissue (PAAD), and Non-cancerous blood for PRJEB49000.
+
+**Decision.** The `[dataset] label` line of tier1.toml alone changes, from "Step-1" to "Non-cancerous blood". Nothing that decides a result changes: no condition, contrast, design, filter, rule, gene list or resource; the slug `tier1` stays, so every output name and cluster folder stays.
+
+**Evidence.** The label reaches pages only through `{dataset}` placeholders; the 92 recorded metrics name their PCA spec and contrasts, never the dataset label, and "Step-1" occurs in none of the record's 93 lines (grep, 2026-10-22). The rule, the conditions and the contrasts in tier1.toml are byte-identical before and after (`git diff` shows the one line).
+
+**Consequence.** Pages built after this say "Non-cancerous blood" where they said "Step-1"; pages built before keep "Step-1" until rebuilt. Any later change to a frozen file needs its own entry like this one, naming the line and why no recorded value can move.
+
+---
+
 ## D-111 — The core edition's pages are lite: only figure and results-table cards, no controls
 
 **Date:** 2026-10-22 · **Status:** decided (Rytis 2026-10-22, the core edition; TODO.md ED.7). Departs from D-045's nine sections for the core edition only.
