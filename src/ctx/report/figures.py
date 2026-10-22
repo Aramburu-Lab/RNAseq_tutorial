@@ -13,7 +13,7 @@ import math
 import re
 import string
 import zlib
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import replace
 from typing import TYPE_CHECKING, Any
 
@@ -333,15 +333,30 @@ def prepare(
     }
 
 
+def _cutoff(controls: Mapping[str, Any]) -> dict[str, Any] | None:
+    """M6's FDR cutoff select (P2S.5): its label, presets and the build's, or None."""
+    spec = controls.get("fdr")
+    if spec is None:
+        return None
+    return {
+        "label": spec["label"],
+        "presets": list(spec["presets"]),
+        "build": f"{spec['alpha']:g}",
+        "noscript": spec.get("noscript", ""),
+    }
+
+
 # What a form prints for the kinds that only pass on parts of their settings: a view's
 # option names (D-051), M6's live ORA's words and backgrounds (GS.5), M9's checkbox sets and
 # its list from a link (E.1a).
-_SHAPED = {
+_SHAPED: dict[str, Callable[[Mapping[str, Any]], dict[str, Any]]] = {
     "view": lambda c: {"options": [o["label"] for o in c["options"]], "label": c["label"],
-                       "axes": c.get("axes", [])},  # fmt: skip
+                       "axes": c.get("axes", []), "fdr": _cutoff(c)},  # fmt: skip
     "ora": lambda c: {"words": c["words"], "backgrounds": c["backgrounds"],
                       "featured": c["featured"], "contrasts": c.get("contrasts", []),
-                      "top": c.get("top"), "alpha": c.get("alpha")},
+                      "top": c.get("top"), "alpha": c.get("alpha"), "fdr": _cutoff(c)},
+    # M6's FDR cutoff on a figure with no other control (P2S.5).
+    "fdr": lambda c: {"fdr": _cutoff(c)},
     "subset": lambda c: {"words": c["words"], "options": c["options"],
                          "scales": c.get("scales", []), "summary": c["summary"]},
     "genelist": lambda c: {"words": c["words"], "contrasts": c["contrasts"],

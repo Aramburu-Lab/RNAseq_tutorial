@@ -22,7 +22,7 @@ from ctx.de import results as m5
 from ctx.de.page import Words, every
 from ctx.de.run import Writer
 from ctx.de.stats import ALPHA
-from ctx.function import background, lite, live, running
+from ctx.function import background, cutoff, lite, live, running
 from ctx.function.page import (
     CALLS,
     PAGE,
@@ -145,9 +145,9 @@ def _ora(
     return pl.DataFrame(rows, schema=list(ORA_COLUMNS), orient="row")
 
 
-def _passing() -> tuple[str, str]:
-    """The words of a set that passes FDR < ALPHA, and of one that does not."""
-    return text.fill(PAGE, "significance.passing", alpha=ALPHA), word(PAGE, "significance.failing")
+def _passing(alpha: float = ALPHA) -> tuple[str, str]:
+    """The words of a set that passes FDR < ``alpha``, and of one that does not."""
+    return text.fill(PAGE, "significance.passing", alpha=alpha), word(PAGE, "significance.failing")
 
 
 def _labelled(frame: pl.DataFrame) -> pl.DataFrame:
@@ -155,17 +155,16 @@ def _labelled(frame: pl.DataFrame) -> pl.DataFrame:
     return frame.with_columns(label=pl.col("gene_set").map_elements(set_words, pl.String))
 
 
-def _gsea_bars(said: Words, frame: pl.DataFrame) -> BarData:
-    """NES of the sets with the smallest FDR."""
-    passing, failing = _passing()
+def _gsea_bars(said: Words, frame: pl.DataFrame, alpha: float = ALPHA) -> BarData:
+    """NES of the sets with the smallest FDR, marked at FDR < ``alpha`` (P2S.5)."""
+    passing, failing = _passing(alpha)
     top = _labelled(frame.sort("fdr", "gene_set").head(TOP_SETS)).with_columns(
-        significance=pl.when(pl.col("fdr") < ALPHA).then(pl.lit(passing))
-        .otherwise(pl.lit(failing)),
-    )  # fmt: skip
+        significance=cutoff.significance(pl.col("fdr"), alpha)
+    )
     columns = {
         **GSEA_COLUMNS,
         "label": ("none", "Set name in words."),
-        "significance": ("none", f"FDR below {ALPHA} or not."),
+        "significance": ("none", f"FDR below {alpha} or not."),
     }
     # The sets drawn, which fall short of TOP_SETS where fewer were tested.
     key = "figures.gsea.caption_one" if top.height == 1 else "figures.gsea.caption"
@@ -192,19 +191,22 @@ def _gsea_bars(said: Words, frame: pl.DataFrame) -> BarData:
     )
 
 
-def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | None:
+def _ora_bars(said: Words, frame: pl.DataFrame, background: int,
+              alpha: float = ALPHA) -> BarData | None:  # fmt: skip
     """-log10 FDR of the sets ``live.bars`` draws, a block per direction; None when none is.
 
     A direction with fewer than ``live.TOP`` passing sets adds its failing sets of smallest
     p in grey (PK.3), past which the dashed line marks FDR = ``ALPHA``. The length is FDR's
     (Rytis 2026-10-21, D-102), so a grey bar is short: Step-1's 5 grey down sets 1.6e-13.
+    ``alpha`` is the page's cutoff (P2S.5), the build's ``ALPHA``.
     """
-    top = _labelled(live.bars(frame)).unique(["label", "series"], maintain_order=True)
+    top = _labelled(live.bars(frame, alpha=alpha)).unique(["label", "series"],
+                                                          maintain_order=True)  # fmt: skip
     if top.is_empty():
         return None
     columns = {
         **ORA_COLUMNS,
-        "passes": ("none", f"FDR below {ALPHA} or not."),
+        "passes": ("none", f"FDR below {alpha} or not."),
         "series": ("none", "The calls counted; _failing where the set does not pass, grey."),
         live.LENGTH: ("-log10 FDR", "Minus log10 of the FDR, the bar's length."),
         "label": ("none", "Set name in words."),
@@ -213,8 +215,8 @@ def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | No
     # The page's own legend words (ctxOra.blocks names its traces from the same keys).
     names = {}
     for d in ("up", "down"):
-        names[d] = fill(PAGE, "live.legend.passing", family=families[d], alpha=ALPHA)
-        names[f"{d}_failing"] = fill(PAGE, "live.legend.failing", family=families[d], alpha=ALPHA)
+        names[d] = fill(PAGE, "live.legend.passing", family=families[d], alpha=alpha)
+        names[f"{d}_failing"] = fill(PAGE, "live.legend.failing", family=families[d], alpha=alpha)
     return BarData(
         frame=top,
         columns=columns,
@@ -229,17 +231,9 @@ def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | No
             "up_failing": None,
             "down_failing": None,
         },  # fmt: skip
-        caption=figure(
-            "ora",
-            "caption",
-            label=said.label,
-            calls=CALLS,
-            background=background,
-            alpha=ALPHA,
-            top=live.TOP,
-        ),  # fmt: skip
+        caption=_ora_caption(said, background, alpha),
         horizontal=True,
-        hline=(-math.log10(ALPHA), figure("ora", "line", alpha=ALPHA)),
+        hline=(-math.log10(alpha), figure("ora", "line", alpha=alpha)),
         hover=("gene_set", "p", "fdr", "hits", "size"),
         width="double",
         names=names,
@@ -247,25 +241,30 @@ def _ora_bars(said: Words, frame: pl.DataFrame, background: int) -> BarData | No
     )
 
 
-def _featured_bars(
-    featured: str, per_contrast: Mapping[str, pl.DataFrame], said: Mapping[str, Words]
-) -> BarData:
-    """One set's NES in every contrast, each contrast by its label."""
-    passing, failing = _passing()
+def _ora_caption(said: Words, background: int, alpha: float | str) -> str:
+    """The ORA bars' caption; ``cutoff.HOLE`` for ``alpha`` leaves the template the page fills."""
+    return figure("ora", "caption", label=said.label, calls=CALLS, background=background,
+                  alpha=alpha, top=live.TOP)  # fmt: skip
+
+
+def _featured_bars(featured: str, per_contrast: Mapping[str, pl.DataFrame],
+                   said: Mapping[str, Words], alpha: float = ALPHA) -> BarData:  # fmt: skip
+    """One set's NES in every contrast, each contrast by its label, marked at ``alpha``."""
+    passing, failing = _passing(alpha)
     rows = []
     for name, frame in per_contrast.items():
         found = frame.filter(pl.col("gene_set") == featured)
         if found.height:
             nes, fdr = found.row(0, named=True)["nes"], found.row(0, named=True)["fdr"]
-            rows.append((name, said[name].label, nes, fdr, passing if fdr < ALPHA else failing))
-    frame = pl.DataFrame(rows, schema=["contrast", "label", "nes", "fdr", "significance"],
-                         orient="row")  # fmt: skip
+            rows.append((name, said[name].label, nes, fdr))
+    frame = pl.DataFrame(rows, schema=["contrast", "label", "nes", "fdr"], orient="row")
+    frame = frame.with_columns(significance=cutoff.significance(pl.col("fdr"), alpha))
     columns = {
         "contrast": ("none", "Contrast."),
         "label": ("none", "The contrast in words, as the page names it."),
         "nes": GSEA_COLUMNS["nes"],
         "fdr": GSEA_COLUMNS["fdr"],
-        "significance": ("none", f"FDR below {ALPHA} or not."),
+        "significance": ("none", f"FDR below {alpha} or not."),
     }
     return BarData(
         frame=frame,
@@ -340,18 +339,22 @@ def _gsea_views(writer: Writer, featured: str, labelled: Mapping[str, Words],
     """The featured contrast's GSEA bars, with every other contrast's as a view.
 
     Work-order item 7 (D-051): passing sets run from 36 of 49 in mono_gcsf to 2 of 48 in the
-    null split (figure controls plan); nothing is recomputed in the page, and each contrast's
-    numbers are its own GSEA table beside the page.
+    null split (figure controls plan); each contrast's numbers are its own GSEA table beside
+    the page. The FDR cutoff (P2S.5) marks the view drawn again in the page, its lead counting
+    that contrast's tested sets.
     """
-    options = []
-    for name in [featured, *(n for n in e.gsea if n != featured)]:
+    options, order = [], [featured, *(n for n in e.gsea if n != featured)]
+    for name in order:
         gsea = e.gsea[name]
         ranked = _gsea_bars(labelled[name], gsea)
         drawn = (int((ranked.frame["fdr"] < ALPHA).sum()), ranked.frame.height)
         words_ = gsea_text(labelled[name], int((gsea["fdr"] < ALPHA).sum()), gsea.height, drawn)
         options.append((labelled[name].label, ranked, words_))
     block = writer.figure(options[0][1], f"gsea_{featured}", options[0][2])
-    return viewed(block, options, figure("gsea", "view")) if len(options) > 1 else block
+    block = viewed(block, options, figure("gsea", "view")) if len(options) > 1 else block
+    return cutoff.attach(
+        block, options[0][1], cutoff.gsea(options[0][1], [e.gsea[n] for n in order])
+    )
 
 
 def _featured(writer: Writer, contrast: Contrast, labelled: Mapping[str, Words],
@@ -377,6 +380,11 @@ def _featured(writer: Writer, contrast: Contrast, labelled: Mapping[str, Words],
         grey = THEMES["white"].reference
         panel["colours"] = {"up": ROLES["comparison"], "down": ROLES["reference"],
                             "all": DATA_COLOURS[0], "failing": grey}  # fmt: skip
+        panel["fdr"] = cutoff.ora(
+            _ora_caption(said, len(background), cutoff.HOLE),
+            len(background),
+            len(text.raw(PAGE, "figures.ora.reading")),
+        )
         # The redraw may name any set: a phone's layout is rebuilt for its labels (PK.4).
         bars = replace(bars, live=panel, drawable=tuple(panel["labels"].values()))
     items = (
@@ -405,8 +413,10 @@ def _page(
     tested = [n for n, table in e.gsea.items() if fn.featured_set in set(table["gene_set"])]
     if tested:
         featured_bars = _featured_bars(fn.featured_set, e.gsea, said)
-        one_set.append(writer.figure(featured_bars, f"nes_{_slug(fn.featured_set)}",
-                                     nes_text(fn.featured_set, len(tested))))  # fmt: skip
+        nes = writer.figure(
+            featured_bars, f"nes_{_slug(fn.featured_set)}", nes_text(fn.featured_set, len(tested))
+        )
+        one_set.append(cutoff.attach(nes, featured_bars, cutoff.nes(featured_bars)))
     else:
         one_set.append(fill(PAGE, "groups.untested", gene_set=set_words(fn.featured_set),
                             low=lite.MIN_SIZE, high=lite.MAX_SIZE, file=e.gmt.name))  # fmt: skip

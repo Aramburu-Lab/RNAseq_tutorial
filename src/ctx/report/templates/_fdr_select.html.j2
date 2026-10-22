@@ -1,0 +1,2 @@
+{# M6's FDR cutoff (P2S.5): the presets, the build's selected; ctxFdr marks the sets at it. #}
+{% set c = f.defaults.fdr %}<label>{{ c.label }}<select name="fdr">{% for value in c.presets %}<option value="{{ value }}"{% if value == c.build %} selected{% endif %}>{{ value }}</option>{% endfor %}</select></label>

@@ -1,0 +1,69 @@
+{% raw %}
+/* M6's FDR cutoff (P2S.5, D-109), the page twin of ctx.function.cutoff, apart from the page so
+   tests/test_fdr_page.py runs it against BarData under node. One rule: a set passes at an FDR
+   below the cutoff, strictly, as the build marks it at ALPHA. */
+var ctxFdr = {
+  /* text.fill for the words the page refills: {name}, and {name:,} with thousands separators. */
+  fill: function (template, values) {
+    return template.replace(/\{(\w+)(:,)?\}/g, function (all, key, comma) {
+      if (!Object.prototype.hasOwnProperty.call(values, key)) return all;
+      var v = values[key];
+      return comma && typeof v === "number" ? v.toLocaleString("en-US") : String(v);
+    });
+  },
+  /* A missing FDR, "" in plotly's customdata, passes no cutoff, as NaN or null fails < in the
+     build. */
+  passes: function (fdr, alpha) { return typeof fdr === "number" && fdr < alpha; },
+  count: function (fdrs, alpha) {
+    return fdrs.filter(function (f) { return ctxFdr.passes(f, alpha); }).length;
+  },
+  /* BarData.interactive's bars at another cutoff: every bar of the drawn traces, in the
+     category axis's order, the frame's, split into the passing series and the failing one,
+     each trace as BarData.trace_style draws its series (spec.levels, the passing name a
+     template of the cutoff), a series with no bar left out; then the traces that are no bars.
+     Returns the traces, showlegend as BarData sets it (more than one trace, or a line), and
+     the bars drawn and passing. */
+  mark: function (data, layout, spec, alpha) {
+    var axis = spec.horizontal ? layout.yaxis : layout.xaxis, at = Object.create(null);
+    var others = [], split = [[], []], out = [];
+    data.forEach(function (t) {
+      if (t.type !== "bar") { others.push(t); return; }
+      for (var i = 0; i < t.x.length; i++) {
+        at[spec.horizontal ? t.y[i] : t.x[i]] = { x: t.x[i], y: t.y[i], c: t.customdata[i] };
+      }
+    });
+    axis.categoryarray.forEach(function (category) {
+      var p = at[category];
+      if (p) split[ctxFdr.passes(p.c[spec.at], alpha) ? 0 : 1].push(p);
+    });
+    split.forEach(function (points, k) {
+      if (!points.length) return;
+      var level = spec.levels[k], values = { alpha: alpha };
+      out.push({ type: "bar", name: ctxFdr.fill(level.name, values),
+                 orientation: level.orientation, marker: JSON.parse(JSON.stringify(level.marker)),
+                 hovertemplate: ctxFdr.fill(level.hovertemplate, values),
+                 x: points.map(function (p) { return p.x; }),
+                 y: points.map(function (p) { return p.y; }),
+                 customdata: points.map(function (p) { return p.c; }) });
+    });
+    var traces = out.concat(others);
+    return { data: traces, showlegend: traces.length > 1 || (layout.shapes || []).length > 0,
+             drawn: split[0].length + split[1].length, passing: split[0].length };
+  },
+  /* The reading line that names what the highlight separates, by how many bars drawn pass:
+     every one, none or some (page.gsea_text's choice). */
+  reading: function (spec, drawn, passing, alpha) {
+    var which = passing === drawn ? "all" : passing === 0 ? "no" : "some";
+    return ctxFdr.fill(spec.reading[which], { alpha: alpha });
+  },
+  /* The dashed line at the cutoff, as BarData's hline draws it at ALPHA: the first shape,
+     at -log10 of the cutoff, its legend name filled. */
+  line: function (shapes, template, alpha) {
+    return shapes.map(function (s, i) {
+      if (i) return s;
+      var at = -Math.log10(alpha);
+      return Object.assign({}, s, { x0: at, x1: at, name: ctxFdr.fill(template, { alpha: alpha }) });
+    });
+  }
+};
+{% endraw %}

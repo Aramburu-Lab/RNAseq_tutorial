@@ -341,6 +341,26 @@ class BarData:
             refit_y_title(fig, ax, self._value_title())
         return fig
 
+    def trace_style(self, level: str) -> dict[str, Any]:
+        """One series' bar trace as ``interactive`` draws it, points aside, whether drawn or not.
+
+        ``ctxFdr.mark`` redraws M6's bars marked by FDR at another cutoff from these, a series
+        the build left empty included (P2S.5).
+        """
+        schema = self.frame.schema
+        value = hover_field("x" if self.horizontal else "y", schema[self.value])
+        hover = [f"{self.category_label}: %{{{'y' if self.horizontal else 'x'}}}"]
+        hover += [f"{self._value_title()}: {value}"]
+        hover += [f"{self._label(c)}: {hover_field(f'customdata[{i}]', schema[c])}"
+                  for i, c in enumerate(self.hover)]  # fmt: skip
+        first = f"{self._label(self.series)}: {self._name(level)}"
+        return {
+            "name": self._name(level), "orientation": "h" if self.horizontal else "v",
+            "marker": {"color": self.colours[level] or THEMES["white"].reference,
+                       "line": {"width": LINE_WIDTHS["marker_edge"]}},
+            "hovertemplate": "<br>".join([first, *hover]) + "<extra></extra>",
+        }  # fmt: skip
+
     def interactive(self) -> Any:
         """Render the plotly figure; hover shows category, series, value and ``hover``.
 
@@ -349,12 +369,7 @@ class BarData:
         """
         import plotly.graph_objects as go  # noqa: PLC0415 - heavy; imported after the profile
 
-        light, schema = THEMES["white"], self.frame.schema
-        value = hover_field("x" if self.horizontal else "y", schema[self.value])
-        hover = [f"{self.category_label}: %{{{'y' if self.horizontal else 'x'}}}"]
-        hover += [f"{self._value_title()}: {value}"]
-        hover += [f"{self._label(c)}: {hover_field(f'customdata[{i}]', schema[c])}"
-                  for i, c in enumerate(self.hover)]  # fmt: skip
+        light = THEMES["white"]
         fig = go.Figure()
         for level in self.colours:
             rows = self.frame.filter(pl.col(self.series) == level)
@@ -362,17 +377,8 @@ class BarData:
                 continue
             axes = (rows[self.value].to_list(), [str(c) for c in rows[self.category]])
             x, y = axes if self.horizontal else axes[::-1]
-            fig.add_trace(
-                go.Bar(
-                    x=x, y=y, name=self._name(level), orientation="h" if self.horizontal else "v",
-                    marker={"color": self.colours[level] or light.reference,
-                            "line": {"width": LINE_WIDTHS["marker_edge"]}},
-                    customdata=hover_rows(rows, self.hover),
-                    hovertemplate="<br>".join([f"{self._label(self.series)}: {self._name(level)}",
-                                               *hover])
-                    + "<extra></extra>",
-                )
-            )  # fmt: skip
+            fig.add_trace(go.Bar(x=x, y=y, customdata=hover_rows(rows, self.hover),
+                                 **self.trace_style(level)))  # fmt: skip
         # Shapes, in rules() order, named in the legend as the static figure names them; the
         # page script moves the median's shape (controls()["median_shape"]).
         add = fig.add_vline if self.horizontal else fig.add_hline

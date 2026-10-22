@@ -25,6 +25,7 @@ from ctx.dataset import load
 from ctx.function import lite, live
 from ctx.function.page import set_words
 from ctx.report import genes, text
+from ctx.viz.style import THEMES
 
 pytestmark = pytest.mark.skipif(CHROMIUM is None, reason="no Chromium; set CTX_CHROMIUM")
 # Tick the picker's first `n` genes, or press a call button; `before` runs first.
@@ -107,6 +108,30 @@ HALLMARK = (
     "ADIPOGENESIS", "ALLOGRAFT_REJECTION", "COAGULATION", "COMPLEMENT", "HYPOXIA",
     "G2M_CHECKPOINT",
 )  # fmt: skip
+# After the six genes arrive, the FDR cutoff (P2S.5) at three presets, each read as SEEN reads
+# the bars, left at 0.01 for the PDF and SVG buttons.
+CUTS = ("0.1", "0.001", "0.01")
+CUT = """(async () => {
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+  const form = document.querySelector('form.ora'), fig = form.closest('.fig');
+  const d = fig.querySelector('.js-plotly-plot'), out = {};
+  for (const cut of CUTS) {
+    form.elements.fdr.value = cut;
+    form.elements.fdr.dispatchEvent(new Event('change', {bubbles: true}));
+    await wait(400);
+    out[cut] = {notes: fig.querySelector('.ora-notes').textContent,
+      summary: fig.querySelector('.ora-summary').textContent,
+      lead: fig.querySelector('.fig-lead').textContent,
+      bars: d.data.filter(t => t.type === 'bar').map(t => ({name: t.name, colour: t.marker.color,
+        y: Array.from(t.y), x: Array.from(t.x)})),
+      shapes: (d.layout.shapes || []).map(s => ({x0: s.x0, x1: s.x1, name: s.name})),
+      moved: !!fig.querySelector('a[data-export][role=button]'),
+      lefts: Array.from(d.querySelectorAll('.yaxislayer-above .ytick text')).map(
+        t => t.getBoundingClientRect().left),
+      box: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth};
+  }
+  return out;
+})()""".replace("CUTS", repr(list(CUTS)))
 GREY_SVG = re.compile(r"fill:\s*rgb\(140,\s*140,\s*140\)|fill=\"#8c8c8c\"", re.IGNORECASE)
 
 
@@ -155,7 +180,9 @@ def ran(tmp_path_factory):
     (m6,) = (m5.parents[1] / "06_function").glob("*_function_desynth_overview_v1.html")
     built = [{"name": n, "url": m6.as_uri(), "width": w, "height": h, "scheme": c, "act": SEEN}
              for n, (w, h, c) in BUILT.items()]  # fmt: skip
-    tasks = [*(_task(name, m5) for name in SIZES), _task("beside", m5, beside=True),
+    cut = [{**t, "name": f"cut_{t['name']}", "mouse": [*t["mouse"], {"at": "[]", "then": CUT}]}
+           for t in (_task(name, m5) for name in SIZES)]  # fmt: skip
+    tasks = [*(_task(name, m5) for name in SIZES), *cut, _task("beside", m5, beside=True),
              _task("many", m5, 0, up), _task("refused", m5, before=REFUSED), *built]  # fmt: skip
     downloads = tmp_path_factory.mktemp("downloads")
     return m5, downloads, _browse(tasks, downloads)
@@ -174,7 +201,7 @@ def _where(seen: dict) -> tuple:
     return seen["top"], seen["window"], seen["scrolled"]
 
 
-def _expected(m5, names: list[str], tmp_path) -> pl.DataFrame:
+def _expected(m5, names: list[str], tmp_path, alpha: float = live.ALPHA) -> pl.DataFrame:
     """``live.bars`` of the picked genes, as ``ctx function --genes-from`` tests the list."""
     root = m5.parents[2]
     spec = load(DE_SPEC)
@@ -182,14 +209,14 @@ def _expected(m5, names: list[str], tmp_path) -> pl.DataFrame:
     sets = lite.read_gmt(root / spec.resource("sets").dest)
     listed = tmp_path / "list.txt"
     listed.write_text("\n".join(names) + "\n")
-    return live.bars(live.listed(listed, pl.read_parquet(path), sets))
+    return live.bars(live.listed(listed, pl.read_parquet(path), sets), alpha=alpha)
 
 
-def _legend(series: str) -> str:
+def _legend(series: str, alpha: float = live.ALPHA) -> str:
     family, _, failing = series.partition("_")
     words = text.raw("function", "live.families")
     key = "live.legend.failing" if failing else "live.legend.passing"
-    return text.fill("function", key, family=words[family], alpha=live.ALPHA)
+    return text.fill("function", key, family=words[family], alpha=alpha)
 
 
 def test_a_clicked_link_shows_the_genes_on_m6(ran):
@@ -337,3 +364,48 @@ def test_a_desktop_labels_every_set(ran, name):
     overlaps = [(a["text"], b["text"]) for a, b in pairwise(rows) if b["top"] < a["bottom"]]
     assert overlaps == [], overlaps
     assert got["scroll"] <= got["box"], (got["scroll"], got["box"])
+
+
+@pytest.mark.parametrize("name", list(SIZES))
+def test_the_six_genes_follow_each_fdr_cutoff(ran, name, tmp_path):
+    """The six genes, then the FDR cutoff at 0.1, 0.001 and 0.01 (P2S.5): each draws the sets
+    ``live.bars`` draws at it, grey where they fail it, the dashed line at -log10 of it named
+    for it, the summary's count and grey sentence at it, the list kept; the PDF and SVG at 0.01
+    are that view. At 1,280 and 375 px, light and dark, no label off screen, no sideways scroll.
+
+    Mutations caught: the twin's comparison <= in place of <; the cutoff dropping the list for
+    the build's calls; the line left at 0.05; the export drawn at the build's cutoff."""
+    m5, downloads, results = ran
+    seen = results[f"cut_{name}"]
+    assert seen["errors"] == []
+    names = seen["acted"]["names"]
+    assert sorted(_listed(seen["moused"][0]["notes"])) == sorted(names)
+    walk = seen["moused"][1]
+    for cut in CUTS:
+        alpha, got = float(cut), walk[cut]
+        want = _expected(m5, names, tmp_path, alpha)
+        drawn = {(b["name"], label) for b in got["bars"] for label in b["y"]}
+        assert drawn == {
+            (_legend(s, alpha), set_words(g))
+            for s, g in zip(want["series"], want["gene_set"], strict=True)
+        }, cut
+        for bar in got["bars"]:
+            assert (bar["colour"] == THEMES["white"].reference) == ("not passing" in bar["name"])
+        assert got["shapes"] == [{"x0": pytest.approx(-math.log10(alpha)),
+                                  "x1": pytest.approx(-math.log10(alpha)),
+                                  "name": f"FDR {cut}"}], got["shapes"]  # fmt: skip
+        failing = int((~want["passes"]).sum())
+        if failing:
+            assert text.fill("function", "live.grey", failing=failing, alpha=alpha,
+                             top=live.TOP) in got["summary"], got["summary"]  # fmt: skip
+        assert f"set results pass FDR < {cut}," in got["summary"]
+        assert got["summary"].startswith("The list of the link: 6 genes")
+        assert sorted(_listed(got["notes"])) == sorted(names)
+        assert got["moved"] and got["scroll"] <= got["box"], (got["scroll"], got["box"])
+        assert all(left >= 0 for left in got["lefts"]), got["lefts"]
+    files = seen["files"]
+    assert files["svg"]["name"].endswith("_view.svg"), files
+    svg = (downloads / files["svg"]["guid"]).read_text()
+    legend = [html.unescape(s) for s in re.findall(r'class="legendtext"[^>]*>([^<]*)', svg)]
+    assert legend == [b["name"] for b in walk["0.01"]["bars"]] + ["FDR 0.01"], legend
+    assert (downloads / files["pdf"]["guid"]).read_bytes().startswith(b"%PDF")

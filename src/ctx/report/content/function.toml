@@ -90,6 +90,13 @@ nes_detail = "FDR {fdr}, {label}"
 [fdr]
 zero = "0 (no null score as extreme)"
 
+# The FDR cutoff a reader picks on each figure that marks sets by FDR (P2S.5, D-109); the
+# build marks them at {build}, the presets are the volcano's.
+[cutoff]
+label = "FDR cutoff"
+moved = "Sets marked at FDR < {alpha}; the figure files mark them at FDR < {build}."
+noscript = "Moving the FDR cutoff needs JavaScript; the tables beside the page hold every set's FDR."
+
 [significance]
 passing = "FDR < {alpha}"
 failing = "not significant"
@@ -219,7 +226,7 @@ union = "gene-set union and tested genes (the background trap)"
 contrast = "Calls of"
 contrast_calls = "The calls of {label}"
 sets = "Sets drawn"
-sets_passing = "Those passing FDR < {alpha}, filled to {top} by p"
+sets_passing = "Those passing the FDR cutoff, filled to {top} by p"
 sets_top = "The {top} smallest p of each family"
 summary = "{source}: {n} genes, {up} up and {down} down, tested against {background}, {size} symbols; {passing} set results pass FDR < {alpha}, BH per family. Lists tested on this page: {tries}; no correction runs across them."
 # PK.3: the sets drawn in grey, and a list no set holds.
@@ -232,6 +239,12 @@ pasted_found = "{n} pasted names are symbols on this page; names matching none: 
 hover = "%{customdata[0]}<br>p %{customdata[4]:.2g}<br>FDR %{customdata[1]:.2g}<br>%{customdata[2]} of %{customdata[3]} set genes in the list"
 columns = "calls\tgene_set\tsize\thits\texpected\tp\tfdr\tgenes"
 noscript = "Testing a gene list needs JavaScript; ctx function --genes-from tests a saved list."
+
+# The lead at another FDR cutoff (P2S.5) where one family is tested; "each" is figures.ora.lead.
+[live.leads]
+up = "{up} gene sets pass FDR < {alpha} on the up calls."
+down = "{down} gene sets pass FDR < {alpha} on the down calls."
+all = "{all} gene sets pass FDR < {alpha} on the list as one family."
 
 [live.directions]
 each = "Up and down, each its own family"
