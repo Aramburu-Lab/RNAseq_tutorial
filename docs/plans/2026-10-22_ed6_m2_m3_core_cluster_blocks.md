@@ -183,7 +183,7 @@ Takes the projects to pilot as arguments, so lung runs later by the same script.
 `ed6_align/<slug>/tasks.tsv`, and at most one index job and one pilot job per project.
 
 ```
-cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
+mkdir -p /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align && cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
 cat > ed6b_1_pilot.sh <<'SCRIPT'
 set -euo pipefail
 S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
