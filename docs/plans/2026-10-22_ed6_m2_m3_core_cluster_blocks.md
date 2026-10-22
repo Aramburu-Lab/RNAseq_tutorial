@@ -459,8 +459,10 @@ if [[ ! -s "$IDX/SA" ]]; then
     dep=(--dependency=afterok:"$old")
 fi
 for p in "$@"; do
+    # A project the loop above skipped has no pilot task list (2026-10-22: lung and pancreas got empty pilots).
+    [[ -s "$E/$p/pilot_tasks.txt" ]] || continue
     if grep -q "^pilot_$p " jobs.txt; then echo "$p: a pilot was submitted before: $(grep "^pilot_$p " jobs.txt)"; continue; fi
-    j=$(sbatch --parsable -A "$A" -c 8 --mem=48G -t 0-12:00:00 --array=1 "${dep[@]}" --chdir="$E/$p" \
+    j=$(sbatch --parsable -A "$A" -c 8 --mem=56G -t 0-12:00:00 --array=1 "${dep[@]}" --chdir="$E/$p" \
         --export=ALL,E="$E",PROJ="$p",IDX="$IDX",GTF="$GTF",BIN="$BIN",CTX_REPO="$CTX_REPO",KEEP=1,PILOT=1,TASKS="$(cat "$E/$p/pilot_tasks.txt")" "$E/ed6_align.sbatch")
     echo "pilot_$p $j" | tee -a jobs.txt
 done
@@ -572,11 +574,11 @@ set -euo pipefail
 S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
 E="$S/ed6_align"
 A=hpc2n2026-161
-# Set from ed6b_2_report.log (ED.6c's rules); none is guessed.
-C=
-MEM=
-N=
-declare -A TIME=([tier1]= [breast_tissue]= [breast_mac]= [breast_mono]= [lung_gse229705]= [pancreas_gse192647]=)
+# Set from ed6b_2_report.log (ED.6c's rules) on 2026-10-22; N=20 is a choice, the disk allowed 167.
+C=8
+MEM=56G
+N=20
+declare -A TIME=([tier1]=0-01:32:00 [breast_tissue]=0-00:27:00 [breast_mac]=0-01:22:00 [breast_mono]=0-00:58:00 [lung_gse229705]= [pancreas_gse192647]=)
 [[ -n "$C" && -n "$MEM" && -n "$N" ]] || { echo "set C, MEM and N from the pilot first"; exit 1; }
 cd "$E"
 BIN=$(cat bin.txt)
@@ -742,6 +744,112 @@ table above, `n_p` its samples, `k_p` the pilot's kept bytes, `peak` the largest
 - copied to the Mac (ED.6d): `kept_total` less the FastQC HTML, fastp HTML, STAR's `Log.out`,
   `Log.progress.out` and `SJ.out.tab` and the logs; measured by the copy itself.
 
+## Block C4 (ED.6c). Run 2026-10-22 16:17: lung and pancreas unattended, block E for four
+
+Block B1's rerun at 16:10 skipped lung and pancreas as still downloading, but its submit loop sent
+each a pilot with no task list (48051523, 48051524). This block cancelled them, moved their lines
+to `jobs_cancelled.txt`, patched the cluster's `ed6b_1_pilot.sh` as block B1 above now reads, and
+ran block E with the values above. For lung and pancreas it queued one 1-core job per project
+after its download (48041315, 48047926): B1 for that project, then, after the pilot, C1 with
+`TIME` from the pilot's sacct by C1's rule (1.5 x ElapsedRaw, rounded up), refusing if the
+pilot's MaxRSS x 1.25 exceeds 56G. Their grids and block E wait for their Mac roots.
+
+```
+cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
+cat > ed6_overnight.sh <<'NIGHT'
+set -euo pipefail
+S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+E="$S/ed6_align"
+A=hpc2n2026-161
+D="$S/RNAseq_tutorial/docs/plans/2026-10-22_ed6_m2_m3_core_cluster_blocks.md"
+cd "$E"
+command -v flock > /dev/null || { echo "no flock on this node"; exit 1; }
+# 1. B1 skipped lung and pancreas as still downloading, but its submit loop still sent each a
+# pilot with no task list. Cancel them and move their lines aside, so B1 sends them again.
+scancel 48051523 48051524 || true
+cp jobs.txt jobs.txt.before_overnight
+grep -E '^pilot_(lung_gse229705|pancreas_gse192647) ' jobs.txt >> jobs_cancelled.txt || true
+grep -vE '^pilot_(lung_gse229705|pancreas_gse192647) ' jobs.txt > jobs.txt.new
+mv jobs.txt.new jobs.txt
+for p in lung_gse229705 pancreas_gse192647; do
+    # A task list written mid-download would be reused by B1 and C1 as if it were complete.
+    if [[ -e "$p/tasks.tsv" ]]; then mv "$p/tasks.tsv" "$p/tasks.tsv.before_download_$(date +%Y%m%d%H%M)"; fi
+done
+# 2. B1 fixed: the submit loop skips a project with no pilot task list; pilots get C1's 56G.
+python3 - ed6b_1_pilot.sh <<'PY'
+import sys
+path = sys.argv[1]
+text = open(path).read()
+loop = '    if grep -q "^pilot_$p " jobs.txt; then'
+guard = '    [[ -s "$E/$p/pilot_tasks.txt" ]] || continue\n'
+mem_old, mem_new = "-c 8 --mem=48G -t 0-12:00:00", "-c 8 --mem=56G -t 0-12:00:00"
+if guard + loop not in text:
+    assert text.count(loop) == 1 and text.count(mem_old) == 1, "ed6b_1_pilot.sh is not the version this patch expects"
+    text = text.replace(loop, guard + loop).replace(mem_old, mem_new)
+    open(path, "w").write(text)
+print("ed6b_1_pilot.sh: skip guard and 56G in place")
+PY
+# 3. Block E for the four projects: C1's C and MEM, TIME 3 x each pilot's ElapsedRaw.
+awk -v s="cat > ed6e_featured.sh <<'SCRIPT'" '$0 == s {on=1} on {print} on && /^SCRIPT$/ {exit}' "$D" > write_ed6e_featured.sh
+bash write_ed6e_featured.sh
+sed -i -e 's/^C=$/C=8/' -e 's/^MEM=$/MEM=56G/' \
+    -e 's/\[tier1\]= \[breast_tissue\]= \[breast_mac\]= \[breast_mono\]=/[tier1]=0-03:03:00 [breast_tissue]=0-00:54:00 [breast_mac]=0-02:44:00 [breast_mono]=0-01:56:00/' ed6e_featured.sh
+grep -nE '^(C|MEM)=|declare -A TIME' ed6e_featured.sh
+bash ed6e_featured.sh tier1 breast_tissue breast_mac breast_mono 2>&1 | tee ed6e_featured.log
+# 4. Lung and pancreas unattended: after the download, B1 (task list, pilot); after the pilot,
+# C1 with TIME from the pilot's sacct by C1's rule. Each step is a 1-core job.
+cat > ed6_after_download.sh <<'EOF'
+set -euo pipefail
+p=$1
+S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+E="$S/ed6_align"
+A=hpc2n2026-161
+cd "$E"
+for v in ${!SLURM_@}; do unset "$v"; done
+[[ -f "$S/$p/nfcore_fetchngs/results.complete" ]] || { echo "$p: no results.complete"; exit 1; }
+flock "$E/b1.lock" bash ed6b_1_pilot.sh "$p" 2>&1 | tee "logs/ed6b_1_pilot_$p.log"
+pid=$(awk -v k="pilot_$p" '$1 == k {print $2}' jobs.txt | tail -n 1)
+[[ -n "$pid" ]] || { echo "$p: B1 submitted no pilot"; exit 1; }
+j=$(sbatch --parsable -A "$A" -c 1 --mem=4G -t 0-01:00:00 -J ed6_full_plan --dependency=afterok:"$pid" \
+    --chdir="$E" -o "$E/logs/ed6_full_plan_${p}_%j.out" --wrap "bash $E/ed6_full_after_pilot.sh $p")
+echo "plan_$p $j" | tee -a jobs.txt
+EOF
+cat > ed6_full_after_pilot.sh <<'EOF'
+set -euo pipefail
+p=$1
+E=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/ed6_align
+cd "$E"
+for v in ${!SLURM_@}; do unset "$v"; done
+pid=$(awk -v k="pilot_$p" '$1 == k {print $2}' jobs.txt | tail -n 1)
+el=$(sacct -n -X -P -j "$pid" --format=ElapsedRaw | head -n 1)
+rss=$(sacct -n -P -j "$pid" --format=MaxRSS | sed -n 's/K$//p' | sort -n | tail -n 1)
+[[ -n "$el" && -n "$rss" ]] || { echo "$p: pilot $pid has no ElapsedRaw or no MaxRSS in K"; exit 1; }
+# C1's MEM rule over this pilot too: its MaxRSS x 1.25 must fit C1's 56G.
+(( rss * 5 / 4 <= 56 * 1024 * 1024 )) || { echo "$p: pilot MaxRSS ${rss}K x 1.25 is over 56G; set MEM by hand"; exit 1; }
+m=$(( (el * 3 + 119) / 120 ))
+T=$(printf '%d-%02d:%02d:00' $((m / 1440)) $((m % 1440 / 60)) $((m % 60)))
+echo "$p: pilot $pid ElapsedRaw $el s, MaxRSS ${rss}K; TIME $T (1.5 x ElapsedRaw, rounded up)"
+sed "s/\[$p\]=\([ )]\)/[$p]=$T\1/" ed6c_1_full.sh > "ed6c_1_full_$p.sh"
+grep -n 'declare -A TIME' "ed6c_1_full_$p.sh"
+flock "$E/b1.lock" bash "ed6c_1_full_$p.sh" "$p" 2>&1 | tee "logs/ed6c_1_full_$p.log"
+EOF
+declare -A DL=([lung_gse229705]=48041315 [pancreas_gse192647]=48047926)
+for p in lung_gse229705 pancreas_gse192647; do
+    dep=()
+    if squeue -h -j "${DL[$p]}" 2>/dev/null | grep -q .; then
+        dep=(--dependency=afterok:"${DL[$p]}")
+    elif [[ ! -f "$S/$p/nfcore_fetchngs/results.complete" ]]; then
+        echo "$p: download job ${DL[$p]} has left the queue without results.complete; read its log"; continue
+    fi
+    j=$(sbatch --parsable -A "$A" -c 1 --mem=4G -t 0-02:00:00 -J ed6_after_dl "${dep[@]}" --chdir="$E" \
+        -o "$E/logs/ed6_after_dl_${p}_%j.out" --wrap "bash $E/ed6_after_download.sh $p")
+    echo "after_dl_$p $j" | tee -a jobs.txt
+done
+squeue -u "$USER"
+NIGHT
+bash ed6_overnight.sh 2>&1 | tee ed6_overnight.log
+```
+
 ## Block E (ED.6e-6). The featured sample's settings and the references, after C1
 
 Rytis decided on 2026-10-22: the featured sample's M3 teaching variants run on the cluster too,
@@ -791,9 +899,9 @@ A=hpc2n2026-161
 CTX_REPO="$S/RNAseq_tutorial"
 PIXI="${PIXI_HOME:-$HOME/.pixi}/bin/pixi"
 # C1's C and MEM; TIME is 3 x each pilot's ElapsedRaw, as sbatch's D-HH:MM:SS. None is guessed.
-C=
-MEM=
-declare -A TIME=([tier1]= [breast_tissue]= [breast_mac]= [breast_mono]= [lung_gse229705]=)
+C=8
+MEM=56G
+declare -A TIME=([tier1]=0-03:03:00 [breast_tissue]=0-00:54:00 [breast_mac]=0-02:44:00 [breast_mono]=0-01:56:00 [lung_gse229705]=)
 # The sample of each gather sheet's first run, read on the Mac 2026-10-22; lung's once its root exists.
 declare -A FEATURED=([tier1]=ERX6994339 [breast_tissue]=SRX2990193 [breast_mac]=SRX4495392 [breast_mono]=SRX4495339 [lung_gse229705]=)
 [[ $# -ge 1 ]] || { echo "usage: bash ed6e_featured.sh <slug> [<slug> ...]"; exit 1; }
