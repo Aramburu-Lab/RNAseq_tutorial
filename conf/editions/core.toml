@@ -13,3 +13,8 @@ modules = ["gather", "qc", "process", "quant", "de", "function", "ncrna", "genec
 # halves of PRJNA483877. lung_gse229705 is PRJNA955664 (TODO.md ED.4).
 datasets = ["tier1", "tier1_teach", "four_runs", "breast_tissue", "breast_mac", "breast_mono",
             "lung_gse229705"]
+# Lite pages (Rytis 2026-10-22, D-111): each module page shows only its figure cards (title,
+# figure, caption, PDF, SVG and CSV) and its results tables; no sections, Reproduce, check
+# tables or page controls. controls = true puts the controls back on those cards.
+page = "lite"
+controls = false

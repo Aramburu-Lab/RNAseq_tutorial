@@ -5,6 +5,9 @@ page (one figure with its reading guide, caption and data), a module report with
 sections of the report skeleton (CONVENTIONS.md, HTML reports), the course hub, the course home
 page and the glossary page. A page that marks a glossary term links the glossary page and
 embeds the tooltips of the terms it marks, and writing it writes the glossary too (D-048).
+
+The selected edition decides how a page is shown (``look``, D-111): a lite page keeps only its
+figure cards and results tables, and a page without controls keeps no form, panel or tab.
 """
 
 import base64
@@ -13,13 +16,14 @@ import gzip
 import hashlib
 import re
 from collections.abc import Iterable, Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
+from ctx import editions
 from ctx.report import cap, export, glossary, marks, text
 from ctx.report.figures import defaults, json_for_script, pack_json, prepare, unpack_figures
 from ctx.viz.style import (
@@ -135,7 +139,12 @@ class FigureBlock:
 
 @dataclass(frozen=True)
 class ResultTable:
-    """A small table of results; at most ``MAX_TABLE_COLUMNS`` columns, cells as text."""
+    """A small table; at most ``MAX_TABLE_COLUMNS`` columns, cells as text.
+
+    ``results`` is set where a module declares the table: True for results a figure's data
+    come from (DE calls, gene sets), which a lite page keeps; False for a check or a record
+    (flagged runs, confounding tests, versions), which it drops (D-111).
+    """
 
     title: str
     columns: tuple[str, ...]
@@ -144,6 +153,7 @@ class ResultTable:
     swatch: int | None = None
     # A class a page script finds the table by, as M10's screen follows the scored list.
     css: str = ""
+    results: bool = False
 
     def __post_init__(self) -> None:
         """Refuse a table the page could only print wrongly."""
@@ -335,6 +345,8 @@ class ModulePage:
     key_numbers: tuple[KeyNumber, ...] = ()
     terms: tuple[tuple[str, str], ...] = ()
     kicker: str = ""
+    # The guide and the teacher page are instructions, shown whole in a lite edition (D-111).
+    instructions: bool = False
 
     def __post_init__(self) -> None:
         """Refuse a page with an empty section; the skeleton is the teaching contract.
@@ -433,10 +445,81 @@ _ENV.filters["explain_terms"] = explain_terms
 _ENV.filters["pack"] = pack
 
 
-def _marked(page: Page) -> list[str]:
+@dataclass(frozen=True)
+class Look:
+    """How the selected edition shows a page (D-111).
+
+    Attributes:
+        lite: Only figure cards (title, figure, caption, files) and results tables.
+        controls: Page controls: forms, panels, tabs, live lines and their scripts.
+    """
+
+    lite: bool = False
+    controls: bool = True
+
+
+FULL = Look()
+
+
+def look() -> Look:
+    """The selected edition's ``page`` and ``controls``: the one place a page reads them."""
+    edition = editions.active()
+    return Look(lite=edition.page == "lite", controls=edition.controls)
+
+
+def _figure_as(block: FigureBlock, seen: Look) -> FigureBlock:
+    """A figure card as ``seen`` shows it: lite keeps title, figure, caption and files."""
+    if seen.lite:
+        words = FigureText(title=block.text.title, tab=block.text.tab, back=block.text.back)
+        block = replace(block, text=words, reproduce=None)
+    return block if seen.controls else replace(block, controls=None)
+
+
+def _item_as(item: "FigureBlock | ResultTable | Code | Panel | str", seen: Look) -> Any:
+    """One result as ``seen`` shows it, or None where it is left out."""
+    if isinstance(item, FigureBlock):
+        return _figure_as(item, seen)
+    if isinstance(item, Panel):
+        return item if seen.controls else None
+    if seen.lite and not (isinstance(item, ResultTable) and item.results):
+        return None
+    return item
+
+
+def results_as(results: Iterable[Result], seen: Look) -> tuple[Result, ...]:
+    """A page's results as ``seen`` shows them; an emptied group goes, tabs need controls."""
+    if seen == FULL:
+        return tuple(results)
+    out: list[Result] = []
+    for result in results:
+        if not isinstance(result, Group):
+            if (one := _item_as(result, seen)) is not None:
+                out.append(one)
+            continue
+        items = tuple(i for i in (_item_as(x, seen) for x in result.items) if i is not None)
+        if items:
+            out.append(replace(result, items=items, lead="" if seen.lite else result.lead,
+                               tabs=result.tabs and seen.controls))  # fmt: skip
+    return tuple(out)
+
+
+def _lite(page: Page, seen: Look) -> bool:
+    """Whether ``page`` is cut to its cards: a lite edition's module report, hub or home page."""
+    if isinstance(page, ModulePage) and page.instructions:
+        return False
+    return seen.lite and isinstance(page, ModulePage | HubPage | CoursePage)
+
+
+def _marked(page: Page, seen: Look = FULL) -> list[str]:
     """Every text of a page that ``explain_terms`` renders: sections, captions and cards."""
     if isinstance(page, FigurePage):
         return [page.figure.caption]
+    if _lite(page, seen):
+        if not isinstance(page, ModulePage):
+            return []
+        shown = results_as(page.results, seen)
+        blocks = [i for r in shown for i in (r.items if isinstance(r, Group) else (r,))]
+        return [b.caption for b in blocks if isinstance(b, FigureBlock)]
     cards = getattr(page, "parameters", ())
     texts = [t for card in cards for t in (card.meaning, card.effect)]
     if not isinstance(page, ModulePage):
@@ -563,11 +646,15 @@ def render(page: Page, glossary_href: str = "") -> str:
     Returns:
         The HTML.
     """
-    used = glossary.used(_marked(page))
+    seen = look()
+    lite = _lite(page, seen)
+    used = glossary.used(_marked(page, seen))
     glossary_href = page.glossary if isinstance(page, CoursePage) else glossary_href
     context: dict[str, Any] = {
         "page": page,
-        "sections": SECTIONS,
+        "lite": lite,
+        # A lite page keeps the results section alone, with no contents rail (D-111).
+        "sections": tuple(s for s in SECTIONS if s[0] == "results") if lite else SECTIONS,
         "ui": text.load("ui"),
         "heading": _heading(page),
         # Our own constants, and CSS inside <style> must not be HTML-escaped.
@@ -600,13 +687,13 @@ def render(page: Page, glossary_href: str = "") -> str:
         # Opened alone, at ALONE_SCALE, the theme toggle swaps templates at that scale too, and
         # at the page's own where the figure is drawn at the page's size (figures.page_layout).
         alone = {name: zoom(t, ALONE_SCALE) for name, t in plotly_templates().items()}
-        figure = prepare(page.figure, 0, 1, 3, ALONE_SCALE)
+        figure = prepare(_figure_as(page.figure, seen), 0, 1, 3, ALONE_SCALE)
         context |= {"figure": figure, "templates": json_for_script(alone),
                     "page_templates": context["templates"],
                     "export": export.assets([figure]), "live": _live([figure]),
                     "cutoff": _cutoff([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
-    results, outline, draws = _walk(page.results)
+    results, outline, draws = _walk(results_as(page.results, replace(seen, lite=lite)))
     if not draws:
         context["plotly_js"] = ""
     versions = page.reproduce.versions
@@ -630,7 +717,7 @@ def rendered(page: Page, path: Path) -> str:
     A module that fits a page's optional parts to the cap measures this (``cap.kept``).
     """
     target = None
-    if isinstance(page, HubPage) or glossary.used(_marked(page)):
+    if isinstance(page, HubPage) or glossary.used(_marked(page, look())):
         target = glossary.page_path(path)
     return render(page, glossary.href(path, target) if target else "")
 
@@ -654,7 +741,7 @@ def write(page: Page, path: Path) -> Path:
         ValueError: If the page or its glossary exceeds ``MAX_BYTES``.
     """
     target = None
-    if isinstance(page, HubPage) or glossary.used(_marked(page)):
+    if isinstance(page, HubPage) or glossary.used(_marked(page, look())):
         target = glossary.page_path(path)
     html = _sized(rendered(page, path), path)
     if target is not None:

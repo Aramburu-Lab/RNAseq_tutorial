@@ -434,7 +434,8 @@ def _page(
     page_results: list[Result] = [
         *_acknowledged(spec),
         ResultTable(word(PAGE, "sets.title"), text.words(PAGE, "sets.columns"),
-                    ((e.gmt.name, f"{len(e.sets):,}", fn.licence),), numeric=(1,)),
+                    ((e.gmt.name, f"{len(e.sets):,}", fn.licence),), numeric=(1,),
+                    results=True),
         first,
         Group(fill(PAGE, "groups.one_set", gene_set=set_words(fn.featured_set)), tuple(one_set)),
         Group(word(PAGE, "groups.background"), (trap,)),

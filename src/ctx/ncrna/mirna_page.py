@@ -128,7 +128,7 @@ def fitted(writer: Writer, ctx: "Context", tcga: "Tcga") -> tuple[Result, pl.Dat
                      f"{r['padj']:.2g}", r["call"]))  # fmt: skip
     table = ResultTable(word("figures.mirna_volcano.table_title"),
                         text.words(PAGE, "figures.mirna_volcano.columns"), tuple(rows),
-                        numeric=(2, 3, 4))  # fmt: skip
+                        numeric=(2, 3, 4), results=True)  # fmt: skip
     return Group(word("groups.mirna"), (block, table)), frame, metrics
 
 
@@ -191,7 +191,7 @@ def shift(writer: Writer, ctx: "Context", tcga: "Tcga",
     block = lookup(block, options, word("figures.shift.view"), axes, at)
     tests = ResultTable(word("figures.shift.table_title"),
                         text.words(PAGE, "figures.shift.columns"), _shift_rows(shifts),
-                        numeric=(3, 4, 5, 6, 7))  # fmt: skip
+                        numeric=(3, 4, 5, 6, 7), results=True)  # fmt: skip
     found = dict(
         fit.filter(pl.col("padj").is_not_null()).select("gene_name", "log2FoldChange").rows()
     )
@@ -203,7 +203,7 @@ def shift(writer: Writer, ctx: "Context", tcga: "Tcga",
                  for r in enriched.iter_rows(named=True))  # fmt: skip
     enrich = ResultTable(word("figures.shift.enrich_title"),
                          text.words(PAGE, "figures.shift.enrich_columns"), rows,
-                         numeric=(3, 4, 5, 6, 7))  # fmt: skip
+                         numeric=(3, 4, 5, 6, 7), results=True)  # fmt: skip
     kept = targets.derived(tcga.found, mirnas, ctx.inputs.genes)
     writer.table(kept, "targets", described(kept))
     metrics: Metrics = {f"shift.{r['mirna']}.{r['target']}.{r['preset']}": (
@@ -315,7 +315,7 @@ def pairs(writer: Writer, ctx: "Context", tcga: "Tcga",
     block = writer.figure(data, "mirna_target_pairs", shown_text)
     summary = ResultTable(fill("figures.mirna_pairs.table_title", alpha=ALPHA),
                           text.words(PAGE, "figures.mirna_pairs.columns"), _pair_rows(table),
-                          numeric=(2, 3, 4, 5))  # fmt: skip
+                          numeric=(2, 3, 4, 5), results=True)  # fmt: skip
     metrics: Metrics = {}
     for r in table.iter_rows(named=True):
         for key in ("rho_tumour", "p_tumour", "rho_normal"):

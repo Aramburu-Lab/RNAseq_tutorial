@@ -214,12 +214,17 @@ def _plot_name(gene_type: str | None, empirical: bool) -> str:
                                       + ("empirical" if empirical else "sd")))  # fmt: skip
 
 
+# The tables of what M3 measured, which a lite page keeps; the rest record its inputs (D-111).
+RESULTS_TABLES = ("alignment", "strandedness", "concordance")
+
+
 def page_table(key: str, rows: Sequence[Sequence[str]], numeric: tuple[int, ...],
                **values: Any) -> ResultTable:  # fmt: skip
     """A small table on the page, its title and headings from ``tables.<key>.page``."""
     return ResultTable(text.fill(PAGE, f"tables.{key}.page.title", **values),
                        text.words(PAGE, f"tables.{key}.page.columns"),
-                       tuple(tuple(r) for r in rows), numeric=numeric)  # fmt: skip
+                       tuple(tuple(r) for r in rows), numeric=numeric,
+                       results=key in RESULTS_TABLES)  # fmt: skip
 
 
 def _share(value: float | None) -> str:

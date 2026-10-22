@@ -83,7 +83,7 @@ def group(writer: Writer, tcga: "Tcga", genes: pl.DataFrame, tumour: str) -> tup
                   f"{v['p']:.2g}") for c, v in found.items())  # fmt: skip
     table = ResultTable(fill("figures.libraries.table_title", other=other),
                         text.words(PAGE, "figures.libraries.columns"), rows,
-                        numeric=(1, 2, 4))  # fmt: skip
+                        numeric=(1, 2, 4), results=True)  # fmt: skip
     metrics |= {f"library.{c}.p": (v["p"], "Wilcoxon signed-rank, rRNA-depleted against other")
                 for c, v in found.items()}  # fmt: skip
     return Group(word("groups.libraries"), (block, table)), metrics, {}

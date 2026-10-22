@@ -3,12 +3,15 @@
 {# The only links off this page are the module pages: the hub must keep working after a copy. #}
 {% block content %}
 <section id="hub">
+{# A lite hub (D-111) is the module list and its links alone. #}
+{% if not lite %}
 <p class="lede">{{ page.intro }}</p>
-{% if page.key_numbers %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
+{% endif %}
+{% if page.key_numbers and not lite %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
 {% if page.links %}<ol class="modules">{% for link in page.links %}{% set number, _, name = link.module.partition(" ") %}<li><span class="kicker">{{ number }}</span><a class="module-name" href="{{ link.href }}">{{ name }}</a><span class="module-date">{{ ui.written }} {{ link.written }}</span></li>{% endfor %}</ol>{% endif %}
-{% if page.missing %}<p class="missing">{{ ui.not_run }} {{ page.missing|join(", ") }}.</p>{% endif %}
+{% if page.missing and not lite %}<p class="missing">{{ ui.not_run }} {{ page.missing|join(", ") }}.</p>{% endif %}
 </section>
-{% if page.rules %}
+{% if page.rules and not lite %}
 <section class="hub-section" id="rules">
 <h2>{{ ui.hub.rules }}</h2>
 <div class="table-scroll"><table class="rules">
@@ -21,5 +24,7 @@
 </table></div>
 </section>
 {% endif %}
+{% if not lite %}
 <details class="params"><summary>{{ ui.cards.report }}</summary>{{ cards_table(page.parameters) }}</details>
+{% endif %}
 {% endblock %}

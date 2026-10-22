@@ -451,6 +451,7 @@ def run(
         results=blocks(spec, spec.path),
         key_numbers=_keys(spec),
         kicker=text.word(PAGE, "kicker"),
+        instructions=True,
         reproduce=Reproduction(
             command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children,

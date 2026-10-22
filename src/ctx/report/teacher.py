@@ -139,6 +139,7 @@ def page(roots: Sequence[Path], command: str, started: float) -> ModulePage:
         results=(group,),
         key_numbers=keys,
         kicker=text.word(PAGE, "kicker"),
+        instructions=True,
         reproduce=Reproduction(
             command=command, wall_seconds=usage.wall_seconds, peak_rss_self=usage.peak_rss_self,
             peak_rss_children=usage.peak_rss_children, profile=text.word(PAGE, "times.profile"),
