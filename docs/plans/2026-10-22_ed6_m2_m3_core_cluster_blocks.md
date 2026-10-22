@@ -396,15 +396,14 @@ PY
 for p in "$@"; do
     R="$S/$p/nfcore_fetchngs/results"
     mkdir -p "$E/$p"
-    # Complete download: every sample, tasks.tsv. Lung still downloading (no results.complete): the
-    # samples whose files are all present, tasks_pilot.tsv; its tasks.tsv waits for block C1.
-    if [[ "$p" != lung_gse229705 || -f "$S/$p/nfcore_fetchngs/results.complete" ]]; then
-        T=tasks.tsv
-        if [[ ! -s "$E/$p/$T" ]]; then python3 "$E/ed6_tasks.py" "$R" "$E/$p/$T"; fi
-    else
-        T=tasks_pilot.tsv
-        python3 "$E/ed6_tasks.py" "$R" "$E/$p/$T" partial
+    # fetchngs writes the samplesheet only once every run has downloaded (first run, 2026-10-22:
+    # lung stopped this block with no samplesheet), so a project still downloading waits.
+    if [[ ! -f "$S/$p/nfcore_fetchngs/results.complete" ]]; then
+        echo "$p: its fetchngs run has not ended, so it has no samplesheet yet; pilot it once it has"
+        continue
     fi
+    T=tasks.tsv
+    if [[ ! -s "$E/$p/$T" ]]; then python3 "$E/ed6_tasks.py" "$R" "$E/$p/$T"; fi
     echo "$T" > "$E/$p/pilot_tasks.txt"
     awk -F'\t' 'NR == 2 {print $1}' "$E/$p/$T" > "$E/$p/pilot.txt"
     echo "$p: pilot $(cat "$E/$p/pilot.txt") from $T"
@@ -432,8 +431,9 @@ SCRIPT
 bash ed6b_1_pilot.sh tier1 breast_tissue breast_mac breast_mono lung_gse229705 2>&1 | tee ed6b_1_pilot.log
 ```
 
-Ready to submit now: the four complete projects pilot their largest sample, lung its largest
-downloaded one (from `tasks_pilot.tsv`).
+Ready to submit now: the four complete projects pilot their largest sample. Lung pilots after its
+download ends, with `bash ed6b_1_pilot.sh lung_gse229705`: a project still downloading is skipped,
+since fetchngs writes its samplesheet last.
 
 Paste back `ed6b_1_pilot.log`: the free space, the commit, `versions.txt`, `refs.txt`, the two MD5
 lines "OK", each project's tasks line (samples written of the sheet's, bytes, the pilot sample), the job ids.
