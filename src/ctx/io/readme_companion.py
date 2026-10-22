@@ -14,7 +14,7 @@ from pathlib import Path
 import polars as pl
 import polars.selectors as cs
 
-from ctx import __version__
+from ctx import __version__, editions
 from ctx.io.naming import check
 from ctx.runtime import source, versions
 
@@ -135,6 +135,7 @@ def _readme(
         f"| Created (UTC) | {created} |",
         f"| Command | `{shlex.join(sys.argv)}` |",
         f"| ctx | {__version__}, {source()} |",
+        f"| Edition | {editions.active().name} |",
         f"| Directory | {next(iter(digests)).parent.resolve()} |",
         f"| Rows | {frame.height} |",
         f"| Columns | {frame.width} |",
