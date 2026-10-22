@@ -452,7 +452,7 @@ class Look:
     """How the selected edition shows a page (D-111).
 
     Attributes:
-        lite: Only figure cards (title, figure, caption, files) and results tables.
+        lite: Only figure cards, with their reading guide and controls, and results tables.
         controls: Page controls: forms, panels, tabs, live lines and their scripts.
     """
 
@@ -470,10 +470,9 @@ def look() -> Look:
 
 
 def _figure_as(block: FigureBlock, seen: Look) -> FigureBlock:
-    """A figure card as ``seen`` shows it: lite keeps title, figure, caption and files."""
+    """A figure card as ``seen`` shows it: lite drops its Reproduce panel and keeps the rest."""
     if seen.lite:
-        words = FigureText(title=block.text.title, tab=block.text.tab, back=block.text.back)
-        block = replace(block, text=words, reproduce=None)
+        block = replace(block, reproduce=None)
     return block if seen.controls else replace(block, controls=None)
 
 

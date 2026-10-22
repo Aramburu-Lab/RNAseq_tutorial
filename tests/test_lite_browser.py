@@ -1,8 +1,9 @@
 """ED.7 in Chromium: a core edition's lite page draws every figure, scrolls no sideways and
 opens its PDF and SVG, at 1,280 and 375 px, light and dark (D-111).
 
-A lite page carries no controls, so no figure is redrawn in the page and its PDF and SVG links
-name the files the build wrote, in the theme shown; Chromium opens each one the links name.
+A lite page keeps its controls (Rytis 2026-10-22): the bar figure's filter form is on the page,
+and each figure's PDF and SVG links name the files the build wrote, in the theme shown;
+Chromium opens each one the links name.
 Skipped where no Chromium is found; set ``CTX_CHROMIUM``.
 """
 
@@ -90,13 +91,13 @@ def ran(tmp_path_factory):
 
 @pytest.mark.parametrize("name", list(SIZES))
 def test_a_lite_page_draws_its_figures_and_links_their_files(ran, name):
-    """Both figures drawn, no form, the results section alone, no sideways scroll, no console
-    error, and each figure's PDF and SVG linked in the theme the page shows."""
+    """Both figures drawn, the bar figure's form, the results section alone, no sideways
+    scroll, no console error, and each figure's PDF and SVG linked in the theme shown."""
     results, stems, _ = ran
     done = results[name]
     seen = done["acted"]
     assert done["errors"] == []
-    assert (seen["figures"], seen["drawn"], seen["forms"]) == (2, 2, 0)
+    assert (seen["figures"], seen["drawn"]) == (2, 2) and seen["forms"] >= 1
     assert seen["sections"] == ["results"]
     assert seen["scroll"] <= seen["page"]
     theme = "black" if SIZES[name][1] == "dark" else "white"

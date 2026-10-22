@@ -14,8 +14,7 @@ modules = ["gather", "qc", "process", "quant", "de", "function", "ncrna", "genec
 # PRJNA792551 (ED.8).
 datasets = ["tier1", "tier1_teach", "four_runs", "breast_tissue", "breast_mac", "breast_mono",
             "lung_gse229705", "pancreas_gse192647"]
-# Lite pages (Rytis 2026-10-22, D-111): each module page shows only its figure cards (title,
-# figure, caption, PDF, SVG and CSV) and its results tables; no sections, Reproduce, check
-# tables or page controls. controls = true puts the controls back on those cards.
+# Lite pages (Rytis 2026-10-22, D-111): each module page shows only its figure cards and its
+# results tables; no sections, Reproduce, check tables or notes. A card keeps its lead, "How
+# to read this" and controls: lite means less text, not less to do (Rytis 2026-10-22).
 page = "lite"
-controls = false

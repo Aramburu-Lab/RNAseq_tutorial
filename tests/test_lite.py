@@ -1,11 +1,12 @@
 """ED.7: the core edition's lite pages (D-111), asserted by structure, never by words.
 
-A lite page keeps each figure card (title, figure, caption, the PDF, SVG and CSV links) and
-every results table, and drops the sections, the Reproduce panels, the leads and reading
-guides, the check tables, the notes and every page control. A full page is unchanged. Three
-mutations were planted and each caught here: a section leaking into lite (``sections`` in
-``builder.render`` left whole), a control leaking (``_figure_as`` keeping ``controls``) and a
-results table dropped (``_item_as`` dropping every table).
+A lite page keeps each figure card (title, lead, reading guide, figure, caption, controls and
+the PDF, SVG and CSV links) and every results table, and drops the sections, the Reproduce
+panels, the group leads, the check tables and the notes: less text, not less to do (Rytis
+2026-10-22). A full page is unchanged. Mutations planted and caught here: a section leaking
+into lite (``sections`` in ``builder.render`` left whole), a reading guide or a control dropped
+(``_figure_as`` emptying ``text`` or ``controls``) and a results table dropped (``_item_as``
+dropping every table).
 """
 
 from dataclasses import replace
@@ -115,10 +116,10 @@ def full(monkeypatch):
 
 
 def test_the_editions_say_how_their_pages_look(full):
-    """core is lite with no controls, full is every section with them; each is one line."""
+    """core is lite with its controls, full is every section with them; each is one line."""
     assert look() == FULL == Look(lite=False, controls=True)
     core = editions.named("core")
-    assert (core.page, core.controls) == ("lite", False)
+    assert (core.page, core.controls) == ("lite", True)
     assert (editions.active().page, editions.active().controls) == ("full", True)
 
 
@@ -135,19 +136,30 @@ def test_an_edition_with_a_bad_look_is_refused(tmp_path, line, problem):
 
 
 def test_a_core_page_keeps_only_its_figure_and_results_cards(core):
-    """Catches a section, a control, a check table, a note or a Reproduce panel leaking into
-    lite, and a figure card, caption, export link or results table dropped from it."""
+    """Catches a section, a check table, a note or a Reproduce panel leaking into lite, and a
+    figure card, its lead, reading guide or controls, a caption, an export link or a results
+    table dropped from it."""
     page = Tags(render(every_part()))
     assert [a["id"] for a in page.having("section")] == ["results"]
-    for gone in ("toc", "keys", "reading", "fig-lead", "group-lead", "repro", "code", "note",
-                 "genelist-panel", "terms"):  # fmt: skip
+    for gone in ("toc", "keys", "group-lead", "repro", "terms"):
         assert page.having(css=gone) == [], gone
-    assert page.having("form") == [] and page.having(role="tablist") == []
-    assert page.having(role="tabpanel") == [] and page.having("textarea") == []
-    assert [a for a in page.having("script") if a.get("id", "").startswith("ctx-controls")] == []
-    figures = page.having("figure", "fig")
+    built = every_part()
+    calls, *rest = built.results
+    bare = replace(calls, items=tuple(i for i in calls.items if not isinstance(i, str)))
+    # The controls carry notes of their own, so the page note is shown gone by the page alone.
+    assert render(built) == render(replace(built, results=(bare, *rest)))
+    # The gene-list panel's own command line is a code figure too, hidden until a list is set.
+    assert [a for a in page.having(css="code") if "list-command" not in a["class"]] == []
+    assert len(page.having(css="reading")) == 3 and len(page.having(css="fig-lead")) == 3
+    assert len(page.having("form")) >= 3 and page.having(role="tablist")
+    assert page.having(css="genelist-panel")
+    assert [a for a in page.having("script") if a.get("id", "").startswith("ctx-controls")]
+    # The gene-list panel draws a figure of its own, with no id and a captioned class.
+    figures = [a for a in page.having("figure", "fig") if "id" in a]
     assert [a["id"] for a in figures] == ["figure-1", "figure-2", "figure-3"]
-    assert len(page.having("figcaption")) == 3 and len(page.having(css="fig-title")) == 3
+    bare = [a for a in page.having("figcaption") if not a.get("class")]
+    assert len(bare) == len(figures) + len(page.having("figure", "list-command"))
+    assert len(page.having(css="fig-title")) == len(page.having("figure", "fig"))
     hrefs = [a["href"] for a in page.having("a") if "href" in a]
     for n in (1, 2, 3):
         for end in ("_white.pdf", "_black.pdf", "_white.svg", "_black.svg"):
@@ -168,26 +180,27 @@ def test_the_same_page_under_full_keeps_every_part(full):
     assert page.captions[:2] == [RESULTS, CHECK]
 
 
-def test_controls_come_back_with_one_line(tmp_path, monkeypatch):
-    """A lite edition with ``controls = true`` keeps the cards' forms and tabs, and nothing
-    else comes back. Catches controls read from anywhere but the edition."""
+def test_controls_go_with_one_line(tmp_path, monkeypatch):
+    """A lite edition with ``controls = false`` drops the cards' forms and tabs and keeps their
+    reading guides. Catches controls read from anywhere but the edition."""
     folder = tmp_path / "editions"
     folder.mkdir()
     (folder / "litectl.toml").write_text(
         '[edition]\nname = "litectl"\nlabel = "L"\nnotes = "L."\nmodules = "all"\n'
-        'datasets = "all"\npage = "lite"\ncontrols = true\n')  # fmt: skip
+        'datasets = "all"\npage = "lite"\ncontrols = false\n')  # fmt: skip
     monkeypatch.setenv(editions.FOLDER_ENV, str(folder))
     monkeypatch.setenv(editions.EDITION_ENV, "litectl")
     page = Tags(render(every_part()))
     assert [a["id"] for a in page.having("section")] == ["results"]
-    assert page.having("form") and page.having(role="tablist")
-    assert page.having(css="repro") == [] and page.having(css="reading") == []
+    assert page.having("form") == [] and page.having(role="tablist") == []
+    assert page.having(css="genelist-panel") == [] and page.having(css="repro") == []
+    assert len(page.having(css="reading")) == 3
 
 
 def test_a_figure_opened_alone_is_its_card_too(core):
     page = Tags(render(FigurePage("Depth", _figure(1))))
-    assert page.having("form") == [] and page.having(css="reading") == []
-    assert page.having(css="repro") == [] and page.having(css="fig-lead") == []
+    assert page.having("form") and page.having(css="reading") and page.having(css="fig-lead")
+    assert page.having(css="repro") == []
     assert len(page.having("figcaption")) == 1
 
 
