@@ -625,6 +625,132 @@ A simplified edition of this tutorial in this repo, from one codebase: datasets 
 - [ ] ED.2 Everything that lists modules or datasets reads the edition: the CLI refuses a module outside it by name, and the hub, `ctx guide`, START.html and `build_kit --edition core` show only its modules and datasets, with the own-data routes kept.
 - [ ] ED.3 M8 on a dataset with no small-RNA library: biotype-stratified QC and DE from the dataset's own counts, no miRNA panel and no miRNA claim, on Step-1, breast_tissue, breast_mac, breast_mono and the lung dataset.
 - [ ] ED.4 The lung dataset file for PRJNA955664 (GSE229705), curated from ENA's read_run report and GEO's sample records, contrast tumour against normal with patient in the design; cluster commands for fetchngs and nf-core/rnaseq for Rytis to run.
+  - [x] ED.4a The dataset file, 2026-10-22: `conf/datasets/lung_gse229705.toml` and its table `lung_gse229705.tsv`, 246 runs, one per GSM, joined on the run, cross-checked on GSM and title against fetchngs's sheet, and on GEO's SRA and BioSample links against ENA's experiment and sample, 246 of 246 equal. Donor is GEO's `patient`: 14 titles carry a suffix (NYU1932A-T, NYU1364-Intra-OPB-T). Read length 51 nt for every run by ENA's counts, paired, NovaSeq 6000, Trio RNA-Seq from 1 ng total RNA; no record states strandedness, so fetchngs's `auto` stands. Progression and recurrence are curated columns, per patient 68 no progression over 5 years, 22 second primary, 13 systemic, 10 locoregional, 10 short follow-up, with no times; M10 is not in the core edition. Contrast `tumour_normal`, n = [123, 123], `~donor + group`, paired. Listed in the `lung` bundle (step 3; gather, qc, de, function). Checked: `ctx.dataset.load`; `ctx gather` on a scratch root whose metadata outdir was laid out from ENA's report, 246 rows, 123 patients each with one tumour and one adjacent normal; `ctx run --check` there lists one problem, function waiting on M5's results, none stopping. Not done: no `[sanity]` rules registered and no `[ncrna]` (ED.3); the featured set HALLMARK_E2F_TARGETS is for Rytis to confirm.
+  - [ ] ED.4b The cluster run (Rytis). Expected download: 385,618,590,287 B (385.6 GB) in 492 FASTQ files, by ENA's fastq_bytes on 2026-10-22. **The download in block 3 needs Rytis's go-ahead before it is submitted.** Each block writes one `set -euo pipefail` script into the run folder and runs it with `bash`, so a failure stops the script and never the login shell. The run folder is on the project storage, never `$SNIC_NOBACKUP`, which this account cannot write. The compute project is `hpc2n2026-161`, Step-1's (Phase 2 step 5); change `A=` if it has moved. Free space: 385.6 GB of FASTQ once (the launcher hard-links `results/` to `work/`), up to as much again of trimmed reads in the rnaseq `work/`, plus the references and index; my arithmetic, not a measurement.
+
+    1. Login node: the course repository and its fetch environment, then the metadata-only fetchngs 1.12.0 run (`fetchngs.sbatch` sets `NXF_SYNTAX_PARSER=v1` and passes `--nf_core_pipeline rnaseq --monochrome_logs true`).
+
+    ```
+    mkdir -p /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705 && cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    cat > ed4_1_meta.sh <<'SCRIPT'
+    set -euo pipefail
+    export CTX_STORE=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+    export CTX_REPO="$CTX_STORE/RNAseq_tutorial"
+    A=hpc2n2026-161
+    RUN="$CTX_STORE/lung_gse229705"
+    df -h /proj/nobackup/hpc2n2024-150
+    if [[ -d "$CTX_REPO/.git" ]]; then git -C "$CTX_REPO" pull --ff-only; else git clone https://github.com/Aramburu-Lab/RNAseq_tutorial.git "$CTX_REPO"; fi
+    git -C "$CTX_REPO" log -1 --format='%h %s'
+    [[ -x "${PIXI_HOME:-$HOME/.pixi}/bin/pixi" ]] || curl -fsSL https://pixi.sh/install.sh | PIXI_VERSION=v0.76.2 PIXI_NO_PATH_UPDATE=1 bash
+    PIXI_CACHE_DIR="$CTX_STORE/pixi_cache" "${PIXI_HOME:-$HOME/.pixi}/bin/pixi" install --manifest-path "$CTX_REPO/pixi.toml" -e fetch --frozen
+    # The env file is written for a login shell, which does not run under nounset.
+    set +u
+    source "$CTX_REPO/scripts/bash/kebnekaise_env.sh"
+    set -u
+    nextflow -version
+    mkdir -p "$RUN" && cd "$RUN"
+    printf '%s\n' PRJNA955664 > ids.txt
+    DRY_RUN=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
+    SKIP_DOWNLOAD=1 sbatch -A "$A" "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
+    SCRIPT
+    bash ed4_1_meta.sh 2>&1 | tee ed4_1_meta.log
+    ```
+
+    Paste back ed4_1_meta.log: the free space, the commit, the dry run's "1 accessions" line, and the job id.
+
+    2. Login node, once that job has ended: the size, read before anything downloads.
+
+    ```
+    cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    cat > ed4_2_size.sh <<'SCRIPT'
+    set -euo pipefail
+    RUN=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    cd "$RUN"
+    test -f nfcore_fetchngs_meta/results.complete
+    grep -h 'bytes of FASTQ at ENA' slurm-ctx_fetchngs-*.out
+    awk -F, 'NR > 1' nfcore_fetchngs_meta/results/samplesheet/samplesheet.csv | wc -l
+    SCRIPT
+    bash ed4_2_size.sh 2>&1 | tee ed4_2_size.log
+    ```
+
+    Expected: "1 accessions; 246 runs; 385,618,590,287 bytes of FASTQ at ENA" and 246 rows. STOP and paste ed4_2_size.log; block 3 waits for Rytis's go-ahead.
+
+    3. Login node, after the go-ahead: the full download, 385.6 GB.
+
+    ```
+    cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    cat > ed4_3_download.sh <<'SCRIPT'
+    set -euo pipefail
+    export CTX_STORE=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+    export CTX_REPO="$CTX_STORE/RNAseq_tutorial"
+    A=hpc2n2026-161
+    RUN="$CTX_STORE/lung_gse229705"
+    cd "$RUN"
+    df -h /proj/nobackup/hpc2n2024-150
+    DRY_RUN=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
+    sbatch -A "$A" "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
+    SCRIPT
+    bash ed4_3_download.sh 2>&1 | tee ed4_3_download.log
+    ```
+
+    A failed download: the dry run prints the `mv` that moves its results aside; after that `mv`, the same sbatch line resumes the rest (the launcher's Usage).
+
+    4. Login node, once the download job's log ends "complete:": GENCODE 50, then nf-core/rnaseq 3.27.0, Salmon only (`rnaseq.sbatch` writes `pseudo_aligner: salmon` and `skip_alignment: true`, checks both references against MD5SUMS and runs under `NXF_SYNTAX_PARSER=v2`).
+
+    ```
+    cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    cat > ed4_4_count.sh <<'SCRIPT'
+    set -euo pipefail
+    export CTX_STORE=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+    export CTX_REPO="$CTX_STORE/RNAseq_tutorial"
+    A=hpc2n2026-161
+    RUN="$CTX_STORE/lung_gse229705"
+    test -f "$RUN/nfcore_fetchngs/results.complete"
+    grep -h 'bytes of FASTQ at ENA\|FASTQ files not hard-linked' "$RUN"/slurm-ctx_fetchngs-*.out
+    mkdir -p "$RUN/refs" && cd "$RUN/refs"
+    B=https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50
+    curl -fL --remote-name-all "$B/MD5SUMS" "$B/GRCh38.primary_assembly.genome.fa.gz" "$B/gencode.v50.primary_assembly.annotation.gtf.gz"
+    cd "$RUN"
+    DRY_RUN=1 bash "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
+    sbatch -A "$A" "$CTX_REPO/scripts/bash/rnaseq.sbatch" "$RUN" refs/GRCh38.primary_assembly.genome.fa.gz refs/gencode.v50.primary_assembly.annotation.gtf.gz true
+    SCRIPT
+    bash ed4_4_count.sh 2>&1 | tee ed4_4_count.log
+    ```
+
+    Paste back ed4_4_count.log. Keep `nfcore_rnaseq/work` until `ctx gather` on the Mac has read the copied results.
+
+    5. Login node, once the rnaseq job has ended: the launcher's own end lines.
+
+    ```
+    cd /proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    cat > ed4_5_check.sh <<'SCRIPT'
+    set -euo pipefail
+    RUN=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    grep -h 'MD5 equal\|rnaseq samplesheet:\|count matrix:' "$RUN"/slurm-ctx_rnaseq-*.out
+    SCRIPT
+    bash ed4_5_check.sh 2>&1 | tee ed4_5_check.log
+    ```
+
+    Expected: both references "MD5 equal", "rnaseq samplesheet: 246 rows, 246 samples", and a count matrix of 246 samples.
+
+    6. On the Mac: the guide's Part 3 copies, the metadata outdir and the rnaseq files ctx reads, into the root `ctx_lung_gse229705`, then setup, the check and the run from the repository's folder (`ctx guide`'s own lines for this dataset file).
+
+    ```
+    cat > ~/ed4_6_copy.sh <<'SCRIPT'
+    set -euo pipefail
+    K=rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/lung_gse229705
+    mkdir -p ~/ctx_lung_gse229705/data/raw
+    /usr/bin/rsync -av "$K/nfcore_fetchngs_meta/results/" ~/ctx_lung_gse229705/data/raw/lung_gse229705_meta/
+    /usr/bin/rsync -avmL --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='pipeline_info/nf_core_rnaseq_software_mqc_versions.yml' --include='pipeline_info/params_*.json' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.json' --include='pipeline_info/execution_trace_*.txt' --exclude='*' "$K/nfcore_rnaseq/results/" ~/ctx_lung_gse229705/data/raw/lung_gse229705_rnaseq/
+    cd /Users/rytis/Scripts/Pipeline/RNAseq_tutorial
+    pixi install -e laptop --frozen && pixi install -e reads --frozen
+    pixi run -e laptop ctx --root ~/ctx_lung_gse229705 setup --dataset-file conf/datasets/lung_gse229705.toml
+    pixi run -e laptop ctx --root ~/ctx_lung_gse229705 run --dataset lung_gse229705 --dataset-file conf/datasets/lung_gse229705.toml --fetchngs-dir ~/ctx_lung_gse229705/data/raw/lung_gse229705_meta --rnaseq-dir ~/ctx_lung_gse229705/data/raw/lung_gse229705_rnaseq --check
+    SCRIPT
+    bash ~/ed4_6_copy.sh 2>&1 | tee ~/ed4_6_copy.log
+    ```
+
+    Paste back the check's last line; `ctx run` itself waits for ED.5.
 - [ ] ED.5 After ED.4's counts: every core root built, and a core kit built and checked, the release built with no made-up page.
 
 - [ ] PK.1 The hand-off in Safari once "Allow remote automation" is enabled (needs an admin).

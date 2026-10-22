@@ -1,0 +1,247 @@
+run_accession	gsm	title	patient	source_name	tissue	progression type	progression	recurrence
+SRR24166098	GSM7173671	NYU62-T (RNA-seq)	NYU62	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166099	GSM7173670	NYU62-N (RNA-seq)	NYU62	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166100	GSM7173669	NYU608-T (RNA-seq)	NYU608	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166101	GSM7173668	NYU608-N (RNA-seq)	NYU608	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166102	GSM7173667	NYU565-T (RNA-seq)	NYU565	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166103	GSM7173666	NYU565-N (RNA-seq)	NYU565	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166104	GSM7173665	NYU539-T (RNA-seq)	NYU539	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166105	GSM7173664	NYU539-N (RNA-seq)	NYU539	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166106	GSM7173663	NYU502-T (RNA-seq)	NYU502	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166107	GSM7173662	NYU502-N (RNA-seq)	NYU502	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166108	GSM7173661	NYU50-T (RNA-seq)	NYU50	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166109	GSM7173660	NYU50-N (RNA-seq)	NYU50	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166110	GSM7173659	NYU457-T (RNA-seq)	NYU457	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166111	GSM7173658	NYU457-N (RNA-seq)	NYU457	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166112	GSM7173657	NYU454-T (RNA-seq)	NYU454	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166113	GSM7173656	NYU454-N (RNA-seq)	NYU454	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166114	GSM7173607	NYU1949-CH-T (RNA-seq)	NYU1949	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166115	GSM7173606	NYU1949-CH-N (RNA-seq)	NYU1949	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166116	GSM7173605	NYU1940A-T (RNA-seq)	NYU1940	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166117	GSM7173604	NYU1940-N (RNA-seq)	NYU1940	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166118	GSM7173603	NYU1932A-T (RNA-seq)	NYU1932	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166119	GSM7173602	NYU1932-N (RNA-seq)	NYU1932	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166120	GSM7173601	NYU1923-T (RNA-seq)	NYU1923	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166121	GSM7173600	NYU1923-N (RNA-seq)	NYU1923	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166122	GSM7173599	NYU1906-T (RNA-seq)	NYU1906	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166123	GSM7173598	NYU1906-N (RNA-seq)	NYU1906	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166124	GSM7173597	NYU1900-T (RNA-seq)	NYU1900	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166125	GSM7173596	NYU1900-N (RNA-seq)	NYU1900	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166126	GSM7173595	NYU1898-T (RNA-seq)	NYU1898	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166127	GSM7173594	NYU1898-N (RNA-seq)	NYU1898	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166128	GSM7173593	NYU1897-T (RNA-seq)	NYU1897	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166129	GSM7173592	NYU1897-N (RNA-seq)	NYU1897	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166130	GSM7173543	NYU1597-T (RNA-seq)	NYU1597	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166131	GSM7173542	NYU1597-N (RNA-seq)	NYU1597	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166132	GSM7173541	NYU1595-T (RNA-seq)	NYU1595	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166133	GSM7173540	NYU1595-N (RNA-seq)	NYU1595	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166134	GSM7173539	NYU1562-T (RNA-seq)	NYU1562	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166135	GSM7173538	NYU1562-N (RNA-seq)	NYU1562	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166136	GSM7173537	NYU1555-T (RNA-seq)	NYU1555	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166137	GSM7173536	NYU1555-N (RNA-seq)	NYU1555	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166138	GSM7173535	NYU1551-T (RNA-seq)	NYU1551	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166139	GSM7173534	NYU1551-N (RNA-seq)	NYU1551	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166140	GSM7173533	NYU1512-T (RNA-seq)	NYU1512	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166141	GSM7173532	NYU1512-N (RNA-seq)	NYU1512	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166142	GSM7173531	NYU1502-T (RNA-seq)	NYU1502	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166143	GSM7173530	NYU1502-N (RNA-seq)	NYU1502	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166144	GSM7173529	NYU1487-T (RNA-seq)	NYU1487	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166145	GSM7173528	NYU1487-N (RNA-seq)	NYU1487	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166146	GSM7173703	NYU947-T (RNA-seq)	NYU947	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166147	GSM7173702	NYU947-N (RNA-seq)	NYU947	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166148	GSM7173701	NYU875-T (RNA-seq)	NYU875	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166149	GSM7173700	NYU875-N (RNA-seq)	NYU875	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166150	GSM7173699	NYU867-T (RNA-seq)	NYU867	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166151	GSM7173698	NYU867-N (RNA-seq)	NYU867	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166152	GSM7173697	NYU848-T (RNA-seq)	NYU848	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166153	GSM7173696	NYU848-N (RNA-seq)	NYU848	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166154	GSM7173695	NYU831-T (RNA-seq)	NYU831	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166155	GSM7173694	NYU831-N (RNA-seq)	NYU831	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166156	GSM7173693	NYU822-T (RNA-seq)	NYU822	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166157	GSM7173692	NYU822-N (RNA-seq)	NYU822	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166158	GSM7173691	NYU784-T (RNA-seq)	NYU784	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166159	GSM7173690	NYU784-N (RNA-seq)	NYU784	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166160	GSM7173689	NYU780-T (RNA-seq)	NYU780	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166161	GSM7173688	NYU780-N (RNA-seq)	NYU780	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166162	GSM7173639	NYU294-T (RNA-seq)	NYU294	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166163	GSM7173638	NYU294-N (RNA-seq)	NYU294	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166164	GSM7173637	NYU279-T (RNA-seq)	NYU279	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166165	GSM7173636	NYU279-N (RNA-seq)	NYU279	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166166	GSM7173635	NYU278-T (RNA-seq)	NYU278	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166167	GSM7173634	NYU278-N (RNA-seq)	NYU278	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166168	GSM7173633	NYU268-T (RNA-seq)	NYU268	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166169	GSM7173632	NYU268-N (RNA-seq)	NYU268	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166170	GSM7173631	NYU252-T (RNA-seq)	NYU252	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166171	GSM7173630	NYU252-N (RNA-seq)	NYU252	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166172	GSM7173629	NYU20S-T (RNA-seq)	NYU20	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166173	GSM7173628	NYU20S-N (RNA-seq)	NYU20	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166174	GSM7173627	NYU2005A-T (RNA-seq)	NYU2005	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166175	GSM7173626	NYU2005-N (RNA-seq)	NYU2005	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166176	GSM7173625	NYU2002-T (RNA-seq)	NYU2002	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166177	GSM7173624	NYU2002-N (RNA-seq)	NYU2002	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166178	GSM7173575	NYU1808-T (RNA-seq)	NYU1808	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166179	GSM7173574	NYU1808-N (RNA-seq)	NYU1808	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166180	GSM7173573	NYU1795-T (RNA-seq)	NYU1795	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166181	GSM7173572	NYU1795-N (RNA-seq)	NYU1795	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166182	GSM7173571	NYU1787-T (RNA-seq)	NYU1787	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166183	GSM7173570	NYU1787-N (RNA-seq)	NYU1787	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166184	GSM7173569	NYU178-T (RNA-seq)	NYU178	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166185	GSM7173568	NYU178-N (RNA-seq)	NYU178	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166186	GSM7173567	NYU1769-T (RNA-seq)	NYU1769	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166187	GSM7173566	NYU1769-N (RNA-seq)	NYU1769	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166188	GSM7173565	NYU1767-T (RNA-seq)	NYU1767	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166189	GSM7173564	NYU1767-N (RNA-seq)	NYU1767	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166190	GSM7173563	NYU175-T (RNA-seq)	NYU175	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166191	GSM7173562	NYU175-N (RNA-seq)	NYU175	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166192	GSM7173561	NYU1749-T (RNA-seq)	NYU1749	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166193	GSM7173560	NYU1749-N (RNA-seq)	NYU1749	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166194	GSM7173511	NYU1368-T (RNA-seq)	NYU1368	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166195	GSM7173510	NYU1368-N (RNA-seq)	NYU1368	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166196	GSM7173509	NYU1364-N (RNA-seq)	NYU1364	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166197	GSM7173508	NYU1364-Intra-OPB-T (RNA-seq)	NYU1364	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166198	GSM7173507	NYU1355-T (RNA-seq)	NYU1355	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166199	GSM7173506	NYU1355-N (RNA-seq)	NYU1355	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166200	GSM7173505	NYU1351-T (RNA-seq)	NYU1351	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166201	GSM7173504	NYU1351-N (RNA-seq)	NYU1351	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166202	GSM7173503	NYU1334-T (RNA-seq)	NYU1334	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166203	GSM7173502	NYU1334-N (RNA-seq)	NYU1334	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166204	GSM7173501	NYU1321-T (RNA-seq)	NYU1321	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166205	GSM7173500	NYU1321-N (RNA-seq)	NYU1321	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166206	GSM7173499	NYU1319-T (RNA-seq)	NYU1319	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166207	GSM7173498	NYU1319-N (RNA-seq)	NYU1319	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166208	GSM7173497	NYU1284-T (RNA-seq)	NYU1284	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166209	GSM7173496	NYU1284-N (RNA-seq)	NYU1284	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166210	GSM7173709	NYU994-T (RNA-seq)	NYU994	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166211	GSM7173708	NYU994-N (RNA-seq)	NYU994	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166212	GSM7173707	NYU965-T (RNA-seq)	NYU965	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166213	GSM7173706	NYU965-N (RNA-seq)	NYU965	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166214	GSM7173705	NYU955-T (RNA-seq)	NYU955	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166215	GSM7173704	NYU955-N (RNA-seq)	NYU955	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166216	GSM7173655	NYU373-T (RNA-seq)	NYU373	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166217	GSM7173654	NYU373-N (RNA-seq)	NYU373	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166218	GSM7173653	NYU359-T (RNA-seq)	NYU359	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166219	GSM7173652	NYU359-N (RNA-seq)	NYU359	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166220	GSM7173651	NYU346-T (RNA-seq)	NYU346	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166221	GSM7173650	NYU346-N (RNA-seq)	NYU346	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166222	GSM7173649	NYU330-T (RNA-seq)	NYU330	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166223	GSM7173648	NYU330-N (RNA-seq)	NYU330	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166224	GSM7173647	NYU32-T (RNA-seq)	NYU32	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166225	GSM7173646	NYU32-N (RNA-seq)	NYU32	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166226	GSM7173645	NYU318-T (RNA-seq)	NYU318	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166227	GSM7173644	NYU318-N (RNA-seq)	NYU318	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166228	GSM7173643	NYU307-T (RNA-seq)	NYU307	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166229	GSM7173642	NYU307-N (RNA-seq)	NYU307	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166230	GSM7173641	NYU300-N (RNA-seq)	NYU300	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166231	GSM7173640	NYU300-2-T (RNA-seq)	NYU300	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166232	GSM7173591	NYU1891-T (RNA-seq)	NYU1891	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166233	GSM7173590	NYU1891-N (RNA-seq)	NYU1891	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166234	GSM7173589	NYU1884-T (RNA-seq)	NYU1884	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166235	GSM7173588	NYU1884-N (RNA-seq)	NYU1884	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166236	GSM7173587	NYU1883-T (RNA-seq)	NYU1883	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166237	GSM7173586	NYU1883-N (RNA-seq)	NYU1883	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166238	GSM7173585	NYU1873-T (RNA-seq)	NYU1873	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166239	GSM7173584	NYU1873-N (RNA-seq)	NYU1873	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166240	GSM7173583	NYU1871-T (RNA-seq)	NYU1871	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166241	GSM7173582	NYU1871-N (RNA-seq)	NYU1871	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166242	GSM7173581	NYU1854-T (RNA-seq)	NYU1854	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166243	GSM7173580	NYU1854-N (RNA-seq)	NYU1854	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166244	GSM7173579	NYU1845-T (RNA-seq)	NYU1845	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166245	GSM7173578	NYU1845-N (RNA-seq)	NYU1845	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166246	GSM7173577	NYU1837-T (RNA-seq)	NYU1837	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166247	GSM7173576	NYU1837-N (RNA-seq)	NYU1837	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166248	GSM7173527	NYU1448-T (RNA-seq)	NYU1448	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166249	GSM7173526	NYU1448-N (RNA-seq)	NYU1448	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166250	GSM7173525	NYU1445-T (RNA-seq)	NYU1445	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166251	GSM7173524	NYU1445-N (RNA-seq)	NYU1445	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166252	GSM7173523	NYU1443-T (RNA-seq)	NYU1443	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166253	GSM7173522	NYU1443-N (RNA-seq)	NYU1443	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166254	GSM7173521	NYU1435-T (RNA-seq)	NYU1435	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166255	GSM7173520	NYU1435-N (RNA-seq)	NYU1435	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166256	GSM7173519	NYU1433-T (RNA-seq)	NYU1433	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166257	GSM7173518	NYU1433-N (RNA-seq)	NYU1433	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166258	GSM7173517	NYU1428-T (RNA-seq)	NYU1428	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166259	GSM7173516	NYU1428-N (RNA-seq)	NYU1428	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166260	GSM7173515	NYU1417-T (RNA-seq)	NYU1417	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166261	GSM7173514	NYU1417-N (RNA-seq)	NYU1417	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166262	GSM7173513	NYU1416-T (RNA-seq)	NYU1416	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166263	GSM7173512	NYU1416-N (RNA-seq)	NYU1416	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166264	GSM7173495	NYU1280-T (RNA-seq)	NYU1280	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166265	GSM7173494	NYU1280-N (RNA-seq)	NYU1280	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166266	GSM7173493	NYU1261-T (RNA-seq)	NYU1261	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166267	GSM7173492	NYU1261-N (RNA-seq)	NYU1261	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166268	GSM7173491	NYU1222-T (RNA-seq)	NYU1222	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166269	GSM7173490	NYU1222-N (RNA-seq)	NYU1222	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166270	GSM7173489	NYU1213-T (RNA-seq)	NYU1213	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166271	GSM7173488	NYU1213-N (RNA-seq)	NYU1213	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166272	GSM7173487	NYU1210-T (RNA-seq)	NYU1210	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166273	GSM7173486	NYU1210-N (RNA-seq)	NYU1210	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166274	GSM7173485	NYU1206-T (RNA-seq)	NYU1206	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166275	GSM7173484	NYU1206-N (RNA-seq)	NYU1206	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166276	GSM7173483	NYU1205-T (RNA-seq)	NYU1205	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166277	GSM7173482	NYU1205-N (RNA-seq)	NYU1205	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166278	GSM7173481	NYU1196-T (RNA-seq)	NYU1196	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166279	GSM7173480	NYU1196-N (RNA-seq)	NYU1196	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166280	GSM7173687	NYU779-T (RNA-seq)	NYU779	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166281	GSM7173686	NYU779-N (RNA-seq)	NYU779	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166282	GSM7173685	NYU741-T (RNA-seq)	NYU741	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166283	GSM7173684	NYU741-N (RNA-seq)	NYU741	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166284	GSM7173683	NYU713-T (RNA-seq)	NYU713	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166285	GSM7173682	NYU713-N (RNA-seq)	NYU713	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166286	GSM7173681	NYU706-T (RNA-seq)	NYU706	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166287	GSM7173680	NYU706-N (RNA-seq)	NYU706	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166288	GSM7173679	NYU704-T (RNA-seq)	NYU704	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166289	GSM7173678	NYU704-N (RNA-seq)	NYU704	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence
+SRR24166290	GSM7173677	NYU689-T (RNA-seq)	NYU689	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166291	GSM7173676	NYU689-N (RNA-seq)	NYU689	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166292	GSM7173675	NYU675-T (RNA-seq)	NYU675	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166293	GSM7173674	NYU675-N (RNA-seq)	NYU675	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166294	GSM7173673	NYU669-T (RNA-seq)	NYU669	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166295	GSM7173672	NYU669-N (RNA-seq)	NYU669	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166296	GSM7173623	NYU1999-T (RNA-seq)	NYU1999	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166297	GSM7173622	NYU1999-N (RNA-seq)	NYU1999	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166298	GSM7173621	NYU1997A-T (RNA-seq)	NYU1997	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166299	GSM7173620	NYU1997-N (RNA-seq)	NYU1997	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166300	GSM7173619	NYU1986A-T (RNA-seq)	NYU1986	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166301	GSM7173618	NYU1986-N (RNA-seq)	NYU1986	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166302	GSM7173617	NYU1982A-T (RNA-seq)	NYU1982	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166303	GSM7173616	NYU1982-N (RNA-seq)	NYU1982	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166304	GSM7173615	NYU1970A-T (RNA-seq)	NYU1970	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166305	GSM7173614	NYU1970-N (RNA-seq)	NYU1970	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166306	GSM7173613	NYU1967A-T (RNA-seq)	NYU1967	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166307	GSM7173612	NYU1967-N (RNA-seq)	NYU1967	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166308	GSM7173611	NYU1953-T (RNA-seq)	NYU1953	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166309	GSM7173610	NYU1953-N (RNA-seq)	NYU1953	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166310	GSM7173609	NYU1951-T (RNA-seq)	NYU1951	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166311	GSM7173608	NYU1951-N (RNA-seq)	NYU1951	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166312	GSM7173559	NYU1738-T (RNA-seq)	NYU1738	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166313	GSM7173558	NYU1738-N (RNA-seq)	NYU1738	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166314	GSM7173557	NYU1707-T (RNA-seq)	NYU1707	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166315	GSM7173556	NYU1707-N (RNA-seq)	NYU1707	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166316	GSM7173555	NYU1682-T (RNA-seq)	NYU1682	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166317	GSM7173554	NYU1682-N (RNA-seq)	NYU1682	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166318	GSM7173553	NYU1678-T (RNA-seq)	NYU1678	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166319	GSM7173552	NYU1678-N (RNA-seq)	NYU1678	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166320	GSM7173551	NYU1636-T (RNA-seq)	NYU1636	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166321	GSM7173550	NYU1636-N (RNA-seq)	NYU1636	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166322	GSM7173549	NYU1630-T (RNA-seq)	NYU1630	Tumor	Tumor	Second Primary	Progression	N/A
+SRR24166323	GSM7173548	NYU1630-N (RNA-seq)	NYU1630	Lung adjacent normal	Lung adjacent normal	Second Primary	Progression	N/A
+SRR24166324	GSM7173547	NYU1609-T (RNA-seq)	NYU1609	Tumor	Tumor	Locoregional	Progression	Recurrence
+SRR24166325	GSM7173546	NYU1609-N (RNA-seq)	NYU1609	Lung adjacent normal	Lung adjacent normal	Locoregional	Progression	Recurrence
+SRR24166326	GSM7173545	NYU1603-T (RNA-seq)	NYU1603	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166327	GSM7173544	NYU1603-N (RNA-seq)	NYU1603	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166328	GSM7173479	NYU1141-T (RNA-seq)	NYU1141	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166329	GSM7173478	NYU1141-N (RNA-seq)	NYU1141	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166330	GSM7173477	NYU113-T (RNA-seq)	NYU113	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166331	GSM7173476	NYU113-N (RNA-seq)	NYU113	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166332	GSM7173475	NYU1124-T (RNA-seq)	NYU1124	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166333	GSM7173474	NYU1124-N (RNA-seq)	NYU1124	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166334	GSM7173473	NYU1079-T (RNA-seq)	NYU1079	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166335	GSM7173472	NYU1079-N (RNA-seq)	NYU1079	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166336	GSM7173471	NYU1057-T (RNA-seq)	NYU1057	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166337	GSM7173470	NYU1057-N (RNA-seq)	NYU1057	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166338	GSM7173469	NYU1037-T (RNA-seq)	NYU1037	Tumor	Tumor	Short Follow Up (<5y)	N/A	N/A
+SRR24166339	GSM7173468	NYU1037-N (RNA-seq)	NYU1037	Lung adjacent normal	Lung adjacent normal	Short Follow Up (<5y)	N/A	N/A
+SRR24166340	GSM7173467	NYU1027-T (RNA-seq)	NYU1027	Tumor	Tumor	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166341	GSM7173466	NYU1027-N (RNA-seq)	NYU1027	Lung adjacent normal	Lung adjacent normal	No Progression (>5y)	No Progression (>5y)	No Progression (>5y)
+SRR24166342	GSM7173465	NYU1019-T (RNA-seq)	NYU1019	Tumor	Tumor	Systemic	Progression	Recurrence
+SRR24166343	GSM7173464	NYU1019-N (RNA-seq)	NYU1019	Lung adjacent normal	Lung adjacent normal	Systemic	Progression	Recurrence

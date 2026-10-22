@@ -25,3 +25,10 @@ step = 3
 modules = ["gather", "qc", "de"]
 laptop_cap = "all"
 note = "Squamous against adenocarcinoma tumours across the two projects, a cross-project contrast."
+
+[[datasets]]
+slug = "lung_gse229705"
+step = 3
+modules = ["gather", "qc", "de", "function"]
+laptop_cap = "all"
+note = "Dolgalev 2023: 123 early-stage adenocarcinomas against their adjacent lung, paired by patient; not yet run."
