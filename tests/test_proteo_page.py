@@ -2,6 +2,7 @@
 rules' registration order. Each test names the mutation it catches.
 """
 
+import html as markup
 import re
 import subprocess
 from pathlib import Path
@@ -10,6 +11,7 @@ import polars as pl
 import pytest
 from proteo_root import TUMOURS
 
+from ctx.report import text
 from ctx.report.builder import unpacked
 from ctx.report.cap import MAX_BYTES
 
@@ -122,3 +124,53 @@ def test_rules_registered_before_the_protein_reader(name):
     ancestor = subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor",
                                registered[0], reader[0]], check=False)  # fmt: skip
     assert ancestor.returncode == 0
+
+
+# Written here, not read from ctx.proteo.page.VARIANTS, so a picker that falls back fails.
+DESIGNS = {"across_samples": "variants.across_samples", "tumour_normal": "variants.tumour_normal",
+           "cross_dataset": None}  # fmt: skip
+SECTIONS = ("purpose", "input", "method", "interpretation", "pitfalls", "terms", "questions")
+
+
+def _plain(marked: str) -> str:
+    """Page text as a reader sees it: a glossary mark is its display text, spaces collapsed."""
+    shown = re.sub(r"\[\[([^\]|]+?)!?(?:\|([^\]]+))?\]\]", lambda m: m[2] or m[1], marked)
+    return " ".join(shown.replace("`", "").split())
+
+
+def _sentences(design: str) -> set[str]:
+    """Every sentence of a design's sections, as the page prints it."""
+    made = text.skeleton("proteo", DESIGNS[design])
+    parts = [made[k] for k in ("purpose", "input", "method", "interpretation")]
+    parts += [*made["pitfalls"], *(m for _, m in made["terms"])]
+    parts += [x for q in made["questions"] for x in (q.prompt, q.answer)]
+    return {s for part in parts for s in re.split(r"(?<=[.?])\s+", _plain(part)) if s}
+
+
+def _seen(root: Path) -> str:
+    """The overview page's words, tags dropped."""
+    html = unpacked(output(root, "overview_v1.html").read_text())
+    words = " ".join(markup.unescape(re.sub(r"<[^>]+>", " ", html)).split())
+    # A mark's closing tag sits before the punctuation after it; the reader sees none.
+    return re.sub(r" ([,.;:?])", r"\1", words)
+
+
+def test_every_design_writes_every_section():
+    """L.1: no design falls back to another design's text: each variant replaces every section."""
+    for key in filter(None, DESIGNS.values()):
+        assert set(SECTIONS) <= set(text.raw("proteo", key)), key
+
+
+@pytest.mark.parametrize("design, fixture", [("across_samples", "proteo_across"),
+                                             ("cross_dataset", "proteo_cross"),
+                                             ("tumour_normal", "proteo_made")])  # fmt: skip
+def test_page_text_is_its_own_designs(design, fixture, request):
+    """L.1: each design's page shows every sentence of its own sections and none of the
+    sentences only another design's sections hold (granules, donors who differ, normals).
+
+    Catches: the variant picker falling back to the page's own, cross-study, sections."""
+    seen = _seen(request.getfixturevalue(fixture)[0])
+    own = _sentences(design)
+    others = set().union(*(_sentences(d) for d in DESIGNS if d != design)) - own
+    assert others and not [s for s in others if s in seen]
+    assert not [s for s in own if s not in seen]

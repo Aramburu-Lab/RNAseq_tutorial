@@ -164,7 +164,7 @@ def skeleton(page: str, variant: str | None = None, /, **values: Any) -> dict[st
     asked = section("questions")
     return {
         **{k: one(k, section(k)) for k in ("purpose", "input", "method", "interpretation")},
-        "terms": tuple((t["term"], one("terms", t["meaning"])) for t in raw(page, "terms")),
+        "terms": tuple((t["term"], one("terms", t["meaning"])) for t in section("terms")),
         "questions": tuple(
             SelfCheck(one("questions", t["prompt"]), one("questions", t["answer"])) for t in asked
         )
