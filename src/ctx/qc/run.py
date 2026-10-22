@@ -115,7 +115,7 @@ def gene_types(root: Path, spec: Dataset) -> tuple[pl.DataFrame | None, str]:
 
 def counts_stage(
     settings: runtime.Settings, spec: Dataset, gathered: Mapping[str, pl.DataFrame],
-    options: Options,
+    options: Options, registry: reg.Registry,
 ) -> tuple[checkpoint.Measured | None, tuple[str, ...]]:  # fmt: skip
     """The count checkpoint, and what was left out: all of it where gather wrote no counts."""
     if "counts" not in gathered:
@@ -123,7 +123,9 @@ def counts_stage(
     types, note = gene_types(settings.root, spec)
     sheet = gathered["samplesheet"]
     _, peers = checkpoint.groupings(options.strata, options.peers, sheet.columns)
-    measured = checkpoint.sample_metrics(gathered["counts"], sheet, gathered["genes"], types,
+    excluded = registry.metrics[checkpoint.TOP_GENE].exclude_gene_ids
+    composition = checkpoint.count_metrics(gathered["counts"], types, excluded)
+    measured = checkpoint.sample_metrics(gathered["counts"], sheet, gathered["genes"], composition,
                                          peers or [options.peers], settings.threads)  # fmt: skip
     return measured, (note,) if note else ()
 
@@ -423,7 +425,7 @@ def run(
         raise QcError(refused[0])
     if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
         raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
-    measured, notes = counts_stage(settings, spec, gathered, options)
+    measured, notes = counts_stage(settings, spec, gathered, options, registry)
     samples = sheet.unique("sample", keep="first", maintain_order=True).select("sample")
     values = measured.values if measured else samples
     sexes = measured.sexes if measured else None

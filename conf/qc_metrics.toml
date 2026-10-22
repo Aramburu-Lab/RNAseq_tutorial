@@ -660,10 +660,12 @@ source_type = "course_convention"
 stage = "counts"
 title = "Share of the top gene"
 meaning = "The share of all counted reads that fall on the single most-read gene that is not rRNA."
-# P2Q.10: Mt_rRNA and the 18S-antisense lncRNAs ENSG00000280614 and ENSG00000281383 are left
-# out of the search (ctx.qc.checkpoint.RRNA_18S_ANTISENSE). On Step-1 the median fell from
-# 5.34 % to 3.22 %; the largest, 17.88 %, is DEFA1B in ERX6994400, under both definitions.
-computed = "largest count among genes other than Mt_rRNA and the two 18S-antisense lncRNAs / library size"
+# P2Q.10: left out of the search are the genes the run's own annotation types Mt_rRNA, and the
+# genes exclude_gene_ids lists. ctx.qc.checkpoint reads the list here and nowhere else, and
+# rrna_fraction counts the same two genes. Without an annotation the metric is not measured,
+# since Mt_rRNA cannot be told apart. On Step-1 the median fell from 5.34 % to 3.22 %; the
+# largest, 17.88 %, is DEFA1B in ERX6994400, under both definitions.
+computed = "largest count among genes other than the annotation's Mt_rRNA genes and exclude_gene_ids / library size"
 unit = "fraction"
 table = "counts"
 column = "top_gene_share"
@@ -672,6 +674,11 @@ direction = "lower"
 bands = "dataset_only"
 rationale = "Neutrophil libraries are dominated by a few granule and ribosomal transcripts by biology; the dataset shows which run is more dominated than its peers."
 causes = ["one transcript taking most reads", "rRNA", "globin"]
+# The two lncRNAs GENCODE 50 annotates antisense to 18S rRNA sequence, 923 nt each on the minus
+# strand of chr21 at 8,254,592 and 8,393,419. Unversioned, so a release that bumps the version
+# still matches.
+exclude_gene_ids = ["ENSG00000280614", "ENSG00000281383"]
+exclude_source = "TODO.md P2Q.10 (D-052): leave out Mt_rRNA genes and the 18S-antisense lncRNAs ENSG00000280614 and ENSG00000281383; approved as decision 10 of docs/plans/2026-10-01_qc_bands_proposal_approved.md, Rytis 2026-10-01"
 action = "flag"
 matters_for_de = true
 read_length_tied = false
@@ -724,7 +731,7 @@ title = "Nuclear rRNA"
 meaning = "The share of reads on nuclear rRNA: the 5S and 5.8S genes, their pseudogenes, and 18S through the two lncRNAs annotated antisense to it. GENCODE 50 has no 45S gene, so 28S reads land on no gene."
 # P2Q.10: the two 18S-antisense lncRNAs join the nuclear rRNA genes. On Step-1 (unstranded)
 # the median rose from 6.48e-6 to 0.041, the range 0.0018 to 0.167 (measured 2026-10-09).
-computed = "counts on nuclear rRNA and rRNA_pseudogene genes and the two 18S-antisense lncRNAs / library size"
+computed = "counts on nuclear rRNA and rRNA_pseudogene genes and the two 18S-antisense lncRNAs of top_gene_share's exclude_gene_ids / library size"
 unit = "fraction"
 table = "counts"
 column = "rrna_fraction"
