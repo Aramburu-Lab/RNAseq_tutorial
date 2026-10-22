@@ -12,7 +12,7 @@
 [dataset]
 slug = "breast_mac"
 # The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
-label = "Breast and endometrial macrophages"
+label = "BRCA immune cells: macrophages"
 ena_study = "PRJNA483877"
 ena_secondary_study = "SRP155941"
 geo = "GSE117970"

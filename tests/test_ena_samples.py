@@ -3,6 +3,7 @@
 import csv
 import importlib.util
 import io
+import re
 import sys
 import urllib.error
 from pathlib import Path
@@ -142,11 +143,55 @@ def test_write_is_atomic(ena, tmp_path, monkeypatch):
     assert list(tmp_path.iterdir()) == []
 
 
+# labdocs lint's rule for a deliverable's stem, the one these names must pass.
+DELIVERABLE_STEM = re.compile(r"^\d{4}-\d{2}-\d{2}_[a-z0-9]+(_[a-z0-9]+)*_v\d+$")
+
+
 def test_deliverable_names(ena, tmp_path):
+    """The accession alone by default, lowercased, as the deliverable rule allows no capital."""
     wide, long = ena.output_paths(STUDY, tmp_path, 1)
     today = ena.date.today().isoformat()
-    assert wide.name == f"{today}_ena_samples_{STUDY}_v1.tsv"
-    assert long.name == f"{today}_ena_samples_{STUDY}_attributes_long_v1.tsv"
+    assert wide.name == f"{today}_ena_samples_{STUDY.lower()}_v1.tsv"
+    assert long.name == f"{today}_ena_samples_{STUDY.lower()}_attributes_long_v1.tsv"
+    assert all(DELIVERABLE_STEM.match(p.stem) for p in (wide, long))
+    assert ena.output_paths(STUDY, tmp_path, None)[0].name == f"{STUDY}_samples.tsv"
+
+
+def test_a_label_names_the_files(ena, tmp_path, monkeypatch):
+    """--label puts the label before the accession, through main, in both tables' names."""
+    # main passes no opener, so run's default is the one to stub.
+    monkeypatch.setattr(ena.run, "__defaults__", (Stub(), None))
+    code = ena.main([STUDY, "--out-dir", str(tmp_path), "--version", "1",
+                     "--label", f"{STUDY}=lung_tissue_luac"])  # fmt: skip
+    assert code == 0
+    today = ena.date.today().isoformat()
+    stem = f"{today}_ena_samples_lung_tissue_luac_{STUDY.lower()}"
+    assert sorted(p.name for p in tmp_path.iterdir()) == [
+        f"{stem}_attributes_long_v1.tsv", f"{stem}_v1.tsv"]  # fmt: skip
+    assert all(DELIVERABLE_STEM.match(p.stem) for p in tmp_path.iterdir())
+    assert ena.output_paths(STUDY, tmp_path, None, "blood")[1].name == (
+        f"blood_{STUDY}_attributes_long.tsv")  # fmt: skip
+
+
+@pytest.mark.parametrize("label", [
+    "Lung_Tissue", "lung tissue", "lung-tissue", "lung_(luac)", "_lung", "lung__tissue", "",
+])  # fmt: skip
+def test_a_label_outside_the_naming_rule_is_refused(ena, tmp_path, label, capsys):
+    out = tmp_path / "out"
+    assert ena.main([STUDY, "--out-dir", str(out), "--label", f"{STUDY}={label}"]) == 1
+    assert "lowercase words joined by underscores" in capsys.readouterr().err
+    assert not out.exists()
+
+
+@pytest.mark.parametrize("pair", ["lung", "PRJNA000002=lung"])
+def test_a_label_names_a_study_given(ena, pair):
+    with pytest.raises(ena.EnaError, match="<study>=<label>"):
+        ena.parse_labels([pair], [STUDY])
+
+
+def test_a_study_is_labelled_once(ena):
+    with pytest.raises(ena.EnaError, match="twice"):
+        ena.parse_labels([f"{STUDY}=a", f"{STUDY}=b"], [STUDY])
 
 
 def test_tsv_quotes_only_when_it_must(ena):

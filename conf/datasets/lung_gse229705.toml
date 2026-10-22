@@ -39,7 +39,7 @@
 [dataset]
 slug = "lung_gse229705"
 # The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
-label = "Lung adenocarcinoma and adjacent lung"
+label = "Lung tissue (LUAC)"
 # What fetchngs downloads, as `ctx guide --dataset-file` writes it into the accession list.
 accessions = ["PRJNA955664"]
 ena_study = "PRJNA955664"

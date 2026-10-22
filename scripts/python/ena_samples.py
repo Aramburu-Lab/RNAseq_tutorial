@@ -21,10 +21,13 @@ renamed when complete.
 
 Usage:
     python scripts/python/ena_samples.py <study> ... --out-dir <folder> [--version N]
+        [--label <study>=<label> ...]
 
 With ``--version N`` the files take the deliverable names
-``<date>_ena_samples_<study>_vN.tsv`` and ``<date>_ena_samples_<study>_attributes_long_vN.tsv``;
-without it, ``<study>_samples.tsv`` and ``<study>_attributes_long.tsv``.
+``<date>_ena_samples_<study>_vN.tsv`` and ``<date>_ena_samples_<study>_attributes_long_vN.tsv``,
+the accession lowercased, as the deliverable rule allows only lowercase; without it,
+``<study>_samples.tsv`` and ``<study>_attributes_long.tsv``. ``--label PRJNA000001=lung_tissue``
+puts the label before the accession in both, so a name says what the samples are.
 """
 
 from __future__ import annotations
@@ -50,6 +53,9 @@ BROWSER_XML = "https://www.ebi.ac.uk/ena/browser/api/xml/"
 RUN_FIELDS = ("run_accession,sample_accession,secondary_sample_accession,sample_alias,"
               "sample_title,experiment_accession,library_layout")  # fmt: skip
 STUDY = re.compile(r"^(PRJ[EDN][A-Z]\d+|[SED]RP\d+)$")
+# A label is a description of the deliverable rule, labdocs lint's DELIVERABLE_STEM; copied,
+# not imported, because this script runs on the standard library alone.
+LABEL = re.compile(r"^[a-z0-9]+(_[a-z0-9]+)*$")
 BATCH = 50
 TIMEOUT = 60
 RETRIES = 2
@@ -263,11 +269,17 @@ def write_atomic(files: dict[Path, bytes]) -> None:
             part.unlink(missing_ok=True)
 
 
-def output_paths(study: str, out_dir: Path, version: int | None) -> tuple[Path, Path]:
-    """The wide and long table paths, deliverable-named when a version is given."""
+def output_paths(
+    study: str, out_dir: Path, version: int | None, label: str | None = None
+) -> tuple[Path, Path]:
+    """The wide and long table paths, deliverable-named when a version is given.
+
+    A label goes before the accession; a deliverable name holds the accession lowercased.
+    """
+    named = f"{label}_{study}" if label else study
     if version is None:
-        return out_dir / f"{study}_samples.tsv", out_dir / f"{study}_attributes_long.tsv"
-    stem = f"{date.today().isoformat()}_ena_samples_{study}"
+        return out_dir / f"{named}_samples.tsv", out_dir / f"{named}_attributes_long.tsv"
+    stem = f"{date.today().isoformat()}_ena_samples_{named.lower()}"
     return out_dir / f"{stem}_v{version}.tsv", out_dir / f"{stem}_attributes_long_v{version}.tsv"
 
 
@@ -279,12 +291,38 @@ def summary(study: str, samples: list[Sample], counter: Requests) -> str:
             f"{counter.made} requests ({counter.retried} retries); tags: {tags}")  # fmt: skip
 
 
-def run(study: str, out_dir: Path, version: int | None, opener: Opener = urlopen) -> str:
+def parse_labels(pairs: Iterable[str], studies: Iterable[str]) -> dict[str, str]:
+    """``<study>=<label>`` pairs as a mapping, each label checked against the naming rule.
+
+    Raises:
+        EnaError: A pair lacks ``=``, names a study not asked for, repeats one, or its label
+            is not lowercase words joined by underscores.
+    """
+    asked, labels = set(studies), {}
+    for pair in pairs:
+        study, sep, label = pair.partition("=")
+        if not sep or study not in asked:
+            raise EnaError(f"--label {pair!r}: expected <study>=<label> for a study given")
+        if study in labels:
+            raise EnaError(f"--label {pair!r}: {study} is labelled twice")
+        if not LABEL.match(label):
+            raise EnaError(f"--label {pair!r}: a label is lowercase words joined by underscores")
+        labels[study] = label
+    return labels
+
+
+def run(
+    study: str,
+    out_dir: Path,
+    version: int | None,
+    opener: Opener = urlopen,
+    label: str | None = None,
+) -> str:
     """Fetch one study and write its two tables; returns its summary line."""
     counter = Requests()
     samples = fetch_study(study, opener, counter)
     header, rows = wide_rows(samples)
-    wide, long = output_paths(study, out_dir, version)
+    wide, long = output_paths(study, out_dir, version, label)
     write_atomic({wide: tsv_bytes(header, rows), long: tsv_bytes(LONG, long_rows(samples))})
     return summary(study, samples, counter)
 
@@ -295,11 +333,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("studies", nargs="+", help="PRJNA/PRJEB/SRP/ERP accessions")
     parser.add_argument("--out-dir", type=Path, required=True)
     parser.add_argument("--version", type=int, help="write deliverable names, _v<N>")
+    parser.add_argument(
+        "--label", action="append", default=[], metavar="STUDY=LABEL",
+        help="put LABEL in STUDY's file names, e.g. PRJNA000001=lung_tissue",
+    )  # fmt: skip
     args = parser.parse_args(argv)
-    args.out_dir.mkdir(parents=True, exist_ok=True)
     try:
+        labels = parse_labels(args.label, args.studies)
+        args.out_dir.mkdir(parents=True, exist_ok=True)
         for study in args.studies:
-            print(run(study, args.out_dir, args.version), flush=True)
+            print(run(study, args.out_dir, args.version, label=labels.get(study)), flush=True)
     except EnaError as error:
         print(f"error: {error}", file=sys.stderr)
         return 1

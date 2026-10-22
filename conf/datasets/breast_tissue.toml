@@ -22,7 +22,7 @@
 [dataset]
 slug = "breast_tissue"
 # The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
-label = "Breast tumour and adjacent tissue"
+label = "Breast tissue (BRCA)"
 ena_study = "PRJNA393443"
 ena_secondary_study = "SRP111343"
 geo = "GSE100925"
