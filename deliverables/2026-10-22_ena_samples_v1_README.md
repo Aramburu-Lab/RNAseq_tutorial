@@ -17,13 +17,13 @@ stage and sex. Written by `scripts/python/ena_samples.py`; do not edit, rerun in
 
 Each name carries the study's label, then its accession, lowercased: the deliverable
 rule allows lowercase words joined by underscores only. A future run names files this way
-with `--label <study>=<label>`, e.g. `--label PRJNA955664=lung_tissue_luac`. PRJNA344450's
+with `--label <study>=<label>`, e.g. `--label PRJNA955664=lung_tissue_luad`. PRJNA344450's
 two files keep their first names, untouched: kept, not used by the course.
 
 | File | Label | Project | Rows | Bytes | SHA-256 |
 | --- | --- | --- | --- | --- | --- |
-| `2026-10-22_ena_samples_lung_tissue_luac_prjna955664_attributes_long_v1.tsv` | Lung tissue (LUAC) | PRJNA955664 | 3444 | 135753 | `ca0c7c41fa7e2757983c5521a516d9fa874c480f7e2f725014aa200cc17a622b` |
-| `2026-10-22_ena_samples_lung_tissue_luac_prjna955664_v1.tsv` | Lung tissue (LUAC) | PRJNA955664 | 246 | 73504 | `fac249b99b226bdb20e6ba247c1596e721f78796b1226fa419f1803680e5c673` |
+| `2026-10-22_ena_samples_lung_tissue_luad_prjna955664_attributes_long_v1.tsv` | Lung tissue (LUAD) | PRJNA955664 | 3444 | 135753 | `ca0c7c41fa7e2757983c5521a516d9fa874c480f7e2f725014aa200cc17a622b` |
+| `2026-10-22_ena_samples_lung_tissue_luad_prjna955664_v1.tsv` | Lung tissue (LUAD) | PRJNA955664 | 246 | 73504 | `fac249b99b226bdb20e6ba247c1596e721f78796b1226fa419f1803680e5c673` |
 | `2026-10-22_ena_samples_breast_tissue_brca_prjna393443_attributes_long_v1.tsv` | Breast tissue (BRCA) | PRJNA393443 | 1648 | 56898 | `aedfcb49762caf884fac36a683614c239c19e2618ac0f18aa411b366ea70fa2b` |
 | `2026-10-22_ena_samples_breast_tissue_brca_prjna393443_v1.tsv` | Breast tissue (BRCA) | PRJNA393443 | 103 | 24811 | `00aaaf576efc6185bf6b799b2aad74700fe70d0d27f5727ee4bd0b9175ef9fad` |
 | `2026-10-22_ena_samples_brca_immune_cells_prjna483877_attributes_long_v1.tsv` | BRCA immune cells | PRJNA483877 | 1351 | 50663 | `d665f5d5c1c552516bb1ad8dd91857921469c21cbaedee4ff32504e04aca9905` |

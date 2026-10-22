@@ -162,10 +162,10 @@ def test_a_label_names_the_files(ena, tmp_path, monkeypatch):
     # main passes no opener, so run's default is the one to stub.
     monkeypatch.setattr(ena.run, "__defaults__", (Stub(), None))
     code = ena.main([STUDY, "--out-dir", str(tmp_path), "--version", "1",
-                     "--label", f"{STUDY}=lung_tissue_luac"])  # fmt: skip
+                     "--label", f"{STUDY}=lung_tissue_luad"])  # fmt: skip
     assert code == 0
     today = ena.date.today().isoformat()
-    stem = f"{today}_ena_samples_lung_tissue_luac_{STUDY.lower()}"
+    stem = f"{today}_ena_samples_lung_tissue_luad_{STUDY.lower()}"
     assert sorted(p.name for p in tmp_path.iterdir()) == [
         f"{stem}_attributes_long_v1.tsv", f"{stem}_v1.tsv"]  # fmt: skip
     assert all(DELIVERABLE_STEM.match(p.stem) for p in tmp_path.iterdir())
@@ -174,7 +174,7 @@ def test_a_label_names_the_files(ena, tmp_path, monkeypatch):
 
 
 @pytest.mark.parametrize("label", [
-    "Lung_Tissue", "lung tissue", "lung-tissue", "lung_(luac)", "_lung", "lung__tissue", "",
+    "Lung_Tissue", "lung tissue", "lung-tissue", "lung_(luad)", "_lung", "lung__tissue", "",
 ])  # fmt: skip
 def test_a_label_outside_the_naming_rule_is_refused(ena, tmp_path, label, capsys):
     out = tmp_path / "out"
