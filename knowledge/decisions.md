@@ -29,7 +29,7 @@ it were reversed.
 
 ## D-108 — A gene typed on M10's ER figures redraws them as its patients at or above its median against below
 
-**Date:** 2026-10-21 · **Status:** decided (M10.G, Rytis 2026-10-20); for Rytis to confirm the open points under Consequence
+**Date:** 2026-10-21 · **Status:** decided (M10.G, Rytis 2026-10-20); both open points confirmed by Rytis 2026-10-22: the box on all four ER tabs, and no box on cohorts without ER
 
 **Context.** M10.G: on Figure 1, OS by ER status, a reader picks any gene and sees how its expression relates to the outcome. Z.1 found the screen genes are exactly the survival panel's, so the panel's gzip+base64 int16 block already holds every value the split needs.
 
@@ -449,7 +449,7 @@ it were reversed.
 
 **Evidence.** A planted gene with alone HR 1.4 and adjusted HR 0.7 gets -1 in Python and in node; every row of the made-up root's page matches its cox_screen table, with genes on both sides of 1. 4 planted mutations caught.
 
-**Consequence.** Before this, a protective gene cancelled a harmful one in the signed mean. Recorded for Rytis to confirm.
+**Consequence.** Before this, a protective gene cancelled a harmful one in the signed mean. Confirmed by Rytis (his approval of the recommended answers, recorded in the 2026-10-20 session summary).
 
 ---
 
@@ -533,7 +533,7 @@ it were reversed.
 
 **Evidence.** A preference on the colour rule; drawn and checked in both themes (wo13-e bf51b75).
 
-**Consequence.** Recorded for Rytis to confirm.
+**Consequence.** Confirmed by Rytis (his approval of the recommended answers, recorded in the 2026-10-20 session summary).
 
 ---
 
