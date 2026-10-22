@@ -695,8 +695,9 @@ table above, `n_p` its samples, `k_p` the pilot's kept bytes, `peak` the largest
 ## Block D (ED.6d). On the Mac: the copy back
 
 Into each ctx root's `data/raw/<slug>_align/`, beside the `<slug>_meta/` and `<slug>_rnaseq/` folders
-ED.4b's block 6 and the earlier copies use. No ctx code reads this folder yet (ED.6e); the name is
-the one ED.6e-1 and ED.6e-4 are to read by default. The includes are the files M2's read stage and
+ED.4b's block 6 and the earlier copies use. `ctx qc --reads --align-dir <folder>` reads its
+`tasks.tsv`, fastp JSON, FastQC zips, seqkit tables and `grid/` (ED.6e-1 to ED.6e-3); `ctx process`
+does not read it yet (ED.6e-4). No command reads it unless `--align-dir` names it. The includes are the files M2's read stage and
 M3 read (fastp JSON, FastQC zips, seqkit tables, the grid's JSON, STAR's two tables, flagstat,
 idxstats, featureCounts matrices and summaries), plus `tasks.tsv`, `versions.txt` and the `time/`
 files as the run's record, which the pages' Reproduce section needs (ED.6e-7).
@@ -749,10 +750,13 @@ for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705; do s=$(cat "
 for p in tier1 breast_tissue breast_mac breast_mono lung_gse229705; do s=$(cat "$p/pilot.txt"); rm -f "$p/runs/$s/star/$s.bam" "$p/runs/$s/star/$s.bam.bai"; rm -rf "$p/runs/$s/trimmed"; done
 ```
 
-**The ctx commands on the Mac.** Today none of them reads `<slug>_align/`: `ctx qc --reads` runs
-FastQC, fastp and seqkit itself on FASTQs under `--fetchngs-dir`, and `ctx process` trims, aligns and
-counts itself from a genome (`--genome`). The commands below are the ones ED.6e-1, ED.6e-2 and ED.6e-4 are to
-make work; the option name `--align-dir` is a proposal, not an option that exists.
+**The ctx commands on the Mac.** `ctx qc --reads --align-dir` reads the cluster's reports in
+place of running FastQC, fastp and seqkit (ED.6e-1 to ED.6e-3). It refuses a folder whose
+`tasks.tsv` and gather sheet disagree on the runs or their layout, a missing or unreadable report,
+and a fastp report run on other files or at a filter other than the command's `--fastp-*`
+settings. The grid is drawn on the sheet's first run unless `--grid-run` names another, and a
+`grid/` run on other files is refused. `ctx process` still trims, aligns and counts itself from a
+genome (`--genome`); its `--align-dir` line below waits for ED.6e-4.
 
 ```
 cd /Users/rytis/Scripts/Pipeline/RNAseq_tutorial

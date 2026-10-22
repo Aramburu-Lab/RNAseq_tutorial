@@ -25,6 +25,7 @@ from ctx.qc import (
     Fastp,
     QcError,
     checkpoint,
+    cluster,
     fastqc,
     fates,
     figure_tables,
@@ -82,6 +83,8 @@ class Options:
             ``<root>/data/raw/<dataset>``.
         fastp: fastp's filter for the reads and the grid.
         grid_run: The run the -q × -l grid is drawn on; None takes the first read.
+        align_dir: A cluster's report folder (ED.6) whose fastp, FastQC and seqkit reports
+            the reads stage reads, in place of running the tools; None runs them.
     """
 
     dataset_file: Path
@@ -94,6 +97,7 @@ class Options:
     fetchngs_dir: Path | None = None
     fastp: Fastp = field(default_factory=Fastp)
     grid_run: str | None = None
+    align_dir: Path | None = None
 
 
 def load_registry(options: Options) -> reg.Registry:
@@ -224,7 +228,10 @@ def reads_stage(writer: Writer, settings: runtime.Settings, dataset: str, sheet:
 
     MultiQC reads the reads into their own report, ``multiqc/reads/``, apart from the
     pipeline's: FastQC names samples by file, and one table would mix the two naming rules.
+    With ``align_dir``, the cluster's reports are read instead (``cluster_reads``).
     """
+    if options.align_dir is not None:
+        return cluster_reads(writer, sheet, registry, options, options.align_dir)
     outdir = options.fetchngs_dir or settings.root / "data" / "raw" / dataset
     files, skipped = reads.fastq_files(sheet, outdir)
     logs = writer.out / "multiqc" / "reads" / "logs"
@@ -239,10 +246,38 @@ def reads_stage(writer: Writer, settings: runtime.Settings, dataset: str, sheet:
     grid = reads.fastp_grid(paths, logs / "grid", writer.out / "multiqc" / "grid",
                             grid=(reads.GRID_Q, reads.GRID_L), fastp=options.fastp,
                             threads=settings.threads)  # fmt: skip
+    return read_values(mqc, files, skipped, registry, (grid, grid_run))
+
+
+def read_values(mqc: multiqc_io.MultiqcRun, files: pl.DataFrame, skipped: pl.DataFrame,
+                registry: reg.Registry, gridded: tuple[pl.DataFrame, str],
+                source: str = "") -> Reads:  # fmt: skip
+    """What MultiQC read of the reads: values per run, FastQC's plots, and the grid given."""
     names = {reads.stem(p): r for r, p in files.select("run_accession", "path").rows()}
     first = [reads.stem(p) for p in files.filter(pl.col("mate") == 1)["path"]]
     return Reads(reads.run_values(mqc, files, registry), skipped,
-                 fastqc.read(mqc, names, first, "run_accession"), grid, grid_run)  # fmt: skip
+                 fastqc.read(mqc, names, first, "run_accession"), *gridded, source)  # fmt: skip
+
+
+def cluster_reads(writer: Writer, sheet: pl.DataFrame, registry: reg.Registry, options: Options,
+                  align_dir: Path) -> Reads:  # fmt: skip
+    """M2a from a cluster's report folder (ED.6): the tools' reports, never the FASTQ files.
+
+    The grid is the cluster's, on the run ``--grid-run`` names or the sheet's first, and a grid
+    run on any other files is refused.
+    """
+    files, skipped, ordered = cluster.files(sheet, align_dir)
+    mqc = cluster.read(ordered, files, cluster.reports(align_dir, ordered),
+                       writer.out / "multiqc" / "reads", multiqc_config(writer, registry),
+                       options.fastp)  # fmt: skip
+    grid_run = options.grid_run or str(files["run_accession"][0])
+    names = files.filter(pl.col("run_accession") == grid_run).sort("mate")["path"].to_list()
+    if not names:
+        raise QcError(f"--grid-run {grid_run} is not a run whose reads were read")
+    grid = cluster.grid(align_dir, writer.out / "multiqc" / "grid", names, options.fastp)
+    source = text.fill(PAGE, "notes.cluster_reads", folder=align_dir.name,
+                       runs=ordered.height, samples=ordered["task"].n_unique())  # fmt: skip
+    return read_values(mqc, files, skipped, registry, (grid, grid_run), source)
 
 
 def judge(values: pl.DataFrame, sheet: pl.DataFrame, found: Reads | None,
@@ -423,6 +458,10 @@ def run(
         refused := counts.refuse_sheet(sheet, inputs["samplesheet"], "qc --reads")
     ):
         raise QcError(refused[0])
+    if options.align_dir is not None:
+        if not options.reads or options.fetchngs_dir is not None:
+            raise QcError("--align-dir is read with --reads, in place of --fetchngs-dir")
+        inputs["align_tasks"] = options.align_dir / cluster.TASKS
     if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
         raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
     measured, notes = counts_stage(settings, spec, gathered, options, registry)

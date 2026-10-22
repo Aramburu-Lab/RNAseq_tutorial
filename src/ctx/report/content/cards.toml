@@ -165,6 +165,10 @@ effect = "Higher cuts more of each tail; only used with --cut-tail."
 meaning = "Run shown in fastp's -q by -l grid. Unset: first run read."
 effect = "Pick a suspect run to see which settings keep its reads."
 
+[options."--align-dir"]
+meaning = "A cluster's report folder: `tasks.tsv` and each run's fastp, FastQC, seqkit reports."
+effect = "With --reads: reports replace FASTQ files; each run checked against the sheet."
+
 [options."--genome"]
 meaning = "Genome FASTA, plain or gzipped; its contig names select the [[annotation|GTF]] lines."
 effect = "A partial genome lowers the mapping rate; genome-wide bands stop applying."

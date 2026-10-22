@@ -7,7 +7,7 @@ outdir's layout (D-031). Every number comes back through MultiQC (`ctx.qc.multiq
 
 import json
 import os
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import replace
 from pathlib import Path
 
@@ -190,11 +190,25 @@ def fastp_grid(
         One row per cell: q, l, the reads that passed, and their percentage of the reads in.
     """
     logs.mkdir(parents=True, exist_ok=True)
-    cells = {f"grid_q{q}_l{length}": (q, length) for q in grid[0] for length in grid[1]}
+    cells = grid_cells(grid)
     for title, (q, length) in cells.items():
         run_fastp(list(paths), logs, title, replace(fastp, q=q, l=length), threads)
     mqc = multiqc_io.run([logs], dest, config=raw_config(logs / "multiqc_config.json"),
                          modules=("fastp",))  # fmt: skip
+    return grid_table(mqc, cells)
+
+
+def grid_cells(grid: tuple[Sequence[int], Sequence[int]]) -> dict[str, tuple[int, int]]:
+    """Each grid cell's fastp title, ``grid_q<q>_l<l>``, and its (-q, -l)."""
+    return {f"grid_q{q}_l{length}": (q, length) for q in grid[0] for length in grid[1]}
+
+
+def grid_table(mqc: multiqc_io.MultiqcRun, cells: Mapping[str, tuple[int, int]]) -> pl.DataFrame:
+    """The grid's table from MultiQC's fastp rows, one row per cell MultiQC read.
+
+    Raises:
+        QcError: If a MultiQC sample is no cell of the grid.
+    """
     table = multiqc_io.numeric(multiqc_io.table(mqc, "general_stats"), GRID_COLUMNS)
     multiqc_io.map_names(table["Sample"], {t: t for t in cells})
     return table.select(
