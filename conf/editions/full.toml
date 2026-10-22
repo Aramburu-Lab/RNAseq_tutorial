@@ -10,3 +10,6 @@ label = "Full course"
 notes = "Every module and every dataset file of the course."
 modules = "all"
 datasets = "all"
+# Every section of every page, with its controls (D-111); both are the defaults.
+page = "full"
+controls = true

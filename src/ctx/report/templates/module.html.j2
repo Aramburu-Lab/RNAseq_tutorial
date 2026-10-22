@@ -4,11 +4,13 @@
 {# A code block's text is printed as given: pre keeps every space and line end, and its Copy button names this block's own id. #}
 {% macro code_block(it) %}<figure class="code"><figcaption>{{ it.code.title }}{% if it.code.source %} <code>{{ it.code.source }}</code>{% endif %}</figcaption><div class="command"><pre><code id="{{ it.id }}">{{ it.code.text }}</code></pre><button type="button" class="copy" data-copy="{{ it.id }}" data-copied="{{ ui.reproduce.copied }}" data-selected="{{ ui.reproduce.selected }}">{{ ui.reproduce.button }}</button></div><p class="sha">{{ ui.code.sha256 }} <code>{{ it.code.sha256 }}</code></p></figure>{% endmacro %}
 {% macro item(kind, it, tab=false) %}{% if kind == "figure" %}{{ figure_block(it, tab=tab) }}{% elif kind == "table" %}{{ result_table(it) }}{% elif kind == "code" %}{{ code_block(it) }}{% elif kind == "panel" %}{{ panel_block(it) }}{% else %}<p class="note">{{ it }}</p>{% endif %}{% endmacro %}
-{% block page_class %} has-rail{% endblock %}
+{% block page_class %}{% if not lite %} has-rail{% endif %}{% endblock %}
 {% block rail %}
+{% if not lite %}
 <nav class="toc" aria-label="{{ ui.contents.label }}"><p class="toc-title">{{ ui.contents.title }}</p><ol>
 {% for id, title in sections %}<li><a href="#{{ id }}">{{ title }}</a>{% if id == "results" and outline %}<ol class="sub">{% for anchor, label in outline %}<li><a href="#{{ anchor }}">{{ label }}</a></li>{% endfor %}</ol>{% endif %}</li>
 {% endfor %}</ol></nav>
+{% endif %}
 {% endblock %}
 {% block content %}
 {% for id, title in sections %}
@@ -24,7 +26,7 @@
 {% elif id == "parameters" %}
 {{ cards_table(page.parameters) }}
 {% elif id == "results" %}
-{% if page.key_numbers %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
+{% if page.key_numbers and not lite %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
 {% for kind, it in results %}
 {% if kind == "group" %}
 <div class="group" id="{{ it.anchor }}">

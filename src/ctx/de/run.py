@@ -870,7 +870,7 @@ def _contrasts_table(fits: Mapping[str, Fit], said: Mapping[str, Words]) -> Resu
             f"{(r['call'] == 'down').sum():,}",
         ))  # fmt: skip
     return ResultTable(word(PAGE, "contrasts.title"), text_words(PAGE, "contrasts.columns"),
-                       tuple(rows), numeric=(4, 5, 6))  # fmt: skip
+                       tuple(rows), numeric=(4, 5, 6), results=True)  # fmt: skip
 
 
 def _keys(sheet: pl.DataFrame, fits: Mapping[str, Fit], featured: Words,

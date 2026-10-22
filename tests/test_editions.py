@@ -179,14 +179,15 @@ def _hub_modules(root: Path) -> list[str]:
 
 
 def test_the_hub_lists_exactly_the_editions_modules(tmp_path, monkeypatch):
-    """With a page of every module under the root, core's hub lists M0 to M6, M8 and M9 and
-    counts 9; full's lists M0 to M10. Mutation caught: hub.run without has_module."""
+    """With a page of every module under the root, core's hub lists M0 to M6, M8 and M9, its
+    lite page with no key numbers (D-111); full's lists M0 to M10. Mutation caught: hub.run
+    without has_module."""
     root = all_module_pages(tmp_path, "study")
     monkeypatch.setenv(editions.EDITION_ENV, "core")
     assert _hub_modules(root) == ["setup", *CORE]
     hub_page = next((root / "outputs" / "09_report").glob("*_hub_v1.html")).read_text()
     assert "07_proteo" not in hub_page and "12_clinical" not in hub_page
-    assert text.fill("hub", "keys.modules_value", run=9, all=9) in unpacked(hub_page)
+    assert 'class="keys"' not in unpacked(hub_page)
     monkeypatch.delenv(editions.EDITION_ENV)
     assert _hub_modules(root) == ["setup", *EVERY]
 

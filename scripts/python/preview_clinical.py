@@ -130,7 +130,7 @@ def group_summary(table: pl.DataFrame) -> ResultTable:
     heads = tuple(fill(f"summary.columns.{k}", level=100 * survival.LEVEL)
                   for k in text.raw(PAGE, "summary.columns"))  # fmt: skip
     title = fill("summary.title", endpoint=ENDPOINT, horizon=HORIZON)
-    return ResultTable(title, heads, rows, numeric=(1, 2, 3, 5))
+    return ResultTable(title, heads, rows, numeric=(1, 2, 3, 5), results=True)
 
 
 def survival_group(writer: Writer, cohort: pl.DataFrame, gene: str) -> tuple[Group, dict[str, Any]]:
@@ -184,7 +184,7 @@ def cox_group(writer: Writer, cohort: pl.DataFrame, gene: str) -> tuple[Group, d
     )  # fmt: skip
     heads = text.words(PAGE, "cox.columns")
     table = ResultTable(fill("cox.title", endpoint=ENDPOINT, gene=gene), heads, shown,
-                        numeric=(1, 2, 3, 5, 6, 7))  # fmt: skip
+                        numeric=(1, 2, 3, 5, 6, 7), results=True)  # fmt: skip
     lead = fill("results.cox_lead", gene=gene, hr_uni=rows[0]["hr"], hr_adj=rows[1]["hr"],
                 covariates=covariates)  # fmt: skip
     return Group(fill("results.cox"), (table,), lead=lead), rows[1]

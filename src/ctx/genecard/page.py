@@ -132,7 +132,7 @@ def _evidence(card: Card, evidence: pl.DataFrame) -> ResultTable:
                      r["call"] if tested and r["call"] else word("evidence.untested")))  # fmt: skip
     return ResultTable(fill("evidence.title", symbol=card.symbol),
                        text.words(PAGE, "evidence.columns"), tuple(rows),
-                       numeric=(1, 2, 3))  # fmt: skip
+                       numeric=(1, 2, 3), results=True)  # fmt: skip
 
 
 def _structure(card: Card) -> list[Result]:
@@ -147,7 +147,7 @@ def _structure(card: Card) -> list[Result]:
         return []
     out: list[Result] = [ResultTable(fill("structure.title", symbol=card.symbol),
                                      text.words(PAGE, "structure.columns"), tuple(rows),
-                                     numeric=(3,))]  # fmt: skip
+                                     numeric=(3,), results=True)]  # fmt: skip
     if card.gtf is not None and card.rest is not None:
         same = (card.gtf.transcript, card.gtf.exons) == (card.rest.transcript, card.rest.exons)
         out.append(word("structure.agree" if same else "structure.differ"))
@@ -208,7 +208,7 @@ def _facts(card: Card, release: str, named_lines: hpa.CellLines | None) -> Resul
         rows.append(_lines(card.lines, named_lines))
     rows.append((word("facts.page"), hpa.page(release, f"ENSG{card.number:011d}"), ""))
     return ResultTable(fill("facts.title", symbol=card.symbol, release=release),
-                       text.words(PAGE, "facts.columns"), tuple(rows))  # fmt: skip
+                       text.words(PAGE, "facts.columns"), tuple(rows), results=True)  # fmt: skip
 
 
 @dataclass(frozen=True)
@@ -498,7 +498,7 @@ def evidence_view(writer: Writer, ctx: Context) -> Evidence | None:
                          f"{calls['padj'].is_not_null().sum():,}"))  # fmt: skip
         items.append(ResultTable(fill("figures.evidence.rest", n=len(rest)),
                                  text.words(PAGE, "figures.evidence.rest_columns"), tuple(rows),
-                                 numeric=(1, 2, 3)))  # fmt: skip
+                                 numeric=(1, 2, 3), results=True))  # fmt: skip
     group = Group(word("figures.evidence.group"), tuple(items))
     return Evidence(group, (heat, "evidence_view", words))
 

@@ -195,7 +195,7 @@ def de(writer: Writer, ctx: Context) -> tuple[Result, pl.DataFrame]:
     table = ResultTable(word("figures.volcano.table_title"),
                         text.words(PAGE, "figures.volcano.columns"),
                         tuple(figures.calls_table(frame, ctx.biotypes)),
-                        numeric=(1, 2, 3, 4, 5))  # fmt: skip
+                        numeric=(1, 2, 3, 4, 5), results=True)  # fmt: skip
     return Group(word("groups.de"), (block, table)), frame
 
 
@@ -259,7 +259,8 @@ def lncrna(writer: Writer, ctx: Context) -> Result:
     block = writer.figure(data, "lncrna_neighbour", words)
     table = ResultTable(fill("figures.neighbour.table_title", alpha=ALPHA),
                         text.words(PAGE, "figures.neighbour.columns"),
-                        tuple(figures.kinds_table(pairs)), numeric=(1, 2, 3, 4))  # fmt: skip
+                        tuple(figures.kinds_table(pairs)), numeric=(1, 2, 3, 4),
+                        results=True)  # fmt: skip
     return Group(word("groups.lncrna"), (block, table))
 
 

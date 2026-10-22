@@ -14,6 +14,10 @@ Not a cohort bundle: a bundle is one cancer's datasets and names the figure IDs 
 (``<cohort>_m5_volcano``), each dataset in exactly one bundle. An edition crosses cancers, the
 core edition Step-1, breast and lung, so as a bundle it would rename those figures or make a
 slug's cohort ambiguous. It reuses the bundles' module names, folder layout and selection.
+
+An edition also says how its pages look (D-111): ``page = "lite"`` cuts a module page to its
+figure and results-table cards, and ``controls = false`` leaves every page control out. Both
+default to the full edition's pages, and ``ctx.report.builder.look`` alone reads them.
 """
 
 import os
@@ -32,7 +36,9 @@ EDITION_ENV = "CTX_EDITION"
 DEFAULT = "full"
 # Every course module, or every dataset file of the datasets folder, as full lists both.
 ALL = "all"
-KEYS = {"name", "label", "notes", "modules", "datasets"}
+KEYS = {"name", "label", "notes", "modules", "datasets", "page", "controls"}
+# How a page is shown: every section (the default), or only its figure and results cards.
+PAGES = ("full", "lite")
 # Built with every edition's pages, never taught on their own (cohorts.RUN_MODULES leaves them).
 ALWAYS = ("setup", "report", "lite_build")
 WORDS = "edition"
@@ -52,7 +58,8 @@ class EditionError(ValueError):
 class Edition:
     """One edition: its name, label, notes, modules in course order and dataset slugs.
 
-    ``datasets`` is None for every dataset file of the folder ``datasets_folder``.
+    ``datasets`` is None for every dataset file of the folder ``datasets_folder``. ``page`` is
+    one of ``PAGES`` and ``controls`` whether pages carry their controls (D-111).
     """
 
     name: str
@@ -62,6 +69,8 @@ class Edition:
     datasets: tuple[str, ...] | None
     path: Path
     datasets_folder: Path
+    page: str = "full"
+    controls: bool = True
 
     def has_module(self, module: str) -> bool:
         """Whether this edition runs and shows a module; setup and report are in every one."""
@@ -161,6 +170,16 @@ def _datasets(value: Any, datasets: Path, problems: list[str]) -> tuple[str, ...
     return slugs
 
 
+def _look(head: Mapping[str, Any], problems: list[str]) -> tuple[str, bool]:
+    """``page`` and ``controls``, each the full edition's when absent, or a problem recorded."""
+    page, controls = head.get("page", PAGES[0]), head.get("controls", True)
+    if page not in PAGES:
+        problems.append(f"edition.page: expected one of {', '.join(PAGES)}, found {page!r}")
+    if not isinstance(controls, bool):
+        problems.append(f"edition.controls: expected true or false, found {controls!r}")
+    return page, controls
+
+
 def load(path: Path, datasets: Path | None = None) -> Edition:
     """Read and check one edition.
 
@@ -190,9 +209,10 @@ def load(path: Path, datasets: Path | None = None) -> Edition:
     label, notes = _text(head, "label", problems), _text(head, "notes", problems)
     modules = _modules(head.get("modules"), problems)
     slugs = _datasets(head.get("datasets"), datasets, problems)
+    page, controls = _look(head, problems)
     if problems:
         raise EditionError(f"{path}:\n  " + "\n  ".join(problems))
-    return Edition(name, label, notes, modules, slugs, path, datasets)
+    return Edition(name, label, notes, modules, slugs, path, datasets, page, controls)
 
 
 def choose(name: str | None) -> None:

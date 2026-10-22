@@ -308,6 +308,7 @@ def _er_check(writer: Writer, ctx: Context) -> list[Result]:
         text.words(PAGE, "er.columns"),
         tuple(rows),
         numeric=(1, 2, 3, 4),
+        results=True,
     )
     return [
         Group(word("er.title"), tuple(blocks), lead=word("er.lead"), tabs=True),
@@ -322,7 +323,7 @@ def _dunn(pairs: pl.DataFrame) -> ResultTable:
                   number(r["p"]), number(r["p_adj"]))
                  for r in pairs.iter_rows(named=True))  # fmt: skip
     return ResultTable(word("expression.dunn_title"), text.words(PAGE, "expression.dunn_columns"),
-                       rows, numeric=(3, 4, 5))  # fmt: skip
+                       rows, numeric=(3, 4, 5), results=True)  # fmt: skip
 
 
 def _expression(writer: Writer, ctx: Context) -> Group:
@@ -337,7 +338,7 @@ def _expression(writer: Writer, ctx: Context) -> Group:
                   word(f"expression.tests.{r['test']}"), f"{r['n']:,}", f"{r['effect']:.3f}",
                   number(r["p"]), number(r["q"])) for r in tests.iter_rows(named=True))  # fmt: skip
     table = ResultTable(word("expression.table_title"), text.words(PAGE, "expression.columns"),
-                        rows, numeric=(3, 4, 5, 6))  # fmt: skip
+                        rows, numeric=(3, 4, 5, 6), results=True)  # fmt: skip
     split = ctx.spec.clinical.box if ctx.spec.clinical else "er"
     data = figures.box(p, values, split)
     first = data.caption.tests[0]
@@ -362,7 +363,7 @@ def _models(result: Scored, ctx: Context) -> ResultTable:
                      number(m.p), number(m.ph_p), number(m.c_index, ".3f")))  # fmt: skip
     return ResultTable(fill("models.title", endpoint=ctx.endpoint),
                        text.words(PAGE, "models.columns"), tuple(rows),
-                       numeric=(1, 2, 3, 5, 6, 7))  # fmt: skip
+                       numeric=(1, 2, 3, 5, 6, 7), results=True)  # fmt: skip
 
 
 def _groups_table(result: Scored, ctx: Context) -> ResultTable:
@@ -372,7 +373,8 @@ def _groups_table(result: Scored, ctx: Context) -> ResultTable:
                   fill("models.ci", low=number(r["low"], ".1f"), high=number(r["high"], ".1f")),
                   f"{r['rmst']:.1f}") for r in result.groups.iter_rows(named=True))  # fmt: skip
     return ResultTable(fill("groups.title", endpoint=ctx.endpoint, horizon=ctx.options.horizon),
-                       text.words(PAGE, "groups.columns"), rows, numeric=(1, 2, 3, 5))  # fmt: skip
+                       text.words(PAGE, "groups.columns"), rows, numeric=(1, 2, 3, 5),
+                       results=True)  # fmt: skip
 
 
 def values(result: Scored, ctx: Context) -> dict[str, Any]:
@@ -537,7 +539,8 @@ def _screen(writer: Writer, ctx: Context, table: pl.DataFrame) -> Group:
                 endpoint=ctx.endpoint)  # fmt: skip
     return Group(word("screen.title"), (ResultTable(fill("screen.table_title", rows=SCREEN_ROWS),
                                                     text.words(PAGE, "screen.columns"), cells,
-                                                    numeric=(1, 2, 3, 5), css="screen"),),
+                                                    numeric=(1, 2, 3, 5), css="screen",
+                                                    results=True),),
                  lead=lead)  # fmt: skip
 
 

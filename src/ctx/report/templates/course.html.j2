@@ -6,17 +6,24 @@
 <div class="zipped" id="ctx-zipped" role="alert" hidden><strong>{{ course.zipped_title }}</strong> {{ course.zipped }}</div>
 <script src="kit.js" onerror="document.getElementById('ctx-zipped').hidden = false"></script>
 <section id="course">
+{# A lite home page (D-111) keeps its links: the glossary, the guide, the hubs, the modules. #}
+{% if not lite %}
 <p class="lede">{{ course.intro }}</p>
-{% if page.key_numbers %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
+{% endif %}
+{% if page.key_numbers and not lite %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
+{% if not lite %}
 <p class="note">{{ course.note }}</p>
 <p class="note">{{ course.unzip }}</p>
+{% endif %}
 {% if page.glossary %}<p class="note"><a href="{{ page.glossary }}">{{ course.glossary }}</a></p>{% endif %}
 {% if page.guide %}<p class="note"><a href="{{ page.guide }}">{{ course.guide }}</a></p>{% endif %}
 </section>
 {% if page.hubs %}
 <section class="hub-section" id="hubs">
 <h2>{{ course.hubs }}</h2>
+{% if not lite %}
 <p class="note">{{ course.hubs_lead }}</p>
+{% endif %}
 <ul class="course-links">{% for l in page.hubs %}{{ link(l) }}{% endfor %}</ul>
 </section>
 {% endif %}
