@@ -1,0 +1,167 @@
+# GSE229705 lung adenocarcinoma and adjacent lung (ED.4, the core edition's lung dataset; Rytis
+# 2026-10-22): 246 paired-end runs, one per GEO sample, a tumour and an adjacent normal sample of
+# each of 123 patients. GEO's series names Dolgalev et al. 2023 as its publication
+# (Series_pubmed_id 37938580), which profiles 143 early-stage tumours with matched
+# tumour-adjacent, histologically normal lung (abstract, PubMed 2026-10-22); the series holds 123
+# of those pairs. Not yet counted: TODO.md ED.4 holds the cluster commands.
+#
+# Curated from its own table, lung_gse229705.tsv: GEO's per-sample records (brief SOFT of
+# GSE229705's samples, acc.cgi?acc=GSE229705&targ=gsm&form=text&view=brief, retrieved 2026-10-22,
+# 707,854 B, SHA-256 61d1567845215f01018bfabe28a4b7b7a0eb287f170d756527ac1c556de98c8d), values
+# verbatim, one row per ENA run (read_run report of PRJNA955664, retrieved 2026-10-22 09:04 UTC
+# with fetchngs's accession, alias and title fields, SHA-256
+# 9a83749b357d6f3425707e8177b6905a69be70bf36d474afd0a3ce5fe38f7e99), joined on the GSM, which is
+# ENA's sample_alias, and cross-checked on the title and on GEO's SRA and BioSample links against
+# ENA's experiment and sample: 246 of 246 match, none repeated. The series record (GSE229705
+# text, SHA-256 5e10944c50d371caf01e96f4f5f3bc7f54aeefd5cb99292fd675f9c17115d83f) lists the same
+# 246 GSMs; it is a SubSeries of GSE229706. `donor` is GEO's `patient`, never the title: 14
+# titles carry a suffix (NYU1932A-T, NYU20S-N, NYU1364-Intra-OPB-T, NYU300-2-T), and every one
+# starts with its patient.
+#
+# What the records state, tallied from them: layout PAIRED, Illumina NovaSeq 6000, total RNA,
+# library selection cDNA, for all 246; read length 51 nt by ENA's counts (base_count / read_count
+# / 2, exact for every run; ENA's nominal_length is empty); 385,618,590,287 B in 492 FASTQ files,
+# every run with a fastq_ftp. Libraries: Tecan's Trio RNA-Seq kit from 1 ng total RNA (SPIA
+# amplification, rRNA removed after it). No record states strandedness: fetchngs writes `auto`
+# and Salmon infers it. The authors' own counts are STAR on hg38 and featureCounts (GEO's data
+# processing); this course counts the reads itself.
+#
+# Progression and recurrence (GEO's characteristics, the same on a patient's tumour and normal
+# sample), per patient: no progression in over 5 years 68; progression with a second primary
+# tumour 22 (recurrence N/A); systemic recurrence 13; locoregional recurrence 10; short follow-up
+# under 5 years 10 (progression and recurrence N/A). No survival times or dates. They are kept as
+# columns; M10 is not in the core edition, and this file has no [gdc] or [clinical].
+#
+# The paper's comparison on these data is progression, from the adjacent tissue (an
+# inflammatory signature). The contrast below is the course's, tumour against adjacent normal,
+# paired by patient, labelled so.
+
+[dataset]
+slug = "lung_gse229705"
+# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+label = "Lung adenocarcinoma and adjacent lung"
+# What fetchngs downloads, as `ctx guide --dataset-file` writes it into the accession list.
+accessions = ["PRJNA955664"]
+ena_study = "PRJNA955664"
+ena_secondary_study = "SRP432629"
+geo = "GSE229705"
+source = "Dolgalev et al. 2023 Nat Commun 14:6764, doi:10.1038/s41467-023-42327-x, PMID 37938580, PMC10632519"
+
+[[resources]]
+name = "msigdb_hallmark"
+urls = [
+    "https://data.broadinstitute.org/gsea-msigdb/msigdb/release/2026.1.Hs/h.all.v2026.1.Hs.symbols.gmt",
+]
+bytes = 48686
+sha256 = "eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596"
+dest = "resources/msigdb/h.all.v2026.1.Hs.symbols.gmt"
+
+[[resources]]
+name = "annotation_gtf"
+urls = [
+    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_50/gencode.v50.primary_assembly.annotation.gtf.gz",
+]
+bytes = 124650284
+sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
+dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
+
+# ENA's read_run report of PRJNA955664 (2026-10-22): runs SRR24166098-343, experiments
+# SRX19963941-4186, samples SAMN34179022-267, SRS17310814-1059; GSMs GSM7173464-709; GEO titles
+# and patients NYU<n>, some with a suffix.
+[guard]
+ids = ["PRJNA955664", "SRP432629", "GSE229705", "GSE229706"]
+patterns = [
+    '\bSRR24166[0-3]\d{2}\b',
+    '\bSRX1996(?:39|4[01])\d{2}\b',
+    '\bSAMN34179[0-2]\d{2}\b',
+    '\bSRS173(?:10[89]|110)\d{2}\b',
+    '\bGSM7173(?:4[6-9]|[56]\d|70)\d\b',
+    '\bNYU\d+\w*',
+]
+
+[sdrf]
+file = "lung_gse229705.tsv"
+join = ["run_accession", "run_accession"]
+cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
+
+[columns.donor]
+source = "patient"
+meaning = "The patient, GEO's patient field (NYU<n>): one tumour and one normal sample each."
+
+[columns.cell_type]
+source = "tissue"
+meaning = "Whole lung tissue, tumour or adjacent; GEO records no cell type."
+values = { "Tumor" = "lung", "Lung adjacent normal" = "lung" }
+
+[columns.condition]
+source = "tissue"
+meaning = "Tumour, or adjacent histologically normal lung, as GEO's tissue field records it."
+values = { "Tumor" = "tumour", "Lung adjacent normal" = "adjacent_normal" }
+
+[columns.progression_type]
+source = "progression type"
+meaning = "GEO's progression type, verbatim: none over 5 years, second primary, systemic, locoregional, or short follow-up."
+
+[columns.progression]
+source = "progression"
+meaning = "GEO's progression, verbatim: Progression, No Progression (>5y), or N/A for short follow-up."
+
+[columns.recurrence]
+source = "recurrence"
+meaning = "GEO's recurrence, verbatim: Recurrence, No Progression (>5y), or N/A for second primaries and short follow-up."
+
+[expect]
+runs = 246
+
+[expect.counts.read_length]
+"51" = 246
+
+[expect.counts.condition]
+tumour = 123
+adjacent_normal = 123
+
+[expect.counts.progression_type]
+"No Progression (>5y)" = 136
+"Second Primary" = 44
+Systemic = 26
+Locoregional = 20
+"Short Follow Up (<5y)" = 20
+
+[expect.counts.progression]
+"No Progression (>5y)" = 136
+Progression = 90
+"N/A" = 20
+
+[expect.counts.recurrence]
+"No Progression (>5y)" = 136
+Recurrence = 46
+"N/A" = 64
+
+# The course's comparison, not the paper's (header): every patient has one sample of each, so the
+# patient enters the design and each tumour is compared with its own adjacent lung.
+
+[[contrasts]]
+name = "tumour_normal"
+label = "Tumour against adjacent normal lung, paired by patient"
+variable = "condition"
+reference = "adjacent_normal"
+tested = "tumour"
+n = [123, 123]
+design = "~donor + group"
+paired = true
+
+[de]
+featured = "tumour_normal"
+
+[[de.pca]]
+name = "tissue"
+filters = {}
+factors = ["condition", "progression_type"]
+
+# The featured set is the course's choice, made before any count exists and for Rytis to
+# confirm; it states no expected direction.
+[function]
+gene_sets = "msigdb_hallmark"
+licence = "MSigDB Hallmark v2026.1.Hs, (c) Broad Institute, MIT and the Regents of the University of California, under CC BY 4.0 (gsea-msigdb.org msigdb_license_terms.jsp, read 2026-09-27)."
+featured_set = "HALLMARK_E2F_TARGETS"
+running = ["tumour_normal", "HALLMARK_E2F_TARGETS"]
