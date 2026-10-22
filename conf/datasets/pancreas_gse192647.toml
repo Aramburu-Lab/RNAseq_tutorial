@@ -46,7 +46,7 @@
 [dataset]
 slug = "pancreas_gse192647"
 # The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
-label = "Pancreatic adenocarcinoma and normal pancreas"
+label = "Pancreas tissue (PAAD)"
 # What fetchngs downloads, as `ctx guide --dataset-file` writes it into the accession list.
 accessions = ["PRJNA792551"]
 ena_study = "PRJNA792551"

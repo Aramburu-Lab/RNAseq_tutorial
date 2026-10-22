@@ -7,7 +7,7 @@
 [dataset]
 slug = "four_runs"
 # The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
-label = "Four Step-1 runs"
+label = "Non-cancerous blood, four runs"
 ena_study = "PRJEB49000"
 ena_secondary_study = "ERP133445"
 arrayexpress = "E-MTAB-11190"
