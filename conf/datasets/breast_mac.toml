@@ -37,6 +37,36 @@ bytes = 124650284
 sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
 dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
 
+# GTEx V11 for M9's gene cards, the same four entries as tcga_brca.toml (Rytis 2026-10-22):
+# ctx setup registers each file in place by its hash, never downloading it again.
+[[resources]]
+name = "gtex_gene_tpm"
+urls = ["https://storage.googleapis.com/adult-gtex/bulk-gex/v11/rna-seq/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_tpm.gct.gz"]
+bytes = 2637294603
+sha256 = "7025f4281da8733367f949ea6fb58ca4c6c4afdfcb5a35910be490f607d8c775"
+dest = "data/raw/gtex_v11/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_tpm.gct.gz"
+
+[[resources]]
+name = "gtex_exon_reads"
+urls = ["https://storage.googleapis.com/adult-gtex/bulk-gex/v11/rna-seq/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_exon_reads.parquet"]
+bytes = 21849125411
+sha256 = "86eb6097394dc59fcf18fe337d11d145a0a98c956565d88ddfb6315412e2503a"
+dest = "data/raw/gtex_v11/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_exon_reads.parquet"
+
+[[resources]]
+name = "gtex_samples"
+urls = ["https://storage.googleapis.com/adult-gtex/annotations/v11/metadata-files/GTEx_Analysis_v11_Annotations_SampleAttributesDS.txt"]
+bytes = 38497961
+sha256 = "98c246b3855edf62cb050982a7ca50f3069d010624baea47ef84a9465900ca4b"
+dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SampleAttributesDS.txt"
+
+[[resources]]
+name = "gtex_subjects"
+urls = ["https://storage.googleapis.com/adult-gtex/annotations/v11/metadata-files/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"]
+bytes = 20292
+sha256 = "2313caeaaf3718ac8aead8c6b9eab92b3f613509cfe1a6f7b6286310a7200e73"
+dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"
+
 # The whole of PRJNA483877, macrophages and monocytes, as ENA's read_run report lists it
 # (2026-10-09: runs SRR7631576-658 and SRR8512442-482, experiments SRX4495339-413 and
 # SRX5316062-102, samples SAMN0975xxxx and SAMN108531xx, SRS36164xx-65xx and SRS43130xx),
