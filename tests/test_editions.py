@@ -31,7 +31,7 @@ EVERY = ("gather", "qc", "process", "quant", "de", "function", "proteo", "ncrna"
          "clinical")  # fmt: skip
 CORE = ("gather", "qc", "process", "quant", "de", "function", "ncrna", "genecard")
 CORE_DATASETS = ("tier1", "tier1_teach", "four_runs", "breast_tissue", "breast_mac",
-                 "breast_mono", "lung_gse229705")  # fmt: skip
+                 "breast_mono", "lung_gse229705", "pancreas_gse192647")  # fmt: skip
 # Every course dataset file the core edition leaves out, on 2026-10-22. A dataset file added to
 # conf/datasets lands here or in core.toml.
 FULL_ONLY = {"cptac_brca", "cptac_ccrcc", "r2_gse130605", "r3_pxd038437", "tcga_brca",

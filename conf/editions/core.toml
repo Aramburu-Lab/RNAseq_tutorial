@@ -6,10 +6,11 @@
 [edition]
 name = "core"
 label = "Core course"
-notes = "Step-1 immune cells, breast tissue and blood cells, and a lung study, through M1 to M6, M8 and M9."
+notes = "Step-1 immune cells, breast tissue and blood cells, a lung study and a pancreas study, through M1 to M6, M8 and M9."
 modules = ["gather", "qc", "process", "quant", "de", "function", "ncrna", "genecard"]
 # Step-1 (PRJEB49000) is tier1 with its two subsets of the same runs: tier1_teach, M3's laptop
 # exercise, and four_runs, the guide's worked example. breast_mac and breast_mono are the two
-# halves of PRJNA483877. lung_gse229705 is PRJNA955664 (TODO.md ED.4).
+# halves of PRJNA483877. lung_gse229705 is PRJNA955664 (TODO.md ED.4), pancreas_gse192647 is
+# PRJNA792551 (ED.8).
 datasets = ["tier1", "tier1_teach", "four_runs", "breast_tissue", "breast_mac", "breast_mono",
-            "lung_gse229705"]
+            "lung_gse229705", "pancreas_gse192647"]
