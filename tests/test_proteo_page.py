@@ -126,29 +126,51 @@ def test_rules_registered_before_the_protein_reader(name):
     assert ancestor.returncode == 0
 
 
+# Written here, not read from ctx.proteo.page.VARIANTS, so a picker that falls back fails.
+DESIGNS = {"across_samples": "variants.across_samples", "tumour_normal": "variants.tumour_normal",
+           "cross_dataset": None}  # fmt: skip
+SECTIONS = ("purpose", "input", "method", "interpretation", "pitfalls", "terms", "questions")
+
+
 def _plain(marked: str) -> str:
     """Page text as a reader sees it: a glossary mark is its display text, spaces collapsed."""
     shown = re.sub(r"\[\[([^\]|]+?)!?(?:\|([^\]]+))?\]\]", lambda m: m[2] or m[1], marked)
-    return " ".join(shown.split())
+    return " ".join(shown.replace("`", "").split())
 
 
-def test_across_page_text_is_written_for_one_study(across_root):
-    """L.1: the across-samples page describes pairs within one study, not two studies.
+def _sentences(design: str) -> set[str]:
+    """Every sentence of a design's sections, as the page prints it."""
+    made = text.skeleton("proteo", DESIGNS[design])
+    parts = [made[k] for k in ("purpose", "input", "method", "interpretation")]
+    parts += [*made["pitfalls"], *(m for _, m in made["terms"])]
+    parts += [x for q in made["questions"] for x in (q.prompt, q.answer)]
+    return {s for part in parts for s in re.split(r"(?<=[.?])\s+", _plain(part)) if s}
+
+
+def _seen(root: Path) -> str:
+    """The overview page's words, tags dropped."""
+    html = unpacked(output(root, "overview_v1.html").read_text())
+    words = " ".join(markup.unescape(re.sub(r"<[^>]+>", " ", html)).split())
+    # A mark's closing tag sits before the punctuation after it; the reader sees none.
+    return re.sub(r" ([,.;:?])", r"\1", words)
+
+
+def test_every_design_writes_every_section():
+    """L.1: no design falls back to another design's text: each variant replaces every section."""
+    for key in filter(None, DESIGNS.values()):
+        assert set(SECTIONS) <= set(text.raw("proteo", key)), key
+
+
+@pytest.mark.parametrize("design, fixture", [("across_samples", "proteo_across"),
+                                             ("cross_dataset", "proteo_cross"),
+                                             ("tumour_normal", "proteo_made")])  # fmt: skip
+def test_page_text_is_its_own_designs(design, fixture, request):
+    """L.1: each design's page shows every sentence of its own sections and none of the
+    sentences only another design's sections hold (granules, donors who differ, normals).
 
     Catches: the variant picker falling back to the page's own, cross-study, sections."""
-    html = unpacked(output(across_root, "overview_v1.html").read_text())
-    # A mark's closing tag sits before the punctuation after it; the reader sees none.
-    words = " ".join(markup.unescape(re.sub(r"<[^>]+>", " ", html)).split())
-    seen = re.sub(r" ([,.;:])", r"\1", words)
-    page, own = text.load("proteo"), text.raw("proteo", "variants.across_samples")
-    cross = [page["method"].split(". ")[-1], page["interpretation"].split("\n\n")[-1],
-             page["pitfalls"][2], page["questions"][2]["prompt"],
-             page["terms"][3]["meaning"]]  # fmt: skip
-    for sentence in cross:
-        assert _plain(sentence).split(":")[0] not in seen, sentence
-    assert "granule" not in seen.lower() and "Cross-study comparison" not in seen
-    ours = [own["purpose"], own["method"].split("\n\n")[-1],
-            own["interpretation"].split("\n\n")[-1], own["pitfalls"][2],
-            own["questions"][2]["prompt"], own["terms"][3]["meaning"]]  # fmt: skip
-    for sentence in ours:
-        assert _plain(sentence).split(": ")[-1].split(". ")[0] in seen, sentence
+    seen = _seen(request.getfixturevalue(fixture)[0])
+    own = _sentences(design)
+    others = set().union(*(_sentences(d) for d in DESIGNS if d != design)) - own
+    assert others and not [s for s in others if s in seen]
+    assert not [s for s in own if s not in seen]

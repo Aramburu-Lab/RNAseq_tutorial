@@ -1,18 +1,20 @@
 # The M7 RNA versus protein page (ctx proteo), on real data. The preview on made-up data keeps
 # its own text in proteo_preview.toml. Placeholders in {braces} are filled by the code.
+# The page's own sections are the cross_dataset design's; each other design replaces every one
+# of them from its [variants.<design>] table (ctx.proteo.page.VARIANTS).
 
 title = "M7 RNA versus protein: {dataset}"
 budget = "Track {track}: under {minutes} min and {ram_gb} GB."
-purpose = "Measure how far protein follows RNA, per gene across samples or as fold changes in one contrast. Name the genes whose protein departs from their RNA."
-input = "Gather's counts or M5's results, and a protein table: [[TMT]] log2 ratios or abundances, or [[proteomic ruler]] copy numbers. `ctx setup` accepts the CPTAC data use agreement on the reader's behalf when it fetches a PDC file: `https://cptac-data-portal.georgetown.edu/cptac/s?id=73217`."
+purpose = "Measure how far protein fold changes follow RNA fold changes in one contrast, RNA from this study and protein from another. Name the genes whose protein departs from their RNA."
+input = "M5's results for the contrast, and another study's protein table of the same cell types as [[proteomic ruler]] copy numbers."
 method = """[[mass spectrometry proteomics|Mass spectrometry]] measures peptides, assembled into [[protein groups]]. Each group becomes one gene; groups naming several genes leave, and a gene measured twice keeps its best-quantified row.
 
 A protein not quantified in a sample is [[missingness|missing]], never zero. Only proteins quantified in enough samples are tested, decided in exact fractions.
 
-Across samples, per-gene [[Spearman]] ρ and Pearson r compare RNA with protein, with [[BH]] over the tested genes. Across studies, RNA and protein fold changes are compared by Spearman ρ with a [[bootstrap]] interval."""
-interpretation = """Read the [[missingness]] figures first: a protein missing in a plex or a donor is untested, not unchanged, and low-abundance genes go missing most often.
+The layers come from different donors, so no sample pairs exist. Protein [[log2 fold change|fold changes]] come from a Welch t on log2 copies, with [[BH]]. [[Spearman]] ρ over genes compares them with M5's RNA fold changes, with a [[bootstrap]] interval."""
+interpretation = """Read the [[missingness]] figures first: a protein missing in a donor is untested, not unchanged, and low-abundance genes go missing most often.
 
-A positive median ρ says RNA explains part of protein variation, not all of it. Complex subunits made in excess are degraded unless assembled, so their ρ runs low; metabolic enzymes follow their RNA more closely.
+A positive fold-change ρ says RNA changes explain part of the protein changes between cell types, not all of them. Complex subunits made in excess are degraded unless assembled, so their protein changes less than their RNA.
 
 Fold changes agree in rank more than in size: [[ratio compression]] and copy-number scaling shrink protein changes. A gene far above the diagonal is a lead for stored protein, such as neutrophil granule proteins made early in development."""
 pitfalls = [
@@ -53,8 +55,8 @@ term = "Quantified share"
 meaning = "Fraction of samples in which a protein has a value; the filter acts on it."
 
 [[terms]]
-term = "Per-gene ρ"
-meaning = "Spearman correlation of one gene's RNA and protein across samples."
+term = "Fold-change ρ"
+meaning = "Spearman correlation, over genes, of RNA and protein fold changes in one contrast."
 
 [[terms]]
 term = "Cross-study comparison"
@@ -65,7 +67,7 @@ prompt = "A complex subunit rises at RNA with no protein change. Name two explan
 answer = "Excess subunits are degraded unless assembled, so protein follows the limiting subunit. Or the protein was quantified in too few samples to test."
 
 [[questions]]
-prompt = "Why is a protein missing from one [[TMT]] plex not a zero in those samples?"
+prompt = "Why is a protein missing in one donor's sample not a zero there?"
 answer = "No peptide of it was identified in that run; it may be present below detection. A zero would claim absence and pull its mean and fold change down."
 
 [[questions]]
@@ -76,6 +78,13 @@ answer = "Granule proteins are made in the bone marrow and stored; mature neutro
 # A tumour against normal design (ctx.proteo.run.tumour_normal) reads these sections in place of
 # the page's own, which were written for cell types compared across studies.
 [variants.tumour_normal]
+purpose = "Measure how far protein follows RNA in one study's tumours and normals, per gene and per patient pair. Name the genes whose protein departs from their RNA."
+input = "Gather's counts of tumours and [[normal adjacent tissue|normals]], M5's results for the paired contrast, and a [[TMT]] protein table of the same patients. `ctx setup` accepts the CPTAC data use agreement on the reader's behalf when it fetches a PDC file: `https://cptac-data-portal.georgetown.edu/cptac/s?id=73217`."
+method = """[[mass spectrometry proteomics|Mass spectrometry]] measures peptides, assembled into [[protein groups]]. Each group becomes one gene; groups naming several genes leave, and a gene measured twice keeps its best-quantified row.
+
+A protein not quantified in a sample is [[missingness|missing]], never zero. Only proteins quantified in enough samples are tested, decided in exact fractions.
+
+Per gene, [[Spearman]] ρ and Pearson r compare RNA with protein within tumours and within normals, with [[BH]] over tested genes. Fold changes take M5's results at RNA and a paired t at protein, over patients with both tissues."""
 interpretation = """Read the [[missingness]] figures first: a protein missing in a [[TMT]] plex is untested, not unchanged.
 
 Per-gene [[Spearman|ρ]] is computed within tumours and within [[normal adjacent tissue|normals]], never over both. Across tumours it follows differences between patients, such as [[tumour purity|purity]]; across normals RNA spreads less, which lowers ρ with no change in regulation.
@@ -86,6 +95,22 @@ pitfalls = [
     "Pooling tumours and normals into one correlation: the tissue difference alone makes RNA and protein agree.",
     "Treating every normal as a control: only patients with both tissues enter the paired fold changes.",
 ]
+
+[[variants.tumour_normal.terms]]
+term = "Protein group"
+meaning = "Proteins that share their identified peptides and cannot be told apart; one row in the table."
+
+[[variants.tumour_normal.terms]]
+term = "Quantified share"
+meaning = "Fraction of samples in which a protein has a value; the filter acts on it."
+
+[[variants.tumour_normal.terms]]
+term = "Per-gene ρ"
+meaning = "Spearman correlation of one gene's RNA and protein across tumours, or across normals."
+
+[[variants.tumour_normal.terms]]
+term = "Patient pair"
+meaning = "One patient's tumour and normal; only pairs enter the paired fold changes."
 
 [[variants.tumour_normal.questions]]
 prompt = "A gene's [[Spearman|ρ]] is high across tumours and near zero across normals. Name a reason other than regulation."
