@@ -16,9 +16,17 @@ import polars as pl
 import ctx
 from ctx import cohorts, runtime
 from ctx.dataset import Dataset, DatasetError, load, loaded
+from ctx.de import results as m5
 from ctx.de.results import newest
 from ctx.figures import kinds
-from ctx.figures.kind import DATASET_FILE, QC_REGISTRY, REGISTRY_OF, RESOURCE, Kind
+from ctx.figures.kind import (
+    DATASET_FILE,
+    M5_RESULTS,
+    QC_REGISTRY,
+    REGISTRY_OF,
+    RESOURCE,
+    Kind,
+)
 from ctx.figures.spec import FigureSpec, Input, figure_id
 from ctx.io.naming import MODULES
 from ctx.report import text
@@ -83,6 +91,8 @@ def input_paths(kind: Kind, params: object, spec: Dataset, root: Path) -> dict[s
             found[name] = Path(pl.read_parquet(options)["registry"][0])
         elif module == RESOURCE:
             found[name] = _fetched(root, spec, what)
+        elif module == M5_RESULTS:
+            found[name] = m5.results(root, spec.slug, what)
         else:
             found[name] = newest(root / "outputs" / FOLDERS[module], spec.slug, what)
     return found

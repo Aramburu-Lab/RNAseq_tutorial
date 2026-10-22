@@ -19,6 +19,7 @@ from pathlib import Path
 import polars as pl
 
 from ctx.dataset import Dataset, DatasetError
+from ctx.de import results as m5
 from ctx.de.results import newest
 from ctx.genecard import GenecardError, annotation, hpa
 from ctx.genecard.cache import Cache
@@ -150,7 +151,7 @@ def from_file(path: Path, table: genes.GeneTable,
 
 def results(root: Path, dataset: str, contrast: str) -> pl.DataFrame:
     """One contrast's M5 results, keyed by unversioned number."""
-    frame = pl.read_parquet(newest(_out(root, "de"), dataset, f"{contrast}_results"))
+    frame = pl.read_parquet(m5.results(root, dataset, contrast))
     numbers = [genes.number(g) for g in frame["gene_id"].to_list()]
     return frame.select(*EVIDENCE).with_columns(number=pl.Series(numbers, dtype=pl.Int64))
 
