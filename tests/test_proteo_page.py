@@ -2,6 +2,7 @@
 rules' registration order. Each test names the mutation it catches.
 """
 
+import html as markup
 import re
 import subprocess
 from pathlib import Path
@@ -10,6 +11,7 @@ import polars as pl
 import pytest
 from proteo_root import TUMOURS
 
+from ctx.report import text
 from ctx.report.builder import unpacked
 from ctx.report.cap import MAX_BYTES
 
@@ -122,3 +124,31 @@ def test_rules_registered_before_the_protein_reader(name):
     ancestor = subprocess.run(["git", "-C", str(ROOT), "merge-base", "--is-ancestor",
                                registered[0], reader[0]], check=False)  # fmt: skip
     assert ancestor.returncode == 0
+
+
+def _plain(marked: str) -> str:
+    """Page text as a reader sees it: a glossary mark is its display text, spaces collapsed."""
+    shown = re.sub(r"\[\[([^\]|]+?)!?(?:\|([^\]]+))?\]\]", lambda m: m[2] or m[1], marked)
+    return " ".join(shown.split())
+
+
+def test_across_page_text_is_written_for_one_study(across_root):
+    """L.1: the across-samples page describes pairs within one study, not two studies.
+
+    Catches: the variant picker falling back to the page's own, cross-study, sections."""
+    html = unpacked(output(across_root, "overview_v1.html").read_text())
+    # A mark's closing tag sits before the punctuation after it; the reader sees none.
+    words = " ".join(markup.unescape(re.sub(r"<[^>]+>", " ", html)).split())
+    seen = re.sub(r" ([,.;:])", r"\1", words)
+    page, own = text.load("proteo"), text.raw("proteo", "variants.across_samples")
+    cross = [page["method"].split(". ")[-1], page["interpretation"].split("\n\n")[-1],
+             page["pitfalls"][2], page["questions"][2]["prompt"],
+             page["terms"][3]["meaning"]]  # fmt: skip
+    for sentence in cross:
+        assert _plain(sentence).split(":")[0] not in seen, sentence
+    assert "granule" not in seen.lower() and "Cross-study comparison" not in seen
+    ours = [own["purpose"], own["method"].split("\n\n")[-1],
+            own["interpretation"].split("\n\n")[-1], own["pitfalls"][2],
+            own["questions"][2]["prompt"], own["terms"][3]["meaning"]]  # fmt: skip
+    for sentence in ours:
+        assert _plain(sentence).split(": ")[-1].split(". ")[0] in seen, sentence

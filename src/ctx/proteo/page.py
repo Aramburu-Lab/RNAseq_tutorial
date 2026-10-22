@@ -37,6 +37,12 @@ MISSINGNESS = ("quantified", "coverage")
 FIRST = len(MISSINGNESS)
 # F5 draws the named genes and this many of the highest and of the lowest per-gene rho.
 PAIRED_TOP = 8
+# Each design's sections, by ``text.skeleton``'s variant key; None keeps the page's own text.
+VARIANTS: dict[str, str | None] = {
+    "across_samples": "variants.across_samples",
+    "tumour_normal": "variants.tumour_normal",
+    "cross_dataset": None,
+}
 METRIC_COLUMNS = {
     "metric": ("none", "Name the [proteo.sanity] rules read."),
     "value": ("varies", "The measured value; the unit follows from the metric's name."),
@@ -61,16 +67,31 @@ def _p(value: float) -> str:
     return f"{value:.2g}"
 
 
+def design(ctx: Context) -> str:
+    """The design the run measured; run() dispatches on the same field, so they cannot differ."""
+    assert ctx.spec.proteo is not None  # noqa: S101 - run() checks
+    return ctx.spec.proteo.design
+
+
+def variant(ctx: Context) -> str | None:
+    """The content table whose sections describe the run's design.
+
+    The page's own text is the cross-dataset design's. A design missing from ``VARIANTS``
+    raises a KeyError, never falls back to it.
+    """
+    return VARIANTS[design(ctx)]
+
+
 def _notes(ctx: Context) -> list[Result]:
     """The source lines: cross-study label, the collapse, zeros read as missing, symbols."""
     m, p = ctx.measured, ctx.spec.proteo
     assert p is not None and m.protein.collapse is not None  # noqa: S101 - run() checks
     c = m.protein.collapse
     out: list[Result] = []
-    if p.design == "cross_dataset":
+    if design(ctx) == "cross_dataset":
         out.append(text.fill(PAGE, "cross_study", rna=ctx.spec.name,
                              protein=p.label or p.protein))  # fmt: skip
-    elif p.design == "across_samples" and p.table is None:
+    elif design(ctx) == "across_samples" and p.table is None:
         out.append(text.word(PAGE, "unregistered"))
     out.append(text.fill(PAGE, "collapse", rows=c.rows, no_symbol=c.no_symbol,
                          several=c.several_genes, twice=c.genes_twice, kept=c.kept))  # fmt: skip
@@ -90,7 +111,7 @@ def _missingness(writer: Writer, ctx: Context) -> list[FigureBlock]:
     assert p is not None  # noqa: S101 - run() checks
     colour = m.extra.get("colour", m.groups)
     assert isinstance(colour, list)  # noqa: S101 - across() sets a list of track values
-    label = text.word(PAGE, f"abundance.{p.design}")
+    label = text.word(PAGE, f"abundance.{design(ctx)}")
     return [figures.quantified(writer, m.protein, colour, m.groups, ctx.options.min_quantified),
             figures.coverage(writer, m.genes, m.abundance, ctx.options.min_quantified,
                              label)]  # fmt: skip
@@ -292,8 +313,7 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     writer.table(m.genes, "genes", figures.columns(*m.genes.columns))
     figure_tables.write(writer, m, ctx.spec, ctx.options, PAIRED_TOP)
     missing = _missingness(writer, ctx)
-    across = ctx.spec.proteo is not None and ctx.spec.proteo.design != "cross_dataset"
-    tests = _across(writer, ctx) if across else _cross(writer, ctx)  # fmt: skip
+    tests = _cross(writer, ctx) if design(ctx) == "cross_dataset" else _across(writer, ctx)
     results: list[Result] = [*_notes(ctx), Group(text.word(PAGE, "groups.missing"), tuple(missing)),
                              *tests]  # fmt: skip
     blocks = [b for r in results for b in (r.items if isinstance(r, Group) else (r,))
@@ -308,8 +328,7 @@ def build(writer: Writer, ctx: Context) -> list[Path]:
     results.append(_sanity(writer, ctx))
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(MODULE)
     track = "A" if MODULE in runtime.TRACK_A_MODULES else "B"
-    paired = ctx.spec.proteo is not None and ctx.spec.proteo.design == "tumour_normal"
-    sections = text.skeleton(PAGE, "variants.tumour_normal" if paired else None)
+    sections = text.skeleton(PAGE, variant(ctx))
     built = ModulePage(
         title=text.fill(PAGE, "title", dataset=ctx.spec.name), **sections,
         parameters=ctx.cards, results=tuple(results), key_numbers=_keys(ctx),

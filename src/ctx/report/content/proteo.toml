@@ -99,6 +99,55 @@ answer = "Patient effects such as genotype, age and sampling cancel within a pai
 prompt = "If oxidative phosphorylation proteins fall further than their RNA in tumours, which change in the cell explains it?"
 answer = "Fewer mitochondria, or subunits left unassembled and degraded: protein then drops below what the RNA predicts. Check the class lines before generalising."
 
+# The across-samples design (ctx.proteo.run.across, ctx.proteo.study.across_table) reads these:
+# RNA and protein of the same samples of one study, never two studies.
+[variants.across_samples]
+purpose = "Measure how far protein follows RNA in the same samples of one study, per gene and per contrast. Name the genes whose protein departs from their RNA."
+input = "Gather's counts, M5's results for each contrast, and a protein table of the same samples: [[TMT]] log2 ratios or [[label-free quantification|label-free]] abundances. `ctx setup` accepts the CPTAC data use agreement on the reader's behalf when it fetches a PDC file: `https://cptac-data-portal.georgetown.edu/cptac/s?id=73217`."
+method = """[[mass spectrometry proteomics|Mass spectrometry]] measures peptides, assembled into [[protein groups]]. Each group becomes one gene; groups naming several genes leave, and a gene measured twice keeps its best-quantified row.
+
+A protein not quantified in a sample is [[missingness|missing]], never zero. Only proteins quantified in enough samples are tested, decided in exact fractions.
+
+Each protein sample is paired with RNA from the same sample. Per gene, [[Spearman]] ρ and Pearson r compare the layers across pairs, with [[BH]] over tested genes. Each contrast's RNA and protein fold changes come from those samples."""
+interpretation = """Read the [[missingness]] figures first: a protein missing in a plex or a run batch is untested, not unchanged. Low-abundance genes go missing most often.
+
+A positive median [[Spearman|ρ]] says RNA explains part of protein variation across samples, not all of it. Complex subunits made in excess are degraded unless assembled, so their ρ runs low; metabolic enzymes follow their RNA more closely. Sample composition, such as [[tumour purity]], moves both layers together and raises ρ.
+
+In a contrast both layers come from the same samples, so a gene called in opposite directions is a lead for control after transcription. [[ratio compression|Ratio compression]] shrinks protein changes, so ranks agree more than sizes."""
+pitfalls = [
+    "Imputing zeros: a missing protein is unmeasured, not absent; a zero shifts its mean, fold change and ρ.",
+    "Joining on symbols alone: [[shared peptides]] map one protein group to several genes, and isoforms map several groups to one.",
+    "Reading a high ρ as regulation: composition, such as [[tumour purity|purity]], moves RNA and protein together across samples.",
+]
+
+[[variants.across_samples.terms]]
+term = "Protein group"
+meaning = "Proteins that share their identified peptides and cannot be told apart; one row in the table."
+
+[[variants.across_samples.terms]]
+term = "Quantified share"
+meaning = "Fraction of samples in which a protein has a value; the filter acts on it."
+
+[[variants.across_samples.terms]]
+term = "Per-gene ρ"
+meaning = "Spearman correlation of one gene's RNA and protein across the paired samples."
+
+[[variants.across_samples.terms]]
+term = "Sample pair"
+meaning = "An RNA sample and a protein sample of one specimen; only pairs enter a test."
+
+[[variants.across_samples.questions]]
+prompt = "A complex subunit's RNA varies across samples while its ρ sits near zero. Name two explanations before calling it noise."
+answer = "Excess subunits are degraded unless assembled, so protein follows the limiting subunit. Or its protein varies too little across samples to rank."
+
+[[variants.across_samples.questions]]
+prompt = "Why is a protein missing from one [[TMT]] plex not a zero in those samples?"
+answer = "No peptide of it was identified in that run; it may be present below detection. A zero would claim absence and pull its mean and fold change down."
+
+[[variants.across_samples.questions]]
+prompt = "A gene is called up at RNA and down at protein in one contrast. Why can donors not explain it?"
+answer = "Both layers come from the same samples, so donors and groups are shared. Look to protein turnover, or to a [[TMT]] artefact."
+
 [abundance]
 across_samples = "log2(CPM + 1), mean over samples"
 tumour_normal = "log2(CPM + 1), mean over tumours"
