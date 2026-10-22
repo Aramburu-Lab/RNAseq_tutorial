@@ -1,0 +1,4411 @@
+sample_accession	tag	value
+SAMEA11307692	ENA-CHECKLIST	ERC000011
+SAMEA11307692	clinical history	steady state
+SAMEA11307692	individual	UPN10
+SAMEA11307692	organism	Homo sapiens
+SAMEA11307692	organism	Homo sapiens
+SAMEA11307692	donor age (ref. to HSCT)	not applicable
+SAMEA11307692	sex	female
+SAMEA11307692	scientific_name	Homo sapiens
+SAMEA11307692	common name	human
+SAMEA11307692	organism part	blood
+SAMEA11307692	donor sex (ref. to HSCT)	not applicable
+SAMEA11307692	isolate	not applicable
+SAMEA11307692	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307692	sampling time point	not applicable
+SAMEA11307692	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307692	immunophenotype	
+SAMEA11307692	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307692	cell_type	normal density neutrophil
+SAMEA11307692	age	
+SAMEA11307692	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307692	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307706	ENA-CHECKLIST	ERC000011
+SAMEA11307706	clinical history	G-CSF
+SAMEA11307706	individual	UPN13
+SAMEA11307706	organism	Homo sapiens
+SAMEA11307706	organism	Homo sapiens
+SAMEA11307706	donor age (ref. to HSCT)	not applicable
+SAMEA11307706	sex	female
+SAMEA11307706	scientific_name	Homo sapiens
+SAMEA11307706	common name	human
+SAMEA11307706	organism part	blood
+SAMEA11307706	donor sex (ref. to HSCT)	not applicable
+SAMEA11307706	isolate	not applicable
+SAMEA11307706	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307706	sampling time point	not applicable
+SAMEA11307706	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307706	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307706	cell isolation strategy	FACS sorting
+SAMEA11307706	cell_type	low density neutrophil
+SAMEA11307706	age	28
+SAMEA11307706	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307706	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307709	ENA-CHECKLIST	ERC000011
+SAMEA11307709	clinical history	steady state
+SAMEA11307709	individual	UPN13
+SAMEA11307709	organism	Homo sapiens
+SAMEA11307709	organism	Homo sapiens
+SAMEA11307709	donor age (ref. to HSCT)	not applicable
+SAMEA11307709	sex	female
+SAMEA11307709	scientific_name	Homo sapiens
+SAMEA11307709	common name	human
+SAMEA11307709	organism part	blood
+SAMEA11307709	donor sex (ref. to HSCT)	not applicable
+SAMEA11307709	isolate	not applicable
+SAMEA11307709	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307709	sampling time point	not applicable
+SAMEA11307709	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307709	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307709	cell isolation strategy	CD14 Microbeads
+SAMEA11307709	cell_type	monocyte
+SAMEA11307709	age	28
+SAMEA11307709	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307709	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307712	ENA-CHECKLIST	ERC000011
+SAMEA11307712	clinical history	G-CSF
+SAMEA11307712	individual	UPN14
+SAMEA11307712	organism	Homo sapiens
+SAMEA11307712	organism	Homo sapiens
+SAMEA11307712	donor age (ref. to HSCT)	not applicable
+SAMEA11307712	sex	female
+SAMEA11307712	scientific_name	Homo sapiens
+SAMEA11307712	common name	human
+SAMEA11307712	organism part	blood
+SAMEA11307712	donor sex (ref. to HSCT)	not applicable
+SAMEA11307712	isolate	not applicable
+SAMEA11307712	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307712	sampling time point	not applicable
+SAMEA11307712	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307712	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307712	cell isolation strategy	FACS sorting
+SAMEA11307712	cell_type	monocyte
+SAMEA11307712	age	58
+SAMEA11307712	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307712	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307713	ENA-CHECKLIST	ERC000011
+SAMEA11307713	clinical history	G-CSF
+SAMEA11307713	individual	UPN14
+SAMEA11307713	organism	Homo sapiens
+SAMEA11307713	organism	Homo sapiens
+SAMEA11307713	donor age (ref. to HSCT)	not applicable
+SAMEA11307713	sex	female
+SAMEA11307713	scientific_name	Homo sapiens
+SAMEA11307713	common name	human
+SAMEA11307713	organism part	blood
+SAMEA11307713	donor sex (ref. to HSCT)	not applicable
+SAMEA11307713	isolate	not applicable
+SAMEA11307713	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307713	sampling time point	not applicable
+SAMEA11307713	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307713	immunophenotype	
+SAMEA11307713	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307713	cell_type	normal density neutrophil
+SAMEA11307713	age	58
+SAMEA11307713	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307713	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307714	ENA-CHECKLIST	ERC000011
+SAMEA11307714	clinical history	steady state
+SAMEA11307714	individual	UPN15
+SAMEA11307714	organism	Homo sapiens
+SAMEA11307714	organism	Homo sapiens
+SAMEA11307714	donor age (ref. to HSCT)	not applicable
+SAMEA11307714	sex	male
+SAMEA11307714	scientific_name	Homo sapiens
+SAMEA11307714	common name	human
+SAMEA11307714	organism part	blood
+SAMEA11307714	donor sex (ref. to HSCT)	not applicable
+SAMEA11307714	isolate	not applicable
+SAMEA11307714	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307714	sampling time point	not applicable
+SAMEA11307714	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307714	immunophenotype	
+SAMEA11307714	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307714	cell_type	normal density neutrophil
+SAMEA11307714	age	28
+SAMEA11307714	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307714	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307720	ENA-CHECKLIST	ERC000011
+SAMEA11307720	clinical history	steady state
+SAMEA11307720	individual	UPN16
+SAMEA11307720	organism	Homo sapiens
+SAMEA11307720	organism	Homo sapiens
+SAMEA11307720	donor age (ref. to HSCT)	not applicable
+SAMEA11307720	sex	not available
+SAMEA11307720	scientific_name	Homo sapiens
+SAMEA11307720	common name	human
+SAMEA11307720	organism part	blood
+SAMEA11307720	donor sex (ref. to HSCT)	not applicable
+SAMEA11307720	isolate	not applicable
+SAMEA11307720	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307720	sampling time point	not applicable
+SAMEA11307720	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307720	immunophenotype	
+SAMEA11307720	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307720	cell_type	normal density neutrophil
+SAMEA11307720	age	not available
+SAMEA11307720	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307720	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307736	ENA-CHECKLIST	ERC000011
+SAMEA11307736	clinical history	G-CSF
+SAMEA11307736	individual	UPN3
+SAMEA11307736	organism	Homo sapiens
+SAMEA11307736	organism	Homo sapiens
+SAMEA11307736	donor age (ref. to HSCT)	not applicable
+SAMEA11307736	sex	male
+SAMEA11307736	scientific_name	Homo sapiens
+SAMEA11307736	common name	human
+SAMEA11307736	organism part	blood
+SAMEA11307736	donor sex (ref. to HSCT)	not applicable
+SAMEA11307736	isolate	not applicable
+SAMEA11307736	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307736	sampling time point	not applicable
+SAMEA11307736	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307736	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307736	cell isolation strategy	CD15 Microbeads
+SAMEA11307736	cell_type	low density neutrophil
+SAMEA11307736	age	28
+SAMEA11307736	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307736	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307740	ENA-CHECKLIST	ERC000011
+SAMEA11307740	clinical history	steady state
+SAMEA11307740	individual	UPN3
+SAMEA11307740	organism	Homo sapiens
+SAMEA11307740	organism	Homo sapiens
+SAMEA11307740	donor age (ref. to HSCT)	not applicable
+SAMEA11307740	sex	male
+SAMEA11307740	scientific_name	Homo sapiens
+SAMEA11307740	common name	human
+SAMEA11307740	organism part	blood
+SAMEA11307740	donor sex (ref. to HSCT)	not applicable
+SAMEA11307740	isolate	not applicable
+SAMEA11307740	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307740	sampling time point	not applicable
+SAMEA11307740	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307740	immunophenotype	
+SAMEA11307740	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307740	cell_type	normal density neutrophil
+SAMEA11307740	age	28
+SAMEA11307740	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307740	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307757	ENA-CHECKLIST	ERC000011
+SAMEA11307757	clinical history	hematopoietic stem cell transplantation
+SAMEA11307757	individual	UPN35
+SAMEA11307757	organism	Homo sapiens
+SAMEA11307757	organism	Homo sapiens
+SAMEA11307757	donor age (ref. to HSCT)	28
+SAMEA11307757	sex	male
+SAMEA11307757	scientific_name	Homo sapiens
+SAMEA11307757	common name	human
+SAMEA11307757	organism part	bone marrow
+SAMEA11307757	donor sex (ref. to HSCT)	male
+SAMEA11307757	isolate	not applicable
+SAMEA11307757	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307757	sampling time point	2nd follow up after transplantation
+SAMEA11307757	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307757	immunophenotype	CD11b-CD16-
+SAMEA11307757	cell isolation strategy	FACS sorting
+SAMEA11307757	cell_type	bone marrow cell
+SAMEA11307757	age	52
+SAMEA11307757	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307757	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307765	ENA-CHECKLIST	ERC000011
+SAMEA11307765	clinical history	hematopoietic stem cell transplantation
+SAMEA11307765	individual	UPN35
+SAMEA11307765	organism	Homo sapiens
+SAMEA11307765	organism	Homo sapiens
+SAMEA11307765	donor age (ref. to HSCT)	28
+SAMEA11307765	sex	male
+SAMEA11307765	scientific_name	Homo sapiens
+SAMEA11307765	common name	human
+SAMEA11307765	organism part	bone marrow
+SAMEA11307765	donor sex (ref. to HSCT)	male
+SAMEA11307765	isolate	not applicable
+SAMEA11307765	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307765	sampling time point	3rd follow up after transplantation
+SAMEA11307765	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307765	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307765	cell isolation strategy	FACS sorting
+SAMEA11307765	cell_type	monocyte
+SAMEA11307765	age	52
+SAMEA11307765	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307765	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307767	ENA-CHECKLIST	ERC000011
+SAMEA11307767	clinical history	hematopoietic stem cell transplantation
+SAMEA11307767	individual	UPN36
+SAMEA11307767	organism	Homo sapiens
+SAMEA11307767	organism	Homo sapiens
+SAMEA11307767	donor age (ref. to HSCT)	33
+SAMEA11307767	sex	female
+SAMEA11307767	scientific_name	Homo sapiens
+SAMEA11307767	common name	human
+SAMEA11307767	organism part	blood
+SAMEA11307767	donor sex (ref. to HSCT)	male
+SAMEA11307767	isolate	not applicable
+SAMEA11307767	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307767	sampling time point	2nd follow up after transplantation
+SAMEA11307767	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307767	immunophenotype	
+SAMEA11307767	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307767	cell_type	normal density neutrophil
+SAMEA11307767	age	23
+SAMEA11307767	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307767	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307768	ENA-CHECKLIST	ERC000011
+SAMEA11307768	clinical history	hematopoietic stem cell transplantation
+SAMEA11307768	individual	UPN36
+SAMEA11307768	organism	Homo sapiens
+SAMEA11307768	organism	Homo sapiens
+SAMEA11307768	donor age (ref. to HSCT)	33
+SAMEA11307768	sex	female
+SAMEA11307768	scientific_name	Homo sapiens
+SAMEA11307768	common name	human
+SAMEA11307768	organism part	blood
+SAMEA11307768	donor sex (ref. to HSCT)	male
+SAMEA11307768	isolate	not applicable
+SAMEA11307768	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307768	sampling time point	3rd follow up after transplantation
+SAMEA11307768	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307768	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307768	cell isolation strategy	FACS sorting
+SAMEA11307768	cell_type	monocyte
+SAMEA11307768	age	23
+SAMEA11307768	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307768	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307769	ENA-CHECKLIST	ERC000011
+SAMEA11307769	clinical history	hematopoietic stem cell transplantation
+SAMEA11307769	individual	UPN36
+SAMEA11307769	organism	Homo sapiens
+SAMEA11307769	organism	Homo sapiens
+SAMEA11307769	donor age (ref. to HSCT)	33
+SAMEA11307769	sex	female
+SAMEA11307769	scientific_name	Homo sapiens
+SAMEA11307769	common name	human
+SAMEA11307769	organism part	blood
+SAMEA11307769	donor sex (ref. to HSCT)	male
+SAMEA11307769	isolate	not applicable
+SAMEA11307769	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307769	sampling time point	3rd follow up after transplantation
+SAMEA11307769	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307769	immunophenotype	
+SAMEA11307769	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307769	cell_type	normal density neutrophil
+SAMEA11307769	age	23
+SAMEA11307769	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307769	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307777	ENA-CHECKLIST	ERC000011
+SAMEA11307777	clinical history	hematopoietic stem cell transplantation
+SAMEA11307777	individual	UPN37
+SAMEA11307777	organism	Homo sapiens
+SAMEA11307777	organism	Homo sapiens
+SAMEA11307777	donor age (ref. to HSCT)	60
+SAMEA11307777	sex	female
+SAMEA11307777	scientific_name	Homo sapiens
+SAMEA11307777	common name	human
+SAMEA11307777	organism part	blood
+SAMEA11307777	donor sex (ref. to HSCT)	male
+SAMEA11307777	isolate	not applicable
+SAMEA11307777	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307777	sampling time point	2nd follow up after transplantation
+SAMEA11307777	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307777	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307777	cell isolation strategy	FACS sorting
+SAMEA11307777	cell_type	low density neutrophil
+SAMEA11307777	age	52
+SAMEA11307777	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307777	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307778	ENA-CHECKLIST	ERC000011
+SAMEA11307778	clinical history	hematopoietic stem cell transplantation
+SAMEA11307778	individual	UPN37
+SAMEA11307778	organism	Homo sapiens
+SAMEA11307778	organism	Homo sapiens
+SAMEA11307778	donor age (ref. to HSCT)	60
+SAMEA11307778	sex	female
+SAMEA11307778	scientific_name	Homo sapiens
+SAMEA11307778	common name	human
+SAMEA11307778	organism part	blood
+SAMEA11307778	donor sex (ref. to HSCT)	male
+SAMEA11307778	isolate	not applicable
+SAMEA11307778	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307778	sampling time point	2nd follow up after transplantation
+SAMEA11307778	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307778	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307778	cell isolation strategy	FACS sorting
+SAMEA11307778	cell_type	monocyte
+SAMEA11307778	age	52
+SAMEA11307778	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307778	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307781	ENA-CHECKLIST	ERC000011
+SAMEA11307781	clinical history	hematopoietic stem cell transplantation
+SAMEA11307781	individual	UPN37
+SAMEA11307781	organism	Homo sapiens
+SAMEA11307781	organism	Homo sapiens
+SAMEA11307781	donor age (ref. to HSCT)	60
+SAMEA11307781	sex	female
+SAMEA11307781	scientific_name	Homo sapiens
+SAMEA11307781	common name	human
+SAMEA11307781	organism part	bone marrow
+SAMEA11307781	donor sex (ref. to HSCT)	male
+SAMEA11307781	isolate	not applicable
+SAMEA11307781	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307781	sampling time point	2nd follow up after transplantation
+SAMEA11307781	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307781	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307781	cell isolation strategy	FACS sorting
+SAMEA11307781	cell_type	bone marrow cell
+SAMEA11307781	age	52
+SAMEA11307781	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307781	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307790	ENA-CHECKLIST	ERC000011
+SAMEA11307790	clinical history	hematopoietic stem cell transplantation
+SAMEA11307790	individual	UPN39
+SAMEA11307790	organism	Homo sapiens
+SAMEA11307790	organism	Homo sapiens
+SAMEA11307790	donor age (ref. to HSCT)	63
+SAMEA11307790	sex	male
+SAMEA11307790	scientific_name	Homo sapiens
+SAMEA11307790	common name	human
+SAMEA11307790	organism part	bone marrow
+SAMEA11307790	donor sex (ref. to HSCT)	female
+SAMEA11307790	isolate	not applicable
+SAMEA11307790	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307790	sampling time point	2nd follow up after transplantation
+SAMEA11307790	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307790	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307790	cell isolation strategy	FACS sorting
+SAMEA11307790	cell_type	bone marrow cell
+SAMEA11307790	age	38
+SAMEA11307790	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307790	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307812	ENA-CHECKLIST	ERC000011
+SAMEA11307812	clinical history	G-CSF
+SAMEA11307812	individual	UPN5
+SAMEA11307812	organism	Homo sapiens
+SAMEA11307812	organism	Homo sapiens
+SAMEA11307812	donor age (ref. to HSCT)	not applicable
+SAMEA11307812	sex	male
+SAMEA11307812	scientific_name	Homo sapiens
+SAMEA11307812	common name	human
+SAMEA11307812	organism part	blood
+SAMEA11307812	donor sex (ref. to HSCT)	not applicable
+SAMEA11307812	isolate	not applicable
+SAMEA11307812	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307812	sampling time point	not applicable
+SAMEA11307812	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307812	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307812	cell isolation strategy	FACS sorting
+SAMEA11307812	cell_type	monocyte
+SAMEA11307812	age	60
+SAMEA11307812	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307812	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307816	ENA-CHECKLIST	ERC000011
+SAMEA11307816	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307816	individual	UPN50
+SAMEA11307816	organism	Homo sapiens
+SAMEA11307816	organism	Homo sapiens
+SAMEA11307816	donor age (ref. to HSCT)	not applicable
+SAMEA11307816	sex	female
+SAMEA11307816	scientific_name	Homo sapiens
+SAMEA11307816	common name	human
+SAMEA11307816	organism part	blood
+SAMEA11307816	donor sex (ref. to HSCT)	not applicable
+SAMEA11307816	isolate	not applicable
+SAMEA11307816	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307816	sampling time point	not applicable
+SAMEA11307816	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307816	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307816	cell isolation strategy	CD15 Microbeads
+SAMEA11307816	cell_type	low density neutrophil
+SAMEA11307816	age	64
+SAMEA11307816	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307816	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307825	ENA-CHECKLIST	ERC000011
+SAMEA11307825	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307825	individual	UPN53
+SAMEA11307825	organism	Homo sapiens
+SAMEA11307825	organism	Homo sapiens
+SAMEA11307825	donor age (ref. to HSCT)	not applicable
+SAMEA11307825	sex	male
+SAMEA11307825	scientific_name	Homo sapiens
+SAMEA11307825	common name	human
+SAMEA11307825	organism part	blood
+SAMEA11307825	donor sex (ref. to HSCT)	not applicable
+SAMEA11307825	isolate	not applicable
+SAMEA11307825	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307825	sampling time point	not applicable
+SAMEA11307825	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307825	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307825	cell isolation strategy	CD15 Microbeads
+SAMEA11307825	cell_type	low density neutrophil
+SAMEA11307825	age	70
+SAMEA11307825	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307825	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307826	ENA-CHECKLIST	ERC000011
+SAMEA11307826	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307826	individual	UPN53
+SAMEA11307826	organism	Homo sapiens
+SAMEA11307826	organism	Homo sapiens
+SAMEA11307826	donor age (ref. to HSCT)	not applicable
+SAMEA11307826	sex	male
+SAMEA11307826	scientific_name	Homo sapiens
+SAMEA11307826	common name	human
+SAMEA11307826	organism part	blood
+SAMEA11307826	donor sex (ref. to HSCT)	not applicable
+SAMEA11307826	isolate	not applicable
+SAMEA11307826	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307826	sampling time point	not applicable
+SAMEA11307826	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307826	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307826	cell isolation strategy	CD14 Microbeads
+SAMEA11307826	cell_type	monocyte
+SAMEA11307826	age	70
+SAMEA11307826	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307826	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307827	ENA-CHECKLIST	ERC000011
+SAMEA11307827	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307827	individual	UPN53
+SAMEA11307827	organism	Homo sapiens
+SAMEA11307827	organism	Homo sapiens
+SAMEA11307827	donor age (ref. to HSCT)	not applicable
+SAMEA11307827	sex	male
+SAMEA11307827	scientific_name	Homo sapiens
+SAMEA11307827	common name	human
+SAMEA11307827	organism part	blood
+SAMEA11307827	donor sex (ref. to HSCT)	not applicable
+SAMEA11307827	isolate	not applicable
+SAMEA11307827	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307827	sampling time point	not applicable
+SAMEA11307827	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307827	immunophenotype	
+SAMEA11307827	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307827	cell_type	normal density neutrophil
+SAMEA11307827	age	70
+SAMEA11307827	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307827	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307830	ENA-CHECKLIST	ERC000011
+SAMEA11307830	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307830	individual	UPN55
+SAMEA11307830	organism	Homo sapiens
+SAMEA11307830	organism	Homo sapiens
+SAMEA11307830	donor age (ref. to HSCT)	not applicable
+SAMEA11307830	sex	female
+SAMEA11307830	scientific_name	Homo sapiens
+SAMEA11307830	common name	human
+SAMEA11307830	organism part	blood
+SAMEA11307830	donor sex (ref. to HSCT)	not applicable
+SAMEA11307830	isolate	not applicable
+SAMEA11307830	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307830	sampling time point	not applicable
+SAMEA11307830	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307830	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307830	cell isolation strategy	CD14 Microbeads
+SAMEA11307830	cell_type	monocyte
+SAMEA11307830	age	71
+SAMEA11307830	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307830	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307843	ENA-CHECKLIST	ERC000011
+SAMEA11307843	clinical history	G-CSF
+SAMEA11307843	individual	UPN6
+SAMEA11307843	organism	Homo sapiens
+SAMEA11307843	organism	Homo sapiens
+SAMEA11307843	donor age (ref. to HSCT)	not applicable
+SAMEA11307843	sex	male
+SAMEA11307843	scientific_name	Homo sapiens
+SAMEA11307843	common name	human
+SAMEA11307843	organism part	blood
+SAMEA11307843	donor sex (ref. to HSCT)	not applicable
+SAMEA11307843	isolate	not applicable
+SAMEA11307843	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307843	sampling time point	not applicable
+SAMEA11307843	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307843	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307843	cell isolation strategy	FACS sorting
+SAMEA11307843	cell_type	low density neutrophil
+SAMEA11307843	age	26
+SAMEA11307843	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307843	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307847	ENA-CHECKLIST	ERC000011
+SAMEA11307847	clinical history	steady state
+SAMEA11307847	individual	UPN6
+SAMEA11307847	organism	Homo sapiens
+SAMEA11307847	organism	Homo sapiens
+SAMEA11307847	donor age (ref. to HSCT)	not applicable
+SAMEA11307847	sex	male
+SAMEA11307847	scientific_name	Homo sapiens
+SAMEA11307847	common name	human
+SAMEA11307847	organism part	blood
+SAMEA11307847	donor sex (ref. to HSCT)	not applicable
+SAMEA11307847	isolate	not applicable
+SAMEA11307847	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307847	sampling time point	not applicable
+SAMEA11307847	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307847	immunophenotype	
+SAMEA11307847	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307847	cell_type	normal density neutrophil
+SAMEA11307847	age	26
+SAMEA11307847	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307847	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307851	ENA-CHECKLIST	ERC000011
+SAMEA11307851	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307851	individual	UPN66
+SAMEA11307851	organism	Homo sapiens
+SAMEA11307851	organism	Homo sapiens
+SAMEA11307851	donor age (ref. to HSCT)	not applicable
+SAMEA11307851	sex	male
+SAMEA11307851	scientific_name	Homo sapiens
+SAMEA11307851	common name	human
+SAMEA11307851	organism part	blood
+SAMEA11307851	donor sex (ref. to HSCT)	not applicable
+SAMEA11307851	isolate	not applicable
+SAMEA11307851	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307851	sampling time point	not applicable
+SAMEA11307851	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307851	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307851	cell isolation strategy	FACS sorting
+SAMEA11307851	cell_type	monocyte
+SAMEA11307851	age	79
+SAMEA11307851	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307851	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307862	ENA-CHECKLIST	ERC000011
+SAMEA11307862	clinical history	steady state
+SAMEA11307862	individual	UPN7
+SAMEA11307862	organism	Homo sapiens
+SAMEA11307862	organism	Homo sapiens
+SAMEA11307862	donor age (ref. to HSCT)	not applicable
+SAMEA11307862	sex	female
+SAMEA11307862	scientific_name	Homo sapiens
+SAMEA11307862	common name	human
+SAMEA11307862	organism part	blood
+SAMEA11307862	donor sex (ref. to HSCT)	not applicable
+SAMEA11307862	isolate	not applicable
+SAMEA11307862	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307862	sampling time point	not applicable
+SAMEA11307862	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307862	immunophenotype	
+SAMEA11307862	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307862	cell_type	normal density neutrophil
+SAMEA11307862	age	63
+SAMEA11307862	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307862	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307869	ENA-CHECKLIST	ERC000011
+SAMEA11307869	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307869	individual	UPN73
+SAMEA11307869	organism	Homo sapiens
+SAMEA11307869	organism	Homo sapiens
+SAMEA11307869	donor age (ref. to HSCT)	not applicable
+SAMEA11307869	sex	female
+SAMEA11307869	scientific_name	Homo sapiens
+SAMEA11307869	common name	human
+SAMEA11307869	organism part	blood
+SAMEA11307869	donor sex (ref. to HSCT)	not applicable
+SAMEA11307869	isolate	not applicable
+SAMEA11307869	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307869	sampling time point	not applicable
+SAMEA11307869	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307869	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307869	cell isolation strategy	FACS sorting
+SAMEA11307869	cell_type	monocyte
+SAMEA11307869	age	74
+SAMEA11307869	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307869	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307882	ENA-CHECKLIST	ERC000011
+SAMEA11307882	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307882	individual	UPN79
+SAMEA11307882	organism	Homo sapiens
+SAMEA11307882	organism	Homo sapiens
+SAMEA11307882	donor age (ref. to HSCT)	not applicable
+SAMEA11307882	sex	female
+SAMEA11307882	scientific_name	Homo sapiens
+SAMEA11307882	common name	human
+SAMEA11307882	organism part	blood
+SAMEA11307882	donor sex (ref. to HSCT)	not applicable
+SAMEA11307882	isolate	not applicable
+SAMEA11307882	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307882	sampling time point	not applicable
+SAMEA11307882	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307882	immunophenotype	
+SAMEA11307882	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307882	cell_type	normal density neutrophil
+SAMEA11307882	age	57
+SAMEA11307882	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307882	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307887	ENA-CHECKLIST	ERC000011
+SAMEA11307887	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307887	individual	UPN80
+SAMEA11307887	organism	Homo sapiens
+SAMEA11307887	organism	Homo sapiens
+SAMEA11307887	donor age (ref. to HSCT)	not applicable
+SAMEA11307887	sex	female
+SAMEA11307887	scientific_name	Homo sapiens
+SAMEA11307887	common name	human
+SAMEA11307887	organism part	blood
+SAMEA11307887	donor sex (ref. to HSCT)	not applicable
+SAMEA11307887	isolate	not applicable
+SAMEA11307887	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307887	sampling time point	not applicable
+SAMEA11307887	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307887	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307887	cell isolation strategy	FACS sorting
+SAMEA11307887	cell_type	low density neutrophil
+SAMEA11307887	age	77
+SAMEA11307887	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307887	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307892	ENA-CHECKLIST	ERC000011
+SAMEA11307892	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307892	individual	UPN82
+SAMEA11307892	organism	Homo sapiens
+SAMEA11307892	organism	Homo sapiens
+SAMEA11307892	donor age (ref. to HSCT)	not applicable
+SAMEA11307892	sex	male
+SAMEA11307892	scientific_name	Homo sapiens
+SAMEA11307892	common name	human
+SAMEA11307892	organism part	blood
+SAMEA11307892	donor sex (ref. to HSCT)	not applicable
+SAMEA11307892	isolate	not applicable
+SAMEA11307892	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307892	sampling time point	not applicable
+SAMEA11307892	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307892	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307892	cell isolation strategy	FACS sorting
+SAMEA11307892	cell_type	monocyte
+SAMEA11307892	age	74
+SAMEA11307892	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307892	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307689	ENA-CHECKLIST	ERC000011
+SAMEA11307689	clinical history	G-CSF
+SAMEA11307689	individual	UPN1
+SAMEA11307689	organism	Homo sapiens
+SAMEA11307689	organism	Homo sapiens
+SAMEA11307689	donor age (ref. to HSCT)	not applicable
+SAMEA11307689	sex	female
+SAMEA11307689	scientific_name	Homo sapiens
+SAMEA11307689	common name	human
+SAMEA11307689	organism part	blood
+SAMEA11307689	donor sex (ref. to HSCT)	not applicable
+SAMEA11307689	isolate	not applicable
+SAMEA11307689	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307689	sampling time point	not applicable
+SAMEA11307689	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307689	immunophenotype	
+SAMEA11307689	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307689	cell_type	normal density neutrophil
+SAMEA11307689	age	36
+SAMEA11307689	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307689	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307691	ENA-CHECKLIST	ERC000011
+SAMEA11307691	clinical history	steady state
+SAMEA11307691	individual	UPN1
+SAMEA11307691	organism	Homo sapiens
+SAMEA11307691	organism	Homo sapiens
+SAMEA11307691	donor age (ref. to HSCT)	not applicable
+SAMEA11307691	sex	female
+SAMEA11307691	scientific_name	Homo sapiens
+SAMEA11307691	common name	human
+SAMEA11307691	organism part	blood
+SAMEA11307691	donor sex (ref. to HSCT)	not applicable
+SAMEA11307691	isolate	not applicable
+SAMEA11307691	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307691	sampling time point	not applicable
+SAMEA11307691	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307691	immunophenotype	
+SAMEA11307691	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307691	cell_type	normal density neutrophil
+SAMEA11307691	age	36
+SAMEA11307691	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307691	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307695	ENA-CHECKLIST	ERC000011
+SAMEA11307695	clinical history	steady state
+SAMEA11307695	individual	UPN10
+SAMEA11307695	organism	Homo sapiens
+SAMEA11307695	organism	Homo sapiens
+SAMEA11307695	donor age (ref. to HSCT)	not applicable
+SAMEA11307695	sex	female
+SAMEA11307695	scientific_name	Homo sapiens
+SAMEA11307695	common name	human
+SAMEA11307695	organism part	bone marrow
+SAMEA11307695	donor sex (ref. to HSCT)	not applicable
+SAMEA11307695	isolate	not applicable
+SAMEA11307695	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307695	sampling time point	not applicable
+SAMEA11307695	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307695	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307695	cell isolation strategy	FACS sorting
+SAMEA11307695	cell_type	bone marrow cell
+SAMEA11307695	age	
+SAMEA11307695	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307695	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307696	ENA-CHECKLIST	ERC000011
+SAMEA11307696	clinical history	steady state
+SAMEA11307696	individual	UPN10
+SAMEA11307696	organism	Homo sapiens
+SAMEA11307696	organism	Homo sapiens
+SAMEA11307696	donor age (ref. to HSCT)	not applicable
+SAMEA11307696	sex	female
+SAMEA11307696	scientific_name	Homo sapiens
+SAMEA11307696	common name	human
+SAMEA11307696	organism part	bone marrow
+SAMEA11307696	donor sex (ref. to HSCT)	not applicable
+SAMEA11307696	isolate	not applicable
+SAMEA11307696	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307696	sampling time point	not applicable
+SAMEA11307696	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307696	immunophenotype	CD11b+CD16int
+SAMEA11307696	cell isolation strategy	FACS sorting
+SAMEA11307696	cell_type	bone marrow cell
+SAMEA11307696	age	
+SAMEA11307696	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307696	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307701	ENA-CHECKLIST	ERC000011
+SAMEA11307701	clinical history	steady state
+SAMEA11307701	individual	UPN11
+SAMEA11307701	organism	Homo sapiens
+SAMEA11307701	organism	Homo sapiens
+SAMEA11307701	donor age (ref. to HSCT)	not applicable
+SAMEA11307701	sex	female
+SAMEA11307701	scientific_name	Homo sapiens
+SAMEA11307701	common name	human
+SAMEA11307701	organism part	blood
+SAMEA11307701	donor sex (ref. to HSCT)	not applicable
+SAMEA11307701	isolate	not applicable
+SAMEA11307701	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307701	sampling time point	not applicable
+SAMEA11307701	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307701	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307701	cell isolation strategy	FACS sorting
+SAMEA11307701	cell_type	monocyte
+SAMEA11307701	age	67
+SAMEA11307701	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307701	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307704	ENA-CHECKLIST	ERC000011
+SAMEA11307704	clinical history	steady state
+SAMEA11307704	individual	UPN12
+SAMEA11307704	organism	Homo sapiens
+SAMEA11307704	organism	Homo sapiens
+SAMEA11307704	donor age (ref. to HSCT)	not applicable
+SAMEA11307704	sex	female
+SAMEA11307704	scientific_name	Homo sapiens
+SAMEA11307704	common name	human
+SAMEA11307704	organism part	bone marrow
+SAMEA11307704	donor sex (ref. to HSCT)	not applicable
+SAMEA11307704	isolate	not applicable
+SAMEA11307704	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307704	sampling time point	not applicable
+SAMEA11307704	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307704	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307704	cell isolation strategy	FACS sorting
+SAMEA11307704	cell_type	bone marrow cell
+SAMEA11307704	age	52
+SAMEA11307704	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307704	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307711	ENA-CHECKLIST	ERC000011
+SAMEA11307711	clinical history	G-CSF
+SAMEA11307711	individual	UPN14
+SAMEA11307711	organism	Homo sapiens
+SAMEA11307711	organism	Homo sapiens
+SAMEA11307711	donor age (ref. to HSCT)	not applicable
+SAMEA11307711	sex	female
+SAMEA11307711	scientific_name	Homo sapiens
+SAMEA11307711	common name	human
+SAMEA11307711	organism part	blood
+SAMEA11307711	donor sex (ref. to HSCT)	not applicable
+SAMEA11307711	isolate	not applicable
+SAMEA11307711	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307711	sampling time point	not applicable
+SAMEA11307711	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307711	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307711	cell isolation strategy	FACS sorting
+SAMEA11307711	cell_type	low density neutrophil
+SAMEA11307711	age	58
+SAMEA11307711	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307711	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307721	ENA-CHECKLIST	ERC000011
+SAMEA11307721	clinical history	G-CSF
+SAMEA11307721	individual	UPN2
+SAMEA11307721	organism	Homo sapiens
+SAMEA11307721	organism	Homo sapiens
+SAMEA11307721	donor age (ref. to HSCT)	not applicable
+SAMEA11307721	sex	male
+SAMEA11307721	scientific_name	Homo sapiens
+SAMEA11307721	common name	human
+SAMEA11307721	organism part	blood
+SAMEA11307721	donor sex (ref. to HSCT)	not applicable
+SAMEA11307721	isolate	not applicable
+SAMEA11307721	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307721	sampling time point	not applicable
+SAMEA11307721	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307721	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307721	cell isolation strategy	CD15 Microbeads
+SAMEA11307721	cell_type	low density neutrophil
+SAMEA11307721	age	36
+SAMEA11307721	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307721	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307723	ENA-CHECKLIST	ERC000011
+SAMEA11307723	clinical history	steady state
+SAMEA11307723	individual	UPN2
+SAMEA11307723	organism	Homo sapiens
+SAMEA11307723	organism	Homo sapiens
+SAMEA11307723	donor age (ref. to HSCT)	not applicable
+SAMEA11307723	sex	male
+SAMEA11307723	scientific_name	Homo sapiens
+SAMEA11307723	common name	human
+SAMEA11307723	organism part	blood
+SAMEA11307723	donor sex (ref. to HSCT)	not applicable
+SAMEA11307723	isolate	not applicable
+SAMEA11307723	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307723	sampling time point	not applicable
+SAMEA11307723	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307723	immunophenotype	
+SAMEA11307723	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307723	cell_type	normal density neutrophil
+SAMEA11307723	age	36
+SAMEA11307723	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307723	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307725	ENA-CHECKLIST	ERC000011
+SAMEA11307725	clinical history	G-CSF
+SAMEA11307725	individual	UPN20
+SAMEA11307725	organism	Homo sapiens
+SAMEA11307725	organism	Homo sapiens
+SAMEA11307725	donor age (ref. to HSCT)	not applicable
+SAMEA11307725	sex	male
+SAMEA11307725	scientific_name	Homo sapiens
+SAMEA11307725	common name	human
+SAMEA11307725	organism part	blood
+SAMEA11307725	donor sex (ref. to HSCT)	not applicable
+SAMEA11307725	isolate	not applicable
+SAMEA11307725	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307725	sampling time point	not applicable
+SAMEA11307725	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307725	immunophenotype	
+SAMEA11307725	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307725	cell_type	normal density neutrophil
+SAMEA11307725	age	20
+SAMEA11307725	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307725	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307726	ENA-CHECKLIST	ERC000011
+SAMEA11307726	clinical history	G-CSF
+SAMEA11307726	individual	UPN21
+SAMEA11307726	organism	Homo sapiens
+SAMEA11307726	organism	Homo sapiens
+SAMEA11307726	donor age (ref. to HSCT)	not applicable
+SAMEA11307726	sex	female
+SAMEA11307726	scientific_name	Homo sapiens
+SAMEA11307726	common name	human
+SAMEA11307726	organism part	blood
+SAMEA11307726	donor sex (ref. to HSCT)	not applicable
+SAMEA11307726	isolate	not applicable
+SAMEA11307726	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307726	sampling time point	not applicable
+SAMEA11307726	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307726	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307726	cell isolation strategy	CD15 Microbeads
+SAMEA11307726	cell_type	low density neutrophil
+SAMEA11307726	age	23
+SAMEA11307726	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307726	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307737	ENA-CHECKLIST	ERC000011
+SAMEA11307737	clinical history	G-CSF
+SAMEA11307737	individual	UPN3
+SAMEA11307737	organism	Homo sapiens
+SAMEA11307737	organism	Homo sapiens
+SAMEA11307737	donor age (ref. to HSCT)	not applicable
+SAMEA11307737	sex	male
+SAMEA11307737	scientific_name	Homo sapiens
+SAMEA11307737	common name	human
+SAMEA11307737	organism part	blood
+SAMEA11307737	donor sex (ref. to HSCT)	not applicable
+SAMEA11307737	isolate	not applicable
+SAMEA11307737	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307737	sampling time point	not applicable
+SAMEA11307737	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307737	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307737	cell isolation strategy	FACS sorting
+SAMEA11307737	cell_type	monocyte
+SAMEA11307737	age	28
+SAMEA11307737	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307737	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307743	ENA-CHECKLIST	ERC000011
+SAMEA11307743	clinical history	steady state
+SAMEA11307743	individual	UPN32
+SAMEA11307743	organism	Homo sapiens
+SAMEA11307743	organism	Homo sapiens
+SAMEA11307743	donor age (ref. to HSCT)	not applicable
+SAMEA11307743	sex	male
+SAMEA11307743	scientific_name	Homo sapiens
+SAMEA11307743	common name	human
+SAMEA11307743	organism part	blood
+SAMEA11307743	donor sex (ref. to HSCT)	not applicable
+SAMEA11307743	isolate	not applicable
+SAMEA11307743	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307743	sampling time point	not applicable
+SAMEA11307743	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307743	immunophenotype	
+SAMEA11307743	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307743	cell_type	normal density neutrophil
+SAMEA11307743	age	24
+SAMEA11307743	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307743	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307744	ENA-CHECKLIST	ERC000011
+SAMEA11307744	clinical history	hematopoietic stem cell transplantation
+SAMEA11307744	individual	UPN33
+SAMEA11307744	organism	Homo sapiens
+SAMEA11307744	organism	Homo sapiens
+SAMEA11307744	donor age (ref. to HSCT)	36
+SAMEA11307744	sex	female
+SAMEA11307744	scientific_name	Homo sapiens
+SAMEA11307744	common name	human
+SAMEA11307744	organism part	blood
+SAMEA11307744	donor sex (ref. to HSCT)	female
+SAMEA11307744	isolate	not applicable
+SAMEA11307744	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307744	sampling time point	1st follow up after transplantation
+SAMEA11307744	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307744	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307744	cell isolation strategy	CD15 Microbeads
+SAMEA11307744	cell_type	low density neutrophil
+SAMEA11307744	age	60
+SAMEA11307744	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307744	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307745	ENA-CHECKLIST	ERC000011
+SAMEA11307745	clinical history	hematopoietic stem cell transplantation
+SAMEA11307745	individual	UPN33
+SAMEA11307745	organism	Homo sapiens
+SAMEA11307745	organism	Homo sapiens
+SAMEA11307745	donor age (ref. to HSCT)	36
+SAMEA11307745	sex	female
+SAMEA11307745	scientific_name	Homo sapiens
+SAMEA11307745	common name	human
+SAMEA11307745	organism part	blood
+SAMEA11307745	donor sex (ref. to HSCT)	female
+SAMEA11307745	isolate	not applicable
+SAMEA11307745	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307745	sampling time point	1st follow up after transplantation
+SAMEA11307745	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307745	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307745	cell isolation strategy	CD14 Microbeads
+SAMEA11307745	cell_type	monocyte
+SAMEA11307745	age	60
+SAMEA11307745	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307745	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307749	ENA-CHECKLIST	ERC000011
+SAMEA11307749	clinical history	hematopoietic stem cell transplantation
+SAMEA11307749	individual	UPN33
+SAMEA11307749	organism	Homo sapiens
+SAMEA11307749	organism	Homo sapiens
+SAMEA11307749	donor age (ref. to HSCT)	36
+SAMEA11307749	sex	female
+SAMEA11307749	scientific_name	Homo sapiens
+SAMEA11307749	common name	human
+SAMEA11307749	organism part	bone marrow
+SAMEA11307749	donor sex (ref. to HSCT)	female
+SAMEA11307749	isolate	not applicable
+SAMEA11307749	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307749	sampling time point	2nd follow up after transplantation
+SAMEA11307749	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307749	immunophenotype	CD11b-CD16-
+SAMEA11307749	cell isolation strategy	FACS sorting
+SAMEA11307749	cell_type	bone marrow cell
+SAMEA11307749	age	60
+SAMEA11307749	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307749	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307754	ENA-CHECKLIST	ERC000011
+SAMEA11307754	clinical history	hematopoietic stem cell transplantation
+SAMEA11307754	individual	UPN35
+SAMEA11307754	organism	Homo sapiens
+SAMEA11307754	organism	Homo sapiens
+SAMEA11307754	donor age (ref. to HSCT)	28
+SAMEA11307754	sex	male
+SAMEA11307754	scientific_name	Homo sapiens
+SAMEA11307754	common name	human
+SAMEA11307754	organism part	blood
+SAMEA11307754	donor sex (ref. to HSCT)	male
+SAMEA11307754	isolate	not applicable
+SAMEA11307754	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307754	sampling time point	1st follow up after transplantation
+SAMEA11307754	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307754	immunophenotype	
+SAMEA11307754	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307754	cell_type	normal density neutrophil
+SAMEA11307754	age	52
+SAMEA11307754	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307754	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307763	ENA-CHECKLIST	ERC000011
+SAMEA11307763	clinical history	hematopoietic stem cell transplantation
+SAMEA11307763	individual	UPN35
+SAMEA11307763	organism	Homo sapiens
+SAMEA11307763	organism	Homo sapiens
+SAMEA11307763	donor age (ref. to HSCT)	28
+SAMEA11307763	sex	male
+SAMEA11307763	scientific_name	Homo sapiens
+SAMEA11307763	common name	human
+SAMEA11307763	organism part	bone marrow
+SAMEA11307763	donor sex (ref. to HSCT)	male
+SAMEA11307763	isolate	not applicable
+SAMEA11307763	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307763	sampling time point	3rd follow up after transplantation
+SAMEA11307763	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307763	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307763	cell isolation strategy	FACS sorting
+SAMEA11307763	cell_type	bone marrow cell
+SAMEA11307763	age	52
+SAMEA11307763	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307763	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307773	ENA-CHECKLIST	ERC000011
+SAMEA11307773	clinical history	hematopoietic stem cell transplantation
+SAMEA11307773	individual	UPN37
+SAMEA11307773	organism	Homo sapiens
+SAMEA11307773	organism	Homo sapiens
+SAMEA11307773	donor age (ref. to HSCT)	60
+SAMEA11307773	sex	female
+SAMEA11307773	scientific_name	Homo sapiens
+SAMEA11307773	common name	human
+SAMEA11307773	organism part	blood
+SAMEA11307773	donor sex (ref. to HSCT)	male
+SAMEA11307773	isolate	not applicable
+SAMEA11307773	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307773	sampling time point	1st follow up after transplantation
+SAMEA11307773	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307773	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307773	cell isolation strategy	FACS sorting
+SAMEA11307773	cell_type	low density neutrophil
+SAMEA11307773	age	52
+SAMEA11307773	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307773	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307780	ENA-CHECKLIST	ERC000011
+SAMEA11307780	clinical history	hematopoietic stem cell transplantation
+SAMEA11307780	individual	UPN37
+SAMEA11307780	organism	Homo sapiens
+SAMEA11307780	organism	Homo sapiens
+SAMEA11307780	donor age (ref. to HSCT)	60
+SAMEA11307780	sex	female
+SAMEA11307780	scientific_name	Homo sapiens
+SAMEA11307780	common name	human
+SAMEA11307780	organism part	bone marrow
+SAMEA11307780	donor sex (ref. to HSCT)	male
+SAMEA11307780	isolate	not applicable
+SAMEA11307780	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307780	sampling time point	2nd follow up after transplantation
+SAMEA11307780	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307780	immunophenotype	CD11b-CD16-
+SAMEA11307780	cell isolation strategy	FACS sorting
+SAMEA11307780	cell_type	bone marrow cell
+SAMEA11307780	age	52
+SAMEA11307780	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307780	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307783	ENA-CHECKLIST	ERC000011
+SAMEA11307783	clinical history	hematopoietic stem cell transplantation
+SAMEA11307783	individual	UPN37
+SAMEA11307783	organism	Homo sapiens
+SAMEA11307783	organism	Homo sapiens
+SAMEA11307783	donor age (ref. to HSCT)	60
+SAMEA11307783	sex	female
+SAMEA11307783	scientific_name	Homo sapiens
+SAMEA11307783	common name	human
+SAMEA11307783	organism part	bone marrow
+SAMEA11307783	donor sex (ref. to HSCT)	male
+SAMEA11307783	isolate	not applicable
+SAMEA11307783	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307783	sampling time point	2nd follow up after transplantation
+SAMEA11307783	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307783	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307783	cell isolation strategy	FACS sorting
+SAMEA11307783	cell_type	monocyte
+SAMEA11307783	age	52
+SAMEA11307783	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307783	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307789	ENA-CHECKLIST	ERC000011
+SAMEA11307789	clinical history	hematopoietic stem cell transplantation
+SAMEA11307789	individual	UPN39
+SAMEA11307789	organism	Homo sapiens
+SAMEA11307789	organism	Homo sapiens
+SAMEA11307789	donor age (ref. to HSCT)	63
+SAMEA11307789	sex	male
+SAMEA11307789	scientific_name	Homo sapiens
+SAMEA11307789	common name	human
+SAMEA11307789	organism part	bone marrow
+SAMEA11307789	donor sex (ref. to HSCT)	female
+SAMEA11307789	isolate	not applicable
+SAMEA11307789	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307789	sampling time point	2nd follow up after transplantation
+SAMEA11307789	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307789	immunophenotype	CD11b-CD16-
+SAMEA11307789	cell isolation strategy	FACS sorting
+SAMEA11307789	cell_type	bone marrow cell
+SAMEA11307789	age	38
+SAMEA11307789	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307789	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307794	ENA-CHECKLIST	ERC000011
+SAMEA11307794	clinical history	G-CSF
+SAMEA11307794	individual	UPN4
+SAMEA11307794	organism	Homo sapiens
+SAMEA11307794	organism	Homo sapiens
+SAMEA11307794	donor age (ref. to HSCT)	not applicable
+SAMEA11307794	sex	male
+SAMEA11307794	scientific_name	Homo sapiens
+SAMEA11307794	common name	human
+SAMEA11307794	organism part	blood
+SAMEA11307794	donor sex (ref. to HSCT)	not applicable
+SAMEA11307794	isolate	not applicable
+SAMEA11307794	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307794	sampling time point	not applicable
+SAMEA11307794	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307794	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307794	cell isolation strategy	FACS sorting
+SAMEA11307794	cell_type	monocyte
+SAMEA11307794	age	33
+SAMEA11307794	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307794	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307804	ENA-CHECKLIST	ERC000011
+SAMEA11307804	clinical history	hematopoietic stem cell transplantation
+SAMEA11307804	individual	UPN44
+SAMEA11307804	organism	Homo sapiens
+SAMEA11307804	organism	Homo sapiens
+SAMEA11307804	donor age (ref. to HSCT)	28
+SAMEA11307804	sex	male
+SAMEA11307804	scientific_name	Homo sapiens
+SAMEA11307804	common name	human
+SAMEA11307804	organism part	bone marrow
+SAMEA11307804	donor sex (ref. to HSCT)	female
+SAMEA11307804	isolate	not applicable
+SAMEA11307804	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307804	sampling time point	2nd follow up after transplantation
+SAMEA11307804	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307804	immunophenotype	CD11b-CD16-
+SAMEA11307804	cell isolation strategy	FACS sorting
+SAMEA11307804	cell_type	bone marrow cell
+SAMEA11307804	age	20
+SAMEA11307804	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307804	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307805	ENA-CHECKLIST	ERC000011
+SAMEA11307805	clinical history	hematopoietic stem cell transplantation
+SAMEA11307805	individual	UPN44
+SAMEA11307805	organism	Homo sapiens
+SAMEA11307805	organism	Homo sapiens
+SAMEA11307805	donor age (ref. to HSCT)	28
+SAMEA11307805	sex	male
+SAMEA11307805	scientific_name	Homo sapiens
+SAMEA11307805	common name	human
+SAMEA11307805	organism part	bone marrow
+SAMEA11307805	donor sex (ref. to HSCT)	female
+SAMEA11307805	isolate	not applicable
+SAMEA11307805	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307805	sampling time point	2nd follow up after transplantation
+SAMEA11307805	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307805	immunophenotype	CD11b+CD16int
+SAMEA11307805	cell isolation strategy	FACS sorting
+SAMEA11307805	cell_type	bone marrow cell
+SAMEA11307805	age	20
+SAMEA11307805	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307805	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307807	ENA-CHECKLIST	ERC000011
+SAMEA11307807	clinical history	hematopoietic stem cell transplantation
+SAMEA11307807	individual	UPN45
+SAMEA11307807	organism	Homo sapiens
+SAMEA11307807	organism	Homo sapiens
+SAMEA11307807	donor age (ref. to HSCT)	58
+SAMEA11307807	sex	female
+SAMEA11307807	scientific_name	Homo sapiens
+SAMEA11307807	common name	human
+SAMEA11307807	organism part	blood
+SAMEA11307807	donor sex (ref. to HSCT)	female
+SAMEA11307807	isolate	not applicable
+SAMEA11307807	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307807	sampling time point	1st follow up after transplantation
+SAMEA11307807	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307807	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307807	cell isolation strategy	FACS sorting
+SAMEA11307807	cell_type	monocyte
+SAMEA11307807	age	57
+SAMEA11307807	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307807	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307809	ENA-CHECKLIST	ERC000011
+SAMEA11307809	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307809	individual	UPN49
+SAMEA11307809	organism	Homo sapiens
+SAMEA11307809	organism	Homo sapiens
+SAMEA11307809	donor age (ref. to HSCT)	not applicable
+SAMEA11307809	sex	female
+SAMEA11307809	scientific_name	Homo sapiens
+SAMEA11307809	common name	human
+SAMEA11307809	organism part	blood
+SAMEA11307809	donor sex (ref. to HSCT)	not applicable
+SAMEA11307809	isolate	not applicable
+SAMEA11307809	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307809	sampling time point	not applicable
+SAMEA11307809	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307809	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307809	cell isolation strategy	CD14 Microbeads
+SAMEA11307809	cell_type	monocyte
+SAMEA11307809	age	74
+SAMEA11307809	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307809	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307811	ENA-CHECKLIST	ERC000011
+SAMEA11307811	clinical history	G-CSF
+SAMEA11307811	individual	UPN5
+SAMEA11307811	organism	Homo sapiens
+SAMEA11307811	organism	Homo sapiens
+SAMEA11307811	donor age (ref. to HSCT)	not applicable
+SAMEA11307811	sex	male
+SAMEA11307811	scientific_name	Homo sapiens
+SAMEA11307811	common name	human
+SAMEA11307811	organism part	blood
+SAMEA11307811	donor sex (ref. to HSCT)	not applicable
+SAMEA11307811	isolate	not applicable
+SAMEA11307811	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307811	sampling time point	not applicable
+SAMEA11307811	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307811	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307811	cell isolation strategy	FACS sorting
+SAMEA11307811	cell_type	low density neutrophil
+SAMEA11307811	age	60
+SAMEA11307811	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307811	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307815	ENA-CHECKLIST	ERC000011
+SAMEA11307815	clinical history	steady state
+SAMEA11307815	individual	UPN5
+SAMEA11307815	organism	Homo sapiens
+SAMEA11307815	organism	Homo sapiens
+SAMEA11307815	donor age (ref. to HSCT)	not applicable
+SAMEA11307815	sex	male
+SAMEA11307815	scientific_name	Homo sapiens
+SAMEA11307815	common name	human
+SAMEA11307815	organism part	blood
+SAMEA11307815	donor sex (ref. to HSCT)	not applicable
+SAMEA11307815	isolate	not applicable
+SAMEA11307815	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307815	sampling time point	not applicable
+SAMEA11307815	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307815	immunophenotype	
+SAMEA11307815	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307815	cell_type	normal density neutrophil
+SAMEA11307815	age	60
+SAMEA11307815	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307815	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307820	ENA-CHECKLIST	ERC000011
+SAMEA11307820	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307820	individual	UPN51
+SAMEA11307820	organism	Homo sapiens
+SAMEA11307820	organism	Homo sapiens
+SAMEA11307820	donor age (ref. to HSCT)	not applicable
+SAMEA11307820	sex	female
+SAMEA11307820	scientific_name	Homo sapiens
+SAMEA11307820	common name	human
+SAMEA11307820	organism part	blood
+SAMEA11307820	donor sex (ref. to HSCT)	not applicable
+SAMEA11307820	isolate	not applicable
+SAMEA11307820	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307820	sampling time point	not applicable
+SAMEA11307820	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307820	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307820	cell isolation strategy	CD14 Microbeads
+SAMEA11307820	cell_type	monocyte
+SAMEA11307820	age	72
+SAMEA11307820	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307820	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307824	ENA-CHECKLIST	ERC000011
+SAMEA11307824	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307824	individual	UPN52
+SAMEA11307824	organism	Homo sapiens
+SAMEA11307824	organism	Homo sapiens
+SAMEA11307824	donor age (ref. to HSCT)	not applicable
+SAMEA11307824	sex	male
+SAMEA11307824	scientific_name	Homo sapiens
+SAMEA11307824	common name	human
+SAMEA11307824	organism part	blood
+SAMEA11307824	donor sex (ref. to HSCT)	not applicable
+SAMEA11307824	isolate	not applicable
+SAMEA11307824	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307824	sampling time point	not applicable
+SAMEA11307824	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307824	immunophenotype	
+SAMEA11307824	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307824	cell_type	normal density neutrophil
+SAMEA11307824	age	77
+SAMEA11307824	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307824	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307831	ENA-CHECKLIST	ERC000011
+SAMEA11307831	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307831	individual	UPN55
+SAMEA11307831	organism	Homo sapiens
+SAMEA11307831	organism	Homo sapiens
+SAMEA11307831	donor age (ref. to HSCT)	not applicable
+SAMEA11307831	sex	female
+SAMEA11307831	scientific_name	Homo sapiens
+SAMEA11307831	common name	human
+SAMEA11307831	organism part	blood
+SAMEA11307831	donor sex (ref. to HSCT)	not applicable
+SAMEA11307831	isolate	not applicable
+SAMEA11307831	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307831	sampling time point	not applicable
+SAMEA11307831	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307831	immunophenotype	
+SAMEA11307831	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307831	cell_type	normal density neutrophil
+SAMEA11307831	age	71
+SAMEA11307831	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307831	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307838	ENA-CHECKLIST	ERC000011
+SAMEA11307838	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307838	individual	UPN58
+SAMEA11307838	organism	Homo sapiens
+SAMEA11307838	organism	Homo sapiens
+SAMEA11307838	donor age (ref. to HSCT)	not applicable
+SAMEA11307838	sex	male
+SAMEA11307838	scientific_name	Homo sapiens
+SAMEA11307838	common name	human
+SAMEA11307838	organism part	blood
+SAMEA11307838	donor sex (ref. to HSCT)	not applicable
+SAMEA11307838	isolate	not applicable
+SAMEA11307838	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307838	sampling time point	not applicable
+SAMEA11307838	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307838	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307838	cell isolation strategy	FACS sorting
+SAMEA11307838	cell_type	low density neutrophil
+SAMEA11307838	age	64
+SAMEA11307838	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307838	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307842	ENA-CHECKLIST	ERC000011
+SAMEA11307842	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307842	individual	UPN59
+SAMEA11307842	organism	Homo sapiens
+SAMEA11307842	organism	Homo sapiens
+SAMEA11307842	donor age (ref. to HSCT)	not applicable
+SAMEA11307842	sex	male
+SAMEA11307842	scientific_name	Homo sapiens
+SAMEA11307842	common name	human
+SAMEA11307842	organism part	blood
+SAMEA11307842	donor sex (ref. to HSCT)	not applicable
+SAMEA11307842	isolate	not applicable
+SAMEA11307842	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307842	sampling time point	not applicable
+SAMEA11307842	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307842	immunophenotype	
+SAMEA11307842	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307842	cell_type	normal density neutrophil
+SAMEA11307842	age	76
+SAMEA11307842	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307842	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307846	ENA-CHECKLIST	ERC000011
+SAMEA11307846	clinical history	steady state
+SAMEA11307846	individual	UPN6
+SAMEA11307846	organism	Homo sapiens
+SAMEA11307846	organism	Homo sapiens
+SAMEA11307846	donor age (ref. to HSCT)	not applicable
+SAMEA11307846	sex	male
+SAMEA11307846	scientific_name	Homo sapiens
+SAMEA11307846	common name	human
+SAMEA11307846	organism part	blood
+SAMEA11307846	donor sex (ref. to HSCT)	not applicable
+SAMEA11307846	isolate	not applicable
+SAMEA11307846	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307846	sampling time point	not applicable
+SAMEA11307846	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307846	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307846	cell isolation strategy	FACS sorting
+SAMEA11307846	cell_type	monocyte
+SAMEA11307846	age	26
+SAMEA11307846	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307846	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307848	ENA-CHECKLIST	ERC000011
+SAMEA11307848	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307848	individual	UPN62
+SAMEA11307848	organism	Homo sapiens
+SAMEA11307848	organism	Homo sapiens
+SAMEA11307848	donor age (ref. to HSCT)	not applicable
+SAMEA11307848	sex	male
+SAMEA11307848	scientific_name	Homo sapiens
+SAMEA11307848	common name	human
+SAMEA11307848	organism part	blood
+SAMEA11307848	donor sex (ref. to HSCT)	not applicable
+SAMEA11307848	isolate	not applicable
+SAMEA11307848	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307848	sampling time point	not applicable
+SAMEA11307848	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307848	immunophenotype	
+SAMEA11307848	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307848	cell_type	normal density neutrophil
+SAMEA11307848	age	65
+SAMEA11307848	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307848	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307858	ENA-CHECKLIST	ERC000011
+SAMEA11307858	clinical history	G-CSF
+SAMEA11307858	individual	UPN7
+SAMEA11307858	organism	Homo sapiens
+SAMEA11307858	organism	Homo sapiens
+SAMEA11307858	donor age (ref. to HSCT)	not applicable
+SAMEA11307858	sex	female
+SAMEA11307858	scientific_name	Homo sapiens
+SAMEA11307858	common name	human
+SAMEA11307858	organism part	blood
+SAMEA11307858	donor sex (ref. to HSCT)	not applicable
+SAMEA11307858	isolate	not applicable
+SAMEA11307858	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307858	sampling time point	not applicable
+SAMEA11307858	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307858	immunophenotype	
+SAMEA11307858	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307858	cell_type	normal density neutrophil
+SAMEA11307858	age	63
+SAMEA11307858	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307858	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307859	ENA-CHECKLIST	ERC000011
+SAMEA11307859	clinical history	steady state
+SAMEA11307859	individual	UPN7
+SAMEA11307859	organism	Homo sapiens
+SAMEA11307859	organism	Homo sapiens
+SAMEA11307859	donor age (ref. to HSCT)	not applicable
+SAMEA11307859	sex	female
+SAMEA11307859	scientific_name	Homo sapiens
+SAMEA11307859	common name	human
+SAMEA11307859	organism part	blood
+SAMEA11307859	donor sex (ref. to HSCT)	not applicable
+SAMEA11307859	isolate	not applicable
+SAMEA11307859	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307859	sampling time point	not applicable
+SAMEA11307859	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307859	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307859	cell isolation strategy	FACS sorting
+SAMEA11307859	cell_type	monocyte
+SAMEA11307859	age	63
+SAMEA11307859	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307859	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307861	ENA-CHECKLIST	ERC000011
+SAMEA11307861	clinical history	steady state
+SAMEA11307861	individual	UPN7
+SAMEA11307861	organism	Homo sapiens
+SAMEA11307861	organism	Homo sapiens
+SAMEA11307861	donor age (ref. to HSCT)	not applicable
+SAMEA11307861	sex	female
+SAMEA11307861	scientific_name	Homo sapiens
+SAMEA11307861	common name	human
+SAMEA11307861	organism part	blood
+SAMEA11307861	donor sex (ref. to HSCT)	not applicable
+SAMEA11307861	isolate	not applicable
+SAMEA11307861	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307861	sampling time point	not applicable
+SAMEA11307861	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307861	immunophenotype	
+SAMEA11307861	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307861	cell_type	normal density neutrophil
+SAMEA11307861	age	63
+SAMEA11307861	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307861	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307868	ENA-CHECKLIST	ERC000011
+SAMEA11307868	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307868	individual	UPN73
+SAMEA11307868	organism	Homo sapiens
+SAMEA11307868	organism	Homo sapiens
+SAMEA11307868	donor age (ref. to HSCT)	not applicable
+SAMEA11307868	sex	female
+SAMEA11307868	scientific_name	Homo sapiens
+SAMEA11307868	common name	human
+SAMEA11307868	organism part	blood
+SAMEA11307868	donor sex (ref. to HSCT)	not applicable
+SAMEA11307868	isolate	not applicable
+SAMEA11307868	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307868	sampling time point	not applicable
+SAMEA11307868	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307868	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307868	cell isolation strategy	FACS sorting
+SAMEA11307868	cell_type	low density neutrophil
+SAMEA11307868	age	74
+SAMEA11307868	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307868	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307877	ENA-CHECKLIST	ERC000011
+SAMEA11307877	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307877	individual	UPN76
+SAMEA11307877	organism	Homo sapiens
+SAMEA11307877	organism	Homo sapiens
+SAMEA11307877	donor age (ref. to HSCT)	not applicable
+SAMEA11307877	sex	male
+SAMEA11307877	scientific_name	Homo sapiens
+SAMEA11307877	common name	human
+SAMEA11307877	organism part	blood
+SAMEA11307877	donor sex (ref. to HSCT)	not applicable
+SAMEA11307877	isolate	not applicable
+SAMEA11307877	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307877	sampling time point	not applicable
+SAMEA11307877	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307877	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307877	cell isolation strategy	FACS sorting
+SAMEA11307877	cell_type	monocyte
+SAMEA11307877	age	74
+SAMEA11307877	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307877	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307878	ENA-CHECKLIST	ERC000011
+SAMEA11307878	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307878	individual	UPN76
+SAMEA11307878	organism	Homo sapiens
+SAMEA11307878	organism	Homo sapiens
+SAMEA11307878	donor age (ref. to HSCT)	not applicable
+SAMEA11307878	sex	male
+SAMEA11307878	scientific_name	Homo sapiens
+SAMEA11307878	common name	human
+SAMEA11307878	organism part	blood
+SAMEA11307878	donor sex (ref. to HSCT)	not applicable
+SAMEA11307878	isolate	not applicable
+SAMEA11307878	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307878	sampling time point	not applicable
+SAMEA11307878	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307878	immunophenotype	
+SAMEA11307878	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307878	cell_type	normal density neutrophil
+SAMEA11307878	age	74
+SAMEA11307878	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307878	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307880	ENA-CHECKLIST	ERC000011
+SAMEA11307880	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307880	individual	UPN78
+SAMEA11307880	organism	Homo sapiens
+SAMEA11307880	organism	Homo sapiens
+SAMEA11307880	donor age (ref. to HSCT)	not applicable
+SAMEA11307880	sex	male
+SAMEA11307880	scientific_name	Homo sapiens
+SAMEA11307880	common name	human
+SAMEA11307880	organism part	blood
+SAMEA11307880	donor sex (ref. to HSCT)	not applicable
+SAMEA11307880	isolate	not applicable
+SAMEA11307880	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307880	sampling time point	not applicable
+SAMEA11307880	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307880	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307880	cell isolation strategy	FACS sorting
+SAMEA11307880	cell_type	monocyte
+SAMEA11307880	age	64
+SAMEA11307880	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307880	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307889	ENA-CHECKLIST	ERC000011
+SAMEA11307889	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307889	individual	UPN80
+SAMEA11307889	organism	Homo sapiens
+SAMEA11307889	organism	Homo sapiens
+SAMEA11307889	donor age (ref. to HSCT)	not applicable
+SAMEA11307889	sex	female
+SAMEA11307889	scientific_name	Homo sapiens
+SAMEA11307889	common name	human
+SAMEA11307889	organism part	blood
+SAMEA11307889	donor sex (ref. to HSCT)	not applicable
+SAMEA11307889	isolate	not applicable
+SAMEA11307889	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307889	sampling time point	not applicable
+SAMEA11307889	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307889	immunophenotype	
+SAMEA11307889	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307889	cell_type	normal density neutrophil
+SAMEA11307889	age	77
+SAMEA11307889	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307889	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307894	ENA-CHECKLIST	ERC000011
+SAMEA11307894	clinical history	G-CSF
+SAMEA11307894	individual	UPN9
+SAMEA11307894	organism	Homo sapiens
+SAMEA11307894	organism	Homo sapiens
+SAMEA11307894	donor age (ref. to HSCT)	not applicable
+SAMEA11307894	sex	male
+SAMEA11307894	scientific_name	Homo sapiens
+SAMEA11307894	common name	human
+SAMEA11307894	organism part	blood
+SAMEA11307894	donor sex (ref. to HSCT)	not applicable
+SAMEA11307894	isolate	not applicable
+SAMEA11307894	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307894	sampling time point	not applicable
+SAMEA11307894	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307894	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307894	cell isolation strategy	FACS sorting
+SAMEA11307894	cell_type	low density neutrophil
+SAMEA11307894	age	31
+SAMEA11307894	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307894	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307895	ENA-CHECKLIST	ERC000011
+SAMEA11307895	clinical history	G-CSF
+SAMEA11307895	individual	UPN9
+SAMEA11307895	organism	Homo sapiens
+SAMEA11307895	organism	Homo sapiens
+SAMEA11307895	donor age (ref. to HSCT)	not applicable
+SAMEA11307895	sex	male
+SAMEA11307895	scientific_name	Homo sapiens
+SAMEA11307895	common name	human
+SAMEA11307895	organism part	blood
+SAMEA11307895	donor sex (ref. to HSCT)	not applicable
+SAMEA11307895	isolate	not applicable
+SAMEA11307895	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307895	sampling time point	not applicable
+SAMEA11307895	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307895	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307895	cell isolation strategy	FACS sorting
+SAMEA11307895	cell_type	monocyte
+SAMEA11307895	age	31
+SAMEA11307895	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307895	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307688	ENA-CHECKLIST	ERC000011
+SAMEA11307688	clinical history	G-CSF
+SAMEA11307688	individual	UPN1
+SAMEA11307688	organism	Homo sapiens
+SAMEA11307688	organism	Homo sapiens
+SAMEA11307688	donor age (ref. to HSCT)	not applicable
+SAMEA11307688	sex	female
+SAMEA11307688	scientific_name	Homo sapiens
+SAMEA11307688	common name	human
+SAMEA11307688	organism part	blood
+SAMEA11307688	donor sex (ref. to HSCT)	not applicable
+SAMEA11307688	isolate	not applicable
+SAMEA11307688	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307688	sampling time point	not applicable
+SAMEA11307688	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307688	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307688	cell isolation strategy	CD15 Microbeads
+SAMEA11307688	cell_type	low density neutrophil
+SAMEA11307688	age	36
+SAMEA11307688	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307688	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307697	ENA-CHECKLIST	ERC000011
+SAMEA11307697	clinical history	steady state
+SAMEA11307697	individual	UPN10
+SAMEA11307697	organism	Homo sapiens
+SAMEA11307697	organism	Homo sapiens
+SAMEA11307697	donor age (ref. to HSCT)	not applicable
+SAMEA11307697	sex	female
+SAMEA11307697	scientific_name	Homo sapiens
+SAMEA11307697	common name	human
+SAMEA11307697	organism part	bone marrow
+SAMEA11307697	donor sex (ref. to HSCT)	not applicable
+SAMEA11307697	isolate	not applicable
+SAMEA11307697	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307697	sampling time point	not applicable
+SAMEA11307697	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307697	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307697	cell isolation strategy	FACS sorting
+SAMEA11307697	cell_type	monocyte
+SAMEA11307697	age	
+SAMEA11307697	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307697	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307699	ENA-CHECKLIST	ERC000011
+SAMEA11307699	clinical history	G-CSF
+SAMEA11307699	individual	UPN11
+SAMEA11307699	organism	Homo sapiens
+SAMEA11307699	organism	Homo sapiens
+SAMEA11307699	donor age (ref. to HSCT)	not applicable
+SAMEA11307699	sex	female
+SAMEA11307699	scientific_name	Homo sapiens
+SAMEA11307699	common name	human
+SAMEA11307699	organism part	blood
+SAMEA11307699	donor sex (ref. to HSCT)	not applicable
+SAMEA11307699	isolate	not applicable
+SAMEA11307699	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307699	sampling time point	not applicable
+SAMEA11307699	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307699	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307699	cell isolation strategy	FACS sorting
+SAMEA11307699	cell_type	monocyte
+SAMEA11307699	age	67
+SAMEA11307699	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307699	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307705	ENA-CHECKLIST	ERC000011
+SAMEA11307705	clinical history	steady state
+SAMEA11307705	individual	UPN12
+SAMEA11307705	organism	Homo sapiens
+SAMEA11307705	organism	Homo sapiens
+SAMEA11307705	donor age (ref. to HSCT)	not applicable
+SAMEA11307705	sex	female
+SAMEA11307705	scientific_name	Homo sapiens
+SAMEA11307705	common name	human
+SAMEA11307705	organism part	bone marrow
+SAMEA11307705	donor sex (ref. to HSCT)	not applicable
+SAMEA11307705	isolate	not applicable
+SAMEA11307705	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307705	sampling time point	not applicable
+SAMEA11307705	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307705	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307705	cell isolation strategy	FACS sorting
+SAMEA11307705	cell_type	monocyte
+SAMEA11307705	age	52
+SAMEA11307705	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307705	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307716	ENA-CHECKLIST	ERC000011
+SAMEA11307716	clinical history	steady state
+SAMEA11307716	individual	UPN15
+SAMEA11307716	organism	Homo sapiens
+SAMEA11307716	organism	Homo sapiens
+SAMEA11307716	donor age (ref. to HSCT)	not applicable
+SAMEA11307716	sex	male
+SAMEA11307716	scientific_name	Homo sapiens
+SAMEA11307716	common name	human
+SAMEA11307716	organism part	bone marrow
+SAMEA11307716	donor sex (ref. to HSCT)	not applicable
+SAMEA11307716	isolate	not applicable
+SAMEA11307716	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307716	sampling time point	not applicable
+SAMEA11307716	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307716	immunophenotype	CD11b+CD16-
+SAMEA11307716	cell isolation strategy	FACS sorting
+SAMEA11307716	cell_type	bone marrow cell
+SAMEA11307716	age	28
+SAMEA11307716	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307716	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307722	ENA-CHECKLIST	ERC000011
+SAMEA11307722	clinical history	G-CSF
+SAMEA11307722	individual	UPN2
+SAMEA11307722	organism	Homo sapiens
+SAMEA11307722	organism	Homo sapiens
+SAMEA11307722	donor age (ref. to HSCT)	not applicable
+SAMEA11307722	sex	male
+SAMEA11307722	scientific_name	Homo sapiens
+SAMEA11307722	common name	human
+SAMEA11307722	organism part	blood
+SAMEA11307722	donor sex (ref. to HSCT)	not applicable
+SAMEA11307722	isolate	not applicable
+SAMEA11307722	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307722	sampling time point	not applicable
+SAMEA11307722	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307722	immunophenotype	
+SAMEA11307722	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307722	cell_type	normal density neutrophil
+SAMEA11307722	age	36
+SAMEA11307722	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307722	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307724	ENA-CHECKLIST	ERC000011
+SAMEA11307724	clinical history	G-CSF
+SAMEA11307724	individual	UPN20
+SAMEA11307724	organism	Homo sapiens
+SAMEA11307724	organism	Homo sapiens
+SAMEA11307724	donor age (ref. to HSCT)	not applicable
+SAMEA11307724	sex	male
+SAMEA11307724	scientific_name	Homo sapiens
+SAMEA11307724	common name	human
+SAMEA11307724	organism part	blood
+SAMEA11307724	donor sex (ref. to HSCT)	not applicable
+SAMEA11307724	isolate	not applicable
+SAMEA11307724	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307724	sampling time point	not applicable
+SAMEA11307724	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307724	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307724	cell isolation strategy	CD15 Microbeads
+SAMEA11307724	cell_type	low density neutrophil
+SAMEA11307724	age	20
+SAMEA11307724	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307724	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307727	ENA-CHECKLIST	ERC000011
+SAMEA11307727	clinical history	G-CSF
+SAMEA11307727	individual	UPN21
+SAMEA11307727	organism	Homo sapiens
+SAMEA11307727	organism	Homo sapiens
+SAMEA11307727	donor age (ref. to HSCT)	not applicable
+SAMEA11307727	sex	female
+SAMEA11307727	scientific_name	Homo sapiens
+SAMEA11307727	common name	human
+SAMEA11307727	organism part	blood
+SAMEA11307727	donor sex (ref. to HSCT)	not applicable
+SAMEA11307727	isolate	not applicable
+SAMEA11307727	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307727	sampling time point	not applicable
+SAMEA11307727	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307727	immunophenotype	
+SAMEA11307727	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307727	cell_type	normal density neutrophil
+SAMEA11307727	age	23
+SAMEA11307727	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307727	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307731	ENA-CHECKLIST	ERC000011
+SAMEA11307731	clinical history	G-CSF
+SAMEA11307731	individual	UPN23
+SAMEA11307731	organism	Homo sapiens
+SAMEA11307731	organism	Homo sapiens
+SAMEA11307731	donor age (ref. to HSCT)	not applicable
+SAMEA11307731	sex	female
+SAMEA11307731	scientific_name	Homo sapiens
+SAMEA11307731	common name	human
+SAMEA11307731	organism part	blood
+SAMEA11307731	donor sex (ref. to HSCT)	not applicable
+SAMEA11307731	isolate	not applicable
+SAMEA11307731	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307731	sampling time point	not applicable
+SAMEA11307731	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307731	immunophenotype	
+SAMEA11307731	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307731	cell_type	normal density neutrophil
+SAMEA11307731	age	20
+SAMEA11307731	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307731	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307742	ENA-CHECKLIST	ERC000011
+SAMEA11307742	clinical history	steady state
+SAMEA11307742	individual	UPN31
+SAMEA11307742	organism	Homo sapiens
+SAMEA11307742	organism	Homo sapiens
+SAMEA11307742	donor age (ref. to HSCT)	not applicable
+SAMEA11307742	sex	female
+SAMEA11307742	scientific_name	Homo sapiens
+SAMEA11307742	common name	human
+SAMEA11307742	organism part	blood
+SAMEA11307742	donor sex (ref. to HSCT)	not applicable
+SAMEA11307742	isolate	not applicable
+SAMEA11307742	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307742	sampling time point	not applicable
+SAMEA11307742	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307742	immunophenotype	
+SAMEA11307742	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307742	cell_type	normal density neutrophil
+SAMEA11307742	age	27
+SAMEA11307742	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307742	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307746	ENA-CHECKLIST	ERC000011
+SAMEA11307746	clinical history	hematopoietic stem cell transplantation
+SAMEA11307746	individual	UPN33
+SAMEA11307746	organism	Homo sapiens
+SAMEA11307746	organism	Homo sapiens
+SAMEA11307746	donor age (ref. to HSCT)	36
+SAMEA11307746	sex	female
+SAMEA11307746	scientific_name	Homo sapiens
+SAMEA11307746	common name	human
+SAMEA11307746	organism part	blood
+SAMEA11307746	donor sex (ref. to HSCT)	female
+SAMEA11307746	isolate	not applicable
+SAMEA11307746	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307746	sampling time point	2nd follow up after transplantation
+SAMEA11307746	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307746	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307746	cell isolation strategy	CD15 Microbeads
+SAMEA11307746	cell_type	low density neutrophil
+SAMEA11307746	age	60
+SAMEA11307746	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307746	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307747	ENA-CHECKLIST	ERC000011
+SAMEA11307747	clinical history	hematopoietic stem cell transplantation
+SAMEA11307747	individual	UPN33
+SAMEA11307747	organism	Homo sapiens
+SAMEA11307747	organism	Homo sapiens
+SAMEA11307747	donor age (ref. to HSCT)	36
+SAMEA11307747	sex	female
+SAMEA11307747	scientific_name	Homo sapiens
+SAMEA11307747	common name	human
+SAMEA11307747	organism part	blood
+SAMEA11307747	donor sex (ref. to HSCT)	female
+SAMEA11307747	isolate	not applicable
+SAMEA11307747	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307747	sampling time point	2nd follow up after transplantation
+SAMEA11307747	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307747	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307747	cell isolation strategy	CD14 Microbeads
+SAMEA11307747	cell_type	monocyte
+SAMEA11307747	age	60
+SAMEA11307747	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307747	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307756	ENA-CHECKLIST	ERC000011
+SAMEA11307756	clinical history	hematopoietic stem cell transplantation
+SAMEA11307756	individual	UPN35
+SAMEA11307756	organism	Homo sapiens
+SAMEA11307756	organism	Homo sapiens
+SAMEA11307756	donor age (ref. to HSCT)	28
+SAMEA11307756	sex	male
+SAMEA11307756	scientific_name	Homo sapiens
+SAMEA11307756	common name	human
+SAMEA11307756	organism part	blood
+SAMEA11307756	donor sex (ref. to HSCT)	male
+SAMEA11307756	isolate	not applicable
+SAMEA11307756	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307756	sampling time point	2nd follow up after transplantation
+SAMEA11307756	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307756	immunophenotype	
+SAMEA11307756	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307756	cell_type	normal density neutrophil
+SAMEA11307756	age	52
+SAMEA11307756	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307756	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307770	ENA-CHECKLIST	ERC000011
+SAMEA11307770	clinical history	hematopoietic stem cell transplantation
+SAMEA11307770	individual	UPN36
+SAMEA11307770	organism	Homo sapiens
+SAMEA11307770	organism	Homo sapiens
+SAMEA11307770	donor age (ref. to HSCT)	33
+SAMEA11307770	sex	female
+SAMEA11307770	scientific_name	Homo sapiens
+SAMEA11307770	common name	human
+SAMEA11307770	organism part	bone marrow
+SAMEA11307770	donor sex (ref. to HSCT)	male
+SAMEA11307770	isolate	not applicable
+SAMEA11307770	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307770	sampling time point	3rd follow up after transplantation
+SAMEA11307770	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307770	immunophenotype	CD11b-CD16-
+SAMEA11307770	cell isolation strategy	FACS sorting
+SAMEA11307770	cell_type	bone marrow cell
+SAMEA11307770	age	23
+SAMEA11307770	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307770	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307772	ENA-CHECKLIST	ERC000011
+SAMEA11307772	clinical history	hematopoietic stem cell transplantation
+SAMEA11307772	individual	UPN36
+SAMEA11307772	organism	Homo sapiens
+SAMEA11307772	organism	Homo sapiens
+SAMEA11307772	donor age (ref. to HSCT)	33
+SAMEA11307772	sex	female
+SAMEA11307772	scientific_name	Homo sapiens
+SAMEA11307772	common name	human
+SAMEA11307772	organism part	bone marrow
+SAMEA11307772	donor sex (ref. to HSCT)	male
+SAMEA11307772	isolate	not applicable
+SAMEA11307772	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307772	sampling time point	3rd follow up after transplantation
+SAMEA11307772	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307772	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307772	cell isolation strategy	FACS sorting
+SAMEA11307772	cell_type	monocyte
+SAMEA11307772	age	23
+SAMEA11307772	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307772	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307775	ENA-CHECKLIST	ERC000011
+SAMEA11307775	clinical history	hematopoietic stem cell transplantation
+SAMEA11307775	individual	UPN37
+SAMEA11307775	organism	Homo sapiens
+SAMEA11307775	organism	Homo sapiens
+SAMEA11307775	donor age (ref. to HSCT)	60
+SAMEA11307775	sex	female
+SAMEA11307775	scientific_name	Homo sapiens
+SAMEA11307775	common name	human
+SAMEA11307775	organism part	blood
+SAMEA11307775	donor sex (ref. to HSCT)	male
+SAMEA11307775	isolate	not applicable
+SAMEA11307775	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307775	sampling time point	1st follow up after transplantation
+SAMEA11307775	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307775	immunophenotype	
+SAMEA11307775	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307775	cell_type	normal density neutrophil
+SAMEA11307775	age	52
+SAMEA11307775	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307775	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307782	ENA-CHECKLIST	ERC000011
+SAMEA11307782	clinical history	hematopoietic stem cell transplantation
+SAMEA11307782	individual	UPN37
+SAMEA11307782	organism	Homo sapiens
+SAMEA11307782	organism	Homo sapiens
+SAMEA11307782	donor age (ref. to HSCT)	60
+SAMEA11307782	sex	female
+SAMEA11307782	scientific_name	Homo sapiens
+SAMEA11307782	common name	human
+SAMEA11307782	organism part	bone marrow
+SAMEA11307782	donor sex (ref. to HSCT)	male
+SAMEA11307782	isolate	not applicable
+SAMEA11307782	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307782	sampling time point	2nd follow up after transplantation
+SAMEA11307782	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307782	immunophenotype	CD11b+CD16int
+SAMEA11307782	cell isolation strategy	FACS sorting
+SAMEA11307782	cell_type	bone marrow cell
+SAMEA11307782	age	52
+SAMEA11307782	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307782	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307785	ENA-CHECKLIST	ERC000011
+SAMEA11307785	clinical history	hematopoietic stem cell transplantation
+SAMEA11307785	individual	UPN39
+SAMEA11307785	organism	Homo sapiens
+SAMEA11307785	organism	Homo sapiens
+SAMEA11307785	donor age (ref. to HSCT)	63
+SAMEA11307785	sex	male
+SAMEA11307785	scientific_name	Homo sapiens
+SAMEA11307785	common name	human
+SAMEA11307785	organism part	blood
+SAMEA11307785	donor sex (ref. to HSCT)	female
+SAMEA11307785	isolate	not applicable
+SAMEA11307785	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307785	sampling time point	1st follow up after transplantation
+SAMEA11307785	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307785	immunophenotype	
+SAMEA11307785	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307785	cell_type	normal density neutrophil
+SAMEA11307785	age	38
+SAMEA11307785	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307785	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307787	ENA-CHECKLIST	ERC000011
+SAMEA11307787	clinical history	hematopoietic stem cell transplantation
+SAMEA11307787	individual	UPN39
+SAMEA11307787	organism	Homo sapiens
+SAMEA11307787	organism	Homo sapiens
+SAMEA11307787	donor age (ref. to HSCT)	63
+SAMEA11307787	sex	male
+SAMEA11307787	scientific_name	Homo sapiens
+SAMEA11307787	common name	human
+SAMEA11307787	organism part	blood
+SAMEA11307787	donor sex (ref. to HSCT)	female
+SAMEA11307787	isolate	not applicable
+SAMEA11307787	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307787	sampling time point	2nd follow up after transplantation
+SAMEA11307787	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307787	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307787	cell isolation strategy	FACS sorting
+SAMEA11307787	cell_type	monocyte
+SAMEA11307787	age	38
+SAMEA11307787	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307787	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307788	ENA-CHECKLIST	ERC000011
+SAMEA11307788	clinical history	hematopoietic stem cell transplantation
+SAMEA11307788	individual	UPN39
+SAMEA11307788	organism	Homo sapiens
+SAMEA11307788	organism	Homo sapiens
+SAMEA11307788	donor age (ref. to HSCT)	63
+SAMEA11307788	sex	male
+SAMEA11307788	scientific_name	Homo sapiens
+SAMEA11307788	common name	human
+SAMEA11307788	organism part	blood
+SAMEA11307788	donor sex (ref. to HSCT)	female
+SAMEA11307788	isolate	not applicable
+SAMEA11307788	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307788	sampling time point	2nd follow up after transplantation
+SAMEA11307788	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307788	immunophenotype	
+SAMEA11307788	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307788	cell_type	normal density neutrophil
+SAMEA11307788	age	38
+SAMEA11307788	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307788	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307791	ENA-CHECKLIST	ERC000011
+SAMEA11307791	clinical history	hematopoietic stem cell transplantation
+SAMEA11307791	individual	UPN39
+SAMEA11307791	organism	Homo sapiens
+SAMEA11307791	organism	Homo sapiens
+SAMEA11307791	donor age (ref. to HSCT)	63
+SAMEA11307791	sex	male
+SAMEA11307791	scientific_name	Homo sapiens
+SAMEA11307791	common name	human
+SAMEA11307791	organism part	bone marrow
+SAMEA11307791	donor sex (ref. to HSCT)	female
+SAMEA11307791	isolate	not applicable
+SAMEA11307791	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307791	sampling time point	2nd follow up after transplantation
+SAMEA11307791	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307791	immunophenotype	CD11b+CD16int
+SAMEA11307791	cell isolation strategy	FACS sorting
+SAMEA11307791	cell_type	bone marrow cell
+SAMEA11307791	age	38
+SAMEA11307791	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307791	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307797	ENA-CHECKLIST	ERC000011
+SAMEA11307797	clinical history	steady state
+SAMEA11307797	individual	UPN4
+SAMEA11307797	organism	Homo sapiens
+SAMEA11307797	organism	Homo sapiens
+SAMEA11307797	donor age (ref. to HSCT)	not applicable
+SAMEA11307797	sex	male
+SAMEA11307797	scientific_name	Homo sapiens
+SAMEA11307797	common name	human
+SAMEA11307797	organism part	blood
+SAMEA11307797	donor sex (ref. to HSCT)	not applicable
+SAMEA11307797	isolate	not applicable
+SAMEA11307797	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307797	sampling time point	not applicable
+SAMEA11307797	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307797	immunophenotype	
+SAMEA11307797	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307797	cell_type	normal density neutrophil
+SAMEA11307797	age	33
+SAMEA11307797	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307797	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307806	ENA-CHECKLIST	ERC000011
+SAMEA11307806	clinical history	hematopoietic stem cell transplantation
+SAMEA11307806	individual	UPN44
+SAMEA11307806	organism	Homo sapiens
+SAMEA11307806	organism	Homo sapiens
+SAMEA11307806	donor age (ref. to HSCT)	28
+SAMEA11307806	sex	male
+SAMEA11307806	scientific_name	Homo sapiens
+SAMEA11307806	common name	human
+SAMEA11307806	organism part	bone marrow
+SAMEA11307806	donor sex (ref. to HSCT)	female
+SAMEA11307806	isolate	not applicable
+SAMEA11307806	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307806	sampling time point	2nd follow up after transplantation
+SAMEA11307806	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307806	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307806	cell isolation strategy	FACS sorting
+SAMEA11307806	cell_type	monocyte
+SAMEA11307806	age	20
+SAMEA11307806	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307806	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307808	ENA-CHECKLIST	ERC000011
+SAMEA11307808	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307808	individual	UPN49
+SAMEA11307808	organism	Homo sapiens
+SAMEA11307808	organism	Homo sapiens
+SAMEA11307808	donor age (ref. to HSCT)	not applicable
+SAMEA11307808	sex	female
+SAMEA11307808	scientific_name	Homo sapiens
+SAMEA11307808	common name	human
+SAMEA11307808	organism part	blood
+SAMEA11307808	donor sex (ref. to HSCT)	not applicable
+SAMEA11307808	isolate	not applicable
+SAMEA11307808	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307808	sampling time point	not applicable
+SAMEA11307808	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307808	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307808	cell isolation strategy	CD15 Microbeads
+SAMEA11307808	cell_type	low density neutrophil
+SAMEA11307808	age	74
+SAMEA11307808	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307808	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307810	ENA-CHECKLIST	ERC000011
+SAMEA11307810	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307810	individual	UPN49
+SAMEA11307810	organism	Homo sapiens
+SAMEA11307810	organism	Homo sapiens
+SAMEA11307810	donor age (ref. to HSCT)	not applicable
+SAMEA11307810	sex	female
+SAMEA11307810	scientific_name	Homo sapiens
+SAMEA11307810	common name	human
+SAMEA11307810	organism part	blood
+SAMEA11307810	donor sex (ref. to HSCT)	not applicable
+SAMEA11307810	isolate	not applicable
+SAMEA11307810	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307810	sampling time point	not applicable
+SAMEA11307810	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307810	immunophenotype	
+SAMEA11307810	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307810	cell_type	normal density neutrophil
+SAMEA11307810	age	74
+SAMEA11307810	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307810	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307814	ENA-CHECKLIST	ERC000011
+SAMEA11307814	clinical history	steady state
+SAMEA11307814	individual	UPN5
+SAMEA11307814	organism	Homo sapiens
+SAMEA11307814	organism	Homo sapiens
+SAMEA11307814	donor age (ref. to HSCT)	not applicable
+SAMEA11307814	sex	male
+SAMEA11307814	scientific_name	Homo sapiens
+SAMEA11307814	common name	human
+SAMEA11307814	organism part	blood
+SAMEA11307814	donor sex (ref. to HSCT)	not applicable
+SAMEA11307814	isolate	not applicable
+SAMEA11307814	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307814	sampling time point	not applicable
+SAMEA11307814	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307814	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307814	cell isolation strategy	FACS sorting
+SAMEA11307814	cell_type	monocyte
+SAMEA11307814	age	60
+SAMEA11307814	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307814	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307818	ENA-CHECKLIST	ERC000011
+SAMEA11307818	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307818	individual	UPN50
+SAMEA11307818	organism	Homo sapiens
+SAMEA11307818	organism	Homo sapiens
+SAMEA11307818	donor age (ref. to HSCT)	not applicable
+SAMEA11307818	sex	female
+SAMEA11307818	scientific_name	Homo sapiens
+SAMEA11307818	common name	human
+SAMEA11307818	organism part	blood
+SAMEA11307818	donor sex (ref. to HSCT)	not applicable
+SAMEA11307818	isolate	not applicable
+SAMEA11307818	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307818	sampling time point	not applicable
+SAMEA11307818	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307818	immunophenotype	
+SAMEA11307818	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307818	cell_type	normal density neutrophil
+SAMEA11307818	age	64
+SAMEA11307818	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307818	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307822	ENA-CHECKLIST	ERC000011
+SAMEA11307822	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307822	individual	UPN52
+SAMEA11307822	organism	Homo sapiens
+SAMEA11307822	organism	Homo sapiens
+SAMEA11307822	donor age (ref. to HSCT)	not applicable
+SAMEA11307822	sex	male
+SAMEA11307822	scientific_name	Homo sapiens
+SAMEA11307822	common name	human
+SAMEA11307822	organism part	blood
+SAMEA11307822	donor sex (ref. to HSCT)	not applicable
+SAMEA11307822	isolate	not applicable
+SAMEA11307822	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307822	sampling time point	not applicable
+SAMEA11307822	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307822	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307822	cell isolation strategy	CD15 Microbeads
+SAMEA11307822	cell_type	low density neutrophil
+SAMEA11307822	age	77
+SAMEA11307822	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307822	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307823	ENA-CHECKLIST	ERC000011
+SAMEA11307823	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307823	individual	UPN52
+SAMEA11307823	organism	Homo sapiens
+SAMEA11307823	organism	Homo sapiens
+SAMEA11307823	donor age (ref. to HSCT)	not applicable
+SAMEA11307823	sex	male
+SAMEA11307823	scientific_name	Homo sapiens
+SAMEA11307823	common name	human
+SAMEA11307823	organism part	blood
+SAMEA11307823	donor sex (ref. to HSCT)	not applicable
+SAMEA11307823	isolate	not applicable
+SAMEA11307823	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307823	sampling time point	not applicable
+SAMEA11307823	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307823	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307823	cell isolation strategy	CD14 Microbeads
+SAMEA11307823	cell_type	monocyte
+SAMEA11307823	age	77
+SAMEA11307823	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307823	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307834	ENA-CHECKLIST	ERC000011
+SAMEA11307834	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307834	individual	UPN56
+SAMEA11307834	organism	Homo sapiens
+SAMEA11307834	organism	Homo sapiens
+SAMEA11307834	donor age (ref. to HSCT)	not applicable
+SAMEA11307834	sex	female
+SAMEA11307834	scientific_name	Homo sapiens
+SAMEA11307834	common name	human
+SAMEA11307834	organism part	blood
+SAMEA11307834	donor sex (ref. to HSCT)	not applicable
+SAMEA11307834	isolate	not applicable
+SAMEA11307834	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307834	sampling time point	not applicable
+SAMEA11307834	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307834	immunophenotype	
+SAMEA11307834	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307834	cell_type	normal density neutrophil
+SAMEA11307834	age	62
+SAMEA11307834	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307834	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307835	ENA-CHECKLIST	ERC000011
+SAMEA11307835	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307835	individual	UPN57
+SAMEA11307835	organism	Homo sapiens
+SAMEA11307835	organism	Homo sapiens
+SAMEA11307835	donor age (ref. to HSCT)	not applicable
+SAMEA11307835	sex	female
+SAMEA11307835	scientific_name	Homo sapiens
+SAMEA11307835	common name	human
+SAMEA11307835	organism part	blood
+SAMEA11307835	donor sex (ref. to HSCT)	not applicable
+SAMEA11307835	isolate	not applicable
+SAMEA11307835	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307835	sampling time point	not applicable
+SAMEA11307835	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307835	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307835	cell isolation strategy	FACS sorting
+SAMEA11307835	cell_type	low density neutrophil
+SAMEA11307835	age	50
+SAMEA11307835	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307835	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307694	ENA-CHECKLIST	ERC000011
+SAMEA11307694	clinical history	steady state
+SAMEA11307694	individual	UPN10
+SAMEA11307694	organism	Homo sapiens
+SAMEA11307694	organism	Homo sapiens
+SAMEA11307694	donor age (ref. to HSCT)	not applicable
+SAMEA11307694	sex	female
+SAMEA11307694	scientific_name	Homo sapiens
+SAMEA11307694	common name	human
+SAMEA11307694	organism part	bone marrow
+SAMEA11307694	donor sex (ref. to HSCT)	not applicable
+SAMEA11307694	isolate	not applicable
+SAMEA11307694	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307694	sampling time point	not applicable
+SAMEA11307694	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307694	immunophenotype	CD11b+CD16-
+SAMEA11307694	cell isolation strategy	FACS sorting
+SAMEA11307694	cell_type	bone marrow cell
+SAMEA11307694	age	
+SAMEA11307694	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307694	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307837	ENA-CHECKLIST	ERC000011
+SAMEA11307837	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307837	individual	UPN57
+SAMEA11307837	organism	Homo sapiens
+SAMEA11307837	organism	Homo sapiens
+SAMEA11307837	donor age (ref. to HSCT)	not applicable
+SAMEA11307837	sex	female
+SAMEA11307837	scientific_name	Homo sapiens
+SAMEA11307837	common name	human
+SAMEA11307837	organism part	blood
+SAMEA11307837	donor sex (ref. to HSCT)	not applicable
+SAMEA11307837	isolate	not applicable
+SAMEA11307837	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307837	sampling time point	not applicable
+SAMEA11307837	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307837	immunophenotype	
+SAMEA11307837	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307837	cell_type	normal density neutrophil
+SAMEA11307837	age	50
+SAMEA11307837	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307837	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307698	ENA-CHECKLIST	ERC000011
+SAMEA11307698	clinical history	G-CSF
+SAMEA11307698	individual	UPN11
+SAMEA11307698	organism	Homo sapiens
+SAMEA11307698	organism	Homo sapiens
+SAMEA11307698	donor age (ref. to HSCT)	not applicable
+SAMEA11307698	sex	female
+SAMEA11307698	scientific_name	Homo sapiens
+SAMEA11307698	common name	human
+SAMEA11307698	organism part	blood
+SAMEA11307698	donor sex (ref. to HSCT)	not applicable
+SAMEA11307698	isolate	not applicable
+SAMEA11307698	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307698	sampling time point	not applicable
+SAMEA11307698	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307698	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307698	cell isolation strategy	FACS sorting
+SAMEA11307698	cell_type	low density neutrophil
+SAMEA11307698	age	67
+SAMEA11307698	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307698	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307839	ENA-CHECKLIST	ERC000011
+SAMEA11307839	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307839	individual	UPN58
+SAMEA11307839	organism	Homo sapiens
+SAMEA11307839	organism	Homo sapiens
+SAMEA11307839	donor age (ref. to HSCT)	not applicable
+SAMEA11307839	sex	male
+SAMEA11307839	scientific_name	Homo sapiens
+SAMEA11307839	common name	human
+SAMEA11307839	organism part	blood
+SAMEA11307839	donor sex (ref. to HSCT)	not applicable
+SAMEA11307839	isolate	not applicable
+SAMEA11307839	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307839	sampling time point	not applicable
+SAMEA11307839	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307839	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307839	cell isolation strategy	FACS sorting
+SAMEA11307839	cell_type	monocyte
+SAMEA11307839	age	64
+SAMEA11307839	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307839	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307700	ENA-CHECKLIST	ERC000011
+SAMEA11307700	clinical history	G-CSF
+SAMEA11307700	individual	UPN11
+SAMEA11307700	organism	Homo sapiens
+SAMEA11307700	organism	Homo sapiens
+SAMEA11307700	donor age (ref. to HSCT)	not applicable
+SAMEA11307700	sex	female
+SAMEA11307700	scientific_name	Homo sapiens
+SAMEA11307700	common name	human
+SAMEA11307700	organism part	blood
+SAMEA11307700	donor sex (ref. to HSCT)	not applicable
+SAMEA11307700	isolate	not applicable
+SAMEA11307700	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307700	sampling time point	not applicable
+SAMEA11307700	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307700	immunophenotype	
+SAMEA11307700	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307700	cell_type	normal density neutrophil
+SAMEA11307700	age	67
+SAMEA11307700	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307700	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307841	ENA-CHECKLIST	ERC000011
+SAMEA11307841	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307841	individual	UPN59
+SAMEA11307841	organism	Homo sapiens
+SAMEA11307841	organism	Homo sapiens
+SAMEA11307841	donor age (ref. to HSCT)	not applicable
+SAMEA11307841	sex	male
+SAMEA11307841	scientific_name	Homo sapiens
+SAMEA11307841	common name	human
+SAMEA11307841	organism part	blood
+SAMEA11307841	donor sex (ref. to HSCT)	not applicable
+SAMEA11307841	isolate	not applicable
+SAMEA11307841	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307841	sampling time point	not applicable
+SAMEA11307841	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307841	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307841	cell isolation strategy	CD14 Microbeads
+SAMEA11307841	cell_type	monocyte
+SAMEA11307841	age	76
+SAMEA11307841	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307841	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307845	ENA-CHECKLIST	ERC000011
+SAMEA11307845	clinical history	G-CSF
+SAMEA11307845	individual	UPN6
+SAMEA11307845	organism	Homo sapiens
+SAMEA11307845	organism	Homo sapiens
+SAMEA11307845	donor age (ref. to HSCT)	not applicable
+SAMEA11307845	sex	male
+SAMEA11307845	scientific_name	Homo sapiens
+SAMEA11307845	common name	human
+SAMEA11307845	organism part	blood
+SAMEA11307845	donor sex (ref. to HSCT)	not applicable
+SAMEA11307845	isolate	not applicable
+SAMEA11307845	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307845	sampling time point	not applicable
+SAMEA11307845	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307845	immunophenotype	
+SAMEA11307845	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307845	cell_type	normal density neutrophil
+SAMEA11307845	age	26
+SAMEA11307845	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307845	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307715	ENA-CHECKLIST	ERC000011
+SAMEA11307715	clinical history	steady state
+SAMEA11307715	individual	UPN15
+SAMEA11307715	organism	Homo sapiens
+SAMEA11307715	organism	Homo sapiens
+SAMEA11307715	donor age (ref. to HSCT)	not applicable
+SAMEA11307715	sex	male
+SAMEA11307715	scientific_name	Homo sapiens
+SAMEA11307715	common name	human
+SAMEA11307715	organism part	bone marrow
+SAMEA11307715	donor sex (ref. to HSCT)	not applicable
+SAMEA11307715	isolate	not applicable
+SAMEA11307715	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307715	sampling time point	not applicable
+SAMEA11307715	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307715	immunophenotype	CD11b-CD16-
+SAMEA11307715	cell isolation strategy	FACS sorting
+SAMEA11307715	cell_type	bone marrow cell
+SAMEA11307715	age	28
+SAMEA11307715	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307715	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307849	ENA-CHECKLIST	ERC000011
+SAMEA11307849	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307849	individual	UPN63
+SAMEA11307849	organism	Homo sapiens
+SAMEA11307849	organism	Homo sapiens
+SAMEA11307849	donor age (ref. to HSCT)	not applicable
+SAMEA11307849	sex	female
+SAMEA11307849	scientific_name	Homo sapiens
+SAMEA11307849	common name	human
+SAMEA11307849	organism part	blood
+SAMEA11307849	donor sex (ref. to HSCT)	not applicable
+SAMEA11307849	isolate	not applicable
+SAMEA11307849	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307849	sampling time point	not applicable
+SAMEA11307849	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307849	immunophenotype	
+SAMEA11307849	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307849	cell_type	normal density neutrophil
+SAMEA11307849	age	62
+SAMEA11307849	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307849	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307728	ENA-CHECKLIST	ERC000011
+SAMEA11307728	clinical history	G-CSF
+SAMEA11307728	individual	UPN22
+SAMEA11307728	organism	Homo sapiens
+SAMEA11307728	organism	Homo sapiens
+SAMEA11307728	donor age (ref. to HSCT)	not applicable
+SAMEA11307728	sex	male
+SAMEA11307728	scientific_name	Homo sapiens
+SAMEA11307728	common name	human
+SAMEA11307728	organism part	blood
+SAMEA11307728	donor sex (ref. to HSCT)	not applicable
+SAMEA11307728	isolate	not applicable
+SAMEA11307728	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307728	sampling time point	not applicable
+SAMEA11307728	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307728	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307728	cell isolation strategy	CD15 Microbeads
+SAMEA11307728	cell_type	low density neutrophil
+SAMEA11307728	age	21
+SAMEA11307728	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307728	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307852	ENA-CHECKLIST	ERC000011
+SAMEA11307852	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307852	individual	UPN66
+SAMEA11307852	organism	Homo sapiens
+SAMEA11307852	organism	Homo sapiens
+SAMEA11307852	donor age (ref. to HSCT)	not applicable
+SAMEA11307852	sex	male
+SAMEA11307852	scientific_name	Homo sapiens
+SAMEA11307852	common name	human
+SAMEA11307852	organism part	blood
+SAMEA11307852	donor sex (ref. to HSCT)	not applicable
+SAMEA11307852	isolate	not applicable
+SAMEA11307852	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307852	sampling time point	not applicable
+SAMEA11307852	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307852	immunophenotype	
+SAMEA11307852	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307852	cell_type	normal density neutrophil
+SAMEA11307852	age	79
+SAMEA11307852	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307852	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307729	ENA-CHECKLIST	ERC000011
+SAMEA11307729	clinical history	G-CSF
+SAMEA11307729	individual	UPN22
+SAMEA11307729	organism	Homo sapiens
+SAMEA11307729	organism	Homo sapiens
+SAMEA11307729	donor age (ref. to HSCT)	not applicable
+SAMEA11307729	sex	male
+SAMEA11307729	scientific_name	Homo sapiens
+SAMEA11307729	common name	human
+SAMEA11307729	organism part	blood
+SAMEA11307729	donor sex (ref. to HSCT)	not applicable
+SAMEA11307729	isolate	not applicable
+SAMEA11307729	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307729	sampling time point	not applicable
+SAMEA11307729	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307729	immunophenotype	
+SAMEA11307729	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307729	cell_type	normal density neutrophil
+SAMEA11307729	age	21
+SAMEA11307729	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307729	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307853	ENA-CHECKLIST	ERC000011
+SAMEA11307853	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307853	individual	UPN68
+SAMEA11307853	organism	Homo sapiens
+SAMEA11307853	organism	Homo sapiens
+SAMEA11307853	donor age (ref. to HSCT)	not applicable
+SAMEA11307853	sex	male
+SAMEA11307853	scientific_name	Homo sapiens
+SAMEA11307853	common name	human
+SAMEA11307853	organism part	blood
+SAMEA11307853	donor sex (ref. to HSCT)	not applicable
+SAMEA11307853	isolate	not applicable
+SAMEA11307853	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307853	sampling time point	not applicable
+SAMEA11307853	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307853	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307853	cell isolation strategy	CD14 Microbeads
+SAMEA11307853	cell_type	monocyte
+SAMEA11307853	age	73
+SAMEA11307853	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307853	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307856	ENA-CHECKLIST	ERC000011
+SAMEA11307856	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307856	individual	UPN69
+SAMEA11307856	organism	Homo sapiens
+SAMEA11307856	organism	Homo sapiens
+SAMEA11307856	donor age (ref. to HSCT)	not applicable
+SAMEA11307856	sex	female
+SAMEA11307856	scientific_name	Homo sapiens
+SAMEA11307856	common name	human
+SAMEA11307856	organism part	blood
+SAMEA11307856	donor sex (ref. to HSCT)	not applicable
+SAMEA11307856	isolate	not applicable
+SAMEA11307856	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307856	sampling time point	not applicable
+SAMEA11307856	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307856	immunophenotype	
+SAMEA11307856	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307856	cell_type	normal density neutrophil
+SAMEA11307856	age	75
+SAMEA11307856	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307856	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307730	ENA-CHECKLIST	ERC000011
+SAMEA11307730	clinical history	G-CSF
+SAMEA11307730	individual	UPN23
+SAMEA11307730	organism	Homo sapiens
+SAMEA11307730	organism	Homo sapiens
+SAMEA11307730	donor age (ref. to HSCT)	not applicable
+SAMEA11307730	sex	female
+SAMEA11307730	scientific_name	Homo sapiens
+SAMEA11307730	common name	human
+SAMEA11307730	organism part	blood
+SAMEA11307730	donor sex (ref. to HSCT)	not applicable
+SAMEA11307730	isolate	not applicable
+SAMEA11307730	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307730	sampling time point	not applicable
+SAMEA11307730	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307730	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307730	cell isolation strategy	FACS sorting
+SAMEA11307730	cell_type	low density neutrophil
+SAMEA11307730	age	20
+SAMEA11307730	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307730	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307867	ENA-CHECKLIST	ERC000011
+SAMEA11307867	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307867	individual	UPN72
+SAMEA11307867	organism	Homo sapiens
+SAMEA11307867	organism	Homo sapiens
+SAMEA11307867	donor age (ref. to HSCT)	not applicable
+SAMEA11307867	sex	male
+SAMEA11307867	scientific_name	Homo sapiens
+SAMEA11307867	common name	human
+SAMEA11307867	organism part	blood
+SAMEA11307867	donor sex (ref. to HSCT)	not applicable
+SAMEA11307867	isolate	not applicable
+SAMEA11307867	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307867	sampling time point	not applicable
+SAMEA11307867	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307867	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307867	cell isolation strategy	FACS sorting
+SAMEA11307867	cell_type	monocyte
+SAMEA11307867	age	51
+SAMEA11307867	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307867	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307732	ENA-CHECKLIST	ERC000011
+SAMEA11307732	clinical history	G-CSF
+SAMEA11307732	individual	UPN24
+SAMEA11307732	organism	Homo sapiens
+SAMEA11307732	organism	Homo sapiens
+SAMEA11307732	donor age (ref. to HSCT)	not applicable
+SAMEA11307732	sex	male
+SAMEA11307732	scientific_name	Homo sapiens
+SAMEA11307732	common name	human
+SAMEA11307732	organism part	blood
+SAMEA11307732	donor sex (ref. to HSCT)	not applicable
+SAMEA11307732	isolate	not applicable
+SAMEA11307732	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307732	sampling time point	not applicable
+SAMEA11307732	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307732	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307732	cell isolation strategy	FACS sorting
+SAMEA11307732	cell_type	low density neutrophil
+SAMEA11307732	age	33
+SAMEA11307732	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307732	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307871	ENA-CHECKLIST	ERC000011
+SAMEA11307871	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307871	individual	UPN74
+SAMEA11307871	organism	Homo sapiens
+SAMEA11307871	organism	Homo sapiens
+SAMEA11307871	donor age (ref. to HSCT)	not applicable
+SAMEA11307871	sex	female
+SAMEA11307871	scientific_name	Homo sapiens
+SAMEA11307871	common name	human
+SAMEA11307871	organism part	blood
+SAMEA11307871	donor sex (ref. to HSCT)	not applicable
+SAMEA11307871	isolate	not applicable
+SAMEA11307871	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307871	sampling time point	not applicable
+SAMEA11307871	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307871	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307871	cell isolation strategy	FACS sorting
+SAMEA11307871	cell_type	low density neutrophil
+SAMEA11307871	age	62
+SAMEA11307871	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307871	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307733	ENA-CHECKLIST	ERC000011
+SAMEA11307733	clinical history	G-CSF
+SAMEA11307733	individual	UPN24
+SAMEA11307733	organism	Homo sapiens
+SAMEA11307733	organism	Homo sapiens
+SAMEA11307733	donor age (ref. to HSCT)	not applicable
+SAMEA11307733	sex	male
+SAMEA11307733	scientific_name	Homo sapiens
+SAMEA11307733	common name	human
+SAMEA11307733	organism part	blood
+SAMEA11307733	donor sex (ref. to HSCT)	not applicable
+SAMEA11307733	isolate	not applicable
+SAMEA11307733	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307733	sampling time point	not applicable
+SAMEA11307733	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307733	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307733	cell isolation strategy	FACS sorting
+SAMEA11307733	cell_type	monocyte
+SAMEA11307733	age	33
+SAMEA11307733	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307733	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307872	ENA-CHECKLIST	ERC000011
+SAMEA11307872	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307872	individual	UPN74
+SAMEA11307872	organism	Homo sapiens
+SAMEA11307872	organism	Homo sapiens
+SAMEA11307872	donor age (ref. to HSCT)	not applicable
+SAMEA11307872	sex	female
+SAMEA11307872	scientific_name	Homo sapiens
+SAMEA11307872	common name	human
+SAMEA11307872	organism part	blood
+SAMEA11307872	donor sex (ref. to HSCT)	not applicable
+SAMEA11307872	isolate	not applicable
+SAMEA11307872	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307872	sampling time point	not applicable
+SAMEA11307872	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307872	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307872	cell isolation strategy	FACS sorting
+SAMEA11307872	cell_type	monocyte
+SAMEA11307872	age	62
+SAMEA11307872	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307872	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307734	ENA-CHECKLIST	ERC000011
+SAMEA11307734	clinical history	G-CSF
+SAMEA11307734	individual	UPN24
+SAMEA11307734	organism	Homo sapiens
+SAMEA11307734	organism	Homo sapiens
+SAMEA11307734	donor age (ref. to HSCT)	not applicable
+SAMEA11307734	sex	male
+SAMEA11307734	scientific_name	Homo sapiens
+SAMEA11307734	common name	human
+SAMEA11307734	organism part	blood
+SAMEA11307734	donor sex (ref. to HSCT)	not applicable
+SAMEA11307734	isolate	not applicable
+SAMEA11307734	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307734	sampling time point	not applicable
+SAMEA11307734	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307734	immunophenotype	
+SAMEA11307734	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307734	cell_type	normal density neutrophil
+SAMEA11307734	age	33
+SAMEA11307734	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307734	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307735	ENA-CHECKLIST	ERC000011
+SAMEA11307735	clinical history	steady state
+SAMEA11307735	individual	UPN29
+SAMEA11307735	organism	Homo sapiens
+SAMEA11307735	organism	Homo sapiens
+SAMEA11307735	donor age (ref. to HSCT)	not applicable
+SAMEA11307735	sex	male
+SAMEA11307735	scientific_name	Homo sapiens
+SAMEA11307735	common name	human
+SAMEA11307735	organism part	blood
+SAMEA11307735	donor sex (ref. to HSCT)	not applicable
+SAMEA11307735	isolate	not applicable
+SAMEA11307735	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307735	sampling time point	not applicable
+SAMEA11307735	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307735	immunophenotype	
+SAMEA11307735	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307735	cell_type	normal density neutrophil
+SAMEA11307735	age	34
+SAMEA11307735	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307735	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307873	ENA-CHECKLIST	ERC000011
+SAMEA11307873	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307873	individual	UPN74
+SAMEA11307873	organism	Homo sapiens
+SAMEA11307873	organism	Homo sapiens
+SAMEA11307873	donor age (ref. to HSCT)	not applicable
+SAMEA11307873	sex	female
+SAMEA11307873	scientific_name	Homo sapiens
+SAMEA11307873	common name	human
+SAMEA11307873	organism part	blood
+SAMEA11307873	donor sex (ref. to HSCT)	not applicable
+SAMEA11307873	isolate	not applicable
+SAMEA11307873	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307873	sampling time point	not applicable
+SAMEA11307873	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307873	immunophenotype	
+SAMEA11307873	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307873	cell_type	normal density neutrophil
+SAMEA11307873	age	62
+SAMEA11307873	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307873	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307739	ENA-CHECKLIST	ERC000011
+SAMEA11307739	clinical history	steady state
+SAMEA11307739	individual	UPN3
+SAMEA11307739	organism	Homo sapiens
+SAMEA11307739	organism	Homo sapiens
+SAMEA11307739	donor age (ref. to HSCT)	not applicable
+SAMEA11307739	sex	male
+SAMEA11307739	scientific_name	Homo sapiens
+SAMEA11307739	common name	human
+SAMEA11307739	organism part	blood
+SAMEA11307739	donor sex (ref. to HSCT)	not applicable
+SAMEA11307739	isolate	not applicable
+SAMEA11307739	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307739	sampling time point	not applicable
+SAMEA11307739	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307739	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307739	cell isolation strategy	CD14 Microbeads
+SAMEA11307739	cell_type	monocyte
+SAMEA11307739	age	28
+SAMEA11307739	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307739	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307875	ENA-CHECKLIST	ERC000011
+SAMEA11307875	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307875	individual	UPN75
+SAMEA11307875	organism	Homo sapiens
+SAMEA11307875	organism	Homo sapiens
+SAMEA11307875	donor age (ref. to HSCT)	not applicable
+SAMEA11307875	sex	male
+SAMEA11307875	scientific_name	Homo sapiens
+SAMEA11307875	common name	human
+SAMEA11307875	organism part	blood
+SAMEA11307875	donor sex (ref. to HSCT)	not applicable
+SAMEA11307875	isolate	not applicable
+SAMEA11307875	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307875	sampling time point	not applicable
+SAMEA11307875	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307875	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307875	cell isolation strategy	FACS sorting
+SAMEA11307875	cell_type	monocyte
+SAMEA11307875	age	55
+SAMEA11307875	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307875	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307750	ENA-CHECKLIST	ERC000011
+SAMEA11307750	clinical history	hematopoietic stem cell transplantation
+SAMEA11307750	individual	UPN33
+SAMEA11307750	organism	Homo sapiens
+SAMEA11307750	organism	Homo sapiens
+SAMEA11307750	donor age (ref. to HSCT)	36
+SAMEA11307750	sex	female
+SAMEA11307750	scientific_name	Homo sapiens
+SAMEA11307750	common name	human
+SAMEA11307750	organism part	bone marrow
+SAMEA11307750	donor sex (ref. to HSCT)	female
+SAMEA11307750	isolate	not applicable
+SAMEA11307750	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307750	sampling time point	2nd follow up after transplantation
+SAMEA11307750	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307750	immunophenotype	CD11b+CD16-
+SAMEA11307750	cell isolation strategy	FACS sorting
+SAMEA11307750	cell_type	bone marrow cell
+SAMEA11307750	age	60
+SAMEA11307750	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307750	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307876	ENA-CHECKLIST	ERC000011
+SAMEA11307876	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307876	individual	UPN75
+SAMEA11307876	organism	Homo sapiens
+SAMEA11307876	organism	Homo sapiens
+SAMEA11307876	donor age (ref. to HSCT)	not applicable
+SAMEA11307876	sex	male
+SAMEA11307876	scientific_name	Homo sapiens
+SAMEA11307876	common name	human
+SAMEA11307876	organism part	blood
+SAMEA11307876	donor sex (ref. to HSCT)	not applicable
+SAMEA11307876	isolate	not applicable
+SAMEA11307876	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307876	sampling time point	not applicable
+SAMEA11307876	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307876	immunophenotype	
+SAMEA11307876	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307876	cell_type	normal density neutrophil
+SAMEA11307876	age	55
+SAMEA11307876	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307876	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307751	ENA-CHECKLIST	ERC000011
+SAMEA11307751	clinical history	hematopoietic stem cell transplantation
+SAMEA11307751	individual	UPN33
+SAMEA11307751	organism	Homo sapiens
+SAMEA11307751	organism	Homo sapiens
+SAMEA11307751	donor age (ref. to HSCT)	36
+SAMEA11307751	sex	female
+SAMEA11307751	scientific_name	Homo sapiens
+SAMEA11307751	common name	human
+SAMEA11307751	organism part	bone marrow
+SAMEA11307751	donor sex (ref. to HSCT)	female
+SAMEA11307751	isolate	not applicable
+SAMEA11307751	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307751	sampling time point	2nd follow up after transplantation
+SAMEA11307751	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307751	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307751	cell isolation strategy	FACS sorting
+SAMEA11307751	cell_type	bone marrow cell
+SAMEA11307751	age	60
+SAMEA11307751	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307751	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307883	ENA-CHECKLIST	ERC000011
+SAMEA11307883	clinical history	G-CSF
+SAMEA11307883	individual	UPN8
+SAMEA11307883	organism	Homo sapiens
+SAMEA11307883	organism	Homo sapiens
+SAMEA11307883	donor age (ref. to HSCT)	not applicable
+SAMEA11307883	sex	male
+SAMEA11307883	scientific_name	Homo sapiens
+SAMEA11307883	common name	human
+SAMEA11307883	organism part	blood
+SAMEA11307883	donor sex (ref. to HSCT)	not applicable
+SAMEA11307883	isolate	not applicable
+SAMEA11307883	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307883	sampling time point	not applicable
+SAMEA11307883	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307883	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307883	cell isolation strategy	FACS sorting
+SAMEA11307883	cell_type	low density neutrophil
+SAMEA11307883	age	35
+SAMEA11307883	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307883	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307753	ENA-CHECKLIST	ERC000011
+SAMEA11307753	clinical history	hematopoietic stem cell transplantation
+SAMEA11307753	individual	UPN35
+SAMEA11307753	organism	Homo sapiens
+SAMEA11307753	organism	Homo sapiens
+SAMEA11307753	donor age (ref. to HSCT)	28
+SAMEA11307753	sex	male
+SAMEA11307753	scientific_name	Homo sapiens
+SAMEA11307753	common name	human
+SAMEA11307753	organism part	blood
+SAMEA11307753	donor sex (ref. to HSCT)	male
+SAMEA11307753	isolate	not applicable
+SAMEA11307753	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307753	sampling time point	1st follow up after transplantation
+SAMEA11307753	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307753	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307753	cell isolation strategy	FACS sorting
+SAMEA11307753	cell_type	monocyte
+SAMEA11307753	age	52
+SAMEA11307753	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307753	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307890	ENA-CHECKLIST	ERC000011
+SAMEA11307890	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307890	individual	UPN81
+SAMEA11307890	organism	Homo sapiens
+SAMEA11307890	organism	Homo sapiens
+SAMEA11307890	donor age (ref. to HSCT)	not applicable
+SAMEA11307890	sex	male
+SAMEA11307890	scientific_name	Homo sapiens
+SAMEA11307890	common name	human
+SAMEA11307890	organism part	blood
+SAMEA11307890	donor sex (ref. to HSCT)	not applicable
+SAMEA11307890	isolate	not applicable
+SAMEA11307890	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307890	sampling time point	not applicable
+SAMEA11307890	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307890	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307890	cell isolation strategy	FACS sorting
+SAMEA11307890	cell_type	monocyte
+SAMEA11307890	age	78
+SAMEA11307890	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307890	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307755	ENA-CHECKLIST	ERC000011
+SAMEA11307755	clinical history	hematopoietic stem cell transplantation
+SAMEA11307755	individual	UPN35
+SAMEA11307755	organism	Homo sapiens
+SAMEA11307755	organism	Homo sapiens
+SAMEA11307755	donor age (ref. to HSCT)	28
+SAMEA11307755	sex	male
+SAMEA11307755	scientific_name	Homo sapiens
+SAMEA11307755	common name	human
+SAMEA11307755	organism part	blood
+SAMEA11307755	donor sex (ref. to HSCT)	male
+SAMEA11307755	isolate	not applicable
+SAMEA11307755	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307755	sampling time point	2nd follow up after transplantation
+SAMEA11307755	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307755	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307755	cell isolation strategy	FACS sorting
+SAMEA11307755	cell_type	monocyte
+SAMEA11307755	age	52
+SAMEA11307755	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307755	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307891	ENA-CHECKLIST	ERC000011
+SAMEA11307891	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307891	individual	UPN81
+SAMEA11307891	organism	Homo sapiens
+SAMEA11307891	organism	Homo sapiens
+SAMEA11307891	donor age (ref. to HSCT)	not applicable
+SAMEA11307891	sex	male
+SAMEA11307891	scientific_name	Homo sapiens
+SAMEA11307891	common name	human
+SAMEA11307891	organism part	blood
+SAMEA11307891	donor sex (ref. to HSCT)	not applicable
+SAMEA11307891	isolate	not applicable
+SAMEA11307891	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307891	sampling time point	not applicable
+SAMEA11307891	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307891	immunophenotype	
+SAMEA11307891	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307891	cell_type	normal density neutrophil
+SAMEA11307891	age	78
+SAMEA11307891	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307891	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307759	ENA-CHECKLIST	ERC000011
+SAMEA11307759	clinical history	hematopoietic stem cell transplantation
+SAMEA11307759	individual	UPN35
+SAMEA11307759	organism	Homo sapiens
+SAMEA11307759	organism	Homo sapiens
+SAMEA11307759	donor age (ref. to HSCT)	28
+SAMEA11307759	sex	male
+SAMEA11307759	scientific_name	Homo sapiens
+SAMEA11307759	common name	human
+SAMEA11307759	organism part	bone marrow
+SAMEA11307759	donor sex (ref. to HSCT)	male
+SAMEA11307759	isolate	not applicable
+SAMEA11307759	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307759	sampling time point	2nd follow up after transplantation
+SAMEA11307759	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307759	immunophenotype	CD11b+CD16int
+SAMEA11307759	cell isolation strategy	FACS sorting
+SAMEA11307759	cell_type	bone marrow cell
+SAMEA11307759	age	52
+SAMEA11307759	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307759	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307893	ENA-CHECKLIST	ERC000011
+SAMEA11307893	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307893	individual	UPN82
+SAMEA11307893	organism	Homo sapiens
+SAMEA11307893	organism	Homo sapiens
+SAMEA11307893	donor age (ref. to HSCT)	not applicable
+SAMEA11307893	sex	male
+SAMEA11307893	scientific_name	Homo sapiens
+SAMEA11307893	common name	human
+SAMEA11307893	organism part	blood
+SAMEA11307893	donor sex (ref. to HSCT)	not applicable
+SAMEA11307893	isolate	not applicable
+SAMEA11307893	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307893	sampling time point	not applicable
+SAMEA11307893	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307893	immunophenotype	
+SAMEA11307893	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307893	cell_type	normal density neutrophil
+SAMEA11307893	age	74
+SAMEA11307893	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307893	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307762	ENA-CHECKLIST	ERC000011
+SAMEA11307762	clinical history	hematopoietic stem cell transplantation
+SAMEA11307762	individual	UPN35
+SAMEA11307762	organism	Homo sapiens
+SAMEA11307762	organism	Homo sapiens
+SAMEA11307762	donor age (ref. to HSCT)	28
+SAMEA11307762	sex	male
+SAMEA11307762	scientific_name	Homo sapiens
+SAMEA11307762	common name	human
+SAMEA11307762	organism part	blood
+SAMEA11307762	donor sex (ref. to HSCT)	male
+SAMEA11307762	isolate	not applicable
+SAMEA11307762	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307762	sampling time point	3rd follow up after transplantation
+SAMEA11307762	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307762	immunophenotype	
+SAMEA11307762	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307762	cell_type	normal density neutrophil
+SAMEA11307762	age	52
+SAMEA11307762	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307762	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307896	ENA-CHECKLIST	ERC000011
+SAMEA11307896	clinical history	G-CSF
+SAMEA11307896	individual	UPN9
+SAMEA11307896	organism	Homo sapiens
+SAMEA11307896	organism	Homo sapiens
+SAMEA11307896	donor age (ref. to HSCT)	not applicable
+SAMEA11307896	sex	male
+SAMEA11307896	scientific_name	Homo sapiens
+SAMEA11307896	common name	human
+SAMEA11307896	organism part	blood
+SAMEA11307896	donor sex (ref. to HSCT)	not applicable
+SAMEA11307896	isolate	not applicable
+SAMEA11307896	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307896	sampling time point	not applicable
+SAMEA11307896	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307896	immunophenotype	
+SAMEA11307896	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307896	cell_type	normal density neutrophil
+SAMEA11307896	age	31
+SAMEA11307896	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307896	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307764	ENA-CHECKLIST	ERC000011
+SAMEA11307764	clinical history	hematopoietic stem cell transplantation
+SAMEA11307764	individual	UPN35
+SAMEA11307764	organism	Homo sapiens
+SAMEA11307764	organism	Homo sapiens
+SAMEA11307764	donor age (ref. to HSCT)	28
+SAMEA11307764	sex	male
+SAMEA11307764	scientific_name	Homo sapiens
+SAMEA11307764	common name	human
+SAMEA11307764	organism part	bone marrow
+SAMEA11307764	donor sex (ref. to HSCT)	male
+SAMEA11307764	isolate	not applicable
+SAMEA11307764	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307764	sampling time point	3rd follow up after transplantation
+SAMEA11307764	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307764	immunophenotype	CD11b+CD16int
+SAMEA11307764	cell isolation strategy	FACS sorting
+SAMEA11307764	cell_type	bone marrow cell
+SAMEA11307764	age	52
+SAMEA11307764	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307764	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307774	ENA-CHECKLIST	ERC000011
+SAMEA11307774	clinical history	hematopoietic stem cell transplantation
+SAMEA11307774	individual	UPN37
+SAMEA11307774	organism	Homo sapiens
+SAMEA11307774	organism	Homo sapiens
+SAMEA11307774	donor age (ref. to HSCT)	60
+SAMEA11307774	sex	female
+SAMEA11307774	scientific_name	Homo sapiens
+SAMEA11307774	common name	human
+SAMEA11307774	organism part	blood
+SAMEA11307774	donor sex (ref. to HSCT)	male
+SAMEA11307774	isolate	not applicable
+SAMEA11307774	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307774	sampling time point	1st follow up after transplantation
+SAMEA11307774	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307774	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307774	cell isolation strategy	FACS sorting
+SAMEA11307774	cell_type	monocyte
+SAMEA11307774	age	52
+SAMEA11307774	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307774	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307784	ENA-CHECKLIST	ERC000011
+SAMEA11307784	clinical history	hematopoietic stem cell transplantation
+SAMEA11307784	individual	UPN39
+SAMEA11307784	organism	Homo sapiens
+SAMEA11307784	organism	Homo sapiens
+SAMEA11307784	donor age (ref. to HSCT)	63
+SAMEA11307784	sex	male
+SAMEA11307784	scientific_name	Homo sapiens
+SAMEA11307784	common name	human
+SAMEA11307784	organism part	blood
+SAMEA11307784	donor sex (ref. to HSCT)	female
+SAMEA11307784	isolate	not applicable
+SAMEA11307784	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307784	sampling time point	1st follow up after transplantation
+SAMEA11307784	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307784	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307784	cell isolation strategy	FACS sorting
+SAMEA11307784	cell_type	monocyte
+SAMEA11307784	age	38
+SAMEA11307784	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307784	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307793	ENA-CHECKLIST	ERC000011
+SAMEA11307793	clinical history	G-CSF
+SAMEA11307793	individual	UPN4
+SAMEA11307793	organism	Homo sapiens
+SAMEA11307793	organism	Homo sapiens
+SAMEA11307793	donor age (ref. to HSCT)	not applicable
+SAMEA11307793	sex	male
+SAMEA11307793	scientific_name	Homo sapiens
+SAMEA11307793	common name	human
+SAMEA11307793	organism part	blood
+SAMEA11307793	donor sex (ref. to HSCT)	not applicable
+SAMEA11307793	isolate	not applicable
+SAMEA11307793	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307793	sampling time point	not applicable
+SAMEA11307793	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307793	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307793	cell isolation strategy	FACS sorting
+SAMEA11307793	cell_type	low density neutrophil
+SAMEA11307793	age	33
+SAMEA11307793	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307793	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307798	ENA-CHECKLIST	ERC000011
+SAMEA11307798	clinical history	hematopoietic stem cell transplantation
+SAMEA11307798	individual	UPN42
+SAMEA11307798	organism	Homo sapiens
+SAMEA11307798	organism	Homo sapiens
+SAMEA11307798	donor age (ref. to HSCT)	67
+SAMEA11307798	sex	female
+SAMEA11307798	scientific_name	Homo sapiens
+SAMEA11307798	common name	human
+SAMEA11307798	organism part	blood
+SAMEA11307798	donor sex (ref. to HSCT)	female
+SAMEA11307798	isolate	not applicable
+SAMEA11307798	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307798	sampling time point	1st follow up after transplantation
+SAMEA11307798	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307798	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307798	cell isolation strategy	FACS sorting
+SAMEA11307798	cell_type	monocyte
+SAMEA11307798	age	59
+SAMEA11307798	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307798	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307799	ENA-CHECKLIST	ERC000011
+SAMEA11307799	clinical history	hematopoietic stem cell transplantation
+SAMEA11307799	individual	UPN42
+SAMEA11307799	organism	Homo sapiens
+SAMEA11307799	organism	Homo sapiens
+SAMEA11307799	donor age (ref. to HSCT)	67
+SAMEA11307799	sex	female
+SAMEA11307799	scientific_name	Homo sapiens
+SAMEA11307799	common name	human
+SAMEA11307799	organism part	blood
+SAMEA11307799	donor sex (ref. to HSCT)	female
+SAMEA11307799	isolate	not applicable
+SAMEA11307799	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307799	sampling time point	1st follow up after transplantation
+SAMEA11307799	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307799	immunophenotype	
+SAMEA11307799	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307799	cell_type	normal density neutrophil
+SAMEA11307799	age	59
+SAMEA11307799	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307799	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307800	ENA-CHECKLIST	ERC000011
+SAMEA11307800	clinical history	hematopoietic stem cell transplantation
+SAMEA11307800	individual	UPN42
+SAMEA11307800	organism	Homo sapiens
+SAMEA11307800	organism	Homo sapiens
+SAMEA11307800	donor age (ref. to HSCT)	67
+SAMEA11307800	sex	female
+SAMEA11307800	scientific_name	Homo sapiens
+SAMEA11307800	common name	human
+SAMEA11307800	organism part	blood
+SAMEA11307800	donor sex (ref. to HSCT)	female
+SAMEA11307800	isolate	not applicable
+SAMEA11307800	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307800	sampling time point	2nd follow up after transplantation
+SAMEA11307800	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307800	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307800	cell isolation strategy	FACS sorting
+SAMEA11307800	cell_type	monocyte
+SAMEA11307800	age	59
+SAMEA11307800	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307800	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307801	ENA-CHECKLIST	ERC000011
+SAMEA11307801	clinical history	hematopoietic stem cell transplantation
+SAMEA11307801	individual	UPN42
+SAMEA11307801	organism	Homo sapiens
+SAMEA11307801	organism	Homo sapiens
+SAMEA11307801	donor age (ref. to HSCT)	67
+SAMEA11307801	sex	female
+SAMEA11307801	scientific_name	Homo sapiens
+SAMEA11307801	common name	human
+SAMEA11307801	organism part	bone marrow
+SAMEA11307801	donor sex (ref. to HSCT)	female
+SAMEA11307801	isolate	not applicable
+SAMEA11307801	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307801	sampling time point	2nd follow up after transplantation
+SAMEA11307801	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307801	immunophenotype	CD11b-CD16-
+SAMEA11307801	cell isolation strategy	FACS sorting
+SAMEA11307801	cell_type	bone marrow cell
+SAMEA11307801	age	59
+SAMEA11307801	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307801	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307802	ENA-CHECKLIST	ERC000011
+SAMEA11307802	clinical history	hematopoietic stem cell transplantation
+SAMEA11307802	individual	UPN42
+SAMEA11307802	organism	Homo sapiens
+SAMEA11307802	organism	Homo sapiens
+SAMEA11307802	donor age (ref. to HSCT)	67
+SAMEA11307802	sex	female
+SAMEA11307802	scientific_name	Homo sapiens
+SAMEA11307802	common name	human
+SAMEA11307802	organism part	bone marrow
+SAMEA11307802	donor sex (ref. to HSCT)	female
+SAMEA11307802	isolate	not applicable
+SAMEA11307802	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307802	sampling time point	2nd follow up after transplantation
+SAMEA11307802	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307802	immunophenotype	CD11b+CD16int
+SAMEA11307802	cell isolation strategy	FACS sorting
+SAMEA11307802	cell_type	bone marrow cell
+SAMEA11307802	age	59
+SAMEA11307802	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307802	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307832	ENA-CHECKLIST	ERC000011
+SAMEA11307832	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307832	individual	UPN56
+SAMEA11307832	organism	Homo sapiens
+SAMEA11307832	organism	Homo sapiens
+SAMEA11307832	donor age (ref. to HSCT)	not applicable
+SAMEA11307832	sex	female
+SAMEA11307832	scientific_name	Homo sapiens
+SAMEA11307832	common name	human
+SAMEA11307832	organism part	blood
+SAMEA11307832	donor sex (ref. to HSCT)	not applicable
+SAMEA11307832	isolate	not applicable
+SAMEA11307832	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307832	sampling time point	not applicable
+SAMEA11307832	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307832	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307832	cell isolation strategy	FACS sorting
+SAMEA11307832	cell_type	low density neutrophil
+SAMEA11307832	age	62
+SAMEA11307832	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307832	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307833	ENA-CHECKLIST	ERC000011
+SAMEA11307833	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307833	individual	UPN56
+SAMEA11307833	organism	Homo sapiens
+SAMEA11307833	organism	Homo sapiens
+SAMEA11307833	donor age (ref. to HSCT)	not applicable
+SAMEA11307833	sex	female
+SAMEA11307833	scientific_name	Homo sapiens
+SAMEA11307833	common name	human
+SAMEA11307833	organism part	blood
+SAMEA11307833	donor sex (ref. to HSCT)	not applicable
+SAMEA11307833	isolate	not applicable
+SAMEA11307833	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307833	sampling time point	not applicable
+SAMEA11307833	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307833	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307833	cell isolation strategy	FACS sorting
+SAMEA11307833	cell_type	monocyte
+SAMEA11307833	age	62
+SAMEA11307833	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307833	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307836	ENA-CHECKLIST	ERC000011
+SAMEA11307836	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307836	individual	UPN57
+SAMEA11307836	organism	Homo sapiens
+SAMEA11307836	organism	Homo sapiens
+SAMEA11307836	donor age (ref. to HSCT)	not applicable
+SAMEA11307836	sex	female
+SAMEA11307836	scientific_name	Homo sapiens
+SAMEA11307836	common name	human
+SAMEA11307836	organism part	blood
+SAMEA11307836	donor sex (ref. to HSCT)	not applicable
+SAMEA11307836	isolate	not applicable
+SAMEA11307836	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307836	sampling time point	not applicable
+SAMEA11307836	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307836	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307836	cell isolation strategy	FACS sorting
+SAMEA11307836	cell_type	monocyte
+SAMEA11307836	age	50
+SAMEA11307836	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307836	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307840	ENA-CHECKLIST	ERC000011
+SAMEA11307840	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307840	individual	UPN58
+SAMEA11307840	organism	Homo sapiens
+SAMEA11307840	organism	Homo sapiens
+SAMEA11307840	donor age (ref. to HSCT)	not applicable
+SAMEA11307840	sex	male
+SAMEA11307840	scientific_name	Homo sapiens
+SAMEA11307840	common name	human
+SAMEA11307840	organism part	blood
+SAMEA11307840	donor sex (ref. to HSCT)	not applicable
+SAMEA11307840	isolate	not applicable
+SAMEA11307840	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307840	sampling time point	not applicable
+SAMEA11307840	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307840	immunophenotype	
+SAMEA11307840	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307840	cell_type	normal density neutrophil
+SAMEA11307840	age	64
+SAMEA11307840	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307840	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307850	ENA-CHECKLIST	ERC000011
+SAMEA11307850	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307850	individual	UPN64
+SAMEA11307850	organism	Homo sapiens
+SAMEA11307850	organism	Homo sapiens
+SAMEA11307850	donor age (ref. to HSCT)	not applicable
+SAMEA11307850	sex	female
+SAMEA11307850	scientific_name	Homo sapiens
+SAMEA11307850	common name	human
+SAMEA11307850	organism part	blood
+SAMEA11307850	donor sex (ref. to HSCT)	not applicable
+SAMEA11307850	isolate	not applicable
+SAMEA11307850	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307850	sampling time point	not applicable
+SAMEA11307850	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307850	immunophenotype	
+SAMEA11307850	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307850	cell_type	normal density neutrophil
+SAMEA11307850	age	68
+SAMEA11307850	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307850	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307854	ENA-CHECKLIST	ERC000011
+SAMEA11307854	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307854	individual	UPN68
+SAMEA11307854	organism	Homo sapiens
+SAMEA11307854	organism	Homo sapiens
+SAMEA11307854	donor age (ref. to HSCT)	not applicable
+SAMEA11307854	sex	male
+SAMEA11307854	scientific_name	Homo sapiens
+SAMEA11307854	common name	human
+SAMEA11307854	organism part	blood
+SAMEA11307854	donor sex (ref. to HSCT)	not applicable
+SAMEA11307854	isolate	not applicable
+SAMEA11307854	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307854	sampling time point	not applicable
+SAMEA11307854	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307854	immunophenotype	
+SAMEA11307854	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307854	cell_type	normal density neutrophil
+SAMEA11307854	age	73
+SAMEA11307854	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307854	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307855	ENA-CHECKLIST	ERC000011
+SAMEA11307855	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307855	individual	UPN69
+SAMEA11307855	organism	Homo sapiens
+SAMEA11307855	organism	Homo sapiens
+SAMEA11307855	donor age (ref. to HSCT)	not applicable
+SAMEA11307855	sex	female
+SAMEA11307855	scientific_name	Homo sapiens
+SAMEA11307855	common name	human
+SAMEA11307855	organism part	blood
+SAMEA11307855	donor sex (ref. to HSCT)	not applicable
+SAMEA11307855	isolate	not applicable
+SAMEA11307855	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307855	sampling time point	not applicable
+SAMEA11307855	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307855	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307855	cell isolation strategy	CD15 Microbeads
+SAMEA11307855	cell_type	low density neutrophil
+SAMEA11307855	age	75
+SAMEA11307855	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307855	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307860	ENA-CHECKLIST	ERC000011
+SAMEA11307860	clinical history	steady state
+SAMEA11307860	individual	UPN7
+SAMEA11307860	organism	Homo sapiens
+SAMEA11307860	organism	Homo sapiens
+SAMEA11307860	donor age (ref. to HSCT)	not applicable
+SAMEA11307860	sex	female
+SAMEA11307860	scientific_name	Homo sapiens
+SAMEA11307860	common name	human
+SAMEA11307860	organism part	blood
+SAMEA11307860	donor sex (ref. to HSCT)	not applicable
+SAMEA11307860	isolate	not applicable
+SAMEA11307860	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307860	sampling time point	not applicable
+SAMEA11307860	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307860	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307860	cell isolation strategy	FACS sorting
+SAMEA11307860	cell_type	monocyte
+SAMEA11307860	age	63
+SAMEA11307860	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307860	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307863	ENA-CHECKLIST	ERC000011
+SAMEA11307863	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307863	individual	UPN71
+SAMEA11307863	organism	Homo sapiens
+SAMEA11307863	organism	Homo sapiens
+SAMEA11307863	donor age (ref. to HSCT)	not applicable
+SAMEA11307863	sex	female
+SAMEA11307863	scientific_name	Homo sapiens
+SAMEA11307863	common name	human
+SAMEA11307863	organism part	blood
+SAMEA11307863	donor sex (ref. to HSCT)	not applicable
+SAMEA11307863	isolate	not applicable
+SAMEA11307863	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307863	sampling time point	not applicable
+SAMEA11307863	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307863	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307863	cell isolation strategy	FACS sorting
+SAMEA11307863	cell_type	low density neutrophil
+SAMEA11307863	age	81
+SAMEA11307863	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307863	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307864	ENA-CHECKLIST	ERC000011
+SAMEA11307864	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307864	individual	UPN71
+SAMEA11307864	organism	Homo sapiens
+SAMEA11307864	organism	Homo sapiens
+SAMEA11307864	donor age (ref. to HSCT)	not applicable
+SAMEA11307864	sex	female
+SAMEA11307864	scientific_name	Homo sapiens
+SAMEA11307864	common name	human
+SAMEA11307864	organism part	blood
+SAMEA11307864	donor sex (ref. to HSCT)	not applicable
+SAMEA11307864	isolate	not applicable
+SAMEA11307864	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307864	sampling time point	not applicable
+SAMEA11307864	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307864	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307864	cell isolation strategy	FACS sorting
+SAMEA11307864	cell_type	monocyte
+SAMEA11307864	age	81
+SAMEA11307864	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307864	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307865	ENA-CHECKLIST	ERC000011
+SAMEA11307865	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307865	individual	UPN71
+SAMEA11307865	organism	Homo sapiens
+SAMEA11307865	organism	Homo sapiens
+SAMEA11307865	donor age (ref. to HSCT)	not applicable
+SAMEA11307865	sex	female
+SAMEA11307865	scientific_name	Homo sapiens
+SAMEA11307865	common name	human
+SAMEA11307865	organism part	blood
+SAMEA11307865	donor sex (ref. to HSCT)	not applicable
+SAMEA11307865	isolate	not applicable
+SAMEA11307865	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307865	sampling time point	not applicable
+SAMEA11307865	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307865	immunophenotype	
+SAMEA11307865	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307865	cell_type	normal density neutrophil
+SAMEA11307865	age	81
+SAMEA11307865	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307865	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307866	ENA-CHECKLIST	ERC000011
+SAMEA11307866	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307866	individual	UPN72
+SAMEA11307866	organism	Homo sapiens
+SAMEA11307866	organism	Homo sapiens
+SAMEA11307866	donor age (ref. to HSCT)	not applicable
+SAMEA11307866	sex	male
+SAMEA11307866	scientific_name	Homo sapiens
+SAMEA11307866	common name	human
+SAMEA11307866	organism part	blood
+SAMEA11307866	donor sex (ref. to HSCT)	not applicable
+SAMEA11307866	isolate	not applicable
+SAMEA11307866	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307866	sampling time point	not applicable
+SAMEA11307866	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307866	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307866	cell isolation strategy	FACS sorting
+SAMEA11307866	cell_type	low density neutrophil
+SAMEA11307866	age	51
+SAMEA11307866	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307866	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307881	ENA-CHECKLIST	ERC000011
+SAMEA11307881	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307881	individual	UPN79
+SAMEA11307881	organism	Homo sapiens
+SAMEA11307881	organism	Homo sapiens
+SAMEA11307881	donor age (ref. to HSCT)	not applicable
+SAMEA11307881	sex	female
+SAMEA11307881	scientific_name	Homo sapiens
+SAMEA11307881	common name	human
+SAMEA11307881	organism part	blood
+SAMEA11307881	donor sex (ref. to HSCT)	not applicable
+SAMEA11307881	isolate	not applicable
+SAMEA11307881	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307881	sampling time point	not applicable
+SAMEA11307881	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307881	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307881	cell isolation strategy	FACS sorting
+SAMEA11307881	cell_type	monocyte
+SAMEA11307881	age	57
+SAMEA11307881	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307881	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307884	ENA-CHECKLIST	ERC000011
+SAMEA11307884	clinical history	G-CSF
+SAMEA11307884	individual	UPN8
+SAMEA11307884	organism	Homo sapiens
+SAMEA11307884	organism	Homo sapiens
+SAMEA11307884	donor age (ref. to HSCT)	not applicable
+SAMEA11307884	sex	male
+SAMEA11307884	scientific_name	Homo sapiens
+SAMEA11307884	common name	human
+SAMEA11307884	organism part	blood
+SAMEA11307884	donor sex (ref. to HSCT)	not applicable
+SAMEA11307884	isolate	not applicable
+SAMEA11307884	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307884	sampling time point	not applicable
+SAMEA11307884	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307884	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307884	cell isolation strategy	FACS sorting
+SAMEA11307884	cell_type	monocyte
+SAMEA11307884	age	35
+SAMEA11307884	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307884	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307888	ENA-CHECKLIST	ERC000011
+SAMEA11307888	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307888	individual	UPN80
+SAMEA11307888	organism	Homo sapiens
+SAMEA11307888	organism	Homo sapiens
+SAMEA11307888	donor age (ref. to HSCT)	not applicable
+SAMEA11307888	sex	female
+SAMEA11307888	scientific_name	Homo sapiens
+SAMEA11307888	common name	human
+SAMEA11307888	organism part	blood
+SAMEA11307888	donor sex (ref. to HSCT)	not applicable
+SAMEA11307888	isolate	not applicable
+SAMEA11307888	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307888	sampling time point	not applicable
+SAMEA11307888	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307888	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307888	cell isolation strategy	FACS sorting
+SAMEA11307888	cell_type	monocyte
+SAMEA11307888	age	77
+SAMEA11307888	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307888	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307897	ENA-CHECKLIST	ERC000011
+SAMEA11307897	clinical history	steady state
+SAMEA11307897	individual	UPN9
+SAMEA11307897	organism	Homo sapiens
+SAMEA11307897	organism	Homo sapiens
+SAMEA11307897	donor age (ref. to HSCT)	not applicable
+SAMEA11307897	sex	male
+SAMEA11307897	scientific_name	Homo sapiens
+SAMEA11307897	common name	human
+SAMEA11307897	organism part	blood
+SAMEA11307897	donor sex (ref. to HSCT)	not applicable
+SAMEA11307897	isolate	not applicable
+SAMEA11307897	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307897	sampling time point	not applicable
+SAMEA11307897	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307897	immunophenotype	
+SAMEA11307897	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307897	cell_type	normal density neutrophil
+SAMEA11307897	age	31
+SAMEA11307897	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307897	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307690	ENA-CHECKLIST	ERC000011
+SAMEA11307690	clinical history	steady state
+SAMEA11307690	individual	UPN1
+SAMEA11307690	organism	Homo sapiens
+SAMEA11307690	organism	Homo sapiens
+SAMEA11307690	donor age (ref. to HSCT)	not applicable
+SAMEA11307690	sex	female
+SAMEA11307690	scientific_name	Homo sapiens
+SAMEA11307690	common name	human
+SAMEA11307690	organism part	blood
+SAMEA11307690	donor sex (ref. to HSCT)	not applicable
+SAMEA11307690	isolate	not applicable
+SAMEA11307690	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307690	sampling time point	not applicable
+SAMEA11307690	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307690	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307690	cell isolation strategy	CD14 Microbeads
+SAMEA11307690	cell_type	monocyte
+SAMEA11307690	age	36
+SAMEA11307690	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307690	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307693	ENA-CHECKLIST	ERC000011
+SAMEA11307693	clinical history	steady state
+SAMEA11307693	individual	UPN10
+SAMEA11307693	organism	Homo sapiens
+SAMEA11307693	organism	Homo sapiens
+SAMEA11307693	donor age (ref. to HSCT)	not applicable
+SAMEA11307693	sex	female
+SAMEA11307693	scientific_name	Homo sapiens
+SAMEA11307693	common name	human
+SAMEA11307693	organism part	bone marrow
+SAMEA11307693	donor sex (ref. to HSCT)	not applicable
+SAMEA11307693	isolate	not applicable
+SAMEA11307693	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307693	sampling time point	not applicable
+SAMEA11307693	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307693	immunophenotype	CD11b-CD16-
+SAMEA11307693	cell isolation strategy	FACS sorting
+SAMEA11307693	cell_type	bone marrow cell
+SAMEA11307693	age	
+SAMEA11307693	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307693	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307702	ENA-CHECKLIST	ERC000011
+SAMEA11307702	clinical history	steady state
+SAMEA11307702	individual	UPN11
+SAMEA11307702	organism	Homo sapiens
+SAMEA11307702	organism	Homo sapiens
+SAMEA11307702	donor age (ref. to HSCT)	not applicable
+SAMEA11307702	sex	female
+SAMEA11307702	scientific_name	Homo sapiens
+SAMEA11307702	common name	human
+SAMEA11307702	organism part	blood
+SAMEA11307702	donor sex (ref. to HSCT)	not applicable
+SAMEA11307702	isolate	not applicable
+SAMEA11307702	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307702	sampling time point	not applicable
+SAMEA11307702	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307702	immunophenotype	
+SAMEA11307702	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307702	cell_type	normal density neutrophil
+SAMEA11307702	age	67
+SAMEA11307702	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307702	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307703	ENA-CHECKLIST	ERC000011
+SAMEA11307703	clinical history	steady state
+SAMEA11307703	individual	UPN12
+SAMEA11307703	organism	Homo sapiens
+SAMEA11307703	organism	Homo sapiens
+SAMEA11307703	donor age (ref. to HSCT)	not applicable
+SAMEA11307703	sex	female
+SAMEA11307703	scientific_name	Homo sapiens
+SAMEA11307703	common name	human
+SAMEA11307703	organism part	bone marrow
+SAMEA11307703	donor sex (ref. to HSCT)	not applicable
+SAMEA11307703	isolate	not applicable
+SAMEA11307703	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307703	sampling time point	not applicable
+SAMEA11307703	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307703	immunophenotype	CD11b-CD16-
+SAMEA11307703	cell isolation strategy	FACS sorting
+SAMEA11307703	cell_type	bone marrow cell
+SAMEA11307703	age	52
+SAMEA11307703	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307703	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307707	ENA-CHECKLIST	ERC000011
+SAMEA11307707	clinical history	G-CSF
+SAMEA11307707	individual	UPN13
+SAMEA11307707	organism	Homo sapiens
+SAMEA11307707	organism	Homo sapiens
+SAMEA11307707	donor age (ref. to HSCT)	not applicable
+SAMEA11307707	sex	female
+SAMEA11307707	scientific_name	Homo sapiens
+SAMEA11307707	common name	human
+SAMEA11307707	organism part	blood
+SAMEA11307707	donor sex (ref. to HSCT)	not applicable
+SAMEA11307707	isolate	not applicable
+SAMEA11307707	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307707	sampling time point	not applicable
+SAMEA11307707	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307707	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307707	cell isolation strategy	FACS sorting
+SAMEA11307707	cell_type	monocyte
+SAMEA11307707	age	28
+SAMEA11307707	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307707	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307708	ENA-CHECKLIST	ERC000011
+SAMEA11307708	clinical history	G-CSF
+SAMEA11307708	individual	UPN13
+SAMEA11307708	organism	Homo sapiens
+SAMEA11307708	organism	Homo sapiens
+SAMEA11307708	donor age (ref. to HSCT)	not applicable
+SAMEA11307708	sex	female
+SAMEA11307708	scientific_name	Homo sapiens
+SAMEA11307708	common name	human
+SAMEA11307708	organism part	blood
+SAMEA11307708	donor sex (ref. to HSCT)	not applicable
+SAMEA11307708	isolate	not applicable
+SAMEA11307708	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307708	sampling time point	not applicable
+SAMEA11307708	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307708	immunophenotype	
+SAMEA11307708	cell isolation strategy	FACS sorting
+SAMEA11307708	cell_type	normal density neutrophil
+SAMEA11307708	age	28
+SAMEA11307708	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307708	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307710	ENA-CHECKLIST	ERC000011
+SAMEA11307710	clinical history	steady state
+SAMEA11307710	individual	UPN13
+SAMEA11307710	organism	Homo sapiens
+SAMEA11307710	organism	Homo sapiens
+SAMEA11307710	donor age (ref. to HSCT)	not applicable
+SAMEA11307710	sex	female
+SAMEA11307710	scientific_name	Homo sapiens
+SAMEA11307710	common name	human
+SAMEA11307710	organism part	blood
+SAMEA11307710	donor sex (ref. to HSCT)	not applicable
+SAMEA11307710	isolate	not applicable
+SAMEA11307710	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307710	sampling time point	not applicable
+SAMEA11307710	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307710	immunophenotype	
+SAMEA11307710	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307710	cell_type	normal density neutrophil
+SAMEA11307710	age	28
+SAMEA11307710	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307710	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307717	ENA-CHECKLIST	ERC000011
+SAMEA11307717	clinical history	steady state
+SAMEA11307717	individual	UPN15
+SAMEA11307717	organism	Homo sapiens
+SAMEA11307717	organism	Homo sapiens
+SAMEA11307717	donor age (ref. to HSCT)	not applicable
+SAMEA11307717	sex	male
+SAMEA11307717	scientific_name	Homo sapiens
+SAMEA11307717	common name	human
+SAMEA11307717	organism part	bone marrow
+SAMEA11307717	donor sex (ref. to HSCT)	not applicable
+SAMEA11307717	isolate	not applicable
+SAMEA11307717	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307717	sampling time point	not applicable
+SAMEA11307717	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307717	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307717	cell isolation strategy	FACS sorting
+SAMEA11307717	cell_type	bone marrow cell
+SAMEA11307717	age	28
+SAMEA11307717	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307717	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307718	ENA-CHECKLIST	ERC000011
+SAMEA11307718	clinical history	steady state
+SAMEA11307718	individual	UPN15
+SAMEA11307718	organism	Homo sapiens
+SAMEA11307718	organism	Homo sapiens
+SAMEA11307718	donor age (ref. to HSCT)	not applicable
+SAMEA11307718	sex	male
+SAMEA11307718	scientific_name	Homo sapiens
+SAMEA11307718	common name	human
+SAMEA11307718	organism part	bone marrow
+SAMEA11307718	donor sex (ref. to HSCT)	not applicable
+SAMEA11307718	isolate	not applicable
+SAMEA11307718	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307718	sampling time point	not applicable
+SAMEA11307718	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307718	immunophenotype	CD11b+CD16int
+SAMEA11307718	cell isolation strategy	FACS sorting
+SAMEA11307718	cell_type	bone marrow cell
+SAMEA11307718	age	28
+SAMEA11307718	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307718	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307719	ENA-CHECKLIST	ERC000011
+SAMEA11307719	clinical history	steady state
+SAMEA11307719	individual	UPN16
+SAMEA11307719	organism	Homo sapiens
+SAMEA11307719	organism	Homo sapiens
+SAMEA11307719	donor age (ref. to HSCT)	not applicable
+SAMEA11307719	sex	not available
+SAMEA11307719	scientific_name	Homo sapiens
+SAMEA11307719	common name	human
+SAMEA11307719	organism part	blood
+SAMEA11307719	donor sex (ref. to HSCT)	not applicable
+SAMEA11307719	isolate	not applicable
+SAMEA11307719	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307719	sampling time point	not applicable
+SAMEA11307719	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307719	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307719	cell isolation strategy	FACS sorting
+SAMEA11307719	cell_type	monocyte
+SAMEA11307719	age	not available
+SAMEA11307719	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307719	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307738	ENA-CHECKLIST	ERC000011
+SAMEA11307738	clinical history	G-CSF
+SAMEA11307738	individual	UPN3
+SAMEA11307738	organism	Homo sapiens
+SAMEA11307738	organism	Homo sapiens
+SAMEA11307738	donor age (ref. to HSCT)	not applicable
+SAMEA11307738	sex	male
+SAMEA11307738	scientific_name	Homo sapiens
+SAMEA11307738	common name	human
+SAMEA11307738	organism part	blood
+SAMEA11307738	donor sex (ref. to HSCT)	not applicable
+SAMEA11307738	isolate	not applicable
+SAMEA11307738	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307738	sampling time point	not applicable
+SAMEA11307738	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307738	immunophenotype	
+SAMEA11307738	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307738	cell_type	normal density neutrophil
+SAMEA11307738	age	28
+SAMEA11307738	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307738	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307741	ENA-CHECKLIST	ERC000011
+SAMEA11307741	clinical history	steady state
+SAMEA11307741	individual	UPN30
+SAMEA11307741	organism	Homo sapiens
+SAMEA11307741	organism	Homo sapiens
+SAMEA11307741	donor age (ref. to HSCT)	not applicable
+SAMEA11307741	sex	male
+SAMEA11307741	scientific_name	Homo sapiens
+SAMEA11307741	common name	human
+SAMEA11307741	organism part	blood
+SAMEA11307741	donor sex (ref. to HSCT)	not applicable
+SAMEA11307741	isolate	not applicable
+SAMEA11307741	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307741	sampling time point	not applicable
+SAMEA11307741	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307741	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307741	cell isolation strategy	CD14 Microbeads
+SAMEA11307741	cell_type	monocyte
+SAMEA11307741	age	36
+SAMEA11307741	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307741	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307748	ENA-CHECKLIST	ERC000011
+SAMEA11307748	clinical history	hematopoietic stem cell transplantation
+SAMEA11307748	individual	UPN33
+SAMEA11307748	organism	Homo sapiens
+SAMEA11307748	organism	Homo sapiens
+SAMEA11307748	donor age (ref. to HSCT)	36
+SAMEA11307748	sex	female
+SAMEA11307748	scientific_name	Homo sapiens
+SAMEA11307748	common name	human
+SAMEA11307748	organism part	blood
+SAMEA11307748	donor sex (ref. to HSCT)	female
+SAMEA11307748	isolate	not applicable
+SAMEA11307748	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307748	sampling time point	2nd follow up after transplantation
+SAMEA11307748	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307748	immunophenotype	
+SAMEA11307748	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307748	cell_type	normal density neutrophil
+SAMEA11307748	age	60
+SAMEA11307748	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307748	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307752	ENA-CHECKLIST	ERC000011
+SAMEA11307752	clinical history	hematopoietic stem cell transplantation
+SAMEA11307752	individual	UPN33
+SAMEA11307752	organism	Homo sapiens
+SAMEA11307752	organism	Homo sapiens
+SAMEA11307752	donor age (ref. to HSCT)	36
+SAMEA11307752	sex	female
+SAMEA11307752	scientific_name	Homo sapiens
+SAMEA11307752	common name	human
+SAMEA11307752	organism part	bone marrow
+SAMEA11307752	donor sex (ref. to HSCT)	female
+SAMEA11307752	isolate	not applicable
+SAMEA11307752	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307752	sampling time point	2nd follow up after transplantation
+SAMEA11307752	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307752	immunophenotype	CD11b+CD16int
+SAMEA11307752	cell isolation strategy	FACS sorting
+SAMEA11307752	cell_type	bone marrow cell
+SAMEA11307752	age	60
+SAMEA11307752	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307752	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307758	ENA-CHECKLIST	ERC000011
+SAMEA11307758	clinical history	hematopoietic stem cell transplantation
+SAMEA11307758	individual	UPN35
+SAMEA11307758	organism	Homo sapiens
+SAMEA11307758	organism	Homo sapiens
+SAMEA11307758	donor age (ref. to HSCT)	28
+SAMEA11307758	sex	male
+SAMEA11307758	scientific_name	Homo sapiens
+SAMEA11307758	common name	human
+SAMEA11307758	organism part	bone marrow
+SAMEA11307758	donor sex (ref. to HSCT)	male
+SAMEA11307758	isolate	not applicable
+SAMEA11307758	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307758	sampling time point	2nd follow up after transplantation
+SAMEA11307758	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307758	immunophenotype	CD11b+CD16hiCD10+
+SAMEA11307758	cell isolation strategy	FACS sorting
+SAMEA11307758	cell_type	bone marrow cell
+SAMEA11307758	age	52
+SAMEA11307758	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307758	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307760	ENA-CHECKLIST	ERC000011
+SAMEA11307760	clinical history	hematopoietic stem cell transplantation
+SAMEA11307760	individual	UPN35
+SAMEA11307760	organism	Homo sapiens
+SAMEA11307760	organism	Homo sapiens
+SAMEA11307760	donor age (ref. to HSCT)	28
+SAMEA11307760	sex	male
+SAMEA11307760	scientific_name	Homo sapiens
+SAMEA11307760	common name	human
+SAMEA11307760	organism part	bone marrow
+SAMEA11307760	donor sex (ref. to HSCT)	male
+SAMEA11307760	isolate	not applicable
+SAMEA11307760	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307760	sampling time point	2nd follow up after transplantation
+SAMEA11307760	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307760	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307760	cell isolation strategy	FACS sorting
+SAMEA11307760	cell_type	monocyte
+SAMEA11307760	age	52
+SAMEA11307760	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307760	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307761	ENA-CHECKLIST	ERC000011
+SAMEA11307761	clinical history	hematopoietic stem cell transplantation
+SAMEA11307761	individual	UPN35
+SAMEA11307761	organism	Homo sapiens
+SAMEA11307761	organism	Homo sapiens
+SAMEA11307761	donor age (ref. to HSCT)	28
+SAMEA11307761	sex	male
+SAMEA11307761	scientific_name	Homo sapiens
+SAMEA11307761	common name	human
+SAMEA11307761	organism part	blood
+SAMEA11307761	donor sex (ref. to HSCT)	male
+SAMEA11307761	isolate	not applicable
+SAMEA11307761	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307761	sampling time point	3rd follow up after transplantation
+SAMEA11307761	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307761	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307761	cell isolation strategy	FACS sorting
+SAMEA11307761	cell_type	monocyte
+SAMEA11307761	age	52
+SAMEA11307761	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307761	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307766	ENA-CHECKLIST	ERC000011
+SAMEA11307766	clinical history	hematopoietic stem cell transplantation
+SAMEA11307766	individual	UPN36
+SAMEA11307766	organism	Homo sapiens
+SAMEA11307766	organism	Homo sapiens
+SAMEA11307766	donor age (ref. to HSCT)	33
+SAMEA11307766	sex	female
+SAMEA11307766	scientific_name	Homo sapiens
+SAMEA11307766	common name	human
+SAMEA11307766	organism part	blood
+SAMEA11307766	donor sex (ref. to HSCT)	male
+SAMEA11307766	isolate	not applicable
+SAMEA11307766	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307766	sampling time point	2nd follow up after transplantation
+SAMEA11307766	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307766	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307766	cell isolation strategy	FACS sorting
+SAMEA11307766	cell_type	low density neutrophil
+SAMEA11307766	age	23
+SAMEA11307766	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307766	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307771	ENA-CHECKLIST	ERC000011
+SAMEA11307771	clinical history	hematopoietic stem cell transplantation
+SAMEA11307771	individual	UPN36
+SAMEA11307771	organism	Homo sapiens
+SAMEA11307771	organism	Homo sapiens
+SAMEA11307771	donor age (ref. to HSCT)	33
+SAMEA11307771	sex	female
+SAMEA11307771	scientific_name	Homo sapiens
+SAMEA11307771	common name	human
+SAMEA11307771	organism part	bone marrow
+SAMEA11307771	donor sex (ref. to HSCT)	male
+SAMEA11307771	isolate	not applicable
+SAMEA11307771	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307771	sampling time point	3rd follow up after transplantation
+SAMEA11307771	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307771	immunophenotype	CD11b+CD16int
+SAMEA11307771	cell isolation strategy	FACS sorting
+SAMEA11307771	cell_type	bone marrow cell
+SAMEA11307771	age	23
+SAMEA11307771	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307771	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307776	ENA-CHECKLIST	ERC000011
+SAMEA11307776	clinical history	hematopoietic stem cell transplantation
+SAMEA11307776	individual	UPN37
+SAMEA11307776	organism	Homo sapiens
+SAMEA11307776	organism	Homo sapiens
+SAMEA11307776	donor age (ref. to HSCT)	60
+SAMEA11307776	sex	female
+SAMEA11307776	scientific_name	Homo sapiens
+SAMEA11307776	common name	human
+SAMEA11307776	organism part	blood
+SAMEA11307776	donor sex (ref. to HSCT)	male
+SAMEA11307776	isolate	not applicable
+SAMEA11307776	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307776	sampling time point	1st follow up after transplantation
+SAMEA11307776	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307776	immunophenotype	
+SAMEA11307776	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307776	cell_type	normal density neutrophil
+SAMEA11307776	age	52
+SAMEA11307776	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307776	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307779	ENA-CHECKLIST	ERC000011
+SAMEA11307779	clinical history	hematopoietic stem cell transplantation
+SAMEA11307779	individual	UPN37
+SAMEA11307779	organism	Homo sapiens
+SAMEA11307779	organism	Homo sapiens
+SAMEA11307779	donor age (ref. to HSCT)	60
+SAMEA11307779	sex	female
+SAMEA11307779	scientific_name	Homo sapiens
+SAMEA11307779	common name	human
+SAMEA11307779	organism part	blood
+SAMEA11307779	donor sex (ref. to HSCT)	male
+SAMEA11307779	isolate	not applicable
+SAMEA11307779	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307779	sampling time point	2nd follow up after transplantation
+SAMEA11307779	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307779	immunophenotype	
+SAMEA11307779	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307779	cell_type	normal density neutrophil
+SAMEA11307779	age	52
+SAMEA11307779	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307779	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307786	ENA-CHECKLIST	ERC000011
+SAMEA11307786	clinical history	hematopoietic stem cell transplantation
+SAMEA11307786	individual	UPN39
+SAMEA11307786	organism	Homo sapiens
+SAMEA11307786	organism	Homo sapiens
+SAMEA11307786	donor age (ref. to HSCT)	63
+SAMEA11307786	sex	male
+SAMEA11307786	scientific_name	Homo sapiens
+SAMEA11307786	common name	human
+SAMEA11307786	organism part	blood
+SAMEA11307786	donor sex (ref. to HSCT)	female
+SAMEA11307786	isolate	not applicable
+SAMEA11307786	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307786	sampling time point	2nd follow up after transplantation
+SAMEA11307786	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307786	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307786	cell isolation strategy	FACS sorting
+SAMEA11307786	cell_type	low density neutrophil
+SAMEA11307786	age	38
+SAMEA11307786	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307786	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307792	ENA-CHECKLIST	ERC000011
+SAMEA11307792	clinical history	hematopoietic stem cell transplantation
+SAMEA11307792	individual	UPN39
+SAMEA11307792	organism	Homo sapiens
+SAMEA11307792	organism	Homo sapiens
+SAMEA11307792	donor age (ref. to HSCT)	63
+SAMEA11307792	sex	male
+SAMEA11307792	scientific_name	Homo sapiens
+SAMEA11307792	common name	human
+SAMEA11307792	organism part	bone marrow
+SAMEA11307792	donor sex (ref. to HSCT)	female
+SAMEA11307792	isolate	not applicable
+SAMEA11307792	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307792	sampling time point	2nd follow up after transplantation
+SAMEA11307792	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307792	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307792	cell isolation strategy	FACS sorting
+SAMEA11307792	cell_type	monocyte
+SAMEA11307792	age	38
+SAMEA11307792	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307792	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307795	ENA-CHECKLIST	ERC000011
+SAMEA11307795	clinical history	G-CSF
+SAMEA11307795	individual	UPN4
+SAMEA11307795	organism	Homo sapiens
+SAMEA11307795	organism	Homo sapiens
+SAMEA11307795	donor age (ref. to HSCT)	not applicable
+SAMEA11307795	sex	male
+SAMEA11307795	scientific_name	Homo sapiens
+SAMEA11307795	common name	human
+SAMEA11307795	organism part	blood
+SAMEA11307795	donor sex (ref. to HSCT)	not applicable
+SAMEA11307795	isolate	not applicable
+SAMEA11307795	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307795	sampling time point	not applicable
+SAMEA11307795	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307795	immunophenotype	
+SAMEA11307795	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307795	cell_type	normal density neutrophil
+SAMEA11307795	age	33
+SAMEA11307795	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307795	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307796	ENA-CHECKLIST	ERC000011
+SAMEA11307796	clinical history	steady state
+SAMEA11307796	individual	UPN4
+SAMEA11307796	organism	Homo sapiens
+SAMEA11307796	organism	Homo sapiens
+SAMEA11307796	donor age (ref. to HSCT)	not applicable
+SAMEA11307796	sex	male
+SAMEA11307796	scientific_name	Homo sapiens
+SAMEA11307796	common name	human
+SAMEA11307796	organism part	blood
+SAMEA11307796	donor sex (ref. to HSCT)	not applicable
+SAMEA11307796	isolate	not applicable
+SAMEA11307796	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307796	sampling time point	not applicable
+SAMEA11307796	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307796	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307796	cell isolation strategy	FACS sorting
+SAMEA11307796	cell_type	monocyte
+SAMEA11307796	age	33
+SAMEA11307796	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307796	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307803	ENA-CHECKLIST	ERC000011
+SAMEA11307803	clinical history	hematopoietic stem cell transplantation
+SAMEA11307803	individual	UPN44
+SAMEA11307803	organism	Homo sapiens
+SAMEA11307803	organism	Homo sapiens
+SAMEA11307803	donor age (ref. to HSCT)	28
+SAMEA11307803	sex	male
+SAMEA11307803	scientific_name	Homo sapiens
+SAMEA11307803	common name	human
+SAMEA11307803	organism part	blood
+SAMEA11307803	donor sex (ref. to HSCT)	female
+SAMEA11307803	isolate	not applicable
+SAMEA11307803	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307803	sampling time point	2nd follow up after transplantation
+SAMEA11307803	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307803	immunophenotype	
+SAMEA11307803	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307803	cell_type	normal density neutrophil
+SAMEA11307803	age	20
+SAMEA11307803	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307803	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307813	ENA-CHECKLIST	ERC000011
+SAMEA11307813	clinical history	G-CSF
+SAMEA11307813	individual	UPN5
+SAMEA11307813	organism	Homo sapiens
+SAMEA11307813	organism	Homo sapiens
+SAMEA11307813	donor age (ref. to HSCT)	not applicable
+SAMEA11307813	sex	male
+SAMEA11307813	scientific_name	Homo sapiens
+SAMEA11307813	common name	human
+SAMEA11307813	organism part	blood
+SAMEA11307813	donor sex (ref. to HSCT)	not applicable
+SAMEA11307813	isolate	not applicable
+SAMEA11307813	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307813	sampling time point	not applicable
+SAMEA11307813	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307813	immunophenotype	
+SAMEA11307813	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307813	cell_type	normal density neutrophil
+SAMEA11307813	age	60
+SAMEA11307813	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307813	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307817	ENA-CHECKLIST	ERC000011
+SAMEA11307817	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307817	individual	UPN50
+SAMEA11307817	organism	Homo sapiens
+SAMEA11307817	organism	Homo sapiens
+SAMEA11307817	donor age (ref. to HSCT)	not applicable
+SAMEA11307817	sex	female
+SAMEA11307817	scientific_name	Homo sapiens
+SAMEA11307817	common name	human
+SAMEA11307817	organism part	blood
+SAMEA11307817	donor sex (ref. to HSCT)	not applicable
+SAMEA11307817	isolate	not applicable
+SAMEA11307817	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307817	sampling time point	not applicable
+SAMEA11307817	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307817	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307817	cell isolation strategy	CD14 Microbeads
+SAMEA11307817	cell_type	monocyte
+SAMEA11307817	age	64
+SAMEA11307817	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307817	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307819	ENA-CHECKLIST	ERC000011
+SAMEA11307819	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307819	individual	UPN51
+SAMEA11307819	organism	Homo sapiens
+SAMEA11307819	organism	Homo sapiens
+SAMEA11307819	donor age (ref. to HSCT)	not applicable
+SAMEA11307819	sex	female
+SAMEA11307819	scientific_name	Homo sapiens
+SAMEA11307819	common name	human
+SAMEA11307819	organism part	blood
+SAMEA11307819	donor sex (ref. to HSCT)	not applicable
+SAMEA11307819	isolate	not applicable
+SAMEA11307819	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307819	sampling time point	not applicable
+SAMEA11307819	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307819	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307819	cell isolation strategy	CD15 Microbeads
+SAMEA11307819	cell_type	low density neutrophil
+SAMEA11307819	age	72
+SAMEA11307819	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307819	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307821	ENA-CHECKLIST	ERC000011
+SAMEA11307821	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307821	individual	UPN51
+SAMEA11307821	organism	Homo sapiens
+SAMEA11307821	organism	Homo sapiens
+SAMEA11307821	donor age (ref. to HSCT)	not applicable
+SAMEA11307821	sex	female
+SAMEA11307821	scientific_name	Homo sapiens
+SAMEA11307821	common name	human
+SAMEA11307821	organism part	blood
+SAMEA11307821	donor sex (ref. to HSCT)	not applicable
+SAMEA11307821	isolate	not applicable
+SAMEA11307821	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307821	sampling time point	not applicable
+SAMEA11307821	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307821	immunophenotype	
+SAMEA11307821	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307821	cell_type	normal density neutrophil
+SAMEA11307821	age	72
+SAMEA11307821	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307821	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307828	ENA-CHECKLIST	ERC000011
+SAMEA11307828	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307828	individual	UPN54
+SAMEA11307828	organism	Homo sapiens
+SAMEA11307828	organism	Homo sapiens
+SAMEA11307828	donor age (ref. to HSCT)	not applicable
+SAMEA11307828	sex	female
+SAMEA11307828	scientific_name	Homo sapiens
+SAMEA11307828	common name	human
+SAMEA11307828	organism part	blood
+SAMEA11307828	donor sex (ref. to HSCT)	not applicable
+SAMEA11307828	isolate	not applicable
+SAMEA11307828	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307828	sampling time point	not applicable
+SAMEA11307828	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307828	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307828	cell isolation strategy	CD15 Microbeads
+SAMEA11307828	cell_type	low density neutrophil
+SAMEA11307828	age	63
+SAMEA11307828	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307828	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307829	ENA-CHECKLIST	ERC000011
+SAMEA11307829	clinical history	metastatic pancreatic ductal adenocarcinoma
+SAMEA11307829	individual	UPN54
+SAMEA11307829	organism	Homo sapiens
+SAMEA11307829	organism	Homo sapiens
+SAMEA11307829	donor age (ref. to HSCT)	not applicable
+SAMEA11307829	sex	female
+SAMEA11307829	scientific_name	Homo sapiens
+SAMEA11307829	common name	human
+SAMEA11307829	organism part	blood
+SAMEA11307829	donor sex (ref. to HSCT)	not applicable
+SAMEA11307829	isolate	not applicable
+SAMEA11307829	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307829	sampling time point	not applicable
+SAMEA11307829	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307829	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307829	cell isolation strategy	CD14 Microbeads
+SAMEA11307829	cell_type	monocyte
+SAMEA11307829	age	63
+SAMEA11307829	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307829	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307844	ENA-CHECKLIST	ERC000011
+SAMEA11307844	clinical history	G-CSF
+SAMEA11307844	individual	UPN6
+SAMEA11307844	organism	Homo sapiens
+SAMEA11307844	organism	Homo sapiens
+SAMEA11307844	donor age (ref. to HSCT)	not applicable
+SAMEA11307844	sex	male
+SAMEA11307844	scientific_name	Homo sapiens
+SAMEA11307844	common name	human
+SAMEA11307844	organism part	blood
+SAMEA11307844	donor sex (ref. to HSCT)	not applicable
+SAMEA11307844	isolate	not applicable
+SAMEA11307844	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307844	sampling time point	not applicable
+SAMEA11307844	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307844	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307844	cell isolation strategy	FACS sorting
+SAMEA11307844	cell_type	monocyte
+SAMEA11307844	age	26
+SAMEA11307844	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307844	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307857	ENA-CHECKLIST	ERC000011
+SAMEA11307857	clinical history	G-CSF
+SAMEA11307857	individual	UPN7
+SAMEA11307857	organism	Homo sapiens
+SAMEA11307857	organism	Homo sapiens
+SAMEA11307857	donor age (ref. to HSCT)	not applicable
+SAMEA11307857	sex	female
+SAMEA11307857	scientific_name	Homo sapiens
+SAMEA11307857	common name	human
+SAMEA11307857	organism part	blood
+SAMEA11307857	donor sex (ref. to HSCT)	not applicable
+SAMEA11307857	isolate	not applicable
+SAMEA11307857	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307857	sampling time point	not applicable
+SAMEA11307857	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307857	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307857	cell isolation strategy	FACS sorting
+SAMEA11307857	cell_type	monocyte
+SAMEA11307857	age	63
+SAMEA11307857	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307857	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307870	ENA-CHECKLIST	ERC000011
+SAMEA11307870	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307870	individual	UPN73
+SAMEA11307870	organism	Homo sapiens
+SAMEA11307870	organism	Homo sapiens
+SAMEA11307870	donor age (ref. to HSCT)	not applicable
+SAMEA11307870	sex	female
+SAMEA11307870	scientific_name	Homo sapiens
+SAMEA11307870	common name	human
+SAMEA11307870	organism part	blood
+SAMEA11307870	donor sex (ref. to HSCT)	not applicable
+SAMEA11307870	isolate	not applicable
+SAMEA11307870	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307870	sampling time point	not applicable
+SAMEA11307870	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307870	immunophenotype	
+SAMEA11307870	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307870	cell_type	normal density neutrophil
+SAMEA11307870	age	74
+SAMEA11307870	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307870	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307874	ENA-CHECKLIST	ERC000011
+SAMEA11307874	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307874	individual	UPN75
+SAMEA11307874	organism	Homo sapiens
+SAMEA11307874	organism	Homo sapiens
+SAMEA11307874	donor age (ref. to HSCT)	not applicable
+SAMEA11307874	sex	male
+SAMEA11307874	scientific_name	Homo sapiens
+SAMEA11307874	common name	human
+SAMEA11307874	organism part	blood
+SAMEA11307874	donor sex (ref. to HSCT)	not applicable
+SAMEA11307874	isolate	not applicable
+SAMEA11307874	ENA-FIRST-PUBLIC	2022-09-09T12:17:13Z
+SAMEA11307874	sampling time point	not applicable
+SAMEA11307874	ENA-LAST-UPDATE	2022-09-09T12:17:13Z
+SAMEA11307874	immunophenotype	(Lin-)CD33+CD14-CD15+CD193-
+SAMEA11307874	cell isolation strategy	FACS sorting
+SAMEA11307874	cell_type	low density neutrophil
+SAMEA11307874	age	55
+SAMEA11307874	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307874	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307879	ENA-CHECKLIST	ERC000011
+SAMEA11307879	clinical history	intraductal papillary mucinous neoplasm
+SAMEA11307879	individual	UPN77
+SAMEA11307879	organism	Homo sapiens
+SAMEA11307879	organism	Homo sapiens
+SAMEA11307879	donor age (ref. to HSCT)	not applicable
+SAMEA11307879	sex	female
+SAMEA11307879	scientific_name	Homo sapiens
+SAMEA11307879	common name	human
+SAMEA11307879	organism part	blood
+SAMEA11307879	donor sex (ref. to HSCT)	not applicable
+SAMEA11307879	isolate	not applicable
+SAMEA11307879	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307879	sampling time point	not applicable
+SAMEA11307879	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307879	immunophenotype	CD3-CD56-CD19-CD34-(Lin-)CD33+CD15-CD14+
+SAMEA11307879	cell isolation strategy	FACS sorting
+SAMEA11307879	cell_type	monocyte
+SAMEA11307879	age	64
+SAMEA11307879	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307879	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307885	ENA-CHECKLIST	ERC000011
+SAMEA11307885	clinical history	G-CSF
+SAMEA11307885	individual	UPN8
+SAMEA11307885	organism	Homo sapiens
+SAMEA11307885	organism	Homo sapiens
+SAMEA11307885	donor age (ref. to HSCT)	not applicable
+SAMEA11307885	sex	male
+SAMEA11307885	scientific_name	Homo sapiens
+SAMEA11307885	common name	human
+SAMEA11307885	organism part	blood
+SAMEA11307885	donor sex (ref. to HSCT)	not applicable
+SAMEA11307885	isolate	not applicable
+SAMEA11307885	ENA-FIRST-PUBLIC	2022-09-09T12:17:11Z
+SAMEA11307885	sampling time point	not applicable
+SAMEA11307885	ENA-LAST-UPDATE	2022-09-09T12:17:11Z
+SAMEA11307885	immunophenotype	
+SAMEA11307885	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307885	cell_type	normal density neutrophil
+SAMEA11307885	age	35
+SAMEA11307885	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307885	ENA-LAST-UPDATE	2022-09-09
+SAMEA11307886	ENA-CHECKLIST	ERC000011
+SAMEA11307886	clinical history	steady state
+SAMEA11307886	individual	UPN8
+SAMEA11307886	organism	Homo sapiens
+SAMEA11307886	organism	Homo sapiens
+SAMEA11307886	donor age (ref. to HSCT)	not applicable
+SAMEA11307886	sex	male
+SAMEA11307886	scientific_name	Homo sapiens
+SAMEA11307886	common name	human
+SAMEA11307886	organism part	blood
+SAMEA11307886	donor sex (ref. to HSCT)	not applicable
+SAMEA11307886	isolate	not applicable
+SAMEA11307886	ENA-FIRST-PUBLIC	2022-09-09T12:17:12Z
+SAMEA11307886	sampling time point	not applicable
+SAMEA11307886	ENA-LAST-UPDATE	2022-09-09T12:17:12Z
+SAMEA11307886	immunophenotype	
+SAMEA11307886	cell isolation strategy	Neutrophil Isolation kit
+SAMEA11307886	cell_type	normal density neutrophil
+SAMEA11307886	age	35
+SAMEA11307886	ENA-FIRST-PUBLIC	2022-09-09
+SAMEA11307886	ENA-LAST-UPDATE	2022-09-09

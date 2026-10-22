@@ -1,0 +1,1649 @@
+sample_accession	tag	value
+SAMN07333305	INSDC secondary accession	SRS2342126
+SAMN07333305	organism	Homo sapiens
+SAMN07333305	tissue	Prophylactic Mastectomy
+SAMN07333305	cell type	--
+SAMN07333305	tumor size	--
+SAMN07333305	NCBI submission package	Generic.1.0
+SAMN07333305	histology	--
+SAMN07333305	grade	--
+SAMN07333305	pr status	--
+SAMN07333305	age	--
+SAMN07333305	her2 status	--
+SAMN07333305	source_name	Prophylactic Mastectomy
+SAMN07333305	er status	--
+SAMN07333305	BioSampleModel	Generic
+SAMN07333305	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333305	ENA-LAST-UPDATE	2017-07-08
+SAMN07333265	INSDC secondary accession	SRS2342128
+SAMN07333265	organism	Homo sapiens
+SAMN07333265	tissue	Breast tumor
+SAMN07333265	cell type	Whole human breast tumor
+SAMN07333265	tumor size	9.6
+SAMN07333265	NCBI submission package	Generic.1.0
+SAMN07333265	histology	Ductal
+SAMN07333265	grade	3
+SAMN07333265	pr status	0
+SAMN07333265	age	66
+SAMN07333265	her2 status	0
+SAMN07333265	source_name	Human breast tumor
+SAMN07333265	er status	0
+SAMN07333265	BioSampleModel	Generic
+SAMN07333265	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333265	ENA-LAST-UPDATE	2017-07-08
+SAMN07333299	INSDC secondary accession	SRS2342130
+SAMN07333299	organism	Homo sapiens
+SAMN07333299	tissue	Breast tumor
+SAMN07333299	cell type	Whole human breast tumor
+SAMN07333299	tumor size	4.3
+SAMN07333299	NCBI submission package	Generic.1.0
+SAMN07333299	histology	Ductal
+SAMN07333299	grade	3
+SAMN07333299	pr status	0
+SAMN07333299	age	49
+SAMN07333299	her2 status	2+
+SAMN07333299	source_name	Human breast tumor
+SAMN07333299	er status	3+ (90)
+SAMN07333299	BioSampleModel	Generic
+SAMN07333299	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333299	ENA-LAST-UPDATE	2017-07-08
+SAMN07333290	INSDC secondary accession	SRS2342143
+SAMN07333290	organism	Homo sapiens
+SAMN07333290	tissue	Breast tumor
+SAMN07333290	cell type	Whole human breast tumor
+SAMN07333290	tumor size	7
+SAMN07333290	NCBI submission package	Generic.1.0
+SAMN07333290	histology	Lobular
+SAMN07333290	grade	2
+SAMN07333290	pr status	1+ (10)
+SAMN07333290	age	59
+SAMN07333290	her2 status	0
+SAMN07333290	source_name	Human breast tumor
+SAMN07333290	er status	3+ (100)
+SAMN07333290	BioSampleModel	Generic
+SAMN07333290	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333290	ENA-LAST-UPDATE	2017-07-08
+SAMN07333289	INSDC secondary accession	SRS2342145
+SAMN07333289	organism	Homo sapiens
+SAMN07333289	tissue	Breast tumor
+SAMN07333289	cell type	Whole human breast tumor
+SAMN07333289	tumor size	3
+SAMN07333289	NCBI submission package	Generic.1.0
+SAMN07333289	histology	Lobular
+SAMN07333289	grade	1
+SAMN07333289	pr status	0
+SAMN07333289	age	71
+SAMN07333289	her2 status	0
+SAMN07333289	source_name	Human breast tumor
+SAMN07333289	er status	3+ (>95)
+SAMN07333289	BioSampleModel	Generic
+SAMN07333289	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333289	ENA-LAST-UPDATE	2017-07-08
+SAMN07333286	INSDC secondary accession	SRS2342148
+SAMN07333286	organism	Homo sapiens
+SAMN07333286	tissue	Breast tumor
+SAMN07333286	cell type	Whole human breast tumor
+SAMN07333286	tumor size	2.1
+SAMN07333286	NCBI submission package	Generic.1.0
+SAMN07333286	histology	Ductal
+SAMN07333286	grade	1
+SAMN07333286	pr status	3+ (70)
+SAMN07333286	age	47
+SAMN07333286	her2 status	0
+SAMN07333286	source_name	Human breast tumor
+SAMN07333286	er status	3+ (90)
+SAMN07333286	BioSampleModel	Generic
+SAMN07333286	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333286	ENA-LAST-UPDATE	2017-07-08
+SAMN07333282	INSDC secondary accession	SRS2342151
+SAMN07333282	organism	Homo sapiens
+SAMN07333282	tissue	Breast tumor
+SAMN07333282	cell type	Whole human breast tumor
+SAMN07333282	tumor size	2.8
+SAMN07333282	NCBI submission package	Generic.1.0
+SAMN07333282	histology	Ductal
+SAMN07333282	grade	3
+SAMN07333282	pr status	0
+SAMN07333282	age	24
+SAMN07333282	her2 status	2+
+SAMN07333282	source_name	Human breast tumor
+SAMN07333282	er status	0
+SAMN07333282	BioSampleModel	Generic
+SAMN07333282	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333282	ENA-LAST-UPDATE	2017-07-08
+SAMN07333276	INSDC secondary accession	SRS2342155
+SAMN07333276	organism	Homo sapiens
+SAMN07333276	tissue	Breast tumor
+SAMN07333276	cell type	Whole human breast tumor
+SAMN07333276	tumor size	2.1
+SAMN07333276	NCBI submission package	Generic.1.0
+SAMN07333276	histology	Ductal
+SAMN07333276	grade	3
+SAMN07333276	pr status	0
+SAMN07333276	age	71
+SAMN07333276	her2 status	2+
+SAMN07333276	source_name	Human breast tumor
+SAMN07333276	er status	0
+SAMN07333276	BioSampleModel	Generic
+SAMN07333276	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333276	ENA-LAST-UPDATE	2017-07-08
+SAMN07333344	INSDC secondary accession	SRS2342161
+SAMN07333344	organism	Homo sapiens
+SAMN07333344	tissue	Adjacent normal
+SAMN07333344	cell type	--
+SAMN07333344	tumor size	--
+SAMN07333344	NCBI submission package	Generic.1.0
+SAMN07333344	histology	--
+SAMN07333344	grade	--
+SAMN07333344	pr status	--
+SAMN07333344	age	--
+SAMN07333344	her2 status	--
+SAMN07333344	source_name	Human breast adjacent normal
+SAMN07333344	er status	--
+SAMN07333344	BioSampleModel	Generic
+SAMN07333344	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333344	ENA-LAST-UPDATE	2017-07-08
+SAMN07333343	INSDC secondary accession	SRS2342162
+SAMN07333343	organism	Homo sapiens
+SAMN07333343	tissue	Breast tumor
+SAMN07333343	cell type	Whole human breast tumor
+SAMN07333343	tumor size	2.4
+SAMN07333343	NCBI submission package	Generic.1.0
+SAMN07333343	histology	Lobular
+SAMN07333343	grade	1
+SAMN07333343	pr status	7 (90)
+SAMN07333343	age	60
+SAMN07333343	her2 status	1+ (20)
+SAMN07333343	source_name	Human breast tumor
+SAMN07333343	er status	8 (100)
+SAMN07333343	BioSampleModel	Generic
+SAMN07333343	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333343	ENA-LAST-UPDATE	2017-07-08
+SAMN07333342	INSDC secondary accession	SRS2342163
+SAMN07333342	organism	Homo sapiens
+SAMN07333342	tissue	Adjacent normal
+SAMN07333342	cell type	--
+SAMN07333342	tumor size	--
+SAMN07333342	NCBI submission package	Generic.1.0
+SAMN07333342	histology	--
+SAMN07333342	grade	--
+SAMN07333342	pr status	--
+SAMN07333342	age	--
+SAMN07333342	her2 status	--
+SAMN07333342	source_name	Human breast adjacent normal
+SAMN07333342	er status	--
+SAMN07333342	BioSampleModel	Generic
+SAMN07333342	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333342	ENA-LAST-UPDATE	2017-07-08
+SAMN07333337	INSDC secondary accession	SRS2342169
+SAMN07333337	organism	Homo sapiens
+SAMN07333337	tissue	Adjacent normal
+SAMN07333337	cell type	--
+SAMN07333337	tumor size	--
+SAMN07333337	NCBI submission package	Generic.1.0
+SAMN07333337	histology	--
+SAMN07333337	grade	--
+SAMN07333337	pr status	--
+SAMN07333337	age	--
+SAMN07333337	her2 status	--
+SAMN07333337	source_name	Human breast adjacent normal
+SAMN07333337	er status	--
+SAMN07333337	BioSampleModel	Generic
+SAMN07333337	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333337	ENA-LAST-UPDATE	2017-07-08
+SAMN07333334	INSDC secondary accession	SRS2342171
+SAMN07333334	organism	Homo sapiens
+SAMN07333334	tissue	Adjacent normal
+SAMN07333334	cell type	--
+SAMN07333334	tumor size	--
+SAMN07333334	NCBI submission package	Generic.1.0
+SAMN07333334	histology	--
+SAMN07333334	grade	--
+SAMN07333334	pr status	--
+SAMN07333334	age	--
+SAMN07333334	her2 status	--
+SAMN07333334	source_name	Human breast adjacent normal
+SAMN07333334	er status	--
+SAMN07333334	BioSampleModel	Generic
+SAMN07333334	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333334	ENA-LAST-UPDATE	2017-07-08
+SAMN07333331	INSDC secondary accession	SRS2342174
+SAMN07333331	organism	Homo sapiens
+SAMN07333331	tissue	Prophylactic Mammoplasty
+SAMN07333331	cell type	--
+SAMN07333331	tumor size	--
+SAMN07333331	NCBI submission package	Generic.1.0
+SAMN07333331	histology	--
+SAMN07333331	grade	--
+SAMN07333331	pr status	--
+SAMN07333331	age	--
+SAMN07333331	her2 status	--
+SAMN07333331	source_name	Prophylactic Mammoplasty
+SAMN07333331	er status	--
+SAMN07333331	BioSampleModel	Generic
+SAMN07333331	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333331	ENA-LAST-UPDATE	2017-07-08
+SAMN07333327	INSDC secondary accession	SRS2342178
+SAMN07333327	organism	Homo sapiens
+SAMN07333327	tissue	Breast tumor
+SAMN07333327	cell type	Whole human breast tumor
+SAMN07333327	tumor size	3
+SAMN07333327	NCBI submission package	Generic.1.0
+SAMN07333327	histology	Ductal
+SAMN07333327	grade	3
+SAMN07333327	pr status	0
+SAMN07333327	age	53
+SAMN07333327	her2 status	3+ (100)
+SAMN07333327	source_name	Human breast tumor
+SAMN07333327	er status	0
+SAMN07333327	BioSampleModel	Generic
+SAMN07333327	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333327	ENA-LAST-UPDATE	2017-07-08
+SAMN07333323	INSDC secondary accession	SRS2342183
+SAMN07333323	organism	Homo sapiens
+SAMN07333323	tissue	Adjacent normal
+SAMN07333323	cell type	--
+SAMN07333323	tumor size	--
+SAMN07333323	NCBI submission package	Generic.1.0
+SAMN07333323	histology	--
+SAMN07333323	grade	--
+SAMN07333323	pr status	--
+SAMN07333323	age	--
+SAMN07333323	her2 status	--
+SAMN07333323	source_name	Human breast adjacent normal
+SAMN07333323	er status	--
+SAMN07333323	BioSampleModel	Generic
+SAMN07333323	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333323	ENA-LAST-UPDATE	2017-07-08
+SAMN07333322	INSDC secondary accession	SRS2342182
+SAMN07333322	organism	Homo sapiens
+SAMN07333322	tissue	Adjacent normal
+SAMN07333322	cell type	--
+SAMN07333322	tumor size	--
+SAMN07333322	NCBI submission package	Generic.1.0
+SAMN07333322	histology	--
+SAMN07333322	grade	--
+SAMN07333322	pr status	--
+SAMN07333322	age	--
+SAMN07333322	her2 status	--
+SAMN07333322	source_name	Human breast adjacent normal
+SAMN07333322	er status	--
+SAMN07333322	BioSampleModel	Generic
+SAMN07333322	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333322	ENA-LAST-UPDATE	2017-07-08
+SAMN07333320	INSDC secondary accession	SRS2342185
+SAMN07333320	organism	Homo sapiens
+SAMN07333320	tissue	Normal Breast
+SAMN07333320	cell type	--
+SAMN07333320	tumor size	--
+SAMN07333320	NCBI submission package	Generic.1.0
+SAMN07333320	histology	--
+SAMN07333320	grade	--
+SAMN07333320	pr status	--
+SAMN07333320	age	--
+SAMN07333320	her2 status	--
+SAMN07333320	source_name	Human Breast Normal
+SAMN07333320	er status	--
+SAMN07333320	BioSampleModel	Generic
+SAMN07333320	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333320	ENA-LAST-UPDATE	2017-07-08
+SAMN07333318	INSDC secondary accession	SRS2342187
+SAMN07333318	organism	Homo sapiens
+SAMN07333318	tissue	Adjacent normal
+SAMN07333318	cell type	--
+SAMN07333318	tumor size	--
+SAMN07333318	NCBI submission package	Generic.1.0
+SAMN07333318	histology	--
+SAMN07333318	grade	--
+SAMN07333318	pr status	--
+SAMN07333318	age	--
+SAMN07333318	her2 status	--
+SAMN07333318	source_name	Human breast adjacent normal
+SAMN07333318	er status	--
+SAMN07333318	BioSampleModel	Generic
+SAMN07333318	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333318	ENA-LAST-UPDATE	2017-07-08
+SAMN07333266	INSDC secondary accession	SRS2342198
+SAMN07333266	organism	Homo sapiens
+SAMN07333266	tissue	Breast tumor
+SAMN07333266	cell type	Whole human breast tumor
+SAMN07333266	tumor size	15.9
+SAMN07333266	NCBI submission package	Generic.1.0
+SAMN07333266	histology	Ductal and Micropapillary
+SAMN07333266	grade	3
+SAMN07333266	pr status	6 (66)
+SAMN07333266	age	42
+SAMN07333266	her2 status	1+ (80)
+SAMN07333266	source_name	Human breast tumor
+SAMN07333266	er status	7-8 (95)
+SAMN07333266	BioSampleModel	Generic
+SAMN07333266	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333266	ENA-LAST-UPDATE	2017-07-08
+SAMN07333357	INSDC secondary accession	SRS2342207
+SAMN07333357	organism	Homo sapiens
+SAMN07333357	tissue	No clinical information available
+SAMN07333357	cell type	--
+SAMN07333357	tumor size	--
+SAMN07333357	NCBI submission package	Generic.1.0
+SAMN07333357	histology	--
+SAMN07333357	grade	--
+SAMN07333357	pr status	--
+SAMN07333357	age	--
+SAMN07333357	her2 status	--
+SAMN07333357	source_name	No clinical information available
+SAMN07333357	er status	--
+SAMN07333357	BioSampleModel	Generic
+SAMN07333357	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333357	ENA-LAST-UPDATE	2017-07-08
+SAMN07333356	INSDC secondary accession	SRS2342209
+SAMN07333356	organism	Homo sapiens
+SAMN07333356	tissue	Normal Breast
+SAMN07333356	cell type	--
+SAMN07333356	tumor size	--
+SAMN07333356	NCBI submission package	Generic.1.0
+SAMN07333356	histology	--
+SAMN07333356	grade	--
+SAMN07333356	pr status	--
+SAMN07333356	age	--
+SAMN07333356	her2 status	--
+SAMN07333356	source_name	Human Breast Normal
+SAMN07333356	er status	--
+SAMN07333356	BioSampleModel	Generic
+SAMN07333356	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333356	ENA-LAST-UPDATE	2017-07-08
+SAMN07333354	INSDC secondary accession	SRS2342210
+SAMN07333354	organism	Homo sapiens
+SAMN07333354	tissue	Adjacent normal
+SAMN07333354	cell type	--
+SAMN07333354	tumor size	--
+SAMN07333354	NCBI submission package	Generic.1.0
+SAMN07333354	histology	--
+SAMN07333354	grade	--
+SAMN07333354	pr status	--
+SAMN07333354	age	--
+SAMN07333354	her2 status	--
+SAMN07333354	source_name	Human breast adjacent normal
+SAMN07333354	er status	--
+SAMN07333354	BioSampleModel	Generic
+SAMN07333354	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333354	ENA-LAST-UPDATE	2017-07-08
+SAMN07333353	INSDC secondary accession	SRS2342211
+SAMN07333353	organism	Homo sapiens
+SAMN07333353	tissue	Adjacent normal
+SAMN07333353	cell type	--
+SAMN07333353	tumor size	--
+SAMN07333353	NCBI submission package	Generic.1.0
+SAMN07333353	histology	--
+SAMN07333353	grade	--
+SAMN07333353	pr status	--
+SAMN07333353	age	--
+SAMN07333353	her2 status	--
+SAMN07333353	source_name	Human breast adjacent normal
+SAMN07333353	er status	--
+SAMN07333353	BioSampleModel	Generic
+SAMN07333353	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333353	ENA-LAST-UPDATE	2017-07-08
+SAMN07333349	INSDC secondary accession	SRS2342215
+SAMN07333349	organism	Homo sapiens
+SAMN07333349	tissue	Prophylactic Mastectomy
+SAMN07333349	cell type	--
+SAMN07333349	tumor size	--
+SAMN07333349	NCBI submission package	Generic.1.0
+SAMN07333349	histology	--
+SAMN07333349	grade	--
+SAMN07333349	pr status	--
+SAMN07333349	age	--
+SAMN07333349	her2 status	--
+SAMN07333349	source_name	Prophylactic Mastectomy
+SAMN07333349	er status	--
+SAMN07333349	BioSampleModel	Generic
+SAMN07333349	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333349	ENA-LAST-UPDATE	2017-07-08
+SAMN07333315	INSDC secondary accession	SRS2342118
+SAMN07333315	organism	Homo sapiens
+SAMN07333315	tissue	Adjacent normal
+SAMN07333315	cell type	--
+SAMN07333315	tumor size	--
+SAMN07333315	NCBI submission package	Generic.1.0
+SAMN07333315	histology	--
+SAMN07333315	grade	--
+SAMN07333315	pr status	--
+SAMN07333315	age	--
+SAMN07333315	her2 status	--
+SAMN07333315	source_name	Human breast adjacent normal
+SAMN07333315	er status	--
+SAMN07333315	BioSampleModel	Generic
+SAMN07333315	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333315	ENA-LAST-UPDATE	2017-07-08
+SAMN07333313	INSDC secondary accession	SRS2342119
+SAMN07333313	organism	Homo sapiens
+SAMN07333313	tissue	Breast tumor
+SAMN07333313	cell type	Whole human breast tumor
+SAMN07333313	tumor size	1.9
+SAMN07333313	NCBI submission package	Generic.1.0
+SAMN07333313	histology	Lobular
+SAMN07333313	grade	2
+SAMN07333313	pr status	8 (100)
+SAMN07333313	age	49
+SAMN07333313	her2 status	1+ (10)
+SAMN07333313	source_name	Human breast tumor
+SAMN07333313	er status	8 (100)
+SAMN07333313	BioSampleModel	Generic
+SAMN07333313	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333313	ENA-LAST-UPDATE	2017-07-08
+SAMN07333311	INSDC secondary accession	SRS2342121
+SAMN07333311	organism	Homo sapiens
+SAMN07333311	tissue	Adjacent normal
+SAMN07333311	cell type	--
+SAMN07333311	tumor size	--
+SAMN07333311	NCBI submission package	Generic.1.0
+SAMN07333311	histology	--
+SAMN07333311	grade	--
+SAMN07333311	pr status	--
+SAMN07333311	age	--
+SAMN07333311	her2 status	--
+SAMN07333311	source_name	Human breast adjacent normal
+SAMN07333311	er status	--
+SAMN07333311	BioSampleModel	Generic
+SAMN07333311	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333311	ENA-LAST-UPDATE	2017-07-08
+SAMN07333308	INSDC secondary accession	SRS2342124
+SAMN07333308	organism	Homo sapiens
+SAMN07333308	tissue	Normal Breast
+SAMN07333308	cell type	--
+SAMN07333308	tumor size	--
+SAMN07333308	NCBI submission package	Generic.1.0
+SAMN07333308	histology	--
+SAMN07333308	grade	--
+SAMN07333308	pr status	--
+SAMN07333308	age	--
+SAMN07333308	her2 status	--
+SAMN07333308	source_name	Human Breast Normal
+SAMN07333308	er status	--
+SAMN07333308	BioSampleModel	Generic
+SAMN07333308	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333308	ENA-LAST-UPDATE	2017-07-08
+SAMN07333300	INSDC secondary accession	SRS2342131
+SAMN07333300	organism	Homo sapiens
+SAMN07333300	tissue	Breast tumor
+SAMN07333300	cell type	Whole human breast tumor
+SAMN07333300	tumor size	4.3
+SAMN07333300	NCBI submission package	Generic.1.0
+SAMN07333300	histology	Ductal
+SAMN07333300	grade	3
+SAMN07333300	pr status	0
+SAMN07333300	age	49
+SAMN07333300	her2 status	2+
+SAMN07333300	source_name	Human breast tumor
+SAMN07333300	er status	3+ (90)
+SAMN07333300	BioSampleModel	Generic
+SAMN07333300	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333300	ENA-LAST-UPDATE	2017-07-08
+SAMN07333294	INSDC secondary accession	SRS2342139
+SAMN07333294	organism	Homo sapiens
+SAMN07333294	tissue	Breast tumor
+SAMN07333294	cell type	Whole human breast tumor
+SAMN07333294	tumor size	5.1
+SAMN07333294	NCBI submission package	Generic.1.0
+SAMN07333294	histology	Ductal
+SAMN07333294	grade	2
+SAMN07333294	pr status	0
+SAMN07333294	age	76
+SAMN07333294	her2 status	2+
+SAMN07333294	source_name	Human breast tumor
+SAMN07333294	er status	0
+SAMN07333294	BioSampleModel	Generic
+SAMN07333294	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333294	ENA-LAST-UPDATE	2017-07-08
+SAMN07333285	INSDC secondary accession	SRS2342146
+SAMN07333285	organism	Homo sapiens
+SAMN07333285	tissue	Breast tumor
+SAMN07333285	cell type	Whole human breast tumor
+SAMN07333285	tumor size	5.3
+SAMN07333285	NCBI submission package	Generic.1.0
+SAMN07333285	histology	Ductal
+SAMN07333285	grade	1
+SAMN07333285	pr status	3+ (50)
+SAMN07333285	age	47
+SAMN07333285	her2 status	0
+SAMN07333285	source_name	Human breast tumor
+SAMN07333285	er status	3+ (95)
+SAMN07333285	BioSampleModel	Generic
+SAMN07333285	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333285	ENA-LAST-UPDATE	2017-07-08
+SAMN07333345	INSDC secondary accession	SRS2342160
+SAMN07333345	organism	Homo sapiens
+SAMN07333345	tissue	Breast tumor
+SAMN07333345	cell type	Whole human breast tumor
+SAMN07333345	tumor size	3.7
+SAMN07333345	NCBI submission package	Generic.1.0
+SAMN07333345	histology	Ductal
+SAMN07333345	grade	2
+SAMN07333345	pr status	1 (10)
+SAMN07333345	age	60
+SAMN07333345	her2 status	2+
+SAMN07333345	source_name	Human breast tumor
+SAMN07333345	er status	3+ (>90)
+SAMN07333345	BioSampleModel	Generic
+SAMN07333345	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333345	ENA-LAST-UPDATE	2017-07-08
+SAMN07333326	INSDC secondary accession	SRS2342179
+SAMN07333326	organism	Homo sapiens
+SAMN07333326	tissue	Adjacent normal
+SAMN07333326	cell type	--
+SAMN07333326	tumor size	--
+SAMN07333326	NCBI submission package	Generic.1.0
+SAMN07333326	histology	--
+SAMN07333326	grade	--
+SAMN07333326	pr status	--
+SAMN07333326	age	--
+SAMN07333326	her2 status	--
+SAMN07333326	source_name	Human breast adjacent normal
+SAMN07333326	er status	--
+SAMN07333326	BioSampleModel	Generic
+SAMN07333326	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333326	ENA-LAST-UPDATE	2017-07-08
+SAMN07333324	INSDC secondary accession	SRS2342180
+SAMN07333324	organism	Homo sapiens
+SAMN07333324	tissue	Adjacent normal
+SAMN07333324	cell type	--
+SAMN07333324	tumor size	--
+SAMN07333324	NCBI submission package	Generic.1.0
+SAMN07333324	histology	--
+SAMN07333324	grade	--
+SAMN07333324	pr status	--
+SAMN07333324	age	--
+SAMN07333324	her2 status	--
+SAMN07333324	source_name	Human breast adjacent normal
+SAMN07333324	er status	--
+SAMN07333324	BioSampleModel	Generic
+SAMN07333324	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333324	ENA-LAST-UPDATE	2017-07-08
+SAMN07333273	INSDC secondary accession	SRS2342190
+SAMN07333273	organism	Homo sapiens
+SAMN07333273	tissue	Adjacent normal
+SAMN07333273	cell type	--
+SAMN07333273	tumor size	--
+SAMN07333273	NCBI submission package	Generic.1.0
+SAMN07333273	histology	--
+SAMN07333273	grade	--
+SAMN07333273	pr status	--
+SAMN07333273	age	--
+SAMN07333273	her2 status	--
+SAMN07333273	source_name	Human breast adjacent normal
+SAMN07333273	er status	--
+SAMN07333273	BioSampleModel	Generic
+SAMN07333273	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333273	ENA-LAST-UPDATE	2017-07-08
+SAMN07333272	INSDC secondary accession	SRS2342191
+SAMN07333272	organism	Homo sapiens
+SAMN07333272	tissue	Adjacent normal
+SAMN07333272	cell type	--
+SAMN07333272	tumor size	--
+SAMN07333272	NCBI submission package	Generic.1.0
+SAMN07333272	histology	--
+SAMN07333272	grade	--
+SAMN07333272	pr status	--
+SAMN07333272	age	--
+SAMN07333272	her2 status	--
+SAMN07333272	source_name	Human breast adjacent normal
+SAMN07333272	er status	--
+SAMN07333272	BioSampleModel	Generic
+SAMN07333272	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333272	ENA-LAST-UPDATE	2017-07-08
+SAMN07333271	INSDC secondary accession	SRS2342192
+SAMN07333271	organism	Homo sapiens
+SAMN07333271	tissue	Adjacent normal
+SAMN07333271	cell type	--
+SAMN07333271	tumor size	--
+SAMN07333271	NCBI submission package	Generic.1.0
+SAMN07333271	histology	--
+SAMN07333271	grade	--
+SAMN07333271	pr status	--
+SAMN07333271	age	--
+SAMN07333271	her2 status	--
+SAMN07333271	source_name	Human breast adjacent normal
+SAMN07333271	er status	--
+SAMN07333271	BioSampleModel	Generic
+SAMN07333271	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333271	ENA-LAST-UPDATE	2017-07-08
+SAMN07333270	INSDC secondary accession	SRS2342194
+SAMN07333270	organism	Homo sapiens
+SAMN07333270	tissue	Normal Breast
+SAMN07333270	cell type	--
+SAMN07333270	tumor size	--
+SAMN07333270	NCBI submission package	Generic.1.0
+SAMN07333270	histology	--
+SAMN07333270	grade	--
+SAMN07333270	pr status	--
+SAMN07333270	age	--
+SAMN07333270	her2 status	--
+SAMN07333270	source_name	Human Breast Normal
+SAMN07333270	er status	--
+SAMN07333270	BioSampleModel	Generic
+SAMN07333270	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333270	ENA-LAST-UPDATE	2017-07-08
+SAMN07333362	INSDC secondary accession	SRS2342202
+SAMN07333362	organism	Homo sapiens
+SAMN07333362	tissue	Adjacent normal
+SAMN07333362	cell type	--
+SAMN07333362	tumor size	--
+SAMN07333362	NCBI submission package	Generic.1.0
+SAMN07333362	histology	--
+SAMN07333362	grade	--
+SAMN07333362	pr status	--
+SAMN07333362	age	--
+SAMN07333362	her2 status	--
+SAMN07333362	source_name	Human breast adjacent normal
+SAMN07333362	er status	--
+SAMN07333362	BioSampleModel	Generic
+SAMN07333362	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333362	ENA-LAST-UPDATE	2017-07-08
+SAMN07333360	INSDC secondary accession	SRS2342204
+SAMN07333360	organism	Homo sapiens
+SAMN07333360	tissue	Adjacent normal
+SAMN07333360	cell type	--
+SAMN07333360	tumor size	--
+SAMN07333360	NCBI submission package	Generic.1.0
+SAMN07333360	histology	--
+SAMN07333360	grade	--
+SAMN07333360	pr status	--
+SAMN07333360	age	--
+SAMN07333360	her2 status	--
+SAMN07333360	source_name	Human breast adjacent normal
+SAMN07333360	er status	--
+SAMN07333360	BioSampleModel	Generic
+SAMN07333360	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333360	ENA-LAST-UPDATE	2017-07-08
+SAMN07333359	INSDC secondary accession	SRS2342206
+SAMN07333359	organism	Homo sapiens
+SAMN07333359	tissue	Normal Breast
+SAMN07333359	cell type	--
+SAMN07333359	tumor size	--
+SAMN07333359	NCBI submission package	Generic.1.0
+SAMN07333359	histology	--
+SAMN07333359	grade	--
+SAMN07333359	pr status	--
+SAMN07333359	age	--
+SAMN07333359	her2 status	--
+SAMN07333359	source_name	Human Breast Normal
+SAMN07333359	er status	--
+SAMN07333359	BioSampleModel	Generic
+SAMN07333359	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333359	ENA-LAST-UPDATE	2017-07-08
+SAMN07333358	INSDC secondary accession	SRS2342205
+SAMN07333358	organism	Homo sapiens
+SAMN07333358	tissue	Breast tumor
+SAMN07333358	cell type	Whole human breast tumor
+SAMN07333358	tumor size	.8
+SAMN07333358	NCBI submission package	Generic.1.0
+SAMN07333358	histology	Ductal
+SAMN07333358	grade	2
+SAMN07333358	pr status	0
+SAMN07333358	age	74
+SAMN07333358	her2 status	2+
+SAMN07333358	source_name	Human breast tumor
+SAMN07333358	er status	1+ (1)
+SAMN07333358	BioSampleModel	Generic
+SAMN07333358	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333358	ENA-LAST-UPDATE	2017-07-08
+SAMN07333317	INSDC secondary accession	SRS2342115
+SAMN07333317	organism	Homo sapiens
+SAMN07333317	tissue	No clinical information available
+SAMN07333317	cell type	--
+SAMN07333317	tumor size	--
+SAMN07333317	NCBI submission package	Generic.1.0
+SAMN07333317	histology	--
+SAMN07333317	grade	--
+SAMN07333317	pr status	--
+SAMN07333317	age	--
+SAMN07333317	her2 status	--
+SAMN07333317	source_name	No clinical information available
+SAMN07333317	er status	--
+SAMN07333317	BioSampleModel	Generic
+SAMN07333317	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333317	ENA-LAST-UPDATE	2017-07-08
+SAMN07333316	INSDC secondary accession	SRS2342116
+SAMN07333316	organism	Homo sapiens
+SAMN07333316	tissue	Breast tumor
+SAMN07333316	cell type	Whole human breast tumor
+SAMN07333316	tumor size	3.5
+SAMN07333316	NCBI submission package	Generic.1.0
+SAMN07333316	histology	Ductal with prominent lobular features
+SAMN07333316	grade	2
+SAMN07333316	pr status	0
+SAMN07333316	age	42
+SAMN07333316	her2 status	2+ (20)
+SAMN07333316	source_name	Human breast tumor
+SAMN07333316	er status	0
+SAMN07333316	BioSampleModel	Generic
+SAMN07333316	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333316	ENA-LAST-UPDATE	2017-07-08
+SAMN07333312	INSDC secondary accession	SRS2342120
+SAMN07333312	organism	Homo sapiens
+SAMN07333312	tissue	Adjacent normal
+SAMN07333312	cell type	--
+SAMN07333312	tumor size	--
+SAMN07333312	NCBI submission package	Generic.1.0
+SAMN07333312	histology	--
+SAMN07333312	grade	--
+SAMN07333312	pr status	--
+SAMN07333312	age	--
+SAMN07333312	her2 status	--
+SAMN07333312	source_name	Human breast adjacent normal
+SAMN07333312	er status	--
+SAMN07333312	BioSampleModel	Generic
+SAMN07333312	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333312	ENA-LAST-UPDATE	2017-07-08
+SAMN07333309	INSDC secondary accession	SRS2342123
+SAMN07333309	organism	Homo sapiens
+SAMN07333309	tissue	Adjacent normal
+SAMN07333309	cell type	--
+SAMN07333309	tumor size	--
+SAMN07333309	NCBI submission package	Generic.1.0
+SAMN07333309	histology	--
+SAMN07333309	grade	--
+SAMN07333309	pr status	--
+SAMN07333309	age	--
+SAMN07333309	her2 status	--
+SAMN07333309	source_name	Human breast adjacent normal
+SAMN07333309	er status	--
+SAMN07333309	BioSampleModel	Generic
+SAMN07333309	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333309	ENA-LAST-UPDATE	2017-07-08
+SAMN07333307	INSDC secondary accession	SRS2342125
+SAMN07333307	organism	Homo sapiens
+SAMN07333307	tissue	Adjacent normal
+SAMN07333307	cell type	--
+SAMN07333307	tumor size	--
+SAMN07333307	NCBI submission package	Generic.1.0
+SAMN07333307	histology	--
+SAMN07333307	grade	--
+SAMN07333307	pr status	--
+SAMN07333307	age	--
+SAMN07333307	her2 status	--
+SAMN07333307	source_name	Human breast adjacent normal
+SAMN07333307	er status	--
+SAMN07333307	BioSampleModel	Generic
+SAMN07333307	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333307	ENA-LAST-UPDATE	2017-07-08
+SAMN07333298	INSDC secondary accession	SRS2342132
+SAMN07333298	organism	Homo sapiens
+SAMN07333298	tissue	Breast tumor
+SAMN07333298	cell type	Whole human breast tumor
+SAMN07333298	tumor size	1.9
+SAMN07333298	NCBI submission package	Generic.1.0
+SAMN07333298	histology	Ductal
+SAMN07333298	grade	1
+SAMN07333298	pr status	3+ (100)
+SAMN07333298	age	36
+SAMN07333298	her2 status	0
+SAMN07333298	source_name	Human breast tumor
+SAMN07333298	er status	3+ (100)
+SAMN07333298	BioSampleModel	Generic
+SAMN07333298	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333298	ENA-LAST-UPDATE	2017-07-08
+SAMN07333304	INSDC secondary accession	SRS2342134
+SAMN07333304	organism	Homo sapiens
+SAMN07333304	tissue	Breast tumor
+SAMN07333304	cell type	Whole human breast tumor
+SAMN07333304	tumor size	4.8
+SAMN07333304	NCBI submission package	Generic.1.0
+SAMN07333304	histology	Ductal
+SAMN07333304	grade	3
+SAMN07333304	pr status	3+ (60)
+SAMN07333304	age	61
+SAMN07333304	her2 status	2+
+SAMN07333304	source_name	Human breast tumor
+SAMN07333304	er status	3+ (99)
+SAMN07333304	BioSampleModel	Generic
+SAMN07333304	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333304	ENA-LAST-UPDATE	2017-07-08
+SAMN07333295	INSDC secondary accession	SRS2342138
+SAMN07333295	organism	Homo sapiens
+SAMN07333295	tissue	Breast tumor
+SAMN07333295	cell type	Whole human breast tumor
+SAMN07333295	tumor size	2.2
+SAMN07333295	NCBI submission package	Generic.1.0
+SAMN07333295	histology	Ductal
+SAMN07333295	grade	3
+SAMN07333295	pr status	0
+SAMN07333295	age	78
+SAMN07333295	her2 status	2+
+SAMN07333295	source_name	Human breast tumor
+SAMN07333295	er status	3+ (100)
+SAMN07333295	BioSampleModel	Generic
+SAMN07333295	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333295	ENA-LAST-UPDATE	2017-07-08
+SAMN07333293	INSDC secondary accession	SRS2342140
+SAMN07333293	organism	Homo sapiens
+SAMN07333293	tissue	Breast tumor
+SAMN07333293	cell type	Whole human breast tumor
+SAMN07333293	tumor size	9
+SAMN07333293	NCBI submission package	Generic.1.0
+SAMN07333293	histology	Ductal
+SAMN07333293	grade	2
+SAMN07333293	pr status	1-3+ (60)
+SAMN07333293	age	65
+SAMN07333293	her2 status	-
+SAMN07333293	source_name	Human breast tumor
+SAMN07333293	er status	1-3+ (90)
+SAMN07333293	BioSampleModel	Generic
+SAMN07333293	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333293	ENA-LAST-UPDATE	2017-07-08
+SAMN07333287	INSDC secondary accession	SRS2342147
+SAMN07333287	organism	Homo sapiens
+SAMN07333287	tissue	Breast tumor
+SAMN07333287	cell type	Whole human breast tumor
+SAMN07333287	tumor size	2.1
+SAMN07333287	NCBI submission package	Generic.1.0
+SAMN07333287	histology	Ductal
+SAMN07333287	grade	1
+SAMN07333287	pr status	3+ (70)
+SAMN07333287	age	47
+SAMN07333287	her2 status	0
+SAMN07333287	source_name	Human breast tumor
+SAMN07333287	er status	3+ (90)
+SAMN07333287	BioSampleModel	Generic
+SAMN07333287	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333287	ENA-LAST-UPDATE	2017-07-08
+SAMN07333281	INSDC secondary accession	SRS2342152
+SAMN07333281	organism	Homo sapiens
+SAMN07333281	tissue	Breast tumor
+SAMN07333281	cell type	Whole human breast tumor
+SAMN07333281	tumor size	9.9
+SAMN07333281	NCBI submission package	Generic.1.0
+SAMN07333281	histology	Ductal
+SAMN07333281	grade	2
+SAMN07333281	pr status	0
+SAMN07333281	age	39
+SAMN07333281	her2 status	2+
+SAMN07333281	source_name	Human breast tumor
+SAMN07333281	er status	3+ (>95)
+SAMN07333281	BioSampleModel	Generic
+SAMN07333281	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333281	ENA-LAST-UPDATE	2017-07-08
+SAMN07333280	INSDC secondary accession	SRS2342154
+SAMN07333280	organism	Homo sapiens
+SAMN07333280	tissue	Breast tumor
+SAMN07333280	cell type	Whole human breast tumor
+SAMN07333280	tumor size	9.2
+SAMN07333280	NCBI submission package	Generic.1.0
+SAMN07333280	histology	Ductal
+SAMN07333280	grade	2
+SAMN07333280	pr status	0
+SAMN07333280	age	38
+SAMN07333280	her2 status	3+
+SAMN07333280	source_name	Human breast tumor
+SAMN07333280	er status	0
+SAMN07333280	BioSampleModel	Generic
+SAMN07333280	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333280	ENA-LAST-UPDATE	2017-07-08
+SAMN07333346	INSDC secondary accession	SRS2342159
+SAMN07333346	organism	Homo sapiens
+SAMN07333346	tissue	Adjacent normal
+SAMN07333346	cell type	--
+SAMN07333346	tumor size	--
+SAMN07333346	NCBI submission package	Generic.1.0
+SAMN07333346	histology	--
+SAMN07333346	grade	--
+SAMN07333346	pr status	--
+SAMN07333346	age	--
+SAMN07333346	her2 status	--
+SAMN07333346	source_name	Human breast adjacent normal
+SAMN07333346	er status	--
+SAMN07333346	BioSampleModel	Generic
+SAMN07333346	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333346	ENA-LAST-UPDATE	2017-07-08
+SAMN07333340	INSDC secondary accession	SRS2342165
+SAMN07333340	organism	Homo sapiens
+SAMN07333340	tissue	Prophylactic Mastectomy
+SAMN07333340	cell type	--
+SAMN07333340	tumor size	--
+SAMN07333340	NCBI submission package	Generic.1.0
+SAMN07333340	histology	--
+SAMN07333340	grade	--
+SAMN07333340	pr status	--
+SAMN07333340	age	--
+SAMN07333340	her2 status	--
+SAMN07333340	source_name	Prophylactic Mastectomy
+SAMN07333340	er status	--
+SAMN07333340	BioSampleModel	Generic
+SAMN07333340	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333340	ENA-LAST-UPDATE	2017-07-08
+SAMN07333338	INSDC secondary accession	SRS2342167
+SAMN07333338	organism	Homo sapiens
+SAMN07333338	tissue	Adjacent normal
+SAMN07333338	cell type	--
+SAMN07333338	tumor size	--
+SAMN07333338	NCBI submission package	Generic.1.0
+SAMN07333338	histology	--
+SAMN07333338	grade	--
+SAMN07333338	pr status	--
+SAMN07333338	age	--
+SAMN07333338	her2 status	--
+SAMN07333338	source_name	Human breast adjacent normal
+SAMN07333338	er status	--
+SAMN07333338	BioSampleModel	Generic
+SAMN07333338	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333338	ENA-LAST-UPDATE	2017-07-08
+SAMN07333329	INSDC secondary accession	SRS2342176
+SAMN07333329	organism	Homo sapiens
+SAMN07333329	tissue	Breast tumor
+SAMN07333329	cell type	Whole human breast tumor
+SAMN07333329	tumor size	3.7
+SAMN07333329	NCBI submission package	Generic.1.0
+SAMN07333329	histology	Ductal
+SAMN07333329	grade	2
+SAMN07333329	pr status	0
+SAMN07333329	age	50
+SAMN07333329	her2 status	0
+SAMN07333329	source_name	Human breast tumor
+SAMN07333329	er status	0
+SAMN07333329	BioSampleModel	Generic
+SAMN07333329	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333329	ENA-LAST-UPDATE	2017-07-08
+SAMN07333328	INSDC secondary accession	SRS2342177
+SAMN07333328	organism	Homo sapiens
+SAMN07333328	tissue	Normal Breast
+SAMN07333328	cell type	--
+SAMN07333328	tumor size	--
+SAMN07333328	NCBI submission package	Generic.1.0
+SAMN07333328	histology	--
+SAMN07333328	grade	--
+SAMN07333328	pr status	--
+SAMN07333328	age	--
+SAMN07333328	her2 status	--
+SAMN07333328	source_name	Human Breast Normal
+SAMN07333328	er status	--
+SAMN07333328	BioSampleModel	Generic
+SAMN07333328	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333328	ENA-LAST-UPDATE	2017-07-08
+SAMN07333325	INSDC secondary accession	SRS2342181
+SAMN07333325	organism	Homo sapiens
+SAMN07333325	tissue	Adjacent normal
+SAMN07333325	cell type	--
+SAMN07333325	tumor size	--
+SAMN07333325	NCBI submission package	Generic.1.0
+SAMN07333325	histology	--
+SAMN07333325	grade	--
+SAMN07333325	pr status	--
+SAMN07333325	age	--
+SAMN07333325	her2 status	--
+SAMN07333325	source_name	Human breast adjacent normal
+SAMN07333325	er status	--
+SAMN07333325	BioSampleModel	Generic
+SAMN07333325	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333325	ENA-LAST-UPDATE	2017-07-08
+SAMN07333365	INSDC secondary accession	SRS2342193
+SAMN07333365	organism	Homo sapiens
+SAMN07333365	tissue	Adjacent normal
+SAMN07333365	cell type	--
+SAMN07333365	tumor size	--
+SAMN07333365	NCBI submission package	Generic.1.0
+SAMN07333365	histology	--
+SAMN07333365	grade	--
+SAMN07333365	pr status	--
+SAMN07333365	age	--
+SAMN07333365	her2 status	--
+SAMN07333365	source_name	Human breast adjacent normal
+SAMN07333365	er status	--
+SAMN07333365	BioSampleModel	Generic
+SAMN07333365	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333365	ENA-LAST-UPDATE	2017-07-08
+SAMN07333366	INSDC secondary accession	SRS2342199
+SAMN07333366	organism	Homo sapiens
+SAMN07333366	tissue	Adjacent normal
+SAMN07333366	cell type	--
+SAMN07333366	tumor size	--
+SAMN07333366	NCBI submission package	Generic.1.0
+SAMN07333366	histology	--
+SAMN07333366	grade	--
+SAMN07333366	pr status	--
+SAMN07333366	age	--
+SAMN07333366	her2 status	--
+SAMN07333366	source_name	Human breast adjacent normal
+SAMN07333366	er status	--
+SAMN07333366	BioSampleModel	Generic
+SAMN07333366	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333366	ENA-LAST-UPDATE	2017-07-08
+SAMN07333364	INSDC secondary accession	SRS2342200
+SAMN07333364	organism	Homo sapiens
+SAMN07333364	tissue	Adjacent normal
+SAMN07333364	cell type	--
+SAMN07333364	tumor size	--
+SAMN07333364	NCBI submission package	Generic.1.0
+SAMN07333364	histology	--
+SAMN07333364	grade	--
+SAMN07333364	pr status	--
+SAMN07333364	age	--
+SAMN07333364	her2 status	--
+SAMN07333364	source_name	Human breast adjacent normal
+SAMN07333364	er status	--
+SAMN07333364	BioSampleModel	Generic
+SAMN07333364	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333364	ENA-LAST-UPDATE	2017-07-08
+SAMN07333363	INSDC secondary accession	SRS2342201
+SAMN07333363	organism	Homo sapiens
+SAMN07333363	tissue	Adjacent normal
+SAMN07333363	cell type	--
+SAMN07333363	tumor size	--
+SAMN07333363	NCBI submission package	Generic.1.0
+SAMN07333363	histology	--
+SAMN07333363	grade	--
+SAMN07333363	pr status	--
+SAMN07333363	age	--
+SAMN07333363	her2 status	--
+SAMN07333363	source_name	Human breast adjacent normal
+SAMN07333363	er status	--
+SAMN07333363	BioSampleModel	Generic
+SAMN07333363	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333363	ENA-LAST-UPDATE	2017-07-08
+SAMN07333351	INSDC secondary accession	SRS2342213
+SAMN07333351	organism	Homo sapiens
+SAMN07333351	tissue	Breast tumor
+SAMN07333351	cell type	Whole human breast tumor
+SAMN07333351	tumor size	4.2
+SAMN07333351	NCBI submission package	Generic.1.0
+SAMN07333351	histology	Ductal
+SAMN07333351	grade	2
+SAMN07333351	pr status	2-3+ (50)
+SAMN07333351	age	73
+SAMN07333351	her2 status	3+
+SAMN07333351	source_name	Human breast tumor
+SAMN07333351	er status	3+ (100)
+SAMN07333351	BioSampleModel	Generic
+SAMN07333351	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333351	ENA-LAST-UPDATE	2017-07-08
+SAMN07333314	INSDC secondary accession	SRS2342117
+SAMN07333314	organism	Homo sapiens
+SAMN07333314	tissue	Breast tumor
+SAMN07333314	cell type	Whole human breast tumor
+SAMN07333314	tumor size	4.2
+SAMN07333314	NCBI submission package	Generic.1.0
+SAMN07333314	histology	Metaplastic
+SAMN07333314	grade	3
+SAMN07333314	pr status	0
+SAMN07333314	age	68
+SAMN07333314	her2 status	0
+SAMN07333314	source_name	Human breast tumor
+SAMN07333314	er status	0
+SAMN07333314	BioSampleModel	Generic
+SAMN07333314	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333314	ENA-LAST-UPDATE	2017-07-08
+SAMN07333310	INSDC secondary accession	SRS2342122
+SAMN07333310	organism	Homo sapiens
+SAMN07333310	tissue	Breast tumor
+SAMN07333310	cell type	Whole human breast tumor
+SAMN07333310	tumor size	3.7
+SAMN07333310	NCBI submission package	Generic.1.0
+SAMN07333310	histology	Ductal
+SAMN07333310	grade	2
+SAMN07333310	pr status	0
+SAMN07333310	age	55
+SAMN07333310	her2 status	1+ (10)
+SAMN07333310	source_name	Human breast tumor
+SAMN07333310	er status	0
+SAMN07333310	BioSampleModel	Generic
+SAMN07333310	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333310	ENA-LAST-UPDATE	2017-07-08
+SAMN07333302	INSDC secondary accession	SRS2342133
+SAMN07333302	organism	Homo sapiens
+SAMN07333302	tissue	Breast tumor
+SAMN07333302	cell type	Whole human breast tumor
+SAMN07333302	tumor size	1.9
+SAMN07333302	NCBI submission package	Generic.1.0
+SAMN07333302	histology	Ductal
+SAMN07333302	grade	1
+SAMN07333302	pr status	3+ (100)
+SAMN07333302	age	36
+SAMN07333302	her2 status	0
+SAMN07333302	source_name	Human breast tumor
+SAMN07333302	er status	3+ (100)
+SAMN07333302	BioSampleModel	Generic
+SAMN07333302	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333302	ENA-LAST-UPDATE	2017-07-08
+SAMN07333303	INSDC secondary accession	SRS2342136
+SAMN07333303	organism	Homo sapiens
+SAMN07333303	tissue	Breast tumor
+SAMN07333303	cell type	Whole human breast tumor
+SAMN07333303	tumor size	2.2
+SAMN07333303	NCBI submission package	Generic.1.0
+SAMN07333303	histology	Ductal
+SAMN07333303	grade	3
+SAMN07333303	pr status	1-3+ (40)
+SAMN07333303	age	78
+SAMN07333303	her2 status	3+
+SAMN07333303	source_name	Human breast tumor
+SAMN07333303	er status	3+ (30)
+SAMN07333303	BioSampleModel	Generic
+SAMN07333303	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333303	ENA-LAST-UPDATE	2017-07-08
+SAMN07333296	INSDC secondary accession	SRS2342137
+SAMN07333296	organism	Homo sapiens
+SAMN07333296	tissue	Breast tumor
+SAMN07333296	cell type	Whole human breast tumor
+SAMN07333296	tumor size	2.2
+SAMN07333296	NCBI submission package	Generic.1.0
+SAMN07333296	histology	Ductal
+SAMN07333296	grade	3
+SAMN07333296	pr status	0
+SAMN07333296	age	78
+SAMN07333296	her2 status	2+
+SAMN07333296	source_name	Human breast tumor
+SAMN07333296	er status	3+ (100)
+SAMN07333296	BioSampleModel	Generic
+SAMN07333296	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333296	ENA-LAST-UPDATE	2017-07-08
+SAMN07333292	INSDC secondary accession	SRS2342141
+SAMN07333292	organism	Homo sapiens
+SAMN07333292	tissue	Breast tumor
+SAMN07333292	cell type	Whole human breast tumor
+SAMN07333292	tumor size	9
+SAMN07333292	NCBI submission package	Generic.1.0
+SAMN07333292	histology	Ductal
+SAMN07333292	grade	2
+SAMN07333292	pr status	1-3+ (60)
+SAMN07333292	age	65
+SAMN07333292	her2 status	-
+SAMN07333292	source_name	Human breast tumor
+SAMN07333292	er status	1-3+ (90)
+SAMN07333292	BioSampleModel	Generic
+SAMN07333292	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333292	ENA-LAST-UPDATE	2017-07-08
+SAMN07333291	INSDC secondary accession	SRS2342142
+SAMN07333291	organism	Homo sapiens
+SAMN07333291	tissue	Breast tumor
+SAMN07333291	cell type	Whole human breast tumor
+SAMN07333291	tumor size	1.1
+SAMN07333291	NCBI submission package	Generic.1.0
+SAMN07333291	histology	Lobular
+SAMN07333291	grade	2
+SAMN07333291	pr status	1-3+ (60)
+SAMN07333291	age	65
+SAMN07333291	her2 status	-
+SAMN07333291	source_name	Human breast tumor
+SAMN07333291	er status	3+ (100)
+SAMN07333291	BioSampleModel	Generic
+SAMN07333291	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333291	ENA-LAST-UPDATE	2017-07-08
+SAMN07333288	INSDC secondary accession	SRS2342144
+SAMN07333288	organism	Homo sapiens
+SAMN07333288	tissue	Breast tumor
+SAMN07333288	cell type	Whole human breast tumor
+SAMN07333288	tumor size	3
+SAMN07333288	NCBI submission package	Generic.1.0
+SAMN07333288	histology	Lobular
+SAMN07333288	grade	1
+SAMN07333288	pr status	0
+SAMN07333288	age	71
+SAMN07333288	her2 status	0
+SAMN07333288	source_name	Human breast tumor
+SAMN07333288	er status	3+ (>95)
+SAMN07333288	BioSampleModel	Generic
+SAMN07333288	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333288	ENA-LAST-UPDATE	2017-07-08
+SAMN07333284	INSDC secondary accession	SRS2342149
+SAMN07333284	organism	Homo sapiens
+SAMN07333284	tissue	Breast tumor
+SAMN07333284	cell type	Whole human breast tumor
+SAMN07333284	tumor size	5.3
+SAMN07333284	NCBI submission package	Generic.1.0
+SAMN07333284	histology	Ductal
+SAMN07333284	grade	1
+SAMN07333284	pr status	3+ (50)
+SAMN07333284	age	47
+SAMN07333284	her2 status	0
+SAMN07333284	source_name	Human breast tumor
+SAMN07333284	er status	3+ (95)
+SAMN07333284	BioSampleModel	Generic
+SAMN07333284	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333284	ENA-LAST-UPDATE	2017-07-08
+SAMN07333279	INSDC secondary accession	SRS2342153
+SAMN07333279	organism	Homo sapiens
+SAMN07333279	tissue	Breast tumor
+SAMN07333279	cell type	Whole human breast tumor
+SAMN07333279	tumor size	4.2
+SAMN07333279	NCBI submission package	Generic.1.0
+SAMN07333279	histology	Ductal
+SAMN07333279	grade	3
+SAMN07333279	pr status	0
+SAMN07333279	age	51
+SAMN07333279	her2 status	2+
+SAMN07333279	source_name	Human breast tumor
+SAMN07333279	er status	2+ (20)
+SAMN07333279	BioSampleModel	Generic
+SAMN07333279	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333279	ENA-LAST-UPDATE	2017-07-08
+SAMN07333278	INSDC secondary accession	SRS2342156
+SAMN07333278	organism	Homo sapiens
+SAMN07333278	tissue	Breast tumor
+SAMN07333278	cell type	Whole human breast tumor
+SAMN07333278	tumor size	4.2
+SAMN07333278	NCBI submission package	Generic.1.0
+SAMN07333278	histology	Ductal
+SAMN07333278	grade	3
+SAMN07333278	pr status	0
+SAMN07333278	age	51
+SAMN07333278	her2 status	2+
+SAMN07333278	source_name	Human breast tumor
+SAMN07333278	er status	2+ (20)
+SAMN07333278	BioSampleModel	Generic
+SAMN07333278	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333278	ENA-LAST-UPDATE	2017-07-08
+SAMN07333277	INSDC secondary accession	SRS2342157
+SAMN07333277	organism	Homo sapiens
+SAMN07333277	tissue	Breast tumor
+SAMN07333277	cell type	Whole human breast tumor
+SAMN07333277	tumor size	--
+SAMN07333277	NCBI submission package	Generic.1.0
+SAMN07333277	histology	--
+SAMN07333277	grade	--
+SAMN07333277	pr status	--
+SAMN07333277	age	--
+SAMN07333277	her2 status	--
+SAMN07333277	source_name	Human breast tumor
+SAMN07333277	er status	--
+SAMN07333277	BioSampleModel	Generic
+SAMN07333277	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333277	ENA-LAST-UPDATE	2017-07-08
+SAMN07333341	INSDC secondary accession	SRS2342164
+SAMN07333341	organism	Homo sapiens
+SAMN07333341	tissue	Breast tumor
+SAMN07333341	cell type	Whole human breast tumor
+SAMN07333341	tumor size	10
+SAMN07333341	NCBI submission package	Generic.1.0
+SAMN07333341	histology	DCIS (Comedo)
+SAMN07333341	grade	3
+SAMN07333341	pr status	3 (<1)
+SAMN07333341	age	33
+SAMN07333341	her2 status	-
+SAMN07333341	source_name	Human breast tumor
+SAMN07333341	er status	3 (10)
+SAMN07333341	BioSampleModel	Generic
+SAMN07333341	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333341	ENA-LAST-UPDATE	2017-07-08
+SAMN07333335	INSDC secondary accession	SRS2342170
+SAMN07333335	organism	Homo sapiens
+SAMN07333335	tissue	Breast tumor
+SAMN07333335	cell type	Whole human breast tumor
+SAMN07333335	tumor size	1.5
+SAMN07333335	NCBI submission package	Generic.1.0
+SAMN07333335	histology	Ductal
+SAMN07333335	grade	3
+SAMN07333335	pr status	8 (100)
+SAMN07333335	age	46
+SAMN07333335	her2 status	3+ (100)
+SAMN07333335	source_name	Human breast tumor
+SAMN07333335	er status	7-8 (89-90)
+SAMN07333335	BioSampleModel	Generic
+SAMN07333335	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333335	ENA-LAST-UPDATE	2017-07-08
+SAMN07333330	INSDC secondary accession	SRS2342175
+SAMN07333330	organism	Homo sapiens
+SAMN07333330	tissue	Normal Breast
+SAMN07333330	cell type	--
+SAMN07333330	tumor size	--
+SAMN07333330	NCBI submission package	Generic.1.0
+SAMN07333330	histology	--
+SAMN07333330	grade	--
+SAMN07333330	pr status	--
+SAMN07333330	age	--
+SAMN07333330	her2 status	--
+SAMN07333330	source_name	Human Breast Normal
+SAMN07333330	er status	--
+SAMN07333330	BioSampleModel	Generic
+SAMN07333330	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333330	ENA-LAST-UPDATE	2017-07-08
+SAMN07333274	INSDC secondary accession	SRS2342189
+SAMN07333274	organism	Homo sapiens
+SAMN07333274	tissue	Breast tumor
+SAMN07333274	cell type	Whole human breast tumor
+SAMN07333274	tumor size	3.5
+SAMN07333274	NCBI submission package	Generic.1.0
+SAMN07333274	histology	Lobular
+SAMN07333274	grade	2
+SAMN07333274	pr status	6-7 (66)
+SAMN07333274	age	70
+SAMN07333274	her2 status	2+
+SAMN07333274	source_name	Human breast tumor
+SAMN07333274	er status	8 (100)
+SAMN07333274	BioSampleModel	Generic
+SAMN07333274	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333274	ENA-LAST-UPDATE	2017-07-08
+SAMN07333268	INSDC secondary accession	SRS2342196
+SAMN07333268	organism	Homo sapiens
+SAMN07333268	tissue	Breast tumor
+SAMN07333268	cell type	Whole human breast tumor
+SAMN07333268	tumor size	2.2
+SAMN07333268	NCBI submission package	Generic.1.0
+SAMN07333268	histology	Ductal
+SAMN07333268	grade	3
+SAMN07333268	pr status	1-3+ (40)
+SAMN07333268	age	78
+SAMN07333268	her2 status	3+
+SAMN07333268	source_name	Human breast tumor
+SAMN07333268	er status	3+ (30)
+SAMN07333268	BioSampleModel	Generic
+SAMN07333268	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333268	ENA-LAST-UPDATE	2017-07-08
+SAMN07333267	INSDC secondary accession	SRS2342197
+SAMN07333267	organism	Homo sapiens
+SAMN07333267	tissue	Adjacent normal
+SAMN07333267	cell type	--
+SAMN07333267	tumor size	--
+SAMN07333267	NCBI submission package	Generic.1.0
+SAMN07333267	histology	--
+SAMN07333267	grade	--
+SAMN07333267	pr status	--
+SAMN07333267	age	--
+SAMN07333267	her2 status	--
+SAMN07333267	source_name	Human breast adjacent normal
+SAMN07333267	er status	--
+SAMN07333267	BioSampleModel	Generic
+SAMN07333267	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333267	ENA-LAST-UPDATE	2017-07-08
+SAMN07333352	INSDC secondary accession	SRS2342212
+SAMN07333352	organism	Homo sapiens
+SAMN07333352	tissue	Adjacent normal
+SAMN07333352	cell type	--
+SAMN07333352	tumor size	--
+SAMN07333352	NCBI submission package	Generic.1.0
+SAMN07333352	histology	--
+SAMN07333352	grade	--
+SAMN07333352	pr status	--
+SAMN07333352	age	--
+SAMN07333352	her2 status	--
+SAMN07333352	source_name	Human breast adjacent normal
+SAMN07333352	er status	--
+SAMN07333352	BioSampleModel	Generic
+SAMN07333352	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333352	ENA-LAST-UPDATE	2017-07-08
+SAMN07333348	INSDC secondary accession	SRS2342216
+SAMN07333348	organism	Homo sapiens
+SAMN07333348	tissue	Breast tumor
+SAMN07333348	cell type	Whole human breast tumor
+SAMN07333348	tumor size	4.6
+SAMN07333348	NCBI submission package	Generic.1.0
+SAMN07333348	histology	Lobular
+SAMN07333348	grade	2
+SAMN07333348	pr status	8 (100)
+SAMN07333348	age	70
+SAMN07333348	her2 status	0
+SAMN07333348	source_name	Human breast tumor
+SAMN07333348	er status	8 (100)
+SAMN07333348	BioSampleModel	Generic
+SAMN07333348	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333348	ENA-LAST-UPDATE	2017-07-08
+SAMN07333347	INSDC secondary accession	SRS2342217
+SAMN07333347	organism	Homo sapiens
+SAMN07333347	tissue	Adjacent normal
+SAMN07333347	cell type	--
+SAMN07333347	tumor size	--
+SAMN07333347	NCBI submission package	Generic.1.0
+SAMN07333347	histology	--
+SAMN07333347	grade	--
+SAMN07333347	pr status	--
+SAMN07333347	age	--
+SAMN07333347	her2 status	--
+SAMN07333347	source_name	Human breast adjacent normal
+SAMN07333347	er status	--
+SAMN07333347	BioSampleModel	Generic
+SAMN07333347	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333347	ENA-LAST-UPDATE	2017-07-08
+SAMN07333306	INSDC secondary accession	SRS2342127
+SAMN07333306	organism	Homo sapiens
+SAMN07333306	tissue	Breast tumor
+SAMN07333306	cell type	Whole human breast tumor
+SAMN07333306	tumor size	--
+SAMN07333306	NCBI submission package	Generic.1.0
+SAMN07333306	histology	--
+SAMN07333306	grade	--
+SAMN07333306	pr status	--
+SAMN07333306	age	--
+SAMN07333306	her2 status	--
+SAMN07333306	source_name	Human breast tumor
+SAMN07333306	er status	--
+SAMN07333306	BioSampleModel	Generic
+SAMN07333306	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333306	ENA-LAST-UPDATE	2017-07-08
+SAMN07333301	INSDC secondary accession	SRS2342129
+SAMN07333301	organism	Homo sapiens
+SAMN07333301	tissue	Breast tumor
+SAMN07333301	cell type	Whole human breast tumor
+SAMN07333301	tumor size	2.6
+SAMN07333301	NCBI submission package	Generic.1.0
+SAMN07333301	histology	Ductal
+SAMN07333301	grade	3
+SAMN07333301	pr status	3+ (>90)
+SAMN07333301	age	56
+SAMN07333301	her2 status	0
+SAMN07333301	source_name	Human breast tumor
+SAMN07333301	er status	3+ (>95)
+SAMN07333301	BioSampleModel	Generic
+SAMN07333301	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333301	ENA-LAST-UPDATE	2017-07-08
+SAMN07333297	INSDC secondary accession	SRS2342135
+SAMN07333297	organism	Homo sapiens
+SAMN07333297	tissue	Breast tumor
+SAMN07333297	cell type	Whole human breast tumor
+SAMN07333297	tumor size	7
+SAMN07333297	NCBI submission package	Generic.1.0
+SAMN07333297	histology	Lobular
+SAMN07333297	grade	2
+SAMN07333297	pr status	3+ (30)
+SAMN07333297	age	54
+SAMN07333297	her2 status	0
+SAMN07333297	source_name	Human breast tumor
+SAMN07333297	er status	3+ (30)
+SAMN07333297	BioSampleModel	Generic
+SAMN07333297	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333297	ENA-LAST-UPDATE	2017-07-08
+SAMN07333283	INSDC secondary accession	SRS2342150
+SAMN07333283	organism	Homo sapiens
+SAMN07333283	tissue	Breast tumor
+SAMN07333283	cell type	Whole human breast tumor
+SAMN07333283	tumor size	2.8
+SAMN07333283	NCBI submission package	Generic.1.0
+SAMN07333283	histology	Ductal
+SAMN07333283	grade	3
+SAMN07333283	pr status	0
+SAMN07333283	age	24
+SAMN07333283	her2 status	2+
+SAMN07333283	source_name	Human breast tumor
+SAMN07333283	er status	0
+SAMN07333283	BioSampleModel	Generic
+SAMN07333283	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333283	ENA-LAST-UPDATE	2017-07-08
+SAMN07333275	INSDC secondary accession	SRS2342158
+SAMN07333275	organism	Homo sapiens
+SAMN07333275	tissue	Prophylactic Mammoplasty
+SAMN07333275	cell type	--
+SAMN07333275	tumor size	--
+SAMN07333275	NCBI submission package	Generic.1.0
+SAMN07333275	histology	--
+SAMN07333275	grade	--
+SAMN07333275	pr status	--
+SAMN07333275	age	--
+SAMN07333275	her2 status	--
+SAMN07333275	source_name	Prophylactic Mammoplasty
+SAMN07333275	er status	--
+SAMN07333275	BioSampleModel	Generic
+SAMN07333275	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333275	ENA-LAST-UPDATE	2017-07-08
+SAMN07333339	INSDC secondary accession	SRS2342166
+SAMN07333339	organism	Homo sapiens
+SAMN07333339	tissue	Adjacent normal
+SAMN07333339	cell type	--
+SAMN07333339	tumor size	--
+SAMN07333339	NCBI submission package	Generic.1.0
+SAMN07333339	histology	--
+SAMN07333339	grade	--
+SAMN07333339	pr status	--
+SAMN07333339	age	--
+SAMN07333339	her2 status	--
+SAMN07333339	source_name	Human breast adjacent normal
+SAMN07333339	er status	--
+SAMN07333339	BioSampleModel	Generic
+SAMN07333339	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333339	ENA-LAST-UPDATE	2017-07-08
+SAMN07333336	INSDC secondary accession	SRS2342168
+SAMN07333336	organism	Homo sapiens
+SAMN07333336	tissue	Breast tumor
+SAMN07333336	cell type	Whole human breast tumor
+SAMN07333336	tumor size	1.5
+SAMN07333336	NCBI submission package	Generic.1.0
+SAMN07333336	histology	Ductal
+SAMN07333336	grade	3
+SAMN07333336	pr status	8 (100)
+SAMN07333336	age	46
+SAMN07333336	her2 status	3+ (100)
+SAMN07333336	source_name	Human breast tumor
+SAMN07333336	er status	7-8 (89-90)
+SAMN07333336	BioSampleModel	Generic
+SAMN07333336	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333336	ENA-LAST-UPDATE	2017-07-08
+SAMN07333333	INSDC secondary accession	SRS2342172
+SAMN07333333	organism	Homo sapiens
+SAMN07333333	tissue	Adjacent normal
+SAMN07333333	cell type	--
+SAMN07333333	tumor size	--
+SAMN07333333	NCBI submission package	Generic.1.0
+SAMN07333333	histology	--
+SAMN07333333	grade	--
+SAMN07333333	pr status	--
+SAMN07333333	age	--
+SAMN07333333	her2 status	--
+SAMN07333333	source_name	Human breast adjacent normal
+SAMN07333333	er status	--
+SAMN07333333	BioSampleModel	Generic
+SAMN07333333	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333333	ENA-LAST-UPDATE	2017-07-08
+SAMN07333332	INSDC secondary accession	SRS2342173
+SAMN07333332	organism	Homo sapiens
+SAMN07333332	tissue	Adjacent normal
+SAMN07333332	cell type	--
+SAMN07333332	tumor size	--
+SAMN07333332	NCBI submission package	Generic.1.0
+SAMN07333332	histology	--
+SAMN07333332	grade	--
+SAMN07333332	pr status	--
+SAMN07333332	age	--
+SAMN07333332	her2 status	--
+SAMN07333332	source_name	Human breast adjacent normal
+SAMN07333332	er status	--
+SAMN07333332	BioSampleModel	Generic
+SAMN07333332	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333332	ENA-LAST-UPDATE	2017-07-08
+SAMN07333321	INSDC secondary accession	SRS2342184
+SAMN07333321	organism	Homo sapiens
+SAMN07333321	tissue	Breast tumor
+SAMN07333321	cell type	Whole human breast tumor
+SAMN07333321	tumor size	2.2
+SAMN07333321	NCBI submission package	Generic.1.0
+SAMN07333321	histology	Ductal
+SAMN07333321	grade	2
+SAMN07333321	pr status	2 (99)
+SAMN07333321	age	70
+SAMN07333321	her2 status	0
+SAMN07333321	source_name	Human breast tumor
+SAMN07333321	er status	1 (95)
+SAMN07333321	BioSampleModel	Generic
+SAMN07333321	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333321	ENA-LAST-UPDATE	2017-07-08
+SAMN07333319	INSDC secondary accession	SRS2342186
+SAMN07333319	organism	Homo sapiens
+SAMN07333319	tissue	Adjacent normal
+SAMN07333319	cell type	--
+SAMN07333319	tumor size	--
+SAMN07333319	NCBI submission package	Generic.1.0
+SAMN07333319	histology	--
+SAMN07333319	grade	--
+SAMN07333319	pr status	--
+SAMN07333319	age	--
+SAMN07333319	her2 status	--
+SAMN07333319	source_name	Human breast adjacent normal
+SAMN07333319	er status	--
+SAMN07333319	BioSampleModel	Generic
+SAMN07333319	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333319	ENA-LAST-UPDATE	2017-07-08
+SAMN07333367	INSDC secondary accession	SRS2342188
+SAMN07333367	organism	Homo sapiens
+SAMN07333367	tissue	Adjacent normal
+SAMN07333367	cell type	--
+SAMN07333367	tumor size	--
+SAMN07333367	NCBI submission package	Generic.1.0
+SAMN07333367	histology	--
+SAMN07333367	grade	--
+SAMN07333367	pr status	--
+SAMN07333367	age	--
+SAMN07333367	her2 status	--
+SAMN07333367	source_name	Human breast adjacent normal
+SAMN07333367	er status	--
+SAMN07333367	BioSampleModel	Generic
+SAMN07333367	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333367	ENA-LAST-UPDATE	2017-07-08
+SAMN07333269	INSDC secondary accession	SRS2342195
+SAMN07333269	organism	Homo sapiens
+SAMN07333269	tissue	Breast tumor
+SAMN07333269	cell type	Whole human breast tumor
+SAMN07333269	tumor size	3
+SAMN07333269	NCBI submission package	Generic.1.0
+SAMN07333269	histology	Ductal
+SAMN07333269	grade	2
+SAMN07333269	pr status	3-4 (1)
+SAMN07333269	age	82
+SAMN07333269	her2 status	2+ (70)
+SAMN07333269	source_name	Human breast tumor
+SAMN07333269	er status	8 (100)
+SAMN07333269	BioSampleModel	Generic
+SAMN07333269	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333269	ENA-LAST-UPDATE	2017-07-08
+SAMN07333361	INSDC secondary accession	SRS2342203
+SAMN07333361	organism	Homo sapiens
+SAMN07333361	tissue	Adjacent normal
+SAMN07333361	cell type	--
+SAMN07333361	tumor size	--
+SAMN07333361	NCBI submission package	Generic.1.0
+SAMN07333361	histology	--
+SAMN07333361	grade	--
+SAMN07333361	pr status	--
+SAMN07333361	age	--
+SAMN07333361	her2 status	--
+SAMN07333361	source_name	Human breast adjacent normal
+SAMN07333361	er status	--
+SAMN07333361	BioSampleModel	Generic
+SAMN07333361	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333361	ENA-LAST-UPDATE	2017-07-08
+SAMN07333355	INSDC secondary accession	SRS2342208
+SAMN07333355	organism	Homo sapiens
+SAMN07333355	tissue	Adjacent normal
+SAMN07333355	cell type	--
+SAMN07333355	tumor size	--
+SAMN07333355	NCBI submission package	Generic.1.0
+SAMN07333355	histology	--
+SAMN07333355	grade	--
+SAMN07333355	pr status	--
+SAMN07333355	age	--
+SAMN07333355	her2 status	--
+SAMN07333355	source_name	Human breast adjacent normal
+SAMN07333355	er status	--
+SAMN07333355	BioSampleModel	Generic
+SAMN07333355	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333355	ENA-LAST-UPDATE	2017-07-08
+SAMN07333350	INSDC secondary accession	SRS2342214
+SAMN07333350	organism	Homo sapiens
+SAMN07333350	tissue	Breast tumor
+SAMN07333350	cell type	Whole human breast tumor
+SAMN07333350	tumor size	1.5
+SAMN07333350	NCBI submission package	Generic.1.0
+SAMN07333350	histology	Ductal
+SAMN07333350	grade	2
+SAMN07333350	pr status	3
+SAMN07333350	age	43
+SAMN07333350	her2 status	1+
+SAMN07333350	source_name	Human breast tumor
+SAMN07333350	er status	6
+SAMN07333350	BioSampleModel	Generic
+SAMN07333350	ENA-FIRST-PUBLIC	2017-07-08
+SAMN07333350	ENA-LAST-UPDATE	2017-07-08

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SAMPLE_SET>
+<SAMPLE accession="SAMN00000001" alias="GSM0000001" center_name="Example Lab, Example University" broker_name="NCBI">
+     <IDENTIFIERS>
+          <PRIMARY_ID>SAMN00000001</PRIMARY_ID>
+          <SECONDARY_ID>SRS0000001</SECONDARY_ID>
+          <EXTERNAL_ID namespace="BioSample">SAMN00000001</EXTERNAL_ID>
+          <SUBMITTER_ID namespace="Example Lab, Example University">GSM0000001</SUBMITTER_ID>
+     </IDENTIFIERS>
+     <TITLE>P1-T (RNA-seq)</TITLE>
+     <SAMPLE_NAME>
+          <TAXON_ID>9606</TAXON_ID>
+          <SCIENTIFIC_NAME>Homo sapiens</SCIENTIFIC_NAME>
+          <COMMON_NAME>human</COMMON_NAME>
+     </SAMPLE_NAME>
+     <SAMPLE_LINKS>
+    <SAMPLE_LINK>
+        <XREF_LINK>
+            <DB>ENA-FASTQ-FILES</DB>
+            <ID><![CDATA[https://www.ebi.ac.uk/ena/portal/api/filereport?accession=SRS0000001&result=read_run&fields=run_accession,fastq_ftp,fastq_md5,fastq_bytes]]></ID>
+        </XREF_LINK>
+    </SAMPLE_LINK>
+</SAMPLE_LINKS>
+<SAMPLE_ATTRIBUTES>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>recurrence</TAG>
+               <VALUE>No Progression (>5y)</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>patient</TAG>
+               <VALUE>P1</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>tissue</TAG>
+               <VALUE>Tumor</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>Sex</TAG>
+               <VALUE>female</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>ENA-FIRST-PUBLIC</TAG>
+               <VALUE>2023-09-08</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>ENA-LAST-UPDATE</TAG>
+               <VALUE>2023-09-08</VALUE>
+          </SAMPLE_ATTRIBUTE>
+     </SAMPLE_ATTRIBUTES>
+</SAMPLE>
+<SAMPLE accession="SAMN00000002" alias="GSM0000002" center_name="Example Lab, Example University" broker_name="NCBI">
+     <IDENTIFIERS>
+          <PRIMARY_ID>SAMN00000002</PRIMARY_ID>
+          <SECONDARY_ID>SRS0000002</SECONDARY_ID>
+          <SUBMITTER_ID namespace="Example Lab, Example University">GSM0000002</SUBMITTER_ID>
+     </IDENTIFIERS>
+     <TITLE>P1-N (RNA-seq)</TITLE>
+     <SAMPLE_NAME>
+          <TAXON_ID>9606</TAXON_ID>
+          <SCIENTIFIC_NAME>Homo sapiens</SCIENTIFIC_NAME>
+     </SAMPLE_NAME>
+<SAMPLE_ATTRIBUTES>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>patient</TAG>
+               <VALUE>P1</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>tissue</TAG>
+               <VALUE>Normal adjacent</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>Sex</TAG>
+               <VALUE>female</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>ENA-FIRST-PUBLIC</TAG>
+               <VALUE>2023-09-08</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>ENA-LAST-UPDATE</TAG>
+               <VALUE>2023-09-08</VALUE>
+          </SAMPLE_ATTRIBUTE>
+     </SAMPLE_ATTRIBUTES>
+</SAMPLE>
+<SAMPLE accession="SAMN00000003" alias="GSM0000003" center_name="Example Lab, Example University" broker_name="NCBI">
+     <IDENTIFIERS>
+          <PRIMARY_ID>SAMN00000003</PRIMARY_ID>
+          <SECONDARY_ID>SRS0000003</SECONDARY_ID>
+          <SUBMITTER_ID namespace="Example Lab, Example University">GSM0000003</SUBMITTER_ID>
+     </IDENTIFIERS>
+     <TITLE>P2-T (RNA-seq)</TITLE>
+     <SAMPLE_NAME>
+          <TAXON_ID>9606</TAXON_ID>
+          <SCIENTIFIC_NAME>Homo sapiens</SCIENTIFIC_NAME>
+     </SAMPLE_NAME>
+     <DESCRIPTION>Resected tumour, stage noted by the submitter.</DESCRIPTION>
+<SAMPLE_ATTRIBUTES>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>recurrence</TAG>
+               <VALUE>Progression (&lt;2y)</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>patient</TAG>
+               <VALUE>P2</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>tissue</TAG>
+               <VALUE>Tumor</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>stage</TAG>
+               <VALUE>IA&#9;(pT1a)</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>ENA-FIRST-PUBLIC</TAG>
+               <VALUE>2023-09-08</VALUE>
+          </SAMPLE_ATTRIBUTE>
+          <SAMPLE_ATTRIBUTE>
+               <TAG>ENA-LAST-UPDATE</TAG>
+               <VALUE>2023-09-10</VALUE>
+          </SAMPLE_ATTRIBUTE>
+     </SAMPLE_ATTRIBUTES>
+</SAMPLE>
+</SAMPLE_SET>
