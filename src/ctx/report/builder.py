@@ -524,6 +524,14 @@ def _live(prepared: Iterable[Mapping[str, Any]]) -> bool:
     return any(f.get("kind") in LIVE_KINDS or f.get("select") for f in prepared)
 
 
+def _cutoff(prepared: Iterable[Mapping[str, Any]]) -> bool:
+    """Whether a page carries M6's FDR cutoff, and so its twin ``_fdr`` (P2S.5).
+
+    The twin's 3.7 kB stay off every other page, live ones too.
+    """
+    return any((f.get("defaults") or {}).get("fdr") for f in prepared)
+
+
 def _heading(page: Page) -> dict[str, str]:
     """Kicker, headline and dataset, parsed from the page title."""
     if isinstance(page, FigurePage):
@@ -595,7 +603,8 @@ def render(page: Page, glossary_href: str = "") -> str:
         figure = prepare(page.figure, 0, 1, 3, ALONE_SCALE)
         context |= {"figure": figure, "templates": json_for_script(alone),
                     "page_templates": context["templates"],
-                    "export": export.assets([figure]), "live": _live([figure])}  # fmt: skip
+                    "export": export.assets([figure]), "live": _live([figure]),
+                    "cutoff": _cutoff([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
     results, outline, draws = _walk(page.results)
     if not draws:
@@ -610,6 +619,7 @@ def render(page: Page, glossary_href: str = "") -> str:
         "key_versions": [(n, versions[n]) for n in KEY_PACKAGES if n in versions],
         "export": export.assets(prepared),
         "live": _live([*prepared, *panels]),
+        "cutoff": _cutoff(prepared),
     }
     return _ENV.get_template("module.html.j2").render(**context)
 

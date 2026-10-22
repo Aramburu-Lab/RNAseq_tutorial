@@ -27,6 +27,22 @@ it were reversed.
 
 ---
 
+## D-109 — M6's figures that mark gene sets by FDR take the reader's FDR cutoff, from the volcano's presets
+
+**Date:** 2026-10-22 · **Status:** decided (Rytis 2026-10-01, P2S.5; D-051's controls rule)
+
+**Context.** P2S.5: every M6 figure that marks sets by FDR takes a selectable FDR, the build's 0.05 the default, with the page as built unchanged. Three figures mark sets by FDR: the over-representation bars (pass or grey, D-100, past the dashed line, D-102), the GSEA bars and one set's NES in every contrast (highlighted or not). The background lesson colours its bars by background, and the running score marks no set; neither takes the control.
+
+**Options.** Python views, one figure per contrast and cutoff (44 GSEA figures on Step-1), which the page looks up; or a twin that marks the bars drawn again in the page from what each figure already carries, its FDR on hover and each view's GSEA table's FDRs for the lead.
+
+**Decision.** The twin. One rule, a set passes at FDR below the cutoff, strictly, as at ALPHA; the presets are the volcano's, `scatter.CUTOFF_PRESETS` (0.1, 0.05, 0.01, 0.001), 0.05 selected. `ctx.function.cutoff` builds each figure's settings and `templates/_fdr.js.j2` (`ctxFdr`) is the twin: `mark` splits the drawn bars at the cutoff as `BarData` draws them there (`BarData.trace_style`, refactored out of `interactive`, gives each series' trace, the empty one too), `line` moves the dashed line to -log10 of the cutoff and names it, `fill` fills the words from `content/function.toml`. The live ORA passes the cutoff to `ctxOra.blocks`; its lead, caption, reading line, summary, legend and export caption follow it. The GSEA bars' select sits beside the contrast view; the NES bars take a control of their own (kind `fdr`). No CLI option: the build stays at ALPHA, so no parameter card. "Those passing FDR < 0.05" in "Sets drawn" became "Those passing the FDR cutoff".
+
+**Evidence.** Node twin (`tests/test_fdr_page.py`): at each preset the page's GSEA and NES traces equal the contracts built at it, trace for trace, on FDRs equal to each preset; the ORA's sets, marks, line, lead, caption and reading equal `live.bars`, `_ora_bars` and `ora_text` there. Chromium (`tests/test_fdr_browser.py`, `test_handoff_browser.py`): 3 cutoffs and back, 1,280 and 375 px, light and dark, on a fixture whose sets fall between the presets, and after the 6-gene hand-off from M5; each figure's PDF and SVG at 0.01 is the view. Step-1's M6 rebuilt from `~/ctx_tier1`: 5 of 5 figures' plotly arguments and both views' option figures byte-equal to the base build; overview 6,538,980 B before, 6,563,355 after (+24,375, cap 15,000,000); 92 of 92 recorded metrics equal. On Step-1 the up calls pass 20, 16, 12 and 9 sets at 0.1, 0.05, 0.01 and 0.001 (down 2 at each, 5 grey); GSEA 25, 21, 19 and 9 of 48 tested sets, its 15 drawn all highlighted down to 0.01 and 9 at 0.001; the NES 10 of 11 contrasts at every preset.
+
+**Consequence.** The background lesson's lead keeps "FDR < 0.05": its passing counts are a lookup over views, not marks; a cutoff there is another decision. Opened alone, the ORA keeps the cutoff with its live panel; the GSEA and NES bars carry none, their pages written from the contract before the control is attached.
+
+---
+
 ## D-108 — A gene typed on M10's ER figures redraws them as its patients at or above its median against below
 
 **Date:** 2026-10-21 · **Status:** decided (M10.G, Rytis 2026-10-20); for Rytis to confirm the open points under Consequence

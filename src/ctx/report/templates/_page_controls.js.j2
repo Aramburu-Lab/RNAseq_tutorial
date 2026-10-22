@@ -26,6 +26,24 @@
        background with it; the build's contrast gives the build's list back. ctxOra.contrast,
        the twin of live.by_contrast, reads them; the GSEA bars' view is another state. */
     var contrast = form.elements.contrast, setsShown = form.elements.sets;
+    /* The FDR cutoff (P2S.5): the lead, the caption, the dashed line's reading line and the
+       export's caption follow it, and the list, once either is moved; as built otherwise. */
+    var cutoff = form.elements.fdr, spec = cfg.fdr, lead = fig.querySelector(".fig-lead");
+    var caption = fig.querySelector("figcaption"), shown = fig.querySelectorAll(".reading li");
+    var reading = spec ? shown[spec.reading.index] : null, exported = cfg.export;
+    var built = { lead: lead ? lead.innerHTML : "", caption: caption.innerHTML,
+                  reading: reading ? reading.innerHTML : "" };
+    function said(moved, alpha, counts, failing, size) {
+      var values = Object.assign({ alpha: alpha, failing: failing, top: cfg.top, background: size }, counts);
+      var r = spec.reading, key = form.elements.direction.value;
+      if (lead) lead[moved ? "textContent" : "innerHTML"] = moved
+        ? ctxFdr.fill(spec.leads[key in spec.leads ? key : "all"], values) : built.lead;
+      caption[moved ? "textContent" : "innerHTML"] = moved ? ctxFdr.fill(spec.caption, values) : built.caption;
+      if (reading) reading[moved ? "textContent" : "innerHTML"] = moved
+        ? ctxFdr.fill(failing ? r.failing : r.passing, values) : built.reading;
+      if (exported) cfg.export = moved
+        ? Object.assign({}, exported, { caption: ctxFdr.fill(spec.export_caption, values) }) : exported;
+    }
     var calls = Object.create(null);
     (cfg.contrasts || []).forEach(function (c) {
       var chosen = ctxOra.contrast(cfg, c[0]);
@@ -46,16 +64,19 @@
     function run() {
       var bg = backgrounds[form.elements.background.value], traces = [], rows = [], passing = 0;
       var cats = [], failing = 0, how = setsShown ? setsShown.value : "passing";
+      /* The FDR cutoff (P2S.5): every mark, count and word below follows it. */
+      var alpha = cutoff ? Number(cutoff.value) : cfg.alpha, counts = {};
       var tested = families().map(function (f) {
         var found = ctxOra.ora(f[1], bg.genes, sets, cfg.min_size, cfg.max_size, lf);
         found.forEach(function (r) { rows.push([f[0]].concat([r.name, r.size, r.hits, r.expected, r.p, r.fdr, r.genes.join(";")])); });
-        passing += found.filter(function (r) { return r.fdr < cfg.alpha; }).length;
+        counts[f[0]] = found.filter(function (r) { return r.fdr < alpha; }).length;
+        passing += counts[f[0]];
         return [f[0], found];
       });
       /* The bars as live.bars draws them (PK.3): ctxOra.blocks orders the categories; the
          traces run as the build's legend does, each family's passing sets, then each
          family's failing sets in grey. */
-      var blocks = ctxOra.blocks(tested, how, cfg.alpha, cfg.top);
+      var blocks = ctxOra.blocks(tested, how, alpha, cfg.top);
       blocks.forEach(function (b) {
         b[1].forEach(function (d) {
           if (cats.indexOf(cfg.labels[d.row.name]) < 0) cats.push(cfg.labels[d.row.name]);
@@ -69,7 +90,7 @@
           if (!shown.length) return;
           traces.push({ type: "bar", orientation: "h",
             name: ctxPick.fill(words.legend[passes ? "passing" : "failing"],
-                               { family: words.families[f[0]], alpha: cfg.alpha }),
+                               { family: words.families[f[0]], alpha: alpha }),
             marker: { color: passes ? colours[f[0]] : colours.failing },
             x: shown.map(function (d) { return d.length; }),
             y: shown.map(function (d) { return cfg.labels[d.row.name]; }),
@@ -79,7 +100,7 @@
       });
       var moved = list !== build || form.elements.direction.value !== "each" ||
         form.elements.background.value !== cfg.featured ||
-        (!!setsShown && setsShown.value !== "passing");
+        (!!setsShown && setsShown.value !== "passing") || alpha !== cfg.alpha;
       /* At the build's settings the figure stays as built, which the PDF and SVG draw. */
       if (moved || drawn) {
         var others = div.data.filter(function (t) { return t.type !== "bar"; });
@@ -96,17 +117,21 @@
         var meta = Object.assign({}, div.layout.meta);
         if (narrow) meta.narrow = narrow; else delete meta.narrow;
         /* The legend names which bars pass, even where one trace is drawn (PK.3). */
+        /* The dashed line at the cutoff, named for it (P2S.5). */
+        var shapes = spec ? ctxFdr.line(div.layout.shapes || [], spec.line, alpha) : div.layout.shapes;
         Plotly.react(div, traces.concat(others), Object.assign(div.layout,
-          { yaxis: yaxis, meta: meta, height: cfg.phone.height, showlegend: traces.length > 0 }));
+          { yaxis: yaxis, meta: meta, height: cfg.phone.height, showlegend: traces.length > 0,
+            shapes: shapes }));
         div.dispatchEvent(new CustomEvent("ctx-view", { detail: { height: cfg.phone.height } }));
         drawn = true;
       }
       var n = list.up.length + list.down.length + (list.none || []).length;
       line.textContent = ctxPick.fill(words.summary, { n: n, up: list.up.length, down: list.down.length,
         background: bg.label, size: bg.genes.length.toLocaleString("en-US"), passing: passing,
-        source: list.source, tries: tries, alpha: cfg.alpha }) +
-        (failing ? " " + ctxPick.fill(words.grey, { failing: failing, alpha: cfg.alpha, top: cfg.top }) : "") +
+        source: list.source, tries: tries, alpha: alpha }) +
+        (failing ? " " + ctxPick.fill(words.grey, { failing: failing, alpha: alpha, top: cfg.top }) : "") +
         (blocks.length ? "" : " " + words.empty);
+      if (spec) said(moved, alpha, counts, failing, bg.genes.length);
       table.textContent = [words.columns].concat(rows.map(function (r) {
         return r.map(function (v) { return typeof v === "number" ? String(v) : v; }).join("\t");
       })).join("\n");
@@ -177,24 +202,69 @@
     /* An option that carries its own file settings (ctx.qc.blocks.exported, ctx.report.lookups)
        exports with its caption and labels; others with the build's. */
     built.export = cfg.export;
+    /* M6's FDR cutoff beside the select (P2S.5): it marks the view drawn. */
+    var cut = cfg.fdr && form.elements.fdr ? cutting(fig, div, cfg.fdr) : null;
     function show() {
       var i = Number(form.elements.view.value), o = cfg.options[i];
       cfg.export = o.export || built.export;
       var layout = Object.assign({}, o.figure.layout,
                                  { template: template(div, root.getAttribute("data-theme")) });
       Plotly.react(div, o.figure.data, layout);
+      if (lead) lead.innerHTML = i ? o.lead : built.lead;
+      var cutSaid = cut ? cut(Number(form.elements.fdr.value), i, true) : "";
       /* The fit takes the view's own phone layout and least width (_page_fit.js.j2). */
       div.dispatchEvent(new CustomEvent("ctx-view", { detail: { width: o.width } }));
-      if (lead) lead.innerHTML = i ? o.lead : built.lead;
       caption.innerHTML = i ? o.caption : built.caption;
       if (title) title.textContent = i ? o.title : built.title;
-      summary.textContent = i ? cfg.moved.replace("{label}", o.label).replace("{build}", cfg.build) : "";
+      summary.textContent = [i ? cfg.moved.replace("{label}", o.label).replace("{build}", cfg.build) : "",
+                             cutSaid].filter(Boolean).join(" ");
       mark(i !== 0, "view");
+      if (cut) mark(cutSaid !== "", "fdr");
     }
     form.addEventListener("change", show);
     form.addEventListener("submit", function (e) { e.preventDefault(); });
-    /* A browser restoring the form on back-navigation sets the select without an event. */
-    if (form.elements.view.value !== "0") show();
+    /* A browser restoring the form on back-navigation sets the selects without an event. */
+    if (form.elements.view.value !== "0" || (cut && Number(form.elements.fdr.value) !== cfg.fdr.alpha)) show();
+  }
+
+  /* M6's FDR cutoff on bars marked by FDR (P2S.5, D-109): ctxFdr.mark splits the bars drawn
+     at the cutoff as BarData draws them there; the lead counts the view's tested sets and the
+     reading line names what the highlight separates. At the build's cutoff a figure not yet
+     marked stays as drawn. Returns the live line's sentence, empty at the build's cutoff. */
+  function cutting(fig, div, spec) {
+    var lead = fig.querySelector(".fig-lead"), line = fig.querySelectorAll(".reading li")[spec.reading.index];
+    var builtLine = line ? line.innerHTML : "", marked = false;
+    return function (alpha, view, fresh) {
+      var moved = alpha !== spec.alpha;
+      if (fresh) marked = false;
+      if (moved || marked) {
+        var m = ctxFdr.mark(div.data, div.layout, spec, alpha);
+        Plotly.react(div, m.data, Object.assign(div.layout, { showlegend: m.showlegend }));
+        if (line) line.textContent = ctxFdr.reading(spec, m.drawn, m.passing, alpha);
+        var tested = spec.fdrs[view || 0];
+        if (moved && spec.lead && lead && tested) {
+          lead.textContent = ctxFdr.fill(spec.lead, { passing: ctxFdr.count(tested, alpha),
+                                                      tested: tested.length, alpha: alpha });
+        }
+        marked = moved;
+      } else if (line) line.innerHTML = builtLine;
+      return moved ? ctxFdr.fill(spec.moved, { alpha: alpha, build: spec.alpha }) : "";
+    };
+  }
+
+  function fdrCut(form) {
+    var fig = form.closest(".fig");
+    var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
+    var div = fig.querySelector(".js-plotly-plot"), mark = exporting(fig, cfg);
+    var cut = cutting(fig, div, cfg.fdr), summary = fig.querySelector(".fdr-summary");
+    function apply() {
+      var said = cut(Number(form.elements.fdr.value), 0, false);
+      summary.textContent = said;
+      mark(said !== "");
+    }
+    form.addEventListener("change", apply);
+    form.addEventListener("submit", function (e) { e.preventDefault(); });
+    if (Number(form.elements.fdr.value) !== cfg.fdr.alpha) apply();
   }
 
   function filtering(form) {

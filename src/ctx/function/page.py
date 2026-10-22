@@ -41,25 +41,27 @@ def fdr_words(fdr: float) -> str:
     return text.word(PAGE, "fdr.zero") if fdr == 0 else f"{fdr:.2g}"
 
 
-def ora_text(said: Words, background: int, up: int, down: int, failing: int = 0) -> FigureText:
-    """Title, lead and reading guide of the ORA bars (``live.bars``).
+def ora_text(said: Words, background: int, up: int, down: int, failing: int = 0,
+             alpha: float = ALPHA) -> FigureText:  # fmt: skip
+    """Title, lead and reading guide of the ORA bars (``live.bars``), at FDR cutoff ``alpha``.
 
     ``up`` and ``down`` count the sets passing on each direction's calls; the lead states
     both, so a direction with no passing set says it has none. ``failing`` counts the grey
     bars, which the last reading line names when there are any (PK.3).
     """
-    last = (figure("ora", "failing", alpha=ALPHA, failing=failing, top=live.TOP) if failing
-            else figure("ora", "passing", alpha=ALPHA, background=background))  # fmt: skip
+    last = (figure("ora", "failing", alpha=alpha, failing=failing, top=live.TOP) if failing
+            else figure("ora", "passing", alpha=alpha, background=background))  # fmt: skip
     return FigureText(
         title=figure("ora", "title", label=said.label),
-        lead=figure("ora", "lead", up=up, down=down, alpha=ALPHA),
+        lead=figure("ora", "lead", up=up, down=down, alpha=alpha),
         reading=(*text.lines(PAGE, "figures.ora.reading", tested=said.tested, calls=CALLS), last),
         tab=figure("ora", "tab"),
     )
 
 
-def gsea_text(said: Words, passing: int, tested: int, drawn: tuple[int, int]) -> FigureText:
-    """Title, lead and reading guide of the GSEA bars.
+def gsea_text(said: Words, passing: int, tested: int, drawn: tuple[int, int],
+              alpha: float = ALPHA) -> FigureText:  # fmt: skip
+    """Title, lead and reading guide of the GSEA bars, marked at FDR cutoff ``alpha``.
 
     ``drawn`` is (bars that pass, bars): the last line names what the highlight separates
     among the bars drawn. On Step-1 all 15 drawn passed, and "the others" pointed at none.
@@ -68,22 +70,22 @@ def gsea_text(said: Words, passing: int, tested: int, drawn: tuple[int, int]) ->
     which = "all" if shown == bars else "no" if shown == 0 else "some"
     return FigureText(
         title=figure("gsea", "title", label=said.label),
-        lead=figure("gsea", "lead", passing=passing, tested=tested, alpha=ALPHA),
+        lead=figure("gsea", "lead", passing=passing, tested=tested, alpha=alpha),
         reading=(
             *text.lines(PAGE, "figures.gsea.reading", tested=said.tested, reference=said.reference),
-            figure("gsea", which, alpha=ALPHA),
+            figure("gsea", which, alpha=alpha),
         ),  # fmt: skip
         tab=figure("gsea", "tab"),
     )
 
 
-def nes_text(gene_set: str, contrasts: int) -> FigureText:
-    """Title, lead and reading guide of one set's NES across contrasts."""
+def nes_text(gene_set: str, contrasts: int, alpha: float = ALPHA) -> FigureText:
+    """Title, lead and reading guide of one set's NES across contrasts, marked at ``alpha``."""
     shown = set_words(gene_set)
     return FigureText(
         title=figure("nes", "title", gene_set=shown),
         lead=figure("nes", "lead", contrasts=contrasts),
-        reading=text.lines(PAGE, "figures.nes.reading", alpha=ALPHA),
+        reading=text.lines(PAGE, "figures.nes.reading", alpha=alpha),
     )
 
 

@@ -17,6 +17,7 @@
 {% include "_live.js.j2" %}
 {% include "_gene.js.j2" %}
 {% include "_m9.js.j2" %}{% endif %}
+{% if cutoff %}{% include "_fdr.js.j2" %}{% endif %}
 {% raw %}
 /* One script for every page kind. Each block runs inside its own guard, so a failure in one
    is logged and never stops the others; every feature degrades to a readable page without
@@ -109,7 +110,7 @@
      and the cutoffs, and fills the page's own sentence templates with the same numbers the
      Python side fills them with. */
   /* The filter and pair forms borrow the calls panel's look (class "calls"), not its script. */
-  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist):not(.recount):not(.judge):not(.strata)").forEach(function (form) {
+  scope.querySelectorAll("form.calls:not(.filter):not(.pairs):not(.select):not(.ora):not(.view):not(.subset):not(.genelist):not(.recount):not(.judge):not(.strata):not(.fdr)").forEach(function (form) {
     guard("calls", function () { liveCalls(form); });
   });
 
@@ -257,6 +258,11 @@
   /* M2's judge panel (work-order item 5): ctxJudge holds the twin. */
   scope.querySelectorAll("form.judge").forEach(function (form) {
     guard("judge", function () { judging(form); });
+  });
+
+  /* M6's FDR cutoff on a figure with no other control (P2S.5): ctxFdr holds the twin. */
+  scope.querySelectorAll("form.fdr").forEach(function (form) {
+    guard("fdr", function () { fdrCut(form); });
   });
 
   /* M6's live over-representation (GS.5). */
