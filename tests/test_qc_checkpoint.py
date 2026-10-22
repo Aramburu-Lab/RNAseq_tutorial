@@ -17,6 +17,7 @@ from ctx.qc import QcError, checkpoint, registry
 
 ROOT = Path(__file__).resolve().parents[1]
 REG = registry.load(ROOT / "conf" / "qc_metrics.toml")
+ANTISENSE = REG.metrics["top_gene_share"].exclude_gene_ids
 # gene_id, gene_name, gene_type, chrom; each class once, and a gene of every other kind.
 GENES = [
     ("A", "MT-RNR2", "Mt_rRNA", "chrM"),
@@ -70,7 +71,8 @@ def test_count_metrics_by_hand():
     types = pl.DataFrame(GENES, schema=["gene_id", "gene_name", "gene_type", "chrom"], orient="row")
     counts = pl.DataFrame({"gene_id": ["A", "B", "C", "D", "E"],
                            "s1": [10, 20, 30, 40, 900], "s2": [0, 5, 0, 0, 95]})  # fmt: skip
-    got = {r["sample"]: r for r in checkpoint.count_metrics(counts, types).iter_rows(named=True)}
+    found = checkpoint.count_metrics(counts, types, ANTISENSE)
+    got = {r["sample"]: r for r in found.iter_rows(named=True)}
     assert got["s1"] == {"sample": "s1", "library_size": 1000.0, "genes_detected": 5,
                          "top_gene_share": 0.9, "mt_fraction": 0.02, "mt_rrna_fraction": 0.01,
                          "rrna_fraction": 0.03, "globin_fraction": 0.04}  # fmt: skip
@@ -84,7 +86,7 @@ def test_an_unknown_gene_stops_the_checkpoint():
                          orient="row")  # fmt: skip
     counts = pl.DataFrame({"gene_id": ["A", "D", "E"], "s1": [1, 2, 3]})
     with pytest.raises(QcError, match=r"2 gene IDs .* \['D', 'E'\]"):
-        checkpoint.count_metrics(counts, types)
+        checkpoint.count_metrics(counts, types, ANTISENSE)
 
 
 def test_replicate_spearman_finds_the_shuffled_sample():
@@ -223,7 +225,8 @@ def test_sample_metrics_on_gathered_counts(tmp_path):
     )
     genes = read["genes"]
     types = genes.with_columns(gene_type=pl.lit("protein_coding"), chrom=pl.lit("chr1"))
-    measured = checkpoint.sample_metrics(read["counts"], sheet, genes, types,
+    composition = checkpoint.count_metrics(read["counts"], types, ANTISENSE)
+    measured = checkpoint.sample_metrics(read["counts"], sheet, genes, composition,
                                          [["cell_type", "condition"]], threads=1)  # fmt: skip
     frame, sexes = measured.values, measured.sexes
     assert sexes is not None

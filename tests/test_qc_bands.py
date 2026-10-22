@@ -131,6 +131,10 @@ def test_a_reason_never_prints_a_value_equal_to_its_bound():
     assert checkpoint.shown_apart(20_000_000.4, 20_000_000.1) == ("20,000,000.4", "20,000,000.1")
 
 
+ANTISENSE = REG.metrics["top_gene_share"].exclude_gene_ids
+SCHEMA = ["gene_id", "gene_name", "gene_type", "chrom"]
+
+
 def test_top_gene_and_rrna_follow_p2q10():
     """The 18S-antisense lncRNA and Mt_rRNA are not the top gene; the lncRNA counts as rRNA.
 
@@ -139,15 +143,102 @@ def test_top_gene_and_rrna_follow_p2q10():
     genes = [("A", "MT-RNR2", "Mt_rRNA", "chrM"), ("B", "RNA5-8SN1", "rRNA", "chr21"),
              ("ENSG00000280614.1", "ENSG00000280614", "lncRNA", "chr21"),
              ("E", "ACTB", "protein_coding", "chr7")]  # fmt: skip
-    types = pl.DataFrame(genes, schema=["gene_id", "gene_name", "gene_type", "chrom"],
-                         orient="row")  # fmt: skip
+    types = pl.DataFrame(genes, schema=SCHEMA, orient="row")
     counts = pl.DataFrame({"gene_id": [g[0] for g in genes], "s1": [300, 30, 600, 70]})
-    row = checkpoint.count_metrics(counts, types).row(0, named=True)
+    row = checkpoint.count_metrics(counts, types, ANTISENSE).row(0, named=True)
     assert row["top_gene_share"] == pytest.approx(0.07)
     assert row["rrna_fraction"] == pytest.approx(0.63)
     assert row["mt_rrna_fraction"] == pytest.approx(0.3)
-    untyped = checkpoint.count_metrics(counts, None).row(0, named=True)
-    assert untyped["top_gene_share"] == pytest.approx(0.3)
+
+
+def test_without_gene_types_no_top_gene_share_is_measured():
+    """Without an annotation no Mt_rRNA gene can be told apart, so the metric is left out.
+
+    Fails before P2Q.10's correction, which reported MT-RNR2's 0.3 under the same name.
+    Mutation caught: the untyped branch searching every gene again (0.3 returned)."""
+    counts = pl.DataFrame({"gene_id": ["A", "E"], "s1": [300, 70]})
+    untyped = checkpoint.count_metrics(counts, None, ANTISENSE)
+    assert untyped.columns == ["sample", "library_size", "genes_detected"]
+
+
+def planted_annotation() -> tuple[pl.DataFrame, pl.DataFrame]:
+    """A fixture annotation with every class P2Q.10 names, and one sample's counts.
+
+    Mt_rRNA is planted under an Ensembl ID and a name with no MT- prefix, so only its type
+    marks it; the two 18S-antisense lncRNAs carry versions; an 18S and a 28S gene, as an
+    annotation with a 45S unit would type them (GENCODE 50 has none), sit on a nuclear contig;
+    a rRNA-typed gene on chrM stays out of rrna_fraction.
+    """
+    genes = [
+        ("ENSG00000211459.2", "RNR_PLANTED", "Mt_rRNA", "chrM"),
+        ("ENSG00000280614.1", "ENSG00000280614", "lncRNA", "chr21"),
+        ("ENSG00000281383.1", "ENSG00000281383", "lncRNA", "chr21"),
+        ("G18S.1", "RNA18SN5", "rRNA", "GL000220.1"),
+        ("G28S.1", "RNA28SN5", "rRNA", "GL000220.1"),
+        ("G5S.1", "RNA5S1", "rRNA_pseudogene", "chr1"),
+        ("GMT.1", "MT-ODD", "rRNA", "chrM"),
+        ("GTOP.1", "DEFA1B", "protein_coding", "chr8"),
+        ("GLOW.1", "ACTB", "protein_coding", "chr7"),
+    ]
+    counts = [500, 400, 350, 200, 100, 10, 20, 150, 270]
+    types = pl.DataFrame(genes, schema=SCHEMA, orient="row")
+    return types, pl.DataFrame({"gene_id": [g[0] for g in genes], "s1": counts})
+
+
+def test_the_planted_fixture_measures_each_corrected_definition():
+    """On the planted annotation: top gene ACTB, 270 of 2,000; nuclear rRNA 18S + 28S + 5S +
+    the two lncRNAs, 1,060 of 2,000; Mt_rRNA 500 of 2,000.
+
+    Mutations caught: Mt_rRNA left in the top-gene search (0.25); either lncRNA left in it (0.2,
+    0.175); the 18S and 28S genes not counted as rRNA (0.38); the chrM rRNA gene counted as
+    nuclear rRNA (0.54)."""
+    types, counts = planted_annotation()
+    row = checkpoint.count_metrics(counts, types, ANTISENSE).row(0, named=True)
+    assert row["library_size"] == 2000
+    assert row["top_gene_share"] == pytest.approx(270 / 2000)
+    assert row["rrna_fraction"] == pytest.approx(1060 / 2000)
+    assert row["mt_rrna_fraction"] == pytest.approx(500 / 2000)
+
+
+def test_the_exclusion_list_is_read_from_the_registry_alone(tmp_path):
+    """The two IDs live in conf/qc_metrics.toml, sourced; checkpoint holds no copy of them.
+
+    Fails before: the registry had no exclude_gene_ids and checkpoint a constant of its own.
+    Mutations caught: a constant reinstated in checkpoint.py; a list without a source; a
+    versioned ID, which would never match an unversioned gene."""
+    metric = REG.metrics["top_gene_share"]
+    assert metric.exclude_gene_ids == ("ENSG00000280614", "ENSG00000281383")
+    assert "TODO.md P2Q.10" in metric.exclude_source
+    code = (ROOT / "src" / "ctx" / "qc" / "checkpoint.py").read_text()
+    assert "ENSG00000280614" not in code and "ENSG00000281383" not in code
+    types, counts = planted_annotation()
+    one = with_metric(tmp_path, "top_gene_share", exclude_gene_ids=["ENSG00000280614"])
+    listed = registry.load(one).metrics["top_gene_share"].exclude_gene_ids
+    row = checkpoint.count_metrics(counts, types, listed).row(0, named=True)
+    assert row["top_gene_share"] == pytest.approx(350 / 2000)
+    shorter = checkpoint.count_metrics(counts, types, ()).row(0, named=True)
+    assert shorter["top_gene_share"] == pytest.approx(400 / 2000)
+    unsourced = tomllib.loads(REGISTRY.read_text())["metrics"]["top_gene_share"]
+    unsourced.pop("exclude_source")
+    with pytest.raises(registry.RegistryError, match="needs an exclude_source"):
+        registry.load(with_entry(tmp_path, "top_gene_share", unsourced))
+    with pytest.raises(registry.RegistryError, match="unversioned Ensembl gene IDs"):
+        registry.load(with_metric(tmp_path, "top_gene_share",
+                                  exclude_gene_ids=["ENSG00000280614.1"]))  # fmt: skip
+
+
+def with_entry(tmp_path: Path, key: str, entry: dict) -> Path:
+    """The repo registry with one metric's table replaced whole, as a new file."""
+    raw = tomllib.loads(REGISTRY.read_text())
+    raw["metrics"][key] = entry
+    lines = []
+    for name, fields in raw["metrics"].items():
+        lines.append(f"[metrics.{name}]")
+        lines += [f"{k} = {json.dumps(v)}" for k, v in fields.items()]
+    head = "\n".join(f"{k} = {json.dumps(v)}" for k, v in raw["registry"].items())
+    path = tmp_path / "whole.toml"
+    path.write_text(f"[registry]\n{head}\n" + "\n".join(lines) + "\n")
+    return path
 
 
 def test_the_sex_check_has_one_definition():

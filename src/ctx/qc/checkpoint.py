@@ -37,11 +37,10 @@ MT_RRNA = ("Mt_rRNA",)
 # GENCODE 50 types the 5S and 5.8S genes rRNA and their copies rRNA_pseudogene; it has no
 # 45S gene, so 18S and 28S reads land on no gene at all (said on the page).
 RRNA = ("rRNA", "rRNA_pseudogene")
-# The two lncRNAs GENCODE 50 annotates antisense to 18S rRNA sequence, 923 nt each on the minus
-# strand of chr21 at 8,254,592 and 8,393,419 (read from the GTF, 2026-10-09). In an unstranded
-# library 18S reads land on them, which made ENSG00000280614 Step-1's top gene in 102 of 210
-# samples (P2Q.10). Unversioned, so a release that bumps the version still matches.
-RRNA_18S_ANTISENSE = ("ENSG00000280614", "ENSG00000281383")
+# The 18S-antisense lncRNAs are the registry's top_gene_share exclude_gene_ids, read there alone.
+# In an unstranded library 18S reads land on them, which made the first of them Step-1's top gene
+# in 102 of 210 samples (P2Q.10).
+TOP_GENE = "top_gene_share"
 GLOBIN = ("HBA1", "HBA2", "HBB")
 ATTRIBUTE = re.compile(r'(gene_id|gene_name|gene_type) "([^"]*)"')
 # ponytail: sex_check is the registry's one category metric; a per-metric flag value in the
@@ -85,9 +84,9 @@ def gene_types(gtf: Path) -> pl.DataFrame:
     )
 
 
-def _antisense_18s() -> pl.Expr:
-    """Whether a row's ``gene_id``, version dropped, is one of the 18S-antisense lncRNAs."""
-    return pl.col("gene_id").str.replace(r"\.\d+$", "").is_in(RRNA_18S_ANTISENSE)
+def _listed(ids: Sequence[str]) -> pl.Expr:
+    """Whether a row's ``gene_id``, version dropped, is one of ``ids`` (unversioned)."""
+    return pl.col("gene_id").str.replace(r"\.\d+$", "").is_in(list(ids))
 
 
 def top_gene(matrix: np.ndarray, rrna: np.ndarray) -> np.ndarray:
@@ -105,14 +104,22 @@ def top_gene(matrix: np.ndarray, rrna: np.ndarray) -> np.ndarray:
     return kept.max(axis=0) if kept.shape[0] else np.zeros(matrix.shape[1])
 
 
-def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFrame:
+def count_metrics(
+    counts: pl.DataFrame, types: pl.DataFrame | None, antisense_18s: Sequence[str]
+) -> pl.DataFrame:
     """Library size, genes detected, top-gene share and the four composition shares per sample.
 
     The shares are of disjoint gene classes: mitochondrial rRNA (Mt_rRNA), the other chrM
-    genes, nuclear rRNA (its genes, pseudogenes and the two 18S-antisense lncRNAs, which hold
+    genes, nuclear rRNA (its genes, pseudogenes and the 18S-antisense lncRNAs, which hold
     18S reads in an unstranded library), and the three globin genes. The top gene is searched
-    among the others. Without gene types the shares are left out, and the top gene is
-    searched outside the 18S-antisense lncRNAs alone.
+    outside the Mt_rRNA genes and the 18S-antisense lncRNAs. Without gene types the shares
+    and the top-gene share are left out: no Mt_rRNA gene can be told apart.
+
+    Args:
+        counts: ``gene_id`` then one column per sample.
+        types: ``gene_types`` of the annotation the counts were made with, or None.
+        antisense_18s: Unversioned IDs of the 18S-antisense lncRNAs, the registry's
+            top_gene_share ``exclude_gene_ids``.
 
     Raises:
         QcError: If a gene of the counts is not in the annotation; the counts then came from
@@ -120,17 +127,8 @@ def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFr
     """
     if types is None:
         matrix = counts.drop("gene_id").to_numpy().astype(float)
-        size = matrix.sum(axis=0)
-        with np.errstate(divide="ignore", invalid="ignore"):
-            top = top_gene(matrix, counts.select(_antisense_18s()).to_series().to_numpy()) / size
-        return pl.DataFrame(
-            {
-                "sample": counts.columns[1:],
-                "library_size": size,
-                "genes_detected": (matrix >= 1).sum(axis=0),
-                "top_gene_share": top,
-            }
-        )
+        return pl.DataFrame({"sample": counts.columns[1:], "library_size": matrix.sum(axis=0),
+                             "genes_detected": (matrix >= 1).sum(axis=0)})  # fmt: skip
     typed = counts.join(types, on="gene_id", how="left", maintain_order="left")
     missing = typed.filter(pl.col("gene_type").is_null())["gene_id"]
     if missing.len():
@@ -143,16 +141,16 @@ def count_metrics(counts: pl.DataFrame, types: pl.DataFrame | None) -> pl.DataFr
         "mt_fraction": (pl.col("chrom") == MT_CHROM) & ~pl.col("gene_type").is_in(MT_RRNA),
         "mt_rrna_fraction": pl.col("gene_type").is_in(MT_RRNA),
         "rrna_fraction": (pl.col("gene_type").is_in(RRNA) & (pl.col("chrom") != MT_CHROM))
-        | _antisense_18s(),
+        | _listed(antisense_18s),
         "globin_fraction": pl.col("gene_name").is_in(GLOBIN),
     }
-    rrna_like = typed.select(pl.col("gene_type").is_in(MT_RRNA) | _antisense_18s()).to_series()
+    rrna_like = pl.col("gene_type").is_in(MT_RRNA) | _listed(antisense_18s)
     with np.errstate(divide="ignore", invalid="ignore"):
         shares = {
             name: matrix[typed.select(mask).to_series().to_numpy()].sum(axis=0) / size
             for name, mask in classes.items()
         }
-        top = top_gene(matrix, rrna_like.to_numpy()) / size
+        top = top_gene(matrix, typed.select(rrna_like).to_series().to_numpy()) / size
     return pl.DataFrame({
         "sample": names, "library_size": size, "genes_detected": (matrix >= 1).sum(axis=0),
         "top_gene_share": top, **shares,
@@ -219,7 +217,7 @@ def sample_metrics(
     counts: pl.DataFrame,
     sheet: pl.DataFrame,
     genes: pl.DataFrame,
-    types: pl.DataFrame | None,
+    composition: pl.DataFrame,
     peers: Sequence[Sequence[str]],
     threads: int,
 ) -> Measured:
@@ -229,8 +227,8 @@ def sample_metrics(
         counts: ``gene_id`` then one column per sample, as gather writes it.
         sheet: The harmonised sheet, one row per run.
         genes: Gather's ``gene_id`` and ``gene_name``, which the sex check reads.
-        types: ``gene_types`` of the annotation the counts were made with; None leaves the
-            composition shares out.
+        composition: ``count_metrics`` of the same counts, with the annotation they were made
+            with and the registry's top_gene_share ``exclude_gene_ids``.
         peers: Peer groupings, the run's first: sheet columns whose shared values make a
             peer group. The values hold the first's agreement and distance; ``by_peers`` each.
         threads: CPUs for the VST.
@@ -241,7 +239,7 @@ def sample_metrics(
     samples = sheet.unique("sample", keep="first", maintain_order=True)
     sexes, _ = sex_check(sheet, counts, genes)
     found = pca(counts, samples["sample"].to_list(), threads=threads)
-    frame = count_metrics(counts, types)
+    frame = composition
     by_peers = tuple(
         replicate_spearman(counts, samples, grouping).join(
             pca_distance(found.scores, samples, grouping), on="sample", how="left",

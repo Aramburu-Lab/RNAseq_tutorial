@@ -235,9 +235,46 @@ def test_without_an_annotation_the_shares_are_left_out_and_said(tmp_path):
     out = root / "outputs" / "02_qc"
     metrics = pl.read_csv(next(out.glob("*_metrics_v1.csv")))
     assert "mt_fraction" not in metrics.columns and "library_size" in metrics.columns
-    assert "Composition shares not measured" in unpacked(
+    assert "top_gene_share" not in metrics.columns
+    assert "Composition shares and the top-gene share not measured" in unpacked(
         next(out.glob("*_overview_v1.html")).read_text()
     )
+
+
+def test_ctx_qc_leaves_the_registry_listed_lncrna_and_mt_rrna_out_of_the_top_gene(tmp_path):
+    """End to end: a gene renamed to ENSG00000280614.1 with the largest count, and the planted
+    MT-RNR2 surplus, are not S020's top gene; the lncRNA counts as nuclear rRNA.
+
+    Mutation caught: counts_stage passing no exclusion list, as a run that ignores the registry
+    would (S020's top gene then the lncRNA)."""
+    root = tmp_path / "root"
+    root.mkdir()
+    planted = plant(root)["mito"]
+    gathered = root / "outputs" / "01_gather"
+    lnc = "ENSG00000280614.1"
+    for what in ("counts", "genes"):
+        path = next(gathered.glob(f"*_{what}_v1.parquet"))
+        frame = pl.read_parquet(path).with_columns(
+            gene_id=pl.when(pl.col("gene_id") == "g00005").then(pl.lit(lnc))
+            .otherwise(pl.col("gene_id")))  # fmt: skip
+        if what == "counts":
+            frame = frame.with_columns(
+                pl.when(pl.col("gene_id") == lnc).then(pl.col(planted) + 900_000)
+                .otherwise(pl.col(planted)).alias(planted))  # fmt: skip
+            counts = frame
+        frame.write_parquet(path)
+    spec = with_annotation(root, tmp_path)
+    done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(spec),
+               cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    metrics = pl.read_csv(next((root / "outputs" / "02_qc").glob("*_metrics_v1.csv")))
+    row = metrics.filter(pl.col("sample") == planted).row(0, named=True)
+    column = counts.filter(~pl.col("gene_id").is_in([lnc, "g00001"]))[planted]
+    size = counts[planted].sum()
+    assert row["top_gene_share"] == pytest.approx(column.max() / size)
+    lnc_reads = counts.filter(pl.col("gene_id") == lnc)[planted][0]
+    rrna = counts.filter(pl.col("gene_id") == "g00003")[planted][0]
+    assert row["rrna_fraction"] == pytest.approx((lnc_reads + rrna) / size)
 
 
 def test_a_strata_column_the_sheet_lacks_stops_the_run(tmp_path):

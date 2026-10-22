@@ -8,6 +8,7 @@ page and MultiQC's report cannot disagree about a value.
 
 import math
 import os
+import re
 import tomllib
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -44,8 +45,11 @@ REQUIRED = (
 OPTIONAL = (
     "module", "kind", "scale", "good", "usable", "bands", "rationale", "stranded", "unstranded",
     "plot_bands", "plot_line", "plot_source", "plot_expected_bias_positions",
-    "plot_unstranded_tolerance", "judged_within",
+    "plot_unstranded_tolerance", "judged_within", "exclude_gene_ids", "exclude_source",
 )  # fmt: skip
+# An unversioned Ensembl gene ID, as exclude_gene_ids names one: the version a release bumps
+# must not stop the match.
+GENE_ID = re.compile(r"ENSG\d{11}")
 # Groups a metric may be judged within instead of the --strata: read_length within its
 # read-length group, never across a cohort that mixes lengths by design (Rytis 2026-10-09).
 # ctx.qc.checkpoint.length_groups is the one definition of the group.
@@ -89,6 +93,8 @@ class Metric:
     plot_expected_bias_positions: int | None = None
     plot_unstranded_tolerance: float | None = None
     judged_within: str | None = None
+    exclude_gene_ids: tuple[str, ...] = ()
+    exclude_source: str = ""
 
     @property
     def banded(self) -> bool:
@@ -206,7 +212,7 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
     if raw.get("source_type") not in SOURCE_TYPES:
         problems.append(f"[metrics.{key}] source_type = {raw.get('source_type')!r}, not one of "
                         f"{sorted(SOURCE_TYPES)}")  # fmt: skip
-    problems += _band_problems(key, raw, kind)
+    problems += _band_problems(key, raw, kind) + _exclusion_problems(key, raw)
     if raw.get("judged_within", JUDGED_WITHIN[0]) not in JUDGED_WITHIN:
         problems.append(f"[metrics.{key}] judged_within = {raw['judged_within']!r}, not one of "
                         f"{JUDGED_WITHIN}")  # fmt: skip
@@ -226,7 +232,25 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
         plot_expected_bias_positions=raw.get("plot_expected_bias_positions"),
         plot_unstranded_tolerance=raw.get("plot_unstranded_tolerance"),
         judged_within=raw.get("judged_within"),
+        exclude_gene_ids=tuple(raw.get("exclude_gene_ids", ())),
+        exclude_source=raw.get("exclude_source", ""),
     ), []  # fmt: skip
+
+
+def _exclusion_problems(key: str, raw: Mapping[str, Any]) -> list[str]:
+    """What is wrong with a metric's gene exclusion list: each an unversioned ID, sourced."""
+    ids = raw.get("exclude_gene_ids")
+    if ids is None:
+        orphan = "exclude_source" in raw
+        return [f"[metrics.{key}] exclude_source needs exclude_gene_ids"] * orphan
+    problems = [f"[metrics.{key}] exclude_gene_ids needs an exclude_source"] * (
+        not raw.get("exclude_source")
+    )
+    if not isinstance(ids, list) or not all(isinstance(i, str) and GENE_ID.fullmatch(i)
+                                            for i in ids):  # fmt: skip
+        problems.append(f"[metrics.{key}] exclude_gene_ids must list unversioned Ensembl gene "
+                        f"IDs (ENSG and 11 digits), not {ids!r}")  # fmt: skip
+    return problems
 
 
 def _band_problems(key: str, raw: Mapping[str, Any], kind: str) -> list[str]:
