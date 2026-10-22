@@ -1,0 +1,1352 @@
+sample_accession	tag	value
+SAMN09752525	condition	Normal
+SAMN09752525	INSDC secondary accession	SRS3616465
+SAMN09752525	NCBI submission package	Generic.1.0
+SAMN09752525	pathology	N/A
+SAMN09752525	organism	Homo sapiens
+SAMN09752525	cell type	monocytes
+SAMN09752525	sequencing batch	Batch 1
+SAMN09752525	age	-
+SAMN09752525	source_name	Blood
+SAMN09752525	BioSampleModel	Generic
+SAMN09752525	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752525	ENA-LAST-UPDATE	2019-03-28
+SAMN09752482	condition	Endometrial cancer
+SAMN09752482	INSDC secondary accession	SRS3616471
+SAMN09752482	NCBI submission package	Generic.1.0
+SAMN09752482	pathology	Carcinoma
+SAMN09752482	organism	Homo sapiens
+SAMN09752482	cell type	monocytes
+SAMN09752482	sequencing batch	Batch 1
+SAMN09752482	age	60
+SAMN09752482	source_name	Blood
+SAMN09752482	BioSampleModel	Generic
+SAMN09752482	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752482	ENA-LAST-UPDATE	2019-03-28
+SAMN09752452	condition	Endometrial cancer
+SAMN09752452	INSDC secondary accession	SRS3616473
+SAMN09752452	NCBI submission package	Generic.1.0
+SAMN09752452	pathology	UPSC
+SAMN09752452	organism	Homo sapiens
+SAMN09752452	cell type	monocytes
+SAMN09752452	sequencing batch	Batch 1
+SAMN09752452	age	71
+SAMN09752452	source_name	Blood
+SAMN09752452	BioSampleModel	Generic
+SAMN09752452	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752452	ENA-LAST-UPDATE	2019-03-28
+SAMN09752377	condition	Breast cancer
+SAMN09752377	INSDC secondary accession	SRS3616477
+SAMN09752377	NCBI submission package	Generic.1.0
+SAMN09752377	pathology	Invasive Breast cancer
+SAMN09752377	organism	Homo sapiens
+SAMN09752377	cell type	monocytes
+SAMN09752377	sequencing batch	Batch 3
+SAMN09752377	age	65
+SAMN09752377	source_name	Blood
+SAMN09752377	BioSampleModel	Generic
+SAMN09752377	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752377	ENA-LAST-UPDATE	2019-03-28
+SAMN09752371	condition	Endometrial cancer
+SAMN09752371	INSDC secondary accession	SRS3616478
+SAMN09752371	NCBI submission package	Generic.1.0
+SAMN09752371	pathology	iEndometrioid
+SAMN09752371	organism	Homo sapiens
+SAMN09752371	cell type	monocytes
+SAMN09752371	sequencing batch	Batch 3
+SAMN09752371	age	66
+SAMN09752371	source_name	Blood
+SAMN09752371	BioSampleModel	Generic
+SAMN09752371	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752371	ENA-LAST-UPDATE	2019-03-28
+SAMN09751463	condition	Normal
+SAMN09751463	INSDC secondary accession	SRS3616483
+SAMN09751463	NCBI submission package	Generic.1.0
+SAMN09751463	pathology	N/A
+SAMN09751463	organism	Homo sapiens
+SAMN09751463	cell type	monocytes
+SAMN09751463	sequencing batch	Batch 4
+SAMN09751463	age	-
+SAMN09751463	source_name	Blood
+SAMN09751463	BioSampleModel	Generic
+SAMN09751463	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751463	ENA-LAST-UPDATE	2019-03-28
+SAMN09751451	condition	Normal
+SAMN09751451	INSDC secondary accession	SRS3616486
+SAMN09751451	NCBI submission package	Generic.1.0
+SAMN09751451	pathology	N/A
+SAMN09751451	organism	Homo sapiens
+SAMN09751451	cell type	monocytes
+SAMN09751451	sequencing batch	Batch 4
+SAMN09751451	age	-
+SAMN09751451	source_name	Blood
+SAMN09751451	BioSampleModel	Generic
+SAMN09751451	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751451	ENA-LAST-UPDATE	2019-03-28
+SAMN09751445	condition	Normal
+SAMN09751445	INSDC secondary accession	SRS3616488
+SAMN09751445	NCBI submission package	Generic.1.0
+SAMN09751445	pathology	N/A
+SAMN09751445	organism	Homo sapiens
+SAMN09751445	cell type	monocytes
+SAMN09751445	sequencing batch	Batch 4
+SAMN09751445	age	-
+SAMN09751445	source_name	Blood
+SAMN09751445	BioSampleModel	Generic
+SAMN09751445	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751445	ENA-LAST-UPDATE	2019-03-28
+SAMN09751395	condition	Breast cancer
+SAMN09751395	INSDC secondary accession	SRS3616494
+SAMN09751395	NCBI submission package	Generic.1.0
+SAMN09751395	pathology	Invasive Breast cancer
+SAMN09751395	organism	Homo sapiens
+SAMN09751395	cell type	monocytes
+SAMN09751395	sequencing batch	Batch 4
+SAMN09751395	age	50
+SAMN09751395	source_name	Blood
+SAMN09751395	BioSampleModel	Generic
+SAMN09751395	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751395	ENA-LAST-UPDATE	2019-03-28
+SAMN09751372	condition	Breast cancer
+SAMN09751372	INSDC secondary accession	SRS3616498
+SAMN09751372	NCBI submission package	Generic.1.0
+SAMN09751372	pathology	Invasive Breast cancer
+SAMN09751372	organism	Homo sapiens
+SAMN09751372	cell type	monocytes
+SAMN09751372	sequencing batch	Batch 4
+SAMN09751372	age	62
+SAMN09751372	source_name	Blood
+SAMN09751372	BioSampleModel	Generic
+SAMN09751372	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751372	ENA-LAST-UPDATE	2019-03-28
+SAMN09751364	condition	Breast cancer
+SAMN09751364	INSDC secondary accession	SRS3616497
+SAMN09751364	NCBI submission package	Generic.1.0
+SAMN09751364	pathology	Invasive Breast cancer
+SAMN09751364	organism	Homo sapiens
+SAMN09751364	cell type	monocytes
+SAMN09751364	sequencing batch	Batch 4
+SAMN09751364	age	57
+SAMN09751364	source_name	Blood
+SAMN09751364	BioSampleModel	Generic
+SAMN09751364	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751364	ENA-LAST-UPDATE	2019-03-28
+SAMN09751350	condition	Normal
+SAMN09751350	INSDC secondary accession	SRS3616500
+SAMN09751350	NCBI submission package	Generic.1.0
+SAMN09751350	pathology	N/A
+SAMN09751350	organism	Homo sapiens
+SAMN09751350	cell type	monocytes
+SAMN09751350	sequencing batch	Batch 5
+SAMN09751350	age	-
+SAMN09751350	source_name	Blood
+SAMN09751350	BioSampleModel	Generic
+SAMN09751350	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751350	ENA-LAST-UPDATE	2019-03-28
+SAMN09752624	condition	Normal
+SAMN09752624	INSDC secondary accession	SRS3616501
+SAMN09752624	NCBI submission package	Generic.1.0
+SAMN09752624	pathology	N/A
+SAMN09752624	organism	Homo sapiens
+SAMN09752624	cell type	monocytes
+SAMN09752624	sequencing batch	Batch 5
+SAMN09752624	age	-
+SAMN09752624	source_name	Blood
+SAMN09752624	BioSampleModel	Generic
+SAMN09752624	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752624	ENA-LAST-UPDATE	2019-03-28
+SAMN09752600	condition	Breast cancer
+SAMN09752600	INSDC secondary accession	SRS3616505
+SAMN09752600	NCBI submission package	Generic.1.0
+SAMN09752600	pathology	Invasive Breast cancer
+SAMN09752600	organism	Homo sapiens
+SAMN09752600	cell type	monocytes
+SAMN09752600	sequencing batch	Batch 5
+SAMN09752600	age	50
+SAMN09752600	source_name	Blood
+SAMN09752600	BioSampleModel	Generic
+SAMN09752600	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752600	ENA-LAST-UPDATE	2019-03-28
+SAMN09752593	condition	Breast cancer
+SAMN09752593	INSDC secondary accession	SRS3616506
+SAMN09752593	NCBI submission package	Generic.1.0
+SAMN09752593	pathology	Invasive Breast cancer
+SAMN09752593	organism	Homo sapiens
+SAMN09752593	cell type	monocytes
+SAMN09752593	sequencing batch	Batch 5
+SAMN09752593	age	66
+SAMN09752593	source_name	Blood
+SAMN09752593	BioSampleModel	Generic
+SAMN09752593	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752593	ENA-LAST-UPDATE	2019-03-28
+SAMN09752592	condition	Breast cancer
+SAMN09752592	INSDC secondary accession	SRS3616507
+SAMN09752592	NCBI submission package	Generic.1.0
+SAMN09752592	pathology	Invasive Breast cancer
+SAMN09752592	organism	Homo sapiens
+SAMN09752592	cell type	monocytes
+SAMN09752592	sequencing batch	Batch 5
+SAMN09752592	age	51
+SAMN09752592	source_name	Blood
+SAMN09752592	BioSampleModel	Generic
+SAMN09752592	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752592	ENA-LAST-UPDATE	2019-03-28
+SAMN09750482	condition	Breast cancer
+SAMN09750482	INSDC secondary accession	SRS3616509
+SAMN09750482	NCBI submission package	Generic.1.0
+SAMN09750482	pathology	Invasive Breast cancer
+SAMN09750482	organism	Homo sapiens
+SAMN09750482	cell type	monocytes
+SAMN09750482	sequencing batch	Batch 5
+SAMN09750482	age	86
+SAMN09750482	source_name	Blood
+SAMN09750482	BioSampleModel	Generic
+SAMN09750482	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750482	ENA-LAST-UPDATE	2019-03-28
+SAMN09750440	condition	Endometrial cancer
+SAMN09750440	INSDC secondary accession	SRS3616513
+SAMN09750440	NCBI submission package	Generic.1.0
+SAMN09750440	pathology	Endometrioid
+SAMN09750440	organism	Homo sapiens
+SAMN09750440	cell type	monocytes
+SAMN09750440	sequencing batch	Batch 5
+SAMN09750440	age	64
+SAMN09750440	source_name	Blood
+SAMN09750440	BioSampleModel	Generic
+SAMN09750440	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750440	ENA-LAST-UPDATE	2019-03-28
+SAMN09750359	condition	Endometrial cancer
+SAMN09750359	INSDC secondary accession	SRS3616522
+SAMN09750359	NCBI submission package	Generic.1.0
+SAMN09750359	pathology	Endometrioid
+SAMN09750359	organism	Homo sapiens
+SAMN09750359	cell type	tumour associated macrophages
+SAMN09750359	sequencing batch	Batch 4
+SAMN09750359	age	44
+SAMN09750359	source_name	Tissue
+SAMN09750359	BioSampleModel	Generic
+SAMN09750359	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750359	ENA-LAST-UPDATE	2019-03-28
+SAMN09750337	condition	Endometrial cancer
+SAMN09750337	INSDC secondary accession	SRS3616524
+SAMN09750337	NCBI submission package	Generic.1.0
+SAMN09750337	pathology	Endometrioid
+SAMN09750337	organism	Homo sapiens
+SAMN09750337	cell type	tumour associated macrophages
+SAMN09750337	sequencing batch	Batch 4
+SAMN09750337	age	81
+SAMN09750337	source_name	Tissue
+SAMN09750337	BioSampleModel	Generic
+SAMN09750337	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750337	ENA-LAST-UPDATE	2019-03-28
+SAMN10853117	condition	Normal
+SAMN10853117	INSDC secondary accession	SRS4313036
+SAMN10853117	NCBI submission package	Generic.1.0
+SAMN10853117	pathology	N/A
+SAMN10853117	organism	Homo sapiens
+SAMN10853117	cell type	monocytes
+SAMN10853117	sequencing batch	6
+SAMN10853117	source_name	Blood
+SAMN10853117	BioSampleModel	Generic
+SAMN10853117	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853117	ENA-LAST-UPDATE	2019-03-28
+SAMN10853116	condition	Normal
+SAMN10853116	INSDC secondary accession	SRS4313038
+SAMN10853116	NCBI submission package	Generic.1.0
+SAMN10853116	pathology	N/A
+SAMN10853116	organism	Homo sapiens
+SAMN10853116	cell type	monocytes
+SAMN10853116	sequencing batch	6
+SAMN10853116	source_name	Blood
+SAMN10853116	BioSampleModel	Generic
+SAMN10853116	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853116	ENA-LAST-UPDATE	2019-03-28
+SAMN10853113	condition	Breast cancer
+SAMN10853113	INSDC secondary accession	SRS4313046
+SAMN10853113	NCBI submission package	Generic.1.0
+SAMN10853113	pathology	Invasive_Breast_cancer
+SAMN10853113	organism	Homo sapiens
+SAMN10853113	cell type	monocytes
+SAMN10853113	sequencing batch	6
+SAMN10853113	source_name	Blood
+SAMN10853113	BioSampleModel	Generic
+SAMN10853113	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853113	ENA-LAST-UPDATE	2019-03-28
+SAMN10853135	condition	Breast cancer
+SAMN10853135	INSDC secondary accession	SRS4313049
+SAMN10853135	NCBI submission package	Generic.1.0
+SAMN10853135	pathology	Invasive_Breast_cancer
+SAMN10853135	organism	Homo sapiens
+SAMN10853135	cell type	monocytes
+SAMN10853135	sequencing batch	6
+SAMN10853135	source_name	Blood
+SAMN10853135	BioSampleModel	Generic
+SAMN10853135	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853135	ENA-LAST-UPDATE	2019-03-28
+SAMN10853133	condition	Breast cancer
+SAMN10853133	INSDC secondary accession	SRS4313051
+SAMN10853133	NCBI submission package	Generic.1.0
+SAMN10853133	pathology	Invasive_Breast_cancer
+SAMN10853133	organism	Homo sapiens
+SAMN10853133	cell type	monocytes
+SAMN10853133	sequencing batch	6
+SAMN10853133	source_name	Blood
+SAMN10853133	BioSampleModel	Generic
+SAMN10853133	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853133	ENA-LAST-UPDATE	2019-03-28
+SAMN10853129	condition	Normal
+SAMN10853129	INSDC secondary accession	SRS4313055
+SAMN10853129	NCBI submission package	Generic.1.0
+SAMN10853129	pathology	N/A
+SAMN10853129	organism	Homo sapiens
+SAMN10853129	cell type	monocytes
+SAMN10853129	sequencing batch	6
+SAMN10853129	source_name	Blood
+SAMN10853129	BioSampleModel	Generic
+SAMN10853129	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853129	ENA-LAST-UPDATE	2019-03-28
+SAMN10853128	condition	Normal
+SAMN10853128	INSDC secondary accession	SRS4313056
+SAMN10853128	NCBI submission package	Generic.1.0
+SAMN10853128	pathology	N/A
+SAMN10853128	organism	Homo sapiens
+SAMN10853128	cell type	monocytes
+SAMN10853128	sequencing batch	6
+SAMN10853128	source_name	Blood
+SAMN10853128	BioSampleModel	Generic
+SAMN10853128	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853128	ENA-LAST-UPDATE	2019-03-28
+SAMN10853162	condition	Normal
+SAMN10853162	INSDC secondary accession	SRS4313065
+SAMN10853162	NCBI submission package	Generic.1.0
+SAMN10853162	pathology	N/A
+SAMN10853162	organism	Homo sapiens
+SAMN10853162	cell type	monocytes
+SAMN10853162	sequencing batch	6
+SAMN10853162	source_name	Blood
+SAMN10853162	BioSampleModel	Generic
+SAMN10853162	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853162	ENA-LAST-UPDATE	2019-03-28
+SAMN10853158	condition	Normal
+SAMN10853158	INSDC secondary accession	SRS4313068
+SAMN10853158	NCBI submission package	Generic.1.0
+SAMN10853158	pathology	N/A
+SAMN10853158	organism	Homo sapiens
+SAMN10853158	cell type	monocytes
+SAMN10853158	sequencing batch	6
+SAMN10853158	source_name	Blood
+SAMN10853158	BioSampleModel	Generic
+SAMN10853158	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853158	ENA-LAST-UPDATE	2019-03-28
+SAMN10853157	condition	Normal
+SAMN10853157	INSDC secondary accession	SRS4313070
+SAMN10853157	NCBI submission package	Generic.1.0
+SAMN10853157	pathology	N/A
+SAMN10853157	organism	Homo sapiens
+SAMN10853157	cell type	monocytes
+SAMN10853157	sequencing batch	6
+SAMN10853157	source_name	Blood
+SAMN10853157	BioSampleModel	Generic
+SAMN10853157	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853157	ENA-LAST-UPDATE	2019-03-28
+SAMN10853153	condition	Normal
+SAMN10853153	INSDC secondary accession	SRS4313073
+SAMN10853153	NCBI submission package	Generic.1.0
+SAMN10853153	pathology	N/A
+SAMN10853153	organism	Homo sapiens
+SAMN10853153	cell type	monocytes
+SAMN10853153	sequencing batch	6
+SAMN10853153	source_name	Blood
+SAMN10853153	BioSampleModel	Generic
+SAMN10853153	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853153	ENA-LAST-UPDATE	2019-03-28
+SAMN09752534	condition	Normal
+SAMN09752534	INSDC secondary accession	SRS3616463
+SAMN09752534	NCBI submission package	Generic.1.0
+SAMN09752534	pathology	N/A
+SAMN09752534	organism	Homo sapiens
+SAMN09752534	cell type	monocytes
+SAMN09752534	sequencing batch	Batch 1
+SAMN09752534	age	-
+SAMN09752534	source_name	Blood
+SAMN09752534	BioSampleModel	Generic
+SAMN09752534	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752534	ENA-LAST-UPDATE	2019-03-28
+SAMN09752515	condition	Normal
+SAMN09752515	INSDC secondary accession	SRS3616466
+SAMN09752515	NCBI submission package	Generic.1.0
+SAMN09752515	pathology	N/A
+SAMN09752515	organism	Homo sapiens
+SAMN09752515	cell type	monocytes
+SAMN09752515	sequencing batch	Batch 1
+SAMN09752515	age	-
+SAMN09752515	source_name	Blood
+SAMN09752515	BioSampleModel	Generic
+SAMN09752515	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752515	ENA-LAST-UPDATE	2019-03-28
+SAMN09752464	condition	Endometrial cancer
+SAMN09752464	INSDC secondary accession	SRS3616472
+SAMN09752464	NCBI submission package	Generic.1.0
+SAMN09752464	pathology	UPSC
+SAMN09752464	organism	Homo sapiens
+SAMN09752464	cell type	monocytes
+SAMN09752464	sequencing batch	Batch 1
+SAMN09752464	age	62
+SAMN09752464	source_name	Blood
+SAMN09752464	BioSampleModel	Generic
+SAMN09752464	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752464	ENA-LAST-UPDATE	2019-03-28
+SAMN09752438	condition	Endometrial cancer
+SAMN09752438	INSDC secondary accession	SRS3616475
+SAMN09752438	NCBI submission package	Generic.1.0
+SAMN09752438	pathology	UPSC
+SAMN09752438	organism	Homo sapiens
+SAMN09752438	cell type	monocytes
+SAMN09752438	sequencing batch	Batch 1
+SAMN09752438	age	70
+SAMN09752438	source_name	Blood
+SAMN09752438	BioSampleModel	Generic
+SAMN09752438	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752438	ENA-LAST-UPDATE	2019-03-28
+SAMN09751505	condition	Endometrial cancer
+SAMN09751505	INSDC secondary accession	SRS3616480
+SAMN09751505	NCBI submission package	Generic.1.0
+SAMN09751505	pathology	iEndometrioid
+SAMN09751505	organism	Homo sapiens
+SAMN09751505	cell type	monocytes
+SAMN09751505	sequencing batch	Batch 3
+SAMN09751505	age	65
+SAMN09751505	source_name	Blood
+SAMN09751505	BioSampleModel	Generic
+SAMN09751505	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751505	ENA-LAST-UPDATE	2019-03-28
+SAMN09751478	condition	Normal
+SAMN09751478	INSDC secondary accession	SRS3616482
+SAMN09751478	NCBI submission package	Generic.1.0
+SAMN09751478	pathology	N/A
+SAMN09751478	organism	Homo sapiens
+SAMN09751478	cell type	monocytes
+SAMN09751478	sequencing batch	Batch 4
+SAMN09751478	age	-
+SAMN09751478	source_name	Blood
+SAMN09751478	BioSampleModel	Generic
+SAMN09751478	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751478	ENA-LAST-UPDATE	2019-03-28
+SAMN09751469	condition	Normal
+SAMN09751469	INSDC secondary accession	SRS3616485
+SAMN09751469	NCBI submission package	Generic.1.0
+SAMN09751469	pathology	N/A
+SAMN09751469	organism	Homo sapiens
+SAMN09751469	cell type	monocytes
+SAMN09751469	sequencing batch	Batch 4
+SAMN09751469	age	-
+SAMN09751469	source_name	Blood
+SAMN09751469	BioSampleModel	Generic
+SAMN09751469	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751469	ENA-LAST-UPDATE	2019-03-28
+SAMN09751380	condition	Breast cancer
+SAMN09751380	INSDC secondary accession	SRS3616496
+SAMN09751380	NCBI submission package	Generic.1.0
+SAMN09751380	pathology	Invasive Breast cancer
+SAMN09751380	organism	Homo sapiens
+SAMN09751380	cell type	monocytes
+SAMN09751380	sequencing batch	Batch 4
+SAMN09751380	age	62
+SAMN09751380	source_name	Blood
+SAMN09751380	BioSampleModel	Generic
+SAMN09751380	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751380	ENA-LAST-UPDATE	2019-03-28
+SAMN09752606	condition	Normal
+SAMN09752606	INSDC secondary accession	SRS3616504
+SAMN09752606	NCBI submission package	Generic.1.0
+SAMN09752606	pathology	N/A
+SAMN09752606	organism	Homo sapiens
+SAMN09752606	cell type	monocytes
+SAMN09752606	sequencing batch	Batch 5
+SAMN09752606	age	-
+SAMN09752606	source_name	Blood
+SAMN09752606	BioSampleModel	Generic
+SAMN09752606	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752606	ENA-LAST-UPDATE	2019-03-28
+SAMN09752575	condition	Breast cancer
+SAMN09752575	INSDC secondary accession	SRS3616508
+SAMN09752575	NCBI submission package	Generic.1.0
+SAMN09752575	pathology	Invasive Breast cancer
+SAMN09752575	organism	Homo sapiens
+SAMN09752575	cell type	monocytes
+SAMN09752575	sequencing batch	Batch 5
+SAMN09752575	age	47
+SAMN09752575	source_name	Blood
+SAMN09752575	BioSampleModel	Generic
+SAMN09752575	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752575	ENA-LAST-UPDATE	2019-03-28
+SAMN09750406	condition	Breast cancer
+SAMN09750406	INSDC secondary accession	SRS3616517
+SAMN09750406	NCBI submission package	Generic.1.0
+SAMN09750406	pathology	Invasive Breast cancer
+SAMN09750406	organism	Homo sapiens
+SAMN09750406	cell type	tumour associated macrophages
+SAMN09750406	sequencing batch	Batch 4
+SAMN09750406	age	69
+SAMN09750406	source_name	Tissue
+SAMN09750406	BioSampleModel	Generic
+SAMN09750406	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750406	ENA-LAST-UPDATE	2019-03-28
+SAMN09750374	condition	Normal Endometrial
+SAMN09750374	INSDC secondary accession	SRS3616520
+SAMN09750374	NCBI submission package	Generic.1.0
+SAMN09750374	pathology	Benign
+SAMN09750374	organism	Homo sapiens
+SAMN09750374	cell type	tumour associated macrophages
+SAMN09750374	sequencing batch	Batch 4
+SAMN09750374	age	39
+SAMN09750374	source_name	Tissue
+SAMN09750374	BioSampleModel	Generic
+SAMN09750374	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750374	ENA-LAST-UPDATE	2019-03-28
+SAMN09750350	condition	Endometrial cancer
+SAMN09750350	INSDC secondary accession	SRS3616567
+SAMN09750350	NCBI submission package	Generic.1.0
+SAMN09750350	pathology	UPSC
+SAMN09750350	organism	Homo sapiens
+SAMN09750350	cell type	tumour associated macrophages
+SAMN09750350	sequencing batch	Batch 4
+SAMN09750350	age	63
+SAMN09750350	source_name	Tissue
+SAMN09750350	BioSampleModel	Generic
+SAMN09750350	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750350	ENA-LAST-UPDATE	2019-03-28
+SAMN09750325	condition	Endometrial cancer
+SAMN09750325	INSDC secondary accession	SRS3616526
+SAMN09750325	NCBI submission package	Generic.1.0
+SAMN09750325	pathology	Endometrioid
+SAMN09750325	organism	Homo sapiens
+SAMN09750325	cell type	tumour associated macrophages
+SAMN09750325	sequencing batch	Batch 4
+SAMN09750325	age	67
+SAMN09750325	source_name	Tissue
+SAMN09750325	BioSampleModel	Generic
+SAMN09750325	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750325	ENA-LAST-UPDATE	2019-03-28
+SAMN09751539	condition	Endometrial cancer
+SAMN09751539	INSDC secondary accession	SRS3616532
+SAMN09751539	NCBI submission package	Generic.1.0
+SAMN09751539	pathology	Endometrioid
+SAMN09751539	organism	Homo sapiens
+SAMN09751539	cell type	tumour associated macrophages
+SAMN09751539	sequencing batch	Batch 5
+SAMN09751539	age	74
+SAMN09751539	source_name	Tissue
+SAMN09751539	BioSampleModel	Generic
+SAMN09751539	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751539	ENA-LAST-UPDATE	2019-03-28
+SAMN10853139	condition	Breast cancer
+SAMN10853139	INSDC secondary accession	SRS4313043
+SAMN10853139	NCBI submission package	Generic.1.0
+SAMN10853139	pathology	DCIS
+SAMN10853139	organism	Homo sapiens
+SAMN10853139	cell type	monocytes
+SAMN10853139	sequencing batch	6
+SAMN10853139	source_name	Blood
+SAMN10853139	BioSampleModel	Generic
+SAMN10853139	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853139	ENA-LAST-UPDATE	2019-03-28
+SAMN10853138	condition	Breast cancer
+SAMN10853138	INSDC secondary accession	SRS4313045
+SAMN10853138	NCBI submission package	Generic.1.0
+SAMN10853138	pathology	Invasive_Breast_cancer
+SAMN10853138	organism	Homo sapiens
+SAMN10853138	cell type	monocytes
+SAMN10853138	sequencing batch	6
+SAMN10853138	source_name	Blood
+SAMN10853138	BioSampleModel	Generic
+SAMN10853138	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853138	ENA-LAST-UPDATE	2019-03-28
+SAMN10853137	condition	Breast cancer
+SAMN10853137	INSDC secondary accession	SRS4313047
+SAMN10853137	NCBI submission package	Generic.1.0
+SAMN10853137	pathology	DCIS
+SAMN10853137	organism	Homo sapiens
+SAMN10853137	cell type	monocytes
+SAMN10853137	sequencing batch	6
+SAMN10853137	source_name	Blood
+SAMN10853137	BioSampleModel	Generic
+SAMN10853137	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853137	ENA-LAST-UPDATE	2019-03-28
+SAMN10853130	condition	Normal
+SAMN10853130	INSDC secondary accession	SRS4313053
+SAMN10853130	NCBI submission package	Generic.1.0
+SAMN10853130	pathology	N/A
+SAMN10853130	organism	Homo sapiens
+SAMN10853130	cell type	monocytes
+SAMN10853130	sequencing batch	6
+SAMN10853130	source_name	Blood
+SAMN10853130	BioSampleModel	Generic
+SAMN10853130	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853130	ENA-LAST-UPDATE	2019-03-28
+SAMN10853125	condition	Normal
+SAMN10853125	INSDC secondary accession	SRS4313059
+SAMN10853125	NCBI submission package	Generic.1.0
+SAMN10853125	pathology	N/A
+SAMN10853125	organism	Homo sapiens
+SAMN10853125	cell type	monocytes
+SAMN10853125	sequencing batch	6
+SAMN10853125	source_name	Blood
+SAMN10853125	BioSampleModel	Generic
+SAMN10853125	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853125	ENA-LAST-UPDATE	2019-03-28
+SAMN10853123	condition	Normal
+SAMN10853123	INSDC secondary accession	SRS4313061
+SAMN10853123	NCBI submission package	Generic.1.0
+SAMN10853123	pathology	N/A
+SAMN10853123	organism	Homo sapiens
+SAMN10853123	cell type	monocytes
+SAMN10853123	sequencing batch	6
+SAMN10853123	source_name	Blood
+SAMN10853123	BioSampleModel	Generic
+SAMN10853123	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853123	ENA-LAST-UPDATE	2019-03-28
+SAMN10853121	condition	Normal
+SAMN10853121	INSDC secondary accession	SRS4313063
+SAMN10853121	NCBI submission package	Generic.1.0
+SAMN10853121	pathology	N/A
+SAMN10853121	organism	Homo sapiens
+SAMN10853121	cell type	monocytes
+SAMN10853121	sequencing batch	6
+SAMN10853121	source_name	Blood
+SAMN10853121	BioSampleModel	Generic
+SAMN10853121	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853121	ENA-LAST-UPDATE	2019-03-28
+SAMN09752508	condition	Breast cancer
+SAMN09752508	INSDC secondary accession	SRS3616464
+SAMN09752508	NCBI submission package	Generic.1.0
+SAMN09752508	pathology	Invasive Breast cancer
+SAMN09752508	organism	Homo sapiens
+SAMN09752508	cell type	monocytes
+SAMN09752508	sequencing batch	Batch 1
+SAMN09752508	age	78
+SAMN09752508	source_name	Blood
+SAMN09752508	BioSampleModel	Generic
+SAMN09752508	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752508	ENA-LAST-UPDATE	2019-03-28
+SAMN09752495	condition	Breast cancer
+SAMN09752495	INSDC secondary accession	SRS3616468
+SAMN09752495	NCBI submission package	Generic.1.0
+SAMN09752495	pathology	Invasive Breast cancer
+SAMN09752495	organism	Homo sapiens
+SAMN09752495	cell type	monocytes
+SAMN09752495	sequencing batch	Batch 1
+SAMN09752495	age	58
+SAMN09752495	source_name	Blood
+SAMN09752495	BioSampleModel	Generic
+SAMN09752495	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752495	ENA-LAST-UPDATE	2019-03-28
+SAMN09752471	condition	Endometrial cancer
+SAMN09752471	INSDC secondary accession	SRS3616470
+SAMN09752471	NCBI submission package	Generic.1.0
+SAMN09752471	pathology	UPSC
+SAMN09752471	organism	Homo sapiens
+SAMN09752471	cell type	monocytes
+SAMN09752471	sequencing batch	Batch 1
+SAMN09752471	age	71
+SAMN09752471	source_name	Blood
+SAMN09752471	BioSampleModel	Generic
+SAMN09752471	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752471	ENA-LAST-UPDATE	2019-03-28
+SAMN09751417	condition	Breast cancer
+SAMN09751417	INSDC secondary accession	SRS3616491
+SAMN09751417	NCBI submission package	Generic.1.0
+SAMN09751417	pathology	-
+SAMN09751417	organism	Homo sapiens
+SAMN09751417	cell type	monocytes
+SAMN09751417	sequencing batch	Batch 4
+SAMN09751417	age	-
+SAMN09751417	source_name	Blood
+SAMN09751417	BioSampleModel	Generic
+SAMN09751417	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751417	ENA-LAST-UPDATE	2019-03-28
+SAMN09750472	condition	Breast cancer
+SAMN09750472	INSDC secondary accession	SRS3616510
+SAMN09750472	NCBI submission package	Generic.1.0
+SAMN09750472	pathology	Invasive Breast cancer
+SAMN09750472	organism	Homo sapiens
+SAMN09750472	cell type	monocytes
+SAMN09750472	sequencing batch	Batch 5
+SAMN09750472	age	86
+SAMN09750472	source_name	Blood
+SAMN09750472	BioSampleModel	Generic
+SAMN09750472	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750472	ENA-LAST-UPDATE	2019-03-28
+SAMN09750425	condition	Normal Breast
+SAMN09750425	INSDC secondary accession	SRS3616515
+SAMN09750425	NCBI submission package	Generic.1.0
+SAMN09750425	pathology	Normal tissue
+SAMN09750425	organism	Homo sapiens
+SAMN09750425	cell type	tumour associated macrophages
+SAMN09750425	sequencing batch	Batch 4
+SAMN09750425	age	62
+SAMN09750425	source_name	Tissue
+SAMN09750425	BioSampleModel	Generic
+SAMN09750425	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750425	ENA-LAST-UPDATE	2019-03-28
+SAMN09750385	condition	Normal Endometrial
+SAMN09750385	INSDC secondary accession	SRS3616518
+SAMN09750385	NCBI submission package	Generic.1.0
+SAMN09750385	pathology	Benign
+SAMN09750385	organism	Homo sapiens
+SAMN09750385	cell type	tumour associated macrophages
+SAMN09750385	sequencing batch	Batch 4
+SAMN09750385	age	43
+SAMN09750385	source_name	Tissue
+SAMN09750385	BioSampleModel	Generic
+SAMN09750385	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750385	ENA-LAST-UPDATE	2019-03-28
+SAMN09750311	condition	Normal Breast
+SAMN09750311	INSDC secondary accession	SRS3616528
+SAMN09750311	NCBI submission package	Generic.1.0
+SAMN09750311	pathology	Normal tissue
+SAMN09750311	organism	Homo sapiens
+SAMN09750311	cell type	tumour associated macrophages
+SAMN09750311	sequencing batch	Batch 5
+SAMN09750311	age	-
+SAMN09750311	source_name	Tissue
+SAMN09750311	BioSampleModel	Generic
+SAMN09750311	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750311	ENA-LAST-UPDATE	2019-03-28
+SAMN09751534	condition	Endometrial cancer
+SAMN09751534	INSDC secondary accession	SRS3616533
+SAMN09751534	NCBI submission package	Generic.1.0
+SAMN09751534	pathology	Carcinosarcoma
+SAMN09751534	organism	Homo sapiens
+SAMN09751534	cell type	tumour associated macrophages
+SAMN09751534	sequencing batch	Batch 5
+SAMN09751534	age	70
+SAMN09751534	source_name	Tissue
+SAMN09751534	BioSampleModel	Generic
+SAMN09751534	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751534	ENA-LAST-UPDATE	2019-03-28
+SAMN10853114	condition	Normal
+SAMN10853114	INSDC secondary accession	SRS4313041
+SAMN10853114	NCBI submission package	Generic.1.0
+SAMN10853114	pathology	N/A
+SAMN10853114	organism	Homo sapiens
+SAMN10853114	cell type	monocytes
+SAMN10853114	sequencing batch	6
+SAMN10853114	source_name	Blood
+SAMN10853114	BioSampleModel	Generic
+SAMN10853114	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853114	ENA-LAST-UPDATE	2019-03-28
+SAMN10853136	condition	Breast cancer
+SAMN10853136	INSDC secondary accession	SRS4313048
+SAMN10853136	NCBI submission package	Generic.1.0
+SAMN10853136	pathology	DCIS
+SAMN10853136	organism	Homo sapiens
+SAMN10853136	cell type	monocytes
+SAMN10853136	sequencing batch	6
+SAMN10853136	source_name	Blood
+SAMN10853136	BioSampleModel	Generic
+SAMN10853136	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853136	ENA-LAST-UPDATE	2019-03-28
+SAMN10853126	condition	Normal
+SAMN10853126	INSDC secondary accession	SRS4313058
+SAMN10853126	NCBI submission package	Generic.1.0
+SAMN10853126	pathology	N/A
+SAMN10853126	organism	Homo sapiens
+SAMN10853126	cell type	monocytes
+SAMN10853126	sequencing batch	6
+SAMN10853126	source_name	Blood
+SAMN10853126	BioSampleModel	Generic
+SAMN10853126	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853126	ENA-LAST-UPDATE	2019-03-28
+SAMN10853124	condition	Normal
+SAMN10853124	INSDC secondary accession	SRS4313060
+SAMN10853124	NCBI submission package	Generic.1.0
+SAMN10853124	pathology	N/A
+SAMN10853124	organism	Homo sapiens
+SAMN10853124	cell type	monocytes
+SAMN10853124	sequencing batch	6
+SAMN10853124	source_name	Blood
+SAMN10853124	BioSampleModel	Generic
+SAMN10853124	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853124	ENA-LAST-UPDATE	2019-03-28
+SAMN10853163	condition	Normal
+SAMN10853163	INSDC secondary accession	SRS4313064
+SAMN10853163	NCBI submission package	Generic.1.0
+SAMN10853163	pathology	N/A
+SAMN10853163	organism	Homo sapiens
+SAMN10853163	cell type	monocytes
+SAMN10853163	sequencing batch	6
+SAMN10853163	source_name	Blood
+SAMN10853163	BioSampleModel	Generic
+SAMN10853163	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853163	ENA-LAST-UPDATE	2019-03-28
+SAMN10853151	condition	Normal
+SAMN10853151	INSDC secondary accession	SRS4313076
+SAMN10853151	NCBI submission package	Generic.1.0
+SAMN10853151	pathology	N/A
+SAMN10853151	organism	Homo sapiens
+SAMN10853151	cell type	monocytes
+SAMN10853151	sequencing batch	6
+SAMN10853151	source_name	Blood
+SAMN10853151	BioSampleModel	Generic
+SAMN10853151	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853151	ENA-LAST-UPDATE	2019-03-28
+SAMN09752542	condition	Normal
+SAMN09752542	INSDC secondary accession	SRS3616462
+SAMN09752542	NCBI submission package	Generic.1.0
+SAMN09752542	pathology	N/A
+SAMN09752542	organism	Homo sapiens
+SAMN09752542	cell type	monocytes
+SAMN09752542	sequencing batch	Batch 1
+SAMN09752542	age	-
+SAMN09752542	source_name	Blood
+SAMN09752542	BioSampleModel	Generic
+SAMN09752542	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752542	ENA-LAST-UPDATE	2019-03-28
+SAMN09752502	condition	Breast cancer
+SAMN09752502	INSDC secondary accession	SRS3616467
+SAMN09752502	NCBI submission package	Generic.1.0
+SAMN09752502	pathology	Invasive Breast cancer
+SAMN09752502	organism	Homo sapiens
+SAMN09752502	cell type	monocytes
+SAMN09752502	sequencing batch	Batch 1
+SAMN09752502	age	74
+SAMN09752502	source_name	Blood
+SAMN09752502	BioSampleModel	Generic
+SAMN09752502	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752502	ENA-LAST-UPDATE	2019-03-28
+SAMN09752488	condition	Breast cancer
+SAMN09752488	INSDC secondary accession	SRS3616469
+SAMN09752488	NCBI submission package	Generic.1.0
+SAMN09752488	pathology	Invasive Breast cancer
+SAMN09752488	organism	Homo sapiens
+SAMN09752488	cell type	monocytes
+SAMN09752488	sequencing batch	Batch 1
+SAMN09752488	age	42
+SAMN09752488	source_name	Blood
+SAMN09752488	BioSampleModel	Generic
+SAMN09752488	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752488	ENA-LAST-UPDATE	2019-03-28
+SAMN09752408	condition	Breast cancer
+SAMN09752408	INSDC secondary accession	SRS3616476
+SAMN09752408	NCBI submission package	Generic.1.0
+SAMN09752408	pathology	Invasive Breast cancer
+SAMN09752408	organism	Homo sapiens
+SAMN09752408	cell type	monocytes
+SAMN09752408	sequencing batch	Batch 3
+SAMN09752408	age	69
+SAMN09752408	source_name	Blood
+SAMN09752408	BioSampleModel	Generic
+SAMN09752408	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752408	ENA-LAST-UPDATE	2019-03-28
+SAMN09751489	condition	Normal
+SAMN09751489	INSDC secondary accession	SRS3616481
+SAMN09751489	NCBI submission package	Generic.1.0
+SAMN09751489	pathology	N/A
+SAMN09751489	organism	Homo sapiens
+SAMN09751489	cell type	monocytes
+SAMN09751489	sequencing batch	Batch 4
+SAMN09751489	age	-
+SAMN09751489	source_name	Blood
+SAMN09751489	BioSampleModel	Generic
+SAMN09751489	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751489	ENA-LAST-UPDATE	2019-03-28
+SAMN09751457	condition	Normal
+SAMN09751457	INSDC secondary accession	SRS3616484
+SAMN09751457	NCBI submission package	Generic.1.0
+SAMN09751457	pathology	N/A
+SAMN09751457	organism	Homo sapiens
+SAMN09751457	cell type	monocytes
+SAMN09751457	sequencing batch	Batch 4
+SAMN09751457	age	-
+SAMN09751457	source_name	Blood
+SAMN09751457	BioSampleModel	Generic
+SAMN09751457	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751457	ENA-LAST-UPDATE	2019-03-28
+SAMN09751409	condition	Endometrial cancer
+SAMN09751409	INSDC secondary accession	SRS3616492
+SAMN09751409	NCBI submission package	Generic.1.0
+SAMN09751409	pathology	iEndometrioid
+SAMN09751409	organism	Homo sapiens
+SAMN09751409	cell type	monocytes
+SAMN09751409	sequencing batch	Batch 4
+SAMN09751409	age	71
+SAMN09751409	source_name	Blood
+SAMN09751409	BioSampleModel	Generic
+SAMN09751409	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751409	ENA-LAST-UPDATE	2019-03-28
+SAMN09751401	condition	Endometrial cancer
+SAMN09751401	INSDC secondary accession	SRS3616493
+SAMN09751401	NCBI submission package	Generic.1.0
+SAMN09751401	pathology	iEndometrioid
+SAMN09751401	organism	Homo sapiens
+SAMN09751401	cell type	monocytes
+SAMN09751401	sequencing batch	Batch 4
+SAMN09751401	age	74
+SAMN09751401	source_name	Blood
+SAMN09751401	BioSampleModel	Generic
+SAMN09751401	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751401	ENA-LAST-UPDATE	2019-03-28
+SAMN09751387	condition	Breast cancer
+SAMN09751387	INSDC secondary accession	SRS3616495
+SAMN09751387	NCBI submission package	Generic.1.0
+SAMN09751387	pathology	Invasive Breast cancer
+SAMN09751387	organism	Homo sapiens
+SAMN09751387	cell type	monocytes
+SAMN09751387	sequencing batch	Batch 4
+SAMN09751387	age	57
+SAMN09751387	source_name	Blood
+SAMN09751387	BioSampleModel	Generic
+SAMN09751387	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751387	ENA-LAST-UPDATE	2019-03-28
+SAMN09752619	condition	Normal
+SAMN09752619	INSDC secondary accession	SRS3616502
+SAMN09752619	NCBI submission package	Generic.1.0
+SAMN09752619	pathology	N/A
+SAMN09752619	organism	Homo sapiens
+SAMN09752619	cell type	monocytes
+SAMN09752619	sequencing batch	Batch 5
+SAMN09752619	age	-
+SAMN09752619	source_name	Blood
+SAMN09752619	BioSampleModel	Generic
+SAMN09752619	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752619	ENA-LAST-UPDATE	2019-03-28
+SAMN09750463	condition	Breast cancer
+SAMN09750463	INSDC secondary accession	SRS3616511
+SAMN09750463	NCBI submission package	Generic.1.0
+SAMN09750463	pathology	Invasive Breast cancer
+SAMN09750463	organism	Homo sapiens
+SAMN09750463	cell type	monocytes
+SAMN09750463	sequencing batch	Batch 5
+SAMN09750463	age	60
+SAMN09750463	source_name	Blood
+SAMN09750463	BioSampleModel	Generic
+SAMN09750463	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750463	ENA-LAST-UPDATE	2019-03-28
+SAMN09750432	condition	Normal Breast
+SAMN09750432	INSDC secondary accession	SRS3616514
+SAMN09750432	NCBI submission package	Generic.1.0
+SAMN09750432	pathology	Normal tissue
+SAMN09750432	organism	Homo sapiens
+SAMN09750432	cell type	tumour associated macrophages
+SAMN09750432	sequencing batch	Batch 4
+SAMN09750432	age	52
+SAMN09750432	source_name	Tissue
+SAMN09750432	BioSampleModel	Generic
+SAMN09750432	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750432	ENA-LAST-UPDATE	2019-03-28
+SAMN09750418	condition	Normal Breast
+SAMN09750418	INSDC secondary accession	SRS3616516
+SAMN09750418	NCBI submission package	Generic.1.0
+SAMN09750418	pathology	Normal tissue
+SAMN09750418	organism	Homo sapiens
+SAMN09750418	cell type	tumour associated macrophages
+SAMN09750418	sequencing batch	Batch 4
+SAMN09750418	age	-
+SAMN09750418	source_name	Tissue
+SAMN09750418	BioSampleModel	Generic
+SAMN09750418	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750418	ENA-LAST-UPDATE	2019-03-28
+SAMN09750366	condition	Normal Endometrial
+SAMN09750366	INSDC secondary accession	SRS3616521
+SAMN09750366	NCBI submission package	Generic.1.0
+SAMN09750366	pathology	Benign
+SAMN09750366	organism	Homo sapiens
+SAMN09750366	cell type	tumour associated macrophages
+SAMN09750366	sequencing batch	Batch 4
+SAMN09750366	age	48
+SAMN09750366	source_name	Tissue
+SAMN09750366	BioSampleModel	Generic
+SAMN09750366	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750366	ENA-LAST-UPDATE	2019-03-28
+SAMN09750343	condition	Endometrial cancer
+SAMN09750343	INSDC secondary accession	SRS3616523
+SAMN09750343	NCBI submission package	Generic.1.0
+SAMN09750343	pathology	UPSC
+SAMN09750343	organism	Homo sapiens
+SAMN09750343	cell type	tumour associated macrophages
+SAMN09750343	sequencing batch	Batch 4
+SAMN09750343	age	65
+SAMN09750343	source_name	Tissue
+SAMN09750343	BioSampleModel	Generic
+SAMN09750343	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750343	ENA-LAST-UPDATE	2019-03-28
+SAMN09750332	condition	Endometrial cancer
+SAMN09750332	INSDC secondary accession	SRS3616525
+SAMN09750332	NCBI submission package	Generic.1.0
+SAMN09750332	pathology	Endometrioid
+SAMN09750332	organism	Homo sapiens
+SAMN09750332	cell type	tumour associated macrophages
+SAMN09750332	sequencing batch	Batch 4
+SAMN09750332	age	59
+SAMN09750332	source_name	Tissue
+SAMN09750332	BioSampleModel	Generic
+SAMN09750332	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750332	ENA-LAST-UPDATE	2019-03-28
+SAMN09750319	condition	Breast cancer
+SAMN09750319	INSDC secondary accession	SRS3616527
+SAMN09750319	NCBI submission package	Generic.1.0
+SAMN09750319	pathology	Invasive Breast cancer
+SAMN09750319	organism	Homo sapiens
+SAMN09750319	cell type	tumour associated macrophages
+SAMN09750319	sequencing batch	Batch 4
+SAMN09750319	age	46
+SAMN09750319	source_name	Tissue
+SAMN09750319	BioSampleModel	Generic
+SAMN09750319	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750319	ENA-LAST-UPDATE	2019-03-28
+SAMN09751560	condition	Breast cancer
+SAMN09751560	INSDC secondary accession	SRS3616529
+SAMN09751560	NCBI submission package	Generic.1.0
+SAMN09751560	pathology	Invasive Breast cancer
+SAMN09751560	organism	Homo sapiens
+SAMN09751560	cell type	tumour associated macrophages
+SAMN09751560	sequencing batch	Batch 5
+SAMN09751560	age	57
+SAMN09751560	source_name	Tissue
+SAMN09751560	BioSampleModel	Generic
+SAMN09751560	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751560	ENA-LAST-UPDATE	2019-03-28
+SAMN09751553	condition	Normal Endometrial
+SAMN09751553	INSDC secondary accession	SRS3616530
+SAMN09751553	NCBI submission package	Generic.1.0
+SAMN09751553	pathology	Benign
+SAMN09751553	organism	Homo sapiens
+SAMN09751553	cell type	tumour associated macrophages
+SAMN09751553	sequencing batch	Batch 5
+SAMN09751553	age	48
+SAMN09751553	source_name	Tissue
+SAMN09751553	BioSampleModel	Generic
+SAMN09751553	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751553	ENA-LAST-UPDATE	2019-03-28
+SAMN10853118	condition	Normal
+SAMN10853118	INSDC secondary accession	SRS4313034
+SAMN10853118	NCBI submission package	Generic.1.0
+SAMN10853118	pathology	N/A
+SAMN10853118	organism	Homo sapiens
+SAMN10853118	cell type	monocytes
+SAMN10853118	sequencing batch	6
+SAMN10853118	source_name	Blood
+SAMN10853118	BioSampleModel	Generic
+SAMN10853118	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853118	ENA-LAST-UPDATE	2019-03-28
+SAMN10853115	condition	Normal
+SAMN10853115	INSDC secondary accession	SRS4313040
+SAMN10853115	NCBI submission package	Generic.1.0
+SAMN10853115	pathology	N/A
+SAMN10853115	organism	Homo sapiens
+SAMN10853115	cell type	monocytes
+SAMN10853115	sequencing batch	6
+SAMN10853115	source_name	Blood
+SAMN10853115	BioSampleModel	Generic
+SAMN10853115	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853115	ENA-LAST-UPDATE	2019-03-28
+SAMN10853134	condition	Breast cancer
+SAMN10853134	INSDC secondary accession	SRS4313050
+SAMN10853134	NCBI submission package	Generic.1.0
+SAMN10853134	pathology	Invasive_Breast_cancer
+SAMN10853134	organism	Homo sapiens
+SAMN10853134	cell type	monocytes
+SAMN10853134	sequencing batch	6
+SAMN10853134	source_name	Blood
+SAMN10853134	BioSampleModel	Generic
+SAMN10853134	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853134	ENA-LAST-UPDATE	2019-03-28
+SAMN10853131	condition	Breast cancer
+SAMN10853131	INSDC secondary accession	SRS4313054
+SAMN10853131	NCBI submission package	Generic.1.0
+SAMN10853131	pathology	DCIS
+SAMN10853131	organism	Homo sapiens
+SAMN10853131	cell type	monocytes
+SAMN10853131	sequencing batch	6
+SAMN10853131	source_name	Blood
+SAMN10853131	BioSampleModel	Generic
+SAMN10853131	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853131	ENA-LAST-UPDATE	2019-03-28
+SAMN10853160	condition	Normal
+SAMN10853160	INSDC secondary accession	SRS4313069
+SAMN10853160	NCBI submission package	Generic.1.0
+SAMN10853160	pathology	N/A
+SAMN10853160	organism	Homo sapiens
+SAMN10853160	cell type	monocytes
+SAMN10853160	sequencing batch	6
+SAMN10853160	source_name	Blood
+SAMN10853160	BioSampleModel	Generic
+SAMN10853160	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853160	ENA-LAST-UPDATE	2019-03-28
+SAMN10853159	condition	Normal
+SAMN10853159	INSDC secondary accession	SRS4313067
+SAMN10853159	NCBI submission package	Generic.1.0
+SAMN10853159	pathology	N/A
+SAMN10853159	organism	Homo sapiens
+SAMN10853159	cell type	monocytes
+SAMN10853159	sequencing batch	6
+SAMN10853159	source_name	Blood
+SAMN10853159	BioSampleModel	Generic
+SAMN10853159	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853159	ENA-LAST-UPDATE	2019-03-28
+SAMN10853156	condition	Normal
+SAMN10853156	INSDC secondary accession	SRS4313071
+SAMN10853156	NCBI submission package	Generic.1.0
+SAMN10853156	pathology	N/A
+SAMN10853156	organism	Homo sapiens
+SAMN10853156	cell type	monocytes
+SAMN10853156	sequencing batch	6
+SAMN10853156	source_name	Blood
+SAMN10853156	BioSampleModel	Generic
+SAMN10853156	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853156	ENA-LAST-UPDATE	2019-03-28
+SAMN10853155	condition	Normal
+SAMN10853155	INSDC secondary accession	SRS4313072
+SAMN10853155	NCBI submission package	Generic.1.0
+SAMN10853155	pathology	N/A
+SAMN10853155	organism	Homo sapiens
+SAMN10853155	cell type	monocytes
+SAMN10853155	sequencing batch	6
+SAMN10853155	source_name	Blood
+SAMN10853155	BioSampleModel	Generic
+SAMN10853155	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853155	ENA-LAST-UPDATE	2019-03-28
+SAMN10853154	condition	Normal
+SAMN10853154	INSDC secondary accession	SRS4313074
+SAMN10853154	NCBI submission package	Generic.1.0
+SAMN10853154	pathology	N/A
+SAMN10853154	organism	Homo sapiens
+SAMN10853154	cell type	monocytes
+SAMN10853154	sequencing batch	6
+SAMN10853154	source_name	Blood
+SAMN10853154	BioSampleModel	Generic
+SAMN10853154	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853154	ENA-LAST-UPDATE	2019-03-28
+SAMN10853149	condition	Normal
+SAMN10853149	INSDC secondary accession	SRS4313078
+SAMN10853149	NCBI submission package	Generic.1.0
+SAMN10853149	pathology	N/A
+SAMN10853149	organism	Homo sapiens
+SAMN10853149	cell type	monocytes
+SAMN10853149	sequencing batch	6
+SAMN10853149	source_name	Blood
+SAMN10853149	BioSampleModel	Generic
+SAMN10853149	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853149	ENA-LAST-UPDATE	2019-03-28
+SAMN09752424	condition	Normal
+SAMN09752424	INSDC secondary accession	SRS3616474
+SAMN09752424	NCBI submission package	Generic.1.0
+SAMN09752424	pathology	N/A
+SAMN09752424	organism	Homo sapiens
+SAMN09752424	cell type	monocytes
+SAMN09752424	sequencing batch	Batch 3
+SAMN09752424	age	-
+SAMN09752424	source_name	Blood
+SAMN09752424	BioSampleModel	Generic
+SAMN09752424	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752424	ENA-LAST-UPDATE	2019-03-28
+SAMN09751498	condition	Normal
+SAMN09751498	INSDC secondary accession	SRS3616479
+SAMN09751498	NCBI submission package	Generic.1.0
+SAMN09751498	pathology	N/A
+SAMN09751498	organism	Homo sapiens
+SAMN09751498	cell type	monocytes
+SAMN09751498	sequencing batch	Batch 4
+SAMN09751498	age	-
+SAMN09751498	source_name	Blood
+SAMN09751498	BioSampleModel	Generic
+SAMN09751498	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751498	ENA-LAST-UPDATE	2019-03-28
+SAMN09751437	condition	Normal
+SAMN09751437	INSDC secondary accession	SRS3616489
+SAMN09751437	NCBI submission package	Generic.1.0
+SAMN09751437	pathology	N/A
+SAMN09751437	organism	Homo sapiens
+SAMN09751437	cell type	monocytes
+SAMN09751437	sequencing batch	Batch 4
+SAMN09751437	age	-
+SAMN09751437	source_name	Blood
+SAMN09751437	BioSampleModel	Generic
+SAMN09751437	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751437	ENA-LAST-UPDATE	2019-03-28
+SAMN09751431	condition	Normal
+SAMN09751431	INSDC secondary accession	SRS3616487
+SAMN09751431	NCBI submission package	Generic.1.0
+SAMN09751431	pathology	N/A
+SAMN09751431	organism	Homo sapiens
+SAMN09751431	cell type	monocytes
+SAMN09751431	sequencing batch	Batch 4
+SAMN09751431	age	-
+SAMN09751431	source_name	Blood
+SAMN09751431	BioSampleModel	Generic
+SAMN09751431	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751431	ENA-LAST-UPDATE	2019-03-28
+SAMN09751425	condition	Breast cancer
+SAMN09751425	INSDC secondary accession	SRS3616490
+SAMN09751425	NCBI submission package	Generic.1.0
+SAMN09751425	pathology	Invasive Breast cancer
+SAMN09751425	organism	Homo sapiens
+SAMN09751425	cell type	monocytes
+SAMN09751425	sequencing batch	Batch 4
+SAMN09751425	age	-
+SAMN09751425	source_name	Blood
+SAMN09751425	BioSampleModel	Generic
+SAMN09751425	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751425	ENA-LAST-UPDATE	2019-03-28
+SAMN09751356	condition	Breast cancer
+SAMN09751356	INSDC secondary accession	SRS3616499
+SAMN09751356	NCBI submission package	Generic.1.0
+SAMN09751356	pathology	Invasive Breast cancer
+SAMN09751356	organism	Homo sapiens
+SAMN09751356	cell type	monocytes
+SAMN09751356	sequencing batch	Batch 4
+SAMN09751356	age	46
+SAMN09751356	source_name	Blood
+SAMN09751356	BioSampleModel	Generic
+SAMN09751356	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751356	ENA-LAST-UPDATE	2019-03-28
+SAMN09752613	condition	Normal
+SAMN09752613	INSDC secondary accession	SRS3616503
+SAMN09752613	NCBI submission package	Generic.1.0
+SAMN09752613	pathology	N/A
+SAMN09752613	organism	Homo sapiens
+SAMN09752613	cell type	monocytes
+SAMN09752613	sequencing batch	Batch 5
+SAMN09752613	age	-
+SAMN09752613	source_name	Blood
+SAMN09752613	BioSampleModel	Generic
+SAMN09752613	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09752613	ENA-LAST-UPDATE	2019-03-28
+SAMN09750457	condition	Breast cancer
+SAMN09750457	INSDC secondary accession	SRS3616552
+SAMN09750457	NCBI submission package	Generic.1.0
+SAMN09750457	pathology	Invasive Breast cancer
+SAMN09750457	organism	Homo sapiens
+SAMN09750457	cell type	monocytes
+SAMN09750457	sequencing batch	Batch 5
+SAMN09750457	age	65
+SAMN09750457	source_name	Blood
+SAMN09750457	BioSampleModel	Generic
+SAMN09750457	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750457	ENA-LAST-UPDATE	2019-03-28
+SAMN09750450	condition	Breast cancer
+SAMN09750450	INSDC secondary accession	SRS3616512
+SAMN09750450	NCBI submission package	Generic.1.0
+SAMN09750450	pathology	Invasive Breast cancer
+SAMN09750450	organism	Homo sapiens
+SAMN09750450	cell type	monocytes
+SAMN09750450	sequencing batch	Batch 5
+SAMN09750450	age	64
+SAMN09750450	source_name	Blood
+SAMN09750450	BioSampleModel	Generic
+SAMN09750450	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750450	ENA-LAST-UPDATE	2019-03-28
+SAMN09750394	condition	Breast cancer
+SAMN09750394	INSDC secondary accession	SRS3616519
+SAMN09750394	NCBI submission package	Generic.1.0
+SAMN09750394	pathology	Invasive Breast cancer
+SAMN09750394	organism	Homo sapiens
+SAMN09750394	cell type	tumour associated macrophages
+SAMN09750394	sequencing batch	Batch 4
+SAMN09750394	age	84
+SAMN09750394	source_name	Tissue
+SAMN09750394	BioSampleModel	Generic
+SAMN09750394	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09750394	ENA-LAST-UPDATE	2019-03-28
+SAMN09751547	condition	Normal Endometrial
+SAMN09751547	INSDC secondary accession	SRS3616531
+SAMN09751547	NCBI submission package	Generic.1.0
+SAMN09751547	pathology	Benign
+SAMN09751547	organism	Homo sapiens
+SAMN09751547	cell type	tumour associated macrophages
+SAMN09751547	sequencing batch	Batch 5
+SAMN09751547	age	38
+SAMN09751547	source_name	Tissue
+SAMN09751547	BioSampleModel	Generic
+SAMN09751547	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751547	ENA-LAST-UPDATE	2019-03-28
+SAMN09751526	condition	Endometrial cancer
+SAMN09751526	INSDC secondary accession	SRS3616534
+SAMN09751526	NCBI submission package	Generic.1.0
+SAMN09751526	pathology	UPSC
+SAMN09751526	organism	Homo sapiens
+SAMN09751526	cell type	tumour associated macrophages
+SAMN09751526	sequencing batch	Batch 5
+SAMN09751526	age	76
+SAMN09751526	source_name	Tissue
+SAMN09751526	BioSampleModel	Generic
+SAMN09751526	ENA-FIRST-PUBLIC	2019-03-28
+SAMN09751526	ENA-LAST-UPDATE	2019-03-28
+SAMN10853140	condition	Breast cancer
+SAMN10853140	INSDC secondary accession	SRS4313042
+SAMN10853140	NCBI submission package	Generic.1.0
+SAMN10853140	pathology	Invasive_Breast_cancer
+SAMN10853140	organism	Homo sapiens
+SAMN10853140	cell type	monocytes
+SAMN10853140	sequencing batch	6
+SAMN10853140	source_name	Blood
+SAMN10853140	BioSampleModel	Generic
+SAMN10853140	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853140	ENA-LAST-UPDATE	2019-03-28
+SAMN10853132	condition	Breast cancer
+SAMN10853132	INSDC secondary accession	SRS4313052
+SAMN10853132	NCBI submission package	Generic.1.0
+SAMN10853132	pathology	Invasive_Breast_cancer
+SAMN10853132	organism	Homo sapiens
+SAMN10853132	cell type	monocytes
+SAMN10853132	sequencing batch	6
+SAMN10853132	source_name	Blood
+SAMN10853132	BioSampleModel	Generic
+SAMN10853132	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853132	ENA-LAST-UPDATE	2019-03-28
+SAMN10853127	condition	Normal
+SAMN10853127	INSDC secondary accession	SRS4313057
+SAMN10853127	NCBI submission package	Generic.1.0
+SAMN10853127	pathology	N/A
+SAMN10853127	organism	Homo sapiens
+SAMN10853127	cell type	monocytes
+SAMN10853127	sequencing batch	6
+SAMN10853127	source_name	Blood
+SAMN10853127	BioSampleModel	Generic
+SAMN10853127	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853127	ENA-LAST-UPDATE	2019-03-28
+SAMN10853122	condition	Normal
+SAMN10853122	INSDC secondary accession	SRS4313062
+SAMN10853122	NCBI submission package	Generic.1.0
+SAMN10853122	pathology	N/A
+SAMN10853122	organism	Homo sapiens
+SAMN10853122	cell type	monocytes
+SAMN10853122	sequencing batch	6
+SAMN10853122	source_name	Blood
+SAMN10853122	BioSampleModel	Generic
+SAMN10853122	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853122	ENA-LAST-UPDATE	2019-03-28
+SAMN10853161	condition	Normal
+SAMN10853161	INSDC secondary accession	SRS4313066
+SAMN10853161	NCBI submission package	Generic.1.0
+SAMN10853161	pathology	N/A
+SAMN10853161	organism	Homo sapiens
+SAMN10853161	cell type	monocytes
+SAMN10853161	sequencing batch	6
+SAMN10853161	source_name	Blood
+SAMN10853161	BioSampleModel	Generic
+SAMN10853161	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853161	ENA-LAST-UPDATE	2019-03-28
+SAMN10853152	condition	Normal
+SAMN10853152	INSDC secondary accession	SRS4313075
+SAMN10853152	NCBI submission package	Generic.1.0
+SAMN10853152	pathology	N/A
+SAMN10853152	organism	Homo sapiens
+SAMN10853152	cell type	monocytes
+SAMN10853152	sequencing batch	6
+SAMN10853152	source_name	Blood
+SAMN10853152	BioSampleModel	Generic
+SAMN10853152	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853152	ENA-LAST-UPDATE	2019-03-28
+SAMN10853150	condition	Normal
+SAMN10853150	INSDC secondary accession	SRS4313077
+SAMN10853150	NCBI submission package	Generic.1.0
+SAMN10853150	pathology	N/A
+SAMN10853150	organism	Homo sapiens
+SAMN10853150	cell type	monocytes
+SAMN10853150	sequencing batch	6
+SAMN10853150	source_name	Blood
+SAMN10853150	BioSampleModel	Generic
+SAMN10853150	ENA-FIRST-PUBLIC	2019-03-28
+SAMN10853150	ENA-LAST-UPDATE	2019-03-28

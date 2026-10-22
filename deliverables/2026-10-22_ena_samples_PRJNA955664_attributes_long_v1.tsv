@@ -1,0 +1,3445 @@
+sample_accession	tag	value
+SAMN34179063	recurrence	Recurrence
+SAMN34179063	collection_date	missing
+SAMN34179063	INSDC secondary accession	SRS17310884
+SAMN34179063	NCBI submission package	Generic.1.0
+SAMN34179063	organism	Homo sapiens
+SAMN34179063	patient	NYU608
+SAMN34179063	progression type	Systemic
+SAMN34179063	geo_loc_name	missing
+SAMN34179063	progression	Progression
+SAMN34179063	tissue	Lung adjacent normal
+SAMN34179063	source_name	Lung adjacent normal
+SAMN34179063	BioSampleModel	Generic
+SAMN34179063	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179063	ENA-LAST-UPDATE	2023-09-08
+SAMN34179065	recurrence	No Progression (>5y)
+SAMN34179065	collection_date	missing
+SAMN34179065	INSDC secondary accession	SRS17310882
+SAMN34179065	NCBI submission package	Generic.1.0
+SAMN34179065	organism	Homo sapiens
+SAMN34179065	patient	NYU565
+SAMN34179065	progression type	No Progression (>5y)
+SAMN34179065	geo_loc_name	missing
+SAMN34179065	progression	No Progression (>5y)
+SAMN34179065	tissue	Lung adjacent normal
+SAMN34179065	source_name	Lung adjacent normal
+SAMN34179065	BioSampleModel	Generic
+SAMN34179065	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179065	ENA-LAST-UPDATE	2023-09-08
+SAMN34179069	recurrence	N/A
+SAMN34179069	collection_date	missing
+SAMN34179069	INSDC secondary accession	SRS17310878
+SAMN34179069	NCBI submission package	Generic.1.0
+SAMN34179069	organism	Homo sapiens
+SAMN34179069	patient	NYU502
+SAMN34179069	progression type	Second Primary
+SAMN34179069	geo_loc_name	missing
+SAMN34179069	progression	Progression
+SAMN34179069	tissue	Lung adjacent normal
+SAMN34179069	source_name	Lung adjacent normal
+SAMN34179069	BioSampleModel	Generic
+SAMN34179069	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179069	ENA-LAST-UPDATE	2023-09-08
+SAMN34179073	recurrence	No Progression (>5y)
+SAMN34179073	collection_date	missing
+SAMN34179073	INSDC secondary accession	SRS17310874
+SAMN34179073	NCBI submission package	Generic.1.0
+SAMN34179073	organism	Homo sapiens
+SAMN34179073	patient	NYU457
+SAMN34179073	progression type	No Progression (>5y)
+SAMN34179073	geo_loc_name	missing
+SAMN34179073	progression	No Progression (>5y)
+SAMN34179073	tissue	Lung adjacent normal
+SAMN34179073	source_name	Lung adjacent normal
+SAMN34179073	BioSampleModel	Generic
+SAMN34179073	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179073	ENA-LAST-UPDATE	2023-09-08
+SAMN34179133	recurrence	N/A
+SAMN34179133	collection_date	missing
+SAMN34179133	INSDC secondary accession	SRS17310862
+SAMN34179133	NCBI submission package	Generic.1.0
+SAMN34179133	organism	Homo sapiens
+SAMN34179133	patient	NYU1906
+SAMN34179133	progression type	Short Follow Up (<5y)
+SAMN34179133	geo_loc_name	missing
+SAMN34179133	progression	N/A
+SAMN34179133	tissue	Lung adjacent normal
+SAMN34179133	source_name	Lung adjacent normal
+SAMN34179133	BioSampleModel	Generic
+SAMN34179133	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179133	ENA-LAST-UPDATE	2023-09-08
+SAMN34179135	recurrence	N/A
+SAMN34179135	collection_date	missing
+SAMN34179135	INSDC secondary accession	SRS17310860
+SAMN34179135	NCBI submission package	Generic.1.0
+SAMN34179135	organism	Homo sapiens
+SAMN34179135	patient	NYU1900
+SAMN34179135	progression type	Second Primary
+SAMN34179135	geo_loc_name	missing
+SAMN34179135	progression	Progression
+SAMN34179135	tissue	Lung adjacent normal
+SAMN34179135	source_name	Lung adjacent normal
+SAMN34179135	BioSampleModel	Generic
+SAMN34179135	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179135	ENA-LAST-UPDATE	2023-09-08
+SAMN34179189	recurrence	No Progression (>5y)
+SAMN34179189	collection_date	missing
+SAMN34179189	INSDC secondary accession	SRS17310854
+SAMN34179189	NCBI submission package	Generic.1.0
+SAMN34179189	organism	Homo sapiens
+SAMN34179189	patient	NYU1597
+SAMN34179189	progression type	No Progression (>5y)
+SAMN34179189	geo_loc_name	missing
+SAMN34179189	progression	No Progression (>5y)
+SAMN34179189	tissue	Lung adjacent normal
+SAMN34179189	source_name	Lung adjacent normal
+SAMN34179189	BioSampleModel	Generic
+SAMN34179189	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179189	ENA-LAST-UPDATE	2023-09-08
+SAMN34179190	recurrence	N/A
+SAMN34179190	collection_date	missing
+SAMN34179190	INSDC secondary accession	SRS17310853
+SAMN34179190	NCBI submission package	Generic.1.0
+SAMN34179190	organism	Homo sapiens
+SAMN34179190	patient	NYU1595
+SAMN34179190	progression type	Second Primary
+SAMN34179190	geo_loc_name	missing
+SAMN34179190	progression	Progression
+SAMN34179190	tissue	Tumor
+SAMN34179190	source_name	Tumor
+SAMN34179190	BioSampleModel	Generic
+SAMN34179190	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179190	ENA-LAST-UPDATE	2023-09-08
+SAMN34179203	recurrence	No Progression (>5y)
+SAMN34179203	collection_date	missing
+SAMN34179203	INSDC secondary accession	SRS17310840
+SAMN34179203	NCBI submission package	Generic.1.0
+SAMN34179203	organism	Homo sapiens
+SAMN34179203	patient	NYU1487
+SAMN34179203	progression type	No Progression (>5y)
+SAMN34179203	geo_loc_name	missing
+SAMN34179203	progression	No Progression (>5y)
+SAMN34179203	tissue	Lung adjacent normal
+SAMN34179203	source_name	Lung adjacent normal
+SAMN34179203	BioSampleModel	Generic
+SAMN34179203	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179203	ENA-LAST-UPDATE	2023-09-08
+SAMN34179037	recurrence	No Progression (>5y)
+SAMN34179037	collection_date	missing
+SAMN34179037	INSDC secondary accession	SRS17310830
+SAMN34179037	NCBI submission package	Generic.1.0
+SAMN34179037	organism	Homo sapiens
+SAMN34179037	patient	NYU831
+SAMN34179037	progression type	No Progression (>5y)
+SAMN34179037	geo_loc_name	missing
+SAMN34179037	progression	No Progression (>5y)
+SAMN34179037	tissue	Lung adjacent normal
+SAMN34179037	source_name	Lung adjacent normal
+SAMN34179037	BioSampleModel	Generic
+SAMN34179037	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179037	ENA-LAST-UPDATE	2023-09-08
+SAMN34179095	recurrence	No Progression (>5y)
+SAMN34179095	collection_date	missing
+SAMN34179095	INSDC secondary accession	SRS17310820
+SAMN34179095	NCBI submission package	Generic.1.0
+SAMN34179095	organism	Homo sapiens
+SAMN34179095	patient	NYU279
+SAMN34179095	progression type	No Progression (>5y)
+SAMN34179095	geo_loc_name	missing
+SAMN34179095	progression	No Progression (>5y)
+SAMN34179095	tissue	Lung adjacent normal
+SAMN34179095	source_name	Lung adjacent normal
+SAMN34179095	BioSampleModel	Generic
+SAMN34179095	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179095	ENA-LAST-UPDATE	2023-09-08
+SAMN34179096	recurrence	No Progression (>5y)
+SAMN34179096	collection_date	missing
+SAMN34179096	INSDC secondary accession	SRS17310819
+SAMN34179096	NCBI submission package	Generic.1.0
+SAMN34179096	organism	Homo sapiens
+SAMN34179096	patient	NYU278
+SAMN34179096	progression type	No Progression (>5y)
+SAMN34179096	geo_loc_name	missing
+SAMN34179096	progression	No Progression (>5y)
+SAMN34179096	tissue	Tumor
+SAMN34179096	source_name	Tumor
+SAMN34179096	BioSampleModel	Generic
+SAMN34179096	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179096	ENA-LAST-UPDATE	2023-09-08
+SAMN34179097	recurrence	No Progression (>5y)
+SAMN34179097	collection_date	missing
+SAMN34179097	INSDC secondary accession	SRS17310818
+SAMN34179097	NCBI submission package	Generic.1.0
+SAMN34179097	organism	Homo sapiens
+SAMN34179097	patient	NYU278
+SAMN34179097	progression type	No Progression (>5y)
+SAMN34179097	geo_loc_name	missing
+SAMN34179097	progression	No Progression (>5y)
+SAMN34179097	tissue	Lung adjacent normal
+SAMN34179097	source_name	Lung adjacent normal
+SAMN34179097	BioSampleModel	Generic
+SAMN34179097	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179097	ENA-LAST-UPDATE	2023-09-08
+SAMN34179098	recurrence	No Progression (>5y)
+SAMN34179098	collection_date	missing
+SAMN34179098	INSDC secondary accession	SRS17310817
+SAMN34179098	NCBI submission package	Generic.1.0
+SAMN34179098	organism	Homo sapiens
+SAMN34179098	patient	NYU268
+SAMN34179098	progression type	No Progression (>5y)
+SAMN34179098	geo_loc_name	missing
+SAMN34179098	progression	No Progression (>5y)
+SAMN34179098	tissue	Tumor
+SAMN34179098	source_name	Tumor
+SAMN34179098	BioSampleModel	Generic
+SAMN34179098	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179098	ENA-LAST-UPDATE	2023-09-08
+SAMN34179102	recurrence	Recurrence
+SAMN34179102	collection_date	missing
+SAMN34179102	INSDC secondary accession	SRS17311059
+SAMN34179102	NCBI submission package	Generic.1.0
+SAMN34179102	organism	Homo sapiens
+SAMN34179102	patient	NYU20
+SAMN34179102	progression type	Systemic
+SAMN34179102	geo_loc_name	missing
+SAMN34179102	progression	Progression
+SAMN34179102	tissue	Tumor
+SAMN34179102	source_name	Tumor
+SAMN34179102	BioSampleModel	Generic
+SAMN34179102	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179102	ENA-LAST-UPDATE	2023-09-08
+SAMN34179106	recurrence	N/A
+SAMN34179106	collection_date	missing
+SAMN34179106	INSDC secondary accession	SRS17311055
+SAMN34179106	NCBI submission package	Generic.1.0
+SAMN34179106	organism	Homo sapiens
+SAMN34179106	patient	NYU2002
+SAMN34179106	progression type	Short Follow Up (<5y)
+SAMN34179106	geo_loc_name	missing
+SAMN34179106	progression	N/A
+SAMN34179106	tissue	Tumor
+SAMN34179106	source_name	Tumor
+SAMN34179106	BioSampleModel	Generic
+SAMN34179106	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179106	ENA-LAST-UPDATE	2023-09-08
+SAMN34179157	recurrence	No Progression (>5y)
+SAMN34179157	collection_date	missing
+SAMN34179157	INSDC secondary accession	SRS17311052
+SAMN34179157	NCBI submission package	Generic.1.0
+SAMN34179157	organism	Homo sapiens
+SAMN34179157	patient	NYU1808
+SAMN34179157	progression type	No Progression (>5y)
+SAMN34179157	geo_loc_name	missing
+SAMN34179157	progression	No Progression (>5y)
+SAMN34179157	tissue	Lung adjacent normal
+SAMN34179157	source_name	Lung adjacent normal
+SAMN34179157	BioSampleModel	Generic
+SAMN34179157	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179157	ENA-LAST-UPDATE	2023-09-08
+SAMN34179161	recurrence	N/A
+SAMN34179161	collection_date	missing
+SAMN34179161	INSDC secondary accession	SRS17311049
+SAMN34179161	NCBI submission package	Generic.1.0
+SAMN34179161	organism	Homo sapiens
+SAMN34179161	patient	NYU1787
+SAMN34179161	progression type	Second Primary
+SAMN34179161	geo_loc_name	missing
+SAMN34179161	progression	Progression
+SAMN34179161	tissue	Lung adjacent normal
+SAMN34179161	source_name	Lung adjacent normal
+SAMN34179161	BioSampleModel	Generic
+SAMN34179161	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179161	ENA-LAST-UPDATE	2023-09-08
+SAMN34179232	recurrence	N/A
+SAMN34179232	collection_date	missing
+SAMN34179232	INSDC secondary accession	SRS17311025
+SAMN34179232	NCBI submission package	Generic.1.0
+SAMN34179232	organism	Homo sapiens
+SAMN34179232	patient	NYU1319
+SAMN34179232	progression type	Second Primary
+SAMN34179232	geo_loc_name	missing
+SAMN34179232	progression	Progression
+SAMN34179232	tissue	Tumor
+SAMN34179232	source_name	Tumor
+SAMN34179232	BioSampleModel	Generic
+SAMN34179232	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179232	ENA-LAST-UPDATE	2023-09-08
+SAMN34179085	recurrence	No Progression (>5y)
+SAMN34179085	collection_date	missing
+SAMN34179085	INSDC secondary accession	SRS17311007
+SAMN34179085	NCBI submission package	Generic.1.0
+SAMN34179085	organism	Homo sapiens
+SAMN34179085	patient	NYU32
+SAMN34179085	progression type	No Progression (>5y)
+SAMN34179085	geo_loc_name	missing
+SAMN34179085	progression	No Progression (>5y)
+SAMN34179085	tissue	Lung adjacent normal
+SAMN34179085	source_name	Lung adjacent normal
+SAMN34179085	BioSampleModel	Generic
+SAMN34179085	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179085	ENA-LAST-UPDATE	2023-09-08
+SAMN34179087	recurrence	No Progression (>5y)
+SAMN34179087	collection_date	missing
+SAMN34179087	INSDC secondary accession	SRS17311002
+SAMN34179087	NCBI submission package	Generic.1.0
+SAMN34179087	organism	Homo sapiens
+SAMN34179087	patient	NYU318
+SAMN34179087	progression type	No Progression (>5y)
+SAMN34179087	geo_loc_name	missing
+SAMN34179087	progression	No Progression (>5y)
+SAMN34179087	tissue	Lung adjacent normal
+SAMN34179087	source_name	Lung adjacent normal
+SAMN34179087	BioSampleModel	Generic
+SAMN34179087	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179087	ENA-LAST-UPDATE	2023-09-08
+SAMN34179145	recurrence	N/A
+SAMN34179145	collection_date	missing
+SAMN34179145	INSDC secondary accession	SRS17310994
+SAMN34179145	NCBI submission package	Generic.1.0
+SAMN34179145	organism	Homo sapiens
+SAMN34179145	patient	NYU1883
+SAMN34179145	progression type	Second Primary
+SAMN34179145	geo_loc_name	missing
+SAMN34179145	progression	Progression
+SAMN34179145	tissue	Lung adjacent normal
+SAMN34179145	source_name	Lung adjacent normal
+SAMN34179145	BioSampleModel	Generic
+SAMN34179145	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179145	ENA-LAST-UPDATE	2023-09-08
+SAMN34179150	recurrence	No Progression (>5y)
+SAMN34179150	collection_date	missing
+SAMN34179150	INSDC secondary accession	SRS17310989
+SAMN34179150	NCBI submission package	Generic.1.0
+SAMN34179150	organism	Homo sapiens
+SAMN34179150	patient	NYU1854
+SAMN34179150	progression type	No Progression (>5y)
+SAMN34179150	geo_loc_name	missing
+SAMN34179150	progression	No Progression (>5y)
+SAMN34179150	tissue	Tumor
+SAMN34179150	source_name	Tumor
+SAMN34179150	BioSampleModel	Generic
+SAMN34179150	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179150	ENA-LAST-UPDATE	2023-09-08
+SAMN34179210	recurrence	No Progression (>5y)
+SAMN34179210	collection_date	missing
+SAMN34179210	INSDC secondary accession	SRS17310976
+SAMN34179210	NCBI submission package	Generic.1.0
+SAMN34179210	organism	Homo sapiens
+SAMN34179210	patient	NYU1435
+SAMN34179210	progression type	No Progression (>5y)
+SAMN34179210	geo_loc_name	missing
+SAMN34179210	progression	No Progression (>5y)
+SAMN34179210	tissue	Tumor
+SAMN34179210	source_name	Tumor
+SAMN34179210	BioSampleModel	Generic
+SAMN34179210	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179210	ENA-LAST-UPDATE	2023-09-08
+SAMN34179213	recurrence	No Progression (>5y)
+SAMN34179213	collection_date	missing
+SAMN34179213	INSDC secondary accession	SRS17310975
+SAMN34179213	NCBI submission package	Generic.1.0
+SAMN34179213	organism	Homo sapiens
+SAMN34179213	patient	NYU1433
+SAMN34179213	progression type	No Progression (>5y)
+SAMN34179213	geo_loc_name	missing
+SAMN34179213	progression	No Progression (>5y)
+SAMN34179213	tissue	Lung adjacent normal
+SAMN34179213	source_name	Lung adjacent normal
+SAMN34179213	BioSampleModel	Generic
+SAMN34179213	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179213	ENA-LAST-UPDATE	2023-09-08
+SAMN34179216	recurrence	No Progression (>5y)
+SAMN34179216	collection_date	missing
+SAMN34179216	INSDC secondary accession	SRS17310972
+SAMN34179216	NCBI submission package	Generic.1.0
+SAMN34179216	organism	Homo sapiens
+SAMN34179216	patient	NYU1417
+SAMN34179216	progression type	No Progression (>5y)
+SAMN34179216	geo_loc_name	missing
+SAMN34179216	progression	No Progression (>5y)
+SAMN34179216	tissue	Tumor
+SAMN34179216	source_name	Tumor
+SAMN34179216	BioSampleModel	Generic
+SAMN34179216	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179216	ENA-LAST-UPDATE	2023-09-08
+SAMN34179237	recurrence	N/A
+SAMN34179237	collection_date	missing
+SAMN34179237	INSDC secondary accession	SRS17310965
+SAMN34179237	NCBI submission package	Generic.1.0
+SAMN34179237	organism	Homo sapiens
+SAMN34179237	patient	NYU1280
+SAMN34179237	progression type	Second Primary
+SAMN34179237	geo_loc_name	missing
+SAMN34179237	progression	Progression
+SAMN34179237	tissue	Lung adjacent normal
+SAMN34179237	source_name	Lung adjacent normal
+SAMN34179237	BioSampleModel	Generic
+SAMN34179237	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179237	ENA-LAST-UPDATE	2023-09-08
+SAMN34179242	recurrence	No Progression (>5y)
+SAMN34179242	collection_date	missing
+SAMN34179242	INSDC secondary accession	SRS17310961
+SAMN34179242	NCBI submission package	Generic.1.0
+SAMN34179242	organism	Homo sapiens
+SAMN34179242	patient	NYU1213
+SAMN34179242	progression type	No Progression (>5y)
+SAMN34179242	geo_loc_name	missing
+SAMN34179242	progression	No Progression (>5y)
+SAMN34179242	tissue	Tumor
+SAMN34179242	source_name	Tumor
+SAMN34179242	BioSampleModel	Generic
+SAMN34179242	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179242	ENA-LAST-UPDATE	2023-09-08
+SAMN34179044	recurrence	Recurrence
+SAMN34179044	collection_date	missing
+SAMN34179044	INSDC secondary accession	SRS17310951
+SAMN34179044	NCBI submission package	Generic.1.0
+SAMN34179044	organism	Homo sapiens
+SAMN34179044	patient	NYU779
+SAMN34179044	progression type	Locoregional
+SAMN34179044	geo_loc_name	missing
+SAMN34179044	progression	Progression
+SAMN34179044	tissue	Tumor
+SAMN34179044	source_name	Tumor
+SAMN34179044	BioSampleModel	Generic
+SAMN34179044	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179044	ENA-LAST-UPDATE	2023-09-08
+SAMN34179053	recurrence	Recurrence
+SAMN34179053	collection_date	missing
+SAMN34179053	INSDC secondary accession	SRS17310940
+SAMN34179053	NCBI submission package	Generic.1.0
+SAMN34179053	organism	Homo sapiens
+SAMN34179053	patient	NYU704
+SAMN34179053	progression type	Systemic
+SAMN34179053	geo_loc_name	missing
+SAMN34179053	progression	Progression
+SAMN34179053	tissue	Lung adjacent normal
+SAMN34179053	source_name	Lung adjacent normal
+SAMN34179053	BioSampleModel	Generic
+SAMN34179053	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179053	ENA-LAST-UPDATE	2023-09-08
+SAMN34179057	recurrence	Recurrence
+SAMN34179057	collection_date	missing
+SAMN34179057	INSDC secondary accession	SRS17310938
+SAMN34179057	NCBI submission package	Generic.1.0
+SAMN34179057	organism	Homo sapiens
+SAMN34179057	patient	NYU675
+SAMN34179057	progression type	Locoregional
+SAMN34179057	geo_loc_name	missing
+SAMN34179057	progression	Progression
+SAMN34179057	tissue	Lung adjacent normal
+SAMN34179057	source_name	Lung adjacent normal
+SAMN34179057	BioSampleModel	Generic
+SAMN34179057	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179057	ENA-LAST-UPDATE	2023-09-08
+SAMN34179111	recurrence	No Progression (>5y)
+SAMN34179111	collection_date	missing
+SAMN34179111	INSDC secondary accession	SRS17310933
+SAMN34179111	NCBI submission package	Generic.1.0
+SAMN34179111	organism	Homo sapiens
+SAMN34179111	patient	NYU1997
+SAMN34179111	progression type	No Progression (>5y)
+SAMN34179111	geo_loc_name	missing
+SAMN34179111	progression	No Progression (>5y)
+SAMN34179111	tissue	Lung adjacent normal
+SAMN34179111	source_name	Lung adjacent normal
+SAMN34179111	BioSampleModel	Generic
+SAMN34179111	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179111	ENA-LAST-UPDATE	2023-09-08
+SAMN34179112	recurrence	N/A
+SAMN34179112	collection_date	missing
+SAMN34179112	INSDC secondary accession	SRS17310931
+SAMN34179112	NCBI submission package	Generic.1.0
+SAMN34179112	organism	Homo sapiens
+SAMN34179112	patient	NYU1986
+SAMN34179112	progression type	Second Primary
+SAMN34179112	geo_loc_name	missing
+SAMN34179112	progression	Progression
+SAMN34179112	tissue	Tumor
+SAMN34179112	source_name	Tumor
+SAMN34179112	BioSampleModel	Generic
+SAMN34179112	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179112	ENA-LAST-UPDATE	2023-09-08
+SAMN34179114	recurrence	N/A
+SAMN34179114	collection_date	missing
+SAMN34179114	INSDC secondary accession	SRS17310930
+SAMN34179114	NCBI submission package	Generic.1.0
+SAMN34179114	organism	Homo sapiens
+SAMN34179114	patient	NYU1982
+SAMN34179114	progression type	Short Follow Up (<5y)
+SAMN34179114	geo_loc_name	missing
+SAMN34179114	progression	N/A
+SAMN34179114	tissue	Tumor
+SAMN34179114	source_name	Tumor
+SAMN34179114	BioSampleModel	Generic
+SAMN34179114	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179114	ENA-LAST-UPDATE	2023-09-08
+SAMN34179121	recurrence	No Progression (>5y)
+SAMN34179121	collection_date	missing
+SAMN34179121	INSDC secondary accession	SRS17310922
+SAMN34179121	NCBI submission package	Generic.1.0
+SAMN34179121	organism	Homo sapiens
+SAMN34179121	patient	NYU1953
+SAMN34179121	progression type	No Progression (>5y)
+SAMN34179121	geo_loc_name	missing
+SAMN34179121	progression	No Progression (>5y)
+SAMN34179121	tissue	Lung adjacent normal
+SAMN34179121	source_name	Lung adjacent normal
+SAMN34179121	BioSampleModel	Generic
+SAMN34179121	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179121	ENA-LAST-UPDATE	2023-09-08
+SAMN34179175	recurrence	No Progression (>5y)
+SAMN34179175	collection_date	missing
+SAMN34179175	INSDC secondary accession	SRS17310916
+SAMN34179175	NCBI submission package	Generic.1.0
+SAMN34179175	organism	Homo sapiens
+SAMN34179175	patient	NYU1707
+SAMN34179175	progression type	No Progression (>5y)
+SAMN34179175	geo_loc_name	missing
+SAMN34179175	progression	No Progression (>5y)
+SAMN34179175	tissue	Lung adjacent normal
+SAMN34179175	source_name	Lung adjacent normal
+SAMN34179175	BioSampleModel	Generic
+SAMN34179175	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179175	ENA-LAST-UPDATE	2023-09-08
+SAMN34179180	recurrence	N/A
+SAMN34179180	collection_date	missing
+SAMN34179180	INSDC secondary accession	SRS17310911
+SAMN34179180	NCBI submission package	Generic.1.0
+SAMN34179180	organism	Homo sapiens
+SAMN34179180	patient	NYU1636
+SAMN34179180	progression type	Second Primary
+SAMN34179180	geo_loc_name	missing
+SAMN34179180	progression	Progression
+SAMN34179180	tissue	Tumor
+SAMN34179180	source_name	Tumor
+SAMN34179180	BioSampleModel	Generic
+SAMN34179180	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179180	ENA-LAST-UPDATE	2023-09-08
+SAMN34179182	recurrence	N/A
+SAMN34179182	collection_date	missing
+SAMN34179182	INSDC secondary accession	SRS17310909
+SAMN34179182	NCBI submission package	Generic.1.0
+SAMN34179182	organism	Homo sapiens
+SAMN34179182	patient	NYU1630
+SAMN34179182	progression type	Second Primary
+SAMN34179182	geo_loc_name	missing
+SAMN34179182	progression	Progression
+SAMN34179182	tissue	Tumor
+SAMN34179182	source_name	Tumor
+SAMN34179182	BioSampleModel	Generic
+SAMN34179182	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179182	ENA-LAST-UPDATE	2023-09-08
+SAMN34179258	recurrence	No Progression (>5y)
+SAMN34179258	collection_date	missing
+SAMN34179258	INSDC secondary accession	SRS17310896
+SAMN34179258	NCBI submission package	Generic.1.0
+SAMN34179258	organism	Homo sapiens
+SAMN34179258	patient	NYU1079
+SAMN34179258	progression type	No Progression (>5y)
+SAMN34179258	geo_loc_name	missing
+SAMN34179258	progression	No Progression (>5y)
+SAMN34179258	tissue	Tumor
+SAMN34179258	source_name	Tumor
+SAMN34179258	BioSampleModel	Generic
+SAMN34179258	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179258	ENA-LAST-UPDATE	2023-09-08
+SAMN34179259	recurrence	No Progression (>5y)
+SAMN34179259	collection_date	missing
+SAMN34179259	INSDC secondary accession	SRS17310898
+SAMN34179259	NCBI submission package	Generic.1.0
+SAMN34179259	organism	Homo sapiens
+SAMN34179259	patient	NYU1079
+SAMN34179259	progression type	No Progression (>5y)
+SAMN34179259	geo_loc_name	missing
+SAMN34179259	progression	No Progression (>5y)
+SAMN34179259	tissue	Lung adjacent normal
+SAMN34179259	source_name	Lung adjacent normal
+SAMN34179259	BioSampleModel	Generic
+SAMN34179259	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179259	ENA-LAST-UPDATE	2023-09-08
+SAMN34179066	recurrence	Recurrence
+SAMN34179066	collection_date	missing
+SAMN34179066	INSDC secondary accession	SRS17310881
+SAMN34179066	NCBI submission package	Generic.1.0
+SAMN34179066	organism	Homo sapiens
+SAMN34179066	patient	NYU539
+SAMN34179066	progression type	Systemic
+SAMN34179066	geo_loc_name	missing
+SAMN34179066	progression	Progression
+SAMN34179066	tissue	Tumor
+SAMN34179066	source_name	Tumor
+SAMN34179066	BioSampleModel	Generic
+SAMN34179066	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179066	ENA-LAST-UPDATE	2023-09-08
+SAMN34179070	recurrence	No Progression (>5y)
+SAMN34179070	collection_date	missing
+SAMN34179070	INSDC secondary accession	SRS17310877
+SAMN34179070	NCBI submission package	Generic.1.0
+SAMN34179070	organism	Homo sapiens
+SAMN34179070	patient	NYU50
+SAMN34179070	progression type	No Progression (>5y)
+SAMN34179070	geo_loc_name	missing
+SAMN34179070	progression	No Progression (>5y)
+SAMN34179070	tissue	Tumor
+SAMN34179070	source_name	Tumor
+SAMN34179070	BioSampleModel	Generic
+SAMN34179070	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179070	ENA-LAST-UPDATE	2023-09-08
+SAMN34179072	recurrence	No Progression (>5y)
+SAMN34179072	collection_date	missing
+SAMN34179072	INSDC secondary accession	SRS17310875
+SAMN34179072	NCBI submission package	Generic.1.0
+SAMN34179072	organism	Homo sapiens
+SAMN34179072	patient	NYU457
+SAMN34179072	progression type	No Progression (>5y)
+SAMN34179072	geo_loc_name	missing
+SAMN34179072	progression	No Progression (>5y)
+SAMN34179072	tissue	Tumor
+SAMN34179072	source_name	Tumor
+SAMN34179072	BioSampleModel	Generic
+SAMN34179072	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179072	ENA-LAST-UPDATE	2023-09-08
+SAMN34179126	recurrence	No Progression (>5y)
+SAMN34179126	collection_date	missing
+SAMN34179126	INSDC secondary accession	SRS17310869
+SAMN34179126	NCBI submission package	Generic.1.0
+SAMN34179126	organism	Homo sapiens
+SAMN34179126	patient	NYU1940
+SAMN34179126	progression type	No Progression (>5y)
+SAMN34179126	geo_loc_name	missing
+SAMN34179126	progression	No Progression (>5y)
+SAMN34179126	tissue	Tumor
+SAMN34179126	source_name	Tumor
+SAMN34179126	BioSampleModel	Generic
+SAMN34179126	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179126	ENA-LAST-UPDATE	2023-09-08
+SAMN34179127	recurrence	No Progression (>5y)
+SAMN34179127	collection_date	missing
+SAMN34179127	INSDC secondary accession	SRS17310868
+SAMN34179127	NCBI submission package	Generic.1.0
+SAMN34179127	organism	Homo sapiens
+SAMN34179127	patient	NYU1940
+SAMN34179127	progression type	No Progression (>5y)
+SAMN34179127	geo_loc_name	missing
+SAMN34179127	progression	No Progression (>5y)
+SAMN34179127	tissue	Lung adjacent normal
+SAMN34179127	source_name	Lung adjacent normal
+SAMN34179127	BioSampleModel	Generic
+SAMN34179127	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179127	ENA-LAST-UPDATE	2023-09-08
+SAMN34179136	recurrence	Recurrence
+SAMN34179136	collection_date	missing
+SAMN34179136	INSDC secondary accession	SRS17310859
+SAMN34179136	NCBI submission package	Generic.1.0
+SAMN34179136	organism	Homo sapiens
+SAMN34179136	patient	NYU1898
+SAMN34179136	progression type	Locoregional
+SAMN34179136	geo_loc_name	missing
+SAMN34179136	progression	Progression
+SAMN34179136	tissue	Tumor
+SAMN34179136	source_name	Tumor
+SAMN34179136	BioSampleModel	Generic
+SAMN34179136	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179136	ENA-LAST-UPDATE	2023-09-08
+SAMN34179191	recurrence	N/A
+SAMN34179191	collection_date	missing
+SAMN34179191	INSDC secondary accession	SRS17310852
+SAMN34179191	NCBI submission package	Generic.1.0
+SAMN34179191	organism	Homo sapiens
+SAMN34179191	patient	NYU1595
+SAMN34179191	progression type	Second Primary
+SAMN34179191	geo_loc_name	missing
+SAMN34179191	progression	Progression
+SAMN34179191	tissue	Lung adjacent normal
+SAMN34179191	source_name	Lung adjacent normal
+SAMN34179191	BioSampleModel	Generic
+SAMN34179191	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179191	ENA-LAST-UPDATE	2023-09-08
+SAMN34179195	recurrence	N/A
+SAMN34179195	collection_date	missing
+SAMN34179195	INSDC secondary accession	SRS17310848
+SAMN34179195	NCBI submission package	Generic.1.0
+SAMN34179195	organism	Homo sapiens
+SAMN34179195	patient	NYU1555
+SAMN34179195	progression type	Second Primary
+SAMN34179195	geo_loc_name	missing
+SAMN34179195	progression	Progression
+SAMN34179195	tissue	Lung adjacent normal
+SAMN34179195	source_name	Lung adjacent normal
+SAMN34179195	BioSampleModel	Generic
+SAMN34179195	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179195	ENA-LAST-UPDATE	2023-09-08
+SAMN34179196	recurrence	No Progression (>5y)
+SAMN34179196	collection_date	missing
+SAMN34179196	INSDC secondary accession	SRS17310847
+SAMN34179196	NCBI submission package	Generic.1.0
+SAMN34179196	organism	Homo sapiens
+SAMN34179196	patient	NYU1551
+SAMN34179196	progression type	No Progression (>5y)
+SAMN34179196	geo_loc_name	missing
+SAMN34179196	progression	No Progression (>5y)
+SAMN34179196	tissue	Tumor
+SAMN34179196	source_name	Tumor
+SAMN34179196	BioSampleModel	Generic
+SAMN34179196	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179196	ENA-LAST-UPDATE	2023-09-08
+SAMN34179197	recurrence	No Progression (>5y)
+SAMN34179197	collection_date	missing
+SAMN34179197	INSDC secondary accession	SRS17310846
+SAMN34179197	NCBI submission package	Generic.1.0
+SAMN34179197	organism	Homo sapiens
+SAMN34179197	patient	NYU1551
+SAMN34179197	progression type	No Progression (>5y)
+SAMN34179197	geo_loc_name	missing
+SAMN34179197	progression	No Progression (>5y)
+SAMN34179197	tissue	Lung adjacent normal
+SAMN34179197	source_name	Lung adjacent normal
+SAMN34179197	BioSampleModel	Generic
+SAMN34179197	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179197	ENA-LAST-UPDATE	2023-09-08
+SAMN34179198	recurrence	N/A
+SAMN34179198	collection_date	missing
+SAMN34179198	INSDC secondary accession	SRS17310845
+SAMN34179198	NCBI submission package	Generic.1.0
+SAMN34179198	organism	Homo sapiens
+SAMN34179198	patient	NYU1512
+SAMN34179198	progression type	Short Follow Up (<5y)
+SAMN34179198	geo_loc_name	missing
+SAMN34179198	progression	N/A
+SAMN34179198	tissue	Tumor
+SAMN34179198	source_name	Tumor
+SAMN34179198	BioSampleModel	Generic
+SAMN34179198	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179198	ENA-LAST-UPDATE	2023-09-08
+SAMN34179200	recurrence	Recurrence
+SAMN34179200	collection_date	missing
+SAMN34179200	INSDC secondary accession	SRS17310843
+SAMN34179200	NCBI submission package	Generic.1.0
+SAMN34179200	organism	Homo sapiens
+SAMN34179200	patient	NYU1502
+SAMN34179200	progression type	Systemic
+SAMN34179200	geo_loc_name	missing
+SAMN34179200	progression	Progression
+SAMN34179200	tissue	Tumor
+SAMN34179200	source_name	Tumor
+SAMN34179200	BioSampleModel	Generic
+SAMN34179200	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179200	ENA-LAST-UPDATE	2023-09-08
+SAMN34179031	recurrence	No Progression (>5y)
+SAMN34179031	collection_date	missing
+SAMN34179031	INSDC secondary accession	SRS17310836
+SAMN34179031	NCBI submission package	Generic.1.0
+SAMN34179031	organism	Homo sapiens
+SAMN34179031	patient	NYU875
+SAMN34179031	progression type	No Progression (>5y)
+SAMN34179031	geo_loc_name	missing
+SAMN34179031	progression	No Progression (>5y)
+SAMN34179031	tissue	Lung adjacent normal
+SAMN34179031	source_name	Lung adjacent normal
+SAMN34179031	BioSampleModel	Generic
+SAMN34179031	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179031	ENA-LAST-UPDATE	2023-09-08
+SAMN34179033	recurrence	N/A
+SAMN34179033	collection_date	missing
+SAMN34179033	INSDC secondary accession	SRS17310834
+SAMN34179033	NCBI submission package	Generic.1.0
+SAMN34179033	organism	Homo sapiens
+SAMN34179033	patient	NYU867
+SAMN34179033	progression type	Second Primary
+SAMN34179033	geo_loc_name	missing
+SAMN34179033	progression	Progression
+SAMN34179033	tissue	Lung adjacent normal
+SAMN34179033	source_name	Lung adjacent normal
+SAMN34179033	BioSampleModel	Generic
+SAMN34179033	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179033	ENA-LAST-UPDATE	2023-09-08
+SAMN34179034	recurrence	N/A
+SAMN34179034	collection_date	missing
+SAMN34179034	INSDC secondary accession	SRS17310833
+SAMN34179034	NCBI submission package	Generic.1.0
+SAMN34179034	organism	Homo sapiens
+SAMN34179034	patient	NYU848
+SAMN34179034	progression type	Second Primary
+SAMN34179034	geo_loc_name	missing
+SAMN34179034	progression	Progression
+SAMN34179034	tissue	Tumor
+SAMN34179034	source_name	Tumor
+SAMN34179034	BioSampleModel	Generic
+SAMN34179034	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179034	ENA-LAST-UPDATE	2023-09-08
+SAMN34179092	recurrence	No Progression (>5y)
+SAMN34179092	collection_date	missing
+SAMN34179092	INSDC secondary accession	SRS17310823
+SAMN34179092	NCBI submission package	Generic.1.0
+SAMN34179092	organism	Homo sapiens
+SAMN34179092	patient	NYU294
+SAMN34179092	progression type	No Progression (>5y)
+SAMN34179092	geo_loc_name	missing
+SAMN34179092	progression	No Progression (>5y)
+SAMN34179092	tissue	Tumor
+SAMN34179092	source_name	Tumor
+SAMN34179092	BioSampleModel	Generic
+SAMN34179092	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179092	ENA-LAST-UPDATE	2023-09-08
+SAMN34179093	recurrence	No Progression (>5y)
+SAMN34179093	collection_date	missing
+SAMN34179093	INSDC secondary accession	SRS17310822
+SAMN34179093	NCBI submission package	Generic.1.0
+SAMN34179093	organism	Homo sapiens
+SAMN34179093	patient	NYU294
+SAMN34179093	progression type	No Progression (>5y)
+SAMN34179093	geo_loc_name	missing
+SAMN34179093	progression	No Progression (>5y)
+SAMN34179093	tissue	Lung adjacent normal
+SAMN34179093	source_name	Lung adjacent normal
+SAMN34179093	BioSampleModel	Generic
+SAMN34179093	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179093	ENA-LAST-UPDATE	2023-09-08
+SAMN34179094	recurrence	No Progression (>5y)
+SAMN34179094	collection_date	missing
+SAMN34179094	INSDC secondary accession	SRS17310821
+SAMN34179094	NCBI submission package	Generic.1.0
+SAMN34179094	organism	Homo sapiens
+SAMN34179094	patient	NYU279
+SAMN34179094	progression type	No Progression (>5y)
+SAMN34179094	geo_loc_name	missing
+SAMN34179094	progression	No Progression (>5y)
+SAMN34179094	tissue	Tumor
+SAMN34179094	source_name	Tumor
+SAMN34179094	BioSampleModel	Generic
+SAMN34179094	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179094	ENA-LAST-UPDATE	2023-09-08
+SAMN34179100	recurrence	No Progression (>5y)
+SAMN34179100	collection_date	missing
+SAMN34179100	INSDC secondary accession	SRS17310815
+SAMN34179100	NCBI submission package	Generic.1.0
+SAMN34179100	organism	Homo sapiens
+SAMN34179100	patient	NYU252
+SAMN34179100	progression type	No Progression (>5y)
+SAMN34179100	geo_loc_name	missing
+SAMN34179100	progression	No Progression (>5y)
+SAMN34179100	tissue	Tumor
+SAMN34179100	source_name	Tumor
+SAMN34179100	BioSampleModel	Generic
+SAMN34179100	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179100	ENA-LAST-UPDATE	2023-09-08
+SAMN34179105	recurrence	No Progression (>5y)
+SAMN34179105	collection_date	missing
+SAMN34179105	INSDC secondary accession	SRS17311056
+SAMN34179105	NCBI submission package	Generic.1.0
+SAMN34179105	organism	Homo sapiens
+SAMN34179105	patient	NYU2005
+SAMN34179105	progression type	No Progression (>5y)
+SAMN34179105	geo_loc_name	missing
+SAMN34179105	progression	No Progression (>5y)
+SAMN34179105	tissue	Lung adjacent normal
+SAMN34179105	source_name	Lung adjacent normal
+SAMN34179105	BioSampleModel	Generic
+SAMN34179105	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179105	ENA-LAST-UPDATE	2023-09-08
+SAMN34179160	recurrence	N/A
+SAMN34179160	collection_date	missing
+SAMN34179160	INSDC secondary accession	SRS17311048
+SAMN34179160	NCBI submission package	Generic.1.0
+SAMN34179160	organism	Homo sapiens
+SAMN34179160	patient	NYU1787
+SAMN34179160	progression type	Second Primary
+SAMN34179160	geo_loc_name	missing
+SAMN34179160	progression	Progression
+SAMN34179160	tissue	Tumor
+SAMN34179160	source_name	Tumor
+SAMN34179160	BioSampleModel	Generic
+SAMN34179160	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179160	ENA-LAST-UPDATE	2023-09-08
+SAMN34179162	recurrence	No Progression (>5y)
+SAMN34179162	collection_date	missing
+SAMN34179162	INSDC secondary accession	SRS17311047
+SAMN34179162	NCBI submission package	Generic.1.0
+SAMN34179162	organism	Homo sapiens
+SAMN34179162	patient	NYU178
+SAMN34179162	progression type	No Progression (>5y)
+SAMN34179162	geo_loc_name	missing
+SAMN34179162	progression	No Progression (>5y)
+SAMN34179162	tissue	Tumor
+SAMN34179162	source_name	Tumor
+SAMN34179162	BioSampleModel	Generic
+SAMN34179162	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179162	ENA-LAST-UPDATE	2023-09-08
+SAMN34179163	recurrence	No Progression (>5y)
+SAMN34179163	collection_date	missing
+SAMN34179163	INSDC secondary accession	SRS17311046
+SAMN34179163	NCBI submission package	Generic.1.0
+SAMN34179163	organism	Homo sapiens
+SAMN34179163	patient	NYU178
+SAMN34179163	progression type	No Progression (>5y)
+SAMN34179163	geo_loc_name	missing
+SAMN34179163	progression	No Progression (>5y)
+SAMN34179163	tissue	Lung adjacent normal
+SAMN34179163	source_name	Lung adjacent normal
+SAMN34179163	BioSampleModel	Generic
+SAMN34179163	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179163	ENA-LAST-UPDATE	2023-09-08
+SAMN34179164	recurrence	No Progression (>5y)
+SAMN34179164	collection_date	missing
+SAMN34179164	INSDC secondary accession	SRS17311044
+SAMN34179164	NCBI submission package	Generic.1.0
+SAMN34179164	organism	Homo sapiens
+SAMN34179164	patient	NYU1769
+SAMN34179164	progression type	No Progression (>5y)
+SAMN34179164	geo_loc_name	missing
+SAMN34179164	progression	No Progression (>5y)
+SAMN34179164	tissue	Tumor
+SAMN34179164	source_name	Tumor
+SAMN34179164	BioSampleModel	Generic
+SAMN34179164	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179164	ENA-LAST-UPDATE	2023-09-08
+SAMN34179169	recurrence	No Progression (>5y)
+SAMN34179169	collection_date	missing
+SAMN34179169	INSDC secondary accession	SRS17311039
+SAMN34179169	NCBI submission package	Generic.1.0
+SAMN34179169	organism	Homo sapiens
+SAMN34179169	patient	NYU175
+SAMN34179169	progression type	No Progression (>5y)
+SAMN34179169	geo_loc_name	missing
+SAMN34179169	progression	No Progression (>5y)
+SAMN34179169	tissue	Lung adjacent normal
+SAMN34179169	source_name	Lung adjacent normal
+SAMN34179169	BioSampleModel	Generic
+SAMN34179169	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179169	ENA-LAST-UPDATE	2023-09-08
+SAMN34179171	recurrence	No Progression (>5y)
+SAMN34179171	collection_date	missing
+SAMN34179171	INSDC secondary accession	SRS17311038
+SAMN34179171	NCBI submission package	Generic.1.0
+SAMN34179171	organism	Homo sapiens
+SAMN34179171	patient	NYU1749
+SAMN34179171	progression type	No Progression (>5y)
+SAMN34179171	geo_loc_name	missing
+SAMN34179171	progression	No Progression (>5y)
+SAMN34179171	tissue	Lung adjacent normal
+SAMN34179171	source_name	Lung adjacent normal
+SAMN34179171	BioSampleModel	Generic
+SAMN34179171	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179171	ENA-LAST-UPDATE	2023-09-08
+SAMN34179222	recurrence	N/A
+SAMN34179222	collection_date	missing
+SAMN34179222	INSDC secondary accession	SRS17311035
+SAMN34179222	NCBI submission package	Generic.1.0
+SAMN34179222	organism	Homo sapiens
+SAMN34179222	patient	NYU1364
+SAMN34179222	progression type	Second Primary
+SAMN34179222	geo_loc_name	missing
+SAMN34179222	progression	Progression
+SAMN34179222	tissue	Lung adjacent normal
+SAMN34179222	source_name	Lung adjacent normal
+SAMN34179222	BioSampleModel	Generic
+SAMN34179222	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179222	ENA-LAST-UPDATE	2023-09-08
+SAMN34179235	recurrence	Recurrence
+SAMN34179235	collection_date	missing
+SAMN34179235	INSDC secondary accession	SRS17311022
+SAMN34179235	NCBI submission package	Generic.1.0
+SAMN34179235	organism	Homo sapiens
+SAMN34179235	patient	NYU1284
+SAMN34179235	progression type	Locoregional
+SAMN34179235	geo_loc_name	missing
+SAMN34179235	progression	Progression
+SAMN34179235	tissue	Lung adjacent normal
+SAMN34179235	source_name	Lung adjacent normal
+SAMN34179235	BioSampleModel	Generic
+SAMN34179235	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179235	ENA-LAST-UPDATE	2023-09-08
+SAMN34179022	recurrence	No Progression (>5y)
+SAMN34179022	collection_date	missing
+SAMN34179022	INSDC secondary accession	SRS17311021
+SAMN34179022	NCBI submission package	Generic.1.0
+SAMN34179022	organism	Homo sapiens
+SAMN34179022	patient	NYU994
+SAMN34179022	progression type	No Progression (>5y)
+SAMN34179022	geo_loc_name	missing
+SAMN34179022	progression	No Progression (>5y)
+SAMN34179022	tissue	Tumor
+SAMN34179022	source_name	Tumor
+SAMN34179022	BioSampleModel	Generic
+SAMN34179022	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179022	ENA-LAST-UPDATE	2023-09-08
+SAMN34179023	recurrence	No Progression (>5y)
+SAMN34179023	collection_date	missing
+SAMN34179023	INSDC secondary accession	SRS17311020
+SAMN34179023	NCBI submission package	Generic.1.0
+SAMN34179023	organism	Homo sapiens
+SAMN34179023	patient	NYU994
+SAMN34179023	progression type	No Progression (>5y)
+SAMN34179023	geo_loc_name	missing
+SAMN34179023	progression	No Progression (>5y)
+SAMN34179023	tissue	Lung adjacent normal
+SAMN34179023	source_name	Lung adjacent normal
+SAMN34179023	BioSampleModel	Generic
+SAMN34179023	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179023	ENA-LAST-UPDATE	2023-09-08
+SAMN34179024	recurrence	No Progression (>5y)
+SAMN34179024	collection_date	missing
+SAMN34179024	INSDC secondary accession	SRS17311018
+SAMN34179024	NCBI submission package	Generic.1.0
+SAMN34179024	organism	Homo sapiens
+SAMN34179024	patient	NYU965
+SAMN34179024	progression type	No Progression (>5y)
+SAMN34179024	geo_loc_name	missing
+SAMN34179024	progression	No Progression (>5y)
+SAMN34179024	tissue	Tumor
+SAMN34179024	source_name	Tumor
+SAMN34179024	BioSampleModel	Generic
+SAMN34179024	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179024	ENA-LAST-UPDATE	2023-09-08
+SAMN34179027	recurrence	No Progression (>5y)
+SAMN34179027	collection_date	missing
+SAMN34179027	INSDC secondary accession	SRS17311016
+SAMN34179027	NCBI submission package	Generic.1.0
+SAMN34179027	organism	Homo sapiens
+SAMN34179027	patient	NYU955
+SAMN34179027	progression type	No Progression (>5y)
+SAMN34179027	geo_loc_name	missing
+SAMN34179027	progression	No Progression (>5y)
+SAMN34179027	tissue	Lung adjacent normal
+SAMN34179027	source_name	Lung adjacent normal
+SAMN34179027	BioSampleModel	Generic
+SAMN34179027	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179027	ENA-LAST-UPDATE	2023-09-08
+SAMN34179078	recurrence	No Progression (>5y)
+SAMN34179078	collection_date	missing
+SAMN34179078	INSDC secondary accession	SRS17311013
+SAMN34179078	NCBI submission package	Generic.1.0
+SAMN34179078	organism	Homo sapiens
+SAMN34179078	patient	NYU359
+SAMN34179078	progression type	No Progression (>5y)
+SAMN34179078	geo_loc_name	missing
+SAMN34179078	progression	No Progression (>5y)
+SAMN34179078	tissue	Tumor
+SAMN34179078	source_name	Tumor
+SAMN34179078	BioSampleModel	Generic
+SAMN34179078	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179078	ENA-LAST-UPDATE	2023-09-08
+SAMN34179080	recurrence	No Progression (>5y)
+SAMN34179080	collection_date	missing
+SAMN34179080	INSDC secondary accession	SRS17311011
+SAMN34179080	NCBI submission package	Generic.1.0
+SAMN34179080	organism	Homo sapiens
+SAMN34179080	patient	NYU346
+SAMN34179080	progression type	No Progression (>5y)
+SAMN34179080	geo_loc_name	missing
+SAMN34179080	progression	No Progression (>5y)
+SAMN34179080	tissue	Tumor
+SAMN34179080	source_name	Tumor
+SAMN34179080	BioSampleModel	Generic
+SAMN34179080	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179080	ENA-LAST-UPDATE	2023-09-08
+SAMN34179082	recurrence	Recurrence
+SAMN34179082	collection_date	missing
+SAMN34179082	INSDC secondary accession	SRS17311009
+SAMN34179082	NCBI submission package	Generic.1.0
+SAMN34179082	organism	Homo sapiens
+SAMN34179082	patient	NYU330
+SAMN34179082	progression type	Systemic
+SAMN34179082	geo_loc_name	missing
+SAMN34179082	progression	Progression
+SAMN34179082	tissue	Tumor
+SAMN34179082	source_name	Tumor
+SAMN34179082	BioSampleModel	Generic
+SAMN34179082	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179082	ENA-LAST-UPDATE	2023-09-08
+SAMN34179090	recurrence	Recurrence
+SAMN34179090	collection_date	missing
+SAMN34179090	INSDC secondary accession	SRS17311001
+SAMN34179090	NCBI submission package	Generic.1.0
+SAMN34179090	organism	Homo sapiens
+SAMN34179090	patient	NYU300
+SAMN34179090	progression type	Locoregional
+SAMN34179090	geo_loc_name	missing
+SAMN34179090	progression	Progression
+SAMN34179090	tissue	Lung adjacent normal
+SAMN34179090	source_name	Lung adjacent normal
+SAMN34179090	BioSampleModel	Generic
+SAMN34179090	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179090	ENA-LAST-UPDATE	2023-09-08
+SAMN34179091	recurrence	Recurrence
+SAMN34179091	collection_date	missing
+SAMN34179091	INSDC secondary accession	SRS17310999
+SAMN34179091	NCBI submission package	Generic.1.0
+SAMN34179091	organism	Homo sapiens
+SAMN34179091	patient	NYU300
+SAMN34179091	progression type	Locoregional
+SAMN34179091	geo_loc_name	missing
+SAMN34179091	progression	Progression
+SAMN34179091	tissue	Tumor
+SAMN34179091	source_name	Tumor
+SAMN34179091	BioSampleModel	Generic
+SAMN34179091	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179091	ENA-LAST-UPDATE	2023-09-08
+SAMN34179146	recurrence	N/A
+SAMN34179146	collection_date	missing
+SAMN34179146	INSDC secondary accession	SRS17310993
+SAMN34179146	NCBI submission package	Generic.1.0
+SAMN34179146	organism	Homo sapiens
+SAMN34179146	patient	NYU1873
+SAMN34179146	progression type	Short Follow Up (<5y)
+SAMN34179146	geo_loc_name	missing
+SAMN34179146	progression	N/A
+SAMN34179146	tissue	Tumor
+SAMN34179146	source_name	Tumor
+SAMN34179146	BioSampleModel	Generic
+SAMN34179146	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179146	ENA-LAST-UPDATE	2023-09-08
+SAMN34179148	recurrence	Recurrence
+SAMN34179148	collection_date	missing
+SAMN34179148	INSDC secondary accession	SRS17310990
+SAMN34179148	NCBI submission package	Generic.1.0
+SAMN34179148	organism	Homo sapiens
+SAMN34179148	patient	NYU1871
+SAMN34179148	progression type	Locoregional
+SAMN34179148	geo_loc_name	missing
+SAMN34179148	progression	Progression
+SAMN34179148	tissue	Tumor
+SAMN34179148	source_name	Tumor
+SAMN34179148	BioSampleModel	Generic
+SAMN34179148	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179148	ENA-LAST-UPDATE	2023-09-08
+SAMN34179152	recurrence	N/A
+SAMN34179152	collection_date	missing
+SAMN34179152	INSDC secondary accession	SRS17310985
+SAMN34179152	NCBI submission package	Generic.1.0
+SAMN34179152	organism	Homo sapiens
+SAMN34179152	patient	NYU1845
+SAMN34179152	progression type	Second Primary
+SAMN34179152	geo_loc_name	missing
+SAMN34179152	progression	Progression
+SAMN34179152	tissue	Tumor
+SAMN34179152	source_name	Tumor
+SAMN34179152	BioSampleModel	Generic
+SAMN34179152	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179152	ENA-LAST-UPDATE	2023-09-08
+SAMN34179154	recurrence	No Progression (>5y)
+SAMN34179154	collection_date	missing
+SAMN34179154	INSDC secondary accession	SRS17310986
+SAMN34179154	NCBI submission package	Generic.1.0
+SAMN34179154	organism	Homo sapiens
+SAMN34179154	patient	NYU1837
+SAMN34179154	progression type	No Progression (>5y)
+SAMN34179154	geo_loc_name	missing
+SAMN34179154	progression	No Progression (>5y)
+SAMN34179154	tissue	Tumor
+SAMN34179154	source_name	Tumor
+SAMN34179154	BioSampleModel	Generic
+SAMN34179154	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179154	ENA-LAST-UPDATE	2023-09-08
+SAMN34179155	recurrence	No Progression (>5y)
+SAMN34179155	collection_date	missing
+SAMN34179155	INSDC secondary accession	SRS17310984
+SAMN34179155	NCBI submission package	Generic.1.0
+SAMN34179155	organism	Homo sapiens
+SAMN34179155	patient	NYU1837
+SAMN34179155	progression type	No Progression (>5y)
+SAMN34179155	geo_loc_name	missing
+SAMN34179155	progression	No Progression (>5y)
+SAMN34179155	tissue	Lung adjacent normal
+SAMN34179155	source_name	Lung adjacent normal
+SAMN34179155	BioSampleModel	Generic
+SAMN34179155	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179155	ENA-LAST-UPDATE	2023-09-08
+SAMN34179208	recurrence	Recurrence
+SAMN34179208	collection_date	missing
+SAMN34179208	INSDC secondary accession	SRS17310979
+SAMN34179208	NCBI submission package	Generic.1.0
+SAMN34179208	organism	Homo sapiens
+SAMN34179208	patient	NYU1443
+SAMN34179208	progression type	Systemic
+SAMN34179208	geo_loc_name	missing
+SAMN34179208	progression	Progression
+SAMN34179208	tissue	Tumor
+SAMN34179208	source_name	Tumor
+SAMN34179208	BioSampleModel	Generic
+SAMN34179208	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179208	ENA-LAST-UPDATE	2023-09-08
+SAMN34179211	recurrence	No Progression (>5y)
+SAMN34179211	collection_date	missing
+SAMN34179211	INSDC secondary accession	SRS17310977
+SAMN34179211	NCBI submission package	Generic.1.0
+SAMN34179211	organism	Homo sapiens
+SAMN34179211	patient	NYU1435
+SAMN34179211	progression type	No Progression (>5y)
+SAMN34179211	geo_loc_name	missing
+SAMN34179211	progression	No Progression (>5y)
+SAMN34179211	tissue	Lung adjacent normal
+SAMN34179211	source_name	Lung adjacent normal
+SAMN34179211	BioSampleModel	Generic
+SAMN34179211	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179211	ENA-LAST-UPDATE	2023-09-08
+SAMN34179236	recurrence	N/A
+SAMN34179236	collection_date	missing
+SAMN34179236	INSDC secondary accession	SRS17310968
+SAMN34179236	NCBI submission package	Generic.1.0
+SAMN34179236	organism	Homo sapiens
+SAMN34179236	patient	NYU1280
+SAMN34179236	progression type	Second Primary
+SAMN34179236	geo_loc_name	missing
+SAMN34179236	progression	Progression
+SAMN34179236	tissue	Tumor
+SAMN34179236	source_name	Tumor
+SAMN34179236	BioSampleModel	Generic
+SAMN34179236	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179236	ENA-LAST-UPDATE	2023-09-08
+SAMN34179238	recurrence	No Progression (>5y)
+SAMN34179238	collection_date	missing
+SAMN34179238	INSDC secondary accession	SRS17310966
+SAMN34179238	NCBI submission package	Generic.1.0
+SAMN34179238	organism	Homo sapiens
+SAMN34179238	patient	NYU1261
+SAMN34179238	progression type	No Progression (>5y)
+SAMN34179238	geo_loc_name	missing
+SAMN34179238	progression	No Progression (>5y)
+SAMN34179238	tissue	Tumor
+SAMN34179238	source_name	Tumor
+SAMN34179238	BioSampleModel	Generic
+SAMN34179238	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179238	ENA-LAST-UPDATE	2023-09-08
+SAMN34179241	recurrence	No Progression (>5y)
+SAMN34179241	collection_date	missing
+SAMN34179241	INSDC secondary accession	SRS17310962
+SAMN34179241	NCBI submission package	Generic.1.0
+SAMN34179241	organism	Homo sapiens
+SAMN34179241	patient	NYU1222
+SAMN34179241	progression type	No Progression (>5y)
+SAMN34179241	geo_loc_name	missing
+SAMN34179241	progression	No Progression (>5y)
+SAMN34179241	tissue	Lung adjacent normal
+SAMN34179241	source_name	Lung adjacent normal
+SAMN34179241	BioSampleModel	Generic
+SAMN34179241	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179241	ENA-LAST-UPDATE	2023-09-08
+SAMN34179243	recurrence	No Progression (>5y)
+SAMN34179243	collection_date	missing
+SAMN34179243	INSDC secondary accession	SRS17310960
+SAMN34179243	NCBI submission package	Generic.1.0
+SAMN34179243	organism	Homo sapiens
+SAMN34179243	patient	NYU1213
+SAMN34179243	progression type	No Progression (>5y)
+SAMN34179243	geo_loc_name	missing
+SAMN34179243	progression	No Progression (>5y)
+SAMN34179243	tissue	Lung adjacent normal
+SAMN34179243	source_name	Lung adjacent normal
+SAMN34179243	BioSampleModel	Generic
+SAMN34179243	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179243	ENA-LAST-UPDATE	2023-09-08
+SAMN34179247	recurrence	No Progression (>5y)
+SAMN34179247	collection_date	missing
+SAMN34179247	INSDC secondary accession	SRS17310954
+SAMN34179247	NCBI submission package	Generic.1.0
+SAMN34179247	organism	Homo sapiens
+SAMN34179247	patient	NYU1206
+SAMN34179247	progression type	No Progression (>5y)
+SAMN34179247	geo_loc_name	missing
+SAMN34179247	progression	No Progression (>5y)
+SAMN34179247	tissue	Lung adjacent normal
+SAMN34179247	source_name	Lung adjacent normal
+SAMN34179247	BioSampleModel	Generic
+SAMN34179247	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179247	ENA-LAST-UPDATE	2023-09-08
+SAMN34179251	recurrence	N/A
+SAMN34179251	collection_date	missing
+SAMN34179251	INSDC secondary accession	SRS17310952
+SAMN34179251	NCBI submission package	Generic.1.0
+SAMN34179251	organism	Homo sapiens
+SAMN34179251	patient	NYU1196
+SAMN34179251	progression type	Short Follow Up (<5y)
+SAMN34179251	geo_loc_name	missing
+SAMN34179251	progression	N/A
+SAMN34179251	tissue	Lung adjacent normal
+SAMN34179251	source_name	Lung adjacent normal
+SAMN34179251	BioSampleModel	Generic
+SAMN34179251	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179251	ENA-LAST-UPDATE	2023-09-08
+SAMN34179050	recurrence	No Progression (>5y)
+SAMN34179050	collection_date	missing
+SAMN34179050	INSDC secondary accession	SRS17310946
+SAMN34179050	NCBI submission package	Generic.1.0
+SAMN34179050	organism	Homo sapiens
+SAMN34179050	patient	NYU706
+SAMN34179050	progression type	No Progression (>5y)
+SAMN34179050	geo_loc_name	missing
+SAMN34179050	progression	No Progression (>5y)
+SAMN34179050	tissue	Tumor
+SAMN34179050	source_name	Tumor
+SAMN34179050	BioSampleModel	Generic
+SAMN34179050	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179050	ENA-LAST-UPDATE	2023-09-08
+SAMN34179113	recurrence	N/A
+SAMN34179113	collection_date	missing
+SAMN34179113	INSDC secondary accession	SRS17310928
+SAMN34179113	NCBI submission package	Generic.1.0
+SAMN34179113	organism	Homo sapiens
+SAMN34179113	patient	NYU1986
+SAMN34179113	progression type	Second Primary
+SAMN34179113	geo_loc_name	missing
+SAMN34179113	progression	Progression
+SAMN34179113	tissue	Lung adjacent normal
+SAMN34179113	source_name	Lung adjacent normal
+SAMN34179113	BioSampleModel	Generic
+SAMN34179113	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179113	ENA-LAST-UPDATE	2023-09-08
+SAMN34179116	recurrence	No Progression (>5y)
+SAMN34179116	collection_date	missing
+SAMN34179116	INSDC secondary accession	SRS17310927
+SAMN34179116	NCBI submission package	Generic.1.0
+SAMN34179116	organism	Homo sapiens
+SAMN34179116	patient	NYU1970
+SAMN34179116	progression type	No Progression (>5y)
+SAMN34179116	geo_loc_name	missing
+SAMN34179116	progression	No Progression (>5y)
+SAMN34179116	tissue	Tumor
+SAMN34179116	source_name	Tumor
+SAMN34179116	BioSampleModel	Generic
+SAMN34179116	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179116	ENA-LAST-UPDATE	2023-09-08
+SAMN34179117	recurrence	No Progression (>5y)
+SAMN34179117	collection_date	missing
+SAMN34179117	INSDC secondary accession	SRS17310926
+SAMN34179117	NCBI submission package	Generic.1.0
+SAMN34179117	organism	Homo sapiens
+SAMN34179117	patient	NYU1970
+SAMN34179117	progression type	No Progression (>5y)
+SAMN34179117	geo_loc_name	missing
+SAMN34179117	progression	No Progression (>5y)
+SAMN34179117	tissue	Lung adjacent normal
+SAMN34179117	source_name	Lung adjacent normal
+SAMN34179117	BioSampleModel	Generic
+SAMN34179117	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179117	ENA-LAST-UPDATE	2023-09-08
+SAMN34179123	recurrence	No Progression (>5y)
+SAMN34179123	collection_date	missing
+SAMN34179123	INSDC secondary accession	SRS17310920
+SAMN34179123	NCBI submission package	Generic.1.0
+SAMN34179123	organism	Homo sapiens
+SAMN34179123	patient	NYU1951
+SAMN34179123	progression type	No Progression (>5y)
+SAMN34179123	geo_loc_name	missing
+SAMN34179123	progression	No Progression (>5y)
+SAMN34179123	tissue	Lung adjacent normal
+SAMN34179123	source_name	Lung adjacent normal
+SAMN34179123	BioSampleModel	Generic
+SAMN34179123	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179123	ENA-LAST-UPDATE	2023-09-08
+SAMN34179184	recurrence	Recurrence
+SAMN34179184	collection_date	missing
+SAMN34179184	INSDC secondary accession	SRS17310907
+SAMN34179184	NCBI submission package	Generic.1.0
+SAMN34179184	organism	Homo sapiens
+SAMN34179184	patient	NYU1609
+SAMN34179184	progression type	Locoregional
+SAMN34179184	geo_loc_name	missing
+SAMN34179184	progression	Progression
+SAMN34179184	tissue	Tumor
+SAMN34179184	source_name	Tumor
+SAMN34179184	BioSampleModel	Generic
+SAMN34179184	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179184	ENA-LAST-UPDATE	2023-09-08
+SAMN34179255	recurrence	No Progression (>5y)
+SAMN34179255	collection_date	missing
+SAMN34179255	INSDC secondary accession	SRS17310901
+SAMN34179255	NCBI submission package	Generic.1.0
+SAMN34179255	organism	Homo sapiens
+SAMN34179255	patient	NYU113
+SAMN34179255	progression type	No Progression (>5y)
+SAMN34179255	geo_loc_name	missing
+SAMN34179255	progression	No Progression (>5y)
+SAMN34179255	tissue	Lung adjacent normal
+SAMN34179255	source_name	Lung adjacent normal
+SAMN34179255	BioSampleModel	Generic
+SAMN34179255	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179255	ENA-LAST-UPDATE	2023-09-08
+SAMN34179257	recurrence	No Progression (>5y)
+SAMN34179257	collection_date	missing
+SAMN34179257	INSDC secondary accession	SRS17310897
+SAMN34179257	NCBI submission package	Generic.1.0
+SAMN34179257	organism	Homo sapiens
+SAMN34179257	patient	NYU1124
+SAMN34179257	progression type	No Progression (>5y)
+SAMN34179257	geo_loc_name	missing
+SAMN34179257	progression	No Progression (>5y)
+SAMN34179257	tissue	Lung adjacent normal
+SAMN34179257	source_name	Lung adjacent normal
+SAMN34179257	BioSampleModel	Generic
+SAMN34179257	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179257	ENA-LAST-UPDATE	2023-09-08
+SAMN34179264	recurrence	No Progression (>5y)
+SAMN34179264	collection_date	missing
+SAMN34179264	INSDC secondary accession	SRS17310893
+SAMN34179264	NCBI submission package	Generic.1.0
+SAMN34179264	organism	Homo sapiens
+SAMN34179264	patient	NYU1027
+SAMN34179264	progression type	No Progression (>5y)
+SAMN34179264	geo_loc_name	missing
+SAMN34179264	progression	No Progression (>5y)
+SAMN34179264	tissue	Tumor
+SAMN34179264	source_name	Tumor
+SAMN34179264	BioSampleModel	Generic
+SAMN34179264	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179264	ENA-LAST-UPDATE	2023-09-08
+SAMN34179267	recurrence	Recurrence
+SAMN34179267	collection_date	missing
+SAMN34179267	INSDC secondary accession	SRS17310888
+SAMN34179267	NCBI submission package	Generic.1.0
+SAMN34179267	organism	Homo sapiens
+SAMN34179267	patient	NYU1019
+SAMN34179267	progression type	Systemic
+SAMN34179267	geo_loc_name	missing
+SAMN34179267	progression	Progression
+SAMN34179267	tissue	Lung adjacent normal
+SAMN34179267	source_name	Lung adjacent normal
+SAMN34179267	BioSampleModel	Generic
+SAMN34179267	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179267	ENA-LAST-UPDATE	2023-09-08
+SAMN34179060	recurrence	No Progression (>5y)
+SAMN34179060	collection_date	missing
+SAMN34179060	INSDC secondary accession	SRS17310887
+SAMN34179060	NCBI submission package	Generic.1.0
+SAMN34179060	organism	Homo sapiens
+SAMN34179060	patient	NYU62
+SAMN34179060	progression type	No Progression (>5y)
+SAMN34179060	geo_loc_name	missing
+SAMN34179060	progression	No Progression (>5y)
+SAMN34179060	tissue	Tumor
+SAMN34179060	source_name	Tumor
+SAMN34179060	BioSampleModel	Generic
+SAMN34179060	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179060	ENA-LAST-UPDATE	2023-09-08
+SAMN34179064	recurrence	No Progression (>5y)
+SAMN34179064	collection_date	missing
+SAMN34179064	INSDC secondary accession	SRS17310883
+SAMN34179064	NCBI submission package	Generic.1.0
+SAMN34179064	organism	Homo sapiens
+SAMN34179064	patient	NYU565
+SAMN34179064	progression type	No Progression (>5y)
+SAMN34179064	geo_loc_name	missing
+SAMN34179064	progression	No Progression (>5y)
+SAMN34179064	tissue	Tumor
+SAMN34179064	source_name	Tumor
+SAMN34179064	BioSampleModel	Generic
+SAMN34179064	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179064	ENA-LAST-UPDATE	2023-09-08
+SAMN34179068	recurrence	N/A
+SAMN34179068	collection_date	missing
+SAMN34179068	INSDC secondary accession	SRS17310879
+SAMN34179068	NCBI submission package	Generic.1.0
+SAMN34179068	organism	Homo sapiens
+SAMN34179068	patient	NYU502
+SAMN34179068	progression type	Second Primary
+SAMN34179068	geo_loc_name	missing
+SAMN34179068	progression	Progression
+SAMN34179068	tissue	Tumor
+SAMN34179068	source_name	Tumor
+SAMN34179068	BioSampleModel	Generic
+SAMN34179068	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179068	ENA-LAST-UPDATE	2023-09-08
+SAMN34179075	recurrence	Recurrence
+SAMN34179075	collection_date	missing
+SAMN34179075	INSDC secondary accession	SRS17310872
+SAMN34179075	NCBI submission package	Generic.1.0
+SAMN34179075	organism	Homo sapiens
+SAMN34179075	patient	NYU454
+SAMN34179075	progression type	Systemic
+SAMN34179075	geo_loc_name	missing
+SAMN34179075	progression	Progression
+SAMN34179075	tissue	Lung adjacent normal
+SAMN34179075	source_name	Lung adjacent normal
+SAMN34179075	BioSampleModel	Generic
+SAMN34179075	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179075	ENA-LAST-UPDATE	2023-09-08
+SAMN34179131	recurrence	No Progression (>5y)
+SAMN34179131	collection_date	missing
+SAMN34179131	INSDC secondary accession	SRS17310864
+SAMN34179131	NCBI submission package	Generic.1.0
+SAMN34179131	organism	Homo sapiens
+SAMN34179131	patient	NYU1923
+SAMN34179131	progression type	No Progression (>5y)
+SAMN34179131	geo_loc_name	missing
+SAMN34179131	progression	No Progression (>5y)
+SAMN34179131	tissue	Lung adjacent normal
+SAMN34179131	source_name	Lung adjacent normal
+SAMN34179131	BioSampleModel	Generic
+SAMN34179131	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179131	ENA-LAST-UPDATE	2023-09-08
+SAMN34179137	recurrence	Recurrence
+SAMN34179137	collection_date	missing
+SAMN34179137	INSDC secondary accession	SRS17310858
+SAMN34179137	NCBI submission package	Generic.1.0
+SAMN34179137	organism	Homo sapiens
+SAMN34179137	patient	NYU1898
+SAMN34179137	progression type	Locoregional
+SAMN34179137	geo_loc_name	missing
+SAMN34179137	progression	Progression
+SAMN34179137	tissue	Lung adjacent normal
+SAMN34179137	source_name	Lung adjacent normal
+SAMN34179137	BioSampleModel	Generic
+SAMN34179137	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179137	ENA-LAST-UPDATE	2023-09-08
+SAMN34179188	recurrence	No Progression (>5y)
+SAMN34179188	collection_date	missing
+SAMN34179188	INSDC secondary accession	SRS17310855
+SAMN34179188	NCBI submission package	Generic.1.0
+SAMN34179188	organism	Homo sapiens
+SAMN34179188	patient	NYU1597
+SAMN34179188	progression type	No Progression (>5y)
+SAMN34179188	geo_loc_name	missing
+SAMN34179188	progression	No Progression (>5y)
+SAMN34179188	tissue	Tumor
+SAMN34179188	source_name	Tumor
+SAMN34179188	BioSampleModel	Generic
+SAMN34179188	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179188	ENA-LAST-UPDATE	2023-09-08
+SAMN34179201	recurrence	Recurrence
+SAMN34179201	collection_date	missing
+SAMN34179201	INSDC secondary accession	SRS17310842
+SAMN34179201	NCBI submission package	Generic.1.0
+SAMN34179201	organism	Homo sapiens
+SAMN34179201	patient	NYU1502
+SAMN34179201	progression type	Systemic
+SAMN34179201	geo_loc_name	missing
+SAMN34179201	progression	Progression
+SAMN34179201	tissue	Lung adjacent normal
+SAMN34179201	source_name	Lung adjacent normal
+SAMN34179201	BioSampleModel	Generic
+SAMN34179201	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179201	ENA-LAST-UPDATE	2023-09-08
+SAMN34179028	recurrence	No Progression (>5y)
+SAMN34179028	collection_date	missing
+SAMN34179028	INSDC secondary accession	SRS17310839
+SAMN34179028	NCBI submission package	Generic.1.0
+SAMN34179028	organism	Homo sapiens
+SAMN34179028	patient	NYU947
+SAMN34179028	progression type	No Progression (>5y)
+SAMN34179028	geo_loc_name	missing
+SAMN34179028	progression	No Progression (>5y)
+SAMN34179028	tissue	Tumor
+SAMN34179028	source_name	Tumor
+SAMN34179028	BioSampleModel	Generic
+SAMN34179028	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179028	ENA-LAST-UPDATE	2023-09-08
+SAMN34179035	recurrence	N/A
+SAMN34179035	collection_date	missing
+SAMN34179035	INSDC secondary accession	SRS17310832
+SAMN34179035	NCBI submission package	Generic.1.0
+SAMN34179035	organism	Homo sapiens
+SAMN34179035	patient	NYU848
+SAMN34179035	progression type	Second Primary
+SAMN34179035	geo_loc_name	missing
+SAMN34179035	progression	Progression
+SAMN34179035	tissue	Lung adjacent normal
+SAMN34179035	source_name	Lung adjacent normal
+SAMN34179035	BioSampleModel	Generic
+SAMN34179035	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179035	ENA-LAST-UPDATE	2023-09-08
+SAMN34179036	recurrence	No Progression (>5y)
+SAMN34179036	collection_date	missing
+SAMN34179036	INSDC secondary accession	SRS17310831
+SAMN34179036	NCBI submission package	Generic.1.0
+SAMN34179036	organism	Homo sapiens
+SAMN34179036	patient	NYU831
+SAMN34179036	progression type	No Progression (>5y)
+SAMN34179036	geo_loc_name	missing
+SAMN34179036	progression	No Progression (>5y)
+SAMN34179036	tissue	Tumor
+SAMN34179036	source_name	Tumor
+SAMN34179036	BioSampleModel	Generic
+SAMN34179036	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179036	ENA-LAST-UPDATE	2023-09-08
+SAMN34179039	recurrence	No Progression (>5y)
+SAMN34179039	collection_date	missing
+SAMN34179039	INSDC secondary accession	SRS17310828
+SAMN34179039	NCBI submission package	Generic.1.0
+SAMN34179039	organism	Homo sapiens
+SAMN34179039	patient	NYU822
+SAMN34179039	progression type	No Progression (>5y)
+SAMN34179039	geo_loc_name	missing
+SAMN34179039	progression	No Progression (>5y)
+SAMN34179039	tissue	Lung adjacent normal
+SAMN34179039	source_name	Lung adjacent normal
+SAMN34179039	BioSampleModel	Generic
+SAMN34179039	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179039	ENA-LAST-UPDATE	2023-09-08
+SAMN34179103	recurrence	Recurrence
+SAMN34179103	collection_date	missing
+SAMN34179103	INSDC secondary accession	SRS17311058
+SAMN34179103	NCBI submission package	Generic.1.0
+SAMN34179103	organism	Homo sapiens
+SAMN34179103	patient	NYU20
+SAMN34179103	progression type	Systemic
+SAMN34179103	geo_loc_name	missing
+SAMN34179103	progression	Progression
+SAMN34179103	tissue	Lung adjacent normal
+SAMN34179103	source_name	Lung adjacent normal
+SAMN34179103	BioSampleModel	Generic
+SAMN34179103	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179103	ENA-LAST-UPDATE	2023-09-08
+SAMN34179104	recurrence	No Progression (>5y)
+SAMN34179104	collection_date	missing
+SAMN34179104	INSDC secondary accession	SRS17311057
+SAMN34179104	NCBI submission package	Generic.1.0
+SAMN34179104	organism	Homo sapiens
+SAMN34179104	patient	NYU2005
+SAMN34179104	progression type	No Progression (>5y)
+SAMN34179104	geo_loc_name	missing
+SAMN34179104	progression	No Progression (>5y)
+SAMN34179104	tissue	Tumor
+SAMN34179104	source_name	Tumor
+SAMN34179104	BioSampleModel	Generic
+SAMN34179104	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179104	ENA-LAST-UPDATE	2023-09-08
+SAMN34179107	recurrence	N/A
+SAMN34179107	collection_date	missing
+SAMN34179107	INSDC secondary accession	SRS17311054
+SAMN34179107	NCBI submission package	Generic.1.0
+SAMN34179107	organism	Homo sapiens
+SAMN34179107	patient	NYU2002
+SAMN34179107	progression type	Short Follow Up (<5y)
+SAMN34179107	geo_loc_name	missing
+SAMN34179107	progression	N/A
+SAMN34179107	tissue	Lung adjacent normal
+SAMN34179107	source_name	Lung adjacent normal
+SAMN34179107	BioSampleModel	Generic
+SAMN34179107	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179107	ENA-LAST-UPDATE	2023-09-08
+SAMN34179167	recurrence	Recurrence
+SAMN34179167	collection_date	missing
+SAMN34179167	INSDC secondary accession	SRS17311041
+SAMN34179167	NCBI submission package	Generic.1.0
+SAMN34179167	organism	Homo sapiens
+SAMN34179167	patient	NYU1767
+SAMN34179167	progression type	Locoregional
+SAMN34179167	geo_loc_name	missing
+SAMN34179167	progression	Progression
+SAMN34179167	tissue	Lung adjacent normal
+SAMN34179167	source_name	Lung adjacent normal
+SAMN34179167	BioSampleModel	Generic
+SAMN34179167	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179167	ENA-LAST-UPDATE	2023-09-08
+SAMN34179228	recurrence	Recurrence
+SAMN34179228	collection_date	missing
+SAMN34179228	INSDC secondary accession	SRS17311028
+SAMN34179228	NCBI submission package	Generic.1.0
+SAMN34179228	organism	Homo sapiens
+SAMN34179228	patient	NYU1334
+SAMN34179228	progression type	Systemic
+SAMN34179228	geo_loc_name	missing
+SAMN34179228	progression	Progression
+SAMN34179228	tissue	Tumor
+SAMN34179228	source_name	Tumor
+SAMN34179228	BioSampleModel	Generic
+SAMN34179228	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179228	ENA-LAST-UPDATE	2023-09-08
+SAMN34179026	recurrence	No Progression (>5y)
+SAMN34179026	collection_date	missing
+SAMN34179026	INSDC secondary accession	SRS17311017
+SAMN34179026	NCBI submission package	Generic.1.0
+SAMN34179026	organism	Homo sapiens
+SAMN34179026	patient	NYU955
+SAMN34179026	progression type	No Progression (>5y)
+SAMN34179026	geo_loc_name	missing
+SAMN34179026	progression	No Progression (>5y)
+SAMN34179026	tissue	Tumor
+SAMN34179026	source_name	Tumor
+SAMN34179026	BioSampleModel	Generic
+SAMN34179026	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179026	ENA-LAST-UPDATE	2023-09-08
+SAMN34179076	recurrence	No Progression (>5y)
+SAMN34179076	collection_date	missing
+SAMN34179076	INSDC secondary accession	SRS17311015
+SAMN34179076	NCBI submission package	Generic.1.0
+SAMN34179076	organism	Homo sapiens
+SAMN34179076	patient	NYU373
+SAMN34179076	progression type	No Progression (>5y)
+SAMN34179076	geo_loc_name	missing
+SAMN34179076	progression	No Progression (>5y)
+SAMN34179076	tissue	Tumor
+SAMN34179076	source_name	Tumor
+SAMN34179076	BioSampleModel	Generic
+SAMN34179076	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179076	ENA-LAST-UPDATE	2023-09-08
+SAMN34179077	recurrence	No Progression (>5y)
+SAMN34179077	collection_date	missing
+SAMN34179077	INSDC secondary accession	SRS17311014
+SAMN34179077	NCBI submission package	Generic.1.0
+SAMN34179077	organism	Homo sapiens
+SAMN34179077	patient	NYU373
+SAMN34179077	progression type	No Progression (>5y)
+SAMN34179077	geo_loc_name	missing
+SAMN34179077	progression	No Progression (>5y)
+SAMN34179077	tissue	Lung adjacent normal
+SAMN34179077	source_name	Lung adjacent normal
+SAMN34179077	BioSampleModel	Generic
+SAMN34179077	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179077	ENA-LAST-UPDATE	2023-09-08
+SAMN34179083	recurrence	Recurrence
+SAMN34179083	collection_date	missing
+SAMN34179083	INSDC secondary accession	SRS17311008
+SAMN34179083	NCBI submission package	Generic.1.0
+SAMN34179083	organism	Homo sapiens
+SAMN34179083	patient	NYU330
+SAMN34179083	progression type	Systemic
+SAMN34179083	geo_loc_name	missing
+SAMN34179083	progression	Progression
+SAMN34179083	tissue	Lung adjacent normal
+SAMN34179083	source_name	Lung adjacent normal
+SAMN34179083	BioSampleModel	Generic
+SAMN34179083	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179083	ENA-LAST-UPDATE	2023-09-08
+SAMN34179088	recurrence	N/A
+SAMN34179088	collection_date	missing
+SAMN34179088	INSDC secondary accession	SRS17311005
+SAMN34179088	NCBI submission package	Generic.1.0
+SAMN34179088	organism	Homo sapiens
+SAMN34179088	patient	NYU307
+SAMN34179088	progression type	Second Primary
+SAMN34179088	geo_loc_name	missing
+SAMN34179088	progression	Progression
+SAMN34179088	tissue	Tumor
+SAMN34179088	source_name	Tumor
+SAMN34179088	BioSampleModel	Generic
+SAMN34179088	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179088	ENA-LAST-UPDATE	2023-09-08
+SAMN34179147	recurrence	N/A
+SAMN34179147	collection_date	missing
+SAMN34179147	INSDC secondary accession	SRS17310992
+SAMN34179147	NCBI submission package	Generic.1.0
+SAMN34179147	organism	Homo sapiens
+SAMN34179147	patient	NYU1873
+SAMN34179147	progression type	Short Follow Up (<5y)
+SAMN34179147	geo_loc_name	missing
+SAMN34179147	progression	N/A
+SAMN34179147	tissue	Lung adjacent normal
+SAMN34179147	source_name	Lung adjacent normal
+SAMN34179147	BioSampleModel	Generic
+SAMN34179147	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179147	ENA-LAST-UPDATE	2023-09-08
+SAMN34179205	recurrence	N/A
+SAMN34179205	collection_date	missing
+SAMN34179205	INSDC secondary accession	SRS17310981
+SAMN34179205	NCBI submission package	Generic.1.0
+SAMN34179205	organism	Homo sapiens
+SAMN34179205	patient	NYU1448
+SAMN34179205	progression type	Short Follow Up (<5y)
+SAMN34179205	geo_loc_name	missing
+SAMN34179205	progression	N/A
+SAMN34179205	tissue	Lung adjacent normal
+SAMN34179205	source_name	Lung adjacent normal
+SAMN34179205	BioSampleModel	Generic
+SAMN34179205	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179205	ENA-LAST-UPDATE	2023-09-08
+SAMN34179206	recurrence	No Progression (>5y)
+SAMN34179206	collection_date	missing
+SAMN34179206	INSDC secondary accession	SRS17310983
+SAMN34179206	NCBI submission package	Generic.1.0
+SAMN34179206	organism	Homo sapiens
+SAMN34179206	patient	NYU1445
+SAMN34179206	progression type	No Progression (>5y)
+SAMN34179206	geo_loc_name	missing
+SAMN34179206	progression	No Progression (>5y)
+SAMN34179206	tissue	Tumor
+SAMN34179206	source_name	Tumor
+SAMN34179206	BioSampleModel	Generic
+SAMN34179206	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179206	ENA-LAST-UPDATE	2023-09-08
+SAMN34179218	recurrence	N/A
+SAMN34179218	collection_date	missing
+SAMN34179218	INSDC secondary accession	SRS17310969
+SAMN34179218	NCBI submission package	Generic.1.0
+SAMN34179218	organism	Homo sapiens
+SAMN34179218	patient	NYU1416
+SAMN34179218	progression type	Short Follow Up (<5y)
+SAMN34179218	geo_loc_name	missing
+SAMN34179218	progression	N/A
+SAMN34179218	tissue	Tumor
+SAMN34179218	source_name	Tumor
+SAMN34179218	BioSampleModel	Generic
+SAMN34179218	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179218	ENA-LAST-UPDATE	2023-09-08
+SAMN34179246	recurrence	No Progression (>5y)
+SAMN34179246	collection_date	missing
+SAMN34179246	INSDC secondary accession	SRS17310957
+SAMN34179246	NCBI submission package	Generic.1.0
+SAMN34179246	organism	Homo sapiens
+SAMN34179246	patient	NYU1206
+SAMN34179246	progression type	No Progression (>5y)
+SAMN34179246	geo_loc_name	missing
+SAMN34179246	progression	No Progression (>5y)
+SAMN34179246	tissue	Tumor
+SAMN34179246	source_name	Tumor
+SAMN34179246	BioSampleModel	Generic
+SAMN34179246	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179246	ENA-LAST-UPDATE	2023-09-08
+SAMN34179250	recurrence	N/A
+SAMN34179250	collection_date	missing
+SAMN34179250	INSDC secondary accession	SRS17310953
+SAMN34179250	NCBI submission package	Generic.1.0
+SAMN34179250	organism	Homo sapiens
+SAMN34179250	patient	NYU1196
+SAMN34179250	progression type	Short Follow Up (<5y)
+SAMN34179250	geo_loc_name	missing
+SAMN34179250	progression	N/A
+SAMN34179250	tissue	Tumor
+SAMN34179250	source_name	Tumor
+SAMN34179250	BioSampleModel	Generic
+SAMN34179250	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179250	ENA-LAST-UPDATE	2023-09-08
+SAMN34179048	recurrence	No Progression (>5y)
+SAMN34179048	collection_date	missing
+SAMN34179048	INSDC secondary accession	SRS17310947
+SAMN34179048	NCBI submission package	Generic.1.0
+SAMN34179048	organism	Homo sapiens
+SAMN34179048	patient	NYU713
+SAMN34179048	progression type	No Progression (>5y)
+SAMN34179048	geo_loc_name	missing
+SAMN34179048	progression	No Progression (>5y)
+SAMN34179048	tissue	Tumor
+SAMN34179048	source_name	Tumor
+SAMN34179048	BioSampleModel	Generic
+SAMN34179048	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179048	ENA-LAST-UPDATE	2023-09-08
+SAMN34179052	recurrence	Recurrence
+SAMN34179052	collection_date	missing
+SAMN34179052	INSDC secondary accession	SRS17310943
+SAMN34179052	NCBI submission package	Generic.1.0
+SAMN34179052	organism	Homo sapiens
+SAMN34179052	patient	NYU704
+SAMN34179052	progression type	Systemic
+SAMN34179052	geo_loc_name	missing
+SAMN34179052	progression	Progression
+SAMN34179052	tissue	Tumor
+SAMN34179052	source_name	Tumor
+SAMN34179052	BioSampleModel	Generic
+SAMN34179052	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179052	ENA-LAST-UPDATE	2023-09-08
+SAMN34179058	recurrence	Recurrence
+SAMN34179058	collection_date	missing
+SAMN34179058	INSDC secondary accession	SRS17310937
+SAMN34179058	NCBI submission package	Generic.1.0
+SAMN34179058	organism	Homo sapiens
+SAMN34179058	patient	NYU669
+SAMN34179058	progression type	Locoregional
+SAMN34179058	geo_loc_name	missing
+SAMN34179058	progression	Progression
+SAMN34179058	tissue	Tumor
+SAMN34179058	source_name	Tumor
+SAMN34179058	BioSampleModel	Generic
+SAMN34179058	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179058	ENA-LAST-UPDATE	2023-09-08
+SAMN34179109	recurrence	No Progression (>5y)
+SAMN34179109	collection_date	missing
+SAMN34179109	INSDC secondary accession	SRS17310932
+SAMN34179109	NCBI submission package	Generic.1.0
+SAMN34179109	organism	Homo sapiens
+SAMN34179109	patient	NYU1999
+SAMN34179109	progression type	No Progression (>5y)
+SAMN34179109	geo_loc_name	missing
+SAMN34179109	progression	No Progression (>5y)
+SAMN34179109	tissue	Lung adjacent normal
+SAMN34179109	source_name	Lung adjacent normal
+SAMN34179109	BioSampleModel	Generic
+SAMN34179109	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179109	ENA-LAST-UPDATE	2023-09-08
+SAMN34179172	recurrence	N/A
+SAMN34179172	collection_date	missing
+SAMN34179172	INSDC secondary accession	SRS17310919
+SAMN34179172	NCBI submission package	Generic.1.0
+SAMN34179172	organism	Homo sapiens
+SAMN34179172	patient	NYU1738
+SAMN34179172	progression type	Second Primary
+SAMN34179172	geo_loc_name	missing
+SAMN34179172	progression	Progression
+SAMN34179172	tissue	Tumor
+SAMN34179172	source_name	Tumor
+SAMN34179172	BioSampleModel	Generic
+SAMN34179172	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179172	ENA-LAST-UPDATE	2023-09-08
+SAMN34179176	recurrence	No Progression (>5y)
+SAMN34179176	collection_date	missing
+SAMN34179176	INSDC secondary accession	SRS17310915
+SAMN34179176	NCBI submission package	Generic.1.0
+SAMN34179176	organism	Homo sapiens
+SAMN34179176	patient	NYU1682
+SAMN34179176	progression type	No Progression (>5y)
+SAMN34179176	geo_loc_name	missing
+SAMN34179176	progression	No Progression (>5y)
+SAMN34179176	tissue	Tumor
+SAMN34179176	source_name	Tumor
+SAMN34179176	BioSampleModel	Generic
+SAMN34179176	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179176	ENA-LAST-UPDATE	2023-09-08
+SAMN34179178	recurrence	No Progression (>5y)
+SAMN34179178	collection_date	missing
+SAMN34179178	INSDC secondary accession	SRS17310913
+SAMN34179178	NCBI submission package	Generic.1.0
+SAMN34179178	organism	Homo sapiens
+SAMN34179178	patient	NYU1678
+SAMN34179178	progression type	No Progression (>5y)
+SAMN34179178	geo_loc_name	missing
+SAMN34179178	progression	No Progression (>5y)
+SAMN34179178	tissue	Tumor
+SAMN34179178	source_name	Tumor
+SAMN34179178	BioSampleModel	Generic
+SAMN34179178	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179178	ENA-LAST-UPDATE	2023-09-08
+SAMN34179179	recurrence	No Progression (>5y)
+SAMN34179179	collection_date	missing
+SAMN34179179	INSDC secondary accession	SRS17310912
+SAMN34179179	NCBI submission package	Generic.1.0
+SAMN34179179	organism	Homo sapiens
+SAMN34179179	patient	NYU1678
+SAMN34179179	progression type	No Progression (>5y)
+SAMN34179179	geo_loc_name	missing
+SAMN34179179	progression	No Progression (>5y)
+SAMN34179179	tissue	Lung adjacent normal
+SAMN34179179	source_name	Lung adjacent normal
+SAMN34179179	BioSampleModel	Generic
+SAMN34179179	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179179	ENA-LAST-UPDATE	2023-09-08
+SAMN34179185	recurrence	Recurrence
+SAMN34179185	collection_date	missing
+SAMN34179185	INSDC secondary accession	SRS17310905
+SAMN34179185	NCBI submission package	Generic.1.0
+SAMN34179185	organism	Homo sapiens
+SAMN34179185	patient	NYU1609
+SAMN34179185	progression type	Locoregional
+SAMN34179185	geo_loc_name	missing
+SAMN34179185	progression	Progression
+SAMN34179185	tissue	Lung adjacent normal
+SAMN34179185	source_name	Lung adjacent normal
+SAMN34179185	BioSampleModel	Generic
+SAMN34179185	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179185	ENA-LAST-UPDATE	2023-09-08
+SAMN34179186	recurrence	No Progression (>5y)
+SAMN34179186	collection_date	missing
+SAMN34179186	INSDC secondary accession	SRS17310904
+SAMN34179186	NCBI submission package	Generic.1.0
+SAMN34179186	organism	Homo sapiens
+SAMN34179186	patient	NYU1603
+SAMN34179186	progression type	No Progression (>5y)
+SAMN34179186	geo_loc_name	missing
+SAMN34179186	progression	No Progression (>5y)
+SAMN34179186	tissue	Tumor
+SAMN34179186	source_name	Tumor
+SAMN34179186	BioSampleModel	Generic
+SAMN34179186	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179186	ENA-LAST-UPDATE	2023-09-08
+SAMN34179262	recurrence	N/A
+SAMN34179262	collection_date	missing
+SAMN34179262	INSDC secondary accession	SRS17310892
+SAMN34179262	NCBI submission package	Generic.1.0
+SAMN34179262	organism	Homo sapiens
+SAMN34179262	patient	NYU1037
+SAMN34179262	progression type	Short Follow Up (<5y)
+SAMN34179262	geo_loc_name	missing
+SAMN34179262	progression	N/A
+SAMN34179262	tissue	Tumor
+SAMN34179262	source_name	Tumor
+SAMN34179262	BioSampleModel	Generic
+SAMN34179262	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179262	ENA-LAST-UPDATE	2023-09-08
+SAMN34179265	recurrence	No Progression (>5y)
+SAMN34179265	collection_date	missing
+SAMN34179265	INSDC secondary accession	SRS17310889
+SAMN34179265	NCBI submission package	Generic.1.0
+SAMN34179265	organism	Homo sapiens
+SAMN34179265	patient	NYU1027
+SAMN34179265	progression type	No Progression (>5y)
+SAMN34179265	geo_loc_name	missing
+SAMN34179265	progression	No Progression (>5y)
+SAMN34179265	tissue	Lung adjacent normal
+SAMN34179265	source_name	Lung adjacent normal
+SAMN34179265	BioSampleModel	Generic
+SAMN34179265	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179265	ENA-LAST-UPDATE	2023-09-08
+SAMN34179062	recurrence	Recurrence
+SAMN34179062	collection_date	missing
+SAMN34179062	INSDC secondary accession	SRS17310885
+SAMN34179062	NCBI submission package	Generic.1.0
+SAMN34179062	organism	Homo sapiens
+SAMN34179062	patient	NYU608
+SAMN34179062	progression type	Systemic
+SAMN34179062	geo_loc_name	missing
+SAMN34179062	progression	Progression
+SAMN34179062	tissue	Tumor
+SAMN34179062	source_name	Tumor
+SAMN34179062	BioSampleModel	Generic
+SAMN34179062	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179062	ENA-LAST-UPDATE	2023-09-08
+SAMN34179071	recurrence	No Progression (>5y)
+SAMN34179071	collection_date	missing
+SAMN34179071	INSDC secondary accession	SRS17310876
+SAMN34179071	NCBI submission package	Generic.1.0
+SAMN34179071	organism	Homo sapiens
+SAMN34179071	patient	NYU50
+SAMN34179071	progression type	No Progression (>5y)
+SAMN34179071	geo_loc_name	missing
+SAMN34179071	progression	No Progression (>5y)
+SAMN34179071	tissue	Lung adjacent normal
+SAMN34179071	source_name	Lung adjacent normal
+SAMN34179071	BioSampleModel	Generic
+SAMN34179071	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179071	ENA-LAST-UPDATE	2023-09-08
+SAMN34179074	recurrence	Recurrence
+SAMN34179074	collection_date	missing
+SAMN34179074	INSDC secondary accession	SRS17310873
+SAMN34179074	NCBI submission package	Generic.1.0
+SAMN34179074	organism	Homo sapiens
+SAMN34179074	patient	NYU454
+SAMN34179074	progression type	Systemic
+SAMN34179074	geo_loc_name	missing
+SAMN34179074	progression	Progression
+SAMN34179074	tissue	Tumor
+SAMN34179074	source_name	Tumor
+SAMN34179074	BioSampleModel	Generic
+SAMN34179074	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179074	ENA-LAST-UPDATE	2023-09-08
+SAMN34179124	recurrence	No Progression (>5y)
+SAMN34179124	collection_date	missing
+SAMN34179124	INSDC secondary accession	SRS17310871
+SAMN34179124	NCBI submission package	Generic.1.0
+SAMN34179124	organism	Homo sapiens
+SAMN34179124	patient	NYU1949
+SAMN34179124	progression type	No Progression (>5y)
+SAMN34179124	geo_loc_name	missing
+SAMN34179124	progression	No Progression (>5y)
+SAMN34179124	tissue	Tumor
+SAMN34179124	source_name	Tumor
+SAMN34179124	BioSampleModel	Generic
+SAMN34179124	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179124	ENA-LAST-UPDATE	2023-09-08
+SAMN34179125	recurrence	No Progression (>5y)
+SAMN34179125	collection_date	missing
+SAMN34179125	INSDC secondary accession	SRS17310870
+SAMN34179125	NCBI submission package	Generic.1.0
+SAMN34179125	organism	Homo sapiens
+SAMN34179125	patient	NYU1949
+SAMN34179125	progression type	No Progression (>5y)
+SAMN34179125	geo_loc_name	missing
+SAMN34179125	progression	No Progression (>5y)
+SAMN34179125	tissue	Lung adjacent normal
+SAMN34179125	source_name	Lung adjacent normal
+SAMN34179125	BioSampleModel	Generic
+SAMN34179125	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179125	ENA-LAST-UPDATE	2023-09-08
+SAMN34179130	recurrence	No Progression (>5y)
+SAMN34179130	collection_date	missing
+SAMN34179130	INSDC secondary accession	SRS17310865
+SAMN34179130	NCBI submission package	Generic.1.0
+SAMN34179130	organism	Homo sapiens
+SAMN34179130	patient	NYU1923
+SAMN34179130	progression type	No Progression (>5y)
+SAMN34179130	geo_loc_name	missing
+SAMN34179130	progression	No Progression (>5y)
+SAMN34179130	tissue	Tumor
+SAMN34179130	source_name	Tumor
+SAMN34179130	BioSampleModel	Generic
+SAMN34179130	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179130	ENA-LAST-UPDATE	2023-09-08
+SAMN34179134	recurrence	N/A
+SAMN34179134	collection_date	missing
+SAMN34179134	INSDC secondary accession	SRS17310861
+SAMN34179134	NCBI submission package	Generic.1.0
+SAMN34179134	organism	Homo sapiens
+SAMN34179134	patient	NYU1900
+SAMN34179134	progression type	Second Primary
+SAMN34179134	geo_loc_name	missing
+SAMN34179134	progression	Progression
+SAMN34179134	tissue	Tumor
+SAMN34179134	source_name	Tumor
+SAMN34179134	BioSampleModel	Generic
+SAMN34179134	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179134	ENA-LAST-UPDATE	2023-09-08
+SAMN34179138	recurrence	N/A
+SAMN34179138	collection_date	missing
+SAMN34179138	INSDC secondary accession	SRS17310857
+SAMN34179138	NCBI submission package	Generic.1.0
+SAMN34179138	organism	Homo sapiens
+SAMN34179138	patient	NYU1897
+SAMN34179138	progression type	Second Primary
+SAMN34179138	geo_loc_name	missing
+SAMN34179138	progression	Progression
+SAMN34179138	tissue	Tumor
+SAMN34179138	source_name	Tumor
+SAMN34179138	BioSampleModel	Generic
+SAMN34179138	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179138	ENA-LAST-UPDATE	2023-09-08
+SAMN34179139	recurrence	N/A
+SAMN34179139	collection_date	missing
+SAMN34179139	INSDC secondary accession	SRS17310856
+SAMN34179139	NCBI submission package	Generic.1.0
+SAMN34179139	organism	Homo sapiens
+SAMN34179139	patient	NYU1897
+SAMN34179139	progression type	Second Primary
+SAMN34179139	geo_loc_name	missing
+SAMN34179139	progression	Progression
+SAMN34179139	tissue	Lung adjacent normal
+SAMN34179139	source_name	Lung adjacent normal
+SAMN34179139	BioSampleModel	Generic
+SAMN34179139	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179139	ENA-LAST-UPDATE	2023-09-08
+SAMN34179192	recurrence	N/A
+SAMN34179192	collection_date	missing
+SAMN34179192	INSDC secondary accession	SRS17310851
+SAMN34179192	NCBI submission package	Generic.1.0
+SAMN34179192	organism	Homo sapiens
+SAMN34179192	patient	NYU1562
+SAMN34179192	progression type	Second Primary
+SAMN34179192	geo_loc_name	missing
+SAMN34179192	progression	Progression
+SAMN34179192	tissue	Tumor
+SAMN34179192	source_name	Tumor
+SAMN34179192	BioSampleModel	Generic
+SAMN34179192	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179192	ENA-LAST-UPDATE	2023-09-08
+SAMN34179199	recurrence	N/A
+SAMN34179199	collection_date	missing
+SAMN34179199	INSDC secondary accession	SRS17310844
+SAMN34179199	NCBI submission package	Generic.1.0
+SAMN34179199	organism	Homo sapiens
+SAMN34179199	patient	NYU1512
+SAMN34179199	progression type	Short Follow Up (<5y)
+SAMN34179199	geo_loc_name	missing
+SAMN34179199	progression	N/A
+SAMN34179199	tissue	Lung adjacent normal
+SAMN34179199	source_name	Lung adjacent normal
+SAMN34179199	BioSampleModel	Generic
+SAMN34179199	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179199	ENA-LAST-UPDATE	2023-09-08
+SAMN34179029	recurrence	No Progression (>5y)
+SAMN34179029	collection_date	missing
+SAMN34179029	INSDC secondary accession	SRS17310838
+SAMN34179029	NCBI submission package	Generic.1.0
+SAMN34179029	organism	Homo sapiens
+SAMN34179029	patient	NYU947
+SAMN34179029	progression type	No Progression (>5y)
+SAMN34179029	geo_loc_name	missing
+SAMN34179029	progression	No Progression (>5y)
+SAMN34179029	tissue	Lung adjacent normal
+SAMN34179029	source_name	Lung adjacent normal
+SAMN34179029	BioSampleModel	Generic
+SAMN34179029	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179029	ENA-LAST-UPDATE	2023-09-08
+SAMN34179030	recurrence	No Progression (>5y)
+SAMN34179030	collection_date	missing
+SAMN34179030	INSDC secondary accession	SRS17310837
+SAMN34179030	NCBI submission package	Generic.1.0
+SAMN34179030	organism	Homo sapiens
+SAMN34179030	patient	NYU875
+SAMN34179030	progression type	No Progression (>5y)
+SAMN34179030	geo_loc_name	missing
+SAMN34179030	progression	No Progression (>5y)
+SAMN34179030	tissue	Tumor
+SAMN34179030	source_name	Tumor
+SAMN34179030	BioSampleModel	Generic
+SAMN34179030	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179030	ENA-LAST-UPDATE	2023-09-08
+SAMN34179032	recurrence	N/A
+SAMN34179032	collection_date	missing
+SAMN34179032	INSDC secondary accession	SRS17310835
+SAMN34179032	NCBI submission package	Generic.1.0
+SAMN34179032	organism	Homo sapiens
+SAMN34179032	patient	NYU867
+SAMN34179032	progression type	Second Primary
+SAMN34179032	geo_loc_name	missing
+SAMN34179032	progression	Progression
+SAMN34179032	tissue	Tumor
+SAMN34179032	source_name	Tumor
+SAMN34179032	BioSampleModel	Generic
+SAMN34179032	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179032	ENA-LAST-UPDATE	2023-09-08
+SAMN34179040	recurrence	No Progression (>5y)
+SAMN34179040	collection_date	missing
+SAMN34179040	INSDC secondary accession	SRS17310827
+SAMN34179040	NCBI submission package	Generic.1.0
+SAMN34179040	organism	Homo sapiens
+SAMN34179040	patient	NYU784
+SAMN34179040	progression type	No Progression (>5y)
+SAMN34179040	geo_loc_name	missing
+SAMN34179040	progression	No Progression (>5y)
+SAMN34179040	tissue	Tumor
+SAMN34179040	source_name	Tumor
+SAMN34179040	BioSampleModel	Generic
+SAMN34179040	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179040	ENA-LAST-UPDATE	2023-09-08
+SAMN34179041	recurrence	No Progression (>5y)
+SAMN34179041	collection_date	missing
+SAMN34179041	INSDC secondary accession	SRS17310826
+SAMN34179041	NCBI submission package	Generic.1.0
+SAMN34179041	organism	Homo sapiens
+SAMN34179041	patient	NYU784
+SAMN34179041	progression type	No Progression (>5y)
+SAMN34179041	geo_loc_name	missing
+SAMN34179041	progression	No Progression (>5y)
+SAMN34179041	tissue	Lung adjacent normal
+SAMN34179041	source_name	Lung adjacent normal
+SAMN34179041	BioSampleModel	Generic
+SAMN34179041	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179041	ENA-LAST-UPDATE	2023-09-08
+SAMN34179043	recurrence	No Progression (>5y)
+SAMN34179043	collection_date	missing
+SAMN34179043	INSDC secondary accession	SRS17310824
+SAMN34179043	NCBI submission package	Generic.1.0
+SAMN34179043	organism	Homo sapiens
+SAMN34179043	patient	NYU780
+SAMN34179043	progression type	No Progression (>5y)
+SAMN34179043	geo_loc_name	missing
+SAMN34179043	progression	No Progression (>5y)
+SAMN34179043	tissue	Lung adjacent normal
+SAMN34179043	source_name	Lung adjacent normal
+SAMN34179043	BioSampleModel	Generic
+SAMN34179043	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179043	ENA-LAST-UPDATE	2023-09-08
+SAMN34179156	recurrence	No Progression (>5y)
+SAMN34179156	collection_date	missing
+SAMN34179156	INSDC secondary accession	SRS17311053
+SAMN34179156	NCBI submission package	Generic.1.0
+SAMN34179156	organism	Homo sapiens
+SAMN34179156	patient	NYU1808
+SAMN34179156	progression type	No Progression (>5y)
+SAMN34179156	geo_loc_name	missing
+SAMN34179156	progression	No Progression (>5y)
+SAMN34179156	tissue	Tumor
+SAMN34179156	source_name	Tumor
+SAMN34179156	BioSampleModel	Generic
+SAMN34179156	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179156	ENA-LAST-UPDATE	2023-09-08
+SAMN34179158	recurrence	N/A
+SAMN34179158	collection_date	missing
+SAMN34179158	INSDC secondary accession	SRS17311050
+SAMN34179158	NCBI submission package	Generic.1.0
+SAMN34179158	organism	Homo sapiens
+SAMN34179158	patient	NYU1795
+SAMN34179158	progression type	Short Follow Up (<5y)
+SAMN34179158	geo_loc_name	missing
+SAMN34179158	progression	N/A
+SAMN34179158	tissue	Tumor
+SAMN34179158	source_name	Tumor
+SAMN34179158	BioSampleModel	Generic
+SAMN34179158	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179158	ENA-LAST-UPDATE	2023-09-08
+SAMN34179166	recurrence	Recurrence
+SAMN34179166	collection_date	missing
+SAMN34179166	INSDC secondary accession	SRS17311043
+SAMN34179166	NCBI submission package	Generic.1.0
+SAMN34179166	organism	Homo sapiens
+SAMN34179166	patient	NYU1767
+SAMN34179166	progression type	Locoregional
+SAMN34179166	geo_loc_name	missing
+SAMN34179166	progression	Progression
+SAMN34179166	tissue	Tumor
+SAMN34179166	source_name	Tumor
+SAMN34179166	BioSampleModel	Generic
+SAMN34179166	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179166	ENA-LAST-UPDATE	2023-09-08
+SAMN34179170	recurrence	No Progression (>5y)
+SAMN34179170	collection_date	missing
+SAMN34179170	INSDC secondary accession	SRS17311040
+SAMN34179170	NCBI submission package	Generic.1.0
+SAMN34179170	organism	Homo sapiens
+SAMN34179170	patient	NYU1749
+SAMN34179170	progression type	No Progression (>5y)
+SAMN34179170	geo_loc_name	missing
+SAMN34179170	progression	No Progression (>5y)
+SAMN34179170	tissue	Tumor
+SAMN34179170	source_name	Tumor
+SAMN34179170	BioSampleModel	Generic
+SAMN34179170	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179170	ENA-LAST-UPDATE	2023-09-08
+SAMN34179220	recurrence	N/A
+SAMN34179220	collection_date	missing
+SAMN34179220	INSDC secondary accession	SRS17311036
+SAMN34179220	NCBI submission package	Generic.1.0
+SAMN34179220	organism	Homo sapiens
+SAMN34179220	patient	NYU1368
+SAMN34179220	progression type	Second Primary
+SAMN34179220	geo_loc_name	missing
+SAMN34179220	progression	Progression
+SAMN34179220	tissue	Tumor
+SAMN34179220	source_name	Tumor
+SAMN34179220	BioSampleModel	Generic
+SAMN34179220	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179220	ENA-LAST-UPDATE	2023-09-08
+SAMN34179226	recurrence	Recurrence
+SAMN34179226	collection_date	missing
+SAMN34179226	INSDC secondary accession	SRS17311031
+SAMN34179226	NCBI submission package	Generic.1.0
+SAMN34179226	organism	Homo sapiens
+SAMN34179226	patient	NYU1351
+SAMN34179226	progression type	Systemic
+SAMN34179226	geo_loc_name	missing
+SAMN34179226	progression	Progression
+SAMN34179226	tissue	Tumor
+SAMN34179226	source_name	Tumor
+SAMN34179226	BioSampleModel	Generic
+SAMN34179226	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179226	ENA-LAST-UPDATE	2023-09-08
+SAMN34179227	recurrence	Recurrence
+SAMN34179227	collection_date	missing
+SAMN34179227	INSDC secondary accession	SRS17311030
+SAMN34179227	NCBI submission package	Generic.1.0
+SAMN34179227	organism	Homo sapiens
+SAMN34179227	patient	NYU1351
+SAMN34179227	progression type	Systemic
+SAMN34179227	geo_loc_name	missing
+SAMN34179227	progression	Progression
+SAMN34179227	tissue	Lung adjacent normal
+SAMN34179227	source_name	Lung adjacent normal
+SAMN34179227	BioSampleModel	Generic
+SAMN34179227	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179227	ENA-LAST-UPDATE	2023-09-08
+SAMN34179230	recurrence	No Progression (>5y)
+SAMN34179230	collection_date	missing
+SAMN34179230	INSDC secondary accession	SRS17311027
+SAMN34179230	NCBI submission package	Generic.1.0
+SAMN34179230	organism	Homo sapiens
+SAMN34179230	patient	NYU1321
+SAMN34179230	progression type	No Progression (>5y)
+SAMN34179230	geo_loc_name	missing
+SAMN34179230	progression	No Progression (>5y)
+SAMN34179230	tissue	Tumor
+SAMN34179230	source_name	Tumor
+SAMN34179230	BioSampleModel	Generic
+SAMN34179230	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179230	ENA-LAST-UPDATE	2023-09-08
+SAMN34179233	recurrence	N/A
+SAMN34179233	collection_date	missing
+SAMN34179233	INSDC secondary accession	SRS17311024
+SAMN34179233	NCBI submission package	Generic.1.0
+SAMN34179233	organism	Homo sapiens
+SAMN34179233	patient	NYU1319
+SAMN34179233	progression type	Second Primary
+SAMN34179233	geo_loc_name	missing
+SAMN34179233	progression	Progression
+SAMN34179233	tissue	Lung adjacent normal
+SAMN34179233	source_name	Lung adjacent normal
+SAMN34179233	BioSampleModel	Generic
+SAMN34179233	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179233	ENA-LAST-UPDATE	2023-09-08
+SAMN34179234	recurrence	Recurrence
+SAMN34179234	collection_date	missing
+SAMN34179234	INSDC secondary accession	SRS17311023
+SAMN34179234	NCBI submission package	Generic.1.0
+SAMN34179234	organism	Homo sapiens
+SAMN34179234	patient	NYU1284
+SAMN34179234	progression type	Locoregional
+SAMN34179234	geo_loc_name	missing
+SAMN34179234	progression	Progression
+SAMN34179234	tissue	Tumor
+SAMN34179234	source_name	Tumor
+SAMN34179234	BioSampleModel	Generic
+SAMN34179234	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179234	ENA-LAST-UPDATE	2023-09-08
+SAMN34179081	recurrence	No Progression (>5y)
+SAMN34179081	collection_date	missing
+SAMN34179081	INSDC secondary accession	SRS17311010
+SAMN34179081	NCBI submission package	Generic.1.0
+SAMN34179081	organism	Homo sapiens
+SAMN34179081	patient	NYU346
+SAMN34179081	progression type	No Progression (>5y)
+SAMN34179081	geo_loc_name	missing
+SAMN34179081	progression	No Progression (>5y)
+SAMN34179081	tissue	Lung adjacent normal
+SAMN34179081	source_name	Lung adjacent normal
+SAMN34179081	BioSampleModel	Generic
+SAMN34179081	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179081	ENA-LAST-UPDATE	2023-09-08
+SAMN34179084	recurrence	No Progression (>5y)
+SAMN34179084	collection_date	missing
+SAMN34179084	INSDC secondary accession	SRS17311006
+SAMN34179084	NCBI submission package	Generic.1.0
+SAMN34179084	organism	Homo sapiens
+SAMN34179084	patient	NYU32
+SAMN34179084	progression type	No Progression (>5y)
+SAMN34179084	geo_loc_name	missing
+SAMN34179084	progression	No Progression (>5y)
+SAMN34179084	tissue	Tumor
+SAMN34179084	source_name	Tumor
+SAMN34179084	BioSampleModel	Generic
+SAMN34179084	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179084	ENA-LAST-UPDATE	2023-09-08
+SAMN34179089	recurrence	N/A
+SAMN34179089	collection_date	missing
+SAMN34179089	INSDC secondary accession	SRS17311004
+SAMN34179089	NCBI submission package	Generic.1.0
+SAMN34179089	organism	Homo sapiens
+SAMN34179089	patient	NYU307
+SAMN34179089	progression type	Second Primary
+SAMN34179089	geo_loc_name	missing
+SAMN34179089	progression	Progression
+SAMN34179089	tissue	Lung adjacent normal
+SAMN34179089	source_name	Lung adjacent normal
+SAMN34179089	BioSampleModel	Generic
+SAMN34179089	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179089	ENA-LAST-UPDATE	2023-09-08
+SAMN34179141	recurrence	No Progression (>5y)
+SAMN34179141	collection_date	missing
+SAMN34179141	INSDC secondary accession	SRS17310998
+SAMN34179141	NCBI submission package	Generic.1.0
+SAMN34179141	organism	Homo sapiens
+SAMN34179141	patient	NYU1891
+SAMN34179141	progression type	No Progression (>5y)
+SAMN34179141	geo_loc_name	missing
+SAMN34179141	progression	No Progression (>5y)
+SAMN34179141	tissue	Lung adjacent normal
+SAMN34179141	source_name	Lung adjacent normal
+SAMN34179141	BioSampleModel	Generic
+SAMN34179141	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179141	ENA-LAST-UPDATE	2023-09-08
+SAMN34179144	recurrence	N/A
+SAMN34179144	collection_date	missing
+SAMN34179144	INSDC secondary accession	SRS17310995
+SAMN34179144	NCBI submission package	Generic.1.0
+SAMN34179144	organism	Homo sapiens
+SAMN34179144	patient	NYU1883
+SAMN34179144	progression type	Second Primary
+SAMN34179144	geo_loc_name	missing
+SAMN34179144	progression	Progression
+SAMN34179144	tissue	Tumor
+SAMN34179144	source_name	Tumor
+SAMN34179144	BioSampleModel	Generic
+SAMN34179144	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179144	ENA-LAST-UPDATE	2023-09-08
+SAMN34179149	recurrence	Recurrence
+SAMN34179149	collection_date	missing
+SAMN34179149	INSDC secondary accession	SRS17310991
+SAMN34179149	NCBI submission package	Generic.1.0
+SAMN34179149	organism	Homo sapiens
+SAMN34179149	patient	NYU1871
+SAMN34179149	progression type	Locoregional
+SAMN34179149	geo_loc_name	missing
+SAMN34179149	progression	Progression
+SAMN34179149	tissue	Lung adjacent normal
+SAMN34179149	source_name	Lung adjacent normal
+SAMN34179149	BioSampleModel	Generic
+SAMN34179149	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179149	ENA-LAST-UPDATE	2023-09-08
+SAMN34179204	recurrence	N/A
+SAMN34179204	collection_date	missing
+SAMN34179204	INSDC secondary accession	SRS17310982
+SAMN34179204	NCBI submission package	Generic.1.0
+SAMN34179204	organism	Homo sapiens
+SAMN34179204	patient	NYU1448
+SAMN34179204	progression type	Short Follow Up (<5y)
+SAMN34179204	geo_loc_name	missing
+SAMN34179204	progression	N/A
+SAMN34179204	tissue	Tumor
+SAMN34179204	source_name	Tumor
+SAMN34179204	BioSampleModel	Generic
+SAMN34179204	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179204	ENA-LAST-UPDATE	2023-09-08
+SAMN34179207	recurrence	No Progression (>5y)
+SAMN34179207	collection_date	missing
+SAMN34179207	INSDC secondary accession	SRS17310980
+SAMN34179207	NCBI submission package	Generic.1.0
+SAMN34179207	organism	Homo sapiens
+SAMN34179207	patient	NYU1445
+SAMN34179207	progression type	No Progression (>5y)
+SAMN34179207	geo_loc_name	missing
+SAMN34179207	progression	No Progression (>5y)
+SAMN34179207	tissue	Lung adjacent normal
+SAMN34179207	source_name	Lung adjacent normal
+SAMN34179207	BioSampleModel	Generic
+SAMN34179207	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179207	ENA-LAST-UPDATE	2023-09-08
+SAMN34179240	recurrence	No Progression (>5y)
+SAMN34179240	collection_date	missing
+SAMN34179240	INSDC secondary accession	SRS17310963
+SAMN34179240	NCBI submission package	Generic.1.0
+SAMN34179240	organism	Homo sapiens
+SAMN34179240	patient	NYU1222
+SAMN34179240	progression type	No Progression (>5y)
+SAMN34179240	geo_loc_name	missing
+SAMN34179240	progression	No Progression (>5y)
+SAMN34179240	tissue	Tumor
+SAMN34179240	source_name	Tumor
+SAMN34179240	BioSampleModel	Generic
+SAMN34179240	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179240	ENA-LAST-UPDATE	2023-09-08
+SAMN34179245	recurrence	N/A
+SAMN34179245	collection_date	missing
+SAMN34179245	INSDC secondary accession	SRS17310958
+SAMN34179245	NCBI submission package	Generic.1.0
+SAMN34179245	organism	Homo sapiens
+SAMN34179245	patient	NYU1210
+SAMN34179245	progression type	Second Primary
+SAMN34179245	geo_loc_name	missing
+SAMN34179245	progression	Progression
+SAMN34179245	tissue	Lung adjacent normal
+SAMN34179245	source_name	Lung adjacent normal
+SAMN34179245	BioSampleModel	Generic
+SAMN34179245	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179245	ENA-LAST-UPDATE	2023-09-08
+SAMN34179045	recurrence	Recurrence
+SAMN34179045	collection_date	missing
+SAMN34179045	INSDC secondary accession	SRS17310949
+SAMN34179045	NCBI submission package	Generic.1.0
+SAMN34179045	organism	Homo sapiens
+SAMN34179045	patient	NYU779
+SAMN34179045	progression type	Locoregional
+SAMN34179045	geo_loc_name	missing
+SAMN34179045	progression	Progression
+SAMN34179045	tissue	Lung adjacent normal
+SAMN34179045	source_name	Lung adjacent normal
+SAMN34179045	BioSampleModel	Generic
+SAMN34179045	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179045	ENA-LAST-UPDATE	2023-09-08
+SAMN34179049	recurrence	No Progression (>5y)
+SAMN34179049	collection_date	missing
+SAMN34179049	INSDC secondary accession	SRS17310945
+SAMN34179049	NCBI submission package	Generic.1.0
+SAMN34179049	organism	Homo sapiens
+SAMN34179049	patient	NYU713
+SAMN34179049	progression type	No Progression (>5y)
+SAMN34179049	geo_loc_name	missing
+SAMN34179049	progression	No Progression (>5y)
+SAMN34179049	tissue	Lung adjacent normal
+SAMN34179049	source_name	Lung adjacent normal
+SAMN34179049	BioSampleModel	Generic
+SAMN34179049	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179049	ENA-LAST-UPDATE	2023-09-08
+SAMN34179051	recurrence	No Progression (>5y)
+SAMN34179051	collection_date	missing
+SAMN34179051	INSDC secondary accession	SRS17310944
+SAMN34179051	NCBI submission package	Generic.1.0
+SAMN34179051	organism	Homo sapiens
+SAMN34179051	patient	NYU706
+SAMN34179051	progression type	No Progression (>5y)
+SAMN34179051	geo_loc_name	missing
+SAMN34179051	progression	No Progression (>5y)
+SAMN34179051	tissue	Lung adjacent normal
+SAMN34179051	source_name	Lung adjacent normal
+SAMN34179051	BioSampleModel	Generic
+SAMN34179051	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179051	ENA-LAST-UPDATE	2023-09-08
+SAMN34179055	recurrence	No Progression (>5y)
+SAMN34179055	collection_date	missing
+SAMN34179055	INSDC secondary accession	SRS17310941
+SAMN34179055	NCBI submission package	Generic.1.0
+SAMN34179055	organism	Homo sapiens
+SAMN34179055	patient	NYU689
+SAMN34179055	progression type	No Progression (>5y)
+SAMN34179055	geo_loc_name	missing
+SAMN34179055	progression	No Progression (>5y)
+SAMN34179055	tissue	Lung adjacent normal
+SAMN34179055	source_name	Lung adjacent normal
+SAMN34179055	BioSampleModel	Generic
+SAMN34179055	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179055	ENA-LAST-UPDATE	2023-09-08
+SAMN34179056	recurrence	Recurrence
+SAMN34179056	collection_date	missing
+SAMN34179056	INSDC secondary accession	SRS17310939
+SAMN34179056	NCBI submission package	Generic.1.0
+SAMN34179056	organism	Homo sapiens
+SAMN34179056	patient	NYU675
+SAMN34179056	progression type	Locoregional
+SAMN34179056	geo_loc_name	missing
+SAMN34179056	progression	Progression
+SAMN34179056	tissue	Tumor
+SAMN34179056	source_name	Tumor
+SAMN34179056	BioSampleModel	Generic
+SAMN34179056	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179056	ENA-LAST-UPDATE	2023-09-08
+SAMN34179115	recurrence	N/A
+SAMN34179115	collection_date	missing
+SAMN34179115	INSDC secondary accession	SRS17310929
+SAMN34179115	NCBI submission package	Generic.1.0
+SAMN34179115	organism	Homo sapiens
+SAMN34179115	patient	NYU1982
+SAMN34179115	progression type	Short Follow Up (<5y)
+SAMN34179115	geo_loc_name	missing
+SAMN34179115	progression	N/A
+SAMN34179115	tissue	Lung adjacent normal
+SAMN34179115	source_name	Lung adjacent normal
+SAMN34179115	BioSampleModel	Generic
+SAMN34179115	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179115	ENA-LAST-UPDATE	2023-09-08
+SAMN34179118	recurrence	No Progression (>5y)
+SAMN34179118	collection_date	missing
+SAMN34179118	INSDC secondary accession	SRS17310925
+SAMN34179118	NCBI submission package	Generic.1.0
+SAMN34179118	organism	Homo sapiens
+SAMN34179118	patient	NYU1967
+SAMN34179118	progression type	No Progression (>5y)
+SAMN34179118	geo_loc_name	missing
+SAMN34179118	progression	No Progression (>5y)
+SAMN34179118	tissue	Tumor
+SAMN34179118	source_name	Tumor
+SAMN34179118	BioSampleModel	Generic
+SAMN34179118	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179118	ENA-LAST-UPDATE	2023-09-08
+SAMN34179120	recurrence	No Progression (>5y)
+SAMN34179120	collection_date	missing
+SAMN34179120	INSDC secondary accession	SRS17310923
+SAMN34179120	NCBI submission package	Generic.1.0
+SAMN34179120	organism	Homo sapiens
+SAMN34179120	patient	NYU1953
+SAMN34179120	progression type	No Progression (>5y)
+SAMN34179120	geo_loc_name	missing
+SAMN34179120	progression	No Progression (>5y)
+SAMN34179120	tissue	Tumor
+SAMN34179120	source_name	Tumor
+SAMN34179120	BioSampleModel	Generic
+SAMN34179120	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179120	ENA-LAST-UPDATE	2023-09-08
+SAMN34179122	recurrence	No Progression (>5y)
+SAMN34179122	collection_date	missing
+SAMN34179122	INSDC secondary accession	SRS17310921
+SAMN34179122	NCBI submission package	Generic.1.0
+SAMN34179122	organism	Homo sapiens
+SAMN34179122	patient	NYU1951
+SAMN34179122	progression type	No Progression (>5y)
+SAMN34179122	geo_loc_name	missing
+SAMN34179122	progression	No Progression (>5y)
+SAMN34179122	tissue	Tumor
+SAMN34179122	source_name	Tumor
+SAMN34179122	BioSampleModel	Generic
+SAMN34179122	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179122	ENA-LAST-UPDATE	2023-09-08
+SAMN34179173	recurrence	N/A
+SAMN34179173	collection_date	missing
+SAMN34179173	INSDC secondary accession	SRS17310918
+SAMN34179173	NCBI submission package	Generic.1.0
+SAMN34179173	organism	Homo sapiens
+SAMN34179173	patient	NYU1738
+SAMN34179173	progression type	Second Primary
+SAMN34179173	geo_loc_name	missing
+SAMN34179173	progression	Progression
+SAMN34179173	tissue	Lung adjacent normal
+SAMN34179173	source_name	Lung adjacent normal
+SAMN34179173	BioSampleModel	Generic
+SAMN34179173	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179173	ENA-LAST-UPDATE	2023-09-08
+SAMN34179174	recurrence	No Progression (>5y)
+SAMN34179174	collection_date	missing
+SAMN34179174	INSDC secondary accession	SRS17310917
+SAMN34179174	NCBI submission package	Generic.1.0
+SAMN34179174	organism	Homo sapiens
+SAMN34179174	patient	NYU1707
+SAMN34179174	progression type	No Progression (>5y)
+SAMN34179174	geo_loc_name	missing
+SAMN34179174	progression	No Progression (>5y)
+SAMN34179174	tissue	Tumor
+SAMN34179174	source_name	Tumor
+SAMN34179174	BioSampleModel	Generic
+SAMN34179174	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179174	ENA-LAST-UPDATE	2023-09-08
+SAMN34179177	recurrence	No Progression (>5y)
+SAMN34179177	collection_date	missing
+SAMN34179177	INSDC secondary accession	SRS17310914
+SAMN34179177	NCBI submission package	Generic.1.0
+SAMN34179177	organism	Homo sapiens
+SAMN34179177	patient	NYU1682
+SAMN34179177	progression type	No Progression (>5y)
+SAMN34179177	geo_loc_name	missing
+SAMN34179177	progression	No Progression (>5y)
+SAMN34179177	tissue	Lung adjacent normal
+SAMN34179177	source_name	Lung adjacent normal
+SAMN34179177	BioSampleModel	Generic
+SAMN34179177	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179177	ENA-LAST-UPDATE	2023-09-08
+SAMN34179181	recurrence	N/A
+SAMN34179181	collection_date	missing
+SAMN34179181	INSDC secondary accession	SRS17310910
+SAMN34179181	NCBI submission package	Generic.1.0
+SAMN34179181	organism	Homo sapiens
+SAMN34179181	patient	NYU1636
+SAMN34179181	progression type	Second Primary
+SAMN34179181	geo_loc_name	missing
+SAMN34179181	progression	Progression
+SAMN34179181	tissue	Lung adjacent normal
+SAMN34179181	source_name	Lung adjacent normal
+SAMN34179181	BioSampleModel	Generic
+SAMN34179181	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179181	ENA-LAST-UPDATE	2023-09-08
+SAMN34179253	recurrence	No Progression (>5y)
+SAMN34179253	collection_date	missing
+SAMN34179253	INSDC secondary accession	SRS17310902
+SAMN34179253	NCBI submission package	Generic.1.0
+SAMN34179253	organism	Homo sapiens
+SAMN34179253	patient	NYU1141
+SAMN34179253	progression type	No Progression (>5y)
+SAMN34179253	geo_loc_name	missing
+SAMN34179253	progression	No Progression (>5y)
+SAMN34179253	tissue	Lung adjacent normal
+SAMN34179253	source_name	Lung adjacent normal
+SAMN34179253	BioSampleModel	Generic
+SAMN34179253	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179253	ENA-LAST-UPDATE	2023-09-08
+SAMN34179256	recurrence	No Progression (>5y)
+SAMN34179256	collection_date	missing
+SAMN34179256	INSDC secondary accession	SRS17310899
+SAMN34179256	NCBI submission package	Generic.1.0
+SAMN34179256	organism	Homo sapiens
+SAMN34179256	patient	NYU1124
+SAMN34179256	progression type	No Progression (>5y)
+SAMN34179256	geo_loc_name	missing
+SAMN34179256	progression	No Progression (>5y)
+SAMN34179256	tissue	Tumor
+SAMN34179256	source_name	Tumor
+SAMN34179256	BioSampleModel	Generic
+SAMN34179256	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179256	ENA-LAST-UPDATE	2023-09-08
+SAMN34179266	recurrence	Recurrence
+SAMN34179266	collection_date	missing
+SAMN34179266	INSDC secondary accession	SRS17310890
+SAMN34179266	NCBI submission package	Generic.1.0
+SAMN34179266	organism	Homo sapiens
+SAMN34179266	patient	NYU1019
+SAMN34179266	progression type	Systemic
+SAMN34179266	geo_loc_name	missing
+SAMN34179266	progression	Progression
+SAMN34179266	tissue	Tumor
+SAMN34179266	source_name	Tumor
+SAMN34179266	BioSampleModel	Generic
+SAMN34179266	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179266	ENA-LAST-UPDATE	2023-09-08
+SAMN34179061	recurrence	No Progression (>5y)
+SAMN34179061	collection_date	missing
+SAMN34179061	INSDC secondary accession	SRS17310886
+SAMN34179061	NCBI submission package	Generic.1.0
+SAMN34179061	organism	Homo sapiens
+SAMN34179061	patient	NYU62
+SAMN34179061	progression type	No Progression (>5y)
+SAMN34179061	geo_loc_name	missing
+SAMN34179061	progression	No Progression (>5y)
+SAMN34179061	tissue	Lung adjacent normal
+SAMN34179061	source_name	Lung adjacent normal
+SAMN34179061	BioSampleModel	Generic
+SAMN34179061	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179061	ENA-LAST-UPDATE	2023-09-08
+SAMN34179067	recurrence	Recurrence
+SAMN34179067	collection_date	missing
+SAMN34179067	INSDC secondary accession	SRS17310880
+SAMN34179067	NCBI submission package	Generic.1.0
+SAMN34179067	organism	Homo sapiens
+SAMN34179067	patient	NYU539
+SAMN34179067	progression type	Systemic
+SAMN34179067	geo_loc_name	missing
+SAMN34179067	progression	Progression
+SAMN34179067	tissue	Lung adjacent normal
+SAMN34179067	source_name	Lung adjacent normal
+SAMN34179067	BioSampleModel	Generic
+SAMN34179067	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179067	ENA-LAST-UPDATE	2023-09-08
+SAMN34179128	recurrence	Recurrence
+SAMN34179128	collection_date	missing
+SAMN34179128	INSDC secondary accession	SRS17310867
+SAMN34179128	NCBI submission package	Generic.1.0
+SAMN34179128	organism	Homo sapiens
+SAMN34179128	patient	NYU1932
+SAMN34179128	progression type	Systemic
+SAMN34179128	geo_loc_name	missing
+SAMN34179128	progression	Progression
+SAMN34179128	tissue	Tumor
+SAMN34179128	source_name	Tumor
+SAMN34179128	BioSampleModel	Generic
+SAMN34179128	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179128	ENA-LAST-UPDATE	2023-09-08
+SAMN34179129	recurrence	Recurrence
+SAMN34179129	collection_date	missing
+SAMN34179129	INSDC secondary accession	SRS17310866
+SAMN34179129	NCBI submission package	Generic.1.0
+SAMN34179129	organism	Homo sapiens
+SAMN34179129	patient	NYU1932
+SAMN34179129	progression type	Systemic
+SAMN34179129	geo_loc_name	missing
+SAMN34179129	progression	Progression
+SAMN34179129	tissue	Lung adjacent normal
+SAMN34179129	source_name	Lung adjacent normal
+SAMN34179129	BioSampleModel	Generic
+SAMN34179129	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179129	ENA-LAST-UPDATE	2023-09-08
+SAMN34179132	recurrence	N/A
+SAMN34179132	collection_date	missing
+SAMN34179132	INSDC secondary accession	SRS17310863
+SAMN34179132	NCBI submission package	Generic.1.0
+SAMN34179132	organism	Homo sapiens
+SAMN34179132	patient	NYU1906
+SAMN34179132	progression type	Short Follow Up (<5y)
+SAMN34179132	geo_loc_name	missing
+SAMN34179132	progression	N/A
+SAMN34179132	tissue	Tumor
+SAMN34179132	source_name	Tumor
+SAMN34179132	BioSampleModel	Generic
+SAMN34179132	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179132	ENA-LAST-UPDATE	2023-09-08
+SAMN34179193	recurrence	N/A
+SAMN34179193	collection_date	missing
+SAMN34179193	INSDC secondary accession	SRS17310850
+SAMN34179193	NCBI submission package	Generic.1.0
+SAMN34179193	organism	Homo sapiens
+SAMN34179193	patient	NYU1562
+SAMN34179193	progression type	Second Primary
+SAMN34179193	geo_loc_name	missing
+SAMN34179193	progression	Progression
+SAMN34179193	tissue	Lung adjacent normal
+SAMN34179193	source_name	Lung adjacent normal
+SAMN34179193	BioSampleModel	Generic
+SAMN34179193	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179193	ENA-LAST-UPDATE	2023-09-08
+SAMN34179194	recurrence	N/A
+SAMN34179194	collection_date	missing
+SAMN34179194	INSDC secondary accession	SRS17310849
+SAMN34179194	NCBI submission package	Generic.1.0
+SAMN34179194	organism	Homo sapiens
+SAMN34179194	patient	NYU1555
+SAMN34179194	progression type	Second Primary
+SAMN34179194	geo_loc_name	missing
+SAMN34179194	progression	Progression
+SAMN34179194	tissue	Tumor
+SAMN34179194	source_name	Tumor
+SAMN34179194	BioSampleModel	Generic
+SAMN34179194	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179194	ENA-LAST-UPDATE	2023-09-08
+SAMN34179202	recurrence	No Progression (>5y)
+SAMN34179202	collection_date	missing
+SAMN34179202	INSDC secondary accession	SRS17310841
+SAMN34179202	NCBI submission package	Generic.1.0
+SAMN34179202	organism	Homo sapiens
+SAMN34179202	patient	NYU1487
+SAMN34179202	progression type	No Progression (>5y)
+SAMN34179202	geo_loc_name	missing
+SAMN34179202	progression	No Progression (>5y)
+SAMN34179202	tissue	Tumor
+SAMN34179202	source_name	Tumor
+SAMN34179202	BioSampleModel	Generic
+SAMN34179202	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179202	ENA-LAST-UPDATE	2023-09-08
+SAMN34179038	recurrence	No Progression (>5y)
+SAMN34179038	collection_date	missing
+SAMN34179038	INSDC secondary accession	SRS17310829
+SAMN34179038	NCBI submission package	Generic.1.0
+SAMN34179038	organism	Homo sapiens
+SAMN34179038	patient	NYU822
+SAMN34179038	progression type	No Progression (>5y)
+SAMN34179038	geo_loc_name	missing
+SAMN34179038	progression	No Progression (>5y)
+SAMN34179038	tissue	Tumor
+SAMN34179038	source_name	Tumor
+SAMN34179038	BioSampleModel	Generic
+SAMN34179038	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179038	ENA-LAST-UPDATE	2023-09-08
+SAMN34179042	recurrence	No Progression (>5y)
+SAMN34179042	collection_date	missing
+SAMN34179042	INSDC secondary accession	SRS17310825
+SAMN34179042	NCBI submission package	Generic.1.0
+SAMN34179042	organism	Homo sapiens
+SAMN34179042	patient	NYU780
+SAMN34179042	progression type	No Progression (>5y)
+SAMN34179042	geo_loc_name	missing
+SAMN34179042	progression	No Progression (>5y)
+SAMN34179042	tissue	Tumor
+SAMN34179042	source_name	Tumor
+SAMN34179042	BioSampleModel	Generic
+SAMN34179042	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179042	ENA-LAST-UPDATE	2023-09-08
+SAMN34179099	recurrence	No Progression (>5y)
+SAMN34179099	collection_date	missing
+SAMN34179099	INSDC secondary accession	SRS17310816
+SAMN34179099	NCBI submission package	Generic.1.0
+SAMN34179099	organism	Homo sapiens
+SAMN34179099	patient	NYU268
+SAMN34179099	progression type	No Progression (>5y)
+SAMN34179099	geo_loc_name	missing
+SAMN34179099	progression	No Progression (>5y)
+SAMN34179099	tissue	Lung adjacent normal
+SAMN34179099	source_name	Lung adjacent normal
+SAMN34179099	BioSampleModel	Generic
+SAMN34179099	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179099	ENA-LAST-UPDATE	2023-09-08
+SAMN34179101	recurrence	No Progression (>5y)
+SAMN34179101	collection_date	missing
+SAMN34179101	INSDC secondary accession	SRS17310814
+SAMN34179101	NCBI submission package	Generic.1.0
+SAMN34179101	organism	Homo sapiens
+SAMN34179101	patient	NYU252
+SAMN34179101	progression type	No Progression (>5y)
+SAMN34179101	geo_loc_name	missing
+SAMN34179101	progression	No Progression (>5y)
+SAMN34179101	tissue	Lung adjacent normal
+SAMN34179101	source_name	Lung adjacent normal
+SAMN34179101	BioSampleModel	Generic
+SAMN34179101	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179101	ENA-LAST-UPDATE	2023-09-08
+SAMN34179159	recurrence	N/A
+SAMN34179159	collection_date	missing
+SAMN34179159	INSDC secondary accession	SRS17311051
+SAMN34179159	NCBI submission package	Generic.1.0
+SAMN34179159	organism	Homo sapiens
+SAMN34179159	patient	NYU1795
+SAMN34179159	progression type	Short Follow Up (<5y)
+SAMN34179159	geo_loc_name	missing
+SAMN34179159	progression	N/A
+SAMN34179159	tissue	Lung adjacent normal
+SAMN34179159	source_name	Lung adjacent normal
+SAMN34179159	BioSampleModel	Generic
+SAMN34179159	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179159	ENA-LAST-UPDATE	2023-09-08
+SAMN34179165	recurrence	No Progression (>5y)
+SAMN34179165	collection_date	missing
+SAMN34179165	INSDC secondary accession	SRS17311045
+SAMN34179165	NCBI submission package	Generic.1.0
+SAMN34179165	organism	Homo sapiens
+SAMN34179165	patient	NYU1769
+SAMN34179165	progression type	No Progression (>5y)
+SAMN34179165	geo_loc_name	missing
+SAMN34179165	progression	No Progression (>5y)
+SAMN34179165	tissue	Lung adjacent normal
+SAMN34179165	source_name	Lung adjacent normal
+SAMN34179165	BioSampleModel	Generic
+SAMN34179165	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179165	ENA-LAST-UPDATE	2023-09-08
+SAMN34179168	recurrence	No Progression (>5y)
+SAMN34179168	collection_date	missing
+SAMN34179168	INSDC secondary accession	SRS17311042
+SAMN34179168	NCBI submission package	Generic.1.0
+SAMN34179168	organism	Homo sapiens
+SAMN34179168	patient	NYU175
+SAMN34179168	progression type	No Progression (>5y)
+SAMN34179168	geo_loc_name	missing
+SAMN34179168	progression	No Progression (>5y)
+SAMN34179168	tissue	Tumor
+SAMN34179168	source_name	Tumor
+SAMN34179168	BioSampleModel	Generic
+SAMN34179168	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179168	ENA-LAST-UPDATE	2023-09-08
+SAMN34179221	recurrence	N/A
+SAMN34179221	collection_date	missing
+SAMN34179221	INSDC secondary accession	SRS17311037
+SAMN34179221	NCBI submission package	Generic.1.0
+SAMN34179221	organism	Homo sapiens
+SAMN34179221	patient	NYU1368
+SAMN34179221	progression type	Second Primary
+SAMN34179221	geo_loc_name	missing
+SAMN34179221	progression	Progression
+SAMN34179221	tissue	Lung adjacent normal
+SAMN34179221	source_name	Lung adjacent normal
+SAMN34179221	BioSampleModel	Generic
+SAMN34179221	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179221	ENA-LAST-UPDATE	2023-09-08
+SAMN34179223	recurrence	N/A
+SAMN34179223	collection_date	missing
+SAMN34179223	INSDC secondary accession	SRS17311033
+SAMN34179223	NCBI submission package	Generic.1.0
+SAMN34179223	organism	Homo sapiens
+SAMN34179223	patient	NYU1364
+SAMN34179223	progression type	Second Primary
+SAMN34179223	geo_loc_name	missing
+SAMN34179223	progression	Progression
+SAMN34179223	tissue	Tumor
+SAMN34179223	source_name	Tumor
+SAMN34179223	BioSampleModel	Generic
+SAMN34179223	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179223	ENA-LAST-UPDATE	2023-09-08
+SAMN34179224	recurrence	N/A
+SAMN34179224	collection_date	missing
+SAMN34179224	INSDC secondary accession	SRS17311034
+SAMN34179224	NCBI submission package	Generic.1.0
+SAMN34179224	organism	Homo sapiens
+SAMN34179224	patient	NYU1355
+SAMN34179224	progression type	Second Primary
+SAMN34179224	geo_loc_name	missing
+SAMN34179224	progression	Progression
+SAMN34179224	tissue	Tumor
+SAMN34179224	source_name	Tumor
+SAMN34179224	BioSampleModel	Generic
+SAMN34179224	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179224	ENA-LAST-UPDATE	2023-09-08
+SAMN34179225	recurrence	N/A
+SAMN34179225	collection_date	missing
+SAMN34179225	INSDC secondary accession	SRS17311032
+SAMN34179225	NCBI submission package	Generic.1.0
+SAMN34179225	organism	Homo sapiens
+SAMN34179225	patient	NYU1355
+SAMN34179225	progression type	Second Primary
+SAMN34179225	geo_loc_name	missing
+SAMN34179225	progression	Progression
+SAMN34179225	tissue	Lung adjacent normal
+SAMN34179225	source_name	Lung adjacent normal
+SAMN34179225	BioSampleModel	Generic
+SAMN34179225	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179225	ENA-LAST-UPDATE	2023-09-08
+SAMN34179229	recurrence	Recurrence
+SAMN34179229	collection_date	missing
+SAMN34179229	INSDC secondary accession	SRS17311029
+SAMN34179229	NCBI submission package	Generic.1.0
+SAMN34179229	organism	Homo sapiens
+SAMN34179229	patient	NYU1334
+SAMN34179229	progression type	Systemic
+SAMN34179229	geo_loc_name	missing
+SAMN34179229	progression	Progression
+SAMN34179229	tissue	Lung adjacent normal
+SAMN34179229	source_name	Lung adjacent normal
+SAMN34179229	BioSampleModel	Generic
+SAMN34179229	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179229	ENA-LAST-UPDATE	2023-09-08
+SAMN34179231	recurrence	No Progression (>5y)
+SAMN34179231	collection_date	missing
+SAMN34179231	INSDC secondary accession	SRS17311026
+SAMN34179231	NCBI submission package	Generic.1.0
+SAMN34179231	organism	Homo sapiens
+SAMN34179231	patient	NYU1321
+SAMN34179231	progression type	No Progression (>5y)
+SAMN34179231	geo_loc_name	missing
+SAMN34179231	progression	No Progression (>5y)
+SAMN34179231	tissue	Lung adjacent normal
+SAMN34179231	source_name	Lung adjacent normal
+SAMN34179231	BioSampleModel	Generic
+SAMN34179231	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179231	ENA-LAST-UPDATE	2023-09-08
+SAMN34179025	recurrence	No Progression (>5y)
+SAMN34179025	collection_date	missing
+SAMN34179025	INSDC secondary accession	SRS17311019
+SAMN34179025	NCBI submission package	Generic.1.0
+SAMN34179025	organism	Homo sapiens
+SAMN34179025	patient	NYU965
+SAMN34179025	progression type	No Progression (>5y)
+SAMN34179025	geo_loc_name	missing
+SAMN34179025	progression	No Progression (>5y)
+SAMN34179025	tissue	Lung adjacent normal
+SAMN34179025	source_name	Lung adjacent normal
+SAMN34179025	BioSampleModel	Generic
+SAMN34179025	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179025	ENA-LAST-UPDATE	2023-09-08
+SAMN34179079	recurrence	No Progression (>5y)
+SAMN34179079	collection_date	missing
+SAMN34179079	INSDC secondary accession	SRS17311012
+SAMN34179079	NCBI submission package	Generic.1.0
+SAMN34179079	organism	Homo sapiens
+SAMN34179079	patient	NYU359
+SAMN34179079	progression type	No Progression (>5y)
+SAMN34179079	geo_loc_name	missing
+SAMN34179079	progression	No Progression (>5y)
+SAMN34179079	tissue	Lung adjacent normal
+SAMN34179079	source_name	Lung adjacent normal
+SAMN34179079	BioSampleModel	Generic
+SAMN34179079	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179079	ENA-LAST-UPDATE	2023-09-08
+SAMN34179086	recurrence	No Progression (>5y)
+SAMN34179086	collection_date	missing
+SAMN34179086	INSDC secondary accession	SRS17311003
+SAMN34179086	NCBI submission package	Generic.1.0
+SAMN34179086	organism	Homo sapiens
+SAMN34179086	patient	NYU318
+SAMN34179086	progression type	No Progression (>5y)
+SAMN34179086	geo_loc_name	missing
+SAMN34179086	progression	No Progression (>5y)
+SAMN34179086	tissue	Tumor
+SAMN34179086	source_name	Tumor
+SAMN34179086	BioSampleModel	Generic
+SAMN34179086	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179086	ENA-LAST-UPDATE	2023-09-08
+SAMN34179140	recurrence	No Progression (>5y)
+SAMN34179140	collection_date	missing
+SAMN34179140	INSDC secondary accession	SRS17311000
+SAMN34179140	NCBI submission package	Generic.1.0
+SAMN34179140	organism	Homo sapiens
+SAMN34179140	patient	NYU1891
+SAMN34179140	progression type	No Progression (>5y)
+SAMN34179140	geo_loc_name	missing
+SAMN34179140	progression	No Progression (>5y)
+SAMN34179140	tissue	Tumor
+SAMN34179140	source_name	Tumor
+SAMN34179140	BioSampleModel	Generic
+SAMN34179140	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179140	ENA-LAST-UPDATE	2023-09-08
+SAMN34179142	recurrence	No Progression (>5y)
+SAMN34179142	collection_date	missing
+SAMN34179142	INSDC secondary accession	SRS17310997
+SAMN34179142	NCBI submission package	Generic.1.0
+SAMN34179142	organism	Homo sapiens
+SAMN34179142	patient	NYU1884
+SAMN34179142	progression type	No Progression (>5y)
+SAMN34179142	geo_loc_name	missing
+SAMN34179142	progression	No Progression (>5y)
+SAMN34179142	tissue	Tumor
+SAMN34179142	source_name	Tumor
+SAMN34179142	BioSampleModel	Generic
+SAMN34179142	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179142	ENA-LAST-UPDATE	2023-09-08
+SAMN34179143	recurrence	No Progression (>5y)
+SAMN34179143	collection_date	missing
+SAMN34179143	INSDC secondary accession	SRS17310996
+SAMN34179143	NCBI submission package	Generic.1.0
+SAMN34179143	organism	Homo sapiens
+SAMN34179143	patient	NYU1884
+SAMN34179143	progression type	No Progression (>5y)
+SAMN34179143	geo_loc_name	missing
+SAMN34179143	progression	No Progression (>5y)
+SAMN34179143	tissue	Lung adjacent normal
+SAMN34179143	source_name	Lung adjacent normal
+SAMN34179143	BioSampleModel	Generic
+SAMN34179143	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179143	ENA-LAST-UPDATE	2023-09-08
+SAMN34179151	recurrence	No Progression (>5y)
+SAMN34179151	collection_date	missing
+SAMN34179151	INSDC secondary accession	SRS17310988
+SAMN34179151	NCBI submission package	Generic.1.0
+SAMN34179151	organism	Homo sapiens
+SAMN34179151	patient	NYU1854
+SAMN34179151	progression type	No Progression (>5y)
+SAMN34179151	geo_loc_name	missing
+SAMN34179151	progression	No Progression (>5y)
+SAMN34179151	tissue	Lung adjacent normal
+SAMN34179151	source_name	Lung adjacent normal
+SAMN34179151	BioSampleModel	Generic
+SAMN34179151	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179151	ENA-LAST-UPDATE	2023-09-08
+SAMN34179153	recurrence	N/A
+SAMN34179153	collection_date	missing
+SAMN34179153	INSDC secondary accession	SRS17310987
+SAMN34179153	NCBI submission package	Generic.1.0
+SAMN34179153	organism	Homo sapiens
+SAMN34179153	patient	NYU1845
+SAMN34179153	progression type	Second Primary
+SAMN34179153	geo_loc_name	missing
+SAMN34179153	progression	Progression
+SAMN34179153	tissue	Lung adjacent normal
+SAMN34179153	source_name	Lung adjacent normal
+SAMN34179153	BioSampleModel	Generic
+SAMN34179153	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179153	ENA-LAST-UPDATE	2023-09-08
+SAMN34179209	recurrence	Recurrence
+SAMN34179209	collection_date	missing
+SAMN34179209	INSDC secondary accession	SRS17310978
+SAMN34179209	NCBI submission package	Generic.1.0
+SAMN34179209	organism	Homo sapiens
+SAMN34179209	patient	NYU1443
+SAMN34179209	progression type	Systemic
+SAMN34179209	geo_loc_name	missing
+SAMN34179209	progression	Progression
+SAMN34179209	tissue	Lung adjacent normal
+SAMN34179209	source_name	Lung adjacent normal
+SAMN34179209	BioSampleModel	Generic
+SAMN34179209	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179209	ENA-LAST-UPDATE	2023-09-08
+SAMN34179212	recurrence	No Progression (>5y)
+SAMN34179212	collection_date	missing
+SAMN34179212	INSDC secondary accession	SRS17310974
+SAMN34179212	NCBI submission package	Generic.1.0
+SAMN34179212	organism	Homo sapiens
+SAMN34179212	patient	NYU1433
+SAMN34179212	progression type	No Progression (>5y)
+SAMN34179212	geo_loc_name	missing
+SAMN34179212	progression	No Progression (>5y)
+SAMN34179212	tissue	Tumor
+SAMN34179212	source_name	Tumor
+SAMN34179212	BioSampleModel	Generic
+SAMN34179212	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179212	ENA-LAST-UPDATE	2023-09-08
+SAMN34179214	recurrence	No Progression (>5y)
+SAMN34179214	collection_date	missing
+SAMN34179214	INSDC secondary accession	SRS17310971
+SAMN34179214	NCBI submission package	Generic.1.0
+SAMN34179214	organism	Homo sapiens
+SAMN34179214	patient	NYU1428
+SAMN34179214	progression type	No Progression (>5y)
+SAMN34179214	geo_loc_name	missing
+SAMN34179214	progression	No Progression (>5y)
+SAMN34179214	tissue	Tumor
+SAMN34179214	source_name	Tumor
+SAMN34179214	BioSampleModel	Generic
+SAMN34179214	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179214	ENA-LAST-UPDATE	2023-09-08
+SAMN34179215	recurrence	No Progression (>5y)
+SAMN34179215	collection_date	missing
+SAMN34179215	INSDC secondary accession	SRS17310973
+SAMN34179215	NCBI submission package	Generic.1.0
+SAMN34179215	organism	Homo sapiens
+SAMN34179215	patient	NYU1428
+SAMN34179215	progression type	No Progression (>5y)
+SAMN34179215	geo_loc_name	missing
+SAMN34179215	progression	No Progression (>5y)
+SAMN34179215	tissue	Lung adjacent normal
+SAMN34179215	source_name	Lung adjacent normal
+SAMN34179215	BioSampleModel	Generic
+SAMN34179215	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179215	ENA-LAST-UPDATE	2023-09-08
+SAMN34179217	recurrence	No Progression (>5y)
+SAMN34179217	collection_date	missing
+SAMN34179217	INSDC secondary accession	SRS17310970
+SAMN34179217	NCBI submission package	Generic.1.0
+SAMN34179217	organism	Homo sapiens
+SAMN34179217	patient	NYU1417
+SAMN34179217	progression type	No Progression (>5y)
+SAMN34179217	geo_loc_name	missing
+SAMN34179217	progression	No Progression (>5y)
+SAMN34179217	tissue	Lung adjacent normal
+SAMN34179217	source_name	Lung adjacent normal
+SAMN34179217	BioSampleModel	Generic
+SAMN34179217	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179217	ENA-LAST-UPDATE	2023-09-08
+SAMN34179219	recurrence	N/A
+SAMN34179219	collection_date	missing
+SAMN34179219	INSDC secondary accession	SRS17310967
+SAMN34179219	NCBI submission package	Generic.1.0
+SAMN34179219	organism	Homo sapiens
+SAMN34179219	patient	NYU1416
+SAMN34179219	progression type	Short Follow Up (<5y)
+SAMN34179219	geo_loc_name	missing
+SAMN34179219	progression	N/A
+SAMN34179219	tissue	Lung adjacent normal
+SAMN34179219	source_name	Lung adjacent normal
+SAMN34179219	BioSampleModel	Generic
+SAMN34179219	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179219	ENA-LAST-UPDATE	2023-09-08
+SAMN34179239	recurrence	No Progression (>5y)
+SAMN34179239	collection_date	missing
+SAMN34179239	INSDC secondary accession	SRS17310964
+SAMN34179239	NCBI submission package	Generic.1.0
+SAMN34179239	organism	Homo sapiens
+SAMN34179239	patient	NYU1261
+SAMN34179239	progression type	No Progression (>5y)
+SAMN34179239	geo_loc_name	missing
+SAMN34179239	progression	No Progression (>5y)
+SAMN34179239	tissue	Lung adjacent normal
+SAMN34179239	source_name	Lung adjacent normal
+SAMN34179239	BioSampleModel	Generic
+SAMN34179239	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179239	ENA-LAST-UPDATE	2023-09-08
+SAMN34179244	recurrence	N/A
+SAMN34179244	collection_date	missing
+SAMN34179244	INSDC secondary accession	SRS17310959
+SAMN34179244	NCBI submission package	Generic.1.0
+SAMN34179244	organism	Homo sapiens
+SAMN34179244	patient	NYU1210
+SAMN34179244	progression type	Second Primary
+SAMN34179244	geo_loc_name	missing
+SAMN34179244	progression	Progression
+SAMN34179244	tissue	Tumor
+SAMN34179244	source_name	Tumor
+SAMN34179244	BioSampleModel	Generic
+SAMN34179244	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179244	ENA-LAST-UPDATE	2023-09-08
+SAMN34179248	recurrence	Recurrence
+SAMN34179248	collection_date	missing
+SAMN34179248	INSDC secondary accession	SRS17310955
+SAMN34179248	NCBI submission package	Generic.1.0
+SAMN34179248	organism	Homo sapiens
+SAMN34179248	patient	NYU1205
+SAMN34179248	progression type	Systemic
+SAMN34179248	geo_loc_name	missing
+SAMN34179248	progression	Progression
+SAMN34179248	tissue	Tumor
+SAMN34179248	source_name	Tumor
+SAMN34179248	BioSampleModel	Generic
+SAMN34179248	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179248	ENA-LAST-UPDATE	2023-09-08
+SAMN34179249	recurrence	Recurrence
+SAMN34179249	collection_date	missing
+SAMN34179249	INSDC secondary accession	SRS17310956
+SAMN34179249	NCBI submission package	Generic.1.0
+SAMN34179249	organism	Homo sapiens
+SAMN34179249	patient	NYU1205
+SAMN34179249	progression type	Systemic
+SAMN34179249	geo_loc_name	missing
+SAMN34179249	progression	Progression
+SAMN34179249	tissue	Lung adjacent normal
+SAMN34179249	source_name	Lung adjacent normal
+SAMN34179249	BioSampleModel	Generic
+SAMN34179249	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179249	ENA-LAST-UPDATE	2023-09-08
+SAMN34179046	recurrence	Recurrence
+SAMN34179046	collection_date	missing
+SAMN34179046	INSDC secondary accession	SRS17310950
+SAMN34179046	NCBI submission package	Generic.1.0
+SAMN34179046	organism	Homo sapiens
+SAMN34179046	patient	NYU741
+SAMN34179046	progression type	Locoregional
+SAMN34179046	geo_loc_name	missing
+SAMN34179046	progression	Progression
+SAMN34179046	tissue	Tumor
+SAMN34179046	source_name	Tumor
+SAMN34179046	BioSampleModel	Generic
+SAMN34179046	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179046	ENA-LAST-UPDATE	2023-09-08
+SAMN34179047	recurrence	Recurrence
+SAMN34179047	collection_date	missing
+SAMN34179047	INSDC secondary accession	SRS17310948
+SAMN34179047	NCBI submission package	Generic.1.0
+SAMN34179047	organism	Homo sapiens
+SAMN34179047	patient	NYU741
+SAMN34179047	progression type	Locoregional
+SAMN34179047	geo_loc_name	missing
+SAMN34179047	progression	Progression
+SAMN34179047	tissue	Lung adjacent normal
+SAMN34179047	source_name	Lung adjacent normal
+SAMN34179047	BioSampleModel	Generic
+SAMN34179047	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179047	ENA-LAST-UPDATE	2023-09-08
+SAMN34179054	recurrence	No Progression (>5y)
+SAMN34179054	collection_date	missing
+SAMN34179054	INSDC secondary accession	SRS17310942
+SAMN34179054	NCBI submission package	Generic.1.0
+SAMN34179054	organism	Homo sapiens
+SAMN34179054	patient	NYU689
+SAMN34179054	progression type	No Progression (>5y)
+SAMN34179054	geo_loc_name	missing
+SAMN34179054	progression	No Progression (>5y)
+SAMN34179054	tissue	Tumor
+SAMN34179054	source_name	Tumor
+SAMN34179054	BioSampleModel	Generic
+SAMN34179054	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179054	ENA-LAST-UPDATE	2023-09-08
+SAMN34179059	recurrence	Recurrence
+SAMN34179059	collection_date	missing
+SAMN34179059	INSDC secondary accession	SRS17310936
+SAMN34179059	NCBI submission package	Generic.1.0
+SAMN34179059	organism	Homo sapiens
+SAMN34179059	patient	NYU669
+SAMN34179059	progression type	Locoregional
+SAMN34179059	geo_loc_name	missing
+SAMN34179059	progression	Progression
+SAMN34179059	tissue	Lung adjacent normal
+SAMN34179059	source_name	Lung adjacent normal
+SAMN34179059	BioSampleModel	Generic
+SAMN34179059	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179059	ENA-LAST-UPDATE	2023-09-08
+SAMN34179108	recurrence	No Progression (>5y)
+SAMN34179108	collection_date	missing
+SAMN34179108	INSDC secondary accession	SRS17310935
+SAMN34179108	NCBI submission package	Generic.1.0
+SAMN34179108	organism	Homo sapiens
+SAMN34179108	patient	NYU1999
+SAMN34179108	progression type	No Progression (>5y)
+SAMN34179108	geo_loc_name	missing
+SAMN34179108	progression	No Progression (>5y)
+SAMN34179108	tissue	Tumor
+SAMN34179108	source_name	Tumor
+SAMN34179108	BioSampleModel	Generic
+SAMN34179108	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179108	ENA-LAST-UPDATE	2023-09-08
+SAMN34179110	recurrence	No Progression (>5y)
+SAMN34179110	collection_date	missing
+SAMN34179110	INSDC secondary accession	SRS17310934
+SAMN34179110	NCBI submission package	Generic.1.0
+SAMN34179110	organism	Homo sapiens
+SAMN34179110	patient	NYU1997
+SAMN34179110	progression type	No Progression (>5y)
+SAMN34179110	geo_loc_name	missing
+SAMN34179110	progression	No Progression (>5y)
+SAMN34179110	tissue	Tumor
+SAMN34179110	source_name	Tumor
+SAMN34179110	BioSampleModel	Generic
+SAMN34179110	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179110	ENA-LAST-UPDATE	2023-09-08
+SAMN34179119	recurrence	No Progression (>5y)
+SAMN34179119	collection_date	missing
+SAMN34179119	INSDC secondary accession	SRS17310924
+SAMN34179119	NCBI submission package	Generic.1.0
+SAMN34179119	organism	Homo sapiens
+SAMN34179119	patient	NYU1967
+SAMN34179119	progression type	No Progression (>5y)
+SAMN34179119	geo_loc_name	missing
+SAMN34179119	progression	No Progression (>5y)
+SAMN34179119	tissue	Lung adjacent normal
+SAMN34179119	source_name	Lung adjacent normal
+SAMN34179119	BioSampleModel	Generic
+SAMN34179119	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179119	ENA-LAST-UPDATE	2023-09-08
+SAMN34179183	recurrence	N/A
+SAMN34179183	collection_date	missing
+SAMN34179183	INSDC secondary accession	SRS17310908
+SAMN34179183	NCBI submission package	Generic.1.0
+SAMN34179183	organism	Homo sapiens
+SAMN34179183	patient	NYU1630
+SAMN34179183	progression type	Second Primary
+SAMN34179183	geo_loc_name	missing
+SAMN34179183	progression	Progression
+SAMN34179183	tissue	Lung adjacent normal
+SAMN34179183	source_name	Lung adjacent normal
+SAMN34179183	BioSampleModel	Generic
+SAMN34179183	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179183	ENA-LAST-UPDATE	2023-09-08
+SAMN34179187	recurrence	No Progression (>5y)
+SAMN34179187	collection_date	missing
+SAMN34179187	INSDC secondary accession	SRS17310906
+SAMN34179187	NCBI submission package	Generic.1.0
+SAMN34179187	organism	Homo sapiens
+SAMN34179187	patient	NYU1603
+SAMN34179187	progression type	No Progression (>5y)
+SAMN34179187	geo_loc_name	missing
+SAMN34179187	progression	No Progression (>5y)
+SAMN34179187	tissue	Lung adjacent normal
+SAMN34179187	source_name	Lung adjacent normal
+SAMN34179187	BioSampleModel	Generic
+SAMN34179187	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179187	ENA-LAST-UPDATE	2023-09-08
+SAMN34179252	recurrence	No Progression (>5y)
+SAMN34179252	collection_date	missing
+SAMN34179252	INSDC secondary accession	SRS17310903
+SAMN34179252	NCBI submission package	Generic.1.0
+SAMN34179252	organism	Homo sapiens
+SAMN34179252	patient	NYU1141
+SAMN34179252	progression type	No Progression (>5y)
+SAMN34179252	geo_loc_name	missing
+SAMN34179252	progression	No Progression (>5y)
+SAMN34179252	tissue	Tumor
+SAMN34179252	source_name	Tumor
+SAMN34179252	BioSampleModel	Generic
+SAMN34179252	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179252	ENA-LAST-UPDATE	2023-09-08
+SAMN34179254	recurrence	No Progression (>5y)
+SAMN34179254	collection_date	missing
+SAMN34179254	INSDC secondary accession	SRS17310900
+SAMN34179254	NCBI submission package	Generic.1.0
+SAMN34179254	organism	Homo sapiens
+SAMN34179254	patient	NYU113
+SAMN34179254	progression type	No Progression (>5y)
+SAMN34179254	geo_loc_name	missing
+SAMN34179254	progression	No Progression (>5y)
+SAMN34179254	tissue	Tumor
+SAMN34179254	source_name	Tumor
+SAMN34179254	BioSampleModel	Generic
+SAMN34179254	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179254	ENA-LAST-UPDATE	2023-09-08
+SAMN34179260	recurrence	No Progression (>5y)
+SAMN34179260	collection_date	missing
+SAMN34179260	INSDC secondary accession	SRS17310894
+SAMN34179260	NCBI submission package	Generic.1.0
+SAMN34179260	organism	Homo sapiens
+SAMN34179260	patient	NYU1057
+SAMN34179260	progression type	No Progression (>5y)
+SAMN34179260	geo_loc_name	missing
+SAMN34179260	progression	No Progression (>5y)
+SAMN34179260	tissue	Tumor
+SAMN34179260	source_name	Tumor
+SAMN34179260	BioSampleModel	Generic
+SAMN34179260	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179260	ENA-LAST-UPDATE	2023-09-08
+SAMN34179261	recurrence	No Progression (>5y)
+SAMN34179261	collection_date	missing
+SAMN34179261	INSDC secondary accession	SRS17310895
+SAMN34179261	NCBI submission package	Generic.1.0
+SAMN34179261	organism	Homo sapiens
+SAMN34179261	patient	NYU1057
+SAMN34179261	progression type	No Progression (>5y)
+SAMN34179261	geo_loc_name	missing
+SAMN34179261	progression	No Progression (>5y)
+SAMN34179261	tissue	Lung adjacent normal
+SAMN34179261	source_name	Lung adjacent normal
+SAMN34179261	BioSampleModel	Generic
+SAMN34179261	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179261	ENA-LAST-UPDATE	2023-09-08
+SAMN34179263	recurrence	N/A
+SAMN34179263	collection_date	missing
+SAMN34179263	INSDC secondary accession	SRS17310891
+SAMN34179263	NCBI submission package	Generic.1.0
+SAMN34179263	organism	Homo sapiens
+SAMN34179263	patient	NYU1037
+SAMN34179263	progression type	Short Follow Up (<5y)
+SAMN34179263	geo_loc_name	missing
+SAMN34179263	progression	N/A
+SAMN34179263	tissue	Lung adjacent normal
+SAMN34179263	source_name	Lung adjacent normal
+SAMN34179263	BioSampleModel	Generic
+SAMN34179263	ENA-FIRST-PUBLIC	2023-09-08
+SAMN34179263	ENA-LAST-UPDATE	2023-09-08
