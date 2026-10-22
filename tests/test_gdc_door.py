@@ -88,7 +88,9 @@ def test_quant_refuses_a_gdc_sheet(tmp_path, gdc_sheet):
 def test_process_refuses_a_gdc_sheet(tmp_path):
     """Mutation caught: process reading a GDC sheet's files as runs (the refusal dropped)."""
     gathered(tmp_path, gdc_sheet=True)
-    found, problems = process_run._sheet(tmp_path, DATASET, SimpleNamespace(fetchngs_dir=None))
+    found, problems = process_run._sheet(
+        tmp_path, DATASET, SimpleNamespace(fetchngs_dir=None), None
+    )
     assert found is None and len(problems) == 1
     assert "is a GDC sheet: ctx process reads a fetchngs dataset's runs" in problems[0]
 

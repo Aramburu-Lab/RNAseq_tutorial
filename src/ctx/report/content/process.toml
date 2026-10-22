@@ -607,7 +607,7 @@ columns = ["Step", "Runs", "Wall time, hours", "Longest run, s", "Peak memory, G
 input = "{samples} samples in {runs} runs, named by the `ctx gather` sheet and aligned on Kebnekaise. The genome `{genome}` holds {length} bases on {genome_name}; the dataset file's [[annotation|GTF]] is {release}."
 method = """On Kebnekaise, [[fastp]] trimmed each run with M2's settings. {aligner}, a splice-aware [[aligner]], placed each read on {genome_name}; a read fitting several loci equally well is a [[multimappers|multimapper]].
 
-[[featureCounts]] assigned reads to genes at `-s 0` (either strand), `-s 1` (the gene's strand) and `-s 2` (the opposite one). The strand call is the forward share: reads at `-s 1` over reads at `-s 1` plus `-s 2`.
+[[featureCounts]] counted reads per gene at `-s 0` (either strand), `-s 1` (the gene's strand) and `-s 2` (the opposite one). The strand call is the forward share: reads at `-s 1` over reads at `-s 1` plus `-s 2`.
 
 Two counters can correlate closely and still disagree. [[Spearman|Spearman's ρ]] measures whether counts rise together; Bland and Altman's bias and limits measure how far apart they are."""
 

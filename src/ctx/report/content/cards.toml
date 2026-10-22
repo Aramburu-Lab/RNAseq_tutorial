@@ -166,7 +166,7 @@ meaning = "Run shown in fastp's -q by -l grid. Unset: first run read."
 effect = "Pick a suspect run to see which settings keep its reads."
 
 [options."--align-dir"]
-meaning = "Folder of a cluster's read and alignment reports, laid out by block D."
+meaning = "Folder of a cluster's read and alignment reports, in block D's layout."
 effect = "Set: its reports replace FASTQ files; nothing is trimmed or aligned here."
 
 [options."--genome"]
