@@ -10,7 +10,7 @@ meaning = "Project directory for all outputs. Unset: CTX_ROOT, else working dire
 effect = "Moves every output; hpc stops unless this or CTX_ROOT is set."
 
 [options."--dataset"]
-meaning = "Dataset short name: lowercase words joined by underscores, in every output name."
+meaning = "Dataset name: letters, digits and hyphens, such as Breast-tissue-BRCA; names every output."
 effect = "Renames every output and selects which earlier outputs this command reads."
 
 [options."--fetchngs-dir"]
