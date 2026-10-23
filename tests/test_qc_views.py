@@ -88,7 +88,8 @@ def test_the_sex_view_compares_each_sample_with_its_own_record(page):
 
 
 def test_each_flow_view_sums_its_own_samples(page):
-    """Mutation caught: a level's flow summing every sample."""
+    """Mutations caught: a level's flow summing every sample; a view's title or its node shares
+    the same as all samples' (Rytis 2026-10-23: the figure did not change between views)."""
     _, out, sheet, html = page
     fates = pl.read_csv(next(out.glob("*_desynth_fates_v1.csv")))
     links = pl.read_csv(next(out.glob("*_flow_views_v1.csv")))
@@ -104,6 +105,10 @@ def test_each_flow_view_sums_its_own_samples(page):
         assert mine["value"].sum() == pytest.approx(sequenced)
         option = cfg["options"][labels.index(label)]
         assert f"of the {len(kept)} samples" in option["export"]["caption"]
+        assert option["title"] == f"Where every read goes, {label}"
+        mapped = fates.filter(pl.col("sample").is_in(kept))["num_mapped"].sum()
+        nodes = option["figure"]["data"][0]["node"]["label"]
+        assert f"assigned {mapped / sequenced:.1%}" in nodes, nodes
 
 
 SWAP = """(async () => {
@@ -117,7 +122,10 @@ SWAP = """(async () => {
   form.dispatchEvent(new Event('change'));
   await wait(400);
   return {line: fig.querySelector('.view-summary').textContent,
-          caption: fig.querySelector('figcaption').textContent};
+          caption: fig.querySelector('figcaption').textContent,
+          title: fig.querySelector('.fig-title').textContent,
+          nodes: Array.from(fig.querySelectorAll('.sankey-node .node-label'),
+                            t => t.textContent)};
 })()"""
 
 
@@ -197,3 +205,16 @@ def test_a_view_s_files_carry_its_own_caption(page, title, tmp_path):
     shown = " ".join(seen["acted"]["caption"].split())
     assert shown in unescape(words), (shown, words)
     assert (tmp_path / seen["files"]["pdf"]["guid"]).read_bytes().startswith(b"%PDF")
+
+
+def test_switching_the_flow_view_changes_the_figure(page, tmp_path):
+    """In Chromium: after a switch the drawn title names the view and every node label prints
+    that view's share. Mutation caught: the view's figure drawn with all samples' words."""
+    _, out, sheet, html = page
+    task = {"name": "f", "url": html.as_uri(), "width": 1280, "height": 900,
+            "act": SWAP % json.dumps("Where every read goes")}  # fmt: skip
+    seen = _browse([task], tmp_path)["f"]
+    assert seen["errors"] == []
+    last = sorted(sheet["condition"].unique())[-1]
+    assert seen["acted"]["title"] == f"Where every read goes, the samples whose condition is {last}"
+    assert seen["acted"]["nodes"] and all("%" in n for n in seen["acted"]["nodes"])

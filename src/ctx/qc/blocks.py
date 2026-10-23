@@ -399,11 +399,19 @@ def fate_figures(writer: Writer, fate: pl.DataFrame, values: pl.DataFrame, sheet
     return Group(text.word(PAGE, "groups.fates"), blocks)
 
 
-def flow_words(fate: pl.DataFrame) -> FigureText:
-    """The Sankey's title, lead and reading guide, its numbers summed over ``fate``'s samples."""
+def flow_words(fate: pl.DataFrame, view: str = "") -> FigureText:
+    """The Sankey's title, lead and reading guide, its numbers summed over ``fate``'s samples.
+
+    A view other than all samples is named in the title, so a switch of view shows on the figure.
+    """
     total, useful = int(fate["total_reads"].sum()), int(fate["num_mapped"].sum())
+    title = (
+        text.fill(PAGE, "figures.flow.title_view", view=view)
+        if view
+        else text.word(PAGE, "figures.flow.title")
+    )
     return FigureText(
-        title=text.word(PAGE, "figures.flow.title"),
+        title=title,
         lead=text.fill(PAGE, "figures.flow.lead", total=total, useful=useful,
                        share=useful / total if total else 0.0),
         reading=lines("figures.flow.reading"))  # fmt: skip
@@ -430,7 +438,10 @@ def flow_figure(writer: Writer, fate: pl.DataFrame, sheet: pl.DataFrame,
             if part.height:
                 label = text.fill(PAGE, "figures.flow.view_level", column=column, level=level)
                 shown.append((label, part))
-    options = [(label, figures.fates_flow(part), flow_words(part)) for label, part in shown]
+    options = [
+        (label, figures.fates_flow(part), flow_words(part, label if i else ""))
+        for i, (label, part) in enumerate(shown)
+    ]
     block = writer.figure(options[0][1], "read_flow", options[0][2])
     if len(options) < 2:  # noqa: PLR2004 - a view needs a second option
         return block

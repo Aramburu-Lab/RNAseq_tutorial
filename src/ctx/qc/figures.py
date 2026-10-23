@@ -88,8 +88,17 @@ def fates_bubble(
 def fates_flow(fates: pl.DataFrame) -> FlowData:
     """Every read of the samples, summed: sequenced, Trim Galore's fates, then Salmon's."""
     total = {c: float(fates[c].sum()) for c in (*fates.columns[1:],)}
-    word = {c: text.word(PAGE, f"figures.flow.nodes.{c}") for c in
-            ("total_reads", "reads_written", *TRIM_FATES, *SALMON_FATES)}  # fmt: skip
+    sequenced = total["total_reads"]
+
+    # Each node names its share of the fragments sequenced: a Sankey draws every view at one
+    # height, so two views differ only in proportions, which the labels now print.
+    def label(c: str) -> str:
+        """A node's words and its share of the fragments sequenced."""
+        share = total[c] / sequenced if sequenced else 0.0
+        node = text.word(PAGE, f"figures.flow.nodes.{c}")
+        return text.fill(PAGE, "figures.flow.node_share", node=node, share=share)
+
+    word = {c: label(c) for c in ("total_reads", "reads_written", *TRIM_FATES, *SALMON_FATES)}
     kept, lost = BAND_COLOURS["good"], None
     nodes = [Node("total_reads", word["total_reads"], 0, ROLES["reference"]),
              Node("reads_written", word["reads_written"], 1, kept),

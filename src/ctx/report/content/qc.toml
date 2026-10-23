@@ -272,6 +272,8 @@ columns.mt_rrna_share = "mt_fraction + mt_rrna_fraction + rrna_fraction."
 
 [figures.flow]
 title = "Where every read goes"
+title_view = "Where every read goes, {view}"
+node_share = "{node} {share:.1%}"
 lead = "Of {total:,} fragments, {useful:,} ({share:.1%}) were assigned to a transcript."
 stages = ["Sequenced", "Trim Galore", "Salmon"]
 caption = "Every fragment of the {n} samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test."
