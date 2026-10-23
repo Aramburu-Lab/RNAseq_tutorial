@@ -230,7 +230,7 @@ SPACE_PX = (4, 8, 12, 16, 24, 32, 48, 64, 96)
 # ALI's page geometry: a 1120 px column with 24 px gutters, 14 px card and 9 px inset radii,
 # a sticky top bar blurred behind; the top bar's height offsets every sticky or anchored thing.
 LAYOUT = {
-    "content": "1072px", "rail": "208px", "gap": "56px", "gutter": "16px",
+    "content": "1072px", "content-wide": "1600px", "rail": "208px", "gap": "56px", "gutter": "16px",
     "gutter-wide": "24px", "key-min": "160px", "card-min": "240px", "reading": "320px",
     "radius": "14px", "radius-sm": "9px", "radius-xs": "6px",
     "rule": "1px", "rule-mid": "2px", "rule-accent": "3px", "rule-strong": "4px",
@@ -247,12 +247,19 @@ def _px(token: str) -> float:
     return float(LAYOUT[token].removesuffix("px"))
 
 
-# The width a module page gives a plot at its full layout: beside the reading guide, or across
-# the figure card under it (a linked view's parallel sets), inside the card's padding and its
-# border of one rule. "Open alone" draws a figure at ALONE_SCALE times this width where the
-# window leaves room for it, so the zoom is the same across as up and down.
+# The width a module page gives a plot at its narrowest full layout: across the figure card,
+# its reading guide under it (D-117), inside the card's padding and its border of one rule. A
+# window wider than the column's 1,072 px grows it to --content-wide, and the plot with it.
+# "Open alone" draws a figure at ALONE_SCALE times this width where the window leaves room for
+# it, so the zoom is the same across as up and down.
 _CARD_PX = _px("content") - 2 * (_px("fig-pad") + _px("rule"))
-PAGE_PLOT_PX = {"across": _CARD_PX, "beside": _CARD_PX - _px("reading") - _px("fig-gap")}
+PAGE_PLOT_PX = {"across": _CARD_PX}
+# The width a heatmap lays its bands out at on the page, and the floor its held layout starts
+# from: the plot's width beside the 320 px reading guide before D-117. Kept there, not moved to
+# the card's width: a wider layout width took the hold from small maps (M12's 4 x 4) and made
+# a band map's phone layout shorter than its desktop one, while the page scales a held map's
+# rows with the width it is drawn at anyway (_page_fit.js.j2, held).
+HEAT_LAYOUT_PX = _CARD_PX - _px("reading") - _px("fig-gap")
 # The widest a page draws a plot: across the card, opened alone in a window wide enough.
 LARGEST_PLOT_PX = max(PAGE_PLOT_PX.values()) * ALONE_SCALE
 # A page draws a line through the points it needs and no more: none of the line's own points
@@ -269,9 +276,14 @@ PHONE_PX = 375
 PHONE_PLOT_PX = PHONE_PX - 2 * (_px("gutter") + SPACE_PX[2] + _px("rule"))
 # Media queries cannot read var(), so the breakpoints are injected into the stylesheet.
 RAIL_FROM_PX, NARROW_PX = 1100, 640
-# "linked": the scatter beside the reading guide; "parcats": its parallel sets under both.
+# "linked": the scatter; "parcats": its parallel sets under it, over the reading guide.
 PLOTLY_HEIGHT_PX = {"scatter": 460, "box": 440, "bar": 400, "strip": 440, "flow": 460,
                     "contour": 460, "linked": 460, "parcats": 420, "km": 540}  # fmt: skip
+# A page plot's drawing area is at least this share of its width tall, 16:9 (Rytis 2026-10-23,
+# D-117): the page script (_page_fit.js.j2) grows a figure's height to it at every width, as
+# its legend's rows push the plot down. A plot that holds its own aspect (a heatmap's cells)
+# keeps it. The figure files keep their journal sizes.
+PAGE_PLOT_ASPECT = 9 / 16
 # Horizontal bars grow per category, as the static figure does with BAR_ROW_MM.
 PLOTLY_BAR_BASE_PX, PLOTLY_BAR_ROW_PX = 150, 28
 PLOTLY_MARGIN_PX = {"l": 8, "r": 8, "t": 48, "b": 8}  # automargin grows each side as needed
@@ -298,6 +310,8 @@ PLOTLY_LEGEND_KEY_PX = 30
 # entry with a gap, and pads the legend by a gap above and below.
 PLOTLY_LEGEND_LINE_PX = on_page(SIZES["legend"]) * LINE_SPACING + 3
 PLOTLY_LEGEND_GAP_PX = 5
+# A page colour bar's thickness, in a row under its plot: a legend marker's most, 16 px.
+PLOTLY_COLORBAR_PX = 16
 PLOTLY_LEGEND_SYMBOL_PX = PLOTLY_LEGEND_KEY_PX + 2 * PLOTLY_LEGEND_GAP_PX
 PLOTLY_LEGEND_PAD_PX = 2 * PLOTLY_LEGEND_GAP_PX
 # What an entry takes beside its text: the symbol before it and the gap after it. Chromium drew

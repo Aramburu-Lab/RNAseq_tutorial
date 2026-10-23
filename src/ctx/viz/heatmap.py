@@ -35,10 +35,10 @@ from ctx.viz.style import (
     BAR_LABEL_ROTATION,
     HEAT,
     HEAT_ALPHAS,
+    HEAT_LAYOUT_PX,
     LINE_SPACING,
     LINE_WIDTHS,
     MM_PER_INCH,
-    PAGE_PLOT_PX,
     PHONE_PLOT_PX,
     PHONE_PX,
     PLOTLY_CAP_SHIFT,
@@ -662,7 +662,7 @@ class HeatmapData:
         n = len(self.columns_in_order())
         sides = self._sides(words.ticks)
         needs = self._needs(words)
-        width = max(PAGE_PLOT_PX["beside"], needs)
+        width = max(HEAT_LAYOUT_PX, needs)
         column = (width - sides) / n
         floors = self._floors(words.ticks)
         rows = len(self.rows_in_order())

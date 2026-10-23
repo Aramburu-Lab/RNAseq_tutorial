@@ -353,13 +353,14 @@ def test_a_desktop_labels_every_set(ran, name):
     do (Rytis 2026-10-21, D-105), so M6's 567 px plot wraps its labels as the GSEA bars beside
     it do. PK.4 asserted the opposite, one line at the build's height: its threshold, the
     widest label plus ``HELD_PAD_PX``, kept plotly's own ticks there, which drew 7 of 14.
+    Since D-117 the plot spans the card, 844 px at 1,280, and its labels need not wrap there;
+    the phone test above asserts the wrap.
 
     Mutation caught: that threshold back in either twin, every other label then skipped."""
     got = _seen(ran[2], name)
     squeeze = [re.sub(r"\s", "", t["text"]) for t in got["ticks"]]
     assert sorted(squeeze) == sorted(re.sub(r"\s", "", c) for c in got["categories"]), squeeze
     assert all(t["left"] >= 0 for t in got["ticks"]), got["ticks"]
-    assert any(t["lines"] > 1 for t in got["ticks"]), "no label wrapped: no phone layout drawn"
     rows = sorted(got["ticks"], key=lambda t: t["top"])
     overlaps = [(a["text"], b["text"]) for a, b in pairwise(rows) if b["top"] < a["bottom"]]
     assert overlaps == [], overlaps

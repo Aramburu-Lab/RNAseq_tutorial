@@ -30,7 +30,9 @@ def test_every_template_is_within_the_file_length_ratchet():
 def test_the_page_script_defines_each_of_its_functions_once():
     """Each function of the page script's one closure is defined once, whichever partial holds
     it, and every partial is included. Mutations: a partial included twice; one left out."""
-    rendered = _ENV.get_template("_page.js.j2").render(live=True)
+    rendered = _ENV.get_template("_page.js.j2").render(
+        live=True, layout={"plot_aspect": 0.5625, "narrow": 640}
+    )
     # The closure follows the shared objects (ctxGlossary, ctxPick, ...), which it includes first.
     script = rendered[rendered.index("/* One script for every page kind.") :]
     names = Counter(re.findall(r"^  function (\w+)\(", script, re.M))

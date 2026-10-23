@@ -3,8 +3,8 @@
 On the page, a lasso on the scatter or a tap on a category of the parallel sets paints those
 samples in the picked colour, in both views at once, and a live line counts what is painted
 (``templates/_brush.js.j2``, whose logic ``tests/test_page_script.py`` runs under node). The
-scatter sits beside the reading guide and the parallel sets under both, across the figure
-card: two plotly figures, ``interactive()`` and ``below()`` (Rytis 2026-10-01). The figure
+scatter sits across the figure card, the parallel sets under it and the reading guide under
+both (D-117): two plotly figures, ``interactive()`` and ``below()`` (Rytis 2026-10-01). The figure
 files draw the parallel sets as vector bands (``FlowData``); painted, the page draws both
 views into its own PDF and SVG. ``static()``, ``interactive()`` and ``below()`` read the same
 ``LinkedData``.
@@ -149,8 +149,8 @@ class LinkedData:
     def controls(self) -> dict[str, Any]:
         """What the page script needs: the traces, the paint colours and the live line.
 
-        The scatter is trace ``scatter`` of the figure beside the reading guide, the parallel
-        sets trace ``parcats`` of the one under it.
+        The scatter is trace ``scatter`` of the figure, the parallel sets trace ``parcats`` of
+        the one under it.
         """
         return {
             "kind": "brush", "scatter": 0, "parcats": 0, "reference": THEMES["white"].reference,

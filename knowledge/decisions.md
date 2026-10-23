@@ -27,6 +27,31 @@ it were reversed.
 
 ---
 
+## D-117 — The plot is the largest part of its figure card: the reading guide under it, legends in rows, 16:9 or taller, a column that grows
+
+**Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23: "The biggest part in the card should be the plot, not the combination of the legend and the 'How to read' blocks. If needed, we can expand the view to with a wide-screen 16:9").
+
+**Context.** Measured in Chromium on the core review pages (`~/ctx_core_review`, 88 visible plotted cards): the plot's drawing area was smaller than its legend's plus its "How to read this" block's in 28 (32 %), the plot's median share of its card was 0.19, and the numbers were the same at 1,280 and 1,920 px. Three causes: the reading guide took a fixed 320 px column beside the plot from 1,100 px up; a figure's height was fixed (`PLOTLY_HEIGHT_PX`), so a legend's rows above the plot took height from the plot (Step-1's mitochondrial scatter, 13 entries: 587 x 94 px of plot under a 136,756 px² legend); and the content column was fixed at 1,072 px.
+
+**Options.** Collapse the reading guide (rejected: D-111's amendment keeps it visible); legends beside the plot (they take width from every plot, as the contour's colour bar did, 294 of 497 px left at 1,280); a fixed taller height per figure type (a fixed number cannot follow a legend that wraps by width); grow the figure's height in the page script, where the legend's and guide's sizes are known.
+
+**Decision.** One rule, in the page script's fit (`_page_fit.js.j2`, `wanted`), with its ratio from `style.PAGE_PLOT_ASPECT` (9/16): a plot that holds no aspect of its own takes the height its figure asks for, grown until its drawing area is at least 9/16 of its width tall and, where its box is wider than 640 px (`NARROW_PX`), larger than its legend's area and its reading guide's together; it gives the height back as it narrows. A heatmap that holds its cells' aspect keeps it (`held`). A phone keeps its own heights: there a five-line guide alone is larger than most plots. "How to read this" sits under the plot (and under a linked view's parallel sets) at every width, across the card, its lines in columns of at least 320 px. Legends stay where the template puts them, a row above the plot; the contour's colour bar becomes a row under its plot (`PLOTLY_COLORBAR_PX`), the one page legend that sat beside its plot. No figure type keeps a side legend. The content column grows with the window from 1,072 to 1,600 px (`LAYOUT["content-wide"]`). The figure files keep their journal sizes; only the page layout changes. `PAGE_PLOT_PX` is the plot's width in the 1,072 px column, across the card (its `beside` entry is gone); "Open alone" stays twice that. Heatmaps lay their bands out at the old 686 px (`HEAT_LAYOUT_PX`): laid out at 1,022 px, M12's 4 x 4 map lost its held aspect and a band map's phone layout came out shorter than its desktop one. `.fig-plot` no longer scrolls up and down: while a plot's height shrank, a vertical scrollbar appeared for a moment and plotly redrew 15 px narrower than its div.
+
+**Evidence.** `tests/test_plot_room_browser.py`, a module page of six cards each with a five-line guide (a scatter with a 14-entry legend, curves, bars, a surface, a heatmap, a volcano), main against this change in Chromium:
+
+| Width | Cards with plot < legend + reading | Median plot share of card | Scatter's plot, px |
+|---|---|---|---|
+| 1,280 before | 4 of 6 | 0.19 | 497 x 155 |
+| 1,280 after | 0 of 6 | 0.38 | 833 x 521 |
+| 1,920 before | 1 of 6 | 0.24 | 616 x 155 |
+| 1,920 after | 0 of 6 | 0.55 | 1,473 x 828 |
+
+At 375 px the page does not scroll sideways, before and after; the plot is still smaller than its guide on 4 of 6 phone cards, as before. Planted mutations, each failing the test: the guide back beside the plot; the legend back at the side; the colour bar back at the side; the column fixed at 1,072 px; the 16:9 floor removed; the outweigh floor removed.
+
+**Consequence.** Pages are taller: a card at 1,920 px holds an 828 px plot where it held 304. Not re-measured on the core review pages, which need rebuilding with this code. A scatter with colour and shape lists every pairing in its legend (13 entries for 6 x 2 on Step-1); listing colours and shapes apart would shrink it, a change to `ScatterData` not made here. Prose lines run wider in a 1,600 px column; no measure cap was added.
+
+---
+
 ## D-116 — M2's read stage and M3 read nf-core/rnaseq's own MultiQC tables and Salmon matrices; ctx runs no tool and no MultiQC over its outdir
 
 **Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23, NF.1). Builds on D-113; supersedes ED.6e's cluster route (`--align-dir`) and M2's local read stage (`--reads`, the fastp grid).

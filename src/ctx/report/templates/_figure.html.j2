@@ -154,16 +154,16 @@
 <p class="gene-summary" aria-live="polite">{{ f.defaults.summary }}</p>
 <p class="gene-notes" aria-live="polite"></p>
 {% endif %}
-<div class="fig-body{% if f.text.reading %} has-reading{% endif %}">
+<div class="fig-body">
 <div class="fig-plot"><p class="scroll-hint" hidden>{{ ui.figures.scroll }}</p>{{ f.html }}</div>
+{% if f.below %}<div class="fig-below"><p class="scroll-hint" hidden>{{ ui.figures.scroll }}</p>{{ f.below }}</div>
+{% endif %}
 {% if f.text.reading %}
 <aside class="reading" aria-label="{{ ui.figures.reading_label }}"><p class="reading-title">{{ ui.figures.reading }}</p><ul>
 {% for line in f.text.reading %}<li{% if f.kind == "calls" %} data-reading="{{ loop.index0 }}"{% endif %}>{{ line | code }}</li>
 {% endfor %}</ul></aside>
 {% endif %}
 </div>
-{% if f.below %}<div class="fig-below"><p class="scroll-hint" hidden>{{ ui.figures.scroll }}</p>{{ f.below }}</div>
-{% endif %}
 <figcaption>{{ f.caption | explain_terms("results") }}</figcaption>
 <p class="fig-files">{% if f.page and not standalone %}<a href="{{ f.page }}">{{ ui.figures.open }}</a>{% endif %}{% for label, theme, href in f.files %}<a{% if theme %} class="only-{{ theme }}"{% endif %} href="{{ href }}"{% if f.export and theme %} title="{{ ui.export.reference }}" data-export="{{ href.rsplit('.', 1)[1] }}" data-view="{{ ui.export.view.format(kind=label) }}" data-view-title="{{ ui.export.view_title }}"{% endif %}>{{ label }}</a>{% endfor %}</p>
 {% if f.reproduce %}{% include "_reproduce.html.j2" %}{% endif %}

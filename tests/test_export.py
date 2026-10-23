@@ -187,7 +187,7 @@ def test_alone_is_the_page_figure_at_twice_its_size(name):
     alone = render(FigurePage("Demo", block))
     drawn = _drawn(alone)
     pages = [block.figure, *([block.below] if block.below is not None else [])]
-    parts = ["beside", "across"]
+    parts = ["across", "across"]
     assert len(drawn) == len(pages) == len(_widths(alone))
     for (_, data, layout), page, part, width in zip(
         drawn, pages, parts, _widths(alone), strict=False
@@ -217,11 +217,11 @@ def test_alone_is_the_page_figure_at_twice_its_size(name):
 
 
 def test_the_page_widths_are_the_stylesheets():
-    """The width a module page gives a plot, from the tokens its stylesheet reads: 1,072 px of
-    content less a card's padding and border each side, less the reading guide and the gap
-    beside it; Chromium measured 686 and 1,022 px at a 1,440 px window (2026-10-01).
-    Mutation: the card's border left out, 2 px too wide."""
-    assert PAGE_PLOT_PX == {"across": 1072 - 2 * 25, "beside": 1072 - 2 * 25 - 320 - 16}
+    """The width a module page gives a plot at its narrowest full layout, from the tokens its
+    stylesheet reads: 1,072 px of content less a card's padding and border each side, the
+    reading guide under the plot (D-117); Chromium measured 1,022 px at a 1,440 px window
+    (2026-10-01). Mutation: the card's border left out, 2 px too wide."""
+    assert PAGE_PLOT_PX == {"across": 1072 - 2 * 25}
     css = render(FigurePage("Demo", _block("pca")))
     assert ".fig{margin:var(--space-5) 0 var(--space-6);padding:var(--fig-pad);" in css
     assert "gap:var(--fig-gap)" in css and "--fig-pad: 24px; --fig-gap: 16px;" in css
@@ -237,11 +237,11 @@ def _module(*blocks) -> ModulePage:
     )  # fmt: skip
 
 
-def test_linked_view_puts_the_sets_across_the_card_and_the_scatter_beside_the_guide():
-    """The scatter in the plot column, the reading guide beside it, the parallel sets after
-    both and before the caption, with room for their outer labels; each plot holds its own
-    trace, as the brush addresses them. Mutations: the parallel sets drawn inside the plot
-    column again; their margins left at the template's, which cut the outer labels off."""
+def test_linked_view_puts_the_sets_under_the_scatter_and_the_guide_under_both():
+    """The scatter, the parallel sets under it, then the reading guide and the caption (D-117),
+    with room for the sets' outer labels; each plot holds its own trace, as the brush
+    addresses them. Mutations: the parallel sets drawn inside the plot column again; their
+    margins left at the template's, which cut the outer labels off."""
     block = _block("linked")
     assert [t.type for t in block.figure.data] == ["scatter"]
     assert [t.type for t in block.below.data] == ["parcats"]
@@ -250,8 +250,8 @@ def test_linked_view_puts_the_sets_across_the_card_and_the_scatter_beside_the_gu
     plot = html.index('<div class="fig-plot">')
     reading, below = html.index('<aside class="reading"'), html.index('<div class="fig-below">')
     caption = html.index("<figcaption>")
-    assert plot < html.index('id="ctx-figure-0"') < reading < below < caption
-    assert below < html.index('id="ctx-below-0"') < caption
+    assert plot < html.index('id="ctx-figure-0"') < below < html.index('id="ctx-below-0"')
+    assert html.index('id="ctx-below-0"') < reading < caption
     # plotly sets the first dimension's levels left of the plot and the last's right of it,
     # each as wide as the one measure of text width sets it.
     data, tick = demo_linked(), on_page(SIZES["tick"])

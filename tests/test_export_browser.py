@@ -880,18 +880,19 @@ def test_no_request_and_no_error(ran):
 
 
 def test_linked_view_stacks_at_phone_width(ran):
-    """At 375 px the scatter, its reading guide and the parallel sets stack, each inside the
+    """At 375 px the scatter, the parallel sets and the reading guide stack, each inside the
     page, which does not scroll sideways. Mutation: the parallel sets inside the plot column."""
     acted = ran[0]["phone"]["acted"]["stack"]
     plot, reading, below = acted["plot"], acted["reading"], acted["below"]
     assert acted["scroll"] <= acted["page"] == 375
-    assert plot[3] <= reading[1] + 1 and reading[3] <= below[1] + 1
+    assert plot[3] <= below[1] + 1 and below[3] <= reading[1] + 1
     assert all(box[0] >= 0 and box[2] <= acted["page"] for box in (plot, reading, below))
 
 
 def test_alone_draws_the_page_figure_at_twice_its_size(ran):
     """Measured in the browser: the standalone scatter's tick text and markers twice the
-    module page's, and its width twice the page's at full layout (style.PAGE_PLOT_PX) in a
+    module page's, and its width twice the page's at its narrowest full layout
+    (style.PAGE_PLOT_PX) in a
     2,560 px window, wide enough for it (Rytis 2026-10-02); the
     volcano's legend keys twice as long and as thick, its marks twice as large up to plotly's
     16 px cap. Mutations: ALONE_SCALE 1.5; the legend's key length left out of the template,
@@ -900,7 +901,7 @@ def test_alone_draws_the_page_figure_at_twice_its_size(ran):
     assert alone["tick"] == pytest.approx(TWICE * page["tick"])
     assert (page["marker"], alone["marker"]) == pytest.approx(
         (PLOTLY_MARKER_PX, TWICE * PLOTLY_MARKER_PX))  # fmt: skip
-    assert alone["width"] == pytest.approx(TWICE * PAGE_PLOT_PX["beside"])
+    assert alone["width"] == pytest.approx(TWICE * PAGE_PLOT_PX["across"])
     (small,), (large,) = ran[0]["page_volcano"]["acted"], ran[0]["alone_volcano"]["acted"]
     for (a, wa), (b, wb) in zip(small["legendlines"], large["legendlines"], strict=True):
         assert (b[2] - b[0], wb) == pytest.approx((TWICE * (a[2] - a[0]), TWICE * wa))
@@ -932,18 +933,19 @@ def _inside(inner: list[float], outer: list[float], slack: float = 0.5) -> bool:
 
 
 @pytest.mark.parametrize("width", [1280, 1440])
-def test_linked_view_spans_the_card_under_the_guide_at_desktop_width(ran, width):
-    """The parallel sets start where the scatter does and end where the reading guide does,
-    and at 1,440 px they are PAGE_PLOT_PX["across"] wide. Mutation: the parallel sets moved
-    into the plot column, beside the guide, which passed a test of the HTML's order alone
-    (review, 2026-10-01)."""
+def test_linked_view_spans_the_card_over_the_guide_at_desktop_width(ran, width):
+    """The parallel sets lie under the scatter, as wide, and the reading guide under both,
+    across the card (D-117), the sets at 1,440 px at least PAGE_PLOT_PX["across"] wide (at
+    1,280 the contents rail leaves the column 968 px). Mutations: the
+    parallel sets moved into the plot column, which passed a test of the HTML's order alone
+    (review, 2026-10-01); the guide back beside the scatter."""
     acted = ran[0][f"desktop_{width}"]["acted"]
     plot, reading, below = acted["plot"], acted["reading"], acted["below"]
-    assert plot[2] < reading[0], "the guide sits beside the scatter"
-    assert below[0] == pytest.approx(plot[0]) and below[2] == pytest.approx(reading[2])
-    assert below[1] >= max(plot[3], reading[3])
+    assert reading[1] >= below[3] >= below[1] >= plot[3], "the guide sits under both plots"
+    assert below[0] == pytest.approx(plot[0]) and below[2] == pytest.approx(plot[2])
+    assert (reading[0], reading[2]) == pytest.approx((plot[0], plot[2]))
     if width == 1440:
-        assert acted["sets"] == pytest.approx(PAGE_PLOT_PX["across"])
+        assert acted["sets"] >= PAGE_PLOT_PX["across"]
 
 
 def test_at_phone_width_nothing_runs_into_anything(ran):
@@ -1012,7 +1014,7 @@ def test_band_map_reflows_as_the_window_changes(ran, name, windows):
     result = ran[0][name]
     plots = [step["plots"][0] for step in (result["acted"], *result["resized"])]
     assert len(plots) == len(windows)
-    floor, cap = TWICE * PHONE_PLOT_PX, TWICE * PAGE_PLOT_PX["beside"]
+    floor, cap = TWICE * PHONE_PLOT_PX, TWICE * PAGE_PLOT_PX["across"]
     alone = name == "bands_alone_reflow"
     for plot in plots:
         expected = min(plot["box"], cap) if alone else plot["box"]
@@ -1137,15 +1139,17 @@ def test_alone_keeps_twice_the_type_within_the_window(ran, kind, width):
 
 def test_alone_takes_twice_the_page_width_in_a_wide_window(ran):
     """At a 2,560 px window each plot opened alone is twice as wide as the module page draws it
-    at full layout (1,440 px): the volcano and the scatter 2 x 686 px, the parallel sets 2 x
-    1,022 px, with no scroll hint. Mutation: the plot left at its box's width, 2,447 px."""
+    at its narrowest full layout, 2 x 1,022 px, with no scroll hint; the module page itself
+    draws every plot across its card, at least that wide, wider as its column grows with the
+    window (D-117). Mutation: the plot left at its box's width, 2,447 px."""
     page = ran[0]["fit_page"]["acted"]["plots"]
-    beside, across = PAGE_PLOT_PX["beside"], PAGE_PLOT_PX["across"]
-    assert [round(page[i]["drawn"]) for i in (0, 1, 2)] == [beside, across, beside]
+    across = PAGE_PLOT_PX["across"]
+    assert len({round(page[i]["drawn"]) for i in (0, 1, 2)}) == 1
+    assert page[0]["drawn"] >= across
     for kind, numbers in ON_PAGE.items():
         fit = ran[0][f"fit_{kind}_2560"]["acted"]
-        for plot, i in zip(fit["plots"], numbers, strict=True):
-            assert plot["drawn"] == pytest.approx(TWICE * page[i]["drawn"]) and not plot["hint"]
+        for plot in fit["plots"][: len(numbers)]:
+            assert plot["drawn"] == pytest.approx(TWICE * across) and not plot["hint"]
 
 
 def test_alone_reflows_when_the_window_narrows(ran):
@@ -1156,7 +1160,7 @@ def test_alone_reflows_when_the_window_narrows(ran):
     plot."""
     before, (after,) = ran[0]["reflow"]["acted"], ran[0]["reflow"]["resized"]
     ((wide,), (narrow,)) = before["plots"], after["plots"]
-    assert wide["drawn"] == pytest.approx(TWICE * PAGE_PLOT_PX["beside"])
+    assert wide["drawn"] == pytest.approx(TWICE * PAGE_PLOT_PX["across"])
     assert narrow["drawn"] == pytest.approx(narrow["box"], abs=0.5)
     assert narrow["drawn"] < wide["drawn"]
     assert after["scroll"] <= after["page"] and not narrow["hint"]

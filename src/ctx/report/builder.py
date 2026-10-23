@@ -30,6 +30,7 @@ from ctx.report.figures import defaults, json_for_script, pack_json, prepare, un
 from ctx.viz.style import (
     ALONE_SCALE,
     NARROW_PX,
+    PAGE_PLOT_ASPECT,
     RAIL_FROM_PX,
     THEMES,
     css_layout,
@@ -685,7 +686,7 @@ def render(page: Page, glossary_href: str = "") -> str:
             **{name: Markup(css_variables(theme)) for name, theme in THEMES.items()},
             "layout": Markup(css_layout()),
         },
-        "layout": {"rail_from": RAIL_FROM_PX, "narrow": NARROW_PX},
+        "layout": {"rail_from": RAIL_FROM_PX, "narrow": NARROW_PX, "plot_aspect": PAGE_PLOT_ASPECT},
         "templates": json_for_script(plotly_templates()),
         "plotly_js": Markup(packed_plotly_js()),
         "terms": glossary.Terms(),

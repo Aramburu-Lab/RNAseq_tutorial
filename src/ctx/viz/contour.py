@@ -24,6 +24,7 @@ from ctx.viz.style import (
     LABEL_BOX_PAD,
     LINE_WIDTHS,
     MARKER_SIZE,
+    PLOTLY_COLORBAR_PX,
     PLOTLY_HEIGHT_PX,
     PLOTLY_LEGEND_SWATCH_PX,
     PLOTLY_MARKER_PX,
@@ -296,7 +297,11 @@ class SurfaceData:
             x=xs, y=ys, z=z, zmin=edges[0], zmax=edges[-1], autocontour=False,
             contours={"start": edges[0], "end": edges[-1], "size": size, "coloring": "fill"},
             colorscale=plotly_steps(list(CIVIDIS)), line={"width": LINE_WIDTHS["band_edge"]},
-            colorbar={"title": {"text": z_title}},
+            # A row under the plot, never beside it, where it took a third of a page plot's
+            # width (D-117); the figure files keep theirs beside the axes.
+            colorbar={"title": {"text": z_title, "side": "top"}, "orientation": "h",
+                      "x": 0, "xanchor": "left", "y": 0, "yref": "container",
+                      "yanchor": "bottom", "len": 0.5, "thickness": PLOTLY_COLORBAR_PX},
             hovertemplate=f"{x_title}: %{{x}}<br>{y_title}: %{{y}}<br>{z_title}: %{{z:.4g}}"
             "<extra></extra>",
         ))  # fmt: skip

@@ -1,4 +1,8 @@
 {# Figure settling: each plot follows its box and swaps layouts. Included by _page.js.j2, inside its one function. #}
+  /* A page plot's drawing area is at least this share of its width tall (style.PAGE_PLOT_ASPECT,
+     16:9, D-117), and wider than a phone's card it is larger than its legend and its reading
+     guide together: a legend's rows take height from the figure, not from the plot. */
+  var PLOT_ASPECT = {{ layout.plot_aspect }}, PLOT_OUTWEIGHS_FROM = {{ layout.narrow }};
 {% raw %}  function at(o, key) {
     return key.split(/[.[\]]+/).filter(Boolean).reduce(function (o, p) { return o && o[p]; }, o);
   }
@@ -53,6 +57,9 @@
                restyle: state.unstyle.concat(twin.restyle) };
     };
     var heightsAt = null, heightsSet = [], settled = false;
+    /* The height the figure, its swapped layout or its view asks for; the 16:9 floor (wanted)
+       grows a plot past it and gives the height back as the plot narrows. */
+    var asked = div.layout.height || null;
     /* The layout for the box as it is. Below the floor the box takes the module page's
        width first, and a phone's layout follows the plot's width there. */
     function pick() {
@@ -105,7 +112,8 @@
         swapping = false;
       }
     }
-    function setHeight(height) {
+    function setHeight(height, floor) {
+      if (!floor) asked = height;
       heights(height);
       Plotly.relayout(div, { height: height, autosize: true, width: null });
     }
@@ -118,6 +126,23 @@
       var size = full._size;
       return size.t + size.b + ratio * size.w * Math.abs(y.range[1] - y.range[0]) /
         Math.abs(x.range[1] - x.range[0]);
+    }
+    /* The height the plot takes at the width drawn: the held one where the cells hold their
+       aspect, else the asked height, grown until the drawing area is PLOT_ASPECT of its width
+       tall at the margins as drawn and, off a phone, larger than the legend's area and the
+       reading guide's. A legend's margin and the guide follow the width, not the height. A
+       phone keeps its own heights: there the guide alone is larger than most plots. */
+    function wanted() {
+      var full = div._fullLayout;
+      if (ratio !== null || !full) return held();
+      var size = full._size, plot = PLOT_ASPECT * size.w;
+      if (holder.clientWidth > PLOT_OUTWEIGHS_FROM) {
+        var legend = full.showlegend && full.legend ? full.legend._width * full.legend._height : 0;
+        var guide = div.closest(".fig-plot") && div.closest(".fig").querySelector(".reading");
+        var box = guide ? guide.getBoundingClientRect() : { width: 0, height: 0 };
+        plot = Math.max(plot, ((legend || 0) + box.width * box.height) / size.w + 1);
+      }
+      return Math.max(asked || full.height, Math.ceil(size.t + size.b + plot));
     }
     function apply() {
       if (swapping) return;
@@ -132,7 +157,7 @@
         Plotly.Plots.resize(div);
         return;
       }
-      settle(held(), width);
+      settle(wanted(), width);
     }
     /* plotly's margins follow the height it draws at, and not smoothly: Step-1's 8-sample
        heatmap drawn 946.5 px tall took margins that held its cells at 938.1 px, and at
@@ -146,13 +171,13 @@
       var seen = heightsSet.some(function (h) { return Math.abs(h - height) <= 1; });
       if (!seen) {
         heightsSet.push(height);
-        setHeight(height);
+        setHeight(height, true);
         return;
       }
       var tallest = Math.max.apply(null, heightsSet);
       if (!settled && Math.abs(tallest - full.height) > 1) {
         settled = true;
-        setHeight(tallest);
+        setHeight(tallest, true);
       }
     }
     if (window.ResizeObserver) {
@@ -170,6 +195,7 @@
       /* A redraw that names its height takes it on the div and its wrapper too, which keep a
          phone's height a swap wrote: M6's six genes stood 1,298 px tall at 480 px (PK.4). */
       if (e.detail && e.detail.height) setHeight(e.detail.height);
+      else asked = div.layout.height || asked;
       /* The shown option's least width (views.own_widths), the build's where it names none: a
          view of 4 then 11 features kept the 4's, and 11 turned names overlapped 10 times. */
       built = (e.detail && e.detail.width) || first;

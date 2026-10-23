@@ -8,7 +8,9 @@ html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
    unbroken, a reading guide's source path widened Step-1's M2 page to 1,579 px. break-word,
    unlike anywhere, leaves min-content alone, so a table keeps its columns and scrolls. */
 body{margin:0;background:var(--page);color:var(--text);font:var(--size-base)/1.62 var(--font-page);font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;overflow-wrap:break-word}
-.page{max-width:calc(var(--content) + 2 * var(--gutter-wide));margin:0 auto;padding:0 var(--gutter-wide) var(--space-9)}
+/* The column grows with the window up to --content-wide, so a wide screen gives every plot
+   more room (D-117). */
+.page{max-width:calc(var(--content-wide) + 2 * var(--gutter-wide));margin:0 auto;padding:0 var(--gutter-wide) var(--space-9)}
 .content{min-width:0}
 section,.group,.fig,.entry{scroll-margin-top:calc(var(--topbar) + var(--space-4))}
 
@@ -118,19 +120,25 @@ html:not(.js) .tabs{display:none}
 .fig-lead{margin:var(--space-1) 0 0;color:var(--text)}
 .fig-body{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--fig-gap);margin-top:var(--space-4)}
 /* A plot kept from shrinking below its least legible width, on a phone or opened alone at
-   twice its type, scrolls inside the card, and the page script shows the hint above it. */
-.fig-plot{min-width:0;overflow-x:auto}
-/* A second plot under the plot and its reading guide, across the card: a linked view's parallel sets. */
-.fig-below{min-width:0;margin-top:var(--fig-gap);overflow-x:auto}
+   twice its type, scrolls inside the card, and the page script shows the hint above it. Never
+   up and down: while a plot's height shrinks, its box is shorter than its drawing for a
+   moment, and a vertical scrollbar there had plotly redraw 15 px narrower than its div (D-117). */
+.fig-plot{min-width:0;overflow-x:auto;overflow-y:hidden}
+/* A second plot under the plot and over the reading guide, across the card: a linked view's
+   parallel sets, next to the scatter they are linked to. */
+.fig-below{min-width:0;overflow-x:auto;overflow-y:hidden}
 .scroll-hint{position:sticky;left:0;margin:0 0 var(--space-2);font-size:var(--fs-sm);color:var(--muted)}
 /* Opened alone, a figure's type, marks and lines are twice the page's (style.ALONE_SCALE) and
    its plot twice as wide where the window has room (figures.figure_html): the page takes the
-   window's width and the reading guide goes under the plot. */
+   window's width. */
 .page.alone{max-width:none}
+/* "How to read this" sits under the plot at every width, across the card, never beside it:
+   beside, its 320 px column took the plot's width, and the plot was the smaller part of 28 of
+   88 cards (D-117). Its lines flow into columns where the card is wide. */
 .reading{align-self:start;margin:0;padding:var(--space-3) var(--space-4);background:var(--surface-2);border:var(--rule) solid var(--line);border-left:var(--rule-accent) solid var(--link);border-radius:var(--radius-sm);font-size:var(--fs-sm)}
 .reading-title{margin:0 0 var(--space-2);font-size:var(--fs-xs);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--link)}
-.reading ul{margin:0;padding-left:var(--space-4)}
-.reading li{margin:var(--space-1) 0;color:var(--text)}
+.reading ul{margin:0;padding-left:var(--space-4);column-width:var(--reading);column-gap:var(--space-7)}
+.reading li{margin:0 0 var(--space-1);color:var(--text);break-inside:avoid}
 .fig figcaption{margin-top:var(--space-3);font-size:var(--fs-xs);line-height:1.55;color:var(--muted)}
 .fig-files{display:flex;flex-wrap:wrap;gap:var(--space-1) var(--space-4);margin:var(--space-2) 0 0;font-size:var(--fs-xs);color:var(--muted)}
 /* A moved view's PDF and SVG draw in the page and link no file. */
@@ -293,9 +301,8 @@ html:not(.js) .glossary-search{display:none}
 section,.group,.fig,.entry{scroll-margin-top:calc(2 * var(--topbar) + var(--space-4))}
 }
 @media (min-width:{{ layout.rail_from }}px){
-.page.has-rail{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);column-gap:var(--gap);max-width:calc(var(--rail) + var(--gap) + var(--content) + 2 * var(--gutter-wide))}
+.page.has-rail{display:grid;grid-template-columns:var(--rail) minmax(0,1fr);column-gap:var(--gap);max-width:calc(var(--rail) + var(--gap) + var(--content-wide) + 2 * var(--gutter-wide))}
 .toc{position:sticky;top:var(--topbar);align-self:start;max-height:calc(100vh - var(--topbar));overflow-y:auto;padding-top:var(--space-8)}
-.page:not(.alone) .fig-body.has-reading{grid-template-columns:minmax(0,1fr) minmax(0,var(--reading))}
 }
 @media (max-width:{{ layout.narrow }}px){
 .page{padding-left:var(--gutter);padding-right:var(--gutter)}

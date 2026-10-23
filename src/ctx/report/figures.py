@@ -75,7 +75,7 @@ def _width(scale: float, part: str, needs: list[list[float]]) -> str:
     return f"max({width}, {least:.0f}px)" if least else width
 
 
-def plot_width(figure: Mapping[str, Any], scale: float = 1.0, part: str = "beside") -> str:
+def plot_width(figure: Mapping[str, Any], scale: float = 1.0, part: str = "across") -> str:
     """The CSS width of a figure's plot box (``_width``), from its own ``meta.least_width``.
 
     One reader for the build's box and for each view option's (``views.viewed``): a view of 4
@@ -220,7 +220,7 @@ def _packed(html: str) -> str:
     return f'{html[: match.end()]}...ctxUnpack("{pack_json(args)}"){html[at:]}'
 
 
-def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "beside") -> Markup:
+def figure_html(figure: Any, div_id: str, scale: float = 1.0, part: str = "across") -> Markup:
     """The plotly div and its drawing script, without plotly.js itself.
 
     The script's three arguments travel as ``pack_json`` text (``_packed``; Z.1, Z.5).

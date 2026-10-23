@@ -3,7 +3,7 @@
     var fig = form.closest(".fig");
     var cfg = JSON.parse(document.getElementById(form.getAttribute("data-controls")).textContent);
     var rows = ctxRows(form);
-    /* The scatter beside the reading guide; the parallel sets under both, across the card. */
+    /* The scatter; the parallel sets under it, across the card. */
     var div = fig.querySelector(".fig-plot .js-plotly-plot");
     var sets = fig.querySelector(".fig-below .js-plotly-plot") || div;
     var summary = fig.querySelector(".brush-summary");
