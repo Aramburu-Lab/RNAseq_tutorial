@@ -3,7 +3,7 @@
 title = "M2 Quality control: {dataset}"
 budget = "Track A: under {minutes} min and {ram_gb} GB"
 purpose = "Flag samples and runs unlike their stratum on each QC metric, and test whether a metric or flag differs between a contrast's groups."
-input = "{samples} samples in {runs} runs from the `ctx gather` sample sheet, its counts where gather wrote them, and the registry `{registry}`. With `--rnaseq-dir`, the nf-core/rnaseq reports; with `--reads`, the [[FASTQ]] files."
+input = "{samples} samples in {runs} runs from the `ctx gather` sample sheet, its counts where gather wrote them, and the registry `{registry}`. With `--rnaseq-dir`, nf-core/rnaseq's own [[MultiQC]] tables of Trim Galore, Salmon and FastQC."
 method = "No universal cut-off exists for most metrics, so a sample is flagged beyond its stratum's median ± {k} scaled [[MAD|MADs]], on the bad side. Where the registry cites a cut-off, the value also gets an [[QC bands|absolute band]]: good, usable or bad. [[Mann-Whitney]] U tests each metric, and [[Fisher's exact test]] each flag, between the groups of every unpaired contrast, with [[BH]] adjustment."
 interpretation = "{flagged} of {runs} runs are flagged, {excluded} of them excluded by a registry action; {confounded} of {tests} confounding tests have a [[padj|BH-adjusted p]] below {alpha}. Do not set a sample aside on a metric that differs between the groups of a contrast: that removes part of the difference under test. A flag that tracks [[read length]] describes the [[batch]], not the sample."
 # "Term: rest" in a pitfall prints Term in bold.
@@ -88,11 +88,7 @@ paired = "not tested: paired, so its groups share individuals, which Mann-Whitne
 no_annotation = "Composition shares and the top-gene share not measured: the dataset file names no {resource} resource, so no gene has a type."
 not_fetched = "Composition shares and the top-gene share not measured: the annotation is not at {path}; run ctx setup with this dataset file."
 no_counts = "Counts not judged: gather wrote no counts for this dataset (it needs --rnaseq-dir). The reads and the pipeline's reports are judged alone."
-cluster_reads = "FastQC, fastp and seqkit ran on the cluster; MultiQC read their reports for {runs} runs of {samples} samples from {folder}."
-skipped = "{n} runs left unread, their FASTQ not verified or not downloaded (the skipped table lists why): {runs}."
 no_sequence_content = "{title}: FastQC's verdict is judged, and no figure is drawn. MultiQC writes no table of it, and only MultiQC reads FastQC's reports."
-flat_grid = "The fastp grid on {run} is flat: every setting keeps {pct:.1f} % of its reads, so there is nothing to map."
-flat_floor = "The fastp grid on {run} is flat: {kept} settings each keep {pct:.1f} % of its reads, and the other {none} keep none. There is nothing to map."
 
 [tests]
 fisher = "Fisher's exact test, two-sided"
@@ -192,18 +188,11 @@ columns.agrees = "Whether they agree; empty with no recorded sex."
 
 # The tables ctx figure redraws M2's figures from, beside those above (F.1).
 [tables.figure_options]
-units = { mad = "MADs", fastp_q = "Phred", fastp_u = "percent", fastp_l = "nt", fastp_window = "nt", fastp_mean = "Phred" }
+units = { mad = "MADs" }
 columns.strata = "The --strata columns, comma separated."
 columns.peers = "The --peers columns, comma separated."
 columns.mad = "The MAD multiplier k the bands used."
 columns.registry = "The QC registry file the run read."
-columns.fastp_q = "fastp -q: the lowest quality a base counts as qualified."
-columns.fastp_u = "fastp -u: the most unqualified bases a read keeps, in percent."
-columns.fastp_l = "fastp -l: the shortest read kept."
-columns.fastp_cut_tail = "Whether fastp cut low-quality tails."
-columns.fastp_window = "fastp -W: the tail cut's window."
-columns.fastp_mean = "fastp -M: the tail cut's mean quality."
-columns.grid_run = "The --grid-run run, empty for the first read."
 
 [tables.pca_scores]
 units = { pc1 = "VST units", pc2 = "VST units" }
@@ -251,7 +240,7 @@ reading = [
     "Each bubble is one sample: across, the fragments sequenced; up, the fragments Salmon assigned to a transcript.",
     "Solid line: every fragment useful. Dashed lines: the useful fraction's median ± {k} scaled MAD.",
 ]
-units = { total_reads = "fragments", reads_written = "fragments", reads_too_short = "fragments", reads_too_long = "fragments", reads_too_many_n = "fragments", reads_discarded_untrimmed = "fragments", num_processed = "fragments", num_mapped = "fragments", num_decoy_fragments = "fragments", not_assigned = "fragments", useful_share = "fraction", mt_rrna_share = "fraction", mt_fraction = "fraction", mt_rrna_fraction = "fraction", rrna_fraction = "fraction" }
+units = { total_reads = "fragments", reads_written = "fragments", reads_too_short = "fragments", reads_too_long = "fragments", reads_too_many_n = "fragments", reads_discarded_untrimmed = "fragments", num_processed = "fragments", num_mapped = "fragments", num_decoy_fragments = "fragments", not_assigned = "fragments", removed_before_salmon = "fragments", useful_share = "fraction", mt_rrna_share = "fraction", mt_fraction = "fraction", mt_rrna_fraction = "fraction", rrna_fraction = "fraction" }
 columns.sample = "Sample."
 columns.group = "Every sample, where no sheet column has few enough levels to colour by."
 columns.total_reads = "Fragments Trim Galore read: read 1 of a pair."
@@ -260,10 +249,11 @@ columns.reads_too_short = "Fragments shorter than the length floor after trimmin
 columns.reads_too_long = "Fragments longer than the ceiling, where one was set."
 columns.reads_too_many_n = "Fragments with too many N bases."
 columns.reads_discarded_untrimmed = "Fragments discarded for carrying no adapter, where that was asked."
-columns.num_processed = "Fragments Salmon processed: the ones Trim Galore wrote."
+columns.num_processed = "Fragments Salmon processed: the ones Trim Galore wrote, less any a step between removed."
 columns.num_mapped = "Fragments Salmon assigned to a transcript: the useful ones."
 columns.num_decoy_fragments = "Fragments whose best match was a decoy, the genome outside the transcripts."
 columns.not_assigned = "Fragments processed but neither assigned nor decoys."
+columns.removed_before_salmon = "Fragments Trim Galore wrote that a step before Salmon removed, such as BBSplit."
 columns.mt_fraction = "Share of counted reads on chrM genes other than Mt_rRNA."
 columns.mt_rrna_fraction = "Share of counted reads on the Mt_rRNA genes."
 columns.rrna_fraction = "Share of counted reads on nuclear rRNA genes, their pseudogenes and the two 18S-antisense lncRNAs."
@@ -276,7 +266,7 @@ title_view = "Where every read goes, {view}"
 node_share = "{node} {share:.1%}"
 lead = "Of {total:,} fragments, {useful:,} ({share:.1%}) were assigned to a transcript."
 stages = ["Sequenced", "Trim Galore", "Salmon"]
-caption = "Every fragment of the {n} samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments Trim Galore wrote. No test."
+caption = "Every fragment of the {n} samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments it processed. No test."
 reading = [
     "Each column is a stage; a block's height is the fragments with that fate, summed over the samples.",
     "A band's width is the fragments passing from one fate to the next.",
@@ -291,6 +281,7 @@ nodes.reads_discarded_untrimmed = "discarded untrimmed"
 nodes.num_mapped = "assigned"
 nodes.num_decoy_fragments = "decoy"
 nodes.not_assigned = "not assigned"
+nodes.removed_before_salmon = "removed before Salmon"
 columns.source = "The fate the fragments leave."
 columns.target = "The fate they reach."
 columns.value = "Fragments along the link, summed over the samples."
@@ -301,18 +292,13 @@ view_level = "the samples whose {column} is {level}"
 
 [groups]
 fates = "Where the reads went"
-reads = "The reads themselves"
 glance = "Every sample at a glance"
 metrics = "Every metric, sample by sample"
 identity = "Composition and identity"
-run_metrics = "Every read metric, run by run"
 fastqc = "FastQC's own plots, sample by sample"
 
-[multiqc]
-comment = "Coloured by the course's QC registry: green good, orange usable, red bad, where a source gives a band. ctx qc also judges each sample against its own stratum."
-
 [tables.fates]
-units = { total_reads = "fragments", reads_written = "fragments", reads_too_short = "fragments", reads_too_long = "fragments", reads_too_many_n = "fragments", reads_discarded_untrimmed = "fragments", num_processed = "fragments", num_mapped = "fragments", num_decoy_fragments = "fragments", not_assigned = "fragments" }
+units = { total_reads = "fragments", reads_written = "fragments", reads_too_short = "fragments", reads_too_long = "fragments", reads_too_many_n = "fragments", reads_discarded_untrimmed = "fragments", num_processed = "fragments", num_mapped = "fragments", num_decoy_fragments = "fragments", not_assigned = "fragments", removed_before_salmon = "fragments" }
 columns.sample = "Sample."
 columns.total_reads = "Fragments Trim Galore read: read 1 of a pair."
 columns.reads_written = "Fragments Trim Galore wrote."
@@ -320,10 +306,11 @@ columns.reads_too_short = "Fragments shorter than the length floor after trimmin
 columns.reads_too_long = "Fragments longer than the ceiling, where one was set."
 columns.reads_too_many_n = "Fragments with too many N bases."
 columns.reads_discarded_untrimmed = "Fragments discarded for carrying no adapter, where that was asked."
-columns.num_processed = "Fragments Salmon processed: the ones Trim Galore wrote."
+columns.num_processed = "Fragments Salmon processed: the ones Trim Galore wrote, less any a step between removed."
 columns.num_mapped = "Fragments Salmon assigned to a transcript."
 columns.num_decoy_fragments = "Fragments whose best match was a decoy, the genome outside the transcripts."
 columns.not_assigned = "Fragments processed but neither assigned nor decoys."
+columns.removed_before_salmon = "Fragments Trim Galore wrote that a step before Salmon removed, such as BBSplit."
 
 # FastQC's own plots behind its verdicts (P2Q.9): read 1 of every run or sample, through MultiQC.
 [figures.fastqc]
@@ -398,48 +385,6 @@ reading = [
     "Each point is one {unit}: up, the share of its reads that are its most frequent sequence.",
     "FastQC warns from one limit and fails from the other; the verdict is shown as a status, not on this axis.",
 ]
-
-[figures.grid]
-title = "Reads fastp keeps, by its quality and length settings"
-lead = "On {run}, fastp keeps between {low:.1f} and {high:.1f} % of the reads across the grid."
-# Where some settings keep no read: grey, apart from the bands, which span the rest.
-lead_floor = "On {run}, fastp keeps between {low:.1f} and {high:.1f} % of the reads at {kept} of the {cells} settings; the other {none} keep none."
-x = "fastp -q"
-y = "fastp -l"
-z = "Reads kept"
-mark = "the setting used (-q {q}, -l {l})"
-floor = "keeps no read"
-caption = "Reads fastp keeps from {run} on a {nq} by {nl} grid of -q and -l, other settings as used (-u {u}). {bands} equal colour bands; the line marks {isoline:.0f} % kept. No test."
-caption_floor = "Reads fastp keeps from {run} on a {nq} by {nl} grid of -q and -l, other settings as used (-u {u}). Grey: {none} settings keep none; {bands} equal bands span the rest; the line marks {isoline:.0f} % kept. No test."
-reading = [
-    "Across, fastp -q; up, fastp -l. The colour at each point is the percentage of reads fastp keeps there.",
-    "In the {bands} equal bands, dark blue keeps the fewest reads and yellow the most; the labelled line joins settings keeping {isoline:.0f} %.",
-    "The dot marks the setting used: -q {q}, -l {l}.",
-]
-reading_floor = "Grey: the {none} settings that keep no read. The bands span only the {kept} that keep some."
-units = { q = "Phred", l = "nt", passed_reads = "reads", passed_pct = "%" }
-columns.q = "fastp -q: a base below this Phred quality is unqualified."
-columns.l = "fastp -l: a read shorter than this is dropped."
-columns.passed_reads = "Reads that passed every filter."
-columns.passed_pct = "Their percentage of the reads in."
-
-[tables.read_flags]
-units = {}
-columns.run_accession = "Run flagged."
-columns.metric = "Registry metric that flagged it."
-columns.reason = "Why, in words."
-
-[tables.skipped]
-units = {}
-columns.run_accession = "Run left unread."
-columns.status = "Its FASTQ status from gather: why it was not read."
-
-[tables.grid]
-units = { q = "Phred", l = "nt", passed_reads = "reads", passed_pct = "%" }
-columns.q = "fastp -q of the cell."
-columns.l = "fastp -l of the cell."
-columns.passed_reads = "Reads that passed every filter."
-columns.passed_pct = "Their percentage of the reads in."
 
 [figures.strip]
 lead = "{flagged} of {n} flagged; a triangle is flagged, the grey bar is its stratum's median ± {k} MAD."

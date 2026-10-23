@@ -30,16 +30,16 @@ rationale = "Many RNA-seq metrics have no universal cut-off; a sample far from i
 # as the row "Theoretical GC Content" of its per-sequence GC plot data.
 fastqc_theoretical_gc = "hg38_txome"
 
-# ---- M2a, reads before alignment (FastQC 0.12.1, fastp 1.1.0, seqkit 2.13.0) --------------
+# ---- M2a, reads before alignment: nf-core's FastQC 0.12.1 on the raw reads (D-116) ---------
 
 [metrics.total_sequences]
 stage = "reads"
 title = "Reads"
 meaning = "How many reads the run holds."
-computed = "FastQC Total Sequences"
+computed = "FastQC Total Sequences, from nf-core's MultiQC FastQC (raw) table"
 unit = "reads"
-table = "general_stats"
-column = "fastqc-total_sequences"
+table = "fastqc_fastqc_raw"
+column = "Total Sequences"
 module = "fastqc"
 scale = "log10"
 direction = "higher"
@@ -64,7 +64,7 @@ meaning = "The mean read length, in bases."
 computed = "FastQC average sequence length"
 unit = "nt"
 table = "general_stats"
-column = "fastqc-avg_sequence_length"
+column = "fastqc_raw-avg_sequence_length"
 module = "fastqc"
 scale = "linear"
 direction = "none"
@@ -89,7 +89,7 @@ meaning = "The share of G and C bases."
 computed = "FastQC %GC"
 unit = "%"
 table = "general_stats"
-column = "fastqc-percent_gc"
+column = "fastqc_raw-percent_gc"
 module = "fastqc"
 scale = "linear"
 direction = "none"
@@ -111,7 +111,7 @@ meaning = "The share of reads that are exact copies of another read."
 computed = "100 - FastQC total_deduplicated_percentage"
 unit = "%"
 table = "general_stats"
-column = "fastqc-percent_duplicates"
+column = "fastqc_raw-percent_duplicates"
 module = "fastqc"
 scale = "linear"
 direction = "lower"
@@ -124,72 +124,6 @@ read_length_tied = false
 source = "FastQC 0.12.1 Configuration/limits.txt: duplication warn 70, error 50 (% of reads left after deduplication)"
 source_type = "tool_code"
 
-[metrics.q30_rate]
-stage = "reads"
-title = "Q30 bases"
-meaning = "The share of bases called with at most a 1 in 1000 chance of error, before trimming."
-computed = "seqkit stats -a Q30(%)"
-unit = "%"
-table = "general_stats"
-column = "seqkit_seqkit-Q30_pct"
-module = "seqkit"
-scale = "linear"
-direction = "higher"
-good = 80.0
-usable = 80.0
-causes = ["a degraded run", "late cycles of a long read"]
-action = "flag"
-matters_for_de = true
-read_length_tied = true
-source = "Q30 below 80 % (TODO.md, M2)"
-source_type = "course_convention"
-rationale = "No source for a Q30 cut-off was found (TODO.md, M2); 80 % is the course's line, shown as such."
-
-[metrics.fastp_surviving]
-stage = "reads"
-title = "Reads passing fastp"
-meaning = "The share of reads fastp keeps with its default filters."
-computed = "fastp pct_surviving_reads"
-unit = "%"
-table = "general_stats"
-column = "fastp-pct_surviving_reads"
-module = "fastp"
-scale = "linear"
-direction = "higher"
-bands = "dataset_only"
-# The approved proposal's last sentence read "The -q and -l grid the page lets you move": the
-# grid has no control (test_no_registry_text_claims_a_control_the_page_lacks), so the sentence
-# keeps the page's own claim and the proposal's meaning (test_qc_bands.DEVIATIONS).
-rationale = "At fastp's default filters a run losing 1 read in 20 is degraded; the band rests on 8 teaching runs and holds at default settings only; the page maps one run's -q by -l, without a control. That grid is never shaded, since there a band would grade the settings, not the run."
-causes = ["low quality", "short inserts", "many N bases"]
-action = "flag"
-matters_for_de = true
-read_length_tied = false
-source = "dataset only"
-source_type = "course_convention"
-plot_bands = [95.0, 90.0]
-plot_source = "Course convention, at fastp's default filters only. fastp 1.1.0 --help, the installed binary: -q 'Default 15 means phred quality >=Q15 is qualified.', -u 'Default 40 means 40%', -n 'Default is 5', -l 'default is 15'. At those settings a read is dropped only when more than 40 % of its bases fall below Q15, it carries more than 5 N, or it is shorter than 15 nt. The worst of the 8 teaching runs loses 1.03 %; 95 % is about five times that loss, 90 % about ten. Not sourced. Read 2026-10-01."
-
-[metrics.fastp_passed_reads]
-stage = "reads"
-title = "Reads after fastp"
-meaning = "How many reads remain after fastp's filters. For a paired run fastp counts both mates, while nf-core's band counts pairs, so a paired run meets the band at half the pairs; the course's cohorts are single-end."
-computed = "fastp filtering_result.passed_filter_reads (both mates of a pair)"
-unit = "reads"
-table = "general_stats"
-column = "fastp-filtering_result_passed_filter_reads"
-module = "fastp"
-scale = "log10"
-direction = "higher"
-good = 10000.0
-usable = 10000.0
-causes = ["a failed library", "heavy filtering"]
-action = "flag"
-matters_for_de = true
-read_length_tied = false
-source = "nf-core/rnaseq 3.27.0 min_trimmed_reads 10000 (nextflow.config; the fixture's params file), set for Trim Galore output and transferred here to fastp's"
-source_type = "pipeline_default"
-
 # FastQC's own module verdicts: pass, warn and fail are FastQC's, from its limits.txt.
 [metrics.fastqc_per_base_quality]
 stage = "reads"
@@ -197,7 +131,7 @@ title = "Per-base quality"
 meaning = "Whether the base quality holds up along the read."
 computed = "FastQC per_base_sequence_quality"
 unit = "status"
-table = "fastqc"
+table = "fastqc_fastqc_raw"
 column = "per_base_sequence_quality"
 module = "fastqc"
 kind = "status"
@@ -220,7 +154,7 @@ title = "Adapter content"
 meaning = "Whether reads run into the sequencing adapter, which happens when the insert is shorter than the read."
 computed = "FastQC adapter_content"
 unit = "status"
-table = "fastqc"
+table = "fastqc_fastqc_raw"
 column = "adapter_content"
 module = "fastqc"
 kind = "status"
@@ -240,7 +174,7 @@ title = "N bases"
 meaning = "Whether many bases were called N, unknown."
 computed = "FastQC per_base_n_content"
 unit = "status"
-table = "fastqc"
+table = "fastqc_fastqc_raw"
 column = "per_base_n_content"
 module = "fastqc"
 kind = "status"
@@ -260,7 +194,7 @@ title = "Per-base sequence content"
 meaning = "Whether the four bases occur evenly along the read."
 computed = "FastQC per_base_sequence_content"
 unit = "status"
-table = "fastqc"
+table = "fastqc_fastqc_raw"
 column = "per_base_sequence_content"
 module = "fastqc"
 kind = "status"
@@ -281,7 +215,7 @@ title = "GC distribution"
 meaning = "Whether reads' GC follows one smooth distribution."
 computed = "FastQC per_sequence_gc_content"
 unit = "status"
-table = "fastqc"
+table = "fastqc_fastqc_raw"
 column = "per_sequence_gc_content"
 module = "fastqc"
 kind = "status"
@@ -301,7 +235,7 @@ title = "Overrepresented sequences"
 meaning = "Whether single sequences make up a large share of the reads."
 computed = "FastQC overrepresented_sequences"
 unit = "status"
-table = "fastqc"
+table = "fastqc_fastqc_raw"
 column = "overrepresented_sequences"
 module = "fastqc"
 kind = "status"
@@ -387,10 +321,10 @@ plot_source = "Course convention. Good to 2.3 %: Trim Galore 0.6.2 trimmed 2.3 %
 stage = "trim"
 title = "Processed reads"
 meaning = "How many reads Trim Galore processed."
-computed = "Trim Galore total_reads"
+computed = "Trim Galore total_reads, from nf-core's MultiQC Trim Galore table (read 1 of a pair)"
 unit = "reads"
-table = "general_stats"
-column = "trim_galore-tg_total_reads"
+table = "trim_galore"
+column = "total_reads"
 module = "trim_galore"
 scale = "log10"
 direction = "higher"
@@ -427,7 +361,8 @@ source = "measured on GENCODE 50 and GRCh38 chr22 (2026-10-01)"
 source_type = "course_convention"
 
 # M2 judges the next four from M3's alignment table, one row per sample, when `ctx process` has
-# run on the dataset (M3.12). M3 aligns to part of the genome, so no genome-wide band applies.
+# run on the dataset (M3.12). M3's laptop route aligns to part of the genome, so no genome-wide
+# band applies; nf-core's route (D-116) aligns to the whole one and writes the same columns.
 [metrics.align_unique_pct]
 stage = "align"
 title = "Reads mapped once"
@@ -523,6 +458,105 @@ matters_for_de = true
 read_length_tied = false
 source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), which docs/usage.md applies to Salmon and to RSeQC infer_experiment; transferred to featureCounts gene-assigned reads"
 source_type = "course_convention"
+
+# M2 judges the next five from the strand table of nf-core's route (`ctx process --rnaseq-dir`,
+# D-116), one row per sample: RSeQC infer_experiment's shares as nf-core's MultiQC plots them,
+# and nf-core's own strand check. ctx applies no strand threshold to them; the call is nf-core's.
+[metrics.rseqc_sense]
+stage = "align"
+title = "Reads on the gene's strand"
+meaning = "RSeQC's share of sampled reads on the gene's own strand: high in a forward-stranded library, low in a reverse one."
+computed = "RSeQC 5.0.4 infer_experiment, through nf-core's MultiQC (rseqc_infer_experiment_plot, Sense)"
+unit = "%"
+table = "strand_check"
+column = "rseqc_sense"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "The library protocol sets it, so every sample of one protocol shares it; a sample far from its stratum came from another protocol or holds genomic DNA."
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.rseqc_antisense]
+stage = "align"
+title = "Reads on the opposite strand"
+meaning = "RSeQC's share of sampled reads on the strand opposite the gene: high in a reverse-stranded library, low in a forward one."
+computed = "RSeQC 5.0.4 infer_experiment, through nf-core's MultiQC (rseqc_infer_experiment_plot, Antisense)"
+unit = "%"
+table = "strand_check"
+column = "rseqc_antisense"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "The library protocol sets it, so every sample of one protocol shares it; a sample far from its stratum came from another protocol or holds genomic DNA."
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.rseqc_undetermined]
+stage = "align"
+title = "Reads of no strand"
+meaning = "RSeQC's share of sampled reads on genes of both strands, which no strand can be given."
+computed = "RSeQC 5.0.4 infer_experiment, through nf-core's MultiQC (rseqc_infer_experiment_plot, Undetermined)"
+unit = "%"
+table = "strand_check"
+column = "rseqc_undetermined"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "The annotation's overlapping genes set most of it, so a dataset shares it; a sample above its stratum holds more reads where genes overlap, or intergenic DNA."
+causes = ["genomic DNA contamination", "an annotation with many overlapping genes"]
+action = "flag"
+matters_for_de = false
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.rseqc_pct]
+stage = "align"
+title = "nf-core's strand share"
+meaning = "nf-core's rseqc_pct for the strand it inferred, from its strand check table."
+computed = "nf-core/rnaseq 3.27.0's strand check table (multiqc_strand_check_summary_table, rseqc_pct); on the aligned fixture's five reverse samples it equals antisense over sense plus antisense, to its one decimal"
+unit = "%"
+table = "strand_check"
+column = "rseqc_pct"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "nf-core calls a library stranded where one strand holds its stranded_threshold; ctx draws that threshold beside the share and takes the call from nf-core, never applying it here."
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+plot_line = 80.0
+plot_source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, as the aligned fixture's params files record it (tests/fixtures/rnaseq_star/pipeline_info/params_*.json), drawn as 80 %"
+
+[metrics.strand_check]
+stage = "align"
+title = "nf-core's strand check"
+meaning = "Whether the strandedness the samplesheet gave nf-core agrees with the one it inferred."
+computed = "nf-core/rnaseq 3.27.0's strand check table (multiqc_strand_check_summary_table, status): pass or fail"
+unit = "category"
+table = "strand_check"
+column = "status"
+kind = "category"
+flagged = "fail"
+direction = "none"
+causes = ["a samplesheet strandedness that does not match the library", "a mixed library"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "nf-core/rnaseq 3.27.0's strand check, read from its MultiQC table"
+source_type = "pipeline_default"
 
 # The GDC counts files' own strand columns (ctx.gather.gdc): STAR's GeneCounts per read strand.
 # In the four TCGA projects on this Mac, 52 of 3,008 files share 0.0444 to 0.1243, the rest

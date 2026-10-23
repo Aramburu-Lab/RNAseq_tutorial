@@ -1,7 +1,9 @@
-"""M3: trim, align and count reads on a partial reference (`ctx process`).
+"""M3 (`ctx process`): nf-core/rnaseq's alignment read from its outputs, or reads aligned here.
 
-Dependency-free, so the command line reads its choices without importing the analysis stack
-(D-034's rule for `ctx qc`).
+Two routes. With ``--rnaseq-dir`` the page reads nf-core/rnaseq 3.27.0's STAR alignment and QC
+from its own tables (``ctx.process.nfcore``, D-116); with ``--genome`` the laptop route trims,
+aligns and counts on a partial reference here. Dependency-free, so the command line reads its
+choices without importing the analysis stack (D-034's rule for `ctx qc`).
 """
 
 from enum import StrEnum

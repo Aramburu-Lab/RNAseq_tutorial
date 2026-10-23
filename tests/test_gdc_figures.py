@@ -26,18 +26,21 @@ CTX = Path(sys.executable).parent / "ctx"
 DE = ('\n[[contrasts]]\nname = "tumour_normal"\nvariable = "condition"\nreference = "normal"\n'
       'tested = "tumour"\ndesign = "~donor + group"\npaired = true\nn = [{n}, {n}]\n'
       '\n[de]\nfeatured = "tumour_normal"\n')  # fmt: skip
-QC = ["band_map", "composition", "fastp_grid", "fastqc", "linked_pca", "read_fates", "read_flow",
-      "run_band_map", "sex_check", "size_genes", "strip"]  # fmt: skip
+QC = ["band_map", "composition", "fastqc", "linked_pca", "read_fates", "read_flow", "sex_check",
+      "size_genes", "strip"]  # fmt: skip
+# M3's kinds, the laptop route's and nf-core's (D-116), offered on every fetchngs route.
+PROCESS = ["agreement", "aligned_mapping", "biotypes", "counters", "duplication",
+           "featured_settings", "gene_coverage", "junction_annotation", "library_complexity",
+           "mapping", "read_distribution", "rseqc_share", "rseqc_strand", "strand_assigned",
+           "strand_share"]  # fmt: skip
 CARDS = ["box", "contrasts", "exons", "immune", "junctions", "tissues"]
 # The kinds offered per module, measured 2026-10-21 from pipeline.route_modules and each kind's
 # own ``made``: one dataset file per route, the GDC one with contrasts, [de] and [clinical].
 OFFERED = {
     "fetchngs_curated": {"gather": ["composition", "library_sizes"], "qc": QC, "quant": ["fates"],
-                         "process": ["agreement", "counters", "featured_settings", "mapping",
-                                     "strand_assigned", "strand_share"],
+                         "process": PROCESS,
                          "genecard": CARDS},
-    "fetchngs_de": {"qc": QC, "process": ["agreement", "counters", "featured_settings",
-                                          "mapping", "strand_assigned", "strand_share"],
+    "fetchngs_de": {"qc": QC, "process": PROCESS,
                     "quant": ["estimates", "fates"],
                     "de": ["box", "calls", "dispersion", "lfc", "ma", "pca", "phist", "volcano"],
                     "function": ["background", "gsea", "nes", "ora", "running"],
@@ -215,8 +218,7 @@ def _gdc_ncrna(tmp: Path) -> tuple[Path, Path]:
 NONE, DRAWN = "no inputs", "drawn"
 # The module's own NoFigureError: it drew no such figure from the options it wrote.
 REFUSED = "refused: {}: the module draws no such figure from these inputs"
-READS_QC = {f"qc/{f}": NONE for f in ("read_fates", "read_flow", "fastqc", "fastp_grid",
-                                       "run_band_map")}  # fmt: skip
+READS_QC = {f"qc/{f}": NONE for f in ("read_fates", "read_flow", "fastqc")}
 QC_RUN = {"qc/band_map": REFUSED.format("band_map"), "qc/linked_pca": DRAWN,
           "qc/size_genes": DRAWN, "qc/strip": REFUSED.format("strip_total_sequences"),
           **READS_QC}  # fmt: skip

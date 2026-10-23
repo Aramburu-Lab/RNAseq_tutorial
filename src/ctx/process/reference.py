@@ -312,48 +312,6 @@ def halves(source: Genome) -> dict[str, int]:
     return {c: n // 2 for c, n in zip(source.contigs, source.lengths, strict=True)}
 
 
-def from_facts(prepared: Path, gtf: Path, parent: Path) -> Reference:
-    """A reference ``prepare`` built elsewhere, from its facts, its annotation rebuilt here.
-
-    The cluster keeps the genome; its folder's ``reference.json`` and ``ctx_manifest.json``
-    are copied (ED.6 block D). The annotation lines are written again from ``gtf`` by
-    ``annotation_subset``, the code that wrote them there, and must match their SHA-256.
-
-    Raises:
-        ProcessError: If the facts or the manifest are absent, ``gtf`` is not the annotation
-            the cluster read, or the rebuilt lines differ from the cluster's.
-    """
-    try:
-        facts = json.loads((prepared / FACTS).read_text())
-        given = json.loads((prepared / cache.MANIFEST).read_text())["inputs"]
-    except (OSError, json.JSONDecodeError, KeyError) as error:
-        raise ProcessError(f"{prepared} holds no readable {FACTS} and {cache.MANIFEST}: "
-                           f"{error}") from error  # fmt: skip
-    annotation_sha256 = sha256(gtf)
-    if given.get("annotation_sha256") != annotation_sha256:
-        raise ProcessError(
-            f"{prepared}: the cluster read an annotation of SHA-256 "
-            f"{given.get('annotation_sha256')}, {gtf.name} has {annotation_sha256}"
-        )
-    source, half = _genome(facts["source"]), bool(given.get("half"))
-
-    def build(dest: Path) -> None:
-        """Write the annotation lines on the cluster genome's contigs, and its facts."""
-        annotation_subset(gtf, source.contigs, dest / ANNOTATION, halves(source) if half else None)
-        (dest / FACTS).write_text(json.dumps(facts, indent=1) + "\n")
-
-    folder, built = cache.keyed(parent, "reference_facts", given, build)
-    if (rebuilt := sha256(folder / ANNOTATION)) != facts["annotation"]["sha256"]:
-        raise ProcessError(f"{folder / ANNOTATION} has SHA-256 {rebuilt}, the cluster's lines "
-                           f"{facts['annotation']['sha256']}")  # fmt: skip
-    return Reference(
-        folder=folder, built=built, key=cache.key(given), half=half, source=source,
-        annotation_source_sha256=annotation_sha256, genome=_genome(facts["genome"]),
-        annotation=Annotation(**facts["annotation"]),
-        start_codons=StartCodons(**facts["start_codons"]),
-    )  # fmt: skip
-
-
 def _genome(raw: dict[str, Any]) -> Genome:
     """A Genome from its JSON form, where tuples came back as lists."""
     return Genome(raw["sha256"], raw["bytes"], tuple(raw["contigs"]), tuple(raw["lengths"]),

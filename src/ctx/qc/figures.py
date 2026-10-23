@@ -2,18 +2,16 @@
 
 from collections.abc import Sequence
 from dataclasses import replace
-from typing import Any
 
 import numpy as np
 import polars as pl
 from scipy.stats import median_abs_deviation
 
-from ctx.qc import Fastp
 from ctx.qc.identity import SEX_X, SEX_Y
 from ctx.qc.registry import STATUS_BANDS as FASTQC_BANDS
 from ctx.qc.registry import Metric, Registry
 from ctx.report import text
-from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES, Mark, SurfaceData, above_floor
+from ctx.viz.contour import DENSITY_MIN_POINTS, HDR_MASSES
 from ctx.viz.density import DensityData
 from ctx.viz.flow import FlowData, Node
 from ctx.viz.heatmap import HeatmapData, Swatch
@@ -27,7 +25,8 @@ PAGE = "qc"
 SHARES = ("mt_fraction", "mt_rrna_fraction", "rrna_fraction")
 # Trim Galore's fates and Salmon's, in the order the Sankey stacks them.
 TRIM_FATES = ("reads_too_short", "reads_too_long", "reads_too_many_n", "reads_discarded_untrimmed")
-SALMON_FATES = ("num_mapped", "num_decoy_fragments", "not_assigned")
+# A read Trim Galore wrote that a step before Salmon removed (BBSplit, SortMeRNA; D-116).
+SALMON_FATES = ("num_mapped", "num_decoy_fragments", "not_assigned", "removed_before_salmon")
 # The two highest-density regions a density draws, as its caption and reading guide name them.
 HDR = {"inner": f"{HDR_MASSES[0] * 100:.0f} %", "outer": f"{HDR_MASSES[1] * 100:.0f} %"}
 
@@ -124,58 +123,6 @@ def colour_column(sheet: pl.DataFrame, candidates: Sequence[str]) -> str | None:
     """The first candidate column with few enough levels to colour by; None if none has."""
     fits = [c for c in candidates if c in sheet.columns and sheet[c].n_unique() <= MAX_CATEGORIES]
     return fits[0] if fits else None
-
-
-# The isoline a grid map draws: the settings that still keep this share of the reads.
-GRID_ISOLINE = 90.0
-# A grid cell keeping this share keeps no read, as -l past the reads' length does
-# (``reads.GRID_L``); it is drawn as the floor, and the bands span the cells above it.
-GRID_FLOOR = 0.0
-
-
-def grid_counts(grid: pl.DataFrame) -> dict[str, Any]:
-    """The grid's cells, those that keep reads and those on the floor, and what they keep."""
-    kept = grid["passed_pct"].filter(above_floor(grid["passed_pct"].to_numpy(), GRID_FLOOR))
-    return {"cells": grid.height, "kept": kept.len(), "none": grid.height - kept.len(),
-            "low": kept.min(), "high": kept.max()}  # fmt: skip
-
-
-def grid_figure(grid: pl.DataFrame, fastp: Fastp, run: str) -> SurfaceData | None:
-    """Reads fastp keeps across -q and -l on one run, settings that keep none as the floor.
-
-    None when the cells that keep reads all keep the same share: there is no band to draw.
-    """
-    counts = grid_counts(grid)
-    if counts["low"] is None or counts["low"] == counts["high"]:
-        return None
-    units = text.raw(PAGE, "figures.grid.units")
-    surface = SurfaceData(
-        frame=grid, x="q", y="l", z="passed_pct",
-        columns={c: (units.get(c, "none"), text.word(PAGE, f"figures.grid.columns.{c}"))
-                 for c in grid.columns},  # fmt: skip
-        x_label=text.word(PAGE, "figures.grid.x"), y_label=text.word(PAGE, "figures.grid.y"),
-        z_label=text.word(PAGE, "figures.grid.z"), caption="",
-        isolines=(GRID_ISOLINE,), isoline_format=".0f",
-        mark=Mark(float(fastp.q), float(fastp.l), text.fill(PAGE, "figures.grid.mark", q=fastp.q,
-                                                              l=fastp.l)),
-        floor=GRID_FLOOR, floor_label=text.word(PAGE, "figures.grid.floor"),
-    )  # fmt: skip
-    # The band count is the one the surface draws, so the caption cannot name another.
-    key = "figures.grid.caption_floor" if counts["none"] else "figures.grid.caption"
-    return replace(surface, caption=text.fill(
-        PAGE, key, run=run, u=fastp.u, nq=grid["q"].n_unique(), nl=grid["l"].n_unique(),
-        isoline=GRID_ISOLINE, bands=len(surface.edges()) - 1, **counts))  # fmt: skip
-
-
-def flat_grid(grid: pl.DataFrame, run: str) -> str:
-    """The note in place of a grid with nothing to map.
-
-    Every cell keeps the same share, or every cell above the floor does and the rest none.
-    """
-    counts = grid_counts(grid)
-    if not counts["none"] or not counts["kept"]:
-        return text.fill(PAGE, "notes.flat_grid", run=run, pct=float(grid["passed_pct"][0]))
-    return text.fill(PAGE, "notes.flat_floor", run=run, pct=float(counts["low"]), **counts)
 
 
 def stratum_labels(strata: Sequence[str]) -> pl.Expr:

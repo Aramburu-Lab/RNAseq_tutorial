@@ -270,3 +270,80 @@ def test_at_once_runs_the_calls_together_and_keeps_their_order():
     with pytest.raises(QcError, match="planted"):
         multiqc_io.at_once({"fails": fails, "slow": slow}, 2)
     assert ended == ["slow"]
+
+
+# --- nf-core's own MultiQC tables, read in place (D-116) ------------------------------------
+
+STAR = ROOT / "tests" / "fixtures" / "rnaseq_star"
+NFCORE_DATA = STAR / "multiqc" / "star_salmon" / "multiqc_report_data"
+
+
+def _report_copy(tmp_path: Path) -> Path:
+    """The aligned fixture's MultiQC tables in a copy of the outdir's layout."""
+    target = tmp_path / "out" / "multiqc" / "star_salmon" / "multiqc_report_data"
+    shutil.copytree(NFCORE_DATA, target)
+    return tmp_path / "out"
+
+
+def test_nfcore_reads_the_tables_where_the_pipeline_wrote_them():
+    """No MultiQC runs: the run's folder is nf-core's own, its version from MultiQC's log."""
+    run = multiqc_io.nfcore(STAR)
+    assert run.data == NFCORE_DATA and run.version == tools.TOOLS["multiqc"].version
+    star = multiqc_io.table(run, "star")
+    assert set(star["Sample"]) == set(SAMPLES)
+    assert not (STAR / "multiqc" / "star_salmon" / "multiqc_data").exists()
+
+
+def test_nfcore_refuses_another_multiqc(tmp_path):
+    """Mutation: the version line ignored; MultiQC 1.34's columns are read as 1.35's."""
+    out = _report_copy(tmp_path)
+    log = out / "multiqc" / "star_salmon" / "multiqc_report_data" / "multiqc.log"
+    log.write_text(log.read_text().replace("This is MultiQC v1.35", "This is MultiQC v1.34"))
+    with pytest.raises(QcError, match=r"MultiQC 1\.34 wrote"):
+        multiqc_io.nfcore(out)
+    log.unlink()
+    with pytest.raises(QcError, match="names no MultiQC version"):
+        multiqc_io.nfcore(out)
+
+
+def test_nfcore_without_tables_names_the_copy_list(tmp_path):
+    with pytest.raises(QcError, match="ALIGNED_FILES"):
+        multiqc_io.nfcore(tmp_path)
+
+
+def test_points_read_every_cell_as_measured():
+    """Qualimap's normalised profile: 100 positions per sample, each "(x, y)" cell as written."""
+    run = multiqc_io.nfcore(STAR)
+    found = multiqc_io.points(run, "qualimap_gene_coverage_profile_Normalised")
+    assert found.group_by("Sample").len()["len"].to_list() == [100] * len(SAMPLES)
+    raw = pl.read_csv(NFCORE_DATA / "qualimap_gene_coverage_profile_Normalised.txt",
+                      separator="\t", infer_schema=False)  # fmt: skip
+    first = raw.row(0)
+    x, y = (float(v) for v in first[1].strip("()").split(","))
+    row = found.filter(pl.col("Sample") == first[0]).row(0, named=True)
+    assert (row["x"], row["y"]) == (x, y)
+
+
+def test_points_refuse_a_cell_that_is_no_point(tmp_path):
+    """Mutation: a cell parsed with findall drops "(1.0, )" without a word."""
+    out = _report_copy(tmp_path)
+    path = (
+        out
+        / "multiqc"
+        / "star_salmon"
+        / "multiqc_report_data"
+        / "preseq_complexity_plot_molecules.txt"
+    )
+    path.write_text(path.read_text().replace("(1.0, 0.3569073)", "(1.0, )"))
+    with pytest.raises(QcError, match="not an"):
+        multiqc_io.points(multiqc_io.nfcore(out), "preseq_complexity_plot_molecules")
+
+
+def test_ragged_takes_each_sample_its_own_x():
+    """dupRadar's table: a header of x values, each sample filling its own cells only."""
+    found = multiqc_io.ragged(multiqc_io.nfcore(STAR), "dupradar")
+    raw = pl.read_csv(NFCORE_DATA / "multiqc_dupradar.txt", separator="\t", infer_schema=False)
+    filled = sum(v is not None and v != "" for row in raw.rows() for v in row[1:])
+    assert found.height == filled and set(found["Sample"]) == set(SAMPLES)
+    per_row = {row[0]: sum(v not in (None, "") for v in row[1:]) for row in raw.rows()}
+    assert dict(found.group_by("Sample").len().rows()) == per_row

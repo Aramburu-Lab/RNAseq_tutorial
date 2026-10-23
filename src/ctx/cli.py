@@ -223,18 +223,6 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     peers: Annotated[str, typer.Option(help=HELP["--peers"])] = "cell_type,condition",
     mad: Annotated[float | None, typer.Option(help=HELP["--mad"])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
-    reads: Annotated[bool, typer.Option("--reads/--no-reads", help=HELP["--reads"])] = False,
-    fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
-    fastp_q: Annotated[int, typer.Option(help=HELP["--fastp-q"])] = Fastp.q,
-    fastp_u: Annotated[int, typer.Option(help=HELP["--fastp-u"])] = Fastp.u,
-    fastp_l: Annotated[int, typer.Option(help=HELP["--fastp-l"])] = Fastp.l,
-    cut_tail: Annotated[
-        bool, typer.Option("--cut-tail/--no-cut-tail", help=HELP["--cut-tail"])
-    ] = Fastp.cut_tail,
-    cut_window: Annotated[int, typer.Option(help=HELP["--cut-window"])] = Fastp.window,
-    cut_mean: Annotated[int, typer.Option(help=HELP["--cut-mean"])] = Fastp.mean,
-    grid_run: Annotated[str | None, typer.Option(help=HELP["--grid-run"])] = None,
-    align_dir: Annotated[Path | None, typer.Option(help=HELP["--align-dir"])] = None,
 ) -> None:
     """Judge every sample by the QC registry and test the flags for confounding (M2)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -244,10 +232,8 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
-    fastp = Fastp(fastp_q, fastp_u, fastp_l, cut_tail, cut_window, cut_mean)
     options = module.Options(dataset_file, registry, _columns(strata), _columns(peers), mad,
-                             rnaseq_dir, reads, fetchngs_dir, fastp, grid_run,
-                             align_dir)  # fmt: skip
+                             rnaseq_dir)  # fmt: skip
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, QcError, RegistryError) as error:
@@ -283,11 +269,11 @@ def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI optio
     ] = Fastp.cut_tail,
     cut_window: Annotated[int, typer.Option(help=HELP["--cut-window"])] = Fastp.window,
     cut_mean: Annotated[int, typer.Option(help=HELP["--cut-mean"])] = Fastp.mean,
-    align_dir: Annotated[Path | None, typer.Option(help=HELP["--align-dir"])] = None,
+    rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
 ) -> None:
-    """Trim, align and count every sample's reads, and test the settings that move counts (M3)."""
+    """Read nf-core's alignment, or align here, and show how reads become gene counts (M3)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
-    from ctx.process import ProcessError  # noqa: PLC0415 - same reason
+    from ctx.process import ProcessError, nfcore_page  # noqa: PLC0415 - after the profile
     from ctx.process import run as module  # noqa: PLC0415 - heavy; after the runtime profile
     from ctx.process.stages import Options  # noqa: PLC0415 - same reason
     from ctx.qc import QcError  # noqa: PLC0415 - same reason
@@ -297,12 +283,30 @@ def process(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI optio
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
     fastp = Fastp(fastp_q, fastp_u, fastp_l, cut_tail, cut_window, cut_mean)
-    options = Options(
-        dataset_file, genome, aligner, strandedness, multimap_max, _columns(settings),
-        featured_sample, reads_per_run, compare_dataset, fetchngs_dir, registry, fastp, align_dir,
-    )  # fmt: skip
+    # The laptop route's own options, refused beside nf-core's alignment, which took none.
+    local = {"--genome": genome is not None, "--aligner": aligner is not Aligner.STAR,
+             "--strandedness": strandedness is not Strandedness.AUTO,
+             "--multimap-max": multimap_max is not None,
+             "--settings": settings != DEFAULT_SETTINGS,
+             "--featured-sample": featured_sample is not None,
+             "--reads-per-run": reads_per_run is not None,
+             "--compare-dataset": compare_dataset is not None,
+             "--fetchngs-dir": fetchngs_dir is not None, "--fastp-*": fastp != Fastp()}  # fmt: skip
     try:
-        written = module.run(ctx.obj["settings"], cards, command, dataset, options)
+        if rnaseq_dir is not None:
+            if given := [flag for flag, on in local.items() if on]:
+                raise ProcessError(f"{', '.join(given)}: the laptop route's, not read with "
+                                   "--rnaseq-dir, whose alignment nf-core made")  # fmt: skip
+            written = nfcore_page.run(
+                ctx.obj["settings"], cards, command, dataset,
+                nfcore_page.Options(dataset_file, rnaseq_dir, registry),
+            )  # fmt: skip
+        else:
+            options = Options(
+                dataset_file, genome, aligner, strandedness, multimap_max, _columns(settings),
+                featured_sample, reads_per_run, compare_dataset, fetchngs_dir, registry, fastp,
+            )  # fmt: skip
+            written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, QcError, ProcessError, RegistryError, ToolError) as error:
         typer.echo(str(error), err=True)
         raise typer.Exit(1) from error
@@ -562,7 +566,6 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     mirna_dir: Annotated[Path | None, typer.Option(help=HELP["--mirna-dir"])] = None,
     isoform_dir: Annotated[Path | None, typer.Option(help=HELP["--isoform-dir"])] = None,
     counts: Annotated[Path | None, typer.Option(help=HELP["--counts"])] = None,
-    align_dir: Annotated[Path | None, typer.Option(help=HELP["--align-dir"])] = None,
     check: Annotated[bool, typer.Option("--check/--no-check", help=HELP["--check"])] = False,
 ) -> None:
     """Run every module the dataset file declares, in course order, each as its own command."""
@@ -571,7 +574,7 @@ def run(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     settings = ctx.obj["settings"]
     gdc_dirs = tuple(gdc_dir or ())
     options = pipeline.Options(dataset, dataset_file, fetchngs_dir, rnaseq_dir, gdc_dirs,
-                               salmon_dir, mirna_dir, isoform_dir, counts, align_dir)  # fmt: skip
+                               salmon_dir, mirna_dir, isoform_dir, counts)  # fmt: skip
     problems, planned = pipeline.check(settings.root, options)
     for problem in problems:
         typer.echo(f"- {problem.text}", err=True)

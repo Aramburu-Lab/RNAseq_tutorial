@@ -8,7 +8,6 @@ sequence content, so that verdict keeps no figure; the page says so. Every numbe
 MultiQC's plot data (D-028), never from a FastQC zip.
 """
 
-import re
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, replace
 
@@ -23,14 +22,15 @@ from ctx.viz.strip import Span, StripData
 from ctx.viz.style import MAX_DISTINCT, category_colours
 
 PAGE = "qc"
-# The registry metric each MultiQC plot shows, in the order the page draws them.
+# The registry metric each MultiQC plot shows, in the order the page draws them: nf-core's
+# MultiQC anchors FastQC on the raw reads as fastqc_raw (D-116).
 PLOTS = {
-    "fastqc_per_base_quality": "fastqc_per_base_sequence_quality_plot",
-    "fastqc_adapter": "fastqc_adapter_content_plot",
-    "fastqc_n_content": "fastqc_per_base_n_content_plot",
-    "fastqc_gc_distribution": "fastqc_per_sequence_gc_content_plot_Percentages",
+    "fastqc_per_base_quality": "fastqc_raw_per_base_sequence_quality_plot",
+    "fastqc_adapter": "fastqc_raw_adapter_content_plot",
+    "fastqc_n_content": "fastqc_raw_per_base_n_content_plot",
+    "fastqc_gc_distribution": "fastqc_raw_per_sequence_gc_content_plot_Percentages",
 }
-OVERREPRESENTED = ("fastqc_overrepresented", "fastqc_overrepresented_sequences_plot",
+OVERREPRESENTED = ("fastqc_overrepresented", "fastqc_raw_overrepresented_sequences_plot",
                    "Top overrepresented sequence")  # fmt: skip
 # The status whose plot MultiQC 1.35 does not export.
 NO_TABLE = "fastqc_sequence_content"
@@ -38,8 +38,6 @@ NO_TABLE = "fastqc_sequence_content"
 THEORETICAL = "Theoretical GC Content"
 # Adapter rows are "<sample> - <adapter>"; FastQC judges the largest adapter at each position.
 ADAPTER_SEPARATOR = " - "
-# A cell of MultiQC's FastQC plot data: "(x, y)".
-POINT = re.compile(r"\(\s*([-0-9.eE]+)\s*,\s*([-0-9.eE]+)\s*\)")
 
 
 @dataclass(frozen=True)
@@ -61,7 +59,7 @@ class Plots:
 
 def _points(row: tuple[str | None, ...]) -> list[tuple[float, float]]:
     """The (x, y) pairs of one row of MultiQC's plot data."""
-    return [(float(x), float(y)) for cell in row if cell for x, y in POINT.findall(cell)]
+    return [(float(x), float(y)) for cell in row if cell for x, y in multiqc_io.POINT.findall(cell)]
 
 
 def read(run: multiqc_io.MultiqcRun, names: Mapping[str, str], first: Collection[str],

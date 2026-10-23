@@ -1,0 +1,6 @@
+Sample	provided	salmon_inferred	rseqc_inferred	rseqc_pct	rseqc_s	rseqc_a	rseqc_u	status	salmon_pct	salmon_s	salmon_a	salmon_u
+RAP1_IAA_30M_REP1	reverse	-	reverse	99.1	0.7	83.6	15.6	pass				
+RAP1_UNINDUCED_REP1	reverse	-	reverse	97.4	2.3	85.4	12.3	pass				
+RAP1_UNINDUCED_REP2	reverse	-	reverse	96.4	3.2	86.0	10.8	pass				
+WT_REP1	auto	reverse	reverse	99.1	0.8	85.7	13.5	pass	89.6	10.4	89.6	0.0
+WT_REP2	reverse	-	reverse	98.9	0.9	83.8	15.3	pass				

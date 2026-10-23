@@ -50,7 +50,7 @@ meaning = "Also estimate apeGLM [[log2 fold change|log2 fold changes]], shrunk t
 effect = "Off: shrunk columns empty, MA plot raw; p-values and calls unchanged."
 
 [options."--rnaseq-dir"]
-meaning = "An nf-core/rnaseq outdir, Salmon only. Unset: none is read."
+meaning = "An nf-core/rnaseq outdir, Salmon-only or aligned with STAR. Unset: none is read."
 effect = "Set: gather checks release and samples, then writes rounded length-scaled counts."
 
 [options."--gdc-dir"]
@@ -133,13 +133,9 @@ effect = "Wider groups score biology as disagreement; a lone sample has no value
 meaning = "Flag distance, in scaled [[MAD|MADs]] from the stratum median. Unset: registry's mad_multiplier."
 effect = "Lower flags more samples, higher fewer; nothing is ever excluded."
 
-[options."--reads"]
-meaning = "Also run FastQC, fastp and seqkit on each run's FASTQ files."
-effect = "On: base-quality curves and the fastp grid, at minutes per million reads."
-
 [options."--fastp-q"]
 meaning = "fastp -q: a base below this [[Phred]] quality counts as unqualified."
-effect = "Higher: more unqualified bases, so more reads fail -u; see the grid."
+effect = "Higher: more unqualified bases, so more reads fail -u."
 
 [options."--fastp-u"]
 meaning = "fastp -u: reads above this percentage of unqualified bases are dropped."
@@ -147,7 +143,7 @@ effect = "Lower drops more reads for quality."
 
 [options."--fastp-l"]
 meaning = "fastp -l: a read shorter than this after trimming is dropped."
-effect = "Higher drops more reads shortened by trimming; the grid shows where."
+effect = "Higher drops more reads shortened by trimming."
 
 [options."--cut-tail"]
 meaning = "fastp --cut_tail: trim tails whose sliding-window mean quality is below --cut-mean."
@@ -160,14 +156,6 @@ effect = "Wider smooths over single bad bases; only used with --cut-tail."
 [options."--cut-mean"]
 meaning = "fastp -M: the mean quality below which --cut-tail cuts."
 effect = "Higher cuts more of each tail; only used with --cut-tail."
-
-[options."--grid-run"]
-meaning = "Run shown in fastp's -q by -l grid. Unset: first run read."
-effect = "Pick a suspect run to see which settings keep its reads."
-
-[options."--align-dir"]
-meaning = "Folder of a cluster's read and alignment reports, in block D's layout."
-effect = "Set: its reports replace FASTQ files; nothing is trimmed or aligned here."
 
 [options."--genome"]
 meaning = "Genome FASTA, plain or gzipped; its contig names select the [[annotation|GTF]] lines."
@@ -287,11 +275,10 @@ effect = "Moves the redrawn files; a folder inside a ctx root is refused."
 "--isoform-dir" = "Carried to gather; needs --gdc-dir and --mirna-dir."
 "--gdc-dir" = "Carried to gather, once per project the dataset file names."
 "--counts" = "Carried to gather; quant and the read stages are not run."
-"--align-dir" = "Carried to process, which then runs before qc reads its tables."
+"--rnaseq-dir" = "Carried to gather, qc and quant; aligned with STAR, to process too."
 
 [effects.qc]
-"--fetchngs-dir" = "With --reads: FASTQ paths resolve against it; nothing else there is read."
-"--rnaseq-dir" = "Set: adds read fates and judges trimming and mapping. Unset: counts only."
+"--rnaseq-dir" = "Set: judges nf-core's Trim Galore, Salmon and FastQC tables; unset: counts only."
 "--dataset-file" = "Selects the contrasts for confounding tests and the gene-type annotation."
 
 [effects.process]
@@ -301,7 +288,7 @@ effect = "Moves the redrawn files; a folder inside a ctx root is refused."
 "--registry" = "Its strand thresholds and start-codon bands decide the calls."
 "--fastp-q" = "Higher: more unqualified bases, so fewer reads reach the aligner."
 "--fastp-l" = "Higher drops short reads, which more often align to several loci."
-"--align-dir" = "Set: the cluster's STAR, samtools and featureCounts files are read; no FASTQ."
+"--rnaseq-dir" = "Set: nf-core's STAR alignment and QC tables are read; nothing runs here."
 
 [effects.quant]
 "--rnaseq-dir" = "Its gene matrix and Salmon logs are read. Unset: give --genome."

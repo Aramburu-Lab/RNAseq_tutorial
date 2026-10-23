@@ -19,16 +19,12 @@ if TYPE_CHECKING:
 SEPARATOR = ","
 
 
-def options_row(registry: reg.Registry, options: "Options", grid_run: str | None) -> pl.DataFrame:
-    """The run's options a figure reads: groupings, k, the registry, fastp, the grid's run."""
-    fastp = options.fastp
+def options_row(registry: reg.Registry, options: "Options") -> pl.DataFrame:
+    """The run's options a figure reads: groupings, k and the registry."""
     return pl.DataFrame({
         "strata": [SEPARATOR.join(options.strata)], "peers": [SEPARATOR.join(options.peers)],
         "mad": [float(registry.mad_multiplier)], "registry": [str(registry.path)],
-        "fastp_q": [fastp.q], "fastp_u": [fastp.u], "fastp_l": [fastp.l],
-        "fastp_cut_tail": [fastp.cut_tail], "fastp_window": [fastp.window],
-        "fastp_mean": [fastp.mean], "grid_run": [grid_run],
-    }, schema_overrides={"grid_run": pl.String})  # fmt: skip
+    })  # fmt: skip
 
 
 def pca_tables(measured: checkpoint.Measured) -> dict[str, pl.DataFrame]:
@@ -55,10 +51,9 @@ def plot_tables(plots: fastqc.Plots) -> dict[str, pl.DataFrame]:
 
 
 def inputs(registry: reg.Registry, options: "Options", measured: checkpoint.Measured | None,
-           plots: fastqc.Plots | None, grid_run: str | None,
-           ) -> dict[str, pl.DataFrame]:  # fmt: skip
+           plots: fastqc.Plots | None) -> dict[str, pl.DataFrame]:  # fmt: skip
     """Every table above this run can write: the options always, the rest where measured."""
-    found = {"figure_options": options_row(registry, options, grid_run)}
+    found = {"figure_options": options_row(registry, options)}
     found |= pca_tables(measured) if measured is not None else {}
     return found | (plot_tables(plots) if plots is not None else {})
 

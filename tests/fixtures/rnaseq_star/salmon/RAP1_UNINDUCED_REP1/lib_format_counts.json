@@ -1,0 +1,25 @@
+{
+  "read_files": [
+    "RAP1_UNINDUCED_REP1_primary.fastq.gz"
+  ],
+  "expected_format": "SR",
+  "compatible_fragment_ratio": 0.9932546800394109,
+  "num_compatible_fragments": 39316,
+  "num_incompatible_fragments": 267,
+  "num_assigned_fragments": 39316,
+  "num_frags_with_concordant_consistent_mappings": 39316,
+  "num_frags_with_inconsistent_or_orphan_mappings": 5879,
+  "strand_mapping_bias": 0.13008076114614447,
+  "IU": 0,
+  "ISF": 0,
+  "ISR": 0,
+  "OU": 0,
+  "OSF": 0,
+  "OSR": 0,
+  "MU": 0,
+  "MSF": 0,
+  "MSR": 0,
+  "U": 0,
+  "SF": 5879,
+  "SR": 39316
+}

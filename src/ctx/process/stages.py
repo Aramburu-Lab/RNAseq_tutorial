@@ -1,7 +1,8 @@
 """What `ctx process` was asked, what it found, and what each stage hands the next.
 
-The run's dataclasses, apart from ``ctx.process.run``, so the two routes (aligning here, or
-reading a cluster's alignment through ``ctx.process.cluster``) share one set of types.
+The laptop route's dataclasses (``ctx.process.run``, aligning here), apart from the run so the
+page and the figures read one set of types. nf-core's route has its own
+(``ctx.process.nfcore_page``).
 """
 
 from collections.abc import Callable, Mapping
@@ -16,7 +17,6 @@ from ctx.process import (
     Aligner,
     Strandedness,
     align,
-    cluster,
     context,
     count,
     reference,
@@ -44,8 +44,6 @@ class Options:
             ``<root>/data/raw/<dataset>``.
         registry: The QC registry; None resolves it.
         fastp: fastp's filter, M2's own, so M2 and M3 trim alike.
-        align_dir: A cluster's alignment as ED.6 block D copies it, read instead of aligning
-            here; never the default (``ctx.process.cluster``). ``genome`` is then optional.
     """
 
     dataset_file: Path
@@ -60,7 +58,6 @@ class Options:
     fetchngs_dir: Path | None = None
     registry: Path | None = None
     fastp: Fastp = field(default_factory=Fastp)
-    align_dir: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -79,8 +76,7 @@ class Inputs:
 
     Attributes:
         genes: The whole annotation's gene records (``checkpoint.gene_types``), read once.
-        genome_name: The genome FASTA's file name, here or on the cluster.
-        source: The cluster's alignment, or None when this run aligns.
+        genome_name: The genome FASTA's file name.
     """
 
     spec: Dataset
@@ -95,7 +91,6 @@ class Inputs:
     compare: context.Tables | None
     reference: reference.Reference
     genome_name: str
-    source: cluster.Source | None = None
 
 
 @dataclass(frozen=True)
@@ -131,6 +126,6 @@ class Counted:
     used: dict[str, Strandedness]
 
 
-# What counts an alignment at some settings: featureCounts here, or a cluster's files joined.
+# What counts an alignment at some settings: featureCounts here.
 # The str names the reference counted on: "main", or "cut" for the featured sample's half.
 Counter = Callable[[str, align.Alignment, Mapping[str, count.FcOptions]], count.Counts]

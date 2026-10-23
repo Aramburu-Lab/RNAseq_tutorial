@@ -5,14 +5,12 @@ its mutation.
 """
 
 import re
-from datetime import date
 from pathlib import Path
 
 import polars as pl
-import pytest
-from conftest import DE_SPEC, once
+from conftest import DE_SPEC
 from test_figures import copied, drawn_alike, redrawn, redrawn_each, specs
-from test_qc_run import with_reads, with_reports  # noqa: F401 - session fixtures used below
+from test_qc_run import with_reports  # noqa: F401 - session fixtures used below
 
 from ctx.figures.spec import parse
 from ctx.report.builder import unpacked
@@ -20,30 +18,6 @@ from ctx.report.builder import unpacked
 QC = ("02_qc",)
 # The linked PCA prints its variance shares on the page's axes alone, not in its PDF or SVG.
 SHARES = re.compile(r"PC[12], \d+% of variance")
-
-
-@pytest.fixture(scope="session")
-def with_fastqc(tmp_path_factory):
-    """ctx qc --rnaseq-dir on a copy of the rnaseq fixture holding FastQC's raw-read reports."""
-    return once(tmp_path_factory, "qc_fastqc", _with_fastqc)
-
-
-def _with_fastqc(tmp: Path) -> Path:
-    from synth import Synthetic, design_counts, write_gather_outputs  # noqa: PLC0415
-    from test_qc_fates import with_raw_fastqc  # noqa: PLC0415
-    from test_qc_run import RNASEQ_SAMPLES, ctx  # noqa: PLC0415
-
-    rnaseq, root = with_raw_fastqc(tmp), tmp / "root"
-    synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
-    names = dict(zip(synthetic.samples["sample"], RNASEQ_SAMPLES, strict=True))
-    renamed = Synthetic(synthetic.counts.rename(names),
-                        synthetic.samples.with_columns(pl.col("sample").replace_strict(names)),
-                        synthetic.truth)  # fmt: skip
-    write_gather_outputs(root, "desynth", renamed, date(2026, 9, 30))
-    done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(DE_SPEC),
-               "--rnaseq-dir", str(rnaseq), cwd=root)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root
 
 
 def _kinds(found) -> set[str]:
@@ -87,31 +61,18 @@ def test_report_figures_redraw_byte_for_byte(with_reports, tmp_path):  # noqa: F
     _redraws_alike(root, found, tmp_path)
 
 
-def test_fastqc_plots_redraw_from_their_tables(with_fastqc, tmp_path):
-    """FastQC's five plots, redrawn from M2's copy of MultiQC's plot data, byte for byte, the
-    GC plot over its theoretical curve. Catches a curve read back under another metric and the
-    theoretical GC curve dropped."""
-    found = specs(with_fastqc, QC, DE_SPEC)
+def test_fastqc_plots_redraw_from_their_tables(with_reports, tmp_path):  # noqa: F811 - fixture
+    """FastQC's five plots, redrawn from M2's copy of nf-core's MultiQC plot data, byte for byte;
+    nf-core's MultiQC draws no theoretical GC curve, so that table is empty (D-116). Catches a
+    curve read back under another metric."""
+    root = with_reports[0]
+    found = specs(root, QC, DE_SPEC)
     plots = {"base_quality", "fastqc_adapter", "fastqc_n_content", "gc_distribution",
              "overrepresented"}  # fmt: skip
     assert {f"fastqc:{n}" for n in plots} <= _kinds(found), _kinds(found)
-    theoretical = next(with_fastqc.glob("outputs/02_qc/*_fastqc_theoretical_v1.parquet"))
-    assert pl.read_parquet(theoretical).height > 0
-    _redraws_alike(with_fastqc, [s for s in found if parse(s.figure_id)[2] == "fastqc"],
-                   tmp_path)  # fmt: skip
-
-
-def test_reads_figures_redraw_and_shared_stems_have_no_spec(with_reads, tmp_path):  # noqa: F811
-    """With --reads, the grid and the runs' band map redraw byte for byte; no strip and no
-    FastQC plot carries a spec, since the reads' figures take the samples' stems. Catches the
-    unless rule left out, which would attach the samples' spec to the reads' strip."""
-    out = with_reads[0]
-    root = out.parent.parent
-    found = specs(root, QC, DE_SPEC)
-    names = _kinds(found)
-    assert {"fastp_grid", "run_band_map"} <= names, names
-    assert not [n for n in names if n.startswith(("strip:", "fastqc:"))], names
-    _redraws_alike(root, found, tmp_path)
+    theoretical = next(root.glob("outputs/02_qc/*_fastqc_theoretical_v1.parquet"))
+    assert pl.read_parquet(theoretical).height == 0
+    _redraws_alike(root, [s for s in found if parse(s.figure_id)[2] == "fastqc"], tmp_path)
 
 
 def test_the_registry_named_by_the_run_is_the_one_copied(qc_run, tmp_path):

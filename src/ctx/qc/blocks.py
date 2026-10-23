@@ -38,21 +38,6 @@ class Stage:
     by_peers: tuple[pl.DataFrame, ...] = ()
 
 
-@dataclass(frozen=True)
-class Reads:
-    """What the reads showed: values per run, the runs left unread, FastQC's plots, the grid.
-
-    ``source`` says where the tools ran when it was not here: empty for the local run.
-    """
-
-    values: pl.DataFrame
-    skipped: pl.DataFrame
-    plots: fastqc.Plots
-    grid: pl.DataFrame
-    grid_run: str
-    source: str = ""
-
-
 def fastqc_figures(
     writer: Writer, plots: fastqc.Plots, units: pl.DataFrame, registry: reg.Registry,
     options: "Options",
@@ -94,30 +79,6 @@ def fastqc_figures(
         items.append(text.fill(PAGE, "notes.no_sequence_content",
                                title=registry.metrics[fastqc.NO_TABLE].title))  # fmt: skip
     return items
-
-
-def read_figures(writer: Writer, seen: Reads, sheet: pl.DataFrame, registry: reg.Registry,
-                 options: "Options") -> Group:  # fmt: skip
-    """FastQC's plots and the fastp grid, with the runs left unread said first."""
-    items: list[FigureBlock | str] = [seen.source] if seen.source else []
-    if seen.skipped.height:
-        items.append(text.fill(PAGE, "notes.skipped", n=seen.skipped.height,
-                               runs=", ".join(seen.skipped["run_accession"].head(10))))  # fmt: skip
-    items += fastqc_figures(writer, seen.plots, sheet, registry, options)
-    grid = figures.grid_figure(seen.grid, options.fastp, seen.grid_run)
-    if grid is None:
-        items.append(figures.flat_grid(seen.grid, seen.grid_run))
-    else:
-        counts, fastp = figures.grid_counts(seen.grid), options.fastp
-        floor = (text.fill(PAGE, "figures.grid.reading_floor", **counts),) if counts["none"] else ()
-        items.append(figure(writer, grid, "fastp_grid", "grid", *floor,
-                            lead="lead_floor" if counts["none"] else "lead", run=seen.grid_run,
-                            q=fastp.q, l=fastp.l, bands=len(grid.edges()) - 1,
-                            isoline=figures.GRID_ISOLINE, **counts))  # fmt: skip
-    run_bands = figures.band_map(seen.values, registry, "run_accession")
-    if run_bands is not None:
-        items.append(band_map(writer, run_bands, "run_band_map", "run_accession"))
-    return Group(text.word(PAGE, "groups.reads"), tuple(items))
 
 
 def strips(writer: Writer, stage: Stage, units: pl.DataFrame, registry: reg.Registry,

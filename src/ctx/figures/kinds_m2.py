@@ -1,8 +1,7 @@
 """M2's figure kinds: drawn from the tables ``ctx qc`` wrote, gather's sheet and the registry.
 
 Every kind reads the run's options and the registry it read, so a redraw judges and colours
-as the run did. A strip or FastQC plot of the reads (``--reads``) is written under the stem
-of the samples' own, so none of them has a spec where the run read reads (``unless``).
+as the run did.
 """
 
 from dataclasses import dataclass
@@ -13,8 +12,6 @@ from ctx.figures.kind import DATASET_FILE, QC_REGISTRY_RUN, Inputs, Kind, Plain,
 from ctx.qc import fastqc
 from ctx.qc import registry as reg
 
-# Tables whose presence means the run read reads, which write the samples' stems again.
-READS = (("qc", "read_metrics"),)
 # FastQC's plots by stem, the registry metric each shows (``blocks.fastqc_figures``).
 FASTQC = {"base_quality": "fastqc_per_base_quality", "fastqc_adapter": "fastqc_adapter",
           "fastqc_n_content": "fastqc_n_content", "gc_distribution": "fastqc_gc_distribution",
@@ -76,17 +73,12 @@ KINDS = (
     Kind("qc", "sex_check", Plain, "ctx.qc.figures:sex_scatter", f"{DRAW}:sex_check", once,
          lambda _: "sex_check", _with("sex_check")),
     Kind("qc", "strip", OneMetric, "ctx.qc.figures:strip", f"{DRAW}:strip", _strips,
-         lambda p: f"strip_{p.metric}", _with("metrics", "bands", "flags"), unless=READS),
+         lambda p: f"strip_{p.metric}", _with("metrics", "bands", "flags")),
     Kind("qc", "read_fates", Plain, "ctx.qc.figures:fates_bubble", f"{DRAW}:read_fates", once,
          lambda _: "read_fates", _with("fates", "metrics")),
     Kind("qc", "read_flow", Plain, "ctx.qc.figures:fates_flow", f"{DRAW}:read_flow", once,
          lambda _: "read_flow", _with("fates")),
     Kind("qc", "fastqc", OnePlot, "ctx.qc.fastqc:curve_figure", f"{DRAW}:fastqc", _plots,
          lambda p: p.plot,
-         _with("fastqc_curves", "fastqc_theoretical", "fastqc_overrepresented"), _plot_check,
-         unless=READS),
-    Kind("qc", "fastp_grid", Plain, "ctx.qc.figures:grid_figure", f"{DRAW}:fastp_grid", once,
-         lambda _: "fastp_grid", _with("grid", "read_metrics")),
-    Kind("qc", "run_band_map", Plain, "ctx.qc.figures:band_map", f"{DRAW}:run_band_map", once,
-         lambda _: "run_band_map", _with("read_metrics", "grid")),
+         _with("fastqc_curves", "fastqc_theoretical", "fastqc_overrepresented"), _plot_check),
 )  # fmt: skip

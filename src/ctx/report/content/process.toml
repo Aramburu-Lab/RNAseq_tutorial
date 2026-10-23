@@ -189,6 +189,12 @@ name = "Multimappers counted or not"
 a = "Plain count"
 b = "Count with -M"
 
+# nf-core's route (content/process_nfcore.toml): its one comparison, drawn by these figures.
+[comparisons.salmon]
+name = "Salmon alone or on STAR's alignment"
+a = "Salmon alone"
+b = "Salmon on STAR's alignment"
+
 [figures]
 group_column = "Sheet column {column}, from the gather sheet."
 no_value = "not recorded"
@@ -588,41 +594,6 @@ columns = ["Comparison", "Genes", "Identical", "Spearman ρ", "Bootstrap interva
 [tables.incomplete.page]
 title = "The featured sample on the whole and on the half reference"
 columns = ["Genes kept", "Genes removed", "Reads on kept genes, whole", "Reads on kept genes, half", "Gained", "Lost", "Reads on removed genes", "Uniquely mapped %, whole to half"]
-
-[tables.cluster_steps]
-units = { files = "files", wall_s_sum = "s", wall_s_max = "s", max_rss_bytes = "bytes" }
-columns.step = "The tool step, named by its time file: fastp, fastqc, seqkit, star, samtools or fc (featureCounts)."
-columns.files = "GNU time files read for the step, one per tool run."
-columns.wall_s_sum = "Wall time of the step's runs, summed."
-columns.wall_s_max = "Wall time of the step's longest run."
-columns.max_rss_bytes = "The largest maximum resident set size of the step's runs."
-
-[tables.cluster_steps.page]
-title = "What each tool cost on the cluster"
-columns = ["Step", "Runs", "Wall time, hours", "Longest run, s", "Peak memory, GiB"]
-
-# The page of a cluster's alignment (ctx process --align-dir; ED.6). Its Input and Method
-# replace the page's own (text.skeleton's variant); every other section is the laptop page's.
-[variants.cluster]
-input = "{samples} samples in {runs} runs, named by the `ctx gather` sheet and aligned on Kebnekaise. The genome `{genome}` holds {length} bases on {genome_name}; the dataset file's [[annotation|GTF]] is {release}."
-method = """On Kebnekaise, [[fastp]] trimmed each run with M2's settings. {aligner}, a splice-aware [[aligner]], placed each read on {genome_name}; a read fitting several loci equally well is a [[multimappers|multimapper]].
-
-[[featureCounts]] counted reads per gene at `-s 0` (either strand), `-s 1` (the gene's strand) and `-s 2` (the opposite one). The strand call is the forward share: reads at `-s 1` over reads at `-s 1` plus `-s 2`.
-
-Two counters can correlate closely and still disagree. [[Spearman|Spearman's ρ]] measures whether counts rise together; Bland and Altman's bias and limits measure how far apart they are."""
-
-[cluster.reproduce]
-tools = "Aligned and counted on Kebnekaise with {versions}, as the cluster's versions.txt states; STAR index {index}. This command read those tools' outputs and ran MultiQC here."
-cost = "The cluster's GNU time files: {files} tool runs, {hours} hours of wall time summed, largest {gib} GiB resident. Slurm's sacct records are not copied here."
-blocks = "The cluster blocks are in docs/plans/2026-10-22_ed6_m2_m3_core_cluster_blocks.md: B1, C1, E and D."
-
-[cluster.steps]
-fastp = "fastp"
-fastqc = "FastQC"
-seqkit = "seqkit"
-star = "STAR"
-samtools = "samtools"
-fc = "featureCounts"
 
 [tables.context.page]
 title = "Salmon's share on these contigs, beside the share assigned here"

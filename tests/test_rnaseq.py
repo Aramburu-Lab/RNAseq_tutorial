@@ -13,11 +13,15 @@ import pytest
 
 from ctx.gather.fetchngs import read as read_fetchngs
 from ctx.gather.rnaseq import (
+    ALIGNED_FILES,
+    ALIGNED_MATRIX,
+    ALIGNER,
     MATRIX_FILE,
     READ_FILES,
     RNASEQ_VERSION,
     VERSIONS_FILE,
     RnaseqError,
+    aligned,
     read,
     to_counts,
 )
@@ -88,6 +92,54 @@ def test_params_disagree_fails(tmp_path):
     assert changed != params.read_text()
     params.with_name("params_2099-01-01_00-00-00.json").write_text(changed)
     with pytest.raises(RnaseqError, match=r"disagree on \['gencode'\]"):
+        read(outdir, fixture_samples())
+
+
+STAR = ROOT / "tests" / "fixtures" / "rnaseq_star"
+
+
+def _aligned_copy(tmp_path: Path) -> Path:
+    target = tmp_path / "rnaseq_star"
+    shutil.copytree(STAR, target)
+    return target
+
+
+def test_reads_the_aligned_fixture():
+    """An outdir aligned with STAR is read as a Salmon-only one, its aligned matrix recorded."""
+    counts = read(STAR, fixture_samples())
+    assert counts.provenance["params aligner"] == ALIGNER
+    assert counts.provenance["params skip_alignment"] == "False"
+    assert f"sha256:{ALIGNED_MATRIX}" in counts.provenance
+    assert aligned(STAR) and not aligned(FIXTURE)
+
+
+def test_an_aligned_copy_missing_a_table_is_refused(tmp_path):
+    """Mutation: a cluster copy that missed one MultiQC table passes gather and stops M3 later.
+    Every missing file is named, here one table and the aligned matrix."""
+    outdir = _aligned_copy(tmp_path)
+    (outdir / ALIGNED_FILES[-1]).unlink()
+    (outdir / ALIGNED_MATRIX).unlink()
+    with pytest.raises(RnaseqError) as raised:
+        read(outdir, fixture_samples())
+    assert ALIGNED_FILES[-1] in str(raised.value) and ALIGNED_MATRIX in str(raised.value)
+
+
+def test_another_aligner_is_refused(tmp_path):
+    """Mutation: an outdir aligned by HISAT2 read as STAR's; ctx reads star_salmon/ alone."""
+    outdir = _aligned_copy(tmp_path)
+    for params in (outdir / "pipeline_info").glob("params_*.json"):
+        params.write_text(params.read_text().replace('"aligner": "star_salmon"',
+                                                     '"aligner": "hisat2"'))  # fmt: skip
+    with pytest.raises(RnaseqError, match="aligner 'hisat2'"):
+        read(outdir, fixture_samples())
+
+
+def test_launches_disagreeing_on_the_aligner_are_refused(tmp_path):
+    """Mutation: AGREE without aligner; a resume that switched aligners mixes two runs."""
+    outdir = _aligned_copy(tmp_path)
+    last = sorted((outdir / "pipeline_info").glob("params_*.json"))[-1]
+    last.write_text(last.read_text().replace('"aligner": "star_salmon"', '"aligner": "star_rsem"'))
+    with pytest.raises(RnaseqError, match=r"disagree on \['aligner'\]"):
         read(outdir, fixture_samples())
 
 
