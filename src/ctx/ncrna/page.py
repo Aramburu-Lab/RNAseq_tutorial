@@ -82,9 +82,10 @@ def _filter_panel(ctx: Context, values: pl.DataFrame, k: int, min_count: int
                   ) -> tuple[Any, FigureText, dict[str, float]]:  # fmt: skip
     """F2 at one minimum count: the curves, their words, and each biotype's kept share, %."""
     test = figures.rank_test(values)
+    said = {**test, "p": text.p_said(test["p"])}
     data = figures.curves(values, ctx.biotypes, float(np.log2(min_count + 1)),
                           fill("figures.filter.caption", **contrast_words(ctx),
-                               min_count=min_count, **test))  # fmt: skip
+                               min_count=min_count, **said))  # fmt: skip
     kept = {b: 100 * float(np.mean(values.filter(pl.col("biotype") == b)["kept"].to_numpy()))
             for b in ctx.biotypes}  # fmt: skip
     words = figure_text("filter", protein_coding=kept.get(biotypes.CODING, float("nan")),

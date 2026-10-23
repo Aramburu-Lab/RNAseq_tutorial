@@ -159,3 +159,10 @@ def test_no_ui_key_shadows_a_dict_method():
     methods = set(dir(dict))
     ui = tomllib.loads((CONTENT / "ui.toml").read_text())
     assert [path for path in _paths(ui) if methods & set(path.split("."))] == []
+
+
+def test_a_p_that_underflowed_is_said_below_the_smallest_double():
+    """A test's p of 0.0 is never printed as "p = 0" (M8's filter caption, 2026-10-23)."""
+    assert text.p_said(0.0) == "< 5e-324"
+    assert text.p_said(0.01234) == "= 0.012"
+    assert text.p_said(3.1e-310) == "= 3.1e-310"

@@ -739,7 +739,7 @@ def rendered(page: Page, path: Path) -> str:
     A module that fits a page's optional parts to the cap measures this (``cap.kept``).
     """
     target = None
-    if isinstance(page, HubPage) or glossary.used(_marked(page, look())):
+    if isinstance(page, HubPage | ModulePage) or glossary.used(_marked(page, look())):
         target = glossary.page_path(path)
     return render(page, glossary.href(path, target) if target else "")
 
@@ -747,7 +747,9 @@ def rendered(page: Page, path: Path) -> str:
 def write(page: Page, path: Path) -> Path:
     """Render and write a page, refusing one over 15 MB before anything is written.
 
-    The hub, and a page that marks a glossary term, link the glossary page of their ctx root
+    The hub, every module page (CONVENTIONS: module pages link it from the top bar, Rytis
+    2026-10-23 found M6 and M9 without it) and a page that marks a glossary term link the
+    glossary page of their ctx root
     (``glossary.page_path``), which is written first, unless the same page is there already:
     a page never links a file that does not exist (D-048). Outside a ctx root such a page keeps
     its tooltips and links no glossary.
@@ -763,7 +765,7 @@ def write(page: Page, path: Path) -> Path:
         ValueError: If the page or its glossary exceeds ``MAX_BYTES``.
     """
     target = None
-    if isinstance(page, HubPage) or glossary.used(_marked(page, look())):
+    if isinstance(page, HubPage | ModulePage) or glossary.used(_marked(page, look())):
         target = glossary.page_path(path)
     html = _sized(rendered(page, path), path)
     if target is not None:

@@ -117,7 +117,7 @@ reading = [
     "The value is the count, at the median library size, that at least {k} of the contrast's samples reach; the filter tests it.",
     "The dashed line is the filter's cutoff; a gene left of it is not tested.",
 ]
-caption = "{n_ref} {reference} and {n_test} {tested} samples of {cell_type}; cutoff {min_count} reads. Mann-Whitney, {n_lncrna:,} lncRNAs against {n_coding:,} protein-coding genes: p = {p:.2g}, rank-biserial r = {r:.2f}."
+caption = "{n_ref} {reference} and {n_test} {tested} samples of {cell_type}; cutoff {min_count} reads. Mann-Whitney, {n_lncrna:,} lncRNAs against {n_coding:,} protein-coding genes: p {p}, rank-biserial r = {r:.2f}."
 x = "Reads at the median library size"
 y = "Share of genes"
 cutoff = "filter cutoff"
@@ -255,7 +255,7 @@ reading = [
     "Points above the dashed line hold more histone mRNA after rRNA depletion, which keeps transcripts without a poly-A tail.",
     "This figure compares the two files of one sample, so it reads files the one-per-patient rule leaves out.",
 ]
-caption = "{n} tumours with an rRNA-depleted and a {other} library, from GDC read groups. Shares of counted reads on [[replication-dependent histone mRNA|histone genes]]; Wilcoxon signed-rank: rRNA-depleted higher in {higher} of {n}, p = {p:.2g}."
+caption = "{n} tumours with an rRNA-depleted and a {other} library, from GDC read groups. Shares of counted reads on [[replication-dependent histone mRNA|histone genes]]; Wilcoxon signed-rank: rRNA-depleted higher in {higher} of {n}, p {p}."
 x = "Histone mRNA, {other} library"
 y = "Histone mRNA, rRNA-depleted library"
 equal = "equal shares"

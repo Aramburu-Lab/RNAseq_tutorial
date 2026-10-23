@@ -113,6 +113,15 @@ def fill(page: str, key: str, **values: Any) -> str:
     return template.format_map(values)
 
 
+def p_said(p: float) -> str:
+    """A p-value with its relation, as a caption states it: ``= 0.012``, or ``< 5e-324``.
+
+    A test whose p underflowed to 0.0 has a p below the smallest positive double, 4.9e-324;
+    "p = 0" says something no test can find (Rytis 2026-10-23, M8's filter caption).
+    """
+    return "< 5e-324" if p == 0 else f"= {p:.2g}"
+
+
 def lines(page: str, key: str, **values: Any) -> tuple[str, ...]:
     """The list of texts at a key, each filled, as ``fill`` fills one.
 

@@ -65,7 +65,7 @@ def group(writer: Writer, tcga: "Tcga", genes: pl.DataFrame, tumour: str) -> tup
     highest = pl.max_horizontal(pl.col("histone_rrna", "histone_other")).max()
     top = float(frame.select(highest).item())
     caption = fill("figures.libraries.caption", n=n, other=other, higher=int(h["higher"]),
-                   p=h["p"])  # fmt: skip
+                   p=text.p_said(h["p"]))  # fmt: skip
     data = ScatterData(
         frame=frame, columns={c: COLUMNS[c] for c in frame.columns}, x="histone_other",
         y="histone_rrna", x_label=fill("figures.libraries.x", other=other),

@@ -361,6 +361,17 @@ def test_writing_a_page_writes_the_glossary_it_links(tmp_path):
     assert {"fastq", "md5"} <= anchors
 
 
+def test_a_module_page_marking_no_term_still_links_the_glossary(tmp_path):
+    """CONVENTIONS: module pages link the glossary from the top bar; M6 and M9 did not, since
+    their pages marked no term (Rytis 2026-10-23). Mutation caught: the link only where a term
+    is marked."""
+    out = _root(tmp_path)
+    bare = _module(purpose="Plain words.", input="Plain files.", method="A plain method.")
+    page = write(bare, out / "01_gather" / f"{TODAY}_gather_bare_overview_v1.html")
+    (link,) = re.findall(r'class="glossary-link" href="([^"]+)"', unpacked(page.read_text()))
+    assert (page.parent / link).resolve().is_file()
+
+
 def test_a_page_outside_a_ctx_root_keeps_its_tooltips_and_links_no_glossary(tmp_path):
     """A page written outside outputs/NN_<module>/, as ``ctx figure`` will write into the
     reader's own folder (Phase 2D), has no glossary beside it: its tooltips open with no link.
