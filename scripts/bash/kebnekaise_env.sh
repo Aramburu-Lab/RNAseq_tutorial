@@ -29,7 +29,7 @@ PIXI="${PIXI:-${PIXI_HOME:-$HOME/.pixi}/bin/pixi}"
 # Every refusal passes through here, so none leaves a helper in the student's shell.
 _ctx_fail() {
     echo "kebnekaise_env.sh: $*" >&2
-    unset _ctx_store _ctx_home _ctx_hook _ctx_want _ctx_nf
+    unset _ctx_store _ctx_home _ctx_hook _ctx_want _ctx_nf _ctx_jvm
     unset -f _ctx_fail
 }
 
@@ -100,5 +100,19 @@ if ! mkdir -p "$NXF_HOME" "$NXF_SINGULARITY_CACHEDIR" "$APPTAINER_CACHEDIR"; the
     _ctx_fail "cannot create the cache folders under $CTX_STORE"
     return 1
 fi
-unset _ctx_store _ctx_home _ctx_hook _ctx_want _ctx_nf
+# In a job, Java runs from a copy on the node's own disk. Run from Lustre, its code could not be
+# read back on 2026-10-23: five head jobs on one node died of SIGBUS (BUS_ADRERR at the program
+# counter, in libjvm.so) while the file stood unchanged since 2026-10-22 (NF.13). A copy that
+# fails or does not start leaves Nextflow on the environment's own Java, said in the job's log.
+_ctx_jvm="$CTX_REPO/.pixi/envs/fetch/lib/jvm"
+if [[ -n "${SLURM_JOB_ID:-}" && -n "${SNIC_TMP:-}" && -d "$_ctx_jvm" ]]; then
+    if mkdir -p "$SNIC_TMP/ctx_jvm" && cp -a "$_ctx_jvm/." "$SNIC_TMP/ctx_jvm/" &&
+        "$SNIC_TMP/ctx_jvm/bin/java" -version >/dev/null 2>&1; then
+        export NXF_JAVA_HOME="$SNIC_TMP/ctx_jvm"
+        echo "kebnekaise_env.sh: Java from the node's disk, $NXF_JAVA_HOME"
+    else
+        echo "kebnekaise_env.sh: Java not copied to $SNIC_TMP; it runs from $_ctx_jvm" >&2
+    fi
+fi
+unset _ctx_store _ctx_home _ctx_hook _ctx_want _ctx_nf _ctx_jvm
 unset -f _ctx_fail

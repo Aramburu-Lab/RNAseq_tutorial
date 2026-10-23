@@ -333,6 +333,46 @@ def test_env_activation(site, pixi_from):
     assert _after(args, "-e") == "fetch" and "--as-is" in args
 
 
+@pytest.mark.parametrize("java_starts", [True, False])
+def test_a_job_runs_java_from_the_node_disk(site, java_starts):
+    """NF.13: five heads died of SIGBUS reading libjvm.so back from Lustre. In a job, Nextflow's
+    Java is a copy on SNIC_TMP; with the environment's own JVM removed, the copy still runs, so
+    the test cannot pass on the original. A copy that does not start leaves NXF_JAVA_HOME unset
+    and says so. Catches the copy skipped, made but not exported, or exported unchecked."""
+    tmp_path, env = site
+    jvm = tmp_path / "my clone" / ".pixi" / "envs" / "fetch" / "lib" / "jvm"
+    _stub(
+        jvm / "bin" / "java", "#!/bin/sh\necho java ran\n" if java_starts else "#!/bin/sh\nexit 1\n"
+    )
+    node = tmp_path / "node tmp"
+    node.mkdir()
+    got = _probe(env, SLURM_JOB_ID="1", SNIC_TMP=str(node))
+    assert got["status"] == "0" and got["helpers"].strip() == "", got["stderr"]
+    if not java_starts:
+        assert got["NXF_JAVA_HOME"] == "unset"
+        assert "Java not copied" in got["stderr"], got["stderr"]
+        return
+    assert got["NXF_JAVA_HOME"] == str(node / "ctx_jvm")
+    shutil.rmtree(jvm)
+    ran = subprocess.run(
+        [got["NXF_JAVA_HOME"] + "/bin/java"], capture_output=True, text=True, check=False
+    )
+    assert ran.stdout == "java ran\n"
+
+
+def test_a_login_shell_keeps_java_where_it_is(site):
+    """Outside a job nothing is copied: a login node has no SNIC_TMP of its own to fill."""
+    tmp_path, env = site
+    _stub(
+        tmp_path / "my clone" / ".pixi" / "envs" / "fetch" / "lib" / "jvm" / "bin" / "java",
+        "#!/bin/sh\n",
+    )
+    node = tmp_path / "node tmp"
+    node.mkdir()
+    got = _probe(env, SNIC_TMP=str(node))
+    assert got["NXF_JAVA_HOME"] == "unset" and not (node / "ctx_jvm").exists()
+
+
 @pytest.mark.parametrize(
     "case", ["no_repo", "no_store", "store_in_home", "store_linked_into_home", "no_environment",
              "hook_fails", "hook_leaves_login_nextflow"],
