@@ -1,5 +1,7 @@
 # NF.1: M2's read stage and M3 on nf-core/rnaseq 3.27.0's outputs (D-113)
 
+Built 2026-10-23 (D-116). Where the build departs from this plan, D-116 says so: the laptop route (`--genome`) stays for M4's laptop path; `--compare-dataset` and the featured sample are not carried to nf-core's route; M2's read stage is per sample, since nf-core merges a sample's runs before FastQC and Trim Galore.
+
 Decided by Rytis, 2026-10-23: every read-level result comes from nf-core/rnaseq 3.27.0 (D-113);
 M3's strand call is RSeQC `infer_experiment`; the fastp grid and the featured sample's variants
 are dropped; all six candidate figures are added; featureCounts' `-O`, `--fraction` and `-M`

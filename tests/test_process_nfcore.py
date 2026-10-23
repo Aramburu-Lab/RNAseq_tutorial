@@ -114,11 +114,13 @@ def test_the_two_matrices_are_not_swapped():
                         separator="\t")  # fmt: skip
     on_star = pl.read_csv(STAR / "star_salmon" / "salmon.merged.gene_counts_length_scaled.tsv",
                           separator="\t")  # fmt: skip
-    gene, sample = alone["gene_id"][0], SAMPLES[0]
+    sample = SAMPLES[0]
+    both = alone.select("gene_id", a=sample).join(on_star.select("gene_id", b=sample), on="gene_id")
+    differ = both.filter(pl.col("a") != pl.col("b"))
+    assert differ.height > 0, "the two matrices must differ somewhere for the test to see a swap"
+    gene, a, b = differ.row(0)
     row = long.filter((pl.col("gene_id") == gene) & (pl.col("sample") == sample)).row(0, named=True)
-    assert row["a"] == alone.filter(pl.col("gene_id") == gene)[sample][0]
-    assert row["b"] == on_star.filter(pl.col("gene_id") == gene)[sample][0]
-    assert not alone.equals(on_star)
+    assert (row["a"], row["b"]) == (a, b)
 
 
 def test_curves_and_ragged_tables_read_every_sample():
@@ -270,3 +272,22 @@ def test_qc_reads_nfcore_tables_and_m3_strand_check(request, edition, tmp_path):
     (page,) = out.glob("*_overview_v1.html")
     assert f'data-edition="{edition}"' in page.read_text()[:500]
     assert lint(out)[1] == []
+
+
+def test_the_drawn_threshold_line_is_the_registry_s():
+    """The rseqc_share figure's line sits at the registry's plot line, whatever it is.
+    Mutation: the line typed as 80 in the figure code."""
+    from dataclasses import replace  # noqa: PLC0415
+
+    from ctx.figures.recorder import Recorder  # noqa: PLC0415
+    from ctx.process import nfcore_blocks  # noqa: PLC0415
+
+    metric = reg.load(reg.resolve(None)).metrics["rseqc_pct"]
+    found = nfcore_blocks.Found(strand=nfcore.strand(_outdir()))
+    groups = pl.DataFrame({"sample": list(SAMPLES)})
+    for line in (70.0, 80.0):
+        shown = nfcore_blocks.Shown(groups, None, replace(metric, plot_line=line))
+        recorder = Recorder("03_process", DATASET)
+        nfcore_blocks.strand_check_figure(recorder, found, shown)
+        data, _ = recorder.one("rseqc_share")
+        assert data.hline is not None and data.hline[0] == line

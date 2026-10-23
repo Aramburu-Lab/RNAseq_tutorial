@@ -1,5 +1,7 @@
 # ED.6 M2 and M3 on the four core projects: Kebnekaise blocks (written 2026-10-22; block A run)
 
+Superseded 2026-10-23 by D-113 and D-116: the read-level pages read nf-core/rnaseq's outputs; `ctx.process.cluster`, `cluster_route`, `fc_compact` and `ctx.qc.cluster`, which these blocks fed, are removed.
+
 Rytis decided on 2026-10-22: in the core edition, all four projects get M2 (QC, its read stage
 included) and M3 (alignment) on their real runs. TODO.md ED.6 holds the items; this file holds the
 blocks. Block A was run by Rytis on 2026-10-22 at 12:27; its numbers are below. No other block
