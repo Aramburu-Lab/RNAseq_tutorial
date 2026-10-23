@@ -529,7 +529,10 @@ def _browse(tasks: list[dict], downloads: Path, chromium: str | None = None,
             except subprocess.TimeoutExpired:
                 os.killpg(proc.pid, signal.SIGKILL)
                 _, stderr = proc.communicate()
-            with contextlib.suppress(ProcessLookupError):  # the group may be gone already
+            # The group may be gone already: Linux says ProcessLookupError; macOS says
+            # PermissionError for a group whose members have exited but are not yet reaped
+            # (seen 2026-10-23 in test_a_page_that_never_yields_is_reported_with_its_frame).
+            with contextlib.suppress(ProcessLookupError, PermissionError):
                 os.killpg(proc.pid, signal.SIGKILL)
             raise AssertionError(f"browser driver past {timeout:g} s:\n{stderr[-4000:]}") from None
     # The driver's own error, which a bare exit status hides.
