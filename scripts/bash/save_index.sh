@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 # /// codebase-meta
 # exempt: run by hand on Kebnekaise after an aligned nf-core/rnaseq run; copies its indexes, runs no step
 # ///
