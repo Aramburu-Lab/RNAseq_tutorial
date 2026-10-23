@@ -24,7 +24,8 @@ from ctx.gather.rnaseq import RNASEQ_VERSION
 ROOT = Path(__file__).resolve().parents[1]
 BASH = ROOT / "scripts" / "bash"
 SCRIPTS = ("kebnekaise_env.sh", "fetchngs.sbatch", "rnaseq.sbatch",
-           "site_kebnekaise.sh", "site_laptop.sh", "fetch_gdc.sbatch", "job_name.sh")  # fmt: skip
+           "site_kebnekaise.sh", "site_laptop.sh", "fetch_gdc.sbatch", "job_name.sh",
+           "save_index.sh")  # fmt: skip
 JOBS = tuple(name for name in SCRIPTS if name.endswith(".sbatch"))
 FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs"
 SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
@@ -707,3 +708,48 @@ def test_a_dataset_name_is_its_label_by_the_job_name_rule():
         assert _job(f'job_field "$(job_project "{path.stem}")"') == path.stem
     assert named == 7  # noqa: PLR2004 - the seven datasets D-114 renamed
     assert _job('job_project "no-dataset-file_here"') == "no-dataset-file_here"
+
+
+def _saved_run(root: Path, fasta: Path, gtf: Path) -> Path:
+    """A finished aligned run's results: both indexes, its params and its versions file."""
+    results = root / "nfcore_rnaseq" / "results"
+    (results / "genome" / "index" / "star").mkdir(parents=True)
+    (results / "genome" / "index" / "star" / "SA").write_bytes(b"suffix array")
+    (results / "genome" / "index" / "salmon").mkdir(parents=True)
+    (results / "genome" / "index" / "salmon" / "info.json").write_text("{}")
+    info = results / "pipeline_info"
+    info.mkdir()
+    (info / "params_2026-10-23_12-00-00.json").write_text(
+        f'{{"fasta": "{fasta}", "gtf": "{gtf}", "gencode": true}}')  # fmt: skip
+    (info / "nf_core_rnaseq_software_mqc_versions.yml").write_text(
+        "SALMON_INDEX:\n  salmon: 1.10.3\nSTAR_GENOMEGENERATE:\n  gawk: 5.1.0\n  star: 2.7.11b\n"
+        "Workflow:\n    nf-core/rnaseq: v3.27.0-ga1fcddd\n")  # fmt: skip
+    return root
+
+
+def test_a_saved_index_is_reused_only_for_its_own_references(site, tmp_path):
+    """save_index.sh copies a run's STAR and Salmon indexes with their provenance and refuses to
+    overwrite; rnaseq.sbatch passes them in for the same FASTA, GTF and release and refuses
+    another GTF (Rytis 2026-10-23). Mutations caught: the GTF check dropped; the copy a move."""
+    _, env = site
+    refs = tmp_path / "submit" / "run" / "refs"
+    refs.mkdir(parents=True)
+    for name, data in REFS.items():
+        (refs / name).write_bytes(data)
+    run = _saved_run(tmp_path / "built", refs / "genome.fa.gz", refs / "annotation.gtf.gz")
+    shared = tmp_path / "shared" / "v50"
+    saved = _run([BASH / "save_index.sh", run, shared], tmp_path, env)
+    assert saved.returncode == 0, saved.stderr
+    assert (shared / "star" / "SA").is_file() and (
+        run / "nfcore_rnaseq/results/genome/index/star/SA"
+    ).is_file()
+    prov = dict(line.split("\t") for line in (shared / "provenance.tsv").read_text().splitlines())
+    assert (prov["star"], prov["salmon"], prov["rnaseq"]) == ("2.7.11b", "1.10.3", "3.27.0")
+    assert _run([BASH / "save_index.sh", run, shared], tmp_path, env).returncode != 0
+    done, _, launch = _rnaseq(site, NFCORE_INDEX=str(shared))
+    assert done.returncode == 0, done.stderr
+    params = (launch / "params.yml").read_text()
+    assert f"star_index: {shared}/star\n" in params and f"salmon_index: {shared}/salmon\n" in params
+    other = {**REFS, "annotation.gtf.gz": b"another annotation"}
+    refused, _, _ = _rnaseq(site, refs=other, run="run2", NFCORE_INDEX=str(shared))
+    assert refused.returncode != 0 and "another GTF" in refused.stderr

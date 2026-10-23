@@ -137,6 +137,7 @@ process {
 EOF
 cmd=(nextflow run nf-core/rnaseq -r 3.27.0 -profile "$SITE_RNASEQ_PROFILE" -params-file "$LAUNCH/params.yml" -c "$LAUNCH/site.config" -resume)
 printf 'the job runs, in %s:\n%s\n' "$LAUNCH" "${cmd[*]}"
+[[ -z "${NFCORE_INDEX:-}" ]] || echo "NFCORE_INDEX=$NFCORE_INDEX: checked against these references when the job runs"
 if [[ "$DRY_RUN" == 1 ]]; then exit 0; fi
 
 # Activated first, so the checks below run on the environment's Python and md5sum.
@@ -155,6 +156,21 @@ for ref in "$FASTA" "$GTF"; do
     [[ "$got" == "$want" ]] || die "${ref##*/}: MD5 $got, not the $want in $sums; download it again"
     echo "${ref##*/}: MD5 equal to $sums"
 done
+# Indexes saved by save_index.sh, where NFCORE_INDEX names a folder of them: used only when they
+# were built from these very files by this release, so a wrong index is refused, never used.
+if [[ -n "${NFCORE_INDEX:-}" ]]; then
+    [[ "$NFCORE_INDEX" == /* ]] || die "NFCORE_INDEX is a full path, not $NFCORE_INDEX"
+    prov="$NFCORE_INDEX/provenance.tsv"
+    [[ -s "$prov" && -d "$NFCORE_INDEX/star" && -d "$NFCORE_INDEX/salmon" ]] ||
+        die "NFCORE_INDEX=$NFCORE_INDEX holds no star/, salmon/ and provenance.tsv from save_index.sh"
+    said() { awk -F'\t' -v k="$1" '$1 == k {print $2}' "$prov"; }
+    [[ "$(said fasta_md5)" == "$(md5sum <"$FASTA" | awk '{print $1}')" ]] || die "$NFCORE_INDEX was built from another genome FASTA than $FASTA"
+    [[ "$(said gtf_md5)" == "$(md5sum <"$GTF" | awk '{print $1}')" ]] || die "$NFCORE_INDEX was built from another GTF than $GTF"
+    [[ "$(said gencode)" == "$GENCODE" ]] || die "$NFCORE_INDEX was built with gencode $(said gencode), this run says $GENCODE"
+    [[ "$(said rnaseq)" == 3.27.0 ]] || die "$NFCORE_INDEX was built by nf-core/rnaseq $(said rnaseq), this run is 3.27.0"
+    printf 'star_index: %s\nsalmon_index: %s\n' "$NFCORE_INDEX/star" "$NFCORE_INDEX/salmon" >> "$LAUNCH/params.yml"
+    echo "indexes from $NFCORE_INDEX: STAR $(said star), Salmon $(said salmon), built by $(said source)"
+fi
 python3 - "$SHEET" "$LAUNCH/samplesheet.csv" <<'CUT'
 import csv
 import sys

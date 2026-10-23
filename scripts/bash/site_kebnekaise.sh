@@ -65,6 +65,10 @@ process {
     withName: '.*:SE_GENE_UNIFIED' { cpus = 1; memory = { 3124.MB * Math.pow(1.25, task.attempt - 1) }; time = { 4.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
     withName: '.*:MAKE_TRANSCRIPTS_FASTA' { cpus = 1; memory = { 6503.MB * Math.pow(1.25, task.attempt - 1) }; time = { 3.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
     withName: '.*:EAUTILS_GTF2BED' { cpus = 1; memory = { 11520.MB * Math.pow(1.25, task.attempt - 1) }; time = { 2.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    // Measured on 2026-10-23's restarted runs (sacct): 211 Salmon, 16 STAR alignments, 4 STAR index builds.
+    withName: '.*:SALMON_QUANT' { cpus = 6; memory = { 20736.MB * Math.pow(1.25, task.attempt - 1) }; time = { 16.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:STAR_ALIGN' { cpus = 7; memory = { 51968.MB * Math.pow(1.25, task.attempt - 1) }; time = { 15.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:STAR_GENOMEGENERATE' { cpus = 6; memory = { 68660.MB * Math.pow(1.25, task.attempt - 1) }; time = { 53.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
 }
 EOF
 }
