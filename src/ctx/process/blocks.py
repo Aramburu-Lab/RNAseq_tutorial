@@ -261,15 +261,6 @@ def contigs(joined: str) -> str:
         PAGE, "genome_contigs", n=len(names))  # fmt: skip
 
 
-def steps_table(steps: pl.DataFrame) -> ResultTable:
-    """The cluster's cost per tool step, from GNU time's files (ED.6e-7)."""
-    rows = [(text.word(PAGE, f"cluster.steps.{r['step']}"), f"{r['files']:,}",
-             f"{r['wall_s_sum'] / 3600:,.2f}", f"{r['wall_s_max']:,.0f}",
-             f"{r['max_rss_bytes'] / 2**30:,.2f}")
-            for r in steps.iter_rows(named=True)]  # fmt: skip
-    return page_table("cluster_steps", rows, (1, 2, 3, 4))
-
-
 def result_tables(found: "Frames") -> dict[str, ResultTable]:
     """The page's tables, at most eight columns each; the files hold every column."""
     ref = [(r["reference"], contigs(r["contigs"]), f"{r['length_nt']:,}",

@@ -37,6 +37,20 @@ def ranks(samples: Iterable[str]) -> dict[str, tuple[str, int]]:
     return out
 
 
+def nfcore_ranks(samples: Iterable[str]) -> dict[str, tuple[str, int]]:
+    """Every name nf-core's own MultiQC gives a sample, ranked as ``ranks`` ranks (D-116).
+
+    ``<sample>_1`` and ``<sample> Read 1`` are read 1 of a pair, ``<sample>_2`` and
+    ``<sample> Read 2`` read 2, ``<sample>`` a single-end sample or a pair's merged or
+    fragment row.
+    """
+    out: dict[str, tuple[str, int]] = {}
+    for sample in samples:
+        out |= {f"{sample}_1": (sample, 0), f"{sample} Read 1": (sample, 0), sample: (sample, 1),
+                f"{sample}_2": (sample, 3), f"{sample} Read 2": (sample, 3)}  # fmt: skip
+    return out
+
+
 def raw_ranks(sample: str) -> dict[str, tuple[str, int]]:
     """The names nf-core's raw-read FastQC reports take in MultiQC, ranked as ``ranks`` ranks.
 

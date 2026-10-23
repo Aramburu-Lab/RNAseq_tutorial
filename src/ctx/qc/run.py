@@ -64,7 +64,8 @@ GTF_RESOURCE = "annotation_gtf"
 SHOWN_TESTS = 10
 ALPHA = 0.05
 # M3's tables M2 judges on the align stage (M3.12): `ctx process` writes one row per sample.
-ALIGN_TABLES = ("alignment", "strandedness")
+# The laptop route writes strandedness, nf-core's route strand_check (D-116); both alignment.
+ALIGN_TABLES = ("alignment", "strandedness", "strand_check")
 
 
 @dataclass(frozen=True)
@@ -178,15 +179,18 @@ def align_tables(root: Path, dataset: str) -> dict[str, Path]:
 def align_stage(tables: Mapping[str, Path], registry: reg.Registry) -> pl.DataFrame | None:
     """M3's per-sample alignment values, by the registry's align-stage columns (M3.12).
 
-    Each table gives the columns of the registry's align metrics it holds; None without any.
+    Each table gives the columns of the registry's align metrics it holds; None without any. A
+    category, nf-core's strand check, stays its word.
     """
     frame = None
     for what, path in tables.items():
-        wanted = [m.column for m in registry.stage("align") if m.table == what]
+        metrics = [m for m in registry.stage("align") if m.table == what]
         table = pl.read_parquet(path)
-        if missing := [c for c in wanted if c not in table.columns]:
+        if missing := [m.column for m in metrics if m.column not in table.columns]:
             raise QcError(f"{path.name} has no {missing}, which the registry's align stage reads")
-        part = table.select("sample", *[pl.col(c).cast(pl.Float64) for c in wanted])
+        part = table.select("sample", *[pl.col(m.column) if m.kind == "category"
+                                        else pl.col(m.column).cast(pl.Float64)
+                                        for m in metrics])  # fmt: skip
         frame = part if frame is None else frame.join(
             part, on="sample", how="full", coalesce=True, maintain_order="left")  # fmt: skip
     return frame

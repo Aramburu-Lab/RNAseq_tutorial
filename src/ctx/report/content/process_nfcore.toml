@@ -1,0 +1,439 @@
+# The M3 page on nf-core/rnaseq's alignment (ctx process --rnaseq-dir; D-116). Placeholders
+# in {braces} are filled by the code; keep their names. The counter figures' words are
+# content/process.toml's, which draws them on both routes.
+
+title = "M3 Align and count: {dataset}"
+budget = "Track A: under {minutes} min and {ram_gb} GB"
+reproduce_note = "nf-core/rnaseq aligned, counted and ran MultiQC on the cluster; this command read its outputs and ran no tool."
+undefined = "not defined"
+purpose = "Read how each sample's reads aligned, which strand they came from, how complex the [[library]] is, and how two quantifications of the same reads differ."
+input = "{samples} samples of the `ctx gather` sheet, aligned by nf-core/rnaseq {release} with [[STAR]] to `{fasta}` and `{gtf}`. Its own [[MultiQC]] tables and [[Salmon]] matrices hold every number."
+method = """nf-core/rnaseq trimmed the reads with Trim Galore and aligned them with [[STAR]], a splice-aware [[aligner]]. samtools, RSeQC, Qualimap, [[dupRadar]], Preseq and [[featureCounts]] checked the alignment. Every number here is the pipeline's own, read from its [[MultiQC]] tables.
+
+[[Salmon]] quantified each sample twice: on STAR's alignment, and alone by [[pseudoalignment|selective alignment]]. [[Spearman|Spearman's ρ]] measures whether the two rise together; Bland and Altman's bias and limits measure how far apart they are."""
+interpretation = """[[uniquely mapped reads|Uniquely mapped reads]] range from {low} % to {high} % of [[STAR]]'s input reads. Compare samples with each other before any genome-wide band.
+
+Take the [[library]]'s strand from RSeQC's shares and nf-core's check, never from the kit name.
+
+A library whose curve flattens early in Preseq holds few distinct molecules: more reads add [[duplicated reads|duplicates]]. In [[dupRadar]], duplication that rises at low expression points to amplification, not to expression.
+
+A correlation near one beside a nonzero bias means one quantification gives some genes more reads."""
+pitfalls = [
+    "Choosing the strand from the kit name: protocols differ between kit versions; read RSeQC's shares.",
+    "Reading high [[duplicated reads|duplication]] as a fault: highly expressed genes duplicate reads in every RNA-seq [[library]].",
+    "Reading a high [[Spearman|ρ]] as agreement: two quantifications can rank genes alike and still differ.",
+]
+
+[[terms]]
+term = "Uniquely mapped"
+meaning = "A read STAR aligned to one locus only."
+
+[[terms]]
+term = "Sense and antisense"
+meaning = "RSeQC's share of sampled reads on a gene's own strand, or on the opposite one; undetermined reads lie where genes of both strands overlap."
+
+[[terms]]
+term = "Library complexity"
+meaning = "How many distinct molecules a library holds: Preseq extrapolates the distinct ones expected at more sequencing."
+
+[[terms]]
+term = "Bias and limits of agreement"
+meaning = "Bland-Altman's mean difference between two measurements, and that mean plus or minus `1.96` standard deviations of the differences."
+
+[[questions]]
+prompt = "RSeQC puts most reads on the antisense strand. Which [[library type]] is this, and which Salmon library type matches it?"
+answer = "Reverse-stranded: read 1 lies opposite the gene. Salmon calls it SR single-end or ISR paired-end."
+
+[[questions]]
+prompt = "Two samples share a depth, yet one Preseq curve flattens far below the other. What does that sample lack?"
+answer = "Distinct molecules: more sequencing of it adds duplicate reads, not new fragments."
+
+[[questions]]
+prompt = "Salmon on STAR's alignment and Salmon alone give [[Spearman|ρ]] near `1`. Are their counts interchangeable?"
+answer = "No. ρ compares ranks; the agreement plot shows the bias and the genes that differ between them."
+
+[notes]
+no_annotation = "The dataset file declares no annotation, so the counter figures colour every gene as one type."
+
+[groups]
+align = "Alignment"
+strand = "Strandedness"
+qc = "What nf-core's QC tools found"
+counters = "Salmon on STAR's alignment against Salmon alone"
+counters_lead = "{same} of {n} genes with a read count the same in both."
+
+[keys]
+samples = "Samples aligned"
+samples_detail = "median {reads} reads into STAR"
+unique = "Median uniquely mapped"
+unique_detail = "lowest {low} % in {sample}"
+strand = "nf-core's strand call"
+strand_detail = "{n_call} of {n} samples"
+differ = "Genes counted differently"
+differ_detail = "of {n}, Salmon alone or on STAR's alignment"
+
+[figures]
+category = "Sample"
+group_column = "Sheet column {column}, from the gather sheet."
+all_samples = "Every sample"
+styles_distinct = "Each sample has its own colour and dash."
+styles_shared = "Past {most} samples a colour marks a group, not a sample."
+filter_labels = { cell_type = "Cell type", condition = "Condition", call = "nf-core's call" }
+
+[figures.mapping]
+tab = "Mapping"
+title = "Where each sample's reads align"
+lead = "Median uniquely mapped: {median} % of input reads; lowest {low} % in {low_sample}."
+reading = [
+    "Each bar is one sample; its segments are STAR's own percentages of its input reads.",
+    "Unique and several loci are aligned reads; every other outcome is a reason a read stayed unaligned.",
+]
+caption = "Reads by [[STAR]] outcome, as STAR's % of each sample's input reads; {n} samples, median {reads} input reads, from nf-core's MultiQC table. No test."
+value = "Reads"
+names = { unique = "Unique", multi = "Several loci", too_many = "Too many loci", mismatches = "Mismatches", too_short = "Too short", other = "Other" }
+labels = { outcome = "Outcome", reads = "Reads", input_reads = "Input reads" }
+units = { percent = "%", reads = "reads", input_reads = "reads" }
+columns.sample = "Sample, from the gather sheet."
+columns.outcome = "STAR's outcome for a read."
+columns.reads = "Reads with this outcome, from STAR's Log.final.out."
+columns.input_reads = "Reads STAR took in; a pair counts once."
+columns.percent = "STAR's own percent of input reads with this outcome."
+
+[figures.strand]
+tab = "Strand"
+title = "Which strand each sample's reads come from"
+lead = "nf-core calls {n_call} of {n} samples {call}; {failed} fail its strand check."
+reading = [
+    "Each bar is one sample: RSeQC's sampled reads on the gene's strand, the opposite one, or neither.",
+    "A stranded library puts most reads on one side; an unstranded one splits them about evenly.",
+]
+caption = "RSeQC [[strandedness inference|infer_experiment]] shares, % of sampled reads, {n} samples; the call and check are nf-core's own. No test."
+value = "Reads"
+names = { rseqc_sense = "Sense", rseqc_antisense = "Antisense", rseqc_undetermined = "Undetermined" }
+labels = { share = "Strand", call = "nf-core's call", provided = "Given in the samplesheet", salmon_inferred = "Salmon's call", status = "Strand check" }
+units = { percent = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.call = "nf-core's call from RSeQC: forward, reverse or unstranded."
+columns.provided = "The strandedness the samplesheet gave nf-core."
+columns.salmon_inferred = "Salmon's call where nf-core asked it, a dash otherwise."
+columns.status = "nf-core's strand check: pass or fail."
+columns.share = "RSeQC's class of a read: sense, antisense or undetermined."
+columns.percent = "The share of RSeQC's sampled reads in that class."
+
+[figures.strand_check]
+tab = "Strand check"
+title = "nf-core's strand share beside its threshold"
+lead = "Lowest share {low} %; the dashed line is the stranded threshold, {line} %."
+reading = [
+    "Each bar is nf-core's rseqc_pct for one sample; its colour is nf-core's call.",
+    "The dashed line is the threshold the registry sources to nf-core: {source}.",
+]
+caption = "nf-core's rseqc_pct for {n} samples, coloured by its call; dashed, its stranded threshold. No test."
+value = "Share"
+line = "Stranded threshold"
+labels = { call = "nf-core's call", status = "Strand check", provided = "Given in the samplesheet", salmon_inferred = "Salmon's call" }
+units = { rseqc_pct = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.rseqc_pct = "nf-core's rseqc_pct, from its strand check table."
+columns.call = "nf-core's call from RSeQC: forward, reverse or unstranded."
+columns.provided = "The strandedness the samplesheet gave nf-core."
+columns.salmon_inferred = "Salmon's call where nf-core asked it, a dash otherwise."
+columns.status = "nf-core's strand check: pass or fail."
+
+[figures.distribution]
+tab = "Read distribution"
+title = "Where in the genes each sample's reads lie"
+lead = "Median {cds} % of assigned tags fall in coding exons."
+reading = [
+    "Each bar is one sample: RSeQC's tags in coding exons, the two UTRs, introns, the 10 kb around genes, or elsewhere.",
+    "Many intronic tags point to pre-mRNA; many intergenic ones to DNA or an incomplete annotation.",
+]
+caption = "RSeQC [[read distribution]]: % of each sample's assigned tags per region, {n} samples, from nf-core's MultiQC plot data. No test."
+value = "Tags"
+names = { cds = "Coding exons", utr5 = "5' UTR", utr3 = "3' UTR", introns = "Introns", flanks = "Within 10 kb", intergenic = "Intergenic" }
+labels = { region = "Region", tags = "Tags" }
+units = { tags = "tags", percent = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.region = "The part of a gene RSeQC's categories lie in."
+columns.tags = "RSeQC's tags in the region, its categories summed."
+columns.percent = "The region's share of the sample's tags."
+
+[figures.junctions]
+tab = "Junctions"
+title = "Splice junctions: annotated or new"
+lead = "Median {known} % of {measure} are known."
+reading = [
+    "Each bar is one sample: known junctions are in the annotation, partly novel ones share one end with it, novel ones neither.",
+]
+caption = "RSeQC junction annotation, % of {measure}, {n} samples, RSeQC's own percentages. No test."
+value = "Junctions"
+view = "Count"
+measures = { events = "spliced reads", junctions = "distinct junctions" }
+names = { known = "Known", partial_novel = "Partly novel", novel = "Novel" }
+labels = { kind = "Kind", count = "Count" }
+units = { count = "count", percent = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.kind = "known, partial_novel or novel."
+columns.count = "RSeQC's count of the kind."
+columns.percent = "RSeQC's percent of the kind."
+
+[figures.coverage]
+tab = "Coverage"
+title = "Coverage along transcripts, 5' to 3'"
+lead = "{n} samples; a flat curve is even coverage along the transcripts."
+reading = [
+    "Each line is one sample: Qualimap's normalised coverage at each percent of transcript length.",
+    "A curve rising toward 3' points to degraded RNA or poly-A selection of fragments.",
+]
+caption = "Qualimap [[gene body coverage]], normalised, along transcript length from 5' to 3'; {n} samples, from nf-core's MultiQC plot data. No test."
+x = "Position along transcript"
+y = "Coverage"
+units = { x = "%", y = "normalised" }
+columns.sample = "Sample, from the gather sheet."
+columns.x = "Position along the transcript, 5' at 0, 3' at 100."
+columns.y = "Qualimap's normalised coverage."
+
+[figures.duplication]
+tab = "Duplication"
+title = "Duplication against expression"
+lead = "{n} samples; duplication rising at low expression points to amplification."
+reading = [
+    "Each line is one sample: dupRadar's fitted duplication against a gene's expression.",
+    "Highly expressed genes duplicate reads in any library; low-expressed ones duplicate only if few molecules were amplified.",
+]
+caption = "[[dupRadar]] fitted duplication against expression, log10 reads per kilobase; {n} samples, from nf-core's MultiQC plot data. No test."
+x = "Expression"
+y = "Duplication"
+units = { x = "log10 reads per kilobase", y = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.x = "log10 of a gene's reads per kilobase, dupRadar's own x."
+columns.y = "dupRadar's duplication, %."
+
+[figures.complexity]
+tab = "Complexity"
+title = "How many distinct molecules more sequencing finds"
+lead = "{n} samples; the dashed line is a library whose every read is unique."
+reading = [
+    "Each line is one sample: Preseq's expected distinct molecules at each depth.",
+    "A curve that flattens early holds few distinct molecules: more reads add duplicates.",
+]
+caption = "Preseq [[library complexity]], expected distinct against total molecules, millions; {n} samples, from nf-core's MultiQC plot data; dashed, every read unique. No test."
+x = "Total molecules"
+y = "Distinct molecules"
+perfect = "Every read unique"
+units = { x = "millions", y = "millions" }
+columns.sample = "Sample, from the gather sheet."
+columns.x = "Total molecules, as MultiQC plots them."
+columns.y = "Expected distinct molecules, as MultiQC plots them."
+
+[figures.biotypes]
+tab = "Biotypes"
+title = "What the reads counted on genes are"
+lead = "Median {share} % of each sample's counted reads are {top}."
+reading = [
+    "Each bar is one sample: featureCounts' reads per gene biotype, the {named} commonest named, the rest together.",
+]
+caption = "[[featureCounts]] reads per [[gene biotype|biotype]], % of each sample's counted reads, {n} samples, from nf-core's biotype QC. No test."
+value = "Reads"
+other = "Other biotypes"
+labels = { biotype = "Biotype", reads = "Reads" }
+units = { reads = "reads", percent = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.biotype = "The gene biotype, or other biotypes together."
+columns.reads = "featureCounts' reads on genes of the biotype."
+columns.percent = "The biotype's share of the sample's counted reads."
+
+[tables.alignment]
+units = { trim_in = "reads", trim_out = "reads", input_reads = "reads", unique = "reads", multi = "reads", too_many = "reads", mismatches = "reads", too_short = "reads", other = "reads", unique_pct = "%", multi_pct = "%", too_many_pct = "%", mismatches_pct = "%", too_short_pct = "%", other_pct = "%", mismatch_rate = "%", splices = "splices", splices_annotated = "splices", splices_noncanonical = "splices", splices_per_100_unique = "splices per 100 reads", splices_annotated_share = "fraction", records = "records", mapped_records_pct = "%", primary_mapped_pct = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.trim_in = "Reads Trim Galore processed; read 1 of a pair, so pairs."
+columns.trim_out = "Reads Trim Galore wrote; read 1 of a pair."
+columns.input_reads = "Reads STAR took in; a pair counts once."
+columns.unique = "STAR: reads aligned to one locus."
+columns.multi = "STAR: reads aligned to several loci."
+columns.too_many = "STAR: reads on too many loci."
+columns.mismatches = "STAR: reads unmapped for too many mismatches."
+columns.too_short = "STAR: reads unmapped as too short."
+columns.other = "STAR: reads unmapped for other reasons."
+columns.unique_pct = "STAR's own percent uniquely mapped."
+columns.multi_pct = "STAR's own percent mapped to several loci."
+columns.too_many_pct = "STAR's own percent on too many loci."
+columns.mismatches_pct = "STAR's own percent unmapped for mismatches."
+columns.too_short_pct = "STAR's own percent unmapped as too short."
+columns.other_pct = "STAR's own percent unmapped for other reasons."
+columns.mismatch_rate = "STAR: mismatches per base of uniquely mapped reads."
+columns.splices = "STAR: splices in uniquely mapped reads."
+columns.splices_annotated = "STAR: of those, at annotated junctions."
+columns.splices_noncanonical = "STAR: of those, without a canonical motif."
+columns.splices_per_100_unique = "splices per 100 uniquely mapped reads."
+columns.splices_annotated_share = "splices_annotated over splices."
+columns.records = "samtools flagstat records, secondary ones included."
+columns.mapped_records_pct = "flagstat's mapped records as a share of all records."
+columns.primary_mapped_pct = "(mapped - secondary - supplementary) / (total - secondary - supplementary)."
+
+[tables.alignment.page]
+title = "Each sample's alignment: reads in, splices, and records"
+columns = ["Sample", "Trim Galore wrote", "STAR took in", "Uniquely mapped %", "Splices per 100 unique", "Annotated splice share", "Records", "Primary mapped %"]
+note = "samtools flagstat counts records on nf-core's duplicate-marked BAM, a multimapper once per alignment, so records exceed reads."
+
+[tables.strand_check]
+units = { rseqc_sense = "%", rseqc_antisense = "%", rseqc_undetermined = "%", rseqc_pct = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.rseqc_sense = "RSeQC infer_experiment: % of sampled reads on the gene's strand."
+columns.rseqc_antisense = "RSeQC infer_experiment: % on the opposite strand."
+columns.rseqc_undetermined = "RSeQC infer_experiment: % on genes of both strands."
+columns.provided = "The strandedness the samplesheet gave nf-core."
+columns.rseqc_inferred = "nf-core's call from RSeQC."
+columns.rseqc_pct = "nf-core's rseqc_pct, from its strand check table."
+columns.salmon_inferred = "Salmon's call where nf-core asked it, a dash otherwise."
+columns.status = "nf-core's strand check: pass or fail."
+
+[tables.strand_check.page]
+title = "Strand per sample, as RSeQC and nf-core give it"
+columns = ["Sample", "Sense %", "Antisense %", "Undetermined %", "Given", "nf-core's call", "Salmon's call", "Check"]
+
+[tables.distribution_tags]
+units = { tags = "tags" }
+columns.sample = "Sample, from the gather sheet."
+columns.category = "RSeQC's category, as MultiQC plots it."
+columns.tags = "RSeQC's tags in the category."
+
+[tables.junction_counts]
+units = { count = "count", percent = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.measure = "events (spliced reads) or junctions (distinct ones)."
+columns.kind = "known, partial_novel or novel."
+columns.count = "RSeQC's count."
+columns.percent = "RSeQC's percent."
+
+[tables.coverage_profile]
+units = { x = "%", y = "normalised" }
+columns.sample = "Sample, from the gather sheet."
+columns.x = "Position along the transcript, 5' at 0, 3' at 100."
+columns.y = "Qualimap's normalised coverage."
+
+[tables.duplication_curve]
+units = { x = "reads per kilobase", y = "%" }
+columns.sample = "Sample, from the gather sheet."
+columns.x = "Expression, as dupRadar's MultiQC table gives it."
+columns.y = "dupRadar's duplication."
+
+[tables.complexity_curve]
+units = { x = "millions", y = "millions" }
+columns.sample = "Sample, from the gather sheet."
+columns.x = "Total molecules, as MultiQC plots them."
+columns.y = "Expected distinct molecules."
+
+[tables.complexity_perfect]
+units = { x = "millions", y = "millions" }
+columns.x = "Total molecules, MultiQC's line of a library whose every read is unique."
+columns.y = "Distinct molecules on that line."
+
+[tables.biotype_reads]
+units = { reads = "reads" }
+columns.sample = "Sample, from the gather sheet."
+columns.biotype = "The gene biotype, as nf-core's biotype QC names it."
+columns.reads = "featureCounts' reads on genes of the biotype."
+
+[tables.steps]
+units = { tasks = "tasks", samples = "samples", peak_rss = "bytes", realtime = "s" }
+columns.process = "The nf-core process, after its last colon."
+columns.tasks = "Tasks of the process that ran, cached ones left out."
+columns.samples = "Samples among them."
+columns.peak_rss = "The largest peak resident memory of a task."
+columns.realtime = "Real time of every task, summed."
+
+[tables.steps.page]
+title = "What each nf-core process behind this page cost"
+columns = ["Process", "Tasks", "Samples", "Peak memory, MiB", "Time, min"]
+
+[tables.reference.page]
+title = "What nf-core aligned to, as its params file names it"
+columns = ["Setting", "Value"]
+
+[tables.reference.rows]
+fasta = "Genome"
+gtf = "Annotation"
+gencode = "GENCODE annotation"
+aligner = "Aligner"
+pseudo_aligner = "Pseudo-aligner"
+
+[tables.gene_comparison]
+units = { a = "reads", b = "reads" }
+columns.comparison = "salmon: Salmon alone against Salmon on STAR's alignment."
+columns.sample = "Sample, from the gather sheet."
+columns.gene_id = "Gene, from nf-core's matrix."
+columns.a = "Salmon alone: nf-core's length-scaled count."
+columns.b = "Salmon on STAR's alignment: nf-core's length-scaled count."
+columns.gene_name = "Gene symbol, from nf-core's matrix."
+columns.gene_type = "The annotation's gene type; empty without one."
+
+[tables.concordance]
+units = { n_genes = "genes", n_identical = "genes", resamples_dropped = "resamples", bias = "log2(count + 1)", bias_low = "log2(count + 1)", bias_high = "log2(count + 1)", sd = "log2(count + 1)", loa_low = "log2(count + 1)", loa_high = "log2(count + 1)", d_p2_5 = "log2(count + 1)", d_p97_5 = "log2(count + 1)", fold = "ratio" }
+columns.comparison = "salmon: Salmon alone against Salmon on STAR's alignment."
+columns.unit = "A sample, or all: each gene's counts summed over every sample."
+columns.n_genes = "Genes with a read in either count."
+columns.n_identical = "Of those, genes with the same count in both."
+columns.spearman = "Spearman's rho on the counts."
+columns.spearman_low = "Lower end of its percentile bootstrap interval, 1,000 resamples of genes, seed 42."
+columns.spearman_high = "Upper end of that interval."
+columns.resamples_dropped = "Bootstrap resamples of tied values with no rank correlation, left out."
+columns.pearson = "Pearson's r on log2(count + 1)."
+columns.pearson_low = "Lower end of its Fisher z interval."
+columns.pearson_high = "Upper end of that interval."
+columns.bias = "Mean of d = log2(b + 1) - log2(a + 1)."
+columns.bias_low = "Lower end of the bias's t interval."
+columns.bias_high = "Upper end of that interval."
+columns.sd = "Standard deviation of d, n - 1 in the denominator."
+columns.loa_low = "Lower limit of agreement: bias - 1.96 sd."
+columns.loa_high = "Upper limit of agreement: bias + 1.96 sd."
+columns.d_p2_5 = "Empirical 2.5th percentile of d."
+columns.d_p97_5 = "Empirical 97.5th percentile of d."
+columns.fold = "2 to the power of the bias: a ratio of (count + 1) values."
+
+[tables.concordance.page]
+title = "The two quantifications over every sample's gene sums"
+columns = ["Comparison", "Genes", "Identical", "Spearman ρ", "Bootstrap interval", "Bias", "Limits of agreement"]
+
+[tables.discordant]
+units = { a = "reads", b = "reads", d = "log2(count + 1)" }
+columns.comparison = "salmon: Salmon alone against Salmon on STAR's alignment."
+columns.gene_id = "Gene, from nf-core's matrix."
+columns.gene_name = "Gene symbol, from nf-core's matrix."
+columns.gene_type = "The annotation's gene type; empty without one."
+columns.a = "Salmon alone, summed over samples."
+columns.b = "Salmon on STAR's alignment, summed over samples."
+columns.d = "log2(b + 1) - log2(a + 1)."
+
+[tables.figure_options]
+units = { genome_genes = "genes" }
+columns.aligner = "star: nf-core aligned with STAR."
+columns.featured = "Empty: nf-core features no sample."
+columns.genome_name = "Empty: the reference table names nf-core's genome."
+columns.genome_genes = "0: the counter figures here count no annotation's genes."
+columns.partial = "False: nf-core aligned to the whole genome."
+columns.registry = "The QC registry file the run read."
+columns.colour = "The sheet column colouring the curves past distinct styles, or empty."
+columns.route = "nfcore: drawn from nf-core/rnaseq's outputs."
+
+[tables.outcomes]
+units = { reads = "reads" }
+columns.label = "Sample: one bar of the mapping figure."
+columns.outcome = "STAR's outcome for a read, or input for the reads it took in."
+columns.reads = "Reads with that outcome."
+
+[tables.sums]
+units = { a = "reads", b = "reads" }
+columns.gene_id = "Gene, from nf-core's matrix."
+columns.a = "Salmon alone, summed over the samples."
+columns.b = "Salmon on STAR's alignment, summed over the samples."
+columns.comparison = "salmon."
+columns.gene_name = "Gene symbol, from nf-core's matrix."
+columns.gene_type = "The annotation's gene type; empty without one."
+columns.type_group = "protein_coding, lncRNA or other: the scatter's colours."
+
+[tables.groups]
+units = {}
+columns.sample = "Sample, from the gather sheet."
+columns.cell_type = "The sheet's cell type, a filter of the bars."
+columns.condition = "The sheet's condition, a filter of the bars."

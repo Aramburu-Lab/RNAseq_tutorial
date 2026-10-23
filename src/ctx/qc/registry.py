@@ -46,6 +46,7 @@ OPTIONAL = (
     "module", "kind", "scale", "good", "usable", "bands", "rationale", "stranded", "unstranded",
     "plot_bands", "plot_line", "plot_source", "plot_expected_bias_positions",
     "plot_unstranded_tolerance", "judged_within", "exclude_gene_ids", "exclude_source",
+    "flagged",
 )  # fmt: skip
 # An unversioned Ensembl gene ID, as exclude_gene_ids names one: the version a release bumps
 # must not stop the match.
@@ -95,6 +96,8 @@ class Metric:
     judged_within: str | None = None
     exclude_gene_ids: tuple[str, ...] = ()
     exclude_source: str = ""
+    # A category metric's value that flags a sample; None is ``checkpoint.FLAGGED_CATEGORY``.
+    flagged: str | None = None
 
     @property
     def banded(self) -> bool:
@@ -213,6 +216,8 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
         problems.append(f"[metrics.{key}] source_type = {raw.get('source_type')!r}, not one of "
                         f"{sorted(SOURCE_TYPES)}")  # fmt: skip
     problems += _band_problems(key, raw, kind) + _exclusion_problems(key, raw)
+    if "flagged" in raw and (kind != "category" or not isinstance(raw["flagged"], str)):
+        problems.append(f"[metrics.{key}] flagged names the value of a category metric that flags")
     if raw.get("judged_within", JUDGED_WITHIN[0]) not in JUDGED_WITHIN:
         problems.append(f"[metrics.{key}] judged_within = {raw['judged_within']!r}, not one of "
                         f"{JUDGED_WITHIN}")  # fmt: skip
@@ -233,7 +238,7 @@ def _metric(key: str, raw: Mapping[str, Any]) -> tuple[Metric | None, list[str]]
         plot_unstranded_tolerance=raw.get("plot_unstranded_tolerance"),
         judged_within=raw.get("judged_within"),
         exclude_gene_ids=tuple(raw.get("exclude_gene_ids", ())),
-        exclude_source=raw.get("exclude_source", ""),
+        exclude_source=raw.get("exclude_source", ""), flagged=raw.get("flagged"),
     ), []  # fmt: skip
 
 

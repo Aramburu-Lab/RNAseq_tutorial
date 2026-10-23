@@ -8,7 +8,6 @@ optional laptop exercise (D-050). What the page shows of each frame is ``ctx.pro
 from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import polars as pl
@@ -20,7 +19,6 @@ from ctx.process import (
     Aligner,
     align,
     blocks,
-    cluster,
     context,
     figure_tables,
     figures,
@@ -49,8 +47,6 @@ PAGE = MODULE = "process"
 # Sheet columns the bars may filter by, where the aligned samples hold two levels or more.
 GROUPS = ("cell_type", "condition")
 SHOWN_RUNS = 10
-# The content table whose Input and Method a cluster's page reads in place of the page's own.
-CLUSTER = "variants.cluster"
 # The derived multimapper limit's row in the settings table (D-041).
 LIMIT_ONE = "limit_1"
 
@@ -85,7 +81,6 @@ class Shown:
         partial: Whether the genome lacks a contig the annotation names, so genome-wide
             mapping bands do not apply.
         prefix: Put before every caption; the preview's says its data are made up.
-        cluster: Whether the reads were aligned on the cluster (``--align-dir``).
     """
 
     aligner: Aligner
@@ -96,7 +91,6 @@ class Shown:
     genome_genes: int
     partial: bool = True
     prefix: str = ""
-    cluster: bool = False
 
     @property
     def usable(self) -> list[str]:
@@ -303,7 +297,9 @@ def groups_of(sheet: pl.DataFrame, samples: Sequence[str]) -> pl.DataFrame:
     A column is worth it with two levels at least and no more than a figure has colours; a
     missing value is shown as a word.
     """
-    kept = sheet.unique("sample", keep="first").filter(pl.col("sample").is_in(samples))
+    kept = sheet.unique("sample", keep="first", maintain_order=True).filter(
+        pl.col("sample").is_in(samples)
+    )
     usable = [g for g in GROUPS if g in kept.columns
               and 1 < kept[g].n_unique() <= MAX_CATEGORIES]  # fmt: skip
     missing = text.word(PAGE, "figures.no_value")
@@ -403,10 +399,9 @@ def prose(shown: Shown, values: Mapping[str, Any]) -> dict[str, str]:
     """Input, Method and Interpretation filled; the reference note says whether bands apply."""
     names = {"genome_name": shown.genome_name, "aligner": str(shown.aligner).upper()}
     note = text.fill(PAGE, f"reference_note.{'partial' if shown.partial else 'whole'}", **names)
-    where = f"{CLUSTER}." if shown.cluster else ""
     return {
-        "input": text.fill(PAGE, f"{where}input", **values, **names),
-        "method": text.fill(PAGE, f"{where}method", **names),
+        "input": text.fill(PAGE, "input", **values, **names),
+        "method": text.fill(PAGE, "method", **names),
         "interpretation": text.fill(PAGE, "interpretation", **values, **names,
                                     reference_note=note),
     }  # fmt: skip
@@ -422,7 +417,7 @@ def sections(ctx: Context, found: Frames, shown: Shown) -> dict[str, Any]:
         "release": ref.annotation.release or text.word(PAGE, "no_release"),
         "low": f"{low:.1f}", "high": f"{high:.1f}",
     })  # fmt: skip
-    return text.skeleton(PAGE, CLUSTER if shown.cluster else None) | filled
+    return text.skeleton(PAGE) | filled
 
 
 def build(ctx: Context) -> ModulePage:
@@ -439,17 +434,10 @@ def build(ctx: Context) -> ModulePage:
         ctx.inputs.registry.metrics["gene_strand_bias"],
         len(ctx.genome_genes),
         partial=partial(found),
-        cluster=ctx.inputs.source is not None,
     )
     # What the figures draw that no table above holds, so ctx figure redraws them (F.1).
     figure_tables.write(ctx.writer, found, shown, ctx.inputs.registry)
     body = results(ctx.writer, found, shown, notes(ctx, found))
-    said: tuple[str, ...] = ()
-    if ctx.inputs.source is not None:
-        steps = cluster.steps(cluster_dirs(ctx))
-        ctx.writer.table(steps, "cluster_steps", described("tables.cluster_steps", steps.columns))
-        body = (*body, blocks.steps_table(steps))
-        said = cluster_notes(ctx, steps)
     usage, budget = runtime.measure(ctx.settings.started), runtime.budget(MODULE)
     aligner = "STAR" if ctx.options.aligner is Aligner.STAR else "hisat2"
     pins = {
@@ -467,31 +455,6 @@ def build(ctx: Context) -> ModulePage:
             peak_rss_self=usage.peak_rss_self, peak_rss_children=usage.peak_rss_children,
             profile=f"{ctx.settings.profile}, {ctx.settings.threads} threads",
             budget=text.fill(PAGE, "budget", minutes=budget.minutes, ram_gb=budget.ram_gb),
-            versions={**runtime.versions(), **pins}, inputs=tuple(inputs), notes=said,
+            versions={**runtime.versions(), **pins}, inputs=tuple(inputs),
         ),
     )  # fmt: skip
-
-
-def cluster_dirs(ctx: Context) -> list[Path]:
-    """Each folder of cluster time files the page reads: every sample's, then the featured's."""
-    source = ctx.inputs.source
-    if source is None:
-        return []
-    return [
-        *(source.sample_dir(s) for s in ctx.aligned.main.samples),
-        *(source.featured_dir(ctx.inputs.featured, s) for s in ctx.aligned.featured),
-    ]
-
-
-def cluster_notes(ctx: Context, steps: pl.DataFrame) -> tuple[str, ...]:
-    """The Reproduce section's word on the cluster: versions.txt's tools, the cost, the blocks."""
-    source = ctx.inputs.source
-    if source is None:
-        return ()
-    versions = ", ".join(f"{t} {v}" for t, v in source.versions.items())
-    wall = float(steps["wall_s_sum"].sum()) if steps.height else 0.0
-    rss = figures.stat(steps["max_rss_bytes"], "max") if steps.height else 0.0
-    return (text.fill(PAGE, "cluster.reproduce.tools", versions=versions, index=source.index),
-            text.fill(PAGE, "cluster.reproduce.cost", files=int(steps["files"].sum()),
-                      hours=f"{wall / 3600:.2f}", gib=f"{rss / 2**30:.2f}"),
-            text.word(PAGE, "cluster.reproduce.blocks"))  # fmt: skip

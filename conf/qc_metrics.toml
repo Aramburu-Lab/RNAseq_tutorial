@@ -427,7 +427,8 @@ source = "measured on GENCODE 50 and GRCh38 chr22 (2026-10-01)"
 source_type = "course_convention"
 
 # M2 judges the next four from M3's alignment table, one row per sample, when `ctx process` has
-# run on the dataset (M3.12). M3 aligns to part of the genome, so no genome-wide band applies.
+# run on the dataset (M3.12). M3's laptop route aligns to part of the genome, so no genome-wide
+# band applies; nf-core's route (D-116) aligns to the whole one and writes the same columns.
 [metrics.align_unique_pct]
 stage = "align"
 title = "Reads mapped once"
@@ -523,6 +524,105 @@ matters_for_de = true
 read_length_tied = false
 source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, unstranded_threshold 0.1 (nextflow.config), which docs/usage.md applies to Salmon and to RSeQC infer_experiment; transferred to featureCounts gene-assigned reads"
 source_type = "course_convention"
+
+# M2 judges the next five from the strand table of nf-core's route (`ctx process --rnaseq-dir`,
+# D-116), one row per sample: RSeQC infer_experiment's shares as nf-core's MultiQC plots them,
+# and nf-core's own strand check. ctx applies no strand threshold to them; the call is nf-core's.
+[metrics.rseqc_sense]
+stage = "align"
+title = "Reads on the gene's strand"
+meaning = "RSeQC's share of sampled reads on the gene's own strand: high in a forward-stranded library, low in a reverse one."
+computed = "RSeQC 5.0.4 infer_experiment, through nf-core's MultiQC (rseqc_infer_experiment_plot, Sense)"
+unit = "%"
+table = "strand_check"
+column = "rseqc_sense"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "The library protocol sets it, so every sample of one protocol shares it; a sample far from its stratum came from another protocol or holds genomic DNA."
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.rseqc_antisense]
+stage = "align"
+title = "Reads on the opposite strand"
+meaning = "RSeQC's share of sampled reads on the strand opposite the gene: high in a reverse-stranded library, low in a forward one."
+computed = "RSeQC 5.0.4 infer_experiment, through nf-core's MultiQC (rseqc_infer_experiment_plot, Antisense)"
+unit = "%"
+table = "strand_check"
+column = "rseqc_antisense"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "The library protocol sets it, so every sample of one protocol shares it; a sample far from its stratum came from another protocol or holds genomic DNA."
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.rseqc_undetermined]
+stage = "align"
+title = "Reads of no strand"
+meaning = "RSeQC's share of sampled reads on genes of both strands, which no strand can be given."
+computed = "RSeQC 5.0.4 infer_experiment, through nf-core's MultiQC (rseqc_infer_experiment_plot, Undetermined)"
+unit = "%"
+table = "strand_check"
+column = "rseqc_undetermined"
+scale = "linear"
+direction = "lower"
+bands = "dataset_only"
+rationale = "The annotation's overlapping genes set most of it, so a dataset shares it; a sample above its stratum holds more reads where genes overlap, or intergenic DNA."
+causes = ["genomic DNA contamination", "an annotation with many overlapping genes"]
+action = "flag"
+matters_for_de = false
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+
+[metrics.rseqc_pct]
+stage = "align"
+title = "nf-core's strand share"
+meaning = "nf-core's rseqc_pct for the strand it inferred, from its strand check table."
+computed = "nf-core/rnaseq 3.27.0's strand check table (multiqc_strand_check_summary_table, rseqc_pct); on the aligned fixture's five reverse samples it equals antisense over sense plus antisense, to its one decimal"
+unit = "%"
+table = "strand_check"
+column = "rseqc_pct"
+scale = "linear"
+direction = "none"
+bands = "dataset_only"
+rationale = "nf-core calls a library stranded where one strand holds its stranded_threshold; ctx draws that threshold beside the share and takes the call from nf-core, never applying it here."
+causes = ["a different library protocol", "genomic DNA contamination"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "dataset only"
+source_type = "course_convention"
+plot_line = 80.0
+plot_source = "nf-core/rnaseq 3.27.0 stranded_threshold 0.8, as the aligned fixture's params files record it (tests/fixtures/rnaseq_star/pipeline_info/params_*.json), drawn as 80 %"
+
+[metrics.strand_check]
+stage = "align"
+title = "nf-core's strand check"
+meaning = "Whether the strandedness the samplesheet gave nf-core agrees with the one it inferred."
+computed = "nf-core/rnaseq 3.27.0's strand check table (multiqc_strand_check_summary_table, status): pass or fail"
+unit = "category"
+table = "strand_check"
+column = "status"
+kind = "category"
+flagged = "fail"
+direction = "none"
+causes = ["a samplesheet strandedness that does not match the library", "a mixed library"]
+action = "flag"
+matters_for_de = true
+read_length_tied = false
+source = "nf-core/rnaseq 3.27.0's strand check, read from its MultiQC table"
+source_type = "pipeline_default"
 
 # The GDC counts files' own strand columns (ctx.gather.gdc): STAR's GeneCounts per read strand.
 # In the four TCGA projects on this Mac, 52 of 3,008 files share 0.0444 to 0.1243, the rest

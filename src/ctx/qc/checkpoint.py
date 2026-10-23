@@ -43,8 +43,8 @@ RRNA = ("rRNA", "rRNA_pseudogene")
 TOP_GENE = "top_gene_share"
 GLOBIN = ("HBA1", "HBA2", "HBB")
 ATTRIBUTE = re.compile(r'(gene_id|gene_name|gene_type) "([^"]*)"')
-# ponytail: sex_check is the registry's one category metric; a per-metric flag value in the
-# registry when a second one arrives.
+# A category metric's value that flags a sample, unless the registry names its own (``flagged``,
+# as nf-core's strand check does with "fail").
 FLAGGED_CATEGORY = "disagrees"
 STRATUM = "stratum"
 # One sample selection of M5: (sample, "reference" or "tested") pairs, sorted.
@@ -374,7 +374,7 @@ def _absolute(frame: pl.DataFrame, metric: Metric, label: str) -> list[tuple[str
     rows = frame.select("sample", metric.column).drop_nulls().rows()
     if metric.kind == "category":
         return [(s, text.fill(PAGE, "reasons.category", title=metric.title, value=v))
-                for s, v in rows if v == FLAGGED_CATEGORY]  # fmt: skip
+                for s, v in rows if v == (metric.flagged or FLAGGED_CATEGORY)]  # fmt: skip
     if metric.kind == "strandedness":
         calls = [(s, metric.strandedness(float(v))) for s, v in rows]
         usual = max(sorted({c for _, c in calls}), key=[c for _, c in calls].count, default="")

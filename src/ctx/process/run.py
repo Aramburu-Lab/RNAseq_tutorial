@@ -32,12 +32,10 @@ from ctx.process import (
     Aligner,
     ProcessError,
     align,
-    cluster,
     context,
     count,
     reference,
 )
-from ctx.process import cluster_route as route
 from ctx.process import page as pages
 from ctx.process import tables as tab
 from ctx.process.stages import Aligned, Built, Counted, Counter, Inputs, Options, Sheet
@@ -70,31 +68,12 @@ def option_problems(options: Options) -> list[str]:
         problems.append(f"--settings: unknown {unknown}; known are {list(SETTINGS)}")
     if options.reads_per_run is not None and options.reads_per_run < 1:
         problems.append(f"--reads-per-run {options.reads_per_run} keeps no read")
-    if options.genome is None and options.align_dir is None:
-        problems.append("--genome is needed: the reads are aligned here unless --align-dir "
-                        "names a cluster's alignment")  # fmt: skip
-    elif options.genome is not None and not options.genome.is_file():
+    if options.genome is None:
+        problems.append("--genome is needed: the reads are aligned here; --rnaseq-dir reads "
+                        "nf-core's alignment instead")  # fmt: skip
+    elif not options.genome.is_file():
         problems.append(f"--genome {options.genome} is not a file")
-    return problems + cluster_problems(options)
-
-
-def cluster_problems(options: Options) -> list[str]:
-    """What --align-dir cannot take: what the cluster did not run, and options for reads here.
-
-    The cluster ran STAR at its default multimapper limit on every read (ED.6 blocks B1, C1).
-    """
-    if options.align_dir is None:
-        return []
-    given = {"--aligner hisat2": options.aligner is Aligner.HISAT2,
-             "--multimap-max": options.multimap is not None,
-             "--reads-per-run": options.reads_per_run is not None,
-             "--fetchngs-dir": options.fetchngs_dir is not None}  # fmt: skip
-    return [
-        f"{flag} is not read with --align-dir: the cluster aligned every read with STAR at "
-        "its default limit, and no FASTQ is opened here"
-        for flag, on in given.items()
-        if on
-    ]
+    return problems
 
 
 def annotation(root: Path, spec: Dataset) -> tuple[Path | None, list[str]]:
@@ -123,13 +102,11 @@ def runs_of(path: Path) -> tuple[pl.DataFrame | None, list[str]]:
     return gdc.chosen(sheet), []
 
 
-def _sheet(root: Path, dataset: str, options: Options,
-           source: cluster.Source | None) -> tuple[Sheet | None, list[str]]:  # fmt: skip
+def _sheet(root: Path, dataset: str, options: Options) -> tuple[Sheet | None, list[str]]:
     """The gather sheet and its readable runs, or why not; a mix of layouts is a problem.
 
-    With a cluster's alignment the runs' files are the cluster's (``cluster.files_of``) and
-    none is opened. A mixed sheet is still returned with its problem, so the checks that read
-    its samples (``--featured-sample``, ``--compare-dataset``) run beside it.
+    A mixed sheet is still returned with its problem, so the checks that read its samples
+    (``--featured-sample``, ``--compare-dataset``) run beside it.
     """
     folder = root / "outputs" / f"{dict(MODULES)['gather']:02d}_gather"
     problems: list[str] = []
@@ -138,12 +115,8 @@ def _sheet(root: Path, dataset: str, options: Options,
         sheet, refused = runs_of(path)
         if sheet is None:
             return None, refused
-        if source is not None:
-            files, problems = cluster.files_of(sheet, source)
-            skipped = pl.DataFrame(schema={"run_accession": pl.String, "status": pl.String})
-        else:
-            files, skipped = reads.fastq_files(sheet, options.fetchngs_dir or root / "data"
-                                               / "raw" / dataset)  # fmt: skip
+        files, skipped = reads.fastq_files(sheet, options.fetchngs_dir or root / "data"
+                                           / "raw" / dataset)  # fmt: skip
     except (DatasetError, QcError) as error:
         return None, [str(error)]
     found = Sheet(sheet, path, files, skipped)
@@ -222,9 +195,7 @@ def resolve(settings: runtime.Settings, dataset: str, options: Options) -> Input
     gtf, found = annotation(settings.root, spec) if spec else (None, [])
     problems += found
     genes = gene_types(gtf) if gtf is not None else None
-    source, found = cluster.read(options.align_dir) if options.align_dir else (None, [])
-    problems += found
-    sheet, found = _sheet(settings.root, dataset, options, source)
+    sheet, found = _sheet(settings.root, dataset, options)
     problems += found
     samples = sheet.files["sample"].unique(maintain_order=True).to_list() if sheet else []
     featured = options.featured or (samples[0] if samples else "")
@@ -232,60 +203,29 @@ def resolve(settings: runtime.Settings, dataset: str, options: Options) -> Input
         problems.append(f"--featured-sample {featured} is not a sample with readable reads")
     compare, found = _compare(settings.root, options, samples, registry, genes)
     problems += found
-    problems += [] if source else _probe(options)
-    main, found, genome_name = _main_reference(settings.root, options, gtf, registry, source)
+    problems += _probe(options)
+    main, found, genome_name = _main_reference(settings.root, options, gtf, registry)
     problems += found
-    if source is not None and sheet is not None and main is not None and gtf is not None:
-        problems += _cluster_problems(source, main, samples, featured, options.settings, gtf)
     if (problems or spec is None or registry is None or sheet is None or gtf is None
             or genes is None or main is None):  # fmt: skip
         raise ProcessError("ctx process cannot start:\n  " + "\n  ".join(problems))
     return Inputs(spec, sheet.sheet, sheet.path, sheet.files, sheet.skipped, gtf, genes,
-                  registry, featured, compare, main, genome_name, source)  # fmt: skip
+                  registry, featured, compare, main, genome_name)  # fmt: skip
 
 
 def _main_reference(root: Path, options: Options, gtf: Path | None,
-                    registry: reg.Registry | None, source: cluster.Source | None
+                    registry: reg.Registry | None
                     ) -> tuple[reference.Reference | None, list[str], str]:  # fmt: skip
     """The whole reference and the genome's file name, or why not.
 
-    Prepared here from ``--genome``, else from the facts ctx prepared on the cluster (block E);
-    either way its start codons must pass the registry's band (D-039).
+    Prepared here from ``--genome``; its start codons must pass the registry's band (D-039).
     """
-    if gtf is None:
+    if gtf is None or options.genome is None:
         return None, [], ""
-    if options.genome is not None:
-        if not options.genome.is_file():
-            return None, [], options.genome.name
-        ref, found = _reference(options.genome, gtf, root, registry)
-        return ref, found, options.genome.name
-    if source is None:
-        return None, [], ""
-    try:
-        ref = reference.from_facts(source.reference("main"), gtf, _out(root) / "tools" / "index")
-    except ProcessError as error:
-        return None, [str(error)], source.genome
-    found = _codon_problems(ref, registry)
-    return (None if found else ref), found, source.genome
-
-
-def _cluster_problems(source: cluster.Source, main: reference.Reference,  # noqa: PLR0913 - one each
-                      samples: list[str], featured: str, settings: tuple[str, ...],
-                      gtf: Path) -> list[str]:  # fmt: skip
-    """The cluster's genome is the reference's, its annotation the dataset's, its settings run."""
-    found, problems = cluster.contigs(source, samples)
-    genome = dict(zip(main.genome.contigs, main.genome.lengths, strict=True))
-    if found and found != genome:
-        problems.append(f"the cluster's BAMs hold {len(found)} contigs, the reference "
-                        f"{len(genome)}, or other lengths: not one genome")  # fmt: skip
-    if source.gtf != gtf.name.removesuffix(".gz"):
-        problems.append(f"the cluster counted with {source.gtf}, not {gtf.name} unzipped")
-    problems += [
-        f"--settings {s}: no {source.featured_dir(featured, s)}; run block E for {featured}"
-        for s in settings
-        if not source.featured_dir(featured, s).is_dir()
-    ]
-    return problems
+    if not options.genome.is_file():
+        return None, [], options.genome.name
+    ref, found = _reference(options.genome, gtf, root, registry)
+    return ref, found, options.genome.name
 
 
 def _out(root: Path) -> Path:
@@ -457,28 +397,18 @@ def run(settings: runtime.Settings, cards: tuple[ParameterCard, ...], command: s
     """
     inputs = resolve(settings, dataset, options)
     parent, threads = _out(settings.root) / "tools" / "index", settings.threads
-    if inputs.source is None:
-        indices = {"main": build_index(inputs.reference, options.aligner, parent, threads)}
-        if "cut" in options.settings:
-            assert options.genome is not None  # noqa: S101 - resolve requires it without a source
-            half = reference.prepare(options.genome, inputs.gtf, parent, half=True)
-            indices["cut"] = build_index(half, options.aligner, parent, threads)
-    else:
-        indices = route.indices(inputs, options, parent)
+    indices = {"main": build_index(inputs.reference, options.aligner, parent, threads)}
+    if "cut" in options.settings:
+        assert options.genome is not None  # noqa: S101 - resolve requires it
+        half = reference.prepare(options.genome, inputs.gtf, parent, half=True)
+        indices["cut"] = build_index(half, options.aligner, parent, threads)
     day = date.today()
     writer = Writer(_out(settings.root), dataset, day, releases(inputs, indices, options))
     tools_readme(writer.out)
     config = multiqc_config(writer, inputs.registry)
     tools_ds = config.parent / "tools" / inputs.spec.slug
-    if inputs.source is None:
-        aligned = align_all(inputs, options, indices, threads, config)
-        counter = counted_here(indices, tools_ds, threads)
-    else:
-        trimmed, main, featured = route.aligned(inputs, options, tools_ds)
-        aligned = Aligned(
-            trimmed, main, featured, summaries(inputs, config, main, featured, trimmed, threads)
-        )
-        counter = route.counter(inputs, inputs.source, tools_ds)
+    aligned = align_all(inputs, options, indices, threads, config)
+    counter = counted_here(indices, tools_ds, threads)
     counted = count_all(inputs, options, aligned, threads, config, counter)
     checks(inputs, indices, aligned, counted)
     page = pages.build(pages.Context(
