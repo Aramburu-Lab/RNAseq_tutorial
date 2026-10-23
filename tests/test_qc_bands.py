@@ -31,10 +31,9 @@ def with_metric(tmp_path: Path, key: str, **fields: object) -> Path:
 
 
 # Fields the registry words otherwise than the proposal, each with the text it keeps instead.
-DEVIATIONS = {
-    # The proposal claimed a control the page lacks: "the page lets you move" the fastp grid.
-    ("fastp_surviving", "rationale"): "the page maps one run's -q by -l, without a control.",
-}
+DEVIATIONS: dict[tuple[str, str], str] = {}
+# Metrics the proposal banded that D-116 removed with the local read stage: fastp's and seqkit's.
+REMOVED = {"q30_rate", "fastp_surviving", "fastp_passed_reads"}
 
 
 def test_the_approved_proposal_is_applied_field_by_field():
@@ -43,6 +42,9 @@ def test_the_approved_proposal_is_applied_field_by_field():
     Mutation caught: fastqc_adapter's plot_bands set to [5.0, 20.0]."""
     metrics = tomllib.loads(REGISTRY.read_text())["metrics"]
     for entry in json.loads(PROPOSAL.read_text()):
+        if entry["id"] in REMOVED:
+            assert entry["id"] not in metrics, entry["id"]
+            continue
         metric = metrics[entry["id"]]
         for field, value in {**entry["registry_add"], **entry["registry_replace"]}.items():
             if (kept := DEVIATIONS.get((entry["id"], field))) is not None:
@@ -54,7 +56,7 @@ def test_the_approved_proposal_is_applied_field_by_field():
 
 @pytest.mark.parametrize(("key", "bands"), [("fastqc_adapter", [10.0, 5.0]),
                                             ("globin_fraction", [0.01, 0.001]),
-                                            ("fastp_surviving", [90.0, 95.0])])  # fmt: skip
+                                            ("tg_pct_passing", [99.0, 99.9])])  # fmt: skip
 def test_a_band_pair_against_its_direction_is_refused(tmp_path, key, bands):
     """lower wants good below usable, higher above it; direction none takes either order.
 
@@ -106,13 +108,13 @@ def strip_of(metric_id: str, values: list[float]):
 def test_strips_draw_display_bands_lines_and_call_regions():
     """plot_bands shade, plot_line is a dashed line, a strand metric shows its call regions.
 
-    Mutations caught: strip() drawing Metric.spans() alone (no shading on fastp_surviving);
+    Mutations caught: strip() drawing Metric.spans() alone (no shading on tg_pct_passing);
     plot_line left undrawn; the tolerance strip left out."""
-    fastp = strip_of("fastp_surviving", [99.0, 98.5, 97.0])
-    assert [(s.band, s.low, s.high) for s in fastp.spans] == [
-        ("good", 95.0, None),
-        ("usable", 90.0, 95.0),
-        ("bad", None, 90.0),
+    passing = strip_of("tg_pct_passing", [99.95, 99.5, 98.0])
+    assert [(s.band, s.low, s.high) for s in passing.spans] == [
+        ("good", 99.9, None),
+        ("usable", 99.0, 99.9),
+        ("bad", None, 99.0),
     ]
     gc = strip_of("percent_gc", [48.0, 50.0, 51.0])
     assert [v for _, v in gc.references] == [49.8] and not gc.spans
@@ -255,15 +257,15 @@ def multiqc_data(tmp_path: Path) -> multiqc_io.MultiqcRun:
     """A MultiQC data folder written by hand, in MultiQC 1.35's plot-data layout."""
     data = tmp_path / "multiqc_data"
     data.mkdir()
-    (data / "fastqc_adapter_content_plot.txt").write_text(
+    (data / "fastqc_raw_adapter_content_plot.txt").write_text(
         "Sample\t0\t1\n"
         "r1_1 - illumina\t(1, 0.0)\t(2, 3.0)\n"
         "r1_1 - polya\t(1, 1.0)\t(2, 2.0)\n"
         "r1_2 - illumina\t(1, 9.0)\t(2, 9.0)\n")  # fmt: skip
-    (data / "fastqc_per_sequence_gc_content_plot_Percentages.txt").write_text(
+    (data / "fastqc_raw_per_sequence_gc_content_plot_Percentages.txt").write_text(
         "Sample\t0\t1\nr1_1\t(40.0, 1.0)\t(50.0, 2.0)\nr1_2\t(40.0, 5.0)\t(50.0, 5.0)\n"
         "Theoretical GC Content\t(40.0, 0.5)\t(50.0, 3.0)\n")  # fmt: skip
-    (data / "fastqc_overrepresented_sequences_plot.txt").write_text(
+    (data / "fastqc_raw_overrepresented_sequences_plot.txt").write_text(
         "Sample\tTop overrepresented sequence\tSum of remaining overrepresented sequences\n"
         "r1_1\t0.2\t1.0\nr1_2\t0.9\t0.0\n")  # fmt: skip
     return multiqc_io.MultiqcRun(data, "1.35")

@@ -22,14 +22,15 @@ from ctx.viz.strip import Span, StripData
 from ctx.viz.style import MAX_DISTINCT, category_colours
 
 PAGE = "qc"
-# The registry metric each MultiQC plot shows, in the order the page draws them.
+# The registry metric each MultiQC plot shows, in the order the page draws them: nf-core's
+# MultiQC anchors FastQC on the raw reads as fastqc_raw (D-116).
 PLOTS = {
-    "fastqc_per_base_quality": "fastqc_per_base_sequence_quality_plot",
-    "fastqc_adapter": "fastqc_adapter_content_plot",
-    "fastqc_n_content": "fastqc_per_base_n_content_plot",
-    "fastqc_gc_distribution": "fastqc_per_sequence_gc_content_plot_Percentages",
+    "fastqc_per_base_quality": "fastqc_raw_per_base_sequence_quality_plot",
+    "fastqc_adapter": "fastqc_raw_adapter_content_plot",
+    "fastqc_n_content": "fastqc_raw_per_base_n_content_plot",
+    "fastqc_gc_distribution": "fastqc_raw_per_sequence_gc_content_plot_Percentages",
 }
-OVERREPRESENTED = ("fastqc_overrepresented", "fastqc_overrepresented_sequences_plot",
+OVERREPRESENTED = ("fastqc_overrepresented", "fastqc_raw_overrepresented_sequences_plot",
                    "Top overrepresented sequence")  # fmt: skip
 # The status whose plot MultiQC 1.35 does not export.
 NO_TABLE = "fastqc_sequence_content"

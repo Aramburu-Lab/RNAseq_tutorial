@@ -546,9 +546,9 @@ def test_help_prints_the_display_text():
     """
     from ctx.cli import app  # noqa: PLC0415
 
-    done = CliRunner().invoke(app, ["qc", "--help"], terminal_width=200)
+    done = CliRunner().invoke(app, ["process", "--help"], terminal_width=200)
     assert done.exit_code == 0
-    assert "[[" not in done.output and "Phred quality" in done.output
+    assert "[[" not in done.output and "Phred" in done.output
 
 
 def test_the_kit_ships_the_glossary_and_start_links_it(tmp_path):

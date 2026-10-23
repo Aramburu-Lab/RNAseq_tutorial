@@ -408,11 +408,11 @@ def test_report_decides_sanity(pipeline):
     assert hub.count('class="verdict"') == 4  # S1, both S2 conditions, S3
 
 
-def test_process_trims_with_m2_s_fastp_defaults():
-    """ctx process and ctx qc share one fastp setting (M3 plan, section 5): each fastp option
-    of process defaults to qc's, and both to ``Fastp()``'s field.
+def test_process_trims_with_fastp_s_own_defaults():
+    """ctx process's laptop route trims at ``Fastp()``'s fields; M2 no longer runs fastp
+    (D-116), so qc takes no fastp option.
 
-    Mutation caught: process's --fastp-l default changed alone (30 against qc's 15)."""
+    Mutation caught: process's --fastp-l default changed (30 against Fastp's 15)."""
     from ctx.qc import Fastp  # noqa: PLC0415
 
     group = typer.main.get_command(app)
@@ -421,16 +421,15 @@ def test_process_trims_with_m2_s_fastp_defaults():
     defaults = {name: {p.opts[0]: p.default for p in group.commands[name].params}
                 for name in ("process", "qc")}  # fmt: skip
     for flag, field in fields.items():
-        assert defaults["process"][flag] == defaults["qc"][flag] == getattr(Fastp(), field), flag
+        assert defaults["process"][flag] == getattr(Fastp(), field), flag
+        assert flag not in defaults["qc"], flag
 
 
 def test_no_card_sends_a_reader_to_another_page_s_figure():
-    """M2's fastp grid is on the qc page alone: no other command's card mentions a grid.
+    """No card mentions a grid: M2's fastp grid went with its read stage (D-116).
 
     Mutation caught: the process page's --fastp-q card left on M2's text ("see the grid")."""
     group = typer.main.get_command(app)
     for name, command in group.commands.items():
-        if name == "qc":
-            continue
         for card in parameter_cards(group, command):
             assert "grid" not in f"{card.meaning} {card.effect}".lower(), (name, card.name)

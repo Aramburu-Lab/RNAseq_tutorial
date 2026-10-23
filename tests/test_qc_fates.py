@@ -1,41 +1,37 @@
-"""ctx.qc.fates on the rnaseq fixture: values and fates against the tools' own reports."""
+"""ctx.qc.fates on the aligned fixture: values and fates from nf-core's own MultiQC tables, held
+to the tools' own reports (D-116). Each test names the mutation it catches."""
 
 import json
 import shutil
 from pathlib import Path
 
+import polars as pl
 import pytest
 
-from ctx.qc import QcError, fates, registry
+from ctx.qc import QcError, fates, multiqc_io, registry
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = ROOT / "tests" / "fixtures" / "rnaseq"
+FIXTURE = ROOT / "tests" / "fixtures" / "rnaseq_star"
+DATA = Path("multiqc") / "star_salmon" / "multiqc_report_data"
 SAMPLES = ["RAP1_IAA_30M_REP1", "RAP1_UNINDUCED_REP1", "RAP1_UNINDUCED_REP2", "WT_REP1", "WT_REP2"]
+PAIRED = {"RAP1_IAA_30M_REP1", "WT_REP1", "WT_REP2"}
 REG = registry.load(ROOT / "conf" / "qc_metrics.toml")
 
 
-def config(tmp: Path) -> Path:
-    path = tmp / "config.json"
-    path.write_text(json.dumps(registry.multiqc_config(REG, "test")))
-    return path
-
-
 def copy(tmp: Path) -> Path:
-    out = tmp / "rnaseq"
-    for part in ("trimgalore", "salmon"):
-        shutil.copytree(FIXTURE / part, out / part)
+    out = tmp / "rnaseq_star"
+    shutil.copytree(FIXTURE, out)
     return out
 
 
 @pytest.fixture(scope="module")
-def ran(tmp_path_factory):
-    tmp = tmp_path_factory.mktemp("fates")
-    run = fates.run_multiqc(FIXTURE, tmp / "multiqc", config(tmp), SAMPLES)
+def ran():
+    run = fates.checked(multiqc_io.nfcore(FIXTURE), SAMPLES)
     return fates.values(run, SAMPLES, REG), fates.fates(run, SAMPLES)
 
 
 def report(sample: str) -> dict:
-    """The sample's read-1 Trim Galore report, or its only one."""
+    """The sample's read-1 Trim Galore JSON report, or its only one."""
     folder = FIXTURE / "trimgalore"
     paths = sorted(folder.glob(f"{sample}_trimmed_1.*.json")) or sorted(
         folder.glob(f"{sample}_trimmed.*.json"))  # fmt: skip
@@ -47,6 +43,8 @@ def meta(sample: str) -> dict:
 
 
 def test_fates_are_the_reports_own_and_add_up(ran):
+    """Trim Galore's fates and Salmon's equal their own reports; every read has one fate.
+    Mutation: read 2 ranked before read 1."""
     _, table = ran
     got = {r["sample"]: r for r in table.iter_rows(named=True)}
     assert sorted(got) == sorted(SAMPLES)
@@ -54,90 +52,66 @@ def test_fates_are_the_reports_own_and_add_up(ran):
         tg, salmon, row = report(sample), meta(sample), got[sample]
         for column in fates.TRIM:
             assert row[column] == tg[column], (sample, column)
-        assert row["num_processed"] == salmon["num_processed"] == tg["reads_written"]
+        assert row["num_processed"] == salmon["num_processed"]
         assert row["num_mapped"] == salmon["num_mapped"]
-        assert row["num_decoy_fragments"] == salmon["num_decoy_fragments"]
+        # The test profile runs BBSplit between Trim Galore and Salmon.
+        assert row["removed_before_salmon"] == tg["reads_written"] - salmon["num_processed"] >= 0
         assert row["not_assigned"] == row["num_processed"] - row["num_mapped"] - row[
             "num_decoy_fragments"] >= 0  # fmt: skip
 
 
-def test_values_take_read_1_and_stay_raw(ran):
+def test_values_take_read_1_and_are_unscaled(ran):
+    """General Statistics scales counts to millions; the read counts come from the module
+    tables, whole. Mutation: tg_total_reads read from General Statistics (0.05, not 50,000)."""
     values, _ = ran
     got = {r["sample"]: r for r in values.iter_rows(named=True)}
     for sample in SAMPLES:
-        assert got[sample]["trim_galore-tg_total_reads"] == report(sample)["total_reads"]
+        assert got[sample]["total_reads"] == report(sample)["total_reads"]
         assert got[sample]["salmon-percent_mapped"] == pytest.approx(meta(sample)["percent_mapped"])
-
-
-def test_a_missing_salmon_report_stops_the_run(tmp_path):
-    outdir = copy(tmp_path)
-    shutil.rmtree(outdir / "salmon" / "WT_REP2")
-    with pytest.raises(QcError, match=r"no salmon report for \['WT_REP2'\]"):
-        fates.run_multiqc(outdir, tmp_path / "multiqc", config(tmp_path), SAMPLES)
-
-
-def test_reads_without_a_fate_stop_the_run(tmp_path):
-    outdir = copy(tmp_path)
-    path = next((outdir / "trimgalore").glob("WT_REP1_trimmed_1.*.json"))
-    data = json.loads(path.read_text())
-    data["read_processing"]["reads_written"] -= 5
-    path.write_text(json.dumps(data))
-    run = fates.run_multiqc(outdir, tmp_path / "multiqc", config(tmp_path), SAMPLES)
-    with pytest.raises(
-        QcError, match=r"miss its total for \['WT_REP1'\].*written for \['WT_REP1'\]"
-    ):
-        fates.fates(run, SAMPLES)
-
-
-FASTQ = ROOT / "tests" / "fixtures" / "fetchngs" / "download" / "fastq"
-# Reads of 126, 251 and 153 nt (measured): a pair's read 1 and read 2 differ in length, so a
-# value taken from read 2 shows.
-RAW = {"_raw": "ERX1234253_ERR1160846.fastq.gz", "_raw_1": "SRX9626017_SRR13191702_1.fastq.gz",
-       "_raw_2": "SRX11047067_SRR14709033.fastq.gz"}  # fmt: skip
-PAIRED = {"RAP1_IAA_30M_REP1", "WT_REP1", "WT_REP2"}
-
-
-def with_raw_fastqc(tmp: Path, leave_out: str = "") -> Path:
-    """The fixture copy with raw-read FastQC reports, named as nf-core/rnaseq names them."""
-    from ctx import tools  # noqa: PLC0415 - only these tests run FastQC
-
-    outdir = copy(tmp)
-    raw, staged = outdir / fates.RAW_FASTQC, tmp / "staged"
-    raw.mkdir(parents=True)
-    staged.mkdir()
+    raw = pl.read_csv(FIXTURE / DATA / "multiqc_fastqc_fastqc_raw.txt", separator="\t")
+    first = dict(raw.select("Sample", "Total Sequences").rows())
     for sample in SAMPLES:
-        for suffix in ("_raw_1", "_raw_2") if sample in PAIRED else ("_raw",):
-            if sample != leave_out:
-                shutil.copy(FASTQ / RAW[suffix], staged / f"{sample}{suffix}.fastq.gz")
-    tools.run("fastqc", ["--quiet", "--outdir", str(raw), *map(str, sorted(staged.iterdir()))],
-              cwd=tmp, log=tmp / "fastqc.log")  # fmt: skip
-    return outdir
-
-
-@pytest.fixture(scope="module")
-def raw_ran(tmp_path_factory):
-    tmp = tmp_path_factory.mktemp("raw")
-    run = fates.run_multiqc(with_raw_fastqc(tmp), tmp / "multiqc", config(tmp), SAMPLES)
-    return fates.values(run, SAMPLES, REG)
-
-
-def test_raw_fastqc_reports_judge_every_sample_by_read_1(raw_ran):
-    """nf-core's FastQC on the raw reads joins the values: FastQC's general statistics and its
-    verdicts per sample, read 1 of a pair standing for it (P2Q.9).
-
-    Mutation caught: `_raw_2` ranked before `_raw_1` (a pair read 153 nt, not 251)."""
-    assert {m.column for m in REG.metrics.values() if m.module == "fastqc"} <= set(raw_ran.columns)
-    length = dict(raw_ran.select("sample", "fastqc-avg_sequence_length").rows())
-    assert {length[s] for s in PAIRED} == {251.0}
-    assert {length[s] for s in set(SAMPLES) - PAIRED} == {126.0}
-    verdicts = set(raw_ran["per_base_sequence_quality"])
+        name = f"{sample}_1" if sample in PAIRED else sample
+        assert got[sample]["Total Sequences"] == first[name]
+    assert {m.column for m in REG.metrics.values() if m.module == "fastqc"} <= set(values.columns)
+    verdicts = set(values["per_base_sequence_quality"])
     assert verdicts and verdicts <= {"pass", "warn", "fail"}
 
 
-def test_a_missing_raw_fastqc_report_stops_the_run(tmp_path):
-    """Once the copy holds FastQC reports, every sample needs one, as for Trim Galore and Salmon.
+def test_a_missing_salmon_row_stops_the_run(tmp_path):
+    """Mutation: a sample absent from one table drawn without it."""
+    outdir = copy(tmp_path)
+    path = outdir / DATA / "multiqc_salmon.txt"
+    path.write_text("".join(line for line in path.read_text().splitlines(keepends=True)
+                            if not line.startswith("WT_REP2\t")))  # fmt: skip
+    with pytest.raises(QcError, match=r"no salmon report for \['WT_REP2'\]"):
+        fates.checked(multiqc_io.nfcore(outdir), SAMPLES)
 
-    Mutation caught: fastqc left out of the modules checked for completeness."""
-    outdir = with_raw_fastqc(tmp_path, leave_out="WT_REP2")
-    with pytest.raises(QcError, match=r"no fastqc report for \['WT_REP2'\]"):
-        fates.run_multiqc(outdir, tmp_path / "multiqc", config(tmp_path), SAMPLES)
+
+def test_a_missing_raw_fastqc_row_stops_the_run(tmp_path):
+    """Mutation: FastQC left out of the tables checked for completeness."""
+    outdir = copy(tmp_path)
+    path = outdir / DATA / "multiqc_fastqc_fastqc_raw.txt"
+    path.write_text("".join(line for line in path.read_text().splitlines(keepends=True)
+                            if not line.startswith("RAP1_UNINDUCED_REP2\t")))  # fmt: skip
+    with pytest.raises(QcError, match=r"no fastqc_fastqc_raw report for \[.RAP1_UNINDUCED_REP2"):
+        fates.checked(multiqc_io.nfcore(outdir), SAMPLES)
+
+
+def test_reads_without_a_fate_stop_the_run(tmp_path):
+    """Mutation: the fate checks dropped; a Trim Galore total that misses a fate, and Salmon
+    processing more than was written, are each named."""
+    outdir = copy(tmp_path)
+    path = outdir / DATA / "multiqc_trim_galore.txt"
+    frame = pl.read_csv(path, separator="\t", infer_schema=False)
+    frame = frame.with_columns(
+        pl.when(pl.col("Sample") == "WT_REP1_1")
+        .then(pl.lit("10"))
+        .otherwise(pl.col("reads_written"))
+        .alias("reads_written")
+    )
+    frame.write_csv(path, separator="\t")
+    run = fates.checked(multiqc_io.nfcore(outdir), SAMPLES)
+    said = r"miss its total for \['WT_REP1'\].*written for \['WT_REP1'\]"
+    with pytest.raises(QcError, match=said):
+        fates.fates(run, SAMPLES)

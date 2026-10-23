@@ -27,7 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_qc.js.j2"
 # One metric of each rule the twin decides, from the registry the run reads.
 METRICS = ("library_size", "genes_detected", "pca_distance", "percent_gc",
-           "percent_duplicates", "q30_rate", "salmon_strand_bias", "read_length")  # fmt: skip
+           "percent_duplicates", "tg_total_reads", "salmon_strand_bias", "read_length")  # fmt: skip
 GROUPINGS = (("cell_type",), (), ("cell_type", "condition"), ("batch",))
 HARNESS = """
 const input = JSON.parse(require("fs").readFileSync(0, "utf8"));
@@ -51,7 +51,7 @@ def _values(seed: int = 11, n: int = 40) -> pl.DataFrame:
         checkpoint.LENGTH_GROUP: [["75 nt", "101 nt"][i % 4 == 0] for i in range(n)],
         "library_size": rng.lognormal(16, 0.6, n), "genes_detected": rng.normal(15000, 900, n),
         "pca_distance": np.abs(rng.normal(0, 3, n)), "percent_gc": rng.normal(50, 2, n),
-        "percent_duplicates": rng.uniform(10, 90, n), "q30_rate": rng.uniform(70, 99, n),
+        "percent_duplicates": rng.uniform(10, 90, n), "tg_total_reads": rng.uniform(2e4, 2e5, n),
         "salmon_strand_bias": rng.choice([0.02, 0.5, 0.97, 0.7, 0.51], n),
         "read_length": rng.choice([75.0, 76.0, 101.0], n),
     })  # fmt: skip
@@ -59,8 +59,8 @@ def _values(seed: int = 11, n: int = 40) -> pl.DataFrame:
         pl.when(pl.col("sample") == "S001").then(1e3).otherwise(pl.col("library_size"))
         .alias("library_size"),
         # In the bad band and far under its stratum: both rules flag it, the MAD's reason last.
-        pl.when(pl.col("sample") == "S002").then(5.0).otherwise(pl.col("q30_rate"))
-        .alias("q30_rate"),
+        pl.when(pl.col("sample") == "S002").then(500.0).otherwise(pl.col("tg_total_reads"))
+        .alias("tg_total_reads"),
         pl.when(pl.col("cell_type") == "c").then(12000.0).otherwise(pl.col("genes_detected"))
         .alias("genes_detected"),
         pl.when(pl.col("sample").is_in(["S004", "S009"])).then(None)

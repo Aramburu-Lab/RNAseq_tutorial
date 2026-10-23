@@ -223,18 +223,6 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
     peers: Annotated[str, typer.Option(help=HELP["--peers"])] = "cell_type,condition",
     mad: Annotated[float | None, typer.Option(help=HELP["--mad"])] = None,
     rnaseq_dir: Annotated[Path | None, typer.Option(help=HELP["--rnaseq-dir"])] = None,
-    reads: Annotated[bool, typer.Option("--reads/--no-reads", help=HELP["--reads"])] = False,
-    fetchngs_dir: Annotated[Path | None, typer.Option(help=HELP["--fetchngs-dir"])] = None,
-    fastp_q: Annotated[int, typer.Option(help=HELP["--fastp-q"])] = Fastp.q,
-    fastp_u: Annotated[int, typer.Option(help=HELP["--fastp-u"])] = Fastp.u,
-    fastp_l: Annotated[int, typer.Option(help=HELP["--fastp-l"])] = Fastp.l,
-    cut_tail: Annotated[
-        bool, typer.Option("--cut-tail/--no-cut-tail", help=HELP["--cut-tail"])
-    ] = Fastp.cut_tail,
-    cut_window: Annotated[int, typer.Option(help=HELP["--cut-window"])] = Fastp.window,
-    cut_mean: Annotated[int, typer.Option(help=HELP["--cut-mean"])] = Fastp.mean,
-    grid_run: Annotated[str | None, typer.Option(help=HELP["--grid-run"])] = None,
-    align_dir: Annotated[Path | None, typer.Option(help=HELP["--align-dir"])] = None,
 ) -> None:
     """Judge every sample by the QC registry and test the flags for confounding (M2)."""
     from ctx.dataset import DatasetError  # noqa: PLC0415 - imported after the runtime profile
@@ -244,10 +232,8 @@ def qc(  # noqa: PLR0913, PLR0917 - typer reads one parameter per CLI option
 
     cards = parameter_cards(ctx.find_root().command, ctx.command)
     command = runtime.retypable(sys.argv[1:])
-    fastp = Fastp(fastp_q, fastp_u, fastp_l, cut_tail, cut_window, cut_mean)
     options = module.Options(dataset_file, registry, _columns(strata), _columns(peers), mad,
-                             rnaseq_dir, reads, fetchngs_dir, fastp, grid_run,
-                             align_dir)  # fmt: skip
+                             rnaseq_dir)  # fmt: skip
     try:
         written = module.run(ctx.obj["settings"], cards, command, dataset, options)
     except (DatasetError, QcError, RegistryError) as error:

@@ -4,7 +4,7 @@ The run is read back as ``ctx qc`` held it when it drew: gather's sheet through 
 with each run's read-length group, the registry it read with its MAD multiplier, the options
 it was given, and its tables. Each drawer calls the block function that drew the figure on the
 page, with a writer that writes nothing (``Recorder``), so the figure and its words are M2's
-own. Nothing is measured again: the PCA, the FastQC curves and the fastp grid are tables.
+own. Nothing is measured again: the PCA and the FastQC curves are tables.
 """
 
 from collections.abc import Mapping
@@ -18,11 +18,10 @@ from ctx.dataset import Dataset
 from ctx.figures.kinds_m2 import OneMetric, OnePlot
 from ctx.figures.recorder import Recorder
 from ctx.gather import gdc
-from ctx.qc import Fastp, blocks, checkpoint, figure_tables
+from ctx.qc import blocks, checkpoint, figure_tables
 from ctx.qc import figures as m2_figures
 from ctx.qc import registry as reg
-from ctx.qc.blocks import Reads, Stage
-from ctx.qc.fastqc import Plots
+from ctx.qc.blocks import Stage
 from ctx.qc.figure_tables import SEPARATOR
 from ctx.qc.run import Options
 from ctx.report.builder import FigureText
@@ -37,12 +36,10 @@ def _context(inputs: Mapping[str, Path], spec: Dataset) -> tuple[pl.DataFrame, r
                                      bool(spec.batch_bins))  # fmt: skip
     row = pl.read_parquet(inputs["figure_options"]).row(0, named=True)
     registry = replace(reg.load(inputs["registry"]), mad_multiplier=row["mad"])
-    fastp = Fastp(row["fastp_q"], row["fastp_u"], row["fastp_l"], row["fastp_cut_tail"],
-                  row["fastp_window"], row["fastp_mean"])  # fmt: skip
     options = Options(dataset_file=inputs["dataset_file"],
                       strata=tuple(c for c in row["strata"].split(SEPARATOR) if c),
                       peers=tuple(c for c in row["peers"].split(SEPARATOR) if c),
-                      mad=row["mad"], fastp=fastp, grid_run=row["grid_run"])  # fmt: skip
+                      mad=row["mad"])  # fmt: skip
     return sheet, registry, options
 
 
@@ -159,30 +156,3 @@ def fastqc(inputs: Mapping[str, Path], p: OnePlot, spec: Dataset) -> tuple[Any, 
     recorder = Recorder(FOLDER, spec.slug)
     blocks.fastqc_figures(recorder, plots, units, registry, options)
     return _drawn(recorder, p.plot)
-
-
-def _reads(inputs: Mapping[str, Path], spec: Dataset, what: str) -> tuple[Any, FigureText]:
-    """The reads' grid and band map, drawn by ``blocks.read_figures``.
-
-    FastQC's plots of the reads are no table, so the block is handed none of them.
-    """
-    sheet, registry, options = _context(inputs, spec)
-    grid = _table(inputs, "grid")
-    run = options.grid_run or ""
-    top = pl.DataFrame(schema={"run_accession": pl.String, "top_pct": pl.Float64})
-    none = Plots("run_accession", {}, None, top)
-    skipped = pl.DataFrame(schema={"run_accession": pl.String, "status": pl.String})
-    seen = Reads(_table(inputs, "read_metrics"), skipped, none, grid, run)
-    recorder = Recorder(FOLDER, spec.slug)
-    blocks.read_figures(recorder, seen, sheet, registry, options)
-    return _drawn(recorder, what)
-
-
-def fastp_grid(inputs: Mapping[str, Path], _: Any, spec: Dataset) -> tuple[Any, FigureText]:
-    """Fastp's -q by -l grid on one run."""
-    return _reads(inputs, spec, "fastp_grid")
-
-
-def run_band_map(inputs: Mapping[str, Path], _: Any, spec: Dataset) -> tuple[Any, FigureText]:
-    """Every run's absolute band on every banded read metric."""
-    return _reads(inputs, spec, "run_band_map")

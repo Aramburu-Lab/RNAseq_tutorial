@@ -287,7 +287,7 @@ def test_a_strata_column_the_sheet_lacks_stops_the_run(tmp_path):
     assert "nowhere" in done.stderr
 
 
-RNASEQ = ROOT / "tests" / "fixtures" / "rnaseq"
+RNASEQ = ROOT / "tests" / "fixtures" / "rnaseq_star"
 RNASEQ_SAMPLES = ("RAP1_IAA_30M_REP1", "RAP1_UNINDUCED_REP1", "RAP1_UNINDUCED_REP2", "WT_REP1",
                   "WT_REP2")  # fmt: skip
 
@@ -314,131 +314,32 @@ def _with_reports(root: Path):
     return root, root / "outputs" / "02_qc"
 
 
-def test_reports_add_fates_figures_and_the_multiqc_report(with_reports):
+def test_reports_add_fates_and_fastqc_figures_from_nfcore_tables(with_reports):
+    """The read stage is nf-core's own MultiQC tables: the fates, FastQC's plots per sample,
+    and no MultiQC run here (D-116). Mutation: MultiQC run again over the outdir."""
     root, out = with_reports
     fates = pl.read_csv(next(out.glob("*_desynth_fates_v1.csv")))
     assert sorted(fates["sample"]) == sorted(RNASEQ_SAMPLES)
-    assert (fates["num_processed"] == fates["reads_written"]).all()
+    assert (fates["num_processed"] + fates["removed_before_salmon"] == fates["reads_written"]).all()
     metrics = pl.read_csv(next(out.glob("*_desynth_metrics_v1.csv")))
-    assert {"salmon-percent_mapped", "trim_galore-tg_total_reads"} <= set(metrics.columns)
-    for what in ("read_fates", "read_flow"):
+    assert {"salmon-percent_mapped", "total_reads", "Total Sequences"} <= set(metrics.columns)
+    for what in ("read_fates", "read_flow", "base_quality", "fastqc_adapter", "fastqc_n_content",
+                 "gc_distribution", "overrepresented"):  # fmt: skip
         assert len(list(out.glob(f"*_desynth_{what}_v1*"))) == 7, what
-    assert (out / "multiqc" / "multiqc_report.html").is_file()
-    assert next(out.glob("*_desynth_multiqc_config_v1.yml")).read_text().startswith("{")
+    assert not (out / "multiqc").exists() and not list(out.glob("*multiqc_config*"))
     assert lint(out)[1] == []
-    page = unpacked(next(out.glob("*_overview_v1.html")).read_text())
-    assert "Where the reads went" in page and "built-in method" not in page
-    assert not (RNASEQ / "multiqc").exists()
-
-
-SE = ROOT / "tests" / "fixtures" / "chr22_se"
-SE_SAMPLES = ("se_a", "se_b", "se_c", "se_d", "se_e")
-# The grid's run, whose reads get graded qualities; Phred 12 as FASTQ writes it.
-GRID_SAMPLE, PHRED_12 = "se_d", b"-"
-
-
-def graded(fastq: bytes) -> bytes:
-    """Read k with its first k mod 60 qualities at Phred 12.
-
-    Every read of a fixture run has one quality string, so each fastp grid cell kept all of
-    its reads or none and nothing lay between to map; graded, -q above 12 rejects a share that
-    grows with -q.
-    """
-    lines = fastq.splitlines(keepends=True)
-    for i in range(3, len(lines), 4):
-        k = i // 4 % 60
-        lines[i] = PHRED_12 * k + lines[i][k:]
-    return b"".join(lines)
-
-
-@pytest.fixture(scope="session")
-def with_reads(tmp_path_factory):
-    """The chr22_se reads as a fetchngs outdir, gather outputs naming them, ctx qc --reads;
-    once for this file and test_figures_m2."""
-    return once(tmp_path_factory, "qc_reads", _with_reads)
-
-
-def _with_reads(root: Path):
-    import gzip  # noqa: PLC0415
-
-    from synth import Synthetic  # noqa: PLC0415
-
-    fastq = root / "data" / "raw" / "desynth" / "fastq"
-    fastq.mkdir(parents=True)
-    for name in SE_SAMPLES:
-        reads = (SE / f"{name}.fq").read_bytes()
-        with gzip.open(fastq / f"{name}.fastq.gz", "wb") as dst:
-            dst.write(graded(reads) if name == GRID_SAMPLE else reads)
-    synthetic = design_counts((("control", "short", 3), ("case", "short", 2)))
-    names = dict(zip(synthetic.samples["sample"], SE_SAMPLES, strict=True))
-    samples = synthetic.samples.with_columns(pl.col("sample").replace_strict(names))
-    renamed = Synthetic(synthetic.counts.rename(names), samples, synthetic.truth)
-    write_gather_outputs(root, "desynth", renamed, date(2026, 9, 30))
-    sheet_path = next((root / "outputs" / "01_gather").glob("*_samplesheet_v1.parquet"))
-    sheet = pl.read_parquet(sheet_path).with_columns(
-        fastq_1=pl.format("fastq/{}.fastq.gz", "sample"), status_1=pl.lit("verified"),
-        fastq_2=pl.lit(""), status_2=pl.lit(""))  # fmt: skip
-    sheet.write_parquet(sheet_path)
-    runs = dict(sheet.select("sample", "run_accession").rows())
-    done = ctx("--root", str(root), "qc", "--dataset", "desynth", "--dataset-file", str(SPEC),
-               "--reads", "--grid-run", runs[GRID_SAMPLE], cwd=root)  # fmt: skip
-    assert done.returncode == 0, done.stderr[-3000:]
-    return root / "outputs" / "02_qc", runs
-
-
-def test_reads_are_judged_run_by_run(with_reads):
-    out, runs = with_reads
-    metrics = pl.read_csv(next(out.glob("*_desynth_read_metrics_v1.csv")))
-    assert sorted(metrics["run_accession"]) == sorted(runs.values())
-    assert (metrics["fastqc-total_sequences"] == 1000).all()
-    flags = {(r, m) for r, m, _ in pl.read_csv(next(out.glob("*_read_flags_v1.csv"))).rows()}
-    assert (runs["se_c"], "fastqc_adapter") in flags
-    assert (runs["se_d"], "fastqc_per_base_quality") in flags
-    status = pl.read_csv(next(out.glob("*_desynth_status_v1.csv")))
-    reasons = dict(status.select("run_accession", "qc_reason").rows())
-    assert "Adapter content" in reasons[runs["se_c"]]
-    assert "Per-base quality" in reasons[runs["se_d"]]
-
-
-def test_reads_add_curves_the_grid_and_their_own_multiqc_report(with_reads):
-    """FastQC's plots behind its verdicts are drawn too (P2Q.9), adapter, N, GC and the top
-    sequence, each with its CSV; per-base sequence content says why it has none.
-
-    Mutation caught: read_figures drawing the quality curves alone."""
-    out, runs = with_reads
-    for what in ("base_quality", "fastqc_adapter", "fastqc_n_content", "gc_distribution",
-                 "overrepresented", "fastp_grid"):  # fmt: skip
-        assert len(list(out.glob(f"*_desynth_{what}_v1*"))) == 7, what
-    grid = pl.read_csv(next(out.glob("*_desynth_grid_v1.csv")))
-    assert grid.height == 36 and grid["passed_pct"].n_unique() > 1
-    assert (out / "multiqc" / "reads" / "multiqc_report.html").is_file()
-    assert lint(out)[1] == []
-    page = unpacked(next(out.glob("*_overview_v1.html")).read_text())
-    assert "The reads themselves" in page and "built-in method" not in page
-    assert "Per-base sequence content: FastQC's verdict is judged" in html.unescape(page)
-
-
-def test_the_grid_draws_settings_that_keep_none_as_its_floor(with_reads):
-    """The fixture's reads are 101 nt, so -l 102 keeps none: those cells take no band, the
-    others span all eight, and the lead counts both."""
-    out, _ = with_reads
-    cells = pl.read_csv(next(out.glob("*_desynth_fastp_grid_v1.csv")))
-    none = cells.filter(pl.col("passed_pct") == 0)
-    assert sorted(none["l"].unique()) == [102] and none.height == 6
-    assert cells.filter(pl.col("band").is_null()).equals(none)
-    kept = cells.filter(pl.col("passed_pct") > 0)
-    assert (kept["band"].min(), kept["band"].max()) == (0, 7)
     page = html.unescape(unpacked(next(out.glob("*_overview_v1.html")).read_text()))
-    assert (f"fastp keeps between {kept['passed_pct'].min():.1f} and "
-            f"{kept['passed_pct'].max():.1f} % of the reads at 30 of the 36 settings; the other 6 "
-            "keep none.") in page  # fmt: skip
+    assert "Where the reads went" in page and "built-in method" not in page
+    assert "FastQC's own plots, sample by sample" in page
+    readme = next(out.glob("*_desynth_fates_v1_README.md")).read_text()
+    assert "multiqc (nf-core)" in readme and "1.35" in readme
 
 
 # Every sentence a registry text says about a page or to its reader, with the figure it is
 # about and the page controls that figure must carry for the sentence to hold. A registry
 # text speaks of the page in no other sentence: D5 found fastp's settings called ones "the
 # page lets you move" (2026-10-07), and the page had no such control.
-PAGE_CLAIMS = {"the page maps one run's -q by -l, without a control": ("fastp_grid", [])}
+PAGE_CLAIMS: dict[str, tuple[str, list[str]]] = {}
 ABOUT_THE_PAGE = re.compile(r"\b(?:pages?|you|your)\b", re.IGNORECASE)
 
 
@@ -452,14 +353,14 @@ def _figures(page: str) -> dict[str, list[str]]:
     return found
 
 
-def test_no_registry_text_claims_a_control_the_page_lacks(with_reads):
+def test_no_registry_text_claims_a_control_the_page_lacks(with_reports):
     """Every registry sentence about the page names a figure the page draws, with the controls
-    it has; the page here is M2 with --reads, the one that prints the fastp rationale.
+    it has; since the fastp grid went (D-116), no registry text speaks of the page.
 
     Mutation caught: the old rationale, "which the page lets you move", restored."""
     from ctx.qc import registry  # noqa: PLC0415
 
-    out, _ = with_reads
+    _, out = with_reports
     page = html.unescape(unpacked(next(out.glob("*_overview_v1.html")).read_text()))
     figures = _figures(page)
     assert figures["linked_pca"] == ["brush"], "the reader of controls must see a real one"
@@ -469,40 +370,8 @@ def test_no_registry_text_claims_a_control_the_page_lacks(with_reads):
                             *m.causes)
               for sentence in re.split(r"(?<=[.;])\s+", field)
               if ABOUT_THE_PAGE.search(sentence)]  # fmt: skip
-    assert ("fastp_surviving", "the page maps one run's -q by -l, without a control") in claims
     for metric, claim in claims:
         assert claim in PAGE_CLAIMS, f"{metric} speaks of the page unchecked: {claim!r}"
         figure, controls = PAGE_CLAIMS[claim]
         assert figures[figure] == controls, (metric, figure)
         assert claim in page, "the claim must be printed on the page it speaks of"
-
-
-FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs" / "download"
-
-
-def test_fetchngs_reads_alone_within_the_track_a_budget(tmp_path):
-    """Gather on fetchngs's own test download, then ctx qc --reads with no counts at all."""
-    import re  # noqa: PLC0415
-
-    from ctx.runtime import BUDGETS  # noqa: PLC0415
-
-    root = tmp_path / "root"
-    spec = tmp_path / "nfcore_test.toml"
-    spec.write_text('[dataset]\nslug = "nfcore_test"\n\n[guard]\nids = []\npatterns = []\n')
-    for args in (("gather", "--dataset", "nfcore_test", "--fetchngs-dir", str(FETCHNGS)),
-                 ("qc", "--dataset", "nfcore_test", "--dataset-file", str(spec), "--reads",
-                  "--fetchngs-dir", str(FETCHNGS))):  # fmt: skip
-        root.mkdir(exist_ok=True)
-        done = ctx("--root", str(root), *args, cwd=root)
-        assert done.returncode == 0, (args[0], done.stderr[-3000:])
-    out = root / "outputs" / "02_qc"
-    page = unpacked(next(out.glob("*_overview_v1.html")).read_text())
-    assert "Counts not judged" in page
-    metrics = pl.read_csv(next(out.glob("*_read_metrics_v1.csv")))
-    assert metrics.height == 4 and (metrics["fastqc-total_sequences"] > 0).all()
-    assert lint(out)[1] == []
-    wall = float(re.search(r'<td class="wall">([\d.]+) s</td>', page).group(1))
-    rss = [int(re.search(rf'<td class="{c}">[\d.]+ MiB \((\d+) bytes\)</td>', page).group(1))
-           for c in ("rss-self", "rss-children")]  # fmt: skip
-    assert 0 < wall < BUDGETS["A"].minutes * 60
-    assert 0 < sum(rss) < BUDGETS["A"].ram_gb * 10**9

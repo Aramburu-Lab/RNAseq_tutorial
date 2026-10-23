@@ -330,8 +330,9 @@ def test_csv_by_ending_and_text_cells(tmp_path):
 
 
 def test_read_level_modules_refuse(tmp_path):
-    """process, quant and qc --reads refuse a count matrix's sheet with the reason. Catches
-    a module that reads the sheet as a fetchngs one and fails on its missing FASTQ paths."""
+    """process and quant refuse a count matrix's sheet with the reason (qc reads no FASTQ since
+    D-116). Catches a module that reads the sheet as a fetchngs one and fails on its missing
+    FASTQ paths."""
     root, spec = root_with(tmp_path)
     path = matrix(tmp_path / "m.tsv", ["ALPHA", "BETA"], whole(2))
     done = ctx_run("--root", str(root), "gather", "--dataset", "mat", "--counts", str(path),
@@ -340,7 +341,6 @@ def test_read_level_modules_refuse(tmp_path):
     for command in (
         ["process", "--genome", str(tmp_path)],
         ["quant", "--rnaseq-dir", str(tmp_path)],
-        ["qc", "--reads"],
     ):
         done = ctx_run("--root", str(root), command[0], "--dataset", "mat", "--dataset-file",
                        str(spec), *command[1:], cwd=tmp_path)  # fmt: skip

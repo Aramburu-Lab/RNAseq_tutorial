@@ -51,7 +51,9 @@ def test_the_processed_reads_metric_is_named_so():
     metric = REG.metrics["tg_total_reads"]
     assert metric.title == "Processed reads"
     assert (metric.meaning, metric.computed) == (
-        "How many reads Trim Galore processed.", "Trim Galore total_reads")  # fmt: skip
+        "How many reads Trim Galore processed.",
+        "Trim Galore total_reads, from nf-core's MultiQC Trim Galore table (read 1 of a pair)",
+    )
 
 
 OLD_TITLE = "Reads written by Trim Galore"

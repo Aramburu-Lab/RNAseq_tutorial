@@ -6,9 +6,8 @@ stratum, writes one status row per run, and asks whether a metric, or a flag, di
 the groups of a comparison M5 makes. Nothing is excluded.
 """
 
-import json
 from collections.abc import Mapping
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, replace
 from datetime import date
 from pathlib import Path
 from typing import Any
@@ -19,31 +18,24 @@ from ctx import runtime
 from ctx.dataset import Dataset, DatasetError, load
 from ctx.de.results import newest
 from ctx.de.run import Writer
-from ctx.gather import counts, gdc
+from ctx.gather import gdc
 from ctx.io.naming import MODULES, stem
 from ctx.qc import (
-    Fastp,
     QcError,
     checkpoint,
-    cluster,
     fastqc,
     fates,
     figure_tables,
     flag_map,
     multiqc_io,
-    reads,
 )
 from ctx.qc import registry as reg
 from ctx.qc.blocks import (
-    Reads,
     Stage,
     fastqc_figures,
     fate_figures,
-    grouping_columns,
     lines,
     overview_groups,
-    read_figures,
-    strips,
 )
 from ctx.report import text
 from ctx.report.builder import (
@@ -78,14 +70,8 @@ class Options:
         strata: Sheet columns whose shared values make a stratum, for the MAD bands.
         peers: Sheet columns whose shared values make a peer group.
         mad: The MAD multiplier; None keeps the registry's.
-        rnaseq_dir: An nf-core/rnaseq outdir whose Trim Galore and Salmon reports to read.
-        reads: Run FastQC, fastp and seqkit on the sheet's FASTQ files (M2a).
-        fetchngs_dir: The fetchngs outdir the sheet's FASTQ paths are relative to; None is
-            ``<root>/data/raw/<dataset>``.
-        fastp: fastp's filter for the reads and the grid.
-        grid_run: The run the -q × -l grid is drawn on; None takes the first read.
-        align_dir: A cluster's report folder (ED.6) whose fastp, FastQC and seqkit reports
-            the reads stage reads, in place of running the tools; None runs them.
+        rnaseq_dir: An nf-core/rnaseq outdir whose own MultiQC tables of Trim Galore, Salmon
+            and FastQC on the raw reads the read stage reads (D-116).
     """
 
     dataset_file: Path
@@ -94,11 +80,6 @@ class Options:
     peers: tuple[str, ...] = ("cell_type", "condition")
     mad: float | None = None
     rnaseq_dir: Path | None = None
-    reads: bool = False
-    fetchngs_dir: Path | None = None
-    fastp: Fastp = field(default_factory=Fastp)
-    grid_run: str | None = None
-    align_dir: Path | None = None
 
 
 def load_registry(options: Options) -> reg.Registry:
@@ -197,137 +178,31 @@ def align_stage(tables: Mapping[str, Path], registry: reg.Registry) -> pl.DataFr
 
 
 def rnaseq_stage(
-    writer: Writer, rnaseq_dir: Path, samples: list[str], registry: reg.Registry
-) -> tuple[pl.DataFrame, pl.DataFrame, fastqc.Plots | None]:
-    """The pipeline's reports through MultiQC: values per sample, the fates, FastQC's plots.
+    rnaseq_dir: Path, samples: list[str], registry: reg.Registry
+) -> tuple[pl.DataFrame, pl.DataFrame, fastqc.Plots, str]:
+    """nf-core's own MultiQC tables: values per sample, the fates, FastQC's plots, the version.
 
-    The MultiQC config the registry implies is written first, beside the tables, so
-    MultiQC's own report colours its table by the same bands. FastQC's plots are None where
-    the outdir's copy holds no raw-read FastQC reports.
+    Read where the pipeline wrote them (``multiqc_io.nfcore``); no MultiQC runs here (D-116).
     """
-    mqc = fates.run_multiqc(rnaseq_dir, writer.out / "multiqc", multiqc_config(writer, registry),
-                            samples)  # fmt: skip
-    plots = None
-    if fates.has_raw_fastqc(rnaseq_dir):
-        names = {name: s for name, (s, _) in fates.ranks(samples).items()}
-        first = [n for n, (_, r) in fates.ranks(samples).items() if r < fates.FIRST_UNUSED_RANK]
-        plots = fastqc.read(mqc, names, first, "sample")
-    return fates.values(mqc, samples, registry), fates.fates(mqc, samples), plots
+    mqc = fates.checked(multiqc_io.nfcore(rnaseq_dir), samples)
+    names = {name: s for name, (s, _) in fates.ranks(samples).items()}
+    plots = fastqc.read(mqc, names, fates.first_names(samples), "sample")
+    return fates.values(mqc, samples, registry), fates.fates(mqc, samples), plots, mqc.version
 
 
-def multiqc_config(writer: Writer, registry: reg.Registry) -> Path:
-    """The MultiQC config the registry implies, written once beside the tables."""
-    config = writer.out / f"{writer.stem('multiqc_config')}.yml"
-    if config not in writer.files:
-        writer.out.mkdir(parents=True, exist_ok=True)
-        settings = reg.multiqc_config(registry, text.word(PAGE, "multiqc.comment"))
-        config.write_text(json.dumps(settings, indent=1) + "\n")
-        writer.files.append(config)
-    return config
-
-
-def reads_stage(writer: Writer, settings: runtime.Settings, dataset: str, sheet: pl.DataFrame,
-                registry: reg.Registry, options: Options) -> Reads:  # fmt: skip
-    """M2a: FastQC, fastp and seqkit on the sheet's FASTQ files, and fastp's grid on one run.
-
-    MultiQC reads the reads into their own report, ``multiqc/reads/``, apart from the
-    pipeline's: FastQC names samples by file, and one table would mix the two naming rules.
-    With ``align_dir``, the cluster's reports are read instead (``cluster_reads``).
-    """
-    if options.align_dir is not None:
-        return cluster_reads(writer, sheet, registry, options, options.align_dir)
-    outdir = options.fetchngs_dir or settings.root / "data" / "raw" / dataset
-    files, skipped = reads.fastq_files(sheet, outdir)
-    logs = writer.out / "multiqc" / "reads" / "logs"
-    folders = reads.run_tools(files, logs, threads=settings.threads, fastp=options.fastp)
-    config = multiqc_config(writer, registry)
-    mqc = multiqc_io.run(folders, writer.out / "multiqc" / "reads", config=config,
-                         modules=reads.MODULES)  # fmt: skip
-    grid_run = options.grid_run or str(files["run_accession"][0])
-    paths = files.filter(pl.col("run_accession") == grid_run).sort("mate")["path"].to_list()
-    if not paths:
-        raise QcError(f"--grid-run {grid_run} is not a run whose reads were read")
-    grid = reads.fastp_grid(paths, logs / "grid", writer.out / "multiqc" / "grid",
-                            grid=(reads.GRID_Q, reads.GRID_L), fastp=options.fastp,
-                            threads=settings.threads)  # fmt: skip
-    return read_values(mqc, files, skipped, registry, (grid, grid_run))
-
-
-def read_values(mqc: multiqc_io.MultiqcRun, files: pl.DataFrame, skipped: pl.DataFrame,
-                registry: reg.Registry, gridded: tuple[pl.DataFrame, str],
-                source: str = "") -> Reads:  # fmt: skip
-    """What MultiQC read of the reads: values per run, FastQC's plots, and the grid given."""
-    names = {reads.stem(p): r for r, p in files.select("run_accession", "path").rows()}
-    first = [reads.stem(p) for p in files.filter(pl.col("mate") == 1)["path"]]
-    return Reads(reads.run_values(mqc, files, registry), skipped,
-                 fastqc.read(mqc, names, first, "run_accession"), *gridded, source)  # fmt: skip
-
-
-def cluster_reads(writer: Writer, sheet: pl.DataFrame, registry: reg.Registry, options: Options,
-                  align_dir: Path) -> Reads:  # fmt: skip
-    """M2a from a cluster's report folder (ED.6): the tools' reports, never the FASTQ files.
-
-    The grid is the cluster's, on the run ``--grid-run`` names or the sheet's first, and a grid
-    run on any other files is refused.
-    """
-    files, skipped, ordered = cluster.files(sheet, align_dir)
-    mqc = cluster.read(ordered, files, cluster.reports(align_dir, ordered),
-                       writer.out / "multiqc" / "reads", multiqc_config(writer, registry),
-                       options.fastp)  # fmt: skip
-    grid_run = options.grid_run or str(files["run_accession"][0])
-    names = files.filter(pl.col("run_accession") == grid_run).sort("mate")["path"].to_list()
-    if not names:
-        raise QcError(f"--grid-run {grid_run} is not a run whose reads were read")
-    grid = cluster.grid(align_dir, writer.out / "multiqc" / "grid", names, options.fastp)
-    source = text.fill(PAGE, "notes.cluster_reads", folder=align_dir.name,
-                       runs=ordered.height, samples=ordered["task"].n_unique())  # fmt: skip
-    return read_values(mqc, files, skipped, registry, (grid, grid_run), source)
-
-
-def judge(values: pl.DataFrame, sheet: pl.DataFrame, found: Reads | None,
-          registry: reg.Registry, options: Options, notes: tuple[str, ...]) -> Stage:  # fmt: skip
-    """Every metric judged: per sample, and the reads per run, both within their strata."""
+def judge(values: pl.DataFrame, sheet: pl.DataFrame, registry: reg.Registry,
+          options: Options, notes: tuple[str, ...]) -> Stage:  # fmt: skip
+    """Every metric judged per sample, within its strata; nf-core's reads are per sample."""
     samples = sheet.unique("sample", keep="first", maintain_order=True)
     bands, flags = checkpoint.judge(values, samples, registry, options.strata)
-    if found is None:
-        return Stage(values, bands, flags, notes)
-    by_run = found.values.drop("sample").rename({"run_accession": "sample"})
-    runs = sheet.select(
-        pl.col("run_accession").alias("sample"), *options.strata, checkpoint.LENGTH_GROUP
-    )
-    run_bands, run_flags = checkpoint.judge(by_run, runs, registry, options.strata)
-    return Stage(values, pl.concat([bands, run_bands], how="diagonal_relaxed"), flags, notes,
-                 found.values, run_flags)  # fmt: skip
+    return Stage(values, bands, flags, notes)
 
 
 def confounding(stage: Stage, sheet: pl.DataFrame, spec: Dataset,
                 registry: reg.Registry) -> pl.DataFrame:  # fmt: skip
-    """The confounding tests on every sample-level value and flag, reads included.
-
-    A sample takes its first run's read metrics and read flags, as M5's selection keeps one
-    run per individual.
-    """
-    values, flags = stage.values, stage.flags
-    if stage.run_values is not None and stage.run_flags is not None:
-        # A metric measured on the sample, from the pipeline's FastQC, keeps that value.
-        own = stage.run_values.drop("sample", *(c for c in values.columns if c != "sample"),
-                                    strict=False)  # fmt: skip
-        values = values.join(by_first_run(own, sheet, "run_accession"), on="sample",
-                             how="left", maintain_order="left")  # fmt: skip
-        flags = pl.concat([flags, by_first_run(stage.run_flags, sheet, "sample")
-                           .select(flags.columns)])  # fmt: skip
-    return checkpoint.confounding(values, flags, sheet, spec.contrasts, spec.order, registry)
-
-
-def by_first_run(run_frame: pl.DataFrame, sheet: pl.DataFrame, key: str) -> pl.DataFrame:
-    """A per-run table keyed by sample, each sample taking the run the sheet lists first."""
-    first = sheet.unique("sample", keep="first", maintain_order=True).select("run_accession",
-                                                                             "sample")  # fmt: skip
-    return (
-        run_frame.rename({key: "run_accession"})
-        .join(first, on="run_accession", how="inner", maintain_order="left")
-        .drop("run_accession")
-    )
+    """The confounding tests on every sample-level value and flag, the reads' included."""
+    return checkpoint.confounding(stage.values, stage.flags, sheet, spec.contrasts, spec.order,
+                                  registry)  # fmt: skip
 
 
 def columns_of(frame: pl.DataFrame, registry: reg.Registry) -> dict[str, tuple[str, str]]:
@@ -411,31 +286,15 @@ def _sections(stage: Stage, registry: reg.Registry, tally: Mapping[str, int]) ->
 
 
 def pipeline_groups(
-    writer: Writer, found: tuple[pl.DataFrame | None, fastqc.Plots | None, Reads | None],
-    stage: Stage, sheet: pl.DataFrame, registry: reg.Registry, options: Options,
+    writer: Writer, found: tuple[pl.DataFrame, fastqc.Plots], stage: Stage, sheet: pl.DataFrame,
+    registry: reg.Registry, options: Options,
 ) -> list[Group]:  # fmt: skip
-    """The groups of the pipeline's reports and of the reads, where the run read them.
-
-    ``found`` is the fates, the pipeline's FastQC plots and what the reads showed, each None
-    where the run did not read it.
-    """
-    fate, plots, seen = found
-    groups = []
-    if fate is not None:
-        groups.append(fate_figures(writer, fate, stage.values, sheet, registry, options))
-    if plots is not None:
-        units = sheet.unique("sample", keep="first", maintain_order=True)
-        items = fastqc_figures(writer, plots, units, registry, options)
-        groups.append(Group(text.word(PAGE, "groups.fastqc"), tuple(items)))
-    if seen is not None:
-        groups.append(read_figures(writer, seen, sheet, registry, options))
-        run_units = sheet.select("run_accession", *grouping_columns(sheet, options),
-                                 checkpoint.LENGTH_GROUP)  # fmt: skip
-        run_strips = strips(writer, stage, run_units, registry, options, "run_accession")
-        if run_strips:
-            groups.append(Group(text.word(PAGE, "groups.run_metrics"), tuple(run_strips),
-                                tabs=len(run_strips) > 1))  # fmt: skip
-    return groups
+    """The groups of nf-core's reports: the read fates, then FastQC's own plots, per sample."""
+    fate, plots = found
+    units = sheet.unique("sample", keep="first", maintain_order=True)
+    items = fastqc_figures(writer, plots, units, registry, options)
+    return [fate_figures(writer, fate, stage.values, sheet, registry, options),
+            Group(text.word(PAGE, "groups.fastqc"), tuple(items))]  # fmt: skip
 
 
 def run(
@@ -458,14 +317,6 @@ def run(
     inputs = gathered_tables(settings.root, dataset)
     gathered = read_gathered(inputs)
     sheet = checkpoint.length_groups(gathered["samplesheet"], bool(spec.batch_bins))
-    if options.reads and (
-        refused := counts.refuse_sheet(sheet, inputs["samplesheet"], "qc --reads")
-    ):
-        raise QcError(refused[0])
-    if options.align_dir is not None:
-        if not options.reads or options.fetchngs_dir is not None:
-            raise QcError("--align-dir is read with --reads, in place of --fetchngs-dir")
-        inputs["align_tasks"] = options.align_dir / cluster.TASKS
     if missing := [c for c in {*options.strata, *options.peers} if c not in sheet.columns]:
         raise DatasetError(f"--strata and --peers name columns the sheet lacks: {missing}")
     measured, notes = counts_stage(settings, spec, gathered, options, registry)
@@ -482,29 +333,23 @@ def run(
                     day, releases)  # fmt: skip
     fate = plots = None
     if options.rnaseq_dir:
-        found, fate, plots = rnaseq_stage(writer, options.rnaseq_dir, values["sample"].to_list(),
-                                          registry)  # fmt: skip
+        names = values["sample"].to_list()
+        found, fate, plots, version = rnaseq_stage(options.rnaseq_dir, names, registry)
         values = values.join(found, on="sample", how="left", maintain_order="left")
-    seen = (
-        reads_stage(writer, settings, dataset, sheet, registry, options) if options.reads else None
-    )
-    stage = judge(values, sheet, seen, registry, options, notes)
-    status = checkpoint.status(sheet, stage.flags, registry, stage.run_flags)
+        writer.releases["multiqc (nf-core)"] = version
+    stage = judge(values, sheet, registry, options, notes)
+    status = checkpoint.status(sheet, stage.flags, registry)
     tests = confounding(stage, sheet, spec, registry)
     frames = {"bands": stage.bands, "flags": stage.flags, "status": status, "confounding": tests}
     frames |= {"sex_check": sexes} if sexes is not None else {}
     frames |= {"fates": fate} if fate is not None else {}
     # What the figures draw that no table above holds, so ctx figure redraws them (F.1).
-    frames |= figure_tables.inputs(registry, options, measured, plots,
-                                   seen.grid_run if seen is not None else None)  # fmt: skip
-    if seen is not None and stage.run_flags is not None:
-        frames |= {"read_flags": stage.run_flags.rename({"sample": "run_accession"}),
-                   "skipped": seen.skipped, "grid": seen.grid}  # fmt: skip
-        writer.table(seen.values, "read_metrics", columns_of(seen.values, registry))
+    frames |= figure_tables.inputs(registry, options, measured, plots)
     _write_tables(writer, stage.values, frames, registry)
     results: list[Result] = [*stage.notes, _status_table(status), _confounding_table(tests)]
     results += overview_groups(writer, stage, measured, (sheet, status), registry, options)
-    results += pipeline_groups(writer, (fate, plots, seen), stage, sheet, registry, options)
+    if fate is not None and plots is not None:
+        results += pipeline_groups(writer, (fate, plots), stage, sheet, registry, options)
     usage, budget = runtime.measure(settings.started), runtime.budget(MODULE)
     tally = _tally(status, tests)
     page = ModulePage(

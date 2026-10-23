@@ -10,7 +10,7 @@ from pathlib import Path
 
 import polars as pl
 import pytest
-from conftest import ctx_run, once
+from conftest import ctx_run, once, writable_copy
 from process_nfcore_root import DATASET, SAMPLES, SPEC, STAR, plant
 from test_figures import drawn_alike, redrawn_each, specs
 
@@ -250,3 +250,23 @@ def test_ctx_run_plans_process_on_an_aligned_outdir_only(tmp_path):
     salmon_only = dict(pipeline.steps(tmp_path, spec, pipeline.Options(
         DATASET, SPEC, rnaseq_dir=STAR.parent / "rnaseq")))  # fmt: skip
     assert "process" not in salmon_only
+
+
+@pytest.mark.parametrize("edition", ["full", "core"])
+def test_qc_reads_nfcore_tables_and_m3_strand_check(request, edition, tmp_path):
+    """M2 on the same root after M3, under each edition: nf-core's FastQC, Trim Galore and
+    Salmon tables per sample, and M3's strand_check judged on the align stage (D-116).
+    Mutation: the align stage left without strand_check (no RSeQC strip)."""
+    built, _ = request.getfixturevalue(edition)
+    root = writable_copy(built, tmp_path / "root")
+    done = ctx_run("--root", str(root), "--edition", edition, "qc", "--dataset", DATASET,
+                   "--dataset-file", str(SPEC), "--rnaseq-dir", str(STAR), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    out = root / "outputs" / "02_qc"
+    for what in ("strip_rseqc_pct", "strip_rseqc_sense", "base_quality", "read_flow"):
+        assert list(out.glob(f"*_{DATASET}_{what}_v1_white.pdf")), what
+    metrics = pl.read_csv(next(out.glob("*_metrics_v1.csv")))
+    assert set(metrics["status"]) == {"pass"}
+    (page,) = out.glob("*_overview_v1.html")
+    assert f'data-edition="{edition}"' in page.read_text()[:500]
+    assert lint(out)[1] == []

@@ -175,7 +175,7 @@ def flagstat(outdir: Outdir) -> pl.DataFrame:
 def trimmed(outdir: Outdir) -> pl.DataFrame:
     """Trim Galore's reads in and written per sample: read 1 of a pair, as fragments."""
     table = _columns(_table(outdir, "trim_galore"), TRIM, "Trim Galore table")
-    ranks = fates.nfcore_ranks(outdir.samples)
+    ranks = fates.ranks(outdir.samples)
     try:
         frame = mqc_io.by_unit(table.select("Sample", *TRIM), ranks, "sample",
                                fates.FIRST_UNUSED_RANK)  # fmt: skip
