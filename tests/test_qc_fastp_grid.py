@@ -1,10 +1,10 @@
 """M2's fastp grid: settings that keep no read are its floor, and the bands span the rest.
 
 The grid is the one ``ctx qc --reads`` measured on the Step-1 teaching subset's grid run on
-2026-10-07 (outputs/02_qc/2026-10-07_qc_Non-cancerous-blood-teaching-subset_grid_v1.csv,
-1,000,000 reads in). -l 102 is longer than that run's 76-nt reads (FastQC's average length,
-76.0), so its 6 cells keep none; the other 30 keep 78.3537 to 99.9985 %. Eight equal bands
-from the grid's 0 put all 30 in the top two bands, 6 and 7.
+2026-10-07 (1,000,000 reads in; the subset since removed, D-115). -l 102 is longer than that
+run's 76-nt reads (FastQC's average length, 76.0), so its 6 cells keep none; the other 30 keep
+78.3537 to 99.9985 %. Eight equal bands from the grid's 0 put all 30 in the top two bands, 6
+and 7.
 """
 
 import json

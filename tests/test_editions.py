@@ -33,8 +33,7 @@ DATASETS = ROOT / "conf" / "datasets"
 EVERY = ("gather", "qc", "process", "quant", "de", "function", "proteo", "ncrna", "genecard",
          "clinical")  # fmt: skip
 CORE = ("gather", "qc", "process", "quant", "de", "function", "ncrna", "genecard")
-CORE_DATASETS = ("Non-cancerous-blood", "Non-cancerous-blood-teaching-subset",
-                 "Non-cancerous-blood-four-runs", "Breast-tissue-BRCA",
+CORE_DATASETS = ("Non-cancerous-blood", "Non-cancerous-blood-four-runs", "Breast-tissue-BRCA",
                  "BRCA-immune-cells-macrophages", "BRCA-immune-cells-monocytes", "Lung-tissue-LUAD",
                  "Pancreas-tissue-PAAD")  # fmt: skip
 # Every course dataset file the core edition leaves out, on 2026-10-22. A dataset file added to

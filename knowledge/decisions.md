@@ -27,6 +27,48 @@ it were reversed.
 
 ---
 
+## D-115 — The 8-run teaching subset of Step-1 is removed
+
+**Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23: "We don't need this teaching subset, remove it entirely."). Supersedes the subset part of D-050 and D-042's subset file.
+
+**Context.** D-050 made the read-level pages (M2's read stage, M3) show all Step-1 runs, aligned on the cluster, and kept the 8-run subset (`tier1_teach`, D-042) as the optional laptop exercise, left out of the kit. Since D-113 every read-level result comes from nf-core/rnaseq 3.27.0 on the cluster, and the subset served nothing else.
+
+**Decision.** The subset is removed from the repository instead of being renamed with D-114: its dataset file (`conf/datasets/tier1_teach.toml`), its entries in `conf/cohorts/myeloid.toml` and `conf/editions/core.toml`, the scripts that made it (`scripts/bash/subsample.sbatch`, `scripts/python/pick_teaching_subset.py`) and their tests (`test_subsample`, `test_subsample_refuses`, `tests/test_pick_teaching_subset.py`), the two budget tests that ran on its 8 runs (`test_track_a_on_the_teaching_subset`, `tests/test_quant_budget.py`), the test that every `subset_of` file curates as its parent (no such file remains), its build steps in `build_kit.py`'s docstring, and its lines in CONVENTIONS and TODO's open items. `Non-cancerous-blood-four-runs` (the guide's worked example) stays: it declares no `subset_of`. The generic `[dataset] subset_of` support (`Dataset.parent`, gather's subset check, the process page's subset note) and `build_kit.py --leave-out` stay, as features of any dataset file. The `seqtk` pin in `pixi.toml`'s `reads` environment stays until the lock is rebuilt (`pixi update`), outside this change.
+
+**Evidence.** No other dataset file declares `subset_of` (`git grep subset_of conf/datasets`, 2026-10-23, none after the removal).
+
+**Consequence.** Data outside the repository is not touched by this change: the subset's FASTQs and pages in local ctx roots (`~/ctx_tier1/data/raw/tier1_teach`, its outputs), its cluster run folder and any Zenodo copy stay where they are, for Rytis to move aside. Track A's laptop budget has no real-data test until another laptop dataset is chosen. Dated records (plans, earlier D-entries, lessons, TODO's done items) keep describing the subset as it was.
+
+---
+
+## D-114 — Seven dataset files take names made from their labels; an output description's word may hold capitals and hyphens
+
+**Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23: "literally everything", parentheses dropped from every file, folder and job name).
+
+**Context.** The slugs (`tier1`, `breast_mac`, ...) named files, folders and job names while pages showed the labels (D-014, D-112), so a reader saw two names for one dataset.
+
+**Decision.** Each name is made from the dataset's label by `job_name.sh`'s `job_field` rule: a colon and parentheses dropped, any other character outside `A-Za-z0-9.-` becomes `-`, a run of `-` is one. The labels stay as they read.
+
+| Old slug | New name | Label |
+|---|---|---|
+| `tier1` | `Non-cancerous-blood` | Non-cancerous blood |
+| `four_runs` | `Non-cancerous-blood-four-runs` | Non-cancerous blood, four runs |
+| `breast_tissue` | `Breast-tissue-BRCA` | Breast tissue (BRCA) |
+| `breast_mac` | `BRCA-immune-cells-macrophages` | BRCA immune cells: macrophages |
+| `breast_mono` | `BRCA-immune-cells-monocytes` | BRCA immune cells: monocytes |
+| `lung_gse229705` | `Lung-tissue-LUAD` | Lung tissue (LUAD) |
+| `pancreas_gse192647` | `Pancreas-tissue-PAAD` | Pancreas tissue (PAAD) |
+
+`tier1_teach` was to become `Non-cancerous-blood-teaching-subset` and was removed instead (D-115). The dataset files are renamed by `git mv` and every live reference follows: `conf/`, `src/`, `scripts/`, `tests/`, README, CONVENTIONS and TODO's open items. The output naming rule (`ctx.io.naming.DESCRIPTION`) changes from lower-case words joined by `_` to words of letters and digits joined by single `-`, words joined by `_`: `2026-10-23_de_Breast-tissue-BRCA_overview_v1.html`. The gene-selection link's source (`ctx.report.genes`, `_select.js.j2`), `build_kit.py`'s folder rule and a new slug check in `ctx.dataset.load` follow it; a label typed as a slug (a space, parentheses, a colon) is refused at load. `job_field` now drops parentheses in a task's tag too.
+
+**Not renamed, and why.** Dated records keep the names they were written with: `docs/plans/*`, the earlier D-entries, `knowledge/lessons.md`, TODO's done items and its run logs and spec prose outside open items, and `deliverables/*`, including the Step-1 record `deliverables/2026-09-30_de_tier1_{sanity,metrics}_v1.csv`, which `tests/test_sanity_record.py` still finds by that name. Accessions, sample and run IDs and GEO series stay. Cluster run folders and local ctx roots (`~/ctx_tier1` and the rest) are renamed outside the repo, by Rytis.
+
+**Frozen files.** Two frozen paths change after the record, as D-112 asked to name: `conf/datasets/tier1.toml` becomes `conf/datasets/Non-cancerous-blood.toml` with four lines changed (the slug, its comment, and the two `resources/datasets/<slug>/` dests), and `src/ctx/dataset/loader.py` gains the slug check and three changed docstring lines. No condition, contrast, design, filter, rule, gene list or resource checksum changes, and none of the record's 92 metric rows or 15 verdict rows names the slug (grep, 2026-10-23), so no recorded value can move. `FROZEN` keeps both paths of the dataset file, as it keeps both of `src/ctx/dataset`, and the registration is found with `git log --follow`.
+
+**Consequence.** Every ctx root's pages are rebuilt under the new names and the old ones moved to its `superseded_2026-10-23/`; a root's `resources/datasets/tier1/` must move to `resources/datasets/Non-cancerous-blood/` or be fetched again by `ctx setup`. `labdocs lint`'s deliverable rule (labcore's `DELIVERABLE_STEM`) still takes lower-case words only, so a deliverable named with a new dataset name needs labcore changed first.
+
+---
+
 ## D-113 — Every read-level result comes from nf-core/rnaseq 3.27.0: STAR and Salmon on Kebnekaise, Salmon alone on a laptop; the hand-written alignment array is retired
 
 **Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23). Supersedes D21's Salmon-only run for Kebnekaise and ED.6's `ed6_align.sbatch`.

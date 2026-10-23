@@ -12,7 +12,6 @@ from pathlib import Path
 
 import pytest
 
-from ctx.dataset import load
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
 
@@ -166,35 +165,6 @@ def test_guard_patterns_cover_study():
         for m in pattern.finditer(p.read_text(errors="ignore"))
     ]
     assert not found, found
-
-
-def test_subsets_curate_as_their_parent():
-    """A dataset declaring ``subset_of`` reads its parent's SDRF the parent's way (D-042).
-
-    Only [dataset] slug, label and subset_of, [expect], and resources it never uses may
-    differ; a column, value map, bin or guard edited in one file alone fails here.
-    """
-    subsets = {
-        path: raw
-        for path in sorted((ROOT / DATASETS).glob("*.toml"))
-        if "subset_of" in (raw := tomllib.loads(path.read_text()))["dataset"]
-    }
-    assert ROOT / DATASETS / "Non-cancerous-blood-teaching-subset.toml" in subsets
-    own = ("slug", "label", "subset_of")
-    for path, sub in subsets.items():
-        parent = tomllib.loads(
-            (ROOT / DATASETS / f"{sub['dataset']['subset_of']}.toml").read_text()
-        )
-        assert set(sub) == {"dataset", "resources", "guard", "sdrf", "columns", "order",
-                            "derived", "expect"}, path.name  # fmt: skip
-        for table in ("guard", "sdrf", "columns", "order", "derived"):
-            assert sub[table] == parent[table], (path.name, table)
-        named = {r["name"]: r for r in parent["resources"]}
-        assert all(r == named.get(r["name"]) for r in sub["resources"]), path.name
-        assert {k: v for k, v in sub["dataset"].items() if k not in own} == {
-            k: v for k, v in parent["dataset"].items() if k not in own
-        }, path.name
-        assert load(path).slug == sub["dataset"]["slug"]
 
 
 @pytest.mark.parametrize(

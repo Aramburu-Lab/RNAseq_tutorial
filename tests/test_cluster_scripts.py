@@ -7,8 +7,6 @@ Each test names the mutation it catches.
 """
 
 import csv
-import gzip
-import hashlib
 import itertools
 import os
 import re
@@ -20,14 +18,12 @@ from pathlib import Path
 import pytest
 
 from ctx.dataset import load
-from ctx.gather import fetchngs
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import RNASEQ_VERSION
-from ctx.tools import locate
 
 ROOT = Path(__file__).resolve().parents[1]
 BASH = ROOT / "scripts" / "bash"
-SCRIPTS = ("kebnekaise_env.sh", "fetchngs.sbatch", "rnaseq.sbatch", "subsample.sbatch",
+SCRIPTS = ("kebnekaise_env.sh", "fetchngs.sbatch", "rnaseq.sbatch",
            "site_kebnekaise.sh", "site_laptop.sh", "fetch_gdc.sbatch", "job_name.sh")  # fmt: skip
 JOBS = tuple(name for name in SCRIPTS if name.endswith(".sbatch"))
 FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs"
@@ -95,16 +91,13 @@ fi
 """
 LOGIN_NEXTFLOW = "#!/bin/sh\necho 'the login Nextflow ran' >&2\nexit 99\n"
 APPTAINER = """#!/usr/bin/env bash
-# apptainer exec [options] IMAGE command: the command on this machine, seqtk the reads one.
+# apptainer exec [options] IMAGE command: the command on this machine.
 echo "$@" >> "$STUB_LOG/apptainer.calls"
 shift
 while [[ $# -gt 0 && "$1" != *.sif ]]; do shift; done
 shift
-if [[ "$1" == seqtk ]]; then shift; exec "$STUB_SEQTK" "$@"; fi
 exec "$@"
 """
-# seqtk 1.3 as it answers with no command: its usage on stderr, exit 1.
-SEQTK_13 = "#!/bin/sh\nprintf 'Usage: seqtk <command>\\nVersion: 1.3-r106\\n' >&2\nexit 1\n"
 # The environment's own Python, which the rnaseq sheet cut must run on (repo L5).
 PYTHON3 = '#!/bin/sh\necho called >> "$STUB_LOG/python3.calls"\nexec "{python}" "$@"\n'
 WGET = """#!/bin/sh
@@ -232,7 +225,6 @@ def test_shell_rules(name):
 RESOURCES = {
     "fetchngs.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
     "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "12G", "-t": "1-00:00:00"},
-    "subsample.sbatch": {"-n": "1", "-c": "2", "--mem": "8G", "-t": "0-04:00:00"},
     # R1: one core for curl and the end check; six hours, 3.6 times the slowest laptop fetch,
     # 5,965 s for 2.65 GB on 2026-10-18 (GDC served 665 s for 2.6 GB on 2026-10-01).
     "fetch_gdc.sbatch": {"-n": "1", "-c": "1", "--mem": "2G", "-t": "0-06:00:00"},
@@ -665,112 +657,6 @@ def test_rnaseq_refuses(site, given, said):
     assert done.returncode == 1 and said in done.stderr, done.stderr
     ran = "STUB_LINK" in given or "STUB_NO_MATRIX" in given
     assert launch.exists() == ran
-
-
-def _tree(folder: Path) -> dict[str, str]:
-    return {str(p.relative_to(folder)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in sorted(folder.rglob("*")) if p.is_file()}  # fmt: skip
-
-
-def _reads(path: Path) -> list[str]:
-    with gzip.open(path, "rt") as fh:
-        return [line.split()[0] for i, line in enumerate(fh) if i % 4 == 0]
-
-
-# subsample.sbatch passes no path to a pipeline, so its run folder may have a space.
-SUBSAMPLE_FROM = "my runs"
-
-
-def _subsample(site, **given):
-    tmp_path, env = site
-    return _run([_spool(tmp_path, "subsample.sbatch"), "run"], tmp_path / SUBSAMPLE_FROM, env,
-                **{"STUB_SEQTK": str(locate("seqtk")), "READS": "20", **given})  # fmt: skip
-
-
-def test_subsample(site):
-    """seqtk 1.4 from the reads environment behind a stub apptainer, on the paired download
-    fixture, with SEED=7. Catches a seed per mate, SEED not taken (the README would state 7 over
-    reads drawn with 42), a timestamp in the gzip header (gzip without -n on macOS), stale md5
-    files, and a README that is not the files."""
-    tmp_path = site[0]
-    run = tmp_path / SUBSAMPLE_FROM / "run"
-    _download(run)
-    source = run / "nfcore_fetchngs" / "results"
-    before = _tree(source)
-    done = _subsample(site, SEED="7")
-    assert done.returncode == 0, done.stderr
-    assert _tree(source) == before
-    image = tmp_path / "my store" / "images" / "seqtk_1.4.sif"
-    assert image.is_file() and not image.with_suffix(".sif.part").exists()
-    subset = run / "subset"
-    names = sorted(p.name for p in (source / "fastq").glob("*.fastq.gz"))
-    assert sorted(p.name for p in (subset / "fastq").glob("*.fastq.gz")) == names
-    for name in names:
-        kept, whole = _reads(subset / "fastq" / name), _reads(source / "fastq" / name)
-        assert len(kept) == min(20, len(whole)) and set(kept) <= set(whole)
-        drawn = subprocess.run(
-            [str(locate("seqtk")), "sample", "-s7", str(source / "fastq" / name), "20"],
-            capture_output=True, text=True, check=True,
-        ).stdout.splitlines()[::4]  # fmt: skip
-        assert kept == [line.split()[0] for line in drawn], name
-        # No timestamp in the gzip header: the same seed gives the same bytes and md5 on a rerun.
-        assert (subset / "fastq" / name).read_bytes()[4:8] == bytes(4), name
-        md5 = (subset / "fastq" / "md5" / f"{name}.md5").read_text().split()
-        assert md5 == [hashlib.md5((subset / "fastq" / name).read_bytes()).hexdigest(), name]
-    for first in [n for n in names if n.endswith("_1.fastq.gz")]:
-        second = first.replace("_1.fastq.gz", "_2.fastq.gz")
-        assert _reads(subset / "fastq" / first) == _reads(subset / "fastq" / second)
-    readme = (subset / "README.md").read_text()
-    assert "`seqtk sample -s7 - 20 | gzip -n`" in readme
-    table = [row.split(" | ") for row in re.findall(r"^\| (.+) \|$", readme, re.M)]
-    assert table[0] == ["file", "reads", "bytes", "md5"]
-    assert table[1:] == [
-        [n, str(len(_reads(subset / "fastq" / n))), str((subset / "fastq" / n).stat().st_size),
-         hashlib.md5((subset / "fastq" / n).read_bytes()).hexdigest()]
-        for n in names
-    ]  # fmt: skip
-    assert all(c in readme for c in ("read_count", "base_count", "fastq_bytes", "fastq_md5"))
-    # ctx gather's own reader takes the subset as a download, every file checked by its md5.
-    runs = fetchngs.read(subset).runs
-    statuses = (set(runs["status_1"]) | set(runs["status_2"])) - {""}
-    assert statuses == {"verified"} and runs.height == len(_ids("download"))
-
-
-@pytest.mark.parametrize(
-    "case", ["no_marker", "no_fastq", "subset_exists", "run_in_home", "image_download_fails",
-             "seqtk_1_3"],
-)  # fmt: skip
-def test_subsample_refuses(site, case):
-    """Exits 1 and writes no subset. Catches the marker check dropped (F5), nullglob dropped
-    (the literal pattern *.fastq.gz then passes as a file), the home check dropped, an image
-    written under its own name before it is whole, and the seqtk version not checked."""
-    tmp_path, env = site
-    run = tmp_path / SUBSAMPLE_FROM / "run"
-    _download(run)
-    given = {}
-    if case == "no_marker":
-        (run / "nfcore_fetchngs" / "results.complete").unlink()
-    if case == "no_fastq":
-        for fastq in (run / "nfcore_fetchngs" / "results" / "fastq").glob("*.fastq.gz"):
-            fastq.unlink()
-    if case == "subset_exists":
-        (run / "subset").mkdir()
-    if case == "run_in_home":
-        given["HOME"] = str(tmp_path / SUBSAMPLE_FROM)
-    if case == "image_download_fails":
-        given["STUB_WGET_FAIL"] = "1"
-    if case == "seqtk_1_3":
-        _stub(tmp_path / "stubs" / "seqtk_1_3", SEQTK_13)
-        given["STUB_SEQTK"] = str(tmp_path / "stubs" / "seqtk_1_3")
-    done = _subsample(site, **given)
-    assert done.returncode == 1 and done.stderr.startswith("subsample.sbatch: "), done.stderr
-    assert (run / "subset").exists() == (case == "subset_exists")
-    calls = tmp_path / "log" / "apptainer.calls"
-    assert calls.exists() == (case == "seqtk_1_3") and "seqtk sample" not in (
-        calls.read_text() if calls.exists() else ""
-    )
-    image = Path(env["CTX_STORE"]) / "images" / "seqtk_1.4.sif"
-    assert image.exists() == (case == "seqtk_1_3")
 
 
 def test_jobs_are_named_for_their_project_and_task(site):

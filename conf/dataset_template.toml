@@ -14,10 +14,10 @@
 #      "sdrf" with its URL, size and SHA-256, and [sdrf] resource = "sdrf" in place of file,
 #      as conf/datasets/Non-cancerous-blood.toml does. `ctx setup --dataset-file` fetches it.
 #   3. Some runs of a study that already has a dataset file: that file's tables with
-#      [dataset] subset_of = "<its slug>", as conf/datasets/Non-cancerous-blood-teaching-subset.toml does.
+#      [dataset] subset_of = "<its slug>".
 
 [dataset]
-# EDIT: lowercase letters, digits and underscores; it names every output file.
+# EDIT: letters and digits joined by - or _, as Breast-tissue-BRCA; it names every output file.
 slug = "mine"
 # EDIT: the name the pages show.
 label = "My study"

@@ -81,7 +81,7 @@ def test_rejects(name):
     [
         "2026-10-23_de_Breast-tissue-BRCA_overview_v1.html",
         "2026-10-23_de_BRCA-immune-cells-macrophages_volcano_v1_white.svg",
-        "2026-10-23_gather_Non-cancerous-blood-teaching-subset_samples_v1_README.md",
+        "2026-10-23_gather_Non-cancerous-blood-four-runs_samples_v1_README.md",
         "2026-10-23_qc_Lung-tissue-LUAD_reads_v2.csv",
         "2026-10-23_de_tcga_brca_volcano_v1.pdf",
     ],

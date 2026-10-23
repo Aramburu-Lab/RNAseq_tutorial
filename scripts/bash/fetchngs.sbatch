@@ -180,6 +180,6 @@ CHECK
 if [[ "$SKIP_DOWNLOAD" == 0 ]]; then
     echo "FASTQ files not hard-linked to work/: $(($(find "$OUT/fastq" -name '*.fastq.gz' -links 1 | wc -l)))"
 fi
-# rnaseq.sbatch and subsample.sbatch start only from a download this check passed.
+# rnaseq.sbatch starts only from a download this check passed.
 date > "$LAUNCH/results.complete"
 echo "complete: $LAUNCH/results.complete"

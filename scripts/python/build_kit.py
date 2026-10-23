@@ -14,11 +14,10 @@ file's SHA-256; ``--zip`` packs one folder.
 
 Usage:
     pixi run python scripts/python/build_kit.py --out ~/ctx_kit/2026-09-30_course_kit_v2 \
-        --real step1=~/ctx_Non-cancerous-blood --made-up preview=~/ctx_preview/synthetic \
-        --leave-out Non-cancerous-blood-teaching-subset --zip
+        --real step1=~/ctx_Non-cancerous-blood --made-up preview=~/ctx_preview/synthetic --zip
 
-``--leave-out`` keeps a dataset's outputs out of the kit: the teaching subset is the optional
-laptop exercise, built in the Step-1 root and never shipped (D-050, Rytis 2026-10-07).
+``--leave-out`` keeps a dataset's outputs out of the kit, as the teaching subset was kept out
+until it was removed (D-050, D-115).
 
 ``--release`` builds the kit students get (K.6, D-050): it refuses a ``--made-up`` root, and a
 page carrying the preview's made-up note inside a ``--real`` root, before anything is written;
@@ -47,17 +46,12 @@ named. Derived tables and figure data ship.
 Every page is rebuilt from one commit first, so the pages and ``MANIFEST.json`` name the same
 commit. The steps for the Step-1 root, kept here since a session's scratch copy was lost twice
 (kits v5 and v6); ``build_preview.py`` refuses an existing root, so move the last one aside:
-    N=Non-cancerous-blood; S=$N-teaching-subset; R=~/ctx_$N; C=conf/datasets; T=$R/data/raw/$S
+    N=Non-cancerous-blood; R=~/ctx_$N; C=conf/datasets
     pixi run ctx --root $R setup
     pixi run ctx --root $R gather --dataset $N --fetchngs-dir $R/data/raw/${N}_meta \
         --dataset-file $C/$N.toml --rnaseq-dir $R/data/raw/${N}_rnaseq
-    pixi run ctx --root $R gather --dataset $S --fetchngs-dir $T --dataset-file $C/$S.toml
     pixi run ctx --root $R qc --dataset $N --dataset-file $C/$N.toml \
         --rnaseq-dir $R/data/raw/${N}_rnaseq
-    pixi run ctx --root $R qc --dataset $S --dataset-file $C/$S.toml --reads --fetchngs-dir $T
-    pixi run ctx --root $R process --dataset $S --dataset-file $C/$S.toml \
-        --genome $R/data/raw/reference/GRCh38.primary_assembly.chr22.fa.gz --aligner hisat2 \
-        --compare-dataset $N --fetchngs-dir $T
     pixi run ctx --root $R de --dataset $N --dataset-file $C/$N.toml
     pixi run ctx --root $R function --dataset $N --dataset-file $C/$N.toml
     pixi run ctx --root $R report --dataset $N --dataset-file $C/$N.toml
