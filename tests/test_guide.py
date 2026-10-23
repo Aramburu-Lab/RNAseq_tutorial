@@ -2,7 +2,7 @@
 
 T1: each `ctx` line parses with the CLI's own click parser. T2: each launcher line is its
 script's Usage line, and the laptop blocks run in page order from a fresh folder behind the
-stubs of test_cluster_scripts. T3: the copy's includes are COPIED_FILES. T4: no number is typed
+stubs of test_cluster_scripts. T3: the copy's includes are CLUSTER_FILES. T4: no number is typed
 into the guide's text. No accession is typed here. Each test names the mutation it catches.
 """
 
@@ -26,7 +26,7 @@ from ctx.cli import app
 from ctx.dataset import load
 from ctx.gather import own_fastq
 from ctx.gather.fetchngs import FETCHNGS_VERSION
-from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
+from ctx.gather.rnaseq import CLUSTER_FILES, RNASEQ_VERSION
 from ctx.report import builder, course, guide, prose, text
 from ctx.report.builder import (
     Code,
@@ -275,11 +275,11 @@ def test_laptop_blocks_run_in_page_order(site, tmp_path):
 
 
 def test_copy_includes_are_copied_files(page_blocks):
-    """T3: the copy from Kebnekaise includes exactly COPIED_FILES, in their order, after the
+    """T3: the copy from Kebnekaise includes exactly CLUSTER_FILES, in their order, after the
     folder rule and before the exclusion. Catches a pattern dropped or added on the page."""
     block = codes(page_blocks[1])[text.word("guide", "part3.copy")].text
     rsync = block.splitlines()[1]
-    assert re.findall(r"--include='([^']+)'", rsync) == ["*/", *COPIED_FILES]
+    assert re.findall(r"--include='([^']+)'", rsync) == ["*/", *CLUSTER_FILES]
     assert rsync.index("--exclude='*'") > rsync.rindex("--include=")
 
 

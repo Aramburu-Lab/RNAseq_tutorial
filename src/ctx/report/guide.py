@@ -3,7 +3,7 @@
 Every command on the page comes from one place, and a test holds each to it: the launchers'
 lines are their Usage blocks' (``USAGE``, filled with the dataset's accessions and slug), the
 ``ctx`` lines are built here from option names the CLI parses, and the copy's includes are
-``rnaseq.COPIED_FILES``. The dataset file fills Parts 1 and 2; the page text is in
+``rnaseq.CLUSTER_FILES``. The dataset file fills Parts 1 and 2; the page text is in
 ``content/guide.toml``. Part 1b lays out a student's own FASTQ files where Parts 2 and 3 read a
 download, with ``ctx reads`` on a laptop and the same code run as a file on Kebnekaise. Part 1c
 takes a count matrix from GEO in place of Parts 1 to 3: the download, the sample table from the
@@ -22,7 +22,7 @@ from ctx import editions, runtime
 from ctx.dataset import Dataset
 from ctx.gather import own_fastq
 from ctx.gather.fetchngs import FETCHNGS_VERSION
-from ctx.gather.rnaseq import COPIED_FILES, RNASEQ_VERSION
+from ctx.gather.rnaseq import CLUSTER_FILES, RNASEQ_VERSION
 from ctx.io.naming import MODULES, stem
 from ctx.proteo import guide as mass_spec
 from ctx.report import guide_gdc, text
@@ -172,11 +172,11 @@ def ctx_line(root: str, command: str, *options: str) -> str:
 
 
 def copy_lines(slug: str) -> tuple[str, ...]:
-    """The two copies from Kebnekaise: the metadata outdir, then ``COPIED_FILES`` alone.
+    """The two copies from Kebnekaise: the metadata outdir, then ``CLUSTER_FILES`` alone.
 
     macOS's own rsync is named by its path: a newer one earlier on PATH reads the same flags.
     """
-    includes = " ".join(f"--include='{p}'" for p in COPIED_FILES)
+    includes = " ".join(f"--include='{p}'" for p in CLUSTER_FILES)
     raw = f"~/ctx_{slug}/data/raw"
     return (
         f"/usr/bin/rsync -av {CLUSTER}:{CLUSTER_RUN}/{META}/ {raw}/{slug}_meta/",

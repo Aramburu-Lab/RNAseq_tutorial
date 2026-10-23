@@ -1,7 +1,8 @@
-"""Read one nf-core/rnaseq outdir (Salmon-only), in the layout of the pinned release.
+"""Read one nf-core/rnaseq outdir, Salmon-only or aligned with STAR, in the pinned layout.
 
 File names are from the 3.27.0 salmon test snapshot (tests/salmon.nf.test.snap) and are
-confirmed by tests/fixtures/rnaseq, a real run. Nothing here writes into the outdir.
+confirmed by tests/fixtures/rnaseq, a real Salmon-only run, and tests/fixtures/rnaseq_star, a
+real run with `aligner: star_salmon` (D-116). Nothing here writes into the outdir.
 """
 
 import hashlib
@@ -56,8 +57,10 @@ MULTIQC_TABLES = (
 )  # fmt: skip
 ALIGNED_FILES = (ALIGNED_MATRIX, *(f"{MULTIQC_DATA}/{name}" for name in MULTIQC_TABLES))
 ALIGNER = "star_salmon"
+# What leaves Kebnekaise, which aligns (D-113): the Salmon-only list and the aligned files.
+CLUSTER_FILES = (*COPIED_FILES, *ALIGNED_FILES)
 # Every params file of one outdir must agree on these; -resume adds a file per launch.
-AGREE = ("pseudo_aligner", "skip_alignment", "gencode", "fasta", "gtf")
+AGREE = ("aligner", "pseudo_aligner", "skip_alignment", "gencode", "fasta", "gtf")
 INT32_MAX = 2**31 - 1
 
 
@@ -118,6 +121,11 @@ def _params(outdir: Path) -> dict[str, str]:
     differ = [k for k in AGREE if any(p.get(k) != first.get(k) for p in loaded.values())]
     if differ:
         raise RnaseqError(f"{outdir}: the {len(found)} params files disagree on {differ}")
+    if first.get("pseudo_aligner") != "salmon":
+        raise RnaseqError(f"{outdir}: pseudo_aligner {first.get('pseudo_aligner')!r}; ctx reads "
+                          f"Salmon's {MATRIX_FILE}")  # fmt: skip
+    if first.get("skip_alignment") is False:
+        _aligned(outdir, first.get("aligner"))
     return {
         **{f"params {k}": str(first.get(k)) for k in AGREE},
         **{
@@ -125,6 +133,51 @@ def _params(outdir: Path) -> dict[str, str]:
             for name in loaded
         },  # fmt: skip
     }
+
+
+def _aligned(outdir: Path, aligner: object) -> None:
+    """An outdir aligned with STAR holds every file ``ALIGNED_FILES`` names, or is refused.
+
+    A copy that missed one stops gather, before M2 or M3 would stop on it.
+    """
+    if aligner != ALIGNER:
+        raise RnaseqError(f"{outdir}: aligner {aligner!r}; ctx reads {ALIGNER}'s folders only")
+    if missing := [p for p in ALIGNED_FILES if not (outdir / p).is_file()]:
+        raise RnaseqError(f"{outdir} was aligned ({ALIGNER}) but holds no {missing}; copy it "
+                          "with the include list of rnaseq.ALIGNED_FILES")  # fmt: skip
+
+
+def first_params(outdir: Path) -> dict[str, object]:
+    """The outdir's first params file, by name; ``_params`` holds the rest to it on ``AGREE``.
+
+    Raises:
+        RnaseqError: If it has no params file.
+    """
+    found = sorted((outdir / "pipeline_info").glob("params_*.json"))
+    if not found:
+        raise RnaseqError(f"{outdir}: no pipeline_info/params_*.json")
+    loaded: dict[str, object] = json.loads(found[0].read_text())
+    return loaded
+
+
+def provenance(outdir: Path) -> dict[str, str]:
+    """The release's and the params files' checks, and what they record (``read``'s first two).
+
+    Raises:
+        RnaseqError: If the release is not the pinned one or the params files disagree, or an
+            aligned outdir lacks a file ``ALIGNED_FILES`` names.
+    """
+    return _versions(outdir) | _params(outdir)
+
+
+def aligned(outdir: Path) -> bool:
+    """Whether an outdir was aligned with STAR: its params say ``skip_alignment`` false.
+
+    Raises:
+        RnaseqError: If it has no params file, or its params files disagree.
+    """
+    _params(outdir)
+    return first_params(outdir).get("skip_alignment") is False
 
 
 def to_counts(values: np.ndarray) -> tuple[np.ndarray, int]:
@@ -189,4 +242,6 @@ def read(outdir: Path, samples: set[str]) -> Counts:
     matrix = pl.DataFrame(integers, schema=in_matrix, orient="row")
     matrix = matrix.insert_column(0, frame["gene_id"])
     provenance[f"sha256:{MATRIX_FILE}"] = _sha256(path)
+    if (outdir / ALIGNED_MATRIX).is_file():
+        provenance[f"sha256:{ALIGNED_MATRIX}"] = _sha256(outdir / ALIGNED_MATRIX)
     return Counts(matrix, frame.select("gene_id", "gene_name"), fractional, provenance)

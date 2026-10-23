@@ -127,3 +127,17 @@ Drop the grid; drop the variants; add all six figures; accept.
 4. **What M3 stops teaching.** featureCounts' overlap and multimapper settings (`-O`,
    `--fraction`, `-M`) have no nf-core counterpart. Accept that, with multimappers taught from
    STAR's own multimapped share in F1?
+
+## The copy to the Mac (NF.1 step 2, 2026-10-23)
+
+What leaves Kebnekaise is `ctx.gather.rnaseq.CLUSTER_FILES`: the Salmon-only list
+(`COPIED_FILES`) and `ALIGNED_FILES`, Salmon on STAR's alignment and the 20 tables nf-core's own
+MultiQC wrote under `multiqc/star_salmon/multiqc_report_data/` (not `multiqc_data/`, as this
+plan first said; NF.7). No BAM, no HTML report. `ctx gather` refuses an aligned outdir that
+lacks one of them, naming each. On `tests/fixtures/rnaseq_star` the list matches 45 files,
+408,958 bytes (measured 2026-10-23); a real project's size is not measured until NF.2 ends.
+One project's copy, `<slug>` its dataset name (the guide's Part 3 prints the same line):
+
+```
+/usr/bin/rsync -avmL --include='*/' --include='salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='pipeline_info/nf_core_rnaseq_software_mqc_versions.yml' --include='pipeline_info/params_*.json' --include='salmon/*/lib_format_counts.json' --include='salmon/*/aux_info/meta_info.json' --include='trimgalore/*_trimming_report.json' --include='pipeline_info/execution_trace_*.txt' --include='star_salmon/salmon.merged.gene_counts_length_scaled.tsv' --include='multiqc/star_salmon/multiqc_report_data/multiqc.log' --include='multiqc/star_salmon/multiqc_report_data/multiqc_general_stats.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_trim_galore.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_salmon.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_fastqc_fastqc_raw.txt' --include='multiqc/star_salmon/multiqc_report_data/fastqc_raw_per_base_sequence_quality_plot.txt' --include='multiqc/star_salmon/multiqc_report_data/fastqc_raw_adapter_content_plot.txt' --include='multiqc/star_salmon/multiqc_report_data/fastqc_raw_per_base_n_content_plot.txt' --include='multiqc/star_salmon/multiqc_report_data/fastqc_raw_per_sequence_gc_content_plot_Percentages.txt' --include='multiqc/star_salmon/multiqc_report_data/fastqc_raw_overrepresented_sequences_plot.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_star.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_samtools_flagstat.txt' --include='multiqc/star_salmon/multiqc_report_data/rseqc_infer_experiment_plot.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_strand_check_summary_table.txt' --include='multiqc/star_salmon/multiqc_report_data/rseqc_read_distribution_plot.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_rseqc_junction_annotation.txt' --include='multiqc/star_salmon/multiqc_report_data/qualimap_gene_coverage_profile_Normalised.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_dupradar.txt' --include='multiqc/star_salmon/multiqc_report_data/preseq_complexity_plot_molecules.txt' --include='multiqc/star_salmon/multiqc_report_data/multiqc_featurecounts_biotype_plot.txt' --exclude='*' rstak@kebnekaise.hpc2n.umu.se:/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial/<slug>/nfcore_rnaseq/results/ ~/ctx_<slug>/data/raw/<slug>_rnaseq/
+```
