@@ -2,7 +2,7 @@
 #SBATCH -J RNAseq-Tutorial_NA_nf-head_NA
 #SBATCH -n 1
 #SBATCH -c 1
-#SBATCH --mem=12G
+#SBATCH --mem=32G
 #SBATCH -t 1-00:00:00
 #SBATCH -o slurm-%x-%j.out
 # /// codebase-meta
@@ -11,7 +11,10 @@
 # One day: Step-1's download of 210 runs took 1 h 39 min and its count, the Salmon index included,
 # 1 h 52 min (2026-09-30). A 7-day head job waited on ReqNodeNotAvail until its limit was lowered to
 # 1 day, which cleared it at once (2026-10-01).
-# 12 GB: the head job peaked at 6.16, 6.61 and 7.49 GiB of its 8 on three breast studies (P4.5).
+# 32 GB: the head job peaked at 6.16, 6.61 and 7.49 GiB of its 8 on three breast studies Salmon-only
+# (P4.5); with STAR (D-113) Breast tissue's head reached 11.73 GiB of 12 (2026-10-23), its heap
+# capped at 4 GB by NXF_OPTS. Five heads, all on one node, aborted in Java's native code that day,
+# two of them at 0.77 and 1.09 GiB, so memory is not the whole cause (NF.13).
 # Gene counts with nf-core/rnaseq from the FASTQs fetchngs.sbatch downloaded: STAR and Salmon
 # where the site aligns (SITE_RNASEQ_ALIGN, D-113), Salmon alone always, so M1 to M5 read one
 # matrix on every computer. It

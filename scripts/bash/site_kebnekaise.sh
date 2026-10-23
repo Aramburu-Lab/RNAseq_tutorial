@@ -48,29 +48,30 @@ process {
     withLabel: process_medium { time = { 4.h * task.attempt } }
     withLabel: process_high { time = { 8.h * task.attempt } }
     withLabel: process_long { time = { 10.h * task.attempt } }
-    // Measured (sacct, 2026-10-23, every completed task of the six aligned runs: 1,035 Trim
-    // Galore, 23 STAR alignments, 5 index builds): each request is that process's largest use,
-    // rounded up past the table's 0.1 rounding; memory and time grow 25 % per retry, cores
-    // never; three retries, on nf-core's own retried exits (Rytis 2026-10-23).
-    withName: '.*:FQ_LINT' { cpus = 1; memory = { 1588.MB * Math.pow(1.25, task.attempt - 1) }; time = { 6.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:TRIMGALORE' { cpus = 3; memory = { 5274.MB * Math.pow(1.25, task.attempt - 1) }; time = { 16.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:FASTQC' { cpus = 2; memory = { 4967.MB * Math.pow(1.25, task.attempt - 1) }; time = { 18.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:FQ_LINT_AFTER_TRIMMING' { cpus = 1; memory = { 2816.MB * Math.pow(1.25, task.attempt - 1) }; time = { 6.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:FQ_SUBSAMPLE' { cpus = 1; memory = { 1178.MB * Math.pow(1.25, task.attempt - 1) }; time = { 6.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:CAT_FASTQ' { cpus = 1; memory = { 5069.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:GUNZIP_FASTA' { cpus = 1; memory = { 2304.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:GUNZIP_GTF' { cpus = 1; memory = { 3328.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:SAMTOOLS_FAIDX' { cpus = 1; memory = { 666.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:CUSTOM_GTFFILTER' { cpus = 1; memory = { 3738.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:SE_TRANSCRIPT_UNIFIED' { cpus = 1; memory = { 7527.MB * Math.pow(1.25, task.attempt - 1) }; time = { 12.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:SE_GENE_UNIFIED' { cpus = 1; memory = { 3124.MB * Math.pow(1.25, task.attempt - 1) }; time = { 4.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:MAKE_TRANSCRIPTS_FASTA' { cpus = 1; memory = { 6503.MB * Math.pow(1.25, task.attempt - 1) }; time = { 3.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:EAUTILS_GTF2BED' { cpus = 1; memory = { 11828.MB * Math.pow(1.25, task.attempt - 1) }; time = { 2.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:SALMON_QUANT' { cpus = 6; memory = { 21863.MB * Math.pow(1.25, task.attempt - 1) }; time = { 16.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:STAR_ALIGN' { cpus = 9; memory = { 54528.MB * Math.pow(1.25, task.attempt - 1) }; time = { 20.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:STAR_GENOMEGENERATE' { cpus = 6; memory = { 68660.MB * Math.pow(1.25, task.attempt - 1) }; time = { 54.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:SAMTOOLS_SORT' { cpus = 5; memory = { 11213.MB * Math.pow(1.25, task.attempt - 1) }; time = { 3.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
-    withName: '.*:SALMON_INDEX' { cpus = 3; memory = { 26983.MB * Math.pow(1.25, task.attempt - 1) }; time = { 28.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    // Measured (sacct, 2026-10-23, every completed task of the six aligned runs: 1,057 Trim
+    // Galore, 61 STAR alignments, 6 index builds), with headroom (Rytis 2026-10-23, after the
+    // exact maxima ran out of retries): time 2x the longest, memory 1.25x the largest peak,
+    // cores as used; 25 % more memory and time per retry, cores never; three retries.
+    withName: '.*:TRIMGALORE' { cpus = 3; memory = { 8000.MB * Math.pow(1.25, task.attempt - 1) }; time = { 33.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:FQ_LINT_AFTER_TRIMMING' { cpus = 1; memory = { 3520.MB * Math.pow(1.25, task.attempt - 1) }; time = { 12.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:FQ_LINT' { cpus = 1; memory = { 1984.MB * Math.pow(1.25, task.attempt - 1) }; time = { 11.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:FASTQC' { cpus = 2; memory = { 6208.MB * Math.pow(1.25, task.attempt - 1) }; time = { 35.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SALMON_QUANT' { cpus = 6; memory = { 27328.MB * Math.pow(1.25, task.attempt - 1) }; time = { 31.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:FQ_SUBSAMPLE' { cpus = 1; memory = { 1473.MB * Math.pow(1.25, task.attempt - 1) }; time = { 11.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:STAR_ALIGN' { cpus = 11; memory = { 71616.MB * Math.pow(1.25, task.attempt - 1) }; time = { 159.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SAMTOOLS_SORT' { cpus = 5; memory = { 16704.MB * Math.pow(1.25, task.attempt - 1) }; time = { 9.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SAMTOOLS_INDEX' { cpus = 2; memory = { 1088.MB * Math.pow(1.25, task.attempt - 1) }; time = { 61.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:CAT_FASTQ' { cpus = 1; memory = { 6336.MB * Math.pow(1.25, task.attempt - 1) }; time = { 2.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:STAR_GENOMEGENERATE' { cpus = 6; memory = { 85824.MB * Math.pow(1.25, task.attempt - 1) }; time = { 111.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:GUNZIP_FASTA' { cpus = 1; memory = { 2880.MB * Math.pow(1.25, task.attempt - 1) }; time = { 2.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:GUNZIP_GTF' { cpus = 1; memory = { 4160.MB * Math.pow(1.25, task.attempt - 1) }; time = { 2.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SAMTOOLS_FAIDX' { cpus = 1; memory = { 832.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:CUSTOM_GTFFILTER' { cpus = 1; memory = { 4672.MB * Math.pow(1.25, task.attempt - 1) }; time = { 2.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:MAKE_TRANSCRIPTS_FASTA' { cpus = 1; memory = { 8128.MB * Math.pow(1.25, task.attempt - 1) }; time = { 6.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:EAUTILS_GTF2BED' { cpus = 1; memory = { 14784.MB * Math.pow(1.25, task.attempt - 1) }; time = { 4.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SALMON_INDEX' { cpus = 3; memory = { 33728.MB * Math.pow(1.25, task.attempt - 1) }; time = { 55.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SE_TRANSCRIPT_UNIFIED' { cpus = 1; memory = { 9408.MB * Math.pow(1.25, task.attempt - 1) }; time = { 23.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SE_GENE_UNIFIED' { cpus = 1; memory = { 3904.MB * Math.pow(1.25, task.attempt - 1) }; time = { 8.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
 }
 EOF
 }

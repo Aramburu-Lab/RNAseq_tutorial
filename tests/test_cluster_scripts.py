@@ -225,7 +225,7 @@ def test_shell_rules(name):
 # peaked at 6.16, 6.61 and 7.49 GiB of 8 on three breast studies.
 RESOURCES = {
     "fetchngs.sbatch": {"-n": "1", "-c": "1", "--mem": "8G", "-t": "1-00:00:00"},
-    "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "12G", "-t": "1-00:00:00"},
+    "rnaseq.sbatch": {"-n": "1", "-c": "1", "--mem": "32G", "-t": "1-00:00:00"},
     # R1: one core for curl and the end check; six hours, 3.6 times the slowest laptop fetch,
     # 5,965 s for 2.65 GB on 2026-10-18 (GDC served 665 s for 2.6 GB on 2026-10-01).
     "fetch_gdc.sbatch": {"-n": "1", "-c": "1", "--mem": "2G", "-t": "0-06:00:00"},
@@ -627,7 +627,7 @@ def test_rnaseq_stubbed(site, gencode):
     assert "withLabel: process_high { time = { 8.h * task.attempt } }" in config
     assert "    time = { 2.h * task.attempt }" in config
     # Measured requests, memory and time 25 % more per retry, cores never (Rytis 2026-10-23).
-    assert "withName: '.*:TRIMGALORE' { cpus = 3; memory = { 5274.MB * Math.pow(1.25" in config
+    assert "withName: '.*:TRIMGALORE' { cpus = 3; memory = { 8000.MB * Math.pow(1.25" in config
     assert nf_env["NXF_SYNTAX_PARSER"] == "v2" and cwd == str(launch)
     assert "count matrix: 2 genes, 2 samples" in done.stdout
     assert "alignment count matrix: 2 genes, 2 samples" in done.stdout
