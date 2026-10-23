@@ -55,6 +55,8 @@ it were reversed.
 
 **Amended 2026-10-22 (Rytis).** "I meant visually lite, not so overwhelming with information": the interactive features and "How to read it" were wanted. A lite figure card now keeps its whole `FigureText` (title, lead, reading guide) and its controls, and loses only its Reproduce panel; `core.toml` no longer sets `controls = false`, so panels, forms and tabs stay. The `controls` key remains, a lite edition's way to drop them, tested by `test_controls_go_with_one_line`. Planted mutation caught: `_figure_as` emptying `text` again fails 3 tests in `tests/test_lite.py`.
 
+**Amended 2026-10-23 (Rytis).** "If there are empty module pages, drop them from the lite version." A lite module page left with no figure and no results table (`builder.empty`; M0 always, M1 on a root with no figure) is still written, so the module's outputs stay whole, and records `<html data-empty>`; `builder.shown` reads it back, and the hub, START.html (the module's row goes when every page of it is empty) and `build_kit.select` leave such a page out. Tests: `test_an_empty_lite_page_is_left_out_of_the_hub_and_start` and `test_a_lite_page_with_nothing_to_show_stays_home`; planted mutations caught: the hub skip, the START.html skip and the kit filter, each removed.
+
 **Consequence.** A table a module adds is dropped from lite pages until it is declared `results=True`. A page with no figure and no results table (M0, and M1 on a fixture with no figure) is a heading over an empty Results section under core. The CONVENTIONS rule of nine sections now holds for the full edition only; D-051's controls rule holds wherever `controls = true`.
 
 ---

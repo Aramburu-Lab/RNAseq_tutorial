@@ -13,7 +13,7 @@ from pathlib import Path
 from ctx import editions
 from ctx.io.naming import MODULES
 from ctx.report import text
-from ctx.report.builder import CourseLink, CoursePage, CourseRow, KeyNumber, write
+from ctx.report.builder import CourseLink, CoursePage, CourseRow, KeyNumber, shown, write
 from ctx.report.hub import NOT_MODULES, PAGE, TITLES
 
 # The page a student double-clicks. A script (.command, .cmd) runs through the student's own
@@ -81,7 +81,10 @@ def page(kit: Path, roots: Sequence[tuple[Path, bool]]) -> CoursePage:
             continue
         suffix = "environment" if module == "setup" else "overview"
         tag, _, name = TITLES[module].partition(" ")
-        links = _links(kit, roots, f"{number:02d}_{module}", suffix)
+        found = _links(kit, roots, f"{number:02d}_{module}", suffix)
+        links = [link for link in found if shown(kit / link.href)]
+        if found and not links:
+            continue  # every page of the module is a lite page with nothing to show
         if module == "setup":
             # One computer built every root's pages, so M0 shows its check once: the newest,
             # by the date its file name carries (Rytis 2026-10-20). max keeps the first of a

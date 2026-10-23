@@ -389,3 +389,27 @@ def test_a_full_kit_of_pages_built_before_ed2b_builds_and_ships_them_unchanged(t
     for p in shipped:
         assert p.read_bytes() == (root / "outputs" / p.relative_to(kit / "step" / "outputs")
                                   ).read_bytes()  # fmt: skip
+
+
+def test_an_empty_lite_page_is_left_out_of_the_hub_and_start(tmp_path, monkeypatch):
+    """A core module page with nothing but a check table is marked ``data-empty``; the hub and
+    START.html leave it out, and under full the same page is listed. Catches hub.run or
+    course.page linking an empty page, and a page with a figure marked empty."""
+    from test_lite import CHECK, every_part  # noqa: PLC0415
+    from test_report import _module  # noqa: PLC0415
+
+    from ctx.report.builder import ResultTable, render, shown  # noqa: PLC0415
+
+    root = all_module_pages(tmp_path, "study")
+    blank = _module(results=(ResultTable(CHECK, ("Run", "Reason"), (("r1", "low"),)),))
+    setup = root / "outputs" / "00_setup" / "2026-10-22_setup_environment_v1.html"
+    monkeypatch.setenv(editions.EDITION_ENV, "core")
+    setup.write_text(render(blank))
+    kept = tmp_path / "kept.html"
+    kept.write_text(render(every_part()))
+    assert not shown(setup) and shown(kept)
+    assert _hub_modules(root) == list(CORE)
+    assert [r.number for r in course.page(tmp_path, [(root, True)]).rows] == CORE_NUMBERS[1:]
+    monkeypatch.delenv(editions.EDITION_ENV)
+    setup.write_text(render(blank))
+    assert shown(setup) and _hub_modules(root) == ["setup", *EVERY]

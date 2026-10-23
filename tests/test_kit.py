@@ -653,3 +653,15 @@ def test_kit_ships_an_older_glossary_a_module_page_links(tmp_path):
     kit, done = build(tmp_path, real=real)
     assert done.returncode == 0, done.stderr
     assert (kit / "step" / "outputs" / "09_report" / f"{OLD}_report_glossary_v1.html").is_file()
+
+
+def test_a_lite_page_with_nothing_to_show_stays_home(tmp_path, kit_script):
+    """A page marked ``data-empty`` (builder.empty) is not shipped; its neighbours are.
+    Mutation caught: select without the ``shown`` filter."""
+    root = a_root(tmp_path / "real", "Study", "study")
+    setup = root / "outputs" / "00_setup" / f"{NEW}_setup_environment_v1.html"
+    setup.write_text('<!doctype html>\n<html lang="en" data-edition="full" data-empty>\n'
+                     "<head><title>M0 Setup</title></head><body></body></html>\n")  # fmt: skip
+    kept, _, _ = kit_script.select(root)
+    names = {p.name for p in kept}
+    assert setup.name not in names and f"{NEW}_gather_study_overview_v1.html" in names

@@ -504,6 +504,24 @@ def results_as(results: Iterable[Result], seen: Look) -> tuple[Result, ...]:
     return tuple(out)
 
 
+# A lite page left with no figure and no results table records it, ``<html data-empty>``, and
+# the hub, START.html and the kit leave it out (Rytis 2026-10-23); the file is still written,
+# so a module's outputs stay whole.
+EMPTY_ATTRIBUTE = "data-empty"
+_EMPTY = re.compile(rf"<html\b[^>]*\b{EMPTY_ATTRIBUTE}[\s>]")
+
+
+def empty(page: Page, seen: Look) -> bool:
+    """Whether ``page`` is a lite module report with nothing to show: no figure, no table."""
+    return isinstance(page, ModulePage) and _lite(page, seen) and not results_as(page.results, seen)
+
+
+def shown(path: Path) -> bool:
+    """Whether a written page is shown: False for a lite page that ``empty`` marked."""
+    with path.open(encoding="utf-8", errors="replace") as f:
+        return not _EMPTY.search(f.read(4096))
+
+
 def _lite(page: Page, seen: Look) -> bool:
     """Whether ``page`` is cut to its cards: a lite edition's module report, hub or home page."""
     if isinstance(page, ModulePage) and page.instructions:
@@ -656,6 +674,7 @@ def render(page: Page, glossary_href: str = "") -> str:
         # Recorded once, here, on every page, so build_kit.py can refuse one built under another.
         "edition": editions.active().name,
         "lite": lite,
+        "empty": empty(page, seen),
         # A lite page keeps the results section alone, with no contents rail (D-111).
         "sections": tuple(s for s in SECTIONS if s[0] == "results") if lite else SECTIONS,
         "ui": text.load("ui"),

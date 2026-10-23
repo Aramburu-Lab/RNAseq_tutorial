@@ -89,6 +89,7 @@ from ctx import editions  # noqa: E402
 from ctx.dataset import load  # noqa: E402
 from ctx.io import naming  # noqa: E402
 from ctx.report import prose, text  # noqa: E402
+from ctx.report.builder import shown  # noqa: E402
 from ctx.report.course import label, newest, write_home  # noqa: E402
 from ctx.report.hub import PAGE  # noqa: E402
 
@@ -201,6 +202,8 @@ def select(
     edition = editions.active()
     held = {d.name for d in outputs.iterdir() if edition.holds(d.name)}
     chosen = {p for p in newest - out if p.relative_to(outputs).parts[0] in held}
+    # A lite page with nothing to show stays home, as the hub and START.html leave it out.
+    chosen = {p for p in chosen if p.suffix != ".html" or shown(p)}
     # Undated, so current() never picks it: each module folder's entry page (GS.2) ships with
     # the folder's pages, and its links are walked like theirs.
     folders = {c.parent for c in chosen}

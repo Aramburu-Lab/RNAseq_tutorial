@@ -21,8 +21,15 @@ from ctx.dataset import load
 from ctx.de.sanity import VERDICT_COLUMNS, decide, parse
 from ctx.io.naming import MODULES, stem
 from ctx.io.readme_companion import write_table
-from ctx.report import text
-from ctx.report.builder import HubLink, HubPage, HubRule, KeyNumber, ParameterCard, write
+from ctx.report import builder, text
+from ctx.report.builder import (
+    HubLink,
+    HubPage,
+    HubRule,
+    KeyNumber,
+    ParameterCard,
+    write,
+)
 
 MODULE = "report"
 # The content file of the hub's words.
@@ -161,6 +168,8 @@ def run(
         page = _newest(outputs / f"{number:02d}_{module}", what)
         if page is None:
             missing.append(TITLES.get(module, module))
+            continue
+        if not builder.shown(page):
             continue
         href = Path(os.path.relpath(page, out)).as_posix()
         links.append(HubLink(TITLES.get(module, module), page.name, href, page.name[:10]))
