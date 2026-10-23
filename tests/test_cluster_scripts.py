@@ -619,7 +619,7 @@ def test_rnaseq_stubbed(site, gencode):
         "input": str(launch / "samplesheet.csv"), "outdir": str(launch / "results"),
         "fasta": str(refs / "genome.fa.gz"), "gtf": str(refs / "annotation.gtf.gz"),
         "gencode": gencode, "pseudo_aligner": "salmon", "aligner": "star_salmon",
-        "save_reference": "true", "publish_dir_mode": "copy",
+        "skip_preseq": "false", "save_reference": "true", "publish_dir_mode": "copy",
     }  # fmt: skip
     argv, nf_env, cwd = _recorded(tmp_path)
     assert argv[:4] == ["run", "nf-core/rnaseq", "-r", RNASEQ_VERSION]

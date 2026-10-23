@@ -92,7 +92,8 @@ limits=$(site_rnaseq_config) || die "the site's limits are unknown; see the line
 LAUNCH="$RUN/nfcore_rnaseq"
 mkdir -p "$LAUNCH"
 [[ "${SITE_RNASEQ_ALIGN:-}" == true || "${SITE_RNASEQ_ALIGN:-}" == false ]] || die "the site file sets no SITE_RNASEQ_ALIGN"
-if [[ "$SITE_RNASEQ_ALIGN" == true ]]; then route="aligner: star_salmon"; else route="skip_alignment: true"; fi
+# Preseq is off by default in 3.27.0 (skip_preseq: true); M3 draws its library complexity (Rytis 2026-10-23).
+if [[ "$SITE_RNASEQ_ALIGN" == true ]]; then route=$'aligner: star_salmon\nskip_preseq: false'; else route="skip_alignment: true"; fi
 
 # publish_dir_mode is stated: under NXF_SYNTAX_PARSER=v2 the config below cannot see a param only
 # the pipeline sets, and its reports were published as symlinks into work/ (D-025).
