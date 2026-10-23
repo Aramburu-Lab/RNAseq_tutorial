@@ -821,6 +821,6 @@ causes = ["a mislabelled sample", "a sample swap", "an HSCT recipient carrying d
 action = "flag"
 matters_for_de = true
 read_length_tied = false
-source = "rule R8 of conf/datasets/tier1.toml; the sex genes of ctx.qc.identity"
+source = "rule R8 of conf/datasets/Non-cancerous-blood.toml; the sex genes of ctx.qc.identity"
 source_type = "course_convention"
 rationale = "A disagreement is a question for the metadata, never a reason on its own to drop a sample; HSCT samples are compared with donor sex."

@@ -6,7 +6,7 @@
 # MTV-high by MTV2.5 below or at least 4.5 (Methods, PMC11092202). Not yet counted: Rytis
 # queued the download and the count on Kebnekaise 2026-10-22 (TODO.md ED.8).
 #
-# Curated from its own table, pancreas_gse192647.tsv: GEO's per-sample records (brief SOFT of
+# Curated from its own table, Pancreas-tissue-PAAD.tsv: GEO's per-sample records (brief SOFT of
 # GSE192647's samples, acc.cgi?acc=GSE192647&targ=gsm&form=text&view=brief, retrieved
 # 2026-10-22, 67,906 B, SHA-256 1c5a48b7fca79c3531c0ab6895b9b97cb5824af2773d9cc6145d19018beb78f2),
 # values verbatim, one row per ENA run (read_run report of PRJNA792551, retrieved 2026-10-22
@@ -44,8 +44,8 @@
 # the paper "normal counterparts" of the resected tumours; "adjacent" is the course's word.
 
 [dataset]
-slug = "pancreas_gse192647"
-# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+slug = "Pancreas-tissue-PAAD"
+# The name pages show; the slug, made from it, names files (D-014, D-114).
 label = "Pancreas tissue (PAAD)"
 # What fetchngs downloads, as `ctx guide --dataset-file` writes it into the accession list.
 accessions = ["PRJNA792551"]
@@ -87,7 +87,7 @@ patterns = [
 ]
 
 [sdrf]
-file = "pancreas_gse192647.tsv"
+file = "Pancreas-tissue-PAAD.tsv"
 join = ["run_accession", "run_accession"]
 cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
 

@@ -1,12 +1,12 @@
 # The custom-data guide's worked example (ctx guide, U.8): Step-1's four smallest runs by ENA
-# fastq_bytes, 1,268,992,130 bytes in all (G.0), curated from their own table, four_runs.csv, as
+# fastq_bytes, 1,268,992,130 bytes in all (G.0), curated from their own table, Non-cancerous-blood-four-runs.csv, as
 # a study without an SDRF is. The table's values are Step-1's curated sheet's (ctx gather on
-# tier1 with tier1.toml, 2026-10-08), so both curations agree run by run. Every run is 101 nt,
+# Non-cancerous-blood with Non-cancerous-blood.toml, 2026-10-08), so both curations agree run by run. Every run is 101 nt,
 # single-end, peripheral blood.
 
 [dataset]
-slug = "four_runs"
-# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+slug = "Non-cancerous-blood-four-runs"
+# The name pages show; the slug, made from it, names files (D-014, D-114).
 label = "Non-cancerous blood, four runs"
 ena_study = "PRJEB49000"
 ena_secondary_study = "ERP133445"
@@ -35,7 +35,7 @@ bytes = 124650284
 sha256 = "89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4"
 dest = "resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz"
 
-# Step-1's study, so Step-1's guard (tier1.toml).
+# Step-1's study, so Step-1's guard (Non-cancerous-blood.toml).
 [guard]
 ids = ["PRJEB49000", "ERP133445", "E-MTAB-11190"]
 patterns = [
@@ -47,7 +47,7 @@ patterns = [
 ]
 
 [sdrf]
-file = "four_runs.csv"
+file = "Non-cancerous-blood-four-runs.csv"
 join = ["run_accession", "run_accession"]
 
 [columns.donor]

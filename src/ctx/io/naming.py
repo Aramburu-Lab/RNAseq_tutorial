@@ -25,9 +25,12 @@ MODULES: tuple[tuple[str, int], ...] = (
     ("clinical", 12),
 )
 THEMES = ("white", "black")
-# A description: lower-case words joined by underscores. A dataset slug and a contrast name
-# are descriptions too, as the output names that carry them require (ctx.report.genes).
-DESCRIPTION = r"[a-z0-9]+(?:_[a-z0-9]+)*"
+# A description: words joined by underscores, each of letters and digits joined by single
+# hyphens, so a dataset name made from its label fits: "Breast-tissue-BRCA" (D-114). A dataset
+# slug and a contrast name are descriptions too, as the output names that carry them require
+# (ctx.report.genes, and its page twin's SOURCE in _select.js.j2).
+WORD = r"[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*"
+DESCRIPTION = rf"{WORD}(?:_{WORD})*"
 # Theme words may only appear as the trailing token, or `volcano_white_v1` would pass.
 _RESERVED = {*THEMES, "light", "dark", "readme"}
 _TOKENS = "|".join(sorted((t for t, _ in MODULES), key=len, reverse=True))
@@ -64,7 +67,7 @@ def check(name: str) -> bool:
     match = _NAME.fullmatch(name)
     if match is None or (match["readme"] and match["theme"]):
         return False
-    if _RESERVED & set(match["desc"].split("_")):
+    if _RESERVED & {word.lower() for word in match["desc"].split("_")}:
         return False
     try:
         date.fromisoformat(match["day"])
@@ -78,7 +81,7 @@ def stem(module: str, description: str, version: int, *, day: date) -> str:
 
     Args:
         module: A token from ``MODULES``, e.g. ``"de"``.
-        description: Lowercase words joined by underscores, e.g. ``"volcano"``.
+        description: ``DESCRIPTION``'s words joined by underscores, e.g. ``"volcano"``.
         version: Positive integer, bumped when the content changes meaning.
         day: The date the output was made.
 

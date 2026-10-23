@@ -22,7 +22,7 @@ is the ten-line version for a new reader.
 ## Your own data
 
 ```bash
-pixi run -e laptop ctx --root ~/ctx_four_runs guide
+pixi run -e laptop ctx --root ~/ctx_Non-cancerous-blood-four-runs guide
 ```
 
 writes the guide page, `outputs/09_report/<date>_report_guide_v1.html`: every command from a
@@ -34,7 +34,7 @@ with how to find a study's accession, and the class exercise of a metadata run a
 ## Teacher guide
 
 ```bash
-pixi run -e laptop python -m ctx.report.teacher ~/ctx_teacher/<date>_report_teacher_v1.html ~/ctx_tier1 ~/ctx_breast
+pixi run -e laptop python -m ctx.report.teacher ~/ctx_teacher/<date>_report_teacher_v1.html ~/ctx_Non-cancerous-blood ~/ctx_breast
 ```
 
 writes the compute time and peak memory of every module, read back from the Reproduce block of

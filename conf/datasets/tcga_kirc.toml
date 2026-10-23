@@ -74,7 +74,7 @@ bytes = 44507458
 sha256 = "81359865bab048361cbeaf91c9441aac4c700b63978e6691d579d78bf2322d30"
 dest = "data/raw/gdc_gencode_v36/gencode.v36.annotation.gtf.gz"
 
-# GTEx V11 for M9's gene cards, the same four files as tier1.toml declares (release
+# GTEx V11 for M9's gene cards, the same four files as Non-cancerous-blood.toml declares (release
 # 2025-08-22, GENCODE 47; Rytis 2026-10-08), not downloaded again: this root links
 # data/raw/gtex_v11 to the one copy, and ctx setup registers each file in place by its hash.
 [[resources]]
@@ -105,7 +105,7 @@ bytes = 20292
 sha256 = "2313caeaaf3718ac8aead8c6b9eab92b3f613509cfe1a6f7b6286310a7200e73"
 dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"
 
-# MSigDB Hallmark for M6 (D1.1, Rytis 2026-10-14), the file tier1.toml declares, not downloaded
+# MSigDB Hallmark for M6 (D1.1, Rytis 2026-10-14), the file Non-cancerous-blood.toml declares, not downloaded
 # again: the scratch root links the one copy, and ctx setup registers a file in place by hash.
 [[resources]]
 name = "msigdb_hallmark"

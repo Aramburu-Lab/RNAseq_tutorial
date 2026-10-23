@@ -1,7 +1,7 @@
-# Cassetta et al. 2019 blood monocytes (TODO.md, the breast_mono download and count, job
+# Cassetta et al. 2019 blood monocytes (TODO.md, the BRCA-immune-cells-monocytes download and count, job
 # 47520582): the 94 GEO samples of GSE117970 whose extract protocol is the monocyte one, 102
 # paired 2 x 100 nt runs (8 samples sequenced twice, merged by nf-core/rnaseq). Curated from its
-# own table, breast_mono.tsv: GEO's per-sample records (brief SOFT of GSE117970's samples,
+# own table, BRCA-immune-cells-monocytes.tsv: GEO's per-sample records (brief SOFT of GSE117970's samples,
 # retrieved 2026-10-09, SHA-256 eb80bb5b44fcdc8f34e675af88d09d9cc1f715b99ce0cadd9fb3d230db02bd00),
 # values verbatim, one row per ENA run (read_run report, 2026-10-09), joined to fetchngs on the run
 # and cross-checked on the GSM and title; `donor` is the title before ':'; `sex` is F for every
@@ -21,8 +21,8 @@
 # different people at least once. The paper's 45 healthy counts both sets.
 
 [dataset]
-slug = "breast_mono"
-# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+slug = "BRCA-immune-cells-monocytes"
+# The name pages show; the slug, made from it, names files (D-014, D-114).
 label = "BRCA immune cells: monocytes"
 ena_study = "PRJNA483877"
 ena_secondary_study = "SRP155941"
@@ -77,7 +77,7 @@ bytes = 20292
 sha256 = "2313caeaaf3718ac8aead8c6b9eab92b3f613509cfe1a6f7b6286310a7200e73"
 dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"
 
-# The same study as breast_mac.toml, so the same guard.
+# The same study as BRCA-immune-cells-macrophages.toml, so the same guard.
 [guard]
 ids = ["PRJNA483877", "SRP155941", "GSE117970"]
 patterns = [
@@ -97,7 +97,7 @@ patterns = [
 ]
 
 [sdrf]
-file = "breast_mono.tsv"
+file = "BRCA-immune-cells-monocytes.tsv"
 join = ["run_accession", "run_accession"]
 cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
 

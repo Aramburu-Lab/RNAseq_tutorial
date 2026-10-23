@@ -2,8 +2,8 @@
 # tests/test_repo.py fails if any [guard] id or pattern appears in src/, tests/ or scripts/.
 
 [dataset]
-slug = "tier1"
-# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+slug = "Non-cancerous-blood"
+# The name pages show; the slug, made from it, names files (D-014, D-114).
 label = "Non-cancerous blood"
 # M1 Figure 1's colours besides batch: tissue and time point nest in cell type and condition,
 # so they are not offered (Rytis 2026-10-18). Sex is the recorded sex, the recipient's.
@@ -26,7 +26,7 @@ urls = [
 ]
 bytes = 108110
 sha256 = "b34b846aafa8a111c3f23a00b1fead7d8b0d73ce2e178d4b1e4b51c455813b9e"
-dest = "resources/datasets/tier1/E-MTAB-11190.sdrf.txt"
+dest = "resources/datasets/Non-cancerous-blood/E-MTAB-11190.sdrf.txt"
 
 [[resources]]
 name = "msigdb_hallmark"
@@ -60,7 +60,7 @@ urls = [
 ]
 bytes = 11193232
 sha256 = "f09c2c03590761fca8b58eb9c3d0a40210b8319e4732f505867ae6238684b184"
-dest = "resources/datasets/tier1/41590_2017_BFni3693_MOESM13_ESM.xlsx"
+dest = "resources/datasets/Non-cancerous-blood/41590_2017_BFni3693_MOESM13_ESM.xlsx"
 
 # MSigDB 2026.1 GO cellular component, for M7's granule class; size and SHA-256 from the
 # download of 2026-10-08 (~/ctx_breast/data/raw/cptac_brca/_manifest_cptac_brca.tsv).

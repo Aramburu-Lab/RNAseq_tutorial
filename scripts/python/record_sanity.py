@@ -13,8 +13,8 @@ the metrics, after checking that deciding again from the union gives the hub's v
 failed check writes nothing (D-026).
 
 Usage:
-    pixi run python scripts/python/record_sanity.py --root ~/ctx_tier1 --dataset tier1 \
-        --dataset-file conf/datasets/tier1.toml
+    pixi run python scripts/python/record_sanity.py --root ~/ctx_Non-cancerous-blood \
+        --dataset Non-cancerous-blood --dataset-file conf/datasets/Non-cancerous-blood.toml
 """
 
 from __future__ import annotations
@@ -112,10 +112,13 @@ def check(
 
 
 def rule_commit(dataset_file: Path) -> str:
-    """The newest commit that registered the dataset file's rules, or 'none found'."""
+    """The newest commit that registered the dataset file's rules, or 'none found'.
+
+    Followed across a rename (D-114), whose commit adds the line under the new path.
+    """
     found = subprocess.run(
-        ["git", "-C", str(ROOT), "log", "-1", "--format=%H", "-G", "^registered = ", "--",
-         str(dataset_file.resolve())],
+        ["git", "-C", str(ROOT), "log", "-1", "--follow", "--format=%H", "-G", "^registered = ",
+         "--", str(dataset_file.resolve())],
         capture_output=True, text=True, check=False,
     ).stdout.strip()  # fmt: skip
     return found or "none found"

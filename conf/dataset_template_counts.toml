@@ -11,7 +11,7 @@
 # placed on the annotation below, and what does not place is listed with its counts.
 
 [dataset]
-# EDIT: lowercase letters, digits and underscores; it names every output file.
+# EDIT: letters and digits joined by - or _, as Breast-tissue-BRCA; it names every output file.
 slug = "mine"
 # EDIT: the name the pages show.
 label = "My study"

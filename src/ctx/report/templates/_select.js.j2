@@ -8,7 +8,8 @@ var ctxSelect = {
   /* Longest fragment read, in UTF-16 units with its '#', as location.hash counts them. */
   LIMIT: 500000,
   ID: /^ENSG([0-9]{11})(?:\.[0-9]+)?$/i,
-  SOURCE: /^[a-z0-9]+(?:_[a-z0-9]+)*:[a-z0-9]+(?:_[a-z0-9]+)*$/,
+  /* ctx.io.naming.DESCRIPTION, a colon, and DESCRIPTION again. */
+  SOURCE: /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:_[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*:[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(?:_[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)*$/,
   HEAD: /^#v=([^&]+)(?:&|$)/,
   /* Written last by encode: no field holds an '&', so a link cut anywhere lacks it. */
   END: "&end",

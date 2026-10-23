@@ -35,7 +35,7 @@ HOME = Path(os.environ.get("CTX_GDC_HOME", Path.home()))
 LINKS = {f"data/raw/{NAME}{k}": HOME / "ctx_breast" / "data/raw" / f"{NAME}{k}"
          for k in ("", "_mirna", "_isoform")}  # fmt: skip
 LINKS |= {
-    "data/raw/mirna_targets": HOME / "ctx_tier1" / "data/raw/mirna_targets",
+    "data/raw/mirna_targets": HOME / "ctx_Non-cancerous-blood" / "data/raw/mirna_targets",
     "data/raw/gdc_gencode_v36": HOME / "ctx_breast" / "data/raw/gdc_gencode_v36",
 }
 

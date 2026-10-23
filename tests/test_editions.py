@@ -33,8 +33,9 @@ DATASETS = ROOT / "conf" / "datasets"
 EVERY = ("gather", "qc", "process", "quant", "de", "function", "proteo", "ncrna", "genecard",
          "clinical")  # fmt: skip
 CORE = ("gather", "qc", "process", "quant", "de", "function", "ncrna", "genecard")
-CORE_DATASETS = ("tier1", "tier1_teach", "four_runs", "breast_tissue", "breast_mac",
-                 "breast_mono", "lung_gse229705", "pancreas_gse192647")  # fmt: skip
+CORE_DATASETS = ("Non-cancerous-blood", "Non-cancerous-blood-four-runs", "Breast-tissue-BRCA",
+                 "BRCA-immune-cells-macrophages", "BRCA-immune-cells-monocytes", "Lung-tissue-LUAD",
+                 "Pancreas-tissue-PAAD")  # fmt: skip
 # Every course dataset file the core edition leaves out, on 2026-10-22. A dataset file added to
 # conf/datasets lands here or in core.toml.
 FULL_ONLY = {"cptac_brca", "cptac_ccrcc", "r2_gse130605", "r3_pxd038437", "tcga_brca",
@@ -87,7 +88,7 @@ name = "Other"
 label = ""
 colour = "red"
 modules = ["qc", "de", "de", "plot"]
-datasets = ["tier1", "absent", "renamed"]
+datasets = ["Non-cancerous-blood", "absent", "renamed"]
 
 [extra]
 """
@@ -100,7 +101,7 @@ def test_a_bad_edition_lists_every_problem(tmp_path):
     folder, datasets = tmp_path / "editions", tmp_path / "datasets"
     folder.mkdir()
     datasets.mkdir()
-    (datasets / "tier1.toml").write_text('[dataset]\nslug = "tier1"\n')
+    (datasets / "Non-cancerous-blood.toml").write_text('[dataset]\nslug = "Non-cancerous-blood"\n')
     (datasets / "renamed.toml").write_text('[dataset]\nslug = "other"\n')
     (folder / "bad.toml").write_text(BAD)
     with pytest.raises(editions.EditionError) as caught:
@@ -135,8 +136,8 @@ def test_an_unknown_edition_is_refused_and_no_folder_means_full(tmp_path, monkey
 def test_core_refuses_m7_and_m10_by_name_and_writes_nothing(tmp_path, module):
     """`ctx --edition core clinical|proteo` exits 1 naming the module, and so does CTX_EDITION;
     nothing is written. Catches the CLI running a module outside the edition."""
-    spec = str(DATASETS / "tier1.toml")
-    args = (module, "--dataset", "tier1", "--dataset-file", spec)
+    spec = str(DATASETS / "Non-cancerous-blood.toml")
+    args = (module, "--dataset", "Non-cancerous-blood", "--dataset-file", spec)
     for flag, env in ((("--edition", "core"), None), ((), {editions.EDITION_ENV: "core"})):
         done = ctx_run("--root", str(tmp_path), *flag, *args, cwd=tmp_path, env=env)
         assert done.returncode == 1
@@ -152,7 +153,7 @@ def test_core_refuses_a_course_dataset_outside_it_and_keeps_the_readers_own(core
     assert core.refusal("de", core.course_slug(DATASETS / "tcga_kirc.toml"))
     assert core.course_slug(tmp_path / "tcga_kirc.toml") is None
     assert core.refusal("gather", "my_lab_study") is None
-    assert core.refusal("de", "tier1") is None
+    assert core.refusal("de", "Non-cancerous-blood") is None
     done = ctx_run("--root", str(tmp_path), "--edition", "core", "guide", "--dataset-file",
                    str(DATASETS / "tcga_brca.toml"), cwd=tmp_path)  # fmt: skip
     assert done.returncode == 1 and "outside the core edition" in done.stderr
@@ -264,10 +265,10 @@ def _every_module_root(tmp: Path, edition: str | None = None) -> Path:
     ``edition`` stamps every page as built under it; None leaves them as pages built before
     ED.2b, recording none.
     """
-    root = a_root(tmp / "real", "Breast tissue", "breast_tissue")
+    root = a_root(tmp / "real", "Breast tissue", "Breast-tissue-BRCA")
     out = root / "outputs"
-    page(out / "07_proteo" / "2026-09-30_proteo_breast_tissue_overview_v1.html", "M7: Breast")
-    page(out / "12_clinical" / "2026-09-30_clinical_breast_tissue_overview_v1.html", "M10: B")
+    page(out / "07_proteo" / "2026-09-30_proteo_Breast-tissue-BRCA_overview_v1.html", "M7: Breast")
+    page(out / "12_clinical" / "2026-09-30_clinical_Breast-tissue-BRCA_overview_v1.html", "M10: B")
     # M10 reads a gene list from a link, so a kit that ships its folder needs its entry page.
     page(out / "12_clinical" / "index.html", "M10 Clinical and survival")
     if edition is not None:
@@ -312,7 +313,7 @@ def test_a_core_kit_refuses_a_root_outside_it_and_a_link_to_m7(tmp_path):
     root = _every_module_root(tmp_path / "linked")
     hub_page = next((root / "outputs" / "09_report").glob("*_hub_v1.html"))
     page(hub_page, "Course hub: Breast tissue",
-         "../07_proteo/2026-09-30_proteo_breast_tissue_overview_v1.html")  # fmt: skip
+         "../07_proteo/2026-09-30_proteo_Breast-tissue-BRCA_overview_v1.html")  # fmt: skip
     _stamp((root / "outputs").rglob("*.html"), "core")
     kit, done = _kit(tmp_path, "kit2", [f"--real=step={root}"], "--edition", "core")
     assert done.returncode != 0 and "outside the core edition" in done.stderr
@@ -366,7 +367,7 @@ def test_a_core_kit_refuses_a_page_built_under_full_naming_it(tmp_path, monkeypa
     root = _every_module_root(tmp_path, "core")
     monkeypatch.delenv(editions.EDITION_ENV, raising=False)
     settings = runtime.Settings("laptop", root, 1, None, 0.0)
-    hub_page = hub.run(settings, (), "breast_tissue")[0]
+    hub_page = hub.run(settings, (), "Breast-tissue-BRCA")[0]
     kit, done = _kit(tmp_path, "kit", [f"--real=step={root}"], "--edition", "core")
     assert done.returncode != 0 and nothing_written(kit)
     assert f"{hub_page.resolve()}: built under the full edition, not core" in done.stderr

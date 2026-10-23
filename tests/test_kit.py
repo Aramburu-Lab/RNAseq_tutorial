@@ -475,7 +475,7 @@ def test_the_declared_sources_are_every_dataset_files_resources(kit_script):
     declared = kit_script.declared_sources()
     cptac = "c27a0226cba4f14c96b905f86c30007b62dd2a67a176e608c96f642566862903"
     assert declared[cptac] == "cptac_brca.toml cptac_freeze"
-    assert any(name.startswith("tier1.toml ") for name in declared.values())
+    assert any(name.startswith("Non-cancerous-blood.toml ") for name in declared.values())
 
 
 def committed(name: str, at: str = "HEAD") -> str:
@@ -485,18 +485,20 @@ def committed(name: str, at: str = "HEAD") -> str:
     return hashlib.sha256(shown).hexdigest()
 
 
-@pytest.mark.parametrize("name", ["tier1.toml", "tcga_kirc.toml"])
+@pytest.mark.parametrize("name", ["Non-cancerous-blood.toml", "tcga_kirc.toml"])
 def test_every_committed_version_of_a_dataset_file_is_the_codebases(kit_script, name):
     """K.9: a gather run reads whichever version its commit held, so every version counts,
     a merge's included: ~/ctx_kidney's TCGA gather read the version merge 789f8ad made.
     Mutations caught: only the newest commit read (git log -n 1); merges skipped (no -m)."""
     codebase = kit_script.codebase_datasets()
-    commits = subprocess.run(["git", "-C", str(ROOT), "log", "--format=%H", "--",
-                              f"conf/datasets/{name}"], capture_output=True, text=True,
-                             check=True).stdout.split()  # fmt: skip
-    assert len(commits) > 1
-    for at in commits:
-        assert codebase[committed(name, at)].path == f"conf/datasets/{name}", at
+    # Followed across a rename (D-114): an older version is the codebase's under its old path.
+    listed = subprocess.run(["git", "-C", str(ROOT), "log", "--follow", "--format=%H",
+                             "--name-only", "--", f"conf/datasets/{name}"], capture_output=True,
+                            text=True, check=True).stdout.split()  # fmt: skip
+    versions = list(zip(listed[::2], listed[1::2], strict=True))
+    assert len(versions) > 1
+    for at, path in versions:
+        assert codebase[committed(Path(path).name, at)].path == path, at
 
 
 @pytest.mark.parametrize("ours", [True, False])
@@ -508,13 +510,13 @@ def test_a_rebuild_command_names_the_codebases_dataset_file(tmp_path, ours):
     provenance, ships byte for byte. Mutations caught: no mapping; a mapping by path, which
     takes a reader's file saved in conf/datasets/ of a clone for the codebase's; the root
     sentence dropped."""
-    clone = tmp_path / "some_clone" / "conf" / "datasets" / "tier1.toml"
-    sha = committed("tier1.toml") if ours else "f" * 64
+    clone = tmp_path / "some_clone" / "conf" / "datasets" / "Non-cancerous-blood.toml"
+    sha = committed("Non-cancerous-blood.toml") if ours else "f" * 64
     real, folder = gdc_root(tmp_path, (str(clone), sha))
     kit, done = build(tmp_path / "k", real=real)
     assert done.returncode == 0, done.stderr
     left = json.loads((kit / "LEFT_OUT.json").read_text())["files"]
-    shown = "conf/datasets/tier1.toml" if ours else str(clone)
+    shown = "conf/datasets/Non-cancerous-blood.toml" if ours else str(clone)
     gather = f"ctx --root {real} gather --dataset tcgax --gdc-dir {folder} --dataset-file {shown}"
     assert [e["rebuild"][-1] for e in left] == [gather, gather]
     assert {e["builder_dataset_file"] for e in left} == {None if ours else str(clone)}

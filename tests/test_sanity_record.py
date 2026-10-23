@@ -96,13 +96,17 @@ def test_schema_errors_listed_together():
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPEC = ROOT / "conf" / "datasets" / "tier1.toml"
+SPEC = ROOT / "conf" / "datasets" / "Non-cancerous-blood.toml"
 # Everything a verdict depends on: the rules, how samples are curated and counted, the
 # models, the enrichment, the PERMANOVA, and the step that decides. None may change between
 # the rule commit and the record commit (critique M4). dataset.py became the package
-# src/ctx/dataset on 2026-10-19 (F.5); both paths stand, one per side of the split.
+# src/ctx/dataset on 2026-10-19 (F.5); both paths stand, one per side of the split. The
+# dataset file was conf/datasets/tier1.toml at the registration and the record, and was
+# renamed on 2026-10-23 (D-114); both paths stand for the same reason, since a diff between
+# two commits that predate the rename sees nothing under the new path.
 FROZEN = (
-    "conf/datasets/tier1.toml", "src/ctx/dataset.py", "src/ctx/dataset",
+    "conf/datasets/Non-cancerous-blood.toml", "conf/datasets/tier1.toml",
+    "src/ctx/dataset.py", "src/ctx/dataset",
     "src/ctx/gather/curation.py", "src/ctx/gather/rnaseq.py", "src/ctx/de", "src/ctx/function",
     "src/ctx/viz/annotate.py", "src/ctx/report/hub.py",
 )  # fmt: skip
@@ -130,16 +134,28 @@ def rule_commit() -> str:
 
     A re-registration (D-013) moves it forward; it must still precede the record.
     """
-    found = git("log", "--format=%H", "-G", r"^registered = ", "--", str(SPEC))
+    return registration()[0]
+
+
+def registration() -> tuple[str, str]:
+    """The registration commit and the dataset file's path in it, followed across renames.
+
+    Without ``--follow`` the history of SPEC starts at its rename (D-114), whose commit adds
+    the ``registered`` line under the new path and would pass for a registration after the
+    record.
+    """
+    found = git("log", "--follow", "--format=%H", "--name-only", "-G", r"^registered = ",
+                "--", str(SPEC)).split()  # fmt: skip
     assert found, "no commit registers the Step-1 [sanity] rules"
-    return found.split()[0]
+    return found[0], found[1]
 
 
 def test_registration_is_the_committed_date():
     if git("rev-parse", "--is-shallow-repository") == "true":
         pytest.skip("shallow clone: CI checks out depth 1, so the registration is absent")
     registered = load(SPEC).sanity["registered"]
-    at_commit = git("show", f"{rule_commit()}:{SPEC.relative_to(ROOT).as_posix()}")
+    commit, path = registration()
+    at_commit = git("show", f"{commit}:{path}")
     assert f'registered = "{registered}"' in at_commit
 
 
@@ -160,7 +176,7 @@ def test_frozen_since_registration():
     assert not changed, (
         f"changed since the registration {rule_commit()[:7]}: {changed}. Revert the change, "
         "or, only while no Step-1 count exists, register again: set [sanity] registered in "
-        "conf/datasets/tier1.toml and record why in knowledge/decisions.md (D-013)."
+        "conf/datasets/Non-cancerous-blood.toml and record why in knowledge/decisions.md (D-013)."
     )
 
 

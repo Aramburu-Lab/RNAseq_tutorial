@@ -1,6 +1,6 @@
 # Cassetta et al. 2019 tissue macrophages (P4.0, TODO.md "Phase 4"): the 22 GEO samples of
 # GSE117970 whose extract protocol is the macrophage one, one paired 2 x 100 nt run each, counted
-# by nf-core/rnaseq 3.27.0 (job 47489148). Curated from its own table, breast_mac.tsv, because the
+# by nf-core/rnaseq 3.27.0 (job 47489148). Curated from its own table, BRCA-immune-cells-macrophages.tsv, because the
 # study has no SDRF: GEO's per-sample records (brief SOFT of GSE117970's samples, retrieved
 # 2026-10-09, SHA-256 eb80bb5b44fcdc8f34e675af88d09d9cc1f715b99ce0cadd9fb3d230db02bd00), values
 # verbatim, one row per ENA run (read_run report, 2026-10-09), joined to fetchngs on the run and
@@ -10,8 +10,8 @@
 # only `condition` tells resident from tumour-associated (TODO.md P4 row 1).
 
 [dataset]
-slug = "breast_mac"
-# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+slug = "BRCA-immune-cells-macrophages"
+# The name pages show; the slug, made from it, names files (D-014, D-114).
 label = "BRCA immune cells: macrophages"
 ena_study = "PRJNA483877"
 ena_secondary_study = "SRP155941"
@@ -71,7 +71,7 @@ dest = "data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt"
 # (2026-10-09: runs SRR7631576-658 and SRR8512442-482, experiments SRX4495339-413 and
 # SRX5316062-102, samples SAMN0975xxxx and SAMN108531xx, SRS36164xx-65xx and SRS43130xx),
 # GSMs GSM3316272-356 and GSM3585969-3586009, and GEO titles MAC<n>, MON<n> and mon<n>.
-# breast_mono.toml declares the same guard.
+# BRCA-immune-cells-monocytes.toml declares the same guard.
 [guard]
 ids = ["PRJNA483877", "SRP155941", "GSE117970"]
 patterns = [
@@ -91,7 +91,7 @@ patterns = [
 ]
 
 [sdrf]
-file = "breast_mac.tsv"
+file = "BRCA-immune-cells-macrophages.tsv"
 join = ["run_accession", "run_accession"]
 cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
 

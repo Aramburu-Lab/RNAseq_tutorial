@@ -18,7 +18,7 @@ from ctx.gather import gdc
 from ctx.report import guide, guide_gdc, text
 
 ROOT = Path(__file__).resolve().parents[1]
-FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
+FOUR = ROOT / "conf" / "datasets" / "Non-cancerous-blood-four-runs.toml"
 # A pixi that installs nothing: the clone's fetch environment is the site fixture's stubs.
 PIXI = '#!/bin/sh\necho "$@" >> "$STUB_LOG/pixi.calls"\n'
 

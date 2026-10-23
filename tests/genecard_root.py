@@ -31,7 +31,7 @@ THEIRS = {NPTX2: "ENSG00000106236.4", ACTB: "ENSG00000075624.17"}
 TWINS = ("ENSG00000900001.1", "ENSG00000900002.1")
 # GENCODE 50's name for HPA v25's NDUFA4L2, whose search lists COXFA4L2 as a synonym.
 RENAMED = ("ENSG00000185633.13", "COXFA4L2")
-# The dataset file's HPA cell-line group and lines, as tier1.toml names them.
+# The dataset file's HPA cell-line group and lines, as Non-cancerous-blood.toml names them.
 LINES = ("cell_RNA_leukemia", ("HL-60", "THP-1", "U-937"))
 # padj and |log2 FC| disagree on UPA and UPB, and UPA and UPC tie on padj.
 CALLED = {"ENSG00000900011.1": ("UPA", 1e-9, 3.0, "up"),

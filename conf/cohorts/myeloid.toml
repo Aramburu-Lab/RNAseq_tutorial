@@ -3,10 +3,10 @@
 # dataset is run through, as its real ctx root holds their pages (2026-10-18), or, for a file
 # not yet run, as its tables declare. `laptop_cap` is "all": no module subsamples on the
 # laptop profile yet, so every sample is used there.
-# Step-1's cohort, named for what its samples are (Rytis 2026-10-20, F.4): tier1's 210 runs
-# are cell types NDN 73, Monocyte 68, LDN 38 and BM_1 to BM_4 31, from blood (PB) 171 and bone
-# marrow (BM) 39, under HSCT 59, G-CSF 44, steady state 41, PDAC 35 and IPMN 31 (counted on
-# the 2026-10-16 gather samplesheet). Neither "pancreas" nor "blood" covers that.
+# Step-1's cohort, named for what its samples are (Rytis 2026-10-20, F.4): the 210 runs of
+# Non-cancerous-blood are cell types NDN 73, Monocyte 68, LDN 38 and BM_1 to BM_4 31, from
+# blood (PB) 171 and bone marrow (BM) 39, under HSCT 59, G-CSF 44, steady state 41, PDAC 35 and
+# IPMN 31 (counted on the 2026-10-16 gather samplesheet). Neither "pancreas" nor "blood" covers that.
 
 [cohort]
 name = "myeloid"
@@ -14,21 +14,14 @@ label = "Neutrophils and monocytes of blood and bone marrow, at steady state and
 notes = "Emergency myelopoiesis: low-density against normal-density neutrophils, monocytes, PDAC, IPMN, G-CSF and HSCT against healthy donors. Read length is confounded with the cancer groups and is taught as a batch lesson."
 
 [[datasets]]
-slug = "tier1"
+slug = "Non-cancerous-blood"
 step = 1
 modules = ["gather", "qc", "process", "quant", "de", "function", "proteo", "ncrna", "genecard"]
 laptop_cap = "all"
 note = "Track B: all 210 runs, counted on the cluster by nf-core/rnaseq."
 
 [[datasets]]
-slug = "tier1_teach"
-step = 1
-modules = ["gather", "qc", "process"]
-laptop_cap = "all"
-note = "Track A teaching subset: 8 runs, trimmed, aligned and counted by M3."
-
-[[datasets]]
-slug = "four_runs"
+slug = "Non-cancerous-blood-four-runs"
 step = 1
 modules = ["gather", "qc", "de", "function"]
 laptop_cap = "all"

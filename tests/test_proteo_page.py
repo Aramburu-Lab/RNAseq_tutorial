@@ -108,7 +108,7 @@ def git(*args: str) -> str:
                           check=True).stdout.strip()  # fmt: skip
 
 
-@pytest.mark.parametrize("name", ["tier1", "cptac_brca"])
+@pytest.mark.parametrize("name", ["Non-cancerous-blood", "cptac_brca"])
 def test_rules_registered_before_the_protein_reader(name):
     """The registration commit of [proteo.sanity] precedes the commit that added the reader.
 
@@ -116,7 +116,9 @@ def test_rules_registered_before_the_protein_reader(name):
     if git("rev-parse", "--is-shallow-repository") == "true":
         pytest.skip("shallow clone: the history is absent")
     path = f"conf/datasets/{name}.toml"
-    registered = git("log", "--format=%H", "-G", r"^registered_at = \"2026-10", "--", path).split()
+    # Followed across a rename (D-114), whose commit would otherwise pass for a registration.
+    registered = git("log", "--follow", "--format=%H", "-G", r"^registered_at = \"2026-10", "--",
+                     path).split()  # fmt: skip
     reader = git("log", "--reverse", "--diff-filter=A", "--format=%H", "--",
                  "src/ctx/proteo/tables.py").split()  # fmt: skip
     assert registered and reader

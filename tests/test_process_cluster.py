@@ -234,8 +234,9 @@ def test_ctx_run_plans_process_from_an_align_dir(tmp_path):
     assert args[args.index("--align-dir") + 1] == str(tmp_path)
     import tomllib  # noqa: PLC0415
 
-    for bundle, slugs in (("myeloid", ["tier1"]), ("lung", ["lung_gse229705"]),
-                          ("breast", ["breast_tissue", "breast_mac", "breast_mono"])):  # fmt: skip
+    for bundle, slugs in (("myeloid", ["Non-cancerous-blood"]), ("lung", ["Lung-tissue-LUAD"]),
+                          ("breast", ["Breast-tissue-BRCA", "BRCA-immune-cells-macrophages",
+                                      "BRCA-immune-cells-monocytes"])):  # fmt: skip
         entries = tomllib.loads((ROOT / "conf" / "cohorts" / f"{bundle}.toml").read_text())
         found = {e["slug"]: e["modules"] for e in entries["datasets"]}
         for slug in slugs:

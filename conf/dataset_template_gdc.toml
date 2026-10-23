@@ -8,7 +8,7 @@
 # ctx reads the file through ctx.dataset, which names every problem at once.
 
 [dataset]
-# EDIT: lowercase letters, digits and underscores; it names every output file and the ctx root.
+# EDIT: letters and digits joined by - or _; it names every output file and the ctx root.
 slug = "tcga_xxxx"
 # EDIT: the name the pages show.
 label = "TCGA project"

@@ -14,11 +14,10 @@ file's SHA-256; ``--zip`` packs one folder.
 
 Usage:
     pixi run python scripts/python/build_kit.py --out ~/ctx_kit/2026-09-30_course_kit_v2 \
-        --real step1=~/ctx_tier1 --made-up preview=~/ctx_preview/synthetic \
-        --leave-out tier1_teach --zip
+        --real step1=~/ctx_Non-cancerous-blood --made-up preview=~/ctx_preview/synthetic --zip
 
-``--leave-out`` keeps a dataset's outputs out of the kit: the teaching subset is the optional
-laptop exercise, built in the Step-1 root and never shipped (D-050, Rytis 2026-10-07).
+``--leave-out`` keeps a dataset's outputs out of the kit, as the teaching subset was kept out
+until it was removed (D-050, D-115).
 
 ``--release`` builds the kit students get (K.6, D-050): it refuses a ``--made-up`` root, and a
 page carrying the preview's made-up note inside a ``--real`` root, before anything is written;
@@ -47,22 +46,15 @@ named. Derived tables and figure data ship.
 Every page is rebuilt from one commit first, so the pages and ``MANIFEST.json`` name the same
 commit. The steps for the Step-1 root, kept here since a session's scratch copy was lost twice
 (kits v5 and v6); ``build_preview.py`` refuses an existing root, so move the last one aside:
-    R=~/ctx_tier1; C=conf/datasets; T=$R/data/raw/tier1_teach
+    N=Non-cancerous-blood; R=~/ctx_$N; C=conf/datasets
     pixi run ctx --root $R setup
-    pixi run ctx --root $R gather --dataset tier1 --fetchngs-dir $R/data/raw/tier1_meta \
-        --dataset-file $C/tier1.toml --rnaseq-dir $R/data/raw/tier1_rnaseq
-    pixi run ctx --root $R gather --dataset tier1_teach --fetchngs-dir $T \
-        --dataset-file $C/tier1_teach.toml
-    pixi run ctx --root $R qc --dataset tier1 --dataset-file $C/tier1.toml \
-        --rnaseq-dir $R/data/raw/tier1_rnaseq
-    pixi run ctx --root $R qc --dataset tier1_teach --dataset-file $C/tier1_teach.toml --reads \
-        --fetchngs-dir $T
-    pixi run ctx --root $R process --dataset tier1_teach --dataset-file $C/tier1_teach.toml \
-        --genome $R/data/raw/reference/GRCh38.primary_assembly.chr22.fa.gz --aligner hisat2 \
-        --compare-dataset tier1 --fetchngs-dir $T
-    pixi run ctx --root $R de --dataset tier1 --dataset-file $C/tier1.toml
-    pixi run ctx --root $R function --dataset tier1 --dataset-file $C/tier1.toml
-    pixi run ctx --root $R report --dataset tier1 --dataset-file $C/tier1.toml
+    pixi run ctx --root $R gather --dataset $N --fetchngs-dir $R/data/raw/${N}_meta \
+        --dataset-file $C/$N.toml --rnaseq-dir $R/data/raw/${N}_rnaseq
+    pixi run ctx --root $R qc --dataset $N --dataset-file $C/$N.toml \
+        --rnaseq-dir $R/data/raw/${N}_rnaseq
+    pixi run ctx --root $R de --dataset $N --dataset-file $C/$N.toml
+    pixi run ctx --root $R function --dataset $N --dataset-file $C/$N.toml
+    pixi run ctx --root $R report --dataset $N --dataset-file $C/$N.toml
     pixi run python scripts/python/build_preview.py --root ~/ctx_preview/synthetic
 """
 
@@ -103,7 +95,8 @@ REFUSED = (".fastq", ".fq", ".fastq.gz", ".fq.gz", ".bam", ".bai", ".sam", ".cra
 # 3 decimals (Rytis 2026-10-09, raised from 50 MB).
 CAP_BYTES = 64_000_000
 DATED = re.compile(r"\d{4}-\d{2}-\d{2}_")
-FOLDER = re.compile(r"[a-z0-9_]+")
+# A kit folder may carry a dataset name, so it is an output description (D-114).
+FOLDER = re.compile(naming.DESCRIPTION)
 # Code a kit is built from; a change here, even an untracked file, marks the commit dirty.
 CODE = ("src", "scripts", "conf", "pixi.toml", "pixi.lock", "pyproject.toml")
 # How the home page marks a made-up link (course.html.j2's pill), counted in a release kit.
@@ -147,8 +140,8 @@ def slugs_in(root: Path) -> set[str]:
 def belongs(name: str, slug: str, slugs: set[str]) -> bool:
     """Whether a dated output is the dataset ``slug``'s.
 
-    The owner is the longest known slug its description starts with, so leaving out
-    ``tier1`` keeps ``tier1_teach``'s files, whose descriptions start with ``tier1_`` too.
+    The owner is the longest known slug its description starts with, then ``_``, so leaving
+    out a dataset keeps the files of another whose slug starts with its slug and ``_``.
     """
     desc = naming.description(name) or ""
     owners = [s for s in slugs | {slug} if desc == s or desc.startswith(f"{s}_")]
@@ -451,7 +444,8 @@ def _roots(args: argparse.Namespace) -> list[tuple[str, Path, bool]]:
         folder, _, path = spec.partition("=")
         root = Path(path).expanduser()
         if not FOLDER.fullmatch(folder) or not (root / "outputs").is_dir():
-            sys.exit(f"{spec}: want <folder>=<ctx root>, folder in a-z 0-9 _, root with outputs/")
+            sys.exit(f"{spec}: want <folder>=<ctx root>, folder of letters, digits, - and _, "
+                     "root with outputs/")  # fmt: skip
         roots.append((folder, root, real))
     return roots
 

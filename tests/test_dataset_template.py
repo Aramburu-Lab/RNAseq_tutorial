@@ -1,7 +1,8 @@
 """U.2 and U.8: the dataset-file template a student copies, and the guide's worked example.
 
-No accession is typed here: the worked example's come from conf/datasets/four_runs.toml, the
-fixture's from its own samplesheet. Each test names the mutation it catches.
+No accession is typed here: the worked example's come from
+conf/datasets/Non-cancerous-blood-four-runs.toml, the fixture's from its own samplesheet. Each
+test names the mutation it catches.
 """
 
 import shutil
@@ -18,8 +19,8 @@ from ctx.gather.harmonise import curated_runs
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "conf" / "dataset_template.toml"
-STEP1 = ROOT / "conf" / "datasets" / "tier1.toml"
-FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
+STEP1 = ROOT / "conf" / "datasets" / "Non-cancerous-blood.toml"
+FOUR = ROOT / "conf" / "datasets" / "Non-cancerous-blood-four-runs.toml"
 FIXTURE = ROOT / "tests" / "fixtures" / "fetchngs" / "metadata_only"
 
 
@@ -72,7 +73,7 @@ def test_filled_template_curates_the_fixture(tmp_path):
     assert curated.height == runs.height and set(curated["condition"]) == {"control", "case"}
 
 
-def test_four_runs_table_is_its_accessions():
+def test_four_run_table_is_its_accessions():
     """The worked example's table lists exactly the runs its guide downloads, and Step-1's
     guard covers it. Catches an accession added to one list alone."""
     spec = load(FOUR)

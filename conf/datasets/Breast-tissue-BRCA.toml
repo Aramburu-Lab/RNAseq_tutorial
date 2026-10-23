@@ -1,7 +1,7 @@
 # GSE100925 breast tissue (P4.0, TODO.md "Phase 4"; counted by nf-core/rnaseq 3.27.0, job
 # 47504033): 103 single-end runs, one per GEO sample. GEO's series names Cassetta et al. 2019 as
 # its publication (Series_pubmed_id 30930117), where it is "cohort 3", whole-tumour RNA-seq from
-# Duke University (Methods). Curated from its own table, breast_tissue.tsv: GEO's per-sample
+# Duke University (Methods). Curated from its own table, Breast-tissue-BRCA.tsv: GEO's per-sample
 # records (brief SOFT of GSE100925's samples, retrieved 2026-10-09, SHA-256
 # 08d5f86020c35c9c41d32fec9d265a95544d584b0a15feceb32da29d1bcf628d), values verbatim,
 # one row per ENA run (read_run report, 2026-10-09), joined on the run and cross-checked on the
@@ -20,8 +20,8 @@
 # another. The contrasts below are the course's, tumour against adjacent normal, labelled so.
 
 [dataset]
-slug = "breast_tissue"
-# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+slug = "Breast-tissue-BRCA"
+# The name pages show; the slug, made from it, names files (D-014, D-114).
 label = "Breast tissue (BRCA)"
 ena_study = "PRJNA393443"
 ena_secondary_study = "SRP111343"
@@ -91,7 +91,7 @@ patterns = [
 ]
 
 [sdrf]
-file = "breast_tissue.tsv"
+file = "Breast-tissue-BRCA.tsv"
 join = ["run_accession", "run_accession"]
 cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
 

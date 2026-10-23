@@ -127,7 +127,7 @@ def test_cli_setup_fetches(server, tmp_path):
 
 @pytest.mark.network
 def test_fetch_real(tmp_path):
-    spec = load(ROOT / "conf" / "datasets" / "tier1.toml")
+    spec = load(ROOT / "conf" / "datasets" / "Non-cancerous-blood.toml")
     entries = fetch(tmp_path, spec.resources)
     assert [e["name"] for e in entries] == [r.name for r in spec.resources]
     for r in spec.resources:

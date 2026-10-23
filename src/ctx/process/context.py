@@ -5,7 +5,8 @@ no locus of their own there. Beside it stands the same samples' full-transcripto
 the share of its length-scaled gene counts (nf-core's ``gene_counts_length_scaled``, what
 ``ctx gather`` keeps) on genes of the genome's contigs. That share is context, not a ceiling:
 reads from absent contigs can align to similar genes on the contigs present and be counted
-there, so the share assigned here can exceed it, as it did in all 8 tier1_teach runs (D-039).
+there, so the share assigned here can exceed it, as it did in all 8 runs of the teaching subset
+(D-039), since removed (D-115).
 Salmon's strand call stands beside featureCounts' (D-039). Both are read from the other
 dataset's gather counts and ``ctx qc`` metrics, never recomputed, and every column is checked
 before it is read: a zero from a column the table does not carry is not a result.

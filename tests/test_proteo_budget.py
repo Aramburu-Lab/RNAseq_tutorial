@@ -84,19 +84,21 @@ def test_cptac_brca_with_f4_fits_track_b(tmp_path):
 
 @pytest.mark.realdata
 @pytest.mark.budget
-def test_tier1_against_rieckmann_fits_track_b(tmp_path):
+def test_non_cancerous_blood_against_rieckmann_fits_track_b(tmp_path):
     """Catches the Step-1 page over the budget or the cap at real size."""
-    home = HOME / "ctx_tier1"
+    home = HOME / "ctx_Non-cancerous-blood"
     results = sorted(
-        (home / "outputs" / "05_de").glob("*_de_tier1_ndn_vs_mono_steady_results_v1.parquet")
+        (home / "outputs" / "05_de").glob(
+            "*_de_Non-cancerous-blood_ndn_vs_mono_steady_results_v1.parquet"
+        )
     )
     if not results:
         pytest.skip(f"{home} has no ndn_vs_mono_steady results")
     root = tmp_path / "root"
     for name in (str(results[-1].relative_to(home)),
-                 "resources/datasets/tier1/41590_2017_BFni3693_MOESM13_ESM.xlsx",
+                 "resources/datasets/Non-cancerous-blood/41590_2017_BFni3693_MOESM13_ESM.xlsx",
                  "resources/msigdb/c5.go.cc.v2026.1.Hs.symbols.gmt"):  # fmt: skip
         link(home, root, name)
-    ctx(root, "proteo", "--dataset", "tier1", "--dataset-file",
-        str(ROOT / "conf" / "datasets" / "tier1.toml"))  # fmt: skip
-    within(root, "07_proteo", "tier1")
+    ctx(root, "proteo", "--dataset", "Non-cancerous-blood", "--dataset-file",
+        str(ROOT / "conf" / "datasets" / "Non-cancerous-blood.toml"))  # fmt: skip
+    within(root, "07_proteo", "Non-cancerous-blood")

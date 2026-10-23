@@ -19,7 +19,7 @@ from ctx.gather import counts_run, geo_table
 from ctx.report import guide, text
 
 ROOT = Path(__file__).resolve().parents[1]
-FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
+FOUR = ROOT / "conf" / "datasets" / "Non-cancerous-blood-four-runs.toml"
 R2 = ROOT / "conf" / "datasets" / "r2_gse130605.toml"
 TEMPLATE = ROOT / guide.COUNTS_TEMPLATE
 # A series matrix as GEO writes it: quoted, tab-separated, one line per field.

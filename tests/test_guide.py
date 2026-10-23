@@ -45,7 +45,7 @@ def site(tmp_path):
 
 
 ROOT = Path(__file__).resolve().parents[1]
-FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
+FOUR = ROOT / "conf" / "datasets" / "Non-cancerous-blood-four-runs.toml"
 CLONE_PLACEHOLDER = "<your clone of the course repository>"
 SOURCE_PLACEHOLDER = "<course repository>"
 # The clone's source as a student types it; the git stub records the call and clones nothing,
@@ -100,11 +100,11 @@ def test_ctx_lines_parse(page_blocks):
     parsed = [parse(line) for line in lines]
     assert {c.info_name for c in parsed} >= {"setup", "run", "gather", "guide", "reads"}
     # typer bundles its own click, so its errors are matched by their words.
-    run = next(line for line in lines if " run --dataset four_runs " in line)
+    run = next(line for line in lines if " run --dataset Non-cancerous-blood-four-runs " in line)
     with pytest.raises(Exception, match="No such option"):
         parse(run.replace("--fetchngs-dir", "--fetchngs-folder"))
     with pytest.raises(Exception, match="Missing parameter: dataset"):
-        parse(run.replace("--dataset four_runs ", ""))
+        parse(run.replace("--dataset Non-cancerous-blood-four-runs ", ""))
 
 
 def test_usage_lines_are_the_scripts(page_blocks):

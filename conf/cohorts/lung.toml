@@ -27,7 +27,7 @@ laptop_cap = "all"
 note = "Squamous against adenocarcinoma tumours across the two projects, a cross-project contrast."
 
 [[datasets]]
-slug = "lung_gse229705"
+slug = "Lung-tissue-LUAD"
 step = 3
 modules = ["gather", "qc", "process", "de", "function", "ncrna"]
 laptop_cap = "all"
