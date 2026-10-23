@@ -56,7 +56,7 @@ source "$CTX_REPO/scripts/bash/job_name.sh"
 # student states which kind of GTF this is.
 [[ "$GENCODE" == true || "$GENCODE" == false ]] || die "GENCODE is true or false, not $GENCODE"
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
-job_rename "${RUN##*/}" nf-head
+job_rename "$(job_project "${RUN##*/}")" nf-head
 [[ "$FASTA" == /* ]] || FASTA="$PWD/$FASTA"
 [[ "$GTF" == /* ]] || GTF="$PWD/$GTF"
 # nf-core/rnaseq 3.27.0's schema takes input ^\S+\.csv$, fasta ^\S+\.fn?a(sta)?(\.gz)?$ and gtf
@@ -87,7 +87,7 @@ MARKER="$RUN/nfcore_fetchngs/results.complete"
 SHEET="$RUN/nfcore_fetchngs/results/samplesheet/samplesheet.csv"
 [[ -s "$SHEET" ]] || die "no samplesheet at $SHEET"
 # Asked of the site before anything is written: on a laptop, what Docker has.
-executor=$(site_executor "${RUN##*/}") || die "the site's executor is unknown; see the line above"
+executor=$(site_executor "$(job_project "${RUN##*/}")") || die "the site's executor is unknown; see the line above"
 limits=$(site_rnaseq_config) || die "the site's limits are unknown; see the line above"
 LAUNCH="$RUN/nfcore_rnaseq"
 mkdir -p "$LAUNCH"

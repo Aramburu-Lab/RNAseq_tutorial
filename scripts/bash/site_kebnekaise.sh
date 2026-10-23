@@ -34,7 +34,20 @@ site_executor() {
     printf '}\n'
 }
 
-# Nothing more: Slurm gives each task what nf-core/rnaseq asks for.
+# Each task's time limit at half of nf-core/rnaseq 3.27.0's conf/base.config (default and
+# process_single and process_low 4 h, process_medium 8 h, process_high 16 h, process_long 20 h,
+# each times task.attempt), so tasks wait less in the queue (Rytis 2026-10-23). A task past its
+# half limit is retried once at twice it, the original, by the pipeline's own retry rule on exit
+# 130 to 145. The head job's #SBATCH -t is not this.
 site_rnaseq_config() {
-    :
+    cat <<'EOF'
+process {
+    time = { 2.h * task.attempt }
+    withLabel: process_single { time = { 2.h * task.attempt } }
+    withLabel: process_low { time = { 2.h * task.attempt } }
+    withLabel: process_medium { time = { 4.h * task.attempt } }
+    withLabel: process_high { time = { 8.h * task.attempt } }
+    withLabel: process_long { time = { 10.h * task.attempt } }
+}
+EOF
 }

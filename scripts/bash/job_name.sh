@@ -3,8 +3,11 @@
 # ///
 # Slurm job names (Rytis 2026-10-23): <ANALYSIS>_<PROJECT>_<PROCESS>_<VERSION>, four fields joined
 # by _, none holding _ itself, so a queue listing splits into exactly four. Inside a field any
-# character other than A-Za-z0-9.()- becomes -. PROJECT is the run folder's name, the dataset
-# slug (breast_mac shows as breast-mac); PROCESS is nf-head for a Nextflow head job, nf-<task>
+# character other than A-Za-z0-9.()- becomes -, a colon is dropped and a run of - is one.
+# PROJECT is the dataset's label (conf/datasets/<run folder>.toml), so breast_mac shows as
+# BRCA-immune-cells-macrophages and breast_tissue as Breast-tissue-BRCA, the label's parentheses
+# dropped as in file names (Rytis 2026-10-23); a task's tag keeps its own. A folder with no
+# dataset file shows its own name. PROCESS is nf-head for a Nextflow head job, nf-<task>
 # for its tasks, the tag kept, or the launcher's own step; VERSION is NA, since no run folder
 # carries a release number. The #SBATCH -J line can only say NA for PROJECT: Slurm reads it
 # before the arguments, so a pending job shows NA until it starts and renames itself.
@@ -12,7 +15,18 @@ JOB_ANALYSIS=RNAseq-Tutorial
 
 job_field() {
     local s=${1:-NA}
-    printf '%s' "${s//[^A-Za-z0-9.()-]/-}"
+    s=${s//:/}
+    s=${s//[^A-Za-z0-9.()-]/-}
+    while [[ "$s" == *--* ]]; do s=${s//--/-}; done
+    printf '%s' "$s"
+}
+
+# A run folder's PROJECT: its dataset's label where the course has a dataset file of that name.
+job_project() {
+    local file="${CTX_REPO:-}/conf/datasets/$1.toml" label=""
+    [[ -f "$file" ]] && label=$(sed -n 's/^label = "\(.*\)"$/\1/p' "$file" | head -n 1)
+    label=${label//[()]/}
+    printf '%s' "${label:-$1}"
 }
 
 job_name() {

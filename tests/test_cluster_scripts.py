@@ -628,6 +628,9 @@ def test_rnaseq_stubbed(site, gencode):
     config = Path(_after(argv, "-c")).read_text()
     assert _queue_size(config)
     assert "withName: '.*:FASTQ_FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE'" in config
+    # Half of nf-core 3.27.0's task limits on Kebnekaise (Rytis 2026-10-23); not the head job's.
+    assert "withLabel: process_high { time = { 8.h * task.attempt } }" in config
+    assert "    time = { 2.h * task.attempt }" in config
     assert nf_env["NXF_SYNTAX_PARSER"] == "v2" and cwd == str(launch)
     assert "count matrix: 2 genes, 2 samples" in done.stdout
     assert "alignment count matrix: 2 genes, 2 samples" in done.stdout
@@ -774,13 +777,16 @@ def test_jobs_are_named_for_their_project_and_task(site):
     folder not used as the project, and the task line missing from the executor block."""
     tmp_path, _ = site
     _stub(tmp_path / "stubs" / "scontrol", '#!/bin/sh\necho "$@" >> "$STUB_LOG/scontrol.calls"\n')
+    datasets = tmp_path / "my clone" / "conf" / "datasets"
+    datasets.mkdir(parents=True)
+    (datasets / "breast_mac.toml").write_text('label = "BRCA immune cells: macrophages (TAM)"\n')
     done, _, launch = _rnaseq(site, run="breast_mac", SLURM_JOB_ID="123")
     assert done.returncode == 0, done.stderr
     calls = (tmp_path / "log" / "scontrol.calls").read_text().split()
-    assert calls == ["update", "JobId=123", "JobName=RNAseq-Tutorial_breast-mac_nf-head_NA"]
+    want = "RNAseq-Tutorial_BRCA-immune-cells-macrophages-TAM_nf-head_NA"
+    assert calls == ["update", "JobId=123", f"JobName={want}"]
     config = (launch / "site.config").read_text()
-    assert 'jobName = { "RNAseq-Tutorial_breast-mac_nf-" + task.name.tokenize' in config
-    named = subprocess.run(
-        ["bash", "-c", f'source "{BASH / "job_name.sh"}"; job_name "a_b c" "nf-STAR_ALIGN (S1)"'],
-        capture_output=True, text=True, check=True).stdout  # fmt: skip
-    assert named == "RNAseq-Tutorial_a-b-c_nf-STAR-ALIGN-(S1)_NA" and len(named.split("_")) == 4
+    assert 'jobName = { "RNAseq-Tutorial_BRCA-immune-cells-macrophages-TAM_nf-" + task.n' in config
+    call = f'source "{BASH / "job_name.sh"}"; job_name "a_b, c: d" "nf-STAR_ALIGN (S1)"'
+    named = subprocess.run(["bash", "-c", call], capture_output=True, text=True, check=True).stdout
+    assert named == "RNAseq-Tutorial_a-b-c-d_nf-STAR-ALIGN-(S1)_NA" and len(named.split("_")) == 4

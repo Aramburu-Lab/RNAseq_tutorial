@@ -84,7 +84,7 @@ for kind in $KINDS; do
     [[ "$kind" == star || "$kind" == mirna || "$kind" == isoform ]] || die "KINDS takes star, mirna and isoform, not $kind"
 done
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
-job_rename "${RUN##*/}" gdc-download
+job_rename "$(job_project "${RUN##*/}")" gdc-download
 # Home is 25 GB, and the run folder takes every FASTQ. Compared canonically, from the nearest
 # folder that exists: the run folder may not exist yet, and either side may be a symlink.
 here=$RUN

@@ -61,7 +61,7 @@ source "$CTX_REPO/scripts/bash/job_name.sh"
 [[ "$SKIP_DOWNLOAD" == [01] && "$DRY_RUN" == [01] ]] || die "SKIP_DOWNLOAD and DRY_RUN take 0 or 1"
 [[ "$MAX_FORKS" =~ ^[1-9][0-9]*$ ]] || die "MAX_FORKS is a whole number, not $MAX_FORKS"
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
-job_rename "${RUN##*/}" nf-head
+job_rename "$(job_project "${RUN##*/}")" nf-head
 # fetchngs's schema takes an --input path only without whitespace (^\S+\.(csv|tsv|txt)$), and
 # the job passes an absolute one, so the folder a relative run folder was given from counts.
 [[ "$RUN" != *[[:space:]]* ]] || die "the run folder has a space, which fetchngs rejects: $RUN"
@@ -78,7 +78,7 @@ case "$here/" in
 esac
 [[ -s "$IDS" ]] || die "no accession list, or an empty one: $IDS"
 # Asked of the site before anything is written: on a laptop, what Docker has.
-executor=$(site_executor "${RUN##*/}") || die "the site's executor is unknown; see the line above"
+executor=$(site_executor "$(job_project "${RUN##*/}")") || die "the site's executor is unknown; see the line above"
 # A metadata-only run keeps its own outdir: one params file per outdir is what ctx gather reads.
 LAUNCH="$RUN/nfcore_fetchngs"
 if [[ "$SKIP_DOWNLOAD" == 1 ]]; then LAUNCH="$RUN/nfcore_fetchngs_meta"; fi
