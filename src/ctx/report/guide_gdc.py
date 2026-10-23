@@ -41,7 +41,7 @@ USAGE = {
     )),
     "cluster_done": (SCRIPT, (
         "# once that job has ended: every check passed, or the problems it names",
-        "tail -n 3 slurm-ctx_gdc-<job id>.out",
+        "tail -n 3 slurm-RNAseq-Tutorial_NA_gdc-download_NA-<job id>.out",
     )),
 }  # fmt: skip
 CLUSTER = "<user>@kebnekaise.hpc2n.umu.se"

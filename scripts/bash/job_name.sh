@@ -1,0 +1,33 @@
+# /// codebase-meta
+# exempt: sourced by every launcher; names Slurm jobs, runs no step
+# ///
+# Slurm job names (Rytis 2026-10-23): <ANALYSIS>_<PROJECT>_<PROCESS>_<VERSION>, four fields joined
+# by _, none holding _ itself, so a queue listing splits into exactly four. Inside a field any
+# character other than A-Za-z0-9.()- becomes -. PROJECT is the run folder's name, the dataset
+# slug (breast_mac shows as breast-mac); PROCESS is nf-head for a Nextflow head job, nf-<task>
+# for its tasks, the tag kept, or the launcher's own step; VERSION is NA, since no run folder
+# carries a release number. The #SBATCH -J line can only say NA for PROJECT: Slurm reads it
+# before the arguments, so a pending job shows NA until it starts and renames itself.
+JOB_ANALYSIS=RNAseq-Tutorial
+
+job_field() {
+    local s=${1:-NA}
+    printf '%s' "${s//[^A-Za-z0-9.()-]/-}"
+}
+
+job_name() {
+    printf '%s_%s_%s_%s' "$JOB_ANALYSIS" "$(job_field "$1")" "$(job_field "$2")" "$(job_field "${3:-NA}")"
+}
+
+# The running job renamed for its project; a failed rename only warns.
+job_rename() {
+    [[ -n "${SLURM_JOB_ID:-}" ]] && command -v scontrol >/dev/null || return 0
+    scontrol update JobId="$SLURM_JOB_ID" JobName="$(job_name "$@")" ||
+        echo "warning: job $SLURM_JOB_ID keeps its name" >&2
+}
+
+# The executor line that names each Nextflow task the same way: the last part of its task name.
+job_nextflow_name() {
+    printf '    jobName = { "%s_%s_nf-" + task.name.tokenize('"':'"')[-1].replaceAll(/[^A-Za-z0-9.()-]/, '"'-'"') + "_%s" }\n' \
+        "$JOB_ANALYSIS" "$(job_field "$1")" "$(job_field "${2:-NA}")"
+}

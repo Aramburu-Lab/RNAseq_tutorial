@@ -26,9 +26,12 @@ site_activate() {
     source "$CTX_REPO/scripts/bash/kebnekaise_env.sh"
 }
 
-# Each task a Slurm job; HPC2N refused 100 jobs at once from one head job.
+# Each task a Slurm job; HPC2N refused 100 jobs at once from one head job. Each named for its
+# project and task (job_name.sh); $1 is the run folder's name.
 site_executor() {
-    printf 'executor {\n    queueSize = 50\n}\n'
+    printf 'executor {\n    queueSize = 50\n'
+    job_nextflow_name "$1"
+    printf '}\n'
 }
 
 # Nothing more: Slurm gives each task what nf-core/rnaseq asks for.

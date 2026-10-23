@@ -26,7 +26,7 @@ from ctx.tools import locate
 ROOT = Path(__file__).resolve().parents[1]
 BASH = ROOT / "scripts" / "bash"
 SCRIPTS = ("kebnekaise_env.sh", "fetchngs.sbatch", "rnaseq.sbatch", "subsample.sbatch",
-           "site_kebnekaise.sh", "site_laptop.sh", "fetch_gdc.sbatch")  # fmt: skip
+           "site_kebnekaise.sh", "site_laptop.sh", "fetch_gdc.sbatch", "job_name.sh")  # fmt: skip
 JOBS = tuple(name for name in SCRIPTS if name.endswith(".sbatch"))
 FETCHNGS = ROOT / "tests" / "fixtures" / "fetchngs"
 SYSTEM_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
@@ -766,3 +766,21 @@ def test_subsample_refuses(site, case):
     )
     image = Path(env["CTX_STORE"]) / "images" / "seqtk_1.4.sif"
     assert image.exists() == (case == "seqtk_1_3")
+
+
+def test_jobs_are_named_for_their_project_and_task(site):
+    """A running head job renames itself <ANALYSIS>_<PROJECT>_nf-head_<VERSION>, and the config
+    names each task the same way, both from job_name.sh. Catches the rename dropped, the run
+    folder not used as the project, and the task line missing from the executor block."""
+    tmp_path, _ = site
+    _stub(tmp_path / "stubs" / "scontrol", '#!/bin/sh\necho "$@" >> "$STUB_LOG/scontrol.calls"\n')
+    done, _, launch = _rnaseq(site, run="breast_mac", SLURM_JOB_ID="123")
+    assert done.returncode == 0, done.stderr
+    calls = (tmp_path / "log" / "scontrol.calls").read_text().split()
+    assert calls == ["update", "JobId=123", "JobName=RNAseq-Tutorial_breast-mac_nf-head_NA"]
+    config = (launch / "site.config").read_text()
+    assert 'jobName = { "RNAseq-Tutorial_breast-mac_nf-" + task.name.tokenize' in config
+    named = subprocess.run(
+        ["bash", "-c", f'source "{BASH / "job_name.sh"}"; job_name "a_b c" "nf-STAR_ALIGN (S1)"'],
+        capture_output=True, text=True, check=True).stdout  # fmt: skip
+    assert named == "RNAseq-Tutorial_a-b-c_nf-STAR-ALIGN-(S1)_NA" and len(named.split("_")) == 4

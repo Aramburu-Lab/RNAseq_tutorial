@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -J ctx_subsample
+#SBATCH -J RNAseq-Tutorial_NA_subsample_NA
 #SBATCH -n 1
 #SBATCH -c 2
 #SBATCH --mem=8G
@@ -34,6 +34,8 @@ die() {
 }
 [[ "$READS" =~ ^[1-9][0-9]*$ && "$SEED" =~ ^[0-9]+$ ]] || die "READS and SEED are whole numbers"
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
+source "${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/job_name.sh"
+job_rename "${RUN##*/}" subsample
 # Home is 25 GB, and the run folder takes every FASTQ. Compared canonically, from the nearest
 # folder that exists: the run folder may not exist yet, and either side may be a symlink.
 here=$RUN

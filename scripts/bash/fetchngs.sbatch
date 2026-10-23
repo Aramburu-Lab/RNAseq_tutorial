@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -J ctx_fetchngs
+#SBATCH -J RNAseq-Tutorial_NA_nf-head_NA
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH --mem=8G
@@ -23,7 +23,7 @@
 #   DRY_RUN=1 bash "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 #   SKIP_DOWNLOAD=1 sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 #   # once that job has ended: the size of the download, read before it is submitted
-#   grep 'bytes of FASTQ at ENA' slurm-ctx_fetchngs-<job id>.out
+#   grep 'bytes of FASTQ at ENA' slurm-RNAseq-Tutorial_NA_nf-head_NA-<job id>.out
 #   sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt
 #   # a failed download: the dry run prints the mv that moves its results aside to a free name;
 #   # after that mv, the same sbatch line resumes the rest
@@ -57,9 +57,11 @@ CTX_SITE="${CTX_SITE:-kebnekaise}"
 SITE_FILE="${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/site_$CTX_SITE.sh"
 [[ -f "$SITE_FILE" ]] || die "no $SITE_FILE; is CTX_REPO your clone of the course repository, and CTX_SITE a site it has?"
 source "$SITE_FILE"
+source "$CTX_REPO/scripts/bash/job_name.sh"
 [[ "$SKIP_DOWNLOAD" == [01] && "$DRY_RUN" == [01] ]] || die "SKIP_DOWNLOAD and DRY_RUN take 0 or 1"
 [[ "$MAX_FORKS" =~ ^[1-9][0-9]*$ ]] || die "MAX_FORKS is a whole number, not $MAX_FORKS"
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
+job_rename "${RUN##*/}" nf-head
 # fetchngs's schema takes an --input path only without whitespace (^\S+\.(csv|tsv|txt)$), and
 # the job passes an absolute one, so the folder a relative run folder was given from counts.
 [[ "$RUN" != *[[:space:]]* ]] || die "the run folder has a space, which fetchngs rejects: $RUN"
@@ -76,7 +78,7 @@ case "$here/" in
 esac
 [[ -s "$IDS" ]] || die "no accession list, or an empty one: $IDS"
 # Asked of the site before anything is written: on a laptop, what Docker has.
-executor=$(site_executor) || die "the site's executor is unknown; see the line above"
+executor=$(site_executor "${RUN##*/}") || die "the site's executor is unknown; see the line above"
 # A metadata-only run keeps its own outdir: one params file per outdir is what ctx gather reads.
 LAUNCH="$RUN/nfcore_fetchngs"
 if [[ "$SKIP_DOWNLOAD" == 1 ]]; then LAUNCH="$RUN/nfcore_fetchngs_meta"; fi

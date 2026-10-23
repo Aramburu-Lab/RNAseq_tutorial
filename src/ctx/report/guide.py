@@ -77,7 +77,7 @@ USAGE = {
     )),
     "fetch_cluster_size": ("fetchngs.sbatch", (
         "# once that job has ended: the size of the download, read before it is submitted",
-        "grep 'bytes of FASTQ at ENA' slurm-ctx_fetchngs-<job id>.out",
+        "grep 'bytes of FASTQ at ENA' slurm-RNAseq-Tutorial_NA_nf-head_NA-<job id>.out",
     )),
     "fetch_cluster_download": ("fetchngs.sbatch", (
         'sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetchngs.sbatch" "$RUN" ids.txt',

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -J ctx_gdc
+#SBATCH -J RNAseq-Tutorial_NA_gdc-download_NA
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH --mem=2G
@@ -30,7 +30,7 @@
 #   # its last line is the size at GDC: read it, then download
 #   sbatch -A <compute project> "$CTX_REPO/scripts/bash/fetch_gdc.sbatch" <project> "$RAW/<slug>"
 #   # once that job has ended: every check passed, or the problems it names
-#   tail -n 3 slurm-ctx_gdc-<job id>.out
+#   tail -n 3 slurm-RNAseq-Tutorial_NA_gdc-download_NA-<job id>.out
 #   # on a laptop: the clone, then the metadata, which prints the size
 #   export CTX_REPO=<your clone of the course repository> RAW="$HOME/ctx_<slug>/data/raw"
 #   git clone <course repository> "$CTX_REPO"
@@ -73,6 +73,7 @@ CTX_SITE="${CTX_SITE:-kebnekaise}"
 SITE_FILE="${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/site_$CTX_SITE.sh"
 [[ -f "$SITE_FILE" ]] || die "no $SITE_FILE; is CTX_REPO your clone of the course repository, and CTX_SITE a site it has?"
 source "$SITE_FILE"
+source "$CTX_REPO/scripts/bash/job_name.sh"
 [[ "$PROJECT" =~ ^[A-Z0-9]+(-[A-Z0-9]+)+$ ]] || die "a GDC project ID is capitals and digits joined by hyphens, not $PROJECT"
 [[ "$DATA" == [01] ]] || die "DATA takes 0 or 1"
 [[ "$CDR" == auto || "$CDR" == [01] ]] || die "CDR takes auto, 0 or 1"
@@ -83,6 +84,7 @@ for kind in $KINDS; do
     [[ "$kind" == star || "$kind" == mirna || "$kind" == isoform ]] || die "KINDS takes star, mirna and isoform, not $kind"
 done
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
+job_rename "${RUN##*/}" gdc-download
 # Home is 25 GB, and the run folder takes every FASTQ. Compared canonically, from the nearest
 # folder that exists: the run folder may not exist yet, and either side may be a symlink.
 here=$RUN

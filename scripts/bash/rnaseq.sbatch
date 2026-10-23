@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#SBATCH -J ctx_rnaseq
+#SBATCH -J RNAseq-Tutorial_NA_nf-head_NA
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH --mem=12G
@@ -50,11 +50,13 @@ CTX_SITE="${CTX_SITE:-kebnekaise}"
 SITE_FILE="${CTX_REPO:?export CTX_REPO=<your clone of the course repository>}/scripts/bash/site_$CTX_SITE.sh"
 [[ -f "$SITE_FILE" ]] || die "no $SITE_FILE; is CTX_REPO your clone of the course repository, and CTX_SITE a site it has?"
 source "$SITE_FILE"
+source "$CTX_REPO/scripts/bash/job_name.sh"
 [[ "$DRY_RUN" == [01] ]] || die "DRY_RUN takes 0 or 1"
 # No default: nf-core/rnaseq builds the Salmon index differently for a GENCODE GTF, so the
 # student states which kind of GTF this is.
 [[ "$GENCODE" == true || "$GENCODE" == false ]] || die "GENCODE is true or false, not $GENCODE"
 [[ "$RUN" == /* ]] || RUN="$PWD/$RUN"
+job_rename "${RUN##*/}" nf-head
 [[ "$FASTA" == /* ]] || FASTA="$PWD/$FASTA"
 [[ "$GTF" == /* ]] || GTF="$PWD/$GTF"
 # nf-core/rnaseq 3.27.0's schema takes input ^\S+\.csv$, fasta ^\S+\.fn?a(sta)?(\.gz)?$ and gtf
@@ -85,7 +87,7 @@ MARKER="$RUN/nfcore_fetchngs/results.complete"
 SHEET="$RUN/nfcore_fetchngs/results/samplesheet/samplesheet.csv"
 [[ -s "$SHEET" ]] || die "no samplesheet at $SHEET"
 # Asked of the site before anything is written: on a laptop, what Docker has.
-executor=$(site_executor) || die "the site's executor is unknown; see the line above"
+executor=$(site_executor "${RUN##*/}") || die "the site's executor is unknown; see the line above"
 limits=$(site_rnaseq_config) || die "the site's limits are unknown; see the line above"
 LAUNCH="$RUN/nfcore_rnaseq"
 mkdir -p "$LAUNCH"
