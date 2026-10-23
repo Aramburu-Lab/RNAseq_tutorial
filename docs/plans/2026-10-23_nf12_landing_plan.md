@@ -1,8 +1,7 @@
 # NF.12: landing nf-core/rnaseq's results in the tutorial pages
 
 Prepared 2026-10-23 while NF.2's six runs go, so each run's results become pages with a copy and
-one command. The copy list is NF.1's `ctx.gather.rnaseq.COPIED_FILES`; the step that needs it is
-marked, and is filled once NF.1 merges.
+one command. The copy list is NF.1's `ctx.gather.rnaseq.CLUSTER_FILES`.
 
 ## Ready now
 
@@ -30,8 +29,11 @@ marked, and is filled once NF.1 merges.
 Two folders per dataset under `~/ctx_core/data/raw/`:
 - `<Name>_meta`: the fetchngs outdir without FASTQs (`samplesheet/`, `metadata/`,
   `pipeline_info/`), what `ctx gather` reads.
-- `<Name>_rnaseq`: NF.1's copy list (TO FILL at NF.1's merge), never a BAM; its byte count is
-  measured on the first dataset.
+- `<Name>_rnaseq`: `ctx.gather.rnaseq.CLUSTER_FILES` (NF.1, merged 2026-10-23 at 6ed389d):
+  the Salmon-only list plus Salmon on STAR's matrix and 20 nf-core MultiQC tables, never a
+  BAM. The rsync line is generated from that tuple by `ctx.report.guide` (one list, one place);
+  45 files and 408,958 B on the fixture, a real dataset's bytes measured on the first one.
+  A copy made with `COPIED_FILES` alone is refused by `ctx qc --rnaseq-dir`.
 
 ## The pages (on the Mac, per dataset)
 
