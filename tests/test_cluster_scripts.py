@@ -679,11 +679,11 @@ def test_jobs_are_named_for_their_project_and_task(site):
     assert calls == ["update", "JobId=123", f"JobName={want}"]
     config = (launch / "site.config").read_text()
     assert 'jobName = { "RNAseq-Tutorial_BRCA-immune-cells-macrophages-TAM_nf-" + task.n' in config
-    assert (".replaceAll(/[()]/, '').replaceAll(/[^A-Za-z0-9.-]/, '-').replaceAll(/-+/, '-')"
+    assert (".replaceAll(/[^A-Za-z0-9.()-]/, '-').replaceAll(/-+/, '-')"
             in config)  # fmt: skip
     call = f'source "{BASH / "job_name.sh"}"; job_name "a_b, c: d" "nf-STAR_ALIGN (S1)"'
     named = subprocess.run(["bash", "-c", call], capture_output=True, text=True, check=True).stdout
-    assert named == "RNAseq-Tutorial_a-b-c-d_nf-STAR-ALIGN-S1_NA" and len(named.split("_")) == 4
+    assert named == "RNAseq-Tutorial_a-b-c-d_nf-STAR-ALIGN-(S1)_NA" and len(named.split("_")) == 4
 
 
 def _job(call: str, repo: Path = ROOT) -> str:
@@ -703,7 +703,7 @@ def test_a_dataset_name_is_its_label_by_the_job_name_rule():
         if dataset.slug.islower() and "-" not in dataset.slug:
             continue  # a slug from before D-114, not made from its label
         named += 1
-        assert dataset.slug == path.stem == _job(f'job_field "{dataset.name}"'), path.name
+        assert dataset.slug == path.stem == _job(f'dataset_name "{dataset.name}"'), path.name
         assert _job(f'job_field "$(job_project "{path.stem}")"') == path.stem
     assert named == 7  # noqa: PLR2004 - the seven datasets D-114 renamed
     assert _job('job_project "no-dataset-file_here"') == "no-dataset-file_here"
