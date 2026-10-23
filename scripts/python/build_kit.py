@@ -103,7 +103,8 @@ REFUSED = (".fastq", ".fq", ".fastq.gz", ".fq.gz", ".bam", ".bai", ".sam", ".cra
 # 3 decimals (Rytis 2026-10-09, raised from 50 MB).
 CAP_BYTES = 64_000_000
 DATED = re.compile(r"\d{4}-\d{2}-\d{2}_")
-FOLDER = re.compile(r"[a-z0-9_]+")
+# A kit folder may carry a dataset name, so it is an output description (D-114).
+FOLDER = re.compile(naming.DESCRIPTION)
 # Code a kit is built from; a change here, even an untracked file, marks the commit dirty.
 CODE = ("src", "scripts", "conf", "pixi.toml", "pixi.lock", "pyproject.toml")
 # How the home page marks a made-up link (course.html.j2's pill), counted in a release kit.
@@ -451,7 +452,8 @@ def _roots(args: argparse.Namespace) -> list[tuple[str, Path, bool]]:
         folder, _, path = spec.partition("=")
         root = Path(path).expanduser()
         if not FOLDER.fullmatch(folder) or not (root / "outputs").is_dir():
-            sys.exit(f"{spec}: want <folder>=<ctx root>, folder in a-z 0-9 _, root with outputs/")
+            sys.exit(f"{spec}: want <folder>=<ctx root>, folder of letters, digits, - and _, "
+                     "root with outputs/")  # fmt: skip
         roots.append((folder, root, real))
     return roots
 

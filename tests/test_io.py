@@ -12,7 +12,7 @@ import polars as pl
 import pytest
 from test_packaging import build_wheel, run_from_wheel
 
-from ctx.io.naming import MODULES, check, figure_files, lint, stem
+from ctx.io.naming import MODULES, check, description, figure_files, lint, stem
 from ctx.io.readme_companion import write_table
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -50,9 +50,19 @@ def test_stem_token_order():
         "2026-09-26_de_volcano_white_v1.pdf",
         "2026-09-26_de_volcano_v1_light.pdf",
         "2026-09-26_de_volcano_v1_dark.pdf",
-        "2026-09-26_de_Volcano_v1.pdf",
         "2026-09-26_de_vol cano_v1.pdf",
-        "2026-09-26_de_vol-cano_v1.pdf",
+        # A dataset label as it reads, never its name (D-114): a space, parentheses, a colon.
+        "2026-09-26_de_Breast tissue (BRCA)_overview_v1.html",
+        "2026-09-26_de_Breast-tissue-(BRCA)_overview_v1.html",
+        "2026-09-26_de_BRCA-immune-cells:-macrophages_overview_v1.html",
+        "2026-09-26_de_Breast-tissue-BRCA,_overview_v1.html",
+        # A hyphen joins two runs of letters or digits, once.
+        "2026-09-26_de_-Breast_v1.pdf",
+        "2026-09-26_de_Breast-_v1.pdf",
+        "2026-09-26_de_Breast--tissue_v1.pdf",
+        "2026-09-26_de_Breast_-tissue_v1.pdf",
+        "2026-09-26_de_Breast-tissue-BRCA_White_v1.pdf",
+        "2026-09-26_de_Breast-tissue-BRCA_overview_v1_White.pdf",
         "2026-02-30_de_volcano_v1.pdf",
         "2026-09-26_de_volcano.pdf",
         "2026-09-26_de_volcano_vx.pdf",
@@ -66,9 +76,29 @@ def test_rejects(name):
     assert not check(name)
 
 
+@pytest.mark.parametrize(
+    "name",
+    [
+        "2026-10-23_de_Breast-tissue-BRCA_overview_v1.html",
+        "2026-10-23_de_BRCA-immune-cells-macrophages_volcano_v1_white.svg",
+        "2026-10-23_gather_Non-cancerous-blood-teaching-subset_samples_v1_README.md",
+        "2026-10-23_qc_Lung-tissue-LUAD_reads_v2.csv",
+        "2026-10-23_de_tcga_brca_volcano_v1.pdf",
+    ],
+)
+def test_accepts_a_dataset_name_from_its_label(name):
+    """Catches: the D-114 names refused, or the older lower-case slugs refused beside them."""
+    assert check(name)
+
+
+def test_description_reads_the_dataset_name_back():
+    name = "2026-10-23_de_Pancreas-tissue-PAAD_overview_v1.html"
+    assert description(name) == "Pancreas-tissue-PAAD_overview"
+
+
 def test_stem_raises_on_illegal_parts():
     with pytest.raises(ValueError, match="legal"):
-        stem("de", "Volcano", 1, day=DAY)
+        stem("de", "Breast tissue (BRCA)", 1, day=DAY)
 
 
 def test_lint_counts(tmp_path):
@@ -92,7 +122,7 @@ def test_lint_counts(tmp_path):
         ("2026-09-26_de_table_v1", {**COLUMNS, "count": ("", "Reads.")}),
         ("2026-09-26_de_table_v1", {**COLUMNS, "score": ("log2 ratio", "")}),
         ("2026-09-26_de_table_v1", {k: v for k, v in COLUMNS.items() if k != "score"}),
-        ("2026-09-26_de_Table_v1", COLUMNS),
+        ("2026-09-26_de_Ta ble_v1", COLUMNS),
     ],
 )
 def test_companion_validates_before_writing(tmp_path, table_stem, columns):

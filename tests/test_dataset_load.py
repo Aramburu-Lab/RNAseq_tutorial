@@ -34,3 +34,31 @@ def test_commands_print_no_traceback(tmp_path, command):
     assert "line 3, column 9" in printed
     assert "Traceback" not in printed
     assert "TOMLDecodeError" not in printed
+
+
+@pytest.mark.parametrize(
+    "slug",
+    [
+        "Breast tissue (BRCA)",
+        "Breast-tissue-(BRCA)",
+        "BRCA-immune-cells:-macrophages",
+        "-Breast",
+        "Breast--BRCA",
+    ],
+)
+def test_a_slug_outside_the_naming_rule_is_refused(tmp_path, slug):
+    """A slug opens every output name, so one the naming lint refuses stops at load (D-114).
+    Catches: a label typed as the slug passing until the first page is written."""
+    path = tmp_path / "planted.toml"
+    path.write_text(f'[dataset]\nslug = "{slug}"\n')
+    with pytest.raises(DatasetError, match="dataset.slug"):
+        load(path)
+
+
+@pytest.mark.parametrize(
+    "slug", ["Breast-tissue-BRCA", "Non-cancerous-blood-four-runs", "tcga_brca"]
+)
+def test_a_name_from_a_label_loads(tmp_path, slug):
+    path = tmp_path / f"{slug}.toml"
+    path.write_text(f'[dataset]\nslug = "{slug}"\n')
+    assert load(path).slug == slug

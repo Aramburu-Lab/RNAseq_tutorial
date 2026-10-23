@@ -164,13 +164,24 @@ def test_select_sorts_by_number_past_2_to_the_32_and_signs_zero_up():
 def test_no_selection_is_made_that_no_fragment_carries():
     """Selection refuses at construction what decode would refuse, in both languages, so the
     page cannot write a link it then refuses. Catches: the page's select or encode taking any
-    source (Tier1:NDN-gcsf, empty), gene 0 or 10**11, or numbers out of order."""
+    source (a label as it reads, a trailing hyphen, empty), gene 0 or 10**11, or numbers out
+    of order."""
     stat1 = ["ENSG00000115415"]
-    calls = [["select", "Tier1:NDN-gcsf", stat1], ["select", "", stat1],
+    calls = [["select", "Non-cancerous blood:ndn_gcsf", stat1], ["select", "", stat1],
              *(["encode", {"src": src, "genes": g}] for src, g in (
-                 ("Tier1:ndn-gcsf", [-115415]), (SRC, [0]), (SRC, [10**11]),
+                 ("Non-cancerous-blood-:ndn_gcsf", [-115415]), (SRC, [0]), (SRC, [10**11]),
                  (SRC, [120217, -115415]), (SRC, [115415, -115415])))]  # fmt: skip
     assert all(result == {"error": True} for result in _both(calls))
+
+
+def test_a_source_is_two_output_descriptions_in_both_languages():
+    """The page's SOURCE is ctx.io.naming.DESCRIPTION twice, as genes' is (D-114). Catches:
+    the page refusing a link to a dataset whose name carries capitals and hyphens."""
+    (page,) = re.findall(r"^  SOURCE: /\^(.*)\$/,$", SCRIPT.read_text(), re.M)
+    assert page == genes._SOURCE.pattern
+    sources = ["BRCA-immune-cells-macrophages:ndn_gcsf", "tcga_brca:tumour_vs_normal"]
+    calls = [["encode", {"src": src, "genes": [-115415]}] for src in sources]
+    assert all("ok" in result for result in _both(calls))
 
 
 def test_select_refuses_a_gene_it_cannot_sign():
@@ -260,7 +271,7 @@ REFUSALS = (
     ("#v=1&src=tier1:ndn_gcsf&n=0&g=&t=black&end", "select.form"),
     # The field pattern is anchored at the end: a second end mark is no gene list's end.
     (GOOD + "1&g=115415&end&t=black&end", "select.form"),
-    ("#v=1&src=Tier1:ndn_gcsf&n=0&g=&end", "select.source"),
+    ("#v=1&src=Breast-tissue-(BRCA):ndn_gcsf&n=0&g=&end", "select.source"),
     ("#v=1&src=tier1&n=0&g=&end", "select.source"),
     ("#v=1&src=tier1:&n=0&g=&end", "select.source"),
     ("#v=1&src=tier1:ndn%20gcsf&n=0&g=&end", "select.source"),

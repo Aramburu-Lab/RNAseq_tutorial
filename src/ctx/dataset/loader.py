@@ -4,6 +4,7 @@ The tables' parsers live one family to a module beside this one; ``load`` calls 
 fixed order, so a broken file lists its problems in the order the tables are read.
 """
 
+import re
 import tomllib
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -33,6 +34,7 @@ from ctx.dataset.sources import (
     _resources,
     _sdrf,
 )
+from ctx.io import naming
 
 TABLES = {
     "dataset", "resources", "guard", "sdrf", "columns", "derived", "order", "expect",
@@ -82,7 +84,7 @@ class Dataset:
     def name(self) -> str:
         """The name pages show: ``[dataset] label`` where given, else the slug.
 
-        The slug names files, so it is lowercase with underscores; the label need not be.
+        The slug names files, so it is a ``ctx.io.naming.DESCRIPTION``; the label need not be.
         """
         return str(self.info.get("label", self.slug))
 
@@ -177,6 +179,10 @@ def load(path: Path) -> Dataset:
     problems = [f"unknown table [{name}]" for name in sorted(set(raw) - TABLES)]
     info = raw.get("dataset", {})
     slug = _need(info, "slug", str, "dataset", problems)
+    # The slug opens every output name, so a name the naming lint refuses stops here instead.
+    if slug is not None and not re.fullmatch(naming.DESCRIPTION, slug):
+        problems.append(f"dataset.slug: {slug!r} is not an output name's description, such as "
+                        "Breast-tissue-BRCA")  # fmt: skip
     if "label" in info:
         _need(info, "label", str, "dataset", problems)
     # The runs `ctx guide` writes into the fetchngs list (Part 1), in the file's order.
