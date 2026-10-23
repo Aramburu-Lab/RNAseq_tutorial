@@ -24,6 +24,7 @@ from jinja2 import Environment, PackageLoader, pass_context, select_autoescape
 from markupsafe import Markup
 
 from ctx import editions
+from ctx.io import keep
 from ctx.report import cap, export, glossary, marks, text
 from ctx.report.figures import defaults, json_for_script, pack_json, prepare, unpack_figures
 from ctx.viz.style import (
@@ -773,9 +774,8 @@ def write(page: Page, path: Path) -> Path:
         entries = _sized(render(book), target)
         if not (target.is_file() and target.read_bytes() == entries):
             target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_bytes(entries)
-    path.write_bytes(html)
-    return path
+            keep.written(target, lambda staged: staged.write_bytes(entries))
+    return keep.written(path, lambda staged: staged.write_bytes(html))
 
 
 def _sized(html: str, path: Path) -> bytes:

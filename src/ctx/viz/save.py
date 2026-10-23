@@ -10,6 +10,7 @@ from typing import Any, Protocol
 import polars as pl
 
 from ctx.figures import panel, record
+from ctx.io import keep
 from ctx.io.naming import check
 from ctx.io.readme_companion import validate, write_table
 from ctx.report import export, glossary
@@ -179,7 +180,9 @@ def save_reproducibly(fig: Any, path: Path) -> None:
     import matplotlib as mpl  # noqa: PLC0415 - heavy; imported after the profile
 
     with mpl.rc_context({"svg.hashsalt": SVG_SALT}):
-        fig.savefig(path, metadata=NO_DATE[path.suffix.lstrip(".")])
+        keep.written(
+            path, lambda staged: fig.savefig(staged, metadata=NO_DATE[path.suffix.lstrip(".")])
+        )
 
 
 def figure_block(data: Figure, figure_stem: str, text: FigureText = NO_TEXT) -> FigureBlock:

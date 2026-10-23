@@ -15,6 +15,7 @@ import polars as pl
 import polars.selectors as cs
 
 from ctx import __version__, editions
+from ctx.io import keep
 from ctx.io.naming import check
 from ctx.runtime import source, versions
 
@@ -55,15 +56,16 @@ def write_table(  # noqa: PLR0913 - keyword-only after the third, each a separat
     for fmt in formats:
         path = directory / f"{table_stem}.{fmt}"
         if fmt == "parquet":
-            frame.write_parquet(path)
+            keep.written(path, frame.write_parquet)
         elif csv_decimals is None:
-            frame.write_csv(path)
+            keep.written(path, frame.write_csv)
         else:
-            frame.with_columns(_shown(csv_decimals)).write_csv(path)
+            keep.written(path, frame.with_columns(_shown(csv_decimals)).write_csv)
         written.append(path)
     digests = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in written}
     readme = directory / f"{table_stem}_README.md"
-    readme.write_text(_readme(frame, table_stem, columns, data_releases, digests, csv_decimals))
+    text = _readme(frame, table_stem, columns, data_releases, digests, csv_decimals)
+    keep.written(readme, lambda staged: staged.write_text(text))
     return [*written, readme]
 
 
