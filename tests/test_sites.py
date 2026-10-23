@@ -60,7 +60,7 @@ def test_sites_define_what_the_launchers_use():
     from one site, which fails under set -u on that site alone, and a launcher reading a name no
     site sets."""
     kebnekaise, laptop = (_defined(n) for n in SITES)
-    assert kebnekaise == laptop and len(kebnekaise) == 8, (kebnekaise, laptop)
+    assert kebnekaise == laptop and len(kebnekaise) == 9, (kebnekaise, laptop)
     code = "\n".join(s for n in LAUNCHERS for s in (BASH / n).read_text().splitlines()
                      if not s.lstrip().startswith("#"))  # fmt: skip
     used = {a or b for a, b in USED.findall(code)}
@@ -122,6 +122,9 @@ def test_laptop_rnaseq(site, arch, fetchngs, rnaseq):
     assert "resourceLimits = [cpus: 6, memory: 12288.MB]" in config, config
     params = (launch / "params.yml").read_text()
     assert "save_reference: false\n" in params, params
+    # A laptop cannot hold STAR's human index, so it stays on Salmon alone (D-113).
+    lines = params.splitlines()
+    assert "skip_alignment: true" in lines and not any(x.startswith("aligner:") for x in lines)
 
 
 def test_laptop_rnaseq_without_docker(site):

@@ -17,6 +17,9 @@ SITE_HOME_ALLOWED=0
 # The index and the references published once per run folder, which later runs on the storage
 # project can reuse.
 SITE_SAVE_REFERENCE=true
+# STAR on the genome, Salmon on its alignment and Salmon alone beside it (Rytis 2026-10-23,
+# D-113): M2 and M3 read nf-core's own trimming, alignment and QC.
+SITE_RNASEQ_ALIGN=true
 
 # Nextflow from the fetch environment, every task a Slurm job (kebnekaise_env.sh).
 site_activate() {

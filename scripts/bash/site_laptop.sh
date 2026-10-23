@@ -17,6 +17,9 @@ SITE_HOME_ALLOWED=1
 # ctx reads none of the published references, and -resume reuses them from work/: saved, they
 # were copied into results/ beside work/'s copy (U.10, 2026-10-08).
 SITE_SAVE_REFERENCE=false
+# Salmon alone: STAR's human index peaked at 44.65 GB building on Kebnekaise (ED.6b), more
+# than a laptop holds.
+SITE_RNASEQ_ALIGN=false
 
 site_activate() {
     if [[ ! -x "$CTX_REPO/.pixi/envs/fetch/bin/nextflow" ]]; then

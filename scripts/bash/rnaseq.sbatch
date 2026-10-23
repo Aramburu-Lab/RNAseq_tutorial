@@ -12,7 +12,9 @@
 # 1 h 52 min (2026-09-30). A 7-day head job waited on ReqNodeNotAvail until its limit was lowered to
 # 1 day, which cleared it at once (2026-10-01).
 # 12 GB: the head job peaked at 6.16, 6.61 and 7.49 GiB of its 8 on three breast studies (P4.5).
-# Gene counts with nf-core/rnaseq, Salmon only, from the FASTQs fetchngs.sbatch downloaded. It
+# Gene counts with nf-core/rnaseq from the FASTQs fetchngs.sbatch downloaded: STAR and Salmon
+# where the site aligns (SITE_RNASEQ_ALIGN, D-113), Salmon alone always, so M1 to M5 read one
+# matrix on every computer. It
 # starts only once fetchngs.sbatch has written nfcore_fetchngs/results.complete in the run folder,
 # and only with references equal to the publisher's MD5SUMS where one sits beside them. Another
 # genome: its FASTA and GTF in place of GENCODE's, and false for a GTF not from GENCODE.
@@ -87,6 +89,8 @@ executor=$(site_executor) || die "the site's executor is unknown; see the line a
 limits=$(site_rnaseq_config) || die "the site's limits are unknown; see the line above"
 LAUNCH="$RUN/nfcore_rnaseq"
 mkdir -p "$LAUNCH"
+[[ "${SITE_RNASEQ_ALIGN:-}" == true || "${SITE_RNASEQ_ALIGN:-}" == false ]] || die "the site file sets no SITE_RNASEQ_ALIGN"
+if [[ "$SITE_RNASEQ_ALIGN" == true ]]; then route="aligner: star_salmon"; else route="skip_alignment: true"; fi
 
 # publish_dir_mode is stated: under NXF_SYNTAX_PARSER=v2 the config below cannot see a param only
 # the pipeline sets, and its reports were published as symlinks into work/ (D-025).
@@ -97,7 +101,7 @@ fasta: $FASTA
 gtf: $GTF
 gencode: $GENCODE
 pseudo_aligner: salmon
-skip_alignment: true
+$route
 save_reference: $SITE_SAVE_REFERENCE
 publish_dir_mode: copy
 EOF
@@ -174,3 +178,8 @@ links=$(($(find "$LAUNCH/results" -type l | wc -l)))
 M="$LAUNCH/results/salmon/salmon.merged.gene_counts_length_scaled.tsv"
 [[ -s "$M" ]] || die "no count matrix at $M"
 echo "count matrix: $(awk 'END{print NR - 1}' "$M") genes, $(head -n 1 "$M" | awk -F'\t' '{print NF - 2}') samples"
+if [[ "$SITE_RNASEQ_ALIGN" == true ]]; then
+    A="$LAUNCH/results/star_salmon/salmon.merged.gene_counts_length_scaled.tsv"
+    [[ -s "$A" ]] || die "no count matrix from the alignment at $A"
+    echo "alignment count matrix: $(awk 'END{print NR - 1}' "$A") genes, $(head -n 1 "$A" | awk -F'\t' '{print NF - 2}') samples"
+fi

@@ -83,6 +83,10 @@ else
     if [ -z "${STUB_NO_MATRIX:-}" ]; then
         printf 'gene_id\\tgene_name\\ts1\\ts2\\ng1\\tA\\t1\\t2\\ng2\\tB\\t3\\t4\\n' \\
             > "$out/salmon/salmon.merged.gene_counts_length_scaled.tsv"
+        if grep -q '^aligner: star_salmon$' "$params"; then
+            mkdir -p "$out/star_salmon"
+            cp "$out/salmon/salmon.merged.gene_counts_length_scaled.tsv" "$out/star_salmon/"
+        fi
     fi
     if [ -n "${STUB_LINK:-}" ]; then ln -s /nonexistent "$out/salmon/report.json"; fi
 fi
@@ -599,7 +603,8 @@ def _rnaseq(site, gencode="true", marker=True, refs=REFS, run="run", **given):
 def test_rnaseq_stubbed(site, gencode):
     """Catches a cut by position, the cut on the system Python (repo L5), parser v1, another
     profile, queueSize dropped, and any params key changed or dropped: publish_dir_mode, gencode
-    not taken from the argument, the Salmon-only route (STAR would run), and a relative GTF."""
+    not taken from the argument, Kebnekaise's STAR route (D-113) or its Salmon beside it lost,
+    and a relative GTF."""
     done, rows, launch = _rnaseq(site, gencode=gencode)
     tmp_path = site[0]
     assert done.returncode == 0, done.stderr
@@ -613,7 +618,7 @@ def test_rnaseq_stubbed(site, gencode):
     assert params == {
         "input": str(launch / "samplesheet.csv"), "outdir": str(launch / "results"),
         "fasta": str(refs / "genome.fa.gz"), "gtf": str(refs / "annotation.gtf.gz"),
-        "gencode": gencode, "pseudo_aligner": "salmon", "skip_alignment": "true",
+        "gencode": gencode, "pseudo_aligner": "salmon", "aligner": "star_salmon",
         "save_reference": "true", "publish_dir_mode": "copy",
     }  # fmt: skip
     argv, nf_env, cwd = _recorded(tmp_path)
@@ -625,6 +630,7 @@ def test_rnaseq_stubbed(site, gencode):
     assert "withName: '.*:FASTQ_FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE'" in config
     assert nf_env["NXF_SYNTAX_PARSER"] == "v2" and cwd == str(launch)
     assert "count matrix: 2 genes, 2 samples" in done.stdout
+    assert "alignment count matrix: 2 genes, 2 samples" in done.stdout
 
 
 @pytest.mark.parametrize(

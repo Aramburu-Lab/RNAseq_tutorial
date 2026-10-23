@@ -27,6 +27,18 @@ it were reversed.
 
 ---
 
+## D-113 — Every read-level result comes from nf-core/rnaseq 3.27.0: STAR and Salmon on Kebnekaise, Salmon alone on a laptop; the hand-written alignment array is retired
+
+**Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23). Supersedes D21's Salmon-only run for Kebnekaise and ED.6's `ed6_align.sbatch`.
+
+**Context.** ED.6 copied ctx's local commands (fastp, STAR, samtools, featureCounts at 12 settings) into a hand-written Slurm array so M3's pages needed no new reader. It cost 94 timeouts of 679 tasks on 2026-10-22, a manual resubmit, and about 1,000 of 2,328 core-hours on tasks that did not finish, while nf-core/rnaseq 3.27.0, already run Salmon-only on every project, does trimming, FastQC, STAR, samtools, RSeQC and Qualimap under Nextflow's retries and resume. Rytis 2026-10-23: "Lets fully move to nf-core/rnaseq pipeline for data analysis. Our downstream interactive report ... has to adapt to the nf-core/rnaseq outputs."
+
+**Decision.** `rnaseq.sbatch` runs nf-core/rnaseq 3.27.0 with `aligner: star_salmon` (the pipeline's default) and `pseudo_aligner: salmon`, which its parameter page says "Runs in addition to '--aligner'", where the site sets `SITE_RNASEQ_ALIGN=true` (Kebnekaise); a laptop keeps `skip_alignment: true`, because STAR's human index peaked at 44.65 GB building (ED.6b). The trimmer stays the default, Trim Galore, which ctx already reads. M1, M4 and M5 keep reading Salmon alone's matrix (`salmon/`), the same on both sites; M2's read stage and M3 move to nf-core's own outputs (plan to be checked in, TODO.md NF.1). The ED.6 results on the cluster are removed by Rytis (`ed6_stop.sh`), after their md5 checks marked the four lab-route downloads complete.
+
+**Consequence.** M3 can no longer show ctx's own strand call from featureCounts at 12 settings or STAR GeneCounts against featureCounts, which nf-core does not produce (featureCounts runs for biotype QC only, per its 3.27.0 output page); what replaces them is NF.1's question. Each project's Salmon-only `results/` is moved aside before the aligned run resumes in the same folder, since `ctx gather` refuses an outdir whose params files disagree.
+
+---
+
 ## D-112 — Step-1's display label becomes "Non-cancerous blood", the one change to a frozen file after the record
 
 **Date:** 2026-10-22 · **Status:** decided (Rytis 2026-10-22: "change Step-1's frozen label to Non-cancerous blood - yes")
