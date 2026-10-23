@@ -627,7 +627,7 @@ def test_rnaseq_stubbed(site, gencode):
     assert "withLabel: process_high { time = { 8.h * task.attempt } }" in config
     assert "    time = { 2.h * task.attempt }" in config
     # Measured requests, memory and time 25 % more per retry, cores never (Rytis 2026-10-23).
-    assert "withName: '.*:TRIMGALORE' { cpus = 3; memory = { 4148.MB * Math.pow(1.25" in config
+    assert "withName: '.*:TRIMGALORE' { cpus = 3; memory = { 5274.MB * Math.pow(1.25" in config
     assert nf_env["NXF_SYNTAX_PARSER"] == "v2" and cwd == str(launch)
     assert "count matrix: 2 genes, 2 samples" in done.stdout
     assert "alignment count matrix: 2 genes, 2 samples" in done.stdout
