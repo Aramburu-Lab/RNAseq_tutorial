@@ -8,7 +8,6 @@ sequence content, so that verdict keeps no figure; the page says so. Every numbe
 MultiQC's plot data (D-028), never from a FastQC zip.
 """
 
-import re
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, replace
 
@@ -38,8 +37,6 @@ NO_TABLE = "fastqc_sequence_content"
 THEORETICAL = "Theoretical GC Content"
 # Adapter rows are "<sample> - <adapter>"; FastQC judges the largest adapter at each position.
 ADAPTER_SEPARATOR = " - "
-# A cell of MultiQC's FastQC plot data: "(x, y)".
-POINT = re.compile(r"\(\s*([-0-9.eE]+)\s*,\s*([-0-9.eE]+)\s*\)")
 
 
 @dataclass(frozen=True)
@@ -61,7 +58,7 @@ class Plots:
 
 def _points(row: tuple[str | None, ...]) -> list[tuple[float, float]]:
     """The (x, y) pairs of one row of MultiQC's plot data."""
-    return [(float(x), float(y)) for cell in row if cell for x, y in POINT.findall(cell)]
+    return [(float(x), float(y)) for cell in row if cell for x, y in multiqc_io.POINT.findall(cell)]
 
 
 def read(run: multiqc_io.MultiqcRun, names: Mapping[str, str], first: Collection[str],

@@ -2,14 +2,19 @@
 
 MultiQC runs by subprocess from the `reads` environment (D-027), never imported, into a
 module's `multiqc/` folder, which keeps MultiQC's own file names (naming lint exemption, D-028).
-Its per-module tables are read with Polars as text, so no value is reinterpreted on the way
-in; a table's sample names are mapped to the course's units (runs or samples) by an explicit
-alias table, and one name that maps to nothing stops the run with every such name listed.
+An nf-core/rnaseq outdir's own MultiQC tables are read where the pipeline wrote them
+(``nfcore``): M2 and M3 run no MultiQC over that outdir (D-116); M4 still runs it over Salmon's
+folders. Its per-module tables are
+read with Polars as text, so no value is reinterpreted on the way in; a table's sample names
+are mapped to the course's units (runs or samples) by an explicit alias table, and one name
+that maps to nothing stops the run with every such name listed.
 """
 
+import re
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from itertools import islice
 from pathlib import Path
 
 import polars as pl
@@ -17,10 +22,19 @@ import polars as pl
 from ctx import tools
 from ctx.qc import QcError
 
-# The MultiQC modules M2 and M3 read; each runs only where its tool's output is among the inputs.
+# The modules ctx's own MultiQC runs read: M3's laptop route, over the tools it ran itself.
 MODULES = ("fastqc", "fastp", "seqkit", "trim_galore", "salmon", "star", "hisat2",
            "featurecounts", "samtools")  # fmt: skip
 DATA = "multiqc_data"
+# Where nf-core/rnaseq 3.27.0's MultiQC writes its tables: under the aligner's folder in an
+# aligned run (the test profile on the Mac, 2026-10-23), at the top in a Salmon-only one.
+NFCORE_DATA = ("multiqc/star_salmon/multiqc_report_data", "multiqc/multiqc_report_data")
+NFCORE_LOG = "multiqc.log"
+# MultiQC's log names its version in its first lines: "This is MultiQC v1.35".
+VERSION = re.compile(r"This is MultiQC v(\S+)")
+VERSION_LINES = 20
+# A cell of MultiQC's line-plot data: "(x, y)".
+POINT = re.compile(r"\(\s*([-0-9.eE+]+)\s*,\s*([-0-9.eE+]+)\s*\)")
 
 
 @dataclass(frozen=True)
@@ -64,6 +78,80 @@ def run(
     if not (dest / DATA).is_dir():
         raise QcError(f"MultiQC wrote no {DATA}/ in {dest}; see {dest / 'multiqc_run.log'}")
     return MultiqcRun(dest / DATA, tools.TOOLS["multiqc"].version)
+
+
+def nfcore(rnaseq_dir: Path) -> MultiqcRun:
+    """The tables nf-core/rnaseq's own MultiQC wrote into an outdir, read in place (D-116).
+
+    The tables' columns are those of the MultiQC that wrote them, so a version other than the
+    course's pin (``tools.TOOLS``) is refused: its columns are not the ones the pages read.
+
+    Raises:
+        QcError: If the outdir holds no MultiQC tables, or they name no version or another.
+    """
+    found = [rnaseq_dir / d for d in NFCORE_DATA if (rnaseq_dir / d).is_dir()]
+    if not found:
+        where = " or ".join(NFCORE_DATA)
+        raise QcError(f"{rnaseq_dir} holds no nf-core MultiQC tables ({where}); copy them with "
+                      "the include list of ctx.gather.rnaseq.ALIGNED_FILES")  # fmt: skip
+    data, log = found[0], found[0] / NFCORE_LOG
+    version = None
+    if log.is_file():
+        with log.open(errors="replace") as handle:
+            head = "".join(islice(handle, VERSION_LINES))
+        version = VERSION.search(head)
+    pinned = tools.TOOLS["multiqc"].version
+    if version is None:
+        raise QcError(f"{log} names no MultiQC version; its tables' columns cannot be checked")
+    if version.group(1) != pinned:
+        raise QcError(f"MultiQC {version.group(1)} wrote {data}; ctx reads MultiQC {pinned}'s "
+                      "columns only")  # fmt: skip
+    return MultiqcRun(data, version.group(1))
+
+
+def points(run: MultiqcRun, name: str) -> pl.DataFrame:
+    """A line plot's data, ``<name>.txt``, whose cells are "(x, y)": Sample, x, y per point.
+
+    Raises:
+        QcError: If MultiQC wrote no such plot, or a non-empty cell holds no point.
+    """
+    path = run.data / f"{name}.txt"
+    if not path.is_file():
+        raise QcError(f"MultiQC wrote no {path.name}: its module found none of its inputs")
+    frame = pl.read_csv(path, separator="\t", infer_schema=False)
+    rows = []
+    for sample, *cells in frame.rows():
+        for cell in cells:
+            if not cell:
+                continue
+            if (found := POINT.fullmatch(cell.strip())) is None:
+                raise QcError(f"{path.name}: {sample!r} holds {cell!r}, not an (x, y) point")
+            rows.append((sample, float(found.group(1)), float(found.group(2))))
+    return pl.DataFrame(rows, schema={"Sample": pl.String, "x": pl.Float64, "y": pl.Float64},
+                        orient="row")  # fmt: skip
+
+
+def ragged(run: MultiqcRun, module: str) -> pl.DataFrame:
+    """A module table whose header is the x of each point and each row fills its own cells.
+
+    MultiQC's dupRadar table, ``multiqc_dupradar.txt``, is one: each sample its own x positions,
+    the other cells empty. Sample, x, y per filled cell, in the header's order.
+
+    Raises:
+        QcError: If MultiQC wrote no table, or a header or a cell is not a number.
+    """
+    path = run.data / f"multiqc_{module}.txt"
+    if not path.is_file():
+        raise QcError(f"MultiQC found no {module} input: {path.name} was not written")
+    frame = pl.read_csv(path, separator="\t", infer_schema=False)
+    try:
+        xs = [float(c) for c in frame.columns[1:]]
+        rows = [(sample, x, float(cell)) for sample, *cells in frame.rows()
+                for x, cell in zip(xs, cells, strict=True) if cell not in (None, "")]  # fmt: skip
+    except ValueError as error:
+        raise QcError(f"{path.name} holds a value that is not a number: {error}") from error
+    return pl.DataFrame(rows, schema={"Sample": pl.String, "x": pl.Float64, "y": pl.Float64},
+                        orient="row")  # fmt: skip
 
 
 def at_once[K, V](work: Mapping[K, Callable[[], V]], jobs: int) -> dict[K, V]:
