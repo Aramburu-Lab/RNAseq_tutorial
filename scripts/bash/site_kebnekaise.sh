@@ -48,6 +48,23 @@ process {
     withLabel: process_medium { time = { 4.h * task.attempt } }
     withLabel: process_high { time = { 8.h * task.attempt } }
     withLabel: process_long { time = { 10.h * task.attempt } }
+    // Measured (sacct, 1,682 completed jobs, 2026-10-23): each request is that process's
+    // largest use, rounded up past the table's rounding; memory and time grow 25 % per retry,
+    // cores never; three retries, on nf-core's own retried exits (Rytis 2026-10-23).
+    withName: '.*:FQ_LINT' { cpus = 1; memory = { 1588.MB * Math.pow(1.25, task.attempt - 1) }; time = { 6.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:TRIMGALORE' { cpus = 3; memory = { 4148.MB * Math.pow(1.25, task.attempt - 1) }; time = { 10.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:FASTQC' { cpus = 2; memory = { 4660.MB * Math.pow(1.25, task.attempt - 1) }; time = { 7.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:FQ_LINT_AFTER_TRIMMING' { cpus = 1; memory = { 2816.MB * Math.pow(1.25, task.attempt - 1) }; time = { 6.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:FQ_SUBSAMPLE' { cpus = 1; memory = { 1076.MB * Math.pow(1.25, task.attempt - 1) }; time = { 5.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:CAT_FASTQ' { cpus = 1; memory = { 5069.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:GUNZIP_FASTA' { cpus = 1; memory = { 2304.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:GUNZIP_GTF' { cpus = 1; memory = { 3328.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SAMTOOLS_FAIDX' { cpus = 1; memory = { 666.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:CUSTOM_GTFFILTER' { cpus = 1; memory = { 3738.MB * Math.pow(1.25, task.attempt - 1) }; time = { 1.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SE_TRANSCRIPT_UNIFIED' { cpus = 1; memory = { 7527.MB * Math.pow(1.25, task.attempt - 1) }; time = { 12.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:SE_GENE_UNIFIED' { cpus = 1; memory = { 3124.MB * Math.pow(1.25, task.attempt - 1) }; time = { 4.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:MAKE_TRANSCRIPTS_FASTA' { cpus = 1; memory = { 6503.MB * Math.pow(1.25, task.attempt - 1) }; time = { 3.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    withName: '.*:EAUTILS_GTF2BED' { cpus = 1; memory = { 11520.MB * Math.pow(1.25, task.attempt - 1) }; time = { 2.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
 }
 EOF
 }
