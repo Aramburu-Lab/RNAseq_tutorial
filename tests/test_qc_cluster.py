@@ -29,7 +29,7 @@ PAIRED = ROOT / "tests" / "fixtures" / "fetchngs" / "download" / "fastq"
 PAIR = "SRX9626017_SRR13191702"
 REG = registry.load(ROOT / "conf" / "qc_metrics.toml")
 # Task samples as fetchngs names them (experiment accessions), unlike the sheet's; one holds
-# two runs, as breast_mono's two-run samples do.
+# two runs, as BRCA-immune-cells-monocytes's two-run samples do.
 TASKS = (("EX_ab", (("R_se_a", ["se_a.fastq.gz"]), ("R_se_b", ["se_b.fastq.gz"]))),
          ("EX_c", (("R_se_c", ["se_c.fastq.gz"]),)), ("EX_d", (("R_se_d", ["se_d.fastq.gz"]),)),
          ("EX_e", (("R_se_e", ["se_e.fastq.gz"]),)),

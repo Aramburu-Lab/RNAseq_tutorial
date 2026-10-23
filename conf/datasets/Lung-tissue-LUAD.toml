@@ -5,7 +5,7 @@
 # tumour-adjacent, histologically normal lung (abstract, PubMed 2026-10-22); the series holds 123
 # of those pairs. Not yet counted: TODO.md ED.4 holds the cluster commands.
 #
-# Curated from its own table, lung_gse229705.tsv: GEO's per-sample records (brief SOFT of
+# Curated from its own table, Lung-tissue-LUAD.tsv: GEO's per-sample records (brief SOFT of
 # GSE229705's samples, acc.cgi?acc=GSE229705&targ=gsm&form=text&view=brief, retrieved 2026-10-22,
 # 707,854 B, SHA-256 61d1567845215f01018bfabe28a4b7b7a0eb287f170d756527ac1c556de98c8d), values
 # verbatim, one row per ENA run (read_run report of PRJNA955664, retrieved 2026-10-22 09:04 UTC
@@ -37,8 +37,8 @@
 # paired by patient, labelled so.
 
 [dataset]
-slug = "lung_gse229705"
-# The name pages show; the slug names files, so it keeps lowercase and underscores (D-014).
+slug = "Lung-tissue-LUAD"
+# The name pages show; the slug, made from it, names files (D-014, D-114).
 label = "Lung tissue (LUAD)"
 # What fetchngs downloads, as `ctx guide --dataset-file` writes it into the accession list.
 accessions = ["PRJNA955664"]
@@ -80,7 +80,7 @@ patterns = [
 ]
 
 [sdrf]
-file = "lung_gse229705.tsv"
+file = "Lung-tissue-LUAD.tsv"
 join = ["run_accession", "run_accession"]
 cross_check = [["gsm", "sample_alias"], ["title", "sample_title"]]
 

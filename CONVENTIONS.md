@@ -42,7 +42,7 @@ Project rules for agents and humans in this repository, imported by `CLAUDE.md`.
 
 ## Outputs
 
-- File naming: `YYYY-MM-DD_<module>_<description>_v<X>.<ext>`; underscores, no spaces. A lint (`ctx.io.naming`) enforces this.
+- File naming: `YYYY-MM-DD_<module>_<description>_v<X>.<ext>`; the description is words joined by underscores, each word letters and digits joined by single hyphens, no spaces, so a dataset name made from its label fits: `2026-10-23_de_Breast-tissue-BRCA_overview_v1.html` (D-114). A lint (`ctx.io.naming`) enforces this.
 - Every data output gets a companion `_README.md`: creation timestamp, source script and commit, tool and data versions, and a data dictionary (one row per column: name, type, unit, meaning).
 - `data/` and `resources/` are never committed; `ctx setup` fetches resources with checksums; `ctx genecard` alone writes `resources/cache/`, with its own manifest (TODO.md M9). External inputs (fetchngs outdirs, GDC and Xena downloads) sit under `data/raw/` as fetched. Writers: modules write only under `<root>/outputs/NN_<module>/`, `ctx setup` under `resources/`, `ctx genecard` under `resources/cache/`; from Phase 2D, `ctx figure` run from a Reproduce panel writes into the reader's own working folder, outside any ctx root.
 

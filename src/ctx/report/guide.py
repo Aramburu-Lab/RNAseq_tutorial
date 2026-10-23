@@ -41,7 +41,7 @@ PAGE = "guide"
 MODULE = "report"
 # The repository this page is built from, for the dataset file's path as a reader types it.
 REPO = Path(__file__).resolve().parents[3]
-DEFAULT = REPO / "conf" / "datasets" / "four_runs.toml"
+DEFAULT = REPO / "conf" / "datasets" / "Non-cancerous-blood-four-runs.toml"
 # (script, its Usage lines) per block, each line as the block holds it; tests/test_guide.py holds
 # them to the scripts. A line with <accession> or <run name, no spaces> is filled below.
 USAGE = {

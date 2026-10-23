@@ -139,7 +139,7 @@ def _measured(html: str) -> tuple[float, int, int]:
 
 
 @pytest.mark.budget
-def test_track_b_at_tier1_size(tmp_path):
+def test_track_b_at_non_cancerous_blood_size(tmp_path):
     spec_path = tmp_path / "budget.toml"
     spec_path.write_text(SPEC)
     spec = load(spec_path)
@@ -176,9 +176,15 @@ def test_track_b_at_tier1_size(tmp_path):
 
 # Track A's real data, where the course was built: the 8-run teaching subset of Step-1, its
 # chr22 genome, and Step-1's gather and qc outputs, which --compare-dataset reads.
-TEACH_ROOT = Path(os.environ.get("CTX_TEACH_ROOT", Path.home() / "ctx_tier1"))
+TEACH_ROOT = Path(os.environ.get("CTX_TEACH_ROOT", Path.home() / "ctx_Non-cancerous-blood"))
 GENOME = "data/raw/reference/GRCh38.primary_assembly.chr22.fa.gz"
-TEACH_INPUTS = ("outputs/01_gather", "outputs/02_qc", "resources", "data/raw/tier1_teach", GENOME)
+TEACH_INPUTS = (
+    "outputs/01_gather",
+    "outputs/02_qc",
+    "resources",
+    "data/raw/Non-cancerous-blood-teaching-subset",
+    GENOME,
+)
 
 
 @pytest.mark.budget
@@ -199,14 +205,19 @@ def test_track_a_on_the_teaching_subset(tmp_path):
     env = {k: v for k, v in os.environ.items() if not k.startswith(("SLURM_", "CTX_"))}
     repo = Path(__file__).resolve().parents[1]
     done = subprocess.run(
-        [str(CTX), "--root", str(tmp_path), "process", "--dataset", "tier1_teach",
-         "--dataset-file", str(repo / "conf" / "datasets" / "tier1_teach.toml"),
+        [str(CTX), "--root", str(tmp_path), "process",
+         "--dataset", "Non-cancerous-blood-teaching-subset",
+         "--dataset-file",
+         str(repo / "conf" / "datasets" / "Non-cancerous-blood-teaching-subset.toml"),
          "--genome", str(TEACH_ROOT / TEACH_INPUTS[-1]), "--aligner", "hisat2",
-         "--compare-dataset", "tier1", "--fetchngs-dir", str(TEACH_ROOT / TEACH_INPUTS[-2])],
+         "--compare-dataset", "Non-cancerous-blood",
+         "--fetchngs-dir", str(TEACH_ROOT / TEACH_INPUTS[-2])],
         cwd=tmp_path, env=env, capture_output=True, text=True, check=False,
     )  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
-    (page,) = (tmp_path / "outputs" / "03_process").glob("*_tier1_teach_overview_v1.html")
+    (page,) = (tmp_path / "outputs" / "03_process").glob(
+        "*_Non-cancerous-blood-teaching-subset_overview_v1.html"
+    )
     wall, self_rss, children = _measured(unpacked(page.read_text()))
     threads = min(4, os.cpu_count() or 1)
     bound = self_rss + threads * children
@@ -218,8 +229,8 @@ def test_track_a_on_the_teaching_subset(tmp_path):
 
 
 # M4's real data: Step-1's gather sheet, its nf-core outdir and copy Q1, linked in.
-QUANT_INPUTS = ("outputs/01_gather", "resources", "data/raw/tier1_rnaseq",
-                "data/raw/tier1_salmon")  # fmt: skip
+QUANT_INPUTS = ("outputs/01_gather", "resources", "data/raw/Non-cancerous-blood_rnaseq",
+                "data/raw/Non-cancerous-blood_salmon")  # fmt: skip
 
 
 @pytest.mark.budget
@@ -240,13 +251,13 @@ def test_quant_on_step1_keeps_track_b(tmp_path):
     env = {k: v for k, v in os.environ.items() if not k.startswith(("SLURM_", "CTX_"))}
     repo = Path(__file__).resolve().parents[1]
     done = subprocess.run(
-        [str(CTX), "--root", str(tmp_path), "quant", "--dataset", "tier1",
-         "--dataset-file", str(repo / "conf" / "datasets" / "tier1.toml"),
+        [str(CTX), "--root", str(tmp_path), "quant", "--dataset", "Non-cancerous-blood",
+         "--dataset-file", str(repo / "conf" / "datasets" / "Non-cancerous-blood.toml"),
          "--rnaseq-dir", str(tmp_path / QUANT_INPUTS[2])],
         cwd=tmp_path, env=env, capture_output=True, text=True, check=False,
     )  # fmt: skip
     assert done.returncode == 0, done.stderr[-3000:]
-    (page,) = (tmp_path / "outputs" / "04_quant").glob("*_tier1_overview_v1.html")
+    (page,) = (tmp_path / "outputs" / "04_quant").glob("*_Non-cancerous-blood_overview_v1.html")
     wall, self_rss, children = _measured(unpacked(page.read_text()))
     bound = self_rss + children
     print(f"\nquant: wall {wall:.1f} s, self {self_rss:,} B, largest child {children:,} B, "

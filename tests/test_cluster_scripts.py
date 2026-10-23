@@ -10,6 +10,7 @@ import csv
 import gzip
 import hashlib
 import itertools
+import os
 import re
 import shutil
 import subprocess
@@ -18,6 +19,7 @@ from pathlib import Path
 
 import pytest
 
+from ctx.dataset import load
 from ctx.gather import fetchngs
 from ctx.gather.fetchngs import FETCHNGS_VERSION
 from ctx.gather.rnaseq import RNASEQ_VERSION
@@ -779,14 +781,41 @@ def test_jobs_are_named_for_their_project_and_task(site):
     _stub(tmp_path / "stubs" / "scontrol", '#!/bin/sh\necho "$@" >> "$STUB_LOG/scontrol.calls"\n')
     datasets = tmp_path / "my clone" / "conf" / "datasets"
     datasets.mkdir(parents=True)
-    (datasets / "breast_mac.toml").write_text('label = "BRCA immune cells: macrophages (TAM)"\n')
-    done, _, launch = _rnaseq(site, run="breast_mac", SLURM_JOB_ID="123")
+    (datasets / "BRCA-immune-cells-macrophages.toml").write_text(
+        'label = "BRCA immune cells: macrophages (TAM)"\n'
+    )
+    done, _, launch = _rnaseq(site, run="BRCA-immune-cells-macrophages", SLURM_JOB_ID="123")
     assert done.returncode == 0, done.stderr
     calls = (tmp_path / "log" / "scontrol.calls").read_text().split()
     want = "RNAseq-Tutorial_BRCA-immune-cells-macrophages-TAM_nf-head_NA"
     assert calls == ["update", "JobId=123", f"JobName={want}"]
     config = (launch / "site.config").read_text()
     assert 'jobName = { "RNAseq-Tutorial_BRCA-immune-cells-macrophages-TAM_nf-" + task.n' in config
+    assert (".replaceAll(/[()]/, '').replaceAll(/[^A-Za-z0-9.-]/, '-').replaceAll(/-+/, '-')"
+            in config)  # fmt: skip
     call = f'source "{BASH / "job_name.sh"}"; job_name "a_b, c: d" "nf-STAR_ALIGN (S1)"'
     named = subprocess.run(["bash", "-c", call], capture_output=True, text=True, check=True).stdout
-    assert named == "RNAseq-Tutorial_a-b-c-d_nf-STAR-ALIGN-(S1)_NA" and len(named.split("_")) == 4
+    assert named == "RNAseq-Tutorial_a-b-c-d_nf-STAR-ALIGN-S1_NA" and len(named.split("_")) == 4
+
+
+def _job(call: str, repo: Path = ROOT) -> str:
+    script = f'source "{BASH / "job_name.sh"}"; {call}'
+    return subprocess.run(["bash", "-c", script], capture_output=True, text=True, check=True,
+                          env={**os.environ, "CTX_REPO": str(repo)}).stdout  # fmt: skip
+
+
+def test_a_dataset_name_is_its_label_by_the_job_name_rule():
+    """Each dataset named from its label (D-114) carries the name job_field makes of that label,
+    as its slug and its file's stem, and a run folder of that name is that project. A folder
+    with no dataset file is its own name. Catches: a slug typed apart from its label, the rule
+    keeping parentheses, and job_project losing the new-name file or the fallback."""
+    named = 0
+    for path in sorted((ROOT / "conf" / "datasets").glob("*.toml")):
+        dataset = load(path)
+        if dataset.slug.islower() and "-" not in dataset.slug:
+            continue  # a slug from before D-114, not made from its label
+        named += 1
+        assert dataset.slug == path.stem == _job(f'job_field "{dataset.name}"'), path.name
+        assert _job(f'job_field "$(job_project "{path.stem}")"') == path.stem
+    assert named == 8  # noqa: PLR2004 - the eight datasets D-114 renamed
+    assert _job('job_project "no-dataset-file_here"') == "no-dataset-file_here"

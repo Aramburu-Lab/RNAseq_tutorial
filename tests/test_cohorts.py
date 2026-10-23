@@ -43,7 +43,7 @@ colour = "red"
 [extra]
 
 [[datasets]]
-slug = "tier1"
+slug = "Non-cancerous-blood"
 step = 4
 modules = ["de", "de", "plot"]
 laptop_cap = 0
@@ -51,7 +51,7 @@ note = " "
 size = 3
 
 [[datasets]]
-slug = "tier1"
+slug = "Non-cancerous-blood"
 step = 1
 modules = ["de"]
 laptop_cap = "all"
@@ -81,7 +81,9 @@ def test_a_bad_bundle_lists_every_problem(tmp_path):
     folder = tmp_path / "cohorts"
     folder.mkdir()
     (tmp_path / "datasets").mkdir()
-    (tmp_path / "datasets" / "tier1.toml").write_bytes((DATASETS / "tier1.toml").read_bytes())
+    (tmp_path / "datasets" / "Non-cancerous-blood.toml").write_bytes(
+        (DATASETS / "Non-cancerous-blood.toml").read_bytes()
+    )
     (tmp_path / "datasets" / "renamed.toml").write_text('[dataset]\nslug = "else"\n')
     (folder / "other.toml").write_text(BAD)
     with pytest.raises(cohorts.CohortError) as error:
@@ -91,7 +93,8 @@ def test_a_bad_bundle_lists_every_problem(tmp_path):
                  "cohort.label: expected non-blank", "datasets[0].step: expected one of",
                  "'plot' is not one of", "a module listed twice", "datasets[0].laptop_cap",
                  "datasets[0].note", "datasets[0].size: unknown key",
-                 "datasets: 'tier1' listed twice", "renamed.toml declares slug 'else'",
+                 "datasets: 'Non-cancerous-blood' listed twice",
+                 "renamed.toml declares slug 'else'",
                  "datasets[3].slug: no dataset file", "datasets[3].modules"):  # fmt: skip
         assert part in said, (part, said)
     assert "datasets[2].laptop_cap" not in said

@@ -204,7 +204,7 @@ def test_home_paths_shown_as_tilde():
     from ctx.runtime import launcher, retypable, shown_path  # noqa: PLC0415
 
     home = Path.home()
-    assert shown_path(home / "ctx_tier1") == "~/ctx_tier1"
+    assert shown_path(home / "ctx_Non-cancerous-blood") == "~/ctx_Non-cancerous-blood"
     assert shown_path(home) == "~"
     # A sibling whose name starts with the home path is not under it.
     assert shown_path(f"{home}2/x") == f"{home}2/x"

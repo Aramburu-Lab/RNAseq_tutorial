@@ -108,7 +108,7 @@ def git(*args: str) -> str:
                           check=True).stdout.strip()  # fmt: skip
 
 
-@pytest.mark.parametrize("name", ["tier1", "cptac_brca"])
+@pytest.mark.parametrize("name", ["Non-cancerous-blood", "cptac_brca"])
 def test_rules_registered_before_the_protein_reader(name):
     """The registration commit of [proteo.sanity] precedes the commit that added the reader.
 

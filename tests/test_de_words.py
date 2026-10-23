@@ -19,19 +19,19 @@ from ctx.gather import gdc
 from ctx.report import text
 
 ROOT = Path(__file__).resolve().parents[1]
-TIER1 = load(ROOT / "conf" / "datasets" / "tier1.toml")
+STEP1 = load(ROOT / "conf" / "datasets" / "Non-cancerous-blood.toml")
 
 
 def test_every_step1_contrast_reads_in_plain_words():
     """Rytis 2026-10-01: titles in plain words, never a contrast's identifier. Every Step-1
     contrast has its own label, no label holds an underscore, and the levels read as the SDRF
     spells them. Mutation: ``level_words`` returning the curated level (``steady_state``)."""
-    said = every(TIER1.contrasts, TIER1.columns)
-    assert all(c.label for c in TIER1.contrasts)
+    said = every(STEP1.contrasts, STEP1.columns)
+    assert all(c.label for c in STEP1.contrasts)
     assert len({w.label for w in said.values()}) == len(said)
     assert not [w.label for w in said.values() if "_" in w.label]
-    assert level_words(TIER1.columns, "condition", "steady_state") == "steady state"
-    assert level_words(TIER1.columns, "condition", "gcsf") == "G-CSF"
+    assert level_words(STEP1.columns, "condition", "steady_state") == "steady state"
+    assert level_words(STEP1.columns, "condition", "gcsf") == "G-CSF"
     assert said["ndn_gcsf"].tested == "G-CSF" and said["ndn_gcsf"].reference == "steady state"
 
 
@@ -39,8 +39,8 @@ def test_a_pca_names_its_samples_in_plain_words():
     """The Step-1 page titled its steady-state PCA "condition steady_state", a level's
     identifier, found reading the built page in Chromium (2026-10-14). Mutation: the filter's
     levels joined as curated."""
-    (ss_ndn,) = [p for p in TIER1.de.pca if p.name == "ss_ndn"]
-    shown = subset_words(ss_ndn.filters, TIER1.columns)
+    (ss_ndn,) = [p for p in STEP1.de.pca if p.name == "ss_ndn"]
+    shown = subset_words(ss_ndn.filters, STEP1.columns)
     assert "steady state" in shown and "_" not in shown
 
 
@@ -97,13 +97,18 @@ def test_m6_of_gdc_data_acknowledges_the_project_and_the_gdc(tmp_path):
 
 
 def test_cassetta_contrasts_read_by_their_labels():
-    """D1.2: breast_mac, breast_mono and breast_tissue each had two contrasts of one pair of
-    levels, which D-067 told apart by identifier. Labelled, every contrast reads by its own
-    label on the contrasts table and in a caption, and no two read alike. Mutation: ``words``
+    """D1.2: BRCA-immune-cells-macrophages, BRCA-immune-cells-monocytes and Breast-tissue-BRCA
+    each had two contrasts of one pair of levels, which D-067 told apart by identifier.
+    Labelled, every contrast reads by its own label on the contrasts table and in a caption,
+    and no two read alike. Mutation: ``words``
     ignoring ``Contrast.label``: the table and caption print the levels and the identifier."""
     results = pl.DataFrame({"pvalue": [0.01, 0.5], "padj": [0.02, 0.6], "call": ["up", "ns"]})
     empty = pl.DataFrame()
-    for slug in ("breast_mac", "breast_mono", "breast_tissue"):
+    for slug in (
+        "BRCA-immune-cells-macrophages",
+        "BRCA-immune-cells-monocytes",
+        "Breast-tissue-BRCA",
+    ):
         spec = load(ROOT / "conf" / "datasets" / f"{slug}.toml")
         said = every(spec.contrasts, spec.columns)
         assert all(c.label for c in spec.contrasts), slug

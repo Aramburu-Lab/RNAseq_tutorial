@@ -6,7 +6,7 @@ title = "Your own data: {dataset}"
 kicker = "Guide"
 budget = "Track B: under {minutes} min and {ram_gb} GB"
 purpose = "Take a study from its accessions to course pages of its own: download the reads, count them, then run every module the dataset file declares."
-input = "A dataset file: its slug, the accessions to download, and how each run gets its donor, cell type and condition. The worked example is `conf/datasets/four_runs.toml` with its own table."
+input = "A dataset file: its slug, the accessions to download, and how each run gets its donor, cell type and condition. The worked example is `conf/datasets/Non-cancerous-blood-four-runs.toml` with its own table."
 method = """The download runs [[nf-core/fetchngs]] on the metadata alone first, so the size is read before any [[FASTQ]] is fetched. The count runs nf-core/rnaseq, [[Salmon]] only, against references checked with the publisher's [[md5|MD5SUMS]].
 
 One launcher per pipeline serves both computers: `CTX_SITE=laptop` runs every task here under Docker, and the default runs each as a Slurm job on Kebnekaise. The last part copies the outdirs into a ctx root and runs the modules in course order.

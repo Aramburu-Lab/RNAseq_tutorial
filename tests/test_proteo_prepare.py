@@ -26,7 +26,7 @@ from ctx.proteo import guide, prepare
 from ctx.report import guide as page
 
 ROOT = Path(__file__).resolve().parents[1]
-FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
+FOUR = ROOT / "conf" / "datasets" / "Non-cancerous-blood-four-runs.toml"
 BODY = b"made-up protein table\n"
 
 
@@ -128,7 +128,7 @@ def test_guide_part_lines_parse():
     Mutations caught: a prepare option renamed in the parser alone; a ctx option renamed; the
     block typed into the guide instead of read from the template."""
     spec = load(FOUR)
-    found = guide.lines(spec, "conf/datasets/four_runs.toml")
+    found = guide.lines(spec, "conf/datasets/Non-cancerous-blood-four-runs.toml")
     for line in (*found["list"], *found["fetch"], *found["samples"]):
         if line.startswith(guide.PREPARE):
             args = shlex.split(line.removeprefix(guide.PREPARE))

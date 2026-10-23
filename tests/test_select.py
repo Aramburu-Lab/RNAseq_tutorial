@@ -23,7 +23,7 @@ from ctx.report import genes, text
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "src" / "ctx" / "report" / "templates" / "_select.js.j2"
 UI = ROOT / "src" / "ctx" / "report" / "content" / "ui.toml"
-SRC = "tier1:ndn_gcsf"
+SRC = "Non-cancerous-blood:ndn_gcsf"
 # Real rows of Step-1's ndn_gcsf results (2026-09-30): the registered box genes, three
 # symbols that name several tested genes, a gene named by its own ID, and C1orf122.
 ROWS = (
@@ -142,7 +142,10 @@ def test_select_strips_the_version_then_signs_then_drops_repeats_then_sorts():
     (picked, fragment) = _both([["select", SRC, ids],
                                 ["encode", _plain(genes.select(SRC, ids, TABLE))]])  # fmt: skip
     assert picked["ok"] == {"src": SRC, "genes": [-115415, 120217, 163568, -202019]}
-    assert fragment["ok"] == "#v=1&src=tier1:ndn_gcsf&n=4&g=-115415,120217,163568,-202019&end"
+    assert (
+        fragment["ok"]
+        == "#v=1&src=Non-cancerous-blood:ndn_gcsf&n=4&g=-115415,120217,163568,-202019&end"
+    )
 
 
 def test_select_sorts_by_number_past_2_to_the_32_and_signs_zero_up():
@@ -223,8 +226,8 @@ def test_encoding_and_decoding_are_exact_inverses_in_both_languages():
         assert genes.decode(fragment) == selection
         assert genes.encode(genes.decode(fragment)) == fragment
         assert decoded["ok"] == _plain(selection)
-    assert fragments[0] == "#v=1&src=tier1:ndn_gcsf&n=0&g=&end"
-    assert fragments[3] == "#v=1&src=tier1:ndn_gcsf&n=2&g=-1,99999999999&end"
+    assert fragments[0] == "#v=1&src=Non-cancerous-blood:ndn_gcsf&n=0&g=&end"
+    assert fragments[3] == "#v=1&src=Non-cancerous-blood:ndn_gcsf&n=2&g=-1,99999999999&end"
 
 
 def test_the_version_is_defined_once_in_each_language(monkeypatch):
@@ -232,7 +235,10 @@ def test_the_version_is_defined_once_in_each_language(monkeypatch):
     decoder reads, and a link of the old version is refused as such. Catches: a fragment
     pattern holding the version as a literal (the page's '#v=1' did, so version 2 links were
     refused as select.form) or built from VERSION when the module loads."""
-    selection, old = genes.Selection(SRC, (-115415,)), "#v=1&src=tier1:ndn_gcsf&n=1&g=-115415&end"
+    selection, old = (
+        genes.Selection(SRC, (-115415,)),
+        "#v=1&src=Non-cancerous-blood:ndn_gcsf&n=1&g=-115415&end",
+    )
     monkeypatch.setattr(genes, "VERSION", 2)
     new = genes.encode(selection)
     assert (new, genes.decode(new)) == (old.replace("v=1", "v=2"), selection)
@@ -243,20 +249,20 @@ def test_the_version_is_defined_once_in_each_language(monkeypatch):
     assert page[2]["refused"]["key"] == "select.version"
 
 
-GOOD = "#v=1&src=tier1:ndn_gcsf&n="
+GOOD = "#v=1&src=Non-cancerous-blood:ndn_gcsf&n="
 REFUSALS = (
     ("", "select.form"),
     ("#results", "select.form"),
     ("#v=", "select.form"),
-    ("v=1&src=tier1:ndn_gcsf&n=0&g=&end", "select.form"),
-    ("#v=2&src=tier1:ndn_gcsf&n=0&g=&end", "select.version"),
+    ("v=1&src=Non-cancerous-blood:ndn_gcsf&n=0&g=&end", "select.form"),
+    ("#v=2&src=Non-cancerous-blood:ndn_gcsf&n=0&g=&end", "select.version"),
     ("#v=2", "select.version"),
-    ("#v=01&src=tier1:ndn_gcsf&n=0&g=&end", "select.version"),
+    ("#v=01&src=Non-cancerous-blood:ndn_gcsf&n=0&g=&end", "select.version"),
     # A lone surrogate, which Python's argv holds for a byte that is not UTF-8.
-    ("#v=1" + chr(0xDCFF) + "&src=tier1:ndn_gcsf&n=0&g=&end", "select.version"),
+    ("#v=1" + chr(0xDCFF) + "&src=Non-cancerous-blood:ndn_gcsf&n=0&g=&end", "select.version"),
     # Cut inside the source, before the g field, at a comma, and just after one.
-    ("#v=1&src=tier1:nd", "select.cut"),
-    ("#v=1&src=tier1:ndn_gcsf&n=0", "select.cut"),
+    ("#v=1&src=Non-cancerous-blood:nd", "select.cut"),
+    ("#v=1&src=Non-cancerous-blood:ndn_gcsf&n=0", "select.cut"),
     (GOOD + "3&g=-115415,120217", "select.cut"),
     (GOOD + "1&g=", "select.cut"),
     (GOOD + "3&g=-115415,120217,", "select.cut"),
@@ -266,15 +272,15 @@ REFUSALS = (
     # Cut inside the end mark, and text after it.
     (GOOD + "1&g=115415&en", "select.cut"),
     (GOOD + "0&g=&end&t=black", "select.cut"),
-    ("#v=1&n=0&src=tier1:ndn_gcsf&g=&end", "select.form"),
-    ("#v=1&src=tier1:ndn_gcsf&n=0&end", "select.form"),
-    ("#v=1&src=tier1:ndn_gcsf&n=0&g=&t=black&end", "select.form"),
+    ("#v=1&n=0&src=Non-cancerous-blood:ndn_gcsf&g=&end", "select.form"),
+    ("#v=1&src=Non-cancerous-blood:ndn_gcsf&n=0&end", "select.form"),
+    ("#v=1&src=Non-cancerous-blood:ndn_gcsf&n=0&g=&t=black&end", "select.form"),
     # The field pattern is anchored at the end: a second end mark is no gene list's end.
     (GOOD + "1&g=115415&end&t=black&end", "select.form"),
     ("#v=1&src=Breast-tissue-(BRCA):ndn_gcsf&n=0&g=&end", "select.source"),
-    ("#v=1&src=tier1&n=0&g=&end", "select.source"),
-    ("#v=1&src=tier1:&n=0&g=&end", "select.source"),
-    ("#v=1&src=tier1:ndn%20gcsf&n=0&g=&end", "select.source"),
+    ("#v=1&src=Non-cancerous-blood&n=0&g=&end", "select.source"),
+    ("#v=1&src=Non-cancerous-blood:&n=0&g=&end", "select.source"),
+    ("#v=1&src=Non-cancerous-blood:ndn%20gcsf&n=0&g=&end", "select.source"),
     ("#v=1&src=&n=0&g=&end", "select.source_empty"),
     (GOOD + "03&g=-115415,120217,163568&end", "select.n"),
     (GOOD + "&g=&end", "select.n_empty"),
@@ -402,7 +408,7 @@ y_rna HLA-H
 NOTAGENE stat1 ENSG00000999999.1 notagene
 ENSG00000202019.1\tY_RNA
 ENSG00000274008 Metazoa_SRP  # a saved list's line: the symbol labels its ID
-# source: tier1:ndn_gcsf
+# source: Non-cancerous-blood:ndn_gcsf
 C1orf122 ENSG00000093100
 (GBP5.) ENSG00000206990.1/ENSG00000275070 -ENSG00000278700.1.
 """
@@ -444,7 +450,7 @@ def test_a_saved_list_reads_back_as_the_selection(tmp_path):
     (written,) = _node([["listText", _plain(selection), "2026-10-01T09:00:00.000Z"]])
     saved = written["ok"]
     assert saved.splitlines()[:4] == [
-        "# source: tier1:ndn_gcsf",
+        "# source: Non-cancerous-blood:ndn_gcsf",
         "# time: 2026-10-01T09:00:00.000Z",
         "# count: 16",
         "ENSG00000093100\tENSG00000093100",

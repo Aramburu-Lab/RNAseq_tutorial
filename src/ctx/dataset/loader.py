@@ -109,8 +109,8 @@ class Dataset:
         """The dataset this one is a subset of (``[dataset] subset_of``), or None for a whole one.
 
         Its file sits beside this one, named by its slug, as ``conf/datasets`` holds both; a
-        page names it by its own ``name``, its label: M3's subset note named the slug, "tier1",
-        where the parent's label is "Step-1" (kit v6, 2026-10-07).
+        page names it by its own ``name``, its label: M3's subset note named the parent's slug
+        where its label was "Step-1" (kit v6, 2026-10-07).
 
         Raises:
             DatasetError: If that file is missing, unusable or names another slug.

@@ -3,8 +3,8 @@
 The local files are the chr22 fixtures, gzipped at test time. The proof runs the worked example
 both ways: the same reads as a fetchngs outdir, written here under the real fixture's headers
 and pipeline_info, and as own files through `ctx reads`, give gather tables equal value by
-value. No accession is typed here: four_runs.toml and its table name them. Each test names the
-mutation it catches.
+value. No accession is typed here: Non-cancerous-blood-four-runs.toml and its table name them.
+Each test names the mutation it catches.
 """
 
 import csv
@@ -31,7 +31,7 @@ from ctx.report.cards import parameter_cards
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests" / "fixtures"
 REAL = FIXTURES / "fetchngs" / "download"
-FOUR = ROOT / "conf" / "datasets" / "four_runs.toml"
+FOUR = ROOT / "conf" / "datasets" / "Non-cancerous-blood-four-runs.toml"
 TEMPLATE = ROOT / "conf" / "dataset_template.toml"
 # What the fixture's study holds by ENA's vocabulary: human RNA-seq. The fetchngs outdir below
 # carries them as ENA would, the own table as a student would; the rest of ENA's descriptions
@@ -59,9 +59,9 @@ def _counted(text: str) -> tuple[int, int]:
     return len(lines) // 4, sum(len(s) for s in lines[1::4])
 
 
-def four_runs_reads() -> dict[str, str]:
+def four_run_reads() -> dict[str, str]:
     """Each worked-example run's reads: halves of chr22_se's two 101 nt samples, se_c and
-    se_d, so the four runs are 101 nt as four_runs.toml expects."""
+    se_d, so the four runs are 101 nt as Non-cancerous-blood-four-runs.toml expects."""
     halves = []
     for name in ("chr22_se/se_c.fq", "chr22_se/se_d.fq"):
         records = _records(name)
@@ -131,7 +131,7 @@ def own_files(folder: Path, reads: dict[str, str]) -> Path:
 
 
 def own_table(path: Path) -> Path:
-    """four_runs' own table with ENA's descriptions a student would record, as a CSV."""
+    """The four runs' own table with ENA's descriptions a student would record, as a CSV."""
     rows, _ = own_fastq.table_rows(load(FOUR).table())
     described = {"study_accession": load(FOUR).info["ena_study"], **DESCRIBED}
     with path.open("w", newline="") as fh:
@@ -148,9 +148,9 @@ def reads_cli(tmp_path: Path, run_folder: Path, folder: Path, table: Path, colum
 
 @pytest.fixture(scope="module")
 def both_ways(tmp_path_factory):
-    """The worked example's reads both ways, and gather run on each with four_runs.toml."""
+    """The worked example's reads both ways, and gather run on each with its dataset file."""
     tmp = tmp_path_factory.mktemp("both")
-    reads = four_runs_reads()
+    reads = four_run_reads()
     done = reads_cli(tmp, tmp / "run", own_files(tmp / "mine", reads),
                      own_table(tmp / "mine.csv"), "run_accession")  # fmt: skip
     assert done.returncode == 0, done.stderr
@@ -159,9 +159,9 @@ def both_ways(tmp_path_factory):
     roots = {}
     for route, outdir in outdirs.items():
         roots[route] = tmp / f"root_{route}"
-        done = ctx_run("--root", str(roots[route]), "gather", "--dataset", "four_runs",
-                       "--dataset-file", str(FOUR), "--fetchngs-dir", str(outdir),
-                       cwd=tmp)  # fmt: skip
+        done = ctx_run("--root", str(roots[route]), "gather",
+                       "--dataset", "Non-cancerous-blood-four-runs", "--dataset-file", str(FOUR),
+                       "--fetchngs-dir", str(outdir), cwd=tmp)  # fmt: skip
         assert done.returncode == 0, (route, done.stderr[-3000:])
     return reads, outdirs, roots, tmp
 
@@ -199,7 +199,7 @@ def test_both_ways_give_equal_gather_tables(both_ways):
             a, b = _fastq_md5(outdirs["fetchngs"], a), _fastq_md5(outdirs["own"], b)
         assert a.equals(b), (name, a, b)
     frame = own[sheet]
-    reads = four_runs_reads()
+    reads = four_run_reads()
     assert frame["read_count"].to_list() == [str(_counted(reads[r])[0])
                                              for r in frame["run_accession"]]  # fmt: skip
     assert set(frame["status_1"]) == {"verified"} and set(frame["read_length"]) == {"101.0"}

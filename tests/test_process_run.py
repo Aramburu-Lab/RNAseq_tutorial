@@ -245,7 +245,7 @@ def test_a_subsets_page_says_it_is_the_laptop_exercise(process_rerun, process_ro
     parent's own dataset file; the full run's page does not.
 
     Mutations caught: the note left out of ``page.notes`` (no subset page says what it is); the
-    parent named by its slug (kit v6: "a subset of tier1's runs", where its label is
+    parent named by its slug (kit v6 named the subset's parent by its slug, where its label was
     "Step-1")."""
     from process_root import PARENT, PARENT_LABEL  # noqa: PLC0415
 

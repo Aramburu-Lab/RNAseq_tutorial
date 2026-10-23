@@ -179,7 +179,7 @@ def test_subsets_curate_as_their_parent():
         for path in sorted((ROOT / DATASETS).glob("*.toml"))
         if "subset_of" in (raw := tomllib.loads(path.read_text()))["dataset"]
     }
-    assert ROOT / DATASETS / "tier1_teach.toml" in subsets
+    assert ROOT / DATASETS / "Non-cancerous-blood-teaching-subset.toml" in subsets
     own = ("slug", "label", "subset_of")
     for path, sub in subsets.items():
         parent = tomllib.loads(

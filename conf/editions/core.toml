@@ -8,12 +8,14 @@ name = "core"
 label = "Core course"
 notes = "Step-1 immune cells, breast tissue and blood cells, a lung study and a pancreas study, through M1 to M6, M8 and M9."
 modules = ["gather", "qc", "process", "quant", "de", "function", "ncrna", "genecard"]
-# Step-1 (PRJEB49000) is tier1 with its two subsets of the same runs: tier1_teach, M3's laptop
-# exercise, and four_runs, the guide's worked example. breast_mac and breast_mono are the two
-# halves of PRJNA483877. lung_gse229705 is PRJNA955664 (TODO.md ED.4), pancreas_gse192647 is
-# PRJNA792551 (ED.8).
-datasets = ["tier1", "tier1_teach", "four_runs", "breast_tissue", "breast_mac", "breast_mono",
-            "lung_gse229705", "pancreas_gse192647"]
+# Step-1 (PRJEB49000) is Non-cancerous-blood with its two subsets of the same runs:
+# Non-cancerous-blood-teaching-subset, M3's laptop exercise, and Non-cancerous-blood-four-runs,
+# the guide's worked example. BRCA-immune-cells-macrophages and BRCA-immune-cells-monocytes are
+# the two halves of PRJNA483877. Lung-tissue-LUAD is PRJNA955664 (TODO.md ED.4),
+# Pancreas-tissue-PAAD is PRJNA792551 (ED.8). Each name is made from its dataset's label (D-114).
+datasets = ["Non-cancerous-blood", "Non-cancerous-blood-teaching-subset",
+            "Non-cancerous-blood-four-runs", "Breast-tissue-BRCA", "BRCA-immune-cells-macrophages",
+            "BRCA-immune-cells-monocytes", "Lung-tissue-LUAD", "Pancreas-tissue-PAAD"]
 # Lite pages (Rytis 2026-10-22, D-111): each module page shows only its figure cards and its
 # results tables; no sections, Reproduce, check tables or notes. A card keeps its lead, "How
 # to read this" and controls: lite means less text, not less to do (Rytis 2026-10-22).

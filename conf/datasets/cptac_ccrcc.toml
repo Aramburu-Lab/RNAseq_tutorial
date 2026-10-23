@@ -57,8 +57,8 @@ bytes = 139294
 sha256 = "222c97ae4b6a63b890d5a08c97ceefb104afd17e319617e074720e3dc442c365"
 dest = "data/raw/cptac_ccrcc/S050_S044_CPTAC_ccRCC_Discovery_Cohort_Clinical_Data_r4_Sept2019.xlsx"
 
-# MSigDB Hallmark for M7's OXPHOS and glycolysis classes, the file tcga_kirc.toml and tier1.toml
-# declare, copied in place from ~/ctx_tier1 and registered by hash.
+# MSigDB Hallmark for M7's OXPHOS and glycolysis classes, the file tcga_kirc.toml and Non-cancerous-blood.toml
+# declare, copied in place from ~/ctx_Non-cancerous-blood and registered by hash.
 [[resources]]
 name = "msigdb_hallmark"
 urls = [
