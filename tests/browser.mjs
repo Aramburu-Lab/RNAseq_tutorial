@@ -31,10 +31,14 @@ const trace = (step) => {
 };
 const profile = mkdtempSync(join(tmpdir(), "ctx-browser-"));
 // plan.headed shows the window, as a student's double-click does; the tests run headless.
+// No page is treated as backgrounded (H.6b): Chromium lowers a backgrounded renderer's process
+// priority and throttles its timers, and on a loaded machine a page waiting on its own timer sat
+// idle, no script running, until the driver's 900 s limit; Puppeteer sets the same three flags.
 const proc = spawn(plan.chromium, [
   ...(plan.headed ? [] : ["--headless=new"]), "--remote-debugging-port=0", `--user-data-dir=${profile}`, "--no-first-run",
   "--no-default-browser-check", "--disable-gpu", "--disable-background-networking",
-  "--disable-component-update", "--disable-sync", "about:blank",
+  "--disable-component-update", "--disable-sync", "--disable-background-timer-throttling",
+  "--disable-renderer-backgrounding", "--disable-backgrounding-occluded-windows", "about:blank",
 ], { stdio: ["ignore", "ignore", "pipe"] });
 const endpoint = await new Promise((resolve, reject) => {
   let seen = "";
