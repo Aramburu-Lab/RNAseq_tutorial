@@ -112,10 +112,13 @@ def check(
 
 
 def rule_commit(dataset_file: Path) -> str:
-    """The newest commit that registered the dataset file's rules, or 'none found'."""
+    """The newest commit that registered the dataset file's rules, or 'none found'.
+
+    Followed across a rename (D-114), whose commit adds the line under the new path.
+    """
     found = subprocess.run(
-        ["git", "-C", str(ROOT), "log", "-1", "--format=%H", "-G", "^registered = ", "--",
-         str(dataset_file.resolve())],
+        ["git", "-C", str(ROOT), "log", "-1", "--follow", "--format=%H", "-G", "^registered = ",
+         "--", str(dataset_file.resolve())],
         capture_output=True, text=True, check=False,
     ).stdout.strip()  # fmt: skip
     return found or "none found"

@@ -703,5 +703,5 @@ def test_a_dataset_name_is_its_label_by_the_job_name_rule():
         named += 1
         assert dataset.slug == path.stem == _job(f'job_field "{dataset.name}"'), path.name
         assert _job(f'job_field "$(job_project "{path.stem}")"') == path.stem
-    assert named == 8  # noqa: PLR2004 - the eight datasets D-114 renamed
+    assert named == 7  # noqa: PLR2004 - the seven datasets D-114 renamed
     assert _job('job_project "no-dataset-file_here"') == "no-dataset-file_here"

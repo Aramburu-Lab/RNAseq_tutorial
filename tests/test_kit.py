@@ -491,12 +491,14 @@ def test_every_committed_version_of_a_dataset_file_is_the_codebases(kit_script, 
     a merge's included: ~/ctx_kidney's TCGA gather read the version merge 789f8ad made.
     Mutations caught: only the newest commit read (git log -n 1); merges skipped (no -m)."""
     codebase = kit_script.codebase_datasets()
-    commits = subprocess.run(["git", "-C", str(ROOT), "log", "--format=%H", "--",
-                              f"conf/datasets/{name}"], capture_output=True, text=True,
-                             check=True).stdout.split()  # fmt: skip
-    assert len(commits) > 1
-    for at in commits:
-        assert codebase[committed(name, at)].path == f"conf/datasets/{name}", at
+    # Followed across a rename (D-114): an older version is the codebase's under its old path.
+    listed = subprocess.run(["git", "-C", str(ROOT), "log", "--follow", "--format=%H",
+                             "--name-only", "--", f"conf/datasets/{name}"], capture_output=True,
+                            text=True, check=True).stdout.split()  # fmt: skip
+    versions = list(zip(listed[::2], listed[1::2], strict=True))
+    assert len(versions) > 1
+    for at, path in versions:
+        assert codebase[committed(Path(path).name, at)].path == path, at
 
 
 @pytest.mark.parametrize("ours", [True, False])
