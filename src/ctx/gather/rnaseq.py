@@ -33,6 +33,29 @@ COPIED_FILES = (
     "trimgalore/*_trimming_report.json",
     "pipeline_info/execution_trace_*.txt",
 )
+# What an outdir aligned with STAR adds (`aligner: star_salmon`, D-113): Salmon on STAR's
+# alignment and the tables nf-core's own MultiQC wrote, which M2's read stage and M3 read in
+# place of running any tool again (D-116). Never a BAM: M3 reads no alignment itself.
+ALIGNED_MATRIX = "star_salmon/salmon.merged.gene_counts_length_scaled.tsv"
+MULTIQC_DATA = "multiqc/star_salmon/multiqc_report_data"
+MULTIQC_TABLES = (
+    # The MultiQC version, which names the tables' columns.
+    "multiqc.log",
+    # M2: Trim Galore, Salmon alone, FastQC on the raw reads and its plots.
+    "multiqc_general_stats.txt", "multiqc_trim_galore.txt", "multiqc_salmon.txt",
+    "multiqc_fastqc_fastqc_raw.txt", "fastqc_raw_per_base_sequence_quality_plot.txt",
+    "fastqc_raw_adapter_content_plot.txt", "fastqc_raw_per_base_n_content_plot.txt",
+    "fastqc_raw_per_sequence_gc_content_plot_Percentages.txt",
+    "fastqc_raw_overrepresented_sequences_plot.txt",
+    # M3: STAR, samtools flagstat, RSeQC, Qualimap, dupRadar, Preseq, featureCounts biotypes.
+    "multiqc_star.txt", "multiqc_samtools_flagstat.txt", "rseqc_infer_experiment_plot.txt",
+    "multiqc_strand_check_summary_table.txt", "rseqc_read_distribution_plot.txt",
+    "multiqc_rseqc_junction_annotation.txt", "qualimap_gene_coverage_profile_Normalised.txt",
+    "multiqc_dupradar.txt", "preseq_complexity_plot_molecules.txt",
+    "multiqc_featurecounts_biotype_plot.txt",
+)  # fmt: skip
+ALIGNED_FILES = (ALIGNED_MATRIX, *(f"{MULTIQC_DATA}/{name}" for name in MULTIQC_TABLES))
+ALIGNER = "star_salmon"
 # Every params file of one outdir must agree on these; -resume adds a file per launch.
 AGREE = ("pseudo_aligner", "skip_alignment", "gencode", "fasta", "gtf")
 INT32_MAX = 2**31 - 1

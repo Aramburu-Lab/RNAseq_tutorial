@@ -1,0 +1,9 @@
+Sample	trim_galore_version	mode	total_reads	reads_with_adapter	reads_written	reads_too_short	reads_too_long	reads_too_many_n	reads_discarded_untrimmed	total_bp_processed	total_bp_written	quality_trimmed_bp	pairs_analyzed	pairs_removed	pairs_removed_n	pairs_removed_too_long	r1_unpaired	r2_unpaired	poly_a_reads_trimmed	poly_a_bases_removed	poly_g_reads_trimmed	poly_g_bases_removed	rrbs_trimmed_3prime	rrbs_trimmed_5prime	rrbs_r2_clipped_5prime
+RAP1_IAA_30M_REP1_1	2.3.0	paired-end	50000	19615	49791	209	0	0	0	5050000	4942737	12524	50000	209	0	0	0	0	0	0	0	0	0	0	0
+RAP1_IAA_30M_REP1_2	2.3.0	paired-end	50000	22073	49791	209	0	0	0	5050000	4938565	30118	50000	209	0	0	0	0	0	0	0	0	0	0	0
+RAP1_UNINDUCED_REP1	2.3.0	single-end	50000	20163	49969	31	0	0	0	5050000	4949812	12473	None	None	None	None	None	None	0	0	0	0	0	0	0
+RAP1_UNINDUCED_REP2	2.3.0	single-end	100000	40242	99971	29	0	0	0	10100000	9912107	21863	None	None	None	None	None	None	0	0	0	0	0	0	0
+WT_REP1_1	2.3.0	paired-end	100000	40205	99566	434	0	0	0	10100000	9873773	23766	100000	434	0	0	0	0	0	0	0	0	0	0	0
+WT_REP1_2	2.3.0	paired-end	100000	44773	99566	434	0	0	0	10100000	9866069	62557	100000	434	0	0	0	0	0	0	0	0	0	0	0
+WT_REP2_1	2.3.0	paired-end	50000	20412	49760	240	0	0	0	5050000	4932091	10391	50000	240	0	0	0	0	0	0	0	0	0	0	0
+WT_REP2_2	2.3.0	paired-end	50000	22442	49760	240	0	0	0	5050000	4927026	31792	50000	240	0	0	0	0	0	0	0	0	0	0	0
