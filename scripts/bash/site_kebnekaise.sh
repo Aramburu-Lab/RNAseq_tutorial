@@ -72,6 +72,12 @@ process {
     withName: '.*:SALMON_INDEX' { cpus = 3; memory = { 33728.MB * Math.pow(1.25, task.attempt - 1) }; time = { 55.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
     withName: '.*:SE_TRANSCRIPT_UNIFIED' { cpus = 1; memory = { 9408.MB * Math.pow(1.25, task.attempt - 1) }; time = { 23.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
     withName: '.*:SE_GENE_UNIFIED' { cpus = 1; memory = { 3904.MB * Math.pow(1.25, task.attempt - 1) }; time = { 8.min * Math.pow(1.25, task.attempt - 1) }; maxRetries = 3 }
+    // Preseq in defect mode from the first try: 3.27.0's retry, meant to add -defects, runs
+    // `args.join(' -defects')`, which is Java's static String.join with no elements and gives ''
+    // (printed '[]' under Nextflow 26.04.6), so the retry drops every argument and fails again;
+    // Pancreas-tissue-PAAD stopped on it 2026-10-24. The rest is nf-core's own ext.args, verbatim
+    // from conf/modules/preseq.config; the same selector, so this file's value is the one used.
+    withName: 'PRESEQ_LCEXTRAP' { ext.args = '-verbose -bam -seed 1 -seg_len 100000000 -defects' }
 }
 EOF
 }

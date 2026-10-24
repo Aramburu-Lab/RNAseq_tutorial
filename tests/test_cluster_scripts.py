@@ -668,6 +668,9 @@ def test_rnaseq_stubbed(site, gencode):
     assert "    time = { 2.h * task.attempt }" in config
     # Measured requests, memory and time 25 % more per retry, cores never (Rytis 2026-10-23).
     assert "withName: '.*:TRIMGALORE' { cpus = 3; memory = { 8000.MB * Math.pow(1.25" in config
+    # nf-core 3.27.0's Preseq ext.args plus -defects, under its selector: its retry cannot add it.
+    preseq = "'-verbose -bam -seed 1 -seg_len 100000000 -defects'"
+    assert f"withName: 'PRESEQ_LCEXTRAP' {{ ext.args = {preseq} }}" in config
     assert nf_env["NXF_SYNTAX_PARSER"] == "v2" and cwd == str(launch)
     assert "count matrix: 2 genes, 2 samples" in done.stdout
     assert "alignment count matrix: 2 genes, 2 samples" in done.stdout
