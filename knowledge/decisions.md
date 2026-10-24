@@ -27,6 +27,31 @@ it were reversed.
 
 ---
 
+## D-118 — M3's counter scatter and agreement plot are drawn on the page as densities plus the genes beyond the limits; the files and CSVs keep every gene
+
+**Date:** 2026-10-25 · **Status:** decided (Rytis 2026-10-25: density plus outliers).
+
+**Context.** On Breast-tissue-BRCA (103 samples, 68,123 genes with a read) `ctx process --rnaseq-dir` refused its own page: 69,066,001 B against the 15,000,000 B cap. F3 and F4 drew every gene in every view (4 and 8 views), with `keep="differs"` keeping nearly every gene from the thinning, and each view's figure travels raw in the page's controls.
+
+**Options.** Thin the points further (the stride sentence would hide most genes and still scale with views); pack the controls JSON (a change to every page script that reads controls); draw where genes concentrate as regions and only the genes beyond the limits as dots (chosen by Rytis).
+
+**Decision.** `ScatterData.outside`: each colour level (gene type) of at least `DENSITY_MIN_POINTS` (30) genes is drawn as its 50 % (solid) and 90 % (dashed) highest-density regions, from one grid and one set of isolines (`ctx.viz.contour.group_densities`, `hdr_lines`, shared with `DensityData`) that the figure files and the page both draw, in the type's Okabe-Ito colour. The page draws as dots, with full hover, the genes beyond the view's limits (bias plus and minus 1.96 SD, or d's 2.5th and 97.5th percentiles in F4's empirical views) and the genes of smaller types. The PDF and SVG files draw every gene and the same isolines; every CSV keeps every gene, with an `outside` column. The page caption ends with `figures.dense` (`content/process.toml`), counting the dots and the genes the regions stand for. A moved view's PDF and SVG are the page's drawing under that page caption (`export_layers` gives the caption and no thinned points): every gene of the twelve views as float32 pairs was 4.1 MB of a 13.2 MB page in a 10-resample test run, which 246 samples' per-sample figures would have pushed past the cap. With no limits (too few genes) the old thinning applies. The legend key of each region is its line in the first type's colour: a key in ink or grey would match the identity, bias and limit lines.
+
+**Evidence.** Measured on Breast-tissue-BRCA, `CTX_EDITION=core`, on a Mac shared with other ctx runs and a preflight, so wall times are under load (`/usr/bin/time -l`, 1,000 resamples, seed 42):
+
+| | Before (391eb6f) | After (this change and NF.12a's agreement once per type) |
+|---|---|---|
+| Wall time | 2,917.8 s | 1,194.6 s |
+| Maximum resident set size | 5,959,401,472 B | 4,057,464,832 B |
+| Peak memory footprint | 7,477,207,872 B | 7,055,875,944 B |
+| Module page | 69,066,001 B, refused | 9,101,357 B, written |
+
+F3 and F4 are 3,574,191 B of the 9,101,357; plotly.js packed 1,958,468 B. Projected, not measured, to Lung-tissue-LUAD's 246 samples by scaling every other byte of the page by 246/103: 14,055,957 B, under the cap with 0.94 MB to spare. The concordance, discordant, sums and gene-comparison CSVs are byte-identical before and after; the counter and agreement CSVs hold all 68,123 genes, 4,166 of them outside in the build's views. Planted mutations, each failing `tests/test_process_views.py`: the page drawing every gene; a type of fewer than 30 genes given a density; the page's isolines moved off the files'; the caption's count of small-type dots wrong; `outside` inverted; a view's export carrying thinned points.
+
+**Consequence.** Hover on the page names only the dots; a gene inside the regions is found in the CSV. A redraw by `ctx figure` draws the same files. Not done: the controls JSON is still unpacked, so a figure with many raw views elsewhere could meet the same cap.
+
+---
+
 ## D-117 — The plot is the largest part of its figure card: the reading guide under it, legends in rows, 16:9 or taller, a column that grows
 
 **Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23: "The biggest part in the card should be the plot, not the combination of the legend and the 'How to read' blocks. If needed, we can expand the view to with a wide-screen 16:9").
