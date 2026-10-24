@@ -106,10 +106,34 @@ def test_strand_columns_swapped_are_caught(tmp_path):
     assert (swapped["rseqc_sense"] > swapped["rseqc_antisense"]).all()
 
 
+def test_a_gene_one_matrix_lacks_is_left_out_and_counted(tmp_path):
+    """Salmon on STAR's alignment held 471 genes Salmon alone has no row for (Breast-tissue-BRCA,
+    2026-10-24), and M3 stopped. Now the shared genes are compared and the others counted with
+    their share of reads, stated in the counter group's lead. Catches the gene compared as a
+    zero, the refusal back, the share taken from the wrong matrix, and the lead dropping it."""
+    from ctx.process import nfcore_blocks, nfcore_page  # noqa: PLC0415 - the page under test
+
+    outdir = _copy(tmp_path)
+    path = outdir / nfcore.MATRICES["salmon"]
+    alone = pl.read_csv(path, separator="\t")
+    on_star = pl.read_csv(outdir / nfcore.MATRICES["star_salmon"], separator="\t")
+    sums = on_star.select("gene_id", reads=pl.sum_horizontal(pl.exclude("gene_id", "gene_name")))
+    gone = sums.filter(pl.col("reads") > 0).row(0)[0]
+    alone.filter(pl.col("gene_id") != gone).write_csv(path, separator="\t")
+    long, unshared = nfcore.matrices(_outdir(outdir))
+    assert gone not in set(long["gene_id"]) and long["gene_id"].n_unique() == alone.height - 1
+    share = sums.filter(pl.col("gene_id") == gone)["reads"].item() / sums["reads"].sum()
+    assert unshared["salmon"] == (0, 0.0)
+    assert unshared["star_salmon"][0] == 1 and unshared["star_salmon"][1] == pytest.approx(share)
+    lead = nfcore_page.counters_lead(nfcore_blocks.Found(unshared=unshared),
+                                     {"n_genes": 10, "n_identical": 4})  # fmt: skip
+    assert "1 genes only Salmon on STAR's alignment holds" in lead and f"{share:.2%}" in lead
+
+
 def test_the_two_matrices_are_not_swapped():
     """a is Salmon alone (salmon/), b Salmon on STAR's alignment (star_salmon/). Mutation: the
     two MATRICES entries swapped."""
-    long = nfcore.matrices(_outdir())
+    long, _ = nfcore.matrices(_outdir())
     alone = pl.read_csv(STAR / "salmon" / "salmon.merged.gene_counts_length_scaled.tsv",
                         separator="\t")  # fmt: skip
     on_star = pl.read_csv(STAR / "star_salmon" / "salmon.merged.gene_counts_length_scaled.tsv",

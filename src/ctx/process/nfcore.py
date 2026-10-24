@@ -294,14 +294,22 @@ def biotypes(outdir: Outdir) -> pl.DataFrame:
     return held.unpivot(index="sample", variable_name="biotype", value_name="reads")
 
 
-def matrices(outdir: Outdir) -> pl.DataFrame:
+def matrices(outdir: Outdir) -> tuple[pl.DataFrame, dict[str, tuple[int, float]]]:
     """Salmon alone and Salmon on STAR's alignment, gene by gene: sample, gene_id, gene_name, a, b.
 
     ``a`` is Salmon alone, ``b`` Salmon on STAR's alignment, each nf-core's length-scaled count
-    as written, not rounded: the two are compared, not fitted.
+    as written, not rounded: the two are compared, not fitted. Only genes both matrices hold
+    are compared. A gene one matrix lacks has no count there, not a zero: on
+    Breast-tissue-BRCA, 2026-10-24, Salmon on STAR's alignment held 471 genes Salmon alone has
+    no row for, 964,113 of its 2,121,067,187 reads. Read as zeros, they would be scored as the
+    two quantifications disagreeing.
+
+    Returns:
+        The shared genes' counts, and per matrix (``salmon``, ``star_salmon``) the genes only it
+        holds and their share of its counts.
 
     Raises:
-        ProcessError: If a matrix is absent, or the two differ in samples or genes.
+        ProcessError: If a matrix is absent, or the two differ in samples.
     """
     frames = {}
     for name, relative in MATRICES.items():
@@ -315,14 +323,19 @@ def matrices(outdir: Outdir) -> pl.DataFrame:
         schema = {"gene_id": pl.String, "gene_name": pl.String,
                   **dict.fromkeys(header[2:], pl.Float64)}  # fmt: skip
         frames[name] = pl.read_csv(path, separator="\t", schema=schema)
-    alone, star_salmon = frames["salmon"], frames["star_salmon"]
-    if set(alone["gene_id"]) != set(star_salmon["gene_id"]):
-        raise ProcessError(f"{MATRICES['salmon']} and {MATRICES['star_salmon']} hold other genes")
-    long = [f.unpivot(index=["gene_id", "gene_name"], variable_name="sample", value_name=side)
-            for side, f in (("a", alone), ("b", star_salmon))]  # fmt: skip
+    shared = set(frames["salmon"]["gene_id"]) & set(frames["star_salmon"]["gene_id"])
+    unshared = {}
+    for name, frame in frames.items():
+        counts = frame.select(pl.sum_horizontal(pl.exclude("gene_id", "gene_name")), "gene_id")
+        total = float(counts.to_series(0).sum())
+        alone = counts.filter(~pl.col("gene_id").is_in(list(shared)))
+        unshared[name] = (alone.height, float(alone.to_series(0).sum()) / total if total else 0.0)
+    long = [f.filter(pl.col("gene_id").is_in(list(shared)))
+            .unpivot(index=["gene_id", "gene_name"], variable_name="sample", value_name=side)
+            for side, f in (("a", frames["salmon"]), ("b", frames["star_salmon"]))]  # fmt: skip
     joined = long[0].join(long[1].drop("gene_name"), on=["gene_id", "sample"],
                           maintain_order="left")  # fmt: skip
-    return joined.select("sample", "gene_id", "gene_name", "a", "b")
+    return joined.select("sample", "gene_id", "gene_name", "a", "b"), unshared
 
 
 def steps(outdir: Outdir) -> pl.DataFrame:

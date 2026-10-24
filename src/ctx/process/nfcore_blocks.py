@@ -48,6 +48,8 @@ class Found:
     biotypes: pl.DataFrame = field(default_factory=pl.DataFrame)
     comparison: pl.DataFrame = field(default_factory=pl.DataFrame)
     agreements: tab.Agreements = field(default_factory=lambda: tab.Agreements(EMPTY, EMPTY, EMPTY))
+    # Per matrix, the genes only it holds and their share of its counts (nfcore.matrices).
+    unshared: Mapping[str, tuple[int, float]] = field(default_factory=dict)
     steps: pl.DataFrame = field(default_factory=pl.DataFrame)
 
 

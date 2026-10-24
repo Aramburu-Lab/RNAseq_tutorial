@@ -61,6 +61,8 @@ strand = "Strandedness"
 qc = "What nf-core's QC tools found"
 counters = "Salmon on STAR's alignment against Salmon alone"
 counters_lead = "{same} of {n} genes with a read count the same in both."
+counters_only.salmon = "{genes} genes only Salmon alone holds, {share} of its counts, are left out."
+counters_only.star_salmon = "{genes} genes only Salmon on STAR's alignment holds, {share} of its counts, are left out."
 
 [keys]
 samples = "Samples aligned"

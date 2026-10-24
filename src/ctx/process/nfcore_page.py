@@ -7,6 +7,7 @@ frame is read from nf-core's own files (``ctx.process.nfcore``); then the tables
 """
 
 from collections import Counter
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -188,12 +189,13 @@ def outcomes(alignment: pl.DataFrame) -> dict[str, dict[str, int]]:
 
 
 def comparison(outdir: nfcore.Outdir, genes: pl.DataFrame | None
-               ) -> tuple[pl.DataFrame, tab.Agreements]:  # fmt: skip
-    """Salmon alone against Salmon on STAR's alignment, per gene: the long form and agreement.
+               ) -> tuple[pl.DataFrame, tab.Agreements, dict[str, tuple[int, float]]]:  # fmt: skip
+    """Salmon alone against Salmon on STAR's alignment, per gene: long form, agreement, unshared.
 
-    Agreement is ``concordance.per_unit``, through ``tables.agreements``, as the laptop route's.
+    Agreement is ``concordance.per_unit``, through ``tables.agreements``, as the laptop route's,
+    on the genes both matrices hold (``nfcore.matrices``).
     """
-    long = nfcore.matrices(outdir)
+    long, unshared = nfcore.matrices(outdir)
     named = long.select("gene_id", "gene_name").unique("gene_id", maintain_order=True)
     if genes is not None:
         named = named.join(genes.select("gene_id", "gene_type"), on="gene_id", how="left",
@@ -203,7 +205,7 @@ def comparison(outdir: nfcore.Outdir, genes: pl.DataFrame | None
     plain = long.select(comparison=pl.lit(COMPARISON), sample="sample", gene_id="gene_id",
                         a="a", b="b")  # fmt: skip
     agreed = tab.agreements(plain, named)
-    return plain.join(named, on="gene_id", how="left", maintain_order="left"), agreed
+    return plain.join(named, on="gene_id", how="left", maintain_order="left"), agreed, unshared
 
 
 def frames(inputs: Inputs) -> blocks.Found:
@@ -211,13 +213,13 @@ def frames(inputs: Inputs) -> blocks.Found:
     outdir = inputs.outdir
     alignment = alignment_frame(outdir)
     complexity, perfect = nfcore.complexity(outdir)
-    long, agreed = comparison(outdir, inputs.genes)
+    long, agreed, unshared = comparison(outdir, inputs.genes)
     return blocks.Found(
         alignment=alignment, outcomes=outcomes(alignment), strand=nfcore.strand(outdir),
         distribution=nfcore.read_distribution(outdir), junctions=nfcore.junctions(outdir),
         coverage=nfcore.coverage(outdir), duplication=nfcore.duplication(outdir),
         complexity=complexity, perfect=perfect, biotypes=nfcore.biotypes(outdir),
-        comparison=long, agreements=agreed, steps=nfcore.steps(outdir),
+        comparison=long, agreements=agreed, unshared=unshared, steps=nfcore.steps(outdir),
     )  # fmt: skip
 
 
@@ -300,11 +302,20 @@ def results(writer: Writer, found: blocks.Found, shown: blocks.Shown,
             blocks.complexity_figure(writer, found, shown),
             blocks.biotype_figure(writer, found, shown)), tabs=True),
         Group(text.word(PAGE, "groups.counters"), (*scatters, *plots),
-              lead=text.fill(PAGE, "groups.counters_lead", n=f"{agree['n_genes']:,}",
-                             same=f"{agree['n_identical']:,}"), tabs=True),
+              lead=counters_lead(found, agree), tabs=True),
         blocks.concordance_table(found),
         blocks.steps_table(found),
     )  # fmt: skip
+
+
+def counters_lead(found: blocks.Found, agree: Mapping[str, object]) -> str:
+    """The genes that agree, then the genes one matrix alone holds, left out of the comparison."""
+    lead = [text.fill(PAGE, "groups.counters_lead", n=f"{agree['n_genes']:,}",
+                      same=f"{agree['n_identical']:,}")]  # fmt: skip
+    lead += [text.fill(PAGE, f"groups.counters_only.{side}", genes=f"{genes:,}",
+                       share=f"{share:.2%}")
+             for side, (genes, share) in found.unshared.items() if genes]  # fmt: skip
+    return " ".join(lead)
 
 
 def key_numbers(found: blocks.Found) -> tuple[KeyNumber, ...]:
