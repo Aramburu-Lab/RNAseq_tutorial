@@ -130,6 +130,22 @@ def test_a_gene_one_matrix_lacks_is_left_out_and_counted(tmp_path):
     assert "1 genes only Salmon on STAR's alignment holds" in lead and f"{share:.2%}" in lead
 
 
+@pytest.mark.parametrize("n", [5, 103, 210])
+def test_a_bar_per_sample_keeps_its_caption_clear_at_any_count(n):
+    """103 samples drew a 20 in tall mapping figure whose axis title ran into its caption: the
+    caption's room left out its gap above the page edge, a share of the height (2026-10-24)."""
+    from ctx.process import nfcore_figures  # noqa: PLC0415 - the figure under test
+    from ctx.viz.save import layout_problems  # noqa: PLC0415 - heavy
+    from ctx.viz.style import THEMES  # noqa: PLC0415 - heavy
+
+    rows = [(f"S{i}", k, 10, 100, 100 / len(nfcore.OUTCOMES))
+            for i in range(n) for k in nfcore.OUTCOMES]  # fmt: skip
+    frame = pl.DataFrame(rows, schema=["sample", "outcome", "reads", "input_reads", "percent"],
+                         orient="row")  # fmt: skip
+    data = nfcore_figures.mapping_bars(frame, [], f"Reads by STAR outcome; {n} samples. No test.")
+    assert layout_problems(data.static(THEMES["white"])) == []
+
+
 def test_the_two_matrices_are_not_swapped():
     """a is Salmon alone (salmon/), b Salmon on STAR's alignment (star_salmon/). Mutation: the
     two MATRICES entries swapped."""

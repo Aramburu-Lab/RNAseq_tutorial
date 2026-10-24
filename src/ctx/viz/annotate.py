@@ -205,8 +205,11 @@ def place_caption(
     caption = "\n".join(wrap_to(plain(text), usable, SIZES["caption"]))
     fig.text(CAPTION_INSET, CAPTION_BOTTOM, caption, ha="left", va="bottom",
              fontsize=SIZES["caption"])  # fmt: skip
+    # The caption sits CAPTION_BOTTOM of the height up, so its room counts that gap too, as the
+    # page's own export does (_export.js.j2): without it a 20 in tall bar figure of 103 samples
+    # lost 0.2 in and its axis title ran into the caption (Breast-tissue-BRCA, 2026-10-24).
     caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
-    rect = (0, caption_inches / height, 1, 1)
+    rect = (0, caption_inches / height + CAPTION_BOTTOM, 1, 1)
     setattr(fig, LAYOUT, rect)
     if not handles:
         fig.tight_layout(rect=rect)
