@@ -217,11 +217,29 @@ def coverage_figure(writer: Writer, found: Found, shown: Shown) -> FigureBlock:
     )
 
 
+# dupRadar's fit holds 2,230 to 3,594 points a sample (Breast-tissue-BRCA, 2026-10-24): drawn
+# whole, 103 samples made a 16.6 MB page, over the 15 MB cap. Drawn at about this many; the
+# duplication_curve table keeps every point.
+CURVE_POINTS = 200
+
+
+def thinned(frame: pl.DataFrame, points: int = CURVE_POINTS) -> pl.DataFrame:
+    """Every k-th point of each sample's curve, in its order, its first and last always kept.
+
+    Args:
+        frame: sample, x, y, each sample's points in x order.
+        points: About how many points each sample keeps; never more than one over.
+    """
+    at, n = pl.int_range(pl.len()).over("sample"), pl.len().over("sample")
+    step = ((n + points - 1) // points).clip(lower_bound=1)
+    return frame.filter((at % step == 0) | (at == n - 1))
+
+
 def duplication_figure(writer: Writer, found: Found, shown: Shown) -> FigureBlock:
     """dupRadar: each sample's duplication against expression, log10 reads per kilobase."""
-    frame = found.duplication.with_columns(pl.col("x").log10())
+    frame = thinned(found.duplication).with_columns(pl.col("x").log10())
     n = frame["sample"].n_unique()
-    caption = text.fill(PAGE, "figures.duplication.caption", n=n)
+    caption = text.fill(PAGE, "figures.duplication.caption", n=n, points=CURVE_POINTS)
     data = fig.curves(frame, "duplication", _units(shown), shown.colour, caption)
     words = _text("duplication", text.fill(PAGE, "figures.duplication.lead", n=n))
     return writer.figure(data, "duplication", replace(words, reading=(*words.reading, _styles(n))))

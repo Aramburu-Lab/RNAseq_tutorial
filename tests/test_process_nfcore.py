@@ -146,6 +146,20 @@ def test_a_bar_per_sample_keeps_its_caption_clear_at_any_count(n):
     assert layout_problems(data.static(THEMES["white"])) == []
 
 
+def test_a_long_curve_is_drawn_thinned_with_its_ends():
+    """dupRadar's 3,594 points a sample made a 16.6 MB page for 103 samples (2026-10-24). Each
+    curve keeps at most one point over CURVE_POINTS, its first and last, in order; a short one
+    keeps every point. Catches the thinning dropped, an end lost, and samples thinned together."""
+    from ctx.process.nfcore_blocks import CURVE_POINTS, thinned  # noqa: PLC0415 - under test
+
+    long = pl.DataFrame({"sample": ["a"] * 3594 + ["b"] * 7,
+                         "x": [*range(3594), *range(7)], "y": [0.0] * 3601})  # fmt: skip
+    kept = thinned(long)
+    a, b = kept.filter(pl.col("sample") == "a"), kept.filter(pl.col("sample") == "b")
+    assert CURVE_POINTS // 2 < a.height <= CURVE_POINTS + 1 and b.height == 7
+    assert (a["x"][0], a["x"][-1]) == (0, 3593) and a["x"].is_sorted()
+
+
 def test_the_two_matrices_are_not_swapped():
     """a is Salmon alone (salmon/), b Salmon on STAR's alignment (star_salmon/). Mutation: the
     two MATRICES entries swapped."""

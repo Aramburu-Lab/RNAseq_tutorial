@@ -203,7 +203,7 @@ reading = [
     "Each line is one sample: dupRadar's fitted duplication against a gene's expression.",
     "Highly expressed genes duplicate reads in any library; low-expressed ones duplicate only if few molecules were amplified.",
 ]
-caption = "[[dupRadar]] fitted duplication against expression, log10 reads per kilobase; {n} samples, from nf-core's MultiQC plot data. No test."
+caption = "[[dupRadar]] fitted duplication against expression, log10 reads per kilobase; {n} samples, from nf-core's MultiQC plot data, each curve drawn at about {points} of its points. No test."
 x = "Expression"
 y = "Duplication"
 units = { x = "log10 reads per kilobase", y = "%" }
