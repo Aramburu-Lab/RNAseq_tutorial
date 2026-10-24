@@ -77,7 +77,11 @@ process {
     // (printed '[]' under Nextflow 26.04.6), so the retry drops every argument and fails again;
     // Pancreas-tissue-PAAD stopped on it 2026-10-24. The rest is nf-core's own ext.args, verbatim
     // from conf/modules/preseq.config; the same selector, so this file's value is the one used.
-    withName: 'PRESEQ_LCEXTRAP' { ext.args = '-verbose -bam -seed 1 -seg_len 100000000 -defects' }
+    // No retry at all: every retry runs with no arguments, -bam among them, and fails on "reads
+    // unsorted", hiding the first try's own cause (on 2026-10-25 the full disk killed it). A
+    // failed Preseq ends the run on its real error, and a resume runs it again whole. Not
+    // maxRetries = 0: Nextflow 26.04.6 still retried once with it (a toy pipeline, 2026-10-25).
+    withName: 'PRESEQ_LCEXTRAP' { ext.args = '-verbose -bam -seed 1 -seg_len 100000000 -defects'; errorStrategy = 'terminate' }
 }
 EOF
 }
