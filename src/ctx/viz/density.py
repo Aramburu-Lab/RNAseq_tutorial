@@ -18,12 +18,12 @@ from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import axis_title, hover_field, hover_rows, page_y_title
 from ctx.viz.contour import (
     DENSITY_BINS,
-    DENSITY_MARGIN,
-    DENSITY_MIN_POINTS,
     DENSITY_SIGMA,
     HDR_MASSES,
-    density_grid,
-    hdr_levels,
+    Density,
+    grid_centres,
+    grid_extent,
+    group_densities,
 )
 from ctx.viz.scatter import log_ticks
 from ctx.viz.style import (
@@ -43,16 +43,7 @@ from ctx.viz.style import (
 )
 
 REGIONS = ("inner", "outer", "outside")
-
-
-@dataclass(frozen=True)
-class Density:
-    """One group's density on the shared grid and its two highest-density levels."""
-
-    group: str
-    n: int
-    density: np.ndarray
-    levels: tuple[float, float]
+__all__ = ["REGIONS", "Density", "DensityData"]
 
 
 @dataclass(frozen=True)
@@ -116,32 +107,18 @@ class DensityData:
     @cached_property
     def extent(self) -> tuple[float, float, float, float]:
         """The shared grid's bounds, on the axes' scales, a margin beyond every point."""
-        bounds = []
-        for column, log in ((self.x, self.log_x), (self.y, self.log_y)):
-            v = self._scaled(column, log)
-            pad = DENSITY_MARGIN * (v.max() - v.min() or 1.0)
-            bounds += [float(v.min() - pad), float(v.max() + pad)]
-        return bounds[0], bounds[1], bounds[2], bounds[3]
+        return grid_extent(self._scaled(self.x, self.log_x), self._scaled(self.y, self.log_y))
 
     @cached_property
     def densities(self) -> dict[str, Density]:
         """The groups with enough samples, each with its density and levels."""
         x, y = self._scaled(self.x, self.log_x), self._scaled(self.y, self.log_y)
-        groups = self.frame[self.group].to_numpy()
-        out = {}
-        for level in self.colours:
-            keep = groups == level
-            if keep.sum() >= DENSITY_MIN_POINTS:
-                _, _, d = density_grid(x[keep], y[keep], self.extent)
-                inner, outer = hdr_levels(d)
-                out[level] = Density(level, int(keep.sum()), d, (inner, outer))
-        return out
+        return group_densities(x, y, self.frame[self.group].to_numpy(), list(self.colours),
+                               self.extent)  # fmt: skip
 
     def centres(self) -> tuple[np.ndarray, np.ndarray]:
         """The grid's bin centres in data units, as both renderers place the contours."""
-        x0, x1, y0, y1 = self.extent
-        xs = x0 + (np.arange(DENSITY_BINS) + 0.5) * (x1 - x0) / DENSITY_BINS
-        ys = y0 + (np.arange(DENSITY_BINS) + 0.5) * (y1 - y0) / DENSITY_BINS
+        xs, ys = grid_centres(self.extent)
         return (10**xs if self.log_x else xs), (10**ys if self.log_y else ys)
 
     def bandwidth(self) -> str:

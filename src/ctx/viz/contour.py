@@ -74,6 +74,60 @@ def hdr_levels(density: np.ndarray, masses: Sequence[float] = HDR_MASSES) -> lis
     return [float(ordered[min(int(np.searchsorted(held, m)), ordered.size - 1)]) for m in masses]
 
 
+@dataclass(frozen=True)
+class Density:
+    """One group's density on the shared grid and its two highest-density levels."""
+
+    group: Any
+    n: int
+    density: np.ndarray
+    levels: tuple[float, float]
+
+
+def grid_extent(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float, float]:
+    """The shared grid's bounds, on the axes' scales, ``DENSITY_MARGIN`` beyond every point."""
+    bounds = []
+    for v in (x, y):
+        pad = DENSITY_MARGIN * (v.max() - v.min() or 1.0)
+        bounds += [float(v.min() - pad), float(v.max() + pad)]
+    return bounds[0], bounds[1], bounds[2], bounds[3]
+
+
+def grid_centres(extent: tuple[float, float, float, float]) -> tuple[np.ndarray, np.ndarray]:
+    """The grid's bin centres on the axes' scales, where both renderers place the contours."""
+    x0, x1, y0, y1 = extent
+    xs = x0 + (np.arange(DENSITY_BINS) + 0.5) * (x1 - x0) / DENSITY_BINS
+    ys = y0 + (np.arange(DENSITY_BINS) + 0.5) * (y1 - y0) / DENSITY_BINS
+    return xs, ys
+
+
+def group_densities(x: np.ndarray, y: np.ndarray, groups: np.ndarray, order: Sequence[Any],
+                    extent: tuple[float, float, float, float]) -> dict[Any, Density]:  # fmt: skip
+    """Each group of ``order`` with ``DENSITY_MIN_POINTS`` points or more: density and levels."""
+    out = {}
+    for level in order:
+        keep = groups == level
+        if keep.sum() >= DENSITY_MIN_POINTS:
+            _, _, d = density_grid(x[keep], y[keep], extent)
+            inner, outer = hdr_levels(d)
+            out[level] = Density(level, int(keep.sum()), d, (inner, outer))
+    return out
+
+
+def hdr_lines(
+    xs: np.ndarray, ys: np.ndarray, density: np.ndarray, level: float
+) -> list[np.ndarray]:
+    """The isolines of ``density`` at ``level`` as (n, 2) arrays of x, y on the axes' scales.
+
+    One computation for both renderers, so the page and the figure files draw the same lines;
+    contourpy is matplotlib's own contour engine, and its default line type is such a list.
+    """
+    from contourpy import contour_generator  # noqa: PLC0415 - heavy
+
+    lines = contour_generator(xs, ys, density).lines(level)
+    return [np.asarray(line, dtype=float) for line in lines]
+
+
 def above_floor(values: np.ndarray, floor: float | None) -> np.ndarray:
     """Whether each value lies above the floor and so takes a band: every value without one."""
     return np.ones(values.size, dtype=bool) if floor is None else values > floor

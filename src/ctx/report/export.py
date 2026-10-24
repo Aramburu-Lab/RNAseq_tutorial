@@ -243,6 +243,8 @@ def settings(
         stem: The figure's file stem; the view is saved as ``<stem>_view.pdf`` and ``.svg``.
         layers: What the figure files draw that the page's plots lack, from the contract's
             ``export_layers()``: points the page thins, labels it leaves out, room it gives.
+            A contract whose view's file is the page's drawing, as a scatter drawn as
+            densities (D-118), gives its page caption here as ``caption``, which replaces it.
 
     Returns:
         The size in pt, the caption, the stem and the caption's type and insets; ``marker``

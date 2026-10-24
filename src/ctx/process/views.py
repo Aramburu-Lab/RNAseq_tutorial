@@ -166,7 +166,9 @@ def scatter(agreed: Agreed, subset: Subset, words: Mapping[str, str],
     filled = values(agreed.of(subset.gene_type), subset, words)
     caption = " ".join([prefix + subset.words() + ".",
                         text.fill(PAGE, "figures.counters.caption", **filled)])  # fmt: skip
-    return figures.counter_scatter(measured(agreed.part, subset), words, caption), filled
+    data = figures.counter_scatter(measured(agreed.part, subset), words, caption,
+                                   figures.limits_of(filled["every"]))  # fmt: skip
+    return data, filled
 
 
 def plot(agreed: Agreed, gene_type: str | None, empirical: bool, words: Mapping[str, str],

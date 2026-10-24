@@ -155,7 +155,7 @@ def agreement_figures(writer: Writer, found: "Frames", shown: "Shown"
                                         len(found.outcomes)) | words  # fmt: skip
         part = sums.filter(pl.col("comparison") == name)
         scatter = figures.counter_scatter(part, words, shown.prefix + text.fill(
-            PAGE, "figures.counters.caption", **values))  # fmt: skip
+            PAGE, "figures.counters.caption", **values), figures.limits_of(every))  # fmt: skip
         built = _text("counters", text.fill(PAGE, "figures.counters.lead", **values), **words)
         block = writer.figure(scatter, f"counters_{name}", built)
         agreed = views.Agreed(long.filter(pl.col("comparison") == name),

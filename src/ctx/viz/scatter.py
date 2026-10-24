@@ -15,6 +15,7 @@ import numpy as np
 import polars as pl
 
 from ctx.report import text
+from ctx.report.marks import plain
 from ctx.viz.annotate import files_room, fit_title, place_caption, refit_y_title
 from ctx.viz.axes import (
     axis_title,
@@ -24,10 +25,20 @@ from ctx.viz.axes import (
     phone_legend,
     screen_title,
 )
+from ctx.viz.contour import (
+    DENSITY_MIN_POINTS,
+    HDR_MASSES,
+    Density,
+    grid_centres,
+    grid_extent,
+    group_densities,
+    hdr_lines,
+)
 from ctx.viz.style import (
     ALONE_SCALE,
     BUBBLE_KEYS,
     BUBBLE_PT,
+    DENSITY_DASH,
     FIGURE_WIDTH,
     LARGEST_PLOT_PX,
     LINE_TOLERANCE_PX,
@@ -53,6 +64,9 @@ THIN_MAX = 2000
 # Numbers the rows while thinning, where no ``unit`` column groups them.
 ROW = "_thin_row"
 MAX_LABELS = 10
+# Decimals of an isoline's points on the page: a 64-bin grid's lines need no more, and each
+# figure view carries every line of every gene type (D-118).
+REGION_DECIMALS = 4
 # Offset of a point label from its point, in points.
 LABEL_OFFSET = 3.0
 # Cutoffs the page offers as presets; the loosest bounds what may be thinned.
@@ -123,6 +137,15 @@ class Thinning(NamedTuple):
     units: int
     drawn: int
     stride: int
+
+
+class Region(NamedTuple):
+    """One isoline of a colour level's density: the level, ``inner`` or ``outer``, its x and y."""
+
+    level: Any
+    region: str
+    x: np.ndarray
+    y: np.ndarray
 
 
 @dataclass(frozen=True)
@@ -284,6 +307,14 @@ class ScatterData:
             such as M8's pair select; None for none. Not with ``calls``, which is one itself.
         select: The gene picker's settings (``ctx.report.genes.picker``) beside ``calls``:
             a lasso, a box or a click selects genes on the volcano (GS.4); None for none.
+        outside: Boolean column of points beyond the figure's limits, such as M3's limits of
+            agreement (D-118). Set, every renderer draws each colour level of at least
+            ``DENSITY_MIN_POINTS`` points as its 50 % and 90 % highest-density regions, from
+            one grid; the page draws as points only the points outside and those of smaller
+            levels, the figure files and the CSV every point. ``keep`` then thins nothing.
+        dense_words: With ``outside``, the page caption's closing sentence, with ``{dense}``,
+            ``{drawn}``, ``{outside}``, ``{small}``, ``{total}``, ``{inner}``, ``{outer}`` and
+            ``{min_points}`` filled from the drawing.
     """
 
     frame: pl.DataFrame
@@ -312,6 +343,8 @@ class ScatterData:
     thinned: str = ""
     live: Mapping[str, Any] | None = None
     select: Mapping[str, Any] | None = None
+    outside: str | None = None
+    dense_words: str = ""
 
     def __post_init__(self) -> None:
         """Refuse a contract the renderers could only draw wrongly."""
@@ -324,6 +357,7 @@ class ScatterData:
             self.keep,
             self.size,
             self.unit,
+            self.outside,
             *self.hover,
         ]
         if self.calls:
@@ -340,6 +374,24 @@ class ScatterData:
             raise ValueError(f"{self.symbol}: more levels than the {len(MARKERS)} marker shapes")
         self._check_controls()
         self._check_unit()
+        self._check_density()
+
+    def _check_density(self) -> None:
+        """Refuse densities the page could only draw wrongly.
+
+        On a log axis, beside a control that moves points between traces, per unit, or with
+        no words for the caption.
+        """
+        if self.outside is None:
+            return
+        if not self.dense_words:
+            raise ValueError(f"outside {self.outside}: name what the page draws in dense_words")
+        if self.log_x or self.log_y or self.calls or self.live or self.symbol or self.size:
+            raise ValueError("densities are drawn on linear axes, one trace per colour")
+        if self.unit:
+            raise ValueError("densities are drawn per point, not per unit")
+        if self.frame[self.outside].dtype != pl.Boolean:
+            raise ValueError(f"{self.outside}: a Boolean column")
 
     def _check_controls(self) -> None:
         """Refuse page controls the page script could only apply wrongly."""
@@ -451,8 +503,17 @@ class ScatterData:
         rows are drawn or left out together: thinned row by row, the MA plot showed one of the
         two estimates of 1,645 of Step-1's 9,093 genes not called. Ties keep the table's
         order, so the same table draws the same page.
+
+        With densities the page draws the points outside and those of levels with no density,
+        and no stride: the densities draw the rest.
         """
         rows = self.frame.with_row_index(ROW)
+        if self.densities:
+            assert self.outside is not None  # noqa: S101 - densities need outside
+            drawn = pl.col(self.outside).fill_null(True) | ~pl.col(self.colour).is_in(
+                list(self.densities))  # fmt: skip
+            page = rows.select(drawn).to_series()
+            return Thinning(page, int((~page).sum()), 0, 1)
         if self.keep is None:
             return Thinning(pl.Series([True] * rows.height), 0, 0, 1)
         kept, unit = pl.col(self.keep).fill_null(False), self.unit or ROW
@@ -464,6 +525,35 @@ class ScatterData:
         page = rows.select(kept | pl.col(unit).is_in(chosen.implode())).to_series()
         return Thinning(page, units.len(), chosen.len(), stride)
 
+    @cached_property
+    def densities(self) -> dict[Any, Density]:
+        """Each colour level's density, of every point of it, on one grid; none without ``outside``.
+
+        Levels with fewer than ``DENSITY_MIN_POINTS`` points have none and are drawn as points.
+        """
+        if self.outside is None:
+            return {}
+        x, y = (self.frame[c].to_numpy().astype(float) for c in (self.x, self.y))
+        return group_densities(x, y, self.frame[self.colour].to_numpy(), list(self.colours),
+                               grid_extent(x, y))  # fmt: skip
+
+    @cached_property
+    def regions(self) -> list[Region]:
+        """Every isoline both renderers draw: each density's 50 % (inner) and 90 % (outer) line."""
+        if not self.densities:
+            return []
+        x, y = (self.frame[c].to_numpy().astype(float) for c in (self.x, self.y))
+        xs, ys = grid_centres(grid_extent(x, y))
+        return [Region(level, region, line[:, 0], line[:, 1])
+                for level, d in self.densities.items()
+                for region, value in zip(("inner", "outer"), d.levels, strict=True)
+                for line in hdr_lines(xs, ys, d.density, value)]  # fmt: skip
+
+    def region_label(self, region: str) -> str:
+        """The legend key of the inner or the outer region's lines."""
+        mass = HDR_MASSES[region == "outer"]
+        return text.fill("ui", "density.region", mass=f"{mass * 100:g}")
+
     def on_page(self) -> pl.DataFrame:
         """The points the HTML page draws, in the table's order: ``thinning``'s selection."""
         return self.frame.filter(self.thinning.page)
@@ -471,9 +561,12 @@ class ScatterData:
     def caption_text(self) -> str:
         """The caption, then the page's thinning sentence when it draws fewer points than the CSV.
 
-        The figure files draw every point, so their caption is ``caption`` alone.
+        With densities, ``dense_words`` filled instead. The figure files draw every point, so
+        their caption is ``caption`` alone.
         """
         t = self.thinning
+        if self.densities:
+            return f"{self.caption} {self._dense_sentence()}"
         if t.stride == 1:
             return self.caption
         rest = self.thinned or text.word("ui", "thinned.callable" if self.calls
@@ -485,6 +578,18 @@ class ScatterData:
         )  # fmt: skip
         return f"{self.caption} {sentence}"
 
+    def _dense_sentence(self) -> str:
+        """``dense_words`` filled from the drawing: the points the page draws and the rest."""
+        assert self.outside is not None  # noqa: S101 - densities need outside
+        drawn = int(self.thinning.page.sum())
+        outside = int(self.frame[self.outside].fill_null(True).sum())
+        return self.dense_words.format_map({
+            "dense": f"{self.frame.height - drawn:,}", "drawn": f"{drawn:,}",
+            "outside": f"{outside:,}", "small": f"{drawn - outside:,}",
+            "total": f"{self.frame.height:,}", "inner": f"{HDR_MASSES[0] * 100:g}",
+            "outer": f"{HDR_MASSES[1] * 100:g}", "min_points": DENSITY_MIN_POINTS,
+        })  # fmt: skip
+
     def export_layers(self) -> dict[str, Any]:
         """What the figure files draw and the page's plot lacks, for its PDF and SVG of a view.
 
@@ -492,7 +597,15 @@ class ScatterData:
         pairs in base64, by trace index; ``labels``: each label the figure files print, at the
         offset in pt and the alignment ``static()`` placed it at. A moved view's file then
         draws every point and label the reference file does (review, 2026-10-01).
+
+        With densities a moved view's file is the page's drawing, regions and dots, under the
+        page's caption, which says so: every point of M3's twelve views as float32 pairs was
+        4.1 of a 13.2 MB page at 103 samples, which 246 samples would have taken past 15 MB
+        (D-118). The build's own files still draw every point.
         """
+        if self.densities:
+            return {"thinned": {}, "labels": self.placed_labels(),
+                    "caption": plain(self.caption_text())}  # fmt: skip
         omitted = self.frame.filter(~self.thinning.page)
         thinned = {}
         for index, rows in enumerate(self._trace_rows(omitted, self.colour)):
@@ -594,6 +707,7 @@ class ScatterData:
             if math.isnan(line.y[0]):
                 continue
             ax.plot(line.x, line.y, linewidth=LINE_WIDTHS["line"], **_line_style(line, theme))
+        region_keys = self._draw_regions(ax, colours)
         ax.set_xscale("log" if self.log_x else "linear")
         ax.set_yscale("log" if self.log_y else "linear")
         for axis, log, column in ((ax.xaxis, self.log_x, self.x), (ax.yaxis, self.log_y, self.y)):
@@ -620,6 +734,7 @@ class ScatterData:
             Line2D([], [], label=line.name, **_line_style(line, theme))
             for line in {ln.name: ln for ln in self.all_lines() if not math.isnan(ln.y[0])}.values()
         ]
+        handles += region_keys
         sns.despine(fig=fig)
         place_caption(fig, self.caption, width, height, ax=ax, handles=handles)
         refit_y_title(fig, ax, self._axis_title(self.y_label, self.y))
@@ -627,6 +742,17 @@ class ScatterData:
             renderer = FigureCanvasAgg(fig).get_renderer()  # type: ignore[no-untyped-call]
             self._place_labels(fig, ax, renderer, theme)
         return fig
+
+    def _draw_regions(self, ax: Any, colours: Mapping[Any, str]) -> list[Any]:
+        """Draw every isoline over the points; return the legend keys of the two regions."""
+        from matplotlib.lines import Line2D  # noqa: PLC0415 - heavy
+
+        for r in self.regions:
+            ax.plot(r.x, r.y, color=colours[r.level], linewidth=LINE_WIDTHS["line"],
+                    linestyle=DENSITY_DASH[r.region][0])  # fmt: skip
+        return [Line2D([], [], color=colours[level], linestyle=DENSITY_DASH[region][0],
+                       label=self.region_label(region))
+                for level, region in self._region_keys()]  # fmt: skip
 
     def _place_labels(self, fig: Any, ax: Any, renderer: Any, theme: Theme) -> None:
         """Label up to ``MAX_LABELS`` points inside the axes, clear of every text on the page.
@@ -689,6 +815,46 @@ class ScatterData:
             return list(line.x), list(line.y)
         kept = needed_points(u, v, (LARGEST_PLOT_PX, PLOTLY_HEIGHT_PX["scatter"] * ALONE_SCALE))
         return x[kept].tolist(), y[kept].tolist()
+
+    def _region_keys(self) -> list[tuple[Any, str]]:
+        """The (level, region) whose lines are the legend's keys: the first level with a density.
+
+        A key in ink or the reference grey would match the identity, bias and limit lines;
+        every level's lines take its points' colour and the region's dash.
+        """
+        return [k for k in self._grouped_regions() if k[0] == next(iter(self.densities))]
+
+    def _region_traces(self) -> list[Any]:
+        """The densities' isolines, one trace per level and region.
+
+        After the point traces and the lines, so the page's exports find a point trace at the
+        index ``export_layers`` names. A level's lines are one trace, broken by nulls. The
+        first level's lines are the legend keys (``_region_keys``), and a key shows or hides its
+        region's lines of every level.
+        """
+        import plotly.graph_objects as go  # noqa: PLC0415 - heavy; imported after the profile
+
+        light, traces, keys = THEMES["white"], [], self._region_keys()
+        for (level, region), lines in self._grouped_regions().items():
+            x: list[float | None] = []
+            y: list[float | None] = []
+            for r in lines:
+                x += [*np.round(r.x, REGION_DECIMALS).tolist(), None]
+                y += [*np.round(r.y, REGION_DECIMALS).tolist(), None]
+            traces.append(go.Scatter(
+                x=x, y=y, mode="lines", name=self.region_label(region),
+                line={"color": self.colours[level] or light.reference,
+                      "width": LINE_WIDTHS["line"], "dash": DENSITY_DASH[region][1]},
+                hoverinfo="skip", showlegend=(level, region) in keys, legendgroup=region,
+            ))  # fmt: skip
+        return traces
+
+    def _grouped_regions(self) -> dict[tuple[Any, str], list[Region]]:
+        """The isolines by colour level and region, in drawing order."""
+        out: dict[tuple[Any, str], list[Region]] = {}
+        for r in self.regions:
+            out.setdefault((r.level, r.region), []).append(r)
+        return out
 
     def interactive(self) -> Any:
         """Render the plotly figure; hover shows x, y and every ``hover`` column.
@@ -758,6 +924,8 @@ class ScatterData:
                 )
             )  # fmt: skip
             named.add(line.name)
+        for trace in self._region_traces():
+            fig.add_trace(trace)
         fig.update_layout(
             template=plotly_templates()["white"],
             height=PLOTLY_HEIGHT_PX["scatter"],
