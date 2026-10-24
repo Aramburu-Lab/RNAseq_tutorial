@@ -283,7 +283,7 @@ var ctxExport = {
   /* The caption block's height in pt: its lines at the caption size and line spacing, and the
      inset under it that the figure files keep. */
   captionHeight: function (n, ex) {
-    return n * ex.size * ex.spacing + ex.bottom * ex.height_pt;
+    return n * ex.size * ex.spacing + ex.bottom;
   },
   escape: function (s) {
     return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");

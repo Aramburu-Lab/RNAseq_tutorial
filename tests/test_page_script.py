@@ -607,9 +607,10 @@ KERNED = (
 def _caption_lines(figure) -> list[str]:
     """The caption a figure file draws, line by line: the text place_caption sets at the
     insets."""
-    from ctx.viz.style import CAPTION_BOTTOM, CAPTION_INSET  # noqa: PLC0415
+    from ctx.viz.style import CAPTION_BOTTOM_PT, CAPTION_INSET  # noqa: PLC0415
 
-    (caption,) = [t for t in figure.texts if t.get_position() == (CAPTION_INSET, CAPTION_BOTTOM)]
+    at = (CAPTION_INSET, CAPTION_BOTTOM_PT / 72 / figure.get_figheight())
+    (caption,) = [t for t in figure.texts if t.get_position() == pytest.approx(at)]
     return caption.get_text().split("\n")
 
 
@@ -818,10 +819,10 @@ def test_export_svg_is_sized_in_points_with_its_caption_inside():
     texts = [t for t in root.iter("{http://www.w3.org/2000/svg}text")][1:]
     assert [t.text for t in texts] == lines
     baselines = [float(t.get("y")) for t in texts]
-    assert baselines[-1] <= h * (1 - ex["bottom"]) + 1e-9
+    assert baselines[-1] <= h - ex["bottom"] + 1e-9
     assert baselines[1] - baselines[0] == pytest.approx(ex["size"] * ex["spacing"])
     assert float(texts[0].get("x")) == pytest.approx(ex["inset"] * w)
-    assert out["height"] == pytest.approx(2 * ex["size"] * ex["spacing"] + ex["bottom"] * h)
+    assert out["height"] == pytest.approx(2 * ex["size"] * ex["spacing"] + ex["bottom"])
     assert "lightgray" not in out["svg"] and 'stroke="none"' in out["svg"]
     assert set(re.findall(r"font-family:\s*([^;\"]+)", out["pdf"])) == {"CtxSans"}
 

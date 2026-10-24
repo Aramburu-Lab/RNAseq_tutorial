@@ -18,7 +18,7 @@ from ctx.report.marks import plain
 from ctx.viz.metrics import words, wrap_to
 from ctx.viz.style import (
     AXIS_TITLE_SHARE,
-    CAPTION_BOTTOM,
+    CAPTION_BOTTOM_PT,
     CAPTION_INSET,
     LEGEND_MAX_COLUMNS,
     LINE_SPACING,
@@ -203,13 +203,14 @@ def place_caption(
     # 2026-10-01). A page's own PDF of a changed view wraps by the same measure (D-033).
     usable = width * 72 * (1 - 2 * CAPTION_INSET)
     caption = "\n".join(wrap_to(plain(text), usable, SIZES["caption"]))
-    fig.text(CAPTION_INSET, CAPTION_BOTTOM, caption, ha="left", va="bottom",
+    fig.text(CAPTION_INSET, CAPTION_BOTTOM_PT / 72 / height, caption, ha="left", va="bottom",
              fontsize=SIZES["caption"])  # fmt: skip
-    # The caption sits CAPTION_BOTTOM of the height up, so its room counts that gap too, as the
-    # page's own export does (_export.js.j2): without it a 20 in tall bar figure of 103 samples
-    # lost 0.2 in and its axis title ran into the caption (Breast-tissue-BRCA, 2026-10-24).
-    caption_inches = (caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING / 72
-    rect = (0, caption_inches / height + CAPTION_BOTTOM, 1, 1)
+    # The room counts the gap under the caption too, as the page's own export does
+    # (_export.js.j2): without it a 20 in tall bar figure of 103 samples ran its axis title
+    # into the caption (Breast-tissue-BRCA, 2026-10-24).
+    caption_inches = ((caption.count("\n") + 1) * SIZES["caption"] * LINE_SPACING
+                      + CAPTION_BOTTOM_PT) / 72  # fmt: skip
+    rect = (0, caption_inches / height, 1, 1)
     setattr(fig, LAYOUT, rect)
     if not handles:
         fig.tight_layout(rect=rect)

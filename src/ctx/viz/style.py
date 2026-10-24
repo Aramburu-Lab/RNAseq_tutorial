@@ -130,9 +130,11 @@ STRIP = {"jitter": 0.3, "range": 0.4}
 # The caption's inset from each side, as a share of the figure's width; annotate.place_caption
 # draws at it and wraps inside it.
 CAPTION_INSET = 0.02
-# Its inset from the bottom, as a share of the figure's height; a page's own PDF and SVG of a
-# changed view draw their caption at the same insets.
-CAPTION_BOTTOM = 0.01
+# Its gap above the bottom edge, in pt, the same at any height: as a share of the height (0.01,
+# 2.4 pt of a 3.35 in bar figure) it grew to 14 pt on a 20 in figure of 103 samples and shrank
+# the axes of a box figure grown for its labels (2026-10-24). A page's own PDF and SVG of a
+# changed view keep the same gap.
+CAPTION_BOTTOM_PT = 2.4
 # Empty space above the tallest box for the p/r labels, as a fraction of the data range.
 HEADROOM = 0.35
 # The least space between two stacked rows of a box figure's labels, and between two labels

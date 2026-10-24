@@ -27,7 +27,7 @@ from markupsafe import Markup
 from ctx.report import text
 from ctx.report.marks import plain
 from ctx.viz.style import (
-    CAPTION_BOTTOM,
+    CAPTION_BOTTOM_PT,
     CAPTION_INSET,
     FONT_CHAIN,
     LINE_SPACING,
@@ -255,7 +255,7 @@ def settings(
         "width_pt": width * 72, "height_pt": height * 72, "caption": plain(file_caption(caption)),
         "note": text.word("ui", "export.note"),
         "file": stem, "size": SIZES["caption"], "spacing": LINE_SPACING, "inset": CAPTION_INSET,
-        "bottom": CAPTION_BOTTOM, "ink": THEMES["white"].ink, "marker": 1 / PAGE_PX_PER_PT,
+        "bottom": CAPTION_BOTTOM_PT, "ink": THEMES["white"].ink, "marker": 1 / PAGE_PX_PER_PT,
         "family": ", ".join([*(f"'{f}'" for f in FONT_CHAIN), "sans-serif"]),
         "label_size": SIZES["annotation"], "leader": LINE_WIDTHS["line"], **(layers or {}),
     }  # fmt: skip
