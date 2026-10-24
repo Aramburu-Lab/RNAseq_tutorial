@@ -70,3 +70,34 @@ Accessions (PRJEB49000 and the rest), sample and run IDs, and GEO series stay as
 Checks: the naming lint passes on every output; a test plants an old slug in a page file name
 and the lint refuses it; Step-1's sanity rules still pass on the renamed record; every page of
 the review set opens in Chromium with no console error.
+
+## Step 3's block (written 2026-10-25; run only once no run of the six is queued or running)
+
+A `set -euo pipefail` script, run with `bash`. It refuses while any `RNAseq-Tutorial_` job is in
+the queue, since a running head holds the old path open. Each folder moves to its new name and
+the old path becomes a symlink to it. A run resumed later from either path reads the same files,
+because every path nf-core and fetchngs recorded is absolute and still resolves. A name that
+exists already is left alone, so a second run of the script changes nothing.
+
+```
+S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+cat > "$S/rename_runs.sh" <<'SH'
+set -euo pipefail
+S=/proj/nobackup/hpc2n2024-150/Rytis/Tasks/RNAseq_tutorial
+if squeue -u "$USER" -h -o '%j' | grep -q '^RNAseq-Tutorial_'; then echo "a run is queued; nothing renamed"; exit 1; fi
+while read -r old new; do
+    if [[ -L "$S/$old" || -e "$S/$new" ]]; then echo "$old: done already"; continue; fi
+    [[ -d "$S/$old" ]] || { echo "$old: no such folder"; continue; }
+    mv "$S/$old" "$S/$new" && ln -s "$new" "$S/$old" && echo "$old -> $new"
+done <<'MAP'
+tier1 Non-cancerous-blood
+breast_tissue Breast-tissue-BRCA
+breast_mac BRCA-immune-cells-macrophages
+breast_mono BRCA-immune-cells-monocytes
+lung_gse229705 Lung-tissue-LUAD
+pancreas_gse192647 Pancreas-tissue-PAAD
+MAP
+ls -l "$S" | grep -- '->'
+SH
+bash "$S/rename_runs.sh"
+```
