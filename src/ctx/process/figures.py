@@ -176,14 +176,41 @@ def _hover_words(words: Mapping[str, str]) -> dict[str, str]:
     return {**labels("counters", ["gene_name", "gene_id"]), "a": words["a"], "b": words["b"]}
 
 
-def counter_scatter(sums: pl.DataFrame, words: Mapping[str, str], caption: str) -> ScatterData:
+def limits_of(row: Mapping[str, Any], empirical: bool = False) -> tuple[float | None, float | None]:
+    """A concordance row's limits: bias plus and minus 1.96 SD, or d's 2.5th and 97.5th."""
+    low, high = ("d_p2_5", "d_p97_5") if empirical else ("loa_low", "loa_high")
+    return row[low], row[high]
+
+
+def beyond(limits: tuple[float | None, float | None]) -> pl.Expr:
+    """Whether a gene's d lies beyond the limits, as the leads count it; null with no limits."""
+    low, high = limits
+    d = pl.col("log2_b") - pl.col("log2_a")
+    if low is None or high is None:
+        return pl.lit(None, pl.Boolean)
+    return ~d.is_between(low, high)
+
+
+def _density(frame: pl.DataFrame) -> dict[str, Any]:
+    """The page's densities (D-118): genes beyond the limits as dots, the rest as regions."""
+    if frame["outside"].null_count():
+        return {}
+    # A template: ScatterData fills it from what the page draws.
+    return {"outside": "outside", "dense_words": str(text.raw(PAGE, "figures.dense"))}
+
+
+def counter_scatter(sums: pl.DataFrame, words: Mapping[str, str], caption: str,
+                    limits: tuple[float | None, float | None] = (None, None)
+                    ) -> ScatterData:  # fmt: skip
     """F3: one gene per point, its two counts summed over samples, on log2(count + 1) axes.
 
-    Points are coloured by gene type; every gene whose two counts differ is kept on the page
-    whatever the thinning, so no disagreement is hidden.
+    Points are coloured by gene type. With ``limits``, the view's limits of agreement, the page
+    draws each gene type as its densities and every gene beyond the limits as a dot (D-118);
+    without them every gene whose two counts differ is kept on the page whatever the thinning,
+    so no disagreement is hidden.
     """
     frame = _typed(sums).select("gene_id", "gene_name", "type_group", "a", "b", "log2_a",
-                                "log2_b", "differs")  # fmt: skip
+                                "log2_b", "differs", outside=beyond(limits))  # fmt: skip
     span = (0.0, max(stat(frame["log2_a"], "max"), stat(frame["log2_b"], "max")))
     extra = {"a": text.fill(PAGE, "figures.counters.columns.a", a=words["a"]),
              "b": text.fill(PAGE, "figures.counters.columns.b", b=words["b"])}  # fmt: skip
@@ -194,7 +221,7 @@ def counter_scatter(sums: pl.DataFrame, words: Mapping[str, str], caption: str) 
         names={t: text.word(PAGE, f"gene_types.{t}") for t in TYPE_LEVELS},
         caption=caption, hover=("gene_name", "gene_id", "a", "b"), keep="differs",
         lines=(Line(text.word(PAGE, "figures.counters.identity"), span, span),),
-        labels=_hover_words(words),
+        labels=_hover_words(words), **_density(frame),
     )  # fmt: skip
 
 
@@ -204,17 +231,19 @@ def agreement_plot(sums: pl.DataFrame, every: Mapping[str, Any], words: Mapping[
 
     The bias is solid, the limits dashed: bias plus and minus 1.96 SD, or with ``empirical``
     the 2.5th and 97.5th percentiles of d (WO8, D-051). A line whose value is undefined is not
-    drawn.
+    drawn. The page draws each gene type as its densities and every gene beyond the limits
+    drawn as a dot (D-118).
     """
+    limits = ("d_p2_5", "d_p97_5") if empirical else ("loa_low", "loa_high")
     frame = _typed(sums).select(
         "gene_id", "gene_name", "type_group", "a", "b",
         mean_log2=(pl.col("log2_a") + pl.col("log2_b")) / 2,
-        diff_log2=pl.col("log2_b") - pl.col("log2_a"), differs="differs")  # fmt: skip
+        diff_log2=pl.col("log2_b") - pl.col("log2_a"), differs="differs",
+        outside=beyond(limits_of(every, empirical)))  # fmt: skip
     span = (stat(frame["mean_log2"], "min"), stat(frame["mean_log2"], "max"))
     lines = []
     if every["bias"] is not None:
         lines.append(Line(text.word(PAGE, "figures.agreement.bias"), span, (every["bias"],) * 2))
-    limits = ("d_p2_5", "d_p97_5") if empirical else ("loa_low", "loa_high")
     label = text.word(PAGE, "figures.agreement.percentiles" if empirical
                       else "figures.agreement.limits")  # fmt: skip
     for limit in limits:
@@ -229,5 +258,5 @@ def agreement_plot(sums: pl.DataFrame, every: Mapping[str, Any], words: Mapping[
         colours=category_colours(list(TYPE_LEVELS)),
         names={t: text.word(PAGE, f"gene_types.{t}") for t in TYPE_LEVELS},
         caption=caption, hover=("gene_name", "gene_id", "a", "b"), keep="differs",
-        lines=tuple(lines), labels=_hover_words(words),
+        lines=tuple(lines), labels=_hover_words(words), **_density(frame),
     )  # fmt: skip

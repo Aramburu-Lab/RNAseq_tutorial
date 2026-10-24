@@ -200,6 +200,9 @@ group_column = "Sheet column {column}, from the gather sheet."
 no_value = "not recorded"
 # What each filter's select is labelled, and the same columns on hover.
 filter_labels = { cell_type = "Cell type", condition = "Condition", call = "Strand call" }
+# Closes the page caption of F3 and F4 where the page draws densities (D-118); the figure files
+# and the CSV hold every gene.
+dense = "On this page, each gene type of {min_points} genes or more is drawn as its {inner} % and {outer} % highest-density regions. Dots: the {outside} genes beyond the limits of agreement and {small} of smaller types; the files and the CSV hold all {total}."
 
 [figures.mapping]
 title = "Where each sample's reads align"
@@ -322,7 +325,8 @@ columns.a = "{a}, summed over samples."
 columns.b = "{b}, summed over samples."
 columns.log2_a = "log2 of a plus 1: the x axis."
 columns.log2_b = "log2 of b plus 1: the y axis."
-columns.differs = "Whether a and b differ; such genes are always drawn on the page."
+columns.differs = "Whether a and b differ; with no limits, such genes are always drawn on the page."
+columns.outside = "Whether d lies beyond the view's limits; such genes are dots on the page. Empty with no limits."
 
 [figures.agreement]
 title = "How far the two counts differ: {name}"
@@ -351,7 +355,8 @@ columns.gene_name = "Gene symbol, from the annotation."
 columns.type_group = "Gene type: protein_coding, lncRNA, or other; the colour."
 columns.mean_log2 = "Mean of log2(a + 1) and log2(b + 1): the x axis."
 columns.diff_log2 = "d = log2(b + 1) - log2(a + 1): the y axis."
-columns.differs = "Whether a and b differ; such genes are always drawn on the page."
+columns.differs = "Whether a and b differ; with no limits, such genes are always drawn on the page."
+columns.outside = "Whether d lies beyond the view's limits; such genes are dots on the page. Empty with no limits."
 
 [tables.alignment]
 units = { input_reads = "reads", unique = "reads", multi = "reads", unmapped = "reads", unique_pct = "%", multi_pct = "%", unmapped_pct = "%", too_many = "reads", mismatches = "reads", too_short = "reads", other = "reads", too_many_pct = "%", mismatches_pct = "%", too_short_pct = "%", other_pct = "%", mismatch_rate = "%", splices = "splices", splices_annotated = "splices", splices_noncanonical = "splices", splices_per_100_unique = "splices per 100 reads", splices_annotated_share = "fraction", fastp_raw = "reads", fastp_passed = "reads", records = "records", mapped_records_pct = "%", primary_mapped_pct = "%" }

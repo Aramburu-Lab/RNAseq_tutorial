@@ -155,10 +155,12 @@ def agreement_figures(writer: Writer, found: "Frames", shown: "Shown"
                                         len(found.outcomes)) | words  # fmt: skip
         part = sums.filter(pl.col("comparison") == name)
         scatter = figures.counter_scatter(part, words, shown.prefix + text.fill(
-            PAGE, "figures.counters.caption", **values))  # fmt: skip
+            PAGE, "figures.counters.caption", **values), figures.limits_of(every))  # fmt: skip
         built = _text("counters", text.fill(PAGE, "figures.counters.lead", **values), **words)
         block = writer.figure(scatter, f"counters_{name}", built)
-        scatters.append(_scatter_views(block, (scatter, built), long, name, words, shown))
+        agreed = views.Agreed(long.filter(pl.col("comparison") == name),
+                              {None: views.from_table(table, name)})  # fmt: skip
+        scatters.append(_scatter_views(block, (scatter, built), agreed, words, shown))
         plot = figures.agreement_plot(part, every, words, shown.prefix + text.fill(
             PAGE, "figures.agreement.caption", **values))  # fmt: skip
         outside = text.word(PAGE, "undefined")
@@ -168,35 +170,33 @@ def agreement_figures(writer: Writer, found: "Frames", shown: "Shown"
         built = _text("agreement", text.fill(PAGE, "figures.agreement.lead", **values,
                                              n_out=outside), **words)  # fmt: skip
         block = writer.figure(plot, f"agreement_{name}", built)
-        plots.append(_plot_views(block, (plot, built), long, name, words, shown))
+        plots.append(_plot_views(block, (plot, built), agreed, words, shown))
     return scatters, plots
 
 
-def _scatter_views(block: FigureBlock, build: tuple[Any, FigureText], long: pl.DataFrame,
-                   name: str, words: dict[str, str], shown: "Shown") -> FigureBlock:  # fmt: skip
+def _scatter_views(block: FigureBlock, build: tuple[Any, FigureText], agreed: views.Agreed,
+                   words: dict[str, str], shown: "Shown") -> FigureBlock:  # fmt: skip
     """F3 with a gene type and a sample as views (WO8): the build's every gene, every sample."""
-    part = long.filter(pl.col("comparison") == name)
-    found, axes, at = views.subsets(part)
+    found, axes, at = views.subsets(agreed.part)
     options = [(found[0].words(), *build)]
     for subset in found[1:]:
-        data, filled = views.scatter(part, subset, words, shown.prefix)
+        data, filled = views.scatter(agreed, subset, words, shown.prefix)
         options.append((subset.words(), data, _text(
             "counters", text.fill(PAGE, "figures.counters.lead", **filled), **words)))  # fmt: skip
     return lookup(block, options, text.word(PAGE, "figures.counters.view"), axes, at)
 
 
-def _plot_views(block: FigureBlock, build: tuple[Any, FigureText], long: pl.DataFrame,
-                name: str, words: dict[str, str], shown: "Shown") -> FigureBlock:  # fmt: skip
+def _plot_views(block: FigureBlock, build: tuple[Any, FigureText], agreed: views.Agreed,
+                words: dict[str, str], shown: "Shown") -> FigureBlock:  # fmt: skip
     """F4 with its limits and a gene type as views (WO8): the build's 1.96 SD, every gene."""
-    part = long.filter(pl.col("comparison") == name)
     options, at = [], []
-    offered = views.types(part, [concordance.ALL])
+    offered = views.types(agreed.part, [concordance.ALL])
     for i, empirical in enumerate((False, True)):
         for j, gene_type in enumerate(offered):
             if (i, j) == (0, 0):
                 options.append((_plot_name(gene_type, empirical), *build))
             else:
-                data, filled = views.plot(part, gene_type, empirical, words, shown.prefix)
+                data, filled = views.plot(agreed, gene_type, empirical, words, shown.prefix)
                 lead = text.fill(PAGE, f"figures.agreement.lead{'_empirical' * empirical}",
                                  **filled)  # fmt: skip
                 options.append((_plot_name(gene_type, empirical), data,

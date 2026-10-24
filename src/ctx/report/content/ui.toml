@@ -81,6 +81,12 @@ heatmap = "This page draws {drawn:,} of the {units:,} rows and their columns, ev
 callable = "points no setting can call"
 other = "other points"
 
+# A scatter whose page draws each colour as its highest-density regions, and as points only the
+# points beyond the figure's limits (ScatterData.outside, D-118): the legend keys of the two
+# regions' lines, solid and dashed, in every renderer.
+[density]
+region = "{mass} % highest-density region"
+
 # The PDF and SVG buttons of a figure with page controls: at the defaults they link the figure
 # files; once a control is moved, they draw the view as set (D-033).
 [export]

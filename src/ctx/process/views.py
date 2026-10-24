@@ -3,13 +3,15 @@
 The counter scatter (F3) can show one gene type, and one sample instead of every sample's
 sums; the agreement plot (F4) one gene type, its limits as bias plus and minus 1.96 SD or as
 d's empirical percentiles. Each view's numbers are ``concordance.per_unit`` on its genes, so
-a near-1 rho over every gene cannot hide a gene type that disagrees. A sample axis is offered
-up to ``SAMPLES_MAX`` samples: each one's view carries its genes again, which 210 runs could
-not.
+a near-1 rho over every gene cannot hide a gene type that disagrees. Those rows depend on the
+comparison and the gene type alone, so ``Agreed`` computes them once per type and every view
+of either figure reads them: recomputed per view, the bootstrap ran 11 times over 103 samples
+of Breast-tissue-BRCA, 2,579 of a 3,300 s profile (2026-10-24). A sample axis is offered up to
+``SAMPLES_MAX`` samples: each one's view carries its genes again, which 210 runs could not.
 """
 
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import polars as pl
@@ -64,21 +66,50 @@ def typed(long: pl.DataFrame, sums: pl.DataFrame) -> pl.DataFrame:
     return plain.join(names, on="gene_id", how="left", maintain_order="left")
 
 
-def measured(part: pl.DataFrame, subset: Subset) -> tuple[pl.DataFrame, pl.DataFrame]:
-    """A subset's agreement rows (``per_unit``) and its genes' counts, typed for the figures.
+def genes_of(part: pl.DataFrame, gene_type: str | None) -> pl.DataFrame:
+    """A comparison's rows of one gene type; None is every gene."""
+    return part if gene_type is None else part.filter(pl.col("type_group") == gene_type)
+
+
+@dataclass(frozen=True)
+class Agreed:
+    """One comparison's agreement rows per gene type, each ``per_unit`` once, when first asked.
+
+    Attributes:
+        part: One comparison's rows of ``typed``.
+        rows: Rows already computed, by gene type; None is every gene, which
+            ``tables.agreements`` computed for the concordance table (``from_table``).
+    """
+
+    part: pl.DataFrame
+    rows: dict[str | None, pl.DataFrame] = field(default_factory=dict)
+
+    def of(self, gene_type: str | None) -> pl.DataFrame:
+        """The concordance rows over one type's genes, each sample and ``all``."""
+        if gene_type not in self.rows:
+            genes = genes_of(self.part, gene_type).select("gene_id", "sample", "a", "b")
+            self.rows[gene_type] = concordance.per_unit(genes, "a", "b", unit="sample",
+                                                        gene="gene_id")  # fmt: skip
+        return self.rows[gene_type]
+
+
+def from_table(table: pl.DataFrame, name: str) -> pl.DataFrame:
+    """The concordance table's rows of one comparison as ``per_unit`` returned them."""
+    rows = table.filter(pl.col("comparison") == name).drop("comparison")
+    return rows.rename({"unit": "sample"})
+
+
+def measured(part: pl.DataFrame, subset: Subset) -> pl.DataFrame:
+    """A subset's genes' counts, typed for the figures.
 
     Args:
         part: One comparison's rows of ``typed``.
         subset: The view.
 
     Returns:
-        The concordance rows over the subset's genes, each sample and ``all``; and one row per
-        gene: gene_id, a, b, gene_name, gene_type, type_group.
+        One row per gene: gene_id, a, b, gene_name, gene_type, type_group.
     """
-    genes = part if subset.gene_type is None else part.filter(
-        pl.col("type_group") == subset.gene_type)  # fmt: skip
-    rows = concordance.per_unit(genes.select("gene_id", "sample", "a", "b"), "a", "b",
-                                unit="sample", gene="gene_id")  # fmt: skip
+    genes = genes_of(part, subset.gene_type)
     if subset.sample == concordance.ALL:
         counts = genes.group_by("gene_id", maintain_order=True).agg(pl.col("a").sum(),
                                                                     pl.col("b").sum())  # fmt: skip
@@ -86,7 +117,7 @@ def measured(part: pl.DataFrame, subset: Subset) -> tuple[pl.DataFrame, pl.DataF
         counts = genes.filter(pl.col("sample") == subset.sample).select("gene_id", "a", "b")
     names = genes.select("gene_id", "gene_name", "gene_type", "type_group").unique(
         "gene_id", maintain_order=True)  # fmt: skip
-    return rows, counts.join(names, on="gene_id", how="left", maintain_order="left")
+    return counts.join(names, on="gene_id", how="left", maintain_order="left")
 
 
 def values(rows: pl.DataFrame, subset: Subset, words: Mapping[str, str]) -> dict[str, Any]:
@@ -129,26 +160,27 @@ def subsets(part: pl.DataFrame) -> tuple[list[Subset], list[tuple[str, list[str]
     return [s for s, _ in found], axes, [p for _, p in found]
 
 
-def scatter(part: pl.DataFrame, subset: Subset, words: Mapping[str, str],
+def scatter(agreed: Agreed, subset: Subset, words: Mapping[str, str],
             prefix: str) -> tuple[ScatterData, dict[str, Any]]:  # fmt: skip
     """F3 for one view: its contract and its numbers."""
-    rows, counts = measured(part, subset)
-    filled = values(rows, subset, words)
+    filled = values(agreed.of(subset.gene_type), subset, words)
     caption = " ".join([prefix + subset.words() + ".",
                         text.fill(PAGE, "figures.counters.caption", **filled)])  # fmt: skip
-    return figures.counter_scatter(counts, words, caption), filled
+    data = figures.counter_scatter(measured(agreed.part, subset), words, caption,
+                                   figures.limits_of(filled["every"]))  # fmt: skip
+    return data, filled
 
 
-def plot(part: pl.DataFrame, gene_type: str | None, empirical: bool, words: Mapping[str, str],
+def plot(agreed: Agreed, gene_type: str | None, empirical: bool, words: Mapping[str, str],
          prefix: str) -> tuple[ScatterData, dict[str, Any]]:  # fmt: skip
     """F4 for one view: its contract and its numbers, ``n_out`` beyond the limits drawn."""
     subset = Subset(gene_type, concordance.ALL)
-    rows, counts = measured(part, subset)
-    filled = values(rows, subset, words)
+    filled = values(agreed.of(gene_type), subset, words)
     every = filled["every"]
     caption = " ".join([prefix + subset.words() + ".",
                         text.fill(PAGE, "figures.agreement.caption", **filled)])  # fmt: skip
-    data = figures.agreement_plot(counts, every, words, caption, empirical=empirical)
+    data = figures.agreement_plot(measured(agreed.part, subset), every, words, caption,
+                                  empirical=empirical)  # fmt: skip
     low, high = ("d_p2_5", "d_p97_5") if empirical else ("loa_low", "loa_high")
     outside = text.word(PAGE, "undefined")
     if every[low] is not None:
