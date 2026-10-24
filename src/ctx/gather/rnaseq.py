@@ -56,6 +56,10 @@ MULTIQC_TABLES = (
     "multiqc_featurecounts_biotype_plot.txt",
 )  # fmt: skip
 ALIGNED_FILES = (ALIGNED_MATRIX, *(f"{MULTIQC_DATA}/{name}" for name in MULTIQC_TABLES))
+# Copied when present, never required: MultiQC writes this table only when some sample has an
+# overrepresented sequence (BRCA-immune-cells-macrophages, 2026-10-24, has none), and its reader,
+# ctx.qc.fastqc, draws nothing without it.
+OPTIONAL_FILES = (f"{MULTIQC_DATA}/fastqc_raw_overrepresented_sequences_plot.txt",)
 ALIGNER = "star_salmon"
 # What leaves Kebnekaise, which aligns (D-113): the Salmon-only list and the aligned files.
 CLUSTER_FILES = (*COPIED_FILES, *ALIGNED_FILES)
@@ -142,7 +146,8 @@ def _aligned(outdir: Path, aligner: object) -> None:
     """
     if aligner != ALIGNER:
         raise RnaseqError(f"{outdir}: aligner {aligner!r}; ctx reads {ALIGNER}'s folders only")
-    if missing := [p for p in ALIGNED_FILES if not (outdir / p).is_file()]:
+    required = [p for p in ALIGNED_FILES if p not in OPTIONAL_FILES]
+    if missing := [p for p in required if not (outdir / p).is_file()]:
         raise RnaseqError(f"{outdir} was aligned ({ALIGNER}) but holds no {missing}; copy it "
                           "with the include list of rnaseq.ALIGNED_FILES")  # fmt: skip
 

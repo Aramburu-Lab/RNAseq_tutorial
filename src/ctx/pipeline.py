@@ -147,11 +147,15 @@ def plan(
 
 
 def _aligned(outdir: Path) -> bool:
-    """Whether an rnaseq outdir was aligned with STAR; one ``_inputs`` refuses counts as not."""
+    """Whether an rnaseq outdir's params say it was aligned with STAR.
+
+    Its files are not checked here: a refused outdir is ``check``'s problem, named, never a
+    module silently left out of the plan (M3 was, for an outdir missing one table, 2026-10-24).
+    """
     try:
-        return rnaseq.aligned(outdir)
+        return rnaseq.first_params(outdir).get("skip_alignment") is False
     except rnaseq.RnaseqError:
-        return False
+        return False  # no params file: check names it
 
 
 def _without_results(root: Path, spec: Dataset, planned: dict[str, tuple[str, ...] | None]
@@ -403,6 +407,11 @@ def check(root: Path, options: Options) -> tuple[list[Problem], list[str]]:
         return [Problem(f"{options.dataset_file} is for {spec.slug!r}, not --dataset "
                         f"{options.dataset!r}")], []  # fmt: skip
     problems = _inputs(root, spec, options)
+    if options.rnaseq_dir is not None and options.rnaseq_dir.is_dir():
+        try:
+            rnaseq.provenance(options.rnaseq_dir)
+        except rnaseq.RnaseqError as error:
+            problems.append(Problem(str(error)))
     scheduled, left_out = plan(root, spec, options)
     modules = [m for m, _ in scheduled]
     problems += [Problem(reason, blocks=False) for reason in left_out]

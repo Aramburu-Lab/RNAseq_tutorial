@@ -17,6 +17,7 @@ from ctx.gather.rnaseq import (
     ALIGNED_MATRIX,
     ALIGNER,
     MATRIX_FILE,
+    OPTIONAL_FILES,
     READ_FILES,
     RNASEQ_VERSION,
     VERSIONS_FILE,
@@ -122,6 +123,17 @@ def test_an_aligned_copy_missing_a_table_is_refused(tmp_path):
     with pytest.raises(RnaseqError) as raised:
         read(outdir, fixture_samples())
     assert ALIGNED_FILES[-1] in str(raised.value) and ALIGNED_MATRIX in str(raised.value)
+
+
+def test_a_table_multiqc_may_not_write_is_not_required(tmp_path):
+    """MultiQC writes the overrepresented-sequences table only when a sample has one; refusing
+    its absence stopped M3 on BRCA-immune-cells-macrophages (2026-10-24). Every other table
+    stays required, so the optional list cannot grow by accident into the whole list."""
+    outdir = _aligned_copy(tmp_path)
+    for name in OPTIONAL_FILES:
+        (outdir / name).unlink()
+    assert read(outdir, fixture_samples()).provenance["params aligner"] == ALIGNER
+    assert len(OPTIONAL_FILES) == 1 and set(OPTIONAL_FILES) < set(ALIGNED_FILES)
 
 
 def test_another_aligner_is_refused(tmp_path):

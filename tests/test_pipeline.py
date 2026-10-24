@@ -7,6 +7,7 @@ Datasets are written at test time over the metadata-only fetchngs fixture with a
 import gzip
 import html
 import re
+import shutil
 import subprocess
 from dataclasses import replace
 from datetime import date
@@ -23,6 +24,7 @@ from test_own_table import FIXTURE, SPEC, dataset, table
 from ctx import pipeline
 from ctx.cli import app
 from ctx.dataset import load
+from ctx.gather import rnaseq
 from ctx.gather.fetchngs import read
 from ctx.io.naming import stem
 from ctx.report.builder import unpacked
@@ -60,6 +62,21 @@ def test_every_command_has_a_place():
     module command left out of ctx run (M8 and M9 join ORDER in their place)."""
     commands = set(typer.main.get_command(app).commands)
     assert commands == set(pipeline.ORDER) | NOT_RUN, commands ^ (set(pipeline.ORDER) | NOT_RUN)
+
+
+def test_a_refused_aligned_outdir_is_a_problem_not_a_missing_module(tmp_path, runs):
+    """An aligned copy missing a table once made ``ctx run --check`` report no problem and plan
+    no M3 (2026-10-24). Now the plan keeps process and the check names the missing table."""
+    spec_path = _spec(tmp_path, runs, CONTRAST.format(reference=7, tested=7, extra=""))
+    outdir = tmp_path / "rnaseq_star"
+    shutil.copytree(ROOT / "tests" / "fixtures" / "rnaseq_star", outdir)
+    gone = next(p for p in rnaseq.ALIGNED_FILES if p not in rnaseq.OPTIONAL_FILES)
+    (outdir / gone).unlink()
+    problems, modules = pipeline.check(
+        tmp_path / "root", pipeline.Options("mine", spec_path, FIXTURE, outdir)
+    )
+    assert "process" in modules
+    assert any(gone in p.text for p in problems), [p.text for p in problems]
 
 
 def test_steps_in_course_order(tmp_path, runs):
