@@ -1051,9 +1051,7 @@ def test_a_curve_draws_ten_times_thicker_on_the_page_than_in_its_files():
     from synth import demo_curves  # noqa: PLC0415
 
     from ctx.viz.style import (  # noqa: PLC0415
-        LINE_WIDTHS,
         PAGE_CURVE_LINE_SCALE,
-        THEMES,
         page_line_width,
     )
 
@@ -1062,9 +1060,35 @@ def test_a_curve_draws_ten_times_thicker_on_the_page_than_in_its_files():
     drawn = [t for t in data.interactive().data if t.name in styles]
     assert drawn, "the demo's levels must name its traces for the test to see them"
     for trace in drawn:
-        assert trace.line.width == page_line_width(styles[trace.name][2])
-    # Plot lines take ten times their width; one line per sample, twice (Rytis 2026-10-25).
-    assert page_line_width(LINE_WIDTHS["line"]) == LINE_WIDTHS["line"] * PAGE_CURVE_LINE_SCALE
-    assert page_line_width(LINE_WIDTHS["sample"]) == LINE_WIDTHS["sample"] * 2
+        per_sample = len(data._lines()) > len(styles)  # noqa: SLF001 - the rule under test
+        assert trace.line.width == page_line_width(styles[trace.name][2], per_sample)
+    assert page_line_width(1.0, per_sample=False) == 1.0 * PAGE_CURVE_LINE_SCALE
+    assert page_line_width(1.0, per_sample=True) == 2.0
+
     widths = [line.get_linewidth() for line in data.static(THEMES["white"]).axes[0].get_lines()]
     assert widths and max(widths) < LINE_WIDTHS["line"] * PAGE_CURVE_LINE_SCALE
+
+
+def test_many_samples_in_few_colours_draw_at_the_sample_width():
+    """M3's coverage drew 103 samples in 6 colours at 1 pt, so a rule keyed on the 3 pt sample
+    width missed it and drew a 10 px band (2026-10-25). More lines than colours is one line
+    per sample: twice the file width. Catches the width rule back."""
+    from ctx.viz.curve import CurveData  # noqa: PLC0415
+    from ctx.viz.style import PAGE_SAMPLE_LINE_SCALE  # noqa: PLC0415
+
+    rows = [(f"s{i}", ("a", "b")[i % 2], x, float(x)) for i in range(40) for x in range(5)]
+    frame = pl.DataFrame(rows, schema=["sample", "group", "x", "y"], orient="row")
+    data = CurveData(
+        frame=frame,
+        columns={c: ("none", c) for c in frame.columns},
+        x="x",
+        y="y",
+        series="sample",
+        colour="group",
+        x_label="x",
+        y_label="y",
+        colours={"a": "#E69F00", "b": "#56B4E9"},
+        caption="Forty samples. No test.",
+    )
+    widths = {t.line.width for t in data.interactive().data if t.name in ("a", "b")}
+    assert widths == {1.0 * PAGE_SAMPLE_LINE_SCALE}

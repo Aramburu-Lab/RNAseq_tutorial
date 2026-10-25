@@ -212,12 +212,17 @@ class CurveData:
         ]) + "<extra></extra>"  # fmt: skip
         shown: set[str] = set()
         styles = self._styles()
-        for name, level, rows in self._lines():
+        lines = self._lines()
+        # One line per sample: lines outnumber colours, or each wears the per-sample width.
+        per_sample = len(lines) > len(styles) or any(
+            s[2] == LINE_WIDTHS["sample"] for s in styles.values())  # fmt: skip
+        for name, level, rows in lines:
             hexa, dash, line_width, opacity = styles[level]
             fig.add_trace(go.Scatter(
                 x=rows[self.x].to_list(), y=rows[self.y].to_list(), mode="lines", name=level,
                 legendgroup=level, showlegend=level not in shown, opacity=opacity,
-                line={"color": hexa, "width": page_line_width(line_width), "dash": dash[1]},
+                line={"color": hexa, "width": page_line_width(line_width, per_sample),
+                      "dash": dash[1]},
                 customdata=[(str(name), *r) for r in self._extra(rows)],
                 hovertemplate=template,
             ))  # fmt: skip
@@ -226,7 +231,7 @@ class CurveData:
             fig.add_trace(go.Scatter(
                 x=list(line.x), y=list(line.y), mode="lines", name=line.name, hoverinfo="skip",
                 line={"color": light.reference,
-                      "width": page_line_width(LINE_WIDTHS["line"]),
+                      "width": page_line_width(LINE_WIDTHS["line"], per_sample=False),
                       "dash": THRESHOLD_DASH[1]},
             ))  # fmt: skip
         fig.update_layout(
