@@ -291,9 +291,10 @@ def results(writer: Writer, found: blocks.Found, shown: blocks.Shown,
         Group(text.word(PAGE, "groups.align"), (
             blocks.mapping_figure(writer, found, shown), blocks.alignment_table(found),
             text.word(PAGE, "tables.alignment.page.note"))),
-        Group(text.word(PAGE, "groups.strand"), (
+        Group(text.word(PAGE, "groups.strand"), tuple(b for b in (
             blocks.strand_figure(writer, found, shown),
-            blocks.strand_check_figure(writer, found, shown), blocks.strand_table(found))),
+            blocks.strand_check_figure(writer, found, shown), blocks.strand_table(found))
+            if b is not None)),
         Group(text.word(PAGE, "groups.qc"), (
             blocks.distribution_figure(writer, found, shown),
             blocks.junction_figure(writer, found, shown),

@@ -136,15 +136,25 @@ def strand_figure(writer: Writer, found: Found, shown: Shown) -> FigureBlock:
     )
 
 
-def strand_check_figure(writer: Writer, found: Found, shown: Shown) -> FigureBlock:
-    """F2b: nf-core's share for its call per sample, beside its stranded threshold."""
-    frame = found.strand.select("sample", "rseqc_pct", "provided", "salmon_inferred", "status",
+def strand_check_figure(writer: Writer, found: Found, shown: Shown) -> FigureBlock | None:
+    """F2b: nf-core's share for its call per sample, beside its stranded threshold.
+
+    nf-core writes no ``rseqc_pct`` for a sample it calls unstranded: 234 of Lung-tissue-LUAD's
+    246 (2026-10-25). Those are left off the bars and counted in the caption; with none left,
+    there is no figure.
+    """
+    every = found.strand.select("sample", "rseqc_pct", "provided", "salmon_inferred", "status",
                                 call="rseqc_inferred")  # fmt: skip
+    frame = every.filter(pl.col("rseqc_pct").is_not_null() & pl.col("rseqc_pct").is_not_nan())
+    if frame.is_empty():
+        return None
     metric = shown.strand_metric
     low: Any = frame["rseqc_pct"].min()
     values = {"n": frame.height, "low": f"{float(low):.1f}",
               "line": f"{metric.plot_line:g}", "source": metric.plot_source}  # fmt: skip
     caption = text.fill(PAGE, "figures.strand_check.caption", **values)
+    if missing := every.height - frame.height:
+        caption += " " + text.fill(PAGE, "figures.strand_check.missing", missing=missing)
     data = fig.strand_check_bars(_joined(frame, shown), shown.usable, metric, caption)
     return writer.figure(
         data,

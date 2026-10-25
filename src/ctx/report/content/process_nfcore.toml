@@ -131,6 +131,8 @@ reading = [
     "The dashed line is the threshold the registry sources to nf-core: {source}.",
 ]
 caption = "nf-core's rseqc_pct for {n} samples, coloured by its call; dashed, its stranded threshold. No test."
+# After the caption, where nf-core called samples unstranded: it writes them no share.
+missing = "{missing} samples called unstranded have no share and are not drawn."
 value = "Share"
 line = "Stranded threshold"
 labels = { call = "nf-core's call", status = "Strand check", provided = "Given in the samplesheet", salmon_inferred = "Salmon's call" }

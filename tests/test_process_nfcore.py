@@ -271,6 +271,33 @@ def test_the_strand_threshold_is_the_registry_s(full, tmp_path):
     assert "stranded threshold, 70 %" in page and line not in page
 
 
+@pytest.mark.parametrize("blank", [2, 5])
+def test_unstranded_samples_without_a_share_are_counted_not_drawn(tmp_path, blank):
+    """nf-core writes no rseqc_pct for a sample it calls unstranded; Lung-tissue-LUAD had 234 of
+    246, and M3 failed on the NaN (2026-10-25). Some blank: the bars hold the rest and the
+    caption counts the blank ones; all blank: no strand-check figure. Catches the NaN back."""
+    outdir = tmp_path / "rnaseq_star"
+    shutil.copytree(STAR, outdir)
+    table = (
+        outdir / "multiqc/star_salmon/multiqc_report_data/multiqc_strand_check_summary_table.txt"
+    )
+    frame = pl.read_csv(table, separator="\t", infer_schema=False)
+    blanked = frame.with_columns(
+        rseqc_pct=pl.when(pl.int_range(pl.len()) < blank).then(pl.lit(None, pl.String))
+        .otherwise(pl.col("rseqc_pct")))  # fmt: skip  # an empty field, as nf-core writes it
+    blanked.write_csv(table, separator="\t")
+    root = plant(tmp_path / "root")
+    done = ctx_run("--root", str(root), "process", "--dataset", DATASET, "--dataset-file",
+                   str(SPEC), "--rnaseq-dir", str(outdir), cwd=root)  # fmt: skip
+    assert done.returncode == 0, done.stderr[-3000:]
+    page = unpacked(next((root / "outputs" / "03_process").glob("*_overview_v1.html"))
+                    .read_text())  # fmt: skip
+    if blank < frame.height:
+        assert f"{blank} samples called unstranded have no share and are not drawn." in page
+    else:
+        assert "strand share beside its threshold" not in page
+
+
 def test_laptop_options_beside_rnaseq_dir_are_refused(tmp_path):
     root = plant(tmp_path / "root")
     done = ctx_run("--root", str(root), "process", "--dataset", DATASET, "--dataset-file",
