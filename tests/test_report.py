@@ -1,5 +1,6 @@
 """HTML pages: the round trip from one BoxData, offline, size cap, skeleton order, escaping."""
 
+import dataclasses
 import json
 import re
 from datetime import date
@@ -521,3 +522,26 @@ def test_every_page_names_the_lab_above_its_title(tmp_path):
     html = render(_module())
     masthead = html[html.index('<header class="masthead">') :]
     assert masthead.index(line) < masthead.index('class="kicker"')
+
+
+def test_a_module_page_numbers_its_figures_on_from_the_earlier_modules(tmp_path):
+    """A reader goes M1 to M9 (Rytis 2026-10-25): M5's first figure follows M1's last, another
+    dataset's pages count nothing, and element ids still start at figure-1. Catches the offset
+    dropped, counted across datasets, or applied to the ids."""
+    from ctx.report.builder import unpacked, write  # noqa: PLC0415
+
+    out = tmp_path / "outputs"
+    m1 = dataclasses.replace(
+        _module(), title="M1 Gather: study", results=(_figure_block("A"), _figure_block("B"))
+    )
+    write(m1, out / "01_gather" / "2026-10-25_gather_study_overview_v1.html")
+    other = dataclasses.replace(_module(), title="M1 Gather: other", results=(_figure_block("C"),))
+    write(other, out / "01_gather" / "2026-10-25_gather_other_overview_v1.html")
+    m5 = dataclasses.replace(
+        _module(),
+        title="M5 Differential expression: study",
+        results=(_figure_block("D"), _figure_block("E")),
+    )
+    html = unpacked(write(m5, out / "05_de" / "2026-10-25_de_study_overview_v1.html").read_text())
+    assert re.findall(r'class="fig-num">Figure (\d+)<', html) == ["3", "4"]
+    assert 'id="figure-1"' in html

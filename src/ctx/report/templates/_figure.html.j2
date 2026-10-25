@@ -1,7 +1,7 @@
 {% macro figure_block(f, standalone=false, tab=false) %}
 <figure class="fig" id="figure-{{ f.number }}"{% if tab %} role="tabpanel" aria-labelledby="tab-{{ f.number }}"{% endif %}>
 {% if not standalone %}
-<p class="fig-num">{{ ui.figure_n.format(n=f.number) }}</p>
+<p class="fig-num">{{ ui.figure_n.format(n=f.label or f.number) }}</p>
 {% if f.title %}<h{{ f.level }} class="fig-title">{{ f.title }}</h{{ f.level }}>{% endif %}
 {% endif %}
 {% if f.lead %}<p class="fig-lead">{{ f.lead }}</p>{% endif %}

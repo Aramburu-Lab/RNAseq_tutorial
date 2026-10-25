@@ -25,6 +25,7 @@ from markupsafe import Markup
 
 from ctx import editions
 from ctx.io import keep
+from ctx.io.naming import MODULES
 from ctx.report import cap, export, glossary, marks, prose, text
 from ctx.report.figures import defaults, json_for_script, pack_json, prepare, unpack_figures
 from ctx.viz.style import (
@@ -579,10 +580,12 @@ def packed_plotly_js() -> str:
     return pack_json(plotly_js())
 
 
-def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:
+def _walk(items: Iterable[Result], first: int = 1
+          ) -> tuple[list[tuple[str, Any]], list[tuple[str, str]], bool]:  # fmt: skip
     """Results ready for the template, the contents entries of the groups, and any figure.
 
-    Figures are numbered in page order across groups; each group gets an anchor.
+    Figures are numbered in page order across groups, the first ``first``; their element ids
+    count from 1 on every page, as the page scripts read them. Each group gets an anchor.
     """
     out: list[tuple[str, Any]] = []
     outline: list[tuple[str, str]] = []
@@ -595,7 +598,9 @@ def _walk(items: Iterable[Result]) -> tuple[list[tuple[str, Any]], list[tuple[st
         nonlocal counter, codes, panels
         if isinstance(item, FigureBlock):
             counter += 1
-            return "figure", prepare(item, counter - 1, counter, level)
+            return "figure", prepare(item, counter - 1, counter, level) | {
+                "label": counter + first - 1
+            }
         if isinstance(item, Panel):
             panels += 1
             return "panel", {"kind": item.kind, "index": panels,
@@ -659,13 +664,14 @@ def _heading(page: Page) -> dict[str, str]:
     return {"kicker": kicker, "headline": match["headline"], "dataset": dataset, "suite": SUITE}
 
 
-def render(page: Page, glossary_href: str = "") -> str:
+def render(page: Page, glossary_href: str = "", first: int = 1) -> str:
     """Render a page to one self-contained HTML string.
 
     Args:
         page: A figure page, a module report, the hub, the course home page or the glossary.
         glossary_href: The glossary page as this page links it, which ``write`` supplies; the
             course home page carries its own. Empty, the page and its tooltips link none.
+        first: A module page's first figure number (``earlier_figures`` plus 1).
 
     Returns:
         The HTML.
@@ -720,7 +726,7 @@ def render(page: Page, glossary_href: str = "") -> str:
                     "export": export.assets([figure]), "live": _live([figure]),
                     "cutoff": _cutoff([figure])}  # fmt: skip
         return _ENV.get_template("figure.html.j2").render(**context)
-    results, outline, draws = _walk(results_as(page.results, replace(seen, lite=lite)))
+    results, outline, draws = _walk(results_as(page.results, replace(seen, lite=lite)), first)
     if not draws:
         context["plotly_js"] = ""
     versions = page.reproduce.versions
@@ -746,7 +752,44 @@ def rendered(page: Page, path: Path) -> str:
     target = None
     if isinstance(page, HubPage | ModulePage) or glossary.used(_marked(page, look())):
         target = glossary.page_path(path)
-    return render(page, glossary.href(path, target) if target else "")
+    first = earlier_figures(page, path) + 1
+    return render(page, glossary.href(path, target) if target else "", first)
+
+
+# A module page's newest copy: its date, then its version.
+_VERSION = re.compile(r"_v(\d+)\.html$")
+
+
+def earlier_figures(page: Page, path: Path) -> int:
+    """The figures on the dataset's earlier module pages in the same ctx root, M1 on.
+
+    A reader goes M1 to M10, so each module page numbers its figures on from the last one
+    before it (Rytis 2026-10-25). A rerun of an earlier module moves the numbers after it
+    until those pages are written again, as ``ctx run`` writes them in order. 0 for a page
+    outside a ctx root's outputs, a page that is no module overview, or a module before M1.
+    """
+    match = TITLE.fullmatch(page.title) if isinstance(page, ModulePage) else None
+    if match is None or match["n"] is None or path.parent.parent.name != "outputs":
+        return 0
+    module, _, rest = path.name[11:].partition("_")
+    dataset = re.sub(r"_overview_v\d+\.html$", "", rest)
+    if dataset == rest:
+        return 0
+    folders = dict(MODULES)
+    count = 0
+    for earlier, title in text.raw("hub", "modules").items():
+        number = int(str(title).split(" ")[0][1:])
+        if not 0 < number < int(match["n"]) or earlier == module:
+            continue
+        pages = sorted(
+            path.parent.parent.glob(
+                f"{folders[earlier]:02d}_{earlier}/*_{earlier}_{dataset}_overview_v*.html"
+            ),
+            key=lambda p: (p.name[:10], int(_VERSION.findall(p.name)[0])),
+        )
+        if pages:
+            count += unpacked(pages[-1].read_text()).count('class="fig-num"')
+    return count
 
 
 def write(page: Page, path: Path) -> Path:
