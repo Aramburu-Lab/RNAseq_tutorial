@@ -363,7 +363,7 @@ def test_a_desktop_labels_every_set(ran, name):
     assert all(t["left"] >= 0 for t in got["ticks"]), got["ticks"]
     rows = sorted(got["ticks"], key=lambda t: t["top"])
     overlaps = [(a["text"], b["text"]) for a, b in pairwise(rows) if b["top"] < a["bottom"]]
-    assert overlaps == [], overlaps
+    assert overlaps == [], (got["height"], got["plot"], len(got["categories"]), overlaps)
     assert got["scroll"] <= got["box"], (got["scroll"], got["box"])
 
 

@@ -278,7 +278,6 @@ lead = "{forward} of {n} samples are called forward, {reverse} reverse, {unstran
 reading = [
     "Each dot is one sample, in sheet order: its reads at `-s 1` over `-s 1` plus `-s 2`.",
     "Above the upper dashed line a sample is forward, below the lowest reverse, between the two middle lines unstranded.",
-    "Move either threshold and every call follows; each sample's two read totals decide it exactly.",
 ]
 caption = "Forward share of {n} samples: reads [[featureCounts]] assigned on the gene's own strand over those on either single strand. Calls at nf-core/rnaseq's thresholds, stranded {stranded}, unstranded {unstranded}. No test."
 x = "Sample"

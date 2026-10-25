@@ -159,12 +159,16 @@
 {% if f.below %}<div class="fig-below"><p class="scroll-hint" hidden>{{ ui.figures.scroll }}</p>{{ f.below }}</div>
 {% endif %}
 {% if f.text.reading %}
-<aside class="reading" aria-label="{{ ui.figures.reading_label }}"><p class="reading-title">{{ ui.figures.reading }}</p><ul>
+{# Folded, opened in place on a click (D-119); the page script still fills its lines. #}
+<aside class="reading" aria-label="{{ ui.figures.reading_label }}"><details><summary class="reading-title">{{ ui.figures.reading }}</summary><ul>
 {% for line in f.text.reading %}<li{% if f.kind == "calls" %} data-reading="{{ loop.index0 }}"{% endif %}>{{ line | code }}</li>
-{% endfor %}</ul></aside>
+{% endfor %}</ul></details></aside>
 {% endif %}
 </div>
-<figcaption>{{ f.caption | explain_terms("results") }}</figcaption>
+{# The page shows the caption's first sentence and folds the rest (D-119); the summary is that
+   sentence, so the caption's text is unchanged. The figure files and the export print it whole. #}
+{% set head, tail = f.caption | first_sentence %}
+<figcaption>{% if tail %}<details class="cap"><summary>{{ head | explain_terms("results") }}</summary>{{ tail | explain_terms("results") }}</details>{% else %}{{ f.caption | explain_terms("results") }}{% endif %}</figcaption>
 <p class="fig-files">{% if f.page and not standalone %}<a href="{{ f.page }}">{{ ui.figures.open }}</a>{% endif %}{% for label, theme, href in f.files %}<a{% if theme %} class="only-{{ theme }}"{% endif %} href="{{ href }}"{% if f.export and theme %} title="{{ ui.export.reference }}" data-export="{{ href.rsplit('.', 1)[1] }}" data-view="{{ ui.export.view.format(kind=label) }}" data-view-title="{{ ui.export.view_title }}"{% endif %}>{{ label }}</a>{% endfor %}</p>
 {% if f.reproduce %}{% include "_reproduce.html.j2" %}{% endif %}
 {% if f.controls %}<script type="application/json" id="ctx-controls-{{ f.index }}">{{ f.controls }}</script>

@@ -27,6 +27,32 @@ it were reversed.
 
 ---
 
+## D-119 — Pages fold the reading guide and each caption after its first sentence; a page file's reading list holds two lines
+
+**Date:** 2026-10-25 · **Status:** decided (Rytis 2026-10-25: fold the guides, fold the captions, scroll hints only where a plot overflows, two lines per guide). Amends D-117's rejected option: the guide is folded, not removed.
+
+**Context.** Rytis wants the module pages to carry far less visible text. Counted on Breast-tissue-BRCA's core pages before this change (below), the reading guides and captions were 7,685 of the 17,912 words in the seven module pages.
+
+**Options.** For the guide and the caption: cut them (the caption's test, n and p are mandatory, D-011), a library's disclosure widget, or the native `<details>`; for the caption, a CSS line clamp (cuts mid-sentence, at a width) or a fold after the first sentence. For the hints: a CSS rule, or the page script's check.
+
+**Decision.** "How to read this" is a `<details>` inside the `aside.reading`, closed at load; its lines keep `data-reading`, so the calls script fills them folded. A caption's first sentence, cut where the prose lint ends one (`prose.first_sentence`), is the `summary` of a `details.cap` holding the rest, so the figcaption's text is unchanged and each part keeps its glossary marks; a term's button takes its own click. The PDF, SVG and the page's export (`controls.export.caption`) keep the whole caption. The fit counts the guide folded, so opening it never grows the plot. Folded, the guide no longer grew horizontal bars, and M6's live ORA drew 14 labels overlapping in a 309 px drawing area: `BarData` now names `PLOTLY_BAR_ROW_PX` in `layout.meta.row`, and off a phone the fit gives each category that much of the drawing area. The scroll hint already showed only where its plot overflowed (`_page.js.j2`, `check`): no change. Each page file's `reading` list holds at most two lines (`prose.READING_LINES`, in the prose lint): what to look at and what a bad result looks like. A line code adds counts only where the figure cannot be read without it: ORA's and GSEA's live FDR line does, so each keeps one content line; the colour, line-style and source lines (`qc.blocks.colour_line`, `nfcore_blocks._styles`, the FastQC source) describe what the legend shows and do not.
+
+**Evidence.** Rebuilt with `ctx run`, `CTX_EDITION=core`, from `~/ctx_core`'s outputs into scratch roots, main (b6a7165) against this change, counted in headless Chromium at 1,280 x 1,000 px over gather, qc, process, quant, de, function and ncrna: every packed group unpacked by a scroll, text outside script, style, template and noscript, a word counted shown when its node has a client rect, passes `checkVisibility` and sits in no closed `details` outside its summary. Shown words with every tab panel shown, folds as loaded:
+
+| | Before | After |
+|---|---|---|
+| Reading guides | 4,675 | 280 |
+| Captions | 3,010 | 1,426 |
+| Leads | 1,069 | 1,069 |
+| Scroll hints | 0 (923 in the page, hidden) | 0 |
+| All words | 14,805 | 8,826 |
+
+M2 alone: 7,391 to 3,474. As loaded, one tab per tab set, 8,436 to 5,754. Reading lists over every content file, words with marks as their display text: 215 lines, 3,707 words, to 171 lines, 3,019. M2's strip guides come from `conf/qc_metrics.toml` (meaning, rationale) and were not cut, so the guides in these pages hold 4,340 words, folded. Planted mutations, each failing a test: a guide loaded open (`test_fold_browser`, `test_plot_room_browser`); the fit counting an opened guide's list (the room test, the crowded scatter 403,648 to 436,720 px²); the caption unfolded (`test_glossary`); a third reading line back (the prose lint, 3 qc lists); the row floor absent (`test_handoff_browser`, built_wide, the failure above).
+
+**Consequence.** A caption that a control rewrites with `textContent` (the FDR cutoff, a moved view) shows whole until the control is reset (read from the page scripts, not measured). Not checked: how a print of the page draws folded parts; words at phone width.
+
+---
+
 ## D-118 — M3's counter scatter and agreement plot are drawn on the page as densities plus the genes beyond the limits; the files and CSVs keep every gene
 
 **Date:** 2026-10-25 · **Status:** decided (Rytis 2026-10-25: density plus outliers).
@@ -54,7 +80,7 @@ F3 and F4 are 3,574,191 B of the 9,101,357; plotly.js packed 1,958,468 B. Projec
 
 ## D-117 — The plot is the largest part of its figure card: the reading guide under it, legends in rows, 16:9 or taller, a column that grows
 
-**Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23: "The biggest part in the card should be the plot, not the combination of the legend and the 'How to read' blocks. If needed, we can expand the view to with a wide-screen 16:9").
+**Date:** 2026-10-23 · **Status:** decided (Rytis 2026-10-23: "The biggest part in the card should be the plot, not the combination of the legend and the 'How to read' blocks. If needed, we can expand the view to with a wide-screen 16:9"). Amended by D-119: the guide is folded and counts folded.
 
 **Context.** Measured in Chromium on the core review pages (`~/ctx_core_review`, 88 visible plotted cards): the plot's drawing area was smaller than its legend's plus its "How to read this" block's in 28 (32 %), the plot's median share of its card was 0.19, and the numbers were the same at 1,280 and 1,920 px. Three causes: the reading guide took a fixed 320 px column beside the plot from 1,100 px up; a figure's height was fixed (`PLOTLY_HEIGHT_PX`), so a legend's rows above the plot took height from the plot (Step-1's mitochondrial scatter, 13 entries: 587 x 94 px of plot under a 136,756 px² legend); and the content column was fixed at 1,072 px.
 

@@ -403,6 +403,9 @@ class BarData:
             xaxis=value_axis if self.horizontal else category_axis,
             yaxis=category_axis if self.horizontal else value_axis,
         )  # fmt: skip
+        if self.horizontal:
+            # The page's fit gives each category this much of the drawing area (D-119).
+            fig.update_layout(meta={**(fig.layout.meta or {}), "row": PLOTLY_BAR_ROW_PX})
         self._phone_layout(fig, categories)
         return fig
 

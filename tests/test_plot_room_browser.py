@@ -26,6 +26,7 @@ WIDTHS = (PHONE_PX, 1280, 1920)
 # Each visible card's plot drawing (plotly's _size), its legends, its reading guide and the
 # card, in px and px²; whether its plot holds its own aspect (a heatmap's cells); and the page.
 CARDS = """new Promise(r => setTimeout(r, 3000)).then(() => {
+  const opened = Array.from(document.querySelectorAll(".reading details")).map(d => d.open);
   const area = e => {
     if (!e) return 0;
     const b = e.getBoundingClientRect();
@@ -46,8 +47,10 @@ CARDS = """new Promise(r => setTimeout(r, 3000)).then(() => {
               held: gd.data.some(t => t.type === "heatmap")};
     });
   const html = document.documentElement;
-  return {cards: cards, box: html.clientWidth, scroll: html.scrollWidth};
+  return {cards: cards, box: html.clientWidth, scroll: html.scrollWidth, opened: opened};
 })"""
+# Every guide opened as the page loads, before its plots settle, then CARDS (D-119).
+OPEN = 'document.querySelectorAll(".reading details").forEach(d => { d.open = true; }); ' + CARDS
 LONG = (
     "tumour-associated macrophages",
     "tissue-resident alveolar macrophages",
@@ -92,9 +95,9 @@ def room_page(folder: Path) -> Path:
     return write(_module(blocks), folder / "2026-10-23_demo_room_v1.html")
 
 
-def measure(page: Path, widths=WIDTHS) -> dict[int, dict]:
-    """``CARDS`` on ``page`` at each width, by width."""
-    tasks = [{"name": str(w), "url": page.as_uri(), "width": w, "height": 1000, "act": CARDS}
+def measure(page: Path, widths=WIDTHS, act: str = CARDS) -> dict[int, dict]:
+    """``act`` on ``page`` at each width, by width."""
+    tasks = [{"name": str(w), "url": page.as_uri(), "width": w, "height": 1000, "act": act}
              for w in widths]  # fmt: skip
     with tempfile.TemporaryDirectory() as folder:
         seen = _browse(tasks, Path(folder))
@@ -105,6 +108,17 @@ def measure(page: Path, widths=WIDTHS) -> dict[int, dict]:
 def measured(tmp_path_factory) -> dict[int, dict]:
     """The room page measured at every width."""
     return measure(room_page(tmp_path_factory.mktemp("room")))
+
+
+def test_reading_guides_load_folded_and_opening_one_keeps_the_plot(measured, tmp_path):
+    """Every guide loads closed; opened, it is counted folded, so the plot keeps its size.
+
+    Catches: a guide that loads open; the fit counting an opened guide's list (D-119)."""
+    assert measured[1280]["opened"] == [False] * 6, measured[1280]["opened"]
+    opened = measure(room_page(tmp_path), (1280,), OPEN)[1280]
+    assert opened["opened"] == [True] * 6
+    for closed, open_ in zip(measured[1280]["cards"], opened["cards"], strict=True):
+        assert abs(open_["plot"] - closed["plot"]) <= 0.01 * closed["plot"], (closed, open_)
 
 
 def test_the_plot_outweighs_its_legend_and_reading_guide(measured):

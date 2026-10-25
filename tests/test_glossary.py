@@ -467,6 +467,32 @@ def test_captions_print_their_display_text_in_pdf_and_svg(tmp_path):
     assert (out.parent / "09_report" / f"{TODAY}_report_glossary_v1.html").is_file()
 
 
+def test_a_page_caption_shows_its_first_sentence_and_folds_the_rest(tmp_path):
+    """The page's caption is a details whose summary is its first sentence (D-119): each part
+    keeps its marks, the first mention of an entry its icon, and the text is the caption's.
+    The PDF and SVG print it whole.
+
+    Mutation: the template's caption back unfolded; the tail drawn before the head.
+    """
+    out = _root(tmp_path) / "02_qc"
+    two = "Reads per [[FASTQ]] file. Each [[phred|Q score]] bin, the FASTQ's own; no test."
+    data = dataclasses.replace(demo_bar(counts()), caption=two)
+    figure_stem = stem("qc", "folded_demo", 1, day=date.today())
+    write_figure(data, out, figure_stem, title="Demo", data_releases={})
+    page = unpacked((out / f"{figure_stem}.html").read_text())
+    (caption,) = re.findall(r"<figcaption>(.*?)</figcaption>", page, re.S)
+    found = re.fullmatch(r'<details class="cap"><summary>(.*?)</summary>(.*)</details>', caption,
+                         re.S)  # fmt: skip
+    assert found, caption
+    head, tail = found[1], found[2]
+    assert re.sub(r"<button.*?</button>|<[^>]+>", "", head) == "Reads per FASTQ file."
+    assert head.count("<button") == 1 and tail.count("<button") == 1, caption
+    shown = re.sub(r"<button.*?</button>|<[^>]+>", "", head + tail).replace("&#39;", "'")
+    assert shown == marks.plain(two)
+    svg = (out / f"{figure_stem}_white.svg").read_text()
+    assert "no test." in svg and "Reads per FASTQ file." in svg
+
+
 class _StaticMark:
     """demo_bar with one marked text in its PDF and SVG only, none in its plotly figure."""
 
