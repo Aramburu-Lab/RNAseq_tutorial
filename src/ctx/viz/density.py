@@ -64,6 +64,9 @@ class DensityData:
         highlight_label: Legend text of those points.
         region_labels: Legend text of the inner and outer regions, e.g. "50 %" and "90 %".
         hover: Columns shown on hover of a drawn point.
+        every_point: Every sample is drawn as a point under its group's contours, not only
+            the highlighted and small groups' (Rytis 2026-10-25: M2's library size against
+            genes drew 1 of 103 samples). For tens or hundreds of samples, not genes.
         log_x: Log-scaled x axis; the density is computed on log10 x.
         log_y: Log-scaled y axis; likewise.
         width: The column; every figure takes ``FIGURE_WIDTH``, the double column.
@@ -82,6 +85,7 @@ class DensityData:
     highlight_label: str = ""
     region_labels: tuple[str, str] = ("50 %", "90 %")
     hover: tuple[str, ...] = ()
+    every_point: bool = False
     log_x: bool = False
     log_y: bool = False
     width: str = FIGURE_WIDTH
@@ -172,7 +176,9 @@ class DensityData:
         return self.caption
 
     def _drawn(self) -> pl.Expr:
-        """Samples drawn as points: highlighted, or in a group too small for a density."""
+        """Samples drawn as points: all with every_point, else highlighted or in small groups."""
+        if self.every_point:
+            return pl.lit(True)
         small = ~pl.col(self.group).is_in(list(self.densities))
         return small | pl.col(self.highlight) if self.highlight else small
 

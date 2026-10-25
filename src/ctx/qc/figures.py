@@ -335,7 +335,7 @@ def density(values: pl.DataFrame, sheet: pl.DataFrame, flags: pl.DataFrame,
                  "flagged_by": ("none", text.word(PAGE, "figures.density.flagged_by"))},
         colours=category_colours(levels), caption="", highlight="flagged",
         highlight_label=text.word(PAGE, "figures.density.flagged_label"),
-        hover=("sample", "flagged_by"), log_x=True, width="double",
+        hover=("sample", "flagged_by"), log_x=True, width="double", every_point=True,
     )  # fmt: skip
     n = ", ".join(f"{g} {d.n}" for g, d in data.densities.items()) or text.word(
         PAGE, "figures.density.none")  # fmt: skip

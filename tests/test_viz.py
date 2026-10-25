@@ -1016,3 +1016,30 @@ def test_a_long_interactive_title_puts_its_unit_on_a_line_of_its_own():
     assert screen_title("Mean of both (log2(count + 1))") == "Mean of both<br>(log2(count + 1))"
     assert screen_title("Reads (%)") == "Reads (%)"
     assert screen_title("A label of thirty characters") == "A label of thirty characters"
+
+
+def test_a_sample_density_draws_every_sample_under_its_contours():
+    """M2's library size against genes drew 1 of 103 samples: the contours stood for the rest
+    (Rytis 2026-10-25). With every_point, each sample is a point in both renderers, the
+    contours kept. Catches every_point ignored by either renderer, and the default changed."""
+    from synth import demo_density  # noqa: PLC0415
+
+    from ctx.viz.style import THEMES  # noqa: PLC0415
+
+    plain = demo_density()
+    every = dataclasses.replace(plain, every_point=True)
+    n = every.frame.height
+    assert every.densities, "the demo must have a group large enough for contours"
+    drawn = sum(len(t.x) for t in every.interactive().data if t.type == "scatter")
+    assert drawn == n and sum(len(t.x) for t in plain.interactive().data if t.type == "scatter") < n
+    axes = every.static(THEMES["white"]).axes[0]
+    assert (
+        sum(
+            len(c.get_offsets())
+            for c in axes.collections
+            if hasattr(c, "get_offsets")
+            and c.get_offsets().ndim == 2
+            and c.__class__.__name__ == "PathCollection"
+        )
+        == n
+    )
