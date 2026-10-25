@@ -94,6 +94,8 @@ REFUSED = (".fastq", ".fq", ".fastq.gz", ".fq.gz", ".bam", ".bai", ".sam", ".cra
 # Above the largest output measured, Step-1's M4 counts CSV at 59,259,687 B written at Salmon's
 # 3 decimals (Rytis 2026-10-09, raised from 50 MB).
 CAP_BYTES = 64_000_000
+# The files a lite kit left out for their size, read back into README.md.
+LARGE = "LEFT_OUT_LARGE.json"
 DATED = re.compile(r"\d{4}-\d{2}-\d{2}_")
 # A kit folder may carry a dataset name, so it is an output description (D-114).
 FOLDER = re.compile(naming.DESCRIPTION)
@@ -178,8 +180,8 @@ def declared_sources(folder: Path = REPO / "conf" / "datasets") -> dict[str, str
 def select(
     root: Path, left_out: tuple[str, ...] = (), slugs: frozenset[str] = frozenset(),
     sources: dict[str, str] | None = None, codebase: dict[str, Version] | None = None,
-) -> tuple[list[Path], dict[Path, dict[str, Any]], list[str]]:  # fmt: skip
-    """A root's files for the kit, its raw GDC count matrices apart, and what stops a ship.
+) -> tuple[list[Path], dict[Path, dict[str, Any]], list[str], list[Path]]:  # fmt: skip
+    """A root's files, its GDC matrices apart, what stops a ship, and lite's oversized files.
 
     A shipped page that links to a left-out dataset's file is a problem: following the link
     would put the dataset back into the kit. A matrix left out by rule needs its rebuild
@@ -216,6 +218,17 @@ def select(
         problems += [f"{p}: its GDC folder {f} holds no manifest or fetch script"
                      for f in m["folders"] if not gdc_sources(f)]  # fmt: skip
     kept = (chosen | found) - matrices.keys()
+    # A lite edition's pages offer no Reproduce panel, so a table over the cap, a redraw input
+    # such as M3's every-gene comparison (633 MB on Breast-tissue-BRCA, 2026-10-25), stays home
+    # and README.md names it; a full kit, whose panels redraw from it, still refuses it.
+    large = sorted(
+        p
+        for p in kept
+        if editions.active().page == "lite"
+        and p.stat().st_size > CAP_BYTES
+        and not p.name.lower().endswith(REFUSED)
+    )
+    kept -= set(large)
     problems += stale_pages(sorted(kept))
     problems += other_edition(sorted(kept), outputs, edition)
     for p in sorted(kept):
@@ -225,7 +238,7 @@ def select(
             problems.append(f"{p}: {p.stat().st_size:,} bytes, over the {CAP_BYTES:,} cap")
         elif (named := sources.get(check_kit.sha256(p))) is not None:
             problems.append(f"{p}: the source file {named}; derived tables ship, sources never")
-    return sorted(kept), matrices, problems
+    return sorted(kept), matrices, problems, large
 
 
 def other_edition(kept: list[Path], outputs: Path, edition: editions.Edition) -> list[str]:
@@ -395,6 +408,12 @@ def readme(kit: Path, roots: list[tuple[str, bool]], shipped: list[Path], commit
     if entries := left_out_files(kit):
         listed = "\n".join(left_out_text(e) for e in entries)
         body += "\n" + text.fill("course", "readme.left_out", files=listed) + "\n"
+    if (kit / LARGE).is_file():
+        big = json.loads((kit / LARGE).read_text(encoding="utf-8"))["files"]
+        listed = "\n".join(text.fill("course", "readme.too_large_file", path=e["path"],
+                                      bytes=f"{e['bytes']:,}") for e in big)  # fmt: skip
+        body += "\n" + text.fill("course", "readme.too_large", cap=f"{CAP_BYTES / 1e6:g}",
+                                  files=listed) + "\n"  # fmt: skip
     out = kit / "README.md"
     out.write_text(body, encoding="utf-8")
     return out
@@ -467,13 +486,18 @@ def build(
     if unknown := sorted(set(left_out) - slugs):
         sys.exit(f"--leave-out {', '.join(unknown)}: no root holds that dataset; nothing written")
     chosen, matrices, problems, sources = {}, {}, [], declared_sources()
+    large: list[dict[str, Any]] = []
     problems += [f"{folder}={root}: {refused}" for folder, root, _ in roots
                  for s in sorted(slugs_in(root) - set(left_out))
                  if (refused := editions.active().refusal(dataset=s))]  # fmt: skip
     codebase = codebase_datasets()
     for folder, root, _ in roots:
-        chosen[folder], matrices[folder], found = select(root, left_out, slugs, sources, codebase)
+        chosen[folder], matrices[folder], found, big = select(root, left_out, slugs, sources,
+                                                              codebase)  # fmt: skip
         problems += found
+        base = (root / "outputs").resolve()
+        large += [{"path": f"{folder}/outputs/{p.relative_to(base).as_posix()}",
+                   "bytes": p.stat().st_size} for p in big]  # fmt: skip
     if release:
         problems += release_problems(roots, chosen)
     if problems:
@@ -492,6 +516,8 @@ def build(
     if entries:
         (out / check_kit.LEFT_OUT).write_text(json.dumps({"files": entries}, indent=1) + "\n",
                                               encoding="utf-8")  # fmt: skip
+    if large:
+        (out / LARGE).write_text(json.dumps({"files": large}, indent=1) + "\n", encoding="utf-8")
     write_home(out, [(out / folder, real) for folder, _, real in roots])
     # Its load proves START.html is beside the kit; see course.html.j2.
     (out / "kit.js").write_text("window.ctxKit = true;\n", encoding="utf-8")

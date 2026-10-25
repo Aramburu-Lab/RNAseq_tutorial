@@ -145,6 +145,26 @@ def test_kit_refuses_reads_and_big_files_and_writes_nothing(tmp_path, name, cont
     assert done.returncode == 1 and reason in done.stderr and nothing_written(kit)
 
 
+def test_a_lite_kit_leaves_a_big_table_home_and_names_it(tmp_path):
+    """Under a lite edition a table over the cap stays out and README.md names it with its size
+    (M3's 633 MB comparison, 2026-10-25); the full kit still refuses it, as above. Catches the
+    file shipped, the build refused, or the README silent."""
+    name = f"{NEW}_gather_study_big_v1.csv"
+    path = a_root(tmp_path / "real", "Study", "study") / "outputs" / "01_gather" / name
+    with path.open("wb") as handle:
+        handle.truncate(64_000_001)
+    for html in tmp_path.glob("real/outputs/**/*.html"):  # pages built under core say so
+        html.write_text(html.read_text().replace("<html>", '<html data-edition="core">'))
+    kit = tmp_path / "kit"
+    done = subprocess.run([sys.executable, str(SCRIPT), "--out", str(kit), "--edition", "core",
+                           f"--real=step={tmp_path / 'real'}"],
+                          capture_output=True, text=True, check=False)  # fmt: skip
+    assert done.returncode == 0, done.stderr
+    assert not list(kit.rglob(name))
+    readme = (kit / "README.md").read_text(encoding="utf-8")
+    assert f"step/outputs/01_gather/{name}`, 64,000,001 bytes" in readme
+
+
 @pytest.mark.parametrize(
     ("extra", "reason"),
     [
@@ -461,7 +481,7 @@ def test_a_source_file_never_ships_whatever_its_name(tmp_path, kit_script, monke
     page(root / "outputs" / "07_proteo" / f"{NEW}_proteo_study_overview_v1.html", "M7: Study",
          copy.name)  # fmt: skip
     planted = {hashlib.sha256(copy.read_bytes()).hexdigest(): "fake.toml freeze"}
-    _, _, problems = kit_script.select(root, sources=planted)
+    _, _, problems, _ = kit_script.select(root, sources=planted)
     assert problems == [f"{copy}: the source file fake.toml freeze; derived tables ship, "
                         "sources never"]  # fmt: skip
     monkeypatch.setattr(kit_script, "declared_sources", lambda: planted)
@@ -664,6 +684,6 @@ def test_a_lite_page_with_nothing_to_show_stays_home(tmp_path, kit_script):
     setup = root / "outputs" / "00_setup" / f"{NEW}_setup_environment_v1.html"
     setup.write_text('<!doctype html>\n<html lang="en" data-edition="full" data-empty>\n'
                      "<head><title>M0 Setup</title></head><body></body></html>\n")  # fmt: skip
-    kept, _, _ = kit_script.select(root)
+    kept, _, _, _ = kit_script.select(root)
     names = {p.name for p in kept}
     assert setup.name not in names and f"{NEW}_gather_study_overview_v1.html" in names

@@ -43,6 +43,12 @@ left_out_root = "`{root}` is the builder's ctx root. In these commands, put your
 left_out_own = "`{path}` is the builder's own dataset file: no commit of the course codebase holds its bytes. Put your own dataset file in its place.\n"
 # Under commands that begin with a `git show` line: what it writes, from where (K.14, D-075).
 left_out_earlier = "`{name}` is `{path}` at commit `{commit}`, an earlier version; run in a clone of the codebase, the `git show` line writes it to the current folder.\n"
+too_large = """## Left out: tables over {cap} MB
+
+These tables feed the figure redraws of a full page's Reproduce panel, which these pages do not show. The course's own build keeps them.
+
+{files}"""
+too_large_file = "- `{path}`, {bytes} bytes"
 release = "This is a release kit: every page in it comes from public data, and it holds no made-up page."
 text = """# Cancer Transcriptomics course kit
 
