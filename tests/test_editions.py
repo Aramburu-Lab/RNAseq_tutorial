@@ -392,6 +392,25 @@ def test_a_full_kit_of_pages_built_before_ed2b_builds_and_ships_them_unchanged(t
                                   ).read_bytes()  # fmt: skip
 
 
+def test_the_core_hub_keeps_a_left_out_module_in_its_place(tmp_path, monkeypatch):
+    """The core hub went from M6 to M8 (Rytis 2026-10-25). Now M7 and M10 stand in their places,
+    muted and linking nowhere. Catches the rows dropped, a row that links, and full showing
+    them. The core hub, a lite page, shows no run count to read (D-111)."""
+    root = all_module_pages(tmp_path, "study")
+    settings = runtime.Settings("laptop", root, 1, None, 0.0)
+    monkeypatch.setenv(editions.EDITION_ENV, "core")
+    html = unpacked(hub.run(settings, (), "study")[0].read_text())
+    kickers = re.findall(r'class="kicker">(M\d+)<', html)
+    assert kickers == ["M0", "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9", "M10"]
+    out = re.findall(
+        r'<li class="left-out"><span class="kicker">(M\d+)</span><span class="module-name">', html
+    )
+    assert out == ["M7", "M10"]
+    monkeypatch.delenv(editions.EDITION_ENV)
+    full = unpacked(hub.run(settings, (), "study")[0].read_text())
+    assert 'class="left-out"' not in full
+
+
 def test_an_empty_lite_page_is_left_out_of_the_hub_and_start(tmp_path, monkeypatch):
     """A core module page with nothing but a check table is marked ``data-empty``; the hub and
     START.html leave it out, and under full the same page is listed. Catches hub.run or

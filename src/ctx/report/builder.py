@@ -266,6 +266,8 @@ class HubLink:
     title: str
     href: str
     written: str
+    # Set on a module the edition leaves out: shown in its place, muted, with no link.
+    left_out: str = ""
 
 
 @dataclass(frozen=True)

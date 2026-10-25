@@ -5,6 +5,8 @@ title = "Course hub: {dataset}"
 intro = "The newest page of every module run on {dataset}, in course order."
 # A value a rule needs that the run did not record.
 not_measured = "not measured"
+# A course module the selected edition leaves out, shown in its place so the numbers read on.
+left_out = "In the full course only."
 
 # Each module's name on the hub, the course page and the teacher guide, in course order.
 [modules]

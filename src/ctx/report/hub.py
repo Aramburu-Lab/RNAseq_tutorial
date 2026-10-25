@@ -162,7 +162,13 @@ def run(
     out.mkdir(parents=True, exist_ok=True)
     links, missing, edition = [], [], editions.active()
     for module, number in MODULES:
-        if module in NOT_MODULES or not edition.has_module(module):
+        if module in NOT_MODULES:
+            continue
+        if not edition.has_module(module):
+            # Its number stays on the list, so the next card's does not read as a skip
+            # (Rytis 2026-10-25: the core hub went from M6 to M8).
+            if module in TITLES:
+                links.append(HubLink(TITLES[module], "", "", "", text.word(WORDS, "left_out")))
             continue
         what = "environment" if module == "setup" else f"{dataset}_overview"
         page = _newest(outputs / f"{number:02d}_{module}", what)
@@ -176,7 +182,8 @@ def run(
     rules = _rules(rows)
     shown = load(dataset_file).name if dataset_file else dataset
     gated = [r for r in rules if r.verdict != "RECORDED"]
-    run_of = text.fill(WORDS, "keys.modules_value", run=len(links), all=len(links) + len(missing))
+    ran = sum(not link.left_out for link in links)
+    run_of = text.fill(WORDS, "keys.modules_value", run=ran, all=ran + len(missing))
     keys: tuple[KeyNumber, ...] = (KeyNumber(text.word(WORDS, "keys.modules"), run_of),)
     if gated:
         passed = sum(r.verdict == "PASS" for r in gated)

@@ -8,7 +8,7 @@
 <p class="lede">{{ page.intro }}</p>
 {% endif %}
 {% if page.key_numbers and not lite %}<dl class="keys">{% for k in page.key_numbers %}<div><dt>{{ k.label }}</dt><dd class="key-value">{{ k.value }}</dd>{% if k.detail %}<dd class="key-detail">{{ k.detail }}</dd>{% endif %}</div>{% endfor %}</dl>{% endif %}
-{% if page.links %}<ol class="modules">{% for link in page.links %}{% set number, _, name = link.module.partition(" ") %}<li><span class="kicker">{{ number }}</span><a class="module-name" href="{{ link.href }}">{{ name }}</a><span class="module-date">{{ ui.written }} {{ link.written }}</span></li>{% endfor %}</ol>{% endif %}
+{% if page.links %}<ol class="modules">{% for link in page.links %}{% set number, _, name = link.module.partition(" ") %}{% if link.left_out %}<li class="left-out"><span class="kicker">{{ number }}</span><span class="module-name">{{ name }}</span><span class="module-date">{{ link.left_out }}</span></li>{% else %}<li><span class="kicker">{{ number }}</span><a class="module-name" href="{{ link.href }}">{{ name }}</a><span class="module-date">{{ ui.written }} {{ link.written }}</span></li>{% endif %}{% endfor %}</ol>{% endif %}
 {% if page.missing and not lite %}<p class="missing">{{ ui.not_run }} {{ page.missing|join(", ") }}.</p>{% endif %}
 </section>
 {% if page.rules and not lite %}
