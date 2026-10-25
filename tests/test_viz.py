@@ -1050,13 +1050,21 @@ def test_a_curve_draws_ten_times_thicker_on_the_page_than_in_its_files():
     PAGE_CURVE_LINE_SCALE times its file width on the page; the files keep LINE_WIDTHS."""
     from synth import demo_curves  # noqa: PLC0415
 
-    from ctx.viz.style import LINE_WIDTHS, PAGE_CURVE_LINE_SCALE, THEMES  # noqa: PLC0415
+    from ctx.viz.style import (  # noqa: PLC0415
+        LINE_WIDTHS,
+        PAGE_CURVE_LINE_SCALE,
+        THEMES,
+        page_line_width,
+    )
 
     data = demo_curves()
     styles = data._styles()  # noqa: SLF001 - the files' own widths per level
     drawn = [t for t in data.interactive().data if t.name in styles]
     assert drawn, "the demo's levels must name its traces for the test to see them"
     for trace in drawn:
-        assert trace.line.width == styles[trace.name][2] * PAGE_CURVE_LINE_SCALE
+        assert trace.line.width == page_line_width(styles[trace.name][2])
+    # Plot lines take ten times their width; one line per sample, twice (Rytis 2026-10-25).
+    assert page_line_width(LINE_WIDTHS["line"]) == LINE_WIDTHS["line"] * PAGE_CURVE_LINE_SCALE
+    assert page_line_width(LINE_WIDTHS["sample"]) == LINE_WIDTHS["sample"] * 2
     widths = [line.get_linewidth() for line in data.static(THEMES["white"]).axes[0].get_lines()]
     assert widths and max(widths) < LINE_WIDTHS["line"] * PAGE_CURVE_LINE_SCALE

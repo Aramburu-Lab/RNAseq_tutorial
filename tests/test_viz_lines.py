@@ -9,7 +9,7 @@ from ctx.viz.style import (
     LINE_COLOURS,
     LINE_WIDTHS,
     MAX_DISTINCT,
-    PAGE_CURVE_LINE_SCALE,
+    PAGE_SAMPLE_LINE_SCALE,
     THEMES,
     distinct_styles,
 )
@@ -42,8 +42,8 @@ def test_every_run_has_its_own_style_in_both_renderers():
     assert LINE_WIDTHS["sample"] == 3 * LINE_WIDTHS["line"]
     traces = [t for t in data.interactive().data if t.mode == "lines"]
     assert len({(t.line.color, t.line.dash) for t in traces}) == 9
-    # The page draws curves ten times the files' width (Rytis 2026-10-25).
-    assert {t.line.width for t in traces} == {LINE_WIDTHS["sample"] * PAGE_CURVE_LINE_SCALE}
+    # One line per sample draws at twice the files' width on the page (Rytis 2026-10-25).
+    assert {t.line.width for t in traces} == {LINE_WIDTHS["sample"] * PAGE_SAMPLE_LINE_SCALE}
     assert {t.opacity for t in traces} == {1.0}
 
 
