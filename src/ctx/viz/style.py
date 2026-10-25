@@ -66,6 +66,9 @@ PX_PER_PT = 96 / 72
 # A plot on the page draws its text, points and marks 25 % larger than the figure file does
 # (Rytis 2026-09-30); the PDF and SVG keep the journal sizes above.
 PAGE_SCALE = 1.25
+# A curve's lines on the page, ten times the files' widths (Rytis 2026-10-25: "very thin");
+# the PDF and SVG keep LINE_WIDTHS.
+PAGE_CURVE_LINE_SCALE = 10
 # Page px per figure pt of a mark: a point drawn at d pt in the PDF is d times this on the page,
 # and a page's own PDF of a changed view divides by it again.
 PAGE_PX_PER_PT = PX_PER_PT * PAGE_SCALE

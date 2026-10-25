@@ -20,6 +20,7 @@ from ctx.viz.style import (
     FIGURE_WIDTH,
     LINE_WIDTHS,
     MAX_CATEGORIES,
+    PAGE_CURVE_LINE_SCALE,
     PLOTLY_HEIGHT_PX,
     POINT_ALPHA,
     THEMES,
@@ -216,7 +217,8 @@ class CurveData:
             fig.add_trace(go.Scatter(
                 x=rows[self.x].to_list(), y=rows[self.y].to_list(), mode="lines", name=level,
                 legendgroup=level, showlegend=level not in shown, opacity=opacity,
-                line={"color": hexa, "width": line_width, "dash": dash[1]},
+                line={"color": hexa, "width": line_width * PAGE_CURVE_LINE_SCALE,
+                      "dash": dash[1]},
                 customdata=[(str(name), *r) for r in self._extra(rows)],
                 hovertemplate=template,
             ))  # fmt: skip
@@ -224,7 +226,8 @@ class CurveData:
         for line in self.thresholds:
             fig.add_trace(go.Scatter(
                 x=list(line.x), y=list(line.y), mode="lines", name=line.name, hoverinfo="skip",
-                line={"color": light.reference, "width": LINE_WIDTHS["line"],
+                line={"color": light.reference,
+                      "width": LINE_WIDTHS["line"] * PAGE_CURVE_LINE_SCALE,
                       "dash": THRESHOLD_DASH[1]},
             ))  # fmt: skip
         fig.update_layout(

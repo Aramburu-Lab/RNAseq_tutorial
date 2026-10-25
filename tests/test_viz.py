@@ -1043,3 +1043,20 @@ def test_a_sample_density_draws_every_sample_under_its_contours():
         )
         == n
     )
+
+
+def test_a_curve_draws_ten_times_thicker_on_the_page_than_in_its_files():
+    """Rytis 2026-10-25: the page's curves were "very thin". Every line, a threshold's too, is
+    PAGE_CURVE_LINE_SCALE times its file width on the page; the files keep LINE_WIDTHS."""
+    from synth import demo_curves  # noqa: PLC0415
+
+    from ctx.viz.style import LINE_WIDTHS, PAGE_CURVE_LINE_SCALE, THEMES  # noqa: PLC0415
+
+    data = demo_curves()
+    styles = data._styles()  # noqa: SLF001 - the files' own widths per level
+    drawn = [t for t in data.interactive().data if t.name in styles]
+    assert drawn, "the demo's levels must name its traces for the test to see them"
+    for trace in drawn:
+        assert trace.line.width == styles[trace.name][2] * PAGE_CURVE_LINE_SCALE
+    widths = [line.get_linewidth() for line in data.static(THEMES["white"]).axes[0].get_lines()]
+    assert widths and max(widths) < LINE_WIDTHS["line"] * PAGE_CURVE_LINE_SCALE

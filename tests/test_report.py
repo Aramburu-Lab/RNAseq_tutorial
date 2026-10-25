@@ -508,3 +508,16 @@ def test_a_bar_figure_page_carries_its_filters(tmp_path):
     (page,) = [p for p in written if p.suffix == ".html"]
     html = unpacked(page.read_text())
     assert 'class="calls filter"' in html and 'data-column="cell_type"' in html
+
+
+def test_every_page_names_the_lab_above_its_title(tmp_path):
+    """Rytis 2026-10-25: every page header carries the lab's line, in the masthead, which prints
+    (the top bar does not). Catches the line dropped from the base template or the words."""
+    from ctx.report import text  # noqa: PLC0415
+    from ctx.report.builder import render  # noqa: PLC0415
+
+    line = text.word("ui", "affiliation")
+    assert line == "Aramburu lab, Department of Molecular Biology, Umeå University"
+    html = render(_module())
+    masthead = html[html.index('<header class="masthead">') :]
+    assert masthead.index(line) < masthead.index('class="kicker"')

@@ -2,6 +2,8 @@
 # Placeholders in {braces} are filled by the code; keep their names.
 
 suite = "Cancer Transcriptomics Teaching Suite"
+# Above every page's title, on screen and in print (Rytis 2026-10-25).
+affiliation = "Aramburu lab, Department of Molecular Biology, Umeå University"
 skip = "Skip to the content"
 dataset = "Dataset"
 module = "Module"

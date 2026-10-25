@@ -464,7 +464,7 @@ left_out = "The flag view of this map is left out: with it the page would pass t
 title = "Library size against genes detected"
 lead = "{flagged} of {n} samples are flagged on library size or genes detected, drawn as triangles; {other} more are flagged only on other metrics."
 reading = [
-    "Solid line: the smallest region holding {inner} of a group's samples; dashed: {outer}. A group under {minimum} samples is drawn as points.",
+    "Each dot is a sample. Solid line: the smallest region holding {inner} of a group's samples; dashed: {outer}; none under {minimum} samples.",
     "Triangles: samples flagged on library size or genes detected, drawn over the contours; the hover names every metric that flagged them.",
 ]
 x = "Library size"
