@@ -145,6 +145,12 @@
         var list = guide && guide.querySelector("details[open]>ul");
         var folded = box.height - (list ? list.getBoundingClientRect().height : 0);
         plot = Math.max(plot, ((legend || 0) + box.width * folded) / size.w + 1);
+        /* Horizontal bars hold a bar's row per category in the drawing area (meta.row,
+           style.PLOTLY_BAR_ROW_PX): their height as built counts the rows against a base the
+           page's margins outgrow, and only the open guide's growth had kept M6's 14 labels
+           apart at 1,280 px. */
+        var row = div.layout.meta && div.layout.meta.row, cats = full.yaxis && full.yaxis._categories;
+        if (row && cats) plot = Math.max(plot, row * cats.length);
       }
       return Math.max(asked || full.height, Math.ceil(size.t + size.b + plot));
     }
