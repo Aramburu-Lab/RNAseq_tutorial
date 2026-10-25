@@ -111,7 +111,6 @@ tab = "ORA"
 lead = "{up} gene sets pass FDR < {alpha} on the up calls, {down} on the down calls."
 reading = [
     "Each bar is one gene set; its length is -log10 of its FDR, so a longer bar is stronger evidence of over-representation.",
-    "Colour says which calls were counted: up or down in {tested} ({calls}).",
 ]
 calls = "padj below {alpha}, log2 FC at or beyond ±{lfc_min}"
 caption = "{label}: hypergeometric ORA of the up and down calls ({calls}), BH per direction, against the {background:,} tested gene symbols. Drawn: each set past the dashed line, FDR = {alpha}, and in grey, the smallest p to {top}."
@@ -132,7 +131,6 @@ tab = "GSEA"
 view = "Contrast"
 lead = "{passing} of {tested} tested gene sets pass FDR < {alpha}."
 reading = [
-    "Each bar is one gene set, the sets with the smallest FDR on top; its length is the NES.",
     "Right of 0, the set's genes gather among genes higher in {tested}; left of 0, among genes higher in {reference}.",
 ]
 caption = "{label}: preranked GSEA on the Wald statistic, {permutations} gene-set permutations, seed {seed}; the {shown} sets with the smallest FDR."
@@ -147,7 +145,6 @@ y = "NES"
 title = "{gene_set} in every contrast"
 lead = "The same set, ranked and permuted separately in each of {contrasts} contrasts."
 reading = [
-    "Each bar is one contrast; its length is the set's NES there.",
     "Right of 0, the set's genes sit among genes higher in that contrast's tested group; left of 0, lower.",
     "Highlighted bars pass FDR < {alpha}.",
 ]
@@ -160,7 +157,6 @@ title = "Running score: {gene_set} in {label}"
 lead = "ES = {es:.2f}, NES = {nes:.2f}, FDR = {fdr}."
 reading = [
     "The {ranked:,} genes are ranked from most up to most down in {tested}; the curve rises at each set member and falls between them.",
-    "Dots mark the set's {size} members; the curve's furthest point from 0 is the enrichment score.",
     "A peak near the start means the members gather among genes higher in {tested}; a trough near the end, among genes higher in {reference}.",
 ]
 caption = "{gene_set} in {label}: ES = {es:.2f}, NES = {nes:.2f}, nominal p = {p:.2g}, FDR = {fdr}. {size} members of {ranked:,} ranked genes; {permutations} gene-set permutations, seed {seed}."

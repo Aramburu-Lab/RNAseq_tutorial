@@ -204,8 +204,6 @@ lead = "Most even adjacent pair: {first} and {second}, larger CV {pair_cv:.2f}; 
 lead_none = "No adjacent exon pair has a defined CV across the tissues drawn, so none is proposed for qPCR."
 reading = [
     "A cell is one exon in one tissue: log2 of its median share over the exon's median across the tissues drawn.",
-    "Only tissues where the gene's median reaches 1 TPM are drawn: elsewhere a few reads set the shares.",
-    "A share over a median of 0 takes the top step; no share against a median above 0, the bottom. No pseudocount.",
     "Right of each row: the exon's CV of share across the tissues; low CV suits qPCR. Blank where undefined.",
 ]
 x = "Tissue"
@@ -298,8 +296,6 @@ lead = "{view}: largest shift drawn in {top}, r {r:.2f}, p {p}; {below} of {fami
 reading = [
     "A box pair is one contrast's samples, each normalised by that contrast's own M5 size factors.",
     "A sample in two contrasts has a value in each. Above each pair: n per group, p and r.",
-    "A contrast with too few values in a group, or nothing to rank, is not tested; the select pages through the rest.",
-    "In a paired contrast a grey line joins each individual's two samples.",
 ]
 x = "Contrast"
 y = "Expression"
@@ -349,11 +345,7 @@ title ="Splice junctions of {symbol} across tissues, GTEx {release}"
 lead = "{matched} of {introns} MANE Select introns match a GTEx {release} junction base for base; {junctions} junctions in all."
 reading = [
     "A cell is one junction in one tissue: log2 of its median reads over the junction's median across the tissues drawn.",
-    "Only tissues where the gene's GTEx V10 median reaches 1 TPM are drawn: the floor and the junctions share one release.",
-    "Reads over a median of 0 take the top step; no reads against a median above 0, the bottom. No pseudocount.",
     "Junctions J1 onwards run in genomic order; hover gives coordinates. MANE marks an intron of the MANE Select transcript.",
-    "Right of each row: the junction's median reads across the tissues drawn.",
-    "GTEx V10 on GENCODE v39, its floor too, not V11: the exon panel above and its floor are V11's.",
 ]
 x = "Tissue"
 y = "Junction"

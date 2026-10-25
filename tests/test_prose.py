@@ -67,6 +67,15 @@ def test_a_caption_has_no_backticks():
     assert any("a backtick" in p for p in prose.check_page("page", page))
 
 
+def test_a_reading_list_holds_two_lines_at_any_depth():
+    """Mutation: the limit at three; the nested FastQC tables skipped."""
+    two = {"reading": ["Look at the bars.", "A short bar is a bad run."]}
+    page = {**CLEAN, "figures": {"f": two, "g": {"h": {"reading": [*two["reading"], "Third."]}}}}
+    assert [p for p in prose.check_page("page", page) if "reading" in p] == [
+        "page: figures.g.h.reading: 3 lines; at most 2"
+    ]
+
+
 def test_page_files_pass():
     """Every content file obeys the rules: CONVENTIONS says a violation fails CI, and this is it."""
     assert prose.lint() == []

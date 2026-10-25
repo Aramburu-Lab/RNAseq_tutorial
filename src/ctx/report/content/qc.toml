@@ -269,7 +269,6 @@ stages = ["Sequenced", "Trim Galore", "Salmon"]
 caption = "Every fragment of the {n} samples, summed; a pair counts once, by its first read. Trim Galore's fates, then Salmon's for the fragments it processed. No test."
 reading = [
     "Each column is a stage; a block's height is the fragments with that fate, summed over the samples.",
-    "A band's width is the fragments passing from one fate to the next.",
     "Blue: fragments sequenced. Green: fragments kept at a stage. Grey: fragments lost there.",
 ]
 nodes.total_reads = "sequenced"
@@ -423,7 +422,6 @@ unit.run_accession = "run"
 reading = [
     "Each column is one {unit}, each row one metric; a cell is that {unit}'s value on that metric.",
     "Colour is the absolute band from the metric's registry source: green good, orange usable, red bad; grey, no value.",
-    "Each row names the metric's unit and its band cut-offs, as the registry gives them.",
 ]
 none = "no band"
 metric = "Registry metric, with its unit and its band cut-offs."
@@ -455,7 +453,6 @@ lead = "{flagged} of {cells} values are flagged; {unjudged} are not judged, whic
 reading = [
     "Each column is one sample, each row one metric the run judged at its k and strata.",
     "Red: flagged by the stratum's median ± k MAD or by the absolute band; green: judged and not flagged.",
-    "Light grey: not judged, as the stratum held too few samples for a band; grey: no value.",
 ]
 caption = "{n} samples on {m} judged metrics: {flagged} values flagged by their stratum's median ± {k} MAD or absolute band. {unjudged} are not judged and {none} have no value; {kept} kept metrics, never flagged, are left out. No test."
 metric = "Registry metric the run judged."
@@ -484,7 +481,6 @@ caption = "Solid: {inner}, dashed: {outer} highest-density regions, per group of
 title = "Recorded sex against expression"
 lead = "{disagree} of {n} samples disagree with their recorded sex."
 reading = [
-    "Each point is one sample: across, its XIST expression; up, the mean of its chrY genes.",
     "Above the line, chrY exceeds XIST and the sample is called male; below it, female.",
     "Colour: the recorded sex. A named point disagrees with its record.",
 ]
@@ -516,7 +512,6 @@ caption = "Per sample, the share of counted reads on nuclear rRNA against the mi
 reading = [
     "Each point is one sample: across, its nuclear rRNA share; up, its mitochondrial share.",
     "Far right: rRNA the library preparation left. High up: stressed or dying cells, or lost cytoplasm.",
-    "The hover names every metric that flagged the sample.",
 ]
 
 [figures.linked]
@@ -525,9 +520,6 @@ lead = "Paint samples in one view to find them in the other."
 reading = [
     "Top: each point is one sample on PC1 and PC2 of the blind VST.",
     "Bottom, across the card: each column is a label or the QC status; a band's width is the samples sharing the levels it joins.",
-    "Points and bands are grey until painted.",
-    "Unpainted, PDF and SVG give the figure files: the bands alone, those into QC green for pass, red for flag, orange for exclude.",
-    "Painted, they become PDF of this view and SVG of this view: both views as painted, one over the other at the figure files' width, the live line and a note closing the caption.",
 ]
 pc1 = "PC1 score of the blind VST."
 pc2 = "PC2 score of the blind VST."

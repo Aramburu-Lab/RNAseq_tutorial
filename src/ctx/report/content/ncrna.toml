@@ -102,8 +102,6 @@ note = "The caption counts every sample."
 reading = [
     "Each bar is one sample, by cell type, then condition; each band is one biotype's share of its counted reads.",
     "small_RNA pools miRNA, snRNA, snoRNA, nuclear rRNA and misc_RNA genes; pseudogene pools every pseudogene type.",
-    "Hover a bar for the sample's cell type and condition.",
-    "Choose one biotype in the filter to show its share of each sample alone.",
 ]
 caption = "{n_samples} samples, {n_genes:,} genes of {gtf}. Shares of counted reads by GENCODE [[biotype]]; descriptive, no test."
 x = "Sample"
@@ -113,7 +111,6 @@ y = "Counted reads"
 title = "Expression by biotype, against the filter"
 lead = "At {min_count} reads, the filter keeps {protein_coding:.0f} % of protein-coding genes and {lncrna:.0f} % of lncRNAs."
 reading = [
-    "Each line is one biotype: the share of its genes at or below each value.",
     "The value is the count, at the median library size, that at least {k} of the contrast's samples reach; the filter tests it.",
     "The dashed line is the filter's cutoff; a gene left of it is not tested.",
 ]
@@ -132,7 +129,6 @@ lead = "{called_protein_coding:,} protein-coding genes and {called_lncrna:,} lnc
 reading = [
     "Each dot is one tested gene: fold change across, significance up.",
     "Colour marks the biotype of a gene with BH-adjusted p below {alpha:g} within its biotype and |log2 FC| at least {lfc_min:g}; grey marks the rest.",
-    "The dashed lines mark the fold-change threshold.",
 ]
 caption = "{n_ref} {reference} and {n_test} {tested} samples; {n_tested:,} genes M5 tested. DESeq2 Wald test from M5, no new fit; [[BH]] within each biotype: {strata}."
 x = "log2 fold change, {tested} over {reference}"
@@ -156,7 +152,6 @@ title = "lncRNAs against their nearest protein-coding genes"
 lead = "{lncrna} and {neighbour}, {kind}: rho {rho} across samples, {rho_within} on residuals, q {q_within}."
 reading = [
     "Each point is one sample: the lncRNA across, its neighbour up.",
-    "Colour marks the condition.",
     "The select offers the {pairs} pairs with the smallest q on residuals; the first is drawn.",
 ]
 caption = "{n_samples} samples of {contrast}; {n_pairs:,} pairs of tested genes. [[Spearman]] rho on log2 CPM and on residuals from each condition's mean; BH over the pairs. Background: {n_background:,} pairs across chromosomes."
@@ -210,7 +205,6 @@ lead = "Median log2 fold change minus that of non-targets: {shift_validated} for
 reading = [
     "Each line is one target class: the share of its genes at or below each fold change.",
     "A line left of the non-targets' line marks lower fold changes, as repression by a rising miRNA predicts.",
-    "Predicted-only targets reach the default context++ cutoff of {preset:g}; non-targets hold no predicted site.",
 ]
 caption = "{n_validated:,} validated, {n_predicted:,} predicted-only, at a [[context++ score]] of at most {preset:g}, and {n_non:,} non-target genes M5 tested. KS test against non-targets, BH over {n_tests} tests: validated D = {d_validated}, q = {q_validated}; predicted-only D = {d_predicted}, q = {q_predicted}."
 x = "log2 fold change, {tested} over {reference}"
@@ -234,7 +228,6 @@ title = "miRNAs against their targets, across tumours"
 lead = "{mirna} and {gene}, {source}: rho {rho} across tumours, {rho_normal} across normals."
 reading = [
     "Each point is one tumour: the miRNA across, its target up, both from one sample.",
-    "The select offers the {pairs} pairs with the smallest q across tumours.",
     "Repression predicts a negative rho; a shared response to hypoxia or growth can give either sign.",
 ]
 caption = "{n_tumour} tumours and {n_normal} normals with a small-RNA and an mRNA library of one sample. [[Spearman]] rho of log2 [[RPM of miRNA-mapped reads]] against log2 CPM, each condition apart; BH over {n_pairs:,} pairs within each."
@@ -253,7 +246,6 @@ lead = "In {higher} of {n} tumours the rRNA-depleted library holds the larger hi
 reading = [
     "Each point is one tumour sequenced twice: its {other} library across, its rRNA-depleted library up.",
     "Points above the dashed line hold more histone mRNA after rRNA depletion, which keeps transcripts without a poly-A tail.",
-    "This figure compares the two files of one sample, so it reads files the one-per-patient rule leaves out.",
 ]
 caption = "{n} tumours with an rRNA-depleted and a {other} library, from GDC read groups. Shares of counted reads on [[replication-dependent histone mRNA|histone genes]]; Wilcoxon signed-rank: rRNA-depleted higher in {higher} of {n}, p {p}."
 x = "Histone mRNA, {other} library"

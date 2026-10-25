@@ -84,7 +84,6 @@ title = "Protein groups quantified per sample"
 lead = "{n_kept:,} of {n_ids:,} protein groups have a value in at least {min_pct} % of samples; the rest are not tested."
 reading = [
     "Each bar is one sample; its height counts the protein groups with a value in it.",
-    "Colour marks the TMT plex the sample was measured in.",
     "Bars within a plex are close: a protein missed in a plex is missing from all its samples.",
 ]
 caption = "Made-up data. {n_samples} samples in {n_plex} [[TMT]] plexes, each with a pooled reference channel; {n_ids:,} protein groups identified, {n_all:,} quantified in every sample. Counts, no test."
@@ -98,7 +97,6 @@ lead = "Median ρ is {median:.2f}; {n_sig:,} of {n_genes:,} genes have ρ above 
 reading = [
     "Each curve is one gene class: the share of its genes with ρ at or below each value.",
     "A curve crosses the dashed line at its class's median ρ; further right, protein follows RNA more.",
-    "ρ is Spearman's, between one gene's RNA and protein across {n_samples} samples.",
 ]
 caption = "Made-up data. Spearman ρ per gene over {n_samples} samples, BH over {n_genes:,} genes; genes per class: {counts}. [[Kruskal-Wallis]] across classes: H = {h:.1f}, p = {p}, ε² = {eps:.2f}."
 x = "RNA-protein correlation"
@@ -109,7 +107,6 @@ median = "median"
 title = "RNA against protein fold change: {tested} vs {reference}"
 lead = "Spearman ρ = {rho:.2f} across {n_genes:,} genes; {n_same:,} have the same sign at both levels."
 reading = [
-    "Each dot is one gene measured at both levels.",
     "Colour: changed at RNA, at protein, at both, or neither: BH-adjusted p < {alpha} and |log2 FC| ≥ {lfc}.",
     "Dashed lines split the quadrants; the solid diagonal is equal change.",
 ]
@@ -129,7 +126,6 @@ lead = "Compare each RNA row with the protein row under it: the top {n_both} gen
 reading = [
     "Each cell is one sample's z-score for one gene and layer; rows pair RNA with protein.",
     "Blue is below the row's mean, vermillion above; an empty cell is a missing protein value.",
-    "Right: the gene's Spearman ρ between RNA and protein over all {n_samples} samples.",
 ]
 caption = "Made-up data. z-scores of log2 CPM and log2 TMT ratio per gene and layer over {n_shown} samples: {n_ref} {reference}, {n_tested} {tested}. Right: per-gene Spearman ρ over {n_samples} samples; no further test."
 row = "Gene and layer"

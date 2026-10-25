@@ -26,6 +26,9 @@ CAPTION_WORDS = 40
 CARD_WORDS = 12
 SENTENCE_WORDS = 25
 PARAGRAPH_SENTENCES = 3
+# Lines of a figure's reading list in a page file: what to look at and what a bad result looks
+# like (Rytis 2026-10-25, D-119). A line code adds (a live FDR line) is not in the file.
+READING_LINES = 2
 BANNED = (
     "we", "let's", "you will", "in this module", "crucial", "powerful", "robust", "seamless",
     "simply", "actually", "very", "unlock", "dive", "journey", "landscape", "leverage",
@@ -154,6 +157,17 @@ def check_page(name: str, raw: Mapping[str, Any]) -> Iterator[str]:
             # The PDF prints a caption as it is, so a backtick would show there.
             if "`" in entry["caption"]:
                 yield f"{where}: a backtick; the PDF prints it, so name the literal in words"
+    yield from _long_readings(f"{name}: figures", raw.get("figures", {}))
+
+
+def _long_readings(where: str, node: Any) -> Iterator[str]:
+    """Each reading list under ``node``, at any depth, of more than ``READING_LINES`` lines."""
+    if not isinstance(node, dict):
+        return
+    for key, value in node.items():
+        if key == "reading" and isinstance(value, list) and len(value) > READING_LINES:
+            yield f"{where}.reading: {len(value)} lines; at most {READING_LINES}"
+        yield from _long_readings(f"{where}.{key}", value)
 
 
 def check_cards(raw: Mapping[str, Any]) -> Iterator[str]:

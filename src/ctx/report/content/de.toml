@@ -151,7 +151,6 @@ basis = "{short}-adjusted p"
 reading = [
     "Each dot is one of {n_tested} {unit} tested in both groups; right of 0 is higher in {tested}, left is higher in {reference}.",
     "Up in {tested}: log2 FC at least {fc} ({fold_up} times as high, +{pct_up} %) and {line_rule}.",
-    "Down in {tested}: log2 FC at most -{fc} ({fold_down} times as high, -{pct_down} %) under the same p-value rule. Grey dots miss at least one of the two conditions.",
 ]
 summary = "Up in {tested}: {n_up} {unit}. Down: {n_down} {unit}. Rule: log2 FC at or beyond ±{fc} and {basis} below {cutoff}."
 line_rule = "above the dashed line at -log10 p = {y_line}, where {basis} falls below {cutoff}"
@@ -162,7 +161,6 @@ title = "Fold change against expression: {label}"
 tab = "MA plot"
 lead = "Shrinkage tames the noisy fold changes of weakly expressed genes."
 reading = [
-    "Each gene appears twice against its mean expression: its raw log2 fold change and its shrunk one, as the legend marks.",
     "Shrinkage pulls weakly expressed genes, which have few reads to go on, toward zero; strongly expressed genes barely move.",
     "The test uses the raw estimate; rank genes by the shrunk one.",
 ]
@@ -188,7 +186,6 @@ tab = "p-value histogram"
 view = "Contrast"
 lead = "{low:,} genes have p < {alpha}, against a flat level of {flat:,.1f} per bin."
 reading = [
-    "Each bar counts the genes whose p-value falls in a {width:g}-wide bin; {tested:,} genes in all.",
     "The dashed line is the flat level, {flat:,.1f} genes per bin: how p-values spread where nothing changes.",
     "The first bar holds {first:,} genes, {ratio} the flat level. A peak at 0 over a flat floor is signal; a hill anywhere else is a model problem.",
 ]
@@ -205,7 +202,6 @@ title = "Dispersion: {label}"
 tab = "Dispersion"
 lead = "Each gene's final dispersion is pulled toward the trend fitted across genes."
 reading = [
-    "Each gene appears twice against its mean expression: its own (gene-wise) dispersion and the final one the test uses.",
     "The line is the trend DESeq2 fits across genes; it pulls each final value toward it, more where the gene's own estimate is less certain.",
     "A cloud far above the trend points to outlier samples or a missing design term.",
 ]
@@ -224,7 +220,6 @@ lead_none = "No contrast calls a gene at this setting."
 reading = [
     "Each bar is one contrast; its length counts the genes called up and down (padj below {alpha}, log2 FC at or beyond ±{lfc_min}).",
     "Compare contrasts only at equal n: a smaller contrast calls fewer genes even when nothing else differs.",
-    "The caption gives each contrast's n and design; the difference between designs on the same samples is the lesson.",
 ]
 caption = "{lesson}: genes called per contrast ({rule}). {sizes}."
 rule = "{basis} below {alpha}, log2 FC at or beyond ±{lfc_min}"
@@ -258,7 +253,6 @@ lead = "The two contrasts agree with Spearman rho = {rho:.2f}."
 reading = [
     "Each dot is one gene tested in both; it sits at its raw log2 fold change in {x} (across) and in {y} (up).",
     "Dots on the solid diagonal changed the same way in both; the tighter the cloud around it, the more the two contrasts agree.",
-    "Highlighted dots are called in at least one of the two.",
 ]
 caption = "Raw log2 FC of {genes:,} genes tested in both: Spearman rho = {rho:.2f}; the line is x = y. {note}"
 shared = "{n} individuals are in both contrasts, so the two estimates are not independent."
@@ -286,7 +280,6 @@ rho_none = "Too few genes are called in either for a rho."
 title = "Named genes: {label}"
 reading = [
     "Each box is one gene in one group: the line is the median sample, the box holds the middle half, and each dot is a sample.",
-    "Expression is log2 of the count divided by the sample's size factor, plus 1.",
     "Above each gene: the Mann-Whitney p, BH-adjusted over the {n_genes} plotted genes, and r, the rank-biserial effect, positive when {tested} is higher.",
 ]
 # A paired contrast's boxes (E.1e): the reading guide's last line.

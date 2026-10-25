@@ -284,7 +284,6 @@ lead = "RNA calls {rna_up:,} genes up and {rna_down:,} down; protein calls {prot
 reading = [
     "Each contour holds most genes of one group: called at both layers, at RNA only, at protein only, or at neither.",
     "Solid line: the smallest region holding {inner} of a group's genes; dashed: {outer}. A group under {minimum} genes is drawn as points.",
-    "A call at either layer needs BH-adjusted p < {alpha} and an absolute log2 fold change of at least {lfc}.",
 ]
 pairs = "{n:,} pairs"
 caption = "{tested} over {reference}; RNA: M5's DESeq2, {n_rna}; protein: {test}, {n_protein}; BH each. Spearman ρ = {rho:.2f} over {n_genes:,} genes, {ci} % CI {low:.2f} to {high:.2f}; regions {inner} and {outer}, {bandwidth}."
@@ -310,7 +309,6 @@ lead = "{n_genes:,} genes over {n_samples:,} samples: each gene's RNA row sits a
 reading = [
     "Each row is z-scored over its samples; a gene whose two rows share a pattern has protein following RNA.",
     "The strips above the columns give each sample's {tracks}; a pattern that follows the plex strip is a batch effect.",
-    "A blank cell is a protein not quantified in that sample, never a zero.",
 ]
 caption = "The named genes, then the highest and the lowest per-gene Spearman ρ, printed at right; {missing:,} protein cells missing. Descriptive, no further test."
 row = "Gene and layer"

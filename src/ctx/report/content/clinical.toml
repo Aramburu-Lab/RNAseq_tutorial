@@ -144,7 +144,6 @@ title = "Kaplan-Meier estimate of {endpoint}, split at the median of {gene}"
 lead = "Median {endpoint}: {median_low} below the median, {median_high} at or above it; log-rank p = {p}."
 reading = [
     "Each line is one group's Kaplan-Meier estimate: the share of its patients still free of the event.",
-    "A step down is one or more events; a short vertical tick is a censored patient.",
     "Colour: expression of {gene} below, or at or above, the cohort median. The rows below count the patients still followed.",
 ]
 caption = "{source}: {n} patients, {events} {endpoint} events, split at the median of {gene}. Log-rank chi-squared {chi2:.2f}, p = {p}. [[RMST]] difference, high minus low, at {horizon} months: {rmst:.1f} months."
@@ -421,7 +420,6 @@ title = "{endpoint} by a score of {genes} genes, split {split}"
 lead = "Log-rank p = {p}; RMST difference at {horizon} months, highest minus lowest group, {rmst} months."
 reading = [
     "Each line is one group's Kaplan-Meier estimate; the shade is its 95 % log-log band.",
-    "A short vertical tick is a censored patient; the rows below count the patients still followed.",
     "The score is the mean z of the genes, standardised: a hazard ratio is per SD of it.",
 ]
 caption = "{n:,} patients, {events:,} {endpoint} events, score of {genes} genes split {split}. [[Log-rank test|Log-rank]] chi-squared {chi2} on {df} df, p = {p}. [[RMST]] difference at {horizon} months, highest minus lowest group: {rmst} months."
