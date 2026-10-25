@@ -57,4 +57,4 @@ measured yet.
 - Shared logic: `labcore`, pinned by tag in `pixi.toml`. Never copied in.
 - Author: Rytis Stakaitis <rytis.stakaitis@umu.se>
 - License: MIT
-- Repository: https://github.com/aramburu-lab/cancer_transcriptomics_teaching
+- Repository: https://github.com/Aramburu-Lab/RNAseq_tutorial
