@@ -81,7 +81,10 @@ process {
     // unsorted", hiding the first try's own cause (on 2026-10-25 the full disk killed it). A
     // failed Preseq ends the run on its real error, and a resume runs it again whole. Not
     // maxRetries = 0: Nextflow 26.04.6 still retried once with it (a toy pipeline, 2026-10-25).
-    withName: 'PRESEQ_LCEXTRAP' { ext.args = '-verbose -bam -seed 1 -seg_len 100000000 -defects'; errorStrategy = 'terminate' }
+    // 32 GB on its one try: every first try on Pancreas-tissue-PAAD was killed OUT_OF_MEMORY at
+    // nf-core's 6 GB (sacct, 2026-10-25, 10 tasks, 1 to 18 min in), so its real peak is not
+    // measured; a choice to replace with 1.25x the peak sacct gives once one completes.
+    withName: 'PRESEQ_LCEXTRAP' { ext.args = '-verbose -bam -seed 1 -seg_len 100000000 -defects'; errorStrategy = 'terminate'; memory = 32.GB }
 }
 EOF
 }

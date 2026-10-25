@@ -671,8 +671,8 @@ def test_rnaseq_stubbed(site, gencode):
     # nf-core 3.27.0's Preseq ext.args plus -defects, under its selector: its retry cannot add it.
     preseq = "'-verbose -bam -seed 1 -seg_len 100000000 -defects'"
     assert (
-        f"withName: 'PRESEQ_LCEXTRAP' {{ ext.args = {preseq}; errorStrategy = 'terminate' }}"
-        in config
+        f"withName: 'PRESEQ_LCEXTRAP' {{ ext.args = {preseq}; errorStrategy = 'terminate'; "
+        "memory = 32.GB }" in config
     )
     assert nf_env["NXF_SYNTAX_PARSER"] == "v2" and cwd == str(launch)
     assert "count matrix: 2 genes, 2 samples" in done.stdout
