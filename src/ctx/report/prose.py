@@ -59,6 +59,16 @@ def _sentences(paragraph: str) -> list[str]:
     return [s for s in _SENTENCE.split(paragraph.strip()) if s]
 
 
+def first_sentence(text: str) -> tuple[str, str]:
+    """The text cut after its first sentence, where the lint ends one: (head, tail).
+
+    The tail keeps the space before it, so head + tail is the text: a page that folds the tail
+    (D-119) still carries every character of the caption.
+    """
+    found = _SENTENCE.search(text)
+    return (text, "") if found is None else (text[: found.start()], text[found.start() :])
+
+
 def outside_code(text: str) -> str:
     """The text with each placeholder and backticked span blanked: what is left is prose."""
     return _NOT_PROSE.sub(" ", text)

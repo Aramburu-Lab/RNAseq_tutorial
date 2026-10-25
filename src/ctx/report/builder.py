@@ -25,7 +25,7 @@ from markupsafe import Markup
 
 from ctx import editions
 from ctx.io import keep
-from ctx.report import cap, export, glossary, marks, text
+from ctx.report import cap, export, glossary, marks, prose, text
 from ctx.report.figures import defaults, json_for_script, pack_json, prepare, unpack_figures
 from ctx.viz.style import (
     ALONE_SCALE,
@@ -448,6 +448,7 @@ def unpacked(html: str) -> str:
 
 _ENV.filters["code"] = code_spans
 _ENV.filters["explain_terms"] = explain_terms
+_ENV.filters["first_sentence"] = prose.first_sentence
 _ENV.filters["pack"] = pack
 
 

@@ -140,7 +140,11 @@
         var legend = full.showlegend && full.legend ? full.legend._width * full.legend._height : 0;
         var guide = div.closest(".fig-plot") && div.closest(".fig").querySelector(".reading");
         var box = guide ? guide.getBoundingClientRect() : { width: 0, height: 0 };
-        plot = Math.max(plot, ((legend || 0) + box.width * box.height) / size.w + 1);
+        /* The guide counts folded, as it loads (D-119): opened, its list would grow the plot
+           a reader is reading it against. */
+        var list = guide && guide.querySelector("details[open]>ul");
+        var folded = box.height - (list ? list.getBoundingClientRect().height : 0);
+        plot = Math.max(plot, ((legend || 0) + box.width * folded) / size.w + 1);
       }
       return Math.max(asked || full.height, Math.ceil(size.t + size.b + plot));
     }
