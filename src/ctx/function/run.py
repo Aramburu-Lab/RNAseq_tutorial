@@ -411,13 +411,15 @@ def _page(
     first = _featured(writer, contrasts[featured], said, e)
     one_set: list[FigureBlock | str] = []
     tested = [n for n, table in e.gsea.items() if fn.featured_set in set(table["gene_set"])]
-    if tested:
+    # One contrast's NES is already a bar of the GSEA figure, and its cutoff could only restyle
+    # that one bar (Rytis 2026-10-26: "does nothing"), so the comparison needs two contrasts.
+    if len(tested) > 1:
         featured_bars = _featured_bars(fn.featured_set, e.gsea, said)
         nes = writer.figure(
             featured_bars, f"nes_{_slug(fn.featured_set)}", nes_text(fn.featured_set, len(tested))
         )
         one_set.append(cutoff.attach(nes, featured_bars, cutoff.nes(featured_bars)))
-    else:
+    elif not tested:
         one_set.append(fill(PAGE, "groups.untested", gene_set=set_words(fn.featured_set),
                             low=lite.MIN_SIZE, high=lite.MAX_SIZE, file=e.gmt.name))  # fmt: skip
     contrast, gene_set = fn.running
