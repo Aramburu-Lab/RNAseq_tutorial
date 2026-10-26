@@ -154,31 +154,20 @@ no = 53
 
 # The course's comparison, not the paper's (header). Library run and read length are partly
 # confounded with tissue: 39 of 51 tumours sit in RNA140128LC at 50 nt, 27 of 38 adjacent normals
-# in RNA150213LC, 16 of them at 100 nt. Unpaired, since no record names a patient.
-
-[[contrasts]]
-name = "tumour_adjacent_naive"
-label = "Tumour against adjacent normal, no batch term"
-variable = "condition"
-reference = "adjacent_normal"
-tested = "tumour"
-n = [38, 51]
+# in RNA150213LC, 16 of them at 100 nt. Unpaired, since no record names a patient. One contrast,
+# no batch term: the pages compared it with a library-run-and-read-length design, a lesson the
+# course dropped to keep M5 to M8 light (Rytis 2026-10-26); the PCA still colours both factors.
 
 [[contrasts]]
 name = "tumour_adjacent"
-label = "Tumour against adjacent normal, library run and read length in the design"
+label = "Tumour against adjacent normal"
 variable = "condition"
 reference = "adjacent_normal"
 tested = "tumour"
 n = [38, 51]
-design = "~library_run + batch + group"
 
 [de]
 featured = "tumour_adjacent"
-scatters = [["tumour_adjacent_naive", "tumour_adjacent"]]
-
-[de.lessons]
-"Batch" = ["tumour_adjacent_naive", "tumour_adjacent"]
 
 [[de.pca]]
 name = "tissue"
