@@ -80,8 +80,11 @@ def keep(names: Sequence[str], current: str, build: str) -> int:
 
 def _ranking(said: Words, results: pl.DataFrame, enriched: Mapping[str, lite.Enriched],
              shown: str) -> dict[str, Any]:  # fmt: skip
-    """One contrast's ranking in base64 float64 and its tested sets, each with its own words."""
-    weight = weights(results)
+    """One contrast's ranking in base64 float64 and its tested sets, each with its own words.
+
+    Each set carries its members' symbols beside their ranks, so the hover names every tick.
+    """
+    genes, weight = lite.ranking(*ranking(results))
     sets = []
     for name in order(enriched, shown):
         hit = enriched[name]
@@ -90,7 +93,8 @@ def _ranking(said: Words, results: pl.DataFrame, enriched: Mapping[str, lite.Enr
         sets.append({"label": set_words(name), "name": name, "title": words.title,
                      "lead": str(marks.html(words.lead)), "caption": str(marks.html(written)),
                      "export_caption": marks.plain(written), "es": hit.es,
-                     "positions": list(hit.positions)})  # fmt: skip
+                     "positions": list(hit.positions),
+                     "genes": [genes[p] for p in hit.positions]})  # fmt: skip
     encoded = base64.b64encode(np.asarray(weight, dtype="<f8").tobytes()).decode("ascii")
     return {"label": said.label, "sets": sets, "weights": encoded}
 
@@ -127,8 +131,14 @@ def panel(said: Words, results: pl.DataFrame, enriched: Mapping[str, lite.Enrich
             "export": dict(exported)}  # fmt: skip
 
 
-def scatter(said: Words, result: lite.Enriched) -> ScatterData:
-    """The running enrichment score, with the set's genes as ticks along the ranking."""
+def scatter(said: Words, result: lite.Enriched, genes: Sequence[str]) -> ScatterData:
+    """The running enrichment score, with the set's genes as ticks along the ranking.
+
+    Args:
+        said: The contrast in words.
+        result: The set's GSEA result.
+        genes: The ranking's symbols in rank order; each tick's hover and CSV row names its gene.
+    """
     ranks = tuple(float(i) for i in range(len(result.running)))
     # A rank is a whole number: as a float, the hover printed 12,345 as 1.23e+4.
     frame = pl.DataFrame(
@@ -136,12 +146,14 @@ def scatter(said: Words, result: lite.Enriched) -> ScatterData:
             "rank": pl.Series([int(p) for p in result.positions], dtype=pl.Int64),
             "running": [result.running[p] for p in result.positions],
             "mark": [figure("running", "member")] * result.size,
+            "gene": [genes[p] for p in result.positions],
         }
     )
     columns = {
         "rank": ("rank", "Position in the ranking, from the most positive statistic."),
         "running": ("dimensionless", "Running enrichment score at this member."),
         "mark": ("none", "Set member."),
+        "gene": ("none", "The member's gene symbol."),
     }
     member = figure("running", "member")
     return ScatterData(
@@ -156,6 +168,8 @@ def scatter(said: Words, result: lite.Enriched) -> ScatterData:
         names={member: member},
         caption=caption(said, result, len(ranks)),
         lines=(Line(figure("running", "line"), ranks, result.running),),
+        hover=("gene",),
+        labels={"gene": figure("running", "gene")},
         width="double",
     )
 
@@ -171,7 +185,7 @@ def block(writer: Writer, name: str, featured: Contrasted, shown: str,
     """
     said, results, enriched = featured
     hit = enriched[shown]
-    data = scatter(said, hit)
+    data = scatter(said, hit, lite.ranking(*ranking(results))[0])
     built = writer.figure(data, f"running_{name}",
                           running_text(said, hit, len(hit.running)))  # fmt: skip
     exported = export.settings(data.inches(), data.caption, built.stem, data.export_layers())

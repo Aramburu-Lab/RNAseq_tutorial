@@ -162,6 +162,7 @@ reading = [
 caption = "{gene_set} in {label}: ES = {es:.2f}, NES = {nes:.2f}, nominal p = {p:.2g}, FDR = {fdr}. {size} members of {ranked:,} ranked genes; {permutations} gene-set permutations, seed {seed}."
 x = "Rank"
 y = "Enrichment score"
+gene = "Gene"
 member = "set member"
 line = "running score"
 # Any set the contrast tested, drawn by the page (WO7, D-051).

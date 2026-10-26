@@ -53,8 +53,8 @@
       var moved = c !== 0 || i !== 0;
       /* Every rank, x with y: the build's line may carry fewer points than the ranking. */
       Plotly.restyle(div, { x: [run.map(function (_, r) { return r; })], y: [run] }, [line]);
-      Plotly.restyle(div, { x: [s.positions], y: [s.positions.map(function (p) { return run[p]; })] },
-                     [dots]);
+      Plotly.restyle(div, { x: [s.positions], y: [s.positions.map(function (p) { return run[p]; })],
+                            customdata: [s.genes.map(function (g) { return [g]; })] }, [dots]);
       if (lead) lead.innerHTML = moved ? s.lead : start.lead;
       caption.innerHTML = moved ? s.caption : start.caption;
       if (title) title.textContent = moved ? s.title : start.title;

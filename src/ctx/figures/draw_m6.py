@@ -80,7 +80,8 @@ def running(inputs: Mapping[str, Path], p: SetInContrast, spec: Dataset) -> tupl
     if (hit := enriched.get(p.gene_set)) is None:
         raise NoFigureError(f"{p.gene_set}: {p.contrast} did not test it, so M6 draws no curve")
     said = every(spec.contrasts, spec.columns)[p.contrast]
-    return m6_running.scatter(said, hit), running_text(said, hit, len(hit.running))
+    genes = lite.ranking(*m6_running.ranking(results))[0]
+    return m6_running.scatter(said, hit, genes), running_text(said, hit, len(hit.running))
 
 
 def background(inputs: Mapping[str, Path], p: OneContrast, spec: Dataset) -> tuple[Any, FigureText]:

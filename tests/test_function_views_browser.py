@@ -31,6 +31,7 @@ RUNNING = """(async () => {
     ranks: Array.from(d.data.find(t => t.name === cfg.line).x),
     dots: [Array.from(d.data.find(t => t.name === cfg.member).x),
            Array.from(d.data.find(t => t.name === cfg.member).y)],
+    genes: Array.from(d.data.find(t => t.name === cfg.member).customdata || []).map(c => c[0]),
     title: words('.fig-title'), lead: words('.fig-lead'), caption: words('figcaption'),
     line_words: words('.running-summary'), es: fig.ctxRunning ? fig.ctxRunning.es : null,
     moved: !!fig.querySelector('a[data-export][role=button]'),
@@ -142,8 +143,8 @@ def _sets(folder) -> dict[str, tuple[str, ...]]:
 @pytest.mark.parametrize("size", ["wide_light", "phone_dark"])
 def test_every_set_draws_lites_running_sum_and_its_own_words(m6, size):
     """Mutations caught: the twin's misses counting the members; the dots left on the build's
-    set; a set's caption not swapped; the export kept on the build's caption; the ES check
-    never run."""
+    set; a tick's hover naming another set's gene; a set's caption not swapped; the export kept
+    on the build's caption; the ES check never run."""
     folder, de, _, seen, _ = m6
     result = seen[f"running_{size}"]
     assert result["errors"] == []
@@ -161,6 +162,7 @@ def test_every_set_draws_lites_running_sum_and_its_own_words(m6, size):
         row = by_words[drawn["label"]]
         positions = np.sort([rank_of[g] for g in members[drawn["label"]] if g in rank_of])
         assert drawn["dots"][0] == positions.tolist()
+        assert drawn["genes"] == [ranked[q] for q in positions]
         expected = lite._running(positions, weights[positions], len(weights))  # noqa: SLF001
         assert np.allclose(drawn["line"], expected, rtol=0, atol=1e-12)
         assert drawn["ranks"] == list(range(len(weights)))

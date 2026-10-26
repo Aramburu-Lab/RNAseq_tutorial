@@ -59,7 +59,7 @@ def _running():
     positions = (10, 2_000, 12_345)
     result = lite.Enriched("SET", 3, 0.5, 2.0, 0.01, 0.0, positions,
                            tuple(0.001 * i for i in range(15_000)))  # fmt: skip
-    return running.scatter(Words("contrast", "b", "a"), result)
+    return running.scatter(Words("contrast", "b", "a"), result, [f"G{i}" for i in range(15_000)])
 
 
 def _gsea():
