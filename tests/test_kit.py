@@ -72,6 +72,16 @@ def build(
     return out, done
 
 
+def link_hubs(root: Path) -> None:
+    """Each hub rewritten to link its dataset's newest page per module, as ``ctx report`` does."""
+    out = root / "outputs"
+    for hub in out.glob("09_report/*_report_*_hub_v1.html"):
+        dataset = hub.name[len("2026-01-01_report_") : -len("_hub_v1.html")]
+        newest = {q.parent: q for q in sorted(out.glob(f"*/*_{dataset}_overview_v1.html"))}
+        page(hub, f"Course hub: {dataset}",
+             *(f"../{q.parent.name}/{q.name}" for q in newest.values()))  # fmt: skip
+
+
 def nothing_written(kit: Path) -> bool:
     return not kit.exists() and not kit.with_name(kit.name + ".partial").exists()
 
@@ -143,6 +153,17 @@ def test_kit_refuses_reads_and_big_files_and_writes_nothing(tmp_path, name, cont
         path.write_bytes(content)
     kit, done = build(tmp_path, real=tmp_path / "real")
     assert done.returncode == 1 and reason in done.stderr and nothing_written(kit)
+
+
+def test_a_module_page_its_hub_does_not_link_stops_the_kit(tmp_path):
+    """Lung-tissue-LUAD's hub was written before its M9 pages, which the kit shipped unlinked
+    (2026-10-26). A dataset's overview page its hub misses stops the build, naming the fix."""
+    root = a_root(tmp_path / "real", "Study", "study")
+    page(root / "outputs" / "11_genecard" / f"{NEW}_genecard_study_overview_v1.html",
+         "M9 Gene cards: Study")  # fmt: skip
+    kit, done = build(tmp_path, real=root)
+    assert done.returncode == 1 and "does not link it" in done.stderr and nothing_written(kit)
+    assert "ctx report --dataset study" in done.stderr
 
 
 def test_a_lite_kit_leaves_a_big_table_home_and_names_it(tmp_path):
@@ -481,6 +502,7 @@ def test_a_source_file_never_ships_whatever_its_name(tmp_path, kit_script, monke
     page(root / "outputs" / "07_proteo" / f"{NEW}_proteo_study_overview_v1.html", "M7: Study",
          copy.name)  # fmt: skip
     planted = {hashlib.sha256(copy.read_bytes()).hexdigest(): "fake.toml freeze"}
+    link_hubs(root)
     _, _, problems, _ = kit_script.select(root, sources=planted)
     assert problems == [f"{copy}: the source file fake.toml freeze; derived tables ship, "
                         "sources never"]  # fmt: skip
@@ -606,6 +628,7 @@ def test_a_dataset_ships_its_newest_run_not_each_names_newest_copy(tmp_path):
     page(cards / f"{NEW}_genecard_study_overview_v1.html", "M9 Gene cards: Study",
          f"{NEW}_genecard_study_card_c_v1.html")  # fmt: skip
     page(cards / "index.html", "M9", f"{NEW}_genecard_study_overview_v1.html")
+    link_hubs(real)
     kit, done = build(tmp_path / "k", real=real)
     assert done.returncode == 0, done.stderr
     shipped = {Path(f).name for f in shipped_files(kit) if "/11_genecard/" in f}
@@ -672,6 +695,7 @@ def test_kit_ships_an_older_glossary_a_module_page_links(tmp_path):
          f"{NEW}_report_glossary_v1.html")  # fmt: skip
     old_qc = real / "outputs" / "02_qc" / f"{OLD}_qc_study_overview_v1.html"
     page(old_qc, "M2 QC: Study", f"../09_report/{OLD}_report_glossary_v1.html")
+    link_hubs(real)
     kit, done = build(tmp_path, real=real)
     assert done.returncode == 0, done.stderr
     assert (kit / "step" / "outputs" / "09_report" / f"{OLD}_report_glossary_v1.html").is_file()

@@ -230,5 +230,28 @@ def main() -> None:
     sys.exit(1 if problems else 0)
 
 
+# A dataset's hub and its module pages, by file name.
+_HUB = re.compile(r"\d{4}-\d{2}-\d{2}_report_(?P<dataset>.+)_hub_v\d+\.html")
+_OVERVIEW = re.compile(r"\d{4}-\d{2}-\d{2}_[a-z_]+?_(?P<dataset>.+)_overview_v\d+\.html")
+
+
+def unlinked_pages(kept: list[Path]) -> list[str]:
+    """Each module page its dataset's hub does not link: the hub was written before it.
+
+    ``ctx run`` writes the hub last and ``ctx genecard`` runs after it, so Lung-tissue-LUAD's
+    first hub linked no M9 page while the kit shipped them (2026-10-26).
+    """
+    hubs = {m["dataset"]: p for p in kept if (m := _HUB.fullmatch(p.name))}
+    problems = []
+    for dataset, hub in sorted(hubs.items()):
+        linked = {target(hub, v) for _, _, v in links(hub)}
+        for p in kept:
+            m = _OVERVIEW.fullmatch(p.name)
+            if m and m["dataset"] == dataset and p not in linked:
+                problems.append(f"{p}: {hub.name} does not link it; write the hub again with "
+                                f"`ctx report --dataset {dataset}`")  # fmt: skip
+    return problems
+
+
 if __name__ == "__main__":
     main()

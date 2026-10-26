@@ -230,6 +230,7 @@ def select(
     )
     kept -= set(large)
     problems += stale_pages(sorted(kept))
+    problems += check_kit.unlinked_pages(sorted(kept))
     problems += other_edition(sorted(kept), outputs, edition)
     for p in sorted(kept):
         if p.name.lower().endswith(REFUSED):
