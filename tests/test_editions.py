@@ -17,7 +17,7 @@ from pathlib import Path
 import polars as pl
 import pytest
 from conftest import ctx_run
-from test_kit import NEW, SCRIPT, a_root, nothing_written, page
+from test_kit import NEW, SCRIPT, a_root, link_hubs, nothing_written, page
 
 from ctx import cohorts, editions, pipeline, runtime
 from ctx.dataset import load
@@ -260,7 +260,7 @@ def _kit(tmp: Path, name: str, roots: list[str], *extra: str
 
 
 def _every_module_root(tmp: Path, edition: str | None = None) -> Path:
-    """A root with an M7 and an M10 page beside the course's, none linked from the hub.
+    """A root with an M7 and an M10 page beside the course's, its hub as ``ctx report`` writes it.
 
     ``edition`` stamps every page as built under it; None leaves them as pages built before
     ED.2b, recording none.
@@ -271,6 +271,8 @@ def _every_module_root(tmp: Path, edition: str | None = None) -> Path:
     page(out / "12_clinical" / "2026-09-30_clinical_Breast-tissue-BRCA_overview_v1.html", "M10: B")
     # M10 reads a gene list from a link, so a kit that ships its folder needs its entry page.
     page(out / "12_clinical" / "index.html", "M10 Clinical and survival")
+    if edition != "core":  # a core hub links no M7 or M10 page: core leaves both modules out
+        link_hubs(root)
     if edition is not None:
         _stamp(out.rglob("*.html"), edition)
     return root

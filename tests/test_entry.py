@@ -11,7 +11,7 @@ import subprocess
 import sys
 
 import pytest
-from test_kit import CHECK, NEW, SCRIPT, a_root, load, page
+from test_kit import CHECK, NEW, SCRIPT, a_root, link_hubs, load, page
 
 from ctx.io.naming import ENTRY, lint
 from ctx.report import builder
@@ -104,6 +104,7 @@ def test_the_kit_ships_entry_pages_and_refuses_a_missing_one(tmp_path):
     root = a_root(tmp_path / "real", "Study", "study")
     folder = root / "outputs" / "12_clinical"
     page(folder / f"{NEW}_clinical_study_overview_v1.html", "M10 Clinical: Study")
+    link_hubs(root)
     out, done = _kit(tmp_path / "a", root)
     assert done.returncode != 0 and "12_clinical: no index.html" in done.stderr
     assert not out.exists()
