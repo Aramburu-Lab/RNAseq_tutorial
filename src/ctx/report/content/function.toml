@@ -230,6 +230,8 @@ grey = "Grey bars: {failing} sets of smallest p that fail FDR < {alpha}; a famil
 empty = "No gene set holds a gene of the list, so no bar is drawn."
 taken = "{n} genes of the list have a symbol on this page; genes left out for want of one: {missing}."
 named = "The list: {names}."
+# Before the lead whenever the list drawn is not the page's own calls.
+list_lead = "{source}: {n} genes."
 more = "{names} and {more} more"
 pasted_found = "{n} pasted names are symbols on this page; names matching none: {missing}."
 hover = "%{customdata[0]}<br>p %{customdata[4]:.2g}<br>FDR %{customdata[1]:.2g}<br>%{customdata[2]} of %{customdata[3]} set genes in the list"

@@ -5,7 +5,7 @@
 {% block content %}
 <section id="entry">
 <p class="lede">{{ ui.entry.lead if page.links|length > 1 else ui.entry.one }}</p>
-<ul class="entry-links">{% for name, href in page.links %}<li><a href="{{ href }}" data-entry>{{ name }}</a></li>{% endfor %}</ul>
+<ul class="entry-links">{% for name, href, dataset in page.links %}<li><a href="{{ href }}" data-entry data-dataset="{{ dataset }}">{{ name }}</a></li>{% endfor %}</ul>
 <noscript><p class="note">{{ ui.entry.noscript }}</p></noscript>
 </section>
 <script>
@@ -14,7 +14,12 @@
   /* The fragment holds the gene list; each link carries it on. One page: go there now, with
      replace, so Back returns to the page that linked here. */
   links.forEach(function (a) { a.setAttribute("href", a.getAttribute("href") + location.hash); });
-  if (links.length === 1) location.replace(links[0].getAttribute("href"));
+  /* A list names the dataset it came from (src=<dataset>:<contrast>): go to that dataset's
+     page, so a student is never asked which dataset they selected in (Rytis 2026-10-26). */
+  var src = /[#&]src=([^&:]*)/.exec(location.hash), from = src ? decodeURIComponent(src[1]) : "";
+  var mine = Array.prototype.filter.call(links, function (a) { return a.getAttribute("data-dataset") === from; });
+  if (mine.length === 1) location.replace(mine[0].getAttribute("href"));
+  else if (links.length === 1) location.replace(links[0].getAttribute("href"));
 })();
 </script>
 {% endblock %}

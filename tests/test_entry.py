@@ -38,14 +38,17 @@ def test_one_dataset_forwards_and_two_are_listed(tmp_path):
     _overview(folder, "tcga_brca", "TCGA breast", day="2026-09-01")
     _overview(folder, "tcga_brca", "TCGA breast")
     html = unpacked(write_entry(folder, "genecard").read_text())
-    assert re.findall(r'<a href="([^"]+)" data-entry>', html) == [
+    assert re.findall(r'<a href="([^"]+)" data-entry data-dataset', html) == [
         f"{NEW}_genecard_tcga_brca_overview_v1.html"]  # fmt: skip
     assert 'location.replace(links[0].getAttribute("href"))' in html
     assert 'a.getAttribute("href") + location.hash' in html
     assert "plotly.js v" not in html and len(html.encode()) < 500_000  # noqa: PLR2004
     _overview(folder, "tcga_kirc", "TCGA kidney")
     html = unpacked(write_entry(folder, "genecard").read_text())
-    assert len(re.findall(r"data-entry>", html)) == 2  # noqa: PLR2004 - two datasets
+    # Two datasets: each link names its own, so a list's src= picks the page (Rytis
+    # 2026-10-26: the reader was asked which dataset they had selected in).
+    assert re.findall(r'data-entry data-dataset="([^"]+)"', html) == ["tcga_brca", "tcga_kirc"]
+    assert 'getAttribute("data-dataset") === from' in html
     with pytest.raises(ValueError, match="reads no gene list"):
         write_entry(folder, "de")
 

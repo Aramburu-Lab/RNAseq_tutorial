@@ -41,6 +41,11 @@ def onward(spec: Dataset) -> list[tuple[str, str]]:
             if runs[m] and edition.has_module(m)]  # fmt: skip
 
 
+def _slug(page: Path, module: str) -> str:
+    """An overview page's dataset, from its name: ``<date>_<module>_<slug>_overview``."""
+    return page.name[len("2026-01-01_") + len(module) + 1 :].rsplit("_overview_v", 1)[0]
+
+
 def write_entry(folder: Path, module: str) -> Path:
     """Write ``index.html`` in a module folder, linking each dataset's newest overview page.
 
@@ -59,6 +64,7 @@ def write_entry(folder: Path, module: str) -> Path:
     pages = newest(folder, "overview")
     if not pages:
         raise ValueError(f"{folder}: no overview page for the entry page to link")
-    links = tuple((label(p), Path(os.path.relpath(p, folder)).as_posix()) for p in pages)
+    links = tuple((label(p), Path(os.path.relpath(p, folder)).as_posix(), _slug(p, module))
+                  for p in pages)  # fmt: skip
     title = text.fill("ui", "entry.title", module=TITLES[module])
     return write(EntryPage(title, links), folder / ENTRY)

@@ -381,11 +381,12 @@ class EntryPage:
 
     Attributes:
         title: The page's title.
-        links: (dataset, href) of each dataset's newest overview in the folder.
+        links: (dataset label, href, dataset slug) of each dataset's newest overview in the
+            folder; the slug is what a link's ``src=`` names, so the page forwards to it.
     """
 
     title: str
-    links: tuple[tuple[str, str], ...]
+    links: tuple[tuple[str, str, str], ...]
 
 
 Page = FigurePage | ModulePage | HubPage | CoursePage | GlossaryPage | EntryPage

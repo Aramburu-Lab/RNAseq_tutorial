@@ -38,6 +38,10 @@
       var r = spec.reading, key = form.elements.direction.value;
       if (lead) lead[moved ? "textContent" : "innerHTML"] = moved
         ? ctxFdr.fill(spec.leads[key in spec.leads ? key : "all"], values) : built.lead;
+      /* A list from a link, a window or a paste names itself first: the lead said "the up
+         calls" over a student's own list, which read as the list not arriving (2026-10-26). */
+      if (lead && list !== build) lead.textContent = ctxPick.fill(words.list_lead,
+        { source: list.source, n: list.up.length + list.down.length }) + " " + lead.textContent;
       caption[moved ? "textContent" : "innerHTML"] = moved ? ctxFdr.fill(spec.caption, values) : built.caption;
       if (reading) reading[moved ? "textContent" : "innerHTML"] = moved
         ? ctxFdr.fill(failing ? r.failing : r.passing, values) : built.reading;
@@ -187,6 +191,8 @@
         notes.textContent = err.key ? ctxSelect.message(err, { select: cfg.errors }) : String(err.message);
       }
       ctxLive.reveal(form);
+      /* The page opens on this card, far down M6, not at its top (Rytis 2026-10-26). */
+      if (!root.ctxListShown) { root.ctxListShown = true; fig.scrollIntoView({ block: "start" }); }
     }
     run();
   }
