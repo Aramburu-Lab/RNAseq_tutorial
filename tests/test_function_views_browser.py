@@ -275,7 +275,7 @@ def test_another_contrasts_calls_rerun_as_its_own_table(m6, size):
 
 
 @pytest.mark.parametrize("size", ["wide_light", "phone_dark"])
-def test_the_background_views_draw_lites_p_for_each_setting(m6, size):
+def test_the_background_views_draw_lites_fdr_for_each_setting(m6, size):
     """Mutations caught: the sets drawn capped at seven in the every-set view; the down calls
     tested as the up; a view's wider background drawn from the build's."""
     folder, de, _, _, views = m6
@@ -299,8 +299,8 @@ def test_the_background_views_draw_lites_p_for_each_setting(m6, size):
         drawn = {t["name"]: (list(t["y"]), list(t["x"])) for t in option["traces"]}
         mine, wide = drawn["tested genes"], drawn["gene-set union"]
         assert mine[0] == wide[0] == [set_words(s) for s in order]
-        assert np.allclose(mine[1], [-math.log10(right[s].p) for s in order])
-        assert np.allclose(wide[1], [-math.log10(wrong[s].p) for s in order])
+        assert np.allclose(mine[1], [-math.log10(right[s].fdr) for s in order])
+        assert np.allclose(wide[1], [-math.log10(wrong[s].fdr) for s in order])
         assert f" {direction} calls" in option["caption"]
     assert seen == {("up", False), ("up", True), ("down", False), ("down", True)}
 

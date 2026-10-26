@@ -69,10 +69,13 @@ class Tested:
         return both[:TOP] if how == "top" else both
 
     def moved(self, how: str) -> tuple[int, int, int]:
-        """Sets drawn that look more and less significant against the wider background; all."""
+        """Sets drawn that look more and less significant against the wider background; all.
+
+        Counted on FDR, the bars' length, so the words match what the bars show.
+        """
         drawn = self.shown(how)
-        more = sum(self.wrong[s].p < self.right[s].p for s in drawn)
-        less = sum(self.wrong[s].p > self.right[s].p for s in drawn)
+        more = sum(self.wrong[s].fdr < self.right[s].fdr for s in drawn)
+        less = sum(self.wrong[s].fdr > self.right[s].fdr for s in drawn)
         return more, less, len(drawn)
 
     def passing(self) -> tuple[int, int]:
@@ -112,28 +115,36 @@ def axes(kept: Sequence[str]) -> list[tuple[str, list[str]]]:
 
 
 def bars(said: Words, calls: int, tested: int, found: Tested, how: str) -> BarData:
-    """One view's bars: each set drawn twice, against the tested genes and the wider one."""
+    """One view's bars: each set drawn twice, against the tested genes and the wider one.
+
+    The length is -log10 FDR with the dashed line at ``ALPHA``, as on the ORA bars: BH gives each
+    background its own p cutoff, so no line on p could mark the sets that pass (Rytis 2026-10-26).
+    """
     drawn = found.shown(how)
     labels = (figure("background", "tested_genes"), words(found.background))
-    rows = [(set_words(s), label, float(-np.log10(r[s].p)))
+    rows = [(set_words(s), label, float(-np.log10(r[s].fdr)))
             for s in drawn
             for label, r in zip(labels, (found.right, found.wrong), strict=True)]  # fmt: skip
-    frame = pl.DataFrame(rows, schema=["gene_set", "background", "neg_log10_p"], orient="row")
+    frame = pl.DataFrame(rows, schema=["gene_set", "background", "neg_log10_fdr"], orient="row")
     columns = {
         "gene_set": ("none", "Gene set in words."),
         "background": ("none", "ORA background."),
-        "neg_log10_p": ("-log10 p", f"Hypergeometric p of the {found.direction} calls."),
+        "neg_log10_fdr": (
+            "-log10 FDR",
+            f"BH FDR over the sets of the {found.direction} calls' hypergeometric p.",
+        ),
     }
     return BarData(
-        frame=frame, columns=columns, category="gene_set", value="neg_log10_p",
+        frame=frame, columns=columns, category="gene_set", value="neg_log10_fdr",
         category_label=figure("background", "x"), value_label=figure("background", "y"),
         series="background",
         colours=dict(zip(labels, category_colours(list(labels)).values(), strict=True)),
         caption=text.fill(PAGE, "figures.background.caption", label=said.label, calls=calls,
                           direction=figure("background", f"direction_{found.direction}"),
-                          hits=found.hits, tested=tested, union=found.size,
+                          hits=found.hits, tested=tested, union=found.size, alpha=ALPHA,
                           wider=figure("background", f"wider_{found.background}")),
         horizontal=True, width="double",
+        hline=(-np.log10(ALPHA), figure("ora", "line", alpha=ALPHA)),
     )  # fmt: skip
 
 

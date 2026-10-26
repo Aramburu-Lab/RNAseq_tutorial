@@ -175,9 +175,9 @@ differs = "The page's running sum gives ES = {page}; the table gives {table}."
 # the words follow the plotted sets: more (most look more significant), less, or mixed.
 [figures.background]
 title = "The background decides the p-value"
-reading_first = "Each gene set appears twice: tested against the genes DESeq2 tested, and against every gene in any set plus the tested ones, gseapy's default."
+reading_first = "Each gene set appears twice: tested against the genes DESeq2 tested, and against a wider background. A bar past the dashed line passes the FDR cutoff."
 reading_last = "Use the tested genes: only they could have been called."
-caption = "{label}: the same {calls:,} {direction} calls, {hits:,} gene symbols, tested by hypergeometric p against two backgrounds. One is the tested genes' {tested:,} symbols; the other, {union:,}, {wider}."
+caption = "{label}: the same {calls:,} {direction} calls, {hits:,} gene symbols, tested against two backgrounds. One is the tested genes' {tested:,} symbols; the other, {union:,}, {wider}. Bars: -log10 FDR, BH per background; dashed line, FDR = {alpha}."
 lead_same = "Here both backgrounds hold the same genes, so the bars match."
 lead_moved = "Against {union:,} gene symbols instead of {tested:,}, {more} of {shown} sets look more significant and {less} less."
 lead_passing = "{right} sets pass FDR < {alpha} against the tested genes, {wrong} against the other background."
