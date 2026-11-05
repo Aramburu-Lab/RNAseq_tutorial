@@ -126,11 +126,6 @@ test = "sh -c 'pytest -q -n auto --dist loadgroup; c=$?; [ $c -eq 5 ] && exit 0;
 lint = "ruff check scripts"
 lint-prose = "python -m ctx.report.prose"
 lint-glossary = "python -m ctx.report.glossary_lint"
-# A release tag must agree with LICENSE, CITATION.cff and conf/references.sha256 (D-020).
-release-check = "python3 bin/check_release.py"
-# After the tag passes release-check, on the machine that holds the images:
-#   pixi run zenodo vX.Y.Z <file.sif> ... [--sandbox] [--publish]
-zenodo = "python3 bin/zenodo_release.py"
 docs = "labdocs render && labdocs api"
 check = "labdocs lint && labdocs render --check"
 
@@ -149,7 +144,16 @@ check = "labdocs lint && labdocs render --check"
 # `prek` includes ruff-format, which REWRITES rather than reports. Preflight can therefore leave
 # the tree formatted; `git diff` after a run is the tell, and committing it is the fix.
 hooks = "prek run --all-files --show-diff-on-failure"
-preflight = { depends-on = ["lint", "check", "test", "hooks"], cmd = "ruff format --check ." }
+# The tree on disk against AGENTS.md (D-019). Its own task because the pipeline flavour has no
+# prek config of ours, so `hooks` cannot reach it there.
+layout = "python3 bin/check_layout.py"
+# Before pushing a v* tag: LICENSE, CITATION.cff and the tag must agree (D-020). Not in preflight,
+# which runs on untagged commits too; CI runs it on every tag push.
+release-check = "python3 bin/check_release.py"
+# After the tag passes release-check, on the machine that holds the images and models:
+#   pixi run zenodo vX.Y.Z <file.sif> <model> ... [--sandbox] [--publish]
+zenodo = "python3 bin/zenodo_release.py"
+preflight = { depends-on = ["lint", "check", "test", "hooks", "layout"], cmd = "ruff format --check ." }
 
 # Project additions (D-001). `ctx` is the teaching package and what it imports; `ctx-dev`
 # holds its gates. Versions are pinned `==` here, as CONVENTIONS.md asks; the template's own

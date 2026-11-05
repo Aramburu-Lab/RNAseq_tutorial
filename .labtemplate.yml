@@ -33,3 +33,10 @@ naming_exempt: []
 file_length:
   warn: 200
   fail: 600
+
+# Paths that may break the layout bin/check_layout.py enforces (D-019): a top-level
+# directory or file, an outputs/ entry, or an older version. Exempting a directory
+# covers everything under it. Add an entry only with the user's say-so and a reason
+# in the commit; the fix is almost always to move the thing, and this list exists
+# so a legacy repo can be baselined in one paste and then only shrink.
+layout_exempt: []

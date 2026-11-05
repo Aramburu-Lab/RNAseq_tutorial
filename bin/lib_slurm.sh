@@ -4,9 +4,19 @@
 #   Sourced helper library, not a pipeline step. It defines functions and writes
 #   nothing of its own, so it has no outputs to describe and no place in the DAG.
 # ///
-# Shared bash helpers. Source it, never execute it:
+# Shared bash helpers. Source it, never execute it — from scripts/bash/<step>.sh:
 #
-#     source "$(dirname "$0")/../../bin/lib_slurm.sh"
+#     LAB_BIN_DIR="${LAB_BIN_DIR:-$(dirname "$0")/../../bin}"
+#     [ -r "$LAB_BIN_DIR/lib_slurm.sh" ] || LAB_BIN_DIR="$PWD/bin"
+#     source "$LAB_BIN_DIR/lib_slurm.sh"
+#
+# Not `dirname "$0"` alone: sbatch runs a spool copy of the step
+# (/var/spool/slurmd/job<id>/slurm_script), so inside a job $0 points into
+# Slurm's spool, not the repository. slurm_selfsubmit exports LAB_BIN_DIR for
+# the job it submits; a plain `sbatch scripts/bash/<step>.sh` falls back to the
+# working directory, which that step's `#SBATCH -o logs/slurm/...` already
+# requires to be the repository root. Wherever nothing was copied — laptop,
+# login node, salloc — $0 is the real path.
 #
 # This file is copied into the project rather than imported, because bash has no
 # import mechanism and cannot reach a pixi-installed package. ADR-4's "logic is
@@ -145,6 +155,12 @@ slurm_selfsubmit() {
         [ -n "$value" ] && args+=("$flag" "$value")
     done
     mkdir -p logs/slurm
+    # The job runs Slurm's spool copy of "$0", which cannot find this file from
+    # its own path, so hand over the directory. Exported rather than passed as
+    # --export=ALL,LAB_BIN_DIR=...: under ALL, an inherited variable of the same
+    # name wins over the explicit value (sbatch(1), --export).
+    LAB_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    export LAB_BIN_DIR
     echo "Not under Slurm — self-submitting (account: $account)" >&2
     exec sbatch -A "$account" "$0" ${args[@]+"${args[@]}"}
 }

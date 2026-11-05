@@ -33,7 +33,11 @@
 
 set -euo pipefail
 
-source "$(dirname "$0")/../../bin/lib_slurm.sh"
+# Not `dirname "$0"` alone: under sbatch, $0 is Slurm's spool copy of this file.
+# bin/lib_slurm.sh explains the three lines.
+LAB_BIN_DIR="${LAB_BIN_DIR:-$(dirname "$0")/../../bin}"
+[ -r "$LAB_BIN_DIR/lib_slurm.sh" ] || LAB_BIN_DIR="$PWD/bin"
+source "$LAB_BIN_DIR/lib_slurm.sh"
 
 INPUT_FILE=""
 OUTPUT_DIR=""

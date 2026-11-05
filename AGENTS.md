@@ -15,8 +15,8 @@ pixi run docs               # labdocs render && labdocs api
 pixi run check              # labdocs lint && labdocs render --check
 pixi run hooks              # every prek hook, incl. the file-length ratchet, as CI runs them
 pixi run preflight          # everything CI runs; before every push, not after
-labdocs render              # regenerate the codebase report: HTML + manifest + map
-labdocs lint                # metadata and naming violations
+pixi run release-check vX.Y.Z  # LICENSE, CITATION.cff and tag agree; CI refuses a tag that fails
+pixi run zenodo vX.Y.Z FILE..  # one DOI: source, .sif, models, checksums; a draft until you publish
 copier update --trust --skip-tasks  # take template updates
 ```
 
@@ -57,7 +57,7 @@ update nobody asked for. Project-specific helpers stay in `scripts/`, marked `ex
 `outputs/NN_<step>/` intermediates, one directory per step ·
 `deliverables/` anything leaving the project ·
 `knowledge/` orientation for humans and agents, half generated ·
-`logs/` Slurm writes here; must exist before submission
+`logs/` Slurm writes here; must exist before submission · all enforced by `pixi run layout`
 
 ## Naming — three regimes, enforced by `labdocs lint`
 

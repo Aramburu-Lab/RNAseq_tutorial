@@ -48,6 +48,14 @@ repos:
         files: '^(scripts|bin)/.*\.(py|sh|bash|R|r|nf|rs)$'
         entry: |
           bash -c 'w=$(sed -n "s/^[[:space:]]*warn:[[:space:]]*//p" .labtemplate.yml); f=$(sed -n "s/^[[:space:]]*fail:[[:space:]]*//p" .labtemplate.yml); rc=0; for p in "$@"; do n=$(awk "END{print NR}" "$p"); if [ "$n" -gt "$f" ]; then echo "$p:1: ERROR $n lines > $f - extract a helper (ADR-12)"; rc=1; elif [ "$n" -gt "$w" ]; then echo "$p:1: warning $n lines > $w target"; fi; done; exit $rc' --
+      # The tree on disk, not just the declared paths labdocs lint reads (D-019). Runs on every
+      # commit whatever is staged, because the mess it catches is mostly never staged at all.
+      - id: check-layout
+        name: check layout (AGENTS.md 'Where things live')
+        language: system
+        always_run: true
+        pass_filenames: false
+        entry: python3 bin/check_layout.py
 
   # Project additions (D-001): the gates CONVENTIONS.md sets for the ctx package, mypy strict
   # and interrogate at 100 %. A separate block, so template updates to the one above merge

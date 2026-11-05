@@ -76,8 +76,9 @@ project's analysis environment, and (b) tool combinations that do not exist upst
 **Caveat:** images produced by the *free hosted Wave service* are **deleted after one week** unless
 the build sets `wave.freeze = true` or you mirror the image into your own registry. Anything a
 manuscript depends on must be mirrored into the `aramburu-lab` GHCR namespace and recorded in
-`digests.lock` first. Wave's on-demand build is also unusable from Kebnekaise compute nodes, which
-have no outbound egress — pre-pull on the login node.
+`digests.lock` first. Do not let a cluster run build on demand either: pre-pull on the login node
+and pin the digest. Kebnekaise compute nodes do reach the registry (measured 2026-08-12), so the
+risk here is the one-week deletion above, not connectivity.
 
 ## Private `labcore`: SSH, not a password prompt
 

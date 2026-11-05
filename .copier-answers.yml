@@ -1,7 +1,9 @@
-_commit: v0.9.10
+_commit: v0.9.16
 _src_path: git@github.com:Aramburu-Lab/codebase_template.git
 author_email: rytis.stakaitis@umu.se
 author_name: Rytis Stakaitis
+author_orcid: ''
+copyright_holder: Rytis Stakaitis
 flavour: analysis
 github_org: aramburu-lab
 hpc2n_compute_account: ''

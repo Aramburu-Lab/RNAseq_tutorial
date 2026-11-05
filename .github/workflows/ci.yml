@@ -66,6 +66,17 @@ jobs:
         if: ${{ !cancelled() }}
         run: pixi run prek run --all-files --show-diff-on-failure
 
+      # A tag is a release: refuse one whose LICENSE or CITATION.cff does not back it up (D-020).
+      - name: release-check
+        if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
+        run: python3 bin/check_release.py "$GITHUB_REF_NAME"
+
+      # Only what is committed: a CI checkout has none of the untracked mess, which the prek hook
+      # and the Claude Code Stop hook catch locally (D-019).
+      - name: layout
+        if: ${{ !cancelled() }}
+        run: pixi run layout
+
       - name: labdocs lint
         if: ${{ !cancelled() }}
         run: pixi run labdocs lint
@@ -107,8 +118,3 @@ jobs:
         env:
           PYTEST_ADDOPTS: "-rpfEsxX --durations=60"
         run: pixi run pytest -q
-
-      # A v* tag must agree with LICENSE, CITATION.cff and conf/references.sha256 (D-020).
-      - name: release-check
-        if: ${{ !cancelled() && startsWith(github.ref, 'refs/tags/v') }}
-        run: python3 bin/check_release.py "$GITHUB_REF_NAME"

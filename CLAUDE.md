@@ -20,5 +20,8 @@ and every human reading the repo cold will also see it.
   goes; the `order:` field decides sequence, never the filename.
 - Run `pixi run docs` after changing any `codebase-meta` block. A stale report is rejected
   by the prek hook.
+- The Stop hook in `.claude/settings.json` runs `bin/check_layout.py` when you end a turn and
+  hands you anything out of place. Move it to where `AGENTS.md` says it lives; do not answer
+  it by adding to `layout_exempt`, which is the user's call.
 - Record any correction you had to make twice as one line in `knowledge/lessons.md`. That
   file is yours to append to and template updates skip it.
