@@ -1,0 +1,35 @@
+# The exact bytes this project's results were computed from (D-020). One line per reference file
+# it reads (genome FASTA, GTF, annotation, database), in `sha256sum` format:
+#
+#     sha256sum /proj/nobackup/hpc2n2024-150/Rytis/Data/<ref>/genome.fa >> conf/references.sha256
+#
+# Archived with every release, so a DOI names the reference as well as the code. A project that
+# reads no reference data says so instead, on a line of its own:  none: <why>
+# `pixi run release-check` refuses a tag while this file holds neither.
+# The ctx modules' references, as each conf/datasets file records them: SHA-256 measured on
+# download, path under the ctx root. The cluster runs' genome FASTA, read from each run's refs/,
+# is not here yet: its checksum is measured on Kebnekaise (TODO(rytis): paste it in).
+eecaf6dad908334ae885406ec72bdc0646d8917588ed7c219fac92fc5363f596  resources/msigdb/h.all.v2026.1.Hs.symbols.gmt
+89bbad69a8c89fee5fadec0a2f14a098752d27a4ef7f24e4de9bac681e1b18f4  resources/gencode/gencode.v50.primary_assembly.annotation.gtf.gz
+7025f4281da8733367f949ea6fb58ca4c6c4afdfcb5a35910be490f607d8c775  data/raw/gtex_v11/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_gene_tpm.gct.gz
+86eb6097394dc59fcf18fe337d11d145a0a98c956565d88ddfb6315412e2503a  data/raw/gtex_v11/GTEx_Analysis_2025-08-22_v11_RNASeQCv2.4.3_exon_reads.parquet
+98c246b3855edf62cb050982a7ca50f3069d010624baea47ef84a9465900ca4b  data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SampleAttributesDS.txt
+2313caeaaf3718ac8aead8c6b9eab92b3f613509cfe1a6f7b6286310a7200e73  data/raw/gtex_v11/GTEx_Analysis_v11_Annotations_SubjectPhenotypesDS.txt
+b34b846aafa8a111c3f23a00b1fead7d8b0d73ce2e178d4b1e4b51c455813b9e  resources/datasets/Non-cancerous-blood/E-MTAB-11190.sdrf.txt
+f09c2c03590761fca8b58eb9c3d0a40210b8319e4732f505867ae6238684b184  resources/datasets/Non-cancerous-blood/41590_2017_BFni3693_MOESM13_ESM.xlsx
+1ee846c446a87c1b6cc2b097dc415bed1c2f6b539312d2611f946038c5f7e9f8  resources/msigdb/c5.go.cc.v2026.1.Hs.symbols.gmt
+c27a0226cba4f14c96b905f86c30007b62dd2a67a176e608c96f642566862903  resources/datasets/cptac_brca/S060_Breast_Cancer_data_freeze_GCTfiles_v5.4-public.tar.gz
+5d61f289a2400cddfbb3a3353829fd2284a360bbe50f2093b566c4b7bea93341  resources/msigdb/c2.cp.reactome.v2026.1.Hs.symbols.gmt
+7720ddd6caf3cc2877b892a3fa4a9d9fc33a4c853395477c13cc0bbfa8bbdf9d  data/raw/cptac_ccrcc/Supplementary_Data_Proteome_TMT.tar.gz
+aec0c4821adae98e8cc385e76e1b5d31cc72a4ab5d511a6fdf53d7521fcfe07e  data/raw/cptac_ccrcc/S044_TMT10_Label_to_Sample_Mapping_File_CCRCC_r2_Jan2019.xlsx
+222c97ae4b6a63b890d5a08c97ceefb104afd17e319617e074720e3dc442c365  data/raw/cptac_ccrcc/S050_S044_CPTAC_ccRCC_Discovery_Cohort_Clinical_Data_r4_Sept2019.xlsx
+686c10607c94b1727422beca53ac6e669cf49e0791bd59b38fd765a9c5669bd0  resources/gencode/gencode.v50.metadata.EntrezGene.gz
+8bf6f686e640dbc864a346484626953621b0500d900d26cd085a35c2782d725d  resources/hgnc/hgnc_complete_set_2026-10-06.txt
+82681a643258644de52be2bbe382ea6a169045c8691c8355cfa756da33082082  data/raw/r3_pxd038437/proteinGroups.txt
+895291af3169223c05adacddd33ece9a33cf332e073449c75ac0f3ee8a4d12b0  data/raw/r3_pxd038437/43018_2024_784_MOESM2_ESM.xlsx
+81359865bab048361cbeaf91c9441aac4c700b63978e6691d579d78bf2322d30  data/raw/gdc_gencode_v36/gencode.v36.annotation.gtf.gz
+73411a01b2745d7098c3e4d36d5887b231ce765e7282013d15df78d736711aee  data/raw/mirna_targets/Predicted_Targets_Context_Scores.default_predictions.txt.zip
+d91827b9c9524f2b970d85f61050ecfa9b8cb7ca395c5f7952b9c21cb3dc3b7a  data/raw/mirna_targets/miR_Family_Info.txt.zip
+482e1b2786d9a4f7b2dfd1364ac1c5132f1015d546dc963e0db405c65ca3fa08  data/raw/mirna_targets/Gene_info.txt.zip
+77a862a5f2f98f52c7a130649803b05e1468f9759b3c0bf8d03a99f75d992e46  data/raw/mirna_targets/miRTarBase_SE_WR.csv
+2f89533fba4d1acadf7e991641c5288a6bb35d5d0417a62c20d81400fd1cb654  resources/ensembl/homo_sapiens_core_116_38_stable_id_event.txt.gz

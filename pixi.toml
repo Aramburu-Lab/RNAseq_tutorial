@@ -126,6 +126,11 @@ test = "sh -c 'pytest -q -n auto --dist loadgroup; c=$?; [ $c -eq 5 ] && exit 0;
 lint = "ruff check scripts"
 lint-prose = "python -m ctx.report.prose"
 lint-glossary = "python -m ctx.report.glossary_lint"
+# A release tag must agree with LICENSE, CITATION.cff and conf/references.sha256 (D-020).
+release-check = "python3 bin/check_release.py"
+# After the tag passes release-check, on the machine that holds the images:
+#   pixi run zenodo vX.Y.Z <file.sif> ... [--sandbox] [--publish]
+zenodo = "python3 bin/zenodo_release.py"
 docs = "labdocs render && labdocs api"
 check = "labdocs lint && labdocs render --check"
 

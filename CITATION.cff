@@ -1,0 +1,19 @@
+# How to cite this code (D-020). GitHub shows a "Cite this repository" button from this file, and
+# Zenodo's GitHub integration reads it for the DOI record, so it is the one place the metadata lives.
+# `pixi run release-check` refuses a tag whose version, date or doi here do not match it.
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+title: "Cancer Transcriptomics Teaching Suite"
+abstract: "The ctx command-line tool and course material: bulk RNA-seq of cancer tissues from raw reads to differential expression, gene-set enrichment, non-coding RNA and gene cards, as interactive pages."
+type: software
+authors:
+  - given-names: "Rytis"
+    family-names: "Stakaitis"
+    affiliation: "Aramburu lab, Department of Molecular Biology, Umeå University"
+license: MIT
+repository-code: "https://github.com/Aramburu-Lab/RNAseq_tutorial"
+version: 0.1.0
+# At each release set version and uncomment date-released. After Zenodo has archived the first
+# release, uncomment doi with its concept DOI (the one that always resolves to the newest version).
+# date-released: YYYY-MM-DD
+# doi: 10.5281/zenodo.NNNNNNN
