@@ -867,6 +867,7 @@ Alongside: the heatmap fix; M3.6, then M3.7 (the page at 1280 and 375 px), M3.9 
 - [x] D3, D6–D9 defaults accepted (Rytis's draft v3.9): STAR on chr22 with an optional HISAT2 full-genome path; Zenodo with DOI; Python CLI first, Nextflow wrapper later; code MIT, materials CC BY 4.0; MSc level, English
 - [x] Merge Rytis's drafts v3.7–v3.9 (TEMP/, 2026-09-29; D-021): see "Merge of drafts v3.7–v3.9" at the end of this file
 - [x] Merge Rytis's parallel drafts v3.4 and v3.6 (TEMP/, 2026-09-29; D-020): see "Merge of drafts v3.4 and v3.6" at the end of this file for what was carried, what was not, and why
+- [x] `TEMP/` and the Quarto render `TODO.html` moved out of the public repo to `~/Documents/RNAseq_tutorial_drafts/` (Rytis 2026-11-05; docs/plans/2026-11-05_layout_move_exempt_list_v1.md); the mentions of `TEMP/` here and in decisions.md record where the drafts sat then
 - [x] Pin tool versions in `pixi.toml` (verify list at the end); FastQC 0.12.1 and MultiQC 1.35 go in a feature that laptops install, not the cluster-only `[feature.tools]` (both noarch on bioconda, read 2026-09-29). Done 2026-09-30: every read-level tool in the `reads` environment (D-027)
 
 ### Phase 1 — Foundations
