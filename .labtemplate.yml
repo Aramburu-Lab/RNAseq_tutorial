@@ -39,4 +39,6 @@ file_length:
 # covers everything under it. Add an entry only with the user's say-so and a reason
 # in the commit; the fix is almost always to move the thing, and this list exists
 # so a legacy repo can be baselined in one paste and then only shrink.
-layout_exempt: []
+layout_exempt:
+  - docs  # plans and run logs that TODO.md and the D-entries cite (Rytis 2026-11-05)
+  - src  # the ctx package CONVENTIONS.md requires (Rytis 2026-11-05)
